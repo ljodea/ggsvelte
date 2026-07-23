@@ -129,8 +129,17 @@ interface MockSpec {
     x?: { transform: string; limits?: number[]; reverse?: boolean; expand?: boolean };
     y?: { transform: string; limits?: number[]; reverse?: boolean; expand?: boolean };
     clip?: boolean;
+    ratio?: number;
   };
   scales?: Record<string, { type: string; parse?: string; transform?: string; breaks?: number[] }>;
+  guides?: Record<
+    string,
+    {
+      type: "legend" | "colorbar" | "colorsteps";
+      position?: "right" | "bottom";
+      direction?: "vertical" | "horizontal";
+    }
+  >;
 }
 
 interface Mention {
@@ -241,6 +250,34 @@ const f = (field: string): Channel => ({ field });
 const COLOR_TRIGGER =
   /colou?red by|colou?r by|map .* to (?:binned )?colou?r|binned colou?r|colou?rsteps|split by|stacked by|grouped by|one (?:line|curve|area) per|shaded by|filled by|one per/;
 
+const STYLE_CHANNELS = ["size", "linewidth", "alpha", "shape", "linetype"] as const;
+type StyleChannel = (typeof STYLE_CHANNELS)[number];
+
+function escapeRegExp(value: string): string {
+  return value.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function mappedStyleField(
+  prompt: string,
+  profile: DataProfile,
+  channel: StyleChannel,
+): string | undefined {
+  const channelPattern =
+    channel === "linewidth"
+      ? "(?:linewidth|line[- ]width|stroke[- ]width)"
+      : channel === "linetype"
+        ? "(?:linetype|line[- ]type|dash(?: pattern)?)"
+        : channel;
+  for (const field of profile.fields) {
+    const fieldPattern = escapeRegExp(field.name.toLowerCase());
+    const mapping = new RegExp(
+      `\\b${fieldPattern}\\b\\s+to\\s+(?:(?:continuous|discrete|binned|point|line)\\s+){0,3}${channelPattern}\\b`,
+    );
+    if (mapping.test(prompt)) return field.name;
+  }
+  return undefined;
+}
+
 export class MockResponder implements Responder {
   readonly name = "mock";
 
@@ -251,12 +288,21 @@ export class MockResponder implements Responder {
     const repair = user.includes(REPAIR_MARKER);
     const profile = parseProfileLine(user);
 
-    const aestheticMapping = /\bmap\s+.+\s+to\s+(?:binned\s+)?(?:colou?r|fill|size|alpha)\b/.test(
-      prompt,
-    );
+    // Aesthetic mapping phrases like "map y to station" / "map period to fill"
+    // must not trigger the geographic-map refusal. Only known aesthetic /
+    // position / style channels count — "map revenue to state" is geo-ish and
+    // must still refuse when the prompt also contains "map".
+    // Scale modifiers match mappedStyleField (continuous/discrete/binned/point/line)
+    // so "map z to continuous fill" and "map region to discrete color" stay aesthetic.
+    const aesChannel =
+      "(?:(?:continuous|discrete|binned|point|line)\\s+){0,3}(?:colou?r|fill|x|y|xmin|xmax|ymin|ymax|width|height|size|alpha|shape|linewidth|linetype|label)";
+    const aestheticMapping =
+      new RegExp(`\\bmap\\s+\\S+\\s+to\\s+${aesChannel}\\b`).test(prompt) ||
+      new RegExp(`\\bmap\\s+${aesChannel}\\s+to\\s+\\S+\\b`).test(prompt) ||
+      STYLE_CHANNELS.some((channel) => mappedStyleField(prompt, profile, channel) !== undefined);
     if (
       /choropleth|\b3-?d\b|surface plot|network diagram/.test(prompt) ||
-      (/\bmap\b/.test(prompt) && !aestheticMapping)
+      (/\bmap\b/.test(prompt) && !aestheticMapping && !/\bribbon\b/.test(prompt))
     ) {
       return Promise.resolve(
         JSON.stringify({
@@ -292,6 +338,21 @@ export class MockResponder implements Responder {
       if (pick.typeOf(which) === "quantitative") scales[channel] = { type: "sequential" };
     };
 
+    const stylesFor = (aes: MockAes): void => {
+      for (const channel of STYLE_CHANNELS) {
+        const field = mappedStyleField(prompt, profile, channel);
+        if (field === undefined) continue;
+        aes[channel] = f(field);
+        const finite = channel === "shape" || channel === "linetype";
+        scales[channel] = {
+          type: finite || pick.typeOf(field) !== "quantitative" ? "ordinal" : "sequential",
+        };
+      }
+    };
+
+    const fieldNamed = (name: string): string | undefined =>
+      profile.fields.some((field) => field.name === name) ? name : undefined;
+
     // --- geom selection (keyword templates, most specific first) -----------
     if (
       prompt.includes("three layers") &&
@@ -308,6 +369,90 @@ export class MockResponder implements Responder {
       );
       scales["x"] = { type: "linear", transform: "log10" };
       xField = x;
+    } else if (/\braster\b/.test(prompt)) {
+      const x = fieldNamed("x") ?? fieldNamed("lon") ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? fieldNamed("lat") ?? pick.quant() ?? "y";
+      const fill =
+        fieldNamed("z") ?? fieldNamed("elev") ?? pick.mentionedQuant() ?? pick.quant() ?? "z";
+      const aes: MockAes = { x: f(x), y: f(y), fill: f(fill) };
+      spec.layers.push({ geom: "raster", aes });
+      xField = x;
+    } else if (/\b(?:geom )?tiles?\b|heatmap/.test(prompt)) {
+      const cats = profile.fields.filter(
+        (field) => field.type === "nominal" || field.type === "ordinal",
+      );
+      const quants = profile.fields.filter((field) => field.type === "quantitative");
+      let x: string;
+      let y: string;
+      let fill: string;
+      if (cats.length >= 2) {
+        x = cats[0]!.name;
+        y = cats[1]!.name;
+        fill = quants[0]?.name ?? pick.quant() ?? "n";
+      } else {
+        x = fieldNamed("x") ?? pick.quant() ?? "x";
+        y = fieldNamed("y") ?? pick.quant() ?? "y";
+        fill =
+          fieldNamed("reading") ?? fieldNamed("n") ?? pick.mentionedQuant() ?? pick.quant() ?? "n";
+      }
+      const aes: MockAes = { x: f(x), y: f(y), fill: f(fill) };
+      spec.layers.push({ geom: "tile", aes });
+      xField = x;
+    } else if (/\brectangles?\b|\bgeom rect\b|\brect\b.*xmin|\bxmin\/xmax\b/.test(prompt)) {
+      const xmin = fieldNamed("xmin") ?? fieldNamed("start") ?? pick.quant() ?? "xmin";
+      const xmax = fieldNamed("xmax") ?? fieldNamed("end") ?? pick.quant() ?? "xmax";
+      const ymin = fieldNamed("ymin") ?? fieldNamed("lo") ?? pick.quant() ?? "ymin";
+      const ymax = fieldNamed("ymax") ?? fieldNamed("hi") ?? pick.quant() ?? "ymax";
+      const aes: MockAes = {
+        xmin: f(xmin),
+        xmax: f(xmax),
+        ymin: f(ymin),
+        ymax: f(ymax),
+      };
+      const fill = pick.cat() ?? pick.mentionedCat();
+      if (fill !== undefined) aes.fill = f(fill);
+      const layer: MockLayer = { geom: "rect", aes };
+      if (/semi-transparent|alpha/.test(prompt)) layer.params = { alpha: 0.4 };
+      spec.layers.push(layer);
+      xField = xmin;
+    } else if (/\bsegment\b|leader line|xend|yend/.test(prompt)) {
+      const x = fieldNamed("x") ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? pick.quant() ?? "y";
+      const xend = fieldNamed("xend") ?? fieldNamed("x2") ?? pick.quant() ?? "xend";
+      const yend = fieldNamed("yend") ?? fieldNamed("y2") ?? pick.quant() ?? "yend";
+      const aes: MockAes = {
+        x: f(x),
+        y: f(y),
+        xend: f(xend),
+        yend: f(yend),
+      };
+      colorFor("color", aes);
+      spec.layers.push({ geom: "segment", aes });
+      xField = x;
+    } else if (/\bribbon\b/.test(prompt) && !/without .*(?:band|ribbon)/.test(prompt)) {
+      // Horizontal (y + xmin/xmax) vs vertical (x + ymin/ymax) ribbons.
+      if (
+        /\bhorizontal\b|map y to|xmin to|xmax to/.test(prompt) &&
+        !/ymin to|ymax to/.test(prompt)
+      ) {
+        const y = fieldNamed("station") ?? pick.quant() ?? "y";
+        const xmin = fieldNamed("min_depth") ?? fieldNamed("xmin") ?? pick.quant() ?? "xmin";
+        const xmax = fieldNamed("max_depth") ?? fieldNamed("xmax") ?? pick.quant() ?? "xmax";
+        spec.layers.push({
+          geom: "ribbon",
+          aes: { y: f(y), xmin: f(xmin), xmax: f(xmax) },
+        });
+        xField = xmin;
+      } else {
+        const x = fieldNamed("week") ?? pick.temporal() ?? pick.quant() ?? "x";
+        const ymin = fieldNamed("lo") ?? fieldNamed("ymin") ?? pick.quant() ?? "ymin";
+        const ymax = fieldNamed("hi") ?? fieldNamed("ymax") ?? pick.quant() ?? "ymax";
+        spec.layers.push({
+          geom: "ribbon",
+          aes: { x: f(x), ymin: f(ymin), ymax: f(ymax) },
+        });
+        xField = x;
+      }
     } else if (/stepp?ed/.test(prompt)) {
       // Intentionally-invalid first attempt (unknown geom) to exercise the
       // repair round; the repair call returns the fixed valid spec.
@@ -326,7 +471,7 @@ export class MockResponder implements Responder {
       colorFor("fill", aes);
       spec.layers.push({ geom: "histogram", aes });
       xField = x;
-    } else if (prompt.includes("density")) {
+    } else if (/\bdensity\b/.test(prompt) && !/\braster\b|\btile\b|\bheatmap\b/.test(prompt)) {
       const x = pick.quant() ?? "x";
       const aes: MockAes = { x: f(x) };
       colorFor("color", aes);
@@ -390,6 +535,7 @@ export class MockResponder implements Responder {
       const y = reversed ? first : second;
       const aes: MockAes = { x: f(x), y: f(y) };
       colorFor("color", aes);
+      stylesFor(aes);
       if (/sized by|size by/.test(prompt)) {
         const size = pick.mentionedQuant();
         if (size !== undefined) aes["size"] = f(size);
@@ -404,7 +550,11 @@ export class MockResponder implements Responder {
         }
       }
       xField = x;
-    } else if (/line chart|over time|time series|per (?:day|week|month|hour)|trend/.test(prompt)) {
+    } else if (
+      /line chart|connected line|over time|time series|per (?:day|week|month|hour)|trend/.test(
+        prompt,
+      )
+    ) {
       const x = /identifier|model code|category/.test(prompt)
         ? (pick.mentionedCat() ?? pick.cat() ?? "x")
         : (pick.temporal() ?? pick.quant() ?? "x");
@@ -497,7 +647,13 @@ export class MockResponder implements Responder {
     }
 
     // --- coord / scales ---------------------------------------------------------
-    if (prompt.includes("horizontal")) spec.coord = { type: "flip" };
+    const hasHorizontalRibbon = spec.layers.some(
+      (layer) => layer.geom === "ribbon" && layer.aes?.["xmin"] !== undefined,
+    );
+    if (prompt.includes("horizontal") && !hasHorizontalRibbon) spec.coord = { type: "flip" };
+    if (/fixed[- ]aspect|equal physical lengths|not stretched/.test(prompt)) {
+      spec.coord = { type: "fixed" };
+    }
     const postStatCoordinate =
       /post-stat coordinate|coordinate transform/.test(prompt) &&
       /\blog(?:10|arithmic)?\b/.test(prompt);
@@ -531,6 +687,18 @@ export class MockResponder implements Responder {
     if (ordered !== undefined) scales["x"] = { type: "time", parse: ordered };
     void xField;
     if (Object.keys(scales).length > 0) spec.scales = scales;
+    if (/legend[^.]*\b(?:below|bottom)\b|\b(?:below|bottom)[^.]*legend/.test(prompt)) {
+      const aesthetic = spec.layers.some((layer) => layer.aes?.["color"] !== undefined)
+        ? "color"
+        : "fill";
+      spec.guides = {
+        [aesthetic]: {
+          type: "legend",
+          position: "bottom",
+          ...(prompt.includes("horizontal") && { direction: "horizontal" }),
+        },
+      };
+    }
     return spec;
   }
 }

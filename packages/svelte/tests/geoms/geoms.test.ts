@@ -18,9 +18,13 @@ import GeomErrorbar from "../../src/lib/geoms/GeomErrorbar.svelte";
 import GeomHistogram from "../../src/lib/geoms/GeomHistogram.svelte";
 import GeomLine from "../../src/lib/geoms/GeomLine.svelte";
 import GeomPoint from "../../src/lib/geoms/GeomPoint.svelte";
+import GeomRaster from "../../src/lib/geoms/GeomRaster.svelte";
+import GeomRect from "../../src/lib/geoms/GeomRect.svelte";
 import GeomRule from "../../src/lib/geoms/GeomRule.svelte";
+import GeomSegment from "../../src/lib/geoms/GeomSegment.svelte";
 import GeomSmooth from "../../src/lib/geoms/GeomSmooth.svelte";
 import GeomText from "../../src/lib/geoms/GeomText.svelte";
+import GeomTile from "../../src/lib/geoms/GeomTile.svelte";
 import SingleGeomPlot from "../fixtures/SingleGeomPlot.svelte";
 import { render } from "../helpers/render.js";
 
@@ -199,6 +203,66 @@ const cases: readonly GeomCase[] = [
     geomProps: { width: 0.2, linewidth: 1.2 },
     paramKey: "width",
     paramValue: 0.2,
+    markSelector: ".gg-segments line",
+  },
+  {
+    name: "GeomRect",
+    Component: GeomRect,
+    geom: "rect",
+    data: [
+      { xmin: 0, xmax: 1, ymin: 0, ymax: 2 },
+      { xmin: 1, xmax: 2, ymin: 1, ymax: 3 },
+    ],
+    aes: { xmin: "xmin", xmax: "xmax", ymin: "ymin", ymax: "ymax" },
+    geomProps: { alpha: 0.6 },
+    paramKey: "alpha",
+    paramValue: 0.6,
+    markSelector: ".gg-rects rect",
+  },
+  {
+    name: "GeomTile",
+    Component: GeomTile,
+    geom: "tile",
+    data: [
+      { x: "a", y: "low", z: 1 },
+      { x: "a", y: "high", z: 2 },
+      { x: "b", y: "low", z: 3 },
+      { x: "b", y: "high", z: 4 },
+    ],
+    aes: { x: "x", y: "y", fill: "z" },
+    geomProps: { alpha: 0.9 },
+    paramKey: "alpha",
+    paramValue: 0.9,
+    markSelector: ".gg-rects rect",
+  },
+  {
+    name: "GeomRaster",
+    Component: GeomRaster,
+    geom: "raster",
+    data: [
+      { x: 0, y: 0, z: 1 },
+      { x: 1, y: 0, z: 2 },
+      { x: 0, y: 1, z: 3 },
+      { x: 1, y: 1, z: 4 },
+    ],
+    aes: { x: "x", y: "y", fill: "z" },
+    geomProps: { alpha: 0.85 },
+    paramKey: "alpha",
+    paramValue: 0.85,
+    markSelector: ".gg-rects rect",
+  },
+  {
+    name: "GeomSegment",
+    Component: GeomSegment,
+    geom: "segment",
+    data: [
+      { x: 0, y: 0, xend: 1, yend: 1 },
+      { x: 1, y: 2, xend: 2, yend: 0 },
+    ],
+    aes: { x: "x", y: "y", xend: "xend", yend: "yend" },
+    geomProps: { linewidth: 2, lineend: "round" },
+    paramKey: "linewidth",
+    paramValue: 2,
     markSelector: ".gg-segments line",
   },
 ];

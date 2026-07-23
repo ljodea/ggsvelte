@@ -1,0 +1,11 @@
+{
+  "workload": "pipeline mapped-style 100k",
+  "rows": 100000,
+  "mappedAesthetics": ["size", "alpha", "shape"],
+  "medianMs": 85.2504,
+  "budgetMs": 132,
+  "runs": 10,
+  "runtime": "Bun 1.3.14 darwin arm64",
+  "result": "pass",
+  "note": "PR-specific initial gate. The isolated benchmark workflow remains authoritative for host-sensitive existing workloads."
+}

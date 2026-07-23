@@ -82,11 +82,18 @@ describe("consumer support matrix", () => {
       readFileSync(join(root, "packages/svelte/package.json"), "utf8"),
     ) as { devDependencies: Record<string, string> };
     const ci = readFileSync(join(root, ".github/workflows/ci.yml"), "utf8");
+    // The publisher's tag must track the matrix too: container jobs pull
+    // ci-runner:<PLAYWRIGHT_CONTAINER_TAG>, and only build-ci-image.yml publishes
+    // that tag. If a Playwright bump updated the matrix + ci.yml but left this
+    // publisher pinned, no matching image would be published and every container
+    // job would fail to pull. Lock all three copies to the same source.
+    const buildCiImage = readFileSync(join(root, ".github/workflows/build-ci-image.yml"), "utf8");
     expect(rootManifest.packageManager).toBe(`bun@${matrix.packageManagers.bun}`);
     expect(rootManifest.devDependencies["@playwright/test"]).toBe(matrix.browsers.playwright);
     expect(rootManifest.devDependencies.pnpm).toBe(matrix.packageManagers.pnpm);
     expect(svelteManifest.devDependencies.playwright).toBe(matrix.browsers.playwright);
     expect(ci).toContain(`PLAYWRIGHT_CONTAINER_TAG: v${matrix.browsers.playwright}-noble`);
+    expect(buildCiImage).toContain(`PLAYWRIGHT_TAG: v${matrix.browsers.playwright}-noble`);
   });
 
   test("keeps the README support claim aligned with the matrix", () => {

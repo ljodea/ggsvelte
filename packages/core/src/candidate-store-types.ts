@@ -18,6 +18,11 @@ export type TraversalDirection =
 export interface CandidateDatum {
   readonly xValue?: CellValue;
   readonly yValue?: CellValue;
+  readonly sizeValue?: CellValue;
+  readonly linewidthValue?: CellValue;
+  readonly alphaValue?: CellValue;
+  readonly shapeValue?: CellValue;
+  readonly linetypeValue?: CellValue;
   readonly seriesId?: number;
   readonly seriesRank?: number;
   readonly sourceOrder?: number;
@@ -53,6 +58,11 @@ export interface CandidateFacts extends CandidateBuildFacts {
   readonly y: number;
   readonly xValue: CellValue;
   readonly yValue: CellValue;
+  readonly sizeValue: CellValue;
+  readonly linewidthValue: CellValue;
+  readonly alphaValue: CellValue;
+  readonly shapeValue: CellValue;
+  readonly linetypeValue: CellValue;
   readonly xToken: CanonicalAxisToken | null;
   readonly yToken: CanonicalAxisToken | null;
   readonly seriesId: number;

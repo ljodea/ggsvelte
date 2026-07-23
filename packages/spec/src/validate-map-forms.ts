@@ -17,11 +17,17 @@ const AES_CHANNEL_KEYS = new Set([
   "size",
   "linewidth",
   "alpha",
+  "shape",
+  "linetype",
   "group",
   "label",
   "weight",
   "ymin",
   "ymax",
+  "xmin",
+  "xmax",
+  "xend",
+  "yend",
 ]);
 
 /** True only for the channel node itself (`…/aes/<channel>`), not nested paths. */
@@ -33,13 +39,23 @@ export function isChannelPath(path: string): boolean {
 }
 
 /**
- * DataRef / InlineData union roots only: `/data` or `/datasets/<name>`.
+ * DataRef / InlineData union roots only:
+ * `/data`, `/datasets/<name>`, or `/layers/<n>/data`.
  * Nested paths under a data container must keep their own diagnostics.
  */
 export function isDataUnionPath(path: string): boolean {
   const segs = pathSegments(path);
   if (segs.length === 1 && segs[0] === "data") return true;
   if (segs.length === 2 && segs[0] === "datasets") return true;
+  // /layers/<index>/data
+  if (
+    segs.length === 3 &&
+    segs[0] === "layers" &&
+    /^\d+$/.test(segs[1] ?? "") &&
+    segs[2] === "data"
+  ) {
+    return true;
+  }
   return false;
 }
 

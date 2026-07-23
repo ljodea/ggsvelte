@@ -6,14 +6,17 @@ import { configuredColorScaleType, type PortableSpec } from "@ggsvelte/spec";
 import type { ColumnTable } from "../table.js";
 
 import { bindLayer } from "./bind.js";
+import { configureStyleBindings } from "./bind-layer-style-config.js";
 import type { FacetPanelDef } from "./facets.js";
-import { buildFrame, remapSourceRows } from "./frame.js";
+import { buildFrame } from "./frame.js";
+import { remapToGlobalSourceRows, sliceLayerForPanel } from "./layer-panel-data.js";
 import { applyPosition } from "./position.js";
 import { resolveColumnTransform } from "./position-program.js";
 import { assertInferredTemporalTransform } from "./scale-config-preflight.js";
 import { computePanelBinRanges } from "./prepare-panels-bin-ranges.js";
 import { resolveBinnedAxis } from "./resolve-binned-axis.js";
 import { warnEmptyLayers } from "./prepare-panels-empty-layers.js";
+import { assertRibbonBounds } from "./ribbon-bounds.js";
 import { xConversionOf, yConversionOf } from "./temporal-position.js";
 import type { PositionConversionContext } from "./temporal-position.js";
 import { preflightTemporalBindings } from "./temporal-preflight.js";
@@ -47,18 +50,27 @@ function sampleFailingSemantic(
 function emitTransformDomainWarnings(
   axis: "x" | "y",
   bindings: readonly LayerBinding[],
-  table: ColumnTable,
+  /** Per-binding filtered tables (parallel to bindings); same rows as frames/stats. */
+  tables: readonly ColumnTable[],
   transform: ColumnTransformConfig | undefined,
   warnings: PipelineWarning[],
   scaleDiagnostics: ScaleDiagnostic[],
 ): void {
   if (transform === undefined) return;
   const path = `/scales/${axis}`;
+  // Keyed by sourceId+field so same field name on different tables both scan.
   const seen = new Set<string>();
-  for (const binding of bindings) {
+  for (let index = 0; index < bindings.length; index++) {
+    const binding = bindings[index]!;
     const field = axis === "x" ? binding.xField : binding.yField;
-    if (field === null || seen.has(field)) continue;
-    seen.add(field);
+    if (field === null) continue;
+    // Scan the filtered layer table (rowFilters applied) so hidden out-of-domain
+    // rows do not emit false transform/OOB diagnostics (#609).
+    const table = tables[index] ?? binding.sourceTable;
+    if (!table.has(field)) continue;
+    const seenKey = `${binding.sourceId}|${field}`;
+    if (seen.has(seenKey)) continue;
+    seen.add(seenKey);
     const conversion = axis === "x" ? xConversionOf(binding) : yConversionOf(binding);
     const view = table.transformed(field, conversion.sourceParser, conversion.options, transform);
     const key = transform.transform.key;
@@ -133,10 +145,16 @@ import type {
 
 export function buildPanelFrames(input: {
   normalized: PortableSpec;
-  table: ColumnTable;
-  sourceTable: ColumnTable;
+  layerContexts: readonly {
+    sourceTable: ColumnTable;
+    filteredTable: ColumnTable;
+    filteredToSource: number[] | null;
+    sourceId: number;
+  }[];
+  registry: import("./source-registry.js").SourceRegistry;
   facetPanels: readonly FacetPanelDef[];
   faceted: boolean;
+  facetFields: readonly string[];
   freeX: boolean;
   warnings: PipelineWarning[];
   advisories: Advisory[];
@@ -151,10 +169,11 @@ export function buildPanelFrames(input: {
 } {
   const {
     normalized,
-    table,
-    sourceTable,
+    layerContexts,
+    registry,
     facetPanels,
     faceted,
+    facetFields,
     freeX,
     warnings,
     advisories,
@@ -163,9 +182,20 @@ export function buildPanelFrames(input: {
 
   const bindings: LayerBinding[] = [];
   const panelFrames: LayerFrame[][] = facetPanels.map(() => []);
+  // Per-layer filtered tables: binned extents, bin ranges, and transform
+  // diagnostics must read each layer's own filtered rows (#609).
+  const filteredLayerTables = layerContexts.map((ctx) => ctx.filteredTable);
 
   for (let index = 0; index < normalized.layers.length; index++) {
-    const binding = bindLayer(normalized.layers[index]!, index, table, warnings, conversions);
+    const ctx = layerContexts[index]!;
+    const binding = bindLayer(
+      normalized.layers[index]!,
+      index,
+      ctx.filteredTable,
+      warnings,
+      conversions,
+      { sourceTable: ctx.sourceTable, sourceId: ctx.sourceId },
+    );
     // Match resolveColorScale family intent (domainMode/onExhaust → ordinal)
     // so line/stat grouping treats inferred ordinal color as discrete groups.
     binding.color.forcedDiscrete = ["ordinal", "manual"].includes(
@@ -174,14 +204,16 @@ export function buildPanelFrames(input: {
     binding.fill.forcedDiscrete = ["ordinal", "manual"].includes(
       configuredColorScaleType(normalized.scales?.fill) ?? normalized.scales?.fill?.type ?? "",
     );
+    configureStyleBindings(binding, normalized.scales, ctx.filteredTable);
     bindings.push(binding);
   }
   const temporal = preflightTemporalBindings({
-    table: sourceTable,
+    table: layerContexts[0]!.sourceTable,
     bindings,
     warnings,
     advisories,
     conversions,
+    layerTables: layerContexts.map((c) => c.sourceTable),
   });
   for (const axis of ["x", "y"] as const) {
     assertInferredTemporalTransform(
@@ -199,13 +231,12 @@ export function buildPanelFrames(input: {
     resolveColumnTransform(normalized.scales?.x, temporal.xConversion) ?? undefined;
   const yTransform =
     resolveColumnTransform(normalized.scales?.y, temporal.yConversion) ?? undefined;
-  // type: "binned" boundaries (transformed space) resolved once from the
-  // parent table, before any frame/stat reads them (pre-stat two-phase).
+  // type: "binned" boundaries — union extents across every layer table.
   const xBinning = resolveBinnedAxis(
     "x",
     normalized.scales?.x,
     bindings,
-    table,
+    filteredLayerTables,
     temporal.xConversion,
     xTransform,
   );
@@ -213,7 +244,7 @@ export function buildPanelFrames(input: {
     "y",
     normalized.scales?.y,
     bindings,
-    table,
+    filteredLayerTables,
     temporal.yConversion,
     yTransform,
   );
@@ -224,24 +255,55 @@ export function buildPanelFrames(input: {
     binding.yBinning = yBinning;
   }
   // One deduplicated per-axis diagnostic for pre-stat transform-domain and OOB
-  // drops, counted on the (filtered) full column before faceting. Emitted on
-  // both the lean warning channel and the rich scaleDiagnostics channel.
+  // drops, counted on each layer's filtered table before faceting.
   const transformDiagnostics: ScaleDiagnostic[] = [];
-  emitTransformDomainWarnings("x", bindings, table, xTransform, warnings, transformDiagnostics);
-  emitTransformDomainWarnings("y", bindings, table, yTransform, warnings, transformDiagnostics);
-  const binRanges = computePanelBinRanges(bindings, table, faceted, freeX);
+  emitTransformDomainWarnings(
+    "x",
+    bindings,
+    filteredLayerTables,
+    xTransform,
+    warnings,
+    transformDiagnostics,
+  );
+  emitTransformDomainWarnings(
+    "y",
+    bindings,
+    filteredLayerTables,
+    yTransform,
+    warnings,
+    transformDiagnostics,
+  );
+  const binRanges = computePanelBinRanges(bindings, filteredLayerTables, faceted, freeX);
   for (let p = 0; p < facetPanels.length; p++) {
-    const panelTable = facetPanels[p]!.table;
     for (let index = 0; index < bindings.length; index++) {
+      const ctx = layerContexts[index]!;
+      const slice = sliceLayerForPanel({
+        filteredTable: ctx.filteredTable,
+        filteredToSource: ctx.filteredToSource,
+        sourceId: ctx.sourceId,
+        registry,
+        panel: facetPanels[p]!,
+        facetFields,
+        faceted,
+      });
       const frame = buildFrame(
         bindings[index]!,
-        panelTable,
+        slice.table,
         warnings,
         advisories,
         binRanges[index],
       );
-      applyPosition(frame, advisories, panelTable);
-      remapSourceRows(frame, facetPanels[p]!.sourceRows);
+      applyPosition(frame, advisories, slice.table);
+      // Pre-stat input rows and post-stat mark rows share the layer's global
+      // source-row namespace (filter + multi-table registry).
+      frame.inputSourceRows = slice.globalSourceRows;
+      // Map panel-local indices → global multi-table source rows.
+      remapToGlobalSourceRows(frame.rowIndex, slice.globalSourceRows);
+      // Boxplot outlier rows carry separate source indices.
+      if (frame.box !== null) {
+        remapToGlobalSourceRows(frame.box.outlierRow, slice.globalSourceRows);
+      }
+      assertRibbonBounds(frame);
       panelFrames[p]!.push(frame);
     }
   }

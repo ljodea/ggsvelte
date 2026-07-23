@@ -3,6 +3,7 @@
  */
 import type {
   BandLayoutDomainContext,
+  LayoutAxisPresentation,
   LayoutTheme,
   Margins,
   TemporalLayoutDomainContext,
@@ -39,6 +40,7 @@ export function placeOneFacetPanel(input: {
   formatV: TickFormatter | undefined;
   measurer: TextMeasurer;
   layoutTheme: LayoutTheme;
+  axis: Readonly<{ x: LayoutAxisPresentation; y: LayoutAxisPresentation }>;
 }): PanelPlacement {
   return placeFacetPanelFromTicks(input);
 }

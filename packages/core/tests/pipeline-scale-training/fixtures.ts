@@ -2,6 +2,7 @@
  * Shared fixtures for pipeline scale-training characterization.
  */
 import { ColumnTable } from "../../src/table.ts";
+import { AUTO_POSITION_CONVERSION } from "../../src/pipeline/temporal-position.ts";
 import type { LayerBinding, LayerFrame } from "../../src/pipeline/types.ts";
 
 export const size = { width: 640, height: 400 };
@@ -12,6 +13,10 @@ export function emptyExtras(): Pick<
   | "ymax"
   | "xmin"
   | "xmax"
+  | "xend"
+  | "yend"
+  | "xendValues"
+  | "yendValues"
   | "dodgeSlot"
   | "dodgeSlotCounts"
   | "offsetX"
@@ -26,6 +31,10 @@ export function emptyExtras(): Pick<
     ymax: null,
     xmin: null,
     xmax: null,
+    xend: null,
+    yend: null,
+    xendValues: null,
+    yendValues: null,
     dodgeSlot: null,
     dodgeSlotCounts: null,
     offsetX: null,
@@ -38,16 +47,35 @@ export function emptyExtras(): Pick<
 }
 
 export function pointFrame(table: ColumnTable): LayerFrame {
+  const style = {
+    field: null,
+    statColumn: null,
+    constant: null,
+    scaledConstant: null,
+  };
   const binding: LayerBinding = {
     layer: { geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } },
     index: 0,
     xField: "x",
     yField: "y",
     yStatColumn: null,
+    xConversion: AUTO_POSITION_CONVERSION,
+    yConversion: AUTO_POSITION_CONVERSION,
     yminField: null,
     ymaxField: null,
+    xminField: null,
+    xmaxField: null,
+    widthField: null,
+    heightField: null,
+    xendField: null,
+    yendField: null,
     color: { field: null, constant: null, scaledConstant: null },
     fill: { field: null, constant: null, scaledConstant: null },
+    size: style,
+    linewidth: style,
+    alpha: style,
+    shape: style,
+    linetype: style,
     labelField: null,
     labelConstant: null,
     weightField: null,

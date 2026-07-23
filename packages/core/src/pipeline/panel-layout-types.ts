@@ -22,6 +22,8 @@ export interface PanelPlacement {
   vGuidePlan?: AxisGuidePlan;
   showAxisX: boolean;
   showAxisY: boolean;
+  /** Original panel allocation before a fixed-aspect data rectangle is fitted. */
+  allocation?: { x: number; y: number; width: number; height: number };
 }
 
 export interface PanelLayoutResult {
@@ -34,11 +36,17 @@ export interface PanelLayoutResult {
   xTitle: string;
   yTitle: string;
   topBand: number;
+  bottomBand: number;
   formatX: TickFormatter | undefined;
   formatY: TickFormatter | undefined;
   displayScales: (p: number) => { h: PositionScale; v: PositionScale };
   legendBlock: ReturnType<typeof buildLegends>;
   guidePlans: readonly AxisGuidePlan[];
+  degraded: boolean;
+  /** Facet strip chrome resolved for this layout (defaults when unfaceted). */
+  strip: import("./facets-types.js").FacetStripConfig;
+  /** Measured strip band size in px (0 when hidden / unfaceted). */
+  stripBand: number;
 }
 
 export type DisplayScalesFn = (p: number) => { h: PositionScale; v: PositionScale };

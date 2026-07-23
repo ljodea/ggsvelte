@@ -118,10 +118,16 @@ export function resolveCandidateFrameRow(input: {
   let derivedGroup = frame?.groups[frameRow] ?? 0;
 
   if (frame !== undefined && batch.kind === "paths") {
-    // After coord projection, candidate facts pass semanticIndex (pre-render
-    // topology) as primitiveIndex. Render pathOffsets are post-tessellation and
-    // cannot index that space; reconstruct group/local from frame groups instead.
-    if (batch.semanticIndex === undefined) {
+    const explicitFrameRow = batch.frameRowIndex?.[primitiveIndex];
+    if (explicitFrameRow !== undefined && explicitFrameRow < frame.n) {
+      // Style-split lines emit exact frame rows so candidate identity survives
+      // subpath reindexing after mapped stroke-style breaks.
+      frameRow = explicitFrameRow;
+      derivedGroup = frame.groups[frameRow] ?? derivedGroup;
+    } else if (batch.semanticIndex === undefined) {
+      // After coord projection, candidate facts pass semanticIndex (pre-render
+      // topology) as primitiveIndex. Render pathOffsets are post-tessellation and
+      // cannot index that space; reconstruct group/local from frame groups instead.
       // O(log P) subpath lookup (was linear O(P) per vertex → O(V·P) at build).
       // Null = OOB / empty offsets: keep default frameRow/derivedGroup (codex P1).
       const subpath = pathSubpathIndex(batch.pathOffsets, primitiveIndex);
@@ -134,16 +140,24 @@ export function resolveCandidateFrameRow(input: {
         frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
       }
     } else if (batch.closed === true) {
-      const resolved = resolveClosedBandFrameRow(
-        getClosedBandLayout(frame, orderedGroups),
-        primitiveIndex,
-      );
-      if (resolved === null) {
-        frameRow = Math.min(Math.max(0, primitiveIndex), Math.max(0, frame.n - 1));
+      // Prefer emitted closed-band frame rows (filtered ribbons) when present —
+      // layout from full frame groups mis-reflects after non-finite edge drops (#502).
+      const emitted = batch.closedFrameRows;
+      if (emitted !== undefined && primitiveIndex >= 0 && primitiveIndex < emitted.length) {
+        frameRow = emitted[primitiveIndex]!;
         derivedGroup = frame.groups[frameRow] ?? derivedGroup;
       } else {
-        frameRow = resolved.frameRow;
-        derivedGroup = resolved.derivedGroup;
+        const resolved = resolveClosedBandFrameRow(
+          getClosedBandLayout(frame, orderedGroups),
+          primitiveIndex,
+        );
+        if (resolved === null) {
+          frameRow = Math.min(Math.max(0, primitiveIndex), Math.max(0, frame.n - 1));
+          derivedGroup = frame.groups[frameRow] ?? derivedGroup;
+        } else {
+          frameRow = resolved.frameRow;
+          derivedGroup = resolved.derivedGroup;
+        }
       }
     } else {
       // Open paths: semantic index is the pre-split vertex / frame row.

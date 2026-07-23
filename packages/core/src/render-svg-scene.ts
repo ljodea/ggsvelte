@@ -2,14 +2,54 @@
  * Scene-level SVG assembly: panel chrome + sceneLabel + sceneToSVGString.
  * Chrome helpers stay file-private (only used by sceneToSVGString).
  */
+import { LINETYPE_NAMES } from "@ggsvelte/spec";
+
 import { groupBatchesByPanel } from "./group-batches-by-panel.js";
-import type { Scene, SceneLegend, ScenePanel } from "./scene.js";
+import { letterboxGutterRects } from "./letterbox-gutters.js";
+import { LINETYPE_DASHES } from "./scales/style.js";
+import type { Scene, SceneLegend, SceneLegendEntry, ScenePanel } from "./scene.js";
 import { STRIP_BAND } from "./scene.js";
 import { LEGEND_ROW_HEIGHT } from "./legend.js";
 import type { ThemeTokens } from "./theme.js";
 import { themeVar } from "./theme.js";
+import { paintDefsSvg, type ResolvedGlow, type ResolvedGradientPaint } from "./mark-paint.js";
 import { escapeXML, px } from "./render-svg-format.js";
-import { renderBatch } from "./render-svg-marks.js";
+import { pointShape, renderBatch, type PaintRenderMode } from "./render-svg-marks.js";
+
+function collectPaintResources(scene: Scene): {
+  paints: ResolvedGradientPaint[];
+  glows: ResolvedGlow[];
+} {
+  const paints: ResolvedGradientPaint[] = [];
+  const glows: ResolvedGlow[] = [];
+  const seen = new Set<string>();
+  for (const batch of scene.batches) {
+    if (batch.kind === "paths" || batch.kind === "rects") {
+      if (batch.fillPaint !== undefined && !seen.has(batch.fillPaint.id)) {
+        seen.add(batch.fillPaint.id);
+        paints.push(batch.fillPaint);
+      }
+      if (batch.strokePaint !== undefined && !seen.has(batch.strokePaint.id)) {
+        seen.add(batch.strokePaint.id);
+        paints.push(batch.strokePaint);
+      }
+      if (batch.glow !== undefined && !seen.has(batch.glow.id)) {
+        seen.add(batch.glow.id);
+        glows.push(batch.glow);
+      }
+    } else if (batch.kind === "segments") {
+      if (batch.strokePaint !== undefined && !seen.has(batch.strokePaint.id)) {
+        seen.add(batch.strokePaint.id);
+        paints.push(batch.strokePaint);
+      }
+      if (batch.glow !== undefined && !seen.has(batch.glow.id)) {
+        seen.add(batch.glow.id);
+        glows.push(batch.glow);
+      }
+    }
+  }
+  return { paints, glows };
+}
 
 function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
   const parts: string[] = [];
@@ -31,14 +71,15 @@ function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
         `<g class="gg-tick${minor ? " gg-tick-minor" : ""}" transform="translate(${px(tick.pos)},0)">`,
       );
       if (!minor) parts.push(`<title>${escapeXML(tick.fullLabel ?? tick.label)}</title>`);
-      if (theme.ticksX) {
+      if (theme.ticksX && tick.showTick !== false) {
         parts.push(
           `<line y2="${px(minor ? theme.tickLength / 2 : theme.tickLength)}" stroke="${tickColor}" stroke-width="${px(theme.tickWidth)}"${minor ? ' opacity="0.5"' : ""} vector-effect="non-scaling-stroke"/>`,
         );
       }
-      if (tick.label !== "") {
-        const yOff = (theme.ticksX ? theme.tickLength : 0) + 3;
-        const font = `fill="${axisText}" font-size="${px(theme.axisTextSize)}" font-weight="${theme.fontWeight}"`;
+      if (tick.label !== "" && tick.showLabel !== false) {
+        const yOff = (theme.ticksX && tick.showTick !== false ? theme.tickLength : 0) + 3;
+        const labelSize = tick.labelSize ?? theme.axisTextSize;
+        const font = `fill="${axisText}" font-size="${px(labelSize)}" font-weight="${theme.fontWeight}"`;
         if (tick.angle !== undefined && tick.angle !== 0) {
           // Rotated band label: hang below the axis, anchored at the tick.
           parts.push(
@@ -46,7 +87,7 @@ function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
           );
         } else if (tick.lines !== undefined && tick.lines.length > 1) {
           // Wrapped band label: one tspan per line, centered.
-          const lineH = theme.axisTextSize * 1.15;
+          const lineH = labelSize * 1.15;
           const tspans = tick.lines
             .map(
               (line, i) =>
@@ -79,14 +120,14 @@ function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
         `<g class="gg-tick${minor ? " gg-tick-minor" : ""}" transform="translate(0,${px(tick.pos)})">`,
       );
       if (!minor) parts.push(`<title>${escapeXML(tick.fullLabel ?? tick.label)}</title>`);
-      if (theme.ticksY) {
+      if (theme.ticksY && tick.showTick !== false) {
         parts.push(
           `<line x2="-${px(minor ? theme.tickLength / 2 : theme.tickLength)}" stroke="${tickColor}" stroke-width="${px(theme.tickWidth)}"${minor ? ' opacity="0.5"' : ""} vector-effect="non-scaling-stroke"/>`,
         );
       }
-      if (tick.label !== "") {
+      if (tick.label !== "" && tick.showLabel !== false) {
         parts.push(
-          `<text x="-${px((theme.ticksY ? theme.tickLength : 0) + 3)}" dy="0.32em" text-anchor="end" fill="${axisText}" font-size="${px(theme.axisTextSize)}" font-weight="${theme.fontWeight}">${escapeXML(tick.label)}</text>`,
+          `<text x="-${px((theme.ticksY && tick.showTick !== false ? theme.tickLength : 0) + 3)}" dy="0.32em" text-anchor="end" fill="${axisText}" font-size="${px(tick.labelSize ?? theme.axisTextSize)}" font-weight="${theme.fontWeight}">${escapeXML(tick.label)}</text>`,
         );
       }
       parts.push("</g>");
@@ -96,16 +137,67 @@ function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
   return parts.join("");
 }
 
-/** Facet strip: a subtle band + centered label above the panel. */
-function renderStrip(panel: ScenePanel, scene: Scene): string {
-  if (panel.strip === "") return "";
+/** Facet strip: band + centered label on the authored side of the panel. */
+function renderStrip(panel: ScenePanel, scene: Scene, panelIndex: number): string {
+  if (panel.strip === "" || panel.showStrip === false) return "";
+  const band = panel.stripBand ?? STRIP_BAND;
+  if (band <= 0) return "";
+  const position = panel.stripPosition ?? "top";
   const ink = themeVar("ink", scene.theme);
   const stripFill = themeVar("grid", scene.theme);
-  const top = panel.y - STRIP_BAND;
+  const bandDraw = Math.max(1, band - 2);
+  let originX = panel.x;
+  let originY = panel.y;
+  let rectW = panel.width;
+  let rectH = bandDraw;
+  let textX = panel.width / 2;
+  let textY = bandDraw / 2;
+  let textTransform = "";
+  let sideClip = false;
+
+  // Layout reserves strip outside the axis margin band (see
+  // panel-layout-facet-cells-place). Renderers place chrome in that reserved
+  // region so strip text does not collide with tick labels.
+  if (position === "top") {
+    originY = panel.y - band;
+  } else if (position === "bottom") {
+    // Below the panel content box; axis ticks/labels sit in the bottom margin
+    // immediately under the panel, then the strip band follows.
+    const axisBand = panel.axisX === null ? 0 : 28;
+    originY = panel.y + panel.height + axisBand;
+  } else if (position === "left") {
+    // Left of the y-axis margin so strip sits outside tick labels.
+    const axisBand = panel.axisY === null ? 0 : 36;
+    originX = panel.x - axisBand - band;
+    rectW = bandDraw;
+    rectH = panel.height;
+    textX = bandDraw / 2;
+    textY = panel.height / 2;
+    textTransform = ` transform="rotate(-90 ${px(textX)} ${px(textY)})"`;
+    // Rotated advance is vertical — clip to the panel-height band so a long
+    // label cannot paint into the row above/below (#611).
+    sideClip = true;
+  } else {
+    originX = panel.x + panel.width;
+    rectW = bandDraw;
+    rectH = panel.height;
+    textX = bandDraw / 2;
+    textY = panel.height / 2;
+    textTransform = ` transform="rotate(90 ${px(textX)} ${px(textY)})"`;
+    sideClip = true;
+  }
+
+  const clipId = `gg-strip-clip-${panelIndex}`;
+  const clipAttr = sideClip ? ` clip-path="url(#${clipId})"` : "";
+  const clipDef = sideClip
+    ? `<clipPath id="${clipId}"><rect width="${px(rectW)}" height="${px(rectH)}"/></clipPath>`
+    : "";
+
   return (
-    `<g class="gg-strip" transform="translate(${px(panel.x)},${px(top)})">` +
-    `<rect width="${px(panel.width)}" height="${px(STRIP_BAND - 2)}" fill="${stripFill}"/>` +
-    `<text x="${px(panel.width / 2)}" y="${px((STRIP_BAND - 2) / 2)}" dy="0.32em" text-anchor="middle" fill="${ink}" font-size="${px(scene.theme.stripSize)}" font-weight="${scene.theme.stripWeight}">${escapeXML(panel.strip)}</text>` +
+    `<g class="gg-strip" transform="translate(${px(originX)},${px(originY)})"${clipAttr}>` +
+    clipDef +
+    `<rect width="${px(rectW)}" height="${px(rectH)}" fill="${stripFill}"/>` +
+    `<text x="${px(textX)}" y="${px(textY)}" dy="0.32em" text-anchor="middle" fill="${ink}" font-size="${px(scene.theme.stripSize)}" font-weight="${scene.theme.stripWeight}"${textTransform}>${escapeXML(panel.strip)}</text>` +
     "</g>"
   );
 }
@@ -122,12 +214,12 @@ function renderAxisTitles(scene: Scene): string {
   const parts: string[] = [];
   if (scene.axes.x.title !== "") {
     parts.push(
-      `<text class="gg-axis-title" x="${px((gridLeft + gridRight) / 2)}" y="${px(gridBottom + (scene.axes.x.titleOffset ?? 32))}" text-anchor="middle" fill="${ink}" font-size="${px(scene.theme.axisTitleSize)}" font-weight="${scene.theme.axisTitleWeight}">${escapeXML(scene.axes.x.title)}</text>`,
+      `<text class="gg-axis-title" x="${px((gridLeft + gridRight) / 2)}" y="${px(gridBottom + (scene.axes.x.titleOffset ?? 32))}" text-anchor="middle" fill="${ink}" font-size="${px(scene.axes.x.titleSize ?? scene.theme.axisTitleSize)}" font-weight="${scene.theme.axisTitleWeight}">${escapeXML(scene.axes.x.title)}</text>`,
     );
   }
   if (scene.axes.y.title !== "") {
     parts.push(
-      `<text class="gg-axis-title" transform="translate(12,${px((gridTop + gridBottom) / 2)}) rotate(-90)" text-anchor="middle" fill="${ink}" font-size="${px(scene.theme.axisTitleSize)}" font-weight="${scene.theme.axisTitleWeight}">${escapeXML(scene.axes.y.title)}</text>`,
+      `<text class="gg-axis-title" transform="translate(12,${px((gridTop + gridBottom) / 2)}) rotate(-90)" text-anchor="middle" fill="${ink}" font-size="${px(scene.axes.y.titleSize ?? scene.theme.axisTitleSize)}" font-weight="${scene.theme.axisTitleWeight}">${escapeXML(scene.axes.y.title)}</text>`,
     );
   }
   return parts.join("");
@@ -167,58 +259,122 @@ function renderGrid(panel: ScenePanel, theme: ThemeTokens): string {
   return parts.join("");
 }
 
+function renderDiscreteLegendKey(
+  entry: SceneLegendEntry,
+  x: number,
+  y: number,
+  size: number,
+  ink: string,
+): string {
+  const centerX = x + size / 2;
+  const centerY = y + size / 2;
+  const opacity =
+    entry.alpha === undefined || entry.alpha === 1 ? "" : ` opacity="${px(entry.alpha)}"`;
+  const styleKey =
+    entry.shape !== undefined ||
+    entry.size !== undefined ||
+    entry.linetype !== undefined ||
+    entry.linewidth !== undefined;
+  const keyColor =
+    styleKey && entry.color === "#999999" && entry.hasPaint !== true ? ink : entry.color;
+  if (entry.shape !== undefined || entry.size !== undefined) {
+    const shape = entry.shape ?? "circle";
+    const radius = Math.min(size / 2, entry.size ?? size / 2);
+    return `<g class="gg-legend-key"${opacity}>${pointShape(shape, centerX, centerY, radius, keyColor)}</g>`;
+  }
+  if (entry.linetype !== undefined || entry.linewidth !== undefined) {
+    const linetype = entry.linetype ?? "solid";
+    const dash = LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? [];
+    const dashAttr = dash.length === 0 ? "" : ` stroke-dasharray="${dash.join(" ")}"`;
+    return `<line class="gg-legend-key" x1="${px(x)}" y1="${px(centerY)}" x2="${px(x + size)}" y2="${px(centerY)}" stroke="${keyColor}" stroke-width="${px(entry.linewidth ?? 1.5)}"${dashAttr}${opacity}/>`;
+  }
+  return `<rect class="gg-legend-swatch" x="${px(x)}" y="${px(y)}" width="${px(size)}" height="${px(size)}" fill="${entry.color}"${opacity}/>`;
+}
+
+function renderDiscreteLegendLabel(
+  entry: SceneLegendEntry,
+  x: number,
+  rowHeight: number,
+  labelSize: number,
+  ink: string,
+): string {
+  const lines = entry.lines;
+  if (lines === undefined || lines.length <= 1) {
+    return `<text class="gg-legend-label" x="${px(x)}" y="${px(entry.y + rowHeight / 2)}" dy="0.32em" font-size="${px(labelSize)}" fill="${ink}">${escapeXML(entry.label)}${entry.fullLabel !== undefined && entry.fullLabel !== entry.label ? `<title>${escapeXML(entry.fullLabel)}</title>` : ""}</text>`;
+  }
+  const lineHeight = entry.lineHeight ?? labelSize * 1.2;
+  const firstY = entry.y + (rowHeight - lines.length * lineHeight) / 2 + lineHeight / 2;
+  const tspans = lines
+    .map(
+      (line, index) =>
+        `<tspan x="${px(x)}"${index === 0 ? "" : ` dy="${px(lineHeight)}"`}>${escapeXML(line)}</tspan>`,
+    )
+    .join("");
+  return `<text class="gg-legend-label" x="${px(x)}" y="${px(firstY)}" dy="0.32em" font-size="${px(labelSize)}" fill="${ink}">${tspans}</text>`;
+}
+
 function renderLegend(legend: SceneLegend, theme: ThemeTokens, gradientId: string): string {
   const ink = themeVar("ink", theme);
+  const horizontal = legend.direction === "horizontal";
+  const titleSize = legend.titleSize ?? 11;
+  const labelSize = legend.labelSize ?? 11;
   const parts: string[] = [
-    `<g class="gg-legend gg-legend-${legend.scale}" transform="translate(${px(legend.x)},${px(legend.y)})">`,
+    `<g class="gg-legend gg-legend-${legend.scale} gg-legend-${legend.position ?? "right"} gg-legend-${legend.direction ?? "vertical"}" transform="translate(${px(legend.x)},${px(legend.y)})">`,
   ];
+  const contentTop = legend.title === "" ? 0 : (legend.titleHeight ?? 18);
+  if (legend.title !== "") {
+    parts.push(
+      `<text class="gg-legend-title" x="4" y="${px(Math.max(11, contentTop - 7))}" font-size="${px(titleSize)}" font-weight="bold" fill="${ink}">${escapeXML(legend.title)}</text>`,
+    );
+  }
   if (legend.type === "discrete") {
-    let contentY = 0;
-    if (legend.title !== "") {
-      parts.push(
-        `<text class="gg-legend-title" x="4" y="11" font-weight="bold" fill="${ink}">${escapeXML(legend.title)}</text>`,
-      );
-      contentY = 0;
-    }
     for (const entry of legend.entries) {
-      const swatchY = entry.y + contentY + (LEGEND_ROW_HEIGHT - legend.swatchSize) / 2;
+      const baseX = (entry.x ?? 0) + 4;
+      const rowHeight = entry.height ?? LEGEND_ROW_HEIGHT;
+      const swatchY = entry.y + (rowHeight - legend.swatchSize) / 2;
       parts.push(
-        `<rect class="gg-legend-swatch" x="4" y="${px(swatchY)}" width="${px(legend.swatchSize)}" height="${px(legend.swatchSize)}" fill="${entry.color}"/>`,
-        `<text class="gg-legend-label" x="${px(4 + legend.swatchSize + 6)}" y="${px(entry.y + contentY + LEGEND_ROW_HEIGHT / 2)}" dy="0.32em" fill="${ink}">${escapeXML(entry.label)}</text>`,
+        renderDiscreteLegendKey(entry, baseX, swatchY, legend.swatchSize, ink),
+        renderDiscreteLegendLabel(
+          entry,
+          baseX + legend.swatchSize + (legend.keyGap ?? 6),
+          rowHeight,
+          labelSize,
+          ink,
+        ),
       );
     }
   } else if (legend.type === "steps") {
-    let stepTop = 0;
-    if (legend.title !== "") {
-      parts.push(
-        `<text class="gg-legend-title" x="4" y="11" font-weight="bold" fill="${ink}">${escapeXML(legend.title)}</text>`,
-      );
-      stepTop = 18;
-    }
     for (const entry of legend.entries) {
+      const entryX = 4 + (entry.x ?? 0);
+      const entryY = contentTop + entry.y;
       parts.push(
-        `<rect class="gg-legend-step" x="4" y="${px(stepTop + entry.y)}" width="${px(legend.stepWidth)}" height="${px(legend.stepHeight)}" fill="${entry.color}"/>`,
-        `<text class="gg-legend-label" x="${px(4 + legend.stepWidth + 6)}" y="${px(stepTop + entry.y + legend.stepHeight / 2)}" dy="0.32em" fill="${ink}">${escapeXML(entry.label)}</text>`,
+        `<rect class="gg-legend-step" x="${px(entryX)}" y="${px(entryY)}" width="${px(legend.stepWidth)}" height="${px(legend.stepHeight)}" fill="${entry.color}"/>`,
+        entry.label === ""
+          ? ""
+          : `<text class="gg-legend-label" x="${px(horizontal ? entryX + legend.stepWidth / 2 : entryX + legend.stepWidth + 6)}" y="${px(horizontal ? entryY + legend.stepHeight + 12 : entryY + legend.stepHeight / 2)}" text-anchor="${horizontal ? "middle" : "start"}" dy="0.32em" font-size="${px(labelSize)}" fill="${ink}">${escapeXML(entry.label)}${entry.fullLabel !== undefined && entry.fullLabel !== entry.label ? `<title>${escapeXML(entry.fullLabel)}</title>` : ""}</text>`,
       );
     }
   } else {
-    let rampTop = 0;
-    if (legend.title !== "") {
-      parts.push(
-        `<text class="gg-legend-title" x="4" y="11" font-weight="bold" fill="${ink}">${escapeXML(legend.title)}</text>`,
-      );
-      rampTop = 18;
-    }
+    const rampX = horizontal ? (legend.rampX ?? 4) : 4;
     const stops = legend.stops
       .map(([offset, color]) => `<stop offset="${px(offset * 100)}%" stop-color="${color}"/>`)
       .join("");
     parts.push(
-      `<defs><linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1">${stops}</linearGradient></defs>`,
-      `<rect class="gg-legend-ramp" x="4" y="${px(rampTop)}" width="${px(legend.rampWidth)}" height="${px(legend.rampHeight)}" fill="url(#${gradientId})"/>`,
+      `<defs><linearGradient id="${gradientId}" x1="0" y1="0" x2="${horizontal ? "1" : "0"}" y2="${horizontal ? "0" : "1"}">${stops}</linearGradient></defs>`,
+      `<rect class="gg-legend-ramp" x="${px(rampX)}" y="${px(contentTop)}" width="${px(legend.rampWidth)}" height="${px(legend.rampHeight)}" fill="url(#${gradientId})"/>`,
     );
     for (const tick of legend.ticks) {
+      const pos = tick.pos ?? tick.y ?? 0;
+      if (legend.showTicks !== false) {
+        parts.push(
+          horizontal
+            ? `<line class="gg-legend-tick" x1="${px(rampX + pos)}" y1="${px(contentTop + legend.rampHeight)}" x2="${px(rampX + pos)}" y2="${px(contentTop + legend.rampHeight + 4)}" stroke="${ink}"/>`
+            : `<line class="gg-legend-tick" x1="${px(rampX + legend.rampWidth)}" y1="${px(contentTop + pos)}" x2="${px(rampX + legend.rampWidth + 4)}" y2="${px(contentTop + pos)}" stroke="${ink}"/>`,
+        );
+      }
+      if (tick.label === "") continue;
       parts.push(
-        `<text class="gg-legend-label" x="${px(4 + legend.rampWidth + 6)}" y="${px(rampTop + tick.y)}" dy="0.32em" fill="${ink}">${escapeXML(tick.label)}</text>`,
+        `<text class="gg-legend-label" x="${px(horizontal ? rampX + pos : rampX + legend.rampWidth + 6)}" y="${px(horizontal ? contentTop + legend.rampHeight + 12 : contentTop + pos)}" text-anchor="${horizontal ? "middle" : "start"}" dy="0.32em" font-size="${px(labelSize)}" fill="${ink}">${escapeXML(tick.label)}${tick.fullLabel !== undefined && tick.fullLabel !== tick.label ? `<title>${escapeXML(tick.fullLabel)}</title>` : ""}</text>`,
       );
     }
   }
@@ -235,15 +391,27 @@ export function sceneLabel(scene: Scene): string {
   return "ggsvelte plot";
 }
 
+/** Optional paint rendering controls for pure SVG export (#591). */
+export interface SceneSVGOptions {
+  /**
+   * Within-mark paint mode. "full" emits gradients/glow; "fallback" uses solid
+   * paint.fallback colors and omits glow (a11y / reduced-effects).
+   */
+  paintMode?: PaintRenderMode;
+}
+
 /** Serialize a computed Scene to a standalone SVG string. */
-export function sceneToSVGString(scene: Scene): string {
+export function sceneToSVGString(scene: Scene, options: SceneSVGOptions = {}): string {
+  const paintMode = options.paintMode ?? "full";
   const panel = scene.panels[0]!;
   const theme = scene.theme;
   const ink = themeVar("ink", theme);
   const parts: string[] = [];
   const label = sceneLabel(scene);
+  const titleX = panel.allocation?.x ?? panel.x;
+  const layoutAttribute = scene.layout === undefined ? "" : ` data-gg-layout="${scene.layout}"`;
   parts.push(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${px(scene.width)}" height="${px(scene.height)}" viewBox="0 0 ${px(scene.width)} ${px(scene.height)}" role="img" aria-label="${escapeXML(label)}" class="gg-plot" font-family="${escapeXML(scene.theme.fontFamily)}" font-size="${px(scene.theme.fontSize)}" font-weight="${scene.theme.fontWeight}" text-rendering="optimizeLegibility" shape-rendering="geometricPrecision">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${px(scene.width)}" height="${px(scene.height)}" viewBox="0 0 ${px(scene.width)} ${px(scene.height)}" role="img" aria-label="${escapeXML(label)}" class="gg-plot"${layoutAttribute} font-family="${escapeXML(scene.theme.fontFamily)}" font-size="${px(scene.theme.fontSize)}" font-weight="${scene.theme.fontWeight}" text-rendering="optimizeLegibility" shape-rendering="geometricPrecision">`,
     `<title>${escapeXML(label)}</title>`,
   );
   if (theme.paper !== "none") {
@@ -253,7 +421,7 @@ export function sceneToSVGString(scene: Scene): string {
   }
   if (scene.title !== "") {
     parts.push(
-      `<text class="gg-title" x="${px(panel.x)}" y="${px(scene.theme.titleSize)}" font-size="${px(scene.theme.titleSize)}" font-weight="${scene.theme.titleWeight}" fill="${ink}">${escapeXML(scene.title)}</text>`,
+      `<text class="gg-title" x="${px(titleX)}" y="${px(scene.theme.titleSize)}" font-size="${px(scene.theme.titleSize)}" font-weight="${scene.theme.titleWeight}" fill="${ink}">${escapeXML(scene.title)}</text>`,
     );
   }
   if (scene.subtitle !== "") {
@@ -262,7 +430,7 @@ export function sceneToSVGString(scene: Scene): string {
         ? scene.theme.subtitleSize
         : scene.theme.titleSize + scene.theme.subtitleSize + 3;
     parts.push(
-      `<text class="gg-subtitle" x="${px(panel.x)}" y="${px(y)}" font-size="${px(scene.theme.subtitleSize)}" font-weight="${scene.theme.subtitleWeight}" fill="${ink}">${escapeXML(scene.subtitle)}</text>`,
+      `<text class="gg-subtitle" x="${px(titleX)}" y="${px(y)}" font-size="${px(scene.theme.subtitleSize)}" font-weight="${scene.theme.subtitleWeight}" fill="${ink}">${escapeXML(scene.subtitle)}</text>`,
     );
   }
   // Panel clip paths (decision 0008/0010 follow-up: marks clip to their
@@ -276,7 +444,18 @@ export function sceneToSVGString(scene: Scene): string {
         : `<clipPath id="gg-clip-${i}"><rect width="${px(p.width)}" height="${px(p.height)}"/></clipPath>`,
     )
     .join("");
-  parts.push(`<defs>${clips}</defs>`);
+  const { paints, glows } = collectPaintResources(scene);
+  const paintDefs = paintMode === "full" ? paintDefsSvg(paints, glows) : "";
+  parts.push(`<defs>${clips}${paintDefs}</defs>`);
+  for (const p of scene.panels) {
+    if (p.allocation === undefined) continue;
+    const fill = themeVar("letterboxFill", theme);
+    for (const gutter of letterboxGutterRects(p.allocation, p)) {
+      parts.push(
+        `<rect class="gg-letterbox" x="${px(gutter.x)}" y="${px(gutter.y)}" width="${px(gutter.width)}" height="${px(gutter.height)}" fill="${fill}"/>`,
+      );
+    }
+  }
   // One O(P+B) panel→batch index (issue #185) instead of re-scanning all
   // batches per panel (O(P·B)). Bucket order preserves original batch list
   // order within each panel.
@@ -291,14 +470,14 @@ export function sceneToSVGString(scene: Scene): string {
       renderGrid(p, theme),
       `<g class="gg-marks"${p.clip === false ? "" : ` clip-path="url(#gg-clip-${i})"`}>`,
     );
-    for (const batch of byPanel[i]!) parts.push(renderBatch(batch, theme));
+    for (const batch of byPanel[i]!) parts.push(renderBatch(batch, theme, paintMode));
     parts.push("</g>");
     if (theme.showPanelBorder) {
       parts.push(
         `<rect class="gg-panel-border" width="${px(p.width)}" height="${px(p.height)}" fill="none" stroke="${themeVar("panelBorder", theme)}" stroke-width="${px(theme.panelBorderWidth)}" vector-effect="non-scaling-stroke"/>`,
       );
     }
-    parts.push("</g>", renderStrip(p, scene), renderPanelAxes(p, theme));
+    parts.push("</g>", renderStrip(p, scene, i), renderPanelAxes(p, theme));
   }
   parts.push(renderAxisTitles(scene));
   for (const legend of scene.legends) {

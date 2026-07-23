@@ -6,8 +6,9 @@ import { encodeKey } from "../scales/state.js";
 import type { CellValue } from "../table.js";
 import type { AxisGuidePlan } from "./temporal-guide.js";
 import { planTemporalAxis } from "./temporal-guide.js";
-import { planBandAxis, type BandAxisPlan } from "./band-guide.js";
+import { planBandAxis, type BandAxisPlan, type BandGuideConfig } from "./band-guide.js";
 import type { TextMeasurer } from "./measure.js";
+import { truncateToFit } from "./truncate.js";
 import {
   defaultLogTickFormat,
   defaultTickFormat,
@@ -84,6 +85,9 @@ export interface DeriveTicksContext {
    *  band planner subtracts it so the band + chrome together honor the margin cap. */
   orthogonalChromePx?: number;
   quantum?: number;
+  ellipsis?: string;
+  /** Top-level band-axis collision override, resolved after scale-local guide settings. */
+  bandCollision?: "ellipsis" | "preserve";
   previousGuidePlan?: AxisGuidePlan;
 }
 
@@ -127,6 +131,7 @@ function bandGuidePlan(
     bandLabelMode: plan.mode,
     bandLabelAngle: plan.angle,
     bandLabelBandHeight: plan.labelBandHeight,
+    ...(plan.authorPinned === true && { bandLabelAuthorPinned: true }),
   });
 }
 
@@ -137,6 +142,73 @@ function smallestGap(values: readonly number[]): number {
     if (d > 0 && (gap === 0 || d < gap)) gap = d;
   }
   return gap;
+}
+
+function bandGuideConfig(value: unknown): BandGuideConfig | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value) || "type" in value)
+    return undefined;
+  return value;
+}
+
+function ellipsizeBandPlan(
+  plan: BandAxisPlan,
+  categoryCount: number,
+  context: DeriveTicksContext,
+): BandAxisPlan {
+  const maxLabelWidth = Math.max(1, context.extentPx / Math.max(1, categoryCount));
+  return {
+    ...plan,
+    mode: "single-line",
+    angle: 0,
+    ticks: plan.ticks.map((plannedTick) => {
+      const { angle: _angle, lines: _lines, ...tick } = plannedTick;
+      return {
+        ...tick,
+        label: tick.labeled
+          ? truncateToFit(
+              tick.fullLabel,
+              maxLabelWidth,
+              context.measurer,
+              context.fontSize,
+              context.ellipsis ?? "…",
+            )
+          : "",
+      };
+    }),
+    labelEvery: 1,
+    labelBandHeight: context.measurer.measureHeight(context.fontSize),
+    alongOverhang: 0,
+    leftOverhang: 0,
+    overlap: false,
+    marginOverflow: false,
+    degraded: [],
+    authorPinned: true,
+  };
+}
+
+/**
+ * Preserve mode renders full, un-truncated single-line labels (presentForLayout
+ * restores fullLabel for every tick and the margin computation uses those widths
+ * uncapped). The pinned-single planner it's routed through still runs its own
+ * end-cap truncation (capEndOverhang) for a normal single-line axis, so its raw
+ * output can carry an ellipsized label plus a false "the end label was truncated"
+ * diagnostic that never matches what's actually rendered. Restore full labels and
+ * drop that diagnostic; genuine neighbour-overlap stays since preserve truly can
+ * render overlapping full labels.
+ */
+function sanitizePreserveBandPlan(plan: BandAxisPlan): BandAxisPlan {
+  return {
+    ...plan,
+    ticks: plan.ticks.map((tick) => ({
+      ...tick,
+      label: tick.labeled ? tick.fullLabel : "",
+    })),
+    alongOverhang: 0,
+    leftOverhang: 0,
+    marginOverflow: false,
+    degraded: plan.degraded.filter((code) => code !== "band-label-margin-overflow"),
+    authorPinned: true,
+  };
 }
 
 export function deriveTicks(
@@ -151,11 +223,66 @@ export function deriveTicks(
     // Resolve break-filtered (or full-domain) entries once for both the measured
     // horizontal planner and the legacy vertical path — O(D+K) via encodeKey map.
     const resolved = resolveBandEntries(domain);
+    const guide = bandGuideConfig(domain.band?.config.guide);
+    // mode:off must apply before the horizontal-only measured branch so vertical
+    // band axes (native Y, or x after coord_flip) also hide labels.
+    if (domain.band !== undefined && guide?.mode === "off") {
+      const plan = planBandAxis({
+        aesthetic: domain.band.aesthetic,
+        panelIndex: domain.band.panelIndex,
+        categoryCount: domain.categories.length,
+        entries: resolved.map(({ value, domainIndex }) => ({
+          value,
+          label: format ? format(value, NaN) : String(value),
+          domainIndex,
+        })),
+        orient: context.orient,
+        extentPx: context.extentPx,
+        reverse: domain.band.config.reverse === true,
+        measurer: context.measurer,
+        fontSize: context.fontSize,
+        marginCapPx: context.marginCapPx,
+        orthogonalMarginCapPx: Math.max(
+          1,
+          (context.orthogonalMarginCapPx ?? context.marginCapPx) -
+            (context.orthogonalChromePx ?? 0),
+        ),
+        ...(context.quantum !== undefined && { quantum: context.quantum }),
+        ...(context.ellipsis !== undefined && { ellipsis: context.ellipsis }),
+        previousMode: context.previousGuidePlan?.bandLabelMode ?? null,
+        config: guide,
+      });
+      const ticks: Tick[] = plan.ticks.map((tick) => ({
+        value: tick.value,
+        label: tick.label,
+        fullLabel: tick.fullLabel,
+        domainIndex: tick.domainIndex,
+        labeled: false,
+      }));
+      return {
+        ticks,
+        step: NaN,
+        empty: plan.ticks.length === 0,
+        guidePlan: bandGuidePlan(plan, domain.band, rawCategories),
+        bandLabelBandHeight: 0,
+        bandAlongOverhang: 0,
+        bandLeftOverhang: 0,
+        bandLabelEvery: 1,
+      };
+    }
     // Measured planner: horizontal band axes with a planning context only (G1).
     // Vertical band (native Y, or categorical-on-Y after coord_flip) falls through
     // to the legacy thin/truncate path.
     if (domain.band !== undefined && context.orient === "horizontal") {
-      const plan = planBandAxis({
+      // "preserve" renders full single-line labels downstream (presentForLayout),
+      // so the guide plan must reflect single-line mode too — otherwise the auto
+      // wrap/rotate plan leaks into the axis-title offset and wrap/rotate advisories
+      // for a layout that is never actually rendered.
+      const resolvedGuide =
+        context.bandCollision === "ellipsis" || context.bandCollision === "preserve"
+          ? { ...guide, mode: "single" as const }
+          : guide;
+      const planned = planBandAxis({
         aesthetic: domain.band.aesthetic,
         panelIndex: domain.band.panelIndex,
         categoryCount: domain.categories.length,
@@ -179,8 +306,17 @@ export function deriveTicks(
             (context.orthogonalChromePx ?? 0),
         ),
         ...(context.quantum !== undefined && { quantum: context.quantum }),
+        ...(context.ellipsis !== undefined && { ellipsis: context.ellipsis }),
         previousMode: context.previousGuidePlan?.bandLabelMode ?? null,
+        // Top-level collision presentation overrides the scale-local layout pin.
+        ...(resolvedGuide === undefined ? {} : { config: resolvedGuide }),
       });
+      const plan =
+        context.bandCollision === "ellipsis"
+          ? ellipsizeBandPlan(planned, domain.categories.length, context)
+          : context.bandCollision === "preserve"
+            ? sanitizePreserveBandPlan(planned)
+            : planned;
       const ticks: Tick[] = plan.ticks.map((tick) => ({
         value: tick.value,
         label: tick.label,

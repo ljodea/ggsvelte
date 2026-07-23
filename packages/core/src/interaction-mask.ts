@@ -41,10 +41,61 @@ function rendererPrimitive(batch: GeometryBatch, candidateIndex: number): number
     : null;
 }
 
+function freezeMasks(
+  batches: readonly GeometryBatch[],
+  focused: Map<number, Uint8Array>,
+): ReadonlyArray<BatchInteractionMask | null> {
+  const masks = batches.map<BatchInteractionMask | null>((_, batchIndex) => {
+    const values = focused.get(batchIndex);
+    if (values === undefined) return null;
+    let focusedCount = 0;
+    for (const value of values) focusedCount += value;
+    return Object.freeze({
+      primitiveCount: values.length,
+      focusedCount,
+      isFocused(primitiveIndex: number): boolean {
+        return values[primitiveIndex] === 1;
+      },
+    });
+  });
+  return Object.freeze(masks);
+}
+
+/**
+ * Mark a **renderer** primitive index as focused (not a candidate vertex index).
+ * Path callers must pass a subpath index; do not run path-vertex remapping here.
+ */
+function markFocusedPrimitive(
+  focused: Map<number, Uint8Array>,
+  batches: readonly GeometryBatch[],
+  batchIndex: number,
+  primitiveIndex: number,
+): void {
+  const batch = batches[batchIndex];
+  if (batch === undefined) return;
+  const count = renderPrimitiveCount(batch);
+  if (!Number.isInteger(primitiveIndex) || primitiveIndex < 0 || primitiveIndex >= count) return;
+  let values = focused.get(batchIndex);
+  if (values === undefined) {
+    values = new Uint8Array(count);
+    focused.set(batchIndex, values);
+  }
+  values[primitiveIndex] = 1;
+}
+
+/** Renderer primitive address for direct (keyless) inspection focus. */
+export interface FocusedPrimitive {
+  readonly batchIndex: number;
+  readonly primitiveIndex: number;
+}
+
 /**
  * Project semantic emphasis keys onto renderer primitives without exposing a
  * mutable backing array. Batches without semantic candidates remain `null`,
- * so annotation-only geometry is not inadvertently de-emphasized.
+ * so pure annotation-only geometry is not inadvertently de-emphasized —
+ * except presentation-only path batches (`candidates: false`) that share a
+ * layer with a focused batch (ribbon outlines), which mirror that layer's mask
+ * so unselected outlines mute with their fill.
  */
 export function buildInteractionMasks<Key extends PropertyKey>(
   batches: readonly GeometryBatch[],
@@ -63,6 +114,8 @@ export function buildInteractionMasks<Key extends PropertyKey>(
     const primitiveIndex = rendererPrimitive(batch, candidate.primitiveIndex);
     if (primitiveIndex === null) continue;
 
+    // Allocate the batch mask whenever a candidate is addressable so
+    // non-matching emphasis still yields focusedCount 0 (not a null mask).
     let values = focused.get(candidate.batchIndex);
     if (values === undefined) {
       values = new Uint8Array(renderPrimitiveCount(batch));
@@ -71,20 +124,62 @@ export function buildInteractionMasks<Key extends PropertyKey>(
     if (candidate.keys.some((key) => emphasis.has(key))) values[primitiveIndex] = 1;
   }
 
-  const masks = batches.map<BatchInteractionMask | null>((_, batchIndex) => {
-    const values = focused.get(batchIndex);
-    if (values === undefined) return null;
-    let focusedCount = 0;
-    for (const value of values) focusedCount += value;
-    return Object.freeze({
-      primitiveCount: values.length,
-      focusedCount,
-      isFocused(primitiveIndex: number): boolean {
-        return values[primitiveIndex] === 1;
-      },
-    });
-  });
-  return Object.freeze(masks);
+  // Mirror fill-batch focus onto presentation-only path batches on the same
+  // layer (ribbon outline open paths). Null masks stay fully opaque in canvas.
+  for (let index = 0; index < batches.length; index++) {
+    const batch = batches[index];
+    if (batch === undefined || batch.kind !== "paths" || batch.candidates !== false) continue;
+    if (focused.has(index)) continue;
+    let source: Uint8Array | undefined;
+    let sourceCount = 0;
+    for (let other = 0; other < batches.length; other++) {
+      if (other === index) continue;
+      const peer = batches[other];
+      if (peer === undefined || peer.layerIndex !== batch.layerIndex) continue;
+      const values = focused.get(other);
+      if (values === undefined) continue;
+      source = values;
+      sourceCount = renderPrimitiveCount(peer);
+      break;
+    }
+    if (source === undefined) continue;
+    const outlineCount = renderPrimitiveCount(batch);
+    const mirrored = new Uint8Array(outlineCount);
+    if (outlineCount === sourceCount) {
+      mirrored.set(source);
+    } else if (sourceCount > 0 && outlineCount === sourceCount * 2) {
+      // outline: "both" — two open subpaths per closed fill run
+      for (let path = 0; path < sourceCount; path++) {
+        const bit = source[path]!;
+        mirrored[path * 2] = bit;
+        mirrored[path * 2 + 1] = bit;
+      }
+    } else if (sourceCount > 0) {
+      // Length mismatch: mute all outline primitives under any active emphasis.
+      // (zeros = not focused → canvas draws at mutedAlpha)
+    }
+    focused.set(index, mirrored);
+  }
+
+  return freezeMasks(batches, focused);
+}
+
+/**
+ * Build focus masks from explicit renderer primitives (no semantic keys).
+ * Used for rect inspection de-emphasis when the chart has no datum keys (#386).
+ */
+export function buildPrimitiveInteractionMasks(
+  batches: readonly GeometryBatch[],
+  primitives: Iterable<FocusedPrimitive>,
+): ReadonlyArray<BatchInteractionMask | null> {
+  const focused = new Map<number, Uint8Array>();
+  let any = false;
+  for (const primitive of primitives) {
+    any = true;
+    markFocusedPrimitive(focused, batches, primitive.batchIndex, primitive.primitiveIndex);
+  }
+  if (!any) return Object.freeze(Array.from<null>({ length: batches.length }).fill(null));
+  return freezeMasks(batches, focused);
 }
 
 /** Typed canonical equality for raw discrete legend values. */

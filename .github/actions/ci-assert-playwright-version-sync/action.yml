@@ -1,0 +1,58 @@
+# Assert npm-resolved Playwright version matches the pinned container tag.
+# Callers gate the step with `if:` when content-hash hit must skip the check.
+name: CI assert Playwright version sync
+description: >
+  Resolve an npm Playwright package version from a working directory and fail
+  when v{version}-noble does not match the pinned container tag.
+
+inputs:
+  working_directory:
+    description: >
+      Directory to resolve the package from (repo-relative). Use `.` for the
+      monorepo root.
+    required: false
+    default: "."
+  package:
+    description: npm package name (`playwright` or `@playwright/test`)
+    required: false
+    default: "playwright"
+  scope:
+    description: >
+      Human-readable scope for log/error messages (e.g. packages/svelte,
+      spikes/browser, root @playwright/test (VR suite)).
+    required: true
+  container_tag:
+    description: Pinned Playwright container tag (v…-noble)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: assert playwright npm/container version sync (${{ inputs.scope }})
+      shell: bash
+      env:
+        # env-indirection: inputs must not expand into the script body (zizmor).
+        WORKING_DIRECTORY: ${{ inputs.working_directory }}
+        PACKAGE: ${{ inputs.package }}
+        SCOPE: ${{ inputs.scope }}
+        CONTAINER_TAG: ${{ inputs.container_tag }}
+      run: |
+        set -euo pipefail
+        npm_version="$(
+          cd "${WORKING_DIRECTORY}"
+          bun -e 'console.log(require(`${process.env.PACKAGE}/package.json`).version)'
+        )"
+        expected="v${npm_version}-noble"
+        if [ "${PACKAGE}" = "playwright" ]; then
+          echo "${SCOPE} playwright: ${npm_version}; container tag: ${CONTAINER_TAG}"
+          if [ "${expected}" != "${CONTAINER_TAG}" ]; then
+            echo "::error::playwright npm version in ${SCOPE} (${npm_version}) does not match pinned container tag (${CONTAINER_TAG})"
+            exit 1
+          fi
+        else
+          echo "${SCOPE}: ${npm_version}; container tag: ${CONTAINER_TAG}"
+          if [ "${expected}" != "${CONTAINER_TAG}" ]; then
+            echo "::error::${PACKAGE} version (${npm_version}) does not match pinned container tag (${CONTAINER_TAG})"
+            exit 1
+          fi
+        fi

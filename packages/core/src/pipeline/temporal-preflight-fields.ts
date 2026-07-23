@@ -31,24 +31,42 @@ export function preflightTemporalFields(input: {
   const docs = temporalPreflightDocs;
 
   for (const binding of bindings) {
+    // Prefer the layer's own source table when multi-table (#589).
+    const layerTable = binding.sourceTable ?? table;
     const processAxis = (axis: "x" | "y"): void => {
       const axisConversion = axis === "x" ? binding.xConversion : binding.yConversion;
       if (axisConversion.forcedDiscrete || axisConversion.forcedNonTemporal) return;
       assertTemporalConfiguration(axis, axisConversion);
+      const isSegment = binding.layer.geom === "segment";
+      // xmin/xmax are only consumed by rect/ribbon (frame-identity gates the same
+      // way). Preflighting them on point/line/etc. fails scales.x.type:"time" when
+      // an unused bound column is non-temporal.
+      const consumesXBounds = binding.layer.geom === "rect" || binding.layer.geom === "ribbon";
       const fields =
-        axis === "x" ? [binding.xField] : [binding.yField, binding.yminField, binding.ymaxField];
+        axis === "x"
+          ? [
+              binding.xField,
+              ...(consumesXBounds ? [binding.xminField, binding.xmaxField] : []),
+              ...(isSegment ? [binding.xendField] : []),
+            ]
+          : [
+              binding.yField,
+              binding.yminField,
+              binding.ymaxField,
+              ...(isSegment ? [binding.yendField] : []),
+            ];
       const fieldResolutions: PositionConversionContext[] = [];
       for (const field of new Set(fields)) {
-        if (field === null || !table.has(field)) continue;
+        if (field === null || !layerTable.has(field)) continue;
         const conversion = axisConversion;
-        const key = `${axis}|${field}|${conversion.parser === "auto" ? "auto" : JSON.stringify(conversion.parser)}|${JSON.stringify(conversion.options)}`;
+        const key = `${binding.sourceId}|${axis}|${field}|${conversion.parser === "auto" ? "auto" : JSON.stringify(conversion.parser)}|${JSON.stringify(conversion.options)}`;
         const cachedResolution = resolvedByKey.get(key);
         if (cachedResolution !== undefined) {
           fieldResolutions.push(cachedResolution);
           continue;
         }
 
-        const view = table.parsed(field, conversion.sourceParser, conversion.options);
+        const view = layerTable.parsed(field, conversion.sourceParser, conversion.options);
         const decision = view.decision;
         const explicit = conversion.parser !== "auto";
         if (explicit && decision.failedCount > 0) {

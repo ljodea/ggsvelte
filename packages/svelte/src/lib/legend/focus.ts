@@ -14,11 +14,11 @@
  */
 import type { SceneLegend, SceneLegendEntry } from "@ggsvelte/core";
 
-import type { InteractionSource } from "../interaction/interaction.js";
+import type { InteractionSource, LegendFocusChange } from "../interaction/interaction.js";
 
 /** Stable renderer identity for one entry in one discrete legend. */
 export interface LegendEntryIdentity {
-  scale: string;
+  scale: LegendFocusChange["scale"];
   entryIndex: number;
 }
 
@@ -50,7 +50,7 @@ export function buildInteractiveLegendEntries(
   legends: readonly SceneLegend[],
 ): InteractiveLegendEntry[] {
   return legends.flatMap((sceneLegend) =>
-    sceneLegend.type === "discrete"
+    sceneLegend.type === "discrete" && sceneLegend.interactive !== false
       ? sceneLegend.entries.map((entry, entryIndex) => ({
           legend: sceneLegend,
           entry,

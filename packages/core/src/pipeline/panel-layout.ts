@@ -2,18 +2,29 @@
  * Two-pass panel layout: facet grids and single-panel plots, including
  * axis-title/legend chrome and free-scale edge axes.
  */
-import type { PortableSpec, TemporalKind } from "@ggsvelte/spec";
+import type { CoordFixedSpec, PortableSpec, TemporalKind } from "@ggsvelte/spec";
 
-import type { LegendInput, LegendOrder } from "../legend.js";
+import {
+  assertLegendBlockFitsPlacedArea,
+  LegendLayoutError,
+  type LegendInput,
+  type LegendOrder,
+} from "../legend.js";
 import type { PositionScale } from "../scales/train.js";
 import type { ThemeTokens } from "../theme.js";
 
-import type { FacetPanelDef } from "./facets.js";
+import type { FacetPanelDef, FacetStripConfig } from "./facets.js";
+import { DEFAULT_FACET_STRIP } from "./facets.js";
+import { measureFacetStripBand } from "./facets-strip.js";
+import { LEGEND_EDGE_PAD } from "./layout-helpers.js";
+import type { AxisGuideAppearance } from "./guide-config.js";
 import { resolvePanelLayoutChrome } from "./panel-layout-chrome.js";
+import { containedRightLegendY } from "./assemble-scene-legends.js";
+import { applyFixedAspectLayout } from "./panel-layout-fixed.js";
 import { buildPanelPlacements } from "./panel-layout-placements.js";
 import { panelLayoutResultFromChrome } from "./panel-layout-result.js";
 import type { PanelLayoutResult } from "./panel-layout-types.js";
-import type { LayerFrame, PipelineWarning, RunOptions } from "./types.js";
+import { PipelineError, type LayerFrame, type PipelineWarning, type RunOptions } from "./types.js";
 
 export type { PanelPlacement, PanelLayoutResult } from "./panel-layout-types.js";
 
@@ -22,35 +33,134 @@ export function computePanelLayout(input: {
   faceted: boolean;
   freeX: boolean;
   freeY: boolean;
+  coordFixed?: CoordFixedSpec | undefined;
   nrow: number;
   ncol: number;
   facetPanels: readonly FacetPanelDef[];
+  strip?: FacetStripConfig;
   panelScales: readonly { x: PositionScale; y: PositionScale }[];
   allFrames: readonly LayerFrame[];
+  hGuide: AxisGuideAppearance;
+  vGuide: AxisGuideAppearance;
   labs: NonNullable<PortableSpec["labs"]>;
   scalesConfig: NonNullable<PortableSpec["scales"]>;
   xScale: PositionScale;
   yScale: PositionScale;
   xTemporalKind: TemporalKind | null;
   yTemporalKind: TemporalKind | null;
-  colorLegend: LegendInput | null;
-  fillLegend: LegendInput | null;
+  legendInputs: readonly LegendInput[];
   legendOrder: LegendOrder;
   theme: ThemeTokens;
+  layoutAxisTitleSize: number;
+  layoutAxisTextSize: number;
   options: Pick<RunOptions, "width" | "height" | "measureText">;
   warnings: PipelineWarning[];
 }): PanelLayoutResult {
   const { faceted, nrow, ncol, facetPanels, options } = input;
+  const strip = input.strip ?? DEFAULT_FACET_STRIP;
 
   const chrome = resolvePanelLayoutChrome(input);
-  const placements = buildPanelPlacements({
+  let stripBand = measureFacetStripBand({
+    faceted,
+    strip,
+    panels: facetPanels,
+    measurer: chrome.measurer,
+    stripSize: input.theme.stripSize,
+  });
+  if (chrome.legendBlock.autoMovedBottom) {
+    input.warnings.push({
+      code: "guide-auto-bottom",
+      message:
+        "Auto-positioned guides moved below the panel to preserve at least 320 px of readable width.",
+    });
+  }
+  let placements = buildPanelPlacements({
     faceted,
     nrow,
     ncol,
     facetPanels,
+    strip,
+    stripBand,
     chrome,
+    axis: { x: input.hGuide, y: input.vGuide },
     options,
   });
+  // Side strips rotate labels: advance becomes vertical. Remeasure the band
+  // against the shortest panel height so reserved width matches the capped
+  // rotated labels (#611). Left/right strip height does not feed approxH, so
+  // one remeasure converges.
+  if (
+    faceted &&
+    strip.show &&
+    (strip.position === "left" || strip.position === "right") &&
+    placements.length > 0
+  ) {
+    const sideMaxAdvance = Math.min(...placements.map((placement) => placement.height));
+    const cappedBand = measureFacetStripBand({
+      faceted,
+      strip,
+      panels: facetPanels,
+      measurer: chrome.measurer,
+      stripSize: input.theme.stripSize,
+      sideMaxAdvance,
+    });
+    if (cappedBand !== stripBand) {
+      stripBand = cappedBand;
+      placements = buildPanelPlacements({
+        faceted,
+        nrow,
+        ncol,
+        facetPanels,
+        strip,
+        stripBand,
+        chrome,
+        axis: { x: input.hGuide, y: input.vGuide },
+        options,
+      });
+    }
+  }
+  let degraded = false;
+  if (input.coordFixed !== undefined) {
+    const fitted = applyFixedAspectLayout({
+      placements,
+      panelScales: input.panelScales,
+      coord: input.coordFixed,
+      faceted,
+      freeX: input.freeX,
+      freeY: input.freeY,
+      scalesConfig: input.scalesConfig,
+      warnings: input.warnings,
+    });
+    placements = fitted.placements;
+    degraded = fitted.degraded;
+  }
+  try {
+    const bottomInset = chrome.bottomBand + LEGEND_EDGE_PAD;
+    const panelY = Math.min(...placements.map((placement) => placement.y));
+    const minimumY = Math.min(
+      ...placements.map((placement) => placement.allocation?.y ?? placement.y),
+    );
+    assertLegendBlockFitsPlacedArea({
+      block: chrome.legendBlock,
+      inputs: input.legendInputs,
+      viewportHeight: options.height,
+      rightTop: containedRightLegendY({
+        legends: chrome.legendBlock.legends,
+        panelY,
+        minimumY,
+        sceneHeight: options.height,
+        bottomInset,
+      }),
+      bottomInset,
+    });
+  } catch (error) {
+    if (!(error instanceof LegendLayoutError)) throw error;
+    throw new PipelineError(
+      "guide-layout-overflow",
+      `/guides/${error.scale}`,
+      `${error.message} ${error.recovery}`,
+    );
+  }
 
-  return panelLayoutResultFromChrome(chrome, placements);
+  return panelLayoutResultFromChrome(chrome, placements, strip, stripBand, degraded);
 }

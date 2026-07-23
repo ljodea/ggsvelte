@@ -6,6 +6,7 @@ import { describe, expect, it } from "bun:test";
 
 import {
   gg,
+  guideLegend,
   normalize,
   scaleColorBinned,
   scaleColorContinuous,
@@ -126,6 +127,22 @@ describe("color/fill scale authoring API", () => {
     });
     expect(scaleColorIdentity()).toEqual({ color: { type: "identity" } });
     expect(scaleFillContinuous()).toEqual({ fill: { type: "sequential" } });
+  });
+
+  it("exposes scale-local guides through constrained helper option types", () => {
+    const guide = guideLegend({ force: true });
+    expect(scaleColorDiscrete({ guide })).toEqual({
+      color: { type: "ordinal", guide },
+    });
+    expect(scaleColorManual({ values: ["#f00"], guide })).toEqual({
+      color: { type: "manual", range: ["#f00"], guide },
+    });
+    expect(scaleColorIdentity({ guide })).toEqual({
+      color: { type: "identity", guide },
+    });
+    expect(scaleFillIdentity({ guide })).toEqual({
+      fill: { type: "identity", guide },
+    });
   });
 
   it("canonicalizes manual values and matches builder and PortableSpec JSON", () => {

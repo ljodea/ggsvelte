@@ -3,11 +3,15 @@
  */
 import type { LayerSpec } from "@ggsvelte/spec";
 
+import type { ColumnTable } from "../table.js";
+
 import type { LayerBinding } from "./types.js";
 
 export function makeLayerBinding(input: {
   layer: LayerSpec;
   index: number;
+  sourceTable: ColumnTable;
+  sourceId: number;
   xField: string | null;
   yField: string | null;
   yStatColumn: string | null;
@@ -15,8 +19,20 @@ export function makeLayerBinding(input: {
   yConversion: LayerBinding["yConversion"];
   yminField: string | null;
   ymaxField: string | null;
+  xminField: string | null;
+  xmaxField: string | null;
+  widthField: string | null;
+  heightField: string | null;
+  xendField: string | null;
+  yendField: string | null;
+  ribbonOrientation?: "x" | "y";
   color: LayerBinding["color"];
   fill: LayerBinding["fill"];
+  size: LayerBinding["size"];
+  linewidth: LayerBinding["linewidth"];
+  alpha: LayerBinding["alpha"];
+  shape: LayerBinding["shape"];
+  linetype: LayerBinding["linetype"];
   labelField: string | null;
   labelConstant: string | null;
   weightField: string | null;
@@ -25,6 +41,8 @@ export function makeLayerBinding(input: {
   return {
     layer: input.layer,
     index: input.index,
+    sourceTable: input.sourceTable,
+    sourceId: input.sourceId,
     xField: input.xField,
     yField: input.yField,
     yStatColumn: input.yStatColumn,
@@ -32,8 +50,20 @@ export function makeLayerBinding(input: {
     yConversion: input.yConversion,
     yminField: input.yminField,
     ymaxField: input.ymaxField,
+    xminField: input.xminField,
+    xmaxField: input.xmaxField,
+    widthField: input.widthField,
+    heightField: input.heightField,
+    xendField: input.xendField,
+    yendField: input.yendField,
+    ...(input.ribbonOrientation !== undefined && { ribbonOrientation: input.ribbonOrientation }),
     color: input.color,
     fill: input.fill,
+    size: input.size,
+    linewidth: input.linewidth,
+    alpha: input.alpha,
+    shape: input.shape,
+    linetype: input.linetype,
     labelField: input.labelField,
     labelConstant: input.labelConstant,
     weightField: input.weightField,

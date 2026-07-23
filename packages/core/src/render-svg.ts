@@ -37,6 +37,11 @@ export interface RenderSVGOptions extends Omit<RunOptions, "height"> {
   height?: number;
   /** Refuse to render more marks than this (default 100_000). */
   maxMarks?: number;
+  /**
+   * Within-mark paint mode (#591). "full" emits gradients/glow; "fallback"
+   * uses solid paint.fallback colors and omits glow (a11y / reduced-effects).
+   */
+  paintMode?: "full" | "fallback";
 }
 
 const DEFAULT_HEIGHT = 400;
@@ -52,7 +57,7 @@ function isBuilder(spec: SpecInput | GGBuilder): spec is GGBuilder {
  */
 export function renderToSVGString(spec: SpecInput | GGBuilder, options: RenderSVGOptions): string {
   const resolved: SpecInput = isBuilder(spec) ? spec.spec() : spec;
-  const { maxMarks, height, ...run } = options;
+  const { maxMarks, height, paintMode, ...run } = options;
   const model: RenderModel = runPipeline(resolved, {
     ...run,
     height: height ?? resolved.height ?? DEFAULT_HEIGHT,
@@ -68,7 +73,7 @@ export function renderToSVGString(spec: SpecInput | GGBuilder, options: RenderSV
     );
   }
   try {
-    return sceneToSVGString(model.scene);
+    return sceneToSVGString(model.scene, { paintMode: paintMode ?? "full" });
   } catch (error) {
     // Failure policy: renderer errors are structured, never blank output.
     throw new PipelineError(

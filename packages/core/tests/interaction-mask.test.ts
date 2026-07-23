@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 
 import {
   buildInteractionMasks,
+  buildPrimitiveInteractionMasks,
   legendValueEqual,
   resolveLegendFocusKeys,
   type SemanticCandidateKeys,
@@ -18,6 +19,18 @@ function pointBatch(count: number): GeometryBatch {
     size: 3,
     alpha: 1,
     shape: "circle",
+    fill: null,
+  };
+}
+
+function rectBatch(count: number): GeometryBatch {
+  return {
+    kind: "rects",
+    layerIndex: 0,
+    panelIndex: 0,
+    rects: new Float32Array(count * 4),
+    rowIndex: Uint32Array.from({ length: count }, (_, index) => index),
+    alpha: 1,
     fill: null,
   };
 }
@@ -89,6 +102,91 @@ describe("buildInteractionMasks", () => {
     ];
 
     expect(buildInteractionMasks([pointBatch(1)], ["focus"], candidates)).toEqual([null]);
+  });
+
+  it("mirrors fill focus onto presentation-only path batches on the same layer", () => {
+    // Ribbon fill (candidates) + outline (candidates: false). Outline must get a
+    // non-null mask so canvas mutes unselected outlines with the fill.
+    const fill: GeometryBatch = {
+      kind: "paths",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions: new Float32Array(16),
+      rowIndex: new Uint32Array([0, 1, 2, 3]),
+      pathOffsets: new Uint32Array([0, 4, 8]),
+      strokes: [null, null],
+      fills: ["#f00", "#0f0"],
+      closed: true,
+      linewidth: 0,
+      alpha: 1,
+      curve: "linear",
+    };
+    const outline: GeometryBatch = {
+      kind: "paths",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions: new Float32Array(32),
+      rowIndex: new Uint32Array(16),
+      pathOffsets: new Uint32Array([0, 4, 8, 12, 16]),
+      strokes: [null, null, null, null],
+      linewidth: 1,
+      alpha: 1,
+      curve: "linear",
+      candidates: false,
+    };
+    const candidates: SemanticCandidateKeys<string>[] = [
+      { batchIndex: 0, primitiveIndex: 0, keys: ["a"] },
+      { batchIndex: 0, primitiveIndex: 3, keys: ["b"] },
+    ];
+
+    const masks = buildInteractionMasks([fill, outline], ["a"], candidates);
+    expect(masks[0]?.isFocused(0)).toBe(true);
+    expect(masks[0]?.isFocused(1)).toBe(false);
+    // outline "both" → 2 subpaths per fill path; path 0 focused → edges 0,1 focused
+    expect(masks[1]).not.toBeNull();
+    expect(masks[1]?.primitiveCount).toBe(4);
+    expect(masks[1]?.isFocused(0)).toBe(true);
+    expect(masks[1]?.isFocused(1)).toBe(true);
+    expect(masks[1]?.isFocused(2)).toBe(false);
+    expect(masks[1]?.isFocused(3)).toBe(false);
+  });
+});
+
+describe("buildPrimitiveInteractionMasks", () => {
+  it("marks explicit rect primitives without semantic keys", () => {
+    const masks = buildPrimitiveInteractionMasks(
+      [rectBatch(3)],
+      [{ batchIndex: 0, primitiveIndex: 1 }],
+    );
+    expect(masks[0]?.focusedCount).toBe(1);
+    expect(masks[0]?.isFocused(0)).toBe(false);
+    expect(masks[0]?.isFocused(1)).toBe(true);
+    expect(masks[0]?.isFocused(2)).toBe(false);
+  });
+
+  it("returns null masks when no primitives are supplied", () => {
+    expect(buildPrimitiveInteractionMasks([rectBatch(2)], [])).toEqual([null]);
+  });
+
+  it("treats path primitive indexes as renderer subpaths, not vertices", () => {
+    // pathOffsets [0, 3, 6] → two subpaths; index 1 is the second path.
+    // Must not remap through pathForVertex (which would map 1 → subpath 0).
+    const paths: GeometryBatch = {
+      kind: "paths",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions: new Float32Array(12),
+      rowIndex: new Uint32Array([0, 1, 2, 3, 4, 5]),
+      pathOffsets: new Uint32Array([0, 3, 6]),
+      strokes: [null, null],
+      linewidth: 1,
+      alpha: 1,
+      curve: "linear",
+    };
+    const masks = buildPrimitiveInteractionMasks([paths], [{ batchIndex: 0, primitiveIndex: 1 }]);
+    expect(masks[0]?.focusedCount).toBe(1);
+    expect(masks[0]?.isFocused(0)).toBe(false);
+    expect(masks[0]?.isFocused(1)).toBe(true);
   });
 });
 

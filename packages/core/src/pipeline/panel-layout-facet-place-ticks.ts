@@ -34,6 +34,7 @@ export function placeFacetPanelFromTicks(input: FacetPanelTicksInput): PanelPlac
     formatV,
     measurer,
     layoutTheme,
+    axis,
   } = input;
 
   const ticksRun = layoutPass(
@@ -47,6 +48,7 @@ export function placeFacetPanelFromTicks(input: FacetPanelTicksInput): PanelPlac
       ...(formatV !== undefined && { formatY: formatV }),
       ...(previousGuidePlans !== undefined && { previousGuidePlans }),
       measurer,
+      axis,
     },
     layoutTheme,
   );

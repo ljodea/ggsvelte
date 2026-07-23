@@ -1,0 +1,21 @@
+{
+  "edition": 2,
+  "data": { "name": "unit-circle" },
+  "layers": [
+    {
+      "geom": "line",
+      "stat": "identity",
+      "position": "identity",
+      "aes": {
+        "x": { "field": "x" },
+        "y": { "field": "y" }
+      }
+    }
+  ],
+  "coord": { "type": "fixed" },
+  "labs": {
+    "title": "Equal units stay circular",
+    "x": "x",
+    "y": "y"
+  }
+}

@@ -14,7 +14,9 @@ import type {
   DataRef,
   DensityParams,
   ErrorbarParams,
+  RibbonParams,
   FacetScales,
+  GuidesSpec,
   InlineData,
   Labs,
   LegendSpec,
@@ -22,14 +24,18 @@ import type {
   PointParams,
   PointPosition,
   PositionParams,
+  RasterParams,
+  RectParams,
   RenderBackend,
   RuleParams,
+  SegmentParams,
   Scales,
   SmoothParams,
   StackablePosition,
   TextParams,
   ThemeName,
   ThemeSpec,
+  TileParams,
 } from "./schema.js";
 
 /** Channel form accepted at the TS/builder level: bare string = { field }. */
@@ -44,26 +50,55 @@ export interface AesInput {
   size?: ChannelInput;
   linewidth?: ChannelInput;
   alpha?: ChannelInput;
+  shape?: ChannelInput;
+  linetype?: ChannelInput;
   group?: ChannelInput;
   label?: ChannelInput;
   weight?: ChannelInput;
   ymin?: ChannelInput;
   ymax?: ChannelInput;
+  xmin?: ChannelInput;
+  xmax?: ChannelInput;
+  xend?: ChannelInput;
+  yend?: ChannelInput;
+  width?: ChannelInput;
+  height?: ChannelInput;
 }
 
 interface LayerInputBase {
   aes?: AesInput;
+  /**
+   * Optional layer-local data. When omitted, the layer inherits plot-level
+   * `data`. Accepts the same DataRef forms as plot-level data.
+   */
+  data?: DataRef;
   /** Rendering backend hint ("auto" is the default and canonicalizes away). */
   render?: RenderBackend;
 }
 
+/** Facet field accepted at the TS/builder level (bare-string field shorthand). */
+export type FacetFieldInput =
+  | string
+  | {
+      field: string;
+      /** Closed explicit panel order (DomainValue[]). */
+      levels?: readonly (string | number | boolean | null)[];
+      /** Display-label map keyed by string form of semantic values. */
+      labels?: Readonly<Record<string, string>>;
+    };
+
 /** Facet accepted at the TS/builder level (bare-string field shorthand). */
 export interface FacetInput {
-  wrap?: string | { field: string };
-  rows?: string | { field: string };
-  cols?: string | { field: string };
+  wrap?: FacetFieldInput;
+  rows?: FacetFieldInput;
+  cols?: FacetFieldInput;
   ncol?: number;
   scales?: FacetScales;
+  /** Strip chrome: position (top/bottom/left/right) and visibility. */
+  strip?: {
+    position?: "top" | "bottom" | "left" | "right";
+    show?: boolean;
+  };
 }
 
 export interface PointLayerInput extends LayerInputBase {
@@ -152,6 +187,41 @@ export interface ErrorbarLayerInput extends LayerInputBase {
   params?: ErrorbarParams;
 }
 
+export interface RectLayerInput extends LayerInputBase {
+  geom: "rect";
+  stat?: "identity";
+  position?: "identity";
+  params?: RectParams;
+}
+
+export interface TileLayerInput extends LayerInputBase {
+  geom: "tile";
+  stat?: "identity";
+  position?: "identity";
+  params?: TileParams;
+}
+
+export interface RasterLayerInput extends LayerInputBase {
+  geom: "raster";
+  stat?: "identity";
+  position?: "identity";
+  params?: RasterParams;
+}
+
+export interface RibbonLayerInput extends LayerInputBase {
+  geom: "ribbon";
+  stat?: "identity";
+  position?: "identity";
+  params?: RibbonParams;
+}
+
+export interface SegmentLayerInput extends LayerInputBase {
+  geom: "segment";
+  stat?: "identity";
+  position?: "identity";
+  params?: SegmentParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -160,12 +230,17 @@ export type LayerInput =
   | BarLayerInput
   | HistogramLayerInput
   | AreaLayerInput
+  | RibbonLayerInput
   | RuleLayerInput
   | TextLayerInput
   | SmoothLayerInput
   | BoxplotLayerInput
   | DensityLayerInput
-  | ErrorbarLayerInput;
+  | ErrorbarLayerInput
+  | RectLayerInput
+  | TileLayerInput
+  | RasterLayerInput
+  | SegmentLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {
@@ -179,6 +254,7 @@ export interface SpecInput {
   facet?: FacetInput;
   coord?: CoordSpec;
   scales?: Scales;
+  guides?: GuidesSpec;
   legend?: LegendSpec;
   labs?: Labs;
   theme?: ThemeName | ThemeSpec;

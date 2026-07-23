@@ -205,6 +205,14 @@
           "$ref": "#/$defs/ChannelValue",
           "description": "Opacity channel, 0 (transparent) to 1 (opaque)."
         },
+        "shape": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Finite point-symbol channel. Continuous values require a binned scale."
+        },
+        "linetype": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Finite stroke-pattern channel. Continuous values require a binned scale."
+        },
         "group": {
           "$ref": "#/$defs/ChannelValue",
           "description": "Explicit grouping channel. Overrides the default grouping (the interaction of all discrete mapped aesthetics). A constant (e.g. {\"value\": 1}) forces a single group."
@@ -219,15 +227,226 @@
         },
         "ymin": {
           "$ref": "#/$defs/ChannelValue",
-          "description": "Lower bound channel (errorbar with the identity stat). Quantitative values only."
+          "description": "Lower y bound (errorbar identity, rect edges, ribbon x-orientation). Quantitative values only."
         },
         "ymax": {
           "$ref": "#/$defs/ChannelValue",
-          "description": "Upper bound channel (errorbar with the identity stat). Quantitative values only."
+          "description": "Upper y bound (errorbar identity, rect edges, ribbon x-orientation). Quantitative values only."
+        },
+        "xmin": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Left edge / lower x bound (geom rect; ribbon y-orientation). Quantitative values only."
+        },
+        "xmax": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Right edge / upper x bound (geom rect; ribbon y-orientation). Quantitative values only."
+        },
+        "xend": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Segment end x (geom segment). Trains the x scale together with aes.x; may be discrete or continuous."
+        },
+        "yend": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Segment end y (geom segment). Trains the y scale together with aes.y; may be discrete or continuous."
+        },
+        "width": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Cell width for geom tile (data units after position transform; not a trained position scale). Prefer params.width for a constant."
+        },
+        "height": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Cell height for geom tile (data units after position transform; not a trained position scale). Prefer params.height for a constant."
         }
       },
       "additionalProperties": false,
       "description": "Aesthetic mapping: which channels read which data fields/constants. Plot-level aes is inherited by every layer; a layer's aes overrides per channel, and null unsets an inherited channel."
+    },
+    "ColorStop": {
+      "type": "object",
+      "required": [
+        "offset",
+        "color"
+      ],
+      "properties": {
+        "offset": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Stop position along the gradient, between 0 and 1 inclusive."
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+          "description": "A solid #rgb or #rrggbb color (no CSS names, url(), or filter strings)."
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Optional stop opacity between 0 and 1 inclusive. Default 1."
+        }
+      },
+      "additionalProperties": false,
+      "description": "One ordered gradient color stop. Stops must be non-decreasing by offset (validated structurally)."
+    },
+    "PaintSpace": {
+      "anyOf": [
+        {
+          "type": "string",
+          "const": "mark"
+        },
+        {
+          "type": "string",
+          "const": "panel"
+        },
+        {
+          "type": "string",
+          "const": "plot"
+        }
+      ],
+      "description": "Gradient coordinate space: \"mark\" (object bounding box, default), \"panel\" (panel-local px), or \"plot\" (plot-local px including panels)."
+    },
+    "LinearGradientPaint": {
+      "type": "object",
+      "required": [
+        "type",
+        "x1",
+        "y1",
+        "x2",
+        "y2",
+        "stops",
+        "fallback"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "linear"
+        },
+        "x1": {
+          "type": "number",
+          "description": "Gradient start x in the chosen space."
+        },
+        "y1": {
+          "type": "number",
+          "description": "Gradient start y in the chosen space."
+        },
+        "x2": {
+          "type": "number",
+          "description": "Gradient end x in the chosen space."
+        },
+        "y2": {
+          "type": "number",
+          "description": "Gradient end y in the chosen space."
+        },
+        "space": {
+          "$ref": "#/$defs/PaintSpace"
+        },
+        "stops": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ColorStop"
+          },
+          "minItems": 2,
+          "maxItems": 16,
+          "description": "Ordered color stops (at least 2, at most 16)."
+        },
+        "fallback": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+          "description": "Required solid #rgb/#rrggbb used for a11y, forced-SVG, and reduced-effects paths."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Deterministic linear gradient paint for within-mark fill or stroke. Not a data scale."
+    },
+    "RadialGradientPaint": {
+      "type": "object",
+      "required": [
+        "type",
+        "cx",
+        "cy",
+        "r",
+        "stops",
+        "fallback"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "radial"
+        },
+        "cx": {
+          "type": "number",
+          "description": "Gradient center x in the chosen space."
+        },
+        "cy": {
+          "type": "number",
+          "description": "Gradient center y in the chosen space."
+        },
+        "r": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Gradient radius in the chosen space. Must be greater than 0."
+        },
+        "space": {
+          "$ref": "#/$defs/PaintSpace"
+        },
+        "stops": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ColorStop"
+          },
+          "minItems": 2,
+          "maxItems": 16,
+          "description": "Ordered color stops (at least 2, at most 16)."
+        },
+        "fallback": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+          "description": "Required solid #rgb/#rrggbb used for a11y, forced-SVG, and reduced-effects paths."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Deterministic radial gradient paint for within-mark fill or stroke. Not a data scale."
+    },
+    "GradientPaint": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LinearGradientPaint"
+        },
+        {
+          "$ref": "#/$defs/RadialGradientPaint"
+        }
+      ],
+      "description": "Closed portable gradient paint: linear or radial with solid fallback."
+    },
+    "GlowSpec": {
+      "type": "object",
+      "required": [
+        "color",
+        "radius",
+        "opacity"
+      ],
+      "properties": {
+        "color": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+          "description": "A solid #rgb or #rrggbb color (no CSS names, url(), or filter strings)."
+        },
+        "radius": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 32,
+          "description": "Blur radius in CSS px, greater than 0 and at most 32."
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Glow opacity between 0 and 1 inclusive."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Bounded glow treatment (explicit color, radius, opacity). Opt-in mark appearance, not theme decoration."
     },
     "PointParams": {
       "type": "object",
@@ -251,14 +470,26 @@
             },
             {
               "type": "string",
+              "const": "triangle"
+            },
+            {
+              "type": "string",
               "const": "square"
             },
             {
               "type": "string",
-              "const": "triangle"
+              "const": "diamond"
+            },
+            {
+              "type": "string",
+              "const": "plus"
+            },
+            {
+              "type": "string",
+              "const": "cross"
             }
           ],
-          "description": "Point shape. One of \"circle\", \"square\", \"triangle\". Default \"circle\"."
+          "description": "Point shape. One of \"circle\", \"triangle\", \"square\", \"diamond\", \"plus\", \"cross\". Default \"circle\"."
         }
       },
       "additionalProperties": false,
@@ -290,6 +521,14 @@
             }
           ],
           "description": "Interpolation between points: \"linear\" (straight segments, default) or \"step\" (horizontal-then-vertical steps, changing at the midpoint between x positions)."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -309,6 +548,14 @@
           "exclusiveMinimum": 0,
           "maximum": 1,
           "description": "Bar width as a fraction of the band step. Must be greater than 0 and at most 1. Default 0.9."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -359,6 +606,14 @@
             }
           ],
           "description": "STAT BIN ONLY: which edge of each bin is inclusive: \"right\" (default, matches ggplot2) or \"left\"."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -425,6 +680,14 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Line opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint for the fitted line (not a data scale)."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -493,6 +756,14 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Area fill opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -572,6 +843,106 @@
       "additionalProperties": false,
       "description": "Parameters for the errorbar geom: styling plus the summary-stat functions (fun, funMin, funMax) used when stat is \"summary\"."
     },
+    "RectParams": {
+      "type": "object",
+      "properties": {
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Outline stroke width in px when color is set. Must be greater than 0."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Rectangle opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient outline paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the rect geom (arbitrary xmin/xmax/ymin/ymax regions)."
+    },
+    "TileParams": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Constant tile width in data units after position transform (band axes: fraction of the band step). Default: resolution of unique x centers (continuous) or 1 (band)."
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Constant tile height in data units after position transform (band axes: fraction of the band step). Default: resolution of unique y centers (continuous) or 1 (band)."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Outline stroke width in px when color is set. Must be greater than 0."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Tile opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient outline paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for the tile geom: center-sized cells (x/y + optional width/height)."
+    },
+    "RasterParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Raster opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "hjust": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Horizontal justification of each cell over its x center (0–1). Default 0.5."
+        },
+        "vjust": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Vertical justification of each cell over its y center (0–1). Default 0.5."
+        },
+        "interpolate": {
+          "type": "boolean",
+          "const": false,
+          "description": "Interpolation between cells. Only false (nearest / no interpolation) is supported."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for the raster geom: equal-cell dense grid (no per-cell stroke)."
+    },
     "PositionParams": {
       "type": "object",
       "properties": {
@@ -610,10 +981,116 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Area fill opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
       "description": "Styling parameters for the area geom."
+    },
+    "RibbonParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Ribbon fill opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Outline stroke width in px when an outline is drawn. Must be greater than 0. Default 1."
+        },
+        "outline": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "both"
+            },
+            {
+              "type": "string",
+              "const": "upper"
+            },
+            {
+              "type": "string",
+              "const": "lower"
+            },
+            {
+              "type": "string",
+              "const": "full"
+            }
+          ],
+          "description": "Which edges receive an outline stroke: \"both\" (default — upper and lower), \"upper\", \"lower\", or \"full\" (closed outline of the band). Strokes appear when aes.color / a color constant is set, or when strokePaint is set."
+        },
+        "orientation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "x"
+            },
+            {
+              "type": "string",
+              "const": "y"
+            }
+          ],
+          "description": "Running-coordinate orientation: \"x\" (map x + ymin + ymax) or \"y\" (map y + xmin + xmax). When omitted, inferred from the complete channel contract; set explicitly if both contracts are mapped."
+        },
+        "lineend": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "butt"
+            },
+            {
+              "type": "string",
+              "const": "round"
+            },
+            {
+              "type": "string",
+              "const": "square"
+            }
+          ],
+          "description": "SVG stroke-linecap for outlines. Default \"butt\"."
+        },
+        "linejoin": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "miter"
+            },
+            {
+              "type": "string",
+              "const": "round"
+            },
+            {
+              "type": "string",
+              "const": "bevel"
+            }
+          ],
+          "description": "SVG stroke-linejoin for outlines. Default \"round\"."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient outline paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling and orientation parameters for the ribbon geom."
     },
     "RuleIntercept": {
       "anyOf": [
@@ -661,10 +1138,61 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "description": "Stroke width in px. Must be greater than 0. Default 1."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
       "description": "Styling parameters for the rule geom. The annotation form sets xintercept and/or yintercept here; the data-driven form maps aes.x OR aes.y instead (never both forms at once)."
+    },
+    "SegmentParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Segment opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px. Must be greater than 0. Default 1."
+        },
+        "lineend": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "butt"
+            },
+            {
+              "type": "string",
+              "const": "round"
+            },
+            {
+              "type": "string",
+              "const": "square"
+            }
+          ],
+          "description": "SVG stroke-linecap for segment ends. Default \"butt\"."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the segment geom (finite line from (x,y) to (xend,yend))."
     },
     "TextParams": {
       "type": "object",
@@ -789,6 +1317,10 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/PointParams"
         }
@@ -823,6 +1355,10 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/LineParams"
         }
@@ -854,6 +1390,10 @@
         },
         "aes": {
           "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
           "$ref": "#/$defs/ColParams"
@@ -895,6 +1435,10 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/BarParams"
         }
@@ -926,6 +1470,10 @@
         },
         "aes": {
           "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
           "$ref": "#/$defs/BarParams"
@@ -960,6 +1508,10 @@
         },
         "aes": {
           "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
           "$ref": "#/$defs/SmoothParams"
@@ -1003,6 +1555,10 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/BoxplotParams"
         }
@@ -1036,6 +1592,10 @@
         },
         "aes": {
           "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
           "$ref": "#/$defs/DensityParams"
@@ -1079,12 +1639,130 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/ErrorbarParams"
         }
       },
       "additionalProperties": false,
       "description": "An errorbar layer. Identity stat: requires x, ymin, and ymax channels. Summary stat: requires x and y channels (bounds computed by params.fun/funMin/funMax, default mean_se)."
+    },
+    "RectLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "rect",
+          "description": "Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Rect layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Rect layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/RectParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A rectangle layer. Requires xmin, xmax, ymin, and ymax channels (quantitative edges)."
+    },
+    "TileLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "tile",
+          "description": "Tile geometry: center-sized cells at (x, y) with optional width/height. Use for heatmaps and gridded categorical cells; supports stroke outlines."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Tile layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Tile layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/TileParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A tile layer. Requires x and y channels; optional width/height (params or aes) size each cell after position transform."
+    },
+    "RasterLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "raster",
+          "description": "Raster geometry: equal-cell grid at (x, y) with fill; optimized dense heatmaps without per-cell strokes. Irregular spacing warns and suggests geom tile."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Raster layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Raster layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/RasterParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A raster layer. Requires x and y (regular spacing); fill maps cell color. No stroke. interpolate must be false when set."
     },
     "AreaLayer": {
       "type": "object",
@@ -1111,12 +1789,54 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/AreaParams"
         }
       },
       "additionalProperties": false,
       "description": "An area layer. Requires x and y channels; rows are sorted by x within each group. Default position \"stack\"."
+    },
+    "RibbonLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "ribbon",
+          "description": "Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Ribbon layers draw precomputed bounds as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Ribbon layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/RibbonParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A ribbon layer. Requires a running coordinate and both interval bounds (x+ymin+ymax or y+xmin+xmax). Rows are sorted along the running coordinate within each group."
     },
     "RuleLayer": {
       "type": "object",
@@ -1144,6 +1864,10 @@
         },
         "aes": {
           "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
           "$ref": "#/$defs/RuleParams"
@@ -1190,12 +1914,54 @@
         "aes": {
           "$ref": "#/$defs/Aes"
         },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
         "params": {
           "$ref": "#/$defs/TextParams"
         }
       },
       "additionalProperties": false,
       "description": "A text-label layer. Requires x, y, and label channels."
+    },
+    "SegmentLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "segment",
+          "description": "Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Segment layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Segment layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/SegmentParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A finite segment layer (ggplot2's geom_segment). Requires x, y, xend, and yend channels."
     },
     "LayerSpec": {
       "anyOf": [
@@ -1218,6 +1984,9 @@
           "$ref": "#/$defs/AreaLayer"
         },
         {
+          "$ref": "#/$defs/RibbonLayer"
+        },
+        {
           "$ref": "#/$defs/RuleLayer"
         },
         {
@@ -1234,6 +2003,18 @@
         },
         {
           "$ref": "#/$defs/ErrorbarLayer"
+        },
+        {
+          "$ref": "#/$defs/RectLayer"
+        },
+        {
+          "$ref": "#/$defs/TileLayer"
+        },
+        {
+          "$ref": "#/$defs/RasterLayer"
+        },
+        {
+          "$ref": "#/$defs/SegmentLayer"
         }
       ],
       "description": "One plot layer. The `geom` field selects the geometry and determines which stat, position, and params are allowed."
@@ -1673,6 +2454,16 @@
               },
               "minItems": 1,
               "description": "Explicit minor gridline positions in semantic source units. Coincident major/minor values render only the major tick. Time scales use dateMinorBreaks instead."
+            },
+            "guide": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/GuideSpec"
+                },
+                {
+                  "$ref": "#/$defs/BandAxisGuideSpec"
+                }
+              ]
             }
           },
           "additionalProperties": false,
@@ -1955,6 +2746,9 @@
             "labels": {
               "type": "string",
               "description": "Guide label format: numeric (\".1f\", \",d\", \".0%\") or temporal strftime-style text."
+            },
+            "guide": {
+              "$ref": "#/$defs/GuideSpec"
             }
           },
           "additionalProperties": false,
@@ -2181,6 +2975,1468 @@
         }
       ]
     },
+    "PositiveStyleScaleSpec": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                {
+                  "type": "string",
+                  "const": "sequential"
+                },
+                {
+                  "type": "string",
+                  "const": "binned"
+                },
+                {
+                  "type": "string",
+                  "const": "manual"
+                },
+                {
+                  "type": "string",
+                  "const": "identity"
+                }
+              ]
+            },
+            "temporalKind": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "date"
+                },
+                {
+                  "type": "string",
+                  "const": "datetime"
+                }
+              ]
+            },
+            "parse": {
+              "$ref": "#/$defs/TemporalParserSpec"
+            },
+            "parseFailure": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "error"
+                },
+                {
+                  "type": "string",
+                  "const": "censor"
+                }
+              ]
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "disambiguation": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "compatible"
+                },
+                {
+                  "type": "string",
+                  "const": "earlier"
+                },
+                {
+                  "type": "string",
+                  "const": "later"
+                },
+                {
+                  "type": "string",
+                  "const": "reject"
+                }
+              ]
+            },
+            "domain": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DomainValue"
+              },
+              "minItems": 1
+            },
+            "domainMode": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "grow"
+                },
+                {
+                  "type": "string",
+                  "const": "data"
+                }
+              ]
+            },
+            "breaks": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "minItems": 2
+            },
+            "range": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "minItems": 1
+            },
+            "reverse": {
+              "type": "boolean"
+            },
+            "oob": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "censor"
+                },
+                {
+                  "type": "string",
+                  "const": "squish"
+                }
+              ]
+            },
+            "naValue": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "unknownValue": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "onExhaust": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "cycle"
+                },
+                {
+                  "type": "string",
+                  "const": "error"
+                }
+              ]
+            },
+            "labels": {
+              "type": "string"
+            },
+            "guide": {
+              "$ref": "#/$defs/GuideSpec"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Configuration for a positive numeric size or linewidth scale."
+        },
+        {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "binned"
+                },
+                "domain": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/DomainValue"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "breaks": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "minItems": 2,
+                  "maxItems": 65
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "minItems": 2
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "range"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "manual"
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "minItems": 1
+                },
+                "temporalKind": {
+                  "not": {}
+                },
+                "parse": {
+                  "not": {}
+                },
+                "parseFailure": {
+                  "not": {}
+                },
+                "timezone": {
+                  "not": {}
+                },
+                "disambiguation": {
+                  "not": {}
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "oob": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "identity"
+                },
+                "temporalKind": {
+                  "not": {}
+                },
+                "parse": {
+                  "not": {}
+                },
+                "parseFailure": {
+                  "not": {}
+                },
+                "timezone": {
+                  "not": {}
+                },
+                "disambiguation": {
+                  "not": {}
+                },
+                "domain": {
+                  "not": {}
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "range": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "oob": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                "temporalKind": {
+                  "not": {}
+                },
+                "parse": {
+                  "not": {}
+                },
+                "parseFailure": {
+                  "not": {}
+                },
+                "timezone": {
+                  "not": {}
+                },
+                "disambiguation": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "oob": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "sequential"
+                },
+                "domain": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/DomainValue"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "minItems": 2
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "not": {}
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "AlphaScaleSpec": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                {
+                  "type": "string",
+                  "const": "sequential"
+                },
+                {
+                  "type": "string",
+                  "const": "binned"
+                },
+                {
+                  "type": "string",
+                  "const": "manual"
+                },
+                {
+                  "type": "string",
+                  "const": "identity"
+                }
+              ]
+            },
+            "temporalKind": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "date"
+                },
+                {
+                  "type": "string",
+                  "const": "datetime"
+                }
+              ]
+            },
+            "parse": {
+              "$ref": "#/$defs/TemporalParserSpec"
+            },
+            "parseFailure": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "error"
+                },
+                {
+                  "type": "string",
+                  "const": "censor"
+                }
+              ]
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "disambiguation": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "compatible"
+                },
+                {
+                  "type": "string",
+                  "const": "earlier"
+                },
+                {
+                  "type": "string",
+                  "const": "later"
+                },
+                {
+                  "type": "string",
+                  "const": "reject"
+                }
+              ]
+            },
+            "domain": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DomainValue"
+              },
+              "minItems": 1
+            },
+            "domainMode": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "grow"
+                },
+                {
+                  "type": "string",
+                  "const": "data"
+                }
+              ]
+            },
+            "breaks": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "minItems": 2
+            },
+            "range": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "minItems": 1
+            },
+            "reverse": {
+              "type": "boolean"
+            },
+            "oob": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "censor"
+                },
+                {
+                  "type": "string",
+                  "const": "squish"
+                }
+              ]
+            },
+            "naValue": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "unknownValue": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "onExhaust": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "cycle"
+                },
+                {
+                  "type": "string",
+                  "const": "error"
+                }
+              ]
+            },
+            "labels": {
+              "type": "string"
+            },
+            "guide": {
+              "$ref": "#/$defs/GuideSpec"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Configuration for an opacity scale constrained to [0, 1]."
+        },
+        {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "binned"
+                },
+                "domain": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/DomainValue"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "breaks": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "minItems": 2,
+                  "maxItems": 65
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "minItems": 2
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "range"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "manual"
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "minItems": 1
+                },
+                "temporalKind": {
+                  "not": {}
+                },
+                "parse": {
+                  "not": {}
+                },
+                "parseFailure": {
+                  "not": {}
+                },
+                "timezone": {
+                  "not": {}
+                },
+                "disambiguation": {
+                  "not": {}
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "oob": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "identity"
+                },
+                "temporalKind": {
+                  "not": {}
+                },
+                "parse": {
+                  "not": {}
+                },
+                "parseFailure": {
+                  "not": {}
+                },
+                "timezone": {
+                  "not": {}
+                },
+                "disambiguation": {
+                  "not": {}
+                },
+                "domain": {
+                  "not": {}
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "range": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "oob": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                "temporalKind": {
+                  "not": {}
+                },
+                "parse": {
+                  "not": {}
+                },
+                "parseFailure": {
+                  "not": {}
+                },
+                "timezone": {
+                  "not": {}
+                },
+                "disambiguation": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "oob": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "sequential"
+                },
+                "domain": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/DomainValue"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "minItems": 2
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "not": {}
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "ShapeScaleSpec": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                {
+                  "type": "string",
+                  "const": "binned"
+                },
+                {
+                  "type": "string",
+                  "const": "manual"
+                },
+                {
+                  "type": "string",
+                  "const": "identity"
+                }
+              ]
+            },
+            "domain": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DomainValue"
+              },
+              "minItems": 1
+            },
+            "domainMode": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "grow"
+                },
+                {
+                  "type": "string",
+                  "const": "data"
+                }
+              ]
+            },
+            "breaks": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2
+            },
+            "range": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "circle"
+                  },
+                  {
+                    "type": "string",
+                    "const": "triangle"
+                  },
+                  {
+                    "type": "string",
+                    "const": "square"
+                  },
+                  {
+                    "type": "string",
+                    "const": "diamond"
+                  },
+                  {
+                    "type": "string",
+                    "const": "plus"
+                  },
+                  {
+                    "type": "string",
+                    "const": "cross"
+                  }
+                ]
+              },
+              "minItems": 1
+            },
+            "reverse": {
+              "type": "boolean"
+            },
+            "naValue": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "circle"
+                },
+                {
+                  "type": "string",
+                  "const": "triangle"
+                },
+                {
+                  "type": "string",
+                  "const": "square"
+                },
+                {
+                  "type": "string",
+                  "const": "diamond"
+                },
+                {
+                  "type": "string",
+                  "const": "plus"
+                },
+                {
+                  "type": "string",
+                  "const": "cross"
+                }
+              ]
+            },
+            "unknownValue": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "circle"
+                },
+                {
+                  "type": "string",
+                  "const": "triangle"
+                },
+                {
+                  "type": "string",
+                  "const": "square"
+                },
+                {
+                  "type": "string",
+                  "const": "diamond"
+                },
+                {
+                  "type": "string",
+                  "const": "plus"
+                },
+                {
+                  "type": "string",
+                  "const": "cross"
+                }
+              ]
+            },
+            "onExhaust": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "cycle"
+                },
+                {
+                  "type": "string",
+                  "const": "error"
+                }
+              ]
+            },
+            "labels": {
+              "type": "string"
+            },
+            "guide": {
+              "$ref": "#/$defs/GuideSpec"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Configuration for a finite point-shape scale."
+        },
+        {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "binned"
+                },
+                "domain": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "breaks": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 65
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "range"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "manual"
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "const": "circle"
+                      },
+                      {
+                        "type": "string",
+                        "const": "triangle"
+                      },
+                      {
+                        "type": "string",
+                        "const": "square"
+                      },
+                      {
+                        "type": "string",
+                        "const": "diamond"
+                      },
+                      {
+                        "type": "string",
+                        "const": "plus"
+                      },
+                      {
+                        "type": "string",
+                        "const": "cross"
+                      }
+                    ]
+                  },
+                  "minItems": 1
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "identity"
+                },
+                "domain": {
+                  "not": {}
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "range": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "not": {}
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "LinetypeScaleSpec": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                {
+                  "type": "string",
+                  "const": "binned"
+                },
+                {
+                  "type": "string",
+                  "const": "manual"
+                },
+                {
+                  "type": "string",
+                  "const": "identity"
+                }
+              ]
+            },
+            "domain": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DomainValue"
+              },
+              "minItems": 1
+            },
+            "domainMode": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "grow"
+                },
+                {
+                  "type": "string",
+                  "const": "data"
+                }
+              ]
+            },
+            "breaks": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2
+            },
+            "range": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "solid"
+                  },
+                  {
+                    "type": "string",
+                    "const": "dashed"
+                  },
+                  {
+                    "type": "string",
+                    "const": "dotted"
+                  },
+                  {
+                    "type": "string",
+                    "const": "dotdash"
+                  },
+                  {
+                    "type": "string",
+                    "const": "longdash"
+                  },
+                  {
+                    "type": "string",
+                    "const": "twodash"
+                  }
+                ]
+              },
+              "minItems": 1
+            },
+            "reverse": {
+              "type": "boolean"
+            },
+            "naValue": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "solid"
+                },
+                {
+                  "type": "string",
+                  "const": "dashed"
+                },
+                {
+                  "type": "string",
+                  "const": "dotted"
+                },
+                {
+                  "type": "string",
+                  "const": "dotdash"
+                },
+                {
+                  "type": "string",
+                  "const": "longdash"
+                },
+                {
+                  "type": "string",
+                  "const": "twodash"
+                }
+              ]
+            },
+            "unknownValue": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "solid"
+                },
+                {
+                  "type": "string",
+                  "const": "dashed"
+                },
+                {
+                  "type": "string",
+                  "const": "dotted"
+                },
+                {
+                  "type": "string",
+                  "const": "dotdash"
+                },
+                {
+                  "type": "string",
+                  "const": "longdash"
+                },
+                {
+                  "type": "string",
+                  "const": "twodash"
+                }
+              ]
+            },
+            "onExhaust": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "cycle"
+                },
+                {
+                  "type": "string",
+                  "const": "error"
+                }
+              ]
+            },
+            "labels": {
+              "type": "string"
+            },
+            "guide": {
+              "$ref": "#/$defs/GuideSpec"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Configuration for a finite line-pattern scale."
+        },
+        {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "binned"
+                },
+                "domain": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "breaks": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 65
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type",
+                "range"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "manual"
+                },
+                "range": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "const": "solid"
+                      },
+                      {
+                        "type": "string",
+                        "const": "dashed"
+                      },
+                      {
+                        "type": "string",
+                        "const": "dotted"
+                      },
+                      {
+                        "type": "string",
+                        "const": "dotdash"
+                      },
+                      {
+                        "type": "string",
+                        "const": "longdash"
+                      },
+                      {
+                        "type": "string",
+                        "const": "twodash"
+                      }
+                    ]
+                  },
+                  "minItems": 1
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "identity"
+                },
+                "domain": {
+                  "not": {}
+                },
+                "domainMode": {
+                  "not": {}
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "range": {
+                  "not": {}
+                },
+                "reverse": {
+                  "not": {}
+                },
+                "onExhaust": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "ordinal"
+                },
+                "breaks": {
+                  "not": {}
+                },
+                "labels": {
+                  "not": {}
+                }
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "not": {}
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
     "Scales": {
       "type": "object",
       "properties": {
@@ -2195,10 +4451,451 @@
         },
         "fill": {
           "$ref": "#/$defs/ColorScaleSpec"
+        },
+        "size": {
+          "$ref": "#/$defs/PositiveStyleScaleSpec"
+        },
+        "linewidth": {
+          "$ref": "#/$defs/PositiveStyleScaleSpec"
+        },
+        "alpha": {
+          "$ref": "#/$defs/AlphaScaleSpec"
+        },
+        "shape": {
+          "$ref": "#/$defs/ShapeScaleSpec"
+        },
+        "linetype": {
+          "$ref": "#/$defs/LinetypeScaleSpec"
         }
       },
       "additionalProperties": false,
       "description": "Per-scale configuration, keyed by aesthetic. Omitted scales use inference (type from field data, domain from data extent)."
+    },
+    "GuideThemeSpec": {
+      "type": "object",
+      "properties": {
+        "titleSize": {
+          "type": "number",
+          "minimum": 8,
+          "maximum": 32
+        },
+        "labelSize": {
+          "type": "number",
+          "minimum": 8,
+          "maximum": 24
+        },
+        "keyGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "rowGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "blockGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "colorbarThickness": {
+          "type": "number",
+          "minimum": 4,
+          "maximum": 48
+        },
+        "colorbarLength": {
+          "type": "number",
+          "minimum": 48,
+          "maximum": 512
+        }
+      },
+      "additionalProperties": false,
+      "description": "Bounded presentation overrides for one guide block."
+    },
+    "BandAxisGuideSpec": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "single"
+            },
+            {
+              "type": "string",
+              "const": "wrap"
+            },
+            {
+              "type": "string",
+              "const": "rotate"
+            },
+            {
+              "type": "string",
+              "const": "off"
+            }
+          ],
+          "description": "Band axis label layout: \"auto\", \"single\", \"wrap\", \"rotate\", or \"off\"."
+        },
+        "angle": {
+          "type": "number",
+          "description": "Rotation in degrees when mode is \"rotate\"."
+        },
+        "wrap": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Maximum wrapped lines when mode is \"wrap\"."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Scale-local band-axis label layout override retained independently from guide appearance."
+    },
+    "AxisGuideSpec": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "axis"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "showTicks": {
+          "type": "boolean"
+        },
+        "showLabels": {
+          "type": "boolean"
+        },
+        "collision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "preserve"
+            },
+            {
+              "type": "string",
+              "const": "ellipsis"
+            }
+          ]
+        },
+        "theme": {
+          "$ref": "#/$defs/GuideThemeSpec"
+        }
+      },
+      "additionalProperties": false
+    },
+    "LegendGuideSpec": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "legend"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "order": {
+          "type": "integer",
+          "minimum": -1024,
+          "maximum": 1024
+        },
+        "position": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "right"
+            },
+            {
+              "type": "string",
+              "const": "bottom"
+            }
+          ]
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "vertical"
+            },
+            {
+              "type": "string",
+              "const": "horizontal"
+            }
+          ]
+        },
+        "keySize": {
+          "type": "number",
+          "minimum": 4,
+          "maximum": 48
+        },
+        "collision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "ellipsis"
+            },
+            {
+              "type": "string",
+              "const": "wrap"
+            },
+            {
+              "type": "string",
+              "const": "error"
+            }
+          ]
+        },
+        "force": {
+          "type": "boolean"
+        },
+        "theme": {
+          "$ref": "#/$defs/GuideThemeSpec"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ColorbarGuideSpec": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "colorbar"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "order": {
+          "type": "integer",
+          "minimum": -1024,
+          "maximum": 1024
+        },
+        "position": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "right"
+            },
+            {
+              "type": "string",
+              "const": "bottom"
+            }
+          ]
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "vertical"
+            },
+            {
+              "type": "string",
+              "const": "horizontal"
+            }
+          ]
+        },
+        "showTicks": {
+          "type": "boolean"
+        },
+        "showLabels": {
+          "type": "boolean"
+        },
+        "collision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "ellipsis"
+            },
+            {
+              "type": "string",
+              "const": "error"
+            }
+          ]
+        },
+        "force": {
+          "type": "boolean"
+        },
+        "theme": {
+          "$ref": "#/$defs/GuideThemeSpec"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ColorstepsGuideSpec": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "colorsteps"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "order": {
+          "type": "integer",
+          "minimum": -1024,
+          "maximum": 1024
+        },
+        "position": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "right"
+            },
+            {
+              "type": "string",
+              "const": "bottom"
+            }
+          ]
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "auto"
+            },
+            {
+              "type": "string",
+              "const": "vertical"
+            },
+            {
+              "type": "string",
+              "const": "horizontal"
+            }
+          ]
+        },
+        "showLabels": {
+          "type": "boolean"
+        },
+        "collision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "ellipsis"
+            },
+            {
+              "type": "string",
+              "const": "error"
+            }
+          ]
+        },
+        "force": {
+          "type": "boolean"
+        },
+        "theme": {
+          "$ref": "#/$defs/GuideThemeSpec"
+        }
+      },
+      "additionalProperties": false
+    },
+    "NoneGuideSpec": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "none"
+        }
+      },
+      "additionalProperties": false
+    },
+    "GuideSpec": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AxisGuideSpec"
+        },
+        {
+          "$ref": "#/$defs/LegendGuideSpec"
+        },
+        {
+          "$ref": "#/$defs/ColorbarGuideSpec"
+        },
+        {
+          "$ref": "#/$defs/ColorstepsGuideSpec"
+        },
+        {
+          "$ref": "#/$defs/NoneGuideSpec"
+        }
+      ]
+    },
+    "GuidesSpec": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "y": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "color": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "fill": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "size": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "linewidth": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "alpha": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "shape": {
+          "$ref": "#/$defs/GuideSpec"
+        },
+        "linetype": {
+          "$ref": "#/$defs/GuideSpec"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Appearance-only guide configuration keyed by aesthetic."
     },
     "LegendSpec": {
       "type": "object",
@@ -2304,6 +5001,10 @@
           "type": "string",
           "description": "Panel background color (CSS color)."
         },
+        "letterboxFill": {
+          "type": "string",
+          "description": "Fixed-aspect gutter color (CSS color). Defaults to the resolved paper role."
+        },
         "axisText": {
           "type": "string",
           "description": "Axis tick-label color (CSS color)."
@@ -2407,6 +5108,41 @@
           "minimum": 1,
           "maximum": 1000
         },
+        "guideTitleSize": {
+          "type": "number",
+          "minimum": 8,
+          "maximum": 32
+        },
+        "legendKeySize": {
+          "type": "number",
+          "minimum": 4,
+          "maximum": 48
+        },
+        "legendKeyGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "legendRowGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "guideBlockGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "colorbarThickness": {
+          "type": "number",
+          "minimum": 4,
+          "maximum": 48
+        },
+        "colorbarLengthMin": {
+          "type": "number",
+          "minimum": 48,
+          "maximum": 512
+        },
         "captionSize": {
           "type": "number",
           "minimum": 1
@@ -2499,6 +5235,26 @@
         "fill": {
           "type": "string",
           "description": "Fill legend title. Defaults to the mapped field name."
+        },
+        "size": {
+          "type": "string",
+          "description": "Size legend title. Defaults to the mapped field name."
+        },
+        "linewidth": {
+          "type": "string",
+          "description": "Linewidth legend title. Defaults to the mapped field name."
+        },
+        "alpha": {
+          "type": "string",
+          "description": "Alpha legend title. Defaults to the mapped field name."
+        },
+        "shape": {
+          "type": "string",
+          "description": "Shape legend title. Defaults to the mapped field name."
+        },
+        "linetype": {
+          "type": "string",
+          "description": "Linetype legend title. Defaults to the mapped field name."
         }
       },
       "additionalProperties": false,
@@ -2525,20 +5281,81 @@
       ],
       "description": "How positional scales behave across facet panels: \"fixed\" (default — all panels share both scales, trained on the union of panel data), \"free\" (both positional scales train per panel), \"free_x\" (only x is per-panel), \"free_y\" (only y is per-panel). Discrete color/fill assignments are ALWAYS global (one legend), regardless of this setting."
     },
+    "FacetFieldRef": {
+      "type": "object",
+      "required": [
+        "field"
+      ],
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Name of the data column that partitions facet panels."
+        },
+        "levels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DomainValue"
+          },
+          "minItems": 1,
+          "description": "Closed explicit panel order for this facet field. When set, panels appear in this order (including empty panels for levels absent from data). Values observed in data but omitted from levels are dropped from all panels and diagnosed. Omit for the default ascending sort of observed values."
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Display-label map for authored facet values (JSON object). Keys are string forms of the semantic values (\"west\", \"1\", \"true\", \"null\"); values are human-readable strip/accessibility text. Labels never change panel IDs or semantic facet identity. Omit to use bandKey(value) as the strip text."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Facet field reference with optional closed order and display labels. Example: {\"field\": \"region\", \"levels\": [\"west\", \"east\"], \"labels\": {\"west\": \"West Coast\"}}. Bare strings are NOT valid here — normalize() expands \"region\" to {\"field\": \"region\"}."
+    },
+    "FacetStripSpec": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "top"
+            },
+            {
+              "type": "string",
+              "const": "bottom"
+            },
+            {
+              "type": "string",
+              "const": "left"
+            },
+            {
+              "type": "string",
+              "const": "right"
+            }
+          ],
+          "description": "Where facet strip bands are reserved and drawn: \"top\" (default), \"bottom\", \"left\", or \"right\". Left/right strips participate in layout measurement rather than overlaying the panel."
+        },
+        "show": {
+          "type": "boolean",
+          "description": "Whether to reserve and draw strip bands (default true). Set false when direct labels are authored elsewhere; panel identity and authored display labels remain available to accessibility and interaction consumers."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Facet strip chrome: position and visibility. Defaults: position \"top\", show true. Example: {\"position\": \"left\"} or {\"show\": false}."
+    },
     "FacetSpec": {
       "type": "object",
       "properties": {
         "wrap": {
-          "$ref": "#/$defs/FieldRef",
-          "description": "Facet WRAP form: partition rows by this data field's distinct values, one panel per value, wrapped into a grid ncol wide (ggplot2's facet_wrap). Mutually exclusive with rows/cols."
+          "$ref": "#/$defs/FacetFieldRef",
+          "description": "Facet WRAP form: partition rows by this data field's distinct values, one panel per value, wrapped into a grid ncol wide (ggplot2's facet_wrap). Mutually exclusive with rows/cols. Optional levels/labels control order and strip text."
         },
         "rows": {
-          "$ref": "#/$defs/FieldRef",
-          "description": "Facet GRID form: the field whose distinct values become grid rows (ggplot2's facet_grid rows). Combine with cols; mutually exclusive with wrap."
+          "$ref": "#/$defs/FacetFieldRef",
+          "description": "Facet GRID form: the field whose distinct values become grid rows (ggplot2's facet_grid rows). Combine with cols; mutually exclusive with wrap. Optional levels/labels control order and strip text."
         },
         "cols": {
-          "$ref": "#/$defs/FieldRef",
-          "description": "Facet GRID form: the field whose distinct values become grid columns (ggplot2's facet_grid cols). Combine with rows; mutually exclusive with wrap."
+          "$ref": "#/$defs/FacetFieldRef",
+          "description": "Facet GRID form: the field whose distinct values become grid columns (ggplot2's facet_grid cols). Combine with rows; mutually exclusive with wrap. Optional levels/labels control order and strip text."
         },
         "ncol": {
           "type": "integer",
@@ -2547,10 +5364,13 @@
         },
         "scales": {
           "$ref": "#/$defs/FacetScales"
+        },
+        "strip": {
+          "$ref": "#/$defs/FacetStripSpec"
         }
       },
       "additionalProperties": false,
-      "description": "Facet the plot into small-multiple panels. Wrap form: set `wrap` (+ optional ncol). Grid form: set `rows` and/or `cols`. Panels partition the data BEFORE stats and positions run (each panel computes its own counts, bins, stacks). Panel values sort ascending; null values form their own panel."
+      "description": "Facet the plot into small-multiple panels. Wrap form: set `wrap` (+ optional ncol). Grid form: set `rows` and/or `cols`. Panels partition the data BEFORE stats and positions run (each panel computes its own counts, bins, stacks). By default panel values sort ascending and strips sit on top; set field `levels`/`labels` and `strip.position`/`strip.show` for authored order, display text, and strip placement. Null values form their own panel when observed (or when listed in levels)."
     },
     "CoordTransformAxisSpec": {
       "type": "object",
@@ -2644,6 +5464,26 @@
       "additionalProperties": false,
       "description": "A post-stat Cartesian coordinate transform with independent x/y projectors. It is intentionally distinct from pre-stat scale transforms."
     },
+    "CoordFixedSpec": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "fixed",
+          "description": "Cartesian coordinates with a fixed physical data-unit ratio."
+        },
+        "ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Physical y-unit length divided by physical x-unit length (default 1, equal units)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "A fixed-aspect Cartesian coordinate system. Layout fits the largest centered data rectangle after chart chrome is allocated."
+    },
     "CoordSpec": {
       "anyOf": [
         {
@@ -2651,9 +5491,12 @@
         },
         {
           "$ref": "#/$defs/CoordTransformSpec"
+        },
+        {
+          "$ref": "#/$defs/CoordFixedSpec"
         }
       ],
-      "description": "The plot coordinate system: ordinary Cartesian, flipped Cartesian, or a post-stat coordinate transform."
+      "description": "The plot coordinate system: ordinary Cartesian, flipped Cartesian, post-stat transformed, or fixed-aspect."
     },
     "PlotSpec": {
       "type": "object",
@@ -2668,7 +5511,7 @@
         "edition": {
           "type": "integer",
           "minimum": 1,
-          "description": "Defaults edition this spec was authored against (currently 1). normalize() stamps the current edition when absent, so a spec keeps ITS edition's default look (theme roles, categorical palette) even after ggsvelte's defaults improve in a later edition. Explicit theme/scale settings always win over edition defaults."
+          "description": "Defaults edition this spec was authored against (currently 2). normalize() stamps the current edition when absent, so a spec keeps ITS edition's default look (theme roles, categorical palette) even after ggsvelte's defaults improve in a later edition. Explicit theme/scale settings always win over edition defaults."
         },
         "data": {
           "$ref": "#/$defs/DataRef",
@@ -2701,6 +5544,9 @@
         },
         "scales": {
           "$ref": "#/$defs/Scales"
+        },
+        "guides": {
+          "$ref": "#/$defs/GuidesSpec"
         },
         "legend": {
           "$ref": "#/$defs/LegendSpec"

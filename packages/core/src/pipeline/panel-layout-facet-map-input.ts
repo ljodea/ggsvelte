@@ -1,7 +1,12 @@
 /**
  * Input for mapping facet panel defs into placements.
  */
-import type { LayoutTheme, Margins, TickFormatter } from "../layout/layout.js";
+import type {
+  LayoutAxisPresentation,
+  LayoutTheme,
+  Margins,
+  TickFormatter,
+} from "../layout/layout.js";
 import type { TextMeasurer } from "../layout/measure.js";
 import type { AxisGuidePlan } from "../layout/temporal-guide.js";
 
@@ -28,4 +33,5 @@ export interface MapFacetPanelPlacementsInput {
   formatV: TickFormatter | undefined;
   measurer: TextMeasurer;
   layoutTheme: LayoutTheme;
+  axis: Readonly<{ x: LayoutAxisPresentation; y: LayoutAxisPresentation }>;
 }

@@ -35,7 +35,9 @@ import {
 import { collectSchemaShapeErrors, GEOM_BRANCHES } from "./validate-schema-shape.js";
 import {
   colorScaleStructuralErrors,
+  coordFacetStructuralErrors,
   facetStructuralErrors,
+  guideStructuralErrors,
   layerStructuralErrors,
 } from "./validate-structure.js";
 
@@ -123,6 +125,11 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
 
     if (schemaValid && isRecord(input) && isRecord(input["scales"])) {
       errors.push(...colorScaleStructuralErrors(input["scales"]));
+    }
+    if (schemaValid && isRecord(input)) {
+      const guides = isRecord(input["guides"]) ? input["guides"] : {};
+      const scales = isRecord(input["scales"]) ? input["scales"] : undefined;
+      errors.push(...guideStructuralErrors(guides, scales), ...coordFacetStructuralErrors(input));
     }
 
     // --- tier 2 (opt-in via options): structural grammar checks ----------------

@@ -5,7 +5,7 @@ import type { ColumnTable } from "../table.js";
 import type { CellValue } from "../table.js";
 
 import { emptyFrameExtras } from "./frame-helpers.js";
-import type { CarriedColumnOf } from "./frame-stats-shared.js";
+import { styleColumns, type CarriedColumnOf } from "./frame-stats-shared.js";
 import type { LayerBinding, LayerFrame } from "./types.js";
 import { NO_ROW } from "./types.js";
 
@@ -14,6 +14,7 @@ type SmoothResult = {
   y: Float64Array;
   ymin: Float64Array | null;
   ymax: Float64Array | null;
+  se: Float64Array;
   groups: number[];
   hasBand: boolean;
   carried: Record<string, CellValue[]>;
@@ -37,9 +38,16 @@ export function packSmoothLayerFrame(
     yNumeric: result.y,
     groups: result.groups,
     inputGroups,
+    inputSourceRows: null,
     rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
     colorValues: col(binding.color.field),
     fillValues: col(binding.fill.field),
+    ...styleColumns(binding, col, {
+      y: result.y,
+      ...(result.ymin !== null && { ymin: result.ymin }),
+      ...(result.ymax !== null && { ymax: result.ymax }),
+      se: result.se,
+    }),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),
     ymin: result.ymin,

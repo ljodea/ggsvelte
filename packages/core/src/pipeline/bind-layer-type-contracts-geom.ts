@@ -62,4 +62,20 @@ export function validateGeomChannelTypeContracts(input: {
       );
     }
   }
+  if (geom === "raster") {
+    if (xField !== null && positionFieldType(table, xField, xConversion) === "nominal") {
+      throw new PipelineError(
+        "channel-type-mismatch",
+        `/layers/${index}/aes/x`,
+        `The raster geom needs continuous x, but field "${xField}" is nominal. Use geom "tile" for discrete axes.`,
+      );
+    }
+    if (yField !== null && positionFieldType(table, yField, yConversion) === "nominal") {
+      throw new PipelineError(
+        "channel-type-mismatch",
+        `/layers/${index}/aes/y`,
+        `The raster geom needs continuous y, but field "${yField}" is nominal. Use geom "tile" for discrete axes.`,
+      );
+    }
+  }
 }

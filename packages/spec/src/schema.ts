@@ -33,10 +33,15 @@ import { SpecDeclarations } from "./schema-declarations.js";
 export {
   CATEGORICAL_SCHEME_NAMES,
   COLOR_SCHEME_NAMES,
+  LINETYPE_NAMES,
   MAX_BINNED_BREAKS,
+  MAX_GLOW_RADIUS,
+  MAX_PAINT_STOPS,
+  POINT_SHAPE_NAMES,
   SEQUENTIAL_SCHEME_NAMES,
   THEME_NAMES,
 } from "./schema-names.js";
+export type { LinetypeName, PointShapeName } from "./schema-names.js";
 
 export {
   CHANNELS,
@@ -103,20 +108,28 @@ export const ColLayerSchema = SpecModule.Import("ColLayer");
 export const BarLayerSchema = SpecModule.Import("BarLayer");
 export const HistogramLayerSchema = SpecModule.Import("HistogramLayer");
 export const AreaLayerSchema = SpecModule.Import("AreaLayer");
+export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
+export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
 export const BoxplotLayerSchema = SpecModule.Import("BoxplotLayer");
 export const DensityLayerSchema = SpecModule.Import("DensityLayer");
 export const ErrorbarLayerSchema = SpecModule.Import("ErrorbarLayer");
+export const RectLayerSchema = SpecModule.Import("RectLayer");
+export const TileLayerSchema = SpecModule.Import("TileLayer");
+export const RasterLayerSchema = SpecModule.Import("RasterLayer");
 export const AesSchema = SpecModule.Import("Aes");
 export const ChannelValueSchema = SpecModule.Import("ChannelValue");
 export const DataRefSchema = SpecModule.Import("DataRef");
 export const ScalesSchema = SpecModule.Import("Scales");
 export const TemporalParserSpecSchemaRef = SpecModule.Import("TemporalParserSpec");
+export const FacetFieldRefSchema = SpecModule.Import("FacetFieldRef");
+export const FacetStripSpecSchema = SpecModule.Import("FacetStripSpec");
 export const FacetSpecSchema = SpecModule.Import("FacetSpec");
 export const CoordTransformAxisSpecSchema = SpecModule.Import("CoordTransformAxisSpec");
 export const CoordTransformSpecSchema = SpecModule.Import("CoordTransformSpec");
+export const CoordFixedSpecSchema = SpecModule.Import("CoordFixedSpec");
 export const CoordSpecSchema = SpecModule.Import("CoordSpec");
 
 // ---------------------------------------------------------------------------
@@ -153,6 +166,18 @@ export type InlineData = DataValues | DataColumns;
 export type ChannelValue = SpecType<"ChannelValue">;
 /** Aesthetic mapping (canonical channel forms only). */
 export type Aes = SpecType<"Aes">;
+/** One ordered gradient color stop. */
+export type ColorStop = SpecType<"ColorStop">;
+/** Gradient coordinate space. */
+export type PaintSpace = SpecType<"PaintSpace">;
+/** Deterministic linear gradient paint. */
+export type LinearGradientPaint = SpecType<"LinearGradientPaint">;
+/** Deterministic radial gradient paint. */
+export type RadialGradientPaint = SpecType<"RadialGradientPaint">;
+/** Closed portable gradient paint (linear | radial). */
+export type GradientPaint = SpecType<"GradientPaint">;
+/** Bounded glow treatment. */
+export type GlowSpec = SpecType<"GlowSpec">;
 /** Point layer params. */
 export type PointParams = SpecType<"PointParams">;
 /** Line layer params. */
@@ -165,6 +190,8 @@ export type BarParams = SpecType<"BarParams">;
 export type AreaParams = SpecType<"AreaParams">;
 /** Rule layer params (annotation intercepts + styling). */
 export type RuleParams = SpecType<"RuleParams">;
+/** Segment layer params (styling + lineend). */
+export type SegmentParams = SpecType<"SegmentParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
@@ -177,34 +204,72 @@ export type DensityParams = SpecType<"DensityParams">;
 export type SummaryFun = SpecType<"SummaryFun">;
 /** Errorbar layer params (styling + summary-stat functions). */
 export type ErrorbarParams = SpecType<"ErrorbarParams">;
+/** Rect layer params. */
+export type RectParams = SpecType<"RectParams">;
+/** Tile layer params. */
+export type TileParams = SpecType<"TileParams">;
+/** Raster layer params. */
+export type RasterParams = SpecType<"RasterParams">;
+/** Ribbon layer params (outline, orientation, stroke ends). */
+export type RibbonParams = SpecType<"RibbonParams">;
 /** Jitter/nudge position parameters. */
 export type PositionParams = SpecType<"PositionParams">;
+// Layer types: TypeBox Static collapses DataRef to object[]; restore the
+// hand-written DataRef on optional per-layer `data` (#589).
+type LayerWithDataRef<T> = Omit<T, "data"> & { data?: DataRef };
 /** A point layer. */
-export type PointLayer = SpecType<"PointLayer">;
+export type PointLayer = LayerWithDataRef<SpecType<"PointLayer">>;
 /** A line layer. */
-export type LineLayer = SpecType<"LineLayer">;
+export type LineLayer = LayerWithDataRef<SpecType<"LineLayer">>;
 /** A col layer (pre-computed bars). */
-export type ColLayer = SpecType<"ColLayer">;
+export type ColLayer = LayerWithDataRef<SpecType<"ColLayer">>;
 /** A bar layer (count or bin stat). */
-export type BarLayer = SpecType<"BarLayer">;
+export type BarLayer = LayerWithDataRef<SpecType<"BarLayer">>;
 /** A histogram layer (alias; normalize() canonicalizes to bar + stat bin). */
-export type HistogramLayer = SpecType<"HistogramLayer">;
+export type HistogramLayer = LayerWithDataRef<SpecType<"HistogramLayer">>;
 /** An area layer. */
-export type AreaLayer = SpecType<"AreaLayer">;
+export type AreaLayer = LayerWithDataRef<SpecType<"AreaLayer">>;
 /** A rule (reference line) layer. */
-export type RuleLayer = SpecType<"RuleLayer">;
+export type RuleLayer = LayerWithDataRef<SpecType<"RuleLayer">>;
 /** A text-label layer. */
-export type TextLayer = SpecType<"TextLayer">;
+export type TextLayer = LayerWithDataRef<SpecType<"TextLayer">>;
 /** A smooth (fitted trend) layer. */
-export type SmoothLayer = SpecType<"SmoothLayer">;
+export type SmoothLayer = LayerWithDataRef<SpecType<"SmoothLayer">>;
 /** A boxplot layer. */
-export type BoxplotLayer = SpecType<"BoxplotLayer">;
+export type BoxplotLayer = LayerWithDataRef<SpecType<"BoxplotLayer">>;
 /** A density (KDE) layer. */
-export type DensityLayer = SpecType<"DensityLayer">;
+export type DensityLayer = LayerWithDataRef<SpecType<"DensityLayer">>;
 /** An errorbar layer. */
-export type ErrorbarLayer = SpecType<"ErrorbarLayer">;
+export type ErrorbarLayer = LayerWithDataRef<SpecType<"ErrorbarLayer">>;
+/** A rect layer (arbitrary xmin/xmax/ymin/ymax regions). */
+export type RectLayer = LayerWithDataRef<SpecType<"RectLayer">>;
+/** A tile layer (center-sized cells). */
+export type TileLayer = LayerWithDataRef<SpecType<"TileLayer">>;
+/** A raster layer (equal-cell dense grid). */
+export type RasterLayer = LayerWithDataRef<SpecType<"RasterLayer">>;
+/** A ribbon (interval band) layer. */
+export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
+/** A finite segment layer ((x,y)→(xend,yend)). */
+export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
 /** One plot layer, discriminated by `geom`. */
-export type LayerSpec = SpecType<"LayerSpec">;
+export type LayerSpec =
+  | PointLayer
+  | LineLayer
+  | ColLayer
+  | BarLayer
+  | HistogramLayer
+  | AreaLayer
+  | RibbonLayer
+  | SegmentLayer
+  | RuleLayer
+  | TextLayer
+  | SmoothLayer
+  | BoxplotLayer
+  | DensityLayer
+  | ErrorbarLayer
+  | RectLayer
+  | TileLayer
+  | RasterLayer;
 /** Stackable position adjustment names. */
 export type StackablePosition = SpecType<"StackablePosition">;
 /** Position adjustments accepted by point layers. */
@@ -216,23 +281,47 @@ export type PositionScaleSpec = SpecType<"PositionScaleSpec">;
 export type ScaleExpansion = SpecType<"ScaleExpansion">;
 /** Color/fill scale configuration. */
 export type ColorScaleSpec = SpecType<"ColorScaleSpec">;
-/** Per-scale configuration ({ x, y, color, fill }). */
+/** Positive numeric size/linewidth scale configuration. */
+export type PositiveStyleScaleSpec = SpecType<"PositiveStyleScaleSpec">;
+/** Opacity scale configuration. */
+export type AlphaScaleSpec = SpecType<"AlphaScaleSpec">;
+/** Finite point-shape scale configuration. */
+export type ShapeScaleSpec = SpecType<"ShapeScaleSpec">;
+/** Finite stroke-pattern scale configuration. */
+export type LinetypeScaleSpec = SpecType<"LinetypeScaleSpec">;
+/** Per-scale configuration for all position and style aesthetics. */
 export type Scales = SpecType<"Scales">;
 /** Facet-panel scale behavior. */
 export type FacetScales = SpecType<"FacetScales">;
 /** Facet configuration (wrap OR rows/cols grid). */
+export type FacetFieldRef = SpecType<"FacetFieldRef">;
+export type FacetStripSpec = SpecType<"FacetStripSpec">;
 export type FacetSpec = SpecType<"FacetSpec">;
 /** One post-stat coordinate axis transform. */
 export type CoordTransformAxisSpec = SpecType<"CoordTransformAxisSpec">;
 /** Post-stat coordinate transform configuration. */
 export type CoordTransformSpec = SpecType<"CoordTransformSpec">;
-/** Cartesian, flipped, or post-stat transformed coordinate system. */
+/** Fixed-aspect Cartesian coordinate configuration. */
+export type CoordFixedSpec = SpecType<"CoordFixedSpec">;
+/** Cartesian, flipped, post-stat transformed, or fixed-aspect coordinate system. */
 export type CoordSpec = SpecType<"CoordSpec">;
 /** Per-layer rendering backend hint. */
 export type RenderBackend = SpecType<"RenderBackend">;
 /** Plot-level accessibility mode. */
 export type A11yMode = "auto" | "force-svg";
-/** Legend options. */
+/** Bounded per-guide presentation theme overrides. */
+export type GuideThemeSpec = SpecType<"GuideThemeSpec">;
+export type BandAxisGuideSpec = SpecType<"BandAxisGuideSpec">;
+export type AxisGuideSpec = SpecType<"AxisGuideSpec">;
+export type LegendGuideSpec = SpecType<"LegendGuideSpec">;
+export type ColorbarGuideSpec = SpecType<"ColorbarGuideSpec">;
+export type ColorstepsGuideSpec = SpecType<"ColorstepsGuideSpec">;
+export type NoneGuideSpec = SpecType<"NoneGuideSpec">;
+/** One portable appearance-only guide configuration. */
+export type GuideSpec = SpecType<"GuideSpec">;
+/** Guide configuration keyed by aesthetic. */
+export type GuidesSpec = SpecType<"GuidesSpec">;
+/** Legacy legend ordering options. */
 export type LegendSpec = SpecType<"LegendSpec">;
 /** Built-in theme names. */
 export type ThemeName = SpecType<"ThemeName">;
@@ -241,7 +330,8 @@ export type ThemeSpec = SpecType<"ThemeSpec">;
 /** Plot labels. */
 export type Labs = SpecType<"Labs">;
 /** The canonical, strictly-JSON plot spec (what agents emit and schemas describe). */
-export type PortableSpec = Omit<SpecType<"PlotSpec">, "data" | "datasets"> & {
+export type PortableSpec = Omit<SpecType<"PlotSpec">, "data" | "datasets" | "layers"> & {
   data?: DataRef;
   datasets?: Record<string, InlineData>;
+  layers: LayerSpec[];
 };

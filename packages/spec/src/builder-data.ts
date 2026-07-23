@@ -119,10 +119,13 @@ export interface BuilderCalendarSource {
 export function calendarDateFields(state: BuilderCalendarSource): ReadonlySet<string> {
   const fields = new Set<string>();
   const mappings = [
-    ["x", ["x"]],
-    ["y", ["y", "ymin", "ymax"]],
+    ["x", ["x", "xmin", "xmax", "xend"]],
+    ["y", ["y", "ymin", "ymax", "yend"]],
     ["color", ["color"]],
     ["fill", ["fill"]],
+    ["size", ["size"]],
+    ["linewidth", ["linewidth"]],
+    ["alpha", ["alpha"]],
   ] as const;
   for (const [scale, channels] of mappings) {
     if (state.scales?.[scale]?.temporalKind !== "date") continue;

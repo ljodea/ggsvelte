@@ -262,7 +262,8 @@ That runs:
    paths only) — do not chase SSR-report gaps or put thresholds there.
 
 CI (`.github/workflows/ci.yml`) runs chromium browser coverage on the
-`component-svelte` job and unit-suite coverage (`bun test --coverage`) on the
+`component-svelte` job (parallel with coverage-free `component-svelte-fx` for
+firefox + webkit) and unit-suite coverage (`bun test --coverage`) on the
 `unit` job, then uploads lcov to Codecov via `codecov/codecov-action` (flags
 `unit` / `svelte`, path components for package badges). SSR coverage is **not**
 collected in CI: `@vitest/coverage-v8` needs Node inspector Coverage APIs that
@@ -395,13 +396,13 @@ staleness-tested). The docs lifecycle page and llms surfaces render from it.
   deprecation window of at least one full minor release. The precise rules
   (windows, fixtures, runtime checks, codemod bar) are decision 0013
   (`docs/decisions/0013-post-0-1-migration-policy.md`).
-- **stable** — committed API under semver. Nothing is `stable` pre-0.1.0.
+- **stable** — committed API under semver. Nothing is `stable` pre-1.0.
 - **superseded** — keeps working but stops being recommended; docs point at
   the replacement. This tag exists to protect agent-generated code from
   silent breakage (superseded surfaces are removed only at a major).
 
-Related: `normalize()` stamps `edition: 1` on every spec (defaults-edition
-mechanism, decision 0012) — default aesthetics are keyed by edition in
+Related: `normalize()` stamps the current defaults edition (`edition: 2`) on
+every unstamped spec (defaults-edition mechanism, decision 0012) — default aesthetics are keyed by edition in
 `@ggsvelte/core`'s `EDITION_DEFAULTS`, so improving defaults later never
 restyles existing specs.
 

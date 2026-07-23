@@ -8,6 +8,7 @@ import type { GeometryBatch, PointsBatch } from "../scene.js";
 import type { LayerFrame } from "./types.js";
 import { NO_ROW } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
+import { numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
 
 const DEFAULT_OUTLIER_SIZE = 1.5;
 
@@ -17,8 +18,9 @@ export function buildBoxplotOutliers(input: {
   centerPx: readonly number[];
   alpha: number;
   params: BoxplotParams;
+  styles: ResolvedStyleScales;
 }): GeometryBatch | null {
-  const { frame, fx, centerPx, alpha, params } = input;
+  const { frame, fx, centerPx, alpha, params, styles } = input;
   const box = frame.box;
   if (box === null || box.outlierY.length === 0) return null;
   if (fx.yScale.type === "band") return null;
@@ -26,6 +28,7 @@ export function buildBoxplotOutliers(input: {
 
   const positions: number[] = [];
   const rowIndex: number[] = [];
+  const styleRows: number[] = [];
   for (let i = 0; i < box.outlierY.length; i++) {
     const boxRow = box.outlierBox[i]!;
     const cx = centerPx[boxRow];
@@ -33,6 +36,7 @@ export function buildBoxplotOutliers(input: {
     if (cx === undefined || Number.isNaN(cx) || Number.isNaN(ty)) continue;
     positions.push(cx, fx.innerHeight - ty * fx.innerHeight);
     rowIndex.push(NO_ROW);
+    styleRows.push(boxRow);
   }
   if (rowIndex.length === 0) return null;
 
@@ -47,5 +51,10 @@ export function buildBoxplotOutliers(input: {
     shape: "circle",
     fill: null,
   };
+  const alphas = numericStyleVector(frame, "alpha", styleRows, styles);
+  if (alphas !== undefined) {
+    batch.alpha = 1;
+    batch.alphas = alphas;
+  }
   return batch;
 }

@@ -9,6 +9,7 @@ import type { Scene } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
 
 import { assembleScene, buildGeometryBatches } from "./assemble-scene.js";
+import { resolveAxisGuide } from "./guide-config.js";
 import type { PanelLayoutResult } from "./panel-layout.js";
 import type { PreparedPanels } from "./prepare-panels.js";
 import type { TrainedPipelineScales } from "./train-pipeline-scales.js";
@@ -37,7 +38,7 @@ export function finalizeGeometryAndScene(input: {
     warnings,
   } = input;
   const { facetPanels, panelFrames } = prepared;
-  const { panelScales, colorResolution, fillResolution } = trained;
+  const { panelScales, colorResolution, fillResolution, styleResolutions } = trained;
 
   // LAYER-major order: layer order is paint order across the whole plot, and
   // it keeps each layer's batches contiguous so strata planning (contiguous
@@ -51,6 +52,12 @@ export function finalizeGeometryAndScene(input: {
     panelScales,
     color: colorResolution.resolved,
     fill: fillResolution.resolved,
+    styles: Object.fromEntries(
+      Object.entries(styleResolutions).map(([aesthetic, resolution]) => [
+        aesthetic,
+        resolution.resolved,
+      ]),
+    ) as import("./geometry-style.js").ResolvedStyleScales,
     flip,
     coordProjectors,
     warnings,
@@ -58,14 +65,20 @@ export function finalizeGeometryAndScene(input: {
   perfMark("ggsvelte:geometry:end");
   perfMeasure("ggsvelte:geometry", "ggsvelte:geometry:start", "ggsvelte:geometry:end");
 
+  const xGuide = resolveAxisGuide("x", trained.scalesConfig, normalized.guides);
+  const yGuide = resolveAxisGuide("y", trained.scalesConfig, normalized.guides);
   return assembleScene({
     width: options.width,
     height: options.height,
     placements: panelLayout.placements,
     facetPanels,
+    strip: panelLayout.strip,
+    stripBand: panelLayout.stripBand,
     displayScales: panelLayout.displayScales,
     hTitle: panelLayout.hTitle,
     vTitle: panelLayout.vTitle,
+    hGuide: flip ? yGuide : xGuide,
+    vGuide: flip ? xGuide : yGuide,
     coordProjectors,
     ...(options.measureText !== undefined && { measureText: options.measureText }),
     axisTextSize: theme.axisTextSize,
@@ -80,6 +93,8 @@ export function finalizeGeometryAndScene(input: {
     batches,
     legendBlock: panelLayout.legendBlock,
     topBand: panelLayout.topBand,
+    bottomBand: panelLayout.bottomBand,
+    degraded: panelLayout.degraded,
     theme,
     title: panelLayout.title,
     subtitle: panelLayout.subtitle,

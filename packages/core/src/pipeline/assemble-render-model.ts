@@ -30,28 +30,37 @@ function bandGuideDiagnostic(code: string, aesthetic: "x" | "y", mode: BandLabel
   // A margin overflow on a single-line axis is a HORIZONTAL end-cap problem (a
   // wide end label past the panel edge), not a rotated-label bottom-margin one —
   // so steer the user to width, not height, and never claim rotation.
+  // Forced wrap overflow is neither rotation nor truncation: over-tall wraps need
+  // height; side overhang from wide wrap lines needs width — mention both.
   const horizontalCap = margin && mode === "single-line";
+  const wrappedCap = margin && mode === "wrapped";
   return {
     code,
     severity: "warning" as const,
     path: `/scales/${aesthetic}`,
     problem: horizontalCap
       ? "A categorical end label is truncated to fit the axis width."
-      : margin
-        ? "A rotated categorical label is truncated to fit the axis margin cap."
-        : "Categorical labels overlap even after wrapping and rotation.",
+      : wrappedCap
+        ? "A wrapped categorical label exceeds the axis margin budget."
+        : margin
+          ? "A rotated categorical label is truncated to fit the axis margin cap."
+          : "Categorical labels overlap even after wrapping and rotation.",
     cause: horizontalCap
       ? "The end label extends past the panel edge and the bounded side margin can't fit it."
-      : margin
-        ? "The full label is longer than the bounded bottom margin allows, even rotated."
-        : "There are more (or longer) categories than the axis width can separate.",
+      : wrappedCap
+        ? "The forced wrap footprint is taller than the bottom margin and/or wider than the side margin allows."
+        : margin
+          ? "The full label is longer than the bounded bottom margin allows, even rotated."
+          : "There are more (or longer) categories than the axis width can separate.",
     fixes: [
       {
         description: horizontalCap
           ? "Use shorter category labels or allocate more chart width."
-          : margin
-            ? "Use shorter category labels or allocate more chart height."
-            : "Reduce the number of categories or allocate more chart width.",
+          : wrappedCap
+            ? "Use shorter category labels, fewer wrap lines, or allocate more chart width/height."
+            : margin
+              ? "Use shorter category labels or allocate more chart height."
+              : "Reduce the number of categories or allocate more chart width.",
       },
       COORD_FLIP_FIX,
     ],
@@ -115,6 +124,8 @@ function bandLabelAdvisories(
   const out: { code: string; path: string; chosen: string; howToOverride: string }[] = [];
   for (const plan of guidePlans) {
     if (plan.type !== "axis" || plan.scaleType !== "band") continue;
+    // Author-pinned modes are intentional — do not emit heuristic wrap/rotate advisories.
+    if (plan.bandLabelAuthorPinned === true) continue;
     const mode = plan.bandLabelMode;
     if (mode !== "wrapped" && mode !== "rotated") continue;
     const key = `${mode}:${plan.aesthetic}`;
@@ -126,13 +137,13 @@ function bandLabelAdvisories(
             code: "band-labels-wrapped",
             path: `/scales/${plan.aesthetic}`,
             chosen: "wrapped long labels onto multiple lines",
-            howToOverride: "Use shorter labels, or coordFlip() for horizontal bars.",
+            howToOverride: `Set scales.${plan.aesthetic}.guide.mode ("single"|"wrap"|"rotate"|"off") or .guide.wrap, use shorter labels, or coordFlip() for horizontal bars.`,
           }
         : {
             code: "band-labels-rotated",
             path: `/scales/${plan.aesthetic}`,
             chosen: `rotated long labels ${String(plan.bandLabelAngle ?? -90)}°`,
-            howToOverride: "coordFlip() lays categories out horizontally (one row each).",
+            howToOverride: `Set scales.${plan.aesthetic}.guide.mode ("single"|"wrap"|"rotate"|"off") or .guide.angle, or coordFlip() for horizontal category rows.`,
           },
     );
   }
@@ -146,6 +157,7 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
     scene,
     candidates,
     table: input.table,
+    ...(input.sourceRegistry !== undefined && { sourceRegistry: input.sourceRegistry }),
   });
   const advisories = [...input.advisories, ...bandLabelAdvisories(input.guidePlans)];
   const diagnostics = dedupeRenderModelDiagnostics(input.warnings, advisories);

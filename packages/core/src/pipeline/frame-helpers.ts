@@ -18,6 +18,10 @@ export function emptyFrameExtras(): Pick<
   | "ymax"
   | "xmin"
   | "xmax"
+  | "xend"
+  | "yend"
+  | "xendValues"
+  | "yendValues"
   | "dodgeSlot"
   | "dodgeSlotCounts"
   | "offsetX"
@@ -34,6 +38,10 @@ export function emptyFrameExtras(): Pick<
     ymax: null,
     xmin: null,
     xmax: null,
+    xend: null,
+    yend: null,
+    xendValues: null,
+    yendValues: null,
     dodgeSlot: null,
     dodgeSlotCounts: null,
     offsetX: null,

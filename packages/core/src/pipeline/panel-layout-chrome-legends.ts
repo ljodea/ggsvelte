@@ -7,10 +7,10 @@ import { DEFAULT_LAYOUT_THEME } from "../layout/layout.js";
 import type { TextMeasurer } from "../layout/measure.js";
 import { MetricsTableMeasurer } from "../layout/measure.js";
 import type { LegendInput, LegendOrder } from "../legend.js";
-import { buildLegends } from "../legend.js";
+import { buildLegends, LegendLayoutError } from "../legend.js";
 import type { ThemeTokens } from "../theme.js";
 
-import type { RunOptions } from "./types.js";
+import { PipelineError, type RunOptions } from "./types.js";
 
 export interface PanelLayoutLegends {
   measurer: TextMeasurer;
@@ -19,28 +19,64 @@ export interface PanelLayoutLegends {
 }
 
 export function resolvePanelLayoutLegends(input: {
-  colorLegend: LegendInput | null;
-  fillLegend: LegendInput | null;
+  legendInputs: readonly LegendInput[];
   legendOrder: LegendOrder;
   theme: ThemeTokens;
-  options: Pick<RunOptions, "width" | "measureText">;
+  layoutAxisTextSize: number;
+  options: Pick<RunOptions, "width" | "height" | "measureText">;
 }): PanelLayoutLegends {
   const { theme, options } = input;
   const measurer = options.measureText ?? new MetricsTableMeasurer(FONT_METRICS);
   const layoutTheme = {
     ...DEFAULT_LAYOUT_THEME,
-    fontSize: theme.axisTextSize,
+    fontSize: input.layoutAxisTextSize,
     tickLength: theme.ticksX || theme.ticksY ? theme.tickLength : 0,
     tickLabelGap: theme.ticksX || theme.ticksY ? 3 : 5,
   };
-  const legendInputs = [input.colorLegend, input.fillLegend].filter(
-    (l): l is LegendInput => l !== null,
-  );
-  const legendBlock = buildLegends(
-    legendInputs,
-    input.legendOrder,
-    measurer,
-    Math.max(48, options.width * 0.35),
-  );
-  return { measurer, layoutTheme, legendBlock };
+  const legendInputs = input.legendInputs.map((legend) => ({
+    ...legend,
+    appearance: {
+      type:
+        legend.appearance?.type ??
+        (legend.kind === "ramp" ? "colorbar" : legend.kind === "steps" ? "colorsteps" : "legend"),
+      title: legend.appearance?.title ?? legend.title,
+      order: legend.appearance?.order ?? 0,
+      position: legend.appearance?.position ?? "auto",
+      direction: legend.appearance?.direction ?? "auto",
+      ...legend.appearance,
+      ...(legend.kind === "discrete" && {
+        keySize: legend.appearance?.keySize ?? theme.legendKeySize,
+      }),
+      theme: {
+        titleSize: theme.guideTitleSize,
+        labelSize: theme.axisTextSize,
+        keyGap: theme.legendKeyGap,
+        rowGap: theme.legendRowGap,
+        blockGap: theme.guideBlockGap,
+        colorbarThickness: theme.colorbarThickness,
+        colorbarLength: theme.colorbarLengthMin,
+        ...legend.appearance?.theme,
+      },
+    },
+  })) as typeof input.legendInputs;
+  try {
+    const legendBlock = buildLegends(
+      legendInputs,
+      input.legendOrder,
+      measurer,
+      Math.max(48, options.width * 0.35),
+      options.width,
+      options.height,
+    );
+    return { measurer, layoutTheme, legendBlock };
+  } catch (error) {
+    if (error instanceof LegendLayoutError) {
+      throw new PipelineError(
+        "guide-layout-overflow",
+        `/guides/${error.scale}`,
+        `${error.message} ${error.recovery}`,
+      );
+    }
+    throw error;
+  }
 }

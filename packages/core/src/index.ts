@@ -181,10 +181,18 @@ export type {
   GuidePlan,
   TemporalAxisPlanInput,
 } from "./layout/temporal-guide.js";
+export { planBandAxis } from "./layout/band-guide.js";
+export type {
+  BandAxisPlan,
+  BandAxisPlanInput,
+  BandGuideConfig,
+  BandLabelMode,
+} from "./layout/band-guide.js";
 export { DEFAULT_LAYOUT_THEME, layout, layoutPass, marginDelta } from "./layout/layout.js";
 export type {
   AxisResult,
   Domain,
+  LayoutAxisPresentation,
   LayoutInput,
   LayoutResult,
   LayoutTheme,
@@ -242,15 +250,27 @@ export type {
 } from "./candidate-store.js";
 export {
   buildInteractionMasks,
+  buildPrimitiveInteractionMasks,
   legendValueEqual,
   resolveLegendFocusKeys,
 } from "./interaction-mask.js";
 export type {
   BatchInteractionMask,
+  FocusedPrimitive,
   LegendValueMembership,
   SemanticCandidateKeys,
 } from "./interaction-mask.js";
 export { PANEL_SPACING, STRIP_BAND } from "./scene.js";
+export { letterboxGutterRects } from "./letterbox-gutters.js";
+export type { LetterboxRect } from "./letterbox-gutters.js";
+export { LINETYPE_DASHES, linetypeIndex, pointShapeIndex } from "./scales/style.js";
+export type {
+  Linetype,
+  PointShape,
+  ResolvedStyleScale,
+  StyleOutput,
+  StyleScale,
+} from "./scales/style.js";
 export type {
   GeometryBatch,
   GlyphsBatch,
@@ -283,6 +303,10 @@ export {
 } from "./render-svg.js";
 /** @lifecycle stable-intent */
 export type { RenderSVGOptions } from "./render-svg.js";
+
+// Within-mark paint (#591) — resource ids and resolved paint types
+export { paintResourceId } from "./mark-paint.js";
+export type { ResolvedGlow, ResolvedGradientPaint } from "./mark-paint.js";
 
 // CLI implementation (the `ggsvelte-render` bin on the ggsvelte package wraps this)
 export { runCLI } from "./cli.js";

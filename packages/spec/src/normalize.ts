@@ -33,12 +33,15 @@ import type {
   Aes,
   ChannelValue,
   FacetSpec,
+  GuidesSpec,
+  GuideSpec,
   LayerSpec,
   PortableSpec,
   ThemeName,
   ThemeSpec,
 } from "./schema.js";
 import { normalizeCoord } from "./normalize-coord.js";
+import { normalizeLayerParamsPaint } from "./normalize-paint.js";
 import { normalizeScales } from "./normalize-scales.js";
 import { CHANNELS, CURRENT_EDITION, GEOM_DEFAULTS } from "./schema.js";
 import type {
@@ -60,15 +63,21 @@ export type {
   ColLayerInput,
   DensityLayerInput,
   ErrorbarLayerInput,
+  FacetFieldInput,
   FacetInput,
   HistogramLayerInput,
+  RibbonLayerInput,
+  SegmentLayerInput,
   LayerInput,
   LineLayerInput,
   PointLayerInput,
+  RasterLayerInput,
+  RectLayerInput,
   RuleLayerInput,
   SmoothLayerInput,
   SpecInput,
   TextLayerInput,
+  TileLayerInput,
 } from "./normalize-input.js";
 
 /** Canonicalize one channel: bare string -> { field }; clone canonical forms. */
@@ -145,7 +154,8 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
     "positionParams" in layer && layer.positionParams !== undefined
       ? { ...layer.positionParams }
       : undefined;
-  const params = layer.params === undefined ? undefined : { ...layer.params };
+  const rawParams = layer.params === undefined ? undefined : { ...layer.params };
+  const params = rawParams === undefined ? undefined : normalizeLayerParamsPaint(rawParams);
   // "auto" is the render default — one canonical form per concept, so it
   // canonicalizes away (same rule as coord "cartesian" / a11y "auto").
   const render = layer.render === "auto" ? undefined : layer.render;
@@ -156,30 +166,83 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
     ...(positionParams !== undefined && { positionParams }),
     ...(render !== undefined && { render }),
     ...(aes !== undefined && { aes }),
+    ...(layer.data !== undefined && { data: layer.data }),
     ...(params !== undefined && { params }),
   };
   return out as LayerSpec;
 }
 
-const fieldRef = (v: string | { field: string } | undefined) =>
-  v === undefined ? undefined : typeof v === "string" ? { field: v } : { field: v.field };
+/** Canonicalize one facet field: bare string -> { field }; clone levels/labels. */
+function normalizeFacetField(v: FacetInput["wrap"]): FacetSpec["wrap"] | undefined {
+  if (v === undefined) return undefined;
+  if (typeof v === "string") return { field: v };
+  const levels =
+    v.levels === undefined
+      ? undefined
+      : ([...v.levels] as NonNullable<FacetSpec["wrap"]>["levels"]);
+  const labels = v.labels === undefined ? undefined : { ...v.labels };
+  return {
+    field: v.field,
+    ...(levels !== undefined && { levels }),
+    ...(labels !== undefined && { labels }),
+  };
+}
+
+/** Canonicalize facet strip chrome (position + show). */
+function normalizeFacetStrip(strip: NonNullable<FacetInput["strip"]>): FacetSpec["strip"] {
+  const out: NonNullable<FacetSpec["strip"]> = {
+    ...(strip.position !== undefined && { position: strip.position }),
+    ...(strip.show !== undefined && { show: strip.show }),
+  };
+  return out;
+}
 
 /** Canonicalize a facet input: bare-string fields -> { field }. */
 function normalizeFacet(facet: FacetInput): FacetSpec {
-  const wrap = fieldRef(facet.wrap);
-  const rows = fieldRef(facet.rows);
-  const cols = fieldRef(facet.cols);
+  const wrap = normalizeFacetField(facet.wrap);
+  const rows = normalizeFacetField(facet.rows);
+  const cols = normalizeFacetField(facet.cols);
+  const strip = facet.strip === undefined ? undefined : normalizeFacetStrip(facet.strip);
   return {
     ...(wrap !== undefined && { wrap }),
     ...(rows !== undefined && { rows }),
     ...(cols !== undefined && { cols }),
     ...(facet.ncol !== undefined && { ncol: facet.ncol }),
     ...(facet.scales !== undefined && { scales: facet.scales }),
+    ...(strip !== undefined && Object.keys(strip).length > 0 && { strip }),
   };
 }
 
 function normalizeTheme(theme: ThemeName | ThemeSpec): ThemeName | ThemeSpec {
   return typeof theme === "string" ? theme : { ...theme };
+}
+
+function normalizeGuide(guide: GuideSpec): GuideSpec {
+  return {
+    ...guide,
+    ...(guide.type !== "none" && guide.theme !== undefined && { theme: { ...guide.theme } }),
+  };
+}
+
+const GUIDE_ORDER = [
+  "x",
+  "y",
+  "color",
+  "fill",
+  "size",
+  "linewidth",
+  "alpha",
+  "shape",
+  "linetype",
+] as const;
+
+function normalizeGuides(guides: GuidesSpec): GuidesSpec {
+  return Object.fromEntries(
+    GUIDE_ORDER.flatMap((aesthetic) => {
+      const guide = guides[aesthetic];
+      return guide === undefined ? [] : [[aesthetic, normalizeGuide(guide)]];
+    }),
+  );
 }
 
 /** Canonicalize a SpecInput into a normalized PortableSpec (see module docs). */
@@ -200,6 +263,7 @@ export function normalize(input: SpecInput): PortableSpec {
     ...(input.facet !== undefined && { facet: normalizeFacet(input.facet) }),
     ...(coord !== undefined && { coord }),
     ...(input.scales !== undefined && { scales: normalizeScales(input.scales) }),
+    ...(input.guides !== undefined && { guides: normalizeGuides(input.guides) }),
     ...(input.legend !== undefined && { legend: { ...input.legend } }),
     ...(input.labs !== undefined && { labs: { ...input.labs } }),
     ...(input.theme !== undefined && { theme: normalizeTheme(input.theme) }),

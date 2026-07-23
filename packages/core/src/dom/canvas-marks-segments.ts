@@ -6,6 +6,7 @@ import type { SegmentsBatch } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
 import { themeVar } from "../theme.js";
 import type { ColorResolver } from "./canvas-dom.js";
+import { applyDash, linetypeAt } from "./canvas-marks-paths.js";
 
 function traceSegment(ctx: CanvasRenderingContext2D, batch: SegmentsBatch, j: number): void {
   if (batch.renderPositions !== undefined && batch.renderPathOffsets !== undefined) {
@@ -47,8 +48,38 @@ export function drawSegments(
 ): void {
   const themeInk = resolve(themeVar("ink", theme));
   ctx.lineWidth = batch.linewidth;
+  // Save/restore lineCap so a segment batch with lineend does not leak into
+  // later rule/errorbar segment batches that leave linecap undefined.
+  const previousLineCap = ctx.lineCap;
+  if (batch.linecap !== undefined) ctx.lineCap = batch.linecap;
+  applyDash(ctx, batch.linetype ?? "solid");
   const n = batch.segments.length / 4;
-  if (n === 0) return;
+  if (n === 0) {
+    ctx.lineCap = previousLineCap;
+    return;
+  }
+
+  const mappedStyle =
+    batch.linewidths !== undefined ||
+    batch.alphas !== undefined ||
+    batch.linetypeIndexes !== undefined;
+  if (mappedStyle) {
+    const baseAlpha = ctx.globalAlpha;
+    for (let j = 0; j < n; j++) {
+      if (includes !== undefined && !includes(j)) continue;
+      ctx.strokeStyle = segmentStrokeAt(batch, j, themeInk, resolve);
+      ctx.lineWidth = batch.linewidths?.[j] ?? batch.linewidth;
+      ctx.globalAlpha = baseAlpha * (batch.alphas?.[j] ?? 1);
+      applyDash(ctx, linetypeAt(batch, j));
+      ctx.beginPath();
+      traceSegment(ctx, batch, j);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = baseAlpha;
+    applyDash(ctx, "solid");
+    ctx.lineCap = previousLineCap;
+    return;
+  }
 
   if (batch.strokes === undefined) {
     ctx.strokeStyle = segmentStrokeAt(batch, 0, themeInk, resolve);
@@ -60,6 +91,8 @@ export function drawSegments(
       traced = true;
     }
     if (traced) ctx.stroke();
+    applyDash(ctx, "solid");
+    ctx.lineCap = previousLineCap;
     return;
   }
 
@@ -83,4 +116,6 @@ export function drawSegments(
     if (traced) ctx.stroke();
     runStart = runEnd;
   }
+  applyDash(ctx, "solid");
+  ctx.lineCap = previousLineCap;
 }

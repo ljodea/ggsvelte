@@ -3,6 +3,7 @@
  */
 import type {
   BandLayoutDomainContext,
+  LayoutAxisPresentation,
   LayoutTheme,
   TemporalLayoutDomainContext,
   TickFormatter,
@@ -27,6 +28,7 @@ export function placeSinglePanel(input: {
   vTitle: string;
   axisTitleBand: number;
   legendWidth: number;
+  legendBottomHeight: number;
   optionsWidth: number;
   layoutHeight: number;
   topBand: number;
@@ -36,6 +38,7 @@ export function placeSinglePanel(input: {
   formatV: TickFormatter | undefined;
   measurer: TextMeasurer;
   layoutTheme: LayoutTheme;
+  axis: Readonly<{ x: LayoutAxisPresentation; y: LayoutAxisPresentation }>;
 }): PanelPlacement {
   const {
     h,
@@ -48,6 +51,7 @@ export function placeSinglePanel(input: {
     vTitle,
     axisTitleBand,
     legendWidth,
+    legendBottomHeight,
     optionsWidth,
     layoutHeight,
     topBand,
@@ -57,6 +61,7 @@ export function placeSinglePanel(input: {
     formatV,
     measurer,
     layoutTheme,
+    axis,
   } = input;
 
   const layoutResult = layout({
@@ -67,7 +72,14 @@ export function placeSinglePanel(input: {
     ...(formatH !== undefined && { formatX: formatH }),
     ...(formatV !== undefined && { formatY: formatV }),
     measurer,
-    reserve: singlePanelMarginReserve(hTitle, vTitle, axisTitleBand, legendWidth),
+    axis,
+    reserve: singlePanelMarginReserve(
+      hTitle,
+      vTitle,
+      axisTitleBand,
+      legendWidth,
+      legendBottomHeight,
+    ),
     theme: layoutTheme,
   });
   return singlePanelPlacementFromLayout(layoutResult, optionsWidth, layoutHeight, topBand);

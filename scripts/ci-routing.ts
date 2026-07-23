@@ -33,6 +33,7 @@ export {
   planJobs,
   evaluateGate,
   formatGithubOutputs,
+  normalizeJobResult,
   parseFileList,
   parseNameStatusList,
   jobNames,

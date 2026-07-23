@@ -46,7 +46,7 @@
       >
         {#if tick.kind !== "minor"}<title>{tick.fullLabel ?? tick.label}</title
           >{/if}
-        {#if theme.ticksX}
+        {#if theme.ticksX && tick.showTick !== false}
           <line
             y2={tick.kind === "minor" ? theme.tickLength / 2 : theme.tickLength}
             stroke={tickColor}
@@ -55,38 +55,44 @@
             vector-effect="non-scaling-stroke"
           />
         {/if}
-        {#if tick.label !== ""}
+        {#if tick.label !== "" && tick.showLabel !== false}
           {#if tick.angle !== undefined && tick.angle !== 0}
             <!-- Rotated band label: hang below the axis, anchored at the tick. -->
             <text
-              transform={`translate(0,${(theme.ticksX ? theme.tickLength : 0) + 3}) rotate(${tick.angle})`}
+              transform={`translate(0,${(theme.ticksX && tick.showTick !== false ? theme.tickLength : 0) + 3}) rotate(${tick.angle})`}
               text-anchor="end"
               dominant-baseline="central"
               fill={axisText}
-              font-size={theme.axisTextSize}
+              font-size={tick.labelSize ?? theme.axisTextSize}
               font-weight={theme.fontWeight}>{tick.label}</text
             >
           {:else if tick.lines !== undefined && tick.lines.length > 1}
             <!-- Wrapped band label: one tspan per line, centered. -->
             <text
-              y={(theme.ticksX ? theme.tickLength : 0) + 3}
+              y={(theme.ticksX && tick.showTick !== false
+                ? theme.tickLength
+                : 0) + 3}
               text-anchor="middle"
               fill={axisText}
-              font-size={theme.axisTextSize}
+              font-size={tick.labelSize ?? theme.axisTextSize}
               font-weight={theme.fontWeight}
               >{#each tick.lines as line, li (li)}<tspan
                   x="0"
-                  dy={li === 0 ? "0.71em" : theme.axisTextSize * 1.15}
+                  dy={li === 0
+                    ? "0.71em"
+                    : (tick.labelSize ?? theme.axisTextSize) * 1.15}
                   >{line}</tspan
                 >{/each}</text
             >
           {:else}
             <text
-              y={(theme.ticksX ? theme.tickLength : 0) + 3}
+              y={(theme.ticksX && tick.showTick !== false
+                ? theme.tickLength
+                : 0) + 3}
               dy="0.71em"
               text-anchor="middle"
               fill={axisText}
-              font-size={theme.axisTextSize}
+              font-size={tick.labelSize ?? theme.axisTextSize}
               font-weight={theme.fontWeight}>{tick.label}</text
             >
           {/if}
@@ -116,7 +122,7 @@
       >
         {#if tick.kind !== "minor"}<title>{tick.fullLabel ?? tick.label}</title
           >{/if}
-        {#if theme.ticksY}
+        {#if theme.ticksY && tick.showTick !== false}
           <line
             x2={tick.kind === "minor"
               ? -theme.tickLength / 2
@@ -127,13 +133,15 @@
             vector-effect="non-scaling-stroke"
           />
         {/if}
-        {#if tick.label !== ""}
+        {#if tick.label !== "" && tick.showLabel !== false}
           <text
-            x={-(theme.ticksY ? theme.tickLength : 0) - 3}
+            x={-(theme.ticksY && tick.showTick !== false
+              ? theme.tickLength
+              : 0) - 3}
             dy="0.32em"
             text-anchor="end"
             fill={axisText}
-            font-size={theme.axisTextSize}
+            font-size={tick.labelSize ?? theme.axisTextSize}
             font-weight={theme.fontWeight}>{tick.label}</text
           >
         {/if}

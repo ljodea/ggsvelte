@@ -16,12 +16,14 @@ const spec: SpecInput = {
 };
 
 describe("band axis diagnostics (#387)", () => {
-  it("emits a rotated advisory that surfaces coord_flip, at a narrow width", () => {
+  it("emits a rotated advisory that surfaces guide pin + coord_flip, at a narrow width", () => {
     const model = runPipeline(spec, { width: 240, height: 300 });
     const advisory = model.advisories.find((a) => a.code === "band-labels-rotated");
     expect(advisory).toBeDefined();
     expect(advisory?.path).toBe("/scales/x");
     expect(advisory?.howToOverride).toContain("coordFlip");
+    expect(advisory?.howToOverride).toContain("guide");
+    expect(advisory?.howToOverride).toContain("scales.x.guide");
   });
 
   it("emits a band-label-margin-overflow diagnostic with a coord_flip fix", () => {
@@ -73,6 +75,21 @@ describe("band axis diagnostics (#387)", () => {
     expect(`${diag?.cause} ${diag?.fixes.map((f) => f.description).join(" ")}`).toMatch(/width/i);
     // No band-labels-rotated advisory either, since the axis is still single-line.
     expect(model.advisories.some((a) => a.code === "band-labels-rotated")).toBe(false);
+  });
+
+  it("describes forced-wrap margin overflow without claiming rotation (Codex #527)", () => {
+    const wrapSpec: SpecInput = {
+      data: { values: rows },
+      layers: [{ geom: "col", aes: { x: { field: "category" }, y: { field: "count" } } }],
+      scales: { x: { guide: { mode: "wrap", wrap: 8 } } },
+    };
+    // Short height forces wrap block past the orthogonal margin cap.
+    const model = runPipeline(wrapSpec, { width: 560, height: 80 });
+    const diag = model.scaleDiagnostics.find((d) => d.code === "band-label-margin-overflow");
+    expect(diag).toBeDefined();
+    expect(diag?.problem).toMatch(/wrap/i);
+    expect(diag?.problem).not.toMatch(/rotat/i);
+    expect(diag?.cause).not.toMatch(/rotat/i);
   });
 
   it("re-plans the narrower final facet panel so the band margin is reserved (Codex P2)", () => {
@@ -144,5 +161,112 @@ describe("band axis diagnostics (#387)", () => {
     const model = runPipeline(shortSpec, { width: 480, height: 300 });
     expect(model.advisories.some((a) => a.code.startsWith("band-labels-"))).toBe(false);
     expect(model.scaleDiagnostics.some((d) => d.code.startsWith("band-label-"))).toBe(false);
+  });
+});
+
+describe("band axis guide pins (#407)", () => {
+  it("scaleXDiscrete guide.mode=rotate+angle pins the guide plan", () => {
+    const pinned: SpecInput = {
+      ...spec,
+      scales: {
+        x: { type: "band", guide: { mode: "rotate", angle: -90 } },
+      },
+    };
+    // Width where auto would wrap (560) — author pin still rotates at −90.
+    const model = runPipeline(pinned, { width: 560, height: 300 });
+    const plan = model.guidePlans.find(
+      (p) => p.type === "axis" && p.scaleType === "band" && p.aesthetic === "x",
+    );
+    expect(plan?.type).toBe("axis");
+    if (plan?.type !== "axis") return;
+    expect(plan.bandLabelMode).toBe("rotated");
+    expect(plan.bandLabelAngle).toBe(-90);
+  });
+
+  it("guide.mode=single suppresses wrap/rotate advisories", () => {
+    const pinned: SpecInput = {
+      ...spec,
+      scales: {
+        x: { type: "band", guide: { mode: "single" } },
+      },
+    };
+    const model = runPipeline(pinned, { width: 240, height: 300 });
+    expect(model.advisories.some((a) => a.code.startsWith("band-labels-"))).toBe(false);
+    const plan = model.guidePlans.find(
+      (p) => p.type === "axis" && p.scaleType === "band" && p.aesthetic === "x",
+    );
+    expect(plan?.type).toBe("axis");
+    if (plan?.type !== "axis") return;
+    expect(plan.bandLabelMode).toBe("single-line");
+    expect(plan.bandLabelAuthorPinned).toBe(true);
+  });
+
+  it("guide.mode=wrap/rotate suppress heuristic advisories for pinned modes", () => {
+    // Short labels would stay single-line under auto; forced wrap must not claim a heuristic.
+    const shortSpec: SpecInput = {
+      data: {
+        values: [
+          { category: "IT", count: 1 },
+          { category: "HR", count: 2 },
+          { category: "Ops", count: 3 },
+        ],
+      },
+      layers: [{ geom: "col", aes: { x: { field: "category" }, y: { field: "count" } } }],
+      scales: { x: { type: "band", guide: { mode: "wrap" } } },
+    };
+    const wrapModel = runPipeline(shortSpec, { width: 480, height: 300 });
+    expect(wrapModel.advisories.some((a) => a.code.startsWith("band-labels-"))).toBe(false);
+    const wrapPlan = wrapModel.guidePlans.find(
+      (p) => p.type === "axis" && p.scaleType === "band" && p.aesthetic === "x",
+    );
+    expect(wrapPlan?.type).toBe("axis");
+    if (wrapPlan?.type === "axis") {
+      expect(wrapPlan.bandLabelMode).toBe("wrapped");
+      expect(wrapPlan.bandLabelAuthorPinned).toBe(true);
+    }
+
+    const rotatePinned: SpecInput = {
+      ...spec,
+      scales: { x: { type: "band", guide: { mode: "rotate", angle: -45 } } },
+    };
+    const rotateModel = runPipeline(rotatePinned, { width: 560, height: 300 });
+    expect(rotateModel.advisories.some((a) => a.code.startsWith("band-labels-"))).toBe(false);
+    const rotatePlan = rotateModel.guidePlans.find(
+      (p) => p.type === "axis" && p.scaleType === "band" && p.aesthetic === "x",
+    );
+    expect(rotatePlan?.type).toBe("axis");
+    if (rotatePlan?.type === "axis") {
+      expect(rotatePlan.bandLabelMode).toBe("rotated");
+      expect(rotatePlan.bandLabelAuthorPinned).toBe(true);
+    }
+  });
+
+  it("guide.mode=off hides band labels on vertical (y) axes", () => {
+    const pinned: SpecInput = {
+      data: {
+        values: [
+          { category: "North region", count: 1 },
+          { category: "South region", count: 2 },
+          { category: "East region", count: 3 },
+        ],
+      },
+      // Horizontal bars: categorical on y (vertical band axis).
+      layers: [{ geom: "col", aes: { y: { field: "category" }, x: { field: "count" } } }],
+      scales: { y: { type: "band", guide: { mode: "off" } } },
+    };
+    const model = runPipeline(pinned, { width: 400, height: 300 });
+    const plan = model.guidePlans.find(
+      (p) => p.type === "axis" && p.scaleType === "band" && p.aesthetic === "y",
+    );
+    expect(plan?.type).toBe("axis");
+    if (plan?.type !== "axis") return;
+    expect(plan.ticks.every((t) => t.label === "")).toBe(true);
+    expect(plan.bandLabelAuthorPinned).toBe(true);
+  });
+
+  it("wrapped advisory howToOverride points at scales.x.guide", () => {
+    const model = runPipeline(spec, { width: 560, height: 300 });
+    const advisory = model.advisories.find((a) => a.code === "band-labels-wrapped");
+    expect(advisory?.howToOverride).toContain("scales.x.guide");
   });
 });

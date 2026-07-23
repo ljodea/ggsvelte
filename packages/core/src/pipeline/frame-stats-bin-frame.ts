@@ -4,7 +4,7 @@
 import type { ColumnTable } from "../table.js";
 
 import { emptyFrameExtras } from "./frame-helpers.js";
-import type { makeColumnOf } from "./frame-stats-shared.js";
+import { styleColumns, type makeColumnOf } from "./frame-stats-shared.js";
 import { forwardMeasureOnce } from "./stat-measure-transform.js";
 import type { LayerBinding, LayerFrame } from "./types.js";
 import { NO_ROW } from "./types.js";
@@ -48,9 +48,11 @@ export function packBinLayerFrame(
     ),
     groups: result.groups,
     inputGroups,
+    inputSourceRows: null,
     rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
     colorValues: col(binding.color.field),
     fillValues: col(binding.fill.field),
+    ...styleColumns(binding, col, columns),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),
     xmin: result.xmin,

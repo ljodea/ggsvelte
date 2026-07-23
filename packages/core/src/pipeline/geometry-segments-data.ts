@@ -5,6 +5,7 @@ import type { LayerFrame, ResolvedColorScale } from "./types.js";
 import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import { positionOf } from "./geometry-shared.js";
+import type { SegmentEmitBuffers } from "./geometry-segments-emit.js";
 
 export function emitDataSegments(input: {
   frame: LayerFrame;
@@ -13,8 +14,10 @@ export function emitDataSegments(input: {
   wantsColors: boolean;
   pushVertical: (t: number | undefined, row: number) => void;
   pushHorizontal: (t: number | undefined, row: number) => void;
-  rowIndex: number[];
-  perSegmentColors: string[];
+  buffers: SegmentEmitBuffers;
+  strokes: string[] | null;
+  /** Frame-local rows parallel to buffers (for style vectors). */
+  styleRows: Uint32Array;
 }): void {
   const {
     frame,
@@ -23,13 +26,14 @@ export function emitDataSegments(input: {
     wantsColors,
     pushVertical,
     pushHorizontal,
-    rowIndex,
-    perSegmentColors,
+    buffers,
+    strokes,
+    styleRows,
   } = input;
   const { binding } = frame;
 
   for (let row = 0; row < frame.n; row++) {
-    const before = rowIndex.length;
+    const before = buffers.kept;
     if (binding.ruleForm === "vertical") {
       pushVertical(positionOf(fx.xScale, frame.xNumeric, frame.xValues, row), frame.rowIndex[row]!);
     } else {
@@ -38,10 +42,13 @@ export function emitDataSegments(input: {
         frame.rowIndex[row]!,
       );
     }
-    if (wantsColors && color !== null && rowIndex.length > before) {
-      const value =
-        frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
-      perSegmentColors.push(colorOf(color, value));
+    if (buffers.kept > before) {
+      styleRows[before] = row;
+      if (wantsColors && color !== null && strokes !== null) {
+        const value =
+          frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
+        strokes[before] = colorOf(color, value);
+      }
     }
   }
 }

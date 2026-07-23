@@ -404,6 +404,16 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "size-linewidth-alpha-shape-and-linetype",
+        title: "Size, linewidth, alpha, shape, and linetype",
+        level: 2,
+      },
+      {
+        id: "responsive-guide-presentation",
+        title: "Responsive guide presentation",
+        level: 2,
+      },
+      {
         id: "date-and-time-axes",
         title: "Date and time axes",
         level: 2,
@@ -438,6 +448,11 @@ export const DOCS_ROUTES = [
       {
         id: "scale-transforms-versus-coordinate-transforms",
         title: "Scale transforms versus coordinate transforms",
+        level: 2,
+      },
+      {
+        id: "preserve-physical-data-unit-ratios",
+        title: "Preserve physical data-unit ratios",
         level: 2,
       },
     ],
@@ -1134,6 +1149,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "guide-aesthetic-incompatible",
+        title: "guide-aesthetic-incompatible",
+        level: 3,
+      },
+      {
+        id: "coord-fixed-free-scales",
+        title: "coord-fixed-free-scales",
+        level: 3,
+      },
+      {
         id: "missing-required-channel",
         title: "missing-required-channel",
         level: 3,
@@ -1179,6 +1204,26 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "unsupported-geom-aesthetic",
+        title: "unsupported-geom-aesthetic",
+        level: 3,
+      },
+      {
+        id: "ribbon-orientation-ambiguous",
+        title: "ribbon-orientation-ambiguous",
+        level: 3,
+      },
+      {
+        id: "paint-stops-unordered",
+        title: "paint-stops-unordered",
+        level: 3,
+      },
+      {
+        id: "paint-scale-conflict",
+        title: "paint-scale-conflict",
+        level: 3,
+      },
+      {
         id: "unknown-field",
         title: "unknown-field",
         level: 3,
@@ -1217,6 +1262,16 @@ export const DOCS_ROUTES = [
         id: "render-time-errors-ggsvelte-core",
         title: "Render-time errors (@ggsvelte/core)",
         level: 2,
+      },
+      {
+        id: "guide-aesthetic-incompatible-pipeline",
+        title: "guide-aesthetic-incompatible — pipeline",
+        level: 3,
+      },
+      {
+        id: "guide-layout-overflow",
+        title: "guide-layout-overflow",
+        level: 3,
       },
       {
         id: "no-data",
@@ -1281,6 +1336,16 @@ export const DOCS_ROUTES = [
       {
         id: "rule-both-axes-pipeline",
         title: "rule-both-axes — pipeline",
+        level: 3,
+      },
+      {
+        id: "ribbon-orientation-ambiguous-pipeline",
+        title: "ribbon-orientation-ambiguous — pipeline",
+        level: 3,
+      },
+      {
+        id: "ribbon-inverted-bounds",
+        title: "ribbon-inverted-bounds",
         level: 3,
       },
       {
@@ -1364,6 +1429,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "coord-fixed-free-scales-pipeline",
+        title: "coord-fixed-free-scales — pipeline",
+        level: 3,
+      },
+      {
+        id: "coord-fixed-invalid-aspect",
+        title: "coord-fixed-invalid-aspect",
+        level: 3,
+      },
+      {
         id: "binned-scale-requires-continuous",
         title: "binned-scale-requires-continuous",
         level: 3,
@@ -1424,6 +1499,86 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "unsupported-aesthetic-scale",
+        title: "unsupported-aesthetic-scale",
+        level: 3,
+      },
+      {
+        id: "unsupported-geom-aesthetic-pipeline",
+        title: "unsupported-geom-aesthetic — pipeline",
+        level: 3,
+      },
+      {
+        id: "unsupported-annotation-style",
+        title: "unsupported-annotation-style",
+        level: 3,
+      },
+      {
+        id: "tile-nonpositive-size",
+        title: "tile-nonpositive-size",
+        level: 3,
+      },
+      {
+        id: "raster-duplicate-cells",
+        title: "raster-duplicate-cells",
+        level: 3,
+      },
+      {
+        id: "unsupported-param",
+        title: "unsupported-param",
+        level: 3,
+      },
+      {
+        id: "invalid-aesthetic-constant",
+        title: "invalid-aesthetic-constant",
+        level: 3,
+      },
+      {
+        id: "style-temporal-parse",
+        title: "style-temporal-parse",
+        level: 3,
+      },
+      {
+        id: "style-temporal-kind",
+        title: "style-temporal-kind",
+        level: 3,
+      },
+      {
+        id: "style-manual-domain-range",
+        title: "style-manual-domain-range",
+        level: 3,
+      },
+      {
+        id: "style-palette-exhausted",
+        title: "style-palette-exhausted",
+        level: 3,
+      },
+      {
+        id: "style-domain-empty",
+        title: "style-domain-empty",
+        level: 3,
+      },
+      {
+        id: "style-domain-invalid",
+        title: "style-domain-invalid",
+        level: 3,
+      },
+      {
+        id: "style-range-invalid",
+        title: "style-range-invalid",
+        level: 3,
+      },
+      {
+        id: "style-binned-breaks",
+        title: "style-binned-breaks",
+        level: 3,
+      },
+      {
+        id: "stat-channel-unsupported",
+        title: "stat-channel-unsupported",
+        level: 3,
+      },
+      {
         id: "unknown-theme",
         title: "unknown-theme",
         level: 3,
@@ -1444,6 +1599,16 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "facet-levels-missing",
+        title: "facet-levels-missing",
+        level: 3,
+      },
+      {
+        id: "facet-levels-unknown",
+        title: "facet-levels-unknown",
+        level: 3,
+      },
+      {
         id: "empty-data",
         title: "empty-data",
         level: 3,
@@ -1461,6 +1626,11 @@ export const DOCS_ROUTES = [
       {
         id: "removed-missing",
         title: "removed-missing",
+        level: 3,
+      },
+      {
+        id: "raster-irregular-spacing",
+        title: "raster-irregular-spacing",
         level: 3,
       },
       {
@@ -1509,6 +1679,41 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "style-temporal-censored",
+        title: "style-temporal-censored",
+        level: 3,
+      },
+      {
+        id: "style-na-values",
+        title: "style-na-values",
+        level: 3,
+      },
+      {
+        id: "style-unknown-values",
+        title: "style-unknown-values",
+        level: 3,
+      },
+      {
+        id: "style-palette-exhausted-warning",
+        title: "style-palette-exhausted — warning",
+        level: 3,
+      },
+      {
+        id: "style-fingerprint-mismatch",
+        title: "style-fingerprint-mismatch",
+        level: 3,
+      },
+      {
+        id: "style-version-mismatch",
+        title: "style-version-mismatch",
+        level: 3,
+      },
+      {
+        id: "style-out-of-domain",
+        title: "style-out-of-domain",
+        level: 3,
+      },
+      {
         id: "invalid-label-format",
         title: "invalid-label-format",
         level: 3,
@@ -1516,11 +1721,6 @@ export const DOCS_ROUTES = [
       {
         id: "unknown-edition",
         title: "unknown-edition",
-        level: 3,
-      },
-      {
-        id: "stat-channel-unsupported",
-        title: "stat-channel-unsupported",
         level: 3,
       },
       {
@@ -1569,6 +1769,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "guide-auto-bottom",
+        title: "guide-auto-bottom",
+        level: 3,
+      },
+      {
         id: "unused-scale-option",
         title: "unused-scale-option",
         level: 3,
@@ -1606,6 +1811,11 @@ export const DOCS_ROUTES = [
       {
         id: "coord-invalid-geometry",
         title: "coord-invalid-geometry",
+        level: 3,
+      },
+      {
+        id: "coord-fixed-degraded",
+        title: "coord-fixed-degraded",
         level: 3,
       },
       {
@@ -1873,8 +2083,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-341",
-        title: "experimental (341)",
+        id: "experimental-508",
+        title: "experimental (508)",
         level: 3,
       },
       {
@@ -1888,8 +2098,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-237",
-        title: "experimental (237)",
+        id: "experimental-258",
+        title: "experimental (258)",
         level: 3,
       },
       {
@@ -1913,8 +2123,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-296",
-        title: "experimental (296)",
+        id: "experimental-419",
+        title: "experimental (419)",
         level: 3,
       },
       {
@@ -1943,6 +2153,31 @@ export const DOCS_ROUTES = [
         id: "five-minute-path",
         title: "Five-minute path",
         level: 2,
+      },
+      {
+        id: "0-7-to-0-8",
+        title: "0.7 to 0.8",
+        level: 2,
+      },
+      {
+        id: "map-style-semantics-instead-of-precomputing-outputs",
+        title: "Map style semantics instead of precomputing outputs",
+        level: 3,
+      },
+      {
+        id: "move-guide-layout-into-the-guide-api",
+        title: "Move guide layout into the guide API",
+        level: 3,
+      },
+      {
+        id: "0-8-to-0-9",
+        title: "0.8 to 0.9",
+        level: 2,
+      },
+      {
+        id: "constrain-the-data-rectangle-instead-of-the-outer-box",
+        title: "Constrain the data rectangle instead of the outer box",
+        level: 3,
       },
       {
         id: "0-6-to-0-7",
@@ -2122,6 +2357,17 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/col/long-labels",
+    title: "Columns with long i18n category labels — ggsvelte gallery",
+    description:
+      "Narrow (480px) column chart with long Spanish multi-word and German single-token category labels — exercises measured band-axis wrap/rotate/truncate layout.",
+    canonicalPath: "/examples/col/long-labels",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/col/value-labels",
     title: "Columns with value labels — ggsvelte gallery",
     description:
@@ -2171,6 +2417,17 @@ export const DOCS_ROUTES = [
     description:
       "The summary stat computes mean ± standard error per group (ggplot2's mean_se default), drawn as errorbars over the seeded-jitter raw observations.",
     canonicalPath: "/examples/errorbar/mean-se",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/facet/ordered-side-strips",
+    title: "Ordered small multiples with side strips — ggsvelte gallery",
+    description:
+      'facet.wrap.levels locks a closed west→midwest→south→northeast panel order independent of row order; labels supply human strip text; strip.position: "left" reserves a measured band beside each panel instead of above it.',
+    canonicalPath: "/examples/facet/ordered-side-strips",
     kind: "page",
     index: true,
     sitemap: true,
@@ -2309,11 +2566,33 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/point/fixed-aspect",
+    title: "Fixed aspect ratio — ggsvelte gallery",
+    description:
+      "A unit circle remains circular through responsive width changes because coord_fixed fits a centered equal-unit data rectangle.",
+    canonicalPath: "/examples/point/fixed-aspect",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/point/jitter",
     title: "Jittered points — ggsvelte gallery",
     description:
       "Seeded jitter spreads overplotted discrete values apart. ggsvelte jitter is ALWAYS seeded (default seed 42) so renders are reproducible — a deliberate divergence from ggplot2's random jitter, surfaced as an advisory.",
     canonicalPath: "/examples/point/jitter",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/point/layer-data-bands",
+    title: "Per-layer data (bands + callout) — ggsvelte gallery",
+    description:
+      "A large observation table layered with a small background-band table and a one-row annotation table. Each geom supplies its own data; the plot has no shared table.",
+    canonicalPath: "/examples/point/layer-data-bands",
     kind: "page",
     index: true,
     sitemap: true,
@@ -2342,6 +2621,61 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/point/style-scales",
+    title: "Complete style scales — ggsvelte gallery",
+    description:
+      "Map size, alpha, linewidth, shape, and linetype with stable legends across SVG and Canvas.",
+    canonicalPath: "/examples/point/style-scales",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/raster/grid",
+    title: "Regular density grid (geom raster) — ggsvelte gallery",
+    description:
+      "Equal-cell raster from a regular (x, y) grid with fill — dense heatmaps without per-cell strokes.",
+    canonicalPath: "/examples/raster/grid",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/rect/regions",
+    title: "Shaded time bands (geom rect) — ggsvelte gallery",
+    description:
+      "Arbitrary rectangles from xmin/xmax/ymin/ymax — background time bands or regions without image injection.",
+    canonicalPath: "/examples/rect/regions",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/ribbon/bounds",
+    title: "Ribbon interval — ggsvelte gallery",
+    description:
+      "A filled band between precomputed lower and upper bounds along x — the canonical geom_ribbon contract (not a zero-baseline area).",
+    canonicalPath: "/examples/ribbon/bounds",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/ribbon/paint",
+    title: "Ribbon paint — ggsvelte gallery",
+    description:
+      "Portable within-mark linear gradients for fill and stroke plus a bounded glow, with required solid fallbacks — not theme decoration and not a data color scale.",
+    canonicalPath: "/examples/ribbon/paint",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/rule/annotation",
     title: "Reference-line annotations — ggsvelte gallery",
     description:
@@ -2364,6 +2698,17 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/segment/annotations",
+    title: "Segment annotations — ggsvelte gallery",
+    description:
+      "Finite data-driven segments from (x,y) to (xend,yend) — leader lines and range ticks that do not span the panel (unlike rule).",
+    canonicalPath: "/examples/segment/annotations",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/smooth/loess-scatter",
     title: "Loess smooth with confidence ribbon — ggsvelte gallery",
     description:
@@ -2380,6 +2725,17 @@ export const DOCS_ROUTES = [
     description:
       "A text layer labels each point from a data field, offset with dy. Labels draw exactly where placed — no collision detection in M1.",
     canonicalPath: "/examples/text/labels",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/tile/heatmap",
+    title: "Categorical heatmap (geom tile) — ggsvelte gallery",
+    description:
+      "Center-sized tiles on discrete x/y with fill — the ordinary heatmap contract without raster grid constraints.",
+    canonicalPath: "/examples/tile/heatmap",
     kind: "page",
     index: true,
     sitemap: true,

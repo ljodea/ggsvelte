@@ -12,6 +12,31 @@ import {
 
 import { PipelineError } from "./types.js";
 
+function preflightStyleScales(spec: PortableSpec): void {
+  for (const aesthetic of ["shape", "linetype"] as const) {
+    const type = (spec.scales?.[aesthetic] as { type?: string } | undefined)?.type;
+    if (type !== "sequential") continue;
+    const path = `/scales/${aesthetic}/type`;
+    throw new PipelineError(
+      "unsupported-aesthetic-scale",
+      path,
+      `Continuous ${aesthetic} interpolation is not meaningful; use type: "binned" for quantitative values.`,
+      {
+        code: "unsupported-aesthetic-scale",
+        severity: "error",
+        path,
+        problem: `${aesthetic} has a finite set of distinguishable outputs and cannot be continuous.`,
+        cause: `type: "sequential" would imply interpolation between named ${aesthetic} values.`,
+        fixes: [
+          { description: `Use scales.${aesthetic}.type = "binned".` },
+          { description: `Map a categorical field and use type: "ordinal".` },
+        ],
+        documentationUrl: "/guide/aesthetic-scales#finite-styles",
+      },
+    );
+  }
+}
+
 function preflightTemporalLabels(spec: PortableSpec): void {
   for (const axis of ["x", "y"] as const) {
     const dateLabels = spec.scales?.[axis]?.dateLabels;
@@ -36,6 +61,7 @@ export function normalizeAndValidateSpec(spec: SpecInput | PortableSpec): Portab
   // Preserve the stable pipeline diagnostic before the portable schema rejects
   // the same closed-token violation as a generic shape error.
   preflightTemporalLabels(normalized);
+  preflightStyleScales(normalized);
   const result = validate(normalized);
   if (!result.ok) throw new SpecValidationError(result.errors);
 

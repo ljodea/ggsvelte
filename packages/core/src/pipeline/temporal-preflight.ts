@@ -32,8 +32,11 @@ export function preflightTemporalBindings(input: {
   warnings: PipelineWarning[];
   advisories: Advisory[];
   conversions: Readonly<{ x: PositionConversionContext; y: PositionConversionContext }>;
+  /** Optional multi-table sources; field preflight prefers binding.sourceTable. */
+  layerTables?: readonly ColumnTable[];
 }): TemporalPreflightResult {
   const { table, bindings, warnings, advisories, conversions } = input;
+  void input.layerTables;
   const { decisions, diagnostics } = preflightTemporalFields({
     table,
     bindings,
@@ -48,8 +51,21 @@ export function preflightTemporalBindings(input: {
     if (fallback.parser !== "auto") return fallback;
     const concrete = new Map<string, PositionConversionContext>();
     for (const binding of bindings) {
+      const isSegment = binding.layer.geom === "segment";
+      const consumesXBounds = binding.layer.geom === "rect" || binding.layer.geom === "ribbon";
       const fields =
-        axis === "x" ? [binding.xField] : [binding.yField, binding.yminField, binding.ymaxField];
+        axis === "x"
+          ? [
+              binding.xField,
+              ...(consumesXBounds ? [binding.xminField, binding.xmaxField] : []),
+              ...(isSegment ? [binding.xendField] : []),
+            ]
+          : [
+              binding.yField,
+              binding.yminField,
+              binding.ymaxField,
+              ...(isSegment ? [binding.yendField] : []),
+            ];
       const conversion = axis === "x" ? binding.xConversion : binding.yConversion;
       if (fields.some((field) => field !== null) && conversion.parser !== "auto") {
         concrete.set(JSON.stringify(conversion), conversion);

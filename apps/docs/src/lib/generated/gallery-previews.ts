@@ -57,6 +57,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "b93353b71db8277b10af4928daf33dff918ed39a0facde19c0b40b08a1ee4e9a",
   },
   {
+    id: "col/long-labels",
+    filename: "col-long-labels-light.png",
+    path: "/previews/col-long-labels-light.png",
+    sha256: "4d63c11fe0772ec0397c07320444f6ab589cfe5a5522f5658003be4246fb64e4",
+  },
+  {
     id: "col/value-labels",
     filename: "col-value-labels-light.png",
     path: "/previews/col-value-labels-light.png",
@@ -85,6 +91,12 @@ export const GALLERY_PREVIEWS = [
     filename: "errorbar-mean-se-light.png",
     path: "/previews/errorbar-mean-se-light.png",
     sha256: "9bd2fb68d59e75b3a5edecbd5ecb2e3a283bf41659d4962dd0ba4147048f84ba",
+  },
+  {
+    id: "facet/ordered-side-strips",
+    filename: "facet-ordered-side-strips-light.png",
+    path: "/previews/facet-ordered-side-strips-light.png",
+    sha256: "1ff868bfd9051b6f9ae141dabe83cacd9e21263d1540a17abc69ffc773c880e4",
   },
   {
     id: "facet/wrap",
@@ -159,10 +171,22 @@ export const GALLERY_PREVIEWS = [
     sha256: "eaa1ff4f5a2e9c113b1ce183b30bf8fbdc08dc77457e97966f974d5c50aa7554",
   },
   {
+    id: "point/fixed-aspect",
+    filename: "point-fixed-aspect-light.png",
+    path: "/previews/point-fixed-aspect-light.png",
+    sha256: "a2a92012bbe2a12699bf9bb9a790276b271678061b797f645c0dcf70d77fba8d",
+  },
+  {
     id: "point/jitter",
     filename: "point-jitter-light.png",
     path: "/previews/point-jitter-light.png",
     sha256: "9aa9e6b97d5d59852a0c815329cd88e17be3bad5546fb68bf1766146872f4e9f",
+  },
+  {
+    id: "point/layer-data-bands",
+    filename: "point-layer-data-bands-light.png",
+    path: "/previews/point-layer-data-bands-light.png",
+    sha256: "33ef20ba4e6e52721af7e43796ce28ef81a28e8221a8758fb2b7b3825cd61dee",
   },
   {
     id: "point/log-scale",
@@ -177,6 +201,36 @@ export const GALLERY_PREVIEWS = [
     sha256: "59a0bef505f951ded0ca4169be93dc43e7b19c71659e4d64d25e88cbfbe9a657",
   },
   {
+    id: "point/style-scales",
+    filename: "point-style-scales-light.png",
+    path: "/previews/point-style-scales-light.png",
+    sha256: "c1de8d1f7a78e15456ee73fd575c57da222648ce8f346bd49e196a5514979058",
+  },
+  {
+    id: "raster/grid",
+    filename: "raster-grid-light.png",
+    path: "/previews/raster-grid-light.png",
+    sha256: "464ccc16ebb67d59c982ef8b0cfa723804c660d2900b646d7edfebce4b3b2b8b",
+  },
+  {
+    id: "rect/regions",
+    filename: "rect-regions-light.png",
+    path: "/previews/rect-regions-light.png",
+    sha256: "3c23db13a617f5c8a8ef1db00bbc75515afd5d841503e5c779d9383f56239326",
+  },
+  {
+    id: "ribbon/bounds",
+    filename: "ribbon-bounds-light.png",
+    path: "/previews/ribbon-bounds-light.png",
+    sha256: "a37d9b1ada234bcaa2fae7978bba5d8fadfb10e84c92f419b90d1cc515ff2f34",
+  },
+  {
+    id: "ribbon/paint",
+    filename: "ribbon-paint-light.png",
+    path: "/previews/ribbon-paint-light.png",
+    sha256: "fd1e353827fa54bbd4114850cdb7dc32327e6e7c90e0237631eff08536c3d86f",
+  },
+  {
     id: "rule/annotation",
     filename: "rule-annotation-light.png",
     path: "/previews/rule-annotation-light.png",
@@ -189,6 +243,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "ee9a5b3b1cafca8caa681aec83a66e09868606bf2f5b47af1abac065011263c1",
   },
   {
+    id: "segment/annotations",
+    filename: "segment-annotations-light.png",
+    path: "/previews/segment-annotations-light.png",
+    sha256: "82902e5513804fd6d87a1028aa6b8b0c1ce3b7b790ecde0cc52bd0f22e72c345",
+  },
+  {
     id: "smooth/loess-scatter",
     filename: "smooth-loess-scatter-light.png",
     path: "/previews/smooth-loess-scatter-light.png",
@@ -199,5 +259,11 @@ export const GALLERY_PREVIEWS = [
     filename: "text-labels-light.png",
     path: "/previews/text-labels-light.png",
     sha256: "517d945fa3196f32dcc93e299761cabb12b168632dce0f82b1e9bce7aa6f15db",
+  },
+  {
+    id: "tile/heatmap",
+    filename: "tile-heatmap-light.png",
+    path: "/previews/tile-heatmap-light.png",
+    sha256: "a5e2b4ce7476ab20c640e84236e265f1e70ab5b7bceb45a3eaa97156ef0e607b",
   },
 ] as const satisfies readonly GalleryPreview[];

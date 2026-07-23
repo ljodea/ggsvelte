@@ -5,6 +5,7 @@ import type {
   DataInput,
   FacetInput,
   GeomName,
+  GuidesSpec,
   Labs,
   LayerInput,
   LegendSpec,
@@ -30,11 +31,39 @@ export type LayerDescriptorLike = {
   readonly geom: GeomName;
   readonly stat?: StatName | undefined;
   readonly aes?: AesInput | undefined;
+  readonly data?: DataInput | readonly Record<string, unknown>[] | undefined;
   readonly position?: PositionName | undefined;
   readonly positionParams?: PositionParams | undefined;
   readonly render?: RenderBackend | undefined;
   readonly params?: Record<string, unknown> | undefined;
 };
+
+/** True when an object is already a single-key DataRef container. */
+function isWrappedDataRef(data: object): data is NonNullable<LayerInput["data"]> {
+  const keys = Object.keys(data);
+  if (keys.length !== 1) return false;
+  const key = keys[0]!;
+  if (key === "name") return typeof (data as { name: unknown }).name === "string";
+  if (key === "values") return Array.isArray((data as { values: unknown }).values);
+  if (key === "columns") {
+    const columns = (data as { columns: unknown }).columns;
+    return typeof columns === "object" && columns !== null && !Array.isArray(columns);
+  }
+  return false;
+}
+
+/** Wrap geom data props into a DataRef shape for LayerInput. */
+function layerDataRef(
+  data: DataInput | readonly Record<string, unknown>[],
+): NonNullable<LayerInput["data"]> {
+  if (Array.isArray(data)) return { values: data as never };
+  if (typeof data === "object" && data !== null) {
+    if (isWrappedDataRef(data)) return data;
+    // Column-oriented bare object.
+    return { columns: data as never };
+  }
+  return { values: [] };
+}
 
 /** Convert a registry descriptor into a LayerInput (reads live getters). */
 export function toLayerInput(descriptor: LayerDescriptorLike): LayerInput {
@@ -49,6 +78,7 @@ export function toLayerInput(descriptor: LayerDescriptorLike): LayerInput {
     }),
     ...(descriptor.render !== undefined && { render: descriptor.render }),
     ...(descriptor.aes !== undefined && { aes: descriptor.aes }),
+    ...(descriptor.data !== undefined && { data: layerDataRef(descriptor.data) }),
     ...(descriptor.params !== undefined && { params: descriptor.params }),
   } as LayerInput;
 }
@@ -62,6 +92,7 @@ export type AssemblePortableSpecInput = {
   readonly facet?: FacetInput;
   readonly coord?: CoordSpec | "flip";
   readonly scales?: Scales;
+  readonly guides?: GuidesSpec;
   readonly legend?: LegendSpec;
   readonly theme?: ThemeName | ThemeSpec;
   readonly labs?: Labs;
@@ -98,6 +129,7 @@ export function assemblePortableSpec(input: AssemblePortableSpecInput): Portable
   if (input.coord !== undefined) builder = builder.coord(input.coord);
   if (input.a11y !== undefined) builder = builder.a11y(input.a11y);
   if (input.scales !== undefined) builder = builder.scales(input.scales);
+  if (input.guides !== undefined) builder = builder.guides(input.guides);
   if (input.legend !== undefined) builder = builder.legend(input.legend);
   if (input.theme !== undefined) builder = builder.theme(input.theme);
   if (input.labs !== undefined) builder = builder.labs(input.labs);

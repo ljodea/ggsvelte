@@ -14,6 +14,12 @@ import Type, { type TLiteral } from "typebox";
  */
 export const MAX_BINNED_BREAKS = 64;
 
+/** Maximum gradient color stops in a portable paint (closed, bounded). */
+export const MAX_PAINT_STOPS = 16;
+
+/** Maximum glow blur radius in CSS px (bounded filter work). */
+export const MAX_GLOW_RADIUS = 32;
+
 /** Named categorical color schemes known to this schema version. */
 export const CATEGORICAL_SCHEME_NAMES = [
   "observable10",
@@ -36,6 +42,36 @@ type ColorSchemeNameValue = (typeof COLOR_SCHEME_NAMES)[number];
 export const COLOR_SCHEME_NAME_SCHEMAS = COLOR_SCHEME_NAMES.map((name) =>
   Type.Literal(name),
 ) as unknown as [TLiteral<ColorSchemeNameValue>, ...TLiteral<ColorSchemeNameValue>[]];
+
+/** Audited finite point symbols, ordered by default assignment priority. */
+export const POINT_SHAPE_NAMES = [
+  "circle",
+  "triangle",
+  "square",
+  "diamond",
+  "plus",
+  "cross",
+] as const;
+export type PointShapeName = (typeof POINT_SHAPE_NAMES)[number];
+type PointShapeNameValue = PointShapeName;
+export const POINT_SHAPE_NAME_SCHEMAS = POINT_SHAPE_NAMES.map((name) =>
+  Type.Literal(name),
+) as unknown as [TLiteral<PointShapeNameValue>, ...TLiteral<PointShapeNameValue>[]];
+
+/** Audited finite stroke patterns, ordered by default assignment priority. */
+export const LINETYPE_NAMES = [
+  "solid",
+  "dashed",
+  "dotted",
+  "dotdash",
+  "longdash",
+  "twodash",
+] as const;
+export type LinetypeName = (typeof LINETYPE_NAMES)[number];
+type LinetypeNameValue = LinetypeName;
+export const LINETYPE_NAME_SCHEMAS = LINETYPE_NAMES.map((name) =>
+  Type.Literal(name),
+) as unknown as [TLiteral<LinetypeNameValue>, ...TLiteral<LinetypeNameValue>[]];
 
 /** Built-in theme names known to this schema version. */
 export const THEME_NAMES = [

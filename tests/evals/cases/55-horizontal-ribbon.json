@@ -1,0 +1,39 @@
+{
+  "id": "55-horizontal-ribbon",
+  "kind": "chart",
+  "prompt": "Horizontal ribbon of depth range by depth station: map y to station, xmin to min_depth, xmax to max_depth.",
+  "dataProfile": {
+    "fields": [
+      { "name": "station", "type": "quantitative" },
+      { "name": "min_depth", "type": "quantitative" },
+      { "name": "max_depth", "type": "quantitative" }
+    ],
+    "rowCount": 5
+  },
+  "data": {
+    "main": [
+      { "station": 1, "min_depth": 10, "max_depth": 20 },
+      { "station": 2, "min_depth": 12, "max_depth": 22 },
+      { "station": 3, "min_depth": 11, "max_depth": 24 },
+      { "station": 4, "min_depth": 14, "max_depth": 25 },
+      { "station": 5, "min_depth": 13, "max_depth": 23 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "ribbon",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "y": { "field": "station" },
+          "xmin": { "field": "min_depth" },
+          "xmax": { "field": "max_depth" }
+        }
+      }
+    ]
+  },
+  "notes": "Y-orientation ribbon: running coordinate y with xmin/xmax bounds."
+}

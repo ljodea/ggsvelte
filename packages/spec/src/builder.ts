@@ -41,9 +41,13 @@ export type {
   GeomHistogramOptions,
   GeomLineOptions,
   GeomPointOptions,
+  GeomRasterOptions,
+  GeomRectOptions,
   GeomRuleOptions,
+  GeomSegmentOptions,
   GeomSmoothOptions,
   GeomTextOptions,
+  GeomTileOptions,
 } from "./builder-options.js";
 
 /**

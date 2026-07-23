@@ -19,6 +19,8 @@ export interface ThemeTokens {
   grid: string;
   /** Panel background (separate from the plot-wide paper). */
   panel: string;
+  /** Fixed-aspect gutter fill (defaults to paper). */
+  letterboxFill: string;
   /** Axis tick-label color. */
   axisText: string;
   /** Axis baseline color. */
@@ -58,6 +60,13 @@ export interface ThemeTokens {
   subtitleWeight: number;
   axisTitleSize: number;
   axisTitleWeight: number;
+  guideTitleSize: number;
+  legendKeySize: number;
+  legendKeyGap: number;
+  legendRowGap: number;
+  guideBlockGap: number;
+  colorbarThickness: number;
+  colorbarLengthMin: number;
   captionSize: number;
   stripSize: number;
   stripWeight: number;
@@ -90,6 +99,7 @@ type FoundationThemeTokens = Omit<
   | "tooltipInk"
   | "tooltipBorder"
   | "toolActive"
+  | "letterboxFill"
 >;
 
 const HRBR_BASE: FoundationThemeTokens = {
@@ -112,6 +122,13 @@ const HRBR_BASE: FoundationThemeTokens = {
   subtitleWeight: 300,
   axisTitleSize: 9,
   axisTitleWeight: 400,
+  guideTitleSize: 11,
+  legendKeySize: 10,
+  legendKeyGap: 6,
+  legendRowGap: 0,
+  guideBlockGap: 12,
+  colorbarThickness: 12,
+  colorbarLengthMin: 180,
   captionSize: 9,
   stripSize: 12,
   stripWeight: 400,
@@ -143,8 +160,11 @@ function translucent(color: string, alpha: number): string {
  * derivation here means every built-in and edition-specific theme gets a
  * coherent interaction treatment when its foundational roles change.
  */
-export function themed(overrides: Partial<FoundationThemeTokens>): ThemeTokens {
-  const foundation = { ...HRBR_BASE, ...overrides };
+export function themed(
+  overrides: Partial<FoundationThemeTokens> & { letterboxFill?: string },
+): ThemeTokens {
+  const { letterboxFill, ...foundationOverrides } = overrides;
+  const foundation = { ...HRBR_BASE, ...foundationOverrides };
   const hasOpaqueSurface = foundation.paper !== "none" || foundation.panel !== "none";
   const tooltipPaper =
     foundation.paper === "none"
@@ -159,6 +179,7 @@ export function themed(overrides: Partial<FoundationThemeTokens>): ThemeTokens {
       : foundation.ink;
   return Object.freeze({
     ...foundation,
+    letterboxFill: letterboxFill ?? foundation.paper,
     interactionInk: foundation.ink,
     interactionMuted: 0.36,
     focusRing: foundation.accent,

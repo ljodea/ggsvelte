@@ -195,11 +195,39 @@ function assembleIdentityCandidateDatum(
   return {
     xValue,
     yValue,
+    ...resolveCandidateStyleValues(located),
     seriesId: attrs.group,
     seriesRank: attrs.seriesRank,
     sourceOrder: attrs.sourceOrder,
     lineage: attrs.lineageKey,
     autoMode: attrs.autoMode,
+  };
+}
+
+function resolveCandidateStyleValues(
+  located: LocatedIdentityCandidate,
+): Pick<
+  CandidateDatum,
+  "sizeValue" | "linewidthValue" | "alphaValue" | "shapeValue" | "linetypeValue"
+> {
+  const binding = located.frame?.binding;
+  const valueOf = (aesthetic: "size" | "linewidth" | "alpha" | "shape" | "linetype"): CellValue => {
+    const style = binding?.[aesthetic];
+    if (style === undefined) return null;
+    if (located.sourceRow !== null && style.field !== null) {
+      return located.sourceValue(style.field);
+    }
+    const values = located.frame?.[`${aesthetic}Values` as const];
+    const frameValue = values?.[located.frameRow];
+    if (frameValue !== undefined) return frameValue;
+    return style.scaledConstant ?? style.constant;
+  };
+  return {
+    sizeValue: valueOf("size"),
+    linewidthValue: valueOf("linewidth"),
+    alphaValue: valueOf("alpha"),
+    shapeValue: valueOf("shape"),
+    linetypeValue: valueOf("linetype"),
   };
 }
 

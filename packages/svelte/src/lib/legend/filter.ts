@@ -1,7 +1,7 @@
 import { encodeKey, type CellValue } from "@ggsvelte/core";
 
 export interface LegendFilterClause {
-  readonly scale: "color" | "fill";
+  readonly scale: "color" | "fill" | "size" | "linewidth" | "alpha" | "shape" | "linetype";
   readonly field: string;
   readonly values: readonly CellValue[];
   readonly mode: "exclude" | "include";

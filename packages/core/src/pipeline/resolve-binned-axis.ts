@@ -20,7 +20,12 @@ export function resolveBinnedAxis(
   axis: "x" | "y",
   config: PositionScaleSpec | undefined,
   bindings: readonly LayerBinding[],
-  table: ColumnTable,
+  /**
+   * Per-binding filtered tables (parallel to `bindings`). Each binding's fields
+   * are read from its own table so multi-table layers (#609) train extents and
+   * type-check against the owning source, not the primary table alone.
+   */
+  tables: readonly ColumnTable[],
   conversion: PositionConversionContext,
   transform: ColumnTransformConfig | undefined,
 ): BinnedBoundaries | undefined {
@@ -52,30 +57,41 @@ export function resolveBinnedAxis(
 
   let lo = Number.POSITIVE_INFINITY;
   let hi = Number.NEGATIVE_INFINITY;
+  // Keyed by sourceId+field so same name on different tables both contribute.
   const seen = new Set<string>();
-  for (const binding of bindings) {
-    const field = axis === "x" ? binding.xField : binding.yField;
-    if (field === null || seen.has(field)) continue;
-    seen.add(field);
-    const fieldType = positionFieldType(table, field, conversion);
-    if (fieldType !== "quantitative") {
-      throw new PipelineError(
-        "binned-scale-requires-continuous",
-        `/scales/${axis}`,
-        `A type: "binned" scale on ${axis} is bound to field "${field}" (${fieldType}), which is not quantitative.`,
-      );
-    }
-    if (explicitEdges !== null) continue;
-    const values =
-      transform === undefined
-        ? table.numeric(field, conversion.sourceParser, conversion.options)
-        : table.transformed(field, conversion.sourceParser, conversion.options, transform)
-            .transformed;
-    for (let i = 0; i < values.length; i++) {
-      const value = values[i]!;
-      if (!Number.isFinite(value)) continue;
-      if (value < lo) lo = value;
-      if (value > hi) hi = value;
+  for (let index = 0; index < bindings.length; index++) {
+    const binding = bindings[index]!;
+    const table = tables[index] ?? tables[0];
+    if (table === undefined) continue;
+    // Segment endpoints train the same axis — include them in auto binned extent.
+    const fields =
+      axis === "x" ? [binding.xField, binding.xendField] : [binding.yField, binding.yendField];
+    for (const field of fields) {
+      if (field === null) continue;
+      const seenKey = `${binding.sourceId}|${field}`;
+      if (seen.has(seenKey)) continue;
+      seen.add(seenKey);
+      if (!table.has(field)) continue;
+      const fieldType = positionFieldType(table, field, conversion);
+      if (fieldType !== "quantitative") {
+        throw new PipelineError(
+          "binned-scale-requires-continuous",
+          `/scales/${axis}`,
+          `A type: "binned" scale on ${axis} is bound to field "${field}" (${fieldType}), which is not quantitative.`,
+        );
+      }
+      if (explicitEdges !== null) continue;
+      const values =
+        transform === undefined
+          ? table.numeric(field, conversion.sourceParser, conversion.options)
+          : table.transformed(field, conversion.sourceParser, conversion.options, transform)
+              .transformed;
+      for (let i = 0; i < values.length; i++) {
+        const value = values[i]!;
+        if (!Number.isFinite(value)) continue;
+        if (value < lo) lo = value;
+        if (value > hi) hi = value;
+      }
     }
   }
   const extent: [number, number] | null = explicitEdges === null && lo <= hi ? [lo, hi] : null;

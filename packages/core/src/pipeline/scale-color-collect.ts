@@ -70,10 +70,12 @@ export function collectColorCatalogValues(
   let anyField = false;
   for (const binding of bindings) {
     const channel = name === "color" ? binding.color : binding.fill;
-    if (channel.field !== null && catalogTable.has(channel.field)) {
+    // Multi-table: each layer contributes from its own source (#589).
+    const table = binding.sourceTable ?? catalogTable;
+    if (channel.field !== null && table.has(channel.field)) {
       anyField = true;
-      if (catalogTable.discreteness(channel.field) === "discrete") anyDiscreteField = true;
-      for (const value of catalogTable.column(channel.field)) addCatalogValue(value);
+      if (table.discreteness(channel.field) === "discrete") anyDiscreteField = true;
+      for (const value of table.column(channel.field)) addCatalogValue(value);
     }
     if (channel.scaledConstant !== null) {
       anyDiscreteField = true;

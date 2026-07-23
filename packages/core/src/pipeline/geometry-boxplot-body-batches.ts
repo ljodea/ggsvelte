@@ -21,6 +21,7 @@ export function batchesFromBoxplotBodyLayout(
   centerPx: number[];
   linewidth: number;
   alpha: number;
+  keptRows: number[];
   params: BoxplotParams;
 } {
   const { linewidth, alpha, params } = layout;
@@ -32,6 +33,7 @@ export function batchesFromBoxplotBodyLayout(
     centerPx: layout.centerPx,
     linewidth,
     alpha,
+    keptRows: layout.keptRows,
     params,
   };
 }

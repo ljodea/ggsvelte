@@ -6,8 +6,9 @@ import type { Aes, LayerSpec } from "@ggsvelte/spec";
 import type { ColumnTable } from "../table.js";
 
 import { checkField, colorBinding } from "./bind-layer-helpers.js";
+import { styleBinding } from "./bind-layer-style-binding.js";
 import { applyColorOnFillGeomWarning } from "./bind-layer-validate.js";
-import type { ColorBinding, PipelineWarning } from "./types.js";
+import type { ColorBinding, PipelineWarning, StyleBinding } from "./types.js";
 import { PipelineError } from "./types.js";
 
 export function resolveLabelWeightColorFill(input: {
@@ -23,6 +24,11 @@ export function resolveLabelWeightColorFill(input: {
   weightField: string | null;
   color: ColorBinding;
   fill: ColorBinding;
+  size: StyleBinding;
+  linewidth: StyleBinding;
+  alpha: StyleBinding;
+  shape: StyleBinding;
+  linetype: StyleBinding;
 } {
   const { aes, geom, stat, index, table, warnings } = input;
 
@@ -45,6 +51,11 @@ export function resolveLabelWeightColorFill(input: {
   const color = colorBinding(aes.color, "color", index, table, warnings);
   const fill = colorBinding(aes.fill, "fill", index, table, warnings);
   applyColorOnFillGeomWarning(geom, index, color, warnings);
+  const size = styleBinding(aes.size, "size", geom, stat, index, table, warnings);
+  const linewidth = styleBinding(aes.linewidth, "linewidth", geom, stat, index, table, warnings);
+  const alpha = styleBinding(aes.alpha, "alpha", geom, stat, index, table, warnings);
+  const shape = styleBinding(aes.shape, "shape", geom, stat, index, table, warnings);
+  const linetype = styleBinding(aes.linetype, "linetype", geom, stat, index, table, warnings);
   if (weightField !== null && (stat === "boxplot" || stat === "smooth" || stat === "summary")) {
     warnings.push({
       code: "weight-unsupported",
@@ -52,5 +63,16 @@ export function resolveLabelWeightColorFill(input: {
     });
   }
 
-  return { labelField, labelConstant, weightField, color, fill };
+  return {
+    labelField,
+    labelConstant,
+    weightField,
+    color,
+    fill,
+    size,
+    linewidth,
+    alpha,
+    shape,
+    linetype,
+  };
 }

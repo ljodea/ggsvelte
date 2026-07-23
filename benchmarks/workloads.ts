@@ -31,6 +31,9 @@ import {
   scaleColorBinned,
   scaleColorLog10,
   scaleColorManual,
+  scaleAlphaContinuous,
+  scaleShapeDiscrete,
+  scaleSizeContinuous,
   scaleXBinned,
   scaleXContinuous,
 } from "@ggsvelte/spec";
@@ -172,6 +175,19 @@ function coordPointSpec(n: number, transform: "identity" | "log10"): PortableSpe
     .spec();
 }
 
+function coordFixedSpec(n: number): PortableSpec {
+  const x = Array.from<number>({ length: n });
+  const y = Array.from<number>({ length: n });
+  for (let i = 0; i < n; i++) {
+    x[i] = i % 1_000;
+    y[i] = (i * 17) % 1_000;
+  }
+  return gg({ x, y }, aes({ x: "x", y: "y" }))
+    .geomPoint({ render: "canvas" })
+    .coordFixed()
+    .spec();
+}
+
 function coordTessellationSpec(n: number): PortableSpec {
   const x = Array.from<number>({ length: n });
   const y = Array.from<number>({ length: n });
@@ -234,6 +250,47 @@ function nonPositionColorSpec(n: number, family: "log10" | "binned" | "manual"):
   return gg({ x, y, color }, aes({ x: "x", y: "y", color: "color" }))
     .geomPoint({ render: "canvas" })
     .scales(scale)
+    .spec();
+}
+
+function responsiveGuideSpec(n: number): PortableSpec {
+  const x = Array.from<number>({ length: n });
+  const y = Array.from<number>({ length: n });
+  const group = Array.from<string>({ length: n });
+  for (let index = 0; index < n; index++) {
+    x[index] = index % 1_000;
+    y[index] = (index * 17) % 1_000;
+    group[index] = `group-${index % 12}`;
+  }
+  return gg({ x, y, group }, aes({ x: "x", y: "y", color: "group" }))
+    .geomPoint({ render: "canvas" })
+    .guides({ color: { type: "legend", position: "auto" } })
+    .spec();
+}
+
+function mappedStyleSpec(n: number): PortableSpec {
+  const x = Array.from<number>({ length: n });
+  const y = Array.from<number>({ length: n });
+  const magnitude = Array.from<number>({ length: n });
+  const confidence = Array.from<number>({ length: n });
+  const group = Array.from<string>({ length: n });
+  for (let index = 0; index < n; index++) {
+    x[index] = index % 1_000;
+    y[index] = (index * 17) % 1_000;
+    magnitude[index] = 1 + (index % 100);
+    confidence[index] = (index % 100) / 100;
+    group[index] = `group-${index % 5}`;
+  }
+  return gg(
+    { x, y, magnitude, confidence, group },
+    aes({ x: "x", y: "y", size: "magnitude", alpha: "confidence", shape: "group" }),
+  )
+    .geomPoint({ render: "canvas" })
+    .scales({
+      ...scaleSizeContinuous(),
+      ...scaleAlphaContinuous(),
+      ...scaleShapeDiscrete(),
+    })
     .spec();
 }
 
@@ -666,6 +723,54 @@ export function buildWorkloads(smoke: boolean): Workload[] {
         fn: () => runPipeline(spec, opts),
       });
     }
+  }
+
+  // --- PR 6 complete mapped style vectors ----------------------------------
+  {
+    const n = smoke ? 1_000 : 100_000;
+    const spec = mappedStyleSpec(n);
+    workloads.push({
+      id: `pipeline mapped-style ${fmtK(n)}`,
+      group: `mapped style vectors ${fmtK(n)}`,
+      bench: `runPipeline mapped style vectors ${fmtK(n)}`,
+      fn: () => runPipeline(spec, opts),
+    });
+  }
+
+  // --- PR 7 responsive guide replanning -----------------------------------
+  {
+    const n = smoke ? 1_000 : 10_000;
+    const spec = responsiveGuideSpec(n);
+    let narrow = false;
+    workloads.push({
+      id: `pipeline responsive-guides resize ${fmtK(n)}`,
+      group: `responsive guide resize ${fmtK(n)}`,
+      bench: `runPipeline responsive guide resize ${fmtK(n)}`,
+      fn: () => {
+        narrow = !narrow;
+        return runPipeline(spec, { ...opts, width: narrow ? 420 : 800 });
+      },
+    });
+  }
+
+  // --- PR 8 fixed-aspect allocation under responsive resize ----------------
+  {
+    const n = smoke ? 1_000 : 10_000;
+    const spec = coordFixedSpec(n);
+    let narrow = false;
+    workloads.push({
+      id: `pipeline coord-fixed resize ${fmtK(n)}`,
+      group: `fixed-aspect resize ${fmtK(n)}`,
+      bench: `runPipeline coord_fixed resize ${fmtK(n)}`,
+      fn: () => {
+        narrow = !narrow;
+        return runPipeline(spec, {
+          ...opts,
+          width: narrow ? 360 : 900,
+          height: narrow ? 640 : 420,
+        });
+      },
+    });
   }
 
   // --- M2 statistical workloads (plan: bin 100k, loess 5k, density 100k) ----

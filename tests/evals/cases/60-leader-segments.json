@@ -1,0 +1,40 @@
+{
+  "id": "60-leader-segments",
+  "kind": "chart",
+  "prompt": "Draw leader lines from each data point (x,y) to a callout anchor (xend,yend) using geom segment.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "xend", "type": "quantitative" },
+      { "name": "yend", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "x": 1, "y": 2, "xend": 1.5, "yend": 2.8 },
+      { "x": 2, "y": 3, "xend": 2.4, "yend": 3.6 },
+      { "x": 3, "y": 1.5, "xend": 3.5, "yend": 2.2 },
+      { "x": 4, "y": 2.5, "xend": 4.6, "yend": 3.1 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "segment",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "xend": { "field": "xend" },
+          "yend": { "field": "yend" }
+        }
+      }
+    ]
+  },
+  "notes": "Finite two-endpoint segment (geom_segment): both ends train scales; not panel-spanning rule."
+}

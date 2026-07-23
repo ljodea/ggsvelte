@@ -14,8 +14,28 @@ export function assertRequiredChannels(input: {
   yStatColumn: string | null;
   yminField: string | null;
   ymaxField: string | null;
+  xminField?: string | null;
+  xmaxField?: string | null;
+  xendField?: string | null;
+  yendField?: string | null;
+  ribbonOrientation?: "x" | "y";
 }): void {
-  const { geom, stat, index, ruleForm, xField, yField, yStatColumn, yminField, ymaxField } = input;
+  const {
+    geom,
+    stat,
+    index,
+    ruleForm,
+    xField,
+    yField,
+    yStatColumn,
+    yminField,
+    ymaxField,
+    xminField = null,
+    xmaxField = null,
+    xendField = null,
+    yendField = null,
+    ribbonOrientation,
+  } = input;
 
   if (
     geom === "point" ||
@@ -24,7 +44,9 @@ export function assertRequiredChannels(input: {
     geom === "area" ||
     geom === "text" ||
     geom === "smooth" ||
-    geom === "boxplot"
+    geom === "boxplot" ||
+    geom === "tile" ||
+    geom === "raster"
   ) {
     requireField(xField, "x", index, geom);
     if (yStatColumn === null) requireField(yField, "y", index, geom);
@@ -39,6 +61,30 @@ export function assertRequiredChannels(input: {
       requireField(ymaxField, "ymax", index, geom);
     }
   }
+  if (geom === "rect") {
+    requireField(xminField, "xmin", index, geom);
+    requireField(xmaxField, "xmax", index, geom);
+    requireField(yminField, "ymin", index, geom);
+    requireField(ymaxField, "ymax", index, geom);
+  }
+  if (geom === "ribbon") {
+    const orientation = ribbonOrientation ?? "x";
+    if (orientation === "x") {
+      requireField(xField, "x", index, geom);
+      requireField(yminField, "ymin", index, geom);
+      requireField(ymaxField, "ymax", index, geom);
+    } else {
+      requireField(yField, "y", index, geom);
+      requireField(xminField, "xmin", index, geom);
+      requireField(xmaxField, "xmax", index, geom);
+    }
+  }
   if (geom === "rule" && ruleForm === "vertical") requireField(xField, "x", index, geom);
   if (geom === "rule" && ruleForm === "horizontal") requireField(yField, "y", index, geom);
+  if (geom === "segment") {
+    requireField(xField, "x", index, geom);
+    requireField(yField, "y", index, geom);
+    requireField(xendField, "xend", index, geom);
+    requireField(yendField, "yend", index, geom);
+  }
 }

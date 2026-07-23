@@ -89,6 +89,32 @@ describe("Cloudflare Pages project contract", () => {
     expect(workflow).toContain("if: github.ref == 'refs/heads/main'");
     expect(workflow).toContain("ref: ${{ github.sha }}");
     expect(workflow).not.toContain("pull_request:");
+    // Superseded builds cancel; deploy/smoke does not cancel mid-flight.
+    expect(workflow).toContain("group: cloudflare-pages-build");
+    expect(workflow).toMatch(/cancel-in-progress:\s*true/);
+    expect(workflow).toContain("group: cloudflare-pages-deploy");
+    expect(workflow).toMatch(/cancel-in-progress:\s*false/);
+    // Build keeps the production environment so env secrets (analytics token)
+    // still inject after the job split.
+    expect(workflow).toMatch(/build:[\s\S]*environment:\s*\n\s*name: cloudflare-production/);
+    expect(workflow).toContain("bun scripts/deployment-asset-smoke-cli.ts");
+  });
+
+  it("ships a CSP-safe deploy-recovery bootstrap from static assets", () => {
+    const appHtml = readFileSync(join(ROOT, "apps", "docs", "src", "app.html"), "utf8");
+    const recovery = readFileSync(
+      join(ROOT, "apps", "docs", "static", "deploy-recovery.js"),
+      "utf8",
+    );
+    expect(appHtml).toContain('src="%sveltekit.assets%/deploy-recovery.js"');
+    expect(recovery).toContain("vite:preloadError");
+    expect(recovery).toContain("Failed to fetch dynamically imported module");
+    expect(recovery).toContain("ggsvelte-deploy-recovery-at");
+    // Storage-blocked clients use a timestamped query flag with cooldown;
+    // only preventDefault when recovery is still available.
+    expect(recovery).toContain("ggsvelte_deploy_recovery");
+    expect(recovery).toContain("withinCooldown");
+    expect(recovery).toContain("if (recentlyReloaded()) return;");
   });
 
   it("does not keep a GitHub Pages deployment workflow or legacy migration scripts", () => {

@@ -13,10 +13,12 @@
     IntervalSelection,
     PlotInspectionChange,
   } from "../interaction/interaction.js";
+  import type {
+    PresentationAnchor,
+    PresentationChrome,
+  } from "../selection/selection.js";
   import InteractionOverlay from "./InteractionOverlay.svelte";
   import { shouldShowInertSelectionOverlay } from "../interaction/capability.js";
-
-  type Anchor = { readonly x: number; readonly y: number };
   type Panel = {
     readonly x: number;
     readonly y: number;
@@ -38,6 +40,7 @@
     inspection = null,
     inspectionPanel = null,
     coordFlipped = false,
+    hoverChrome = "ring",
     selectedAnchors = [],
     emphasizedAnchors = [],
     brushRect = null,
@@ -57,8 +60,9 @@
     > | null;
     inspectionPanel?: Panel | null;
     coordFlipped?: boolean;
-    selectedAnchors?: readonly Anchor[];
-    emphasizedAnchors?: readonly Anchor[];
+    hoverChrome?: PresentationChrome;
+    selectedAnchors?: readonly PresentationAnchor[];
+    emphasizedAnchors?: readonly PresentationAnchor[];
     brushRect?: BrushRect | null;
     activeTool?: InteractionTool;
     areaAwaitingSecond?: boolean;
@@ -81,6 +85,7 @@
     {inspection}
     {inspectionPanel}
     {coordFlipped}
+    {hoverChrome}
     {selectedAnchors}
     {emphasizedAnchors}
     {brushRect}

@@ -17,8 +17,14 @@
     BatchInteractionMask,
     GeometryBatch,
     Scene,
+    ScenePanel,
   } from "@ggsvelte/core";
-  import { sceneLabel, STRIP_BAND, themeVar } from "@ggsvelte/core";
+  import {
+    letterboxGutterRects,
+    sceneLabel,
+    STRIP_BAND,
+    themeVar,
+  } from "@ggsvelte/core";
 
   import Axis from "./Axis.svelte";
   import Batch from "./Batch.svelte";
@@ -49,6 +55,79 @@
     focusMasks?: readonly (BatchInteractionMask | null)[];
   } = $props();
 
+  /** Strip band geometry matching core renderToSVGString (issue #590 / #611). */
+  function stripGeometry(panel: ScenePanel): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    textX: number;
+    textY: number;
+    rotate: string | undefined;
+    /** Clip rotated side-strip labels to the panel-height band (#611). */
+    clip: boolean;
+  } | null {
+    if (panel.strip === "" || panel.showStrip === false) return null;
+    const band = panel.stripBand ?? STRIP_BAND;
+    if (band <= 0) return null;
+    const position = panel.stripPosition ?? "top";
+    const bandDraw = Math.max(1, band - 2);
+    if (position === "top") {
+      return {
+        x: panel.x,
+        y: panel.y - band,
+        width: panel.width,
+        height: bandDraw,
+        textX: panel.width / 2,
+        textY: bandDraw / 2,
+        rotate: undefined,
+        clip: false,
+      };
+    }
+    if (position === "bottom") {
+      // Below the x-axis margin so strip text does not collide with ticks.
+      const axisBand = panel.axisX === null ? 0 : 28;
+      return {
+        x: panel.x,
+        y: panel.y + panel.height + axisBand,
+        width: panel.width,
+        height: bandDraw,
+        textX: panel.width / 2,
+        textY: bandDraw / 2,
+        rotate: undefined,
+        clip: false,
+      };
+    }
+    if (position === "left") {
+      // Left of the y-axis margin so strip text does not collide with ticks.
+      const axisBand = panel.axisY === null ? 0 : 36;
+      const textX = bandDraw / 2;
+      const textY = panel.height / 2;
+      return {
+        x: panel.x - axisBand - band,
+        y: panel.y,
+        width: bandDraw,
+        height: panel.height,
+        textX,
+        textY,
+        rotate: `rotate(-90 ${textX} ${textY})`,
+        clip: true,
+      };
+    }
+    const textX = bandDraw / 2;
+    const textY = panel.height / 2;
+    return {
+      x: panel.x + panel.width,
+      y: panel.y,
+      width: bandDraw,
+      height: panel.height,
+      textX,
+      textY,
+      rotate: `rotate(90 ${textX} ${textY})`,
+      clip: true,
+    };
+  }
+
   const uid = $props.id();
 
   const label = $derived(ariaLabel ?? sceneLabel(scene));
@@ -73,6 +152,28 @@
       bottom: Math.max(...panels.map((p) => p.y + p.height)),
     };
   });
+  const rootBounds = $derived.by(() => {
+    const panels = scene.panels;
+    if (panels.length === 0) return gridBounds;
+    return {
+      left: Math.min(...panels.map((p) => p.allocation?.x ?? p.x)),
+      right: Math.max(
+        ...panels.map((p) =>
+          p.allocation === undefined
+            ? p.x + p.width
+            : p.allocation.x + p.allocation.width,
+        ),
+      ),
+      top: Math.min(...panels.map((p) => p.allocation?.y ?? p.y)),
+      bottom: Math.max(
+        ...panels.map((p) =>
+          p.allocation === undefined
+            ? p.y + p.height
+            : p.allocation.y + p.allocation.height,
+        ),
+      ),
+    };
+  });
 </script>
 
 <svg
@@ -84,6 +185,7 @@
   aria-label={mode === "full" || mode === "chrome-bottom" ? label : undefined}
   aria-hidden={mode === "marks" || mode === "chrome-top" ? "true" : undefined}
   class={mode === "full" ? "gg-plot" : `gg-plot gg-stratum gg-svg-${mode}`}
+  data-gg-layout={scene.layout}
   font-family={scene.theme.fontFamily}
   font-size={scene.theme.fontSize}
   font-weight={scene.theme.fontWeight}
@@ -101,10 +203,26 @@
       fill={themeVar("paper", scene.theme)}
     />
   {/if}
+  {#if drawChrome}
+    {#each scene.panels as panel, i (`letterbox-${i}`)}
+      {#if panel.allocation !== undefined}
+        {#each letterboxGutterRects(panel.allocation, panel) as gutter, gi (`letterbox-${i}-${gi}`)}
+          <rect
+            class="gg-letterbox"
+            x={gutter.x}
+            y={gutter.y}
+            width={gutter.width}
+            height={gutter.height}
+            fill={themeVar("letterboxFill", scene.theme)}
+          />
+        {/each}
+      {/if}
+    {/each}
+  {/if}
   {#if drawTop && scene.title !== ""}
     <text
       class="gg-title"
-      x={gridBounds.left}
+      x={rootBounds.left}
       y={scene.theme.titleSize}
       font-size={scene.theme.titleSize}
       font-weight={scene.theme.titleWeight}
@@ -114,7 +232,7 @@
   {#if drawTop && scene.subtitle !== ""}
     <text
       class="gg-subtitle"
-      x={gridBounds.left}
+      x={rootBounds.left}
       y={scene.title === ""
         ? scene.theme.subtitleSize
         : scene.theme.titleSize + scene.theme.subtitleSize + 3}
@@ -221,24 +339,32 @@
         />
       {/if}
     </g>
-    {#if drawChrome && panel.strip !== ""}
+    {#if drawChrome && stripGeometry(panel) !== null}
+      {@const strip = stripGeometry(panel)!}
       <g
         class="gg-strip"
-        transform={`translate(${panel.x},${panel.y - STRIP_BAND})`}
+        transform={`translate(${strip.x},${strip.y})`}
+        clip-path={strip.clip ? `url(#${uid}-strip-clip-${i})` : undefined}
       >
+        {#if strip.clip}
+          <clipPath id={`${uid}-strip-clip-${i}`}>
+            <rect width={strip.width} height={strip.height} />
+          </clipPath>
+        {/if}
         <rect
-          width={panel.width}
-          height={STRIP_BAND - 2}
+          width={strip.width}
+          height={strip.height}
           fill={themeVar("grid", scene.theme)}
         />
         <text
-          x={panel.width / 2}
-          y={(STRIP_BAND - 2) / 2}
+          x={strip.textX}
+          y={strip.textY}
           dy="0.32em"
           text-anchor="middle"
           fill={ink}
           font-size={scene.theme.stripSize}
-          font-weight={scene.theme.stripWeight}>{panel.strip}</text
+          font-weight={scene.theme.stripWeight}
+          transform={strip.rotate}>{panel.strip}</text
         >
       </g>
     {/if}
@@ -256,7 +382,7 @@
       y={gridBounds.bottom + (scene.axes.x.titleOffset ?? 32)}
       text-anchor="middle"
       fill={ink}
-      font-size={scene.theme.axisTitleSize}
+      font-size={scene.axes.x.titleSize ?? scene.theme.axisTitleSize}
       font-weight={scene.theme.axisTitleWeight}>{scene.axes.x.title}</text
     >
   {/if}
@@ -266,7 +392,7 @@
       transform={`translate(12,${(gridBounds.top + gridBounds.bottom) / 2}) rotate(-90)`}
       text-anchor="middle"
       fill={ink}
-      font-size={scene.theme.axisTitleSize}
+      font-size={scene.axes.y.titleSize ?? scene.theme.axisTitleSize}
       font-weight={scene.theme.axisTitleWeight}>{scene.axes.y.title}</text
     >
   {/if}

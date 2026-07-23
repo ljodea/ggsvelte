@@ -236,8 +236,10 @@ describe("sceneToSVGString panel batch routing", () => {
       panels,
       batches,
     });
-    // groupBatchesByPanel walks each list index once (including the invalid entry).
-    expect(indexReads).toBe(rawBatches.length);
+    // Paint resource collection walks each list index once, then
+    // groupBatchesByPanel walks once more (including the invalid entry).
+    // Still O(B), not O(P·B).
+    expect(indexReads).toBe(rawBatches.length * 2);
     // Every valid batch still rendered once (fill color is unique per batch).
     for (let layer = 0; layer < batchesPerPanel; layer++) {
       for (let p = 0; p < panelCount; p++) {

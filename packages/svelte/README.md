@@ -16,7 +16,7 @@ Requires Node.js 22+ and Svelte 5.33.1+.
 
 ```svelte
 <script lang="ts">
-  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import { GeomPoint, GGPlot, guideLegend } from "@ggsvelte/svelte";
 
   const rows = [
     { engine: 1.8, highway: 29, class: "compact" },
@@ -30,6 +30,7 @@ Requires Node.js 22+ and Svelte 5.33.1+.
 <GGPlot
   data={rows}
   aes={{ x: "engine", y: "highway", color: "class" }}
+  guides={{ color: guideLegend({ position: "auto" }) }}
   labs={{
     title: "Highway efficiency by engine size",
     x: "Engine displacement",
@@ -53,12 +54,29 @@ statistics without changing the values consumed by a fit or bin. Nonlinear paths
 tessellated without creating inspectable rows, and interval or brush inversion returns
 semantic values.
 
+Use `coord={coordFixed()}` when equal data units must remain physically equal.
+The Svelte renderer uses the same centered data rectangle and theme-owned
+letterbox gutters as headless SVG, including the `data-gg-layout="degraded"`
+state for unusually constrained allocations. `coord_fixed`, `coordEqual`, and
+`coord_equal` are re-exported aliases over the same portable implementation.
+
 Color/fill helpers are re-exported from the package root. For example,
 `scales={scaleColorBinned({ breaks: [0, 10, 100], range: ["#ddd", "#222"] })}`
 renders deterministic color steps and a colorsteps guide. Continuous,
 discrete, log10, sqrt, date, datetime, manual, and identity families use the
 same JSON accepted by `<GGPlot>`, with binding-identical `color`/`colour` and
 ggplot2 snake-case aliases.
+
+Size, linewidth, alpha, shape, and linetype helpers are also re-exported from
+the package root. Their per-mark/per-path vectors render consistently in SVG,
+canvas, and SSR; style legends retain keyboard focus and filtering behavior,
+and inspection reports resolved semantic style values.
+
+Pass `guides` directly to `<GGPlot>` to suppress or restyle axes and to place,
+orient, title, order, or force legends/colorbars/colorsteps. Automatic guides move
+from right to bottom at narrow widths without retraining scales; merged exact-value
+entries keep keyboard focus and filtering across every represented aesthetic. The
+same planned scene renders in browser SVG, headless SVG, and SSR.
 
 ## Links
 

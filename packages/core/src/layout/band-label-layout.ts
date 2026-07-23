@@ -17,6 +17,8 @@ export const MIN_BAND_LABEL_GAP_PX = 4;
 export const BAND_THIN_MIN_CATEGORIES = 12;
 /** Wrapped labels use at most this many lines before escalating to rotation. */
 export const MAX_WRAP_LINES = 2;
+/** Clamp author `guide.wrap` into a sane line budget. */
+export const MAX_AUTHOR_WRAP_LINES = 8;
 
 export const RAD = Math.PI / 180;
 
@@ -33,22 +35,34 @@ export function quantizeUp(px: number, quantum: number): number {
   return Math.ceil(px / quantum - 1e-9) * quantum;
 }
 
-/** Greedy word wrap; null when a single token exceeds `maxWidth` or lines > cap. */
+/**
+ * Greedy word wrap.
+ * - null when a single token exceeds `maxWidth` (unbreakable), or when
+ *   lines > cap and `force` is false.
+ * - When `force` is true and the wrap needs more than `maxLines`, keep the
+ *   first `maxLines - 1` lines and join the remainder onto the last line so
+ *   forced wrap pins stay multi-line instead of collapsing to the full label.
+ */
 export function wrapLabel(
   label: string,
   maxWidth: number,
   measurer: TextMeasurer,
   fontSize: number,
   maxLines: number,
+  options?: { readonly force?: boolean },
 ): string[] | null {
+  const force = options?.force === true;
   const words = label.split(/\s+/).filter((w) => w.length > 0);
   if (words.length <= 1) {
-    return measurer.measureWidth(label, fontSize) <= maxWidth ? [label] : null;
+    return measurer.measureWidth(label, fontSize) <= maxWidth || force ? [label] : null;
   }
   const lines: string[] = [];
   let current = "";
   for (const word of words) {
-    if (measurer.measureWidth(word, fontSize) > maxWidth) return null; // unbreakable token
+    if (measurer.measureWidth(word, fontSize) > maxWidth) {
+      // Unbreakable token — force keeps a single-line pin; auto escalates.
+      return force ? [label] : null;
+    }
     const trial = current === "" ? word : `${current} ${word}`;
     if (measurer.measureWidth(trial, fontSize) <= maxWidth) {
       current = trial;
@@ -58,7 +72,14 @@ export function wrapLabel(
     }
   }
   if (current !== "") lines.push(current);
-  return lines.length <= maxLines ? lines : null;
+  if (lines.length <= maxLines) return lines;
+  if (!force) return null;
+  // Cap: preserve multi-line presentation; remaining words sit on the last line
+  // (may be over-wide — callers report side/overlap overflow honestly).
+  if (maxLines === 1) return [lines.join(" ")];
+  const head = lines.slice(0, maxLines - 1);
+  const tail = lines.slice(maxLines - 1).join(" ");
+  return [...head, tail];
 }
 
 /**

@@ -1,5 +1,6 @@
 import {
   pathSemanticNeighborRange,
+  pathSubpathIndex,
   segmentDistance,
   segmentIntersectsRect,
 } from "./candidate-geometry.js";
@@ -16,7 +17,10 @@ export function pathSubpathAabb(
   fallbackY: number,
   hitTolerance: number,
 ): readonly [number, number, number, number] {
-  const pad = batch.linewidth / 2 + hitTolerance;
+  const subpath = pathSubpathIndex(batch.pathOffsets, start);
+  const pad =
+    (subpath === null ? batch.linewidth : (batch.linewidths?.[subpath] ?? batch.linewidth)) / 2 +
+    hitTolerance;
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -93,7 +97,10 @@ export function pathVertexStrokeAabb(
   end: number,
   hitTolerance: number,
 ): readonly [number, number, number, number] {
-  const pad = batch.linewidth / 2 + hitTolerance;
+  const subpath = pathSubpathIndex(batch.pathOffsets, i);
+  const pad =
+    (subpath === null ? batch.linewidth : (batch.linewidths?.[subpath] ?? batch.linewidth)) / 2 +
+    hitTolerance;
   let minX = panelX + batch.positions[i * 2]!;
   let minY = panelY + batch.positions[i * 2 + 1]!;
   let maxX = minX;

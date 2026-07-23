@@ -1,5 +1,5 @@
 /**
- * Coordinate-system canonicalization for normalize() (cartesian/flip/transform).
+ * Coordinate-system canonicalization for normalize() (cartesian/flip/transform/fixed).
  * Scales: normalize-scales.ts. Layer/aes orchestration: normalize.ts.
  */
 
@@ -62,6 +62,11 @@ export function normalizeCoord(coord: CoordSpec | undefined): CoordSpec | undefi
       ? ({ ...record } as CoordSpec)
       : undefined;
   if (record["type"] === "flip") return { ...record } as CoordSpec;
+  if (record["type"] === "fixed") {
+    const fixed = { ...record } as unknown as { type: "fixed"; ratio?: unknown };
+    if (fixed.ratio === 1 || fixed.ratio === undefined) delete fixed.ratio;
+    return fixed as CoordSpec;
+  }
   if (record["type"] !== "transform") return { ...record } as CoordSpec;
   const transformed = coord as CoordTransformSpec;
   const x = normalizeCoordAxis(transformed.x);

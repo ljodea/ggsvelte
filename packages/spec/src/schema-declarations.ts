@@ -17,15 +17,200 @@ import {
 } from "./temporal-interval.js";
 
 import { TemporalParserSpecSchema } from "./temporal-parse.js";
+import { CURRENT_EDITION } from "./schema-catalog.js";
 
 import {
   COLOR_SCHEME_NAME_SCHEMAS,
+  LINETYPE_NAME_SCHEMAS,
   MAX_BINNED_BREAKS,
+  MAX_GLOW_RADIUS,
+  MAX_PAINT_STOPS,
+  POINT_SHAPE_NAME_SCHEMAS,
   THEME_NAMES,
   THEME_NAME_SCHEMAS,
 } from "./schema-names.js";
 
+/** Portable #rgb / #rrggbb only — no CSS names, url(), or filter strings. */
+const HEX_COLOR = Type.String({
+  pattern: "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+  description: "A solid #rgb or #rrggbb color (no CSS names, url(), or filter strings).",
+});
+
 const forbiddenColorOption = () => Type.Optional(Type.Never());
+const forbiddenStyleOption = () => Type.Optional(Type.Never());
+
+function numericStyleScaleSpec(rangeValue: ReturnType<typeof Type.Number>, description: string) {
+  return Type.Intersect([
+    Type.Object(
+      {
+        type: Type.Optional(
+          Type.Union([
+            Type.Literal("ordinal"),
+            Type.Literal("sequential"),
+            Type.Literal("binned"),
+            Type.Literal("manual"),
+            Type.Literal("identity"),
+          ]),
+        ),
+        temporalKind: Type.Optional(Type.Union([Type.Literal("date"), Type.Literal("datetime")])),
+        parse: Type.Optional(Type.Ref("TemporalParserSpec")),
+        parseFailure: Type.Optional(Type.Union([Type.Literal("error"), Type.Literal("censor")])),
+        timezone: Type.Optional(Type.String({ minLength: 1, maxLength: 128 })),
+        disambiguation: Type.Optional(
+          Type.Union([
+            Type.Literal("compatible"),
+            Type.Literal("earlier"),
+            Type.Literal("later"),
+            Type.Literal("reject"),
+          ]),
+        ),
+        domain: Type.Optional(Type.Array(Type.Ref("DomainValue"), { minItems: 1 })),
+        domainMode: Type.Optional(Type.Union([Type.Literal("grow"), Type.Literal("data")])),
+        breaks: Type.Optional(
+          Type.Array(Type.Union([Type.Number(), Type.String()]), { minItems: 2 }),
+        ),
+        range: Type.Optional(Type.Array(rangeValue, { minItems: 1 })),
+        reverse: Type.Optional(Type.Boolean()),
+        oob: Type.Optional(Type.Union([Type.Literal("censor"), Type.Literal("squish")])),
+        naValue: Type.Optional(rangeValue),
+        unknownValue: Type.Optional(rangeValue),
+        onExhaust: Type.Optional(Type.Union([Type.Literal("cycle"), Type.Literal("error")])),
+        labels: Type.Optional(Type.String()),
+        guide: Type.Optional(Type.Ref("GuideSpec")),
+      },
+      { additionalProperties: false, description },
+    ),
+    Type.Union([
+      Type.Object({
+        type: Type.Literal("binned"),
+        domain: Type.Optional(Type.Array(Type.Ref("DomainValue"), { minItems: 2, maxItems: 2 })),
+        breaks: Type.Optional(
+          Type.Array(Type.Union([Type.Number(), Type.String()]), {
+            minItems: 2,
+            maxItems: MAX_BINNED_BREAKS + 1,
+          }),
+        ),
+        range: Type.Optional(Type.Array(rangeValue, { minItems: 2 })),
+        domainMode: forbiddenStyleOption(),
+        onExhaust: forbiddenStyleOption(),
+      }),
+      Type.Object({
+        type: Type.Literal("manual"),
+        range: Type.Array(rangeValue, { minItems: 1 }),
+        temporalKind: forbiddenStyleOption(),
+        parse: forbiddenStyleOption(),
+        parseFailure: forbiddenStyleOption(),
+        timezone: forbiddenStyleOption(),
+        disambiguation: forbiddenStyleOption(),
+        domainMode: forbiddenStyleOption(),
+        breaks: forbiddenStyleOption(),
+        reverse: forbiddenStyleOption(),
+        oob: forbiddenStyleOption(),
+        onExhaust: forbiddenStyleOption(),
+        labels: forbiddenStyleOption(),
+      }),
+      Type.Object({
+        type: Type.Literal("identity"),
+        temporalKind: forbiddenStyleOption(),
+        parse: forbiddenStyleOption(),
+        parseFailure: forbiddenStyleOption(),
+        timezone: forbiddenStyleOption(),
+        disambiguation: forbiddenStyleOption(),
+        domain: forbiddenStyleOption(),
+        domainMode: forbiddenStyleOption(),
+        breaks: forbiddenStyleOption(),
+        range: forbiddenStyleOption(),
+        reverse: forbiddenStyleOption(),
+        oob: forbiddenStyleOption(),
+        onExhaust: forbiddenStyleOption(),
+        labels: forbiddenStyleOption(),
+      }),
+      Type.Object({
+        type: Type.Literal("ordinal"),
+        temporalKind: forbiddenStyleOption(),
+        parse: forbiddenStyleOption(),
+        parseFailure: forbiddenStyleOption(),
+        timezone: forbiddenStyleOption(),
+        disambiguation: forbiddenStyleOption(),
+        breaks: forbiddenStyleOption(),
+        oob: forbiddenStyleOption(),
+        labels: forbiddenStyleOption(),
+      }),
+      Type.Object({
+        type: Type.Literal("sequential"),
+        domain: Type.Optional(Type.Array(Type.Ref("DomainValue"), { minItems: 2, maxItems: 2 })),
+        range: Type.Optional(Type.Array(rangeValue, { minItems: 2 })),
+        domainMode: forbiddenStyleOption(),
+        onExhaust: forbiddenStyleOption(),
+      }),
+      Type.Object({ type: forbiddenStyleOption() }),
+    ]),
+  ]);
+}
+
+function finiteStyleScaleSpec(rangeValue: ReturnType<typeof Type.Union>, description: string) {
+  return Type.Intersect([
+    Type.Object(
+      {
+        type: Type.Optional(
+          Type.Union([
+            Type.Literal("ordinal"),
+            Type.Literal("binned"),
+            Type.Literal("manual"),
+            Type.Literal("identity"),
+          ]),
+        ),
+        domain: Type.Optional(Type.Array(Type.Ref("DomainValue"), { minItems: 1 })),
+        domainMode: Type.Optional(Type.Union([Type.Literal("grow"), Type.Literal("data")])),
+        breaks: Type.Optional(Type.Array(Type.Number(), { minItems: 2 })),
+        range: Type.Optional(Type.Array(rangeValue, { minItems: 1 })),
+        reverse: Type.Optional(Type.Boolean()),
+        naValue: Type.Optional(rangeValue),
+        unknownValue: Type.Optional(rangeValue),
+        onExhaust: Type.Optional(Type.Union([Type.Literal("cycle"), Type.Literal("error")])),
+        labels: Type.Optional(Type.String()),
+        guide: Type.Optional(Type.Ref("GuideSpec")),
+      },
+      { additionalProperties: false, description },
+    ),
+    Type.Union([
+      Type.Object({
+        type: Type.Literal("binned"),
+        domain: Type.Optional(Type.Array(Type.Number(), { minItems: 2, maxItems: 2 })),
+        breaks: Type.Optional(
+          Type.Array(Type.Number(), { minItems: 2, maxItems: MAX_BINNED_BREAKS + 1 }),
+        ),
+        domainMode: forbiddenStyleOption(),
+        onExhaust: forbiddenStyleOption(),
+      }),
+      Type.Object({
+        type: Type.Literal("manual"),
+        range: Type.Array(rangeValue, { minItems: 1 }),
+        domainMode: forbiddenStyleOption(),
+        breaks: forbiddenStyleOption(),
+        reverse: forbiddenStyleOption(),
+        onExhaust: forbiddenStyleOption(),
+        labels: forbiddenStyleOption(),
+      }),
+      Type.Object({
+        type: Type.Literal("identity"),
+        domain: forbiddenStyleOption(),
+        domainMode: forbiddenStyleOption(),
+        breaks: forbiddenStyleOption(),
+        range: forbiddenStyleOption(),
+        reverse: forbiddenStyleOption(),
+        onExhaust: forbiddenStyleOption(),
+        labels: forbiddenStyleOption(),
+      }),
+      Type.Object({
+        type: Type.Literal("ordinal"),
+        breaks: forbiddenStyleOption(),
+        labels: forbiddenStyleOption(),
+      }),
+      Type.Object({ type: forbiddenStyleOption() }),
+    ]),
+  ]);
+}
 
 export const SpecDeclarations = {
   CellValue: Type.Union([Type.String(), Type.Number(), Type.Boolean(), Type.Null()], {
@@ -176,6 +361,16 @@ export const SpecDeclarations = {
           description: "Opacity channel, 0 (transparent) to 1 (opaque).",
         }),
       ),
+      shape: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description: "Finite point-symbol channel. Continuous values require a binned scale.",
+        }),
+      ),
+      linetype: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description: "Finite stroke-pattern channel. Continuous values require a binned scale.",
+        }),
+      ),
       group: Type.Optional(
         Type.Ref("ChannelValue", {
           description:
@@ -197,13 +392,49 @@ export const SpecDeclarations = {
       ymin: Type.Optional(
         Type.Ref("ChannelValue", {
           description:
-            "Lower bound channel (errorbar with the identity stat). Quantitative values only.",
+            "Lower y bound (errorbar identity, rect edges, ribbon x-orientation). Quantitative values only.",
         }),
       ),
       ymax: Type.Optional(
         Type.Ref("ChannelValue", {
           description:
-            "Upper bound channel (errorbar with the identity stat). Quantitative values only.",
+            "Upper y bound (errorbar identity, rect edges, ribbon x-orientation). Quantitative values only.",
+        }),
+      ),
+      xmin: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Left edge / lower x bound (geom rect; ribbon y-orientation). Quantitative values only.",
+        }),
+      ),
+      xmax: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Right edge / upper x bound (geom rect; ribbon y-orientation). Quantitative values only.",
+        }),
+      ),
+      xend: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Segment end x (geom segment). Trains the x scale together with aes.x; may be discrete or continuous.",
+        }),
+      ),
+      yend: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Segment end y (geom segment). Trains the y scale together with aes.y; may be discrete or continuous.",
+        }),
+      ),
+      width: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Cell width for geom tile (data units after position transform; not a trained position scale). Prefer params.width for a constant.",
+        }),
+      ),
+      height: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Cell height for geom tile (data units after position transform; not a trained position scale). Prefer params.height for a constant.",
         }),
       ),
     },
@@ -211,6 +442,115 @@ export const SpecDeclarations = {
       additionalProperties: false,
       description:
         "Aesthetic mapping: which channels read which data fields/constants. Plot-level aes is inherited by every layer; a layer's aes overrides per channel, and null unsets an inherited channel.",
+    },
+  ),
+
+  // --- within-mark paint (#591) ----------------------------------------------
+
+  ColorStop: Type.Object(
+    {
+      offset: Type.Number({
+        minimum: 0,
+        maximum: 1,
+        description: "Stop position along the gradient, between 0 and 1 inclusive.",
+      }),
+      color: HEX_COLOR,
+      opacity: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Optional stop opacity between 0 and 1 inclusive. Default 1.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "One ordered gradient color stop. Stops must be non-decreasing by offset (validated structurally).",
+    },
+  ),
+
+  PaintSpace: Type.Union([Type.Literal("mark"), Type.Literal("panel"), Type.Literal("plot")], {
+    description:
+      'Gradient coordinate space: "mark" (object bounding box, default), "panel" (panel-local px), or "plot" (plot-local px including panels).',
+  }),
+
+  LinearGradientPaint: Type.Object(
+    {
+      type: Type.Literal("linear"),
+      x1: Type.Number({ description: "Gradient start x in the chosen space." }),
+      y1: Type.Number({ description: "Gradient start y in the chosen space." }),
+      x2: Type.Number({ description: "Gradient end x in the chosen space." }),
+      y2: Type.Number({ description: "Gradient end y in the chosen space." }),
+      space: Type.Optional(Type.Ref("PaintSpace")),
+      stops: Type.Array(Type.Ref("ColorStop"), {
+        minItems: 2,
+        maxItems: MAX_PAINT_STOPS,
+        description: `Ordered color stops (at least 2, at most ${String(MAX_PAINT_STOPS)}).`,
+      }),
+      fallback: Type.String({
+        pattern: "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+        description:
+          "Required solid #rgb/#rrggbb used for a11y, forced-SVG, and reduced-effects paths.",
+      }),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Deterministic linear gradient paint for within-mark fill or stroke. Not a data scale.",
+    },
+  ),
+
+  RadialGradientPaint: Type.Object(
+    {
+      type: Type.Literal("radial"),
+      cx: Type.Number({ description: "Gradient center x in the chosen space." }),
+      cy: Type.Number({ description: "Gradient center y in the chosen space." }),
+      r: Type.Number({
+        exclusiveMinimum: 0,
+        description: "Gradient radius in the chosen space. Must be greater than 0.",
+      }),
+      space: Type.Optional(Type.Ref("PaintSpace")),
+      stops: Type.Array(Type.Ref("ColorStop"), {
+        minItems: 2,
+        maxItems: MAX_PAINT_STOPS,
+        description: `Ordered color stops (at least 2, at most ${String(MAX_PAINT_STOPS)}).`,
+      }),
+      fallback: Type.String({
+        pattern: "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+        description:
+          "Required solid #rgb/#rrggbb used for a11y, forced-SVG, and reduced-effects paths.",
+      }),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Deterministic radial gradient paint for within-mark fill or stroke. Not a data scale.",
+    },
+  ),
+
+  GradientPaint: Type.Union([Type.Ref("LinearGradientPaint"), Type.Ref("RadialGradientPaint")], {
+    description: "Closed portable gradient paint: linear or radial with solid fallback.",
+  }),
+
+  GlowSpec: Type.Object(
+    {
+      color: HEX_COLOR,
+      radius: Type.Number({
+        exclusiveMinimum: 0,
+        maximum: MAX_GLOW_RADIUS,
+        description: `Blur radius in CSS px, greater than 0 and at most ${String(MAX_GLOW_RADIUS)}.`,
+      }),
+      opacity: Type.Number({
+        minimum: 0,
+        maximum: 1,
+        description: "Glow opacity between 0 and 1 inclusive.",
+      }),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Bounded glow treatment (explicit color, radius, opacity). Opt-in mark appearance, not theme decoration.",
     },
   ),
 
@@ -232,8 +572,9 @@ export const SpecDeclarations = {
         }),
       ),
       shape: Type.Optional(
-        Type.Union([Type.Literal("circle"), Type.Literal("square"), Type.Literal("triangle")], {
-          description: 'Point shape. One of "circle", "square", "triangle". Default "circle".',
+        Type.Union(POINT_SHAPE_NAME_SCHEMAS, {
+          description:
+            'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
         }),
       ),
     },
@@ -264,6 +605,17 @@ export const SpecDeclarations = {
             'Interpolation between points: "linear" (straight segments, default) or "step" (horizontal-then-vertical steps, changing at the midpoint between x positions).',
         }),
       ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -286,6 +638,17 @@ export const SpecDeclarations = {
           maximum: 1,
           description:
             "Bar width as a fraction of the band step. Must be greater than 0 and at most 1. Default 0.9.",
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
         }),
       ),
     },
@@ -342,6 +705,17 @@ export const SpecDeclarations = {
         Type.Union([Type.Literal("right"), Type.Literal("left")], {
           description:
             'STAT BIN ONLY: which edge of each bin is inclusive: "right" (default, matches ggplot2) or "left".',
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
         }),
       ),
     },
@@ -405,6 +779,16 @@ export const SpecDeclarations = {
           minimum: 0,
           maximum: 1,
           description: "Line opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description: "Within-mark gradient stroke paint for the fitted line (not a data scale).",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
         }),
       ),
     },
@@ -496,6 +880,17 @@ export const SpecDeclarations = {
           description: "Area fill opacity. Must be between 0 and 1 (inclusive). Default 1.",
         }),
       ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -565,6 +960,136 @@ export const SpecDeclarations = {
     },
   ),
 
+  RectParams: Type.Object(
+    {
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Outline stroke width in px when color is set. Must be greater than 0.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Rectangle opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient outline paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description: "Styling parameters for the rect geom (arbitrary xmin/xmax/ymin/ymax regions).",
+    },
+  ),
+
+  TileParams: Type.Object(
+    {
+      width: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Constant tile width in data units after position transform (band axes: fraction of the band step). Default: resolution of unique x centers (continuous) or 1 (band).",
+        }),
+      ),
+      height: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Constant tile height in data units after position transform (band axes: fraction of the band step). Default: resolution of unique y centers (continuous) or 1 (band).",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Outline stroke width in px when color is set. Must be greater than 0.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Tile opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient outline paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for the tile geom: center-sized cells (x/y + optional width/height).",
+    },
+  ),
+
+  RasterParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Raster opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      hjust: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description:
+            "Horizontal justification of each cell over its x center (0–1). Default 0.5.",
+        }),
+      ),
+      vjust: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Vertical justification of each cell over its y center (0–1). Default 0.5.",
+        }),
+      ),
+      interpolate: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Interpolation between cells. Only false (nearest / no interpolation) is supported.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description: "Parameters for the raster geom: equal-cell dense grid (no per-cell stroke).",
+    },
+  ),
+
   PositionParams: Type.Object(
     {
       width: Type.Optional(
@@ -617,10 +1142,91 @@ export const SpecDeclarations = {
           description: "Area fill opacity. Must be between 0 and 1 (inclusive). Default 1.",
         }),
       ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
     },
     {
       additionalProperties: false,
       description: "Styling parameters for the area geom.",
+    },
+  ),
+
+  RibbonParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Ribbon fill opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Outline stroke width in px when an outline is drawn. Must be greater than 0. Default 1.",
+        }),
+      ),
+      outline: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("both"),
+            Type.Literal("upper"),
+            Type.Literal("lower"),
+            Type.Literal("full"),
+          ],
+          {
+            description:
+              'Which edges receive an outline stroke: "both" (default — upper and lower), "upper", "lower", or "full" (closed outline of the band). Strokes appear when aes.color / a color constant is set, or when strokePaint is set.',
+          },
+        ),
+      ),
+      orientation: Type.Optional(
+        Type.Union([Type.Literal("x"), Type.Literal("y")], {
+          description:
+            'Running-coordinate orientation: "x" (map x + ymin + ymax) or "y" (map y + xmin + xmax). When omitted, inferred from the complete channel contract; set explicitly if both contracts are mapped.',
+        }),
+      ),
+      lineend: Type.Optional(
+        Type.Union([Type.Literal("butt"), Type.Literal("round"), Type.Literal("square")], {
+          description: 'SVG stroke-linecap for outlines. Default "butt".',
+        }),
+      ),
+      linejoin: Type.Optional(
+        Type.Union([Type.Literal("miter"), Type.Literal("round"), Type.Literal("bevel")], {
+          description: 'SVG stroke-linejoin for outlines. Default "round".',
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient outline paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description: "Styling and orientation parameters for the ribbon geom.",
     },
   ),
 
@@ -663,11 +1269,61 @@ export const SpecDeclarations = {
           description: "Stroke width in px. Must be greater than 0. Default 1.",
         }),
       ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
     },
     {
       additionalProperties: false,
       description:
         "Styling parameters for the rule geom. The annotation form sets xintercept and/or yintercept here; the data-driven form maps aes.x OR aes.y instead (never both forms at once).",
+    },
+  ),
+
+  SegmentParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Segment opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      lineend: Type.Optional(
+        Type.Union([Type.Literal("butt"), Type.Literal("round"), Type.Literal("square")], {
+          description: 'SVG stroke-linecap for segment ends. Default "butt".',
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Styling parameters for the segment geom (finite line from (x,y) to (xend,yend)).",
     },
   ),
 
@@ -748,6 +1404,12 @@ export const SpecDeclarations = {
       positionParams: Type.Optional(Type.Ref("PositionParams")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("PointParams")),
     },
     {
@@ -771,6 +1433,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("LineParams")),
     },
     {
@@ -792,6 +1460,12 @@ export const SpecDeclarations = {
       position: Type.Optional(Type.Ref("StackablePosition")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("ColParams")),
     },
     {
@@ -816,6 +1490,12 @@ export const SpecDeclarations = {
       position: Type.Optional(Type.Ref("StackablePosition")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("BarParams")),
     },
     {
@@ -840,6 +1520,12 @@ export const SpecDeclarations = {
       position: Type.Optional(Type.Ref("StackablePosition")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("BarParams")),
     },
     {
@@ -866,6 +1552,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("SmoothParams")),
     },
     {
@@ -895,6 +1587,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("BoxplotParams")),
     },
     {
@@ -920,6 +1618,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("DensityParams")),
     },
     {
@@ -946,12 +1650,105 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("ErrorbarParams")),
     },
     {
       additionalProperties: false,
       description:
         "An errorbar layer. Identity stat: requires x, ymin, and ymax channels. Summary stat: requires x and y channels (bounds computed by params.fun/funMin/funMax, default mean_se).",
+    },
+  ),
+
+  RectLayer: Type.Object(
+    {
+      geom: Type.Literal("rect", {
+        description:
+          "Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Rect layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Rect layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("RectParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A rectangle layer. Requires xmin, xmax, ymin, and ymax channels (quantitative edges).",
+    },
+  ),
+
+  TileLayer: Type.Object(
+    {
+      geom: Type.Literal("tile", {
+        description:
+          "Tile geometry: center-sized cells at (x, y) with optional width/height. Use for heatmaps and gridded categorical cells; supports stroke outlines.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Tile layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Tile layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("TileParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A tile layer. Requires x and y channels; optional width/height (params or aes) size each cell after position transform.",
+    },
+  ),
+
+  RasterLayer: Type.Object(
+    {
+      geom: Type.Literal("raster", {
+        description:
+          "Raster geometry: equal-cell grid at (x, y) with fill; optimized dense heatmaps without per-cell strokes. Irregular spacing warns and suggests geom tile.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Raster layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Raster layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("RasterParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A raster layer. Requires x and y (regular spacing); fill maps cell color. No stroke. interpolate must be false when set.",
     },
   ),
 
@@ -967,12 +1764,47 @@ export const SpecDeclarations = {
       position: Type.Optional(Type.Ref("StackablePosition")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("AreaParams")),
     },
     {
       additionalProperties: false,
       description:
         'An area layer. Requires x and y channels; rows are sorted by x within each group. Default position "stack".',
+    },
+  ),
+
+  RibbonLayer: Type.Object(
+    {
+      geom: Type.Literal("ribbon", {
+        description:
+          "Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Ribbon layers draw precomputed bounds as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Ribbon layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("RibbonParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A ribbon layer. Requires a running coordinate and both interval bounds (x+ymin+ymax or y+xmin+xmax). Rows are sorted along the running coordinate within each group.",
     },
   ),
 
@@ -990,6 +1822,12 @@ export const SpecDeclarations = {
       ),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("RuleParams")),
     },
     {
@@ -1017,11 +1855,46 @@ export const SpecDeclarations = {
       positionParams: Type.Optional(Type.Ref("PositionParams")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
       params: Type.Optional(Type.Ref("TextParams")),
     },
     {
       additionalProperties: false,
       description: "A text-label layer. Requires x, y, and label channels.",
+    },
+  ),
+
+  SegmentLayer: Type.Object(
+    {
+      geom: Type.Literal("segment", {
+        description:
+          "Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Segment layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Segment layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("SegmentParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A finite segment layer (ggplot2's geom_segment). Requires x, y, xend, and yend channels.",
     },
   ),
 
@@ -1033,12 +1906,17 @@ export const SpecDeclarations = {
       Type.Ref("BarLayer"),
       Type.Ref("HistogramLayer"),
       Type.Ref("AreaLayer"),
+      Type.Ref("RibbonLayer"),
       Type.Ref("RuleLayer"),
       Type.Ref("TextLayer"),
       Type.Ref("SmoothLayer"),
       Type.Ref("BoxplotLayer"),
       Type.Ref("DensityLayer"),
       Type.Ref("ErrorbarLayer"),
+      Type.Ref("RectLayer"),
+      Type.Ref("TileLayer"),
+      Type.Ref("RasterLayer"),
+      Type.Ref("SegmentLayer"),
     ],
     {
       description:
@@ -1225,6 +2103,7 @@ export const SpecDeclarations = {
               "Explicit minor gridline positions in semantic source units. Coincident major/minor values render only the major tick. Time scales use dateMinorBreaks instead.",
           }),
         ),
+        guide: Type.Optional(Type.Union([Type.Ref("GuideSpec"), Type.Ref("BandAxisGuideSpec")])),
       },
       {
         additionalProperties: false,
@@ -1376,6 +2255,7 @@ export const SpecDeclarations = {
               'Guide label format: numeric (".1f", ",d", ".0%") or temporal strftime-style text.',
           }),
         ),
+        guide: Type.Optional(Type.Ref("GuideSpec")),
       },
       {
         additionalProperties: false,
@@ -1452,12 +2332,37 @@ export const SpecDeclarations = {
     ]),
   ]),
 
+  PositiveStyleScaleSpec: numericStyleScaleSpec(
+    Type.Number({ exclusiveMinimum: 0 }),
+    "Configuration for a positive numeric size or linewidth scale.",
+  ),
+
+  AlphaScaleSpec: numericStyleScaleSpec(
+    Type.Number({ minimum: 0, maximum: 1 }),
+    "Configuration for an opacity scale constrained to [0, 1].",
+  ),
+
+  ShapeScaleSpec: finiteStyleScaleSpec(
+    Type.Union(POINT_SHAPE_NAME_SCHEMAS),
+    "Configuration for a finite point-shape scale.",
+  ),
+
+  LinetypeScaleSpec: finiteStyleScaleSpec(
+    Type.Union(LINETYPE_NAME_SCHEMAS),
+    "Configuration for a finite line-pattern scale.",
+  ),
+
   Scales: Type.Object(
     {
       x: Type.Optional(Type.Ref("PositionScaleSpec")),
       y: Type.Optional(Type.Ref("PositionScaleSpec")),
       color: Type.Optional(Type.Ref("ColorScaleSpec")),
       fill: Type.Optional(Type.Ref("ColorScaleSpec")),
+      size: Type.Optional(Type.Ref("PositiveStyleScaleSpec")),
+      linewidth: Type.Optional(Type.Ref("PositiveStyleScaleSpec")),
+      alpha: Type.Optional(Type.Ref("AlphaScaleSpec")),
+      shape: Type.Optional(Type.Ref("ShapeScaleSpec")),
+      linetype: Type.Optional(Type.Ref("LinetypeScaleSpec")),
     },
     {
       additionalProperties: false,
@@ -1466,7 +2371,159 @@ export const SpecDeclarations = {
     },
   ),
 
-  // --- legend / theme ----------------------------------------------------------
+  // --- guide / legend / theme --------------------------------------------------
+
+  GuideThemeSpec: Type.Object(
+    {
+      titleSize: Type.Optional(Type.Number({ minimum: 8, maximum: 32 })),
+      labelSize: Type.Optional(Type.Number({ minimum: 8, maximum: 24 })),
+      keyGap: Type.Optional(Type.Number({ minimum: 0, maximum: 32 })),
+      rowGap: Type.Optional(Type.Number({ minimum: 0, maximum: 32 })),
+      blockGap: Type.Optional(Type.Number({ minimum: 0, maximum: 64 })),
+      colorbarThickness: Type.Optional(Type.Number({ minimum: 4, maximum: 48 })),
+      colorbarLength: Type.Optional(Type.Number({ minimum: 48, maximum: 512 })),
+    },
+    {
+      additionalProperties: false,
+      description: "Bounded presentation overrides for one guide block.",
+    },
+  ),
+
+  BandAxisGuideSpec: Type.Object(
+    {
+      mode: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("auto"),
+            Type.Literal("single"),
+            Type.Literal("wrap"),
+            Type.Literal("rotate"),
+            Type.Literal("off"),
+          ],
+          {
+            description: 'Band axis label layout: "auto", "single", "wrap", "rotate", or "off".',
+          },
+        ),
+      ),
+      angle: Type.Optional(
+        Type.Number({ description: 'Rotation in degrees when mode is "rotate".' }),
+      ),
+      wrap: Type.Optional(
+        Type.Number({
+          minimum: 1,
+          maximum: 8,
+          description: 'Maximum wrapped lines when mode is "wrap".',
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Scale-local band-axis label layout override retained independently from guide appearance.",
+    },
+  ),
+
+  AxisGuideSpec: Type.Object(
+    {
+      type: Type.Literal("axis"),
+      title: Type.Optional(Type.String({ maxLength: 256 })),
+      showTicks: Type.Optional(Type.Boolean()),
+      showLabels: Type.Optional(Type.Boolean()),
+      collision: Type.Optional(
+        Type.Union([Type.Literal("auto"), Type.Literal("preserve"), Type.Literal("ellipsis")]),
+      ),
+      theme: Type.Optional(Type.Ref("GuideThemeSpec")),
+    },
+    { additionalProperties: false },
+  ),
+
+  LegendGuideSpec: Type.Object(
+    {
+      type: Type.Literal("legend"),
+      title: Type.Optional(Type.String({ maxLength: 256 })),
+      order: Type.Optional(Type.Integer({ minimum: -1024, maximum: 1024 })),
+      position: Type.Optional(
+        Type.Union([Type.Literal("auto"), Type.Literal("right"), Type.Literal("bottom")]),
+      ),
+      direction: Type.Optional(
+        Type.Union([Type.Literal("auto"), Type.Literal("vertical"), Type.Literal("horizontal")]),
+      ),
+      keySize: Type.Optional(Type.Number({ minimum: 4, maximum: 48 })),
+      collision: Type.Optional(
+        Type.Union([Type.Literal("ellipsis"), Type.Literal("wrap"), Type.Literal("error")]),
+      ),
+      force: Type.Optional(Type.Boolean()),
+      theme: Type.Optional(Type.Ref("GuideThemeSpec")),
+    },
+    { additionalProperties: false },
+  ),
+
+  ColorbarGuideSpec: Type.Object(
+    {
+      type: Type.Literal("colorbar"),
+      title: Type.Optional(Type.String({ maxLength: 256 })),
+      order: Type.Optional(Type.Integer({ minimum: -1024, maximum: 1024 })),
+      position: Type.Optional(
+        Type.Union([Type.Literal("auto"), Type.Literal("right"), Type.Literal("bottom")]),
+      ),
+      direction: Type.Optional(
+        Type.Union([Type.Literal("auto"), Type.Literal("vertical"), Type.Literal("horizontal")]),
+      ),
+      showTicks: Type.Optional(Type.Boolean()),
+      showLabels: Type.Optional(Type.Boolean()),
+      collision: Type.Optional(Type.Union([Type.Literal("ellipsis"), Type.Literal("error")])),
+      force: Type.Optional(Type.Boolean()),
+      theme: Type.Optional(Type.Ref("GuideThemeSpec")),
+    },
+    { additionalProperties: false },
+  ),
+
+  ColorstepsGuideSpec: Type.Object(
+    {
+      type: Type.Literal("colorsteps"),
+      title: Type.Optional(Type.String({ maxLength: 256 })),
+      order: Type.Optional(Type.Integer({ minimum: -1024, maximum: 1024 })),
+      position: Type.Optional(
+        Type.Union([Type.Literal("auto"), Type.Literal("right"), Type.Literal("bottom")]),
+      ),
+      direction: Type.Optional(
+        Type.Union([Type.Literal("auto"), Type.Literal("vertical"), Type.Literal("horizontal")]),
+      ),
+      showLabels: Type.Optional(Type.Boolean()),
+      collision: Type.Optional(Type.Union([Type.Literal("ellipsis"), Type.Literal("error")])),
+      force: Type.Optional(Type.Boolean()),
+      theme: Type.Optional(Type.Ref("GuideThemeSpec")),
+    },
+    { additionalProperties: false },
+  ),
+
+  NoneGuideSpec: Type.Object({ type: Type.Literal("none") }, { additionalProperties: false }),
+
+  GuideSpec: Type.Union([
+    Type.Ref("AxisGuideSpec"),
+    Type.Ref("LegendGuideSpec"),
+    Type.Ref("ColorbarGuideSpec"),
+    Type.Ref("ColorstepsGuideSpec"),
+    Type.Ref("NoneGuideSpec"),
+  ]),
+
+  GuidesSpec: Type.Object(
+    {
+      x: Type.Optional(Type.Ref("GuideSpec")),
+      y: Type.Optional(Type.Ref("GuideSpec")),
+      color: Type.Optional(Type.Ref("GuideSpec")),
+      fill: Type.Optional(Type.Ref("GuideSpec")),
+      size: Type.Optional(Type.Ref("GuideSpec")),
+      linewidth: Type.Optional(Type.Ref("GuideSpec")),
+      alpha: Type.Optional(Type.Ref("GuideSpec")),
+      shape: Type.Optional(Type.Ref("GuideSpec")),
+      linetype: Type.Optional(Type.Ref("GuideSpec")),
+    },
+    {
+      additionalProperties: false,
+      description: "Appearance-only guide configuration keyed by aesthetic.",
+    },
+  ),
 
   LegendSpec: Type.Object(
     {
@@ -1521,6 +2578,12 @@ export const SpecDeclarations = {
       ),
       grid: Type.Optional(Type.String({ description: "Panel grid line color (CSS color)." })),
       panel: Type.Optional(Type.String({ description: "Panel background color (CSS color)." })),
+      letterboxFill: Type.Optional(
+        Type.String({
+          description:
+            "Fixed-aspect gutter color (CSS color). Defaults to the resolved paper role.",
+        }),
+      ),
       axisText: Type.Optional(Type.String({ description: "Axis tick-label color (CSS color)." })),
       axisLine: Type.Optional(Type.String({ description: "Axis-line color (CSS color)." })),
       tickColor: Type.Optional(Type.String({ description: "Axis-tick color (CSS color)." })),
@@ -1563,6 +2626,13 @@ export const SpecDeclarations = {
       subtitleWeight: Type.Optional(Type.Number({ minimum: 1, maximum: 1000 })),
       axisTitleSize: Type.Optional(Type.Number({ minimum: 1 })),
       axisTitleWeight: Type.Optional(Type.Number({ minimum: 1, maximum: 1000 })),
+      guideTitleSize: Type.Optional(Type.Number({ minimum: 8, maximum: 32 })),
+      legendKeySize: Type.Optional(Type.Number({ minimum: 4, maximum: 48 })),
+      legendKeyGap: Type.Optional(Type.Number({ minimum: 0, maximum: 32 })),
+      legendRowGap: Type.Optional(Type.Number({ minimum: 0, maximum: 32 })),
+      guideBlockGap: Type.Optional(Type.Number({ minimum: 0, maximum: 64 })),
+      colorbarThickness: Type.Optional(Type.Number({ minimum: 4, maximum: 48 })),
+      colorbarLengthMin: Type.Optional(Type.Number({ minimum: 48, maximum: 512 })),
       captionSize: Type.Optional(Type.Number({ minimum: 1 })),
       stripSize: Type.Optional(Type.Number({ minimum: 1 })),
       stripWeight: Type.Optional(Type.Number({ minimum: 1, maximum: 1000 })),
@@ -1606,6 +2676,21 @@ export const SpecDeclarations = {
       fill: Type.Optional(
         Type.String({ description: "Fill legend title. Defaults to the mapped field name." }),
       ),
+      size: Type.Optional(
+        Type.String({ description: "Size legend title. Defaults to the mapped field name." }),
+      ),
+      linewidth: Type.Optional(
+        Type.String({ description: "Linewidth legend title. Defaults to the mapped field name." }),
+      ),
+      alpha: Type.Optional(
+        Type.String({ description: "Alpha legend title. Defaults to the mapped field name." }),
+      ),
+      shape: Type.Optional(
+        Type.String({ description: "Shape legend title. Defaults to the mapped field name." }),
+      ),
+      linetype: Type.Optional(
+        Type.String({ description: "Linetype legend title. Defaults to the mapped field name." }),
+      ),
     },
     {
       additionalProperties: false,
@@ -1623,24 +2708,80 @@ export const SpecDeclarations = {
     },
   ),
 
+  FacetFieldRef: Type.Object(
+    {
+      field: Type.String({
+        description: "Name of the data column that partitions facet panels.",
+      }),
+      levels: Type.Optional(
+        Type.Array(Type.Ref("DomainValue"), {
+          minItems: 1,
+          description:
+            "Closed explicit panel order for this facet field. When set, panels appear in this order (including empty panels for levels absent from data). Values observed in data but omitted from levels are dropped from all panels and diagnosed. Omit for the default ascending sort of observed values.",
+        }),
+      ),
+      labels: Type.Optional(
+        Type.Record(Type.String(), Type.String(), {
+          description:
+            'Display-label map for authored facet values (JSON object). Keys are string forms of the semantic values ("west", "1", "true", "null"); values are human-readable strip/accessibility text. Labels never change panel IDs or semantic facet identity. Omit to use bandKey(value) as the strip text.',
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        'Facet field reference with optional closed order and display labels. Example: {"field": "region", "levels": ["west", "east"], "labels": {"west": "West Coast"}}. Bare strings are NOT valid here — normalize() expands "region" to {"field": "region"}.',
+    },
+  ),
+
+  FacetStripSpec: Type.Object(
+    {
+      position: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("top"),
+            Type.Literal("bottom"),
+            Type.Literal("left"),
+            Type.Literal("right"),
+          ],
+          {
+            description:
+              'Where facet strip bands are reserved and drawn: "top" (default), "bottom", "left", or "right". Left/right strips participate in layout measurement rather than overlaying the panel.',
+          },
+        ),
+      ),
+      show: Type.Optional(
+        Type.Boolean({
+          description:
+            "Whether to reserve and draw strip bands (default true). Set false when direct labels are authored elsewhere; panel identity and authored display labels remain available to accessibility and interaction consumers.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        'Facet strip chrome: position and visibility. Defaults: position "top", show true. Example: {"position": "left"} or {"show": false}.',
+    },
+  ),
+
   FacetSpec: Type.Object(
     {
       wrap: Type.Optional(
-        Type.Ref("FieldRef", {
+        Type.Ref("FacetFieldRef", {
           description:
-            "Facet WRAP form: partition rows by this data field's distinct values, one panel per value, wrapped into a grid ncol wide (ggplot2's facet_wrap). Mutually exclusive with rows/cols.",
+            "Facet WRAP form: partition rows by this data field's distinct values, one panel per value, wrapped into a grid ncol wide (ggplot2's facet_wrap). Mutually exclusive with rows/cols. Optional levels/labels control order and strip text.",
         }),
       ),
       rows: Type.Optional(
-        Type.Ref("FieldRef", {
+        Type.Ref("FacetFieldRef", {
           description:
-            "Facet GRID form: the field whose distinct values become grid rows (ggplot2's facet_grid rows). Combine with cols; mutually exclusive with wrap.",
+            "Facet GRID form: the field whose distinct values become grid rows (ggplot2's facet_grid rows). Combine with cols; mutually exclusive with wrap. Optional levels/labels control order and strip text.",
         }),
       ),
       cols: Type.Optional(
-        Type.Ref("FieldRef", {
+        Type.Ref("FacetFieldRef", {
           description:
-            "Facet GRID form: the field whose distinct values become grid columns (ggplot2's facet_grid cols). Combine with rows; mutually exclusive with wrap.",
+            "Facet GRID form: the field whose distinct values become grid columns (ggplot2's facet_grid cols). Combine with rows; mutually exclusive with wrap. Optional levels/labels control order and strip text.",
         }),
       ),
       ncol: Type.Optional(
@@ -1651,11 +2792,12 @@ export const SpecDeclarations = {
         }),
       ),
       scales: Type.Optional(Type.Ref("FacetScales")),
+      strip: Type.Optional(Type.Ref("FacetStripSpec")),
     },
     {
       additionalProperties: false,
       description:
-        "Facet the plot into small-multiple panels. Wrap form: set `wrap` (+ optional ncol). Grid form: set `rows` and/or `cols`. Panels partition the data BEFORE stats and positions run (each panel computes its own counts, bins, stacks). Panel values sort ascending; null values form their own panel.",
+        "Facet the plot into small-multiple panels. Wrap form: set `wrap` (+ optional ncol). Grid form: set `rows` and/or `cols`. Panels partition the data BEFORE stats and positions run (each panel computes its own counts, bins, stacks). By default panel values sort ascending and strips sit on top; set field `levels`/`labels` and `strip.position`/`strip.show` for authored order, display text, and strip placement. Null values form their own panel when observed (or when listed in levels).",
     },
   ),
 
@@ -1731,10 +2873,33 @@ export const SpecDeclarations = {
     },
   ),
 
-  CoordSpec: Type.Union([Type.Ref("CoordCartesianSpec"), Type.Ref("CoordTransformSpec")], {
-    description:
-      "The plot coordinate system: ordinary Cartesian, flipped Cartesian, or a post-stat coordinate transform.",
-  }),
+  CoordFixedSpec: Type.Object(
+    {
+      type: Type.Literal("fixed", {
+        description: "Cartesian coordinates with a fixed physical data-unit ratio.",
+      }),
+      ratio: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Physical y-unit length divided by physical x-unit length (default 1, equal units).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A fixed-aspect Cartesian coordinate system. Layout fits the largest centered data rectangle after chart chrome is allocated.",
+    },
+  ),
+
+  CoordSpec: Type.Union(
+    [Type.Ref("CoordCartesianSpec"), Type.Ref("CoordTransformSpec"), Type.Ref("CoordFixedSpec")],
+    {
+      description:
+        "The plot coordinate system: ordinary Cartesian, flipped Cartesian, post-stat transformed, or fixed-aspect.",
+    },
+  ),
 
   PlotSpec: Type.Object(
     {
@@ -1746,8 +2911,7 @@ export const SpecDeclarations = {
       edition: Type.Optional(
         Type.Integer({
           minimum: 1,
-          description:
-            "Defaults edition this spec was authored against (currently 1). normalize() stamps the current edition when absent, so a spec keeps ITS edition's default look (theme roles, categorical palette) even after ggsvelte's defaults improve in a later edition. Explicit theme/scale settings always win over edition defaults.",
+          description: `Defaults edition this spec was authored against (currently ${CURRENT_EDITION}). normalize() stamps the current edition when absent, so a spec keeps ITS edition's default look (theme roles, categorical palette) even after ggsvelte's defaults improve in a later edition. Explicit theme/scale settings always win over edition defaults.`,
         }),
       ),
       data: Type.Optional(
@@ -1773,6 +2937,7 @@ export const SpecDeclarations = {
       facet: Type.Optional(Type.Ref("FacetSpec")),
       coord: Type.Optional(Type.Ref("CoordSpec")),
       scales: Type.Optional(Type.Ref("Scales")),
+      guides: Type.Optional(Type.Ref("GuidesSpec")),
       legend: Type.Optional(Type.Ref("LegendSpec")),
       labs: Type.Optional(Type.Ref("Labs")),
       theme: Type.Optional(

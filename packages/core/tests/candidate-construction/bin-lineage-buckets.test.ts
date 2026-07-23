@@ -28,6 +28,8 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
       yStatColumn: null,
       yminField: null,
       ymaxField: null,
+      xminField: null,
+      xmaxField: null,
       color: { field: colorField, constant: null, scaledConstant: null },
       fill: { field: null, constant: null, scaledConstant: null },
       labelField: null,

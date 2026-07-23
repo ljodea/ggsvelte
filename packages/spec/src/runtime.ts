@@ -28,9 +28,14 @@ import type {
   LineLayer,
   PointLayer,
   PortableSpec,
+  RasterLayer,
+  RectLayer,
+  RibbonLayer,
+  SegmentLayer,
   RuleLayer,
   SmoothLayer,
   TextLayer,
+  TileLayer,
 } from "./schema.js";
 
 /** A function channel accessor: computes the channel value per row. */
@@ -57,12 +62,17 @@ export interface RuntimeColLayer extends WithRuntimeAes<ColLayer> {}
 export interface RuntimeBarLayer extends WithRuntimeAes<BarLayer> {}
 export interface RuntimeHistogramLayer extends WithRuntimeAes<HistogramLayer> {}
 export interface RuntimeAreaLayer extends WithRuntimeAes<AreaLayer> {}
+export interface RuntimeRibbonLayer extends WithRuntimeAes<RibbonLayer> {}
+export interface RuntimeSegmentLayer extends WithRuntimeAes<SegmentLayer> {}
 export interface RuntimeRuleLayer extends WithRuntimeAes<RuleLayer> {}
 export interface RuntimeTextLayer extends WithRuntimeAes<TextLayer> {}
 export interface RuntimeSmoothLayer extends WithRuntimeAes<SmoothLayer> {}
 export interface RuntimeBoxplotLayer extends WithRuntimeAes<BoxplotLayer> {}
 export interface RuntimeDensityLayer extends WithRuntimeAes<DensityLayer> {}
 export interface RuntimeErrorbarLayer extends WithRuntimeAes<ErrorbarLayer> {}
+export interface RuntimeRectLayer extends WithRuntimeAes<RectLayer> {}
+export interface RuntimeTileLayer extends WithRuntimeAes<TileLayer> {}
+export interface RuntimeRasterLayer extends WithRuntimeAes<RasterLayer> {}
 
 export type RuntimeLayerSpec =
   | RuntimePointLayer
@@ -71,12 +81,17 @@ export type RuntimeLayerSpec =
   | RuntimeBarLayer
   | RuntimeHistogramLayer
   | RuntimeAreaLayer
+  | RuntimeRibbonLayer
+  | RuntimeSegmentLayer
   | RuntimeRuleLayer
   | RuntimeTextLayer
   | RuntimeSmoothLayer
   | RuntimeBoxplotLayer
   | RuntimeDensityLayer
-  | RuntimeErrorbarLayer;
+  | RuntimeErrorbarLayer
+  | RuntimeRectLayer
+  | RuntimeTileLayer
+  | RuntimeRasterLayer;
 
 /** The in-memory spec superset ({ fn } channel accessors allowed). */
 type RuntimeSpecPortableFields = Omit<PortableSpec, "aes" | "layers">;

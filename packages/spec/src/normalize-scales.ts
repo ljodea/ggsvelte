@@ -5,6 +5,19 @@
 
 import type { ColorScaleSpec, PositionScaleSpec, Scales } from "./schema.js";
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function withGuide<T extends object>(scale: T): T {
+  if (!("guide" in scale) || !isRecord(scale.guide)) return { ...scale };
+  const guide = {
+    ...scale.guide,
+    ...(isRecord(scale.guide["theme"]) && { theme: { ...scale.guide["theme"] } }),
+  };
+  return { ...scale, guide };
+}
+
 function normalizeHexColor(color: string): string {
   const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color);
   if (match === null) return color;
@@ -21,9 +34,9 @@ function normalizeColorScale(scale: ColorScaleSpec): ColorScaleSpec {
       unknownValue: normalizeHexColor(scale.unknownValue),
     }),
   };
-  if (scale.type === "identity") return { ...scale, ...fallbacks };
+  if (scale.type === "identity") return { ...withGuide(scale), ...fallbacks };
   return {
-    ...scale,
+    ...withGuide(scale),
     ...(Array.isArray(scale.range) && {
       range: scale.range.map((color) => normalizeHexColor(color)),
     }),
@@ -82,9 +95,14 @@ function normalizePositionScale(scale: PositionScaleSpec): PositionScaleSpec {
 
 export function normalizeScales(scales: Scales): Scales {
   return {
-    ...(scales.x !== undefined && { x: normalizePositionScale(scales.x) }),
-    ...(scales.y !== undefined && { y: normalizePositionScale(scales.y) }),
+    ...(scales.x !== undefined && { x: withGuide(normalizePositionScale(scales.x)) }),
+    ...(scales.y !== undefined && { y: withGuide(normalizePositionScale(scales.y)) }),
     ...(scales.color !== undefined && { color: normalizeColorScale(scales.color) }),
     ...(scales.fill !== undefined && { fill: normalizeColorScale(scales.fill) }),
+    ...(scales.size !== undefined && { size: withGuide(scales.size) }),
+    ...(scales.linewidth !== undefined && { linewidth: withGuide(scales.linewidth) }),
+    ...(scales.alpha !== undefined && { alpha: withGuide(scales.alpha) }),
+    ...(scales.shape !== undefined && { shape: withGuide(scales.shape) }),
+    ...(scales.linetype !== undefined && { linetype: withGuide(scales.linetype) }),
   };
 }

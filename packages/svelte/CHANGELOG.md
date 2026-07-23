@@ -1,5 +1,172 @@
 # @ggsvelte/svelte
 
+## 0.9.0
+
+### Minor Changes
+
+- e45a6a5: # Facet value order, labels, and strip position
+
+  Extend facet field configuration with JSON-serializable options for closed panel order, display labels, and strip placement (issue #590).
+
+  - `facet.wrap|rows|cols.levels` — closed explicit panel order (empty panels for missing levels; unknown data values diagnosed and excluded)
+  - `facet.wrap|rows|cols.labels` — display-label map (identity keys stay semantic)
+  - `facet.strip.position` — `top` (default) | `bottom` | `left` | `right`; left/right bands are measured and reserved in layout
+  - `facet.strip.show` — set `false` to hide strip chrome when labels are authored elsewhere
+
+  Migration: none — additive
+
+  Defaults preserve ascending sort and top strips.
+
+- 463adcf: # Fixed-aspect coordinates
+
+  Add strict `coordFixed`/`coord_fixed`/`coordEqual` authoring and fit exact physical data-unit ratios inside responsive chart chrome. Fixed-scale facets keep equal panels, free positional facets fail early, theme-owned letterbox gutters render consistently across Core and Svelte, and constrained layouts preserve ratio with an explicit degraded diagnostic.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-8-to-0-9>
+
+  Replace outer-wrapper CSS aspect-ratio workarounds with `coord={coordFixed()}`. Fixed coordinates now reject free positional facet scales; use fixed facets or remove the fixed coordinate.
+
+- 6179954: <!-- markdownlint-disable MD041 -->
+
+  feat: add geom segment for finite two-endpoint lines (x,y → xend,yend)
+
+  Migration: none — additive
+
+- f8723b4: <!-- markdownlint-disable MD041 -->
+
+  feat: optional per-layer `data` (DataRef) with multi-table pipeline support
+
+  Migration: none — additive
+
+  Layers may supply their own `{values}` / `{columns}` / `{name}` data; when
+  omitted they inherit plot-level data. Shared scales train over the union of
+  layer tables, facets replicate annotation layers that omit facet fields, and
+  `model.row()` resolves global multi-table source ids. Builder and declaration
+  geom sugar accept layer `data` as well.
+
+### Patch Changes
+
+- 1b7bae9: <!-- markdownlint-disable MD041 -->
+
+  fix: do not disable legend filters when a hidden rowless annotation scaled-constant shares a style scale
+
+  A data field mapping + annotation `rule` constant on the same discrete style
+  scale still exposes filter controls for the visible data categories. Rowful
+  scaled constants that appear as legend entries remain non-filterable.
+
+- Updated dependencies [e45a6a5]
+- Updated dependencies [463adcf]
+- Updated dependencies [6179954]
+- Updated dependencies [f8723b4]
+- Updated dependencies [29f05e4]
+- Updated dependencies [fd28b89]
+  - @ggsvelte/spec@0.9.0
+  - @ggsvelte/core@0.9.0
+
+## 0.8.0
+
+### Minor Changes
+
+- 43e05b8: # Complete mapped style aesthetics
+
+  Add complete mapped size, linewidth, alpha, shape, and linetype scale plumbing across strict authoring helpers, grouping, stats, SVG/Canvas/SSR rendering, style-aware legends, inspection, and hit testing.
+
+  Discrete and binned style mappings now participate in implicit grouping. Review layered path geoms and add an explicit `group` mapping where style categories are descriptive rather than structural. Mapped `alpha` is the complete opacity aesthetic rather than a value multiplied by a scalar geom `alpha`; set the scale range to bound mapped opacity.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-7-to-0-8>
+
+- afaaeeb: <!-- markdownlint-disable MD041 -->
+
+  feat: add geom ribbon for precomputed interval bands (x+ymin+ymax or y+xmin+xmax)
+
+  Migration: none — additive
+
+- fcc8ad0: # Responsive guide presentation
+
+  Add strict scale-local and top-level guide APIs, responsive right/bottom guide layout, semantically safe discrete-guide merging, guide theme roles, and merged legend interactions.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-7-to-0-8>
+
+- 737ca85: # Add geom rect, tile, and raster to PortableSpec and all renderers
+
+  Migration: none — additive
+
+  - `rect` maps arbitrary regions with `xmin`/`xmax`/`ymin`/`ymax`
+  - `tile` draws center-sized cells (band or continuous) with optional width/height
+  - `raster` draws equal-cell dense grids with fill and no per-cell stroke
+  - Builder: `geomRect` / `geomTile` / `geomRaster`; Svelte: `<GeomRect>` / `<GeomTile>` / `<GeomRaster>`
+  - Mapped color outlines use `strokes[]` on rect batches; tile/raster use center candidate anchors
+
+### Patch Changes
+
+- Updated dependencies [2efb5b2]
+- Updated dependencies [43e05b8]
+- Updated dependencies [afaaeeb]
+- Updated dependencies [fcc8ad0]
+- Updated dependencies [737ca85]
+  - @ggsvelte/core@0.8.0
+  - @ggsvelte/spec@0.8.0
+
+## 0.7.1
+
+### Patch Changes
+
+- 616bcc6: <!-- markdownlint-disable MD041 -->
+
+  fix: geom_col/bar hover uses relative de-emphasis instead of a point ring
+
+  Rect mark inspection no longer draws a circle hover/selection ring at the bar
+  anchor. Sibling bars de-emphasize via interaction masks (including keyless
+  charts via seed primitive focus). Point-like geoms keep circle chrome.
+
+- Updated dependencies [42b031a]
+- Updated dependencies [c4d6b6c]
+- Updated dependencies [bbe65c7]
+- Updated dependencies [dc6c3fe]
+- Updated dependencies [7181580]
+- Updated dependencies [7f38860]
+- Updated dependencies [b349179]
+- Updated dependencies [f66f44b]
+- Updated dependencies [1fa684e]
+- Updated dependencies [c422da0]
+- Updated dependencies [a2c8da0]
+- Updated dependencies [94fdbec]
+- Updated dependencies [6261ee1]
+- Updated dependencies [f1b4a3d]
+- Updated dependencies [8b9e95d]
+- Updated dependencies [d591a18]
+- Updated dependencies [774f6de]
+- Updated dependencies [ddc3cd8]
+- Updated dependencies [dbdec68]
+- Updated dependencies [80905dd]
+- Updated dependencies [616bcc6]
+- Updated dependencies [328ac7d]
+- Updated dependencies [5cebbab]
+- Updated dependencies [eeffbb6]
+- Updated dependencies [4e5b875]
+- Updated dependencies [3f16ec8]
+- Updated dependencies [e6d5f6f]
+- Updated dependencies [72b01ee]
+- Updated dependencies [6afccdc]
+- Updated dependencies [c4f91d0]
+- Updated dependencies [29f0565]
+- Updated dependencies [1fed2f3]
+- Updated dependencies [9a366cf]
+- Updated dependencies [ec7f21b]
+- Updated dependencies [a54932c]
+- Updated dependencies [d1f69cb]
+- Updated dependencies [9affbb6]
+- Updated dependencies [571721f]
+- Updated dependencies [f5a8919]
+- Updated dependencies [09e6954]
+- Updated dependencies [3231dc7]
+- Updated dependencies [b278811]
+- Updated dependencies [1428eb2]
+- Updated dependencies [eeb5ce0]
+- Updated dependencies [4e4ec5b]
+- Updated dependencies [1f94c1c]
+  - @ggsvelte/core@0.7.1
+  - @ggsvelte/spec@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes

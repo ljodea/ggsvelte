@@ -79,6 +79,7 @@
     facet,
     coord,
     scales,
+    guides,
     legend,
     theme,
     labs,
@@ -125,6 +126,7 @@
     facet: () => facet,
     coord: () => coord,
     scales: () => scales,
+    guides: () => guides,
     legend: () => legend,
     theme: () => theme,
     labs: () => labs,
@@ -308,6 +310,7 @@
       inspection={inspectionState.inspection}
       inspectionPanel={inspectionState.inspectionPanel}
       coordFlipped={engine.coordFlipped}
+      hoverChrome={engine.hoverChrome}
       selectedAnchors={engine.selectedAnchors}
       emphasizedAnchors={engine.emphasizedAnchors}
       brushRect={surfaceState.brushRect}

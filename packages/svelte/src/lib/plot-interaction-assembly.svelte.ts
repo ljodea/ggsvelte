@@ -32,6 +32,7 @@ import { createIntervalState } from "./interval/interval-state.svelte.js";
 import { createInspectionState } from "./inspection/inspection-state.svelte.js";
 import { createSurfaceState } from "./surface/surface-state.svelte.js";
 import { createSelectionState, type SelectionState } from "./selection/selection-state.svelte.js";
+import { presentationChromeForKind } from "./selection/selection.js";
 import { createPlotChromeState } from "./chrome/chrome-state.svelte.js";
 
 export type PlotInteractionAssemblyDeps<
@@ -144,7 +145,12 @@ export function createPlotInteractionAssembly<
     const data = inputs.data();
     const spec = inputs.spec();
     const layers = inputs.layers();
-    const layerCount = layers === undefined ? inputs.registry.layers.length : layers.length;
+    // Declaration children expose live data getters via the registry.
+    const layerDescriptors =
+      layers === undefined
+        ? inputs.registry.layers
+        : layers.map((layer) => ({ data: (layer as { data?: unknown }).data }));
+    const layerCount = layerDescriptors.length;
     // Ready without reading `assembled` so chrome-only respecs do not re-enter.
     const ready = spec !== undefined || layerCount > 0;
     const sourceIdentity = (value: unknown) => identityTracker.sourceIdentity(value);
@@ -156,12 +162,16 @@ export function createPlotInteractionAssembly<
       spec !== undefined && typeof spec === "object"
         ? (spec as { datasets?: unknown }).datasets
         : undefined;
+    // Layer-local data must participate: a plot with only geom-child data and
+    // no plot data/spec prop would otherwise keep a stable epoch across row
+    // replacements (#609).
     return dataIdentityEpochToken({
       ready,
       dataToken: sourceIdentity(data),
       specToken: sourceIdentity(spec),
       data: contentData ?? null,
       datasets: contentDatasets ?? null,
+      layers: layerDescriptors,
       sourceIdentity,
     });
   });
@@ -376,12 +386,22 @@ export function createPlotInteractionAssembly<
     emphasisKeys: () => legendFocusState.effectiveEmphasisKeys,
     inspectionFocus: () => {
       const current = inspectionState.inspection;
-      return current === null
-        ? null
-        : {
-            sourceKeys: current.focus.sourceKeys,
-            key: current.focus.key,
-          };
+      const seed = inspectionState.inspectionSeed;
+      if (current === null) return null;
+      return {
+        sourceKeys: current.focus.sourceKeys,
+        key: current.focus.key,
+        kind: seed?.kind ?? null,
+        primitives:
+          seed === null
+            ? []
+            : Object.freeze([
+                {
+                  batchIndex: seed.batchIndex,
+                  primitiveIndex: seed.primitiveIndex,
+                },
+              ]),
+      };
     },
   });
   // ------------------------------------------------- plot chrome
@@ -482,6 +502,11 @@ export function createPlotInteractionAssembly<
     },
     get emphasizedAnchors() {
       return semanticCandidateProjection.emphasizedAnchors;
+    },
+    get hoverChrome() {
+      // Read inspection $state so chrome updates with seed (plain let).
+      if (inspectionState.inspection === null) return "ring";
+      return presentationChromeForKind(inspectionState.inspectionSeed?.kind);
     },
     get interactionMasks() {
       return semanticCandidateProjection.interactionMasks;

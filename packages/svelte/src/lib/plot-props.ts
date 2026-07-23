@@ -10,6 +10,7 @@ import type {
   CoordSpec,
   DataInput,
   FacetInput,
+  GuidesSpec,
   Labs,
   LayerInput,
   LegendSpec,
@@ -65,7 +66,9 @@ export interface GGPlotProps<
   coord?: CoordSpec | "flip";
   /** Per-scale configuration (types, domains, schemes, breaks, labels). */
   scales?: Scales;
-  /** Legend options (order). */
+  /** Appearance-only guide configuration keyed by aesthetic. */
+  guides?: GuidesSpec;
+  /** Legacy legend entry ordering. */
   legend?: LegendSpec;
   /** Theme: a registered name or an object with role overrides. */
   theme?: ThemeName | ThemeSpec;

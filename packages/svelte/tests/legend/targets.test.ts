@@ -149,6 +149,33 @@ describe("LegendTargets", () => {
     expect(targets.item(0)?.style.width).toBe("24px");
   });
 
+  it("extends a row-ending horizontal target to the legend edge", () => {
+    const horizontal = {
+      ...discreteFill,
+      direction: "horizontal" as const,
+      width: 180,
+      entries: [
+        { ...webEntry, x: 0, y: 18 },
+        { ...storeEntry, x: 80, y: 18 },
+        { value: "partner", label: "Partner", color: "#abcdef", x: 0, y: 42 },
+      ],
+    };
+    const horizontalEntries: InteractiveLegendEntry[] = horizontal.entries.map((entry, index) => ({
+      legend: horizontal,
+      entry,
+      identity: { scale: "fill", entryIndex: index },
+    }));
+    const { container } = render(LegendTargets, {
+      entries: horizontalEntries,
+      sceneWidth: 400,
+      sceneHeight: 300,
+      clearLegendX: null,
+      ...noopHandlers,
+    });
+    const targets = container.querySelectorAll<HTMLButtonElement>("[data-gg-legend-target]");
+    expect(targets.item(1)?.style.width).toBe("100px");
+  });
+
   it("wires preview enter for non-touch pointers", () => {
     const onPreviewIndex = vi.fn();
     const { container } = render(LegendTargets, {

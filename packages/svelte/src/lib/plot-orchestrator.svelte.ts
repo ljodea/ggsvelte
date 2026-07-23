@@ -27,6 +27,7 @@ import type {
   CoordSpec,
   DataInput,
   FacetInput,
+  GuidesSpec,
   Labs,
   LayerInput,
   LegendSpec,
@@ -69,6 +70,7 @@ import type { IntervalState } from "./interval/interval-state.svelte.js";
 import type { InspectionState } from "./inspection/inspection-state.svelte.js";
 import type { SurfaceState } from "./surface/surface-state.svelte.js";
 import type { SelectionState } from "./selection/selection-state.svelte.js";
+import type { PresentationAnchor, PresentationChrome } from "./selection/selection.js";
 import type { PlotChromeState } from "./chrome/chrome-state.svelte.js";
 import type { LegendFilterEvent, LegendFilterInput } from "./legend/filter.js";
 import type { LayerRegistry } from "./geoms/registry.svelte.js";
@@ -98,6 +100,7 @@ export type OrchestratorInputs<
   facet: () => FacetInput | undefined;
   coord: () => CoordSpec | "flip" | undefined;
   scales: () => Scales | undefined;
+  guides: () => GuidesSpec | undefined;
   legend: () => LegendSpec | undefined;
   theme: () => ThemeName | ThemeSpec | undefined;
   labs: () => Labs | undefined;
@@ -153,8 +156,9 @@ export type PlotOrchestrator = {
   readonly surfaceInteractive: boolean;
   readonly coordFlipped: boolean;
   readonly legendFocusEnabled: boolean;
-  readonly selectedAnchors: { x: number; y: number }[];
-  readonly emphasizedAnchors: { x: number; y: number }[];
+  readonly selectedAnchors: PresentationAnchor[];
+  readonly emphasizedAnchors: PresentationAnchor[];
+  readonly hoverChrome: PresentationChrome;
   readonly interactionMasks: readonly (BatchInteractionMask | null)[];
   readonly interactiveLegendEntries: InteractiveLegendEntry[];
   readonly effectiveLegendPressed: LegendEntryIdentity | null;
@@ -186,6 +190,7 @@ export function createPlotOrchestrator<
     const facet = inputs.facet();
     const coord = inputs.coord();
     const scales = inputs.scales();
+    const guides = inputs.guides();
     const legend = inputs.legend();
     const theme = inputs.theme();
     const labs = inputs.labs();
@@ -197,6 +202,7 @@ export function createPlotOrchestrator<
       ...(facet !== undefined && { facet }),
       ...(coord !== undefined && { coord }),
       ...(scales !== undefined && { scales }),
+      ...(guides !== undefined && { guides }),
       ...(legend !== undefined && { legend }),
       ...(theme !== undefined && { theme }),
       ...(labs !== undefined && { labs }),

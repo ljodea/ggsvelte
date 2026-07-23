@@ -20,5 +20,11 @@ export type {
 } from "./types-public.js";
 export { CANVAS_AUTO_THRESHOLD, PipelineError } from "./types-public.js";
 
-export type { ColorBinding, LayerBinding, LayerFrame, RuleForm } from "./types-frame.js";
+export type {
+  ColorBinding,
+  LayerBinding,
+  LayerFrame,
+  RuleForm,
+  StyleBinding,
+} from "./types-frame.js";
 export { NO_ROW, colorOf } from "./types-frame.js";

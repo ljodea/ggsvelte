@@ -71,9 +71,16 @@ export function buildIdentityFrame(
           ),
     groups,
     inputGroups: groups,
+    inputSourceRows: null,
     rowIndex: Uint32Array.from({ length: n }, (_, i) => i),
     colorValues: binding.color.field === null ? null : table.column(binding.color.field),
     fillValues: binding.fill.field === null ? null : table.column(binding.fill.field),
+    sizeValues: binding.size.field === null ? null : table.column(binding.size.field),
+    linewidthValues:
+      binding.linewidth.field === null ? null : table.column(binding.linewidth.field),
+    alphaValues: binding.alpha.field === null ? null : table.column(binding.alpha.field),
+    shapeValues: binding.shape.field === null ? null : table.column(binding.shape.field),
+    linetypeValues: binding.linetype.field === null ? null : table.column(binding.linetype.field),
     labelValues: binding.labelField === null ? null : table.column(binding.labelField),
     ...emptyFrameExtras(),
     xBinId:
@@ -104,5 +111,59 @@ export function buildIdentityFrame(
             binding.yTransform,
             binding.yBinning,
           ),
+    // Only ribbon (and stats that write xmin/xmax themselves) consume these
+    // fields — do not populate them for unrelated geoms that happen to map
+    // xmin/xmax, or scale collection treats the layer as edge/bin evidence.
+    xmin:
+      (binding.layer.geom === "rect" || binding.layer.geom === "ribbon") &&
+      binding.xminField !== null
+        ? positionNumeric(
+            table,
+            binding.xminField,
+            binding.xConversion,
+            binding.xTransform,
+            binding.xBinning,
+          )
+        : null,
+    xmax:
+      (binding.layer.geom === "rect" || binding.layer.geom === "ribbon") &&
+      binding.xmaxField !== null
+        ? positionNumeric(
+            table,
+            binding.xmaxField,
+            binding.xConversion,
+            binding.xTransform,
+            binding.xBinning,
+          )
+        : null,
+    // Segment only — keep xend/yend off other geoms so scale training stays clean.
+    xend:
+      binding.layer.geom === "segment" && binding.xendField !== null
+        ? positionNumeric(
+            table,
+            binding.xendField,
+            binding.xConversion,
+            binding.xTransform,
+            binding.xBinning,
+          )
+        : null,
+    yend:
+      binding.layer.geom === "segment" && binding.yendField !== null
+        ? positionNumeric(
+            table,
+            binding.yendField,
+            binding.yConversion,
+            binding.yTransform,
+            binding.yBinning,
+          )
+        : null,
+    xendValues:
+      binding.layer.geom === "segment" && binding.xendField !== null
+        ? table.column(binding.xendField)
+        : null,
+    yendValues:
+      binding.layer.geom === "segment" && binding.yendField !== null
+        ? table.column(binding.yendField)
+        : null,
   };
 }

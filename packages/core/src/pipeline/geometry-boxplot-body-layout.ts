@@ -37,8 +37,12 @@ export function layoutBoxplotBody(
   }
   const params = (binding.layer.params ?? {}) as BoxplotParams;
   const widthFrac = (params.width ?? DEFAULT_BAR_WIDTH) * fx.xScale.step;
-  const linewidth = params.linewidth ?? DEFAULT_BOX_LINEWIDTH;
-  const alpha = params.alpha ?? 1;
+  const linewidth =
+    typeof binding.linewidth.constant === "number"
+      ? binding.linewidth.constant
+      : (params.linewidth ?? DEFAULT_BOX_LINEWIDTH);
+  const alpha =
+    typeof binding.alpha.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1);
   const yScale = fx.yScale;
 
   const buffers = createBoxplotBodyBuffers();

@@ -1,10 +1,12 @@
 /**
  * Area/density path geometry batch builder (closed ribbons).
  */
+import { layerPaintFromParams, resolveGlow, resolveGradientPaint } from "../mark-paint.js";
 import type { PathsBatch } from "../scene.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
+import { numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
 import { bucketByGroup, sortGroupRowsByX } from "./geometry-shared.js";
 import { writeClosedPathGroups } from "./geometry-paths-closed-batch.js";
 import { areaGroupFillOf } from "./geometry-paths-area-fill.js";
@@ -13,6 +15,7 @@ export function areaBatch(
   frame: LayerFrame,
   fx: Frame,
   fill: ResolvedColorScale | null,
+  styles: ResolvedStyleScales,
   warnings: PipelineWarning[],
 ): PathsBatch | null {
   const { binding } = frame;
@@ -21,32 +24,55 @@ export function areaBatch(
   if (groupRows.length === 0) return null;
   sortGroupRowsByX(groupRows, frame, fx);
 
+  const paint = layerPaintFromParams(binding.layer.params);
+  const fillPaintResolved =
+    paint.fillPaint === null
+      ? undefined
+      : resolveGradientPaint(paint.fillPaint, binding.index, "fill");
+  const glowResolved = paint.glow === null ? undefined : resolveGlow(paint.glow, binding.index);
+
   // Draw later-stacked groups first so the first-seen group paints on top.
-  const { positions, rowIndex, pathOffsets, fills, strokes } = writeClosedPathGroups({
-    frame,
-    fx,
-    groupRows,
-    yTop: frame.ymax,
-    yBottom: frame.ymin,
-    fillOf: (rows) => areaGroupFillOf(frame, fill, rows),
-  });
+  const { positions, rowIndex, closedFrameRows, pathOffsets, fills, strokes } =
+    writeClosedPathGroups({
+      frame,
+      fx,
+      groupRows,
+      yTop: frame.ymax,
+      yBottom: frame.ymin,
+      fillOf: (rows) => areaGroupFillOf(frame, fill, rows) ?? fillPaintResolved?.fallback ?? null,
+    });
 
   const params: { alpha?: number } =
     binding.layer.geom === "area" || binding.layer.geom === "density"
       ? (binding.layer.params ?? {})
       : {};
+  const alphas = numericStyleVector(
+    frame,
+    "alpha",
+    groupRows.map((rows) => rows[0]!),
+    styles,
+  );
   return {
     kind: "paths",
     layerIndex: binding.index,
     panelIndex: 0,
     positions,
     rowIndex,
+    closedFrameRows,
     pathOffsets,
     strokes,
     fills,
     closed: true,
     linewidth: 0,
-    alpha: params.alpha ?? 1,
+    alpha:
+      alphas === undefined
+        ? typeof binding.alpha.constant === "number"
+          ? binding.alpha.constant
+          : (params.alpha ?? 1)
+        : 1,
+    ...(alphas !== undefined && { alphas }),
     curve: "linear",
+    ...(fillPaintResolved !== undefined && { fillPaint: fillPaintResolved }),
+    ...(glowResolved !== undefined && { glow: glowResolved }),
   };
 }

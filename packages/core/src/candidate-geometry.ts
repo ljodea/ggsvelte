@@ -1,5 +1,7 @@
 import type { ResolvedCandidateInspectMode } from "./candidate-store-types.js";
-import type { GeometryBatch } from "./scene.js";
+import { POINT_SHAPE_NAMES } from "@ggsvelte/spec";
+
+import type { GeometryBatch, PointsBatch } from "./scene.js";
 
 /**
  * Geometry-array topology for candidate indexes / hit refine:
@@ -37,10 +39,12 @@ export function renderPrimitiveCount(batch: GeometryBatch): number {
 }
 
 export function isCandidatePrimitive(batch: GeometryBatch, primitiveIndex: number): boolean {
+  if (batch.kind === "paths" && batch.candidates === false) return false;
   return batch.kind !== "paths" || batch.semanticAnchors?.[primitiveIndex] !== 0;
 }
 
 export function candidatePrimitiveCount(batch: GeometryBatch): number {
+  if (batch.kind === "paths" && batch.candidates === false) return 0;
   if (batch.kind !== "paths" || batch.semanticAnchors === undefined) return primitiveCount(batch);
   let count = 0;
   for (const anchor of batch.semanticAnchors) if (anchor !== 0) count++;
@@ -48,8 +52,12 @@ export function candidatePrimitiveCount(batch: GeometryBatch): number {
 }
 
 export function localAnchor(batch: GeometryBatch, i: number): readonly [number, number] {
-  if (batch.kind === "rects")
-    return [batch.rects[i * 4]! + batch.rects[i * 4 + 2]! / 2, batch.rects[i * 4 + 1]!];
+  if (batch.kind === "rects") {
+    const x = batch.rects[i * 4]! + batch.rects[i * 4 + 2]! / 2;
+    const yTop = batch.rects[i * 4 + 1]!;
+    const h = batch.rects[i * 4 + 3]!;
+    return batch.anchor === "center" ? [x, yTop + h / 2] : [x, yTop];
+  }
   if (batch.kind === "segments")
     return batch.anchorPositions === undefined
       ? [
@@ -117,6 +125,36 @@ export function segmentIntersectsRect(
     if (enter > exit) return false;
   }
   return true;
+}
+
+/** Conservative shape-aware point hit distance, or null outside the symbol bounds. */
+export function pointHitDistance(
+  batch: PointsBatch,
+  primitive: number,
+  dx: number,
+  dy: number,
+  hitTolerance: number,
+): number | null {
+  const size = batch.sizes?.[primitive] ?? batch.size;
+  const shape =
+    batch.shapeIndexes === undefined
+      ? batch.shape
+      : POINT_SHAPE_NAMES[batch.shapeIndexes[primitive]!]!;
+  if (shape === "circle") {
+    const distance = Math.hypot(dx, dy);
+    return distance <= size + hitTolerance ? distance : null;
+  }
+  const ax = Math.abs(dx);
+  const ay = Math.abs(dy);
+  const inside =
+    shape === "triangle"
+      ? ax <= size * 1.1 + hitTolerance && ay <= size * 1.2 + hitTolerance
+      : shape === "diamond"
+        ? ax + ay * 0.8 <= size + hitTolerance
+        : shape === "plus"
+          ? ax <= size * 1.25 + hitTolerance && ay <= size * 1.25 + hitTolerance
+          : ax <= size + hitTolerance && ay <= size + hitTolerance;
+  return inside ? Math.hypot(dx, dy) : null;
 }
 
 /**

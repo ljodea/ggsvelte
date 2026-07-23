@@ -61,7 +61,11 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes): SpatialIndex 
     const batch = scene.batches[batchIds[id]!]!;
     if (batch.kind === "points") {
       isPoint[id] = 1;
-      maxPointReach = Math.max(maxPointReach, batch.size + hitTolerance);
+      const primitive = primitiveIds[id]!;
+      maxPointReach = Math.max(
+        maxPointReach,
+        (batch.sizes?.[primitive] ?? batch.size) * 1.25 + hitTolerance,
+      );
       const ids = pointIdsByBatch.get(batchIds[id]!);
       if (ids === undefined) pointIdsByBatch.set(batchIds[id]!, [id]);
       else ids.push(id);
@@ -84,7 +88,7 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes): SpatialIndex 
       maxX = Math.max(rx, rx + rw);
       maxY = Math.max(ry, ry + rh);
     } else if (batch.kind === "segments") {
-      const pad = batch.linewidth / 2 + hitTolerance;
+      const pad = (batch.linewidths?.[i] ?? batch.linewidth) / 2 + hitTolerance;
       const renderStart = batch.renderPathOffsets?.[i];
       const renderEnd = batch.renderPathOffsets?.[i + 1];
       if (

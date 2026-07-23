@@ -109,6 +109,16 @@ export const ERROR_CATALOG = {
     summary: "A manual color scale has different domain and range lengths.",
     fix: "Provide exactly one range color for each explicit domain value.",
   },
+  "guide-aesthetic-incompatible": {
+    tier: 1,
+    summary: "A guide variant is incompatible with its aesthetic or trained scale family.",
+    fix: "Use axis for x/y, legend for discrete/style scales, colorbar for sequential color, or colorsteps for binned color.",
+  },
+  "coord-fixed-free-scales": {
+    tier: 1,
+    summary: "Fixed-aspect coordinates cannot represent free positional facet scales truthfully.",
+    fix: 'Use facet.scales = "fixed", or remove coord_fixed.',
+  },
   // --- tier 1 structural (grammar rules the schema alone cannot express) ---
   "missing-required-channel": {
     tier: 2,
@@ -155,6 +165,28 @@ export const ERROR_CATALOG = {
     tier: 2,
     summary: "facet.ncol only applies to the wrap form.",
     fix: "Remove ncol, or switch to the wrap form.",
+  },
+  "unsupported-geom-aesthetic": {
+    tier: 2,
+    summary: "A mapped style aesthetic is not consumed by the selected geom.",
+    fix: "Remove the mapping or move it to one of the compatible geoms listed in the error.",
+  },
+  "ribbon-orientation-ambiguous": {
+    tier: 2,
+    summary:
+      "A ribbon layer maps both x-orientation (x+ymin+ymax) and y-orientation (y+xmin+xmax) contracts without params.orientation.",
+    fix: 'Set params.orientation to "x" or "y", or map only one complete interval contract.',
+  },
+  "paint-stops-unordered": {
+    tier: 2,
+    summary: "A gradient paint's color stops are not in non-decreasing offset order.",
+    fix: "Sort stops by offset ascending (each offset between 0 and 1 inclusive).",
+  },
+  "paint-scale-conflict": {
+    tier: 2,
+    summary:
+      "Within-mark fillPaint/strokePaint cannot combine with a data-mapped fill/color scale channel.",
+    fix: "Remove the data-mapped fill/color aesthetic, or remove the paint and keep the scale.",
   },
   // --- tier 2 (data-aware; needs inline data or a DataProfile) -------------
   "unknown-field": {

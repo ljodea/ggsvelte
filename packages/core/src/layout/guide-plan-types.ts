@@ -4,7 +4,7 @@
  * Behavior (planning algorithms) lives in temporal-guide.ts and color/legend
  * pipeline modules; this file is pure data shapes only.
  */
-import type { TemporalKind } from "@ggsvelte/spec";
+import type { StyleAesthetic, TemporalKind } from "@ggsvelte/spec";
 
 import type { CellValue } from "../table.js";
 import type { BandLabelMode } from "./band-guide.js";
@@ -38,28 +38,38 @@ export interface AxisGuidePlan {
   degraded: readonly string[];
   /** Band label layout (measured horizontal band axes only). */
   bandLabelMode?: BandLabelMode;
-  /** Band rotation in degrees (0 | -45 | -90). */
+  /** Band rotation in degrees (auto chooses −45/−90; authors may pin any finite angle). */
   bandLabelAngle?: number;
   /** Measured orthogonal (bottom) band height the labels require, px. */
   bandLabelBandHeight?: number;
+  /**
+   * True when the author forced `scales.*.guide.mode` (not auto). Heuristic
+   * wrap/rotate advisories should be suppressed for these plans.
+   */
+  bandLabelAuthorPinned?: boolean;
 }
 
 export interface DiscreteGuideEntry {
   value: CellValue;
   label: string;
-  color: string;
+  color?: string;
+  size?: number;
+  linewidth?: number;
+  alpha?: number;
+  shape?: string;
+  linetype?: string;
 }
 
 export interface DiscreteGuidePlan {
   type: "discrete";
   id: string;
-  aesthetic: "color" | "fill";
-  scaleType: "ordinal" | "manual";
+  aesthetic: "color" | "fill" | StyleAesthetic;
+  scaleType: "sequential" | "ordinal" | "binned" | "manual" | "identity";
   title: string;
   domain: readonly CellValue[];
   entries: readonly DiscreteGuideEntry[];
-  naValue: string;
-  unknownValue: string;
+  naValue: string | number;
+  unknownValue: string | number;
 }
 
 export interface ColorbarGuideTick {

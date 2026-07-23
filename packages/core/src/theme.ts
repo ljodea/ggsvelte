@@ -56,6 +56,7 @@ export function resolveTheme(
     accent: theme.accent ?? base.accent,
     grid: theme.grid ?? base.grid,
     panel: theme.panel ?? base.panel,
+    ...(theme.letterboxFill !== undefined && { letterboxFill: theme.letterboxFill }),
     axisText: theme.axisText ?? base.axisText,
     axisLine: theme.axisLine ?? base.axisLine,
     tickColor: theme.tickColor ?? base.tickColor,
@@ -70,6 +71,13 @@ export function resolveTheme(
     subtitleWeight: theme.subtitleWeight ?? base.subtitleWeight,
     axisTitleSize: theme.axisTitleSize ?? base.axisTitleSize,
     axisTitleWeight: theme.axisTitleWeight ?? base.axisTitleWeight,
+    guideTitleSize: theme.guideTitleSize ?? base.guideTitleSize,
+    legendKeySize: theme.legendKeySize ?? base.legendKeySize,
+    legendKeyGap: theme.legendKeyGap ?? base.legendKeyGap,
+    legendRowGap: theme.legendRowGap ?? base.legendRowGap,
+    guideBlockGap: theme.guideBlockGap ?? base.guideBlockGap,
+    colorbarThickness: theme.colorbarThickness ?? base.colorbarThickness,
+    colorbarLengthMin: theme.colorbarLengthMin ?? base.colorbarLengthMin,
     captionSize: theme.captionSize ?? base.captionSize,
     stripSize: theme.stripSize ?? base.stripSize,
     stripWeight: theme.stripWeight ?? base.stripWeight,
@@ -108,6 +116,7 @@ export type ThemeColorRole =
   | "accent"
   | "grid"
   | "panel"
+  | "letterboxFill"
   | "axisText"
   | "axisLine"
   | "tickColor"

@@ -260,7 +260,7 @@ export function writeConsumerFixture(
   writeFileSync(
     join(directory, "src", "routes", "contract", "+page.svelte"),
     `<script lang="ts">
-  import { coord_transform, coordTransform, dmy, GGPlot, GeomLine, GeomPoint, scaleColorBinned, scaleColourBinned, scaleXBinned, scaleXDate, scaleXLog10, scale_color_binned, scale_colour_binned, scale_x_date, scale_x_log10, type GuidePlan, type PortableSpec } from "@ggsvelte/svelte";
+  import { coord_transform, coordTransform, dmy, GGPlot, GeomLine, GeomPoint, guideColorsteps, guideLegend, guide_legend, scaleColorBinned, scaleColourBinned, scaleShapeDiscrete, scaleSizeContinuous, scaleXBinned, scaleXDate, scaleXLog10, scale_color_binned, scale_colour_binned, scale_shape_discrete, scale_x_date, scale_x_log10, type GuidePlan, type PortableSpec } from "@ggsvelte/svelte";
   const spec: PortableSpec = ${JSON.stringify(plotSpec)};
   const temporalRows = [
     { year: "1835", value: 12 },
@@ -282,6 +282,8 @@ export function writeConsumerFixture(
   const binnedScale = scaleXBinned({ breaks: [1, 10, 100, 1000] });
   const binnedColor = scaleColorBinned({ breaks: [1, 10, 100, 1000] });
   if (scaleColorBinned !== scaleColourBinned || scaleColorBinned !== scale_color_binned || scaleColorBinned !== scale_colour_binned) throw new Error("color alias identity mismatch");
+  if (scaleShapeDiscrete !== scale_shape_discrete) throw new Error("shape alias identity mismatch");
+  if (guideLegend !== guide_legend) throw new Error("guide alias identity mismatch");
   const transformedCoord = coordTransform({ x: "log10" });
   if (coord_transform !== coordTransform) throw new Error("coord alias identity mismatch");
   void transformedCoord;
@@ -320,9 +322,20 @@ export function writeConsumerFixture(
   data={[{ x: 1, y: 1 }, { x: 10, y: 2 }, { x: 100, y: 3 }]}
   aes={{ x: "x", y: "y", color: "x" }}
   scales={scaleColorBinned({ breaks: [1, 10, 100] })}
+  guides={{ color: guideColorsteps({ position: "bottom", direction: "horizontal" }) }}
   width={480}
   height={320}
   ariaLabel="Packed binned color contract chart"
+>
+  <GeomPoint />
+</GGPlot>
+<GGPlot
+  data={[{ x: 1, y: 1, amount: 2, group: "a" }, { x: 2, y: 2, amount: 8, group: "b" }]}
+  aes={{ x: "x", y: "y", size: "amount", shape: "group" }}
+  scales={{ ...scaleSizeContinuous(), ...scaleShapeDiscrete() }}
+  width={480}
+  height={320}
+  ariaLabel="Packed mapped style contract chart"
 >
   <GeomPoint />
 </GGPlot>
@@ -361,7 +374,7 @@ console.log("prerendered Quickstart verified");
   writeFileSync(
     join(directory, "smoke.mjs"),
     `import { strict as assert } from "node:assert";
-import { coord_transform, coordTransform, SpecModule, normalize, scaleColorBinned, scaleColourBinned, scaleXBinned, scaleXLog10, scale_colour_binned, scale_x_log10, validate } from "@ggsvelte/spec";
+import { coord_equal, coord_fixed, coord_transform, coordEqual, coordFixed, coordTransform, guideColorsteps, guideLegend, guide_legend, SpecModule, normalize, scaleColorBinned, scaleColourBinned, scaleShapeDiscrete, scaleSizeContinuous, scaleXBinned, scaleXLog10, scale_colour_binned, scale_shape_discrete, scale_x_log10, validate } from "@ggsvelte/spec";
 import { renderToSVGString, runPipeline } from "@ggsvelte/core";
 
 const pointParamsSchema = SpecModule.Import("PointParams");
@@ -370,8 +383,15 @@ const spec = ${JSON.stringify(plotSpec)};
 const logScale = scaleXLog10();
 assert.deepEqual(logScale, scale_x_log10());
 assert.equal(coordTransform, coord_transform);
+assert.equal(coordFixed, coord_fixed);
+assert.equal(coordEqual, coord_equal);
+assert.equal(coordEqual, coordFixed);
+assert.deepEqual(coordFixed(), { type: "fixed" });
 assert.equal(scaleColorBinned, scaleColourBinned);
 assert.equal(scaleColorBinned, scale_colour_binned);
+assert.equal(scaleShapeDiscrete, scale_shape_discrete);
+assert.equal(guideLegend, guide_legend);
+assert.deepEqual(scaleSizeContinuous({ range: [2, 8] }), { size: { type: "sequential", range: [2, 8] } });
 assert.deepEqual(coordTransform({ x: "log10" }), { type: "transform", x: { transform: "log10" } });
 assert.equal(normalize({ data: spec.data, layers: spec.layers, scales: logScale }).scales.x.type, "linear");
 assert.equal(normalize({ data: spec.data, layers: spec.layers, scales: logScale }).scales.x.transform, "log10");
@@ -384,6 +404,7 @@ const colorSpec = {
   data: { values: [{ x: 1, y: 1, score: 1 }, { x: 2, y: 2, score: 10 }, { x: 3, y: 3, score: 100 }] },
   layers: [{ geom: "point", aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "score" } } }],
   scales: scaleColorBinned({ breaks: [1, 10, 100] }),
+  guides: { color: guideColorsteps({ position: "bottom" }) },
 };
 const temporalSpec = {
   data: { values: [{ year: "1835", value: 12 }, { year: "2026", value: 31 }] },

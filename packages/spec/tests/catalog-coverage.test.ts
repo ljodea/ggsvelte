@@ -53,6 +53,16 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
       scales: { color: { type: "manual", domain: ["a", "b"], range: ["#f00"] } },
     },
   },
+  "guide-aesthetic-incompatible": {
+    spec: { layers: [point], scales: { x: { guide: { type: "legend" } } } },
+  },
+  "coord-fixed-free-scales": {
+    spec: {
+      layers: [point],
+      coord: { type: "fixed" },
+      facet: { wrap: { field: "group" }, scales: "free_x" },
+    },
+  },
   "missing-required-channel": { spec: { layers: [{ geom: "point" }] }, options: {} },
   "rule-form-ambiguous": {
     spec: {
@@ -87,6 +97,94 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
   "facet-form-missing": { spec: { layers: [point], facet: {} }, options: {} },
   "facet-ncol-without-wrap": {
     spec: { layers: [point], facet: { rows: { field: "g" }, ncol: 2 } },
+    options: {},
+  },
+  "unsupported-geom-aesthetic": {
+    spec: {
+      layers: [
+        {
+          geom: "line",
+          aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "x" } },
+        },
+      ],
+    },
+    options: {},
+  },
+  "ribbon-orientation-ambiguous": {
+    spec: {
+      layers: [
+        {
+          geom: "ribbon",
+          aes: {
+            x: { field: "x" },
+            y: { field: "y" },
+            ymin: { field: "ymin" },
+            ymax: { field: "ymax" },
+            xmin: { field: "xmin" },
+            xmax: { field: "xmax" },
+          },
+        },
+      ],
+    },
+    options: {},
+  },
+  "paint-stops-unordered": {
+    spec: {
+      layers: [
+        {
+          geom: "ribbon",
+          aes: {
+            x: { field: "x" },
+            ymin: { field: "lo" },
+            ymax: { field: "hi" },
+          },
+          params: {
+            fillPaint: {
+              type: "linear",
+              x1: 0,
+              y1: 0,
+              x2: 1,
+              y2: 0,
+              stops: [
+                { offset: 0.9, color: "#000000" },
+                { offset: 0.1, color: "#ffffff" },
+              ],
+              fallback: "#000000",
+            },
+          },
+        },
+      ],
+    },
+    options: {},
+  },
+  "paint-scale-conflict": {
+    spec: {
+      layers: [
+        {
+          geom: "ribbon",
+          aes: {
+            x: { field: "x" },
+            ymin: { field: "lo" },
+            ymax: { field: "hi" },
+            fill: { field: "g" },
+          },
+          params: {
+            fillPaint: {
+              type: "linear",
+              x1: 0,
+              y1: 0,
+              x2: 1,
+              y2: 0,
+              stops: [
+                { offset: 0, color: "#000000" },
+                { offset: 1, color: "#ffffff" },
+              ],
+              fallback: "#000000",
+            },
+          },
+        },
+      ],
+    },
     options: {},
   },
   "unknown-field": {

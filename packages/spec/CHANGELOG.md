@@ -1,5 +1,173 @@
 # @ggsvelte/spec
 
+## 0.9.0
+
+### Minor Changes
+
+- e45a6a5: # Facet value order, labels, and strip position
+
+  Extend facet field configuration with JSON-serializable options for closed panel order, display labels, and strip placement (issue #590).
+
+  - `facet.wrap|rows|cols.levels` — closed explicit panel order (empty panels for missing levels; unknown data values diagnosed and excluded)
+  - `facet.wrap|rows|cols.labels` — display-label map (identity keys stay semantic)
+  - `facet.strip.position` — `top` (default) | `bottom` | `left` | `right`; left/right bands are measured and reserved in layout
+  - `facet.strip.show` — set `false` to hide strip chrome when labels are authored elsewhere
+
+  Migration: none — additive
+
+  Defaults preserve ascending sort and top strips.
+
+- 463adcf: # Fixed-aspect coordinates
+
+  Add strict `coordFixed`/`coord_fixed`/`coordEqual` authoring and fit exact physical data-unit ratios inside responsive chart chrome. Fixed-scale facets keep equal panels, free positional facets fail early, theme-owned letterbox gutters render consistently across Core and Svelte, and constrained layouts preserve ratio with an explicit degraded diagnostic.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-8-to-0-9>
+
+  Replace outer-wrapper CSS aspect-ratio workarounds with `coord={coordFixed()}`. Fixed coordinates now reject free positional facet scales; use fixed facets or remove the fixed coordinate.
+
+- 6179954: <!-- markdownlint-disable MD041 -->
+
+  feat: add geom segment for finite two-endpoint lines (x,y → xend,yend)
+
+  Migration: none — additive
+
+- f8723b4: <!-- markdownlint-disable MD041 -->
+
+  feat: optional per-layer `data` (DataRef) with multi-table pipeline support
+
+  Migration: none — additive
+
+  Layers may supply their own `{values}` / `{columns}` / `{name}` data; when
+  omitted they inherit plot-level data. Shared scales train over the union of
+  layer tables, facets replicate annotation layers that omit facet fields, and
+  `model.row()` resolves global multi-table source ids. Builder and declaration
+  geom sugar accept layer `data` as well.
+
+### Patch Changes
+
+- fd28b89: <!-- markdownlint-disable MD041 -->
+
+  fix: align temporal color censor recovery with runtime channel training
+
+  parseFailure: "censor" on sequential/binned color now recovers from
+  channel-wide training sources (sibling fields, scaled constants), parseable
+  domain endpoints, and parseable binned breaks — matching collectColorChannelValues
+  and sequential/binned train behavior.
+
+## 0.8.0
+
+### Minor Changes
+
+- 43e05b8: # Complete mapped style aesthetics
+
+  Add complete mapped size, linewidth, alpha, shape, and linetype scale plumbing across strict authoring helpers, grouping, stats, SVG/Canvas/SSR rendering, style-aware legends, inspection, and hit testing.
+
+  Discrete and binned style mappings now participate in implicit grouping. Review layered path geoms and add an explicit `group` mapping where style categories are descriptive rather than structural. Mapped `alpha` is the complete opacity aesthetic rather than a value multiplied by a scalar geom `alpha`; set the scale range to bound mapped opacity.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-7-to-0-8>
+
+- afaaeeb: <!-- markdownlint-disable MD041 -->
+
+  feat: add geom ribbon for precomputed interval bands (x+ymin+ymax or y+xmin+xmax)
+
+  Migration: none — additive
+
+- fcc8ad0: # Responsive guide presentation
+
+  Add strict scale-local and top-level guide APIs, responsive right/bottom guide layout, semantically safe discrete-guide merging, guide theme roles, and merged legend interactions.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-7-to-0-8>
+
+- 737ca85: # Add geom rect, tile, and raster to PortableSpec and all renderers
+
+  Migration: none — additive
+
+  - `rect` maps arbitrary regions with `xmin`/`xmax`/`ymin`/`ymax`
+  - `tile` draws center-sized cells (band or continuous) with optional width/height
+  - `raster` draws equal-cell dense grids with fill and no per-cell stroke
+  - Builder: `geomRect` / `geomTile` / `geomRaster`; Svelte: `<GeomRect>` / `<GeomTile>` / `<GeomRaster>`
+  - Mapped color outlines use `strokes[]` on rect batches; tile/raster use center candidate anchors
+
+## 0.7.1
+
+### Patch Changes
+
+- bbe65c7: <!-- markdownlint-disable MD041 -->
+
+  feat: author `scales.*.guide` pins for band axis label layout
+
+  Optional `{ mode, angle, wrap }` on position scales locks categorical label
+  presentation (single / wrap / rotate / off) instead of auto-escalation.
+  Advisories now point at `scales.x.guide` as the howToOverride surface.
+
+- 4e5b875: <!-- markdownlint-disable MD041 -->
+
+  Extract builder authoring data conversion into builder-data.ts and split the long temporal scale API tests into schema vs authoring files. Public builder exports are unchanged.
+
+- 3f16ec8: <!-- markdownlint-disable MD041 -->
+
+  Extract fluent builder geom option types and scale sugar into focused modules, and split position-scale schema vs helper tests. Public gg()/GGBuilder API is unchanged.
+
+- e6d5f6f: <!-- markdownlint-disable MD041 -->
+
+  Extract the pure LINT_CATALOG into lint-catalog.ts (error-catalog pattern) and split the long lint test suite into rules vs wiring files. Public lint imports are unchanged.
+
+- 72b01ee: <!-- markdownlint-disable MD041 -->
+
+  Split lintSpec into layer and scale rule modules, guard schema-invalid scale entries so lint never throws, and keep catalog source-scan coverage multi-file. Public lintSpec behavior is otherwise unchanged.
+
+- 6afccdc: <!-- markdownlint-disable MD041 -->
+
+  Split normalize scale and coordinate canonicalization into dedicated modules behind the existing normalize() entry. Public normalize/normalizeChannel exports and behavior are unchanged.
+
+- c4f91d0: <!-- markdownlint-disable MD041 -->
+
+  Split strict portability checks from lossy tooling conversion, with co-located tests. Public isPortable/toPortable/toPortableLossy surface is unchanged.
+
+- 29f0565: <!-- markdownlint-disable MD041 -->
+
+  Split scale authoring helpers into position and color modules with a thin facade, and split the long tier-2 validate suite by concern. Public scale-helper import paths and validation behavior are unchanged.
+
+- 1fed2f3: <!-- markdownlint-disable MD041 -->
+
+  Split temporal guides into interval grammar/labels and tick generation behind a stable temporal-guides facade. Public package exports and interval tick behavior are unchanged.
+
+- 9a366cf: <!-- markdownlint-disable MD041 -->
+
+  Split value-level temporal parsing into core, exact-format, and named-engine modules, and co-locate format plus tier-2 temporal scale tests. Public parseTemporal surface is unchanged.
+
+- ec7f21b: <!-- markdownlint-disable MD041 -->
+
+  Split temporal parsing into parse engines, column inference, and a thin authoring facade so domain edits do not require reading the full module. Public package exports and `./temporal.js` re-exports are unchanged.
+
+- a54932c: <!-- markdownlint-disable MD041 -->
+
+  Split the long temporal characterization suite into parse, column, and helpers test files co-located with the temporal production modules. No runtime behavior change.
+
+- d1f69cb: <!-- markdownlint-disable MD041 -->
+
+  Split tier-2 dataChecks into position, color, and shared temporal modules, and co-locate color data-aware validation tests. Public validate() behavior is unchanged.
+
+- 9affbb6: <!-- markdownlint-disable MD041 -->
+
+  Split tier-1 TypeBox error mapping into schema/path walk helpers and the agent SpecError mapper. Public validate() surface and error messages are unchanged.
+
+- 571721f: <!-- markdownlint-disable MD041 -->
+
+  Extract channel/DataRef form classification from the TypeBox error mapper and split temporal decision-reuse tier-2 tests into their own file. Public validate() behavior is unchanged.
+
+- f5a8919: <!-- markdownlint-disable MD041 -->
+
+  Split TypeBox path-group error mapping into union classification and keyword handlers. Public validate() agent diagnostics are unchanged.
+
+- 09e6954: <!-- markdownlint-disable MD041 -->
+
+  Extract tier-1 schema shape walks into a focused module with shared GEOM_BRANCHES, and co-locate temporal tier-2 tests with decision-reuse vs position-scale production modules. Public validate() behavior is unchanged.
+
+- 3231dc7: <!-- markdownlint-disable MD041 -->
+
+  Split data-free structural validation into layer, color-scheme, and facet modules behind a stable validate-structure barrel. Public validate() behavior is unchanged.
+
 ## 0.7.0
 
 ### Minor Changes

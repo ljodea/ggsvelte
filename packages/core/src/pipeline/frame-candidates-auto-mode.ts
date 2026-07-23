@@ -16,6 +16,9 @@ export function candidateAutoMode(
       return "xy";
     case "col":
     case "bar":
+    case "rect":
+    case "tile":
+    case "raster":
       return "exact";
     case "line":
     case "area":
@@ -24,6 +27,8 @@ export function candidateAutoMode(
     case "errorbar":
     case "boxplot":
       return "x";
+    case "ribbon":
+      return binding.ribbonOrientation === "y" ? "y" : "x";
     case "rule": {
       if (binding.ruleForm === "vertical") return "x";
       if (binding.ruleForm === "horizontal") return "y";

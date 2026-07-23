@@ -40,8 +40,21 @@ export function resolveLayerFields(
     }
     push("ymin", binding.yminField);
     push("ymax", binding.ymaxField);
+    push("xmin", binding.xminField);
+    push("xmax", binding.xmaxField);
+    if (binding.layer.geom === "segment") {
+      push("xend", binding.xendField);
+      push("yend", binding.yendField);
+    }
+    push("width", binding.widthField);
+    push("height", binding.heightField);
     push("color", binding.color.field);
     push("fill", binding.fill.field);
+    for (const channel of ["size", "linewidth", "alpha", "shape", "linetype"] as const) {
+      const style = binding[channel];
+      push(channel, style.field);
+      if (style.statColumn !== null) push(channel, style.statColumn, "stat");
+    }
     push("label", binding.labelField);
     push("weight", binding.weightField);
     return fields;

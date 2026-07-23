@@ -1,0 +1,6 @@
+{
+  "title": "Ribbon interval",
+  "description": "A filled band between precomputed lower and upper bounds along x — the canonical geom_ribbon contract (not a zero-baseline area).",
+  "tags": ["ribbon", "interval", "bounds"],
+  "docsSection": "Areas"
+}

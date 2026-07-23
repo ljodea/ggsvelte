@@ -16,6 +16,8 @@
  *
  * @internal
  */
+import type { ResolvedGlow, ResolvedGradientPaint } from "./mark-paint.js";
+import type { Linetype, PointShape } from "./scales/style.js";
 import type { CellValue } from "./table.js";
 import type { ThemeTokens } from "./theme.js";
 
@@ -35,8 +37,14 @@ export interface PointsBatch {
   rowIndex: Uint32Array;
   /** Point radius in px. */
   size: number;
+  /** Per-mark radii when aes.size is mapped; omitted keeps the scalar fast path. */
+  sizes?: Float32Array;
   alpha: number;
-  shape: "circle" | "square" | "triangle";
+  /** Per-mark opacity when aes.alpha is mapped. */
+  alphas?: Float32Array;
+  shape: PointShape;
+  /** Canonical POINT_SHAPE_NAMES indexes when aes.shape is mapped. */
+  shapeIndexes?: Uint8Array;
   /** Constant color, or null when `colors` carries per-mark values. */
   fill: string | null;
   /** Per-mark resolved colors (when the color channel is data-mapped). */
@@ -52,6 +60,8 @@ export interface PathsBatch {
   positions: Float32Array;
   /** Source row per render vertex (synthetic vertices inherit an adjacent row). */
   rowIndex: Uint32Array;
+  /** Frame row per semantic vertex when render subpaths split one statistical group. */
+  frameRowIndex?: Uint32Array;
   /**
    * Optional render-vertex mask: 1 for original/stat semantic anchors, 0 for
    * coordinate-tessellation vertices. CandidateStore ignores zero entries.
@@ -60,6 +70,13 @@ export interface PathsBatch {
   /** Original/stat primitive index for each render vertex. Candidate datum
    * resolution uses this instead of synthetic render topology indexes. */
   semanticIndex?: Uint32Array;
+  /**
+   * Closed ribbons only: frame-row id per **pre-projection** semantic vertex
+   * (upper ascending, then lower descending). Matches emitted vertices after
+   * non-finite edge filtering so coord `semanticIndex` maps to the correct
+   * frame row (#502). Length = pre-projection vertex count.
+   */
+  closedFrameRows?: Uint32Array;
   /** Start offset (in points) of each subpath; length = subpathCount + 1. */
   pathOffsets: Uint32Array;
   /** Stroke color per subpath (null = theme ink). */
@@ -70,8 +87,27 @@ export interface PathsBatch {
   /** Close each subpath (area polygons). */
   closed?: boolean;
   linewidth: number;
+  linewidths?: Float32Array;
   alpha: number;
+  alphas?: Float32Array;
+  linetype?: Linetype;
+  linetypeIndexes?: Uint8Array;
+  /** Stroke line cap (ribbon outlines; default renderer round when omitted). */
+  linecap?: "butt" | "round" | "square";
+  /** Stroke line join (ribbon outlines; default renderer round when omitted). */
+  linejoin?: "miter" | "round" | "bevel";
+  /**
+   * When false, candidate construction skips this batch (presentation-only
+   * outline edges of a composite mark). Default true / omitted = candidates.
+   */
+  candidates?: boolean;
   curve: "linear" | "step";
+  /** Within-mark gradient fill (fallback solid remains in `fills`). */
+  fillPaint?: ResolvedGradientPaint;
+  /** Within-mark gradient stroke (fallback solid remains in `strokes`). */
+  strokePaint?: ResolvedGradientPaint;
+  /** Bounded glow treatment for this batch's marks. */
+  glow?: ResolvedGlow;
 }
 
 export interface RectsBatch {
@@ -94,9 +130,28 @@ export interface RectsBatch {
   /** Outline stroke: a color string, or null for theme ink. Omitted =
    *  no outline (bars/cols — decision 0008 note 7). */
   stroke?: string | null;
-  /** Outline width in px (only with `stroke`). */
+  /** Per-rect outline colors when aes.color is data-mapped (rect/tile). */
+  strokes?: string[];
+  /** Outline width in px (only with `stroke` / `strokes`). */
   strokeWidth?: number;
+  strokeWidths?: Float32Array;
+  /** Constant outline linetype (boxplot boxes; omitted = solid). */
+  linetype?: Linetype;
+  /** Per-rect outline linetype indexes when aes.linetype is mapped. */
+  linetypeIndexes?: Uint8Array;
   alpha: number;
+  alphas?: Float32Array;
+  /**
+   * Candidate/tooltip anchor: top-center (default, bars/boxplot) or geometric
+   * center (rect/tile/raster).
+   */
+  anchor?: "top-center" | "center";
+  /** Within-mark gradient fill (fallback solid remains in `fill`/`fills`). */
+  fillPaint?: ResolvedGradientPaint;
+  /** Within-mark gradient stroke (fallback solid remains in `stroke`/`strokes`). */
+  strokePaint?: ResolvedGradientPaint;
+  /** Bounded glow treatment for this batch's marks. */
+  glow?: ResolvedGlow;
 }
 
 export interface SegmentsBatch {
@@ -120,7 +175,17 @@ export interface SegmentsBatch {
   stroke: string | null;
   strokes?: string[];
   linewidth: number;
+  linewidths?: Float32Array;
   alpha: number;
+  alphas?: Float32Array;
+  linetype?: Linetype;
+  linetypeIndexes?: Uint8Array;
+  /** Optional stroke linecap (segment geom). Undefined leaves renderer default / no attribute. */
+  linecap?: "butt" | "round" | "square";
+  /** Within-mark gradient stroke (fallback solid remains in `stroke`/`strokes`). */
+  strokePaint?: ResolvedGradientPaint;
+  /** Bounded glow treatment for this batch's marks. */
+  glow?: ResolvedGlow;
 }
 
 export interface GlyphsBatch {
@@ -139,8 +204,10 @@ export interface GlyphsBatch {
   colors?: string[];
   /** Font size in px. */
   size: number;
+  sizes?: Float32Array;
   anchor: "start" | "middle" | "end";
   alpha: number;
+  alphas?: Float32Array;
 }
 
 export type GeometryBatch = PointsBatch | PathsBatch | RectsBatch | SegmentsBatch | GlyphsBatch;
@@ -154,6 +221,10 @@ export interface SceneTick {
   /** Standalone accessible text; contextual visible labels may be shorter. */
   fullLabel: string;
   kind: "major" | "minor";
+  /** Appearance-only visibility flags; semantic value/fullLabel remain intact. */
+  showTick?: boolean;
+  showLabel?: boolean;
+  labelSize?: number;
   /** Wrapped label lines (band axis, mode "wrapped"). */
   lines?: string[];
   /** Rotation in degrees (band axis, mode "rotated"): -45 | -90. */
@@ -164,6 +235,7 @@ export interface SceneAxis {
   ticks: SceneTick[];
   /** Axis title ("" = none). */
   title: string;
+  titleSize?: number;
   /** Title offset below the panel grid, px (derived from a multi-line/rotated
    * band label band; falls back to the fixed default when absent). */
   titleOffset?: number;
@@ -179,8 +251,19 @@ export interface ScenePanel {
   y: number;
   width: number;
   height: number;
-  /** Facet strip label above the panel ("" = no strip). */
+  /** Facet strip display label ("" = unfaceted / no label). */
   strip: string;
+  /**
+   * Where the strip band is reserved and drawn (default "top" when faceted).
+   * Left/right bands use `stripBand` as width; top/bottom as height.
+   */
+  stripPosition?: "top" | "bottom" | "left" | "right";
+  /** Whether strip chrome is drawn (false when `strip.show: false`). */
+  showStrip?: boolean;
+  /** Reserved strip band size in px (0 when hidden). */
+  stripBand?: number;
+  /** Original panel allocation before a fixed-aspect data rectangle was fitted. */
+  allocation?: { x: number; y: number; width: number; height: number };
   /** Whether renderers clip marks to this panel rectangle (default true). */
   clip?: boolean;
   /** Bottom-axis ticks for THIS panel (null = this panel draws no x axis:
@@ -202,16 +285,45 @@ export interface SceneLegendEntry {
   /** Raw domain value, retained separately from its formatted label. */
   value: unknown;
   label: string;
+  /** Complete semantic label when `label` is visually abbreviated. */
+  fullLabel?: string;
+  /** Visual lines when collision policy wraps without changing the semantic label. */
+  lines?: string[];
+  /** Measured line box used to position wrapped labels. */
+  lineHeight?: number;
   color: string;
-  /** Top of the entry row, legend-local px. */
+  /** True when a paint aesthetic supplied `color`, including literal sentinel-gray values. */
+  hasPaint?: boolean;
+  size?: number;
+  linewidth?: number;
+  alpha?: number;
+  shape?: PointShape;
+  linetype?: Linetype;
+  /** Left/top of the entry row, legend-local px. */
+  x?: number;
   y: number;
+  /** Measured row height, including wrapped labels and oversized keys. */
+  height?: number;
 }
+
+type SceneLegendScale = "color" | "fill" | "size" | "linewidth" | "alpha" | "shape" | "linetype";
 
 /** A discrete (swatch list) legend. */
 export interface SceneDiscreteLegend {
   type: "discrete";
-  /** Which scale produced it ("color" | "fill"). */
-  scale: string;
+  /** Primary aesthetic used for stable interaction identity. */
+  scale: SceneLegendScale;
+  /** Every aesthetic represented by a merged key. */
+  aesthetics?: readonly SceneLegendScale[];
+  position?: "right" | "bottom";
+  direction?: "vertical" | "horizontal";
+  titleSize?: number;
+  /** Measured title band height, including descender gap. */
+  titleHeight?: number;
+  labelSize?: number;
+  keyGap?: number;
+  /** False when entries are representative ticks/bins rather than raw value identities. */
+  interactive?: boolean;
   title: string;
   /** Legend box origin in plot px. */
   x: number;
@@ -227,15 +339,26 @@ export interface SceneDiscreteLegend {
 export interface SceneRampLegend {
   type: "ramp";
   scale: string;
+  aesthetics?: readonly string[];
+  position?: "right" | "bottom";
+  direction?: "vertical" | "horizontal";
+  titleSize?: number;
+  /** Measured title band height, including descender gap. */
+  titleHeight?: number;
+  labelSize?: number;
   title: string;
   x: number;
   y: number;
   width: number;
   height: number;
-  /** Gradient stops top(=max) to bottom(=min): [offset 0..1, color]. */
+  /** Gradient stops in rendered direction: horizontal low→high, vertical high→low. */
   stops: [number, string][];
-  /** Labeled positions along the ramp: y = legend-local px from ramp top. */
-  ticks: { y: number; label: string }[];
+  /** Whether renderer tick marks are visible independently of labels. */
+  showTicks?: boolean;
+  /** Labeled positions along the ramp's primary direction. */
+  ticks: { pos?: number; y?: number; label: string; fullLabel?: string }[];
+  /** Horizontal ramp inset reserved for the leading endpoint label. */
+  rampX?: number;
   /** Ramp bar size in px. */
   rampWidth: number;
   rampHeight: number;
@@ -244,12 +367,19 @@ export interface SceneRampLegend {
 export interface SceneStepsLegend {
   type: "steps";
   scale: string;
+  aesthetics?: readonly string[];
+  position?: "right" | "bottom";
+  direction?: "vertical" | "horizontal";
+  titleSize?: number;
+  /** Measured title band height, including descender gap. */
+  titleHeight?: number;
+  labelSize?: number;
   title: string;
   x: number;
   y: number;
   width: number;
   height: number;
-  entries: { label: string; color: string; y: number }[];
+  entries: { label: string; fullLabel?: string; color: string; x?: number; y: number }[];
   stepWidth: number;
   stepHeight: number;
 }
@@ -261,6 +391,8 @@ export interface Scene {
   height: number;
   /** Facet panels in row-major order (one panel when unfaceted). */
   panels: ScenePanel[];
+  /** Declared responsive layout state; absent means the normal layout. */
+  layout?: "degraded";
   batches: GeometryBatch[];
   /**
    * The shared-axis view: plot-level axis TITLES plus the ticks of the first

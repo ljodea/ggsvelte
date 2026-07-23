@@ -63,11 +63,32 @@ numeric or temporal `labels` formats apply to colorbars and colorsteps.
 `guidePlans` includes immutable `discrete`, `colorbar`, and `colorsteps`
 payloads, while SVG, canvas, and Svelte consume the same resolved mark colors.
 
+Mapped size, linewidth, alpha, shape, and linetype share stable training,
+NA/unknown policy, immutable guide plans, and scene vectors. Size interpolates
+in symbol area; shape/linetype use finite named sets and require binning for
+quantitative data. Discrete and binned styles contribute to grouping while
+continuous numeric styles do not. Candidate hit geometry follows mapped point
+radius and stroke width, and candidate semantics retain the resolved styles.
+
+Guide appearance resolves after scale training. Automatic guides use the right zone
+only when the viewport remains readable, otherwise they move below with horizontal
+ramps and deterministic key wrapping. Explicit right and bottom zones can coexist.
+Discrete guides merge only across exact semantic identities and preserve every
+represented aesthetic for focus/filter indexing. Identity guides remain suppressed
+unless forced; representative numeric ticks and bins remain non-interactive.
+
 `coordTransform` is a separate post-stat projector. Per-panel projectors map
 trained scale-space values through identity/log10/sqrt coordinates, project
 axis ticks and grids, adaptively tessellate curved paths/segments, and expose
 the inverse used before scale inversion. Synthetic tessellation vertices are
 render topology only; `CandidateStore` retains original/stat semantic anchors.
+
+`coordFixed({ ratio: 1 })` runs after chart chrome allocation and fits the
+largest centered data rectangle whose physical y-unit/x-unit ratio is exact.
+Fixed-scale facets retain equal panel dimensions; free positional facet scales
+fail with `coord-fixed-free-scales`. Letterbox gutters use the theme paper role
+by default. Constrained scenes preserve the ratio, remove minor furniture, and
+publish one `coord-fixed-degraded` warning plus `scene.layout = "degraded"`.
 
 Browser rendering:
 

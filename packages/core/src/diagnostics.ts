@@ -23,9 +23,17 @@ export interface PipelineErrorCatalogEntry {
 
 /** Structured errors thrown as `PipelineError { code, path, message }`. */
 export const PIPELINE_ERROR_CATALOG = {
+  "guide-aesthetic-incompatible": {
+    summary: "A requested guide variant does not match the trained aesthetic scale family.",
+    fix: "Use axis for positions, legend for discrete scales, colorbar for sequential colors, colorsteps for binned colors, or none.",
+  },
+  "guide-layout-overflow": {
+    summary: "A guide configured with collision: error cannot fit its authored label.",
+    fix: 'Use collision: "ellipsis" for long labels; increase the chart size, reduce categories, or suppress an oversized guide.',
+  },
   "no-data": {
-    summary: "The spec has no data source and no layer provides one.",
-    fix: "Set spec.data ({values}, {columns}, or {name}) or pass named data via RunOptions.data.",
+    summary: "A layer has neither plot-level data nor its own layer.data.",
+    fix: "Set spec.data and/or layer.data ({values}, {columns}, or {name}), or pass named data via RunOptions.data.",
   },
   "dataset-collision": {
     summary: "A dataset name is defined in both spec.datasets and RunOptions.data.",
@@ -74,6 +82,15 @@ export const PIPELINE_ERROR_CATALOG = {
   "rule-both-axes": {
     summary: "A data-driven rule layer maps BOTH aes.x and aes.y.",
     fix: "Keep one direction and unset the other channel with null.",
+  },
+  "ribbon-orientation-ambiguous": {
+    summary:
+      "A ribbon layer maps both x-orientation and y-orientation contracts without params.orientation.",
+    fix: 'Set params.orientation to "x" or "y", or map only one complete interval contract.',
+  },
+  "ribbon-inverted-bounds": {
+    summary: "A ribbon layer has one or more rows where the lower bound exceeds the upper bound.",
+    fix: "Swap or correct ymin/ymax (or xmin/xmax) so lower ≤ upper on every finite row.",
   },
   "facet-form-ambiguous": {
     summary: "A facet sets BOTH the wrap form and the rows/cols grid form.",
@@ -144,6 +161,15 @@ export const PIPELINE_ERROR_CATALOG = {
       "A quantitative coordinate transform or numeric limits were requested for a band axis.",
     fix: "Use identity coordinates for categories, or configure a continuous quantitative scale.",
   },
+  "coord-fixed-free-scales": {
+    summary: "Fixed-aspect coordinates were combined with free positional facet scales.",
+    fix: 'Use facet.scales = "fixed", or remove coord_fixed.',
+  },
+  "coord-fixed-invalid-aspect": {
+    summary:
+      "A fixed-aspect target or fitted data rectangle is non-finite or non-positive after chrome is allocated.",
+    fix: "Use a moderate finite ratio and non-degenerate positional domains, or enlarge the plot allocation.",
+  },
   "binned-scale-requires-continuous": {
     summary: 'A type: "binned" scale is bound to a discrete or temporal field.',
     fix: 'Map a quantitative field, or use type: "band"/"time" instead of "binned".',
@@ -194,6 +220,71 @@ export const PIPELINE_ERROR_CATALOG = {
     summary: "A sequential color/fill domain is invalid for its requested transform.",
     fix: "Use positive endpoints for log10, non-negative endpoints for sqrt, or identity.",
   },
+  "unsupported-aesthetic-scale": {
+    summary: "A finite shape/linetype aesthetic was configured as a continuous scale.",
+    fix: "Use a binned scale for quantitative values or an ordinal scale for categories.",
+  },
+  "unsupported-geom-aesthetic": {
+    summary: "A mapped style aesthetic is not consumed by the selected geom.",
+    fix: "Remove the mapping or move it to one of the compatible geoms listed in the error.",
+  },
+  "unsupported-annotation-style": {
+    summary:
+      "A fixed-intercept annotation rule maps a style to a field or after-stat column, but it has no data rows to map.",
+    fix: "Use a constant style value (optionally { value, scale: true }) on the annotation rule.",
+  },
+  "tile-nonpositive-size": {
+    summary: "A tile layer has a non-positive or non-finite width/height.",
+    fix: "Map a positive width/height or set params.width / params.height to a positive number.",
+  },
+  "raster-duplicate-cells": {
+    summary: "A raster layer has duplicate (x, y) coordinates.",
+    fix: 'Aggregate to one value per cell, or use geom "tile" for overlapping cells.',
+  },
+  "unsupported-param": {
+    summary: "A layer param value is not supported by this runtime.",
+    fix: "Use a documented supported value for the param (see the error message).",
+  },
+  "invalid-aesthetic-constant": {
+    summary: "A literal style constant is outside the aesthetic's supported output domain.",
+    fix: "Use a positive size/linewidth, alpha in [0,1], or a documented shape/linetype name.",
+  },
+  "style-temporal-parse": {
+    summary: "A temporal numeric style scale could not parse the complete mapped column.",
+    fix: "Set the exact parser, correct the rejected values, or explicitly choose censoring.",
+  },
+  "style-temporal-kind": {
+    summary: "A temporal numeric style scale requested the wrong date/datetime precision.",
+    fix: "Use the matching date/datetime helper or correct the source precision.",
+  },
+  "style-manual-domain-range": {
+    summary: "A manual style scale has different domain and range lengths.",
+    fix: "Provide exactly one output style for every domain value.",
+  },
+  "style-palette-exhausted": {
+    summary: "A finite style scale needs more distinguishable outputs than its range provides.",
+    fix: "Provide a larger range, reduce categories/bins, or deliberately opt into cycling.",
+  },
+  "style-domain-empty": {
+    summary: "No finite values can train the requested numeric or binned style scale.",
+    fix: "Correct the mapped values or provide a valid explicit domain.",
+  },
+  "style-domain-invalid": {
+    summary: "An explicit style domain is malformed or contradicts its binned boundaries.",
+    fix: "Provide two finite semantic endpoints matching the first and last boundaries.",
+  },
+  "style-range-invalid": {
+    summary: "A numeric sequential/binned style range has fewer than two endpoints.",
+    fix: "Provide at least two valid output values in the aesthetic's supported bounds.",
+  },
+  "style-binned-breaks": {
+    summary: "Binned style boundaries are missing, non-finite, duplicated, or unordered.",
+    fix: "Provide 2–65 strictly increasing numeric boundaries.",
+  },
+  "stat-channel-unsupported": {
+    summary: "A { stat } style mapping names an output the selected stat does not publish.",
+    fix: "Use a generated output listed for that stat or map the original field instead.",
+  },
   "unknown-theme": {
     summary: "spec.theme names a theme that is not registered.",
     fix: "Use a registered name (default, light, dark, minimal) or a theme object.",
@@ -212,6 +303,14 @@ export type PipelineErrorCode = keyof typeof PIPELINE_ERROR_CATALOG;
 
 /** Warnings (`RenderModel.warnings`): degraded-but-rendered conditions. */
 export const PIPELINE_WARNING_CATALOG = {
+  "facet-levels-missing": {
+    summary:
+      "An explicit facet levels list includes values absent from the data; empty panels are kept.",
+  },
+  "facet-levels-unknown": {
+    summary:
+      "Data values for a facet field were omitted from the closed levels list and are excluded from every panel.",
+  },
   "empty-data": {
     summary: "The data has no rows; the frame and axes render as a placeholder.",
   },
@@ -224,6 +323,10 @@ export const PIPELINE_WARNING_CATALOG = {
   "removed-missing": {
     summary:
       "Rows with missing/non-finite values in required channels were dropped (count in message).",
+  },
+  "raster-irregular-spacing": {
+    summary:
+      "Raster cell centers are not on a regular grid; the minimum spacing is used (prefer geom tile).",
   },
   "scale-transform-domain": {
     summary:
@@ -258,15 +361,33 @@ export const PIPELINE_WARNING_CATALOG = {
     summary:
       "Invalid, unmapped, transformed, or censored color/fill values render with the configured unknown color (count in message).",
   },
+  "style-temporal-censored": {
+    summary: "A temporal numeric style parser censored invalid source values by explicit request.",
+  },
+  "style-na-values": {
+    summary: "Missing mapped style values use the configured NA output.",
+  },
+  "style-unknown-values": {
+    summary: "Invalid or out-of-domain mapped style values use the configured unknown output.",
+  },
+  "style-palette-exhausted": {
+    summary: "A finite style range cycled after explicit author opt-in.",
+  },
+  "style-fingerprint-mismatch": {
+    summary: "Restored style state used a different output range; assignments start fresh.",
+  },
+  "style-version-mismatch": {
+    summary: "Restored style state has an unknown schema version; assignments start fresh.",
+  },
+  "style-out-of-domain": {
+    summary: "Values outside an explicit style domain use the unknown output.",
+  },
   "invalid-label-format": {
     summary: "A labels format string was not recognized; the default format is used.",
   },
   "unknown-edition": {
     summary:
       "The spec targets a defaults edition this build does not know; the latest known edition's defaults are used.",
-  },
-  "stat-channel-unsupported": {
-    summary: "A { stat } channel is mapped where this milestone only supports it on y.",
   },
   "color-on-fill-geom": {
     summary:
@@ -297,6 +418,9 @@ export const PIPELINE_WARNING_CATALOG = {
   "temporal-values-censored": {
     summary: "An explicit temporal parser censored invalid source values by author request.",
   },
+  "guide-auto-bottom": {
+    summary: "An auto-positioned guide moved below the panel to preserve readable width.",
+  },
   "unused-scale-option": {
     summary: "A lower-precedence scale option was ignored in favor of an explicit winner.",
   },
@@ -314,7 +438,7 @@ export const PIPELINE_WARNING_CATALOG = {
   },
   "band-label-margin-overflow": {
     summary:
-      "A band label is truncated (ellipsis) to fit a bounded axis margin — a rotated label past the bottom cap, or a single-line end label past the side cap.",
+      "A band label exceeds a bounded axis margin — single-line end truncation, forced-wrap height/side overflow, or a rotated label past the bottom/side cap.",
   },
   "coord-tessellation-cap": {
     summary:
@@ -323,6 +447,10 @@ export const PIPELINE_WARNING_CATALOG = {
   "coord-invalid-geometry": {
     summary:
       "Path vertices outside a coordinate transform's domain were removed without bridging the remaining finite runs.",
+  },
+  "coord-fixed-degraded": {
+    summary:
+      "A fixed-aspect data rectangle is below the documented readable minimum; the ratio remains exact and minor furniture is removed.",
   },
 } as const satisfies Record<string, { summary: string }>;
 
@@ -376,11 +504,12 @@ export const ADVISORY_CATALOG = {
     summary: "A date-like field remained discrete because whole-column validation failed.",
   },
   "band-labels-wrapped": {
-    summary: "Long categorical x labels were wrapped onto multiple lines to avoid collisions.",
+    summary:
+      "Long categorical x labels were wrapped onto multiple lines to avoid collisions; pin with scales.x.guide.mode or coordFlip().",
   },
   "band-labels-rotated": {
     summary:
-      "Long categorical x labels were rotated to avoid collisions; coord_flip lays them out horizontally.",
+      "Long categorical x labels were rotated to avoid collisions; pin with scales.x.guide.mode/angle, or coordFlip() for horizontal rows.",
   },
 } as const satisfies Record<string, { summary: string }>;
 

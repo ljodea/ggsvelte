@@ -44,9 +44,14 @@ describe("R0 release wiring", () => {
   it("runs the Playwright interaction performance gate with benchmark budgets", () => {
     const ci = read(".github/workflows/ci.yml");
     const bench = read(".github/workflows/bench.yml");
-    // Browser surface: svelte + spikes (component). Journeys is docs_journeys-routed.
+    // Browser surface: svelte (chromium) + svelte-fx (firefox/webkit) + spikes.
+    // Journeys is docs_journeys-routed.
     const svelteJob = ci.slice(
-      ci.indexOf("  component-svelte:"),
+      ci.indexOf("  component-svelte:\n"),
+      ci.indexOf("  component-svelte-fx:"),
+    );
+    const svelteFxJob = ci.slice(
+      ci.indexOf("  component-svelte-fx:"),
       ci.indexOf("  component-spikes:"),
     );
     const spikesJob = ci.slice(
@@ -61,16 +66,26 @@ describe("R0 release wiring", () => {
       ci.indexOf("  interaction-perf:"),
       ci.indexOf("  build:\n    name: build (packages"),
     );
-    expect(ci).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
+    // Container jobs pull the prebaked ci-runner image (Playwright + unzip),
+    // not the raw upstream Playwright image. The tag still tracks the matrix
+    // (see scripts/support-matrix.test.ts).
+    expect(ci).toContain("ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble");
     expect(ci).toContain("HOME: /root");
     // Package browser shards download packages/*/dist (issue #241); no monorepo rebuild.
     // Download+verify lives in ci-download-packages-dist (pin + entrypoint checks).
-    for (const job of [svelteJob, spikesJob]) {
+    for (const job of [svelteJob, svelteFxJob, spikesJob]) {
       expect(job).toContain("uses: ./.github/actions/ci-download-packages-dist");
       expect(job).toContain("packages-dist");
       expect(job).not.toContain("run: bun run build\n");
     }
     expect(svelteJob).toContain("working-directory: packages/svelte");
+    expect(svelteJob).toContain("--project chromium");
+    expect(svelteJob).not.toContain("--project firefox");
+    expect(svelteFxJob).toContain("working-directory: packages/svelte");
+    expect(svelteFxJob).toContain("--project firefox");
+    expect(svelteFxJob).toContain("--project webkit");
+    expect(svelteFxJob).not.toContain("--coverage");
+    expect(svelteFxJob).toContain("HOME: /root");
     expect(spikesJob).toContain("working-directory: spikes/browser");
     // Journeys: docs_journeys routing + full non-pixel inventory; may build docs site.
     expect(journeysJob).toContain("docs_journeys == 'true'");
@@ -83,8 +98,9 @@ describe("R0 release wiring", () => {
     expect(journeysJob).toContain("docs-progressive-search.spec.ts");
     expect(journeysJob).toContain("docs-themes.spec.ts");
     expect(journeysJob).toContain("--grep-invert 'visual contract'");
-    // ci-gate: package component = svelte+spikes; docs_journeys is independent.
+    // ci-gate: package component = svelte+svelte-fx+spikes; docs_journeys is independent.
     expect(ci).toContain("COMPONENT_SVELTE_RES");
+    expect(ci).toContain("COMPONENT_SVELTE_FX_RES");
     expect(ci).toContain("COMPONENT_SPIKES_RES");
     expect(ci).toContain("DOCS_JOURNEYS_RES");
     expect(ci).toContain("DOCS_JOURNEYS_REQ");
@@ -97,7 +113,7 @@ describe("R0 release wiring", () => {
     expect(interactionPerfJob).toContain("interaction_perf == 'true'");
     expect(interactionPerfJob).toContain("uses: ./.github/actions/ci-download-packages-dist");
     expect(interactionPerfJob).toContain("packages-dist");
-    expect(bench).toContain("mcr.microsoft.com/playwright:v1.61.1-noble");
+    expect(bench).toContain("ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble");
     expect(bench).toContain("bun run test:interaction-perf");
     expect(read("package.json")).toContain('"test:interaction-perf"');
     expect(read("tests/performance/interaction.spec.ts")).toContain("/__perf/interaction-100k");
@@ -121,7 +137,7 @@ describe("R0 release wiring", () => {
     // Consumers download instead of rebuilding packages (via composite).
     const consumerJob = ci.slice(
       ci.indexOf("  consumer-compat:\n    name: packed consumer"),
-      ci.indexOf("  component-svelte:\n    name: component-svelte"),
+      ci.indexOf("  component-svelte:\n    name: component-svelte (packages/svelte chromium"),
     );
     expect(consumerJob).toContain("uses: ./.github/actions/ci-download-packages-dist");
     expect(consumerJob).toContain("packages-dist");
@@ -195,6 +211,7 @@ describe("R0 release wiring", () => {
     // generous window so the content-hash write is still inside the slice.
     for (const [job, execution] of [
       ["component-svelte", "component_svelte"],
+      ["component-svelte-fx", "component_svelte_fx"],
       ["component-spikes", "component_spikes"],
       ["component-journeys", "component_journeys"],
     ] as const) {
@@ -210,7 +227,7 @@ describe("R0 release wiring", () => {
     // Consumer: runtime resolution stays in the job; matrix dims pass into restore composite.
     const consumerJob = ci.slice(
       ci.indexOf("  consumer-compat:\n    name: packed consumer"),
-      ci.indexOf("  component-svelte:\n    name: component-svelte"),
+      ci.indexOf("  component-svelte:\n    name: component-svelte (packages/svelte chromium"),
     );
     expect(consumerJob).toContain("uses: ./.github/actions/ci-content-hash-restore");
     expect(consumerJob).toContain("execution: consumer");
@@ -343,6 +360,28 @@ describe("R0 release wiring", () => {
     expect(approvalJob).toContain("shell: bash");
   });
 
+  it("scopes approve-regenerate to smoke VR screenshots only (#421)", () => {
+    // Full-suite --update-snapshots fails on non-snapshot assertion tests and
+    // permanently blocks baseline landing when any journey is red (see #421).
+    const workflow = read(".github/workflows/vr-compare.yml");
+    const approvalJob = workflow.slice(workflow.indexOf("  approve-regenerate:"));
+    const nextJob = approvalJob.search(/\n  [a-zA-Z0-9_-]+:/);
+    const job = nextJob === -1 ? approvalJob : approvalJob.slice(0, nextJob);
+    expect(job).toContain("bun run test:visual -- vr.spec.ts --workers=1 --update-snapshots");
+    // Must not reintroduce the full-suite regenerate command.
+    expect(job).not.toMatch(/bun run test:visual -- --workers=1 --update-snapshots/);
+    // approve-regenerate checks out the *approved PR's merge SHA*, which may
+    // still contain the pre-move non-pixel scroll test in vr.spec.ts. Invert
+    // that title so legacy render trees cannot block baseline upload.
+    expect(job).toContain("--grep-invert 'preserves real page scrolling'");
+    // Smoke file on main must stay screenshot-only (Codex P2 on #531).
+    const smokeSpec = read("tests/visual/vr.spec.ts");
+    expect(smokeSpec).not.toContain("without a golden");
+    expect(smokeSpec).not.toContain("preserves real page scrolling");
+    const journeysSpec = read("tests/visual/interaction-accessibility.spec.ts");
+    expect(journeysSpec).toContain("preserves real page scrolling");
+  });
+
   it("wires Dependabot for bun workspaces and GitHub Actions", () => {
     const dependabot = read(".github/dependabot.yml");
     expect(dependabot).toContain('package-ecosystem: "bun"');
@@ -367,6 +406,7 @@ describe("R0 release wiring", () => {
     expect(dependabot).toContain('"/.github/actions/ci-setup-bun"');
     expect(dependabot).toContain('"/.github/actions/ci-bun-install"');
     expect(dependabot).toContain('"/.github/actions/ci-download-packages-dist"');
+    expect(dependabot).toContain('"/.github/actions/ci-assert-playwright-version-sync"');
     // Human-authored locksteps / Changesets-owned internal ranges.
     expect(dependabot).toContain('dependency-name: "playwright"');
     expect(dependabot).toContain('dependency-name: "@playwright/test"');

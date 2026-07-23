@@ -1,0 +1,6 @@
+{
+  "title": "Shaded time bands (geom rect)",
+  "description": "Arbitrary rectangles from xmin/xmax/ymin/ymax — background time bands or regions without image injection.",
+  "tags": ["rect", "regions", "bands"],
+  "docsSection": "Rectangles & grids"
+}

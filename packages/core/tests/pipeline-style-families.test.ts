@@ -1,0 +1,1586 @@
+import { describe, expect, it } from "bun:test";
+import { fromAny } from "@total-typescript/shoehorn";
+
+import type { PortableSpec } from "@ggsvelte/spec";
+
+import { runPipeline } from "../src/pipeline.js";
+import { resolveStyleScale } from "../src/pipeline/scale-style.js";
+import type { LayerBinding, LayerFrame } from "../src/pipeline/types.js";
+import { sceneToSVGString } from "../src/render-svg-scene.js";
+import { ColumnTable } from "../src/table.js";
+
+const viewport = { width: 640, height: 400 };
+
+function pointStylesSpec(): PortableSpec {
+  return fromAny({
+    data: {
+      values: [
+        { x: 1, y: 1, amount: 0, opacity: 0, group: "a" },
+        { x: 2, y: 2, amount: 50, opacity: 50, group: "b" },
+        { x: 3, y: 3, amount: 100, opacity: 100, group: "c" },
+      ],
+    },
+    aes: {
+      x: { field: "x" },
+      y: { field: "y" },
+      size: { field: "amount" },
+      alpha: { field: "opacity" },
+      shape: { field: "group" },
+    },
+    layers: [{ geom: "point" }],
+    scales: {
+      size: { type: "sequential", range: [2, 10] },
+      alpha: { type: "sequential", range: [0.2, 1] },
+      shape: { type: "ordinal" },
+    },
+  });
+}
+
+describe("complete mapped style plumbing", () => {
+  it("maps point size by area, alpha, and finite shapes into per-mark vectors", () => {
+    const model = runPipeline(pointStylesSpec(), viewport);
+    const points = model.scene.batches.find((batch) => batch.kind === "points");
+    if (points?.kind !== "points") throw new Error("expected points batch");
+
+    expect([...points.sizes!]).toEqual([2, Math.fround(Math.sqrt(52)), 10]);
+    expect([...points.alphas!]).toEqual([Math.fround(0.2), Math.fround(0.6), 1]);
+    expect([...points.shapeIndexes!]).toEqual([0, 1, 2]);
+
+    const shapePlan = model.guidePlans.find((plan) => plan.aesthetic === "shape");
+    if (shapePlan?.type !== "discrete") throw new Error("expected shape guide plan");
+    expect(shapePlan.entries.map((entry) => entry.shape)).toEqual(["circle", "triangle", "square"]);
+    expect(Object.isFrozen(shapePlan)).toBe(true);
+
+    const svg = sceneToSVGString(model.scene);
+    expect(svg).toContain('r="2"');
+    expect(svg).toContain('opacity="0.2"');
+    expect(svg).toContain("gg-shape-triangle");
+    expect(svg).toContain("gg-shape-square");
+    expect(svg).toContain('width="20" height="20"');
+    expect(model.candidates.candidate(0)).toMatchObject({
+      sizeValue: 0,
+      alphaValue: 0,
+      shapeValue: "a",
+    });
+  });
+
+  it("maps linewidth, alpha, and linetype per subpath without reordering", () => {
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, series: "a", width: 1, opacity: 0.3 },
+            { x: 2, y: 2, series: "a", width: 1, opacity: 0.3 },
+            { x: 1, y: 2, series: "b", width: 5, opacity: 0.9 },
+            { x: 2, y: 3, series: "b", width: 5, opacity: 0.9 },
+          ],
+        },
+        aes: {
+          x: { field: "x" },
+          y: { field: "y" },
+          group: { field: "series" },
+          linewidth: { field: "width" },
+          alpha: { field: "opacity" },
+          linetype: { field: "series" },
+        },
+        layers: [{ geom: "line" }],
+        scales: {
+          linewidth: { type: "identity" },
+          alpha: { type: "identity" },
+          linetype: { type: "ordinal" },
+        },
+      }),
+      viewport,
+    );
+    const paths = model.scene.batches.find((batch) => batch.kind === "paths");
+    if (paths?.kind !== "paths") throw new Error("expected paths batch");
+
+    expect([...paths.linewidths!]).toEqual([1, 5]);
+    expect([...paths.alphas!]).toEqual([Math.fround(0.3), Math.fround(0.9)]);
+    expect([...paths.linetypeIndexes!]).toEqual([0, 1]);
+
+    const svg = sceneToSVGString(model.scene);
+    expect(svg).toContain('stroke-width="1"');
+    expect(svg).toContain('stroke-width="5"');
+    expect(svg).toContain('stroke-dasharray="6 4"');
+    expect(svg).toContain('opacity="0.3"');
+    expect(svg).toContain('opacity="0.9"');
+
+    const varying = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, width: 1 },
+            { x: 2, y: 2, width: 3 },
+            { x: 3, y: 3, width: 2 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, linewidth: { field: "width" } },
+        layers: [{ geom: "line" }],
+        scales: { linewidth: { type: "sequential", domain: [1, 3], range: [1, 5] } },
+      }),
+      viewport,
+    );
+    const varyingPaths = varying.scene.batches.find((batch) => batch.kind === "paths");
+    if (varyingPaths?.kind !== "paths") throw new Error("expected varying paths");
+    expect([...varyingPaths.pathOffsets]).toEqual([0, 2, 4]);
+    expect([...varyingPaths.linewidths!]).toEqual([1, 5]);
+    expect([...varyingPaths.frameRowIndex!]).toEqual([0, 1, 1, 2]);
+
+    const afterStat = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1 },
+            { x: 2, y: 2 },
+            { x: 3, y: 4 },
+          ],
+        },
+        aes: {
+          x: { field: "x" },
+          y: { field: "y" },
+          linewidth: { stat: "y" },
+        },
+        layers: [{ geom: "smooth", params: { method: "lm", se: false } }],
+        scales: { linewidth: { type: "identity" } },
+      }),
+      viewport,
+    );
+    const first = afterStat.candidates.candidate(1);
+    const duplicate = afterStat.candidates.candidate(2);
+    expect(first?.x).toBeCloseTo(duplicate?.x ?? Number.NaN);
+    expect(duplicate?.xValue).toBe(first?.xValue);
+    expect(duplicate?.linewidthValue).toBe(first?.linewidthValue);
+  });
+
+  it("uses mapped point radii for candidate hit regions", () => {
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, radius: 2 },
+            { x: 2, y: 2, radius: 10 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "radius" } },
+        layers: [{ geom: "point" }],
+        scales: { size: { type: "identity" } },
+      }),
+      viewport,
+    );
+    const points = model.scene.batches.find((batch) => batch.kind === "points");
+    if (points?.kind !== "points") throw new Error("expected points batch");
+    const smallX = points.positions[0]! + model.scene.panels[0]!.x;
+    const smallY = points.positions[1]! + model.scene.panels[0]!.y;
+    const largeX = points.positions[2]! + model.scene.panels[0]!.x;
+    const largeY = points.positions[3]! + model.scene.panels[0]!.y;
+
+    expect(model.candidates.hitTest(smallX + 6, smallY)).toBeNull();
+    expect(model.candidates.hitTest(largeX + 6, largeY)?.rowIndex).toBe(1);
+
+    const plus = runPipeline(
+      fromAny({
+        data: { values: [{ x: 1, y: 1, radius: 20 }] },
+        aes: {
+          x: { field: "x" },
+          y: { field: "y" },
+          size: { field: "radius" },
+          shape: { value: "plus" },
+        },
+        layers: [{ geom: "point" }],
+        scales: { size: { type: "identity" } },
+      }),
+      viewport,
+    );
+    const plusPoints = plus.scene.batches.find((batch) => batch.kind === "points");
+    if (plusPoints?.kind !== "points") throw new Error("expected plus point");
+    const plusPanel = plus.scene.panels[0]!;
+    expect(
+      plus.candidates.hitTest(
+        plusPanel.x + plusPoints.positions[0]! + 24,
+        plusPanel.y + plusPoints.positions[1]!,
+      )?.rowIndex,
+    ).toBe(0);
+  });
+
+  it("maps alpha through rectangles and size/alpha through text glyphs", () => {
+    const bars = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: "a", y: 1, opacity: 0.2 },
+            { x: "b", y: 2, opacity: 0.8 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, alpha: { field: "opacity" } },
+        layers: [{ geom: "col" }],
+        scales: { alpha: { type: "identity" } },
+      }),
+      viewport,
+    );
+    const rects = bars.scene.batches.find((batch) => batch.kind === "rects");
+    if (rects?.kind !== "rects") throw new Error("expected rects batch");
+    expect([...rects.alphas!]).toEqual([Math.fround(0.2), Math.fround(0.8)]);
+
+    const mappedOverridesParam = runPipeline(
+      fromAny({
+        data: { values: [{ x: 1, y: 1, opacity: 0.8 }] },
+        aes: { x: { field: "x" }, y: { field: "y" }, alpha: { field: "opacity" } },
+        layers: [{ geom: "point", params: { alpha: 0.1 } }],
+        scales: { alpha: { type: "identity" } },
+      }),
+      viewport,
+    );
+    const mappedPoint = mappedOverridesParam.scene.batches.find((batch) => batch.kind === "points");
+    if (mappedPoint?.kind !== "points") throw new Error("expected mapped point");
+    expect(mappedPoint.alpha).toBe(1);
+    expect([...mappedPoint.alphas!]).toEqual([Math.fround(0.8)]);
+
+    const text = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, label: "small", size: 8, opacity: 0.25 },
+            { x: 2, y: 2, label: "large", size: 18, opacity: 0.75 },
+          ],
+        },
+        aes: {
+          x: { field: "x" },
+          y: { field: "y" },
+          label: { field: "label" },
+          size: { field: "size" },
+          alpha: { field: "opacity" },
+        },
+        layers: [{ geom: "text" }],
+        scales: { size: { type: "identity" }, alpha: { type: "identity" } },
+      }),
+      viewport,
+    );
+    const glyphs = text.scene.batches.find((batch) => batch.kind === "glyphs");
+    if (glyphs?.kind !== "glyphs") throw new Error("expected glyph batch");
+    expect([...glyphs.sizes!]).toEqual([8, 18]);
+    expect([...glyphs.alphas!]).toEqual([Math.fround(0.25), Math.fround(0.75)]);
+    expect(sceneToSVGString(text.scene)).toContain('font-size="18"');
+  });
+
+  it("maps rule stroke styles and uses mapped widths for stroke hit regions", () => {
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, width: 1, opacity: 0.3, kind: "solid" },
+            { x: 2, width: 8, opacity: 0.9, kind: "dashed" },
+          ],
+        },
+        aes: {
+          x: { field: "x" },
+          linewidth: { field: "width" },
+          alpha: { field: "opacity" },
+          linetype: { field: "kind" },
+        },
+        layers: [{ geom: "rule" }],
+        scales: {
+          linewidth: { type: "identity" },
+          alpha: { type: "identity" },
+          linetype: { type: "identity" },
+        },
+      }),
+      viewport,
+    );
+    const segments = model.scene.batches.find((batch) => batch.kind === "segments");
+    if (segments?.kind !== "segments") throw new Error("expected segments batch");
+    expect([...segments.linewidths!]).toEqual([1, 8]);
+    expect([...segments.linetypeIndexes!]).toEqual([0, 1]);
+    expect([...segments.alphas!]).toEqual([Math.fround(0.3), Math.fround(0.9)]);
+    const panel = model.scene.panels[0]!;
+    const wideX = panel.x + segments.segments[4]!;
+    const wideY = panel.y + (segments.segments[5]! + segments.segments[7]!) / 2;
+    expect(model.candidates.hitTest(wideX + 5, wideY)?.rowIndex).toBe(1);
+  });
+
+  it("carries stroke styles through area, smooth, errorbar, and boxplot composite batches", () => {
+    const sharedScales = {
+      linewidth: { type: "ordinal", range: [1, 4] },
+      alpha: { type: "ordinal", range: [0.4, 1] },
+      linetype: { type: "ordinal", range: ["solid", "dashed"] },
+    };
+    const styleAes = {
+      linewidth: { field: "group" },
+      alpha: { field: "group" },
+      linetype: { field: "group" },
+    };
+    const area = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, group: "a" },
+            { x: 2, y: 2, group: "a" },
+            { x: 1, y: 2, group: "b" },
+            { x: 2, y: 3, group: "b" },
+          ],
+        },
+        aes: {
+          x: { field: "x" },
+          y: { field: "y" },
+          alpha: { field: "group" },
+        },
+        layers: [{ geom: "area", position: "identity" }],
+        scales: { alpha: sharedScales.alpha },
+      }),
+      viewport,
+    );
+    const areaPaths = area.scene.batches.find((batch) => batch.kind === "paths");
+    if (areaPaths?.kind !== "paths") throw new Error("expected area paths");
+    expect(areaPaths.alphas).toBeDefined();
+
+    const smooth = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, group: "a" },
+            { x: 2, y: 2, group: "a" },
+            { x: 1, y: 2, group: "b" },
+            { x: 2, y: 4, group: "b" },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, ...styleAes },
+        layers: [{ geom: "smooth", params: { method: "lm", se: false } }],
+        scales: sharedScales,
+      }),
+      viewport,
+    );
+    const smoothPaths = smooth.scene.batches.find((batch) => batch.kind === "paths");
+    if (smoothPaths?.kind !== "paths") throw new Error("expected smooth paths");
+    expect(smoothPaths.linewidths).toBeDefined();
+    expect(smoothPaths.alphas).toBeDefined();
+    expect(smoothPaths.linetypeIndexes).toBeDefined();
+
+    const errorbar = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 2, ymin: 1, ymax: 3, group: "a" },
+            { x: 2, y: 3, ymin: 2, ymax: 4, group: "b" },
+          ],
+        },
+        aes: {
+          x: { field: "x" },
+          y: { field: "y" },
+          ymin: { field: "ymin" },
+          ymax: { field: "ymax" },
+          ...styleAes,
+        },
+        layers: [{ geom: "errorbar" }],
+        scales: sharedScales,
+      }),
+      viewport,
+    );
+    const errorSegments = errorbar.scene.batches.find((batch) => batch.kind === "segments");
+    if (errorSegments?.kind !== "segments") throw new Error("expected errorbar segments");
+    expect(errorSegments.linewidths).toBeDefined();
+    expect(errorSegments.alphas).toBeDefined();
+    expect(errorSegments.linetypeIndexes).toBeDefined();
+
+    const boxplot = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: "a", y: 1, group: "a" },
+            { x: "a", y: 2, group: "a" },
+            { x: "a", y: 3, group: "a" },
+            { x: "b", y: 2, group: "b" },
+            { x: "b", y: 3, group: "b" },
+            { x: "b", y: 5, group: "b" },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, ...styleAes },
+        layers: [{ geom: "boxplot" }],
+        scales: sharedScales,
+      }),
+      viewport,
+    );
+    const boxSegments = boxplot.scene.batches.find((batch) => batch.kind === "segments");
+    const boxRects = boxplot.scene.batches.find((batch) => batch.kind === "rects");
+    if (boxSegments?.kind !== "segments" || boxRects?.kind !== "rects") {
+      throw new Error("expected boxplot composite batches");
+    }
+    expect(boxSegments.linewidths).toBeDefined();
+    expect(boxSegments.alphas).toBeDefined();
+    expect(boxSegments.linetypeIndexes).toBeDefined();
+    expect(boxRects.alphas).toBeDefined();
+    expect(boxRects.strokeWidths).toBeDefined();
+    expect(boxRects.linetypeIndexes).toBeDefined();
+  });
+
+  it("applies literal and scaled styles to annotation rules and boxplot outlines", () => {
+    const annotation = runPipeline(
+      fromAny({
+        data: { values: [{ x: 1, y: 1 }] },
+        layers: [
+          {
+            geom: "rule",
+            aes: {
+              linewidth: { value: 5, scale: true },
+              alpha: { value: 0.4, scale: true },
+              linetype: { value: "dashed", scale: true },
+            },
+            params: { yintercept: 0.5 },
+          },
+        ],
+        scales: {
+          linewidth: { type: "identity" },
+          alpha: { type: "identity" },
+          linetype: { type: "identity" },
+        },
+      }),
+      viewport,
+    );
+    const rule = annotation.scene.batches.find((batch) => batch.kind === "segments");
+    if (rule?.kind !== "segments") throw new Error("expected annotation rule");
+    expect([...rule.linewidths!]).toEqual([5]);
+    expect([...rule.alphas!]).toEqual([Math.fround(0.4)]);
+    expect([...rule.linetypeIndexes!]).toEqual([1]);
+
+    const boxplot = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: "a", y: 1 },
+            { x: "a", y: 2 },
+            { x: "a", y: 3 },
+          ],
+        },
+        aes: {
+          x: { field: "x" },
+          y: { field: "y" },
+          linetype: { value: "dashed" },
+        },
+        layers: [{ geom: "boxplot" }],
+      }),
+      viewport,
+    );
+    const segments = boxplot.scene.batches.filter((batch) => batch.kind === "segments");
+    const rects = boxplot.scene.batches.find((batch) => batch.kind === "rects");
+    if (segments.length === 0 || rects?.kind !== "rects") {
+      throw new Error("expected boxplot segments and rects");
+    }
+    for (const batch of segments) {
+      if (batch.kind !== "segments") continue;
+      expect(batch.linetype).toBe("dashed");
+    }
+    expect(rects.linetype).toBe("dashed");
+  });
+
+  it("trains binned finite styles from an explicit domain when data is empty", () => {
+    // Empty mapped samples (runtime-filtered frame) must still train from an
+    // explicit domain — same contract as numeric/color binned scales.
+    const table = ColumnTable.fromRows([{ x: 1, y: 1 }]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: { shape: { field: "value" } } },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: "value", statColumn: null, constant: null, scaledConstant: null },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table,
+      n: 0,
+      xNumeric: new Float64Array(0),
+      yNumeric: new Float64Array(0),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array(0),
+      shapeValues: [],
+    });
+    const warnings: { code: string; message: string }[] = [];
+    const resolution = resolveStyleScale({
+      aesthetic: "shape",
+      frames: [frame],
+      bindings: [binding],
+      table,
+      sourceTable: table,
+      config: {
+        type: "binned",
+        domain: [0, 10],
+        breaks: [0, 5, 10],
+        range: ["circle", "square"],
+      },
+      prevState: null,
+      title: "shape",
+      warnings,
+    });
+    expect(resolution.guidePlan?.type).toBe("discrete");
+    if (resolution.guidePlan?.type !== "discrete") throw new Error("expected discrete guide");
+    expect(resolution.guidePlan.domain).toEqual([0, 5]);
+  });
+
+  it("trains a temporal sequential style from an explicit domain when all rows are filtered", () => {
+    // A runtime filter can empty the frame while an authored temporal domain
+    // still fully determines the scale. It must train from that domain instead
+    // of throwing style-temporal-parse / style-temporal-kind on zero samples.
+    const table = ColumnTable.fromRows([{ x: 1, y: 1 }]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: { size: { field: "when" } } },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: "when", statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table,
+      n: 0,
+      xNumeric: new Float64Array(0),
+      yNumeric: new Float64Array(0),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array(0),
+      sizeValues: [],
+    });
+    const warnings: { code: string; message: string }[] = [];
+    const resolution = resolveStyleScale({
+      aesthetic: "size",
+      frames: [frame],
+      bindings: [binding],
+      table,
+      sourceTable: table,
+      config: {
+        type: "sequential",
+        temporalKind: "date",
+        domain: ["2024-01-01", "2024-01-31"],
+      },
+      prevState: null,
+      title: "size",
+      warnings,
+    });
+    expect(resolution.resolved).not.toBeNull();
+    expect(resolution.resolved?.scale.domain).toEqual([
+      Date.UTC(2024, 0, 1),
+      Date.UTC(2024, 0, 31),
+    ]);
+  });
+
+  it("trains binned finite styles from authored breaks alone when data is empty", () => {
+    // Authored breaks fully define the bins and domain, so a runtime-filtered
+    // frame must train from them without an explicit domain (previously only
+    // `domain` exempted the empty-extent throw).
+    const table = ColumnTable.fromRows([{ x: 1, y: 1 }]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: { shape: { field: "value" } } },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: "value", statColumn: null, constant: null, scaledConstant: null },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table,
+      n: 0,
+      xNumeric: new Float64Array(0),
+      yNumeric: new Float64Array(0),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array(0),
+      shapeValues: [],
+    });
+    const warnings: { code: string; message: string }[] = [];
+    const resolution = resolveStyleScale({
+      aesthetic: "shape",
+      frames: [frame],
+      bindings: [binding],
+      table,
+      sourceTable: table,
+      config: {
+        type: "binned",
+        breaks: [0, 5, 10],
+        range: ["circle", "square"],
+      },
+      prevState: null,
+      title: "shape",
+      warnings,
+    });
+    expect(resolution.guidePlan?.type).toBe("discrete");
+    if (resolution.guidePlan?.type !== "discrete") throw new Error("expected discrete guide");
+    expect(resolution.guidePlan.domain).toEqual([0, 5]);
+  });
+
+  it("trains a temporal binned numeric style from authored breaks when all rows are filtered", () => {
+    // The temporal parser seed must fall back to authored breaks (not just an
+    // authored domain) so a fully filtered temporal binned scale still resolves
+    // instead of throwing style-temporal-parse on zero samples.
+    const table = ColumnTable.fromRows([{ x: 1, y: 1 }]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: { size: { field: "when" } } },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: "when", statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table,
+      n: 0,
+      xNumeric: new Float64Array(0),
+      yNumeric: new Float64Array(0),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array(0),
+      sizeValues: [],
+    });
+    const warnings: { code: string; message: string }[] = [];
+    const resolution = resolveStyleScale({
+      aesthetic: "size",
+      frames: [frame],
+      bindings: [binding],
+      table,
+      sourceTable: table,
+      config: {
+        type: "binned",
+        temporalKind: "date",
+        breaks: ["2024-01-01", "2024-01-15", "2024-01-31"],
+        range: [2, 6],
+      },
+      prevState: null,
+      title: "size",
+      warnings,
+    });
+    expect(resolution.resolved).not.toBeNull();
+    expect(resolution.resolved?.scale.domain).toEqual([
+      Date.UTC(2024, 0, 1),
+      Date.UTC(2024, 0, 31),
+    ]);
+  });
+
+  it("refuses to invent a sequential temporal domain from guide-tick breaks", () => {
+    // Sequential breaks are guide-tick positions, not bin boundaries. When all
+    // rows are filtered they must NOT seed the temporal parser (only binned
+    // breaks do) — otherwise arbitrary tick choices would silently train the
+    // scale extent. With no samples the sequential scale must refuse instead.
+    const table = ColumnTable.fromRows([{ x: 1, y: 1 }]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: { size: { field: "when" } } },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: "when", statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table,
+      n: 0,
+      xNumeric: new Float64Array(0),
+      yNumeric: new Float64Array(0),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array(0),
+      sizeValues: [],
+    });
+    const warnings: { code: string; message: string }[] = [];
+    expect(() =>
+      resolveStyleScale({
+        aesthetic: "size",
+        frames: [frame],
+        bindings: [binding],
+        table,
+        sourceTable: table,
+        config: {
+          type: "sequential",
+          temporalKind: "date",
+          breaks: ["2024-01-01", "2024-01-15", "2024-01-31"],
+        },
+        prevState: null,
+        title: "size",
+        warnings,
+      }),
+    ).toThrow();
+  });
+
+  it("keeps continuous mapped styles out of grouping and discrete stroke styles in grouping", () => {
+    const rows = [
+      { x: 1, y: 1, alpha: 0.2, kind: "a" },
+      { x: 2, y: 2, alpha: 0.4, kind: "a" },
+      { x: 3, y: 3, alpha: 0.6, kind: "b" },
+      { x: 4, y: 4, alpha: 0.8, kind: "b" },
+    ];
+    const continuous = runPipeline(
+      fromAny({
+        data: { values: rows },
+        aes: { x: { field: "x" }, y: { field: "y" }, alpha: { field: "alpha" } },
+        layers: [{ geom: "smooth", params: { method: "lm", se: false } }],
+        scales: { alpha: { type: "sequential" } },
+      }),
+      viewport,
+    );
+    const onePath = continuous.scene.batches.find((batch) => batch.kind === "paths");
+    if (onePath?.kind !== "paths") throw new Error("expected smooth path");
+    expect(onePath.pathOffsets).toHaveLength(2);
+
+    const discrete = runPipeline(
+      fromAny({
+        data: { values: rows },
+        aes: { x: { field: "x" }, y: { field: "y" }, linetype: { field: "kind" } },
+        layers: [{ geom: "smooth", params: { method: "lm", se: false } }],
+        scales: { linetype: { type: "ordinal" } },
+      }),
+      viewport,
+    );
+    const twoPaths = discrete.scene.batches.find((batch) => batch.kind === "paths");
+    if (twoPaths?.kind !== "paths") throw new Error("expected grouped smooth paths");
+    expect(twoPaths.pathOffsets).toHaveLength(3);
+    expect([...twoPaths.linetypeIndexes!]).toEqual([0, 1]);
+
+    const binned = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, value: 1 },
+            { x: 2, y: 2, value: 2 },
+            { x: 3, y: 3, value: 8 },
+            { x: 4, y: 4, value: 9 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, linetype: { field: "value" } },
+        layers: [{ geom: "smooth", params: { method: "lm", se: false } }],
+        scales: { linetype: { type: "binned", breaks: [0, 5, 10] } },
+      }),
+      viewport,
+    );
+    const binnedPaths = binned.scene.batches.find((batch) => batch.kind === "paths");
+    if (binnedPaths?.kind !== "paths") throw new Error("expected binned smooth paths");
+    expect(binnedPaths.pathOffsets).toHaveLength(3);
+    expect([...binnedPaths.linetypeIndexes!]).toEqual([0, 1]);
+
+    const temporalBinned = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, when: "01/02/2024" },
+            { x: 2, y: 2, when: "02/02/2024" },
+            { x: 3, y: 3, when: "08/02/2024" },
+            { x: 4, y: 4, when: "09/02/2024" },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, linewidth: { field: "when" } },
+        layers: [{ geom: "smooth", params: { method: "lm", se: false } }],
+        scales: {
+          linewidth: {
+            type: "binned",
+            temporalKind: "date",
+            parse: "dmy",
+            breaks: ["01/02/2024", "05/02/2024", "10/02/2024"],
+          },
+        },
+      }),
+      viewport,
+    );
+    const temporalPaths = temporalBinned.scene.batches.find((batch) => batch.kind === "paths");
+    if (temporalPaths?.kind !== "paths") throw new Error("expected temporal binned paths");
+    expect(temporalPaths.pathOffsets).toHaveLength(3);
+
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: {
+            values: [
+              { x: 1, y: 1, when: "01/02/2024" },
+              { x: 2, y: 2, when: "08/02/2024" },
+            ],
+          },
+          aes: { x: { field: "x" }, y: { field: "y" }, linewidth: { field: "when" } },
+          layers: [{ geom: "line" }],
+          scales: {
+            linewidth: {
+              type: "binned",
+              temporalKind: "date",
+              parse: "dmy",
+              breaks: ["01/02/2024", "not-a-date", "10/02/2024"],
+            },
+          },
+        }),
+        viewport,
+      ),
+    ).toThrow(expect.objectContaining({ code: "style-binned-breaks" }));
+  });
+
+  it("normalizes a reversed binned style domain before grouping", () => {
+    // The style trainer normalizes an authored domain with Math.min/max; the
+    // grouping path must too, or a reversed domain like [10, 0] yields descending
+    // breaks that treat every in-domain value as out-of-bounds — collapsing the
+    // grouped lines instead of binning them like the rendered scale.
+    const rows = [
+      { x: 1, y: 1, w: 1 },
+      { x: 2, y: 2, w: 1 },
+      { x: 3, y: 3, w: 9 },
+      { x: 4, y: 4, w: 9 },
+    ];
+    const pathCountForDomain = (domain: number[]): number => {
+      const model = runPipeline(
+        fromAny({
+          data: { values: rows },
+          aes: { x: { field: "x" }, y: { field: "y" }, linewidth: { field: "w" } },
+          layers: [{ geom: "smooth", params: { method: "lm", se: false } }],
+          scales: { linewidth: { type: "binned", domain } },
+        }),
+        viewport,
+      );
+      const paths = model.scene.batches.find((batch) => batch.kind === "paths");
+      if (paths?.kind !== "paths") throw new Error("expected smooth paths");
+      return paths.pathOffsets.length;
+    };
+    // Values 1 and 9 fall in distinct default bins → two grouped lines. The
+    // reversed domain must bin identically to the ascending one.
+    expect(pathCountForDomain([0, 10])).toBe(3);
+    expect(pathCountForDomain([10, 0])).toBe(pathCountForDomain([0, 10]));
+  });
+
+  it("preserves temporal semantics and formatted date labels on numeric style guides", () => {
+    const result = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, when: "2024-01-01" },
+            { x: 2, y: 2, when: "2024-01-03" },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "when" } },
+        layers: [{ geom: "point" }],
+        scales: {
+          size: {
+            type: "sequential",
+            temporalKind: "date",
+            parse: "ymd",
+            labels: "%Y-%m-%d",
+          },
+        },
+      }),
+      viewport,
+    );
+    expect(result.scales.size?.scale.domain).toEqual([Date.UTC(2024, 0, 1), Date.UTC(2024, 0, 3)]);
+    const guide = result.guidePlans.find((plan) => plan.id === "guide:size");
+    expect(guide?.type).toBe("discrete");
+    if (guide?.type !== "discrete") throw new Error("expected size guide");
+    expect(guide.entries[0]?.label).toBe("2024-01-01");
+    const legend = result.scene.legends.find((candidate) => candidate.scale === "size");
+    expect(legend?.type).toBe("discrete");
+    if (legend?.type !== "discrete") throw new Error("expected discrete size legend");
+    expect(legend.entries[0]?.label).toBe("2024-01-01");
+  });
+
+  it("supports manual, binned, identity, and explicit exhaustion policy", () => {
+    const manual = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, group: "a" },
+            { x: 2, y: 2, group: "b" },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, shape: { field: "group" } },
+        layers: [{ geom: "point" }],
+        scales: { shape: { type: "manual", domain: ["a", "b"], range: ["circle", "diamond"] } },
+      }),
+      viewport,
+    );
+    const points = manual.scene.batches.find((batch) => batch.kind === "points");
+    if (points?.kind !== "points") throw new Error("expected points");
+    expect([...points.shapeIndexes!]).toEqual([0, 3]);
+    expect(manual.scene.legends.find((legend) => legend.scale === "shape")).toBeDefined();
+
+    const binned = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, value: 1 },
+            { x: 2, y: 2, value: 1 },
+            { x: 1, y: 2, value: 9 },
+            { x: 2, y: 3, value: 9 },
+          ],
+        },
+        aes: {
+          x: { field: "x" },
+          y: { field: "y" },
+          group: { field: "value" },
+          linetype: { field: "value" },
+        },
+        layers: [{ geom: "line" }],
+        scales: { linetype: { type: "binned", breaks: [0, 5, 10], range: ["solid", "dashed"] } },
+      }),
+      viewport,
+    );
+    const paths = binned.scene.batches.find((batch) => batch.kind === "paths");
+    if (paths?.kind !== "paths") throw new Error("expected paths");
+    expect([...paths.linetypeIndexes!]).toEqual([0, 1]);
+
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: {
+            values: Array.from({ length: 7 }, (_, index) => ({
+              x: index,
+              y: index,
+              group: `g${index}`,
+            })),
+          },
+          aes: { x: { field: "x" }, y: { field: "y" }, shape: { field: "group" } },
+          layers: [{ geom: "point" }],
+        }),
+        viewport,
+      ),
+    ).toThrow(expect.objectContaining({ code: "style-palette-exhausted" }));
+  });
+
+  it("resolves after-stat style mappings instead of dropping them", () => {
+    const model = runPipeline(
+      fromAny({
+        data: { values: [{ category: "a" }, { category: "a" }, { category: "b" }] },
+        aes: { x: { field: "category" }, alpha: { stat: "count" } },
+        layers: [{ geom: "bar" }],
+        scales: { alpha: { type: "sequential", domain: [1, 2], range: [0.25, 1] } },
+      }),
+      viewport,
+    );
+    const rects = model.scene.batches.find((batch) => batch.kind === "rects");
+    if (rects?.kind !== "rects") throw new Error("expected bars");
+    expect([...rects.alphas!].toSorted((left, right) => left - right)).toEqual([0.25, 1]);
+    expect(
+      [
+        model.candidates.candidate(0)?.alphaValue,
+        model.candidates.candidate(1)?.alphaValue,
+      ].toSorted((left, right) => (left ?? 0) - (right ?? 0)),
+    ).toEqual([1, 2]);
+  });
+
+  it("rejects unsupported continuous shape and incompatible geom mappings with fixes", () => {
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: { values: [{ x: 1, y: 2, value: 3 }] },
+          aes: { x: { field: "x" }, y: { field: "y" }, shape: { field: "value" } },
+          layers: [{ geom: "point" }],
+          scales: { shape: { type: "sequential" } },
+        }),
+        viewport,
+      ),
+    ).toThrow(expect.objectContaining({ code: "unsupported-aesthetic-scale" }));
+
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: { values: [{ x: 1, y: 2, group: "a" }] },
+          aes: { x: { field: "x" }, y: { field: "y" }, shape: { field: "group" } },
+          layers: [{ geom: "line" }],
+        }),
+        viewport,
+      ),
+    ).toThrow(expect.objectContaining({ code: "unsupported-geom-aesthetic" }));
+  });
+
+  it("routes null to naValue and out-of-domain to unknownValue with warnings", () => {
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, amount: 10 },
+            { x: 2, y: 2, amount: null },
+            { x: 3, y: 3, amount: 200 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "amount" } },
+        layers: [{ geom: "point" }],
+        scales: {
+          size: {
+            type: "sequential",
+            domain: [0, 100],
+            range: [2, 10],
+            naValue: 1,
+            unknownValue: 99,
+          },
+        },
+      }),
+      viewport,
+    );
+    const points = model.scene.batches.find((batch) => batch.kind === "points");
+    if (points?.kind !== "points") throw new Error("expected points");
+    // size interpolates by area: sqrt(2^2 + 0.1*(10^2-2^2)) = sqrt(13.6) in-range;
+    // null -> naValue (1); 200 is OOB -> unknownValue (99).
+    expect([...points.sizes!]).toEqual([Math.fround(Math.sqrt(13.6)), 1, 99]);
+    expect(model.warnings.some((warning) => warning.code === "style-na-values")).toBe(true);
+    expect(model.warnings.some((warning) => warning.code === "style-unknown-values")).toBe(true);
+  });
+
+  it("clamps out-of-domain values under oob squish without an unknown warning", () => {
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, amount: 10 },
+            { x: 2, y: 2, amount: 200 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "amount" } },
+        layers: [{ geom: "point" }],
+        scales: { size: { type: "sequential", domain: [0, 100], range: [2, 10], oob: "squish" } },
+      }),
+      viewport,
+    );
+    const points = model.scene.batches.find((batch) => batch.kind === "points");
+    if (points?.kind !== "points") throw new Error("expected points");
+    // 200 clamps to the domain max (100) -> range max (10) rather than the unknown style.
+    expect([...points.sizes!]).toEqual([Math.fround(Math.sqrt(13.6)), 10]);
+    expect(model.warnings.some((warning) => warning.code === "style-unknown-values")).toBe(false);
+  });
+
+  it("cycles finite shapes past the palette when onExhaust is cycle", () => {
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: Array.from({ length: 7 }, (_, index) => ({
+            x: index,
+            y: index,
+            group: `g${index}`,
+          })),
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, shape: { field: "group" } },
+        layers: [{ geom: "point" }],
+        scales: { shape: { type: "ordinal", onExhaust: "cycle" } },
+      }),
+      viewport,
+    );
+    const points = model.scene.batches.find((batch) => batch.kind === "points");
+    if (points?.kind !== "points") throw new Error("expected points");
+    // Six named symbols; the seventh group wraps to the first instead of throwing.
+    expect([...points.shapeIndexes!]).toEqual([0, 1, 2, 3, 4, 5, 0]);
+  });
+
+  it("rejects a binned domain that disagrees with its boundaries", () => {
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: { values: [{ x: 1, y: 1, amount: 3 }] },
+          aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "amount" } },
+          layers: [{ geom: "point" }],
+          scales: { size: { type: "binned", domain: [0, 50], breaks: [0, 5, 10], range: [2, 6] } },
+        }),
+        viewport,
+      ),
+    ).toThrow(expect.objectContaining({ code: "style-domain-invalid" }));
+  });
+
+  it("fails deterministically when temporal style values cannot be parsed", () => {
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: {
+            values: [
+              { x: 1, y: 1, when: "2024-01-01" },
+              { x: 2, y: 2, when: "not-a-date" },
+            ],
+          },
+          aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "when" } },
+          layers: [{ geom: "point" }],
+          scales: { size: { type: "sequential", temporalKind: "date", parse: "ymd" } },
+        }),
+        viewport,
+      ),
+    ).toThrow(expect.objectContaining({ code: "style-temporal-parse" }));
+  });
+
+  it("rejects temporal values mapped to a binned finite style", () => {
+    // shape/linetype do not support date/datetime (capability contract); a
+    // temporal column under type:"binned" must fail loudly, not silently map to
+    // the unknown symbol or throw a misleading style-domain-empty.
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: {
+            values: [
+              { x: 1, y: 1, when: "2024-01-01" },
+              { x: 2, y: 2, when: "2024-06-01" },
+            ],
+          },
+          aes: { x: { field: "x" }, y: { field: "y" }, shape: { field: "when" } },
+          layers: [{ geom: "point" }],
+          scales: { shape: { type: "binned", breaks: [0, 1, 2] } },
+        }),
+        viewport,
+      ),
+    ).toThrow(expect.objectContaining({ code: "unsupported-aesthetic-scale" }));
+  });
+
+  it("resolves a smooth se after-stat mapping to linewidth instead of rejecting it", () => {
+    // Previously threw stat-channel-unsupported: se is a published smooth output
+    // and must be mappable to a numeric style. It now resolves onto the frame and
+    // candidate (interaction truth) rather than being rejected.
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1 },
+            { x: 2, y: 3 },
+            { x: 3, y: 2 },
+            { x: 4, y: 5 },
+            { x: 5, y: 4 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, linewidth: { stat: "se" } },
+        layers: [{ geom: "smooth", params: { method: "lm", se: true } }],
+        scales: { linewidth: { type: "identity" } },
+      }),
+      viewport,
+    );
+    const paths = model.scene.batches.find((batch) => batch.kind === "paths");
+    if (paths?.kind !== "paths") throw new Error("expected smooth path");
+    const width = model.candidates.candidate(0)?.linewidthValue;
+    // Identity carries the pointwise standard error (>= 0) as the linewidth value.
+    expect(typeof width).toBe("number");
+    expect(Number.isFinite(width) && (width as number) >= 0).toBe(true);
+  });
+
+  it("bins faceted styles on the global extent, not panel-local extents", () => {
+    // Two panels whose local value ranges differ wildly; with global bins each
+    // panel's points fall in a single bin (one line), so grouping must not split
+    // them using panel-local rescaled bins.
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { g: "p1", x: 1, y: 1, band: 0 },
+            { g: "p1", x: 2, y: 2, band: 0 },
+            { g: "p1", x: 3, y: 3, band: 1 },
+            { g: "p1", x: 4, y: 4, band: 1 },
+            { g: "p2", x: 1, y: 1, band: 99 },
+            { g: "p2", x: 2, y: 2, band: 99 },
+            { g: "p2", x: 3, y: 3, band: 100 },
+            { g: "p2", x: 4, y: 4, band: 100 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, linetype: { field: "band" } },
+        layers: [{ geom: "line" }],
+        facet: { wrap: { field: "g" } },
+        scales: { linetype: { type: "binned" } },
+      }),
+      viewport,
+    );
+    const pathBatches = model.scene.batches.filter((batch) => batch.kind === "paths");
+    const totalSubpaths = pathBatches.reduce(
+      (sum, batch) => sum + (batch.kind === "paths" ? batch.pathOffsets.length - 1 : 0),
+      0,
+    );
+    // Global [0,100] bins put p1 (0,1) in bin 0 and p2 (99,100) in the top bin —
+    // one line per panel. Panel-local binning would rescale each to [low,high]
+    // and split every panel into two one-value groups (4 subpaths).
+    expect(totalSubpaths).toBe(2);
+  });
+
+  it("trains a stat-only discrete numeric style from observed values and disables its legend", () => {
+    // alpha is driven only by an after-stat column (count); stat columns never
+    // reach the source catalog, so the ordinal domain must fall back to the
+    // observed values instead of collapsing to an empty domain (which dropped
+    // the legend entirely). And because a stat-only mapping has no field/constant
+    // to index, the resulting discrete legend must be non-interactive.
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { cat: "a" },
+            { cat: "a" },
+            { cat: "b" },
+            { cat: "b" },
+            { cat: "b" },
+            { cat: "c" },
+          ],
+        },
+        aes: { x: { field: "cat" }, alpha: { stat: "count" } },
+        layers: [{ geom: "bar" }],
+        scales: { alpha: { type: "ordinal" } },
+      }),
+      viewport,
+    );
+    const plan = model.guidePlans.find((p) => p.aesthetic === "alpha");
+    if (plan?.type !== "discrete") throw new Error("expected alpha discrete guide plan");
+    // Observed per-bar counts {2,3,1} → three ordinal entries, not a dropped legend.
+    expect(plan.entries.length).toBeGreaterThan(0);
+    const legend = model.scene.legends.find(
+      (entry) => entry.type === "discrete" && entry.scale === "alpha",
+    );
+    if (legend?.type !== "discrete") throw new Error("expected alpha discrete legend");
+    expect(legend.interactive).toBe(false);
+  });
+
+  it("keeps a field-mapped discrete numeric style legend interactive", () => {
+    // Contrast to the stat-only case: a real field mapping IS indexable, so the
+    // discrete legend stays interactive (hover/click resolves rows).
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, grp: "a" },
+            { x: 2, y: 2, grp: "b" },
+            { x: 3, y: 3, grp: "c" },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "grp" } },
+        layers: [{ geom: "point" }],
+        scales: { size: { type: "ordinal" } },
+      }),
+      viewport,
+    );
+    const legend = model.scene.legends.find(
+      (entry) => entry.type === "discrete" && entry.scale === "size",
+    );
+    if (legend?.type !== "discrete") throw new Error("expected size discrete legend");
+    expect(legend.interactive).not.toBe(false);
+  });
+
+  it("honors authored guide breaks on a sequential numeric style scale", () => {
+    // Sequential breaks are guide ticks (like color sequential scales), not bin
+    // boundaries — they must not throw style-binned-breaks and should become the
+    // legend ticks instead of the default linearTicks.
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, amount: 0 },
+            { x: 2, y: 2, amount: 50 },
+            { x: 3, y: 3, amount: 100 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "amount" } },
+        layers: [{ geom: "point" }],
+        scales: { size: { type: "sequential", range: [2, 10], breaks: [0, 25, 50, 75, 100] } },
+      }),
+      viewport,
+    );
+    const plan = model.guidePlans.find((p) => p.aesthetic === "size");
+    if (plan?.type !== "discrete") throw new Error("expected size guide plan");
+    expect(plan.entries.map((entry) => entry.value)).toEqual([0, 25, 50, 75, 100]);
+  });
+
+  it("rejects sequential style breaks that fall outside the domain", () => {
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: { values: [{ x: 1, y: 1, amount: 50 }] },
+          aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "amount" } },
+          layers: [{ geom: "point" }],
+          scales: { size: { type: "sequential", domain: [0, 100], breaks: [0, 50, 200] } },
+        }),
+        viewport,
+      ),
+    ).toThrow(expect.objectContaining({ code: "style-domain-invalid" }));
+  });
+
+  it("rejects a field-mapped style on a fixed-intercept annotation rule", () => {
+    // An annotation rule emits no data rows, so a field mapping has nothing to
+    // map and would produce NaN/invalid style vectors — reject it loudly.
+    expect(() =>
+      runPipeline(
+        fromAny({
+          data: {
+            values: [
+              { x: 1, y: 1, kind: "a" },
+              { x: 2, y: 2, kind: "b" },
+            ],
+          },
+          aes: { x: { field: "x" }, y: { field: "y" } },
+          layers: [
+            { geom: "point" },
+            { geom: "rule", aes: { linetype: { field: "kind" } }, params: { yintercept: 2 } },
+          ],
+        }),
+        viewport,
+      ),
+    ).toThrow(expect.objectContaining({ code: "unsupported-annotation-style" }));
+  });
+
+  it("allows a scaled-constant style on a fixed-intercept annotation rule", () => {
+    // Constants (including { value, scale: true }) DO expand per emitted segment,
+    // so they remain valid on annotation rules — only field/stat mappings reject.
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1 },
+            { x: 2, y: 2 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" } },
+        layers: [
+          { geom: "point" },
+          {
+            geom: "rule",
+            aes: { linewidth: { value: 5, scale: true } },
+            params: { yintercept: 1 },
+          },
+        ],
+      }),
+      viewport,
+    );
+    expect(model.scene.batches.some((batch) => batch.kind === "segments")).toBe(true);
+  });
+
+  it("keeps a rowless annotation scaled-constant legend non-interactive", () => {
+    // A fixed-intercept rule's scaled constant lives on an n === 0 annotation
+    // frame with no source row or lineage, so its legend entry would resolve to
+    // an empty key bucket — hover/click emphasizing nothing. It must render but
+    // stay non-interactive (contrast the field-mapped discrete legend above).
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1 },
+            { x: 2, y: 2 },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" } },
+        layers: [
+          { geom: "point" },
+          {
+            geom: "rule",
+            aes: { linetype: { value: "threshold", scale: true } },
+            params: { yintercept: 1 },
+          },
+        ],
+        scales: { linetype: { type: "ordinal" } },
+      }),
+      viewport,
+    );
+    const legend = model.scene.legends.find(
+      (entry) => entry.type === "discrete" && entry.scale === "linetype",
+    );
+    if (legend?.type !== "discrete") throw new Error("expected linetype discrete legend");
+    expect(legend.interactive).toBe(false);
+  });
+
+  it("excludes a rowless annotation value from a mixed interactive style legend", () => {
+    // A data-backed linetype field makes the whole scale interactive; a rule
+    // annotation constant sharing that scale indexes no rendered mark, so it must
+    // not become a hover/clickable legend entry (an empty key bucket). It still
+    // trains the scale (so the annotation renders) but is dropped from the legend.
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [
+            { x: 1, y: 1, group: "a" },
+            { x: 2, y: 2, group: "a" },
+            { x: 1, y: 3, group: "b" },
+            { x: 2, y: 4, group: "b" },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" } },
+        layers: [
+          { geom: "line", aes: { linetype: { field: "group" } } },
+          {
+            geom: "rule",
+            aes: { linetype: { value: "threshold", scale: true } },
+            params: { yintercept: 2 },
+          },
+        ],
+        scales: { linetype: { type: "ordinal" } },
+      }),
+      viewport,
+    );
+    const legend = model.scene.legends.find(
+      (entry) => entry.type === "discrete" && entry.scale === "linetype",
+    );
+    if (legend?.type !== "discrete") throw new Error("expected linetype discrete legend");
+    expect(legend.interactive).toBe(true);
+    const values = legend.entries.map((entry) => entry.value);
+    expect(values).toContain("a");
+    expect(values).toContain("b");
+    expect(values).not.toContain("threshold");
+  });
+
+  it("returns a null resolution when no style mapping is present", () => {
+    // Collect must report anyField=false so the orchestrator short-circuits
+    // without inventing a constant scale.
+    const table = ColumnTable.fromRows([{ x: 1, y: 1 }]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: {} },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table,
+      n: 1,
+      xNumeric: new Float64Array([1]),
+      yNumeric: new Float64Array([1]),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array([0]),
+    });
+    const warnings: { code: string; message: string }[] = [];
+    const resolution = resolveStyleScale({
+      aesthetic: "size",
+      frames: [frame],
+      bindings: [binding],
+      table,
+      sourceTable: table,
+      config: undefined,
+      prevState: null,
+      title: "size",
+      warnings,
+    });
+    expect(resolution).toEqual({
+      aesthetic: "size",
+      resolved: null,
+      legendInput: null,
+      guidePlan: null,
+      state: null,
+    });
+    expect(warnings).toEqual([]);
+  });
+
+  it("trains a discrete style from a scaled constant and keeps its legend interactive", () => {
+    // Scaled constants are catalog-backed and indexable — collect must set
+    // anyField/anyDiscrete/anyIndexable so ordinal training and hover keys work.
+    const table = ColumnTable.fromRows([{ x: 1, y: 1 }]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: { shape: { value: "focus", scale: true } } },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: null, statColumn: null, constant: null, scaledConstant: "focus" },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table,
+      n: 1,
+      xNumeric: new Float64Array([1]),
+      yNumeric: new Float64Array([1]),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array([0]),
+      shapeValues: ["focus"],
+    });
+    const warnings: { code: string; message: string }[] = [];
+    const resolution = resolveStyleScale({
+      aesthetic: "shape",
+      frames: [frame],
+      bindings: [binding],
+      table,
+      sourceTable: table,
+      config: { type: "ordinal" },
+      prevState: null,
+      title: "shape",
+      warnings,
+    });
+    expect(resolution.resolved?.scale.domain).toEqual(["focus"]);
+    expect(resolution.resolved?.scale.valueOf("focus")).toBe("circle");
+    expect(resolution.legendInput).not.toBeNull();
+    expect(resolution.legendInput?.interactive).not.toBe(false);
+    expect(resolution.guidePlan?.type).toBe("discrete");
+  });
+
+  it("trains ordinal style domains from the source catalog when the frame is filtered", () => {
+    // Runtime filters drop rows from panel frames, but the unfiltered source
+    // catalog must still train ordinal domains so legend keys and assignments
+    // stay stable across filters (mirrors color ordinal catalog training).
+    const sourceTable = ColumnTable.fromRows([
+      { x: 1, y: 1, group: "a" },
+      { x: 2, y: 2, group: "b" },
+      { x: 3, y: 3, group: "c" },
+    ]);
+    // Filtered frame only sees a + b.
+    const filteredTable = ColumnTable.fromRows([
+      { x: 1, y: 1, group: "a" },
+      { x: 2, y: 2, group: "b" },
+    ]);
+    const binding = fromAny<LayerBinding>({
+      layer: { geom: "point", aes: { shape: { field: "group" } } },
+      index: 0,
+      xField: "x",
+      yField: "y",
+      color: { field: null, constant: null, scaledConstant: null },
+      fill: { field: null, constant: null, scaledConstant: null },
+      size: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      linewidth: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      alpha: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      shape: { field: "group", statColumn: null, constant: null, scaledConstant: null },
+      linetype: { field: null, statColumn: null, constant: null, scaledConstant: null },
+      ruleForm: null,
+    });
+    const frame = fromAny<LayerFrame>({
+      binding,
+      table: filteredTable,
+      n: 2,
+      xNumeric: new Float64Array([1, 2]),
+      yNumeric: new Float64Array([1, 2]),
+      groups: [],
+      inputGroups: [],
+      rowIndex: new Uint32Array([0, 1]),
+      shapeValues: ["a", "b"],
+    });
+    const warnings: { code: string; message: string }[] = [];
+    const resolution = resolveStyleScale({
+      aesthetic: "shape",
+      frames: [frame],
+      bindings: [binding],
+      table: filteredTable,
+      sourceTable,
+      config: { type: "ordinal" },
+      prevState: null,
+      title: "shape",
+      warnings,
+    });
+    expect(resolution.resolved?.scale.domain).toEqual(["a", "b", "c"]);
+    // Filtered-out category still receives a stable palette slot.
+    expect(resolution.resolved?.scale.valueOf("c")).toBe("square");
+    expect(resolution.guidePlan?.type).toBe("discrete");
+    if (resolution.guidePlan?.type !== "discrete") throw new Error("expected discrete guide");
+    expect(resolution.guidePlan.domain).toEqual(["a", "b", "c"]);
+  });
+});

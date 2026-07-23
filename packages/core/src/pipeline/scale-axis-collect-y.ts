@@ -31,9 +31,12 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
       acc.numeric.push(frame.yNumeric);
     }
     if (frame.box !== null) acc.numeric.push(frame.box.outlierY);
-    const boundFields = [binding.yminField, binding.ymaxField].filter(
-      (field): field is string => field !== null,
-    );
+    // Tile/raster y edges are synthetic from centers — type evidence from
+    // yField only so inherited ymin/ymax cannot poison inference.
+    const boundFields =
+      geom === "tile" || geom === "raster"
+        ? []
+        : [binding.yminField, binding.ymaxField].filter((field): field is string => field !== null);
     const evidenceFields = [
       ...new Set(
         boundFields.length > 0 ? boundFields : binding.yField === null ? [] : [binding.yField],
@@ -71,6 +74,25 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
     acc.typeParts.add(fieldType);
     if (fieldType === "nominal") acc.anyDiscrete = true;
     if (fieldType !== "temporal") acc.allTemporal = false;
+    acc.sawContinuousEvidence = true;
+  }
+  // Segment end y: dual evidence (numeric + discrete) even when yField is set.
+  // Guard undefined partial fixtures (not only null).
+  if (frame.yend !== null && frame.yend !== undefined) {
+    acc.numeric.push(frame.yend);
+    if (frame.yendValues !== null && frame.yendValues !== undefined) {
+      acc.columns.push(frame.yendValues);
+    }
+    const endField = binding.yendField;
+    if (endField !== null && frame.table.has(endField)) {
+      const endType = positionFieldType(frame.table, endField, yConversion);
+      acc.typeParts.add(endType);
+      if (endType === "nominal") acc.anyDiscrete = true;
+      if (endType !== "temporal") acc.allTemporal = false;
+    } else {
+      acc.typeParts.add("quantitative");
+      acc.allTemporal = false;
+    }
     acc.sawContinuousEvidence = true;
   }
   for (const v of frame.yIntercepts) {

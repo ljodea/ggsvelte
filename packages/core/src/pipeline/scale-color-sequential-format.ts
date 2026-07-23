@@ -17,8 +17,8 @@ function resolveColorLegendFormat(input: {
   domain: readonly [number, number];
   temporalKind: TemporalKind | null;
   transform?: "identity" | "log10" | "sqrt";
-  config: ColorScaleSpec | undefined;
-  name: "color" | "fill";
+  config: Pick<ColorScaleSpec, "labels" | "timezone" | "transform"> | undefined;
+  name: string;
   warnings: PipelineWarning[];
 }): ColorLegendFormatter {
   const { domain, temporalKind, config, name, warnings } = input;
@@ -58,6 +58,9 @@ function resolveColorLegendFormat(input: {
 
   // Log colorbars use decade ticks; linear span precision labels sub-unit
   // powers (0.001, 0.01, 0.1) as "0". Derive decimals from the domain floor.
+  // ECMA-402 caps maximumFractionDigits at 20 — extreme domains (e.g. 1e-300)
+  // use exponential labels instead of throwing RangeError.
+  const MAX_LOCALE_FRACTION_DIGITS = 20;
   let label: (value: number) => string;
   if (transform === "log10" && labelFormat === undefined) {
     const positives = domain.filter((value) => Number.isFinite(value) && value > 0);
@@ -66,6 +69,9 @@ function resolveColorLegendFormat(input: {
     label = (value: number) => {
       if (!Number.isFinite(value)) return String(value);
       if (decimals === 0) return defaultTickFormat(tickStep(domain[0], domain[1], 5))(value);
+      if (decimals > MAX_LOCALE_FRACTION_DIGITS) {
+        return value.toExponential(2);
+      }
       return value.toLocaleString("en-US", {
         maximumFractionDigits: decimals,
         minimumFractionDigits: 0,
@@ -86,6 +92,16 @@ function resolveColorLegendFormat(input: {
     }
   }
   return { label, fullLabel: label };
+}
+
+export function resolveStyleLegendFormat(input: {
+  domain: readonly [number, number];
+  temporalKind: TemporalKind | null;
+  config: { labels?: string; timezone?: string } | undefined;
+  name: string;
+  warnings: PipelineWarning[];
+}): ColorLegendFormatter {
+  return resolveColorLegendFormat(input);
 }
 
 export function resolveSequentialLegendFormat(

@@ -7,6 +7,7 @@ import { perfMark, perfMeasure } from "../perf.js";
 import type { ThemeTokens } from "../theme.js";
 
 import { TemporalGuideIntervalError } from "../layout/temporal-guide.js";
+import { prepareLegendInputs, resolveAxisGuide } from "./guide-config.js";
 import { computePanelLayout } from "./panel-layout.js";
 import type { PanelLayoutResult } from "./panel-layout.js";
 import type { PreparedPanels } from "./prepare-panels.js";
@@ -23,13 +24,14 @@ export function finalizePanelLayoutPass(input: {
   warnings: PipelineWarning[];
 }): PanelLayoutResult {
   const { normalized, options, theme, flip, prepared, trained, warnings } = input;
-  const { faceted, freeX, freeY, nrow, ncol, facetPanels } = prepared;
+  const { faceted, freeX, freeY, nrow, ncol, facetPanels, strip } = prepared;
   const {
     xTraining,
     yTraining,
     panelScales,
     colorResolution,
     fillResolution,
+    styleResolutions,
     scalesConfig,
     allFrames,
   } = trained;
@@ -77,6 +79,29 @@ export function finalizePanelLayoutPass(input: {
     return scale.type === "time" && conversion.requestedTime ? "datetime" : null;
   };
 
+  const xGuide = resolveAxisGuide("x", scalesConfig, normalized.guides);
+  const yGuide = resolveAxisGuide("y", scalesConfig, normalized.guides);
+  const labs = { ...normalized.labs };
+  if (xGuide.visible) {
+    if (xGuide.title !== undefined) labs.x = xGuide.title;
+  } else labs.x = "";
+  if (yGuide.visible) {
+    if (yGuide.title !== undefined) labs.y = yGuide.title;
+  } else labs.y = "";
+  const legendInputs = prepareLegendInputs({
+    items: [
+      { input: colorResolution.legendInput, plan: colorResolution.guidePlan },
+      { input: fillResolution.legendInput, plan: fillResolution.guidePlan },
+      ...Object.values(styleResolutions).map((resolution) => ({
+        input: resolution.legendInput,
+        plan: resolution.guidePlan,
+      })),
+    ],
+    bindings: prepared.bindings,
+    scales: scalesConfig,
+    guides: normalized.guides,
+  });
+
   perfMark("ggsvelte:layout:start");
   let panelLayout: PanelLayoutResult;
   try {
@@ -85,21 +110,34 @@ export function finalizePanelLayoutPass(input: {
       faceted,
       freeX,
       freeY,
+      ...(normalized.coord?.type === "fixed" && { coordFixed: normalized.coord }),
       nrow,
       ncol,
       facetPanels,
+      strip,
       panelScales,
       allFrames,
-      labs: normalized.labs ?? {},
+      hGuide: flip ? yGuide : xGuide,
+      vGuide: flip ? xGuide : yGuide,
+      labs,
       scalesConfig,
       xScale: xTraining.scale,
       yScale: yTraining.scale,
       xTemporalKind: temporalKind("x"),
       yTemporalKind: temporalKind("y"),
-      colorLegend: colorResolution.legendInput,
-      fillLegend: fillResolution.legendInput,
+      legendInputs,
       legendOrder: normalized.legend?.order ?? "stable-domain",
       theme,
+      layoutAxisTitleSize: Math.max(
+        theme.axisTitleSize,
+        xGuide.theme?.titleSize ?? 0,
+        yGuide.theme?.titleSize ?? 0,
+      ),
+      layoutAxisTextSize: Math.max(
+        theme.axisTextSize,
+        xGuide.theme?.labelSize ?? 0,
+        yGuide.theme?.labelSize ?? 0,
+      ),
       options,
       warnings,
     });

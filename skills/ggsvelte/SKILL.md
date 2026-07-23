@@ -22,11 +22,11 @@ spec = data + aes (mappings) + layers[]        one layer = { geom, stat, positio
   `{"value": "red"}` is a constant; `{"stat": "count"}` reads a stat output;
   `null` unsets an inherited channel. **Bare strings are invalid in JSON
   specs** — always `{"field": ...}`. Channels: x, y, color (strokes/points),
-  fill (bars/areas), group, label, weight, ymin, ymax. The schema also reserves
-  mapped size, linewidth, and alpha, but this release does not yet render those
-  field mappings; use geom params for constant styling until that capability lands.
+  fill (bars/areas), group, label, weight, ymin, ymax, xmin, xmax, width, height.
+  Mapped size, linewidth, alpha, shape, and linetype are supported on the geoms
+  that consume them (see STYLE_AESTHETIC_GEOMS).
 - **layers**: drawn in order. Geoms: `point, line, col, bar, histogram, area,
-rule, text, smooth, boxplot, density, errorbar`. Each geom has a default
+rule, text, smooth, boxplot, density, errorbar, rect, tile, raster, ribbon`. Each geom has a default
   stat/position (bar → count+stack, histogram → bin+stack, col/area →
   identity+stack, boxplot → boxplot+dodge, everything else identity).
 - **stats compute columns**: count→`count`; bin→`count, density, ncount,
@@ -43,7 +43,11 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
   Use `coordTransform`/`coord_transform`; unlike scale transforms, coordinate
   transforms preserve stat inputs, tessellate curved render topology, and
   invert coordinates before scales for interactions. Non-identity coordinate
-  transforms require continuous non-temporal axes.
+  transforms require continuous non-temporal axes. Fixed aspect uses
+  `{"type":"fixed","ratio":1}`, `coordFixed`/`coord_fixed`, or
+  `coordEqual`/`coord_equal`; ratio is physical y-unit/x-unit length. Fixed
+  coordinates fit a centered data rectangle after chart chrome and reject
+  free positional facet scales.
 - **facet**: wrap form `{"wrap": {"field": "g"}, "ncol": 3}` XOR grid form
   `{"rows": {...}, "cols": {...}}`; `"scales": "fixed"|"free"|"free_x"|"free_y"`.
 - **scales**: canonical x/y families are `{"type": "linear"|"binned"|"time"|"band"}`.
@@ -70,6 +74,15 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
   helpers for color or fill. `color`/`colour` and ggplot2 snake-case exports
   are binding-identical. GuidePlans are `discrete`, `colorbar`, or
   `colorsteps`. Defaults are inferred and disclosed as advisories.
+- **guides**: top-level `guides` overrides scale-local `guide`. Use `axis`,
+  `legend`, `colorbar`, `colorsteps`, or `none` through the camelCase helpers
+  (or binding-identical snake-case aliases). Guide options style titles,
+  ticks/labels, numeric order, `auto|right|bottom` placement,
+  `auto|vertical|horizontal` direction, collision handling, force visibility,
+  and bounded theme roles without changing scale math. Auto non-position guides
+  move below when the viewport is at most 480px or a right guide would leave
+  less than 320px of panel. Exact discrete entries remain interactive; numeric
+  ticks/bins do not. Force identity/single-value manual guides explicitly.
 - **temporal defaults**: ISO dates/date-times, four-digit year strings,
   year-months, month-years, and year-quarters infer time after bounded sampling
   plus whole-column validation. Ambiguous ordered dates stay discrete: set

@@ -1,13 +1,21 @@
-import type { CellValue } from "@ggsvelte/core";
-import type { PlotInteractionEvent } from "@ggsvelte/svelte";
-
-export type PlaygroundInteractionEvent = PlotInteractionEvent<Record<string, CellValue>>;
+/**
+ * Bounded playground event ring buffer for the interaction debug panel.
+ *
+ * Structural event shape only — avoids deep PlotInteractionEvent generics that
+ * can collapse under type-aware lint when LayerSpec grows.
+ */
 
 export const PLAYGROUND_MAX_EVENTS = 20;
 
+export interface PlaygroundInteractionEvent {
+  readonly type: string;
+  readonly phase: string;
+  readonly source: string;
+}
+
 export interface PlaygroundEventEntry {
   readonly sequence: number;
-  readonly type: PlaygroundInteractionEvent["type"];
+  readonly type: string;
   readonly phase: string;
   readonly source: string;
   readonly json: string;

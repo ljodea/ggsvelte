@@ -70,15 +70,29 @@ function datum<Row extends Record<string, CellValue>, Key extends PropertyKey>(
     if (source === null) return null;
     return keyOf(source as Row, rowIndex);
   }) as Key[];
+  const candidateValue = (channel: string): CellValue => {
+    switch (channel) {
+      case "x":
+        return candidate.xValue;
+      case "y":
+        return candidate.yValue;
+      case "size":
+        return candidate.sizeValue;
+      case "linewidth":
+        return candidate.linewidthValue;
+      case "alpha":
+        return candidate.alphaValue;
+      case "shape":
+        return candidate.shapeValue;
+      case "linetype":
+        return candidate.linetypeValue;
+      default:
+        return null;
+    }
+  };
   const fields = (model.layerFields[candidate.layerIndex] ?? []).map((field) => ({
     ...field,
-    value:
-      row?.[field.field] ??
-      (row === null && field.channel === "x"
-        ? candidate.xValue
-        : row === null && field.channel === "y"
-          ? candidate.yValue
-          : null),
+    value: row?.[field.field] ?? (row === null ? candidateValue(field.channel) : null),
   }));
   return Object.freeze({
     key,

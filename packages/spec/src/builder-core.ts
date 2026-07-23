@@ -2,11 +2,22 @@
  * Fluent builder core: state, geom/facet/coord/labs/theme/spec.
  * Scale sugar mixin: builder-scales.ts. Public GGBuilder: builder.ts.
  */
-import { coordTransform, type CoordTransformOptions } from "./coord-helpers.js";
+import {
+  coordFixed,
+  coordTransform,
+  type CoordFixedOptions,
+  type CoordTransformOptions,
+} from "./coord-helpers.js";
 import { SpecValidationError } from "./errors.js";
 import type { AesInput, FacetInput, LayerInput, SpecInput } from "./normalize.js";
 import { normalize } from "./normalize.js";
-import { calendarDateFields, toDataRef, type AuthoringDataRef } from "./builder-data.js";
+import {
+  calendarDateFields,
+  toAuthoringDataRef,
+  toDataRef,
+  type AuthoringDataRef,
+  type DataInput,
+} from "./builder-data.js";
 import type {
   GeomAreaOptions,
   GeomBarOptions,
@@ -14,15 +25,21 @@ import type {
   GeomColOptions,
   GeomDensityOptions,
   GeomErrorbarOptions,
+  GeomRibbonOptions,
   GeomHistogramOptions,
   GeomLineOptions,
   GeomPointOptions,
+  GeomRasterOptions,
+  GeomRectOptions,
   GeomRuleOptions,
+  GeomSegmentOptions,
   GeomSmoothOptions,
   GeomTextOptions,
+  GeomTileOptions,
 } from "./builder-options.js";
 import type {
   A11yMode,
+  GuidesSpec,
   Labs,
   LegendSpec,
   PortableSpec,
@@ -43,6 +60,7 @@ interface BuilderState {
   readonly coord?: SpecInput["coord"];
   readonly a11y?: A11yMode;
   readonly scales?: Scales;
+  readonly guides?: GuidesSpec;
   readonly legend?: LegendSpec;
   readonly labs?: Labs;
   readonly theme?: ThemeName | ThemeSpec;
@@ -59,9 +77,14 @@ function layerFrom(
     position?: string;
     positionParams?: PositionParams;
     stat?: string;
+    data?: DataInput;
   },
 ): LayerInput {
-  const { aes: layerAes, render, position, positionParams, stat, ...params } = options;
+  const { aes: layerAes, render, position, positionParams, stat, data, ...params } = options;
+  // Snapshot authoring data immediately so later mutation of the caller's array
+  // cannot leak into the builder; portable Date→ISO conversion happens in .spec().
+  const withData =
+    data === undefined ? {} : { data: toAuthoringDataRef(data) as LayerInput["data"] };
   return {
     geom,
     ...(stat !== undefined && { stat }),
@@ -69,6 +92,7 @@ function layerFrom(
     ...(positionParams !== undefined && { positionParams }),
     ...(render !== undefined && { render }),
     ...(layerAes !== undefined && { aes: layerAes }),
+    ...withData,
     ...(Object.keys(params).length > 0 && { params }),
   } as LayerInput;
 }
@@ -167,10 +191,43 @@ export class GGBuilderCore {
     return this.layer(layerFrom("errorbar", options));
   }
 
+  /** Sugar for .layer({ geom: 'rect', ... }) — arbitrary xmin/xmax/ymin/ymax regions. */
+  geomRect(options: GeomRectOptions = {}): GGBuilder {
+    return this.layer(layerFrom("rect", options));
+  }
+
+  /** Sugar for .layer({ geom: 'tile', ... }) — center-sized cells at x/y. */
+  geomTile(options: GeomTileOptions = {}): GGBuilder {
+    return this.layer(layerFrom("tile", options));
+  }
+
+  /** Sugar for .layer({ geom: 'raster', ... }) — equal-cell dense grid. */
+  geomRaster(options: GeomRasterOptions = {}): GGBuilder {
+    return this.layer(layerFrom("raster", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'ribbon', ... }). Map x+ymin+ymax (or y+xmin+xmax
+   * for y orientation) to precomputed interval bounds.
+   */
+  geomRibbon(options: GeomRibbonOptions = {}): GGBuilder {
+    return this.layer(layerFrom("ribbon", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'segment', ... }). Map x, y, xend, and yend for
+   * finite two-endpoint lines (leader lines, range ticks, annotations).
+   */
+  geomSegment(options: GeomSegmentOptions = {}): GGBuilder {
+    return this.layer(layerFrom("segment", options));
+  }
+
   /**
    * Facet into small multiples: wrap form ({ wrap, ncol? }) or grid form
-   * ({ rows, cols }). Bare strings are field shorthand. scales controls
-   * per-panel positional-scale freedom ("fixed" default).
+   * ({ rows, cols }). Bare strings are field shorthand. Field objects accept
+   * closed `levels` order and a display `labels` map. `strip.position` is
+   * top/bottom/left/right (default top); `strip.show: false` hides strip
+   * chrome. scales controls per-panel positional-scale freedom ("fixed" default).
    */
   facet(facet: FacetInput): GGBuilder {
     return this.#with({ facet });
@@ -191,6 +248,16 @@ export class GGBuilderCore {
     return this.coord(coordTransform(options));
   }
 
+  /** Preserve a physical y-unit/x-unit ratio in the fitted data rectangle. */
+  coordFixed(options: CoordFixedOptions = {}): GGBuilder {
+    return this.coord(coordFixed(options));
+  }
+
+  /** Equal-unit spelling of coordFixed(). */
+  coordEqual(options: CoordFixedOptions = {}): GGBuilder {
+    return this.coord(coordFixed(options));
+  }
+
   /** Set the accessibility mode ("force-svg" keeps every layer in SVG). */
   a11y(mode: A11yMode): GGBuilder {
     return this.#with({ a11y: mode });
@@ -201,7 +268,12 @@ export class GGBuilderCore {
     return this.#with({ scales: { ...this.#state.scales, ...scales } });
   }
 
-  /** Configure the legend (merged over previous calls). */
+  /** Configure appearance-only guides (merged per aesthetic over previous calls). */
+  guides(guides: GuidesSpec): GGBuilder {
+    return this.#with({ guides: { ...this.#state.guides, ...guides } });
+  }
+
+  /** Configure the legacy legend entry order (merged over previous calls). */
   legend(legend: LegendSpec): GGBuilder {
     return this.#with({ legend: { ...this.#state.legend, ...legend } });
   }
@@ -230,20 +302,32 @@ export class GGBuilderCore {
       coord,
       a11y,
       scales,
+      guides,
       legend,
       labs,
       theme,
       width,
       height,
     } = this.#state;
+    const calendarFields = calendarDateFields(this.#state);
+    const portableLayers = layers.map((layer) => {
+      if (layer.data === undefined) return layer;
+      // layerFrom stores AuthoringDataRef snapshots as LayerInput.data; portable
+      // ISO conversion runs here with the final calendar-date field set.
+      return {
+        ...layer,
+        data: toDataRef(layer.data, calendarFields),
+      };
+    });
     const input: SpecInput = {
-      ...(data !== undefined && { data: toDataRef(data, calendarDateFields(this.#state)) }),
+      ...(data !== undefined && { data: toDataRef(data, calendarFields) }),
       ...(plotAes !== undefined && { aes: plotAes }),
-      layers: [...layers],
+      layers: portableLayers,
       ...(facet !== undefined && { facet }),
       ...(coord !== undefined && { coord }),
       ...(a11y !== undefined && { a11y }),
       ...(scales !== undefined && { scales }),
+      ...(guides !== undefined && { guides }),
       ...(legend !== undefined && { legend }),
       ...(labs !== undefined && { labs }),
       ...(theme !== undefined && { theme }),

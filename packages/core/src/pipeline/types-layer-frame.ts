@@ -5,6 +5,8 @@ import type { CellValue, ColumnTable } from "../table.js";
 
 import type { LayerBinding } from "./types-binding.js";
 
+type StyleValueColumn = readonly CellValue[] | Float64Array;
+
 interface BoxFrame {
   lower: Float64Array;
   middle: Float64Array;
@@ -42,10 +44,21 @@ export interface LayerFrame {
    * Length is always `table.rowCount` (empty for annotation frames with no rows).
    */
   inputGroups: readonly number[];
+  /**
+   * Global source-row id per pre-stat input table row (multi-table SourceRegistry
+   * ids after filter/facet remap). Length is `table.rowCount`. Used by aggregate
+   * lineage when FacetPanelDef.sourceRows is not layer-local (#589).
+   */
+  inputSourceRows: number[] | null;
   /** Source row per post-stat row (NO_ROW for synthesized rows). */
   rowIndex: Uint32Array;
   colorValues: readonly CellValue[] | null;
   fillValues: readonly CellValue[] | null;
+  sizeValues: StyleValueColumn | null;
+  linewidthValues: StyleValueColumn | null;
+  alphaValues: StyleValueColumn | null;
+  shapeValues: StyleValueColumn | null;
+  linetypeValues: StyleValueColumn | null;
   labelValues: readonly CellValue[] | null;
   /** Post-position / stat bounds (bars, areas, bands, boxes, errorbars). */
   ymin: Float64Array | null;
@@ -53,6 +66,14 @@ export interface LayerFrame {
   /** Bin edges (bin-stat layers; rects span them on a continuous x). */
   xmin: Float64Array | null;
   xmax: Float64Array | null;
+  /** Segment end x (transformed scale-space); null when unused. */
+  xend: Float64Array | null;
+  /** Segment end y (transformed scale-space); null when unused. */
+  yend: Float64Array | null;
+  /** Raw segment end x values (discrete evidence); null when unused. */
+  xendValues: readonly CellValue[] | null;
+  /** Raw segment end y values (discrete evidence); null when unused. */
+  yendValues: readonly CellValue[] | null;
   dodgeSlot: Uint32Array | null;
   /** Per-row dodge slot count (per-x, ggplot2 preserve="total"). */
   dodgeSlotCounts: Uint32Array | null;

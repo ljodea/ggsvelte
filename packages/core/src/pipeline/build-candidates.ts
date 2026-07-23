@@ -41,6 +41,8 @@ function createRawCandidateDatumResolver(
     if (binding === undefined || sourceRow === null) return {};
     const value = (field: string | null): CellValue =>
       field === null ? null : table.column(field)[sourceRow]!;
+    const styleValue = (style: LayerBinding["size"]): CellValue =>
+      style.field === null ? (style.scaledConstant ?? style.constant) : value(style.field);
     const group = groupsFor(facts.layerIndex)[sourceRow] ?? 0;
     const colorRank = ordinalColorRank(color, binding.color.field, () =>
       value(binding.color.field),
@@ -49,6 +51,11 @@ function createRawCandidateDatumResolver(
     return {
       xValue: value(binding.xField),
       yValue: value(binding.yField),
+      sizeValue: styleValue(binding.size),
+      linewidthValue: styleValue(binding.linewidth),
+      alphaValue: styleValue(binding.alpha),
+      shapeValue: styleValue(binding.shape),
+      linetypeValue: styleValue(binding.linetype),
       seriesId: group,
       seriesRank: colorRank >= 0 ? colorRank : fillRank >= 0 ? fillRank : group,
       sourceOrder: sourceRow,

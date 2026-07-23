@@ -1,0 +1,8 @@
+{
+  "runtimeDependenciesAdded": [],
+  "lockfilePackagesAdded": [],
+  "portableExecutableSurfaceAdded": false,
+  "callbacksAdded": false,
+  "regularExpressionsAddedToPortableSpec": false,
+  "summary": "coord_fixed is implemented with existing Spec/Core/Svelte layout primitives and adds no runtime dependency."
+}

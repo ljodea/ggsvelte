@@ -380,6 +380,75 @@ helpers reuse the strict parser registry and semantic epoch representation:
 Open [continuous color](/examples/color/continuous) for a colorbar and
 [binned color](/examples/color/binned) for colorsteps.
 
+## Size, linewidth, alpha, shape, and linetype
+
+The remaining visual channels use the same stable scale contract. Quantitative
+\`size\`, \`linewidth\`, and \`alpha\` default to sequential scales; categorical
+values default to ordinal scales. Size interpolation is perceptually linear in
+symbol area. Alpha is bounded to 0–1, while size and linewidth must stay
+positive.
+
+\`\`\`ts fragment
+import {
+  scaleSizeContinuous,
+  scaleLinewidthBinned,
+  scaleAlphaDate,
+  scaleShapeManual,
+  scaleLinetypeDiscrete,
+} from "@ggsvelte/spec";
+
+const scales = {
+  ...scaleSizeContinuous({ range: [2, 10] }),
+  ...scaleLinewidthBinned({ breaks: [0, 10, 20, 50] }),
+  ...scaleShapeManual({
+    domain: ["control", "treated"],
+    values: ["circle", "triangle"],
+  }),
+  ...scaleLinetypeDiscrete(),
+};
+\`\`\`
+
+Shape and linetype are finite perceptual sets. Continuous values therefore
+require an explicit \`binned\` scale; they are never silently interpolated.
+Manual scales require one output per domain value, and exhaustion errors by
+default unless \`onExhaust: "cycle"\` is explicitly selected. Identity scales
+validate literal outputs and suppress guides.
+
+Discrete and binned style mappings participate in grouping; continuous numeric
+styles do not. Mapped values survive stats, positions, SVG/Canvas rendering,
+server rendering, inspection, legend focus/filtering, and hit testing. Literal
+constants remain unscaled unless authored as \`{ value, scale: true }\`.
+Missing and invalid values use distinct \`naValue\` and \`unknownValue\` outputs.
+Date/datetime helpers reuse the strict parser and timezone semantics used by
+position and color scales.
+
+Open [complete style scales](/examples/point/style-scales) for the runnable
+five-channel contract.
+
+## Responsive guide presentation
+
+Guide appearance is downstream of scale training. Author top-level \`guides\`,
+a scale-local \`guide\`, or fluent \`.guides()\` with \`guideAxis\`,
+\`guideLegend\`, \`guideColorbar\`, \`guideColorsteps\`, and \`guideNone\`.
+Top-level entries win over scale-local entries.
+
+\`\`\`ts fragment
+import { guideAxis, guideColorsteps } from "@ggsvelte/spec";
+
+const guides = {
+  x: guideAxis({ title: "Hour", showTicks: false }),
+  color: guideColorsteps({ position: "bottom", direction: "horizontal" }),
+};
+\`\`\`
+
+Automatic legends stay right only when the viewport is wider than 480px and at
+least 320px of readable panel remains; otherwise they move below. Bottom keys
+wrap without shrinking type and bottom ramps are horizontal. Discrete guides
+merge only across exact semantic and presentation identities. Exact raw-value
+entries stay interactive after merging; numeric ticks and bins do not become
+filter targets. Identity/manual guides with fewer than two entries remain
+hidden unless \`force: true\` is explicit.
+
 ## Date and time axes
 
 Declare a time scale for ISO 8601 values and let the scale choose UTC calendar
@@ -461,6 +530,29 @@ interval, and brush-zoom values remain semantic. Nonlinear lines, smooths,
 areas, smooth confidence bands, and segments use bounded adaptive tessellation;
 synthetic render vertices never become inspectable data. Set \`clip: false\`
 only for intentional panel overflow.
+
+## Preserve physical data-unit ratios
+
+Use \`coordFixed()\` when equal data units must have equal physical lengths. The
+layout reserves titles, axes, and responsive guides first, then centers the
+largest exact-ratio data rectangle in the remaining allocation. Panel fill,
+grids, marks, clipping, axes, and facet strips occupy only that rectangle;
+letterbox gutters use the theme paper role by default.
+
+\`\`\`ts fragment
+gg(rows, aes({ x: "x", y: "y" }))
+  .geomLine()
+  .coordFixed({ ratio: 1 });
+\`\`\`
+
+\`ratio\` is physical y-unit length divided by physical x-unit length. The
+camelCase helper, builder \`.coordFixed()\`, \`coord_fixed\`, \`coordEqual\`, and
+\`coord_equal\` all emit the same strict JSON. Free positional facet scales are
+rejected with \`coord-fixed-free-scales\`; use fixed facet scales when panels must
+share one physical comparison. On an unusually constrained container the ratio
+is never stretched: minor furniture is removed, the SVG declares
+\`data-gg-layout="degraded"\`, and authors receive one \`coord-fixed-degraded\`
+warning. See the runnable [fixed-aspect example](/examples/point/fixed-aspect).
 
 Non-identity coordinate transforms reject band and temporal axes with
 \`coord-transform-continuous\` or \`coord-transform-temporal\`. Domains that
@@ -1462,6 +1554,190 @@ migration note here. The pre-release API has its own page:
 The accepted lifecycle and deprecation policy remains in
 [Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
 rather than creating a second policy.
+
+## 0.7 to 0.8
+
+### Map style semantics instead of precomputing outputs
+
+Mapped \`size\`, \`linewidth\`, and \`alpha\` now train and render complete
+scales. \`shape\` and \`linetype\` now use closed finite symbol sets. Remove
+application-side radius, opacity, stroke-width, and dash lookup columns when
+they only existed to compensate for ignored style mappings. Map the semantic
+source field and select a scale family instead.
+
+Before 0.8, applications commonly precomputed a point radius and passed it
+through identity:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+
+  // Before 0.8, applications precomputed symbol radii.
+  const rows = [
+    { x: 1, y: 2, radius: 2 },
+    { x: 2, y: 3, radius: 5 },
+    { x: 3, y: 4, radius: 9 },
+  ];
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y", size: "radius" }}
+  scales={{ size: { type: "identity" } }}
+>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+In 0.8, keep the source measure and let the scale interpolate in symbol area:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import {
+    GeomPoint,
+    GGPlot,
+    scaleSizeContinuous,
+  } from "@ggsvelte/svelte";
+
+  // In 0.8, map the semantic measure and let size interpolate in symbol area.
+  const rows = [
+    { x: 1, y: 2, magnitude: 4 },
+    { x: 2, y: 3, magnitude: 25 },
+    { x: 3, y: 4, magnitude: 81 },
+  ];
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y", size: "magnitude" }}
+  scales={scaleSizeContinuous({ range: [2, 9] })}
+>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+Review implicit grouping on line, area, smooth, errorbar, and boxplot layers.
+Discrete and binned style mappings now split groups, as color/fill mappings do;
+continuous numeric styles do not. If a discrete style is descriptive rather
+than structural, author an explicit \`group\` mapping. Shape/linetype do not
+silently interpolate quantitative values: use \`type: "binned"\` or move the
+measure to a numeric style channel.
+
+A mapped \`alpha\` is now the complete authored opacity aesthetic; it is not
+multiplied by a competing scalar geom \`alpha\` parameter. Remove that scalar
+parameter and set the mapped scale's \`range\` when you need a lower opacity
+ceiling.
+
+### Move guide layout into the guide API
+
+Automatic non-position guides now move below the chart when the viewport is at
+most 480px or a right guide would leave less than 320px of readable panel.
+Bottom colorbars/colorsteps are horizontal and discrete keys wrap without
+shrinking text. If an application positioned or hid the old fixed right legend
+with surrounding CSS, remove that workaround and author portable guide intent:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GGPlot, GeomPoint } from "@ggsvelte/svelte";
+
+  // Before 0.8, automatic legends always occupied the fixed right column.
+  const rows = [
+    { x: 1, y: 2, region: "North" },
+    { x: 2, y: 3, region: "South" },
+  ];
+</script>
+
+<GGPlot data={rows} aes={{ x: "x", y: "y", color: "region" }}>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+In 0.8, declare the alternate presentation directly:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GGPlot, GeomPoint, guideLegend } from "@ggsvelte/svelte";
+
+  // Since 0.8, guide presentation is portable and responsive without changing scale math.
+  const rows = [
+    { x: 1, y: 2, region: "North" },
+    { x: 2, y: 3, region: "South" },
+  ];
+</script>
+
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y", color: "region" }}
+  guides={{
+    color: guideLegend({ position: "bottom", direction: "horizontal" }),
+  }}
+>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+Top-level \`guides\` override scale-local \`guide\` settings. Use
+\`guideNone()\` for suppression and \`force: true\` only when an identity or
+single-value manual guide is intentional. Guide appearance does not alter scale
+domains or assignments. Exact discrete entries remain focus/filter targets;
+numeric guide ticks and bins remain representative and non-interactive.
+
+## 0.8 to 0.9
+
+### Constrain the data rectangle instead of the outer box
+
+Before 0.9, CSS \`aspect-ratio\` on a chart wrapper constrained the complete SVG.
+Axes, titles, and guides still changed the inner panel ratio, so equal data
+units could render at unequal physical lengths:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GGPlot, GeomLine } from "@ggsvelte/svelte";
+
+  // Before 0.9, an outer CSS aspect ratio could not preserve data-unit lengths
+  // after axes, titles, and guides consumed chart space.
+  const circle = [
+    { x: 1, y: 0 },
+    { x: 0, y: 1 },
+    { x: -1, y: 0 },
+    { x: 0, y: -1 },
+    { x: 1, y: 0 },
+  ];
+</script>
+
+<div style="aspect-ratio: 1">
+  <GGPlot data={circle} aes={{ x: "x", y: "y" }}>
+    <GeomLine />
+  </GGPlot>
+</div>
+\`\`\`
+
+Since 0.9, remove that wrapper workaround and author the coordinate directly:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { coordFixed, GGPlot, GeomLine } from "@ggsvelte/svelte";
+
+  // Since 0.9, constrain the measured data rectangle instead of the outer box.
+  const circle = [
+    { x: 1, y: 0 },
+    { x: 0, y: 1 },
+    { x: -1, y: 0 },
+    { x: 0, y: -1 },
+    { x: 1, y: 0 },
+  ];
+</script>
+
+<GGPlot data={circle} aes={{ x: "x", y: "y" }} coord={coordFixed()}>
+  <GeomLine />
+</GGPlot>
+\`\`\`
+
+\`coordFixed({ ratio: 1 })\` measures the trained data rectangle after chart
+chrome is allocated and letterboxes it without distortion. Fixed aspect now
+rejects \`facet.scales\` values \`"free"\`, \`"free_x"\`, and \`"free_y"\`; switch those
+facets to \`"fixed"\` or remove the fixed coordinate rather than presenting a
+false shared physical scale.
 
 ## 0.6 to 0.7
 

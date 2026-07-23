@@ -112,6 +112,8 @@ type CancelPointerInspectPolicy = {
 export type InspectionState = {
   readonly inspection: PlotInspectionChange<Record<string, CellValue>, PropertyKey> | null;
   readonly inspectionPanel: ScenePanel | null;
+  /** Seed candidate for presentation chrome (kind); not emitted on public events. */
+  readonly inspectionSeed: CandidateFacts | null;
   setInspection(
     hit: SceneHit | null,
     source: InteractionSource,
@@ -283,8 +285,11 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
       })
     )
       deps.clearAnnouncement();
-    // Non-pointer applies must cancel queued hover (was: reducer boundary cancel).
-    if (source !== "pointer" && source !== "touch") {
+    // Direct applies (keyboard/touch/programmatic) must cancel queued hover /
+    // touch-move inspect frames so a pending rAF cannot override the apply
+    // (e.g. touch tap after a sub-threshold touch move scheduled inspect).
+    // Pointer hover keeps the queue so successive move frames coalesce.
+    if (source !== "pointer") {
       invalidatePointerInspect({ pendingPinned: "preserve" });
     }
     const action = resolveSetInspectionAction({
@@ -644,6 +649,10 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     },
     get inspectionPanel() {
       return inspectionPanel;
+    },
+    /** Internal seed for presentation chrome (kind); not part of the public inspection event. */
+    get inspectionSeed() {
+      return inspectionSeed;
     },
     setInspection,
     toggleInspectionPin,

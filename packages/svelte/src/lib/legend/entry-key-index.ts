@@ -175,7 +175,7 @@ export function buildLegendEntryKeyIndex(
     ReadonlyMap<string, number>
   >();
   for (const sceneLegend of adapter.legends) {
-    if (sceneLegend.type !== "discrete") continue;
+    if (sceneLegend.type !== "discrete" || sceneLegend.interactive === false) continue;
     discreteLegends.push(sceneLegend);
     for (let entryIndex = 0; entryIndex < sceneLegend.entries.length; entryIndex++)
       index.set(legendIdentityKey({ scale: sceneLegend.scale, entryIndex }), []);
@@ -193,6 +193,35 @@ export function buildLegendEntryKeyIndex(
   };
 
   const visited = new Set<string>();
+  const indexAestheticRows = (input: {
+    sceneLegend: Extract<SceneLegend, { type: "discrete" }>;
+    candidate: LegendKeyCandidate;
+    aesthetic: string;
+    rowIndexes: () => Iterable<number>;
+  }): void => {
+    const { sceneLegend, candidate, aesthetic, rowIndexes } = input;
+    const field = fieldFor(candidate.layerIndex, aesthetic);
+    const scaledConstant =
+      field === undefined
+        ? adapter.layerScaledConstant?.(candidate.layerIndex, aesthetic)
+        : undefined;
+    if (field === undefined && scaledConstant === undefined) return;
+    const entryByToken = entryLookupByLegend.get(sceneLegend)!;
+    for (const rowIndex of rowIndexes()) {
+      const visitField = field ?? `const:${String(scaledConstant)}`;
+      const visit = `${sceneLegend.scale}:${String(candidate.layerIndex)}:${aesthetic}:${visitField}:${String(rowIndex)}`;
+      if (visited.has(visit)) continue;
+      visited.add(visit);
+      const key = adapter.semanticKey(rowIndex);
+      if (key === null || key === undefined) continue;
+      const matched = resolveLegendMatchValue(adapter, field, scaledConstant, rowIndex);
+      if (matched.skip) continue;
+      const entryIndex = entryByToken.get(legendValueToken(matched.value));
+      if (entryIndex === undefined) continue;
+      index.get(legendIdentityKey({ scale: sceneLegend.scale, entryIndex }))?.push(key);
+    }
+  };
+
   for (const candidate of adapter.candidates()) {
     // Lineage Set once per candidate when any discrete legend applies —
     // not once per legend (was O(C·L·R) Set construction).
@@ -206,26 +235,13 @@ export function buildLegendEntryKeyIndex(
     };
 
     for (const sceneLegend of discreteLegends) {
-      const field = fieldFor(candidate.layerIndex, sceneLegend.scale);
-      const scaledConstant =
-        field === undefined
-          ? adapter.layerScaledConstant?.(candidate.layerIndex, sceneLegend.scale)
-          : undefined;
-      if (field === undefined && scaledConstant === undefined) continue;
-      const entryByToken = entryLookupByLegend.get(sceneLegend)!;
-      for (const rowIndex of rowsForCandidate()) {
-        const visitField = field ?? `const:${String(scaledConstant)}`;
-        const visit = `${sceneLegend.scale}:${String(candidate.layerIndex)}:${visitField}:${String(rowIndex)}`;
-        if (visited.has(visit)) continue;
-        visited.add(visit);
-        const key = adapter.semanticKey(rowIndex);
-        if (key === null || key === undefined) continue;
-        const matched = resolveLegendMatchValue(adapter, field, scaledConstant, rowIndex);
-        if (matched.skip) continue;
-        const entryIndex = entryByToken.get(legendValueToken(matched.value));
-        if (entryIndex === undefined) continue;
-        index.get(legendIdentityKey({ scale: sceneLegend.scale, entryIndex }))?.push(key);
-      }
+      for (const aesthetic of sceneLegend.aesthetics ?? [sceneLegend.scale])
+        indexAestheticRows({
+          sceneLegend,
+          candidate,
+          aesthetic,
+          rowIndexes: rowsForCandidate,
+        });
     }
   }
   return new Map(

@@ -7,7 +7,11 @@ import { statSummary } from "../stats/summary.js";
 import { ColumnTable, type CellValue } from "../table.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import { makeColumnOf, shouldAggregateOnSemanticTemporalX } from "./frame-stats-shared.js";
+import {
+  makeColumnOf,
+  shouldAggregateOnSemanticTemporalX,
+  styleColumns,
+} from "./frame-stats-shared.js";
 import { positionColumn, positionValuesToNumeric } from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { NO_ROW } from "./types.js";
@@ -66,9 +70,15 @@ export function buildSummaryFrame(
     yNumeric: result.y,
     groups: result.groups,
     inputGroups: groups,
+    inputSourceRows: null,
     rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
     colorValues: col(binding.color.field),
     fillValues: col(binding.fill.field),
+    ...styleColumns(binding, col, {
+      y: result.y,
+      ymin: result.ymin,
+      ymax: result.ymax,
+    }),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),
     ymin: result.ymin,

@@ -8,6 +8,7 @@ import type { SceneAxis, ScenePanel, SceneTick } from "../scene.js";
 import type { PositionScale } from "../scales/train.js";
 
 import type { FacetPanelDef } from "./facets.js";
+import { capSideStripLabel, isSideStrip } from "./facets-strip.js";
 import { axisTicks } from "./layout-helpers.js";
 import type { PanelPlacement } from "./panel-layout.js";
 
@@ -97,23 +98,32 @@ function gridPositionsByKind(ticks: readonly SceneTick[]): {
 export function assembleScenePanels(input: {
   placements: readonly PanelPlacement[];
   facetPanels: readonly FacetPanelDef[];
+  strip: import("./facets-types.js").FacetStripConfig;
+  stripBand: number;
   displayScales: (p: number) => { h: PositionScale; v: PositionScale };
   hTitle: string;
   vTitle: string;
   coordProjectors: readonly PanelCoordProjector[];
   measureText?: TextMeasurer | undefined;
   axisTextSize: number;
+  /** Theme strip font size used to cap rotated side-strip labels (#611). */
+  stripSize?: number;
+  /** Resolved per-axis guide font sizes used for projected-label collision checks. */
+  hAxisTextSize?: number;
+  vAxisTextSize?: number;
   /** Tick chrome (theme tickLength + label gap) below gridBottom; renderer-matched. */
   tickChromePx?: number;
   hMinorBreaks?: readonly number[] | undefined;
   vMinorBreaks?: readonly number[] | undefined;
+  degraded?: boolean;
 }): {
   scenePanels: ScenePanel[];
   xAxis: SceneAxis;
   yAxis: SceneAxis;
 } {
-  const { placements, facetPanels, displayScales, hTitle, vTitle } = input;
+  const { placements, facetPanels, displayScales, hTitle, vTitle, strip, stripBand } = input;
   const measurer = input.measureText ?? new MetricsTableMeasurer(FONT_METRICS);
+  const stripSize = input.stripSize ?? 12;
 
   const scenePanels: ScenePanel[] = placements.map((placement, p) => {
     const { h, v } = displayScales(p);
@@ -148,14 +158,33 @@ export function assembleScenePanels(input: {
       .filter((tick) => Number.isFinite(tick.pos) && tick.pos >= 0 && tick.pos <= placement.height);
     const bottom =
       projector?.x.active === true
-        ? suppressProjectedLabelOverlap(projectedBottom, "horizontal", measurer, input.axisTextSize)
+        ? suppressProjectedLabelOverlap(
+            projectedBottom,
+            "horizontal",
+            measurer,
+            input.hAxisTextSize ?? input.axisTextSize,
+          )
         : projectedBottom;
     const left =
       projector?.y.active === true
-        ? suppressProjectedLabelOverlap(projectedLeft, "vertical", measurer, input.axisTextSize)
+        ? suppressProjectedLabelOverlap(
+            projectedLeft,
+            "vertical",
+            measurer,
+            input.vAxisTextSize ?? input.axisTextSize,
+          )
         : projectedLeft;
     const xGrid = gridPositionsByKind(bottom);
     const yGrid = gridPositionsByKind(left);
+    const label = facetPanels[p]!.label;
+    const hasStrip = label !== "";
+    // Left/right strips rotate labels 90°: advance width becomes vertical
+    // extent. Cap to panel height so multi-row layouts cannot paint into
+    // neighboring panel content (#611).
+    const stripLabel =
+      hasStrip && strip.show && isSideStrip(strip.position)
+        ? capSideStripLabel(label, placement.height, measurer, stripSize)
+        : label;
     return {
       identity: facetPanels[p]!.identity,
       id: facetPanels[p]!.id,
@@ -163,15 +192,21 @@ export function assembleScenePanels(input: {
       y: placement.y,
       width: placement.width,
       height: placement.height,
-      strip: facetPanels[p]!.label,
+      strip: stripLabel,
+      ...(hasStrip && {
+        stripPosition: strip.position,
+        showStrip: strip.show,
+        stripBand: strip.show ? stripBand : 0,
+      }),
+      ...(placement.allocation !== undefined && { allocation: { ...placement.allocation } }),
       clip: projector?.clip ?? true,
       axisX: placement.showAxisX ? bottom : null,
       axisY: placement.showAxisY ? left : null,
       grid: {
         x: xGrid.major,
         y: yGrid.major,
-        minorX: xGrid.minor,
-        minorY: yGrid.minor,
+        minorX: input.degraded === true ? [] : xGrid.minor,
+        minorY: input.degraded === true ? [] : yGrid.minor,
       },
     };
   });

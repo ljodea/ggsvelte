@@ -1,0 +1,75 @@
+# Build and publish the CI runner image (Playwright + unzip) to GHCR.
+#
+# The image lets container jobs skip the per-job `apt-get install unzip` (slow
+# from GitHub's Azure runners against the public Ubuntu mirrors). Publishing is
+# free: ljodea/ggsvelte is public, so GHCR storage/bandwidth are not billed, and
+# image pulls inside Actions never bill data transfer.
+#
+# Runs ONLY on pushes to main that touch the Dockerfile or this workflow. After
+# the first successful run publishes ghcr.io/<owner>/<repo>/ci-runner:<tag>,
+# container jobs can switch their `image:` to it and drop the ci-install-unzip step.
+#
+# No `workflow_dispatch`: dispatchability is keyed to the workflow file on the
+# DEFAULT branch, but a dispatched run executes the SELECTED branch's copy. With
+# dispatch enabled, a write collaborator could branch, strip the `main` guard
+# below while keeping `packages: write`, and dispatch to overwrite the published
+# tag with a poisoned image — bypassing review entirely. Omitting dispatch makes
+# the workflow non-dispatchable, so publishing requires a commit on main (review-
+# gated). On-demand rebuilds: re-run the last successful main run from the Actions
+# UI, or push a no-op change to the Dockerfile / this file.
+name: build CI image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/docker/ci-runner/Dockerfile
+      - .github/workflows/build-ci-image.yml
+
+# PLAYWRIGHT_TAG MUST stay in sync with env.PLAYWRIGHT_CONTAINER_TAG in ci.yml.
+env:
+  PLAYWRIGHT_TAG: v1.61.1-noble
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build + push ci-runner image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # The GitHub Actions cache backend (type=gha) requires the docker-container
+      # Buildx driver; the default `docker` driver does not support it, so the
+      # cache export silently no-ops (or errors). Set up Buildx first.
+      - name: set up Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+      # Defense-in-depth: this workflow only triggers on main pushes (no
+      # workflow_dispatch, see the `on:` note), so github.ref is always
+      # refs/heads/main here. The explicit ref guards remain so that if a future
+      # change ever broadens the trigger, non-main runs stay build-only and never
+      # authenticate to GHCR or overwrite the published tag.
+      - name: log in to GHCR
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: build and push
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .github/docker/ci-runner
+          build-args: PLAYWRIGHT_TAG=${{ env.PLAYWRIGHT_TAG }}
+          # Publish only from main (always true given the main-only trigger; kept
+          # explicit as defense-in-depth if the trigger ever broadens).
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: ghcr.io/${{ github.repository }}/ci-runner:${{ env.PLAYWRIGHT_TAG }}
+          # Cache layers across builds to keep republishes fast.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

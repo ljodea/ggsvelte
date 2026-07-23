@@ -1,0 +1,39 @@
+{
+  "id": "56-staffing-tile-heatmap",
+  "kind": "chart",
+  "prompt": "Make a categorical heatmap of staffing counts by department and shift with geom tile.",
+  "dataProfile": {
+    "fields": [
+      { "name": "dept", "type": "nominal", "examples": ["Ops", "Eng"] },
+      { "name": "shift", "type": "nominal", "examples": ["Day", "Eve"] },
+      { "name": "n", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "dept": "Ops", "shift": "Day", "n": 12 },
+      { "dept": "Ops", "shift": "Eve", "n": 9 },
+      { "dept": "Eng", "shift": "Day", "n": 18 },
+      { "dept": "Eng", "shift": "Eve", "n": 11 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "tile",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "dept" },
+          "y": { "field": "shift" },
+          "fill": { "field": "n" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom tile categorical heatmap."
+}

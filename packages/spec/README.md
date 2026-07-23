@@ -86,11 +86,31 @@ Binned color is capped at 64 deterministic intervals, manual mappings require
 one range color per domain value, and temporal families reuse the parser
 registry rather than field-name inference.
 
+Mapped `size`, `linewidth`, and `alpha` add sequential, ordinal, binned, manual,
+identity, date, and datetime helpers. `shape` and `linetype` use finite named
+output sets, so quantitative mappings require explicit binning instead of
+silent interpolation. CamelCase, fluent-builder, and ggplot2 snake-case forms
+all emit the same strict JSON; callbacks and regular expressions remain
+forbidden.
+
+Guide presentation is a separate portable contract. Use top-level `guides`, a
+scale-local `guide`, fluent `.guides()`, or `guideAxis`, `guideLegend`,
+`guideColorbar`, `guideColorsteps`, and `guideNone` (plus snake-case aliases).
+Top-level entries win over scale-local entries. Non-position guides accept bounded
+right/bottom placement, direction, collision, force, and theme overrides; invalid
+aesthetic/variant combinations fail validation instead of being ignored.
+
 Post-stat coordinate transforms use the separate strict `CoordTransformSpec`.
 `coordTransform({ x: "log10", y: "sqrt" })` and its binding-identical
 `coord_transform` alias emit canonical JSON; builder `.coordTransform()` emits
 the same spec. Coordinate limits preserve stat inputs, `reverse` composes in
 coordinate space, and `clip: false` explicitly permits panel overflow.
+
+Fixed-aspect coordinates use `coordFixed({ ratio: 1 })`, builder
+`.coordFixed()`, or the identical `coord_fixed`, `coordEqual`, and `coord_equal`
+aliases. `ratio` is physical y-unit length divided by physical x-unit length.
+The strict schema rejects non-positive/non-finite ratios and rejects
+`coord_fixed` with free positional facet scales before rendering.
 
 All six orders (`ymd`, `ydm`, `mdy`, `myd`, `dmy`, `dym`), timestamp variants,
 exact closed formats, and epoch units are typed. PortableSpec never contains `Date`,

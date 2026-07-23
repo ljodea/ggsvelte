@@ -236,6 +236,12 @@ live output and complete source.
 
 [![Temperature and elevation with a continuous viridis color scale](apps/docs/static/previews/color-continuous-light.png)](https://ggsvelte.sh/examples/color/continuous)
 
+Guide presentation stays separate from scale math. Use `guides={{ color:
+guideColorbar({ position: "bottom" }) }}` (or fluent `.guides()`) to title,
+orient, place, suppress, or force axes and non-position guides. Automatic legends use
+the right side only while at least 320px of panel remains, then move below with
+complete accessible labels and unchanged scale assignments.
+
 ### [Boxplots](https://ggsvelte.sh/examples/boxplot/by-category)
 
 <!-- example-source: boxplot/by-category -->
@@ -341,8 +347,8 @@ use a built-in theme or explicit theme tokens.
   and text can occupy the same plot.
 - Statistics and positions include binning, density, loess and linear fits, stacking,
   filling, dodging, and seeded jitter.
-- Scales cover continuous, discrete, temporal, binned, transformed, and color data.
-- Facets train fixed or free panel scales; coordinates can flip axes or project final geometry after statistics.
+- Scales cover continuous, discrete, temporal, binned, transformed, color/fill, size, linewidth, alpha, shape, and linetype data.
+- Facets train fixed or free panel scales; coordinates can flip axes, project final geometry after statistics, or preserve exact physical data-unit ratios with `coordFixed()`.
 - Inspection, selection, zoom, and legend controls emit semantic Svelte events.
 - Ordinary layers render as SVG. Dense point layers move to canvas while axes, text,
   legends, and accessible descriptions remain in the DOM.

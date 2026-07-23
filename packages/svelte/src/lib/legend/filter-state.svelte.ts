@@ -24,6 +24,16 @@ import {
 // Public types
 // ---------------------------------------------------------------------------
 
+const FILTERABLE_LEGEND_SCALES = [
+  "color",
+  "fill",
+  "size",
+  "linewidth",
+  "alpha",
+  "shape",
+  "linetype",
+] as const;
+
 type ResolvedLegendFilterOptions = {
   readonly mode: "exclude" | "include";
   readonly multiple: boolean;
@@ -95,7 +105,7 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
     const effectiveSpec = deps.effectiveSpec();
     if (effectiveSpec === null) return bindings;
     for (const layer of effectiveSpec.layers) {
-      for (const scale of ["color", "fill"] as const) {
+      for (const scale of FILTERABLE_LEGEND_SCALES) {
         const own = layer.aes?.[scale];
         // Explicit null is an unset (normalize's null-unset semantics): the
         // layer deliberately removed the plot-level binding — never inherit.
@@ -162,8 +172,8 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
   function computeEntries(model: RenderModel | null): FilterableLegendEntry[] {
     if (model === null || legendFilterOptions === null) return [];
     return model.scene.legends.flatMap((sceneLegend) => {
-      if (sceneLegend.type !== "discrete") return [];
-      if (sceneLegend.scale !== "color" && sceneLegend.scale !== "fill") return [];
+      if (sceneLegend.type !== "discrete" || sceneLegend.interactive === false) return [];
+      if (!FILTERABLE_LEGEND_SCALES.some((scale) => scale === sceneLegend.scale)) return [];
       const fields = new Set(
         model.layerFields
           .flat()
@@ -177,9 +187,20 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
       if (field === undefined || fields.size !== 1) return [];
       // A scaled constant (aes { value, scale: true }) feeds this legend
       // without a field: toggling its entry would filter an unrelated field
-      // while the constant-colored layer stays rendered. Keep it static.
+      // while the constant-colored layer stays rendered. Keep it static —
+      // but only when that constant is actually a *visible* legend entry.
+      // Rowless annotation constants train the scale and appear on
+      // layerScaledConstants for focus/index, yet are excluded from the
+      // interactive legend domain (#598); those must not disable filters.
+      const scaledConstantKeys = new Set(
+        model.layerScaledConstants
+          .map((constants) => constants[sceneLegend.scale])
+          .filter((value): value is CellValue => value !== undefined)
+          .map((value) => encodeKey(value)),
+      );
       if (
-        model.layerScaledConstants.some((constants) => constants[sceneLegend.scale] !== undefined)
+        scaledConstantKeys.size > 0 &&
+        sceneLegend.entries.some((entry) => scaledConstantKeys.has(encodeKey(entry.value)))
       )
         return [];
       const current = localLegendFilters.find(
@@ -229,7 +250,7 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
       legendFilterOptions.multiple,
     );
     const clause: LegendFilterClause = Object.freeze({
-      scale: target.legend.scale as "color" | "fill",
+      scale: target.legend.scale,
       field: target.field,
       values,
       mode: legendFilterOptions.mode,
