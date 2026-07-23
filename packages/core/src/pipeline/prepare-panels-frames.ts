@@ -50,6 +50,8 @@ function sampleFailingSemantic(
 function emitTransformDomainWarnings(
   axis: "x" | "y",
   bindings: readonly LayerBinding[],
+  /** Per-binding filtered tables (parallel to bindings); same rows as frames/stats. */
+  tables: readonly ColumnTable[],
   transform: ColumnTransformConfig | undefined,
   warnings: PipelineWarning[],
   scaleDiagnostics: ScaleDiagnostic[],
@@ -58,12 +60,13 @@ function emitTransformDomainWarnings(
   const path = `/scales/${axis}`;
   // Keyed by sourceId+field so same field name on different tables both scan.
   const seen = new Set<string>();
-  for (const binding of bindings) {
+  for (let index = 0; index < bindings.length; index++) {
+    const binding = bindings[index]!;
     const field = axis === "x" ? binding.xField : binding.yField;
     if (field === null) continue;
-    // Prefer the filtered frame-binding table when available; fall back to source.
-    // Diagnostics count pre-facet filtered rows (same as the prior single-table path).
-    const table = binding.sourceTable;
+    // Scan the filtered layer table (rowFilters applied) so hidden out-of-domain
+    // rows do not emit false transform/OOB diagnostics (#609).
+    const table = tables[index] ?? binding.sourceTable;
     if (!table.has(field)) continue;
     const seenKey = `${binding.sourceId}|${field}`;
     if (seen.has(seenKey)) continue;
@@ -179,8 +182,9 @@ export function buildPanelFrames(input: {
 
   const bindings: LayerBinding[] = [];
   const panelFrames: LayerFrame[][] = facetPanels.map(() => []);
-  // Primary filtered table (first layer) for shared bin-range fallbacks.
-  const primaryFiltered = layerContexts[0]!.filteredTable;
+  // Per-layer filtered tables: binned extents, bin ranges, and transform
+  // diagnostics must read each layer's own filtered rows (#609).
+  const filteredLayerTables = layerContexts.map((ctx) => ctx.filteredTable);
 
   for (let index = 0; index < normalized.layers.length; index++) {
     const ctx = layerContexts[index]!;
@@ -227,12 +231,12 @@ export function buildPanelFrames(input: {
     resolveColumnTransform(normalized.scales?.x, temporal.xConversion) ?? undefined;
   const yTransform =
     resolveColumnTransform(normalized.scales?.y, temporal.yConversion) ?? undefined;
-  // type: "binned" boundaries — resolve from the first layer that maps the field.
+  // type: "binned" boundaries — union extents across every layer table.
   const xBinning = resolveBinnedAxis(
     "x",
     normalized.scales?.x,
     bindings,
-    primaryFiltered,
+    filteredLayerTables,
     temporal.xConversion,
     xTransform,
   );
@@ -240,7 +244,7 @@ export function buildPanelFrames(input: {
     "y",
     normalized.scales?.y,
     bindings,
-    primaryFiltered,
+    filteredLayerTables,
     temporal.yConversion,
     yTransform,
   );
@@ -251,11 +255,25 @@ export function buildPanelFrames(input: {
     binding.yBinning = yBinning;
   }
   // One deduplicated per-axis diagnostic for pre-stat transform-domain and OOB
-  // drops, counted on each layer's source table before faceting.
+  // drops, counted on each layer's filtered table before faceting.
   const transformDiagnostics: ScaleDiagnostic[] = [];
-  emitTransformDomainWarnings("x", bindings, xTransform, warnings, transformDiagnostics);
-  emitTransformDomainWarnings("y", bindings, yTransform, warnings, transformDiagnostics);
-  const binRanges = computePanelBinRanges(bindings, primaryFiltered, faceted, freeX);
+  emitTransformDomainWarnings(
+    "x",
+    bindings,
+    filteredLayerTables,
+    xTransform,
+    warnings,
+    transformDiagnostics,
+  );
+  emitTransformDomainWarnings(
+    "y",
+    bindings,
+    filteredLayerTables,
+    yTransform,
+    warnings,
+    transformDiagnostics,
+  );
+  const binRanges = computePanelBinRanges(bindings, filteredLayerTables, faceted, freeX);
   for (let p = 0; p < facetPanels.length; p++) {
     for (let index = 0; index < bindings.length; index++) {
       const ctx = layerContexts[index]!;

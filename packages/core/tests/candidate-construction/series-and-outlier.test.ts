@@ -57,4 +57,23 @@ describe("resolveOutlierContext", () => {
       }),
     ).toEqual({ outlierLocalRow: null, outlierSourceRow: null });
   });
+
+  // #609 — outlierRow is already global after prepare-panels remap; do not
+  // re-index through facetPanel.sourceRows (double remap).
+  it("treats boxplot outlierRow as already-global source ids", async () => {
+    const { resolveOutlierContext } =
+      await import("../../src/pipeline/candidate-construction/datum.ts");
+    const result = resolveOutlierContext({
+      frame: fromAny({
+        box: { outlierRow: new Uint32Array([42]) },
+        binding: { layer: { geom: "boxplot" } },
+      }),
+      batch: fromAny({ kind: "points" }),
+      primitiveIndex: 0,
+      // A non-empty sourceRows would wrongly remap 42 → sourceRows[42] if still panel-local.
+      facetPanel: fromAny({ sourceRows: Array.from({ length: 50 }, (_, i) => i + 1000) }),
+    });
+    expect(result.outlierSourceRow).toBe(42);
+    expect(result.outlierLocalRow).toBe(42);
+  });
 });

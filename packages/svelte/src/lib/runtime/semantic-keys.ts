@@ -159,6 +159,22 @@ function datasetsOrderToken(datasets: unknown, sourceIdentity: (value: unknown) 
 }
 
 /**
+ * O(layers) fingerprint of geom-child / layer-local data props.
+ * Missing `layers` → `"null"` so legacy callers keep a stable suffix.
+ */
+export function layersDataOrderToken(
+  layers: readonly { readonly data?: unknown }[] | undefined,
+  sourceIdentity: (value: unknown) => string,
+): string {
+  if (layers === undefined) return "null";
+  let token = `L:${layers.length}`;
+  for (let index = 0; index < layers.length; index++) {
+    token += `|${index}=${dataContentOrderToken(layers[index]?.data, sourceIdentity)}`;
+  }
+  return token;
+}
+
+/**
  * Stable data/spec identity token for inspection reconcile epochs.
  *
  * Host supplies:
@@ -166,6 +182,8 @@ function datasetsOrderToken(datasets: unknown, sourceIdentity: (value: unknown) 
  * - `data` / `datasets` — content to order-fingerprint (prefer **prop** values,
  *   not a freshly assembled PortableSpec shell, so theme/labs respecs do not
  *   force a re-walk)
+ * - `layers` — optional geom-child descriptors whose `data` must also bump the
+ *   epoch when plot-level data/spec are absent (#609)
  * - `sourceIdentity` — stable object ids for the O(R) order fingerprint
  *
  * Ready=false (no plot yet) → `"no-data"`. Complexity: O(R) over row refs,
@@ -177,10 +195,11 @@ export function dataIdentityEpochToken(input: {
   readonly specToken: string;
   readonly data: unknown;
   readonly datasets: unknown;
+  readonly layers?: readonly { readonly data?: unknown }[];
   readonly sourceIdentity: (value: unknown) => string;
 }): string {
   if (!input.ready) return "no-data";
-  return `${input.dataToken}:${input.specToken}:${dataContentOrderToken(input.data, input.sourceIdentity)}:${datasetsOrderToken(input.datasets, input.sourceIdentity)}`;
+  return `${input.dataToken}:${input.specToken}:${dataContentOrderToken(input.data, input.sourceIdentity)}:${datasetsOrderToken(input.datasets, input.sourceIdentity)}:${layersDataOrderToken(input.layers, input.sourceIdentity)}`;
 }
 
 /** Empty semantic-key bag when there is no render model. */

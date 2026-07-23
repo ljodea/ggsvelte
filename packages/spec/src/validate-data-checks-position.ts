@@ -16,7 +16,7 @@ import {
   temporalLabelConfigurationError,
   temporalLocaleConfigurationError,
 } from "./temporal-interval.js";
-import type { FieldEvidenceMap } from "./validate-data-evidence.js";
+import type { FieldEvidenceEntry, FieldEvidenceMap } from "./validate-data-evidence.js";
 import {
   appendTemporalKindMismatch,
   temporalDecisionForField,
@@ -123,13 +123,19 @@ export function validateTemporalAxisConfiguration(scales: Record<string, unknown
 export function checkPositionScaleDataCompatibility(input: {
   scales: Record<string, unknown> | undefined;
   fields: FieldEvidenceMap;
+  /**
+   * Optional per-use evidence lookup. When provided, prefer it over the
+   * last-wins `fields` union so multi-table layers with the same field name
+   * keep their own type evidence (#609).
+   */
+  evidenceForUse?: (use: ChannelFieldUse) => FieldEvidenceEntry | undefined;
   axisFields: Record<"x" | "y", ChannelFieldUse[]>;
   invalidTemporalAxes: ReadonlySet<"x" | "y">;
   temporalDecisionCache: TemporalDecisionCache;
 }): SpecError[] {
   const { scales, fields, axisFields, invalidTemporalAxes, temporalDecisionCache } = input;
   const errors: SpecError[] = [];
-  const typeOf = (field: string) => fields.get(field)?.type ?? null;
+  const evidenceOf = (use: ChannelFieldUse) => input.evidenceForUse?.(use) ?? fields.get(use.field);
 
   for (const axis of AXIS_CHANNELS) {
     const config = scales?.[axis] as PositionScaleSpec | undefined;
@@ -137,10 +143,10 @@ export function checkPositionScaleDataCompatibility(input: {
       config?.type === "band" ? "band" : scaleRequestsTime(scales, axis) ? "time" : config?.type;
     if (declared === undefined || declared === "band" || invalidTemporalAxes.has(axis)) continue;
     for (const use of axisFields[axis]) {
-      const type = typeOf(use.field);
+      const info = evidenceOf(use);
+      const type = info?.type ?? null;
       if (type === null) continue;
       if (declared === "time") {
-        const info = fields.get(use.field);
         const decision = temporalDecisionForField(
           temporalDecisionCache,
           use.field,

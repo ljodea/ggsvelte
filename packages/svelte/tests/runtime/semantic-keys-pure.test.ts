@@ -191,6 +191,60 @@ describe("dataIdentityEpochToken", () => {
     }
     spy.mockRestore();
   });
+
+  // #609 — geom-child layer data must participate in the identity epoch.
+  it("includes layer-local data in the epoch when plot data/spec are absent", () => {
+    const tracker = createSourceIdentityTracker();
+    const id = (value: unknown) => tracker.sourceIdentity(value);
+    const rowsA = [
+      { x: 1, y: 2 },
+      { x: 3, y: 4 },
+    ];
+    const rowsB = [
+      { x: 9, y: 8 },
+      { x: 7, y: 6 },
+    ];
+    const withoutLayers = dataIdentityEpochToken({
+      ready: true,
+      dataToken: id(undefined),
+      specToken: id(undefined),
+      data: null,
+      datasets: null,
+      sourceIdentity: id,
+    });
+    const withLayerA = dataIdentityEpochToken({
+      ready: true,
+      dataToken: id(undefined),
+      specToken: id(undefined),
+      data: null,
+      datasets: null,
+      layers: [{ data: rowsA }],
+      sourceIdentity: id,
+    });
+    const withLayerB = dataIdentityEpochToken({
+      ready: true,
+      dataToken: id(undefined),
+      specToken: id(undefined),
+      data: null,
+      datasets: null,
+      layers: [{ data: rowsB }],
+      sourceIdentity: id,
+    });
+    expect(withLayerA).not.toBe(withoutLayers);
+    expect(withLayerA).not.toBe(withLayerB);
+    // Same layer data reference → stable epoch.
+    expect(
+      dataIdentityEpochToken({
+        ready: true,
+        dataToken: id(undefined),
+        specToken: id(undefined),
+        data: null,
+        datasets: null,
+        layers: [{ data: rowsA }],
+        sourceIdentity: id,
+      }),
+    ).toBe(withLayerA);
+  });
 });
 
 describe("resolveSemanticKeysForPlot", () => {

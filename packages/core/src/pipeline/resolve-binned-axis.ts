@@ -20,7 +20,12 @@ export function resolveBinnedAxis(
   axis: "x" | "y",
   config: PositionScaleSpec | undefined,
   bindings: readonly LayerBinding[],
-  table: ColumnTable,
+  /**
+   * Per-binding filtered tables (parallel to `bindings`). Each binding's fields
+   * are read from its own table so multi-table layers (#609) train extents and
+   * type-check against the owning source, not the primary table alone.
+   */
+  tables: readonly ColumnTable[],
   conversion: PositionConversionContext,
   transform: ColumnTransformConfig | undefined,
 ): BinnedBoundaries | undefined {
@@ -52,14 +57,21 @@ export function resolveBinnedAxis(
 
   let lo = Number.POSITIVE_INFINITY;
   let hi = Number.NEGATIVE_INFINITY;
+  // Keyed by sourceId+field so same name on different tables both contribute.
   const seen = new Set<string>();
-  for (const binding of bindings) {
+  for (let index = 0; index < bindings.length; index++) {
+    const binding = bindings[index]!;
+    const table = tables[index] ?? tables[0];
+    if (table === undefined) continue;
     // Segment endpoints train the same axis — include them in auto binned extent.
     const fields =
       axis === "x" ? [binding.xField, binding.xendField] : [binding.yField, binding.yendField];
     for (const field of fields) {
-      if (field === null || seen.has(field)) continue;
-      seen.add(field);
+      if (field === null) continue;
+      const seenKey = `${binding.sourceId}|${field}`;
+      if (seen.has(seenKey)) continue;
+      seen.add(seenKey);
+      if (!table.has(field)) continue;
       const fieldType = positionFieldType(table, field, conversion);
       if (fieldType !== "quantitative") {
         throw new PipelineError(

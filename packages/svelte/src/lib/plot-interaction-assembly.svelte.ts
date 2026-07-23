@@ -146,7 +146,12 @@ export function createPlotInteractionAssembly<
     const data = inputs.data();
     const spec = inputs.spec();
     const layers = inputs.layers();
-    const layerCount = layers === undefined ? inputs.registry.layers.length : layers.length;
+    // Declaration children expose live data getters via the registry.
+    const layerDescriptors =
+      layers === undefined
+        ? inputs.registry.layers
+        : layers.map((layer) => ({ data: (layer as { data?: unknown }).data }));
+    const layerCount = layerDescriptors.length;
     // Ready without reading `assembled` so chrome-only respecs do not re-enter.
     const ready = spec !== undefined || layerCount > 0;
     const sourceIdentity = (value: unknown) => identityTracker.sourceIdentity(value);
@@ -158,12 +163,16 @@ export function createPlotInteractionAssembly<
       spec !== undefined && typeof spec === "object"
         ? (spec as { datasets?: unknown }).datasets
         : undefined;
+    // Layer-local data must participate: a plot with only geom-child data and
+    // no plot data/spec prop would otherwise keep a stable epoch across row
+    // replacements (#609).
     return dataIdentityEpochToken({
       ready,
       dataToken: sourceIdentity(data),
       specToken: sourceIdentity(spec),
       data: contentData ?? null,
       datasets: contentDatasets ?? null,
+      layers: layerDescriptors,
       sourceIdentity,
     });
   });

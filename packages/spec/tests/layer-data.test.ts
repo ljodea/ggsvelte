@@ -122,6 +122,44 @@ describe("layer data schema + normalize", () => {
     expect(err!.message).toContain("hwy");
     expect(err!.message).not.toContain("xmin");
   });
+
+  // #609 — scale checks must not last-wins-collapse same field names across layers.
+  it("scale-type-mismatch still fires when a later numeric layer shares field name v", () => {
+    const result = validate(
+      {
+        scales: { x: { type: "linear" } },
+        layers: [
+          {
+            geom: "point",
+            // strings first — last-wins union would hide this under the numeric layer.
+            data: {
+              values: [
+                { v: "a", y: 1 },
+                { v: "b", y: 2 },
+              ],
+            },
+            aes: { x: { field: "v" }, y: { field: "y" } },
+          },
+          {
+            geom: "point",
+            data: {
+              values: [
+                { v: 1, y: 3 },
+                { v: 2, y: 4 },
+              ],
+            },
+            aes: { x: { field: "v" }, y: { field: "y" } },
+          },
+        ],
+      },
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const mismatch = result.errors.filter((e) => e.code === "scale-type-mismatch");
+    expect(mismatch.length).toBeGreaterThanOrEqual(1);
+    expect(mismatch.some((e) => e.message.includes("v"))).toBe(true);
+  });
 });
 
 describe("layer data builder", () => {
