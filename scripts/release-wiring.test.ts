@@ -406,6 +406,7 @@ describe("R0 release wiring", () => {
     expect(dependabot).toContain('"/.github/actions/ci-setup-bun"');
     expect(dependabot).toContain('"/.github/actions/ci-bun-install"');
     expect(dependabot).toContain('"/.github/actions/ci-download-packages-dist"');
+    expect(dependabot).toContain('"/.github/actions/ci-assert-playwright-version-sync"');
     // Human-authored locksteps / Changesets-owned internal ranges.
     expect(dependabot).toContain('dependency-name: "playwright"');
     expect(dependabot).toContain('dependency-name: "@playwright/test"');

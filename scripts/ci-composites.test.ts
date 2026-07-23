@@ -12,6 +12,15 @@ const read = (path: string) => readFileSync(join(root, path), "utf8");
 const SETUP_BUN = ".github/actions/ci-setup-bun/action.yml";
 const BUN_INSTALL = ".github/actions/ci-bun-install/action.yml";
 const DOWNLOAD_DIST = ".github/actions/ci-download-packages-dist/action.yml";
+const ASSERT_PW_SYNC = ".github/actions/ci-assert-playwright-version-sync/action.yml";
+
+/** Jobs that assert npm Playwright vs PLAYWRIGHT_CONTAINER_TAG. */
+const PLAYWRIGHT_VERSION_SYNC_JOBS = [
+  "component-svelte",
+  "component-svelte-fx",
+  "component-spikes",
+  "component-journeys",
+] as const;
 
 /** Jobs that download the shared packages-dist artifact. */
 const PACKAGES_DIST_CONSUMERS = [
@@ -161,6 +170,55 @@ describe("ci-bun-install composite", () => {
   });
 });
 
+describe("ci-assert-playwright-version-sync composite", () => {
+  it("exists with env-indirected inputs and noble tag comparison", () => {
+    expect(existsSync(join(root, ASSERT_PW_SYNC))).toBe(true);
+    const action = read(ASSERT_PW_SYNC);
+    expect(action).toContain("using: composite");
+    expect(action).toContain("WORKING_DIRECTORY: ${{ inputs.working_directory }}");
+    expect(action).toContain("PACKAGE: ${{ inputs.package }}");
+    expect(action).toContain("SCOPE: ${{ inputs.scope }}");
+    expect(action).toContain("CONTAINER_TAG: ${{ inputs.container_tag }}");
+    expect(action).toContain('expected="v${npm_version}-noble"');
+    expect(action).toContain("::error::");
+    expect(action).toContain("shell: bash");
+    // No external actions — pure assertion step.
+    expect(action).not.toMatch(/uses:\s+(?!composite)/);
+  });
+
+  it("is the sole playwright version-sync path for the four container jobs", () => {
+    const ci = read(".github/workflows/ci.yml");
+    for (const jobId of PLAYWRIGHT_VERSION_SYNC_JOBS) {
+      const job = jobSlice(ci, jobId);
+      expect(job, jobId).toContain("uses: ./.github/actions/ci-assert-playwright-version-sync");
+      // No inline require("playwright…") version assertions left in job bodies.
+      expect(job, jobId).not.toMatch(
+        /require\(["'](?:playwright|@playwright\/test)\/package\.json["']\)/,
+      );
+    }
+    const uses = ci.match(/uses: \.\/\.github\/actions\/ci-assert-playwright-version-sync/g) ?? [];
+    expect(uses.length).toBe(4);
+  });
+
+  it("wires scope/package inputs for svelte, spikes, and VR root", () => {
+    const ci = read(".github/workflows/ci.yml");
+    const svelte = jobSlice(ci, "component-svelte");
+    expect(svelte).toMatch(/working_directory:\s*packages\/svelte/);
+    expect(svelte).toMatch(/package:\s*playwright/);
+    expect(svelte).toMatch(/scope:\s*packages\/svelte/);
+
+    const spikes = jobSlice(ci, "component-spikes");
+    expect(spikes).toMatch(/working_directory:\s*spikes\/browser/);
+    expect(spikes).toMatch(/package:\s*playwright/);
+    expect(spikes).toMatch(/scope:\s*spikes\/browser/);
+
+    const journeys = jobSlice(ci, "component-journeys");
+    expect(journeys).toMatch(/working_directory:\s*\./);
+    expect(journeys).toMatch(/package:\s*["']@playwright\/test["']/);
+    expect(journeys).toMatch(/scope:\s*root @playwright\/test \(VR suite\)/);
+  });
+});
+
 describe("Dependabot covers new CI composites", () => {
   it("lists each composite directory under github-actions", () => {
     const dependabot = read(".github/dependabot.yml");
@@ -170,6 +228,7 @@ describe("Dependabot covers new CI composites", () => {
       '"/.github/actions/ci-setup-bun"',
       '"/.github/actions/ci-bun-install"',
       '"/.github/actions/ci-download-packages-dist"',
+      '"/.github/actions/ci-assert-playwright-version-sync"',
     ]) {
       expect(dependabot).toContain(dir);
     }

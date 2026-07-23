@@ -125,6 +125,7 @@ updates:
       - "/.github/actions/ci-setup-bun"
       - "/.github/actions/ci-bun-install"
       - "/.github/actions/ci-download-packages-dist"
+      - "/.github/actions/ci-assert-playwright-version-sync"
     schedule:
       interval: "weekly"
       day: "tuesday"
