@@ -34,6 +34,7 @@ import {
 } from "./validate-data.js";
 import { collectSchemaShapeErrors, GEOM_BRANCHES } from "./validate-schema-shape.js";
 import {
+  binnedStyleScaleStructuralErrors,
   colorScaleStructuralErrors,
   coordFacetStructuralErrors,
   facetStructuralErrors,
@@ -124,7 +125,10 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
     }
 
     if (schemaValid && isRecord(input) && isRecord(input["scales"])) {
-      errors.push(...colorScaleStructuralErrors(input["scales"]));
+      errors.push(
+        ...colorScaleStructuralErrors(input["scales"]),
+        ...binnedStyleScaleStructuralErrors(input["scales"]),
+      );
     }
     if (schemaValid && isRecord(input)) {
       const guides = isRecord(input["guides"]) ? input["guides"] : {};
