@@ -211,7 +211,16 @@ export function resolveLayerFieldEvidence(
     totalRows += rowCount;
     totalBytes += estimateBytes(columns, rowCount);
   };
-  if (plotColumns !== null) countTable("__plot__", plotColumns);
+  if (plotColumns !== null) {
+    // Prefer name: key so plot-level { name } matching a layer named ref is not
+    // double-counted toward maxRows (same embedded/named dataset once).
+    const plotData = spec["data"];
+    const plotKey =
+      isRecord(plotData) && typeof plotData["name"] === "string"
+        ? `name:${plotData["name"]}`
+        : "__plot__";
+    countTable(plotKey, plotColumns);
+  }
 
   const layers = Array.isArray(spec["layers"]) ? (spec["layers"] as unknown[]) : [];
   const layerColumns: Array<Record<string, readonly CellValue[]> | null | "runtime"> = [];

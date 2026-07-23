@@ -42,7 +42,7 @@ describe("temporal pipeline: stats and facets", () => {
       { when: "05/06/2024", value: 3, visibility: "keep" },
     ];
     const model = runPipeline(
-      gg(rows, aes({ x: "when", y: "value" }))
+      gg(rows, aes({ x: "when", y: "value", color: "visibility" }))
         .geomErrorbar({ stat: "summary" })
         .spec(),
       {
