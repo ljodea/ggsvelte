@@ -29,8 +29,10 @@ describe("band label rendering (#387)", () => {
 
   it("rotates x labels at narrow width and pushes the axis title below them", () => {
     const svg = renderToSVGString(spec, { width: 240, height: 300 });
-    // Rotated tick labels use a rotate transform anchored below the axis.
-    expect(svg).toContain('rotate(-90)" text-anchor="end"');
+    // Prefer −45° when parallel baselines clear (not −90 merely because an AABB
+    // overlaps the neighbour column). Still rotated + end-anchored.
+    expect(svg).toContain('rotate(-45)" text-anchor="end"');
+    expect(svg).not.toContain('rotate(-90)" text-anchor="end"');
     // The x-axis title clears the rotated label band (offset well past the fixed 32).
     const title = svg.match(/class="gg-axis-title"[^>]*y="([\d.]+)"/);
     expect(title).not.toBeNull();
