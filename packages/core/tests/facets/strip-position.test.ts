@@ -1,10 +1,12 @@
 /**
- * Facet strip position and visibility (issue #590).
+ * Facet strip position and visibility (issue #590 / #611).
  * Seam: runPipeline scene geometry + SVG strip chrome.
  */
 import { describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
 
+import { FONT_METRICS } from "../../src/layout/font-metrics.ts";
+import { MetricsTableMeasurer } from "../../src/layout/measure.ts";
 import { runPipeline } from "../../src/pipeline.ts";
 import { sceneToSVGString } from "../../src/render-svg.ts";
 import { STRIP_BAND } from "../../src/scene.ts";
@@ -107,5 +109,84 @@ describe("facet strip position — layout and render (#590)", () => {
 
     const svg = sceneToSVGString(model.scene);
     expect(svg).not.toContain('class="gg-strip"');
+  });
+});
+
+describe("side strip vertical collision (#611)", () => {
+  const longLabel =
+    "Extremely Long Facet Panel Label That Exceeds Short Multi-Row Panel Height When Rotated";
+
+  it("caps rotated left strip label advance to panel height and clips SVG paint", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, y: 1, g: "a" },
+          { x: 2, y: 2, g: "b" },
+          { x: 3, y: 3, g: "c" },
+          { x: 4, y: 4, g: "d" },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .facet({
+          wrap: {
+            field: "g",
+            levels: ["a", "b", "c", "d"],
+            labels: {
+              a: longLabel,
+              b: longLabel,
+              c: longLabel,
+              d: longLabel,
+            },
+          },
+          ncol: 1,
+          strip: { position: "left" },
+        })
+        .spec(),
+      // Short viewport → multi-row panels shorter than the full label advance.
+      { width: 360, height: 220 },
+    );
+
+    expect(model.scene.panels.length).toBe(4);
+    // Multi-row: distinct y positions
+    expect(new Set(model.scene.panels.map((p) => p.y)).size).toBeGreaterThan(1);
+
+    const measurer = new MetricsTableMeasurer(FONT_METRICS);
+    const stripSize = model.scene.theme.stripSize;
+
+    for (const panel of model.scene.panels) {
+      expect(panel.stripPosition).toBe("left");
+      // Rotated advance must fit inside the panel's vertical budget.
+      expect(measurer.measureWidth(panel.strip, stripSize)).toBeLessThanOrEqual(panel.height + 0.5);
+      // Full label was longer than the panel — expect ellipsis truncation.
+      expect(panel.strip.length).toBeLessThan(longLabel.length);
+      expect(panel.strip.endsWith("…")).toBe(true);
+      // Band width also respects the vertical budget (+ pad).
+      expect(panel.stripBand!).toBeLessThanOrEqual(Math.ceil(panel.height) + 8 + 1);
+    }
+
+    const svg = sceneToSVGString(model.scene);
+    expect(svg).toContain("gg-strip-clip-");
+    expect(svg).toContain('clip-path="url(#gg-strip-clip-0)"');
+    // Truncated label is rendered; full long string is not.
+    expect(svg).not.toContain(longLabel);
+    expect(svg).toContain("…");
+  });
+
+  it("leaves short side-strip labels untruncated", () => {
+    const model = runPipeline(
+      gg(wrapRows, aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .facet({
+          wrap: { field: "g", levels: ["a", "b"], labels: { a: "Alpha", b: "Beta" } },
+          strip: { position: "left" },
+        })
+        .spec(),
+      size,
+    );
+    expect(model.scene.panels.map((p) => p.strip)).toEqual(["Alpha", "Beta"]);
+    const svg = sceneToSVGString(model.scene);
+    expect(svg).toContain("Alpha");
+    expect(svg).toContain("Beta");
   });
 });

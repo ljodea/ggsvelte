@@ -55,7 +55,7 @@
     focusMasks?: readonly (BatchInteractionMask | null)[];
   } = $props();
 
-  /** Strip band geometry matching core renderToSVGString (issue #590). */
+  /** Strip band geometry matching core renderToSVGString (issue #590 / #611). */
   function stripGeometry(panel: ScenePanel): {
     x: number;
     y: number;
@@ -64,6 +64,8 @@
     textX: number;
     textY: number;
     rotate: string | undefined;
+    /** Clip rotated side-strip labels to the panel-height band (#611). */
+    clip: boolean;
   } | null {
     if (panel.strip === "" || panel.showStrip === false) return null;
     const band = panel.stripBand ?? STRIP_BAND;
@@ -79,6 +81,7 @@
         textX: panel.width / 2,
         textY: bandDraw / 2,
         rotate: undefined,
+        clip: false,
       };
     }
     if (position === "bottom") {
@@ -92,6 +95,7 @@
         textX: panel.width / 2,
         textY: bandDraw / 2,
         rotate: undefined,
+        clip: false,
       };
     }
     if (position === "left") {
@@ -107,6 +111,7 @@
         textX,
         textY,
         rotate: `rotate(-90 ${textX} ${textY})`,
+        clip: true,
       };
     }
     const textX = bandDraw / 2;
@@ -119,6 +124,7 @@
       textX,
       textY,
       rotate: `rotate(90 ${textX} ${textY})`,
+      clip: true,
     };
   }
 
@@ -335,7 +341,16 @@
     </g>
     {#if drawChrome && stripGeometry(panel) !== null}
       {@const strip = stripGeometry(panel)!}
-      <g class="gg-strip" transform={`translate(${strip.x},${strip.y})`}>
+      <g
+        class="gg-strip"
+        transform={`translate(${strip.x},${strip.y})`}
+        clip-path={strip.clip ? `url(#${uid}-strip-clip-${i})` : undefined}
+      >
+        {#if strip.clip}
+          <clipPath id={`${uid}-strip-clip-${i}`}>
+            <rect width={strip.width} height={strip.height} />
+          </clipPath>
+        {/if}
         <rect
           width={strip.width}
           height={strip.height}
