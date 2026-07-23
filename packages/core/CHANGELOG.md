@@ -1,5 +1,68 @@
 # @ggsvelte/core
 
+## 0.9.0
+
+### Minor Changes
+
+- e45a6a5: # Facet value order, labels, and strip position
+
+  Extend facet field configuration with JSON-serializable options for closed panel order, display labels, and strip placement (issue #590).
+
+  - `facet.wrap|rows|cols.levels` — closed explicit panel order (empty panels for missing levels; unknown data values diagnosed and excluded)
+  - `facet.wrap|rows|cols.labels` — display-label map (identity keys stay semantic)
+  - `facet.strip.position` — `top` (default) | `bottom` | `left` | `right`; left/right bands are measured and reserved in layout
+  - `facet.strip.show` — set `false` to hide strip chrome when labels are authored elsewhere
+
+  Migration: none — additive
+
+  Defaults preserve ascending sort and top strips.
+
+- 463adcf: # Fixed-aspect coordinates
+
+  Add strict `coordFixed`/`coord_fixed`/`coordEqual` authoring and fit exact physical data-unit ratios inside responsive chart chrome. Fixed-scale facets keep equal panels, free positional facets fail early, theme-owned letterbox gutters render consistently across Core and Svelte, and constrained layouts preserve ratio with an explicit degraded diagnostic.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-8-to-0-9>
+
+  Replace outer-wrapper CSS aspect-ratio workarounds with `coord={coordFixed()}`. Fixed coordinates now reject free positional facet scales; use fixed facets or remove the fixed coordinate.
+
+- 6179954: <!-- markdownlint-disable MD041 -->
+
+  feat: add geom segment for finite two-endpoint lines (x,y → xend,yend)
+
+  Migration: none — additive
+
+- f8723b4: <!-- markdownlint-disable MD041 -->
+
+  feat: optional per-layer `data` (DataRef) with multi-table pipeline support
+
+  Migration: none — additive
+
+  Layers may supply their own `{values}` / `{columns}` / `{name}` data; when
+  omitted they inherit plot-level data. Shared scales train over the union of
+  layer tables, facets replicate annotation layers that omit facet fields, and
+  `model.row()` resolves global multi-table source ids. Builder and declaration
+  geom sugar accept layer `data` as well.
+
+### Patch Changes
+
+- 29f05e4: <!-- markdownlint-disable MD041 -->
+
+  fix(core): union facet panel keys across complete per-layer DataRef sources
+
+  When several layer-local tables each carry the facet fields but different
+  levels, facet layout no longer stops at the first complete table. Panel keys
+  are the union of every complete source so later layers cannot introduce
+  orphaned levels.
+
+  Migration: none — corrects multi-table facet layout under per-layer data
+
+- Updated dependencies [e45a6a5]
+- Updated dependencies [463adcf]
+- Updated dependencies [6179954]
+- Updated dependencies [f8723b4]
+- Updated dependencies [fd28b89]
+  - @ggsvelte/spec@0.9.0
+
 ## 0.8.0
 
 ### Minor Changes
