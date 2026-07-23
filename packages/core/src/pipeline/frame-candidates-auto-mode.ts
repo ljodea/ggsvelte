@@ -6,10 +6,14 @@ import type { ResolvedCandidateInspectMode } from "../candidate-store.js";
 import { interceptList } from "./frame-helpers.js";
 import type { LayerBinding } from "./types.js";
 
+/**
+ * Layer-level auto hit mode. Returns `undefined` when the store should use
+ * geometry-based {@link defaultAutoMode} (e.g. finite segments: axis from dx/dy).
+ */
 export function candidateAutoMode(
   binding: LayerBinding,
   primitiveIndex: number,
-): ResolvedCandidateInspectMode {
+): ResolvedCandidateInspectMode | undefined {
   switch (binding.layer.geom) {
     case "point":
     case "text":
@@ -29,6 +33,9 @@ export function candidateAutoMode(
       return "x";
     case "ribbon":
       return binding.ribbonOrientation === "y" ? "y" : "x";
+    case "segment":
+      // Geometry-based mode in defaultAutoMode (long horizontal → "y", vertical → "x").
+      return undefined;
     case "rule": {
       if (binding.ruleForm === "vertical") return "x";
       if (binding.ruleForm === "horizontal") return "y";

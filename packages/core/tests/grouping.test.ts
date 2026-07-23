@@ -221,6 +221,25 @@ describe("deriveGroups: edge cases", () => {
     expect(r.groupCount).toBe(1);
   });
 
+  test("xend/yend never participate in default grouping", () => {
+    // Plot-level segment endpoints can inherit onto line/point layers; they must
+    // not split those layers by unused categorical endpoints.
+    const t: Columns = {
+      x: [1, 2, 3, 4],
+      y: [1, 2, 3, 4],
+      xend: ["a", "b", "a", "b"],
+      yend: ["c", "c", "d", "d"],
+    };
+    const r = deriveGroups(t, {
+      x: { field: "x" },
+      y: { field: "y" },
+      xend: { field: "xend" },
+      yend: { field: "yend" },
+    });
+    expect(r.source).toBe("none");
+    expect(r.groupCount).toBe(1);
+  });
+
   test("zero-row table yields zero groups", () => {
     const r = deriveGroups({ cat1: [] }, { x: { field: "cat1" } });
     expect(r.groupCount).toBe(0);

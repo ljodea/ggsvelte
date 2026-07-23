@@ -48,6 +48,7 @@ function createRawCandidateDatumResolver(
       value(binding.color.field),
     );
     const fillRank = ordinalColorRank(fill, binding.fill.field, () => value(binding.fill.field));
+    const autoMode = candidateAutoMode(binding, facts.primitiveIndex);
     return {
       xValue: value(binding.xField),
       yValue: value(binding.yField),
@@ -60,7 +61,7 @@ function createRawCandidateDatumResolver(
       seriesRank: colorRank >= 0 ? colorRank : fillRank >= 0 ? fillRank : group,
       sourceOrder: sourceRow,
       lineage: lineage.intern([sourceRow]),
-      autoMode: candidateAutoMode(binding, facts.primitiveIndex),
+      ...(autoMode === undefined ? {} : { autoMode }),
     };
   };
 }

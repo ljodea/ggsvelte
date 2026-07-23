@@ -74,6 +74,43 @@ describe("segment geom", () => {
     expect(model.scales.x.domain).toContain("Z");
   });
 
+  it("uses geometry-based auto hit mode (not forced xy)", () => {
+    // Vertical segment → defaultAutoMode "x"; horizontal → "y".
+    const model = runPipeline(
+      gg(
+        {
+          x: [1, 0],
+          y: [0, 1],
+          xend: [1, 10],
+          yend: [10, 1],
+        },
+        aes({ x: "x", y: "y", xend: "xend", yend: "yend" }),
+      )
+        .geomSegment()
+        .spec(),
+      size,
+    );
+    expect(model.candidates.candidate(0)?.autoMode).toBe("x");
+    expect(model.candidates.candidate(1)?.autoMode).toBe("y");
+  });
+
+  it("does not reject a binned x from unused plot-level xend on a point layer", () => {
+    // Plot aes includes xend for a sibling segment; point layer must not train
+    // binned x from the (possibly nominal) endpoint field.
+    expect(() =>
+      runPipeline(
+        gg(
+          { x: [1, 2, 3], y: [1, 2, 3], xend: ["a", "b", "c"], yend: [1, 2, 3] },
+          aes({ x: "x", y: "y", xend: "xend", yend: "yend" }),
+        )
+          .geomPoint()
+          .scales({ x: { type: "binned" } })
+          .spec(),
+        size,
+      ),
+    ).not.toThrow();
+  });
+
   it("requires all four endpoints at bind time", () => {
     expect(() =>
       runPipeline(

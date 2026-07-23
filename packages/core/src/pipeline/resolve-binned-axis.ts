@@ -63,9 +63,13 @@ export function resolveBinnedAxis(
     const binding = bindings[index]!;
     const table = tables[index] ?? tables[0];
     if (table === undefined) continue;
-    // Segment endpoints train the same axis — include them in auto binned extent.
+    // Segment endpoints train the same axis — only when this binding is a segment
+    // (plot-level aes can leave xend/yend on non-segment layers that ignore them).
+    const isSegment = binding.layer.geom === "segment";
     const fields =
-      axis === "x" ? [binding.xField, binding.xendField] : [binding.yField, binding.yendField];
+      axis === "x"
+        ? [binding.xField, ...(isSegment ? [binding.xendField] : [])]
+        : [binding.yField, ...(isSegment ? [binding.yendField] : [])];
     for (const field of fields) {
       if (field === null) continue;
       const seenKey = `${binding.sourceId}|${field}`;
