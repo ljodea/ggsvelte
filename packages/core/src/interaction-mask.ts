@@ -92,7 +92,10 @@ export interface FocusedPrimitive {
 /**
  * Project semantic emphasis keys onto renderer primitives without exposing a
  * mutable backing array. Batches without semantic candidates remain `null`,
- * so annotation-only geometry is not inadvertently de-emphasized.
+ * so pure annotation-only geometry is not inadvertently de-emphasized —
+ * except presentation-only path batches (`candidates: false`) that share a
+ * layer with a focused batch (ribbon outlines), which mirror that layer's mask
+ * so unselected outlines mute with their fill.
  */
 export function buildInteractionMasks<Key extends PropertyKey>(
   batches: readonly GeometryBatch[],
@@ -119,6 +122,43 @@ export function buildInteractionMasks<Key extends PropertyKey>(
       focused.set(candidate.batchIndex, values);
     }
     if (candidate.keys.some((key) => emphasis.has(key))) values[primitiveIndex] = 1;
+  }
+
+  // Mirror fill-batch focus onto presentation-only path batches on the same
+  // layer (ribbon outline open paths). Null masks stay fully opaque in canvas.
+  for (let index = 0; index < batches.length; index++) {
+    const batch = batches[index];
+    if (batch === undefined || batch.kind !== "paths" || batch.candidates !== false) continue;
+    if (focused.has(index)) continue;
+    let source: Uint8Array | undefined;
+    let sourceCount = 0;
+    for (let other = 0; other < batches.length; other++) {
+      if (other === index) continue;
+      const peer = batches[other];
+      if (peer === undefined || peer.layerIndex !== batch.layerIndex) continue;
+      const values = focused.get(other);
+      if (values === undefined) continue;
+      source = values;
+      sourceCount = renderPrimitiveCount(peer);
+      break;
+    }
+    if (source === undefined) continue;
+    const outlineCount = renderPrimitiveCount(batch);
+    const mirrored = new Uint8Array(outlineCount);
+    if (outlineCount === sourceCount) {
+      mirrored.set(source);
+    } else if (sourceCount > 0 && outlineCount === sourceCount * 2) {
+      // outline: "both" — two open subpaths per closed fill run
+      for (let path = 0; path < sourceCount; path++) {
+        const bit = source[path]!;
+        mirrored[path * 2] = bit;
+        mirrored[path * 2 + 1] = bit;
+      }
+    } else if (sourceCount > 0) {
+      // Length mismatch: mute all outline primitives under any active emphasis.
+      // (zeros = not focused → canvas draws at mutedAlpha)
+    }
+    focused.set(index, mirrored);
   }
 
   return freezeMasks(batches, focused);

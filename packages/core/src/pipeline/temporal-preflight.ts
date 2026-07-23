@@ -52,12 +52,12 @@ export function preflightTemporalBindings(input: {
     const concrete = new Map<string, PositionConversionContext>();
     for (const binding of bindings) {
       const isSegment = binding.layer.geom === "segment";
+      const consumesXBounds = binding.layer.geom === "rect" || binding.layer.geom === "ribbon";
       const fields =
         axis === "x"
           ? [
               binding.xField,
-              binding.xminField,
-              binding.xmaxField,
+              ...(consumesXBounds ? [binding.xminField, binding.xmaxField] : []),
               ...(isSegment ? [binding.xendField] : []),
             ]
           : [
