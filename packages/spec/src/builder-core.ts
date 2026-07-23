@@ -127,10 +127,9 @@ export class GGBuilderCore {
     if (layer.data === undefined) {
       return this.#with({ layers: [...this.#state.layers, layer] });
     }
-    const snapped = {
-      ...layer,
-      data: toAuthoringDataRef(layer.data as DataInput),
-    } as LayerInput;
+    // layer.data is AuthoringDataRef at rest; cast through DataInput for snapshot.
+    const data: DataInput = layer.data;
+    const snapped = { ...layer, data: toAuthoringDataRef(data) } as LayerInput;
     return this.#with({ layers: [...this.#state.layers, snapped] });
   }
 

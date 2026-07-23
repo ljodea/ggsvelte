@@ -553,7 +553,7 @@ describe("multi-table edges (#609)", () => {
     // Four source rows once — not 8 from a double registry registration.
     expect(model.row(0)).toMatchObject({ x: 1, y: 10 });
     expect(model.row(3)).toMatchObject({ x: 4, y: 25 });
-    expect(model.row(4) == null).toBe(true);
+    expect(model.row(4)).toBeNull();
   });
 
   it("does not apply a color legend filter to layers that do not map color", () => {

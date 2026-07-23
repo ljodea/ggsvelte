@@ -86,11 +86,9 @@ function layerMapsLegendFilter(
   clause: NonNullable<RunOptions["rowFilters"]>[number],
 ): boolean {
   const channel = clause.scale;
-  const layerAes = layer.aes as Record<string, unknown> | undefined;
-  const plot = plotAes as Record<string, unknown> | undefined;
-  const mapped = layerAes?.[channel] ?? plot?.[channel];
+  const mapped = layer.aes?.[channel] ?? plotAes?.[channel];
   if (mapped === undefined || mapped === null || typeof mapped !== "object") return false;
-  return "field" in mapped && (mapped as { field: unknown }).field === clause.field;
+  return "field" in mapped && mapped.field === clause.field;
 }
 
 /** Apply rowFilters only for clauses this layer maps on the matching scale. */
