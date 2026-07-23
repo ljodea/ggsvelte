@@ -32,6 +32,7 @@ export function normalizeInteractionConfig<Row, Key>(
         pin: value.pin ?? true,
         maxDistance,
         contentMode: value.contentMode ?? "informational",
+        muteSiblings: value.muteSiblings ?? false,
         ...(value.content !== undefined && { content: value.content }),
       });
     }

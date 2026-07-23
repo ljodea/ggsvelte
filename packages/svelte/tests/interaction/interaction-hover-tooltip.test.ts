@@ -72,7 +72,7 @@ describe("hover + tooltip (overlays, never a pipeline re-run)", () => {
     await until(() => container.querySelector(".gg-tooltip") === null);
   });
 
-  it("geom_col hover de-emphasizes sibling bars without a circle ring (#386)", async () => {
+  it("geom_col hover shows tooltip without sibling mute by default (#633)", async () => {
     let model: RenderModel | null = null;
     const colRows = [
       { category: "A", count: 7030 },
@@ -84,6 +84,45 @@ describe("hover + tooltip (overlays, never a pipeline re-run)", () => {
       aes: { x: "category", y: "count" },
       layers: [{ geom: "col" }],
       inspect: true,
+      onrender: (m: RenderModel) => {
+        model = m;
+      },
+      ...size,
+    });
+    const m = requireModel(model);
+    let seed = m.candidates.candidate(0);
+    for (let id = 0; id < m.candidates.size; id++) {
+      const candidate = m.candidates.candidate(id);
+      if (candidate?.kind === "rects") {
+        seed = candidate;
+        break;
+      }
+    }
+    if (seed === null || seed.kind !== "rects") throw new Error("expected rect candidate");
+    const capture = container.querySelector(".gg-capture")!;
+    pointerMoveAt(capture, seed.x, seed.y);
+    await until(() => container.querySelector(".gg-tooltip") !== null);
+    // #386: still no point ring on rects
+    expect(container.querySelector(".gg-hover-ring")).toBeNull();
+    // #633: default is tooltip-only — no focus-mask de-emphasis flicker
+    expect(container.querySelectorAll(".gg-rects rect[data-gg-focused]")).toHaveLength(0);
+    for (const rect of container.querySelectorAll(".gg-rects rect")) {
+      expect(rect.getAttribute("opacity")).toBeNull();
+    }
+  });
+
+  it("geom_col hover mutes siblings when inspect.muteSiblings is true (#633)", async () => {
+    let model: RenderModel | null = null;
+    const colRows = [
+      { category: "A", count: 7030 },
+      { category: "B", count: 2100 },
+      { category: "C", count: 1800 },
+    ];
+    const { container } = render(GGPlot, {
+      data: colRows,
+      aes: { x: "category", y: "count" },
+      layers: [{ geom: "col" }],
+      inspect: { muteSiblings: true },
       onrender: (m: RenderModel) => {
         model = m;
       },

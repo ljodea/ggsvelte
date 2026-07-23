@@ -1,6 +1,6 @@
 import type { InteractionSource, PointSelection } from "../interaction/interaction.js";
 
-/** Overlay chrome for a presentation anchor. Rect marks use relative de-emphasis, not rings. */
+/** Overlay chrome for a presentation anchor. Rect marks never use rings (#386). */
 export type PresentationChrome = "ring" | "none";
 
 export type PresentationAnchor = {
@@ -17,7 +17,7 @@ export type CandidateAnchorKeys = {
   readonly kind?: string;
 };
 
-/** Point-like chrome by default; rect batches use mask de-emphasis only. */
+/** Point-like chrome by default; rect batches suppress rings (sibling mute is opt-in, #633). */
 export function presentationChromeForKind(kind: string | null | undefined): PresentationChrome {
   return kind === "rects" ? "none" : "ring";
 }
@@ -202,21 +202,31 @@ export type PresentationInspectionFocus = {
   }[];
 };
 
+export type MergePresentationFocusOptions = {
+  /**
+   * When true, empty-emphasis rect inspection contributes focus keys so
+   * sibling marks can mute. Default false (#633); legend emphasis still unions.
+   */
+  readonly muteSiblings?: boolean;
+};
+
 /**
  * Keys used for interaction mask presentation.
  * - Legend emphasis alone: return emphasis (same reference when inspection null).
  * - Legend emphasis + inspection: freeze Set-union (emphasis → sourceKeys → key).
- * - Inspection of rect marks with empty emphasis: freeze inspection keys so
- *   bar/col hover can de-emphasize siblings without a point ring (#386).
+ * - Inspection of rect marks with empty emphasis: only when `muteSiblings` is
+ *   true — freeze inspection keys so bar/col hover can de-emphasize siblings
+ *   without a point ring (#386 opt-in; #633 default off).
  * - Other inspection-only cases: return empty emphasis (point chrome keeps rings).
  */
 export function mergePresentationFocusKeys(
   emphasisKeys: readonly PropertyKey[],
   inspection: PresentationInspectionFocus | null,
+  options: MergePresentationFocusOptions = {},
 ): readonly PropertyKey[] {
   if (inspection === null) return emphasisKeys;
   if (emphasisKeys.length === 0) {
-    if (inspection.kind !== "rects") return emphasisKeys;
+    if (inspection.kind !== "rects" || options.muteSiblings !== true) return emphasisKeys;
     const keys = [...inspection.sourceKeys, ...(inspection.key === null ? [] : [inspection.key])];
     if (keys.length === 0) return emphasisKeys;
     return Object.freeze([...new Set(keys)]);

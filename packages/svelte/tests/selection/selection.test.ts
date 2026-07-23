@@ -267,16 +267,43 @@ describe("mergePresentationFocusKeys", () => {
     expect(mergePresentationFocusKeys(emphasis, null)).toBe(emphasis);
   });
 
-  it("uses inspection keys alone for rect focus when emphasis is empty", () => {
+  it("uses inspection keys alone for rect focus when muteSiblings and emphasis is empty", () => {
     const empty: PropertyKey[] = [];
-    const result = mergePresentationFocusKeys(empty, {
-      sourceKeys: ["a", "b"],
-      key: "c",
-      kind: "rects",
-    });
+    const result = mergePresentationFocusKeys(
+      empty,
+      {
+        sourceKeys: ["a", "b"],
+        key: "c",
+        kind: "rects",
+      },
+      { muteSiblings: true },
+    );
     expect(result).toEqual(["a", "b", "c"]);
     expect(Object.isFrozen(result)).toBe(true);
     expect(result).not.toBe(empty);
+  });
+
+  it("ignores rect-only inspection keys when muteSiblings is off (#633)", () => {
+    const empty: PropertyKey[] = [];
+    expect(
+      mergePresentationFocusKeys(
+        empty,
+        {
+          sourceKeys: ["a", "b"],
+          key: "c",
+          kind: "rects",
+        },
+        { muteSiblings: false },
+      ),
+    ).toBe(empty);
+    // Default is off — same as muteSiblings: false
+    expect(
+      mergePresentationFocusKeys(empty, {
+        sourceKeys: ["a"],
+        key: null,
+        kind: "rects",
+      }),
+    ).toBe(empty);
   });
 
   it("unions emphasis then sourceKeys then optional key, dedupes, and freezes", () => {

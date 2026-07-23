@@ -384,6 +384,7 @@ export function createPlotInteractionAssembly<
     intervalKeys: () => intervalState.effectiveIntervalKeys,
     intervals: () => intervalState.effectiveIntervals,
     emphasisKeys: () => legendFocusState.effectiveEmphasisKeys,
+    muteSiblingsOnInspect: () => interactionConfig.inspect?.muteSiblings === true,
     inspectionFocus: () => {
       const current = inspectionState.inspection;
       const seed = inspectionState.inspectionSeed;

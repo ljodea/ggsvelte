@@ -61,7 +61,7 @@ describe("createSemanticCandidateProjection", () => {
     destroy();
   });
 
-  it("builds interaction masks from keyless rect inspection primitives", () => {
+  it("does not mute siblings from rect inspection by default (#633)", () => {
     const colModel = modelFor(
       gg(
         [
@@ -89,6 +89,55 @@ describe("createSemanticCandidateProjection", () => {
         intervalKeys: () => [],
         intervals: () => [],
         emphasisKeys: () => [],
+        muteSiblingsOnInspect: () => false,
+        inspectionFocus: () => ({
+          sourceKeys: [],
+          key: null,
+          kind: first.kind,
+          primitives: [
+            {
+              batchIndex: first.batchIndex,
+              primitiveIndex: first.primitiveIndex,
+            },
+          ],
+        }),
+      }),
+    );
+
+    expect(first.kind).toBe("rects");
+    expect(value.interactionMasks).toEqual([]);
+    destroy();
+  });
+
+  it("builds interaction masks from keyless rect inspection when muteSiblings is on", () => {
+    const colModel = modelFor(
+      gg(
+        [
+          { category: "A", count: 10 },
+          { category: "B", count: 20 },
+          { category: "C", count: 15 },
+        ],
+        aes({ x: "category", y: "count" }),
+      )
+        .geomCol()
+        .spec(),
+    );
+    const first = (() => {
+      for (let id = 0; id < colModel.candidates.size; id++) {
+        const candidate = colModel.candidates.candidate(id);
+        if (candidate?.rowIndex === 0) return candidate;
+      }
+      throw new Error("missing col candidate");
+    })();
+    const { value, destroy } = withFlushedEffectRoot(() =>
+      createSemanticCandidateProjection({
+        model: () => colModel,
+        candidateSemanticKeys: () => [],
+        selectedKeys: () => [],
+        intervalKeys: () => [],
+        intervals: () => [],
+        emphasisKeys: () => [],
+        muteSiblingsOnInspect: () => true,
         inspectionFocus: () => ({
           sourceKeys: [],
           key: null,
