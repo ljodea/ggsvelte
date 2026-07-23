@@ -11,8 +11,9 @@ export function collectBinnedXEvidence(frame: LayerFrame, acc: AxisCollectAcc): 
   const xConversion = xConversionOf(frame.binding);
   const geom = frame.binding.layer.geom;
   // Rect: only endpoint fields (never inherited plot-level x).
-  // Tile/raster: edges are often synthetic from centers — fall back to xField
-  // so temporal inference still sees the mapped center column.
+  // Tile/raster: edges are always synthesized from centers — always use
+  // xField for type/temporal evidence so inherited plot-level xmin/xmax
+  // (meant for a sibling rect/ribbon) cannot force a band x scale.
   // Stat-bin bars keep xField for the historical "binned …" type label.
   const evidenceFields =
     geom === "rect"
@@ -24,17 +25,9 @@ export function collectBinnedXEvidence(frame: LayerFrame, acc: AxisCollectAcc): 
           ),
         ]
       : geom === "tile" || geom === "raster"
-        ? [
-            ...new Set(
-              [
-                frame.binding.xminField,
-                frame.binding.xmaxField,
-                ...(frame.binding.xminField === null && frame.binding.xmaxField === null
-                  ? [frame.binding.xField]
-                  : []),
-              ].filter((field): field is string => field !== null),
-            ),
-          ]
+        ? frame.binding.xField === null
+          ? []
+          : [frame.binding.xField]
         : frame.binding.xField === null
           ? []
           : [frame.binding.xField];

@@ -74,7 +74,17 @@ export function expandEdgeFrame(frame: LayerFrame, warnings: PipelineWarning[]):
 
   // Band axes train from centers only. Expand edges only on continuous axes
   // (mixed band+continuous tiles keep continuous-axis domain expansion).
+  // Clear inactive edge arrays so inherited plot-level ymin/ymax (or xmin/xmax)
+  // meant for rect/ribbon cannot train continuous edge evidence on a band axis.
   if (geom === "tile") {
+    if (xType === "nominal") {
+      frame.xmin = null;
+      frame.xmax = null;
+    }
+    if (yType === "nominal") {
+      frame.ymin = null;
+      frame.ymax = null;
+    }
     if (xType === "nominal" && yType === "nominal") return;
     const params = frame.binding.layer.params ?? {};
     const defW = defaultResolution(frame.xNumeric);

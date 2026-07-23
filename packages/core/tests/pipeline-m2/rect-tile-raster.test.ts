@@ -147,6 +147,72 @@ describe("geom tile", () => {
       ),
     ).toThrow(PipelineError);
   });
+
+  it("infers a time x scale from temporal tile centers with synthetic edges", () => {
+    const model = runPipeline(
+      gg(
+        {
+          day: ["2024-01-01", "2024-01-02", "2024-01-03"],
+          band: ["a", "b", "c"],
+          z: [1, 2, 3],
+        },
+        aes({ x: "day", y: "band", fill: "z" }),
+      )
+        .geomTile()
+        .spec(),
+      size,
+    );
+    expect(model.scales.x.type).toBe("time");
+  });
+
+  it("ignores inherited xmin/xmax for tile x-scale type (uses center x)", () => {
+    // Plot-level endpoint aes intended for rect/ribbon must not force a band
+    // x scale on tile when the layer maps continuous centers.
+    const model = runPipeline(
+      gg(
+        {
+          cat: ["a", "b"],
+          y0: [0, 0],
+          y1: [1, 1],
+          x: [0, 1],
+          y: [0, 1],
+          z: [1, 2],
+        },
+        aes({ xmin: "cat", xmax: "cat", ymin: "y0", ymax: "y1" }),
+      )
+        .geomTile({ aes: { x: "x", y: "y", fill: "z" } })
+        .scales({ x: { nice: false }, y: { nice: false } })
+        .spec(),
+      size,
+    );
+    expect(model.scales.x.type).toBe("linear");
+    const batch = model.scene.batches[0] as RectsBatch;
+    expect(batch.kind).toBe("rects");
+    expect(batch.rects.length / 4).toBe(2);
+  });
+
+  it("clears inherited ymin/ymax when tile y is categorical", () => {
+    const model = runPipeline(
+      gg(
+        {
+          x: [0, 1, 2],
+          y: ["a", "b", "c"],
+          ymin: [0, 0, 0],
+          ymax: [1, 1, 1],
+          z: [1, 2, 3],
+        },
+        aes({ x: "x", y: "y", ymin: "ymin", ymax: "ymax", fill: "z" }),
+      )
+        .geomTile()
+        .spec(),
+      size,
+    );
+    expect(model.scales.y.type).toBe("band");
+    expect(model.scales.y.domain).toEqual(["a", "b", "c"]);
+    const batch = model.scene.batches[0] as RectsBatch;
+    expect(batch.kind).toBe("rects");
+    expect(batch.rects.length / 4).toBe(3);
+  });
 });
 
 describe("geom raster", () => {
@@ -193,22 +259,5 @@ describe("geom raster", () => {
     expect(model.warnings.some((w) => w.code === "raster-irregular-spacing")).toBe(true);
     const batch = model.scene.batches[0] as RectsBatch;
     expect(batch.rects.length / 4).toBe(3);
-  });
-
-  it("infers a time x scale from temporal tile centers with synthetic edges", () => {
-    const model = runPipeline(
-      gg(
-        {
-          day: ["2024-01-01", "2024-01-02", "2024-01-03"],
-          band: ["a", "b", "c"],
-          z: [1, 2, 3],
-        },
-        aes({ x: "day", y: "band", fill: "z" }),
-      )
-        .geomTile()
-        .spec(),
-      size,
-    );
-    expect(model.scales.x.type).toBe("time");
   });
 });
