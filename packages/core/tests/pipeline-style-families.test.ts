@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { fromAny } from "@total-typescript/shoehorn";
 
-import type { PortableSpec } from "@ggsvelte/spec";
+import { SpecValidationError, type PortableSpec } from "@ggsvelte/spec";
 
 import { runPipeline } from "../src/pipeline.js";
 import { resolveStyleScale } from "../src/pipeline/scale-style.js";
@@ -813,7 +813,10 @@ describe("complete mapped style plumbing", () => {
     if (temporalPaths?.kind !== "paths") throw new Error("expected temporal binned paths");
     expect(temporalPaths.pathOffsets).toHaveLength(3);
 
-    expect(() =>
+    // Unparseable temporal breaks are rejected at validation (scale-binned-breaks)
+    // before the pipeline trainer can throw style-binned-breaks.
+    let unparseableBreaksError: unknown;
+    try {
       runPipeline(
         fromAny({
           data: {
@@ -834,8 +837,14 @@ describe("complete mapped style plumbing", () => {
           },
         }),
         viewport,
-      ),
-    ).toThrow(expect.objectContaining({ code: "style-binned-breaks" }));
+      );
+    } catch (error) {
+      unparseableBreaksError = error;
+    }
+    expect(unparseableBreaksError).toBeInstanceOf(SpecValidationError);
+    expect(
+      (unparseableBreaksError as SpecValidationError).errors.map((item) => item.code),
+    ).toContain("scale-binned-breaks");
   });
 
   it("normalizes a reversed binned style domain before grouping", () => {
@@ -1089,7 +1098,10 @@ describe("complete mapped style plumbing", () => {
   });
 
   it("rejects a binned domain that disagrees with its boundaries", () => {
-    expect(() =>
+    // Domain/breaks disagreement is now a validation-time scale-binned-domain
+    // (pre-empting runtime style-domain-invalid).
+    let domainBreaksError: unknown;
+    try {
       runPipeline(
         fromAny({
           data: { values: [{ x: 1, y: 1, amount: 3 }] },
@@ -1098,8 +1110,14 @@ describe("complete mapped style plumbing", () => {
           scales: { size: { type: "binned", domain: [0, 50], breaks: [0, 5, 10], range: [2, 6] } },
         }),
         viewport,
-      ),
-    ).toThrow(expect.objectContaining({ code: "style-domain-invalid" }));
+      );
+    } catch (error) {
+      domainBreaksError = error;
+    }
+    expect(domainBreaksError).toBeInstanceOf(SpecValidationError);
+    expect((domainBreaksError as SpecValidationError).errors.map((item) => item.code)).toContain(
+      "scale-binned-domain",
+    );
   });
 
   it("fails deterministically when temporal style values cannot be parsed", () => {

@@ -1614,6 +1614,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["scale-manual-domain-range"],
   },
   {
+    id: "heading:guide-errors:scale-binned-breaks",
+    kind: "heading",
+    title: "scale-binned-breaks",
+    summary:
+      "scale-binned-breaks in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#scale-binned-breaks",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["scale-binned-breaks"],
+  },
+  {
+    id: "heading:guide-errors:scale-binned-domain",
+    kind: "heading",
+    title: "scale-binned-domain",
+    summary:
+      "scale-binned-domain in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#scale-binned-domain",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["scale-binned-domain"],
+  },
+  {
     id: "heading:guide-errors:guide-aesthetic-incompatible",
     kind: "heading",
     title: "guide-aesthetic-incompatible",
@@ -15446,6 +15466,34 @@ export const DOCS_SEARCH_INDEX = [
       "Provide exactly one range color for each explicit domain value.",
     ],
     exact: ["scale-manual-domain-range", "validation:scale-manual-domain-range"],
+  },
+  {
+    id: "diagnostic:validation:scale-binned-breaks",
+    kind: "diagnostic",
+    title: "scale-binned-breaks · validation",
+    summary:
+      "A binned style scale's authored breaks are missing, non-finite after parsing, duplicated, or not strictly increasing.",
+    href: "/guide/errors#scale-binned-breaks",
+    keywords: [
+      "validation",
+      "error",
+      "Provide 2+ strictly increasing boundaries (numeric, or temporal strings that parse under the scale's parser).",
+    ],
+    exact: ["scale-binned-breaks", "validation:scale-binned-breaks"],
+  },
+  {
+    id: "diagnostic:validation:scale-binned-domain",
+    kind: "diagnostic",
+    title: "scale-binned-domain · validation",
+    summary:
+      "A binned style scale's explicit domain does not match the first and last authored breaks.",
+    href: "/guide/errors#scale-binned-domain",
+    keywords: [
+      "validation",
+      "error",
+      "Set domain to the first and last break values, or omit domain and let breaks define it.",
+    ],
+    exact: ["scale-binned-domain", "validation:scale-binned-domain"],
   },
   {
     id: "diagnostic:validation:guide-aesthetic-incompatible",

@@ -1149,6 +1149,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "scale-binned-breaks",
+        title: "scale-binned-breaks",
+        level: 3,
+      },
+      {
+        id: "scale-binned-domain",
+        title: "scale-binned-domain",
+        level: 3,
+      },
+      {
         id: "guide-aesthetic-incompatible",
         title: "guide-aesthetic-incompatible",
         level: 3,
