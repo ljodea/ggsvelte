@@ -59,7 +59,8 @@ describe("runPipeline runtime row filters", () => {
     const model = runPipeline(
       {
         data: { values: rows },
-        aes: { x: "group" },
+        // fill maps the filtered field so the legend-scale gate applies the clause.
+        aes: { x: "group", fill: "group" },
         layers: [{ geom: "bar" as const }],
       },
       {
@@ -141,7 +142,7 @@ describe("runPipeline runtime row filters", () => {
   test("filters before count stats, positional scale training, and axis layout", () => {
     const countSpec = {
       data: { values: rows },
-      aes: { x: "group" },
+      aes: { x: "group", fill: "group" },
       layers: [{ geom: "bar" as const }],
     };
     const initial = runPipeline(countSpec, size);
