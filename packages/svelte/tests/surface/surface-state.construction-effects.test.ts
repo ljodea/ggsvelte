@@ -41,7 +41,6 @@ describe("createSurfaceState construction", () => {
     let availableToolsCalls = 0;
     let toolPropCalls = 0;
     let tooltipHoveredCalls = 0;
-    let coordFlippedCalls = 0;
     let surfaceInteractiveCalls = 0;
 
     // Minimal stubs so construction can close the cycle without real siblings.
@@ -108,10 +107,6 @@ describe("createSurfaceState construction", () => {
     const { value: state, destroy } = withEffectRoot(() =>
       createSurfaceState({
         model: () => model,
-        coordFlipped: () => {
-          coordFlippedCalls++;
-          return false;
-        },
         root: () => null,
         toolProp: () => {
           toolPropCalls++;
@@ -168,13 +163,14 @@ describe("createSurfaceState construction", () => {
       }),
     );
 
-    // Public accessors only (+ flush) — brushing is private.
+    // Public accessors only — brushing is private. Sibling controllers must
+    // not be touched at construction (before flush). Tool-sync / window
+    // effects may read toolProp/availableTools/surfaceInteractive after flush.
     expect(state.reducer).toBeDefined();
     expect(state.activeTool).toBeTypeOf("string");
     expect(state.surfaceDescription).toBeTypeOf("string");
     expect(state.brushRect).toBeNull();
     expect(state.areaAwaitingSecond).toBe(false);
-    flushSync();
 
     expect(inspectionCalls).toBe(0);
     expect(intervalCalls).toBe(0);
@@ -188,8 +184,19 @@ describe("createSurfaceState construction", () => {
     expect(availableToolsCalls).toBe(0);
     expect(toolPropCalls).toBe(0);
     expect(tooltipHoveredCalls).toBe(0);
-    expect(coordFlippedCalls).toBe(0);
     expect(surfaceInteractiveCalls).toBe(0);
+
+    flushSync();
+    // Sibling controller getters stay cold after tool-sync flush.
+    expect(inspectionCalls).toBe(0);
+    expect(intervalCalls).toBe(0);
+    expect(zoomCalls).toBe(0);
+    expect(emitSelectionCalls).toBe(0);
+    expect(semanticKeyCalls).toBe(0);
+    expect(candidateSemanticKeysCalls).toBe(0);
+    expect(togglePointKeysCalls).toBe(0);
+    expect(pointSelectEnabledCalls).toBe(0);
+    expect(tooltipHoveredCalls).toBe(0);
 
     destroy();
   });
@@ -237,7 +244,6 @@ describe("createSurfaceState construction", () => {
     const { value: state, destroy } = withEffectRoot(() =>
       createSurfaceState({
         model: () => model,
-        coordFlipped: () => false,
         root: () => null,
         toolProp: () => {
           /* uncontrolled */

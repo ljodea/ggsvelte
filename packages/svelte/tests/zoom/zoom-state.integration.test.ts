@@ -67,7 +67,6 @@ describe("runtime + zoom real cycle", () => {
         },
         onrender: runtimeDeps.onrender,
       });
-      runtime.registerModelEffects();
       return { runtime, zoom };
     });
 

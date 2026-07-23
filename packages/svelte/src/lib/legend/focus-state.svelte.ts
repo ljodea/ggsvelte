@@ -97,8 +97,12 @@ export type LegendFocusState = {
   clearLegendFromControl(event: MouseEvent): void;
   setTouchIndexCleared(): void;
   setClearPointerType(type: string | null): void;
-  /** Register reconcile effects at their original host position. */
-  registerReconcileEffects(): void;
+  /**
+   * Install reconcile effects after host `$derived` entry lists exist.
+   * Irreducible late hook: entries/pressed close over host-held deriveds that
+   * require this factory's compute* methods (#627 — not a sibling-controller cycle).
+   */
+  installHostDerivedEffects(): void;
 };
 
 // ---------------------------------------------------------------------------
@@ -106,10 +110,9 @@ export type LegendFocusState = {
 // ---------------------------------------------------------------------------
 
 /**
- * Create the legend-focus controller. Construction registers only the
- * construction-time `effectiveEmphasisKeys` derived (over earlier host
- * bindings). Call `registerReconcileEffects` at the original catalog/reconcile
- * position after the host declares model-dependent deriveds.
+ * Create the legend-focus controller. Construction registers
+ * `effectiveEmphasisKeys`. Call `installHostDerivedEffects` after the host
+ * declares entry/pressed deriveds that this factory's compute* methods feed.
  */
 export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusState {
   let localEmphasisKeys = $state<PropertyKey[]>([]);
@@ -407,7 +410,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
     previewLegend(null);
   }
 
-  function registerReconcileEffects(): void {
+  function installHostDerivedEffects(): void {
     $effect.pre(() => {
       const count = deps.entries().length;
       const active = document.activeElement;
@@ -530,6 +533,6 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
     clearLegendFromControl,
     setTouchIndexCleared,
     setClearPointerType,
-    registerReconcileEffects,
+    installHostDerivedEffects,
   };
 }

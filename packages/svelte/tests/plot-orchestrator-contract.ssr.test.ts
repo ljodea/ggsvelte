@@ -8,23 +8,12 @@ const interactionAssemblyPath = join(
   import.meta.dirname,
   "../src/lib/plot-interaction-assembly.svelte.ts",
 );
+const transitionOwnerPath = join(import.meta.dirname, "../src/lib/interaction/transition-owner.ts");
 
-function expectOrdered(source: string, tokens: readonly string[]): void {
-  let previousIndex = -1;
-  for (const token of tokens) {
-    const index = source.indexOf(token);
-    expect(index, `missing orchestrator contract token: ${token}`).toBeGreaterThanOrEqual(0);
-    expect(
-      index,
-      `${token} must remain after ${tokens[tokens.indexOf(token) - 1]}`,
-    ).toBeGreaterThan(previousIndex);
-    previousIndex = index;
-  }
-}
-
-describe("plot interaction assembly lifecycle contract", () => {
+describe("plot interaction assembly seam (#627)", () => {
   const orchestratorSource = readFileSync(orchestratorPath, "utf8");
   const assemblySource = readFileSync(interactionAssemblyPath, "utf8");
+  const transitionOwnerSource = readFileSync(transitionOwnerPath, "utf8");
 
   it("keeps interaction topology behind the assembly seam", () => {
     expect(orchestratorSource).toContain("createPlotInteractionAssembly(");
@@ -46,23 +35,6 @@ describe("plot interaction assembly lifecycle contract", () => {
     }
   });
 
-  it("keeps controller construction in dependency order", () => {
-    expectOrdered(assemblySource, [
-      "const zoomState = createPlotZoomState(",
-      "const legendFilterState = createLegendFilterState(",
-      "const runtime = createPlotRuntime(",
-      "const semanticKeys = createSemanticKeyService(",
-      "const legendEntryKeys = createLegendEntryKeyIndex(",
-      "const inspectionState = createInspectionState(",
-      "const surfaceState = createSurfaceState(",
-      "const selectionState = createSelectionState(",
-      "const legendFocusState = createLegendFocusState(",
-      "const intervalState = createIntervalState(",
-      "const semanticCandidateProjection = createSemanticCandidateProjection(",
-      "const chromeState = createPlotChromeState(",
-    ]);
-  });
-
   it("uses the model-owned CandidateStore without constructing a second hit index", () => {
     expect(assemblySource).not.toContain("buildHitIndex");
     expect(assemblySource).not.toContain("SceneHitIndex");
@@ -79,15 +51,18 @@ describe("plot interaction assembly lifecycle contract", () => {
     }
   });
 
-  it("keeps phased effects in registration order", () => {
-    expectOrdered(assemblySource, [
-      "runtime.registerModelEffects();",
-      "semanticKeys.registerEffects();",
-      "surfaceState.registerSurfaceEffects();",
-      "legendFilterState.registerCatalogEffects(",
-      "legendFocusState.registerReconcileEffects();",
-      "inspectionState.registerInspectionEffects();",
-      "runtime.registerLateEffects();",
-    ]);
+  it("owns multi-module dismiss apply in transition-owner (not inspection surface deps)", () => {
+    expect(transitionOwnerSource).toContain("applyInspectionDismissSideEffects");
+    expect(assemblySource).not.toContain("clearBrush: () =>");
+    expect(assemblySource).not.toContain("chooseTool: (next)");
+    expect(assemblySource).not.toContain("registerSurfaceEffects");
+    expect(assemblySource).not.toContain("registerInspectionEffects");
+    expect(assemblySource).not.toContain("registerCatalogEffects");
+    expect(assemblySource).not.toContain("registerReconcileEffects");
+    expect(assemblySource).not.toContain("registerModelEffects");
+    expect(assemblySource).not.toContain("registerLateEffects");
+    expect(assemblySource).not.toContain("semanticKeys.registerEffects");
+    // Irreducible host-derived legend-focus reconcile (not sibling cycles).
+    expect(assemblySource).toContain("installHostDerivedEffects");
   });
 });

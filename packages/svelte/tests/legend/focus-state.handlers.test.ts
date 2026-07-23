@@ -56,16 +56,15 @@ describe("createLegendFocusState construction", () => {
       }),
     );
 
+    // $effect.pre roving sync may read entries at construction; handlers and
+    // other armed getters must stay cold until user input.
     expect(entryKeysCalls).toBe(0);
     expect(entriesCalls).toBe(0);
     expect(pressedCalls).toBe(0);
-    // Deriveds are lazy on client and server at the 5.33.1 floor, so this
-    // guard proves the exposed accessors reach no armed getter (reads + one
-    // flush below) — the construction-read discipline. Direct (non-derived)
-    // construction-time reads of armed deps would throw right here.
     expect(state.effectiveEmphasisKeys).toEqual([]);
     expect(state.previewIdentity).toBeNull();
     expect(state.rovingIndex).toBe(0);
+    // Effects install only via installHostDerivedEffects (not called here).
     flushSync();
     expect(entryKeysCalls).toBe(0);
     expect(entriesCalls).toBe(0);

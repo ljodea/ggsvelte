@@ -49,7 +49,6 @@ describe("createSemanticKeyService", () => {
           diagnostics.push(d.code);
         },
       });
-      created.registerEffects();
       return created;
     });
 
@@ -108,7 +107,6 @@ describe("createSemanticKeyService", () => {
         sourceIdentity: (value) => tracker.sourceIdentity(value),
         deliverDiagnostic: () => {},
       });
-      created.registerEffects();
       return created;
     });
 
@@ -153,7 +151,6 @@ describe("createSemanticKeyService", () => {
           diagnostics.push(d.code);
         },
       });
-      created.registerEffects();
       return created;
     });
 

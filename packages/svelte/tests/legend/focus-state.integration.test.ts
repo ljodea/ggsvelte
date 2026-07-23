@@ -67,6 +67,7 @@ describe("runtime + legend-focus real cycle", () => {
         oninteraction: noCallback,
         announce: () => {},
       });
+      focus.installHostDerivedEffects();
       const runtime = createPlotRuntime({
         ...runtimeDeps,
         effectiveLegendFilters: () => [],
@@ -87,9 +88,6 @@ describe("runtime + legend-focus real cycle", () => {
       entriesRef = () => focus.computeInteractiveEntries(runtime.model);
       pressedRef = () => focus.computeLegendPressed(runtime.model);
       // Host registration order: model -> catalog(S2) -> reconcile(S3) -> late.
-      runtime.registerModelEffects();
-      focus.registerReconcileEffects();
-      runtime.registerLateEffects();
       runtimeDeps.setOnrender((model) => {
         renders.push(model);
       });

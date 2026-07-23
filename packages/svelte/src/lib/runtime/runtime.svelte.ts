@@ -2,7 +2,7 @@
  * Plot runtime: container sizing, model production (runPipeline + scale gate),
  * strata plan, paint ledger, and readiness. Extracted from GGPlot for S1.
  *
- * Effect registration is phased (see registerModelEffects / registerLateEffects)
+ * Effects register at construction (#627)
  * so relative order vs host effects is preserved.
  */
 import {
@@ -47,19 +47,12 @@ export type PlotRuntime = {
   readonly ready: boolean;
   notifyPainted(runId: number, stratumKey: string): void;
   resetScales(): void;
-  /** Register dispose + onrender effects (original position ~after legend resets). */
-  registerModelEffects(): void;
-  /** Register clientFlush/ready effect (end of script). */
-  registerLateEffects(): void;
 };
 
 /**
- * Create the plot runtime. Construction registers ONLY the ResizeObserver
- * effect. Call `registerModelEffects` and `registerLateEffects` at their
- * original host positions. Dep getters must not be invoked during construction
- * for construction-time deriveds; the host must declare every binding a dep
- * getter closes over BEFORE calling this factory (declaration order is the
- * topological order; direct construction-time reads of later bindings TDZ).
+ * Create the plot runtime. Construction registers ResizeObserver, model
+ * dispose/onrender, and clientFlush effects (#627). Dep getters must not be
+ * invoked during construction for construction-time deriveds.
  */
 export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
   // ------------------------------------------------- container width (RO)
@@ -185,7 +178,7 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
     scaleEpoch++;
   }
 
-  // Readiness: clientFlush is false until registerLateEffects runs its effect.
+  // Readiness: clientFlush flips true on first client effect flush (SSR stays false).
   let clientFlush = $state(false);
   const ready = $derived.by(() => {
     void paintEpoch;
@@ -199,28 +192,24 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
     });
   });
 
-  function registerModelEffects(): void {
-    // Memory ownership: dispose the previous model once the DOM has moved on
-    // (effect cleanup runs post-flush), and the last model on unmount.
-    $effect(() => {
-      const m = model;
-      return () => m?.dispose();
-    });
+  // Memory ownership: dispose the previous model once the DOM has moved on
+  // (effect cleanup runs post-flush), and the last model on unmount.
+  $effect(() => {
+    const m = model;
+    return () => m?.dispose();
+  });
 
-    $effect(() => {
-      const m = model;
-      const assembled = deps.assembled();
-      if (m !== null && assembled !== null) untrack(() => deps.onrender()?.(m, assembled));
-    });
-  }
+  $effect(() => {
+    const m = model;
+    const assembled = deps.assembled();
+    if (m !== null && assembled !== null) untrack(() => deps.onrender()?.(m, assembled));
+  });
 
-  function registerLateEffects(): void {
-    // clientFlush via $effect: never runs during SSR → prerender stays
-    // data-gg-ready="false" until the first client committed flush (decision 0009)
-    $effect(() => {
-      clientFlush = true;
-    });
-  }
+  // clientFlush via $effect: never runs during SSR → prerender stays
+  // data-gg-ready="false" until the first client committed flush (decision 0009)
+  $effect(() => {
+    clientFlush = true;
+  });
 
   return {
     get model() {
@@ -245,7 +234,5 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
     },
     notifyPainted,
     resetScales,
-    registerModelEffects,
-    registerLateEffects,
   };
 }

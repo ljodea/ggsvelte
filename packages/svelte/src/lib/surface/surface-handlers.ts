@@ -24,6 +24,7 @@ import {
 import { BRUSH_SECOND_CORNER_ANNOUNCEMENT } from "../assembly/labels.js";
 import { hitFromCandidate, plotPointFromClient } from "./plot-px.js";
 import { resolveSurfaceBlurAction } from "../inspection/teardown.js";
+import { applyInspectionDismissSideEffects } from "../interaction/transition-owner.js";
 import { resolveSurfaceKeyAction } from "./keyboard.js";
 import {
   advanceTouchInspectMoved,
@@ -434,11 +435,16 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
       case "toggle-pin":
         inspection.toggleInspectionPin("keyboard");
         return;
-      case "escape":
-        inspection.dismissInspection("escape", "keyboard", {
+      case "escape": {
+        const plan = inspection.dismissInspection("escape", "keyboard", {
           returnToInspect: action.returnToInspect,
         });
+        applyInspectionDismissSideEffects(plan, {
+          clearBrush,
+          chooseTool,
+        });
         break;
+      }
       case "none":
         break;
     }

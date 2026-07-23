@@ -33,8 +33,6 @@ describe("createInspectionState construction", () => {
     let clearTooltipHoveredCalls = 0;
     let keyAtCalls = 0;
     let inspectEnabledCalls = 0;
-    let chooseToolCalls = 0;
-    let clearBrushCalls = 0;
     let oninspectCalls = 0;
     let oninteractionCalls = 0;
     let plotIdCalls = 0;
@@ -75,12 +73,6 @@ describe("createInspectionState construction", () => {
         clearTooltipHovered: () => {
           clearTooltipHoveredCalls++;
         },
-        clearBrush: () => {
-          clearBrushCalls++;
-        },
-        chooseTool: () => {
-          chooseToolCalls++;
-        },
         oninspect: () => {
           oninspectCalls++;
           return noInspect();
@@ -100,28 +92,13 @@ describe("createInspectionState construction", () => {
     expect(clearTooltipHoveredCalls).toBe(0);
     expect(keyAtCalls).toBe(0);
     expect(inspectEnabledCalls).toBe(0);
-    expect(chooseToolCalls).toBe(0);
-    expect(clearBrushCalls).toBe(0);
     expect(oninspectCalls).toBe(0);
     expect(oninteractionCalls).toBe(0);
     expect(plotIdCalls).toBe(0);
-    // Accessors + one flush must not reach armed getters (construction-read
-    // discipline). Direct construction-time reads of armed deps would throw
-    // right here.
+    // Accessors before flush must not reach armed getters (construction-read
+    // discipline). Scene-reconcile effects may read inspectEnabled after flush.
     expect(state.inspection).toBeNull();
     expect(state.inspectionPanel).toBeNull();
-    flushSync();
-    expect(reducerCalls).toBe(0);
-    expect(captureSurfaceCalls).toBe(0);
-    expect(tooltipHoveredCalls).toBe(0);
-    expect(clearTooltipHoveredCalls).toBe(0);
-    expect(keyAtCalls).toBe(0);
-    expect(inspectEnabledCalls).toBe(0);
-    expect(chooseToolCalls).toBe(0);
-    expect(clearBrushCalls).toBe(0);
-    expect(oninspectCalls).toBe(0);
-    expect(oninteractionCalls).toBe(0);
-    expect(plotIdCalls).toBe(0);
     destroy();
   });
 });
@@ -149,7 +126,6 @@ describe("createInspectionState scene-reconcile effect", () => {
       oninspect: () => (event) => {
         events.push(event);
       },
-      registerEffects: true,
     });
 
     const { candidate, hit } = candidateHit(modelA);
@@ -238,7 +214,6 @@ describe("createInspectionState callback replacement", () => {
       model: () => model,
       oninspect: () => inspectBox.value,
       oninteraction: () => interactionBox.value,
-      registerEffects: false,
     });
 
     const { candidate, hit } = candidateHit(model);

@@ -14,8 +14,7 @@
  * internal state + inspectConfig. Sibling controllers, sinks, and chrome
  * getters are handler/effect-only (armed for the construction guard).
  *
- * Effects register via registerSurfaceEffects() at the original line-810
- * position (after diagnostics effects, before catalog/focus/inspection).
+ * Window-teardown + tool-sync effects register inside this factory (#627).
  */
 import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
 
@@ -107,8 +106,6 @@ export type SurfaceState = {
   onCaptureClick(event: MouseEvent): void;
   onSurfaceKeyDown(event: KeyboardEvent): void;
   onSurfaceBlur(event: FocusEvent): void;
-  /** Register window-teardown + tool-sync effects at the original host site. */
-  registerSurfaceEffects(): void;
 };
 
 // ---------------------------------------------------------------------------
@@ -116,9 +113,8 @@ export type SurfaceState = {
 // ---------------------------------------------------------------------------
 
 /**
- * Create the surface controller. Construction registers only the
- * construction-time deriveds. Call `registerSurfaceEffects` at the original
- * line-810 position (after diagnostics, before catalog/focus/inspection).
+ * Create the surface controller. Construction registers deriveds and
+ * window-teardown + tool-sync effects.
  *
  * Construction-order note: deps must not be invoked during construction —
  * construction-read discipline enforced by the armed-getter suite.
@@ -184,45 +180,40 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
     },
   });
 
-  function registerSurfaceEffects(): void {
-    // Window outside-pointer / blur teardown (original line-810).
-    $effect(() => {
-      // No-op cleanup keeps every code path returning a teardown (consistent-return).
-      if (!deps.surfaceInteractive()) return () => {};
-      const onOutsidePointer = (event: PointerEvent) => {
-        if (
-          !shouldClosePinnedOnOutsidePointer({
-            inspectionState: deps.inspection().inspection?.state,
-            targetInsideRoot: deps.root()?.contains(event.target as Node) === true,
-          })
-        )
-          return;
-        deps.inspection().closeInspection("pointer", false);
-      };
-      const cancelDraft = () => {
-        brushRect = null;
-        deps.inspection().cancelPointerInspect({ pendingPinned: "preserve" });
-        handlers.clearTouchInspectStart();
-        reducer.cancelScheduledPointer();
-        reducer.dispatch({ type: "cancel-area" });
-      };
-      window.addEventListener("pointerdown", onOutsidePointer);
-      window.addEventListener("blur", cancelDraft);
-      return () => {
-        window.removeEventListener("pointerdown", onOutsidePointer);
-        window.removeEventListener("blur", cancelDraft);
-      };
-    });
+  // Window outside-pointer / blur teardown + tool-sync (formerly host-phased
+  // registerSurfaceEffects — registered at construction, #627).
+  $effect(() => {
+    // No-op cleanup keeps every code path returning a teardown (consistent-return).
+    if (!deps.surfaceInteractive()) return () => {};
+    const onOutsidePointer = (event: PointerEvent) => {
+      if (
+        !shouldClosePinnedOnOutsidePointer({
+          inspectionState: deps.inspection().inspection?.state,
+          targetInsideRoot: deps.root()?.contains(event.target as Node) === true,
+        })
+      )
+        return;
+      deps.inspection().closeInspection("pointer", false);
+    };
+    const cancelDraft = () => {
+      brushRect = null;
+      deps.inspection().cancelPointerInspect({ pendingPinned: "preserve" });
+      handlers.clearTouchInspectStart();
+      reducer.cancelScheduledPointer();
+      reducer.dispatch({ type: "cancel-area" });
+    };
+    window.addEventListener("pointerdown", onOutsidePointer);
+    window.addEventListener("blur", cancelDraft);
+    return () => {
+      window.removeEventListener("pointerdown", onOutsidePointer);
+      window.removeEventListener("blur", cancelDraft);
+    };
+  });
 
-    // Tool-sync (original line-837).
-    $effect(() => {
-      const next = resolveEffectiveTool(
-        deps.toolProp() ?? deps.initialTool(),
-        deps.availableTools(),
-      );
-      reducer.dispatch({ type: "set-tool", tool: next });
-    });
-  }
+  $effect(() => {
+    const next = resolveEffectiveTool(deps.toolProp() ?? deps.initialTool(), deps.availableTools());
+    reducer.dispatch({ type: "set-tool", tool: next });
+  });
 
   return {
     get reducer() {
@@ -273,6 +264,5 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
     onSurfaceBlur: (event) => {
       handlers.onSurfaceBlur(event);
     },
-    registerSurfaceEffects,
   };
 }
