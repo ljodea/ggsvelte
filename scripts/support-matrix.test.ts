@@ -47,8 +47,11 @@ export function comparePlaywrightContainerTags(a: string, b: string): number {
 
 function extractWorkflowEnvTag(yaml: string, key: string): string {
   const m = new RegExp(`^\\s*${key}:\\s*(\\S+)\\s*$`, "m").exec(yaml);
-  if (!m?.[1]) throw new Error(`missing workflow env ${key}`);
-  return m[1];
+  const value = m?.[1];
+  if (value === undefined || value === "") {
+    throw new Error(`missing workflow env ${key}`);
+  }
+  return value;
 }
 
 describe("Playwright container tag helpers (issue #610)", () => {
