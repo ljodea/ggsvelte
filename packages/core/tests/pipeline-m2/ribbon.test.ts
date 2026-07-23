@@ -144,4 +144,43 @@ describe("ribbon geom", () => {
     // 3 upper + 3 baseline
     expect(batch.positions.length / 2).toBe(6);
   });
+
+  it("drops rows when the measure axis is band (unprojectable bounds)", () => {
+    // scales.y.type: "band" makes projectMeasure return NaN; ribbons must not emit
+    // NaN path vertices — finiteRibbonRuns drops every row and yields no batch paths.
+    const model = runPipeline(
+      gg({ x: [1, 2, 3], lo: [0, 0, 0], hi: [1, 2, 1] }, aes({ x: "x", ymin: "lo", ymax: "hi" }))
+        .geomRibbon()
+        .scales({ y: { type: "band" } })
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PathsBatch | undefined;
+    // No finite runs → either no path batch or empty subpaths
+    if (batch !== undefined && batch.kind === "paths") {
+      expect(batch.pathOffsets.length - 1).toBe(0);
+    } else {
+      expect(model.scene.batches.length).toBe(0);
+    }
+  });
+
+  it("does not fail temporal x preflight for unused xmin on a point layer", () => {
+    // Point maps xmin but does not consume it; scales.x.type:"time" must not parse xmin.
+    expect(() =>
+      runPipeline(
+        gg(
+          {
+            x: ["2024-01-01", "2024-01-02"],
+            y: [1, 2],
+            junk: ["not-a-date", "also-bad"],
+          },
+          aes({ x: "x", y: "y", xmin: "junk", xmax: "junk" }),
+        )
+          .geomPoint()
+          .scales({ x: { type: "time", parse: "iso" } })
+          .spec(),
+        size,
+      ),
+    ).not.toThrow();
+  });
 });

@@ -103,6 +103,53 @@ describe("buildInteractionMasks", () => {
 
     expect(buildInteractionMasks([pointBatch(1)], ["focus"], candidates)).toEqual([null]);
   });
+
+  it("mirrors fill focus onto presentation-only path batches on the same layer", () => {
+    // Ribbon fill (candidates) + outline (candidates: false). Outline must get a
+    // non-null mask so canvas mutes unselected outlines with the fill.
+    const fill: GeometryBatch = {
+      kind: "paths",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions: new Float32Array(16),
+      rowIndex: new Uint32Array([0, 1, 2, 3]),
+      pathOffsets: new Uint32Array([0, 4, 8]),
+      strokes: [null, null],
+      fills: ["#f00", "#0f0"],
+      closed: true,
+      linewidth: 0,
+      alpha: 1,
+      curve: "linear",
+    };
+    const outline: GeometryBatch = {
+      kind: "paths",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions: new Float32Array(32),
+      rowIndex: new Uint32Array(16),
+      pathOffsets: new Uint32Array([0, 4, 8, 12, 16]),
+      strokes: [null, null, null, null],
+      linewidth: 1,
+      alpha: 1,
+      curve: "linear",
+      candidates: false,
+    };
+    const candidates: SemanticCandidateKeys<string>[] = [
+      { batchIndex: 0, primitiveIndex: 0, keys: ["a"] },
+      { batchIndex: 0, primitiveIndex: 3, keys: ["b"] },
+    ];
+
+    const masks = buildInteractionMasks([fill, outline], ["a"], candidates);
+    expect(masks[0]?.isFocused(0)).toBe(true);
+    expect(masks[0]?.isFocused(1)).toBe(false);
+    // outline "both" → 2 subpaths per fill path; path 0 focused → edges 0,1 focused
+    expect(masks[1]).not.toBeNull();
+    expect(masks[1]?.primitiveCount).toBe(4);
+    expect(masks[1]?.isFocused(0)).toBe(true);
+    expect(masks[1]?.isFocused(1)).toBe(true);
+    expect(masks[1]?.isFocused(2)).toBe(false);
+    expect(masks[1]?.isFocused(3)).toBe(false);
+  });
 });
 
 describe("buildPrimitiveInteractionMasks", () => {

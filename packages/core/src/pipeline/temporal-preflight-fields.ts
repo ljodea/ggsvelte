@@ -38,12 +38,15 @@ export function preflightTemporalFields(input: {
       if (axisConversion.forcedDiscrete || axisConversion.forcedNonTemporal) return;
       assertTemporalConfiguration(axis, axisConversion);
       const isSegment = binding.layer.geom === "segment";
+      // xmin/xmax are only consumed by rect/ribbon (frame-identity gates the same
+      // way). Preflighting them on point/line/etc. fails scales.x.type:"time" when
+      // an unused bound column is non-temporal.
+      const consumesXBounds = binding.layer.geom === "rect" || binding.layer.geom === "ribbon";
       const fields =
         axis === "x"
           ? [
               binding.xField,
-              binding.xminField,
-              binding.xmaxField,
+              ...(consumesXBounds ? [binding.xminField, binding.xmaxField] : []),
               ...(isSegment ? [binding.xendField] : []),
             ]
           : [

@@ -155,9 +155,18 @@ function finiteRibbonRuns(
     for (const row of rows) {
       const a = lo[row]!;
       const b = hi[row]!;
-      // Require bounds finite and the running coord to project (band or continuous).
+      // Require bounds finite, running coord projectable (band or continuous), and
+      // measure bounds projectable (band measure axes yield NaN — drop the row).
       const runningPx = projectRunning(frame, fx, orientation, row);
-      if (!Number.isFinite(a) || !Number.isFinite(b) || !Number.isFinite(runningPx)) {
+      const loPx = projectMeasure(frame, fx, orientation, a);
+      const hiPx = projectMeasure(frame, fx, orientation, b);
+      if (
+        !Number.isFinite(a) ||
+        !Number.isFinite(b) ||
+        !Number.isFinite(runningPx) ||
+        !Number.isFinite(loPx) ||
+        !Number.isFinite(hiPx)
+      ) {
         removed++;
         if (current.length >= 2) runs.push({ rows: current, group });
         current = [];
