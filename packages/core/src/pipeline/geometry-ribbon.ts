@@ -2,6 +2,7 @@
  * Ribbon interval geometry: closed band between two varying bounds along a
  * running coordinate, plus optional outline path batches.
  */
+import { layerPaintFromParams, resolveGlow, resolveGradientPaint } from "../mark-paint.js";
 import type { PathsBatch } from "../scene.js";
 import { linetypeIndex, type Linetype } from "../scales/style.js";
 
@@ -367,8 +368,27 @@ export function ribbonBatches(
   const literalAlpha = frame.binding.alpha.constant;
   const literalLinewidth = frame.binding.linewidth.constant;
   const literalLinetype = frame.binding.linetype.constant;
-  const strokeOf = (rows: readonly number[]) => explicitStrokeColor(frame, color, rows);
-  const hasExplicitColor = runs.some((run) => strokeOf(run.rows) !== null);
+  const paint = layerPaintFromParams(frame.binding.layer.params);
+  const layerIndex = frame.binding.index;
+  const fillPaintResolved =
+    paint.fillPaint === null
+      ? undefined
+      : resolveGradientPaint(paint.fillPaint, layerIndex, "fill");
+  const strokePaintResolved =
+    paint.strokePaint === null
+      ? undefined
+      : resolveGradientPaint(paint.strokePaint, layerIndex, "stroke");
+  const glowResolved = paint.glow === null ? undefined : resolveGlow(paint.glow, layerIndex);
+
+  const strokeOf = (rows: readonly number[]) => {
+    const solid = explicitStrokeColor(frame, color, rows);
+    if (solid !== null) return solid;
+    // strokePaint supplies a solid fallback so outlines can activate without
+    // aes.color (within-mark paint is not a data scale).
+    return strokePaintResolved?.fallback ?? null;
+  };
+  const hasExplicitColor =
+    strokePaintResolved !== undefined || runs.some((run) => strokeOf(run.rows) !== null);
   const outlineWidth =
     typeof literalLinewidth === "number"
       ? literalLinewidth
@@ -381,14 +401,17 @@ export function ribbonBatches(
     fx,
     orientation,
     runs,
-    fillOf: (rows) => areaGroupFillOf(frame, fill, rows),
+    fillOf: (rows) => {
+      const solid = areaGroupFillOf(frame, fill, rows);
+      return solid ?? fillPaintResolved?.fallback ?? null;
+    },
     strokeOf,
     strokeWidth: fullStroke ? outlineWidth : 0,
   });
 
   out.push({
     kind: "paths",
-    layerIndex: frame.binding.index,
+    layerIndex,
     panelIndex: 0,
     positions: closed.positions,
     rowIndex: closed.rowIndex,
@@ -411,6 +434,9 @@ export function ribbonBatches(
     ...(fullStroke && linetypeIndexes !== undefined && { linetypeIndexes }),
     ...(fullStroke && { linecap, linejoin }),
     curve: "linear",
+    ...(fillPaintResolved !== undefined && { fillPaint: fillPaintResolved }),
+    ...(fullStroke && strokePaintResolved !== undefined && { strokePaint: strokePaintResolved }),
+    ...(glowResolved !== undefined && { glow: glowResolved }),
   });
 
   if (outline !== "full" && hasExplicitColor) {
@@ -450,7 +476,7 @@ export function ribbonBatches(
     // Open outline batches are presentation-only (no candidate duplication).
     out.push({
       kind: "paths",
-      layerIndex: frame.binding.index,
+      layerIndex,
       panelIndex: 0,
       positions: open.positions,
       rowIndex: open.rowIndex,
@@ -467,6 +493,7 @@ export function ribbonBatches(
           : 1,
       ...(outlineAlphas !== undefined && { alphas: outlineAlphas as Float32Array }),
       ...(typeof literalLinetype === "string" && { linetype: literalLinetype as Linetype }),
+      ...(strokePaintResolved !== undefined && { strokePaint: strokePaintResolved }),
       ...(outlineLinetypes !== undefined && { linetypeIndexes: outlineLinetypes as Uint8Array }),
       linecap,
       linejoin,

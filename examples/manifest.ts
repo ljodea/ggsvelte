@@ -473,6 +473,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "ribbon/paint",
+    category: "ribbon",
+    name: "paint",
+    title: "Ribbon paint",
+    description: "Portable within-mark linear gradients for fill and stroke plus a bounded glow, with required solid fallbacks — not theme decoration and not a data color scale.",
+    tags: ["ribbon", "interval", "gradient", "glow", "paint"],
+    docsSection: "Areas",
+    hasData: true,
+  },
+  {
     id: "rule/annotation",
     category: "rule",
     name: "annotation",

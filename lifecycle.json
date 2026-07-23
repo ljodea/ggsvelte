@@ -176,6 +176,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ColorStop": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ColorStopInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ColorbarGuideOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -456,6 +464,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GlowOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GlowSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GradientPaint": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GuideSpec": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -564,6 +584,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "LinearGradientPaint": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LinearPaintOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "LinetypeName": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -585,6 +613,14 @@
           "lifecycle": "experimental"
         },
         "MAX_BINNED_BREAKS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "MAX_GLOW_RADIUS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "MAX_PAINT_STOPS": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -626,6 +662,10 @@
         },
         "POINT_SHAPE_NAMES": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "PaintSpace": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "ParsedTemporalColumn": {
@@ -685,6 +725,14 @@
           "lifecycle": "experimental"
         },
         "ProfileFieldType": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RadialGradientPaint": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RadialPaintOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1212,6 +1260,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "fillPaintLinear": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "fillPaintRadial": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "fromEpochMilliseconds": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1221,6 +1277,10 @@
           "lifecycle": "experimental"
         },
         "gg": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "glow": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1948,6 +2008,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "strokePaintLinear": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "strokePaintRadial": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "temporalIntervalTicks": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2495,6 +2563,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ResolvedGlow": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ResolvedGradientPaint": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ResolvedStyleScale": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2888,6 +2964,10 @@
           "lifecycle": "experimental"
         },
         "numberFormatter": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "paintResourceId": {
           "kind": "value",
           "lifecycle": "experimental"
         },

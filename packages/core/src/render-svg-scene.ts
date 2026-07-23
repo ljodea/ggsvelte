@@ -12,8 +12,44 @@ import { STRIP_BAND } from "./scene.js";
 import { LEGEND_ROW_HEIGHT } from "./legend.js";
 import type { ThemeTokens } from "./theme.js";
 import { themeVar } from "./theme.js";
+import { paintDefsSvg, type ResolvedGlow, type ResolvedGradientPaint } from "./mark-paint.js";
 import { escapeXML, px } from "./render-svg-format.js";
-import { pointShape, renderBatch } from "./render-svg-marks.js";
+import { pointShape, renderBatch, type PaintRenderMode } from "./render-svg-marks.js";
+
+function collectPaintResources(scene: Scene): {
+  paints: ResolvedGradientPaint[];
+  glows: ResolvedGlow[];
+} {
+  const paints: ResolvedGradientPaint[] = [];
+  const glows: ResolvedGlow[] = [];
+  const seen = new Set<string>();
+  for (const batch of scene.batches) {
+    if (batch.kind === "paths" || batch.kind === "rects") {
+      if (batch.fillPaint !== undefined && !seen.has(batch.fillPaint.id)) {
+        seen.add(batch.fillPaint.id);
+        paints.push(batch.fillPaint);
+      }
+      if (batch.strokePaint !== undefined && !seen.has(batch.strokePaint.id)) {
+        seen.add(batch.strokePaint.id);
+        paints.push(batch.strokePaint);
+      }
+      if (batch.glow !== undefined && !seen.has(batch.glow.id)) {
+        seen.add(batch.glow.id);
+        glows.push(batch.glow);
+      }
+    } else if (batch.kind === "segments") {
+      if (batch.strokePaint !== undefined && !seen.has(batch.strokePaint.id)) {
+        seen.add(batch.strokePaint.id);
+        paints.push(batch.strokePaint);
+      }
+      if (batch.glow !== undefined && !seen.has(batch.glow.id)) {
+        seen.add(batch.glow.id);
+        glows.push(batch.glow);
+      }
+    }
+  }
+  return { paints, glows };
+}
 
 function renderPanelAxes(panel: ScenePanel, theme: ThemeTokens): string {
   const parts: string[] = [];
@@ -343,8 +379,18 @@ export function sceneLabel(scene: Scene): string {
   return "ggsvelte plot";
 }
 
+/** Optional paint rendering controls for pure SVG export (#591). */
+export interface SceneSVGOptions {
+  /**
+   * Within-mark paint mode. "full" emits gradients/glow; "fallback" uses solid
+   * paint.fallback colors and omits glow (a11y / reduced-effects).
+   */
+  paintMode?: PaintRenderMode;
+}
+
 /** Serialize a computed Scene to a standalone SVG string. */
-export function sceneToSVGString(scene: Scene): string {
+export function sceneToSVGString(scene: Scene, options: SceneSVGOptions = {}): string {
+  const paintMode = options.paintMode ?? "full";
   const panel = scene.panels[0]!;
   const theme = scene.theme;
   const ink = themeVar("ink", theme);
@@ -386,7 +432,9 @@ export function sceneToSVGString(scene: Scene): string {
         : `<clipPath id="gg-clip-${i}"><rect width="${px(p.width)}" height="${px(p.height)}"/></clipPath>`,
     )
     .join("");
-  parts.push(`<defs>${clips}</defs>`);
+  const { paints, glows } = collectPaintResources(scene);
+  const paintDefs = paintMode === "full" ? paintDefsSvg(paints, glows) : "";
+  parts.push(`<defs>${clips}${paintDefs}</defs>`);
   for (const p of scene.panels) {
     if (p.allocation === undefined) continue;
     const fill = themeVar("letterboxFill", theme);
@@ -410,7 +458,7 @@ export function sceneToSVGString(scene: Scene): string {
       renderGrid(p, theme),
       `<g class="gg-marks"${p.clip === false ? "" : ` clip-path="url(#gg-clip-${i})"`}>`,
     );
-    for (const batch of byPanel[i]!) parts.push(renderBatch(batch, theme));
+    for (const batch of byPanel[i]!) parts.push(renderBatch(batch, theme, paintMode));
     parts.push("</g>");
     if (theme.showPanelBorder) {
       parts.push(

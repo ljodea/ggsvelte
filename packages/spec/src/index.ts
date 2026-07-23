@@ -46,6 +46,8 @@ export {
   LineLayerSchema,
   LINETYPE_NAMES,
   MAX_BINNED_BREAKS,
+  MAX_GLOW_RADIUS,
+  MAX_PAINT_STOPS,
   POINT_SHAPE_NAMES,
   PlotSpecSchema,
   PointLayerSchema,
@@ -70,8 +72,14 @@ export type {
   CellValue,
   ChannelName,
   ChannelValue,
+  ColorStop,
   ColLayer,
   ColorScaleSpec,
+  GradientPaint,
+  GlowSpec,
+  LinearGradientPaint,
+  PaintSpace,
+  RadialGradientPaint,
   AlphaScaleSpec,
   ColParams,
   CoordSpec,
@@ -553,6 +561,21 @@ export type {
   GeomTextOptions,
   GeomTileOptions,
 } from "./builder.js";
+
+// Within-mark paint helpers (#591)
+export {
+  fillPaintLinear,
+  fillPaintRadial,
+  glow,
+  strokePaintLinear,
+  strokePaintRadial,
+} from "./paint-helpers.js";
+export type {
+  ColorStopInput,
+  GlowOptions,
+  LinearPaintOptions,
+  RadialPaintOptions,
+} from "./paint-helpers.js";
 
 // Schema artifact (schema/v0.json)
 export { buildSchemaArtifact, SCHEMA_VERSION, schemaArtifactJSON } from "./artifact.js";

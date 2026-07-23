@@ -261,6 +261,193 @@
       "additionalProperties": false,
       "description": "Aesthetic mapping: which channels read which data fields/constants. Plot-level aes is inherited by every layer; a layer's aes overrides per channel, and null unsets an inherited channel."
     },
+    "ColorStop": {
+      "type": "object",
+      "required": [
+        "offset",
+        "color"
+      ],
+      "properties": {
+        "offset": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Stop position along the gradient, between 0 and 1 inclusive."
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+          "description": "A solid #rgb or #rrggbb color (no CSS names, url(), or filter strings)."
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Optional stop opacity between 0 and 1 inclusive. Default 1."
+        }
+      },
+      "additionalProperties": false,
+      "description": "One ordered gradient color stop. Stops must be non-decreasing by offset (validated structurally)."
+    },
+    "PaintSpace": {
+      "anyOf": [
+        {
+          "type": "string",
+          "const": "mark"
+        },
+        {
+          "type": "string",
+          "const": "panel"
+        },
+        {
+          "type": "string",
+          "const": "plot"
+        }
+      ],
+      "description": "Gradient coordinate space: \"mark\" (object bounding box, default), \"panel\" (panel-local px), or \"plot\" (plot-local px including panels)."
+    },
+    "LinearGradientPaint": {
+      "type": "object",
+      "required": [
+        "type",
+        "x1",
+        "y1",
+        "x2",
+        "y2",
+        "stops",
+        "fallback"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "linear"
+        },
+        "x1": {
+          "type": "number",
+          "description": "Gradient start x in the chosen space."
+        },
+        "y1": {
+          "type": "number",
+          "description": "Gradient start y in the chosen space."
+        },
+        "x2": {
+          "type": "number",
+          "description": "Gradient end x in the chosen space."
+        },
+        "y2": {
+          "type": "number",
+          "description": "Gradient end y in the chosen space."
+        },
+        "space": {
+          "$ref": "#/$defs/PaintSpace"
+        },
+        "stops": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ColorStop"
+          },
+          "minItems": 2,
+          "maxItems": 16,
+          "description": "Ordered color stops (at least 2, at most 16)."
+        },
+        "fallback": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+          "description": "Required solid #rgb/#rrggbb used for a11y, forced-SVG, and reduced-effects paths."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Deterministic linear gradient paint for within-mark fill or stroke. Not a data scale."
+    },
+    "RadialGradientPaint": {
+      "type": "object",
+      "required": [
+        "type",
+        "cx",
+        "cy",
+        "r",
+        "stops",
+        "fallback"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "radial"
+        },
+        "cx": {
+          "type": "number",
+          "description": "Gradient center x in the chosen space."
+        },
+        "cy": {
+          "type": "number",
+          "description": "Gradient center y in the chosen space."
+        },
+        "r": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Gradient radius in the chosen space. Must be greater than 0."
+        },
+        "space": {
+          "$ref": "#/$defs/PaintSpace"
+        },
+        "stops": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ColorStop"
+          },
+          "minItems": 2,
+          "maxItems": 16,
+          "description": "Ordered color stops (at least 2, at most 16)."
+        },
+        "fallback": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+          "description": "Required solid #rgb/#rrggbb used for a11y, forced-SVG, and reduced-effects paths."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Deterministic radial gradient paint for within-mark fill or stroke. Not a data scale."
+    },
+    "GradientPaint": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LinearGradientPaint"
+        },
+        {
+          "$ref": "#/$defs/RadialGradientPaint"
+        }
+      ],
+      "description": "Closed portable gradient paint: linear or radial with solid fallback."
+    },
+    "GlowSpec": {
+      "type": "object",
+      "required": [
+        "color",
+        "radius",
+        "opacity"
+      ],
+      "properties": {
+        "color": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+          "description": "A solid #rgb or #rrggbb color (no CSS names, url(), or filter strings)."
+        },
+        "radius": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 32,
+          "description": "Blur radius in CSS px, greater than 0 and at most 32."
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Glow opacity between 0 and 1 inclusive."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Bounded glow treatment (explicit color, radius, opacity). Opt-in mark appearance, not theme decoration."
+    },
     "PointParams": {
       "type": "object",
       "properties": {
@@ -334,6 +521,14 @@
             }
           ],
           "description": "Interpolation between points: \"linear\" (straight segments, default) or \"step\" (horizontal-then-vertical steps, changing at the midpoint between x positions)."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -353,6 +548,14 @@
           "exclusiveMinimum": 0,
           "maximum": 1,
           "description": "Bar width as a fraction of the band step. Must be greater than 0 and at most 1. Default 0.9."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -403,6 +606,14 @@
             }
           ],
           "description": "STAT BIN ONLY: which edge of each bin is inclusive: \"right\" (default, matches ggplot2) or \"left\"."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -469,6 +680,14 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Line opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint for the fitted line (not a data scale)."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -537,6 +756,14 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Area fill opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -629,6 +856,18 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Rectangle opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient outline paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -657,6 +896,18 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Tile opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient outline paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -730,6 +981,14 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Area fill opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -768,7 +1027,7 @@
               "const": "full"
             }
           ],
-          "description": "Which edges receive an outline stroke: \"both\" (default — upper and lower), \"upper\", \"lower\", or \"full\" (closed outline of the band). Strokes appear only when aes.color / a color constant is set."
+          "description": "Which edges receive an outline stroke: \"both\" (default — upper and lower), \"upper\", \"lower\", or \"full\" (closed outline of the band). Strokes appear when aes.color / a color constant is set, or when strokePaint is set."
         },
         "orientation": {
           "anyOf": [
@@ -816,6 +1075,18 @@
             }
           ],
           "description": "SVG stroke-linejoin for outlines. Default \"round\"."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient outline paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -867,6 +1138,14 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "description": "Stroke width in px. Must be greater than 0. Default 1."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,
@@ -902,6 +1181,14 @@
             }
           ],
           "description": "SVG stroke-linecap for segment ends. Default \"butt\"."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
         }
       },
       "additionalProperties": false,

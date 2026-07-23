@@ -99,7 +99,7 @@ test("gallery exposes six featured previews and all generated previews", async (
   await page.goto("/examples");
   await expect(page.locator(".featured-gallery li")).toHaveCount(6);
   // One meta.json per example under examples/ (grows when new specimens land).
-  const exampleCount = 42; // +segment +layer-data-bands +fixed-aspect +facet/ordered-side-strips
+  const exampleCount = 43; // +segment +layer-data-bands +fixed-aspect +facet/ordered-side-strips +ribbon/paint
   await expect(page.locator(".example-grid li")).toHaveCount(exampleCount);
   await expect(page.locator('img[src*="/previews/"]')).toHaveCount(6 + exampleCount);
   await expect(page.getByText(`${String(exampleCount)} of ${String(exampleCount)}`)).toBeVisible();

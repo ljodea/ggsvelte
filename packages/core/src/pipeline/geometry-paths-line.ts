@@ -1,6 +1,7 @@
 /**
  * Line path geometry batch builder.
  */
+import { layerPaintFromParams, resolveGlow, resolveGradientPaint } from "../mark-paint.js";
 import type { PathsBatch } from "../scene.js";
 import { linetypeIndex, type Linetype } from "../scales/style.js";
 
@@ -29,6 +30,13 @@ export function lineBatch(
   const subpaths = splitStyleSubpaths(frame, groupedRows, styles);
   const styleSplit = subpaths.length > groupedRows.length;
 
+  const paint = layerPaintFromParams(binding.layer.params);
+  const strokePaintResolved =
+    paint.strokePaint === null
+      ? undefined
+      : resolveGradientPaint(paint.strokePaint, binding.index, "stroke");
+  const glowResolved = paint.glow === null ? undefined : resolveGlow(paint.glow, binding.index);
+
   const { positions, rowIndex, frameRowIndex, pathOffsets, strokes } = writeLineSubpaths({
     frame,
     fx,
@@ -36,6 +44,13 @@ export function lineBatch(
     subpaths,
     includeFrameRows: styleSplit,
   });
+
+  // Apply strokePaint solid fallback when a stroke is still null/theme-default.
+  if (strokePaintResolved !== undefined) {
+    for (let i = 0; i < strokes.length; i++) {
+      strokes[i] ??= strokePaintResolved.fallback;
+    }
+  }
 
   const params = binding.layer.geom === "line" ? (binding.layer.params ?? {}) : {};
   const styleRows = subpaths.map((rows) => rows[0]!);
@@ -71,5 +86,7 @@ export function lineBatch(
     ...(typeof literalLinetype === "string" && { linetype: literalLinetype as Linetype }),
     ...(linetypeIndexes !== undefined && { linetypeIndexes }),
     curve: params.curve ?? "linear",
+    ...(strokePaintResolved !== undefined && { strokePaint: strokePaintResolved }),
+    ...(glowResolved !== undefined && { glow: glowResolved }),
   };
 }

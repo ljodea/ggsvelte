@@ -41,6 +41,7 @@ import type {
   ThemeSpec,
 } from "./schema.js";
 import { normalizeCoord } from "./normalize-coord.js";
+import { normalizeLayerParamsPaint } from "./normalize-paint.js";
 import { normalizeScales } from "./normalize-scales.js";
 import { CHANNELS, CURRENT_EDITION, GEOM_DEFAULTS } from "./schema.js";
 import type {
@@ -153,7 +154,8 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
     "positionParams" in layer && layer.positionParams !== undefined
       ? { ...layer.positionParams }
       : undefined;
-  const params = layer.params === undefined ? undefined : { ...layer.params };
+  const rawParams = layer.params === undefined ? undefined : { ...layer.params };
+  const params = rawParams === undefined ? undefined : normalizeLayerParamsPaint(rawParams);
   // "auto" is the render default — one canonical form per concept, so it
   // canonicalizes away (same rule as coord "cartesian" / a11y "auto").
   const render = layer.render === "auto" ? undefined : layer.render;

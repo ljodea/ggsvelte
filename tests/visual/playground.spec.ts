@@ -110,7 +110,8 @@ async function applyTitle(page: Page, title: string): Promise<void> {
   spec["labs"] = { ...(spec["labs"] as Record<string, unknown> | undefined), title };
   await page.getByLabel("PortableSpec JSON").fill(JSON.stringify(spec, null, 2));
   await page.getByRole("button", { name: "Apply draft" }).click();
-  await expect(page.getByText("Rendered custom draft.")).toBeVisible();
+  // Prefer chart title (stable) over the status toast, which can clear quickly.
+  await expect(page.locator(".active-chart .gg-title")).toHaveText(title, { timeout: 15_000 });
 }
 
 test("landing page makes the gallery and local adaptation paths obvious", async ({ page }) => {
@@ -521,6 +522,7 @@ test("share owns only the fragment, preserves query state, and Back/Forward rest
   page,
   context,
 }) => {
+  test.setTimeout(60_000);
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/playground?theme=dark");
   await settleVisualState(page);

@@ -1214,6 +1214,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "paint-stops-unordered",
+        title: "paint-stops-unordered",
+        level: 3,
+      },
+      {
+        id: "paint-scale-conflict",
+        title: "paint-scale-conflict",
+        level: 3,
+      },
+      {
         id: "unknown-field",
         title: "unknown-field",
         level: 3,
@@ -2073,8 +2083,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-491",
-        title: "experimental (491)",
+        id: "experimental-508",
+        title: "experimental (508)",
         level: 3,
       },
       {
@@ -2088,8 +2098,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-249",
-        title: "experimental (249)",
+        id: "experimental-252",
+        title: "experimental (252)",
         level: 3,
       },
       {
@@ -2649,6 +2659,17 @@ export const DOCS_ROUTES = [
     description:
       "A filled band between precomputed lower and upper bounds along x — the canonical geom_ribbon contract (not a zero-baseline area).",
     canonicalPath: "/examples/ribbon/bounds",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/ribbon/paint",
+    title: "Ribbon paint — ggsvelte gallery",
+    description:
+      "Portable within-mark linear gradients for fill and stroke plus a bounded glow, with required solid fallbacks — not theme decoration and not a data color scale.",
+    canonicalPath: "/examples/ribbon/paint",
     kind: "page",
     index: true,
     sitemap: true,

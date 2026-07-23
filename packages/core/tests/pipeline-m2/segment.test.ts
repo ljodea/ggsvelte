@@ -124,7 +124,7 @@ describe("segment geom", () => {
         .spec(),
       size,
     );
-    const svg = sceneToSVGString(model.scene, model.theme);
+    const svg = sceneToSVGString(model.scene);
     expect(svg).not.toContain("stroke-linecap");
   });
 
@@ -138,7 +138,7 @@ describe("segment geom", () => {
         .spec(),
       size,
     );
-    const svg = sceneToSVGString(model.scene, model.theme);
+    const svg = sceneToSVGString(model.scene);
     expect(svg).toContain('stroke-linecap="square"');
   });
 

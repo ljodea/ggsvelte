@@ -23,10 +23,18 @@ import {
   COLOR_SCHEME_NAME_SCHEMAS,
   LINETYPE_NAME_SCHEMAS,
   MAX_BINNED_BREAKS,
+  MAX_GLOW_RADIUS,
+  MAX_PAINT_STOPS,
   POINT_SHAPE_NAME_SCHEMAS,
   THEME_NAMES,
   THEME_NAME_SCHEMAS,
 } from "./schema-names.js";
+
+/** Portable #rgb / #rrggbb only — no CSS names, url(), or filter strings. */
+const HEX_COLOR = Type.String({
+  pattern: "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+  description: "A solid #rgb or #rrggbb color (no CSS names, url(), or filter strings).",
+});
 
 const forbiddenColorOption = () => Type.Optional(Type.Never());
 const forbiddenStyleOption = () => Type.Optional(Type.Never());
@@ -437,6 +445,115 @@ export const SpecDeclarations = {
     },
   ),
 
+  // --- within-mark paint (#591) ----------------------------------------------
+
+  ColorStop: Type.Object(
+    {
+      offset: Type.Number({
+        minimum: 0,
+        maximum: 1,
+        description: "Stop position along the gradient, between 0 and 1 inclusive.",
+      }),
+      color: HEX_COLOR,
+      opacity: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Optional stop opacity between 0 and 1 inclusive. Default 1.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "One ordered gradient color stop. Stops must be non-decreasing by offset (validated structurally).",
+    },
+  ),
+
+  PaintSpace: Type.Union([Type.Literal("mark"), Type.Literal("panel"), Type.Literal("plot")], {
+    description:
+      'Gradient coordinate space: "mark" (object bounding box, default), "panel" (panel-local px), or "plot" (plot-local px including panels).',
+  }),
+
+  LinearGradientPaint: Type.Object(
+    {
+      type: Type.Literal("linear"),
+      x1: Type.Number({ description: "Gradient start x in the chosen space." }),
+      y1: Type.Number({ description: "Gradient start y in the chosen space." }),
+      x2: Type.Number({ description: "Gradient end x in the chosen space." }),
+      y2: Type.Number({ description: "Gradient end y in the chosen space." }),
+      space: Type.Optional(Type.Ref("PaintSpace")),
+      stops: Type.Array(Type.Ref("ColorStop"), {
+        minItems: 2,
+        maxItems: MAX_PAINT_STOPS,
+        description: `Ordered color stops (at least 2, at most ${String(MAX_PAINT_STOPS)}).`,
+      }),
+      fallback: Type.String({
+        pattern: "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+        description:
+          "Required solid #rgb/#rrggbb used for a11y, forced-SVG, and reduced-effects paths.",
+      }),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Deterministic linear gradient paint for within-mark fill or stroke. Not a data scale.",
+    },
+  ),
+
+  RadialGradientPaint: Type.Object(
+    {
+      type: Type.Literal("radial"),
+      cx: Type.Number({ description: "Gradient center x in the chosen space." }),
+      cy: Type.Number({ description: "Gradient center y in the chosen space." }),
+      r: Type.Number({
+        exclusiveMinimum: 0,
+        description: "Gradient radius in the chosen space. Must be greater than 0.",
+      }),
+      space: Type.Optional(Type.Ref("PaintSpace")),
+      stops: Type.Array(Type.Ref("ColorStop"), {
+        minItems: 2,
+        maxItems: MAX_PAINT_STOPS,
+        description: `Ordered color stops (at least 2, at most ${String(MAX_PAINT_STOPS)}).`,
+      }),
+      fallback: Type.String({
+        pattern: "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+        description:
+          "Required solid #rgb/#rrggbb used for a11y, forced-SVG, and reduced-effects paths.",
+      }),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Deterministic radial gradient paint for within-mark fill or stroke. Not a data scale.",
+    },
+  ),
+
+  GradientPaint: Type.Union([Type.Ref("LinearGradientPaint"), Type.Ref("RadialGradientPaint")], {
+    description: "Closed portable gradient paint: linear or radial with solid fallback.",
+  }),
+
+  GlowSpec: Type.Object(
+    {
+      color: HEX_COLOR,
+      radius: Type.Number({
+        exclusiveMinimum: 0,
+        maximum: MAX_GLOW_RADIUS,
+        description: `Blur radius in CSS px, greater than 0 and at most ${String(MAX_GLOW_RADIUS)}.`,
+      }),
+      opacity: Type.Number({
+        minimum: 0,
+        maximum: 1,
+        description: "Glow opacity between 0 and 1 inclusive.",
+      }),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Bounded glow treatment (explicit color, radius, opacity). Opt-in mark appearance, not theme decoration.",
+    },
+  ),
+
   // --- per-geom params -------------------------------------------------------
 
   PointParams: Type.Object(
@@ -488,6 +605,17 @@ export const SpecDeclarations = {
             'Interpolation between points: "linear" (straight segments, default) or "step" (horizontal-then-vertical steps, changing at the midpoint between x positions).',
         }),
       ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -510,6 +638,17 @@ export const SpecDeclarations = {
           maximum: 1,
           description:
             "Bar width as a fraction of the band step. Must be greater than 0 and at most 1. Default 0.9.",
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
         }),
       ),
     },
@@ -566,6 +705,17 @@ export const SpecDeclarations = {
         Type.Union([Type.Literal("right"), Type.Literal("left")], {
           description:
             'STAT BIN ONLY: which edge of each bin is inclusive: "right" (default, matches ggplot2) or "left".',
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
         }),
       ),
     },
@@ -629,6 +779,16 @@ export const SpecDeclarations = {
           minimum: 0,
           maximum: 1,
           description: "Line opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description: "Within-mark gradient stroke paint for the fitted line (not a data scale).",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
         }),
       ),
     },
@@ -720,6 +880,17 @@ export const SpecDeclarations = {
           description: "Area fill opacity. Must be between 0 and 1 (inclusive). Default 1.",
         }),
       ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -804,6 +975,23 @@ export const SpecDeclarations = {
           description: "Rectangle opacity. Must be between 0 and 1 (inclusive). Default 1.",
         }),
       ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient outline paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -838,6 +1026,23 @@ export const SpecDeclarations = {
           minimum: 0,
           maximum: 1,
           description: "Tile opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient outline paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
         }),
       ),
     },
@@ -937,6 +1142,17 @@ export const SpecDeclarations = {
           description: "Area fill opacity. Must be between 0 and 1 (inclusive). Default 1.",
         }),
       ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -970,7 +1186,7 @@ export const SpecDeclarations = {
           ],
           {
             description:
-              'Which edges receive an outline stroke: "both" (default — upper and lower), "upper", "lower", or "full" (closed outline of the band). Strokes appear only when aes.color / a color constant is set.',
+              'Which edges receive an outline stroke: "both" (default — upper and lower), "upper", "lower", or "full" (closed outline of the band). Strokes appear when aes.color / a color constant is set, or when strokePaint is set.',
           },
         ),
       ),
@@ -988,6 +1204,23 @@ export const SpecDeclarations = {
       linejoin: Type.Optional(
         Type.Union([Type.Literal("miter"), Type.Literal("round"), Type.Literal("bevel")], {
           description: 'SVG stroke-linejoin for outlines. Default "round".',
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient outline paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
         }),
       ),
     },
@@ -1036,6 +1269,17 @@ export const SpecDeclarations = {
           description: "Stroke width in px. Must be greater than 0. Default 1.",
         }),
       ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -1062,6 +1306,17 @@ export const SpecDeclarations = {
       lineend: Type.Optional(
         Type.Union([Type.Literal("butt"), Type.Literal("round"), Type.Literal("square")], {
           description: 'SVG stroke-linecap for segment ends. Default "butt".',
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
         }),
       ),
     },

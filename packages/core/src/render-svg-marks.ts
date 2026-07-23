@@ -3,6 +3,7 @@
  * Public: countMarks, pathData. Internal: renderBatch.
  */
 import { renderPrimitiveCount } from "./candidate-geometry.js";
+import type { ResolvedGlow, ResolvedGradientPaint } from "./mark-paint.js";
 import type {
   GlyphsBatch,
   PathsBatch,
@@ -16,6 +17,32 @@ import { LINETYPE_NAMES, POINT_SHAPE_NAMES } from "@ggsvelte/spec";
 import type { ThemeTokens } from "./theme.js";
 import { themeVar } from "./theme.js";
 import { escapeXML, px } from "./render-svg-format.js";
+
+/** When true, use solid paint fallbacks and skip glow filters. */
+export type PaintRenderMode = "full" | "fallback";
+
+function paintFill(
+  solid: string,
+  paint: ResolvedGradientPaint | undefined,
+  mode: PaintRenderMode,
+): string {
+  if (paint === undefined || mode === "fallback") return solid;
+  return `url(#${paint.id})`;
+}
+
+function paintStroke(
+  solid: string,
+  paint: ResolvedGradientPaint | undefined,
+  mode: PaintRenderMode,
+): string {
+  if (paint === undefined || mode === "fallback") return solid;
+  return `url(#${paint.id})`;
+}
+
+function glowAttr(glow: ResolvedGlow | undefined, mode: PaintRenderMode): string {
+  if (glow === undefined || mode === "fallback") return "";
+  return ` filter="url(#${glow.id})"`;
+}
 
 export function countMarks(scene: Scene): number {
   let marks = 0;
@@ -106,10 +133,14 @@ function dashAttr(linetype: Linetype): string {
   return dash.length === 0 ? "" : ` stroke-dasharray="${dash.join(" ")}"`;
 }
 
-function renderPaths(batch: PathsBatch, theme: ThemeTokens): string {
+function renderPaths(
+  batch: PathsBatch,
+  theme: ThemeTokens,
+  mode: PaintRenderMode = "full",
+): string {
   const isArea = batch.fills !== undefined;
   const parts: string[] = [
-    `<g class="gg-batch ${isArea ? "gg-areas" : "gg-paths"}" data-layer="${batch.layerIndex}"${alphaAttr(batch.alpha)}>`,
+    `<g class="gg-batch ${isArea ? "gg-areas" : "gg-paths"}" data-layer="${batch.layerIndex}"${alphaAttr(batch.alpha)}${glowAttr(batch.glow, mode)}>`,
   ];
   const subpaths = batch.pathOffsets.length - 1;
   for (let s = 0; s < subpaths; s++) {
@@ -122,7 +153,8 @@ function renderPaths(batch: PathsBatch, theme: ThemeTokens): string {
     );
     if (d === "") continue;
     if (isArea) {
-      const fill = batch.fills![s] ?? themeVar("accent", theme);
+      const solidFill = batch.fills![s] ?? batch.fillPaint?.fallback ?? themeVar("accent", theme);
+      const fill = paintFill(solidFill, batch.fillPaint, mode);
       const alpha = batch.alphas?.[s];
       const strokeColor = batch.strokes[s];
       const linewidth = batch.linewidths?.[s] ?? batch.linewidth;
@@ -134,8 +166,9 @@ function renderPaths(batch: PathsBatch, theme: ThemeTokens): string {
             : LINETYPE_NAMES[batch.linetypeIndexes[s]!]!;
         const linejoin = batch.linejoin ?? "round";
         const linecap = batch.linecap ?? "round";
+        const stroke = paintStroke(strokeColor, batch.strokePaint, mode);
         parts.push(
-          `<path d="${d}" fill="${fill}" stroke="${strokeColor}" stroke-width="${px(linewidth)}"${dashAttr(linetype)}${alpha === undefined ? "" : alphaAttr(alpha)} stroke-linejoin="${linejoin}" stroke-linecap="${linecap}"/>`,
+          `<path d="${d}" fill="${fill}" stroke="${stroke}" stroke-width="${px(linewidth)}"${dashAttr(linetype)}${alpha === undefined ? "" : alphaAttr(alpha)} stroke-linejoin="${linejoin}" stroke-linecap="${linecap}"/>`,
         );
       } else {
         parts.push(
@@ -143,7 +176,8 @@ function renderPaths(batch: PathsBatch, theme: ThemeTokens): string {
         );
       }
     } else {
-      const stroke = batch.strokes[s] ?? themeVar("ink", theme);
+      const solidStroke = batch.strokes[s] ?? batch.strokePaint?.fallback ?? themeVar("ink", theme);
+      const stroke = paintStroke(solidStroke, batch.strokePaint, mode);
       const linewidth = batch.linewidths?.[s] ?? batch.linewidth;
       const alpha = batch.alphas?.[s];
       const linetype =
@@ -246,12 +280,16 @@ function renderGlyphs(batch: GlyphsBatch, theme: ThemeTokens): string {
 }
 
 /** Dispatch one geometry batch to its emitter (internal to the pure renderer). */
-export function renderBatch(batch: Scene["batches"][number], theme: ThemeTokens): string {
+export function renderBatch(
+  batch: Scene["batches"][number],
+  theme: ThemeTokens,
+  mode: PaintRenderMode = "full",
+): string {
   switch (batch.kind) {
     case "points":
       return renderPoints(batch, theme);
     case "paths":
-      return renderPaths(batch, theme);
+      return renderPaths(batch, theme, mode);
     case "rects":
       return renderRects(batch, theme);
     case "segments":
