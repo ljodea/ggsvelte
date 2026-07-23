@@ -76,9 +76,9 @@
     },
     "packages/core": {
       "name": "@ggsvelte/core",
-      "version": "0.5.1",
+      "version": "0.9.0",
       "dependencies": {
-        "@ggsvelte/spec": "^0.5.1",
+        "@ggsvelte/spec": "^0.9.0",
       },
       "devDependencies": {
         "typescript": "^6.0.3",
@@ -86,7 +86,7 @@
     },
     "packages/spec": {
       "name": "@ggsvelte/spec",
-      "version": "0.5.1",
+      "version": "0.9.0",
       "dependencies": {
         "@js-temporal/polyfill": "^0.5.1",
         "typebox": "^1.3.6",
@@ -98,13 +98,13 @@
     },
     "packages/svelte": {
       "name": "@ggsvelte/svelte",
-      "version": "0.5.1",
+      "version": "0.9.0",
       "bin": {
         "ggsvelte-render": "bin/ggsvelte-render.js",
       },
       "dependencies": {
-        "@ggsvelte/core": "^0.5.1",
-        "@ggsvelte/spec": "^0.5.1",
+        "@ggsvelte/core": "^0.9.0",
+        "@ggsvelte/spec": "^0.9.0",
       },
       "devDependencies": {
         "@sveltejs/package": "^2.5.8",
