@@ -34,6 +34,7 @@ describe("createSemanticKeyService", () => {
     const diagnostics: string[] = [];
 
     const { value: service, destroy } = withFlushedEffectRoot(() => {
+      let attachSemantic!: () => void;
       const created = createSemanticKeyService({
         model: () => model.value,
         assembled: () => ({
@@ -48,8 +49,11 @@ describe("createSemanticKeyService", () => {
         deliverDiagnostic: (d) => {
           diagnostics.push(d.code);
         },
+        onRegisterEffects: (attach) => {
+          attachSemantic = attach;
+        },
       });
-      created.registerEffects();
+      attachSemantic();
       return created;
     });
 
@@ -107,8 +111,8 @@ describe("createSemanticKeyService", () => {
         spec: () => null,
         sourceIdentity: (value) => tracker.sourceIdentity(value),
         deliverDiagnostic: () => {},
+        onRegisterEffects: (attach) => attach(),
       });
-      created.registerEffects();
       return created;
     });
 
@@ -152,8 +156,8 @@ describe("createSemanticKeyService", () => {
         deliverDiagnostic: (d) => {
           diagnostics.push(d.code);
         },
+        onRegisterEffects: (attach) => attach(),
       });
-      created.registerEffects();
       return created;
     });
 

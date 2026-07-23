@@ -52,6 +52,7 @@ describe("runtime + legend-focus real cycle", () => {
       let entriesRef: () => readonly InteractiveLegendEntry[] = () => [];
       let pressedRef: () => LegendEntryIdentity | null = () => null;
       let entryKeysRef: ReturnType<typeof createLegendEntryKeyIndex> | null = null;
+      let attachReconcile!: () => void;
       const focus = createLegendFocusState({
         interaction: noController,
         resolvedInteractionScope: () => defaultScope,
@@ -66,6 +67,9 @@ describe("runtime + legend-focus real cycle", () => {
         },
         oninteraction: noCallback,
         announce: () => {},
+        onRegisterEffects: (attach) => {
+          attachReconcile = attach;
+        },
       });
       const runtime = createPlotRuntime({
         ...runtimeDeps,
@@ -88,8 +92,8 @@ describe("runtime + legend-focus real cycle", () => {
       pressedRef = () => focus.computeLegendPressed(runtime.model);
       // Host registration order: model -> catalog(S2) -> reconcile(S3) -> late.
       runtime.registerModelEffects();
-      focus.registerReconcileEffects();
-      runtime.registerLateEffects();
+      attachReconcile();
+      runtimeDeps.attachLateEffects();
       runtimeDeps.setOnrender((model) => {
         renders.push(model);
       });

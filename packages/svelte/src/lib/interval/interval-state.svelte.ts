@@ -33,7 +33,6 @@ import type {
   IntervalSelection,
   PlotInteractionInterval,
   PlotInteractionScope,
-  PlotSelection,
   ReadonlyIntervalDomains,
   ResolvedInteractionConfig,
   SemanticIntervalAxis,
@@ -53,6 +52,7 @@ import {
   type IntervalConsumptionCandidate,
 } from "./consumption.js";
 import { boundsEditorInputForScale, semanticAxisFromBounds } from "./precise-bounds.js";
+import type { InteractionTransitionPort } from "../interaction/transition-port.js";
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -60,14 +60,14 @@ import { boundsEditorInputForScale, semanticAxisFromBounds } from "./precise-bou
 
 export type IntervalStateDeps = {
   model: () => RenderModel | null;
+  /** Authoritative cross-module transition seam (owner-populated). */
+  port: InteractionTransitionPort;
   interaction: () => PlotInteractionController<PropertyKey> | undefined;
   resolvedInteractionScope: () => PlotInteractionScope;
   /** Narrow getter over `interactionConfig.select`. */
   selectConfig: () => ResolvedInteractionConfig["select"];
   /** Host alias over the S4 zoom controller (construction-safe). */
   effectiveZoomDomains: () => ContinuousZoomDomains | null;
-  /** S4 controller write path for the bounds-editor zoom branch (stable fn). */
-  commitZoom: (domains: ContinuousZoomDomains | null, source: InteractionSource) => void;
   captureSurface: () => HTMLDivElement | null;
   /** Used by the precise-bounds lineage projection. */
   candidateSemanticKeys: (candidate: CandidateFacts) => PropertyKey[];
@@ -76,14 +76,6 @@ export type IntervalStateDeps = {
    * Projection ownership stays outside interval behavior.
    */
   consumptionCandidates: () => readonly IntervalConsumptionCandidate<PropertyKey>[];
-  /**
-   * Handler-only: `openBoundsEditor` select branch reads the host's inspection
-   * panel as its fallback target. Host derived is earlier than the factory and
-   * returns `ScenePanel | null`.
-   */
-  inspectionPanel: () => ScenePanel | null;
-  /** Hoisted host fn (shared with point selection until S7/S8). */
-  emitSelection: (event: PlotSelection) => void;
   announce: (message: string) => void;
 };
 
@@ -346,7 +338,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     );
     committedInterval = null;
     committedIntervalRecord = null;
-    deps.emitSelection(event);
+    deps.port.emitSelection(event);
   }
 
   function clearCurrentPanelInterval(source: InteractionSource): void {
@@ -372,7 +364,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     );
     committedInterval = null;
     committedIntervalRecord = null;
-    deps.emitSelection(event);
+    deps.port.emitSelection(event);
   }
 
   function semanticAxis(
@@ -470,7 +462,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     // truthiness is identical.
     if (persistent ?? false) commitIntervalSelection(eventValue, source);
     // Emit after writes so listeners observe committed state (load-bearing).
-    deps.emitSelection(eventValue);
+    deps.port.emitSelection(eventValue);
   }
 
   function openBoundsEditor(
@@ -482,7 +474,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     if (action === "select") {
       const panel =
         currentIntervalRecord === null
-          ? (deps.inspectionPanel() ?? deps.model()?.scene.panels[0])
+          ? (deps.port.inspectionPanel ?? deps.model()?.scene.panels[0])
           : currentIntervalPanel;
       if (panel === undefined) return;
       boundsEditor = {
@@ -499,7 +491,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   function applyPreciseBounds(event: PreciseBoundsApplyEvent): void {
     if (event.action === "zoom") {
       if (event.scale === "band") return;
-      deps.commitZoom(
+      deps.port.commitZoom(
         frozenZoomDomains({
           ...deps.effectiveZoomDomains(),
           [event.axis]: [...event.bounds],
@@ -562,7 +554,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
       source: event.inputSource,
     });
     committedInterval = persistentSelectionOrNull(deps.selectConfig()?.persistent, eventValue);
-    deps.emitSelection(eventValue);
+    deps.port.emitSelection(eventValue);
     boundsEditor = null;
   }
 

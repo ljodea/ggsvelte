@@ -91,7 +91,7 @@ describe("createLegendFilterState toggle and mode", () => {
         },
         model: () => model,
       });
-      controller.registerCatalogEffects(() => controller.computeEntries(model));
+      controller.attachCatalogEffects(() => controller.computeEntries(model));
       return controller;
     });
 
@@ -147,7 +147,7 @@ describe("createLegendFilterState toggle and mode", () => {
         announce: () => {},
         model: () => model,
       });
-      controller.registerCatalogEffects(() => controller.computeEntries(model));
+      controller.attachCatalogEffects(() => controller.computeEntries(model));
       return controller;
     });
 
@@ -284,7 +284,7 @@ describe("createLegendFilterState capability and mode reset", () => {
         },
         model: () => model,
       });
-      controller.registerCatalogEffects(() => controller.computeEntries(model));
+      controller.attachCatalogEffects(() => controller.computeEntries(model));
       return controller;
     });
 
@@ -332,7 +332,7 @@ describe("createLegendFilterState capability and mode reset", () => {
         announce: () => {},
         model: () => model,
       });
-      controller.registerCatalogEffects(() => controller.computeEntries(model));
+      controller.attachCatalogEffects(() => controller.computeEntries(model));
       return controller;
     });
 
@@ -377,7 +377,7 @@ describe("createLegendFilterState catalog reconciliation", () => {
         announce: () => {},
         model: () => modelBox.value,
       });
-      controller.registerCatalogEffects(() => controller.computeEntries(modelBox.value));
+      controller.attachCatalogEffects(() => controller.computeEntries(modelBox.value));
       return controller;
     });
 
@@ -437,10 +437,9 @@ describe("runtime + legend-filter real cycle", () => {
         effectiveLegendFilters: () => controller.filters,
       });
       runtimeRef = runtime;
-      // Host registration order (GGPlot.svelte): model -> catalog -> late.
       runtime.registerModelEffects();
-      controller.registerCatalogEffects(() => controller.computeEntries(runtime.model));
-      runtime.registerLateEffects();
+      controller.attachCatalogEffects(() => controller.computeEntries(runtime.model));
+      runtimeDeps.attachLateEffects();
       return { runtime, controller };
     });
 

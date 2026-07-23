@@ -13,6 +13,10 @@ import type {
 import { normalizeInteractionConfig } from "../../src/lib/interaction/interaction.js";
 import { createInteractionReducer } from "../../src/lib/interaction/reducer.js";
 import {
+  bindInteractionTransitionPort,
+  type InteractionTransitionWiring,
+} from "../../src/lib/interaction/transition-port.js";
+import {
   createInspectionState,
   type InspectionStateDeps,
 } from "../../src/lib/inspection/inspection-state.svelte.js";
@@ -179,13 +183,15 @@ export function mountInspectionController(
     announce?: (message: string) => void;
     clearAnnouncement?: () => void;
     registerEffects?: boolean;
-    /** Wire deferred frame + onInspectPointerFrame (for schedulePointerInspect). */
     deferredFrames?: boolean;
   } = {},
 ): InspectionHarness {
   const defaultModel = modelFor(continuousSpec());
   const scheduler = options.deferredFrames === true ? createDeferredFrameScheduler() : null;
-  let controllerRef: ReturnType<typeof createInspectionState> | null = null;
+  const wiring: InteractionTransitionWiring = {};
+  const port = bindInteractionTransitionPort(wiring);
+  let chooseToolCalls: string[] = [];
+  const effectRegistrars: Array<() => void> = [];
 
   const ownedReducer =
     options.reducer === undefined
@@ -202,17 +208,30 @@ export function mountInspectionController(
               ? undefined
               : (action) => {
                   if (action.type === "inspect")
-                    return controllerRef!.onInspectPointerFrame(action);
+                    return wiring.inspection!.onInspectPointerFrame(action);
                   return true;
                 },
         })
       : null;
   const getReducer = options.reducer ?? (() => ownedReducer!);
 
+  wiring.surface = {
+    reducer: getReducer(),
+    activeTool: "inspect",
+    clearBrush: () => {
+      options.clearBrush?.();
+    },
+    chooseTool: (tool) => {
+      chooseToolCalls.push(tool);
+      options.chooseTool?.(tool as "inspect");
+    },
+    clearTouchInspectStart: () => {},
+  };
+
   const { value: state, destroy } = withFlushedEffectRoot(() => {
     const controller = createInspectionState({
       model: options.model ?? (() => defaultModel),
-      reducer: getReducer,
+      port,
       inspectConfig: options.inspectConfig ?? defaultInspect,
       inspectEnabled: options.inspectEnabled ?? (() => true),
       dataIdentityEpoch: options.dataIdentityEpoch ?? (() => "epoch-1"),
@@ -227,15 +246,18 @@ export function mountInspectionController(
       plotId: options.plotId ?? (() => "plot-test"),
       tooltipHovered: options.tooltipHovered ?? (() => false),
       clearTooltipHovered: options.clearTooltipHovered ?? (() => {}),
-      clearBrush: options.clearBrush ?? (() => {}),
-      chooseTool: options.chooseTool ?? (() => {}),
       oninspect: options.oninspect ?? noInspect,
       oninteraction: options.oninteraction ?? noInteraction,
       announce: options.announce ?? (() => {}),
       clearAnnouncement: options.clearAnnouncement ?? (() => {}),
+      onRegisterEffects: (attach) => {
+        effectRegistrars.push(attach);
+      },
     });
-    controllerRef = controller;
-    if (options.registerEffects !== false) controller.registerInspectionEffects();
+    wiring.inspection = controller;
+    if (options.registerEffects !== false) {
+      for (const attach of effectRegistrars) attach();
+    }
     return controller;
   });
 

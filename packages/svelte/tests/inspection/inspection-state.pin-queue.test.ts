@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import type { CandidateFacts, CellValue } from "@ggsvelte/core";
 
 import type { PlotInspection } from "../../src/lib/interaction/interaction.js";
+import { bindInteractionTransitionPort } from "../../src/lib/interaction/transition-port.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 import {
   candidateHit,
@@ -385,9 +386,18 @@ describe("createInspectionState setInspection(null) clear ordering", () => {
     const stateTag = (): string => (controllerRef?.inspection === null ? "null" : "non-null");
 
     const handle = withFlushedEffectRoot(() => {
+      const wiring: Parameters<typeof bindInteractionTransitionPort>[0] = {};
+      const port = bindInteractionTransitionPort(wiring);
+      wiring.surface = {
+        reducer: createInteractionReducer(),
+        activeTool: "inspect",
+        clearBrush: () => {},
+        chooseTool: () => {},
+        clearTouchInspectStart: () => {},
+      };
       const controller = createInspectionState({
         model: () => model,
-        reducer: () => createInteractionReducer(),
+        port,
         inspectConfig: defaultInspect,
         inspectEnabled: () => true,
         dataIdentityEpoch: () => "epoch-1",
@@ -397,8 +407,6 @@ describe("createInspectionState setInspection(null) clear ordering", () => {
         plotId: () => "plot",
         tooltipHovered: () => false,
         clearTooltipHovered: () => {},
-        clearBrush: () => {},
-        chooseTool: () => {},
         oninspect: () => (event) => {
           if (event.phase === "clear") log.push(`emit-clear-inspection-${stateTag()}`);
         },
@@ -406,6 +414,7 @@ describe("createInspectionState setInspection(null) clear ordering", () => {
         announce: () => {},
         clearAnnouncement: () => {},
       });
+      wiring.inspection = controller;
       controllerRef = controller;
       return controller;
     });

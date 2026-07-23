@@ -9,6 +9,7 @@ import { encodeKey } from "@ggsvelte/core";
 
 import { withEffectRoot } from "../helpers/effect-root.svelte.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
+import { bindInteractionTransitionPort } from "../../src/lib/interaction/transition-port.js";
 import {
   bandXSpec,
   brushEvent,
@@ -38,35 +39,56 @@ describe("createIntervalState construction", () => {
     // read is not production-shaped and would defeat identity assertions).
     const constructionModel = modelFor(continuousSpec());
 
+    const wiring: Parameters<typeof bindInteractionTransitionPort>[0] = {};
+    const port = bindInteractionTransitionPort(wiring);
+    wiring.zoom = {
+      applyBrushZoom: () => {},
+      commitZoom: () => {
+        commitZoomCalls++;
+      },
+    };
+    wiring.selection = {
+      emitSelection: () => {
+        emitCalls++;
+      },
+      togglePointKeys: () => {},
+    };
+    wiring.inspection = {
+      get inspection() {
+        return null;
+      },
+      get inspectionPanel() {
+        inspectionPanelCalls++;
+        return null;
+      },
+      schedulePointerInspect: () => {},
+      cancelPointerInspect: () => {},
+      onInspectPointerFrame: () => true,
+      setInspection: () => {},
+      closeInspection: () => {},
+      dismissInspection: () => {},
+      toggleInspectionPin: () => {},
+      navigateDirection: () => {},
+      cycleCoincident: () => {},
+      resetTraversalIndex: () => {},
+    };
+    wiring.model = () => constructionModel;
+
     const { value: state, destroy } = withEffectRoot(() =>
       createIntervalState({
         model: () => constructionModel,
+        port,
         interaction: noController,
         resolvedInteractionScope: () => defaultScope,
         selectConfig: persistentSelect,
         effectiveZoomDomains: () => null,
-        commitZoom: () => {
-          commitZoomCalls++;
-        },
-        coordFlipped: () => false,
         captureSurface: () => null,
-        // Issue #165 history: under the retired eager-SSR floor, a
-        // pre-populated non-union controller + non-null model reached this
-        // at construction. Deriveds are lazy at the 5.33.1 floor, so this
-        // guard pins the common empty-intervals construction path only.
         candidateSemanticKeys: (candidate) => {
           candidateSemanticKeysCalls++;
           return identityCandidateKeys(candidate);
         },
         consumptionCandidates: () => {
           throw new Error("consumptionCandidates must remain lazy for empty intervals");
-        },
-        inspectionPanel: () => {
-          inspectionPanelCalls++;
-          return null;
-        },
-        emitSelection: () => {
-          emitCalls++;
         },
         announce: () => {
           announceCalls++;

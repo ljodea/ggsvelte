@@ -36,6 +36,8 @@ export type PlotRuntimeDeps = {
    * (matches GGPlot.svelte:677-680).
    */
   onrender: () => ((model: RenderModel, spec: PortableSpec) => void) | undefined;
+  /** Owner-only: collect late effect registration (clientFlush/ready). */
+  onRegisterLateEffects?: (attach: () => void) => void;
 };
 
 export type PlotRuntime = {
@@ -49,8 +51,6 @@ export type PlotRuntime = {
   resetScales(): void;
   /** Register dispose + onrender effects (original position ~after legend resets). */
   registerModelEffects(): void;
-  /** Register clientFlush/ready effect (end of script). */
-  registerLateEffects(): void;
 };
 
 /**
@@ -214,13 +214,15 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
     });
   }
 
-  function registerLateEffects(): void {
+  function attachLateEffects(): void {
     // clientFlush via $effect: never runs during SSR → prerender stays
     // data-gg-ready="false" until the first client committed flush (decision 0009)
     $effect(() => {
       clientFlush = true;
     });
   }
+
+  deps.onRegisterLateEffects?.(attachLateEffects);
 
   return {
     get model() {
@@ -246,6 +248,5 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
     notifyPainted,
     resetScales,
     registerModelEffects,
-    registerLateEffects,
   };
 }

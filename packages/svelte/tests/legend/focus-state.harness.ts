@@ -99,6 +99,7 @@ export function mountFocusController(
     });
     let entriesRef: () => readonly InteractiveLegendEntry[] = () => [];
     let pressedRef: () => LegendEntryIdentity | null = () => null;
+    let attachReconcile!: () => void;
     const controller = createLegendFocusState({
       interaction: options.interaction ?? noController,
       resolvedInteractionScope: () => defaultScope,
@@ -111,11 +112,13 @@ export function mountFocusController(
       onlegendfocus: options.onlegendfocus ?? noCallback,
       oninteraction: options.oninteraction ?? noCallback,
       announce: options.announce ?? (() => {}),
+      onRegisterEffects: (attach) => {
+        attachReconcile = attach;
+      },
     });
-    // Deferred refs mirror the host's later-declared deriveds.
     entriesRef = () => controller.computeInteractiveEntries(model());
     pressedRef = () => controller.computeLegendPressed(model());
-    controller.registerReconcileEffects();
+    attachReconcile();
     return controller;
   });
 

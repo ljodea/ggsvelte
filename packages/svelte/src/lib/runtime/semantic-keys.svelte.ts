@@ -25,6 +25,8 @@ export type SemanticKeyServiceDeps = {
   spec: () => unknown;
   sourceIdentity: (value: unknown) => string;
   deliverDiagnostic: (diagnostic: InteractionDiagnostic) => void;
+  /** Owner-only: collect phased effect registration for deterministic ordering. */
+  onRegisterEffects?: (attach: () => void) => void;
 };
 
 export type SemanticKeyService = {
@@ -32,8 +34,6 @@ export type SemanticKeyService = {
   candidateSemanticKeys(candidate: CandidateFacts): PropertyKey[];
   /** Direct map lookup (inspection coordinator / mask paths). */
   keyAt(index: number): PropertyKey | null;
-  /** Register diagnostics delivery at the host's original effect position. */
-  registerEffects(): void;
 };
 
 /**
@@ -65,11 +65,13 @@ export function createSemanticKeyService(deps: SemanticKeyServiceDeps): Semantic
     });
   });
 
-  function registerEffects(): void {
+  function attachSemanticEffects(): void {
     $effect(() => {
       for (const diagnostic of semanticKeys.diagnostics) deps.deliverDiagnostic(diagnostic);
     });
   }
+
+  deps.onRegisterEffects?.(attachSemanticEffects);
 
   function semanticKey(
     row: Record<string, CellValue> | null,
@@ -116,6 +118,5 @@ export function createSemanticKeyService(deps: SemanticKeyServiceDeps): Semantic
     keyAt(index: number): PropertyKey | null {
       return semanticKeys.keys.get(index) ?? null;
     },
-    registerEffects,
   };
 }

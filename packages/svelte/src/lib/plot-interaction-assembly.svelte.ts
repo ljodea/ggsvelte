@@ -27,13 +27,17 @@ import type { LegendEntryIdentity } from "./legend/focus.js";
 import { createLegendFilterState } from "./legend/filter-state.svelte.js";
 import { createLegendEntryKeyIndex } from "./legend/entry-key-index.svelte.js";
 import { createLegendFocusState } from "./legend/focus-state.svelte.js";
-import { createPlotZoomState, type PlotZoomState } from "./zoom/zoom-state.svelte.js";
+import { createPlotZoomState } from "./zoom/zoom-state.svelte.js";
 import { createIntervalState } from "./interval/interval-state.svelte.js";
 import { createInspectionState } from "./inspection/inspection-state.svelte.js";
 import { createSurfaceState } from "./surface/surface-state.svelte.js";
-import { createSelectionState, type SelectionState } from "./selection/selection-state.svelte.js";
+import { createSelectionState } from "./selection/selection-state.svelte.js";
 import { presentationChromeForKind } from "./selection/selection.js";
 import { createPlotChromeState } from "./chrome/chrome-state.svelte.js";
+import {
+  bindInteractionTransitionPort,
+  type InteractionTransitionWiring,
+} from "./interaction/transition-port.js";
 
 export type PlotInteractionAssemblyDeps<
   Row extends Record<string, CellValue> = Record<string, CellValue>,
@@ -179,6 +183,13 @@ export function createPlotInteractionAssembly<
   // Live-region announcer (owned early so legend-reset effects can call it).
   const announcer = createPlotAnnouncer();
 
+  const transitionWiring: InteractionTransitionWiring = {};
+  const port = bindInteractionTransitionPort(transitionWiring);
+  const effectRegistrars: Array<() => void> = [];
+  const collectEffects = (attach: () => void): void => {
+    effectRegistrars.push(attach);
+  };
+
   // ------------------------------------------------- legend filter
   // Construction-time deriveds read legendFilter/effectiveSpec only —
   // model is deferred (declared after the runtime).
@@ -211,6 +222,7 @@ export function createPlotInteractionAssembly<
       zoomState.resetForScales();
     },
     onrender: () => inputs.onrender(),
+    onRegisterLateEffects: collectEffects,
   });
   // Model dispose + onrender effects (after the legend-reset effects that
   // registered during legendFilterState construction; before late effects).
@@ -228,6 +240,7 @@ export function createPlotInteractionAssembly<
     spec: () => inputs.spec(),
     sourceIdentity: (value: unknown) => identityTracker.sourceIdentity(value),
     deliverDiagnostic,
+    onRegisterEffects: collectEffects,
   });
   const semanticKey: SemanticKeyService["semanticKey"] = (...args) =>
     semanticKeys.semanticKey(...args);
@@ -243,87 +256,15 @@ export function createPlotInteractionAssembly<
   });
 
   // ---------------------------------------------------------- interaction
-  // source rows/spec -> pipeline/scene + CandidateStore -> semantic resolver
-  // -> chart-local reducer -> tooltip/crosshair/tools/callbacks. Presentation
-  // consumes one resolved inspection and never reconstructs grouping itself.
+  // Chart-local transitions route through one port; the owner registers phased
+  // effects in deterministic order after sibling wiring is complete.
   const interactive = $derived(interactionConfig.interactive);
   const surfaceInteractive = $derived(interactionConfig.availableTools.length > 0);
+  const inspectEnabled = $derived(interactionConfig.inspect !== null);
+  const legendFocusEnabled = $derived(interactionConfig.legendFocus !== null);
 
-  // ------------------------------------------------- inspection
-  // Construction-time deriveds may read the earlier model. Phased effects
-  // register later via registerInspectionEffects().
-  // Reversed deps: reducer / clearBrush / chooseTool close over the later-
-  // declared surfaceState (handler/effect-only; construction guard).
-  const inspectionState = createInspectionState({
-    model: () => runtime.model,
-    // Deferred: surface owns the reducer (handler/effect only).
-    reducer: () => surfaceState.reducer,
-    inspectConfig: () => interactionConfig.inspect,
-    inspectEnabled: () => inspectEnabled,
-    dataIdentityEpoch: () => dataIdentityEpoch,
-    // Deferred: semantic-key service is declared later (handler only).
-    keyAt: (index) => semanticKeys.keyAt(index),
-    root: inputs.root,
-    captureSurface: inputs.captureSurface,
-    plotId: () => inputs.plotId,
-    tooltipHovered: () => tooltipHovered,
-    clearTooltipHovered: () => {
-      tooltipHovered = false;
-    },
-    clearBrush: () => {
-      surfaceState.clearBrush();
-    },
-    chooseTool: (next) => {
-      surfaceState.chooseTool(next);
-    },
-    oninspect: inputs.oninspect,
-    oninteraction: inputs.oninteraction,
-    announce: announceSink,
-    clearAnnouncement: () => {
-      announcer.clear();
-    },
-  });
-  // ------------------------------------------------- surface
-  // Construction-time deriveds read module-internal state + inspectConfig.
-  // Sibling controllers, sinks, and chrome getters are handler/effect-only.
-  // Phased effects register later via registerSurfaceEffects().
-  const surfaceState = createSurfaceState({
-    model: () => runtime.model,
-    root: inputs.root,
-    toolProp: () => inputs.tool(),
-    initialTool: () => interactionConfig.initialTool,
-    // Deferred: chrome availableTools (handler/effect only).
-    availableTools: () => chromeState.availableTools,
-    inspectConfig: () => interactionConfig.inspect,
-    selectConfig: () => interactionConfig.select,
-    // Deferred: chrome canPublishPointSelection (handler only).
-    pointSelectEnabled: () => chromeState.canPublishPointSelection,
-    ontoolchange: () => inputs.ontoolchange(),
-    surfaceInteractive: () => surfaceInteractive,
-    // Deferred: semantic-key service initializes later (issue #165).
-    candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
-    inspection: () => inspectionState,
-    // Deferred: interval is declared after surface (handler only).
-    interval: () => intervalState,
-    zoom: () => zoomState,
-    // Deferred: selection controller is declared after surface (handler only).
-    emitSelection: (event) => {
-      selectionState.emitSelection(event);
-    },
-    // Deferred: semantic-key service is declared later (handler only).
-    semanticKey: (row, index) => semanticKey(row, index),
-    // Deferred: selection controller is declared after surface (handler only).
-    togglePointKeys: (keys, source) => {
-      selectionState.togglePointKeys(keys, source);
-    },
-    tooltipHovered: () => tooltipHovered,
-    announce: announceSink,
-  });
-  const coordFlipped = $derived(assembled()?.coord?.type === "flip");
   let tooltipHovered = $state(false);
-  // ------------------------------------------------- selection
-  // Construction-time effectiveSelectedKeys reads earlier interaction/scope
-  // only. The later runtime projection module owns anchors and masks.
+
   const selectionState = createSelectionState({
     interaction: inputs.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
@@ -332,12 +273,9 @@ export function createPlotInteractionAssembly<
     oninteraction: inputs.oninteraction,
     announce: announceSink,
   });
-  // Shared enablement predicates (avoid re-typing the same config gates).
-  const inspectEnabled = $derived(interactionConfig.inspect !== null);
-  const legendFocusEnabled = $derived(interactionConfig.legendFocus !== null);
-  // ------------------------------------------------- legend focus
-  // Factory sits after the enablement cluster so construction-time
-  // effectiveEmphasisKeys closes over earlier bindings only.
+  transitionWiring.selection = selectionState;
+  transitionWiring.zoom = zoomState;
+
   const legendFocusState = createLegendFocusState({
     interaction: inputs.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
@@ -346,37 +284,79 @@ export function createPlotInteractionAssembly<
     root: inputs.root,
     entryKeys: () => legendEntryKeys,
     entries: () => interactiveLegendEntries,
-    // Deferred read of the later-declared cached derived (handlers only).
     pressed: () => effectiveLegendPressed,
     onlegendfocus: inputs.onlegendfocus,
     oninteraction: inputs.oninteraction,
     announce: announceSink,
+    onRegisterEffects: collectEffects,
   });
-  // ------------------------------------------------- interval selection
-  // Construction-time deriveds may read model/effectiveZoomDomains (both
-  // earlier-declared). Effects register here — relative order is runtime
-  // model effects < interval effects < semantic diagnostics.
+
   const intervalState = createIntervalState({
     model: () => runtime.model,
+    port,
     interaction: inputs.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     selectConfig: () => interactionConfig.select,
     effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
-    // Direct construction edges (not deferred thunks): zoom + selection
-    // are already constructed when interval is built.
-    commitZoom: (...args: Parameters<PlotZoomState["commitZoom"]>) => {
-      zoomState.commitZoom(...args);
-    },
     captureSurface: inputs.captureSurface,
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
-    // Deferred: the projection module is constructed immediately after interval.
     consumptionCandidates: () => semanticCandidateProjection.intervalConsumptionCandidates,
-    inspectionPanel: () => inspectionState.inspectionPanel,
-    emitSelection: (...args: Parameters<SelectionState["emitSelection"]>) => {
-      selectionState.emitSelection(...args);
-    },
     announce: announceSink,
   });
+  transitionWiring.interval = intervalState;
+
+  const inspectionState = createInspectionState({
+    model: () => runtime.model,
+    port,
+    inspectConfig: () => interactionConfig.inspect,
+    inspectEnabled: () => inspectEnabled,
+    dataIdentityEpoch: () => dataIdentityEpoch,
+    keyAt: (index) => semanticKeys.keyAt(index),
+    root: inputs.root,
+    captureSurface: inputs.captureSurface,
+    plotId: () => inputs.plotId,
+    tooltipHovered: () => tooltipHovered,
+    clearTooltipHovered: () => {
+      tooltipHovered = false;
+    },
+    oninspect: inputs.oninspect,
+    oninteraction: inputs.oninteraction,
+    announce: announceSink,
+    clearAnnouncement: () => {
+      announcer.clear();
+    },
+    onRegisterEffects: collectEffects,
+  });
+  transitionWiring.inspection = inspectionState;
+
+  const surfaceState = createSurfaceState({
+    model: () => runtime.model,
+    port,
+    root: inputs.root,
+    toolProp: () => inputs.tool(),
+    initialTool: () => interactionConfig.initialTool,
+    availableTools: () => chromeState.availableTools,
+    inspectConfig: () => interactionConfig.inspect,
+    selectConfig: () => interactionConfig.select,
+    pointSelectEnabled: () => chromeState.canPublishPointSelection,
+    ontoolchange: () => inputs.ontoolchange(),
+    surfaceInteractive: () => surfaceInteractive,
+    tooltipHovered: () => tooltipHovered,
+    announce: announceSink,
+    onRegisterEffects: collectEffects,
+  });
+  transitionWiring.surface = {
+    reducer: surfaceState.reducer,
+    activeTool: surfaceState.activeTool,
+    clearBrush: () => surfaceState.clearBrush(),
+    chooseTool: (next) => surfaceState.chooseTool(next),
+    clearTouchInspectStart: () => surfaceState.clearTouchInspectStart(),
+  };
+  transitionWiring.semanticKey = semanticKey;
+  transitionWiring.candidateSemanticKeys = candidateSemanticKeys;
+  transitionWiring.model = () => runtime.model;
+
+  const coordFlipped = $derived(assembled()?.coord?.type === "flip");
   const semanticCandidateProjection = createSemanticCandidateProjection({
     model: () => runtime.model,
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
@@ -425,8 +405,6 @@ export function createPlotInteractionAssembly<
     resolvedHeight: () => runtime.resolvedHeight,
   });
   // Semantic diagnostics effects (before host diagnostic / surface effects).
-  semanticKeys.registerEffects();
-
   $effect(() => {
     for (const diagnostic of chromeState.areaScaleDiagnostics) deliverDiagnostic(diagnostic);
   });
@@ -435,12 +413,6 @@ export function createPlotInteractionAssembly<
     for (const diagnostic of chromeState.legendDiagnostics) deliverDiagnostic(diagnostic);
   });
 
-  // Surface window-teardown + tool-sync (after diagnostics, before catalog/
-  // focus/inspection registrations).
-  surfaceState.registerSurfaceEffects();
-
-  // Host-side deriveds kept outside the factory (construction-time free of
-  // the model read).
   const interactiveLegendEntries = $derived(
     legendFocusState.computeInteractiveEntries(runtime.model),
   );
@@ -449,23 +421,15 @@ export function createPlotInteractionAssembly<
     legendFocusState.computeLegendPressed(runtime.model),
   );
 
-  // Single source for "the legend clear row is shown": the root class and
-  // the filter fieldset's below-clear offset must flip together (the legend
-  // layout test pins their combined geometry).
   const legendClearActive = $derived(legendFocusEnabled && effectiveLegendPressed !== null);
 
-  // Host-side derived kept outside the factory (construction-time free of
-  // the model read).
   const filterableLegendEntries = $derived(legendFilterState.computeEntries(runtime.model));
-  // Catalog reconcile after model effects.
-  legendFilterState.registerCatalogEffects(() => filterableLegendEntries);
-  // Legend-focus reconcile after catalog.
-  legendFocusState.registerReconcileEffects();
-  // Inspection disposal + scene reconcile after legend-focus.
-  inspectionState.registerInspectionEffects();
 
-  // clientFlush/ready effect at end of script (late registration).
-  runtime.registerLateEffects();
+  effectRegistrars.push(() =>
+    legendFilterState.attachCatalogEffects(() => filterableLegendEntries),
+  );
+
+  for (const attach of effectRegistrars) attach();
 
   return {
     zoomState,

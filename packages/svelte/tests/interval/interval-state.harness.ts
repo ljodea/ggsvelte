@@ -14,6 +14,10 @@ import type {
 } from "../../src/lib/interaction/interaction.js";
 import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
 import {
+  bindInteractionTransitionPort,
+  type InteractionTransitionWiring,
+} from "../../src/lib/interaction/transition-port.js";
+import {
   createIntervalState,
   type IntervalStateDeps,
 } from "../../src/lib/interval/interval-state.svelte.js";
@@ -135,39 +139,77 @@ export type IntervalHarness = {
   destroy: () => void;
 };
 
+type IntervalMountOptions = {
+  model?: () => RenderModel | null;
+  interaction?: () => MaybeController;
+  resolvedInteractionScope?: () => PlotInteractionScope;
+  selectConfig?: () => SelectConfig;
+  effectiveZoomDomains?: () => ContinuousZoomDomains | null;
+  commitZoom?: (domains: ContinuousZoomDomains | null, source: InteractionSource) => void;
+  captureSurface?: () => HTMLDivElement | null;
+  candidateSemanticKeys?: (candidate: CandidateFacts) => PropertyKey[];
+  consumptionCandidates?: IntervalStateDeps["consumptionCandidates"];
+  inspectionPanel?: () => ScenePanel | null;
+  emitSelection?: (event: PlotSelection) => void;
+  announce?: (message: string) => void;
+};
+
 /**
  * Mount the controller with production-shaped deps: every reactive dep is a
  * getter (mirroring IntervalStateDeps). Tests that need reactivity pass
  * getters over their own reactive boxes; omitted options get static defaults.
  */
-export function mountIntervalController(
-  options: {
-    model?: () => RenderModel | null;
-    interaction?: () => MaybeController;
-    resolvedInteractionScope?: () => PlotInteractionScope;
-    selectConfig?: () => SelectConfig;
-    effectiveZoomDomains?: () => ContinuousZoomDomains | null;
-    commitZoom?: IntervalStateDeps["commitZoom"];
-    coordFlipped?: () => boolean;
-    captureSurface?: () => HTMLDivElement | null;
-    candidateSemanticKeys?: (candidate: CandidateFacts) => PropertyKey[];
-    consumptionCandidates?: IntervalStateDeps["consumptionCandidates"];
-    inspectionPanel?: () => ScenePanel | null;
-    emitSelection?: (event: PlotSelection) => void;
-    announce?: (message: string) => void;
-  } = {},
-): IntervalHarness {
+export function mountIntervalController(options: IntervalMountOptions = {}): IntervalHarness {
   const defaultModel = modelFor(continuousSpec());
+  const wiring: InteractionTransitionWiring = {};
+  const port = bindInteractionTransitionPort(wiring);
+  let commitZoomCalls = 0;
+  let emitSelectionCalls = 0;
+  let inspectionPanelCalls = 0;
+
+  wiring.zoom = {
+    applyBrushZoom: () => {},
+    commitZoom: (domains, source) => {
+      commitZoomCalls++;
+      options.commitZoom?.(domains, source);
+    },
+  };
+  wiring.selection = {
+    emitSelection: (event) => {
+      emitSelectionCalls++;
+      options.emitSelection?.(event);
+    },
+    togglePointKeys: () => {},
+  };
+  wiring.inspection = {
+    get inspection() {
+      return null;
+    },
+    get inspectionPanel() {
+      inspectionPanelCalls++;
+      return options.inspectionPanel?.() ?? null;
+    },
+    schedulePointerInspect: () => {},
+    cancelPointerInspect: () => {},
+    onInspectPointerFrame: () => true,
+    setInspection: () => {},
+    closeInspection: () => {},
+    dismissInspection: () => {},
+    toggleInspectionPin: () => {},
+    navigateDirection: () => {},
+    cycleCoincident: () => {},
+    resetTraversalIndex: () => {},
+  };
+  wiring.model = () => options.model?.() ?? defaultModel;
 
   const { value: state, destroy } = withFlushedEffectRoot(() =>
     createIntervalState({
       model: options.model ?? (() => defaultModel),
+      port,
       interaction: options.interaction ?? noController,
       resolvedInteractionScope: options.resolvedInteractionScope ?? (() => defaultScope),
       selectConfig: options.selectConfig ?? persistentSelect,
       effectiveZoomDomains: options.effectiveZoomDomains ?? (() => null),
-      commitZoom: options.commitZoom ?? (() => {}),
-      coordFlipped: options.coordFlipped ?? (() => false),
       captureSurface: options.captureSurface ?? (() => null),
       candidateSemanticKeys: options.candidateSemanticKeys ?? identityCandidateKeys,
       consumptionCandidates:
@@ -187,11 +229,13 @@ export function mountIntervalController(
           }
           return candidates;
         }),
-      inspectionPanel: options.inspectionPanel ?? (() => null),
-      emitSelection: options.emitSelection ?? (() => {}),
       announce: options.announce ?? (() => {}),
     }),
   );
+
+  void commitZoomCalls;
+  void emitSelectionCalls;
+  void inspectionPanelCalls;
 
   return { state, destroy };
 }

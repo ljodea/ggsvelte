@@ -4,6 +4,7 @@
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
+import { bindInteractionTransitionPort } from "../../src/lib/interaction/transition-port.js";
 import { hitFromCandidate } from "../../src/lib/surface/plot-px.js";
 import { withEffectRoot } from "../helpers/effect-root.svelte.js";
 import {
@@ -13,10 +14,8 @@ import {
   createSurfaceState,
   normalizeInteractionConfig,
   modelFor,
-  fromAny,
   panelCenterClient,
   pointerEvent,
-  type SurfaceStateDeps,
   type InteractionTool,
 } from "./surface-state.harness.js";
 
@@ -44,74 +43,13 @@ describe("createSurfaceState construction", () => {
     let coordFlippedCalls = 0;
     let surfaceInteractiveCalls = 0;
 
-    // Minimal stubs so construction can close the cycle without real siblings.
-    const stubInspection = fromAny<
-      SurfaceStateDeps["inspection"] extends () => infer R ? R : never
-    >({
-      get inspection() {
-        inspectionCalls++;
-        return null;
-      },
-      get inspectionPanel() {
-        inspectionCalls++;
-        return null;
-      },
-      schedulePointerInspect: () => {
-        inspectionCalls++;
-      },
-      cancelPointerInspect: () => {
-        inspectionCalls++;
-      },
-      onInspectPointerFrame: () => {
-        inspectionCalls++;
-        return true;
-      },
-      setInspection: () => {
-        inspectionCalls++;
-      },
-      closeInspection: () => {
-        inspectionCalls++;
-      },
-      dismissInspection: () => {
-        inspectionCalls++;
-      },
-      toggleInspectionPin: () => {
-        inspectionCalls++;
-      },
-      navigateDirection: () => {
-        inspectionCalls++;
-      },
-      cycleCoincident: () => {
-        inspectionCalls++;
-      },
-      resetTraversalIndex: () => {
-        inspectionCalls++;
-      },
-    });
+    const wiring: Parameters<typeof bindInteractionTransitionPort>[0] = {};
+    const port = bindInteractionTransitionPort(wiring);
 
-    const stubInterval = fromAny<SurfaceStateDeps["interval"] extends () => infer R ? R : never>({
-      get committedInterval() {
-        intervalCalls++;
-        return null;
-      },
-      finishBrushSelect: () => {
-        intervalCalls++;
-      },
-    });
-
-    const stubZoom = fromAny<SurfaceStateDeps["zoom"] extends () => infer R ? R : never>({
-      applyBrushZoom: () => {
-        zoomCalls++;
-      },
-    });
-
-    const { value: state, destroy } = withEffectRoot(() =>
-      createSurfaceState({
+    const { value: state, destroy } = withEffectRoot(() => {
+      const surface = createSurfaceState({
         model: () => model,
-        coordFlipped: () => {
-          coordFlippedCalls++;
-          return false;
-        },
+        port,
         root: () => null,
         toolProp: () => {
           toolPropCalls++;
@@ -134,39 +72,94 @@ describe("createSurfaceState construction", () => {
           surfaceInteractiveCalls++;
           return true;
         },
-        candidateSemanticKeys: () => {
-          candidateSemanticKeysCalls++;
-          return [];
-        },
-        inspection: () => {
-          inspectionCalls++;
-          return stubInspection;
-        },
-        interval: () => {
-          intervalCalls++;
-          return stubInterval;
-        },
-        zoom: () => {
-          zoomCalls++;
-          return stubZoom;
-        },
-        emitSelection: () => {
-          emitSelectionCalls++;
-        },
-        semanticKey: () => {
-          semanticKeyCalls++;
-          return null;
-        },
-        togglePointKeys: () => {
-          togglePointKeysCalls++;
-        },
         tooltipHovered: () => {
           tooltipHoveredCalls++;
           return false;
         },
         announce: () => {},
-      }),
-    );
+      });
+      wiring.surface = {
+        reducer: surface.reducer,
+        activeTool: surface.activeTool,
+        clearBrush: () => surface.clearBrush(),
+        chooseTool: (tool) => surface.chooseTool(tool),
+        clearTouchInspectStart: () => surface.clearTouchInspectStart(),
+      };
+      wiring.inspection = {
+        get inspection() {
+          inspectionCalls++;
+          return null;
+        },
+        get inspectionPanel() {
+          inspectionCalls++;
+          return null;
+        },
+        schedulePointerInspect: () => {
+          inspectionCalls++;
+        },
+        cancelPointerInspect: () => {
+          inspectionCalls++;
+        },
+        onInspectPointerFrame: () => {
+          inspectionCalls++;
+          return true;
+        },
+        setInspection: () => {
+          inspectionCalls++;
+        },
+        closeInspection: () => {
+          inspectionCalls++;
+        },
+        dismissInspection: () => {
+          inspectionCalls++;
+        },
+        toggleInspectionPin: () => {
+          inspectionCalls++;
+        },
+        navigateDirection: () => {
+          inspectionCalls++;
+        },
+        cycleCoincident: () => {
+          inspectionCalls++;
+        },
+        resetTraversalIndex: () => {
+          inspectionCalls++;
+        },
+      };
+      wiring.interval = {
+        get committedInterval() {
+          intervalCalls++;
+          return null;
+        },
+        finishBrushSelect: () => {
+          intervalCalls++;
+        },
+      };
+      wiring.zoom = {
+        applyBrushZoom: () => {
+          zoomCalls++;
+        },
+        commitZoom: () => {},
+      };
+      wiring.selection = {
+        emitSelection: () => {
+          emitSelectionCalls++;
+        },
+        togglePointKeys: () => {
+          togglePointKeysCalls++;
+        },
+      };
+      wiring.semanticKey = () => {
+        semanticKeyCalls++;
+        return null;
+      };
+      wiring.candidateSemanticKeys = () => {
+        candidateSemanticKeysCalls++;
+        return [];
+      };
+      wiring.model = () => model;
+      return surface;
+    });
 
     // Public accessors only (+ flush) — brushing is private.
     expect(state.reducer).toBeDefined();
@@ -204,44 +197,15 @@ describe("createSurfaceState construction", () => {
       zoom: true,
     });
     let inspectConfigCalls = 0;
-    const stubInspection = fromAny<
-      SurfaceStateDeps["inspection"] extends () => infer R ? R : never
-    >({
-      get inspection() {
-        return null;
-      },
-      schedulePointerInspect: () => {},
-      cancelPointerInspect: () => {},
-      onInspectPointerFrame: () => true,
-      setInspection: () => {},
-      closeInspection: () => {},
-      dismissInspection: () => {},
-      toggleInspectionPin: () => {},
-      navigateDirection: () => {},
-      cycleCoincident: () => {},
-      resetTraversalIndex: () => {},
-      get inspectionPanel() {
-        return null;
-      },
-    });
-    const stubInterval = fromAny<SurfaceStateDeps["interval"] extends () => infer R ? R : never>({
-      finishBrushSelect: () => {},
-      get committedInterval() {
-        return null;
-      },
-    });
-    const stubZoom = fromAny<SurfaceStateDeps["zoom"] extends () => infer R ? R : never>({
-      applyBrushZoom: () => {},
-    });
+    const wiring: Parameters<typeof bindInteractionTransitionPort>[0] = {};
+    const port = bindInteractionTransitionPort(wiring);
 
-    const { value: state, destroy } = withEffectRoot(() =>
-      createSurfaceState({
+    const { value: state, destroy } = withEffectRoot(() => {
+      const surface = createSurfaceState({
         model: () => model,
-        coordFlipped: () => false,
+        port,
         root: () => null,
-        toolProp: () => {
-          /* uncontrolled */
-        },
+        toolProp: () => {},
         initialTool: () => config.initialTool,
         availableTools: () => config.availableTools,
         inspectConfig: () => {
@@ -250,21 +214,49 @@ describe("createSurfaceState construction", () => {
         },
         selectConfig: () => config.select,
         pointSelectEnabled: () => false,
-        ontoolchange: () => {
-          /* no controlled callback */
-        },
+        ontoolchange: () => {},
         surfaceInteractive: () => true,
-        candidateSemanticKeys: () => [],
-        inspection: () => stubInspection,
-        interval: () => stubInterval,
-        zoom: () => stubZoom,
-        emitSelection: () => {},
-        semanticKey: () => null,
-        togglePointKeys: () => {},
         tooltipHovered: () => false,
         announce: () => {},
-      }),
-    );
+      });
+      wiring.surface = {
+        reducer: surface.reducer,
+        activeTool: surface.activeTool,
+        clearBrush: () => surface.clearBrush(),
+        chooseTool: (tool) => surface.chooseTool(tool),
+        clearTouchInspectStart: () => surface.clearTouchInspectStart(),
+      };
+      wiring.inspection = {
+        get inspection() {
+          return null;
+        },
+        get inspectionPanel() {
+          return null;
+        },
+        schedulePointerInspect: () => {},
+        cancelPointerInspect: () => {},
+        onInspectPointerFrame: () => true,
+        setInspection: () => {},
+        closeInspection: () => {},
+        dismissInspection: () => {},
+        toggleInspectionPin: () => {},
+        navigateDirection: () => {},
+        cycleCoincident: () => {},
+        resetTraversalIndex: () => {},
+      };
+      wiring.interval = {
+        get committedInterval() {
+          return null;
+        },
+        finishBrushSelect: () => {},
+      };
+      wiring.zoom = { applyBrushZoom: () => {}, commitZoom: () => {} };
+      wiring.selection = { emitSelection: () => {}, togglePointKeys: () => {} };
+      wiring.semanticKey = () => null;
+      wiring.candidateSemanticKeys = () => [];
+      wiring.model = () => model;
+      return surface;
+    });
 
     flushSync();
     inspectConfigCalls = 0;

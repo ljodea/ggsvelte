@@ -11,6 +11,7 @@ import type { LegendFilterClause } from "../../src/lib/legend/filter.js";
 import type { PlotRuntimeDeps } from "../../src/lib/runtime/runtime.svelte.js";
 
 export type ReactiveRuntimeDeps = PlotRuntimeDeps & {
+  attachLateEffects(): void;
   setWidth(v: number | "container" | undefined): void;
   setHeight(v: number | undefined): void;
   setAssembled(v: PortableSpec | null): void;
@@ -37,6 +38,7 @@ export function createReactiveRuntimeDeps(initial: {
   let root = $state<HTMLDivElement | null>(null);
   let onrender = $state<((model: RenderModel, spec: PortableSpec) => void) | undefined>();
   let resetZoom = $state<() => void>(() => {});
+  let attachLate: (() => void) | undefined;
 
   return {
     widthProp: () => width,
@@ -50,6 +52,12 @@ export function createReactiveRuntimeDeps(initial: {
       resetZoom();
     },
     onrender: () => onrender,
+    onRegisterLateEffects: (attach) => {
+      attachLate = attach;
+    },
+    attachLateEffects: () => {
+      attachLate?.();
+    },
     setWidth: (v) => {
       width = v;
     },

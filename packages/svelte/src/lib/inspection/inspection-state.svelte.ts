@@ -21,7 +21,8 @@
 import type { CandidateFacts, CellValue, RenderModel, ScenePanel } from "@ggsvelte/core";
 
 import { createInspectionCoordinator } from "./coordinator.js";
-import type { createInteractionReducer, InteractionAction } from "../interaction/reducer.js";
+import type { InteractionAction } from "../interaction/reducer.js";
+import type { InteractionTransitionPort } from "../interaction/transition-port.js";
 import type {
   InteractionSource,
   PlotInspection,
@@ -56,19 +57,13 @@ import {
 // Public types
 // ---------------------------------------------------------------------------
 
-/** Component-held reducer shape — factory-only export from interaction/reducer. */
-type InteractionReducer = ReturnType<typeof createInteractionReducer>;
-
 /** Inspect frame action delivered to onPointerFrame (non-move-area branch). */
 type InspectPointerFrameAction = Extract<InteractionAction, { type: "inspect" }>;
 
 export type InspectionStateDeps = {
   model: () => RenderModel | null;
-  /**
-   * Component-held reducer (plan mandate). Deferred: declared AFTER the
-   * factory — handler/effect-only reads.
-   */
-  reducer: () => InteractionReducer;
+  /** Authoritative cross-module transition seam (owner-populated). */
+  port: InteractionTransitionPort;
   inspectConfig: () => ResolvedInteractionConfig["inspect"];
   inspectEnabled: () => boolean;
   dataIdentityEpoch: () => string;
@@ -82,10 +77,6 @@ export type InspectionStateDeps = {
   plotId: () => string;
   tooltipHovered: () => boolean;
   clearTooltipHovered: () => void;
-  /** S7 state still host-held: dismiss plan.clearBrush → brushRect = null. */
-  clearBrush: () => void;
-  /** S7 fn still host-held: dismiss plan.returnToInspect. */
-  chooseTool: (tool: "inspect") => void;
   oninspect: () => ((event: PlotInspection<Record<string, CellValue>>) => void) | undefined;
   oninteraction: () =>
     | ((event: PlotInteractionEvent<Record<string, CellValue>>) => void)
@@ -93,6 +84,8 @@ export type InspectionStateDeps = {
   /** Stable sinks over the announcer. */
   announce: (message: string) => void;
   clearAnnouncement: () => void;
+  /** Owner-only: collect phased effect registration for deterministic ordering. */
+  onRegisterEffects?: (attach: () => void) => void;
 };
 
 /** Intent for a coalesced pointer-inspect frame (nearest lookup owned here). */
@@ -148,8 +141,6 @@ export type InspectionState = {
    * Returns false when the frame is dropped so the reducer skips dispatch.
    */
   onInspectPointerFrame(action: InspectPointerFrameAction): boolean;
-  /** Register disposal + scene-reconcile effects at the original host site. */
-  registerInspectionEffects(): void;
 };
 
 // ---------------------------------------------------------------------------
@@ -423,7 +414,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
       clearDismissedLatch();
     }
     // Real Escape cancels area + bumps epoch; close does not.
-    if (kind === "escape") deps.reducer().dispatch({ type: "escape", source });
+    if (kind === "escape") deps.port.dispatchReducer({ type: "escape", source });
     if (plan.emitClear) emitInspection({ type: "inspect", phase: "clear", source });
     inspection = null;
     inspectionSeed = null;
@@ -431,9 +422,9 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     if (plan.clearPendingPinned) pendingPinnedPointer = null;
     if (plan.coordinator === "invalidate") inspectionCoordinator.invalidate();
     else inspectionCoordinator.release("pinned");
-    if (plan.clearBrush) deps.clearBrush();
+    if (plan.clearBrush) deps.port.clearBrush();
     if (plan.restoreFocus) queueMicrotask(() => deps.captureSurface()?.focus());
-    if (plan.returnToInspect) deps.chooseTool("inspect");
+    if (plan.returnToInspect) deps.port.chooseTool("inspect");
   }
 
   function closeInspection(source: InteractionSource, restoreFocus = true): void {
@@ -500,7 +491,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
       fallbackCandidate: () => model?.candidates.hitTest(input.point.x, input.point.y) ?? null,
       panelIdForIndex,
     });
-    const reducer = deps.reducer();
+    const reducer = deps.port.reducer;
     queuedPointerInspection = frame.queued;
     queuedPointerToken = reducer.frameToken();
     try {
@@ -520,7 +511,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   function cancelPointerInspect(policy: CancelPointerInspectPolicy): void {
     queuedPointerInspection = null;
     if (policy.pendingPinned === "discard") pendingPinnedPointer = null;
-    deps.reducer().cancelScheduledPointer("inspect");
+    deps.port.cancelScheduledPointer("inspect");
   }
 
   /**
@@ -537,7 +528,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     // called for empty frames (Codex plan review).
     const frameAction = resolveQueuedInspectFrameAction({
       hasPending: pending !== null,
-      tokenAccepted: pending === null || token === null || deps.reducer().accepts(token),
+      tokenAccepted: pending === null || token === null || deps.port.reducer.accepts(token),
       currentState: inspection === null ? "none" : inspection.state,
       candidateEpochMismatch:
         action.candidate !== null && action.candidate.epoch !== deps.model()?.runId,
@@ -567,7 +558,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     return true;
   }
 
-  function registerInspectionEffects(): void {
+  function attachInspectionEffects(): void {
     $effect(() => {
       return () => {
         inspectionCoordinator.invalidate();
@@ -600,11 +591,11 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
         case "invalidate-reconcile-pinned": {
           // currentModel is non-null for invalidate-* (plan requires run advance).
           const runId = currentModel!.runId;
-          deps.reducer().dispatch({ type: "invalidate", reason: "scene" });
+          deps.port.dispatchReducer({ type: "invalidate", reason: "scene" });
           queuedPointerInspection = null;
           pendingPinnedPointer = null;
           queuedPointerToken = null;
-          deps.reducer().cancelScheduledPointer();
+          deps.port.cancelScheduledPointer();
           clearDismissedLatch();
           reconciledRun = runId;
           if (plan.type === "invalidate-clear-transient") {
@@ -643,6 +634,8 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     });
   }
 
+  deps.onRegisterEffects?.(attachInspectionEffects);
+
   return {
     get inspection() {
       return inspection;
@@ -665,6 +658,5 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     schedulePointerInspect,
     cancelPointerInspect,
     onInspectPointerFrame,
-    registerInspectionEffects,
   };
 }

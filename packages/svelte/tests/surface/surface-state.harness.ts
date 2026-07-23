@@ -21,6 +21,10 @@ import type {
   PlotSelection,
 } from "../../src/lib/interaction/interaction.js";
 import { normalizeInteractionConfig } from "../../src/lib/interaction/interaction.js";
+import {
+  bindInteractionTransitionPort,
+  type InteractionTransitionWiring,
+} from "../../src/lib/interaction/transition-port.js";
 import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
 import {
   createInspectionState,
@@ -271,34 +275,32 @@ export function mountSurfaceComposite(
   const semanticKey = identitySemanticKey();
 
   const { value: bundle, destroy: destroyRoot } = withFlushedEffectRoot(() => {
-    // Production order: zoom → inspection → surface → interval → effects.
-    // Deferred getters close over later const bindings (handler/effect only).
-    let surface!: SurfaceState;
-    let interval!: IntervalState;
+    const wiring: InteractionTransitionWiring = {};
+    const port = bindInteractionTransitionPort(wiring);
+    const effectRegistrars: Array<() => void> = [];
+    const collectEffects = (attach: () => void): void => {
+      effectRegistrars.push(attach);
+    };
 
-    // 1. zoom (pre-existing)
+    const selectionController = createPlotInteraction<PropertyKey>();
+
     const zoom = createPlotZoomState({
       interaction: noController,
       resolvedInteractionScope: () => ({ keys: "plot", x: "x", y: "y" }),
       zoomConfig: () => config.zoom,
       assembled: () => options.spec ?? continuousSpec(),
       model: () => model,
-      coordFlipped: () => false,
-      onzoom: () => {
-        /* no callback */
-      },
-      oninteraction: () => {
-        /* no callback */
-      },
+      onzoom: () => {},
+      oninteraction: () => {},
       announce: (message) => {
         announcements.push(message);
       },
     });
+    wiring.zoom = zoom;
 
-    // 2. inspection (before surface — reversed reducer dep)
     const inspection = createInspectionState({
       model: () => model,
-      reducer: () => surface.reducer,
+      port,
       inspectConfig: () => config.inspect,
       inspectEnabled: () => config.inspect !== null,
       dataIdentityEpoch: () => "epoch-1",
@@ -308,28 +310,19 @@ export function mountSurfaceComposite(
       plotId: () => "plot-test",
       tooltipHovered: () => false,
       clearTooltipHovered: () => {},
-      clearBrush: () => {
-        surface.clearBrush();
-      },
-      chooseTool: (next) => {
-        surface.chooseTool(next);
-      },
-      oninspect: () => {
-        /* no callback */
-      },
-      oninteraction: () => {
-        /* no callback */
-      },
+      oninspect: () => {},
+      oninteraction: () => {},
       announce: (message) => {
         announcements.push(message);
       },
       clearAnnouncement: () => {},
+      onRegisterEffects: collectEffects,
     });
+    wiring.inspection = inspection;
 
-    // 3. surface (owns reducer). Global rAF is the deferred suite pump.
-    surface = createSurfaceState({
+    const surface = createSurfaceState({
       model: () => model,
-      coordFlipped: () => false,
+      port,
       root: () => root,
       toolProp: () => toolPropBox.value,
       initialTool: () => config.initialTool,
@@ -339,43 +332,30 @@ export function mountSurfaceComposite(
       pointSelectEnabled: () => config.select?.type === "point",
       ontoolchange: () => onToolChangeBox.value,
       surfaceInteractive: () => options.surfaceInteractive ?? true,
-      candidateSemanticKeys: identityCandidateKeys,
-      inspection: () => inspection,
-      interval: () => interval,
-      zoom: () => zoom,
-      emitSelection: (event) => {
-        if (event.phase === "end") {
-          selectionOrderLog.push(
-            interval.committedInterval === null
-              ? "emit:end:before-commit"
-              : "emit:end:after-commit",
-          );
-        } else {
-          selectionOrderLog.push(`emit:${event.phase}`);
-        }
-        selectionEvents.push(event);
-      },
-      semanticKey,
-      togglePointKeys: (keys, source) => {
-        toggleCalls.push({ keys, source });
-      },
       tooltipHovered: () => false,
       announce: (message) => {
         announcements.push(message);
       },
+      onRegisterEffects: collectEffects,
     });
+    wiring.surface = {
+      reducer: surface.reducer,
+      activeTool: surface.activeTool,
+      clearBrush: () => surface.clearBrush(),
+      chooseTool: (next) => surface.chooseTool(next),
+      clearTouchInspectStart: () => surface.clearTouchInspectStart(),
+    };
+    wiring.semanticKey = semanticKey;
+    wiring.candidateSemanticKeys = identityCandidateKeys;
+    wiring.model = () => model;
 
-    // 4. interval AFTER surface (production order — deferred surface→interval)
-    interval = createIntervalState({
+    const interval = createIntervalState({
       model: () => model,
+      port,
       interaction: noController,
       resolvedInteractionScope: () => ({ keys: "plot", x: "x", y: "y", intervals: "plot" }),
       selectConfig: () => config.select,
       effectiveZoomDomains: () => zoom.effectiveZoomDomains,
-      commitZoom: (domains, source) => {
-        zoom.commitZoom(domains, source);
-      },
-      coordFlipped: () => false,
       captureSurface: () => capture,
       candidateSemanticKeys: identityCandidateKeys,
       consumptionCandidates: () => {
@@ -392,7 +372,12 @@ export function mountSurfaceComposite(
         }
         return candidates;
       },
-      inspectionPanel: () => inspection.inspectionPanel,
+      announce: (message) => {
+        announcements.push(message);
+      },
+    });
+    wiring.interval = interval;
+    wiring.selection = {
       emitSelection: (event) => {
         if (event.phase === "end") {
           selectionOrderLog.push(
@@ -405,16 +390,16 @@ export function mountSurfaceComposite(
         }
         selectionEvents.push(event);
       },
-      announce: (message) => {
-        announcements.push(message);
+      togglePointKeys: (keys, source) => {
+        toggleCalls.push({ keys, source });
       },
-    });
+    };
 
-    // 5. surface effects then 6. inspection effects (host 810 vs 954)
     if (options.registerEffects !== false) {
-      surface.registerSurfaceEffects();
-      inspection.registerInspectionEffects();
+      for (const attach of effectRegistrars) attach();
     }
+
+    void selectionController;
 
     return { surface, inspection, interval, zoom };
   });

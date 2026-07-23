@@ -74,8 +74,8 @@ export type LegendFilterState = {
   toggle(target: FilterableLegendEntry, event: MouseEvent): void;
   reset(event: MouseEvent): void;
   setPointerType(type: string | null): void;
-  /** Register catalog-reconcile effect at its original host position. */
-  registerCatalogEffects(entries: () => readonly FilterableLegendEntry[]): void;
+  /** Register catalog-reconcile effect (owner-only lifecycle). */
+  attachCatalogEffects(entries: () => readonly FilterableLegendEntry[]): void;
 };
 
 // ---------------------------------------------------------------------------
@@ -295,7 +295,7 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
     legendFilterPointerType = type;
   }
 
-  function registerCatalogEffects(entries: () => readonly FilterableLegendEntry[]): void {
+  function attachCatalogEffects(entries: () => readonly FilterableLegendEntry[]): void {
     // Catalog changes prune values that no longer exist. An emptied clause is
     // removed, so a category that disappears and later returns is visible by
     // default. resetScales() deliberately does not alter this filter state.
@@ -376,6 +376,6 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
     toggle,
     reset,
     setPointerType,
-    registerCatalogEffects,
+    attachCatalogEffects,
   };
 }

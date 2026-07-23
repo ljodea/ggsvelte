@@ -104,7 +104,7 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
         live.setBrushRect(null);
         // set-tool already full-cancels the schedule; clear inspect payload only
         // (preserve pinned stash — matches prior clearQueuedPointer-only path).
-        deps.inspection().cancelPointerInspect({ pendingPinned: "preserve" });
+        deps.port.cancelPointerInspect({ pendingPinned: "preserve" });
         deps.ontoolchange()?.(next);
         break;
     }
@@ -148,7 +148,7 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
     });
     switch (action.type) {
       case "touch-inspect-drag-cancel":
-        deps.inspection().cancelPointerInspect({ pendingPinned: "preserve" });
+        deps.port.cancelPointerInspect({ pendingPinned: "preserve" });
         return;
       case "queue-area-move":
         queuedAreaSource = action.source;
@@ -157,7 +157,7 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
       case "queue-inspect":
         // mode/maxDistance from pure snapshot — no inspect config re-gate.
         // Inspection owns nearest lookup, token, and reducer.queuePointer.
-        deps.inspection().schedulePointerInspect({
+        deps.port.schedulePointerInspect({
           point: p,
           source: action.source,
           mode: action.mode,
@@ -178,7 +178,7 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
     const next = brushWithEnd(draft, point);
     live.setBrushRect(next);
     if (live.getActiveTool() === "select-area")
-      deps.emitSelection(selectionEvent("change", normalizedRect(next), source));
+      deps.port.emitSelection(selectionEvent("change", normalizedRect(next), source));
   }
 
   /** Map the live render model into the pure interval query scene adapter. */
@@ -203,13 +203,13 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
         live.setBrushRect(null);
         const eventValue = selectionEvent("end", finish.rect, source);
         // Interval owns commit + emit; surface only routes FinishBrushAction.
-        deps.interval().finishBrushSelect(eventValue, source);
+        deps.port.finishBrushSelect(eventValue, source);
         reducer.dispatch({ type: "cancel-area" });
         break;
       }
       case "zoom-end":
         live.setBrushRect(null);
-        deps.zoom().applyBrushZoom(finish.rect, source);
+        deps.port.applyBrushZoom(finish.rect, source);
         reducer.dispatch({ type: "cancel-area" });
         break;
       case "end-area":
@@ -231,16 +231,16 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
         })
       )
         return;
-      deps.inspection().cancelPointerInspect({ pendingPinned: "discard" });
+      deps.port.cancelPointerInspect({ pendingPinned: "discard" });
       reducer.cancelScheduledPointer();
-      deps.inspection().setInspection(null, "pointer");
+      deps.port.setInspection(null, "pointer");
     });
   }
 
   function onPointerDown(event: PointerEvent): void {
     // Always cancel queued inspection before pure routing (host cleanup).
     // Preserve pinned stash; full schedule cancel (inspect + move-area).
-    deps.inspection().cancelPointerInspect({ pendingPinned: "preserve" });
+    deps.port.cancelPointerInspect({ pendingPinned: "preserve" });
     reducer.cancelScheduledPointer();
     // point always computed (pure begin-area needs it; touch/none ignore).
     const p = plotPoint(event);
@@ -273,7 +273,7 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
         if (originPanel === null) break;
         // Pure table owns fresh vs extend corner policy.
         live.setBrushRect(action.corners);
-        deps.inspection().setInspection(null, action.source);
+        deps.port.setInspection(null, action.source);
         reducer.dispatch({
           type: "begin-area",
           point: p,
@@ -281,7 +281,7 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
         });
         if (action.emitSelectStart) {
           const startEvent = selectionEvent("start", normalizedRect(action.corners), action.source);
-          deps.emitSelection(startEvent);
+          deps.port.emitSelection(startEvent);
         }
         try {
           (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
@@ -302,7 +302,7 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
   ): IntervalSelection {
     const originPanelId =
       reducer.state.area.kind === "idle"
-        ? deps.interval().committedInterval?.panelId
+        ? deps.port.committedInterval?.panelId
         : reducer.state.area.panelId;
     return buildIntervalSelectionFromScene({
       phase,
@@ -311,7 +311,7 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
       pixels: rect,
       scene: intervalQueryScene(),
       ...(originPanelId !== undefined && { panelId: originPanelId }),
-      keyForRow: (rowIndex) => deps.semanticKey(deps.model()?.row(rowIndex) ?? null, rowIndex),
+      keyForRow: (rowIndex) => deps.port.semanticKey(deps.model()?.row(rowIndex) ?? null, rowIndex),
     });
   }
 
@@ -343,9 +343,13 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
           maxDistance: action.maxDistance,
         });
         if (match !== null && match !== undefined) {
-          deps
-            .inspection()
-            .setInspection(hitFromCandidate(match), "touch", action.state, match.mode, match);
+          deps.port.setInspection(
+            hitFromCandidate(match),
+            "touch",
+            action.state,
+            match.mode,
+            match,
+          );
           suppressClickUntil = performance.now() + TOUCH_INSPECT_CLICK_SUPPRESS_MS;
         }
         break;
@@ -364,32 +368,30 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
   function onSurfaceBlur(event: FocusEvent): void {
     const blurAction = resolveSurfaceBlurAction({
       relatedTargetInsideRoot: deps.root()?.contains(event.relatedTarget as Node | null) === true,
-      inspectionState: deps.inspection().inspection?.state ?? "none",
+      inspectionState: deps.port.inspection?.state ?? "none",
     });
     if (blurAction.type === "ignore") return;
-    // Shared for keep-pinned and clear-inspection (ordering is load-bearing).
-    deps.inspection().resetTraversalIndex();
-    deps.inspection().cancelPointerInspect({ pendingPinned: "preserve" });
-    if (blurAction.type === "blur-clear-inspection")
-      deps.inspection().setInspection(null, "keyboard");
+    deps.port.resetTraversalIndex();
+    deps.port.cancelPointerInspect({ pendingPinned: "preserve" });
+    if (blurAction.type === "blur-clear-inspection") deps.port.setInspection(null, "keyboard");
   }
 
   function onSurfaceKeyDown(event: KeyboardEvent): void {
     // Decision table is pure (surface/keyboard); this switch owns side
     // effects only. brushCorners is the draft source of truth (not reducer
     // live.getBrushing()); nudge/complete-area carry pure payloads so host only applies.
-    const inspection = deps.inspection();
+    const inspectionState = deps.port.inspection;
     const { action, preventDefault } = resolveSurfaceKeyAction({
       key: event.key,
       shiftKey: event.shiftKey,
       activeTool: live.getActiveTool(),
       brushCorners: live.getBrushRect(),
-      hasInspection: inspection.inspection !== null,
+      hasInspection: inspectionState !== null,
       pinEnabled: deps.inspectConfig()?.pin === true,
-      focusKey: inspection.inspection?.focus.key ?? null,
-      sourceKeys: inspection.inspection?.focus.sourceKeys ?? [],
-      inspectionAnchor: inspection.inspection?.focus.anchor ?? null,
-      inspectionPanel: inspection.inspectionPanel,
+      focusKey: inspectionState?.focus.key ?? null,
+      sourceKeys: inspectionState?.focus.sourceKeys ?? [],
+      inspectionAnchor: inspectionState?.focus.anchor ?? null,
+      inspectionPanel: deps.port.inspectionPanel,
       firstPanel: deps.model()?.scene.panels[0],
     });
     if (preventDefault) event.preventDefault();
@@ -423,19 +425,19 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
         return;
       }
       case "cycle-coincident":
-        inspection.cycleCoincident(action.delta);
+        deps.port.cycleCoincident(action.delta);
         return;
       case "navigate-direction":
-        inspection.navigateDirection(action.dx, action.dy);
+        deps.port.navigateDirection(action.dx, action.dy);
         return;
       case "toggle-point-keys":
-        deps.togglePointKeys(action.keys, "keyboard");
+        deps.port.togglePointKeys(action.keys, "keyboard");
         return;
       case "toggle-pin":
-        inspection.toggleInspectionPin("keyboard");
+        deps.port.toggleInspectionPin("keyboard");
         return;
       case "escape":
-        inspection.dismissInspection("escape", "keyboard", {
+        deps.port.dismissInspection("escape", "keyboard", {
           returnToInspect: action.returnToInspect,
         });
         break;
@@ -445,14 +447,13 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
   }
 
   function onCaptureClick(event: MouseEvent): void {
-    const inspection = deps.inspection();
     const action = resolveCaptureClickAction({
       suppressClick: performance.now() < suppressClickUntil,
       activeTool: live.getActiveTool(),
       pointSelectEnabled: deps.pointSelectEnabled(),
       inspectEnabled: deps.inspectConfig() !== null,
       pinEnabled: deps.inspectConfig()?.pin === true,
-      hasInspection: inspection.inspection !== null,
+      hasInspection: deps.port.inspection !== null,
     });
     switch (action.type) {
       case "suppress":
@@ -465,11 +466,11 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
           maxDistance: POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
         });
         if (match === null || match === undefined) break;
-        deps.togglePointKeys(deps.candidateSemanticKeys(match), "pointer");
+        deps.port.togglePointKeys(deps.port.candidateSemanticKeys(match), "pointer");
         break;
       }
       case "toggle-pin":
-        inspection.toggleInspectionPin("pointer");
+        deps.port.toggleInspectionPin("pointer");
         break;
       case "none":
         break;
@@ -479,7 +480,7 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
   /** Pointer-cancel always drops draft/queue/touch-inspect and cancels area. */
   function onPointerCancel(): void {
     // Preserve pinned stash (leave discards; cancel preserves).
-    deps.inspection().cancelPointerInspect({ pendingPinned: "preserve" });
+    deps.port.cancelPointerInspect({ pendingPinned: "preserve" });
     touchInspectStart = null;
     touchInspectMoved = false;
     reducer.cancelScheduledPointer();

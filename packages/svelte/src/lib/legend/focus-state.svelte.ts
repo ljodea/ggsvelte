@@ -78,6 +78,8 @@ export type LegendFocusStateDeps = {
     | undefined;
   /** Stable announce sink (not a getter). */
   announce: (message: string) => void;
+  /** Owner-only: collect phased effect registration for deterministic ordering. */
+  onRegisterEffects?: (attach: () => void) => void;
 };
 
 export type LegendFocusState = {
@@ -97,8 +99,6 @@ export type LegendFocusState = {
   clearLegendFromControl(event: MouseEvent): void;
   setTouchIndexCleared(): void;
   setClearPointerType(type: string | null): void;
-  /** Register reconcile effects at their original host position. */
-  registerReconcileEffects(): void;
 };
 
 // ---------------------------------------------------------------------------
@@ -407,7 +407,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
     previewLegend(null);
   }
 
-  function registerReconcileEffects(): void {
+  function attachReconcileEffects(): void {
     $effect.pre(() => {
       const count = deps.entries().length;
       const active = document.activeElement;
@@ -507,6 +507,8 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
     });
   }
 
+  deps.onRegisterEffects?.(attachReconcileEffects);
+
   return {
     get effectiveEmphasisKeys() {
       return effectiveEmphasisKeys;
@@ -530,6 +532,5 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
     clearLegendFromControl,
     setTouchIndexCleared,
     setClearPointerType,
-    registerReconcileEffects,
   };
 }

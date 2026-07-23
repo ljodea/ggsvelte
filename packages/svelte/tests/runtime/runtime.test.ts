@@ -71,7 +71,7 @@ describe("createPlotRuntime construction", () => {
       });
       const rt = createPlotRuntime(deps);
       rt.registerModelEffects();
-      rt.registerLateEffects();
+      deps.attachLateEffects();
       return { runtime: rt, deps };
     });
     const { runtime, deps } = value;
@@ -109,7 +109,7 @@ describe("createPlotRuntime model production", () => {
       });
       const rt = createPlotRuntime(deps);
       rt.registerModelEffects();
-      rt.registerLateEffects();
+      deps.attachLateEffects();
       return rt;
     });
 
@@ -141,7 +141,7 @@ describe("createPlotRuntime model production", () => {
       });
       const rt = createPlotRuntime(deps);
       rt.registerModelEffects();
-      rt.registerLateEffects();
+      deps.attachLateEffects();
       return rt;
     });
 
@@ -225,7 +225,7 @@ describe("createPlotRuntime model production", () => {
       });
       const rt = createPlotRuntime(deps);
       rt.registerModelEffects();
-      rt.registerLateEffects();
+      deps.attachLateEffects();
       return rt;
     });
 
@@ -259,7 +259,7 @@ describe("createPlotRuntime model production", () => {
       });
       const rt = createPlotRuntime(deps);
       rt.registerModelEffects();
-      rt.registerLateEffects();
+      deps.attachLateEffects();
       return rt;
     });
 
@@ -331,7 +331,7 @@ describe("createPlotRuntime model production", () => {
         deps.setWidth("container");
         const rt = createPlotRuntime(deps);
         rt.registerModelEffects();
-        rt.registerLateEffects();
+        deps.attachLateEffects();
         return rt;
       });
 

@@ -9,6 +9,7 @@ import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
 import type { PlotInspection } from "../../src/lib/interaction/interaction.js";
 import { withEffectRoot } from "../helpers/effect-root.svelte.js";
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
+import { bindInteractionTransitionPort } from "../../src/lib/interaction/transition-port.js";
 import {
   applyInspect,
   candidateHit,
@@ -41,14 +42,24 @@ describe("createInspectionState construction", () => {
 
     const constructionModel = modelFor(continuousSpec());
     const reducer = createInteractionReducer();
+    const wiring: Parameters<typeof bindInteractionTransitionPort>[0] = {};
+    const port = bindInteractionTransitionPort(wiring);
+    wiring.surface = {
+      reducer,
+      activeTool: "inspect",
+      clearBrush: () => {
+        clearBrushCalls++;
+      },
+      chooseTool: () => {
+        chooseToolCalls++;
+      },
+      clearTouchInspectStart: () => {},
+    };
 
     const { value: state, destroy } = withEffectRoot(() =>
       createInspectionState({
         model: () => constructionModel,
-        reducer: () => {
-          reducerCalls++;
-          return reducer;
-        },
+        port,
         inspectConfig: defaultInspect,
         inspectEnabled: () => {
           inspectEnabledCalls++;
@@ -75,12 +86,6 @@ describe("createInspectionState construction", () => {
         clearTooltipHovered: () => {
           clearTooltipHoveredCalls++;
         },
-        clearBrush: () => {
-          clearBrushCalls++;
-        },
-        chooseTool: () => {
-          chooseToolCalls++;
-        },
         oninspect: () => {
           oninspectCalls++;
           return noInspect();
@@ -95,7 +100,6 @@ describe("createInspectionState construction", () => {
     );
 
     expect(reducerCalls).toBe(0);
-    expect(captureSurfaceCalls).toBe(0);
     expect(tooltipHoveredCalls).toBe(0);
     expect(clearTooltipHoveredCalls).toBe(0);
     expect(keyAtCalls).toBe(0);
@@ -112,7 +116,6 @@ describe("createInspectionState construction", () => {
     expect(state.inspectionPanel).toBeNull();
     flushSync();
     expect(reducerCalls).toBe(0);
-    expect(captureSurfaceCalls).toBe(0);
     expect(tooltipHoveredCalls).toBe(0);
     expect(clearTooltipHoveredCalls).toBe(0);
     expect(keyAtCalls).toBe(0);
