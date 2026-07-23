@@ -60,7 +60,13 @@ export const GALLERY_PREVIEWS = [
     id: "col/long-labels",
     filename: "col-long-labels-light.png",
     path: "/previews/col-long-labels-light.png",
-    sha256: "4d63c11fe0772ec0397c07320444f6ab589cfe5a5522f5658003be4246fb64e4",
+    sha256: "dd6ed7effa8c6d2a0f6f10a65a54a11396232a77397abb19c88839c4370e9575",
+  },
+  {
+    id: "col/mixed-outlier-labels",
+    filename: "col-mixed-outlier-labels-light.png",
+    path: "/previews/col-mixed-outlier-labels-light.png",
+    sha256: "dcb21d857966e5016b30fa8d7c39c5383beb19bc8a348e7162e3c45d99119f68",
   },
   {
     id: "col/value-labels",

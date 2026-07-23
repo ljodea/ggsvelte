@@ -2,7 +2,9 @@
  * Measured categorical (band) axis label planner — the discrete analogue of
  * `planTemporalAxis`. Escalation ladder (horizontal only):
  *
- *   single-line → wrapped (≤2 lines) → rotated (−45° then −90°)
+ *   single-line → wrapped (≤2 lines, top-aligned plane overlap; balanced
+ *     breaks when greedy exceeds the line cap)
+ *     → rotated (−45° then −90°; parallel-baseline text-text, not AABB vs column)
  *     → truncate + margin-overflow warning
  *     → thin (labelEvery)
  *     → overlap warning
@@ -11,9 +13,15 @@
  * escalation and report honest overlap/overflow when the pin cannot fit.
  *
  * Types live in `band-guide-types.ts`; wrap/cap helpers in `band-label-layout.ts`.
+ * Wrap overlap assumes the same top-aligned tspan stack as Axis.svelte /
+ * render-svg-scene (plane 0 = first line).
  */
 
-import { neighbourOverlap, neighbourOverlapAsym } from "./axis-overlap.js";
+import {
+  neighbourOverlap,
+  neighbourOverlapByPlane,
+  uniformAngleBaselinesCollide,
+} from "./axis-overlap.js";
 import type { BandAxisPlan, BandAxisPlanInput, BandAxisPlanTick } from "./band-guide-types.js";
 import {
   BAND_THIN_MIN_CATEGORIES,
@@ -186,13 +194,20 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     );
     if (!force && !wrapped.every((w): w is string[] => w !== null)) return null;
     const linesList = wrapped as string[][];
-    const lineWidths = linesList.map((lines) =>
-      Math.max(...lines.map((l) => measurer.measureWidth(l, fontSize))),
+    // Per-line widths; overlap uses top-aligned planes (matches renderer tspan stack),
+    // not max(lineWidths) as a centered block — a longer line2 must not reject when
+    // neighbours only occupy plane 0.
+    const perLineWidths = linesList.map((lines) =>
+      lines.map((l) => measurer.measureWidth(l, fontSize)),
     );
+    const lineWidths = perLineWidths.map((widths) => Math.max(...widths));
     const maxLines = Math.max(...linesList.map((w) => w.length));
     const blockHeight = maxLines * lineHeight;
-    const wrapOverlap = neighbourOverlap(
-      entries.map((e, i) => ({ pos: e.center, half: lineWidths[i]! / 2 })),
+    const wrapOverlap = neighbourOverlapByPlane(
+      entries.map((e, i) => ({
+        pos: e.center,
+        halfByPlane: perLineWidths[i]!.map((w) => w / 2),
+      })),
       gap,
     );
     if (!force && (wrapOverlap || blockHeight > orthoCap)) return null;
@@ -202,6 +217,11 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
       const half = lineWidths[i]! / 2;
       wrapLeft = Math.max(wrapLeft, half - entries[i]!.center);
       wrapRight = Math.max(wrapRight, half - (extentPx - entries[i]!.center));
+    }
+    // Oversize wrap lines (B3 alternate breaks) can overhang the panel; non-force
+    // must not accept a layout that draws into chrome without a side budget.
+    if (!force && (wrapLeft > marginCapPx + 1e-6 || wrapRight > marginCapPx + 1e-6)) {
+      return null;
     }
     const degraded: string[] = [];
     let marginOverflow = false;
@@ -251,32 +271,21 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     for (let i = 0; i < entries.length; i += every) max = Math.max(max, entries[i]!.width);
     return max;
   };
-  // Overlap of the rotated footprint at displayed (every-k) ticks. Entries may
-  // be in authored break order (not domain order), so project+sort once per
-  // angle by pos, then filter by array index for thinning — O(K log K) once +
-  // O(K) per doubling step, not O(K log K) per step.
-  type AsymItem = { pos: number; left: number; right: number; index: number };
-  const rotatedOverlapsSorted = (every: number, sorted: readonly AsymItem[]) => {
-    const items = every === 1 ? sorted : sorted.filter((item) => item.index % every === 0);
-    return neighbourOverlapAsym(items, gap, { alreadySorted: true });
+  // Overlap of adjacent rotated labels at a shared angle. Uniform-angle labels
+  // sit on parallel baselines — collide only when perpendicular band separation
+  // is below lineHeight+gap (width-independent). AABB asym extents still drive
+  // overhang / side-cap truncation below; do not use them to pick −90.
+  const rotatedTextCollides = (every: number, angle: number) => {
+    // Labeled ticks are every `every`-th entry in display order; centers are
+    // spaced by `every * bandWidth` along the axis.
+    return uniformAngleBaselinesCollide(angle, bandWidth * every, lineHeight, gap);
   };
-  const projectRotatedSorted = (angle: number): AsymItem[] =>
-    entries
-      .map((e, index) => ({
-        pos: e.center,
-        left: leftExtOf(e.width, angle),
-        right: rightExtOf(angle),
-        index,
-      }))
-      .toSorted((a, b) => a.pos - b.pos);
 
   const chooseAutoAngle = (): number => {
-    const sortedAtNeg45 = projectRotatedSorted(-45);
-    return rotatedOverlapsSorted(1, sortedAtNeg45) ? -90 : -45;
+    return rotatedTextCollides(1, -45) ? -90 : -45;
   };
 
   const rotatedPlan = (angle: number): BandAxisPlan => {
-    const sortedAtAngle = projectRotatedSorted(angle);
     const degraded: string[] = [];
     let labelEvery = 1;
     let overlap = false;
@@ -285,16 +294,13 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     // Along-axis: do adjacent rotated labels still collide at their real positions?
     // Gate thinning on the number of DISPLAYED ticks (a small authored-break subset
     // of a huge domain must keep every break), never the full category count.
-    if (rotatedOverlapsSorted(1, sortedAtAngle)) {
+    if (rotatedTextCollides(1, angle)) {
       if (entries.length >= BAND_THIN_MIN_CATEGORIES) {
         // High cardinality: thin (never for a handful of named bars).
-        while (
-          rotatedOverlapsSorted(labelEvery, sortedAtAngle) &&
-          labelEvery * 2 < entries.length
-        ) {
+        while (rotatedTextCollides(labelEvery, angle) && labelEvery * 2 < entries.length) {
           labelEvery *= 2;
         }
-        if (rotatedOverlapsSorted(labelEvery, sortedAtAngle)) {
+        if (rotatedTextCollides(labelEvery, angle)) {
           overlap = true;
           degraded.push("band-label-overlap");
         }

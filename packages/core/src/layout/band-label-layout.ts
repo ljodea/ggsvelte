@@ -38,7 +38,11 @@ export function quantizeUp(px: number, quantum: number): number {
 /**
  * Greedy word wrap.
  * - null when a single token exceeds `maxWidth` (unbreakable), or when
- *   lines > cap and `force` is false.
+ *   lines > cap and no ≤`maxLines` alternate break exists (`force` false).
+ * - When greedy needs more than `maxLines`, auto tries every token split that
+ *   yields exactly `maxLines` (preferring lines that fit `maxWidth`, else the
+ *   most balanced max-line-width). Oversize lines are allowed; callers validate
+ *   neighbour overlap and side margins.
  * - When `force` is true and the wrap needs more than `maxLines`, keep the
  *   first `maxLines - 1` lines and join the remainder onto the last line so
  *   forced wrap pins stay multi-line instead of collapsing to the full label.
@@ -56,13 +60,32 @@ export function wrapLabel(
   if (words.length <= 1) {
     return measurer.measureWidth(label, fontSize) <= maxWidth || force ? [label] : null;
   }
-  const lines: string[] = [];
-  let current = "";
   for (const word of words) {
     if (measurer.measureWidth(word, fontSize) > maxWidth) {
       // Unbreakable token — force keeps a single-line pin; auto escalates.
       return force ? [label] : null;
     }
+  }
+  const greedy = greedyWrapLines(words, maxWidth, measurer, fontSize);
+  if (greedy.length <= maxLines) return greedy;
+  if (!force) return bestFixedLineWrap(words, maxWidth, measurer, fontSize, maxLines);
+  // Cap: preserve multi-line presentation; remaining words sit on the last line
+  // (may be over-wide — callers report side/overlap overflow honestly).
+  if (maxLines === 1) return [greedy.join(" ")];
+  const head = greedy.slice(0, maxLines - 1);
+  const tail = greedy.slice(maxLines - 1).join(" ");
+  return [...head, tail];
+}
+
+function greedyWrapLines(
+  words: readonly string[],
+  maxWidth: number,
+  measurer: TextMeasurer,
+  fontSize: number,
+): string[] {
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
     const trial = current === "" ? word : `${current} ${word}`;
     if (measurer.measureWidth(trial, fontSize) <= maxWidth) {
       current = trial;
@@ -72,13 +95,43 @@ export function wrapLabel(
     }
   }
   if (current !== "") lines.push(current);
-  if (lines.length <= maxLines) return lines;
-  if (!force) return null;
-  // Cap: preserve multi-line presentation; remaining words sit on the last line
-  // (may be over-wide — callers report side/overlap overflow honestly).
-  if (maxLines === 1) return [lines.join(" ")];
-  const head = lines.slice(0, maxLines - 1);
-  const tail = lines.slice(maxLines - 1).join(" ");
+  return lines;
+}
+
+/**
+ * Produce exactly `maxLines` by splitting on word boundaries. Prefers every
+ * line ≤ maxWidth; otherwise minimizes the widest line (balanced break).
+ */
+function bestFixedLineWrap(
+  words: readonly string[],
+  maxWidth: number,
+  measurer: TextMeasurer,
+  fontSize: number,
+  maxLines: number,
+): string[] | null {
+  if (maxLines < 2 || words.length < maxLines) return null;
+  if (maxLines === 2) {
+    let best: string[] | null = null;
+    let bestScore = Number.POSITIVE_INFINITY;
+    for (let k = 1; k < words.length; k++) {
+      const lines = [words.slice(0, k).join(" "), words.slice(k).join(" ")];
+      const widths = lines.map((l) => measurer.measureWidth(l, fontSize));
+      const maxW = Math.max(...widths);
+      const fits = widths.every((w) => w <= maxWidth);
+      // Fitting candidates outrank oversize; among equals prefer tighter max.
+      const score = (fits ? 0 : 1e9) + maxW;
+      if (score < bestScore) {
+        bestScore = score;
+        best = lines;
+      }
+    }
+    return best;
+  }
+  // maxLines > 2 (author pins): fall back to greedy head + remainder on last line.
+  const greedy = greedyWrapLines(words, maxWidth, measurer, fontSize);
+  if (greedy.length <= maxLines) return greedy;
+  const head = greedy.slice(0, maxLines - 1);
+  const tail = greedy.slice(maxLines - 1).join(" ");
   return [...head, tail];
 }
 

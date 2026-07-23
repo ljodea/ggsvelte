@@ -3891,6 +3891,24 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Columns with long i18n category labels"],
   },
   {
+    id: "example:col:mixed-outlier-labels",
+    kind: "example",
+    title: "Columns with one multi-word category outlier",
+    summary:
+      "Desktop-width (640px) column chart: mostly short labels plus one four-token Spanish outlier — band planner should wrap, not fall to −90° + truncate (#634).",
+    href: "/examples/col/mixed-outlier-labels",
+    keywords: [
+      "Columns with one multi-word category outlier",
+      "Bars & columns",
+      "col",
+      "band",
+      "labels",
+      "i18n",
+      "vr",
+    ],
+    exact: ["Columns with one multi-word category outlier"],
+  },
+  {
     id: "example:col:value-labels",
     kind: "example",
     title: "Columns with value labels",

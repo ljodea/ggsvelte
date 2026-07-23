@@ -130,6 +130,17 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "col/mixed-outlier-labels",
+    category: "col",
+    name: "mixed-outlier-labels",
+    title: "Columns with one multi-word category outlier",
+    description: "Desktop-width (640px) column chart: mostly short labels plus one four-token Spanish outlier — band planner should wrap, not fall to −90° + truncate (#634).",
+    tags: ["col", "band", "labels", "i18n", "vr"],
+    docsSection: "Bars & columns",
+    vrHeight: 320,
+    hasData: true,
+  },
+  {
     id: "col/value-labels",
     category: "col",
     name: "value-labels",
