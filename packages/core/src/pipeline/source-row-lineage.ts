@@ -27,7 +27,7 @@ export interface PanelSourceRowMap {
 }
 
 /** Remap panel-local indices in place through a finalized global map. */
-export function remapPanelLocalIndicesToGlobal(
+function remapPanelLocalIndicesToGlobal(
   rowIndex: Uint32Array,
   globalSourceRows: readonly number[],
 ): void {
