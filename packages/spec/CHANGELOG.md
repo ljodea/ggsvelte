@@ -1,5 +1,72 @@
 # @ggsvelte/spec
 
+## 0.10.0
+
+### Minor Changes
+
+- 69415d9: <!-- markdownlint-disable MD041 -->
+
+  feat: portable within-mark gradients and bounded glow (#591)
+
+  Add a closed JSON-serializable paint vocabulary on compatible geom params
+  (`fillPaint`, `strokePaint`, `glow`) with deterministic linear/radial gradients,
+  ordered hex color stops, required solid fallbacks, and bounded glow radii.
+
+  Migration: none — additive
+
+### Patch Changes
+
+- 5d04e1f: <!-- markdownlint-disable MD041 -->
+
+  fix: remaining multi-table edges after per-layer DataRef
+
+  Binned axes and fixed histogram bin ranges read each layer filtered table;
+  transform diagnostics count filtered (not unfiltered) rows; scale validation
+  keeps per-layer field evidence; boxplot outlier lineage is not double-remapped
+  under facets; Svelte identity epochs fingerprint geom-child data props.
+
+  Migration: none — corrects multi-table behavior under per-layer data
+
+- 127e3fc: <!-- markdownlint-disable MD041 -->
+
+  fix: channel-wide censor recovery for temporal numeric styles
+
+  parseFailure: "censor" on size/linewidth/alpha now recovers all-invalid
+  fields and constants when a sibling field or scaled constant trains the
+  shared scale (parity with runtime channel collection).
+
+- 59232e8: <!-- markdownlint-disable MD041 -->
+
+  fix: segment endpoint grouping, binned extent, auto-hit, validation
+
+  - Exclude xend/yend from default discrete grouping
+  - Gate binned-axis endpoint fields to segment layers only
+  - Preserve geometry-based auto hit mode for geom segment
+  - Reject non-field segment endpoint mappings at validate time
+
+- 92e7049: <!-- markdownlint-disable MD041 -->
+
+  fix: multi-table DataRef post-merge edges from #603
+
+  - Seed named table cache from plot-level named data
+  - Deduplicate plot+layer named refs in validation maxRows
+  - Snapshot data on builder .layer()
+  - Unify binned style binExtent across layers
+  - Gate legend rowFilters to layers that map the scale field
+  - Skip globalSourceRows retention on annotation frames
+
+- ae74d06: <!-- markdownlint-disable MD041 -->
+
+  fix(spec): validate binned style breaks monotonicity and domain agreement (#599)
+
+  Reject binned size/linewidth/alpha/shape/linetype scales whose authored `breaks`
+  are non-finite or not strictly increasing, and reject specs where both `domain`
+  and `breaks` are authored with disagreeing endpoints — pre-empting runtime
+  `style-binned-breaks` / `style-domain-invalid` with targeted validation codes
+  `scale-binned-breaks` and `scale-binned-domain`.
+
+  Migration: none — additive diagnostics for specs that already failed at render
+
 ## 0.9.0
 
 ### Minor Changes
