@@ -6,8 +6,10 @@
 # from GitHub's Azure runners (observed 15m50s / 34 kB/s). Baking it in once
 # removes that cost from every container job.
 #
-# PLAYWRIGHT_TAG MUST stay in sync with env.PLAYWRIGHT_CONTAINER_TAG in
-# .github/workflows/ci.yml. Build/publish via .github/workflows/build-ci-image.yml.
+# PLAYWRIGHT_TAG default tracks env.PLAYWRIGHT_TAG in build-ci-image.yml (the
+# publisher). Consumers in ci.yml may lag during a step-1 prepublish (#610);
+# never set this default behind the published/publisher tag. Procedure:
+# CONTRIBUTING.md "Bumping Playwright / the CI runner image".
 ARG PLAYWRIGHT_TAG=v1.61.1-noble
 FROM mcr.microsoft.com/playwright:${PLAYWRIGHT_TAG}
 

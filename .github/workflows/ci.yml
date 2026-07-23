@@ -54,12 +54,16 @@ concurrency:
 # unnecessary work, but no longer sit behind a repo-local four-job ceiling.
 
 env:
-  # Keep in sync with: spikes/browser devDependency "playwright" and the
-  # `component` job's container image below. The sync is asserted in a step.
-  # Container jobs now pull the prebaked ghcr.io/<repo>/ci-runner:<tag> image
-  # (Playwright + unzip). Bumping this tag requires FIRST rebuilding and
-  # publishing that tag via .github/workflows/build-ci-image.yml — otherwise
-  # every container job fails to pull the (nonexistent) new tag.
+  # Keep in sync with: support-matrix.json browsers.playwright, package pins
+  # (@playwright/test / playwright), and every hardcoded ci-runner: image line
+  # below (asserted in scripts/support-matrix.test.ts + per-job pin steps).
+  # Container jobs pull the prebaked ghcr.io/<repo>/ci-runner:<tag> image
+  # (Playwright + unzip), published ONLY on main by build-ci-image.yml.
+  # Bumping this tag is step 2 of a two-step process (issue #610): first
+  # prepublish the image by landing a publisher-only bump of PLAYWRIGHT_TAG in
+  # build-ci-image.yml (and the Dockerfile ARG default), then point consumers
+  # here at the published tag. Single-PR lockstep deadlocks PR CI on a missing
+  # pull. See CONTRIBUTING.md "Bumping Playwright / the CI runner image".
   PLAYWRIGHT_CONTAINER_TAG: v1.61.1-noble
 
 jobs:

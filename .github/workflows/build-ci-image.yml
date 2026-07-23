@@ -17,6 +17,17 @@
 # the workflow non-dispatchable, so publishing requires a commit on main (review-
 # gated). On-demand rebuilds: re-run the last successful main run from the Actions
 # UI, or push a no-op change to the Dockerfile / this file.
+#
+# Playwright tag bumps (issue #610) are TWO-STEP — do not bump consumers in the
+# same PR as this publisher tag, or PR CI will try to pull a tag that only this
+# main-only workflow can create:
+#   1) Prepublish: bump PLAYWRIGHT_TAG here + ARG default in the Dockerfile;
+#      merge; wait for this workflow to publish ci-runner:<new-tag>.
+#   2) Consume: bump support-matrix / package pins / PLAYWRIGHT_CONTAINER_TAG
+#      and hardcoded ci-runner: image lines to the published tag.
+# Steady state: publisher tag == consumer tag. Publisher may *lead* consumers
+# between steps; it must never lag. Procedure: CONTRIBUTING.md
+# "Bumping Playwright / the CI runner image".
 name: build CI image
 
 on:
@@ -26,7 +37,8 @@ on:
       - .github/docker/ci-runner/Dockerfile
       - .github/workflows/build-ci-image.yml
 
-# PLAYWRIGHT_TAG MUST stay in sync with env.PLAYWRIGHT_CONTAINER_TAG in ci.yml.
+# PLAYWRIGHT_TAG may equal or lead env.PLAYWRIGHT_CONTAINER_TAG in ci.yml
+# (prepublish). Consumers must never reference a tag this file has not published.
 env:
   PLAYWRIGHT_TAG: v1.61.1-noble
 
