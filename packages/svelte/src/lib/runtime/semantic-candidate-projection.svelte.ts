@@ -24,6 +24,9 @@ type SemanticCandidate = IntervalConsumptionCandidate<PropertyKey> & {
   readonly kind: string;
 };
 
+/** Stable empty masks — avoid fresh `[]` identity churn on tooltip-only hover. */
+const EMPTY_INTERACTION_MASKS = Object.freeze([]) as readonly (BatchInteractionMask | null)[];
+
 /** OR two mask projections per batch (focused if either side is focused). */
 function unionInteractionMasks(
   left: readonly (BatchInteractionMask | null)[],
@@ -147,7 +150,7 @@ export function createSemanticCandidateProjection(
   );
   const interactionMasks = $derived.by((): readonly (BatchInteractionMask | null)[] => {
     const model = deps.model();
-    if (model === null) return [];
+    if (model === null) return EMPTY_INTERACTION_MASKS;
     const focus = deps.inspectionFocus();
     // Rect inspection primitives: muteSiblings opt-in, or layer under active
     // legend/controller emphasis so the seed bar stays focused (#386 / #633).
@@ -170,7 +173,7 @@ export function createSemanticCandidateProjection(
     }
     // Keyless rect inspection: layer seed primitives so legend/controller
     // emphasis keys do not suppress the hovered bar's de-emphasis (#386).
-    if (rectPrimitives === null) return keyMasks ?? [];
+    if (rectPrimitives === null) return keyMasks ?? EMPTY_INTERACTION_MASKS;
     const primitiveMasks = buildPrimitiveInteractionMasks(model.scene.batches, rectPrimitives);
     if (keyMasks === null) return primitiveMasks;
     return unionInteractionMasks(keyMasks, primitiveMasks);

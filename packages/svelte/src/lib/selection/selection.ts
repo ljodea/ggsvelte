@@ -17,7 +17,7 @@ export type CandidateAnchorKeys = {
   readonly kind?: string;
 };
 
-/** Point-like chrome by default; rect batches suppress rings (sibling mute is opt-in, #633). */
+/** Point-like chrome by default; rect batches suppress rings (#386). */
 export function presentationChromeForKind(kind: string | null | undefined): PresentationChrome {
   return kind === "rects" ? "none" : "ring";
 }

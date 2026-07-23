@@ -159,7 +159,7 @@ describe("createSemanticCandidateProjection", () => {
     destroy();
   });
 
-  it("layers keyless rect seed primitives under active legend emphasis", () => {
+  it("layers keyless rect seed primitives under legend emphasis when muteSiblings is off (#633)", () => {
     const colModel = modelFor(
       gg(
         [
@@ -188,6 +188,8 @@ describe("createSemanticCandidateProjection", () => {
         intervalKeys: () => [],
         intervals: () => [],
         emphasisKeys: () => ["legend-only"],
+        // Emphasis alone still layers rect seeds (#386); muteSiblings stays off.
+        muteSiblingsOnInspect: () => false,
         inspectionFocus: () => ({
           sourceKeys: [],
           key: null,

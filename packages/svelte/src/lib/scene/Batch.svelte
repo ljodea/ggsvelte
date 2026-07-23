@@ -441,15 +441,18 @@
 {/if}
 
 <style>
-  /* Soften mute/unmute when interaction masks are active (inspect.muteSiblings).
-     Gap flicker is primarily avoided by default-off mute (#633); this eases
-     opt-in transitions. Instant under prefers-reduced-motion. */
-  .gg-batch :global([data-gg-focused]) {
+  /* Ease interaction-mask opacity changes (legend emphasis, muteSiblings, etc.).
+     Transition on direct mark children — not only [data-gg-focused] — so unmute
+     on mask clear still eases. Default-off mute (#633) avoids gap flicker; this
+     softens remaining mask transitions. Instant under prefers-reduced-motion. */
+  /* svelte-ignore css_unused_selector */
+  .gg-batch > :global(*) {
     transition: opacity 120ms ease;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .gg-batch :global([data-gg-focused]) {
+    /* svelte-ignore css_unused_selector */
+    .gg-batch > :global(*) {
       transition: none;
     }
   }

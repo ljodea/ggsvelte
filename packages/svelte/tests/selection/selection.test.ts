@@ -306,6 +306,23 @@ describe("mergePresentationFocusKeys", () => {
     ).toBe(empty);
   });
 
+  it("still unions rect inspection keys with legend emphasis when muteSiblings is off (#633)", () => {
+    expect(
+      mergePresentationFocusKeys(
+        ["legend"],
+        { sourceKeys: ["bar"], key: null, kind: "rects" },
+        { muteSiblings: false },
+      ),
+    ).toEqual(["legend", "bar"]);
+    expect(
+      mergePresentationFocusKeys(["legend"], {
+        sourceKeys: ["bar"],
+        key: "baz",
+        kind: "rects",
+      }),
+    ).toEqual(["legend", "bar", "baz"]);
+  });
+
   it("unions emphasis then sourceKeys then optional key, dedupes, and freezes", () => {
     const result = mergePresentationFocusKeys(["a"], {
       sourceKeys: ["b", "a"],
