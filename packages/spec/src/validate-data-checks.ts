@@ -84,6 +84,8 @@ function quantitativeTemporalFieldError(input: {
   hasEpochParser: boolean;
   hasExplicitDomain: boolean;
   hasBinnedBreaks: boolean;
+  /** Channel-wide training (sibling fields / scaled constants) for parseFailure: "censor". */
+  channelTrains: boolean;
 }): SpecError | null {
   const {
     decision,
@@ -95,6 +97,7 @@ function quantitativeTemporalFieldError(input: {
     hasEpochParser,
     hasExplicitDomain,
     hasBinnedBreaks,
+    channelTrains,
   } = input;
   const mismatch: SpecError = {
     code: "scale-type-mismatch",
@@ -104,7 +107,8 @@ function quantitativeTemporalFieldError(input: {
       description: `Map a temporal field, use a working parse: { epoch: "ms" | "s" }, or remove temporal ${aesthetic} options.`,
     },
   };
-  const censorRecovers = parseFailure === "censor" && (hasExplicitDomain || hasBinnedBreaks);
+  const censorRecovers =
+    parseFailure === "censor" && (hasExplicitDomain || hasBinnedBreaks || channelTrains);
   if (decision === null || decision === undefined) {
     // Profile-backed: no samples. An epoch parser makes numbers temporal, but always as
     // `datetime`, so it can never satisfy a requested `date` kind — the runtime throws
@@ -127,7 +131,7 @@ function quantitativeTemporalFieldError(input: {
     parse !== undefined &&
     parseFailure === "censor" &&
     decision.status === "invalid" &&
-    ((decision.validatedCount ?? 0) > 0 || hasExplicitDomain || hasBinnedBreaks);
+    ((decision.validatedCount ?? 0) > 0 || hasExplicitDomain || hasBinnedBreaks || channelTrains);
   if (decision.status !== "temporal" && !censoredInvalid) return mismatch;
   // temporalKind may be a schema-invalid non-string (e.g. a Symbol) reaching tier-2;
   // only compare/stringify when it is a valid string, else defer to the schema diagnostic.
@@ -664,15 +668,53 @@ export function dataChecks(
         : [];
     const hasBinnedBreaks =
       binnedBreaks.length >= 2 && binnedBreaks.every((value) => parseableBound(value));
-    // A temporal field with real parseable values trains the scale, so an invalid
-    // censored scaled constant sharing it is censored to the unknown style rather than
-    // rejected (the same partial-invalid path fields already accept). Track it here to
-    // extend censor recovery to the scaled-constant check below.
+    // Pass 1: channel-wide training sources (sibling fields + scaled constants).
+    // Runtime trains sequential/binned style scales from the full channel value
+    // list, so an all-invalid field/constant is censored when any sibling trains.
     let fieldTrainsScale = false;
     for (const use of numericStyleFields[aesthetic]) {
       const type = typeOf(use.field);
-      // A temporal-typed field always trains the scale (extends censor recovery below).
-      if (type === "temporal") fieldTrainsScale = true;
+      if (type === "temporal") {
+        fieldTrainsScale = true;
+        continue;
+      }
+      if (type !== "quantitative" || !requestsTemporal || !temporalInputsUsable) continue;
+      const decision = temporalDecisionForField(
+        temporalDecisionCache,
+        use.field,
+        fields.get(use.field),
+        parser as Parameters<typeof temporalDecisionForField>[3],
+        temporalOptions as Parameters<typeof temporalDecisionForField>[4],
+      );
+      fieldTrainsScale ||=
+        decision !== null &&
+        decision !== undefined &&
+        (decision.status === "temporal" || (decision.validatedCount ?? 0) > 0);
+    }
+    let constantTrainsScale = false;
+    if (requestsTemporal && temporalInputsUsable) {
+      for (const value of numericStyleScaledConstants[aesthetic]) {
+        if (value instanceof Date) {
+          constantTrainsScale = true;
+          break;
+        }
+        if (typeof value !== "string" && typeof value !== "number") continue;
+        const decision = parseTemporalColumn(
+          [value] as Parameters<typeof parseTemporalColumn>[0],
+          parser,
+          temporalOptions,
+        ).decision;
+        if (decision.status === "temporal" || (decision.validatedCount ?? 0) > 0) {
+          constantTrainsScale = true;
+          break;
+        }
+      }
+    }
+    const channelTrains = fieldTrainsScale || constantTrainsScale;
+
+    // Pass 2: field diagnostics (use channel-wide censor recovery).
+    for (const use of numericStyleFields[aesthetic]) {
+      const type = typeOf(use.field);
       // A quantitative field carrying temporal options fails at resolve time
       // unless a working parser (or censor recovery) yields temporal values —
       // mirror the color checker rather than deferring unconditionally.
@@ -686,11 +728,6 @@ export function dataChecks(
           parser as Parameters<typeof temporalDecisionForField>[3],
           temporalOptions as Parameters<typeof temporalDecisionForField>[4],
         );
-        // A field that parses (fully or partially) trains the scale from data.
-        fieldTrainsScale ||=
-          decision !== null &&
-          decision !== undefined &&
-          (decision.status === "temporal" || (decision.validatedCount ?? 0) > 0);
         const error = quantitativeTemporalFieldError({
           decision,
           aesthetic,
@@ -701,6 +738,7 @@ export function dataChecks(
           hasEpochParser,
           hasExplicitDomain,
           hasBinnedBreaks,
+          channelTrains,
         });
         if (error !== null) errors.push(error);
       }
@@ -724,8 +762,7 @@ export function dataChecks(
     // resolve throws at runtime (style-domain-empty / style-temporal-parse). Reject
     // it here too, mirroring the field checks above for both resolution paths.
     const censorRecovers =
-      config.parseFailure === "censor" &&
-      (hasExplicitDomain || hasBinnedBreaks || fieldTrainsScale);
+      config.parseFailure === "censor" && (hasExplicitDomain || hasBinnedBreaks || channelTrains);
     for (const value of numericStyleScaledConstants[aesthetic]) {
       const error = numericStyleConstantError({
         value,
