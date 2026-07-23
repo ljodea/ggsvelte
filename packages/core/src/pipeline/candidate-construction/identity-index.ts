@@ -8,6 +8,7 @@ import {
   appendSourceRowByGroupX,
   buildBinLineageBuckets,
 } from "./identity-buckets.js";
+import { globalSourceRowForInputRow } from "../source-row-lineage.js";
 
 export interface CandidateIdentityIndex {
   readonly seriesByRow: Map<string, number>;
@@ -37,7 +38,7 @@ export interface CandidateIdentityIndex {
 
 export function buildCandidateIdentityIndex(
   panelFrames: readonly (readonly LayerFrame[])[],
-  facetPanels: readonly FacetPanelDef[],
+  _facetPanels: readonly FacetPanelDef[],
 ): CandidateIdentityIndex {
   const seriesByRow = new Map<string, number>();
   const sourceRowsByGroup = new Map<string, number[]>();
@@ -56,11 +57,7 @@ export function buildCandidateIdentityIndex(
       // Only count/summary/boxplot resolve via group×x buckets; skip for other layers.
       const bucketByX = stat === "count" || stat === "summary" || stat === "boxplot";
       const xField = frame.binding.xField;
-      // localRow → sourceRow invariant: panel-local table indexes drive
-      // parse/finite-y membership; stored memberships are always source-table
-      // rows via `facetPanel.sourceRows?.[localRow] ?? localRow` (unfaceted =
-      // identity). Faceted temporal summary/count must not intern localRow into
-      // LineageStore keys (#437).
+      // Panel-local input rows → finalized global source ids (issue #626).
       const yField = frame.binding.yField;
       const finiteY =
         (stat === "smooth" || stat === "summary" || stat === "boxplot") && yField !== null;
@@ -86,10 +83,7 @@ export function buildCandidateIdentityIndex(
           : null;
       for (let localRow = 0; localRow < inputGroups.length; localRow++) {
         const group = inputGroups[localRow]!;
-        const sourceRow =
-          frame.inputSourceRows?.[localRow] ??
-          facetPanels[panelIndex]!.sourceRows?.[localRow] ??
-          localRow;
+        const sourceRow = globalSourceRowForInputRow(frame, localRow);
         const key = `${frameKey}:${group}`;
         appendSourceRowByGroupKey(sourceRowsByGroup, key, sourceRow);
         if (bucketByX && xField !== null) {
@@ -118,7 +112,6 @@ export function buildCandidateIdentityIndex(
           frame,
           panelIndex,
           layerIndex,
-          facetPanel: facetPanels[panelIndex]!,
           sourceRowsByGroupBin,
         });
       }

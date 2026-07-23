@@ -11,7 +11,6 @@ import type { ColumnTable } from "../table.js";
 
 import type { FacetPanelDef } from "./facets-types.js";
 import type { SourceRegistry } from "./source-registry.js";
-import { NO_ROW } from "./types-no-row.js";
 
 export interface LayerPanelSlice {
   table: ColumnTable;
@@ -116,16 +115,4 @@ export function sliceLayerForPanel(input: {
     return { table: filteredTable, globalSourceRows };
   }
   return { table: filteredTable.subset(keep), globalSourceRows };
-}
-
-/** Remap frame.rowIndex panel-local indices through globalSourceRows. */
-export function remapToGlobalSourceRows(
-  rowIndex: Uint32Array,
-  globalSourceRows: readonly number[],
-): void {
-  for (let i = 0; i < rowIndex.length; i++) {
-    const local = rowIndex[i]!;
-    if (local === NO_ROW) continue;
-    rowIndex[i] = globalSourceRows[local] ?? NO_ROW;
-  }
 }

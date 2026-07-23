@@ -5,7 +5,6 @@
 import type { ColumnTable } from "../table.js";
 
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
-import { NO_ROW } from "./types.js";
 import { buildAnnotationFrame } from "./frame-annotation.js";
 import { expandEdgeFrame } from "./frame-edge-expand.js";
 import { deriveLayerGroups } from "./frame-helpers.js";
@@ -44,16 +43,4 @@ export function buildFrame(
   const frame = { ...buildIdentityFrame(binding, table, inputGroups), inputGroups };
   expandEdgeFrame(frame, warnings);
   return frame;
-}
-
-/**
- * Facet frames index into the PANEL table; hit-testing/tooltips need SOURCE
- * rows, so remap through the partition (NO_ROW stays NO_ROW).
- */
-export function remapSourceRows(frame: LayerFrame, sourceRows: number[] | null): void {
-  if (sourceRows === null) return;
-  for (let i = 0; i < frame.rowIndex.length; i++) {
-    const local = frame.rowIndex[i]!;
-    if (local !== NO_ROW) frame.rowIndex[i] = sourceRows[local]!;
-  }
 }

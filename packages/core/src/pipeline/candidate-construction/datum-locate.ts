@@ -4,7 +4,6 @@
 import type { CandidateBuildFacts } from "../../candidate-store.js";
 import type { GeometryBatch } from "../../scene.js";
 import type { CellValue, ColumnTable } from "../../table.js";
-import type { FacetPanelDef } from "../facets.js";
 import type { LayerFrame, MappedField } from "../types.js";
 import { resolveCandidateFrameRow } from "./frame-row.js";
 import type { IdentityCandidateResolveContext, LocatedIdentityCandidate } from "./datum-types.js";
@@ -32,20 +31,16 @@ function makeSourceValueLookup(
 }
 
 /**
- * Boxplot outlier local/source row mapping for point primitives.
+ * Boxplot outlier source row for point primitives.
  *
- * `frame.box.outlierRow` is remapped to global SourceRegistry ids during frame
- * assembly (`prepare-panels-frames`). Do not re-index through
- * `facetPanel.sourceRows` — that double-remap breaks lineage under facets (#609).
+ * `frame.box.outlierRow` holds finalized global SourceRegistry ids after
+ * {@link finalizeFrameSourceRows} during panel assembly.
  */
 export function resolveOutlierContext(input: {
   frame: LayerFrame | undefined;
   batch: GeometryBatch;
   primitiveIndex: number;
-  /** Retained for call-site compatibility; no longer used for remapping. */
-  facetPanel: FacetPanelDef | undefined;
 }): { outlierLocalRow: number | null; outlierSourceRow: number | null } {
-  void input.facetPanel;
   const { frame, batch, primitiveIndex } = input;
   const outlierSourceRow =
     frame?.box !== null && frame?.binding.layer.geom === "boxplot" && batch.kind === "points"
@@ -75,7 +70,6 @@ export function locateIdentityCandidate(
     frame,
     batch,
     primitiveIndex: facts.primitiveIndex,
-    facetPanel: ctx.facetPanels[facts.panelIndex],
   });
   const orderedGroups = frameGroups.get(`${facts.panelIndex}:${facts.layerIndex}`) ?? [0];
   const { frameRow, derivedGroup } = resolveCandidateFrameRow({
