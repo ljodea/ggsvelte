@@ -20,7 +20,7 @@ import { createPlotZoomState } from "../../src/lib/zoom/zoom-state.svelte.js";
 import { withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
 import { modelFor } from "../helpers/model.js";
 
-export const zoomRows = [
+const zoomRows = [
   { id: "a", x: 1, y: 1 },
   { id: "b", x: 10, y: 20 },
 ];
