@@ -474,15 +474,12 @@ jobs:
         if: steps.content_hash.outputs.hit != 'true'
       - name: assert playwright npm/container version sync (packages/svelte)
         if: steps.content_hash.outputs.hit != 'true'
-        run: |
-          set -euo pipefail
-          npm_version="$(cd packages/svelte && bun -e 'console.log(require("playwright/package.json").version)')"
-          expected="v${npm_version}-noble"
-          echo "packages/svelte playwright: ${npm_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
-          if [ "${expected}" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
-            echo "::error::playwright npm version in packages/svelte (${npm_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
-            exit 1
-          fi
+        uses: ./.github/actions/ci-assert-playwright-version-sync
+        with:
+          working_directory: packages/svelte
+          package: playwright
+          scope: packages/svelte
+          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
       # Chromium collects browser v8 coverage (CDP; works under bun) and enforces
       # thresholds. SSR runs under bun without --coverage: @vitest/coverage-v8
       # needs Node inspector Coverage APIs that bun does not implement
@@ -602,15 +599,12 @@ jobs:
         if: steps.content_hash.outputs.hit != 'true'
       - name: assert playwright npm/container version sync (packages/svelte)
         if: steps.content_hash.outputs.hit != 'true'
-        run: |
-          set -euo pipefail
-          npm_version="$(cd packages/svelte && bun -e 'console.log(require("playwright/package.json").version)')"
-          expected="v${npm_version}-noble"
-          echo "packages/svelte playwright: ${npm_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
-          if [ "${expected}" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
-            echo "::error::playwright npm version in packages/svelte (${npm_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
-            exit 1
-          fi
+        uses: ./.github/actions/ci-assert-playwright-version-sync
+        with:
+          working_directory: packages/svelte
+          package: playwright
+          scope: packages/svelte
+          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
       - name: component tests (packages/svelte, firefox + webkit)
         if: steps.content_hash.outputs.hit != 'true'
         working-directory: packages/svelte
@@ -670,15 +664,12 @@ jobs:
         if: steps.content_hash.outputs.hit != 'true'
       - name: assert playwright npm/container version sync (spikes/browser)
         if: steps.content_hash.outputs.hit != 'true'
-        run: |
-          set -euo pipefail
-          npm_version="$(cd spikes/browser && bun -e 'console.log(require("playwright/package.json").version)')"
-          expected="v${npm_version}-noble"
-          echo "spikes/browser playwright: ${npm_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
-          if [ "${expected}" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
-            echo "::error::playwright npm version in spikes/browser (${npm_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
-            exit 1
-          fi
+        uses: ./.github/actions/ci-assert-playwright-version-sync
+        with:
+          working_directory: spikes/browser
+          package: playwright
+          scope: spikes/browser
+          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
       - name: retired spike suites (browser + ssr projects)
         if: steps.content_hash.outputs.hit != 'true'
         working-directory: spikes/browser
@@ -740,14 +731,12 @@ jobs:
         if: steps.content_hash.outputs.hit != 'true'
       - name: assert playwright npm/container version sync (root @playwright/test)
         if: steps.content_hash.outputs.hit != 'true'
-        run: |
-          set -euo pipefail
-          vr_version="$(bun -e 'console.log(require("@playwright/test/package.json").version)')"
-          echo "root @playwright/test (VR suite): ${vr_version}; container tag: ${PLAYWRIGHT_CONTAINER_TAG}"
-          if [ "v${vr_version}-noble" != "${PLAYWRIGHT_CONTAINER_TAG}" ]; then
-            echo "::error::@playwright/test version (${vr_version}) does not match pinned container tag (${PLAYWRIGHT_CONTAINER_TAG})"
-            exit 1
-          fi
+        uses: ./.github/actions/ci-assert-playwright-version-sync
+        with:
+          working_directory: .
+          package: "@playwright/test"
+          scope: root @playwright/test (VR suite)
+          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
       - name: build packaged interaction test target
         if: steps.content_hash.outputs.hit != 'true'
         run: DOCS_BUILD_MODE=cloudflare-preview bun run build:docs
