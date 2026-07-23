@@ -77,26 +77,26 @@ upstream, `.md`/`.yaml`/`.svelte` can fold back into oxfmt (`.oxfmtrc.json`
 
 ## Tool roster and versions (verified working, July 2026)
 
-| Tool                                         | Version                | Role                                                                                  |
-| -------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------- |
-| bun                                          | 1.3.14 (pinned)        | PM / runner / unit tests                                                              |
-| typescript                                   | 6.0.3                  | `tsc -b` project references (spec, core)                                              |
-| oxlint                                       | 1.73.0                 | JS/TS linting (correctness+suspicious error, pedantic warn)                           |
-| oxlint-tsgolint                              | 0.24.0                 | type-aware rules via `oxlint --type-aware` (no standalone CLI)                        |
-| oxfmt                                        | 0.58.0                 | formatter for ts/js/json/jsonc/css/toml                                               |
-| prettier + prettier-plugin-svelte            | 3.9.5 / 4.1.1          | formatter for .svelte/.md/.yaml (see quirk above)                                     |
-| markdownlint-cli2                            | 0.23.0                 | markdown lint (pre-commit stage; config `.markdownlint-cli2.jsonc`)                   |
-| svelte-check                                 | 4.7.3                  | Svelte template + type checking (packages/svelte)                                     |
-| knip                                         | 6.26.0                 | unused files/exports/deps (spikes ignored)                                            |
-| publint / @arethetypeswrong/cli              | 0.3.21 / 0.18.5        | package publish shape (skips unbuilt stubs)                                           |
-| actionlint (npm, wasm)                       | 2.0.6                  | workflow lint via `scripts/actionlint.ts` (no shellcheck integration — wasm build)    |
-| zizmor                                       | 1.26.1 (uv tool)       | Actions security audit                                                                |
-| @changesets/cli                              | 2.31.0                 | versioning/release (spec+core+ggsvelte linked, access public)                         |
-| vitest + @vitest/browser-playwright          | 4.1.10                 | browser-mode component tests (factory `playwright()` provider)                        |
-| playwright / @playwright/test                | 1.61.1 (exact pins)    | must match CI container `mcr.microsoft.com/playwright:v1.61.1-noble` — asserted in CI |
-| @sveltejs/kit + @sveltejs/adapter-static     | 2.x / 3.x              | apps/docs static docs site (the VR screenshot target)                                 |
-| svelte / vite / @sveltejs/vite-plugin-svelte | 5.56.4 / 8.1.4 / 7.2.0 | spike + adapter toolchain                                                             |
-| pre-commit                                   | 4.6.0                  | hook framework (both stages)                                                          |
+| Tool                                         | Version                | Role                                                                               |
+| -------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------- |
+| bun                                          | 1.3.14 (pinned)        | PM / runner / unit tests                                                           |
+| typescript                                   | 6.0.3                  | `tsc -b` project references (spec, core)                                           |
+| oxlint                                       | 1.73.0                 | JS/TS linting (correctness+suspicious error, pedantic warn)                        |
+| oxlint-tsgolint                              | 0.24.0                 | type-aware rules via `oxlint --type-aware` (no standalone CLI)                     |
+| oxfmt                                        | 0.58.0                 | formatter for ts/js/json/jsonc/css/toml                                            |
+| prettier + prettier-plugin-svelte            | 3.9.5 / 4.1.1          | formatter for .svelte/.md/.yaml (see quirk above)                                  |
+| markdownlint-cli2                            | 0.23.0                 | markdown lint (pre-commit stage; config `.markdownlint-cli2.jsonc`)                |
+| svelte-check                                 | 4.7.3                  | Svelte template + type checking (packages/svelte)                                  |
+| knip                                         | 6.26.0                 | unused files/exports/deps (spikes ignored)                                         |
+| publint / @arethetypeswrong/cli              | 0.3.21 / 0.18.5        | package publish shape (skips unbuilt stubs)                                        |
+| actionlint (npm, wasm)                       | 2.0.6                  | workflow lint via `scripts/actionlint.ts` (no shellcheck integration — wasm build) |
+| zizmor                                       | 1.26.1 (uv tool)       | Actions security audit                                                             |
+| @changesets/cli                              | 2.31.0                 | versioning/release (spec+core+ggsvelte linked, access public)                      |
+| vitest + @vitest/browser-playwright          | 4.1.10                 | browser-mode component tests (factory `playwright()` provider)                     |
+| playwright / @playwright/test                | 1.61.1 (exact pins)    | must match `ghcr.io/<repo>/ci-runner:v1.61.1-noble` — two-step bump (see below)    |
+| @sveltejs/kit + @sveltejs/adapter-static     | 2.x / 3.x              | apps/docs static docs site (the VR screenshot target)                              |
+| svelte / vite / @sveltejs/vite-plugin-svelte | 5.56.4 / 8.1.4 / 7.2.0 | spike + adapter toolchain                                                          |
+| pre-commit                                   | 4.6.0                  | hook framework (both stages)                                                       |
 
 ## Dependency updates (Dependabot)
 
@@ -112,8 +112,11 @@ upstream, `.md`/`.yaml`/`.svelte` can fold back into oxfmt (`.oxfmtrc.json`
 
 Dependabot does **not** auto-bump these (human-authored locksteps / release flow):
 
-- `playwright` / `@playwright/test` — exact pins must match every
-  `mcr.microsoft.com/playwright:v…-noble` container tag (asserted in CI).
+- `playwright` / `@playwright/test` — exact pins must match
+  `support-matrix.json` `browsers.playwright` and the consumer
+  `ghcr.io/<repo>/ci-runner:v…-noble` tag (asserted in
+  `scripts/support-matrix.test.ts`). Bump via the two-step procedure below —
+  never as a Dependabot PR.
 - `pnpm` — root pin must match `support-matrix.json` `packageManagers.pnpm`
   (asserted in `scripts/support-matrix.test.ts`).
 - `@ggsvelte/*` — internal publish ranges are owned by Changesets, not registry
@@ -121,6 +124,51 @@ Dependabot does **not** auto-bump these (human-authored locksteps / release flow
 
 Majors for `svelte`, `vite`, `@sveltejs/*`, `typescript`, and `vitest` are also
 ignored — land those as deliberate migrations.
+
+### Bumping Playwright / the CI runner image
+
+Container jobs pull `ghcr.io/<owner>/<repo>/ci-runner:<tag>` (Playwright +
+`unzip`), published **only** by [`.github/workflows/build-ci-image.yml`](.github/workflows/build-ci-image.yml)
+on pushes to `main` that touch the Dockerfile or that workflow. There is
+intentionally **no** `workflow_dispatch`: a dispatchable workflow can run an
+unreviewed branch's copy with `packages: write` and overwrite the published
+tag with a poisoned image. On-demand rebuilds re-run the last successful main
+run from the Actions UI, or push a no-op change to the Dockerfile / publisher
+workflow.
+
+A single PR that bumps **consumers and publisher together deadlocks**:
+`scripts/support-matrix.test.ts` used to force them equal, so the PR would
+point container jobs at `ci-runner:<new-tag>` before main could publish that
+tag. Use a **two-step** bump (issue
+[#610](https://github.com/ljodea/ggsvelte/issues/610)):
+
+**Step 1 — prepublish the image** (publisher may _lead_ consumers):
+
+1. Bump `PLAYWRIGHT_TAG` in `.github/workflows/build-ci-image.yml`.
+2. Bump `ARG PLAYWRIGHT_TAG` default in `.github/docker/ci-runner/Dockerfile`
+   to the same value.
+3. Do **not** change `support-matrix.json`, package pins, or consumer workflow
+   tags (`PLAYWRIGHT_CONTAINER_TAG` / hardcoded `ci-runner:` image lines).
+4. Merge to `main`; wait for the `build CI image` workflow to publish
+   `ghcr.io/<owner>/<repo>/ci-runner:<new-tag>`.
+5. Verify the tag exists (Actions run green, or
+   `docker manifest inspect ghcr.io/ljodea/ggsvelte/ci-runner:vX.Y.Z-noble`).
+
+**Step 2 — consume the published tag**:
+
+1. Bump `support-matrix.json` `browsers.playwright`.
+2. Bump root `@playwright/test`, `packages/svelte` `playwright`, and
+   `spikes/browser` `playwright` to the same version; run `bun install`.
+3. Bump `PLAYWRIGHT_CONTAINER_TAG` in `.github/workflows/ci.yml` and every
+   hardcoded `ci-runner:v…-noble` image line (`ci.yml`, `vr-compare.yml`,
+   `bench.yml`).
+4. Update any hardcoded version strings in
+   `scripts/release-wiring.test.ts` (and similar) if present.
+5. Merge once container jobs pull the prepublished image successfully.
+
+**Steady state:** publisher tag == consumer tag == matrix. Between step 1 and
+step 2 the publisher may be **ahead**; it must never lag (consumers would pull
+a tag main never publishes). The lockstep test encodes that inequality.
 
 ## Running the checks
 
