@@ -200,7 +200,7 @@ function assembleIdentityCandidateDatum(
     seriesRank: attrs.seriesRank,
     sourceOrder: attrs.sourceOrder,
     lineage: attrs.lineageKey,
-    autoMode: attrs.autoMode,
+    ...(attrs.autoMode === undefined ? {} : { autoMode: attrs.autoMode }),
   };
 }
 

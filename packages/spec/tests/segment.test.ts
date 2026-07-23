@@ -71,4 +71,29 @@ describe("segment geom (spec)", () => {
     );
     expect(result.ok).toBe(true);
   });
+
+  it("rejects constant (non-field) segment endpoints", () => {
+    // Runtime only materializes field endpoints; constants must not pass validate.
+    const result = validate(
+      {
+        data: { values: [{ x: 1, y: 2 }] },
+        layers: [
+          {
+            geom: "segment",
+            aes: {
+              x: { field: "x" },
+              y: { field: "y" },
+              xend: { value: 3 },
+              yend: { value: 4 },
+            },
+          },
+        ],
+      },
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.errors.some((e) => e.code === "missing-required-channel")).toBe(true);
+    expect(result.errors.map((e) => e.path).join(" ")).toMatch(/xend|yend/);
+  });
 });

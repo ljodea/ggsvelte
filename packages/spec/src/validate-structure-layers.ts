@@ -274,11 +274,30 @@ export function layerStructuralErrors(
     if ((geom === "bar" || geom === "histogram" || geom === "density") && channel !== "x") {
       continue;
     }
-    if (mapped(channel) === undefined) {
+    const value = mapped(channel);
+    if (value === undefined) {
       errors.push({
         code: "missing-required-channel",
         path: `${layerPath}/aes/${channel}`,
         message: `The ${geom} geom requires a "${channel}" channel; map it in the layer's aes or the plot-level aes.`,
+        fix: {
+          description: `Map "${channel}" to a data field.`,
+          example: { [channel]: CHANNEL_FIX_EXAMPLE },
+        },
+      });
+      continue;
+    }
+    // Segment runtime only materializes field endpoints (checkField); constants/stat
+    // mappings would pass validation then throw in requireField — reject early.
+    if (
+      geom === "segment" &&
+      (channel === "x" || channel === "y" || channel === "xend" || channel === "yend") &&
+      !("field" in value)
+    ) {
+      errors.push({
+        code: "missing-required-channel",
+        path: `${layerPath}/aes/${channel}`,
+        message: `The segment geom requires aes.${channel} to map a data field (not a constant or stat).`,
         fix: {
           description: `Map "${channel}" to a data field.`,
           example: { [channel]: CHANNEL_FIX_EXAMPLE },

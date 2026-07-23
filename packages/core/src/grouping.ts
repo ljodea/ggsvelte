@@ -63,6 +63,10 @@ const NON_GROUPING_CHANNELS: ReadonlySet<string> = new Set([
   "xmax",
   "ymin",
   "ymax",
+  // Segment endpoints — plot-level aes may inherit them onto non-segment layers
+  // that never consume them; they must not join the discrete interaction.
+  "xend",
+  "yend",
 ]);
 
 /** Distinct sentinel for null cells so null forms its own interaction level. */
