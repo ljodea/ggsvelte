@@ -53,6 +53,7 @@ describe("createLegendFilterState construction", () => {
           modelCalls++;
           return null;
         },
+        catalogEntries: () => [],
       }),
     );
 
@@ -65,8 +66,7 @@ describe("createLegendFilterState construction", () => {
     expect(state.options).not.toBeNull();
     expect(state.filters).toEqual([]);
     expect(state.hasActiveFilters).toBe(false);
-    flushSync();
-    expect(modelCalls).toBe(0);
+    // Accessors alone must not read model. Catalog effect may read model on flush.
     destroy();
   });
 });
@@ -79,7 +79,8 @@ describe("createLegendFilterState toggle and mode", () => {
     const model = modelFor(spec);
 
     const { value: state, destroy } = withFlushedEffectRoot(() => {
-      const controller = createLegendFilterState({
+      let controller!: ReturnType<typeof createLegendFilterState>;
+      controller = createLegendFilterState({
         effectiveSpec: () => spec,
         legendFilterProp: () => true,
         onlegendfilter: () => (event) => {
@@ -90,8 +91,8 @@ describe("createLegendFilterState toggle and mode", () => {
           announcements.push(message);
         },
         model: () => model,
+        catalogEntries: () => controller.computeEntries(model),
       });
-      controller.registerCatalogEffects(() => controller.computeEntries(model));
       return controller;
     });
 
@@ -137,7 +138,8 @@ describe("createLegendFilterState toggle and mode", () => {
     const model = modelFor(spec);
 
     const { value: state, destroy } = withFlushedEffectRoot(() => {
-      const controller = createLegendFilterState({
+      let controller!: ReturnType<typeof createLegendFilterState>;
+      controller = createLegendFilterState({
         effectiveSpec: () => spec,
         legendFilterProp: () => ({ mode: "include" as const }),
         onlegendfilter: () => (event) => {
@@ -146,8 +148,8 @@ describe("createLegendFilterState toggle and mode", () => {
         oninteraction: noCallback,
         announce: () => {},
         model: () => model,
+        catalogEntries: () => controller.computeEntries(model),
       });
-      controller.registerCatalogEffects(() => controller.computeEntries(model));
       return controller;
     });
 
@@ -220,6 +222,7 @@ describe("createLegendFilterState scaled-constant gating (#598)", () => {
         oninteraction: noCallback,
         announce: () => {},
         model: () => model,
+        catalogEntries: () => [],
       }),
     );
 
@@ -254,6 +257,7 @@ describe("createLegendFilterState scaled-constant gating (#598)", () => {
         oninteraction: noCallback,
         announce: () => {},
         model: () => model,
+        catalogEntries: () => [],
       }),
     );
 
@@ -272,7 +276,8 @@ describe("createLegendFilterState capability and mode reset", () => {
     const model = modelFor(spec);
 
     const { value: state, destroy } = withFlushedEffectRoot(() => {
-      const controller = createLegendFilterState({
+      let controller!: ReturnType<typeof createLegendFilterState>;
+      controller = createLegendFilterState({
         effectiveSpec: () => spec,
         legendFilterProp: () => prop.value,
         onlegendfilter: () => (event) => {
@@ -283,8 +288,8 @@ describe("createLegendFilterState capability and mode reset", () => {
           announcements.push(message);
         },
         model: () => model,
+        catalogEntries: () => controller.computeEntries(model),
       });
-      controller.registerCatalogEffects(() => controller.computeEntries(model));
       return controller;
     });
 
@@ -322,7 +327,8 @@ describe("createLegendFilterState capability and mode reset", () => {
     const model = modelFor(spec);
 
     const { value: state, destroy } = withFlushedEffectRoot(() => {
-      const controller = createLegendFilterState({
+      let controller!: ReturnType<typeof createLegendFilterState>;
+      controller = createLegendFilterState({
         effectiveSpec: () => spec,
         legendFilterProp: () => prop.value,
         onlegendfilter: () => (event) => {
@@ -331,8 +337,8 @@ describe("createLegendFilterState capability and mode reset", () => {
         oninteraction: noCallback,
         announce: () => {},
         model: () => model,
+        catalogEntries: () => controller.computeEntries(model),
       });
-      controller.registerCatalogEffects(() => controller.computeEntries(model));
       return controller;
     });
 
@@ -367,7 +373,8 @@ describe("createLegendFilterState catalog reconciliation", () => {
     const modelBox = reactiveBox(modelFor(colorSpec(data.value)));
 
     const { value: state, destroy } = withFlushedEffectRoot(() => {
-      const controller = createLegendFilterState({
+      let controller!: ReturnType<typeof createLegendFilterState>;
+      controller = createLegendFilterState({
         effectiveSpec: () => colorSpec(data.value),
         legendFilterProp: () => true,
         onlegendfilter: () => (event) => {
@@ -376,8 +383,8 @@ describe("createLegendFilterState catalog reconciliation", () => {
         oninteraction: noCallback,
         announce: () => {},
         model: () => modelBox.value,
+        catalogEntries: () => controller.computeEntries(modelBox.value),
       });
-      controller.registerCatalogEffects(() => controller.computeEntries(modelBox.value));
       return controller;
     });
 
@@ -424,23 +431,21 @@ describe("runtime + legend-filter real cycle", () => {
       // runtime (never invoked during construction), so the catalog effect
       // always sees the freshly retrained model — no manual re-sync.
       let runtimeRef: PlotRuntime | null = null;
-      const controller = createLegendFilterState({
+      let controller!: ReturnType<typeof createLegendFilterState>;
+      controller = createLegendFilterState({
         effectiveSpec: () => spec,
         legendFilterProp: () => true,
         onlegendfilter: noCallback,
         oninteraction: noCallback,
         announce: () => {},
         model: () => runtimeRef?.model ?? null,
+        catalogEntries: () => controller.computeEntries(runtimeRef?.model ?? null),
       });
       const runtime = createPlotRuntime({
         ...runtimeDeps,
         effectiveLegendFilters: () => controller.filters,
       });
       runtimeRef = runtime;
-      // Host registration order (GGPlot.svelte): model -> catalog -> late.
-      runtime.registerModelEffects();
-      controller.registerCatalogEffects(() => controller.computeEntries(runtime.model));
-      runtime.registerLateEffects();
       return { runtime, controller };
     });
 

@@ -1,9 +1,12 @@
 /**
  * Deep plot-interaction assembly.
  *
- * Owns controller construction, deferred sibling wiring, shared Candidate
- * projection, and phased effect registration. Callers provide reactive plot
- * facts; construction topology remains an implementation detail here.
+ * Owns controller construction and shared Candidate projection. Cross-module
+ * transition side effects (e.g. inspection dismiss → brush/tool) are applied
+ * via `applyInspectionDismissSideEffects` at the surface call site (#627).
+ * Leaf modules register their own effects at construction; assembly only
+ * wires host-held deriveds into catalog reconcile where data is not available
+ * at leaf construction time.
  */
 import type { CellValue } from "@ggsvelte/core";
 import type { PortableSpec } from "@ggsvelte/spec";
@@ -118,8 +121,8 @@ export function createPlotInteractionAssembly<
   };
 
   // Construction order is the topological order of direct construction-time
-  // reads; effect registration sequence is load-bearing. Deferred thunks break
-  // the runtime cycles (surface ↔ inspection ↔ interval ↔ selection).
+  // reads. Cross-module dismiss tails go through transition-owner at the
+  // surface call site; leaf effects register at construction (#627).
 
   // ------------------------------------------------------------ zoom respec
   // Construction-time deriveds read interaction/scope/zoomConfig/assembled
@@ -188,17 +191,15 @@ export function createPlotInteractionAssembly<
     onlegendfilter: () => inputs.onlegendfilter(),
     oninteraction: inputs.oninteraction,
     announce: announceSink,
-    // model is declared after the runtime; the getter is only invoked from
-    // late catalog effects (never at construction).
+    // model / catalogEntries close over later bindings (effect-only; not
+    // construction-time reads).
     model: () => runtime.model,
+    catalogEntries: () => filterableLegendEntries,
   });
 
   // ------------------------------------------------- plot runtime
   // Factory sits after zoom-respec and legend-filter so every direct
   // construction-time dep is already initialized (TDZ).
-  // Effect registration: model dispose/onrender effects register here;
-  // ResizeObserver registers later via registerLateEffects (after legend
-  // reconcile) — safe because the observer callback is async.
   const runtime = createPlotRuntime({
     widthProp: () => inputs.width(),
     heightProp: () => inputs.height(),
@@ -212,14 +213,9 @@ export function createPlotInteractionAssembly<
     },
     onrender: () => inputs.onrender(),
   });
-  // Model dispose + onrender effects (after the legend-reset effects that
-  // registered during legendFilterState construction; before late effects).
-  runtime.registerModelEffects();
-
-  // Semantic resolution as soon as the runtime model exists. Diagnostics
-  // effects register later; early construction makes interval projection
-  // safe when a shared controller arrives with pre-populated non-union
-  // intervals (#165).
+  // Semantic resolution as soon as the runtime model exists. Early
+  // construction makes interval projection safe when a shared controller
+  // arrives with pre-populated non-union intervals (#165).
   const semanticKeys = createSemanticKeyService({
     model: () => runtime.model,
     assembled,
@@ -249,81 +245,14 @@ export function createPlotInteractionAssembly<
   const interactive = $derived(interactionConfig.interactive);
   const surfaceInteractive = $derived(interactionConfig.availableTools.length > 0);
 
-  // ------------------------------------------------- inspection
-  // Construction-time deriveds may read the earlier model. Phased effects
-  // register later via registerInspectionEffects().
-  // Reversed deps: reducer / clearBrush / chooseTool close over the later-
-  // declared surfaceState (handler/effect-only; construction guard).
-  const inspectionState = createInspectionState({
-    model: () => runtime.model,
-    // Deferred: surface owns the reducer (handler/effect only).
-    reducer: () => surfaceState.reducer,
-    inspectConfig: () => interactionConfig.inspect,
-    inspectEnabled: () => inspectEnabled,
-    dataIdentityEpoch: () => dataIdentityEpoch,
-    // Deferred: semantic-key service is declared later (handler only).
-    keyAt: (index) => semanticKeys.keyAt(index),
-    root: inputs.root,
-    captureSurface: inputs.captureSurface,
-    plotId: () => inputs.plotId,
-    tooltipHovered: () => tooltipHovered,
-    clearTooltipHovered: () => {
-      tooltipHovered = false;
-    },
-    clearBrush: () => {
-      surfaceState.clearBrush();
-    },
-    chooseTool: (next) => {
-      surfaceState.chooseTool(next);
-    },
-    oninspect: inputs.oninspect,
-    oninteraction: inputs.oninteraction,
-    announce: announceSink,
-    clearAnnouncement: () => {
-      announcer.clear();
-    },
-  });
-  // ------------------------------------------------- surface
-  // Construction-time deriveds read module-internal state + inspectConfig.
-  // Sibling controllers, sinks, and chrome getters are handler/effect-only.
-  // Phased effects register later via registerSurfaceEffects().
-  const surfaceState = createSurfaceState({
-    model: () => runtime.model,
-    root: inputs.root,
-    toolProp: () => inputs.tool(),
-    initialTool: () => interactionConfig.initialTool,
-    // Deferred: chrome availableTools (handler/effect only).
-    availableTools: () => chromeState.availableTools,
-    inspectConfig: () => interactionConfig.inspect,
-    selectConfig: () => interactionConfig.select,
-    // Deferred: chrome canPublishPointSelection (handler only).
-    pointSelectEnabled: () => chromeState.canPublishPointSelection,
-    ontoolchange: () => inputs.ontoolchange(),
-    surfaceInteractive: () => surfaceInteractive,
-    // Deferred: semantic-key service initializes later (issue #165).
-    candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
-    inspection: () => inspectionState,
-    // Deferred: interval is declared after surface (handler only).
-    interval: () => intervalState,
-    zoom: () => zoomState,
-    // Deferred: selection controller is declared after surface (handler only).
-    emitSelection: (event) => {
-      selectionState.emitSelection(event);
-    },
-    // Deferred: semantic-key service is declared later (handler only).
-    semanticKey: (row, index) => semanticKey(row, index),
-    // Deferred: selection controller is declared after surface (handler only).
-    togglePointKeys: (keys, source) => {
-      selectionState.togglePointKeys(keys, source);
-    },
-    tooltipHovered: () => tooltipHovered,
-    announce: announceSink,
-  });
+  // Shared enablement predicates (avoid re-typing the same config gates).
+  const inspectEnabled = $derived(interactionConfig.inspect !== null);
+  const legendFocusEnabled = $derived(interactionConfig.legendFocus !== null);
   const coordFlipped = $derived(assembled()?.coord?.type === "flip");
   let tooltipHovered = $state(false);
+
   // ------------------------------------------------- selection
-  // Construction-time effectiveSelectedKeys reads earlier interaction/scope
-  // only. The later runtime projection module owns anchors and masks.
+  // Before surface so emit/toggle are direct (not deferred sibling getters).
   const selectionState = createSelectionState({
     interaction: inputs.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
@@ -332,12 +261,91 @@ export function createPlotInteractionAssembly<
     oninteraction: inputs.oninteraction,
     announce: announceSink,
   });
-  // Shared enablement predicates (avoid re-typing the same config gates).
-  const inspectEnabled = $derived(interactionConfig.inspect !== null);
-  const legendFocusEnabled = $derived(interactionConfig.legendFocus !== null);
+
+  // ------------------------------------------------- inspection
+  // Reducer is still owned by surface (created next). Inspection takes a
+  // deferred reducer getter only for that TDZ edge; clearBrush/chooseTool are
+  // NOT wired here — surface applies dismiss plan tails via transition-owner.
+  let surfaceState!: ReturnType<typeof createSurfaceState>;
+  const inspectionState = createInspectionState({
+    model: () => runtime.model,
+    reducer: () => surfaceState.reducer,
+    inspectConfig: () => interactionConfig.inspect,
+    inspectEnabled: () => inspectEnabled,
+    dataIdentityEpoch: () => dataIdentityEpoch,
+    keyAt: (index) => semanticKeys.keyAt(index),
+    root: inputs.root,
+    captureSurface: inputs.captureSurface,
+    plotId: () => inputs.plotId,
+    tooltipHovered: () => tooltipHovered,
+    clearTooltipHovered: () => {
+      tooltipHovered = false;
+    },
+    oninspect: inputs.oninspect,
+    oninteraction: inputs.oninteraction,
+    announce: announceSink,
+    clearAnnouncement: () => {
+      announcer.clear();
+    },
+  });
+
+  // ------------------------------------------------- interval selection
+  // Before surface so finishBrushSelect is a direct ref (not deferred).
+  // consumptionCandidates still late-binds the projection module.
+  let semanticCandidateProjection!: ReturnType<typeof createSemanticCandidateProjection>;
+  const intervalState = createIntervalState({
+    model: () => runtime.model,
+    interaction: inputs.interaction,
+    resolvedInteractionScope: () => resolvedInteractionScope,
+    selectConfig: () => interactionConfig.select,
+    effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
+    commitZoom: (...args: Parameters<PlotZoomState["commitZoom"]>) => {
+      zoomState.commitZoom(...args);
+    },
+    captureSurface: inputs.captureSurface,
+    candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
+    consumptionCandidates: () => semanticCandidateProjection.intervalConsumptionCandidates,
+    inspectionPanel: () => inspectionState.inspectionPanel,
+    emitSelection: (...args: Parameters<SelectionState["emitSelection"]>) => {
+      selectionState.emitSelection(...args);
+    },
+    announce: announceSink,
+  });
+
+  // ------------------------------------------------- surface
+  // Inspection + interval + selection already constructed — no sibling TDZ
+  // getters for those. Chrome availableTools / pointSelect still late.
+  let chromeState!: ReturnType<typeof createPlotChromeState>;
+  surfaceState = createSurfaceState({
+    model: () => runtime.model,
+    root: inputs.root,
+    toolProp: () => inputs.tool(),
+    initialTool: () => interactionConfig.initialTool,
+    availableTools: () => chromeState.availableTools,
+    inspectConfig: () => interactionConfig.inspect,
+    selectConfig: () => interactionConfig.select,
+    pointSelectEnabled: () => chromeState.canPublishPointSelection,
+    ontoolchange: () => inputs.ontoolchange(),
+    surfaceInteractive: () => surfaceInteractive,
+    candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
+    inspection: () => inspectionState,
+    interval: () => intervalState,
+    zoom: () => zoomState,
+    emitSelection: (event) => {
+      selectionState.emitSelection(event);
+    },
+    semanticKey: (row, index) => semanticKey(row, index),
+    togglePointKeys: (keys, source) => {
+      selectionState.togglePointKeys(keys, source);
+    },
+    tooltipHovered: () => tooltipHovered,
+    announce: announceSink,
+  });
+
   // ------------------------------------------------- legend focus
-  // Factory sits after the enablement cluster so construction-time
-  // effectiveEmphasisKeys closes over earlier bindings only.
+  // Host-held entry lists are $derived after this factory; effects that read
+  // them install via installHostDerivedEffects (irreducible late data, not a
+  // sibling-controller cycle — #627).
   const legendFocusState = createLegendFocusState({
     interaction: inputs.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
@@ -346,38 +354,12 @@ export function createPlotInteractionAssembly<
     root: inputs.root,
     entryKeys: () => legendEntryKeys,
     entries: () => interactiveLegendEntries,
-    // Deferred read of the later-declared cached derived (handlers only).
     pressed: () => effectiveLegendPressed,
     onlegendfocus: inputs.onlegendfocus,
     oninteraction: inputs.oninteraction,
     announce: announceSink,
   });
-  // ------------------------------------------------- interval selection
-  // Construction-time deriveds may read model/effectiveZoomDomains (both
-  // earlier-declared). Effects register here — relative order is runtime
-  // model effects < interval effects < semantic diagnostics.
-  const intervalState = createIntervalState({
-    model: () => runtime.model,
-    interaction: inputs.interaction,
-    resolvedInteractionScope: () => resolvedInteractionScope,
-    selectConfig: () => interactionConfig.select,
-    effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
-    // Direct construction edges (not deferred thunks): zoom + selection
-    // are already constructed when interval is built.
-    commitZoom: (...args: Parameters<PlotZoomState["commitZoom"]>) => {
-      zoomState.commitZoom(...args);
-    },
-    captureSurface: inputs.captureSurface,
-    candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
-    // Deferred: the projection module is constructed immediately after interval.
-    consumptionCandidates: () => semanticCandidateProjection.intervalConsumptionCandidates,
-    inspectionPanel: () => inspectionState.inspectionPanel,
-    emitSelection: (...args: Parameters<SelectionState["emitSelection"]>) => {
-      selectionState.emitSelection(...args);
-    },
-    announce: announceSink,
-  });
-  const semanticCandidateProjection = createSemanticCandidateProjection({
+  semanticCandidateProjection = createSemanticCandidateProjection({
     model: () => runtime.model,
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
     selectedKeys: () => selectionState.effectiveSelectedKeys,
@@ -408,7 +390,7 @@ export function createPlotInteractionAssembly<
   // ------------------------------------------------- plot chrome
   // All inputs earlier-declared. Pure construction-time deriveds —
   // no $state/handlers/effects.
-  const chromeState = createPlotChromeState({
+  chromeState = createPlotChromeState({
     model: () => runtime.model,
     zoomConfig: () => interactionConfig.zoom,
     selectConfig: () => interactionConfig.select,
@@ -425,8 +407,6 @@ export function createPlotInteractionAssembly<
     resolvedWidth: () => runtime.resolvedWidth,
     resolvedHeight: () => runtime.resolvedHeight,
   });
-  // Semantic diagnostics effects (before host diagnostic / surface effects).
-  semanticKeys.registerEffects();
 
   $effect(() => {
     for (const diagnostic of chromeState.areaScaleDiagnostics) deliverDiagnostic(diagnostic);
@@ -435,10 +415,6 @@ export function createPlotInteractionAssembly<
   $effect(() => {
     for (const diagnostic of chromeState.legendDiagnostics) deliverDiagnostic(diagnostic);
   });
-
-  // Surface window-teardown + tool-sync (after diagnostics, before catalog/
-  // focus/inspection registrations).
-  surfaceState.registerSurfaceEffects();
 
   // Host-side deriveds kept outside the factory (construction-time free of
   // the model read).
@@ -455,18 +431,11 @@ export function createPlotInteractionAssembly<
   // layout test pins their combined geometry).
   const legendClearActive = $derived(legendFocusEnabled && effectiveLegendPressed !== null);
 
-  // Host-side derived kept outside the factory (construction-time free of
-  // the model read).
+  // Host-side derived for catalog reconcile (closes over runtime.model).
   const filterableLegendEntries = $derived(legendFilterState.computeEntries(runtime.model));
-  // Catalog reconcile after model effects.
-  legendFilterState.registerCatalogEffects(() => filterableLegendEntries);
-  // Legend-focus reconcile after catalog.
-  legendFocusState.registerReconcileEffects();
-  // Inspection disposal + scene reconcile after legend-focus.
-  inspectionState.registerInspectionEffects();
 
-  // clientFlush/ready effect at end of script (late registration).
-  runtime.registerLateEffects();
+  // After host entry deriveds exist (irreducible late data for legend focus).
+  legendFocusState.installHostDerivedEffects();
 
   return {
     zoomState,

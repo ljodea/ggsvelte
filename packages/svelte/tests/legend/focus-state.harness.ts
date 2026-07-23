@@ -115,7 +115,7 @@ export function mountFocusController(
     // Deferred refs mirror the host's later-declared deriveds.
     entriesRef = () => controller.computeInteractiveEntries(model());
     pressedRef = () => controller.computeLegendPressed(model());
-    controller.registerReconcileEffects();
+    controller.installHostDerivedEffects();
     return controller;
   });
 

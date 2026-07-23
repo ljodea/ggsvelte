@@ -66,7 +66,6 @@ describe("createInspectionState setInspection", () => {
     const model = modelFor(continuousSpec());
     const { state, flushFrame, destroy } = mountInspectionController({
       model: () => model,
-      registerEffects: false,
       deferredFrames: true,
       inspectConfig: () => ({ mode: "xy", maxDistance: 1e6, pin: false }),
     });
@@ -128,7 +127,6 @@ describe("createInspectionState pin cycle", () => {
     const model = modelFor(continuousSpec());
     const { state, flushFrame, destroy } = mountInspectionController({
       model: () => model,
-      registerEffects: false,
       deferredFrames: true,
     });
 
@@ -181,7 +179,6 @@ describe("createInspectionState schedulePointerInspect / onInspectPointerFrame",
       announce: (message) => {
         announcements.push(message);
       },
-      registerEffects: false,
       deferredFrames: true,
     });
     const { candidate } = candidateHit(model);
@@ -198,6 +195,9 @@ describe("createInspectionState schedulePointerInspect / onInspectPointerFrame",
     expect(state.inspection).toBeNull();
 
     // Fresh schedule + flush → InspectionState owns transient lifecycle.
+    // Scene-reconcile may have already bumped reducer revision at mount;
+    // pin that applying inspect does not advance it further.
+    const revisionBeforeInspect = reducer.state.revision;
     state.schedulePointerInspect({
       point: { x: candidate.x, y: candidate.y },
       source: "pointer",
@@ -207,8 +207,8 @@ describe("createInspectionState schedulePointerInspect / onInspectPointerFrame",
     flushFrame();
     flushSync();
     expect(state.inspection?.state).toBe("transient");
-    // Reducer is not the inspection authority (no inspection field).
-    expect(reducer.state.revision).toBe(0);
+    // Reducer is not the inspection authority (inspect frames never commit).
+    expect(reducer.state.revision).toBe(revisionBeforeInspect);
 
     // Re-apply empty (queues cleared) keeps transient.
     expect(
@@ -363,7 +363,6 @@ describe("createInspectionState schedulePointerInspect / onInspectPointerFrame",
     const { state, destroy } = mountInspectionController({
       model: () => model,
       reducer: () => reducer,
-      registerEffects: false,
     });
     controller = state;
 
@@ -397,8 +396,6 @@ describe("createInspectionState setInspection(null) clear ordering", () => {
         plotId: () => "plot",
         tooltipHovered: () => false,
         clearTooltipHovered: () => {},
-        clearBrush: () => {},
-        chooseTool: () => {},
         oninspect: () => (event) => {
           if (event.phase === "clear") log.push(`emit-clear-inspection-${stateTag()}`);
         },
@@ -439,7 +436,6 @@ describe("createInspectionState completeness selection", () => {
       inspectConfig: modeXInspect,
       oninspect: () => oninspectBox.value,
       oninteraction: noInteraction,
-      registerEffects: false,
     });
 
     const candidate = firstCandidate(model);

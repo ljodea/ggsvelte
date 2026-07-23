@@ -32,15 +32,11 @@ export type SemanticKeyService = {
   candidateSemanticKeys(candidate: CandidateFacts): PropertyKey[];
   /** Direct map lookup (inspection coordinator / mask paths). */
   keyAt(index: number): PropertyKey | null;
-  /** Register diagnostics delivery at the host's original effect position. */
-  registerEffects(): void;
 };
 
 /**
  * Owns priorKeys, semantic key resolution, and diagnostics delivery.
- * Construction may happen as soon as the runtime model exists; call
- * `registerEffects` at the original GGPlot registration site so the
- * diagnostics `$effect` keeps its relative order.
+ * Diagnostics `$effect` registers at construction (#627).
  */
 export function createSemanticKeyService(deps: SemanticKeyServiceDeps): SemanticKeyService {
   // Owned for the component lifetime; resolveSemanticKeys mutates in place.
@@ -65,11 +61,9 @@ export function createSemanticKeyService(deps: SemanticKeyServiceDeps): Semantic
     });
   });
 
-  function registerEffects(): void {
-    $effect(() => {
-      for (const diagnostic of semanticKeys.diagnostics) deps.deliverDiagnostic(diagnostic);
-    });
-  }
+  $effect(() => {
+    for (const diagnostic of semanticKeys.diagnostics) deps.deliverDiagnostic(diagnostic);
+  });
 
   function semanticKey(
     row: Record<string, CellValue> | null,
@@ -116,6 +110,5 @@ export function createSemanticKeyService(deps: SemanticKeyServiceDeps): Semantic
     keyAt(index: number): PropertyKey | null {
       return semanticKeys.keys.get(index) ?? null;
     },
-    registerEffects,
   };
 }

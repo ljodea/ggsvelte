@@ -153,8 +153,7 @@ function createDeferredFrameScheduler(): {
 /**
  * Mount the controller with production-shaped deps: every reactive dep is a
  * getter (mirroring InspectionStateDeps). Harness owns the component-held
- * reducer and passes a getter. Call registerInspectionEffects when effects
- * are under test.
+ * reducer and passes a getter. Effects register inside the factory (#627).
  *
  * When `deferredFrames` is true, owns a deferred scheduler and wires
  * `onPointerFrame` → `onInspectPointerFrame` so schedule+flush is testable.
@@ -172,13 +171,10 @@ export function mountInspectionController(
     plotId?: () => string;
     tooltipHovered?: () => boolean;
     clearTooltipHovered?: () => void;
-    clearBrush?: () => void;
-    chooseTool?: (tool: "inspect") => void;
     oninspect?: InspectionStateDeps["oninspect"];
     oninteraction?: InspectionStateDeps["oninteraction"];
     announce?: (message: string) => void;
     clearAnnouncement?: () => void;
-    registerEffects?: boolean;
     /** Wire deferred frame + onInspectPointerFrame (for schedulePointerInspect). */
     deferredFrames?: boolean;
   } = {},
@@ -227,15 +223,12 @@ export function mountInspectionController(
       plotId: options.plotId ?? (() => "plot-test"),
       tooltipHovered: options.tooltipHovered ?? (() => false),
       clearTooltipHovered: options.clearTooltipHovered ?? (() => {}),
-      clearBrush: options.clearBrush ?? (() => {}),
-      chooseTool: options.chooseTool ?? (() => {}),
       oninspect: options.oninspect ?? noInspect,
       oninteraction: options.oninteraction ?? noInteraction,
       announce: options.announce ?? (() => {}),
       clearAnnouncement: options.clearAnnouncement ?? (() => {}),
     });
     controllerRef = controller;
-    if (options.registerEffects !== false) controller.registerInspectionEffects();
     return controller;
   });
 

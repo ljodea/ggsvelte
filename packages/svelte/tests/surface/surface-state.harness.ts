@@ -3,8 +3,7 @@
  * Factories own deriveds + effects — instantiate under `$effect.root` and destroy.
  *
  * Production phased order:
- *   zoom → inspection → surface → interval → registerSurfaceEffects
- *   → registerInspectionEffects
+ *   zoom → inspection → surface → interval (effects register inside factories)
  *
  * Frame pump: each suite file that imports this module gets a module-scoped
  * rAF patch and afterEach discard (Vitest loads this per test file isolate).
@@ -283,7 +282,6 @@ export function mountSurfaceComposite(
       zoomConfig: () => config.zoom,
       assembled: () => options.spec ?? continuousSpec(),
       model: () => model,
-      coordFlipped: () => false,
       onzoom: () => {
         /* no callback */
       },
@@ -308,12 +306,6 @@ export function mountSurfaceComposite(
       plotId: () => "plot-test",
       tooltipHovered: () => false,
       clearTooltipHovered: () => {},
-      clearBrush: () => {
-        surface.clearBrush();
-      },
-      chooseTool: (next) => {
-        surface.chooseTool(next);
-      },
       oninspect: () => {
         /* no callback */
       },
@@ -329,7 +321,6 @@ export function mountSurfaceComposite(
     // 3. surface (owns reducer). Global rAF is the deferred suite pump.
     surface = createSurfaceState({
       model: () => model,
-      coordFlipped: () => false,
       root: () => root,
       toolProp: () => toolPropBox.value,
       initialTool: () => config.initialTool,
@@ -375,7 +366,6 @@ export function mountSurfaceComposite(
       commitZoom: (domains, source) => {
         zoom.commitZoom(domains, source);
       },
-      coordFlipped: () => false,
       captureSurface: () => capture,
       candidateSemanticKeys: identityCandidateKeys,
       consumptionCandidates: () => {
@@ -411,10 +401,6 @@ export function mountSurfaceComposite(
     });
 
     // 5. surface effects then 6. inspection effects (host 810 vs 954)
-    if (options.registerEffects !== false) {
-      surface.registerSurfaceEffects();
-      inspection.registerInspectionEffects();
-    }
 
     return { surface, inspection, interval, zoom };
   });

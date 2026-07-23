@@ -7,6 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { CellValue } from "@ggsvelte/core";
 
 import type { PlotInspection } from "../../src/lib/interaction/interaction.js";
+import { applyInspectionDismissSideEffects } from "../../src/lib/interaction/transition-owner.js";
 import {
   candidateHit,
   continuousSpec,
@@ -30,17 +31,10 @@ describe("createInspectionState dismissInspection", () => {
       clearTooltipHovered: () => {
         tooltipHovered = false;
       },
-      clearBrush: () => {
-        brushCleared++;
-      },
-      chooseTool: (tool) => {
-        chooseToolCalls.push(tool);
-      },
       captureSurface: () => capture,
       oninspect: () => (event) => {
         events.push(event);
       },
-      registerEffects: false,
     });
 
     const { candidate, hit } = candidateHit(model);
@@ -48,7 +42,17 @@ describe("createInspectionState dismissInspection", () => {
     flushSync();
     events.length = 0;
 
-    state.dismissInspection("escape", "keyboard", { returnToInspect: true });
+    const escapePlan = state.dismissInspection("escape", "keyboard", {
+      returnToInspect: true,
+    });
+    applyInspectionDismissSideEffects(escapePlan, {
+      clearBrush: () => {
+        brushCleared++;
+      },
+      chooseTool: (tool) => {
+        chooseToolCalls.push(tool);
+      },
+    });
     flushSync();
     expect(state.inspection).toBeNull();
     expect(tooltipHovered).toBe(false);
@@ -61,11 +65,22 @@ describe("createInspectionState dismissInspection", () => {
     state.setInspection(hit, "pointer", "transient", "xy", candidate);
     flushSync();
     events.length = 0;
-    state.closeInspection("pointer", true);
+    const closePlan = state.closeInspection("pointer", true);
+    applyInspectionDismissSideEffects(closePlan, {
+      clearBrush: () => {
+        brushCleared++;
+      },
+      chooseTool: (tool) => {
+        chooseToolCalls.push(tool);
+      },
+    });
     flushSync();
     expect(state.inspection).toBeNull();
     await Promise.resolve();
     expect(focusSpy).toHaveBeenCalled();
+    // close plan must not clear brush / return to inspect
+    expect(closePlan.clearBrush).toBe(false);
+    expect(closePlan.returnToInspect).toBe(false);
 
     destroy();
   });
@@ -76,7 +91,6 @@ describe("createInspectionState traversal", () => {
     const model = modelFor(continuousSpec());
     const { state, destroy } = mountInspectionController({
       model: () => model,
-      registerEffects: false,
     });
 
     // Seed traversal at index 0 via navigate from -1.
@@ -126,7 +140,6 @@ describe("createInspectionState traversal", () => {
 
     const { state, destroy } = mountInspectionController({
       model: () => model,
-      registerEffects: false,
     });
 
     state.navigate(1);
@@ -163,7 +176,6 @@ describe("createInspectionState traversal", () => {
 
     const { state, destroy } = mountInspectionController({
       model: () => model,
-      registerEffects: false,
     });
 
     state.navigate(1);

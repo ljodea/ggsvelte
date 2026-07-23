@@ -70,8 +70,6 @@ describe("createPlotRuntime construction", () => {
         effectiveSpec: minimalSpec,
       });
       const rt = createPlotRuntime(deps);
-      rt.registerModelEffects();
-      rt.registerLateEffects();
       return { runtime: rt, deps };
     });
     const { runtime, deps } = value;
@@ -108,8 +106,6 @@ describe("createPlotRuntime model production", () => {
         effectiveSpec: minimalSpec,
       });
       const rt = createPlotRuntime(deps);
-      rt.registerModelEffects();
-      rt.registerLateEffects();
       return rt;
     });
 
@@ -140,8 +136,6 @@ describe("createPlotRuntime model production", () => {
         resetZoom();
       });
       const rt = createPlotRuntime(deps);
-      rt.registerModelEffects();
-      rt.registerLateEffects();
       return rt;
     });
 
@@ -224,8 +218,6 @@ describe("createPlotRuntime model production", () => {
         effectiveSpec: canvasSpec,
       });
       const rt = createPlotRuntime(deps);
-      rt.registerModelEffects();
-      rt.registerLateEffects();
       return rt;
     });
 
@@ -258,8 +250,6 @@ describe("createPlotRuntime model production", () => {
         effectiveSpec: minimalSpec,
       });
       const rt = createPlotRuntime(deps);
-      rt.registerModelEffects();
-      rt.registerLateEffects();
       return rt;
     });
 
@@ -330,8 +320,6 @@ describe("createPlotRuntime model production", () => {
         deps.setRoot(el);
         deps.setWidth("container");
         const rt = createPlotRuntime(deps);
-        rt.registerModelEffects();
-        rt.registerLateEffects();
         return rt;
       });
 

@@ -55,10 +55,15 @@ export type LegendFilterStateDeps = {
   /** Stable announce sink (not a getter). */
   announce: (message: string) => void;
   /**
-   * Used ONLY inside late catalog effects (never at construction). Armed-getter
+   * Used ONLY inside catalog effects (never at construction). Armed-getter
    * construction tests enforce this construction-order DAG contract.
    */
   model: () => RenderModel | null;
+  /**
+   * Live filterable entries for catalog reconcile. May close over a later
+   * host `$derived` (handler/effect-only; not read at construction).
+   */
+  catalogEntries: () => readonly FilterableLegendEntry[];
 };
 
 export type LegendFilterState = {
@@ -74,8 +79,6 @@ export type LegendFilterState = {
   toggle(target: FilterableLegendEntry, event: MouseEvent): void;
   reset(event: MouseEvent): void;
   setPointerType(type: string | null): void;
-  /** Register catalog-reconcile effect at its original host position. */
-  registerCatalogEffects(entries: () => readonly FilterableLegendEntry[]): void;
 };
 
 // ---------------------------------------------------------------------------
@@ -83,10 +86,8 @@ export type LegendFilterState = {
 // ---------------------------------------------------------------------------
 
 /**
- * Create the legend-filter controller. Construction registers ONLY the
- * capability-reset and mode-reset effects (original ~550 region). Call
- * `registerCatalogEffects` at the original catalog position after the
- * runtime's model effects so callback/event order is preserved.
+ * Create the legend-filter controller. Construction registers capability-reset,
+ * mode-reset, and catalog-reconcile effects (#627).
  */
 export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilterState {
   const legendFilterOptions: ResolvedLegendFilterOptions | null = $derived.by(() => {
@@ -295,72 +296,70 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
     legendFilterPointerType = type;
   }
 
-  function registerCatalogEffects(entries: () => readonly FilterableLegendEntry[]): void {
-    // Catalog changes prune values that no longer exist. An emptied clause is
-    // removed, so a category that disappears and later returns is visible by
-    // default. resetScales() deliberately does not alter this filter state.
-    $effect(() => {
-      const catalogs = new Map<string, CellValue[]>();
-      for (const target of entries()) {
-        const key = `${target.legend.scale}:${target.field}`;
-        const catalog = catalogs.get(key) ?? [];
-        catalog.push(target.entry.value as CellValue);
-        catalogs.set(key, catalog);
+  // Catalog changes prune values that no longer exist. An emptied clause is
+  // removed, so a category that disappears and later returns is visible by
+  // default. resetScales() deliberately does not alter this filter state.
+  $effect(() => {
+    const catalogs = new Map<string, CellValue[]>();
+    for (const target of deps.catalogEntries()) {
+      const key = `${target.legend.scale}:${target.field}`;
+      const catalog = catalogs.get(key) ?? [];
+      catalog.push(target.entry.value as CellValue);
+      catalogs.set(key, catalog);
+    }
+    let next = localLegendFilters;
+    const reconciled: Array<{
+      clause: LegendFilterClause;
+      removed: boolean;
+    }> = [];
+    // A clause whose field is still mapped but whose legend stopped being
+    // filterable (second unlike field on the scale, a scaled constant, a
+    // non-discrete legend) has no checkbox or reset control left — remove it
+    // rather than filtering rows invisibly. Unmapped fields are handled by
+    // the capability reset above.
+    if (deps.model() !== null && legendFilterOptions !== null) {
+      for (const clause of next.filter(
+        (candidate) =>
+          activeLegendFilterBindings.has(`${candidate.scale}:${candidate.field}`) &&
+          !catalogs.has(`${candidate.scale}:${candidate.field}`),
+      )) {
+        next = next.filter((candidate) => candidate !== clause);
+        reconciled.push({ clause, removed: true });
       }
-      let next = localLegendFilters;
-      const reconciled: Array<{
-        clause: LegendFilterClause;
-        removed: boolean;
-      }> = [];
-      // A clause whose field is still mapped but whose legend stopped being
-      // filterable (second unlike field on the scale, a scaled constant, a
-      // non-discrete legend) has no checkbox or reset control left — remove it
-      // rather than filtering rows invisibly. Unmapped fields are handled by
-      // the capability reset above.
-      if (deps.model() !== null && legendFilterOptions !== null) {
-        for (const clause of next.filter(
-          (candidate) =>
-            activeLegendFilterBindings.has(`${candidate.scale}:${candidate.field}`) &&
-            !catalogs.has(`${candidate.scale}:${candidate.field}`),
-        )) {
-          next = next.filter((candidate) => candidate !== clause);
-          reconciled.push({ clause, removed: true });
-        }
-      }
-      for (const [key, catalog] of catalogs) {
-        const fingerprint = JSON.stringify(catalog.map((value) => encodeKey(value)));
-        const priorFingerprint = legendCatalogFingerprints.get(key);
-        legendCatalogFingerprints.set(key, fingerprint);
-        if (priorFingerprint === undefined || priorFingerprint === fingerprint) continue;
-        const index = next.findIndex((clause) => `${clause.scale}:${clause.field}` === key);
-        if (index < 0) continue;
-        const clause = next[index]!;
-        const values = reconcileLegendFilterValues(clause.values, catalog);
-        reconciled.push({
-          clause: Object.freeze({ ...clause, values }),
-          removed: values.length === 0,
-        });
-        next =
-          values.length === 0
-            ? next.filter((_, candidateIndex) => candidateIndex !== index)
-            : next.map((candidate, candidateIndex) =>
-                candidateIndex === index ? Object.freeze({ ...candidate, values }) : candidate,
-              );
-      }
-      for (const key of legendCatalogFingerprints.keys())
-        if (!catalogs.has(key)) legendCatalogFingerprints.delete(key);
-      if (next === localLegendFilters) return;
-      localLegendFilters = [...next];
-      for (const { clause, removed } of reconciled)
-        emitLegendFilter({
-          type: "legend-filter",
-          phase: removed ? "remove" : "change",
-          source: "programmatic",
-          clause,
-        });
-      deps.announce("Legend filters reconciled with the available groups.");
-    });
-  }
+    }
+    for (const [key, catalog] of catalogs) {
+      const fingerprint = JSON.stringify(catalog.map((value) => encodeKey(value)));
+      const priorFingerprint = legendCatalogFingerprints.get(key);
+      legendCatalogFingerprints.set(key, fingerprint);
+      if (priorFingerprint === undefined || priorFingerprint === fingerprint) continue;
+      const index = next.findIndex((clause) => `${clause.scale}:${clause.field}` === key);
+      if (index < 0) continue;
+      const clause = next[index]!;
+      const values = reconcileLegendFilterValues(clause.values, catalog);
+      reconciled.push({
+        clause: Object.freeze({ ...clause, values }),
+        removed: values.length === 0,
+      });
+      next =
+        values.length === 0
+          ? next.filter((_, candidateIndex) => candidateIndex !== index)
+          : next.map((candidate, candidateIndex) =>
+              candidateIndex === index ? Object.freeze({ ...candidate, values }) : candidate,
+            );
+    }
+    for (const key of legendCatalogFingerprints.keys())
+      if (!catalogs.has(key)) legendCatalogFingerprints.delete(key);
+    if (next === localLegendFilters) return;
+    localLegendFilters = [...next];
+    for (const { clause, removed } of reconciled)
+      emitLegendFilter({
+        type: "legend-filter",
+        phase: removed ? "remove" : "change",
+        source: "programmatic",
+        clause,
+      });
+    deps.announce("Legend filters reconciled with the available groups.");
+  });
 
   return {
     get options() {
@@ -376,6 +375,5 @@ export function createLegendFilterState(deps: LegendFilterStateDeps): LegendFilt
     toggle,
     reset,
     setPointerType,
-    registerCatalogEffects,
   };
 }
