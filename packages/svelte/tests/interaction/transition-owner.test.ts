@@ -14,8 +14,8 @@ describe("applyInspectionDismissSideEffects", () => {
       hasInspection: true,
       returnToInspect: true,
     });
-    const clearBrush = vi.fn();
-    const chooseTool = vi.fn();
+    const clearBrush = vi.fn((): void => {});
+    const chooseTool = vi.fn((_tool: string): void => {});
 
     applyInspectionDismissSideEffects(plan, { clearBrush, chooseTool });
 
@@ -29,8 +29,8 @@ describe("applyInspectionDismissSideEffects", () => {
       hasInspection: true,
       restoreFocus: true,
     });
-    const clearBrush = vi.fn();
-    const chooseTool = vi.fn();
+    const clearBrush = vi.fn((): void => {});
+    const chooseTool = vi.fn((_tool: string): void => {});
 
     applyInspectionDismissSideEffects(plan, { clearBrush, chooseTool });
 
@@ -44,8 +44,8 @@ describe("applyInspectionDismissSideEffects", () => {
       hasInspection: true,
       returnToInspect: false,
     });
-    const clearBrush = vi.fn();
-    const chooseTool = vi.fn();
+    const clearBrush = vi.fn((): void => {});
+    const chooseTool = vi.fn((_tool: string): void => {});
 
     applyInspectionDismissSideEffects(plan, { clearBrush, chooseTool });
 
