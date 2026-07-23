@@ -46,8 +46,8 @@ export interface LayerFrame {
   inputGroups: readonly number[];
   /**
    * Global source-row id per pre-stat input table row (multi-table SourceRegistry
-   * ids after filter/facet remap). Length is `table.rowCount`. Used by aggregate
-   * lineage when FacetPanelDef.sourceRows is not layer-local (#589).
+   * ids after filter/facet remap). Length is `table.rowCount`. Set by
+   * {@link finalizeFrameSourceRows} during panel assembly (#626).
    */
   inputSourceRows: number[] | null;
   /** Source row per post-stat row (NO_ROW for synthesized rows). */

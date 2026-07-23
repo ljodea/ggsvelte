@@ -3,10 +3,10 @@ import type { BarParams } from "@ggsvelte/spec";
 import { bandKey } from "../../scales/train.js";
 import { ColumnTable } from "../../table.js";
 import { assignBinId } from "../binned-scale.js";
-import type { FacetPanelDef } from "../facets.js";
 import { shouldAggregateOnSemanticTemporalX } from "../frame-stats-shared.js";
 import { positionColumn, xConversionOf } from "../temporal-position.js";
 import type { LayerBinding, LayerFrame } from "../types.js";
+import { globalSourceRowForInputRow } from "../source-row-lineage.js";
 
 /** Key used for count/summary/boxplot group×x lineage buckets (matches frame xValues). */
 export function aggregateLineageXKey(
@@ -78,10 +78,9 @@ export function buildBinLineageBuckets(input: {
   frame: LayerFrame;
   panelIndex: number;
   layerIndex: number;
-  facetPanel: FacetPanelDef;
   sourceRowsByGroupBin: Map<string, number[]>;
 }): void {
-  const { frame, panelIndex, layerIndex, facetPanel, sourceRowsByGroupBin } = input;
+  const { frame, panelIndex, layerIndex, sourceRowsByGroupBin } = input;
   const field = frame.binding.xField;
   if (field === null) return;
 
@@ -124,8 +123,7 @@ export function buildBinLineageBuckets(input: {
     const membersByGroup = new Map<number, number[]>();
     for (let localRow = 0; localRow < inputGroups.length; localRow++) {
       const group = inputGroups[localRow]!;
-      const sourceRow =
-        frame.inputSourceRows?.[localRow] ?? facetPanel.sourceRows?.[localRow] ?? localRow;
+      const sourceRow = globalSourceRowForInputRow(frame, localRow);
       const members = membersByGroup.get(group);
       if (members === undefined) membersByGroup.set(group, [sourceRow]);
       else members.push(sourceRow);
@@ -159,8 +157,7 @@ export function buildBinLineageBuckets(input: {
     if (!Number.isFinite(value)) continue;
     const idx = findBinIndex(value, bins, closed);
     if (idx < 0) continue;
-    const sourceRow =
-      frame.inputSourceRows?.[localRow] ?? facetPanel.sourceRows?.[localRow] ?? localRow;
+    const sourceRow = globalSourceRowForInputRow(frame, localRow);
     bins[idx]!.bucket.push(sourceRow);
   }
 }

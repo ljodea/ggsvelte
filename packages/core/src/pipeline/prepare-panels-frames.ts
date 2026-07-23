@@ -10,7 +10,8 @@ import { configureStyleBindings } from "./bind-layer-style-config.js";
 import type { FacetPanelDef } from "./facets.js";
 import { styleBinExtent } from "./frame-group-columns.js";
 import { buildFrame } from "./frame.js";
-import { remapToGlobalSourceRows, sliceLayerForPanel } from "./layer-panel-data.js";
+import { finalizeFrameSourceRows } from "./source-row-lineage.js";
+import { sliceLayerForPanel } from "./layer-panel-data.js";
 import { applyPosition } from "./position.js";
 import { resolveColumnTransform } from "./position-program.js";
 import { assertInferredTemporalTransform } from "./scale-config-preflight.js";
@@ -335,15 +336,7 @@ export function buildPanelFrames(input: {
       // Annotation frames are rowless — do not retain the full panel source-row
       // array (can be huge under facets) when there is no lineage to resolve.
       if (bindings[index]!.ruleForm !== "annotation") {
-        // Pre-stat input rows and post-stat mark rows share the layer's global
-        // source-row namespace (filter + multi-table registry).
-        frame.inputSourceRows = slice.globalSourceRows;
-        // Map panel-local indices → global multi-table source rows.
-        remapToGlobalSourceRows(frame.rowIndex, slice.globalSourceRows);
-        // Boxplot outlier rows carry separate source indices.
-        if (frame.box !== null) {
-          remapToGlobalSourceRows(frame.box.outlierRow, slice.globalSourceRows);
-        }
+        finalizeFrameSourceRows(frame, slice);
       }
       assertRibbonBounds(frame);
       panelFrames[p]!.push(frame);

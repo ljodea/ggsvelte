@@ -58,6 +58,7 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
       n: groups.length,
       groups,
       inputGroups,
+      inputSourceRows: [0, 1, 2, 3, 4],
       xmin: null,
       xmax: null,
     });
@@ -66,7 +67,6 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
       frame,
       panelIndex: 0,
       layerIndex: 0,
-      facetPanel: fromAny({ sourceRows: null }),
       sourceRowsByGroupBin,
     });
 
@@ -76,7 +76,7 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
     expect(sourceRowsByGroupBin.get("0:0:1:3")).toEqual([1, 3]);
   });
 
-  it("remaps through facetPanel.sourceRows in first-seen order", async () => {
+  it("uses finalized inputSourceRows for global lineage ids", async () => {
     const buildBinLineageBuckets = await loadBuildBinLineageBuckets();
     const table = ColumnTable.fromRows([
       { g: "a", x: 1 },
@@ -91,6 +91,7 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
       n: groups.length,
       groups,
       inputGroups,
+      inputSourceRows: [10, 20, 30],
       xmin: null,
       xmax: null,
     });
@@ -99,7 +100,6 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
       frame,
       panelIndex: 2,
       layerIndex: 1,
-      facetPanel: fromAny({ sourceRows: [10, 20, 30] }),
       sourceRowsByGroupBin,
     });
 
@@ -127,6 +127,7 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
       n: k,
       groups,
       inputGroups,
+      inputSourceRows: Array.from({ length: n }, (_, i) => i),
       xmin: null,
       xmax: null,
     });
@@ -135,7 +136,6 @@ describe("buildBinLineageBuckets missing-edges fallback (issue #218)", () => {
       frame,
       panelIndex: 0,
       layerIndex: 0,
-      facetPanel: fromAny({ sourceRows: null }),
       sourceRowsByGroupBin,
     });
 
