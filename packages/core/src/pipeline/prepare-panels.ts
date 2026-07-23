@@ -3,7 +3,7 @@
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import { ColumnTable } from "../table.js";
+import { ColumnTable, type CellValue } from "../table.js";
 
 import { bindLayer } from "./bind.js";
 import { bindLayerTable, bindPlotData } from "./bind-data.js";
@@ -32,26 +32,48 @@ import type {
 export type { PreparedPanels } from "./prepare-panels-types.js";
 
 /**
- * Choose the table used to build facet layout:
- * 1. Plot table when it contains every facet field.
- * 2. Else first layer table that contains every facet field.
- * resolveFacet still throws unknown-field when the chosen table lacks a field.
+ * Choose the table used to build facet layout (#608):
+ * - `sources` is one filtered table per distinct SourceRegistry namespace
+ *   (caller dedupes inherited plot tables so we do not double-count).
+ * - Collect every complete source (has all facet fields).
+ * - One complete source → use it as-is (panel sourceRows stay real).
+ * - Several complete sources → concatenate facet columns so resolveFacet
+ *   discovers the union of panel keys (layers still slice by panel identity).
+ * - None complete → fall back so resolveFacet can emit unknown-field.
  */
 function facetLayoutTable(
   facet: PortableSpec["facet"],
-  plotTable: ColumnTable | null,
-  layerSources: readonly ColumnTable[],
+  sources: readonly ColumnTable[],
 ): ColumnTable {
   const fields = facetFieldNames(facet);
   if (fields.length === 0) {
-    return plotTable ?? layerSources[0] ?? ColumnTable.fromRows([]);
+    return sources[0] ?? ColumnTable.fromRows([]);
   }
-  if (plotTable !== null && fields.every((f) => plotTable.has(f))) return plotTable;
-  for (const table of layerSources) {
-    if (fields.every((f) => table.has(f))) return table;
+  const complete = sources.filter((table) => fields.every((f) => table.has(f)));
+  if (complete.length === 0) {
+    // Fall back so resolveFacet emits a clear unknown-field.
+    return sources[0] ?? ColumnTable.fromRows([]);
   }
-  // Fall back to plot or first layer so resolveFacet emits a clear unknown-field.
-  return plotTable ?? layerSources[0] ?? ColumnTable.fromRows([]);
+  if (complete.length === 1) return complete[0]!;
+  return unionFacetKeyColumns(complete, fields);
+}
+
+/** Concatenate facet-key columns from complete sources for layout discovery. */
+function unionFacetKeyColumns(
+  tables: readonly ColumnTable[],
+  fields: readonly string[],
+): ColumnTable {
+  const columns: Record<string, CellValue[]> = {};
+  for (const field of fields) columns[field] = [];
+  for (const table of tables) {
+    const cols = fields.map((f) => table.column(f));
+    for (let row = 0; row < table.rowCount; row++) {
+      for (let i = 0; i < fields.length; i++) {
+        columns[fields[i]!]!.push(cols[i]![row]!);
+      }
+    }
+  }
+  return ColumnTable.fromColumns(columns);
 }
 
 /** Apply rowFilters only for clauses whose field exists on this layer table. */
@@ -137,11 +159,21 @@ export function preparePanels(
   assertScaleConfiguration("x", normalized.scales?.x);
   assertScaleConfiguration("y", normalized.scales?.y);
 
-  const layoutTable = facetLayoutTable(
-    normalized.facet,
-    plotSource === null ? null : primaryFiltered.table,
-    layerContexts.map((c) => c.filteredTable),
-  );
+  // One filtered view per unfiltered source object: plot first when present,
+  // then layer-local tables. Inherited layers share plotSource and must not
+  // re-enter the complete set (#608 union without double-counting).
+  const layoutSources: ColumnTable[] = [];
+  const seenSourceTables = new Set<ColumnTable>();
+  if (plotSource !== null) {
+    layoutSources.push(primaryFiltered.table);
+    seenSourceTables.add(plotSource);
+  }
+  for (const ctx of layerContexts) {
+    if (seenSourceTables.has(ctx.sourceTable)) continue;
+    seenSourceTables.add(ctx.sourceTable);
+    layoutSources.push(ctx.filteredTable);
+  }
+  const layoutTable = facetLayoutTable(normalized.facet, layoutSources);
   // Closed levels still produce empty panels when every row was filtered out;
   // only implicit (data-driven) facets collapse to a single placeholder.
   const hasClosedLevels =
