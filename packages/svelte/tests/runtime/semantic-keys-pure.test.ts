@@ -191,6 +191,47 @@ describe("dataIdentityEpochToken", () => {
     }
     spy.mockRestore();
   });
+
+  // #609 — geom-child layer data must participate in the identity epoch.
+  it("includes layer-local data in the epoch when plot data/spec are absent", () => {
+    const tracker = createSourceIdentityTracker();
+    const id = (value: unknown) => tracker.sourceIdentity(value);
+    const rowsA = [
+      { x: 1, y: 2 },
+      { x: 3, y: 4 },
+    ];
+    const rowsB = [
+      { x: 9, y: 8 },
+      { x: 7, y: 6 },
+    ];
+    // Plot-level data/spec absent — tokens are stable literals.
+    const absent = {
+      ready: true as const,
+      dataToken: "none",
+      specToken: "none",
+      data: null,
+      datasets: null,
+      sourceIdentity: id,
+    };
+    const withoutLayers = dataIdentityEpochToken(absent);
+    const withLayerA = dataIdentityEpochToken({
+      ...absent,
+      layers: [{ data: rowsA }],
+    });
+    const withLayerB = dataIdentityEpochToken({
+      ...absent,
+      layers: [{ data: rowsB }],
+    });
+    expect(withLayerA).not.toBe(withoutLayers);
+    expect(withLayerA).not.toBe(withLayerB);
+    // Same layer data reference → stable epoch.
+    expect(
+      dataIdentityEpochToken({
+        ...absent,
+        layers: [{ data: rowsA }],
+      }),
+    ).toBe(withLayerA);
+  });
 });
 
 describe("resolveSemanticKeysForPlot", () => {

@@ -31,23 +31,28 @@ function makeSourceValueLookup(
     sourceRow === null || field === undefined ? null : table.column(field)[sourceRow]!;
 }
 
-/** Boxplot outlier local/source row mapping for point primitives. */
+/**
+ * Boxplot outlier local/source row mapping for point primitives.
+ *
+ * `frame.box.outlierRow` is remapped to global SourceRegistry ids during frame
+ * assembly (`prepare-panels-frames`). Do not re-index through
+ * `facetPanel.sourceRows` — that double-remap breaks lineage under facets (#609).
+ */
 export function resolveOutlierContext(input: {
   frame: LayerFrame | undefined;
   batch: GeometryBatch;
   primitiveIndex: number;
+  /** Retained for call-site compatibility; no longer used for remapping. */
   facetPanel: FacetPanelDef | undefined;
 }): { outlierLocalRow: number | null; outlierSourceRow: number | null } {
-  const { frame, batch, primitiveIndex, facetPanel } = input;
-  const outlierLocalRow =
+  void input.facetPanel;
+  const { frame, batch, primitiveIndex } = input;
+  const outlierSourceRow =
     frame?.box !== null && frame?.binding.layer.geom === "boxplot" && batch.kind === "points"
       ? (frame?.box.outlierRow[primitiveIndex] ?? null)
       : null;
-  const outlierSourceRow =
-    outlierLocalRow === null
-      ? null
-      : (facetPanel?.sourceRows?.[outlierLocalRow] ?? outlierLocalRow);
-  return { outlierLocalRow, outlierSourceRow };
+  // outlierLocalRow kept for frame-row call sites; same global id (no panel remap).
+  return { outlierLocalRow: outlierSourceRow, outlierSourceRow };
 }
 
 export function locateIdentityCandidate(

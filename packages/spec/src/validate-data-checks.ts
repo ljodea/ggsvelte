@@ -543,8 +543,9 @@ export function dataChecks(
   }
 
   // --- scale/type compatibility (order preserved for diagnostics) ------------
-  // Union layer evidence for global scale checks (same field name across layers
-  // is last-wins; per-layer unknown-field already used layer-local maps above).
+  // Union layer evidence as a fallback for non-layer-scoped checks (e.g. color
+  // manual ranges). Position scale checks prefer per-layer evidence via
+  // evidenceForUse so same field names on different tables stay independent (#609).
   const fields: FieldEvidenceMap = new Map(plotFields ?? undefined);
   if (layerResolved.status === "ok") {
     for (const layerMap of layerResolved.layers) {
@@ -555,6 +556,23 @@ export function dataChecks(
   if (fields.size === 0 && resolved.status === "ok") {
     for (const [name, entry] of resolved.fields) fields.set(name, entry);
   }
+  const layerMaps = layerResolved.status === "ok" ? layerResolved.layers : null;
+  const evidenceForUse = (use: { field: string; path: string }) => {
+    const match = /^\/layers\/(\d+)\//.exec(use.path);
+    if (match !== null && layerMaps !== null) {
+      const layerMap = layerMaps[Number(match[1])];
+      if (layerMap !== null && layerMap !== undefined) {
+        const hit = layerMap.get(use.field);
+        if (hit !== undefined) return hit;
+      }
+      // Layer with no override inherits plot evidence.
+      if (plotFields !== null) {
+        const hit = plotFields.get(use.field);
+        if (hit !== undefined) return hit;
+      }
+    }
+    return fields.get(use.field);
+  };
   const typeOf = (field: string) => fields.get(field)?.type ?? null;
   for (const aesthetic of ["shape", "linetype"] as const) {
     const config = scales?.[aesthetic] as { type?: string } | undefined;
@@ -728,6 +746,7 @@ export function dataChecks(
     ...checkPositionScaleDataCompatibility({
       scales,
       fields,
+      evidenceForUse,
       axisFields,
       invalidTemporalAxes,
       temporalDecisionCache,

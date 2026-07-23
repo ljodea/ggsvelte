@@ -388,3 +388,148 @@ describe("layer data facets", () => {
     expect(markCount(model, "points")).toBe(2);
   });
 });
+
+// #609 — remaining multi-table edges deferred from PR #603.
+describe("multi-table edges (#609)", () => {
+  it("type:binned x reads each layer table (no unknown-field on later-layer field)", () => {
+    const model = runPipeline(
+      {
+        scales: { x: { type: "binned" } },
+        layers: [
+          {
+            geom: "point",
+            data: {
+              values: [
+                { a: 1, y: 1 },
+                { a: 2, y: 2 },
+              ],
+            },
+            aes: { x: { field: "a" }, y: { field: "y" } },
+          },
+          {
+            geom: "point",
+            data: {
+              values: [
+                { score: 10, y: 3 },
+                { score: 90, y: 4 },
+              ],
+            },
+            aes: { x: { field: "score" }, y: { field: "y" } },
+          },
+        ],
+      },
+      size,
+    );
+    expect(markCount(model, "points")).toBe(4);
+    // Extent must include the later-layer field (score up to 90), not only primary `a`.
+    const xDomain = model.domains.effective.x;
+    expect(xDomain[1]).toBeGreaterThanOrEqual(50);
+  });
+
+  it("fixed-x faceted histogram bins each layer's own x field", () => {
+    const model = runPipeline(
+      {
+        facet: { wrap: { field: "g" } },
+        scales: { x: { type: "linear" } },
+        layers: [
+          {
+            geom: "histogram",
+            stat: "bin",
+            data: {
+              values: [
+                { a: 1, g: "p" },
+                { a: 2, g: "p" },
+                { a: 1, g: "q" },
+                { a: 3, g: "q" },
+              ],
+            },
+            aes: { x: { field: "a" } },
+          },
+          {
+            geom: "histogram",
+            stat: "bin",
+            data: {
+              values: [
+                { score: 10, g: "p" },
+                { score: 20, g: "p" },
+                { score: 15, g: "q" },
+              ],
+            },
+            aes: { x: { field: "score" } },
+          },
+        ],
+      },
+      size,
+    );
+    expect(model.scene.panels.length).toBe(2);
+    // Both layers contribute rects without throwing unknown-field on `score`.
+    expect(markCount(model, "rects")).toBeGreaterThan(0);
+  });
+
+  it("transform diagnostics scan filtered layer tables, not unfiltered sources", () => {
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { x: 1, y: 1, group: "keep" },
+            { x: -5, y: 2, group: "hide" },
+            { x: 10, y: 3, group: "keep" },
+          ],
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "group" } },
+        scales: { x: { type: "linear", transform: "log10" } },
+        layers: [{ geom: "point" }],
+      },
+      {
+        ...size,
+        rowFilters: [{ scale: "color", field: "group", mode: "exclude", values: ["hide"] }],
+      },
+    );
+    // Filtered-out non-positive x must not emit transform-domain diagnostics.
+    expect(model.warnings.some((w) => w.code === "scale-transform-domain")).toBe(false);
+    expect(model.scaleDiagnostics.some((d) => d.code === "scale-transform-domain")).toBe(false);
+    expect(markCount(model, "points")).toBe(2);
+  });
+
+  it("faceted boxplot outlier candidates keep global source rows (no double remap)", () => {
+    // Enough rows per panel that a panel-local outlier index can be confused with
+    // a different sourceRows entry if remapped twice (#609).
+    const values = [
+      { g: "a", cat: "box", y: 1 },
+      { g: "a", cat: "box", y: 2 },
+      { g: "a", cat: "box", y: 3 },
+      { g: "a", cat: "box", y: 4 },
+      { g: "a", cat: "box", y: 5 },
+      { g: "a", cat: "box", y: 100 }, // outlier at source row 5
+      { g: "b", cat: "box", y: 1 },
+      { g: "b", cat: "box", y: 2 },
+      { g: "b", cat: "box", y: 3 },
+      { g: "b", cat: "box", y: 4 },
+      { g: "b", cat: "box", y: 5 },
+      { g: "b", cat: "box", y: 6 },
+    ];
+    const model = runPipeline(
+      {
+        data: { values },
+        facet: { wrap: { field: "g" } },
+        layers: [
+          {
+            geom: "boxplot",
+            stat: "boxplot",
+            aes: { x: { field: "cat" }, y: { field: "y" } },
+          },
+        ],
+      },
+      size,
+    );
+    const outliers = Array.from({ length: model.candidates.size }, (_, id) =>
+      model.candidates.candidate(id),
+    ).filter((c) => c?.kind === "points" && c.yValue === 100);
+    expect(outliers.length).toBe(1);
+    const outlier = outliers[0]!;
+    // Lineage must pin the true observation row (index 5), not a remapped alias.
+    const keys = [...model.lineage.keys(outlier.lineage)];
+    expect(keys).toEqual([5]);
+    expect(model.row(5)?.y).toBe(100);
+  });
+});
