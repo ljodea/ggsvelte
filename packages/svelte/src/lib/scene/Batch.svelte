@@ -439,3 +439,21 @@
     {/each}
   </g>
 {/if}
+
+<style>
+  /* Ease interaction-mask opacity changes (legend emphasis, muteSiblings, etc.).
+     Transition on direct mark children — not only [data-gg-focused] — so unmute
+     on mask clear still eases. Default-off mute (#633) avoids gap flicker; this
+     softens remaining mask transitions. Instant under prefers-reduced-motion. */
+  /* svelte-ignore css_unused_selector */
+  .gg-batch > :global(*) {
+    transition: opacity 120ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* svelte-ignore css_unused_selector */
+    .gg-batch > :global(*) {
+      transition: none;
+    }
+  }
+</style>

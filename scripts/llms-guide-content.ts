@@ -918,7 +918,9 @@ concrete mode before an event is emitted. \`x\` and \`y\` return one
 representative per semantic series at the focused axis value; \`exact\` and
 \`xy\` return the focused datum. \`maxDistance\` is measured in CSS pixels: the
 dominant axis for \`x\` or \`y\`, Euclidean distance for \`xy\`, and geometry
-containment plus tolerance for \`exact\`.
+containment plus tolerance for \`exact\`. Rect marks (\`geom_col\` / \`geom_bar\`)
+never draw a point ring; default hover is tooltip-only. Pass
+\`muteSiblings: true\` to mute non-focused bars via the interaction mask.
 
 For custom HTML, pass a Svelte 5 snippet. Informational content is the default;
 choose \`contentMode: "interactive"\` only when the pinned tooltip contains

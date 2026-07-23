@@ -135,6 +135,12 @@ export interface InspectOptions<Row = Record<string, CellValue>, Key = PropertyK
   readonly pin?: boolean;
   readonly maxDistance?: number;
   readonly contentMode?: "informational" | "interactive";
+  /**
+   * When true, inspection mutes non-focused marks (sibling bars/cols) via the
+   * interaction mask. Default false — tooltip-only hover avoids full-plot
+   * flicker when the pointer crosses gaps between rect marks (#633).
+   */
+  readonly muteSiblings?: boolean;
   readonly content?: Snippet<[PlotInspectionChange<Row, Key>]>;
 }
 

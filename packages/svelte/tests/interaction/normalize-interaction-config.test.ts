@@ -25,8 +25,18 @@ describe("interaction capability normalization", () => {
         mode: "auto",
         pin: true,
         contentMode: "informational",
+        muteSiblings: false,
       },
       initialTool: "inspect",
+    });
+  });
+
+  it("defaults muteSiblings off and accepts explicit opt-in (#633)", () => {
+    expect(normalizeInteractionConfig({ inspect: true }).inspect).toMatchObject({
+      muteSiblings: false,
+    });
+    expect(normalizeInteractionConfig({ inspect: { muteSiblings: true } }).inspect).toMatchObject({
+      muteSiblings: true,
     });
   });
 

@@ -24,6 +24,9 @@ type SemanticCandidate = IntervalConsumptionCandidate<PropertyKey> & {
   readonly kind: string;
 };
 
+/** Stable empty masks — avoid fresh `[]` identity churn on tooltip-only hover. */
+const EMPTY_INTERACTION_MASKS = Object.freeze([]) as readonly (BatchInteractionMask | null)[];
+
 /** OR two mask projections per batch (focused if either side is focused). */
 function unionInteractionMasks(
   left: readonly (BatchInteractionMask | null)[],
@@ -73,6 +76,11 @@ export type SemanticCandidateProjectionDeps = {
   intervalKeys: () => readonly PropertyKey[];
   intervals: () => readonly PlotInteractionInterval<PropertyKey>[];
   emphasisKeys: () => readonly PropertyKey[];
+  /**
+   * When true, rect inspection builds sibling-mute masks (#386 opt-in).
+   * Default off — tooltip-only hover (#633).
+   */
+  muteSiblingsOnInspect?: () => boolean;
   inspectionFocus: () => PresentationInspectionFocus | null;
 };
 
@@ -90,8 +98,11 @@ export type SemanticCandidateProjection = {
 export function createSemanticCandidateProjection(
   deps: SemanticCandidateProjectionDeps,
 ): SemanticCandidateProjection {
+  const muteSiblingsOnInspect = $derived(deps.muteSiblingsOnInspect?.() === true);
   const presentationFocusKeys = $derived(
-    mergePresentationFocusKeys(deps.emphasisKeys(), deps.inspectionFocus()),
+    mergePresentationFocusKeys(deps.emphasisKeys(), deps.inspectionFocus(), {
+      muteSiblings: muteSiblingsOnInspect,
+    }),
   );
   const selectedKeyCount = $derived(deps.selectedKeys().length);
   const emphasisKeyCount = $derived(deps.emphasisKeys().length);
@@ -139,10 +150,16 @@ export function createSemanticCandidateProjection(
   );
   const interactionMasks = $derived.by((): readonly (BatchInteractionMask | null)[] => {
     const model = deps.model();
-    if (model === null) return [];
+    if (model === null) return EMPTY_INTERACTION_MASKS;
     const focus = deps.inspectionFocus();
+    // Rect inspection primitives: muteSiblings opt-in, or layer under active
+    // legend/controller emphasis so the seed bar stays focused (#386 / #633).
+    const applyRectInspectionMask = muteSiblingsOnInspect || emphasisKeyCount > 0;
     const rectPrimitives =
-      focus?.kind === "rects" && focus.primitives !== undefined && focus.primitives.length > 0
+      applyRectInspectionMask &&
+      focus?.kind === "rects" &&
+      focus.primitives !== undefined &&
+      focus.primitives.length > 0
         ? focus.primitives
         : null;
 
@@ -154,9 +171,9 @@ export function createSemanticCandidateProjection(
         sharedCandidateProjection,
       );
     }
-    // Keyless rect inspection: always layer seed primitives so legend/controller
+    // Keyless rect inspection: layer seed primitives so legend/controller
     // emphasis keys do not suppress the hovered bar's de-emphasis (#386).
-    if (rectPrimitives === null) return keyMasks ?? [];
+    if (rectPrimitives === null) return keyMasks ?? EMPTY_INTERACTION_MASKS;
     const primitiveMasks = buildPrimitiveInteractionMasks(model.scene.batches, rectPrimitives);
     if (keyMasks === null) return primitiveMasks;
     return unionInteractionMasks(keyMasks, primitiveMasks);
