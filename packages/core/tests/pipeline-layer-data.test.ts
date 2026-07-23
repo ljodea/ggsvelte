@@ -532,4 +532,82 @@ describe("multi-table edges (#609)", () => {
     expect(keys).toEqual([5]);
     expect(model.row(5)?.y).toBe(100);
   });
+
+  it("shares source-row identity for plot named ref and explicit layer named ref", () => {
+    // Same name:"cars" at plot and layer must reuse one ColumnTable / registry range.
+    const model = runPipeline(
+      {
+        data: { name: "cars" },
+        datasets: { cars: { values: obs } },
+        layers: [
+          { geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } },
+          {
+            geom: "point",
+            data: { name: "cars" },
+            aes: { x: { field: "x" }, y: { field: "y" } },
+          },
+        ],
+      },
+      size,
+    );
+    // Four source rows once — not 8 from a double registry registration.
+    expect(model.row(0)).toMatchObject({ x: 1, y: 10 });
+    expect(model.row(3)).toMatchObject({ x: 4, y: 25 });
+    expect(model.row(4) == null).toBe(true);
+  });
+
+  it("does not apply a color legend filter to layers that do not map color", () => {
+    // Layer 1 maps color:group; layer 2 has a group column for faceting only.
+    const model = runPipeline(
+      {
+        layers: [
+          {
+            geom: "point",
+            data: {
+              values: [
+                { x: 1, y: 1, group: "a" },
+                { x: 2, y: 2, group: "b" },
+              ],
+            },
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "group" } },
+          },
+          {
+            geom: "point",
+            data: {
+              values: [
+                { x: 3, y: 3, group: "a" },
+                { x: 4, y: 4, group: "b" },
+              ],
+            },
+            aes: { x: { field: "x" }, y: { field: "y" } },
+          },
+        ],
+      },
+      {
+        ...size,
+        rowFilters: [{ scale: "color", field: "group", mode: "exclude", values: ["a"] }],
+      },
+    );
+    // Layer 1 loses group "a"; layer 2 keeps both rows (no color mapping).
+    expect(markCount(model, "points")).toBe(3);
+  });
+
+  it("does not retain panel source rows on annotation frames", () => {
+    const model = runPipeline(
+      {
+        data: { values: obs },
+        layers: [
+          { geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } },
+          { geom: "rule", params: { yintercept: 15 } },
+        ],
+      },
+      size,
+    );
+    // Annotation batch has no source rows; rowIndex sentinel remains NO_ROW.
+    const rule = model.scene.batches.find((b) => b.kind === "segments" || b.kind === "paths");
+    expect(rule).toBeDefined();
+    if (rule !== undefined) {
+      for (const row of rule.rowIndex) expect(row).toBe(0xffffffff);
+    }
+  });
 });

@@ -122,7 +122,16 @@ export class GGBuilderCore {
 
   /** Add a layer (canonical form — the geom* methods are sugar for this). */
   layer(layer: LayerInput): GGBuilder {
-    return this.#with({ layers: [...this.#state.layers, layer] });
+    // Snapshot authoring data at insertion (same as geom* sugar via layerFrom)
+    // so later mutation of caller-owned arrays cannot leak into .spec().
+    if (layer.data === undefined) {
+      return this.#with({ layers: [...this.#state.layers, layer] });
+    }
+    const snapped = {
+      ...layer,
+      data: toAuthoringDataRef(layer.data as DataInput),
+    } as LayerInput;
+    return this.#with({ layers: [...this.#state.layers, snapped] });
   }
 
   /** Sugar for .layer({ geom: 'point', ... }). */

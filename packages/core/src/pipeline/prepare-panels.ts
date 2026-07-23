@@ -76,13 +76,36 @@ function unionFacetKeyColumns(
   return ColumnTable.fromColumns(columns);
 }
 
-/** Apply rowFilters only for clauses whose field exists on this layer table. */
+/**
+ * Whether this layer's effective aes maps `clause.scale` to `clause.field`.
+ * Legend filters must not hide layers that merely have a same-named column.
+ */
+function layerMapsLegendFilter(
+  layer: PortableSpec["layers"][number],
+  plotAes: PortableSpec["aes"],
+  clause: NonNullable<RunOptions["rowFilters"]>[number],
+): boolean {
+  const channel = clause.scale;
+  const layerAes = layer.aes as Record<string, unknown> | undefined;
+  const plot = plotAes as Record<string, unknown> | undefined;
+  const mapped = layerAes?.[channel] ?? plot?.[channel];
+  if (mapped === undefined || mapped === null || typeof mapped !== "object") return false;
+  return "field" in mapped && (mapped as { field: unknown }).field === clause.field;
+}
+
+/** Apply rowFilters only for clauses this layer maps on the matching scale. */
 function filterLayerTable(
   table: ColumnTable,
   clauses: RunOptions["rowFilters"],
+  layer?: PortableSpec["layers"][number],
+  plotAes?: PortableSpec["aes"],
 ): { table: ColumnTable; sourceRows: number[] | null } {
   if (clauses === undefined || clauses.length === 0) return { table, sourceRows: null };
-  const applicable = clauses.filter((c) => table.has(c.field));
+  const applicable = clauses.filter((c) => {
+    if (!table.has(c.field)) return false;
+    if (layer === undefined) return true;
+    return layerMapsLegendFilter(layer, plotAes, c);
+  });
   return applyRuntimeRowFilters(table, applicable);
 }
 
@@ -97,6 +120,18 @@ export function preparePanels(
   // Reuse ColumnTable instances for identical named refs so shared datasets
   // share SourceRegistry namespaces (and therefore source-row identity).
   const namedTableCache = new Map<string, ColumnTable>();
+  // Seed from plot-level named data so an explicit layer `data: { name }` that
+  // matches the plot ref reuses the same table (and registry row range).
+  const plotData = normalized.data;
+  if (
+    plotSource !== null &&
+    plotData !== undefined &&
+    "name" in plotData &&
+    !("values" in plotData) &&
+    !("columns" in plotData)
+  ) {
+    namedTableCache.set(plotData.name, plotSource);
+  }
 
   const layerContexts: LayerDataContext[] = [];
   for (let index = 0; index < normalized.layers.length; index++) {
@@ -126,7 +161,7 @@ export function preparePanels(
       }
     }
     const sourceId = registry.register(sourceTable);
-    const filtered = filterLayerTable(sourceTable, options.rowFilters);
+    const filtered = filterLayerTable(sourceTable, options.rowFilters, layer, normalized.aes);
     layerContexts.push({
       sourceTable,
       filteredTable: filtered.table,

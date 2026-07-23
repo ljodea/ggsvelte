@@ -175,4 +175,46 @@ describe("layer data builder", () => {
     expect(spec.layers[1]!.data).toEqual({ values: bands });
     expect(spec.data).toBeUndefined();
   });
+
+  it("snapshots data passed to .layer() so later mutation cannot leak", () => {
+    const rows = [
+      { x: 1, y: 2 },
+      { x: 3, y: 4 },
+    ];
+    const builder = gg().layer({
+      geom: "point",
+      data: { values: rows },
+      aes: { x: { field: "x" }, y: { field: "y" } },
+    });
+    rows[0]!.x = 999;
+    const spec = builder.spec();
+    expect(spec.layers[0]!.data).toEqual({
+      values: [
+        { x: 1, y: 2 },
+        { x: 3, y: 4 },
+      ],
+    });
+  });
+});
+
+describe("layer data validation limits", () => {
+  it("does not double-count plot named ref and matching layer named ref toward maxRows", () => {
+    const values = Array.from({ length: 60_000 }, (_, i) => ({ x: i, y: i }));
+    const result = validate(
+      {
+        data: { name: "cars" },
+        datasets: { cars: { values } },
+        layers: [
+          { geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } },
+          {
+            geom: "point",
+            data: { name: "cars" },
+            aes: { x: { field: "x" }, y: { field: "y" } },
+          },
+        ],
+      },
+      { limits: { maxRows: 100_000 } },
+    );
+    expect(result.ok).toBe(true);
+  });
 });

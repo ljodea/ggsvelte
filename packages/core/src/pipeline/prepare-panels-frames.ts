@@ -8,6 +8,7 @@ import type { ColumnTable } from "../table.js";
 import { bindLayer } from "./bind.js";
 import { configureStyleBindings } from "./bind-layer-style-config.js";
 import type { FacetPanelDef } from "./facets.js";
+import { styleBinExtent } from "./frame-group-columns.js";
 import { buildFrame } from "./frame.js";
 import { remapToGlobalSourceRows, sliceLayerForPanel } from "./layer-panel-data.js";
 import { applyPosition } from "./position.js";
@@ -23,6 +24,40 @@ import { preflightTemporalBindings } from "./temporal-preflight.js";
 import type { ColumnTransformConfig } from "../scales/transform.js";
 
 const DOCS = "https://ggsvelte.sh/guide/errors";
+
+const STYLE_AESTHETICS = ["size", "linewidth", "alpha", "shape", "linetype"] as const;
+
+/**
+ * After per-layer configureStyleBindings, pin the same binExtent on every
+ * binding that trains a global binned style scale without authored breaks/domain.
+ */
+function unifyBinnedStyleExtents(
+  bindings: readonly LayerBinding[],
+  tables: readonly ColumnTable[],
+  scales: PortableSpec["scales"] | undefined,
+): void {
+  for (const aesthetic of STYLE_AESTHETICS) {
+    const config = scales?.[aesthetic];
+    if (config?.type !== "binned") continue;
+    if (config.breaks !== undefined || config.domain !== undefined) continue;
+    let low = Number.POSITIVE_INFINITY;
+    let high = Number.NEGATIVE_INFINITY;
+    for (let index = 0; index < bindings.length; index++) {
+      const style = bindings[index]![aesthetic];
+      if (style.binned !== true || style.field === null) continue;
+      const extent = styleBinExtent(style, tables[index]!);
+      if (extent === undefined) continue;
+      low = Math.min(low, extent[0]);
+      high = Math.max(high, extent[1]);
+    }
+    if (!Number.isFinite(low)) continue;
+    const unified: readonly [number, number] = [low, high];
+    for (const binding of bindings) {
+      const style = binding[aesthetic];
+      if (style.binned === true && style.field !== null) style.binExtent = unified;
+    }
+  }
+}
 
 /** Up to `limit` finite semantic values that failed the transform (invalid). */
 function sampleFailingSemantic(
@@ -207,6 +242,9 @@ export function buildPanelFrames(input: {
     configureStyleBindings(binding, normalized.scales, ctx.filteredTable);
     bindings.push(binding);
   }
+  // Unify binned style extents across layers that share a global style scale so
+  // default grouping bins match the multi-layer-trained legend (not layer-local).
+  unifyBinnedStyleExtents(bindings, filteredLayerTables, normalized.scales);
   const temporal = preflightTemporalBindings({
     table: layerContexts[0]!.sourceTable,
     bindings,
@@ -294,14 +332,18 @@ export function buildPanelFrames(input: {
         binRanges[index],
       );
       applyPosition(frame, advisories, slice.table);
-      // Pre-stat input rows and post-stat mark rows share the layer's global
-      // source-row namespace (filter + multi-table registry).
-      frame.inputSourceRows = slice.globalSourceRows;
-      // Map panel-local indices → global multi-table source rows.
-      remapToGlobalSourceRows(frame.rowIndex, slice.globalSourceRows);
-      // Boxplot outlier rows carry separate source indices.
-      if (frame.box !== null) {
-        remapToGlobalSourceRows(frame.box.outlierRow, slice.globalSourceRows);
+      // Annotation frames are rowless — do not retain the full panel source-row
+      // array (can be huge under facets) when there is no lineage to resolve.
+      if (bindings[index]!.ruleForm !== "annotation") {
+        // Pre-stat input rows and post-stat mark rows share the layer's global
+        // source-row namespace (filter + multi-table registry).
+        frame.inputSourceRows = slice.globalSourceRows;
+        // Map panel-local indices → global multi-table source rows.
+        remapToGlobalSourceRows(frame.rowIndex, slice.globalSourceRows);
+        // Boxplot outlier rows carry separate source indices.
+        if (frame.box !== null) {
+          remapToGlobalSourceRows(frame.box.outlierRow, slice.globalSourceRows);
+        }
       }
       assertRibbonBounds(frame);
       panelFrames[p]!.push(frame);
