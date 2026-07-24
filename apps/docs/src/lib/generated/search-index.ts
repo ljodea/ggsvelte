@@ -3482,14 +3482,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-268",
+    id: "heading:guide-lifecycle:experimental-270",
     kind: "heading",
-    title: "experimental (268)",
+    title: "experimental (270)",
     summary:
-      "experimental (268) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-268",
+      "experimental (270) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-270",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (268)"],
+    exact: ["experimental (270)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -9100,6 +9100,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["AesMapping"],
   },
   {
+    id: "api:ggsvelte-core:AxisEditModel",
+    kind: "api",
+    title: "AxisEditModel",
+    summary: "@ggsvelte/core · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "type", "experimental"],
+    exact: ["AxisEditModel"],
+  },
+  {
     id: "api:ggsvelte-core:AxisGuidePlan",
     kind: "api",
     title: "AxisGuidePlan",
@@ -9908,6 +9917,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "type", "experimental"],
     exact: ["NamedData"],
+  },
+  {
+    id: "api:ggsvelte-core:NormalizedSpan",
+    kind: "api",
+    title: "NormalizedSpan",
+    summary: "@ggsvelte/core · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "type", "experimental"],
+    exact: ["NormalizedSpan"],
   },
   {
     id: "api:ggsvelte-core:NumberFormatter",
