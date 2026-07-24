@@ -39,7 +39,10 @@
       // tests/migrations are upgrade-guide fixtures: read by
       // scripts/migration-fixtures.test.ts via the filesystem (not imports)
       // and type-checked by svelte-check — invisible to knip's graph.
-      "entry": ["tests/**/*.test.ts", "tests/migrations/**"],
+      // src/lib/data/data-contract.ts exists only to be type-checked: it
+      // asserts every bundled dataset stays assignable to the plot's data
+      // prop, which nothing imports at runtime by design.
+      "entry": ["tests/**/*.test.ts", "tests/migrations/**", "src/lib/data/data-contract.ts"],
       "project": ["src/**", "tests/**"],
     },
     "benchmarks": {

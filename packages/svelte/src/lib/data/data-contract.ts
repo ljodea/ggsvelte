@@ -1,0 +1,22 @@
+/**
+ * Compile-time contract for bundled datasets.
+ *
+ * A dataset is only useful if it can be handed straight to `<GGPlot data={…}>`
+ * in a consumer's own type-checked app. That requires an implicit index
+ * signature, which TypeScript grants type aliases and withholds from
+ * interfaces — so declaring a row type as an `interface` compiles fine here
+ * and then fails in the consumer, which is exactly what happened once.
+ *
+ * These assignments are the guard. They are types only: nothing is emitted,
+ * and svelte-check fails the package build if a bundled dataset stops
+ * satisfying the plot's data input.
+ */
+import type { DataInput } from "@ggsvelte/spec";
+
+import { kyotoSakura } from "./kyoto-sakura.js";
+
+/** Every bundled dataset must be assignable to the plot `data` prop. */
+type BundledDataset = DataInput;
+
+const kyotoSakuraIsPlottable: BundledDataset = kyotoSakura;
+void kyotoSakuraIsPlottable;
