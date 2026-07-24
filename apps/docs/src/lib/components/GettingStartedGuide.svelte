@@ -68,7 +68,6 @@
 
   <h2 id="create-a-sveltekit-app">Create a SvelteKit app</h2>
   <p>Start with Node.js 22 or newer in an empty directory.</p>
-  <p class="guide-code-classification">Complete command</p>
   <CopyCode
     class="lesson-source"
     language="bash"
@@ -78,7 +77,6 @@
 
   <h2 id="install-ggsvelte">Install ggsvelte</h2>
   <p>Choose the package manager already used by the app.</p>
-  <p class="guide-code-classification">Complete command</p>
   <CopyCode
     class="lesson-source"
     language="bash"
@@ -181,7 +179,6 @@
       <div class="step-copy">
         <h3 id={step.id}>{step.title}</h3>
         <p>{step.outcome}</p>
-        <p class="guide-code-classification">Fragment</p>
         <CopyCode
           class="lesson-source"
           language="svelte"
@@ -223,7 +220,6 @@
   </p>
   <h3 id="fluent-builder">Fluent builder</h3>
   <p>Use the builder to construct specs programmatically in TypeScript.</p>
-  <p class="guide-code-classification">Fragment</p>
   <CopyCode
     class="lesson-source"
     language="typescript"
@@ -235,7 +231,6 @@
     Use PortableSpec to save, transmit, validate, or generate a chart without
     executable accessors.
   </p>
-  <p class="guide-code-classification">Fragment</p>
   <CopyCode
     class="lesson-source"
     language="json"
@@ -249,14 +244,12 @@
     <code>ggsvelte-render</code> CLI writes SVG to stdout and JSON Lines diagnostics
     to stderr.
   </p>
-  <p class="guide-code-classification">Fragment</p>
   <CopyCode
     class="lesson-source"
     language="typescript"
     accessibleLabel="Copy headless fragment"
     code={QUICKSTART_HEADLESS_FRAGMENT}
   />
-  <p class="guide-code-classification">Fragment</p>
   <CopyCode
     class="lesson-source"
     language="bash"
@@ -346,15 +339,6 @@
 
   .getting-started-guide :global(.lesson-source .code-body pre) {
     white-space: pre;
-  }
-
-  .guide-code-classification {
-    margin: 1rem 0 0.35rem;
-    color: var(--muted);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
   }
 
   @media (max-width: 63.99rem) {

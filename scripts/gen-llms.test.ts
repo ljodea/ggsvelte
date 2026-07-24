@@ -82,7 +82,19 @@ describe("renderMarkdown", () => {
     expect(html).toContain('<pre id="guide-code-1"><code class="hljs language-json">');
     expect(html).toContain("hljs-");
     expect(html).toContain('<span id="guide-code-1-status" role="status" class="visually-hidden">');
-    expect(html).toContain('<p class="guide-code-classification">Fragment</p>');
+  });
+
+  it("never stamps a classification label over a code block", () => {
+    for (const fence of [
+      '```json fragment copy\n{"x": 1}\n```',
+      "```svelte complete\n<script></script>\n```",
+      "```sh complete\nbun add @ggsvelte/svelte\n```",
+      "```ts\nconst x = 1;\n```",
+    ]) {
+      const html = renderMarkdown(fence);
+      expect(html).not.toContain("guide-code-classification");
+      expect(html).not.toMatch(/>(Fragment|Complete file|Complete command|Complete example)</);
+    }
   });
 
   it("adds stable unique heading fragments", () => {
