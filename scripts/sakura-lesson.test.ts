@@ -29,7 +29,7 @@ const finished = foldSakura(SAKURA_STEPS.length, rows);
 function yTicks(spec: unknown): { label: string; pos: number }[] {
   const model = runPipeline(spec as never, { width: 900, height: 480 });
   return model.scene.panels[0]!.axisY.map((tick) => ({
-    label: String(tick.label),
+    label: tick.label,
     pos: tick.pos,
   }));
 }
@@ -42,7 +42,7 @@ describe("the sakura lesson folds to renderable specs", () => {
     expect(start.spec.theme).toBeUndefined();
     expect(start.key).toBeUndefined();
     expect(start.source).toBe(QUICKSTART_PAGE_SVELTE);
-    const model = runPipeline(start.spec as never, { width: 900, height: 480 });
+    const model = runPipeline(start.spec, { width: 900, height: 480 });
     expect(model.scene.batches[0]!.kind).toBe("points");
   });
 
@@ -51,7 +51,7 @@ describe("the sakura lesson folds to renderable specs", () => {
       const step = foldSakura(count, rows);
       const result = validate(step.spec);
       expect(result.ok, `step ${count}: ${JSON.stringify(result)}`).toBe(true);
-      const svg = renderToSVGString(step.spec as never, { width: 900, height: 480 });
+      const svg = renderToSVGString(step.spec, { width: 900, height: 480 });
       expect(svg).toContain("<svg");
     }
   });
@@ -161,10 +161,10 @@ describe("gate G1 — the reversed temporal y-axis", () => {
 
 describe("gate G4 — the loess trend", () => {
   it("draws a fitted path, not the raw points", () => {
-    const model = runPipeline(foldSakura(1, rows).spec as never, { width: 900, height: 480 });
+    const model = runPipeline(foldSakura(1, rows).spec, { width: 900, height: 480 });
     const trend = model.scene.batches.find((batch) => batch.kind === "paths");
     expect(trend).toBeDefined();
-    const vertices = Object.keys(trend!.positions as Record<string, number>).length / 2;
+    const vertices = Object.keys(trend!.positions).length / 2;
     expect(vertices).toBeGreaterThan(40);
     expect(vertices).toBeLessThan(rows.length);
   });

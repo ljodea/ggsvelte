@@ -76,11 +76,12 @@ describe("candidates with per-layer data", () => {
     expect(new Set(bandFacts.map((candidate) => candidate.seriesRank)).size).toBe(2);
 
     const pointFacts = byLayer.get(1) ?? [];
-    expect(pointFacts.map((candidate) => candidate.xValue).toSorted()).toEqual(
-      observations.map((row) => row.year).toSorted(),
+    const ascending = (a: unknown, b: unknown): number => Number(a) - Number(b);
+    expect(pointFacts.map((candidate) => candidate.xValue).toSorted(ascending)).toEqual(
+      observations.map((row) => row.year).toSorted(ascending),
     );
-    expect(pointFacts.map((candidate) => candidate.yValue).toSorted()).toEqual(
-      observations.map((row) => row.value).toSorted(),
+    expect(pointFacts.map((candidate) => candidate.yValue).toSorted(ascending)).toEqual(
+      observations.map((row) => row.value).toSorted(ascending),
     );
   });
 });
