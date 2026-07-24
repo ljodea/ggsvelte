@@ -8,7 +8,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import GGPlot from "../../src/lib/GGPlot.svelte";
 import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
-import type { InteractionDiagnostic } from "../../src/lib/interaction/interaction.js";
+import type { PlotDiagnostic } from "../../src/lib/diagnostics/deprecation.js";
 import { render } from "../helpers/render.js";
 
 const rows = [
@@ -26,10 +26,10 @@ const base = {
 };
 
 function collect(): {
-  diagnostics: InteractionDiagnostic[];
-  ondiagnostic: (diagnostic: InteractionDiagnostic) => void;
+  diagnostics: PlotDiagnostic[];
+  ondiagnostic: (diagnostic: PlotDiagnostic) => void;
 } {
-  const diagnostics: InteractionDiagnostic[] = [];
+  const diagnostics: PlotDiagnostic[] = [];
   return {
     diagnostics,
     ondiagnostic: (diagnostic) => {

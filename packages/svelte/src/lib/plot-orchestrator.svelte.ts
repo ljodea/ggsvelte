@@ -38,9 +38,9 @@ import type {
   ThemeSpec,
 } from "@ggsvelte/spec";
 
+import type { PlotDiagnostic } from "./diagnostics/deprecation.js";
 import type {
   InspectInput,
-  InteractionDiagnostic,
   InteractionTool,
   LegendFocusEvent,
   LegendFocusInput,
@@ -126,7 +126,7 @@ export type OrchestratorInputs<
   oninteraction: () =>
     | ((event: PlotInteractionEvent<Record<string, CellValue>>) => void)
     | undefined;
-  ondiagnostic: () => ((diagnostic: InteractionDiagnostic) => void) | undefined;
+  ondiagnostic: () => ((diagnostic: PlotDiagnostic) => void) | undefined;
   ontoolchange: () => ((tool: InteractionTool) => void) | undefined;
   onrender: () => ((model: RenderModel, spec: PortableSpec) => void) | undefined;
 };

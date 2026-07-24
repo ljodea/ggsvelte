@@ -2127,13 +2127,13 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-421",
-        title: "experimental (421)",
+        id: "experimental-429",
+        title: "experimental (429)",
         level: 3,
       },
       {
-        id: "stable-intent-6",
-        title: "stable-intent (6)",
+        id: "stable-intent-19",
+        title: "stable-intent (19)",
         level: 3,
       },
     ],
@@ -2157,6 +2157,21 @@ export const DOCS_ROUTES = [
         id: "five-minute-path",
         title: "Five-minute path",
         level: 2,
+      },
+      {
+        id: "0-10-to-0-11",
+        title: "0.10 to 0.11",
+        level: 2,
+      },
+      {
+        id: "compose-the-theme-as-a-child-layer",
+        title: "Compose the theme as a child layer",
+        level: 3,
+      },
+      {
+        id: "diagnostic-handlers-receive-plotdiagnostic",
+        title: "Diagnostic handlers receive PlotDiagnostic",
+        level: 3,
       },
       {
         id: "0-7-to-0-8",

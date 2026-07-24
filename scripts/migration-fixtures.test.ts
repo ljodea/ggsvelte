@@ -65,6 +65,8 @@ describe("upgrading-guide migration fixtures", () => {
       "PlotInspectionChange",
       "ZoomDomains",
       "ReadonlyZoomDomains",
+      "LayerDescriptor",
+      "MarkLayerDescriptor",
     ]) {
       expect(combined, `alias fixture must exercise ${name}`).toContain(name);
     }
