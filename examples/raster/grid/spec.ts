@@ -1,15 +1,20 @@
-import { aes, gg } from "@ggsvelte/spec";
+import { aes, gg, scaleFillContinuous } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { grid } from "./data.js";
+import { criminalStature } from "./data.js";
 
 export default defineExample(
-  gg(grid, aes({ x: "x", y: "y", fill: "z" }))
+  gg(criminalStature, aes({ x: "finger", y: "height", fill: "men" }))
     .geomRaster()
+    .scales(scaleFillContinuous({ scheme: "viridis" }))
+    .theme("few")
     .labs({
-      title: "Regular density surface (geom raster)",
-      x: "x",
-      y: "y",
+      title: "Three thousand criminals, measured",
+      subtitle:
+        "Macdonell, 1902: stature against left middle-finger length, 495 cells of a complete grid",
+      x: "Left middle finger (cm)",
+      y: "Height (feet)",
+      fill: "Men",
     })
     .spec(),
 );

@@ -1,25 +1,29 @@
 import { aes, gg, guideColorsteps, scaleColorBinned } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { readings } from "./data.js";
+import { jevonsTrials } from "./data.js";
 
 export default defineExample(
-  gg(readings, aes({ x: "hour", y: "pm25", color: "pm25" }))
+  gg(jevonsTrials, aes({ x: "actual", y: "estimated", color: "trials" }))
     .geomPoint({ size: 5 })
+    // Colour carries a third variable — how often that (actual, estimated)
+    // pairing came up across 1,027 throws — rather than restating x or y.
     .scales(
       scaleColorBinned({
-        breaks: [0, 12, 35, 55, 100],
-        range: ["#2a9d8f", "#e9c46a", "#f4a261", "#e76f51"],
+        breaks: [0, 5, 20, 60, 130],
+        range: ["#d3d3d0", "#8ba89c", "#4f8a6e", "#1e5c43"],
       }),
     )
     .guides({
       color: guideColorsteps({ position: "bottom", direction: "horizontal" }),
     })
+    .theme("light")
     .labs({
-      title: "Particle pollution by hour",
-      x: "Hour",
-      y: "PM2.5 (µg/m³)",
-      color: "PM2.5 band",
+      title: "How many beans can you see at once?",
+      subtitle: "Jevons threw beans into a box 1,027 times — never wrong up to four",
+      x: "Beans actually thrown",
+      y: "Beans estimated",
+      color: "Trials",
     })
     .spec(),
 );

@@ -1,6 +1,6 @@
 {
   "title": "Shaded time bands (geom rect)",
-  "description": "Arbitrary rectangles from xmin/xmax/ymin/ymax — background time bands or regions without image injection.",
-  "tags": ["rect", "regions", "bands"],
+  "description": "Arbitrary rectangles from xmin/xmax/ymin/ymax — background time bands or regions without image injection. Two layers over two unrelated datasets, so neither inherits a plot-level mapping: the rects are Playfair's twelve reigns, the line is his wheat-price series.",
+  "tags": ["rect", "regions", "bands", "layers"],
   "docsSection": "Rectangles & grids"
 }

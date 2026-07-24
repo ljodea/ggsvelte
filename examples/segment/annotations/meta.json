@@ -1,6 +1,6 @@
 {
   "title": "Segment annotations",
-  "description": "Finite data-driven segments from (x,y) to (xend,yend) — leader lines and range ticks that do not span the panel (unlike rule).",
-  "tags": ["segment", "annotation", "leader"],
+  "description": "Finite data-driven segments from (x,y) to (xend,yend) — leader lines and range ticks that do not span the panel (unlike rule). Here each segment runs from a pair's self-fertilised height to its cross-fertilised one, so the direction of the segment carries Darwin's result.",
+  "tags": ["segment", "annotation", "leader", "slope"],
   "docsSection": "Lines & rules"
 }

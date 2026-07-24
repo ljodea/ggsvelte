@@ -1,28 +1,30 @@
 <script lang="ts">
   import { GeomLine, GeomPoint, GeomRule, GGPlot } from "@ggsvelte/svelte";
 
-  import { signups, target } from "./data.js";
+  import { earthDensity } from "./data.js";
 </script>
 
 <GGPlot
-  data={signups}
-  aes={{ x: "week", y: "count" }}
+  data={earthDensity}
+  aes={{ x: "trial", y: "density" }}
+  theme="tufte"
   labs={{
-    title: "Weekly sign-ups around launch",
-    subtitle: "Vertical rule: launch week. Horizontal rule: quarter target.",
-    x: "Weeks since launch",
-    y: "Sign-ups",
+    title: "Cavendish weighs the world, 1798",
+    subtitle:
+      "Vertical rule: he refits the balance with a stiffer wire. Horizontal: the modern value.",
+    x: "Determination",
+    y: "Density of the earth (water = 1)",
   }}
   width={640}
   height={400}
 >
-  <GeomRule xintercept={0} aes={{ color: { value: "#d4615c" } }} />
+  <GeomRule xintercept={6.5} aes={{ color: { value: "#d4615c" } }} />
   <GeomRule
-    yintercept={target}
+    yintercept={5.517}
     linewidth={1}
     alpha={0.6}
     aes={{ color: { value: "#888888" } }}
   />
-  <GeomLine linewidth={2} />
+  <GeomLine linewidth={1.4} />
   <GeomPoint size={2.5} />
 </GGPlot>
