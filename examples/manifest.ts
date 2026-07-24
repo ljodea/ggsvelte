@@ -31,6 +31,8 @@ export interface ExampleManifestEntry {
   readonly docsSection: string;
   /** VR frame height in px (default 400). */
   readonly vrHeight?: number;
+  /** VR frame width in px (default 640). */
+  readonly vrWidth?: number;
   /** Optional guided interaction journey for runnable examples. */
   readonly journey?: ExampleJourney;
   /** Whether the example ships a data.ts module. */
@@ -305,6 +307,7 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     tags: ["interaction", "legend", "focus", "controller", "linked-views", "canvas", "keyboard", "touch"],
     docsSection: "Interaction",
     vrHeight: 980,
+    vrWidth: 960,
     journey: {
       pointer: "Hover a discrete legend entry to preview one plot, then click to pin the group across all three views.",
       keyboard: "Tab to a legend entry, use arrow keys or Home and End to move, press Enter or Space to pin, and Escape to clear.",
