@@ -51,7 +51,8 @@ export function resolveRectSlot(input: {
         const boundaries = frame.binding.xBinning;
         const transformedCenter = frame.xNumeric?.[row];
         if (boundaries === undefined || transformedCenter === undefined) return null;
-        const xBinId = frame.bin === null ? null : frame.bin.xId;
+        const bin = frame.bin;
+        const xBinId = bin === undefined || bin === null ? null : bin.xId;
         const index =
           xBinId === null
             ? boundaries.centers.findIndex((value) => Object.is(value, transformedCenter))

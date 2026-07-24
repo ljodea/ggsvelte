@@ -338,11 +338,12 @@ export function buildPanelFrames(input: {
       // array (can be huge under facets) when there is no lineage to resolve.
       // Still mark lineage finalized (empty) so panelFrames is FinalizedLayerFrame[].
       let finalized: FinalizedLayerFrame;
-      if (bindings[index]!.ruleForm !== "annotation") {
-        finalized = finalizeFrameSourceRows(frame, slice);
-      } else {
+      if (bindings[index]!.ruleForm === "annotation") {
+        // Rowless — empty lineage map (do not retain huge panel source-row arrays).
         frame.inputSourceRows = [];
         finalized = frame as FinalizedLayerFrame;
+      } else {
+        finalized = finalizeFrameSourceRows(frame, slice);
       }
       assertRibbonBounds(finalized);
       panelFrames[p]!.push(finalized);

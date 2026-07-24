@@ -118,7 +118,8 @@ export function filterRepresentedSourceRows(input: {
   // LineageStore can WeakMap-intern once — no clone, no per-mark y re-filter.
   // Binned counts key by integer bin id (frame.bin.xId), not inverse centers.
   if (needsX && indexKeyPrefix !== null && input.sourceRowsByGroupX !== undefined) {
-    const xBinId = frame.bin === null ? null : frame.bin.xId;
+    const bin = frame.bin;
+    const xBinId = bin === undefined || bin === null ? null : bin.xId;
     const xKey =
       frame.binding.xBinning !== undefined && xBinId !== null
         ? bandKey(xBinId[frameRow]!)
