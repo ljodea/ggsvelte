@@ -22,7 +22,7 @@ test("Getting Started renders the packed file and first live grammar delta", asy
 
   const step = guide.locator(".progressive-step").first();
   await expect(step.getByRole("heading", { level: 3 })).toHaveText("Map fields to position");
-  await expect(step.getByText("Fragment", { exact: true })).toBeVisible();
+  await expect(step.locator(".guide-code-classification")).toHaveCount(0);
   await expect(step.locator(".gg-points circle")).toHaveCount(8);
   await expect(step.getByRole("link", { name: "Read Data and mappings" })).toHaveAttribute(
     "href",
