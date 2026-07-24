@@ -1,5 +1,31 @@
 # @ggsvelte/core
 
+## 0.10.1
+
+### Patch Changes
+
+- 2b31212: <!-- markdownlint-disable MD041 -->
+
+  fix: band x-label ladder prefers wrap / −45° over −90°+truncate (#634)
+
+  Auto categorical labels now (1) try balanced ≤2-line wraps when greedy
+  needs more lines, (2) check wrap collisions on top-aligned line planes
+  matching the renderer, and (3) pick −45° vs −90° from parallel-baseline
+  text clearance instead of AABB-vs-column false positives.
+
+  Migration: none — auto layout quality only; author guide pins unchanged
+
+- 4a31bf1: <!-- markdownlint-disable MD041 -->
+
+  fix: wrap-then−45° hybrid band labels when plain wrap fails (#637)
+
+  Auto categorical labels that cannot wrap now balance multi-word text onto
+  ≤2 shorter lines and rotate at −45° before full-string −45°/−90° + truncate.
+  Svelte and SVG renderers draw multi-line end-anchored rotated ticks.
+
+  Migration: none — auto layout quality only; author guide pins unchanged
+  - @ggsvelte/spec@0.10.1
+
 ## 0.10.0
 
 ### Minor Changes
