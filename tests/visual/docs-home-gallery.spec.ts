@@ -13,8 +13,9 @@ test("homepage first viewport leads with a live chart and two actions", async ({
     "The layered grammar of graphics, in Svelte 5 — and in JSON",
   );
   await expect(page.locator(".home-hero .gg-plot-root")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Getting started" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Examples" }).first()).toBeVisible();
+  const cta = page.locator(".cta-row");
+  await expect(cta.getByRole("link", { name: "Getting started" })).toBeVisible();
+  await expect(cta.getByRole("link", { name: "Examples" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Copy install" })).toBeVisible();
   await expectNoOverflow(page);
 });
@@ -86,7 +87,7 @@ test("install copy and code tabs share the manual-copy fallback", async ({ page 
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Copy install" }).click();
-  await expect(page.locator(".hero-actions [role=status]")).toHaveText(
+  await expect(page.locator(".hero-masthead [role=status]")).toHaveText(
     "Clipboard unavailable. Code selected for manual copy.",
   );
   expect(await page.evaluate(() => getSelection()?.toString())).toContain(
