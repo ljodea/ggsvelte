@@ -56,6 +56,31 @@ test("the finished chart answers keyboard inspection", async ({ page }) => {
   await expect(page.locator(".finished-chart .gg-tooltip")).toBeVisible();
 });
 
+/*
+ * The library sets `forced-color-adjust: none` on `.gg-plot`, so nothing in a
+ * chart adapts on its own. The epoch bands are the one mark carried by fill
+ * alone, so under a requested palette they drop and the names in the note
+ * under the chart do the work instead. Asserted through `emulateMedia`: this
+ * config sets `contextOptions`, which clobbers Playwright's `forcedColors`
+ * fixture, so `test.use` would silently measure a normal page.
+ */
+test("the finished chart drops its band fills and names the epochs in forced colors", async ({
+  page,
+}) => {
+  await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
+  await page.goto("/guide/getting-started?theme=light");
+  const finished = page.locator(".finished-chart");
+  await expect(finished.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
+  expect(await page.evaluate(() => matchMedia("(forced-colors: active)").matches)).toBe(true);
+
+  const fills = await finished
+    .locator(".gg-marks rect")
+    .evaluateAll((rects) => rects.map((rect) => getComputedStyle(rect).fill));
+  expect(fills.length).toBeGreaterThan(0);
+  expect(new Set(fills)).toEqual(new Set(["none"]));
+  await expect(finished.locator(".chart-note")).toContainText("Bands, left to right:");
+});
+
 test("Docs landing and sidebar expose the full path without duplicate Reference", async ({
   page,
 }) => {
