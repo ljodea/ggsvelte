@@ -90,7 +90,7 @@ export const GALLERY_PREVIEWS = [
     id: "density/overlay",
     filename: "density-overlay-light.png",
     path: "/previews/density-overlay-light.png",
-    sha256: "20dac03be6f1856efd319d34b8be9e2fa96eee6df978515a2bb1fd0a3f86a9a6",
+    sha256: "ed9b36f500ef5789d5bf1b6c853bb5e3768ccfddd075e8f5eb8630d5689408d8",
   },
   {
     id: "errorbar/mean-se",
