@@ -130,8 +130,8 @@ describe("<ToolRail> forced-colors disabled→enabled paint contract (#161)", ()
     render(ToolRail, toolRailProps());
     const cssText = documentCssText();
     // --gg-theme-interactionMuted is a number (0.36); invalid in `color:`.
-    // Only the consumer color override may appear in the color chain.
-    expect(cssText).toMatch(/color:\s*var\(--gg-interactionMuted,\s*currentColor\)/i);
+    // Inactive chrome ink uses --gg-toolInactive (not --gg-interactionMuted).
+    expect(cssText).toMatch(/color:\s*var\(--gg-toolInactive,\s*currentColor\)/i);
     expect(cssText).not.toMatch(
       /color:\s*var\(\s*--gg-interactionMuted\s*,\s*var\(\s*--gg-theme-interactionMuted/i,
     );

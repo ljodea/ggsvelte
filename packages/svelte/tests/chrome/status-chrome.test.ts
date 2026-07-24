@@ -126,7 +126,7 @@ describe("StatusChrome", () => {
       })
       .join("\n");
     // --gg-theme-interactionMuted is a numeric alpha; invalid in color position.
-    expect(cssText).toMatch(/color:\s*var\(--gg-interactionMuted,\s*currentColor\)/i);
+    expect(cssText).toMatch(/color:\s*var\(--gg-toolInactive,\s*currentColor\)/i);
     expect(cssText).not.toMatch(
       /color:\s*var\(\s*--gg-interactionMuted\s*,\s*var\(\s*--gg-theme-interactionMuted/i,
     );

@@ -9,10 +9,11 @@ const docsAppCss = readFileSync(
 );
 
 describe("docs example-frame chrome bridge (#651)", () => {
-  it("publishes toolActive and interactionMuted color overrides on .gg-example-frame", () => {
+  it("publishes toolActive and toolInactive color overrides on .gg-example-frame", () => {
     // Dark theme only reassigns --fg / --muted; overrides reference those vars.
     expect(docsAppCss).toMatch(/\.gg-example-frame\s*\{[^}]*--gg-toolActive:\s*var\(--fg\)/s);
-    expect(docsAppCss).toMatch(
+    expect(docsAppCss).toMatch(/\.gg-example-frame\s*\{[^}]*--gg-toolInactive:\s*var\(--muted\)/s);
+    expect(docsAppCss).not.toMatch(
       /\.gg-example-frame\s*\{[^}]*--gg-interactionMuted:\s*var\(--muted\)/s,
     );
   });

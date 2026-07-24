@@ -23,10 +23,10 @@
      appearance is independent of chart theme, so publish consumer color
      overrides here — otherwise --gg-theme-toolActive follows the (often
      light) chart ink and fails contrast on a dark frame (#651).
-     --gg-interactionMuted is the inactive *color* override (not the numeric
-     --gg-theme-interactionMuted mark-opacity token). */
+     --gg-toolInactive is the inactive *color* override; do not reuse
+     --gg-interactionMuted here (that name is themeVar mark-opacity). */
   --gg-toolActive: var(--fg);
-  --gg-interactionMuted: var(--muted);
+  --gg-toolInactive: var(--muted);
 
   min-width: 0;
   overflow: hidden;
