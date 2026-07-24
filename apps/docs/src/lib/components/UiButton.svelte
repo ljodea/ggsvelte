@@ -23,7 +23,7 @@
   } = $props();
 
   const classes = $derived(
-    `ui-button ui-button--${variant}${className !== "" ? ` ${className}` : ""}`,
+    `ui-button ui-button--${variant}${className === "" ? "" : ` ${className}`}`,
   );
 </script>
 

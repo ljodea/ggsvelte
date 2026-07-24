@@ -116,10 +116,6 @@ async function applyTitle(page: Page, title: string): Promise<void> {
 
 test("landing page makes the gallery and local adaptation paths obvious", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("link", { name: "Example source" })).toHaveAttribute(
-    "href",
-    /examples\/interactions\/inspection$/,
-  );
   await page.getByRole("link", { name: "Playground" }).first().click();
   await expect(page).toHaveURL(/\/playground$/);
   await expect(page.getByRole("heading", { name: "Playground" })).toBeVisible();

@@ -48,7 +48,10 @@
 
 <section class="home-hero" aria-labelledby="home-heading">
   <div class="hero-claim">
-    <h1 id="home-heading">A grammar of graphics for Svelte.</h1>
+    <h1 id="home-heading">
+      An agent-first implementation of the layered grammar of graphics in Svelte
+      5
+    </h1>
     <p>
       ggplot2's layered grammar and defaults as Svelte components, a TypeScript
       builder, and a validated JSON spec agents can write. Inspection,
