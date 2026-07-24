@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { matchCorsOrigin } from "../src/cors";
-import { handleGenerate, sanitizeForLeak } from "../src/handler";
+import { DEFAULT_MODELS, handleGenerate, sanitizeForLeak } from "../src/handler";
 import {
   assembleSystemPrompt,
   buildChatMessages,
@@ -341,5 +341,142 @@ describe("handleGenerate", () => {
     );
     expect(res.status).toBe(405);
     expect(res.headers.get("Allow")).toBe("POST, OPTIONS");
+  });
+
+  // The outbound call is the only place money is spent. Without these
+  // assertions the allowlist, token ceiling, and JSON mode could all be
+  // dropped — or swapped to a paid model — with every other test still green.
+  test("outbound request pins the cost-control surface", async () => {
+    let seenUrl = "";
+    let seenBody: Record<string, unknown> = {};
+    await handleGenerate(request({ prompt: "scatter", datasetId: "penguins" }), {
+      OPENROUTER_API_KEY: "sk-test-key",
+      ...okLimiters,
+      fetch: (url, init) => {
+        seenUrl = typeof url === "string" ? url : url instanceof URL ? url.href : url.url;
+        seenBody = JSON.parse(typeof init?.body === "string" ? init.body : "{}") as Record<
+          string,
+          unknown
+        >;
+        return Promise.resolve(
+          new Response(JSON.stringify({ model: "m", choices: [{ message: { content: "{}" } }] }), {
+            status: 200,
+          }),
+        );
+      },
+    });
+    expect(seenUrl).toBe("https://openrouter.ai/api/v1/chat/completions");
+    expect(seenBody["models"]).toEqual([...DEFAULT_MODELS]);
+    expect(seenBody["max_tokens"]).toBe(2000);
+    expect(seenBody["response_format"]).toEqual({ type: "json_object" });
+  });
+
+  test("MODEL_ALLOWLIST overrides the default model list", async () => {
+    let seenBody: Record<string, unknown> = {};
+    await handleGenerate(request({ prompt: "scatter", datasetId: "penguins" }), {
+      OPENROUTER_API_KEY: "sk-test-key",
+      MODEL_ALLOWLIST: "vendor/free-a, vendor/free-b",
+      ...okLimiters,
+      fetch: (_url, init) => {
+        seenBody = JSON.parse(typeof init?.body === "string" ? init.body : "{}") as Record<
+          string,
+          unknown
+        >;
+        return Promise.resolve(
+          new Response(JSON.stringify({ model: "m", choices: [{ message: { content: "{}" } }] }), {
+            status: 200,
+          }),
+        );
+      },
+    });
+    expect(seenBody["models"]).toEqual(["vendor/free-a", "vendor/free-b"]);
+  });
+
+  // Both limiters keyed the same way would collapse every visitor into one
+  // bucket (or give each visitor their own global budget).
+  test("limiters are keyed per-IP and globally", async () => {
+    const keys: Record<string, string> = {};
+    const req = new Request("https://playground-api.ggsvelte.sh/v1/generate", {
+      method: "POST",
+      headers: new Headers({
+        "Content-Type": "application/json",
+        Origin: "https://ggsvelte.sh",
+        "CF-Connecting-IP": "203.0.113.7",
+      }),
+      body: JSON.stringify({ prompt: "hi", datasetId: "penguins" }),
+    });
+    await handleGenerate(req, {
+      OPENROUTER_API_KEY: "sk-test",
+      RATE_LIMIT_IP: {
+        limit: (o: { key: string }) => {
+          keys["ip"] = o.key;
+          return Promise.resolve({ success: true });
+        },
+      },
+      RATE_LIMIT_GLOBAL: {
+        limit: (o: { key: string }) => {
+          keys["global"] = o.key;
+          return Promise.resolve({ success: true });
+        },
+      },
+      fetch: () => Promise.resolve(new Response("{}", { status: 200 })),
+    });
+    expect(keys["ip"]).toBe("203.0.113.7");
+    expect(keys["global"]).toBe("global");
+  });
+
+  test("oversized body is refused even without a Content-Length header", async () => {
+    let called = false;
+    // No Content-Length: the header pre-filter cannot fire, so the ceiling has
+    // to be enforced on the bytes actually read.
+    const body = JSON.stringify({
+      prompt: "hi",
+      datasetId: "penguins",
+      pad: "x".repeat(80 * 1024),
+    });
+    const req = new Request("https://playground-api.ggsvelte.sh/v1/generate", {
+      method: "POST",
+      headers: new Headers({ "Content-Type": "application/json", Origin: "https://ggsvelte.sh" }),
+      body: new ReadableStream({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode(body));
+          controller.close();
+        },
+      }),
+      // @ts-expect-error duplex is required for a streaming request body.
+      duplex: "half",
+    });
+    const res = await handleGenerate(req, {
+      OPENROUTER_API_KEY: "sk-test",
+      ...okLimiters,
+      fetch: () => {
+        called = true;
+        return Promise.resolve(new Response("{}", { status: 200 }));
+      },
+    });
+    expect(res.status).toBe(400);
+    expect(called).toBe(false);
+  });
+
+  test("adversarially large priorErrors are refused before assembling messages", async () => {
+    let called = false;
+    const res = await handleGenerate(
+      request({
+        prompt: "fix",
+        datasetId: "penguins",
+        priorSpec: { ok: true },
+        priorErrors: [{ code: "x", path: "/", message: "m".repeat(9 * 1024) }],
+      }),
+      {
+        OPENROUTER_API_KEY: "sk-test",
+        ...okLimiters,
+        fetch: () => {
+          called = true;
+          return Promise.resolve(new Response("{}", { status: 200 }));
+        },
+      },
+    );
+    expect(res.status).toBe(400);
+    expect(called).toBe(false);
   });
 });

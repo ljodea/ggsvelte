@@ -1,8 +1,11 @@
 /**
  * Self-contained agent handoff prompt (OV5-A).
  * Bundles current chart + trimmed contract + install + SKILL link.
- * Contract mirrors workers/playground-api/src/prompt.ts trimmedHandoffContract
- * (kept here so the docs app does not import the worker package).
+ *
+ * This is the contract for the VISITOR's own agent, and it is deliberately
+ * shorter than the worker's system prompt (workers/playground-api/src/prompt.ts):
+ * that one also carries dataset schemas and recipes the visitor does not have.
+ * The two are related but not copies, so they are not kept byte-identical.
  */
 
 import type { PortableSpec } from "@ggsvelte/spec";
@@ -10,9 +13,8 @@ import type { PortableSpec } from "@ggsvelte/spec";
 export const AGENT_HANDOFF_MAX_CHARS = 8_000;
 
 const SKILL_URL = "https://ggsvelte.sh/llms.txt";
-const SKILL_DEPTH = "https://github.com/liamodea/ggsvelte/blob/main/skills/ggsvelte/SKILL.md";
+const SKILL_DEPTH = "https://github.com/ljodea/ggsvelte/blob/main/skills/ggsvelte/SKILL.md";
 
-/** Same content as workers/playground-api/src/prompt.ts#trimmedHandoffContract. */
 export function trimmedHandoffContract(): string {
   return `You emit ggsvelte PortableSpec JSON charts.
 
@@ -20,7 +22,8 @@ Rules:
 - data is either {"values":[rows]} (your data) or {"name":"dataset"} when using a named set.
 - Aes uses {"field":"col"} only — bare strings are invalid in JSON specs.
 - layers: [{geom, stat?, position?, aes?, params?}]
-- Geoms: point, line, col, bar, histogram, area, rule, text, smooth, boxplot, density.
+- Geoms: point, line, col, bar, histogram, area, rule, text, smooth, boxplot, density, errorbar, rect, tile, ribbon.
+- Positions are scoped per geom: bar/col/area/histogram → identity, stack, fill, dodge; point → identity, jitter, nudge; boxplot → dodge, identity; every other geom → identity only.
 - Interactions are GGPlot props, not spec fields: inspect, select ("point"|"interval"), zoom, legendFilter, legendFocus.
 - Prefer minimal complete specs with labs.title/x/y.
 

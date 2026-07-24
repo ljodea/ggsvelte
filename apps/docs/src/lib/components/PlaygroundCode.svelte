@@ -51,8 +51,10 @@
       })),
   );
 
-  const specTabActiveNote =
-    "This is the portable spec — the JSON contract AI agents use to create and edit ggsvelte charts. Validated by /schema/v0.json.";
+  // Rendered under the tab strip, not inside the Spec tab, so the wording has
+  // to be true whichever tab is showing.
+  const specCaption =
+    "Spec (JSON) is the contract AI agents use to create and edit ggsvelte charts. Validated by /schema/v0.json.";
 
   function downloadSvg(): void {
     if (!enabled) return;
@@ -106,7 +108,7 @@
     <CodeTabs {tabs} />
   {/if}
 
-  <p class="spec-caption">{specTabActiveNote}</p>
+  <p class="spec-caption">{specCaption}</p>
 
   <div class="actions">
     <UiButton type="button" onclick={downloadSvg} disabled={!enabled}>
@@ -121,7 +123,9 @@
       Share this chart
     </button>
     <span class="status" role="status" aria-live="polite"
-      >{exportStatus || shareStatus}</span
+      >{enabled
+        ? exportStatus || shareStatus
+        : "Available once the chart renders."}</span
     >
   </div>
 

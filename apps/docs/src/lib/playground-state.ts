@@ -138,7 +138,7 @@ export function stagePlaygroundDraft(state: PlaygroundState): PlaygroundState {
 export function stagePlaygroundSeed(
   state: PlaygroundState,
   seed: PlaygroundSeedV1,
-  origin: Exclude<PlaygroundCandidateOrigin, "apply" | "undo"> | "agent",
+  origin: Exclude<PlaygroundCandidateOrigin, "apply" | "undo">,
   targetHash?: string | null,
 ): PlaygroundState {
   const bounded = validatePlaygroundSeed(seed);

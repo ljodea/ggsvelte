@@ -93,28 +93,27 @@
   }
 
   function candidatePainted(generation: number): void {
+    // onrender fires from the child's effect, which runs BEFORE this component's
+    // bind:this is assigned — so the DOM lookup, not the binding, is the
+    // reliable path on the first paint of each candidate.
     const candidateRoot =
       candidateChartEl ??
       (document.querySelector(".candidate-chart") as HTMLElement | null);
     if (candidateRoot === null) {
-      onCandidateReady(generation, {
-        inert: true,
-        inertAttribute: true,
-        ariaHidden: "true",
-        activeRetained: false,
-        activeTitle: null,
+      // Previously this reported a hand-written "isolated" snapshot that nothing
+      // had measured, which the visual suite then asserted against. If the
+      // candidate really is not in the DOM, fail the candidate instead.
+      onCandidateFailed(generation, {
+        source: "pipeline",
+        code: "candidate-element-missing",
+        path: "/",
+        message: "Candidate chart painted but its element was not in the DOM.",
       });
       return;
     }
-    const probe =
-      (
-        window as typeof window & {
-          playgroundRetainedActive?: Element | null;
-        }
-      ).playgroundRetainedActive ?? null;
     onCandidateReady(
       generation,
-      snapshotCandidateIsolation(candidateRoot, activeChartEl ?? null, probe),
+      snapshotCandidateIsolation(candidateRoot, activeChartEl ?? null),
     );
   }
 

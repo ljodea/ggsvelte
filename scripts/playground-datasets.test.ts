@@ -15,8 +15,10 @@ import {
   PLAYGROUND_MAX_ROWS,
   encodePlaygroundSeed,
 } from "../apps/docs/src/lib/playground-codec";
-import { agentHandoffPrompt } from "../apps/docs/src/lib/playground-agent-handoff";
-import { AGENT_HANDOFF_MAX_CHARS } from "../apps/docs/src/lib/playground-agent-handoff";
+import {
+  agentHandoffPrompt,
+  AGENT_HANDOFF_MAX_CHARS,
+} from "../apps/docs/src/lib/playground-agent-handoff";
 
 describe("playground datasets", () => {
   test("each curated dataset is 40–60 rows and within codec limits", () => {

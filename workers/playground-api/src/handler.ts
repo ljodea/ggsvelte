@@ -43,6 +43,8 @@ export interface GenerateRequestBody {
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 /** One request body ceiling checked before parsing (cheap DoS guard). */
 const MAX_REQUEST_BODY_BYTES = 64 * 1024;
+/** Repair diagnostics are small by construction; this only bounds abuse. */
+const PRIOR_ERRORS_MAX_BYTES = 8 * 1024;
 export const DEFAULT_MODELS = [
   "google/gemini-2.0-flash-exp:free",
   "meta-llama/llama-3.3-70b-instruct:free",
@@ -199,15 +201,26 @@ export async function handleGenerate(request: Request, env: PlaygroundApiEnv): P
     }
   }
 
-  const contentLength = Number(request.headers.get("Content-Length") ?? "0");
+  // Content-Length is a cheap pre-filter only — it is client-supplied and absent
+  // entirely under chunked transfer-encoding. The authoritative check is on the
+  // bytes actually read, below.
+  const contentLength = Number(request.headers.get("Content-Length") ?? "");
   if (Number.isFinite(contentLength) && contentLength > MAX_REQUEST_BODY_BYTES) {
     return jsonResponse(apiError("bad_request", SAFE_MESSAGES.oversized_input), 400, cors);
   }
 
   let body: GenerateRequestBody;
   try {
-    body = (await request.json()) as GenerateRequestBody;
+    const raw = await request.arrayBuffer();
+    if (raw.byteLength > MAX_REQUEST_BODY_BYTES) {
+      return jsonResponse(apiError("bad_request", SAFE_MESSAGES.oversized_input), 400, cors);
+    }
+    body = JSON.parse(new TextDecoder().decode(raw)) as GenerateRequestBody;
   } catch {
+    return jsonResponse(apiError("bad_request", SAFE_MESSAGES.bad_request), 400, cors);
+  }
+
+  if (!isObject(body)) {
     return jsonResponse(apiError("bad_request", SAFE_MESSAGES.bad_request), 400, cors);
   }
 
@@ -238,6 +251,12 @@ export async function handleGenerate(request: Request, env: PlaygroundApiEnv): P
       return jsonResponse(apiError("bad_request", SAFE_MESSAGES.bad_request), 400, cors);
     }
     priorErrors = body.priorErrors.slice(0, PRIOR_ERRORS_MAX);
+    // Count-capped is not size-capped: buildChatMessages stringifies these, and
+    // adversarially deep/large entries would throw RangeError (a 500) inside the
+    // token check rather than being rejected here.
+    if (exceedsBytes(priorErrors, PRIOR_ERRORS_MAX_BYTES)) {
+      return jsonResponse(apiError("bad_request", SAFE_MESSAGES.oversized_input), 400, cors);
+    }
   }
 
   const repairUsed = body.priorSpec !== undefined && priorErrors !== undefined;

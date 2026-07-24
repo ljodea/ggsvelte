@@ -40,7 +40,9 @@ Geoms: point, line, col, bar, histogram, area, rule, text, smooth, boxplot, dens
 errorbar, rect, tile, ribbon.
 Defaults: bar→count+stack; histogram→bin+stack; col/area→identity+stack;
 boxplot→boxplot+dodge; else identity.
-Positions: identity, stack, fill, dodge, jitter, nudge.
+Positions are scoped per geom — one used outside its geom is rejected:
+bar/col/area/histogram → identity, stack, fill, dodge; point → identity, jitter, nudge;
+boxplot → dodge, identity; every other geom → identity only.
 Bar/histogram/density must NOT map aes.y to a field (stat computes y).
 
 ## Scales / facet / coord

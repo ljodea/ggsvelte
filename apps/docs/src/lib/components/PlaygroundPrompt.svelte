@@ -44,6 +44,11 @@
 
   let detailsOpen = $state(false);
 
+  // The alert is a decision, not a second copy of the browse row below it:
+  // offer a few recovery charts, not the whole catalogue.
+  const RECOVERY_SAMPLE_LIMIT = 3;
+  const recoverySamples = $derived(samples.slice(0, RECOVERY_SAMPLE_LIMIT));
+
   const canSubmit = $derived(
     prompt.trim() !== "" && !generateDisabled && !busy,
   );
@@ -126,7 +131,7 @@
       {/if}
       <p class="next-action">
         Try one of these instead —
-        {#each samples as sample, i (sample.id)}
+        {#each recoverySamples as sample, i (sample.id)}
           {#if i > 0}<span class="sep"> · </span>{/if}
           <button
             type="button"
@@ -280,6 +285,13 @@
 
   .details {
     font-size: 0.875rem;
+  }
+
+  .details summary {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    cursor: pointer;
   }
 
   .details-pre {
