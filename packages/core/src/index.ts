@@ -304,9 +304,24 @@ export {
 /** @lifecycle stable-intent */
 export type { RenderSVGOptions } from "./render-svg.js";
 
-// Within-mark paint (#591) — resource ids and resolved paint types
-export { paintResourceId } from "./mark-paint.js";
-export type { ResolvedGlow, ResolvedGradientPaint } from "./mark-paint.js";
+// Within-mark paint (#591) — resource ids, resolved paint, and shared mark style
+export {
+  areaOutlineActive,
+  linetypeDash,
+  markLinetype,
+  paintResourceId,
+  pointShapeGeometry,
+  pointShapePathD,
+  resolvePathMark,
+  resolvePointMark,
+} from "./mark-paint.js";
+export type {
+  PointShapeGeometry,
+  ResolvedGlow,
+  ResolvedGradientPaint,
+  ResolvedPathMark,
+  ResolvedPointMark,
+} from "./mark-paint.js";
 
 // CLI implementation (the `ggsvelte-render` bin on the ggsvelte package wraps this)
 export { runCLI } from "./cli.js";

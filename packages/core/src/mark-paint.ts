@@ -1,8 +1,228 @@
 /**
  * Within-mark paint resolution (#591): closed gradients + bounded glow with
  * stable resource ids (plot/layer/role — never randomness or process counters).
+ *
+ * Also owns renderer-neutral mark style resolution (shapes, dash, stroke-null)
+ * so SVG / canvas / Svelte serializers share one table.
  */
 import type { GradientPaint, GlowSpec, PaintSpace } from "@ggsvelte/spec";
+import { LINETYPE_NAMES, POINT_SHAPE_NAMES } from "@ggsvelte/spec";
+
+import type { PathsBatch, PointsBatch } from "./scene.js";
+import { LINETYPE_DASHES, type Linetype, type PointShape } from "./scales/style.js";
+
+/** Renderer-neutral point-shape geometry (one proportion table). */
+export type PointShapeGeometry =
+  | { kind: "circle"; mode: "fill"; cx: number; cy: number; r: number }
+  | { kind: "rect"; mode: "fill"; x: number; y: number; width: number; height: number }
+  | { kind: "polygon"; mode: "fill"; points: readonly (readonly [number, number])[] }
+  | {
+      kind: "lines";
+      mode: "stroke";
+      strokeWidth: number;
+      segments: readonly (readonly [readonly [number, number], readonly [number, number]])[];
+    };
+
+/** Closed shape proportions shared by SVG, canvas, and Svelte serializers. */
+export function pointShapeGeometry(
+  shape: PointShape,
+  x: number,
+  y: number,
+  size: number,
+): PointShapeGeometry {
+  switch (shape) {
+    case "square":
+      return {
+        kind: "rect",
+        mode: "fill",
+        x: x - size,
+        y: y - size,
+        width: size * 2,
+        height: size * 2,
+      };
+    case "triangle":
+      return {
+        kind: "polygon",
+        mode: "fill",
+        points: [
+          [x, y - size * 1.2],
+          [x + size * 1.1, y + size * 0.9],
+          [x - size * 1.1, y + size * 0.9],
+        ],
+      };
+    case "diamond":
+      return {
+        kind: "polygon",
+        mode: "fill",
+        points: [
+          [x, y - size * 1.25],
+          [x + size, y],
+          [x, y + size * 1.25],
+          [x - size, y],
+        ],
+      };
+    case "plus":
+      return {
+        kind: "lines",
+        mode: "stroke",
+        strokeWidth: Math.max(1, size / 2),
+        segments: [
+          [
+            [x - size, y],
+            [x + size, y],
+          ],
+          [
+            [x, y - size],
+            [x, y + size],
+          ],
+        ],
+      };
+    case "cross": {
+      const arm = size * 0.75;
+      return {
+        kind: "lines",
+        mode: "stroke",
+        strokeWidth: Math.max(1, size / 2),
+        segments: [
+          [
+            [x - arm, y - arm],
+            [x + arm, y + arm],
+          ],
+          [
+            [x + arm, y - arm],
+            [x - arm, y + arm],
+          ],
+        ],
+      };
+    }
+    default:
+      return { kind: "circle", mode: "fill", cx: x, cy: y, r: size };
+  }
+}
+
+/** SVG path `d` for polygon/lines shapes (circle/rect keep dedicated elements). */
+export function pointShapePathD(
+  geometry: Extract<PointShapeGeometry, { kind: "polygon" | "lines" }>,
+  format: (n: number) => string = String,
+): string {
+  if (geometry.kind === "polygon") {
+    const [first, ...rest] = geometry.points;
+    if (first === undefined) return "";
+    const parts = [`M${format(first[0])} ${format(first[1])}`];
+    for (const [px, py] of rest) parts.push(`L${format(px)} ${format(py)}`);
+    parts.push("Z");
+    return parts.join("");
+  }
+  return geometry.segments
+    .map(([a, b]) => `M${format(a[0])} ${format(a[1])}L${format(b[0])} ${format(b[1])}`)
+    .join("");
+}
+
+/** Dash array for a named linetype (empty = solid). */
+export function linetypeDash(linetype: Linetype): readonly number[] {
+  return LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? [];
+}
+
+/** Area outline is drawn only when stroke is concrete and linewidth > 0. */
+export function areaOutlineActive(
+  stroke: string | null | undefined,
+  linewidth: number,
+): stroke is string {
+  return stroke !== null && stroke !== undefined && linewidth > 0;
+}
+
+export interface ResolvedPointMark {
+  fill: string;
+  alpha: number;
+  size: number;
+  shape: PointShape;
+  geometry: PointShapeGeometry;
+}
+
+export interface ResolvedPathMark {
+  fill: string | "none";
+  stroke: string | "none";
+  width: number;
+  dash: readonly number[];
+  alpha: number;
+  linecap: "butt" | "round" | "square";
+  linejoin: "miter" | "round" | "bevel";
+}
+
+function linetypeAt(
+  batch: { linetype?: Linetype; linetypeIndexes?: Uint8Array },
+  index: number,
+): Linetype {
+  return batch.linetypeIndexes === undefined
+    ? (batch.linetype ?? "solid")
+    : LINETYPE_NAMES[batch.linetypeIndexes[index]!]!;
+}
+
+/** Resolve linetype for batch index `i` (constant or per-mark indexes). */
+export function markLinetype(
+  batch: { linetype?: Linetype; linetypeIndexes?: Uint8Array },
+  index: number,
+): Linetype {
+  return linetypeAt(batch, index);
+}
+
+/** Resolve one point mark's fill/shape/alpha for any serializer. */
+export function resolvePointMark(
+  batch: PointsBatch,
+  index: number,
+  themeInk: string,
+): ResolvedPointMark {
+  const size = batch.sizes?.[index] ?? batch.size;
+  const shape =
+    batch.shapeIndexes === undefined ? batch.shape : POINT_SHAPE_NAMES[batch.shapeIndexes[index]!]!;
+  return {
+    fill: batch.colors?.[index] ?? batch.fill ?? themeInk,
+    alpha: batch.alphas?.[index] ?? 1,
+    size,
+    shape,
+    geometry: pointShapeGeometry(
+      shape,
+      batch.positions[index * 2]!,
+      batch.positions[index * 2 + 1]!,
+      size,
+    ),
+  };
+}
+
+/** Resolve one path/area subpath's stroke/fill/dash for any serializer. */
+export function resolvePathMark(
+  batch: PathsBatch,
+  index: number,
+  theme: { ink: string; accent: string },
+): ResolvedPathMark {
+  const isArea = batch.fills !== undefined;
+  const linewidth = batch.linewidths?.[index] ?? batch.linewidth;
+  const strokeColor = batch.strokes[index];
+  const dash = linetypeDash(linetypeAt(batch, index));
+  const alpha = batch.alphas?.[index] ?? 1;
+  const linecap = batch.linecap ?? "round";
+  const linejoin = batch.linejoin ?? "round";
+  if (isArea) {
+    return {
+      fill: batch.fills![index] ?? batch.fillPaint?.fallback ?? theme.accent,
+      stroke: areaOutlineActive(strokeColor, linewidth) ? strokeColor : "none",
+      width: linewidth,
+      dash,
+      alpha,
+      linecap,
+      linejoin,
+    };
+  }
+  return {
+    fill: "none",
+    stroke: strokeColor ?? batch.strokePaint?.fallback ?? theme.ink,
+    width: linewidth,
+    dash,
+    alpha,
+    linecap,
+    linejoin,
+  };
+}
 
 /** Resolved gradient ready for SVG/canvas paint. */
 export interface ResolvedGradientPaint {
