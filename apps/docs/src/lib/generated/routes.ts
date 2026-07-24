@@ -185,13 +185,8 @@ export const DOCS_ROUTES = [
     },
     headings: [
       {
-        id: "create-a-sveltekit-app",
-        title: "Create a SvelteKit app",
-        level: 2,
-      },
-      {
-        id: "install-ggsvelte",
-        title: "Install ggsvelte",
+        id: "install",
+        title: "Install",
         level: 2,
       },
       {
@@ -200,73 +195,58 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "you-have-a-chart",
-        title: "You have a chart",
+        id: "build-the-chart",
+        title: "Build the chart",
         level: 2,
       },
       {
-        id: "build-the-grammar-one-change-at-a-time",
-        title: "Build the grammar one change at a time",
+        id: "separate-signal-from-noise",
+        title: "Separate the signal from the noise",
+        level: 3,
+      },
+      {
+        id: "put-earlier-bloom-on-top",
+        title: "Put earlier bloom on top",
+        level: 3,
+      },
+      {
+        id: "put-the-climate-behind-the-data",
+        title: "Put the climate behind the data",
+        level: 3,
+      },
+      {
+        id: "name-the-records",
+        title: "Name the records",
+        level: 3,
+      },
+      {
+        id: "finish-it",
+        title: "Finish it",
+        level: 3,
+      },
+      {
+        id: "and-it-is-data",
+        title: "Make it answer questions — and notice it is data",
+        level: 3,
+      },
+      {
+        id: "the-chart",
+        title: "The chart",
         level: 2,
       },
       {
-        id: "map-fields-to-position",
-        title: "Map fields to position",
-        level: 3,
-      },
-      {
-        id: "add-a-second-layer",
-        title: "Add a second layer",
-        level: 3,
-      },
-      {
-        id: "make-color-meaning-explicit",
-        title: "Make color meaning explicit",
-        level: 3,
-      },
-      {
-        id: "add-a-statistical-smoother",
-        title: "Add a statistical smoother",
-        level: 3,
-      },
-      {
-        id: "facet-the-comparison",
-        title: "Facet the comparison",
-        level: 3,
-      },
-      {
-        id: "choose-a-chart-theme",
-        title: "Choose a chart theme",
-        level: 3,
-      },
-      {
-        id: "enable-inspect-and-pin",
-        title: "Enable inspect and pin",
-        level: 3,
-      },
-      {
-        id: "choose-another-surface-only-when-you-need-it",
-        title: "Choose another surface only when you need it",
+        id: "the-finished-file",
+        title: "The finished file",
         level: 2,
       },
       {
-        id: "fluent-builder",
-        title: "Fluent builder",
-        level: 3,
-      },
-      {
-        id: "portablespec-json",
-        title: "PortableSpec JSON",
-        level: 3,
-      },
-      {
-        id: "headless-and-server-rendering",
-        title: "Headless and server rendering",
+        id: "built-for-agents",
+        title: "Built for agents",
         level: 2,
       },
       {
-        id: "validating-specs",
-        title: "Validating specs",
+        id: "the-rest-of-the-grammar",
+        title: "The rest of the grammar",
         level: 2,
       },
       {

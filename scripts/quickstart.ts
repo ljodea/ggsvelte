@@ -1,136 +1,648 @@
+/**
+ * The getting-started lesson, as data.
+ *
+ * One chart is built across seven renders: a plain scatter of 838 Kyoto
+ * cherry-blossom observations, then six steps that each add one grammar
+ * element. Every step declares two deltas — the PortableSpec the live chart
+ * renders from, and the Svelte source the reader copies — and `foldSakura`
+ * accumulates both. The page never re-derives either, so the chart on screen,
+ * the fragment beside it, and the finished file at the end cannot drift
+ * (asserted in scripts/sakura-lesson.test.ts).
+ *
+ * Shared byte-for-byte by the docs site, the llms surfaces, and the packed
+ * consumer-compat fixture app.
+ */
+
+import type { Labs, LayerSpec, PortableSpec, Scales, ThemeName } from "@ggsvelte/spec";
+
 export const QUICKSTART_PAGE_FILENAME = "src/routes/+page.svelte";
 
-export const QUICKSTART_BUILDER_FRAGMENT = `import { aes, gg } from "@ggsvelte/svelte";
+/** Bloom days are projected onto this non-leap year so a date axis can draw them. */
+export const SAKURA_REFERENCE_YEAR = 2001;
 
-const spec = gg(cars, aes({ x: "weight", y: "economy" }))
+/** Loess neighborhood fraction: large enough that the millennium reads flat. */
+export const SAKURA_LOESS_SPAN = 0.4;
+
+/** Median bloom day 1600–1850, drawn as the pre-industrial baseline. */
+export const SAKURA_BASELINE = "2001-04-15";
+
+const Y_TOP = "2001-03-18";
+const Y_BOTTOM = "2001-05-10";
+
+const ARIA_LABEL = "Kyoto peak bloom, 812 to 2026: about a week earlier since 1850";
+
+// --- the two lesson-only tables -------------------------------------------
+// Both are small enough to read at a glance, and both are drawn by layers that
+// carry their own `data` — the reason they exist as source in the lesson.
+
+// `year` is the band's first year, so the plot's `key="year"` resolves on
+// these rows too — every table the chart draws from speaks the same identity.
+export const SAKURA_EPOCHS = [
+  { epoch: "Medieval warm period", year: 812, until: 1300 },
+  { epoch: "Little Ice Age", year: 1300, until: 1850 },
+  { epoch: "Industrial era", year: 1850, until: 2026 },
+].map((band) => ({ ...band, top: Y_TOP, bottom: Y_BOTTOM }));
+
+/**
+ * Where the bands meet. Drawn as hairlines so the epochs survive forced-colors
+ * mode, where translucent fills are unreliable.
+ */
+export const SAKURA_EPOCH_EDGES = SAKURA_EPOCHS.slice(1).map((band) => ({ year: band.year }));
+
+export const SAKURA_RECORDS = [
+  {
+    year: 1323,
+    bloomRefDate: "2001-05-04",
+    label: "1323 — latest on record",
+    labelYear: 1150,
+    labelDate: "2001-05-08",
+  },
+  {
+    year: 1409,
+    bloomRefDate: "2001-03-27",
+    label: "1409 — earliest for six centuries",
+    labelYear: 1480,
+    labelDate: "2001-03-24",
+  },
+  {
+    year: 2023,
+    bloomRefDate: "2001-03-25",
+    label: "2023 — earliest in 1,200 years",
+    labelYear: 1790,
+    labelDate: "2001-03-19",
+  },
+];
+
+// --- step model ------------------------------------------------------------
+
+export interface SakuraSpecDelta {
+  /** Layers keyed by name; a repeated key replaces that layer. */
+  readonly layers?: Readonly<Record<string, LayerSpec>>;
+  /** Full bottom-to-top z-order after this step. */
+  readonly order?: readonly string[];
+  readonly scales?: Scales;
+  readonly labs?: Labs;
+  readonly theme?: ThemeName;
+}
+
+export interface SakuraSourceDelta {
+  /** Components added to the `@ggsvelte/svelte` import. */
+  readonly components?: readonly string[];
+  /** Whole `const` blocks added to the module script. */
+  readonly consts?: readonly string[];
+  /** `<GGPlot>` attributes, keyed by attribute name; a repeat replaces it. */
+  readonly attrs?: Readonly<Record<string, string>>;
+  /** Child elements keyed by the layer they draw; a repeat replaces it. */
+  readonly children?: Readonly<Record<string, string>>;
+  /** Full bottom-to-top child order after this step. */
+  readonly childOrder?: readonly string[];
+}
+
+export interface SakuraStep {
+  readonly id: string;
+  /** Step heading. States the reader's goal, not the mechanism. */
+  readonly title: string;
+  /** What changes on the chart. One line. */
+  readonly outcome: string;
+  /** The grammar concept the step teaches. */
+  readonly explanation: string;
+  /** The delta the reader types, as it appears beside the chart. */
+  readonly fragment: string;
+  readonly chapterTitle: string;
+  readonly href: string;
+  readonly spec: SakuraSpecDelta;
+  readonly source: SakuraSourceDelta;
+}
+
+const EPOCHS_CONST = `  // Full panel height, so the bands read as background, not as data.
+  const span = { top: "${Y_TOP}", bottom: "${Y_BOTTOM}" };
+  const epochs = [
+${SAKURA_EPOCHS.map(
+  (e) => `    { epoch: "${e.epoch}", year: ${e.year}, until: ${e.until}, ...span },`,
+).join("\n")}
+  ];`;
+
+const RECORDS_CONST = `  const records = [
+${SAKURA_RECORDS.map(
+  (r) =>
+    `    {\n      year: ${r.year}, bloomRefDate: "${r.bloomRefDate}",\n      labelYear: ${r.labelYear}, labelDate: "${r.labelDate}",\n      label: "${r.label}",\n    },`,
+).join("\n")}
+  ];`;
+
+const EPOCH_EDGES_CONST = `  const epochEdges = [${SAKURA_EPOCH_EDGES.map((e) => `{ year: ${e.year} }`).join(", ")}];`;
+
+export const SAKURA_STEPS: readonly SakuraStep[] = [
+  {
+    id: "separate-signal-from-noise",
+    title: "Separate the signal from the noise",
+    outcome: "A fitted trend rises out of eight centuries of scatter.",
+    explanation:
+      "GeomSmooth is a stat layer: the library fits the loess locally and draws the result. Nothing is precomputed, and the points stay exactly as they were — only their alpha changes, so the fit has something to sit on.",
+    fragment: `<GeomPoint aes={{ color: { value: "#777777" } }} alpha={0.5} size={1.6} />
+<GeomSmooth method="loess" span={0.4} se={false} linewidth={1.8}
+  aes={{ color: { value: "#262626" } }} />`,
+    chapterTitle: "Statistics and positions",
+    href: "/guide/statistics-positions#statistical-summaries",
+    spec: {
+      layers: {
+        points: {
+          geom: "point",
+          aes: { color: { value: "#777777" } },
+          params: { alpha: 0.5, size: 1.6 },
+        },
+        trend: {
+          geom: "smooth",
+          aes: { color: { value: "#262626" } },
+          params: { method: "loess", span: SAKURA_LOESS_SPAN, se: false, linewidth: 1.8 },
+        },
+      },
+      order: ["points", "trend"],
+    },
+    source: {
+      components: ["GeomSmooth"],
+      children: {
+        points: `  <GeomPoint aes={{ color: { value: "#777777" } }} alpha={0.5} size={1.6} />`,
+        trend: `  <GeomSmooth
+    method="loess"
+    span={${SAKURA_LOESS_SPAN}}
+    se={false}
+    linewidth={1.8}
+    aes={{ color: { value: "#262626" } }}
+  />`,
+      },
+      childOrder: ["points", "trend"],
+    },
+  },
+  {
+    id: "put-earlier-bloom-on-top",
+    title: "Put earlier bloom on top",
+    outcome: "Real dates on the axis, reversed: earlier spring now reads as up.",
+    explanation:
+      "The bloom day is a date, so the y scale is temporal — dateBreaks and dateLabels format it. Reversing the scale changes direction only; no value is touched, and the trend line above is refit from the same rows.",
+    fragment: `scales={{
+  y: {
+    type: "time",
+    temporalKind: "date",
+    reverse: true,
+    dateBreaks: "10 days",
+    dateLabels: "%b %d",
+    domain: ["${Y_BOTTOM}", "${Y_TOP}"],
+  },
+}}`,
+    chapterTitle: "Scales and guides",
+    href: "/guide/scales-guides#date-and-time-axes",
+    spec: {
+      scales: {
+        y: {
+          type: "time",
+          temporalKind: "date",
+          reverse: true,
+          dateBreaks: "10 days",
+          dateLabels: "%b %d",
+          domain: [Y_BOTTOM, Y_TOP],
+        },
+        x: { type: "linear", domain: [800, 2040] },
+      },
+      labs: { x: "Year", y: "Peak bloom" },
+    },
+    source: {
+      attrs: {
+        scales: `  scales={{
+    y: {
+      type: "time",
+      temporalKind: "date",
+      reverse: true,
+      dateBreaks: "10 days",
+      dateLabels: "%b %d",
+      domain: ["${Y_BOTTOM}", "${Y_TOP}"],
+    },
+    x: { type: "linear", domain: [800, 2040] },
+    fill: {
+      type: "manual",
+      domain: [${SAKURA_EPOCHS.map((e) => `"${e.epoch}"`).join(", ")}],
+      range: ["#f5edc4", "#dce8f2", "#f3dcda"],
+    },
+  }}`,
+        labs: `  labs={{ x: "Year", y: "Peak bloom" }}`,
+      },
+    },
+  },
+  {
+    id: "put-the-climate-behind-the-data",
+    title: "Put the climate behind the data",
+    outcome: "Three epoch bands sit under the observations.",
+    explanation:
+      "A layer may bring its own data. This one draws three rows the plot's 838 know nothing about, so it unsets the inherited x and y and maps corners instead. A manual fill scale names the bands in the legend.",
+    fragment: `<GeomRect
+  data={epochs}
+  aes={{
+    x: null, y: null,
+    xmin: "year", xmax: "until", ymin: "top", ymax: "bottom",
+    fill: "epoch",
+  }}
+  alpha={0.55}
+/>
+<GeomRule data={epochEdges} aes={{ y: null, color: { value: "#c8ccd0" } }}
+  linewidth={0.5} />`,
+    chapterTitle: "Layers and marks",
+    href: "/guide/layers-marks#compose-layers",
+    spec: {
+      layers: {
+        epochs: {
+          geom: "rect",
+          data: { values: SAKURA_EPOCHS },
+          aes: {
+            x: null,
+            y: null,
+            xmin: { field: "year" },
+            xmax: { field: "until" },
+            ymin: { field: "top" },
+            ymax: { field: "bottom" },
+            fill: { field: "epoch" },
+          },
+          params: { alpha: 0.55 },
+        },
+        epochEdges: {
+          geom: "rule",
+          data: { values: SAKURA_EPOCH_EDGES },
+          aes: { y: null, color: { value: "#c8ccd0" } },
+          params: { linewidth: 0.5 },
+        },
+      },
+      order: ["epochs", "epochEdges", "points", "trend"],
+      scales: {
+        fill: {
+          type: "manual",
+          domain: SAKURA_EPOCHS.map((epoch) => epoch.epoch),
+          range: ["#f5edc4", "#dce8f2", "#f3dcda"],
+        },
+      },
+    },
+    source: {
+      components: ["GeomRect", "GeomRule"],
+      consts: [EPOCHS_CONST, EPOCH_EDGES_CONST],
+      children: {
+        epochEdges: `  <GeomRule
+    data={epochEdges}
+    aes={{ y: null, color: { value: "#c8ccd0" } }}
+    linewidth={0.5}
+  />`,
+        epochs: `  <GeomRect
+    data={epochs}
+    aes={{
+      x: null,
+      y: null,
+      xmin: "year",
+      xmax: "until",
+      ymin: "top",
+      ymax: "bottom",
+      fill: "epoch",
+    }}
+    alpha={0.55}
+  />`,
+      },
+      childOrder: ["epochs", "epochEdges", "points", "trend"],
+    },
+  },
+  {
+    id: "name-the-records",
+    title: "Name the records",
+    outcome: "A baseline, and three observations called out by name.",
+    explanation:
+      "Annotations are layers like any other: a rule at a constant, then leader lines and text driven by a three-row table. Nothing here is a chart-library escape hatch.",
+    fragment: `<GeomRule yintercept="${SAKURA_BASELINE}" linewidth={0.75} alpha={0.7}
+  aes={{ color: { value: "#9aa0a6" }, linetype: { value: "dashed" } }} />
+<GeomSegment data={records}
+  aes={{ x: "labelYear", y: "labelDate", xend: "year",
+         yend: "bloomRefDate", color: { value: "#b3452f" } }} linewidth={0.7} />
+<GeomText data={records}
+  aes={{ x: "labelYear", y: "labelDate", label: "label",
+         color: { value: "#b3452f" } }} size={11} />`,
+    chapterTitle: "Data and mappings",
+    href: "/guide/data-mappings#keep-data-local",
+    spec: {
+      layers: {
+        baseline: {
+          geom: "rule",
+          aes: { color: { value: "#9aa0a6" }, linetype: { value: "dashed" } },
+          params: { yintercept: SAKURA_BASELINE, linewidth: 0.75, alpha: 0.7 },
+        },
+        leaders: {
+          geom: "segment",
+          data: { values: SAKURA_RECORDS },
+          aes: {
+            x: { field: "labelYear" },
+            y: { field: "labelDate" },
+            xend: { field: "year" },
+            yend: { field: "bloomRefDate" },
+            color: { value: "#b3452f" },
+          },
+          params: { linewidth: 0.7, alpha: 0.9 },
+        },
+        callouts: {
+          geom: "text",
+          data: { values: SAKURA_RECORDS },
+          aes: {
+            x: { field: "labelYear" },
+            y: { field: "labelDate" },
+            label: { field: "label" },
+            color: { value: "#b3452f" },
+          },
+          params: { size: 11 },
+        },
+      },
+      order: ["epochs", "epochEdges", "points", "baseline", "trend", "leaders", "callouts"],
+    },
+    source: {
+      components: ["GeomSegment", "GeomText"],
+      consts: [RECORDS_CONST],
+      children: {
+        baseline: `  <GeomRule
+    yintercept="${SAKURA_BASELINE}"
+    linewidth={0.75}
+    alpha={0.7}
+    aes={{ color: { value: "#9aa0a6" }, linetype: { value: "dashed" } }}
+  />`,
+        leaders: `  <GeomSegment
+    data={records}
+    aes={{
+      x: "labelYear",
+      y: "labelDate",
+      xend: "year",
+      yend: "bloomRefDate",
+      color: { value: "#b3452f" },
+    }}
+    linewidth={0.7}
+    alpha={0.9}
+  />`,
+        callouts: `  <GeomText
+    data={records}
+    aes={{
+      x: "labelYear",
+      y: "labelDate",
+      label: "label",
+      color: { value: "#b3452f" },
+    }}
+    size={11}
+  />`,
+      },
+      childOrder: ["epochs", "epochEdges", "points", "baseline", "trend", "leaders", "callouts"],
+    },
+  },
+  {
+    id: "finish-it",
+    title: "Finish it",
+    outcome: "Tufte theme, a title that states the finding, a caption that cites the source.",
+    explanation:
+      "Theme is appearance; labs is editorial. Neither touches a mapping, so swapping themes cannot change what the chart claims.",
+    fragment: `theme="tufte"
+labs={{
+  title: "Kyoto cherry blossom, 812–2026",
+  subtitle: "Bloom now arrives about a week earlier than it did for a millennium",
+  caption: "838 observations. Data: Yasuyuki Aono (2008, 2010).",
+  x: "Year",
+  y: "Peak bloom",
+  fill: "Climate epoch",
+}}`,
+    chapterTitle: "Themes and color",
+    href: "/guide/themes-color#choose-a-chart-theme",
+    spec: {
+      theme: "tufte",
+      labs: {
+        title: "Kyoto cherry blossom, 812–2026",
+        subtitle: "Bloom now arrives about a week earlier than it did for a millennium",
+        caption: "838 observations. Data: Yasuyuki Aono (2008, 2010).",
+        x: "Year",
+        y: "Peak bloom",
+        fill: "Climate epoch",
+      },
+    },
+    source: {
+      attrs: {
+        theme: `  theme="tufte"`,
+        labs: `  labs={{
+    x: "Year",
+    y: "Peak bloom",
+    title: "Kyoto cherry blossom, 812–2026",
+    subtitle:
+      "Bloom now arrives about a week earlier than it did for a millennium",
+    caption:
+      "838 observations. Data: Yasuyuki Aono (2008, 2010).",
+    fill: "Climate epoch",
+  }}`,
+      },
+    },
+  },
+  {
+    id: "and-it-is-data",
+    title: "Make it answer questions — and notice it is data",
+    outcome: "Inspect and pin any of the 838 observations, by pointer or keyboard.",
+    explanation:
+      "Inspection needs a stable identity per row; year is unique here. Everything above is also a JSON PortableSpec — the same chart an agent can emit, validate, and correct without opening this file.",
+    fragment: `key="year"
+inspect={{ mode: "exact", pin: true }}`,
+    chapterTitle: "Inspect and pin",
+    href: "/guide/inspect-pin#inspect-and-pin",
+    spec: {},
+    source: {
+      attrs: {
+        key: `  key="year"`,
+        inspect: `  inspect={{ mode: "exact", pin: true }}`,
+      },
+    },
+  },
+];
+
+// --- the fold --------------------------------------------------------------
+
+/** A row of the plot-level dataset (the shape kyotoSakura rows have). */
+export type SakuraRow = Record<string, string | number>;
+
+export interface SakuraFold {
+  /** The PortableSpec this step's chart renders from. */
+  readonly spec: PortableSpec;
+  /** The complete `+page.svelte` at this step. */
+  readonly source: string;
+  /** Runtime-only <GGPlot> props, which are not spec fields. */
+  readonly key: string | undefined;
+  readonly inspect: { mode: "exact"; pin: true } | undefined;
+}
+
+const BASE_LAYERS: Record<string, LayerSpec> = { points: { geom: "point" } };
+const BASE_ORDER = ["points"];
+const BASE_CHILDREN: Record<string, string> = { points: "  <GeomPoint />" };
+
+/** Layers that only make sense when the chart is wide enough to place text. */
+export const SAKURA_ANNOTATION_LAYERS = ["leaders", "callouts"] as const;
+
+export interface FoldSakuraOptions {
+  /**
+   * Drop the record callouts and their leader lines. The page does this below
+   * a ~560px chart container, where hand-placed text collides with the data;
+   * the records move to the caption instead. Bands, trend, baseline and points
+   * are never dropped.
+   */
+  readonly annotations?: boolean;
+}
+
+/**
+ * Accumulate the first `count` steps (0 = the first render). Pure: the same
+ * count always yields the same spec and the same source text.
+ */
+export function foldSakura(
+  count: number,
+  rows: readonly SakuraRow[] = [],
+  options: FoldSakuraOptions = {},
+): SakuraFold {
+  const steps = SAKURA_STEPS.slice(0, Math.max(0, Math.min(count, SAKURA_STEPS.length)));
+
+  const layers: Record<string, LayerSpec> = { ...BASE_LAYERS };
+  let order: readonly string[] = BASE_ORDER;
+  let scales: Scales = {};
+  let labs: Labs | undefined;
+  let theme: ThemeName | undefined;
+
+  const components = new Set(["GeomPoint", "GGPlot"]);
+  const consts: string[] = [];
+  const attrs = new Map<string, string>([
+    ["data", "  data={kyotoSakura}"],
+    ["aes", `  aes={{ x: "year", y: "bloomRefDate" }}`],
+  ]);
+  const children: Record<string, string> = { ...BASE_CHILDREN };
+  let childOrder: readonly string[] = BASE_ORDER;
+
+  for (const step of steps) {
+    Object.assign(layers, step.spec.layers ?? {});
+    if (step.spec.order !== undefined) order = step.spec.order;
+    scales = { ...scales, ...step.spec.scales };
+    if (step.spec.labs !== undefined) labs = { ...labs, ...step.spec.labs };
+    if (step.spec.theme !== undefined) theme = step.spec.theme;
+
+    for (const component of step.source.components ?? []) components.add(component);
+    consts.push(...(step.source.consts ?? []));
+    for (const [name, text] of Object.entries(step.source.attrs ?? {})) attrs.set(name, text);
+    Object.assign(children, step.source.children ?? {});
+    if (step.source.childOrder !== undefined) childOrder = step.source.childOrder;
+  }
+
+  const drawn =
+    options.annotations === false
+      ? order.filter((name) => !SAKURA_ANNOTATION_LAYERS.includes(name as never))
+      : order;
+
+  const spec: PortableSpec = {
+    data: { values: [...rows] },
+    aes: { x: { field: "year" }, y: { field: "bloomRefDate" } },
+    layers: drawn.map((name) => layers[name]!),
+    ...(Object.keys(scales).length > 0 && { scales }),
+    ...(labs !== undefined && { labs }),
+    ...(theme !== undefined && { theme }),
+  };
+
+  attrs.set("ariaLabel", `  ariaLabel="${ARIA_LABEL}"`);
+  const imported = [...components].toSorted((a, b) => a.localeCompare(b));
+  // Wrap the component import once it stops fitting on one readable line.
+  const imports =
+    imported.join(", ").length > 60
+      ? `{\n${imported.map((name) => `    ${name},`).join("\n")}\n  }`
+      : `{ ${imported.join(", ")} }`;
+  const script = [
+    `  import ${imports} from "@ggsvelte/svelte";`,
+    `  import { kyotoSakura } from "@ggsvelte/svelte/data";`,
+    ...(consts.length > 0 ? ["", ...consts] : []),
+  ].join("\n");
+
+  const source = `<script lang="ts">
+${script}
+</script>
+
+<svelte:head><title>Kyoto cherry blossom</title></svelte:head>
+
+<GGPlot
+${[...attrs.values()].join("\n")}
+>
+${childOrder.map((name) => children[name]).join("\n")}
+</GGPlot>`;
+
+  return {
+    spec,
+    source,
+    key: attrs.has("key") ? "year" : undefined,
+    inspect: attrs.has("inspect") ? { mode: "exact", pin: true } : undefined,
+  };
+}
+
+/** The honest starting chart: 838 points, default everything, noise winning. */
+export const QUICKSTART_PAGE_SVELTE = foldSakura(0).source;
+
+/** The chart the lesson is building toward. */
+export const SAKURA_FINISHED_SVELTE = foldSakura(SAKURA_STEPS.length).source;
+
+/**
+ * Section headings of the HUMAN getting-started page, in page order.
+ *
+ * `/guide/getting-started` is the one route whose prose is a Svelte component
+ * rather than guide markdown (the markdown at that slug is the agent doc, which
+ * is deliberately a different document — see D6 in the overhaul plan). Its
+ * on-this-page navigation is generated from this list, and
+ * scripts/getting-started-headings.test.ts asserts the component really renders
+ * each id.
+ */
+export const GETTING_STARTED_PAGE_HEADINGS = [
+  { id: "install", title: "Install", level: 2 },
+  { id: "draw-your-first-chart", title: "Draw your first chart", level: 2 },
+  { id: "build-the-chart", title: "Build the chart", level: 2 },
+  ...SAKURA_STEPS.map((step) => ({ id: step.id, title: step.title, level: 3 as const })),
+  { id: "the-chart", title: "The chart", level: 2 },
+  { id: "the-finished-file", title: "The finished file", level: 2 },
+  { id: "built-for-agents", title: "Built for agents", level: 2 },
+  { id: "the-rest-of-the-grammar", title: "The rest of the grammar", level: 2 },
+  { id: "where-next", title: "Where next", level: 2 },
+] as const satisfies readonly { id: string; title: string; level: 2 | 3 }[];
+
+export function sakuraLessonMarkdown(): string {
+  return SAKURA_STEPS.map(
+    (step) =>
+      `### ${step.title}\n\n${step.outcome}\n\n\`\`\`svelte\n${step.fragment}\n\`\`\`\n\n${step.explanation}\n\n[Read ${step.chapterTitle}](${step.href}).`,
+  ).join("\n\n");
+}
+
+// --- the agent surface -----------------------------------------------------
+// These live on /llms.txt and in the "Built for agents" section, not in the
+// human walkthrough: their audience is code that emits specs, not a reader
+// following along in an editor.
+
+export const QUICKSTART_BUILDER_FRAGMENT = `import { aes, gg } from "@ggsvelte/svelte";
+import { kyotoSakura } from "@ggsvelte/svelte/data";
+
+const spec = gg(kyotoSakura, aes({ x: "year", y: "bloomRefDate" }))
   .geomPoint()
+  .geomSmooth({ method: "loess", span: ${SAKURA_LOESS_SPAN} })
   .spec();`;
 
+/**
+ * The reference form: large or reused data goes in `datasets` by name, in
+ * columns form. Inline `values` is for data small enough to read.
+ */
 export const QUICKSTART_PORTABLE_SPEC_FRAGMENT = `{
-  "data": { "values": [{ "weight": 1.8, "economy": 37 }] },
-  "layers": [
-    {
-      "geom": "point",
-      "aes": {
-        "x": { "field": "weight" },
-        "y": { "field": "economy" }
+  "data": { "name": "kyotoSakura" },
+  "datasets": {
+    "kyotoSakura": {
+      "columns": {
+        "year": [812, 815, 831, 851, 853],
+        "bloomRefDate": ["2001-04-01", "2001-04-14", "2001-04-05", "2001-04-17", "2001-04-13"]
       }
     }
+  },
+  "aes": { "x": { "field": "year" }, "y": { "field": "bloomRefDate" } },
+  "layers": [
+    { "geom": "point", "params": { "alpha": 0.5 } },
+    { "geom": "smooth", "params": { "method": "loess", "span": ${SAKURA_LOESS_SPAN} } }
   ]
 }`;
 
 export const QUICKSTART_HEADLESS_FRAGMENT = `import { renderToSVGString } from "@ggsvelte/core";
 
-const svg = renderToSVGString(spec, { width: 640, height: 400 });`;
+const svg = renderToSVGString(spec, { width: 900, height: 480 });`;
 
-export const QUICKSTART_CLI_FRAGMENT = "ggsvelte-render spec.json > chart.svg";
-
-/**
- * Complete first-chart fixture shared byte-for-byte by docs and packed consumers.
- * Keep this beginner surface to framework-native Svelte composition only.
- */
-export interface QuickstartLessonStep {
-  id: string;
-  title: string;
-  outcome: string;
-  fragment: string;
-  explanation: string;
-  chapterTitle: string;
-  href: string;
-}
-
-export const QUICKSTART_LESSON_STEPS = [
-  {
-    id: "map-fields-to-position",
-    title: "Map fields to position",
-    outcome: "Map fields to x and y; source rows stay unchanged.",
-    fragment: 'aes={{ x: "weight", y: "economy" }}',
-    explanation: "aes names channels; it does not reshape the data.",
-    chapterTitle: "Data and mappings",
-    href: "/guide/data-mappings#map-fields-to-position",
-  },
-  {
-    id: "add-a-second-layer",
-    title: "Add a second layer",
-    outcome: "Line under points; both layers share plot aes.",
-    fragment: "<GeomLine />\n<GeomPoint />",
-    explanation: "Layers paint in source order; a layer may override mapping or data.",
-    chapterTitle: "Layers and marks",
-    href: "/guide/layers-marks#compose-layers",
-  },
-  {
-    id: "make-color-meaning-explicit",
-    title: "Make color meaning explicit",
-    outcome: "Discrete color via a named categorical scheme.",
-    fragment:
-      'aes={{ x: "weight", y: "economy", color: "vehicleClass" }}\nscales={{ color: { scheme: "observable10" } }}',
-    explanation: "Scale owns data color; theme changes do not reassign categories.",
-    chapterTitle: "Scales and guides",
-    href: "/guide/scales-guides#categorical-color",
-  },
-  {
-    id: "add-a-statistical-smoother",
-    title: "Add a statistical smoother",
-    outcome: "Add a fitted trend layer over the points.",
-    fragment: '<GeomSmooth method="lm" />',
-    explanation: "Stat derives marks from mapped rows; point layer stays.",
-    chapterTitle: "Statistics and positions",
-    href: "/guide/statistics-positions#statistical-summaries",
-  },
-  {
-    id: "facet-the-comparison",
-    title: "Facet the comparison",
-    outcome: "One panel per vehicle class.",
-    fragment: 'facet={{ wrap: "vehicleClass", ncol: 2 }}',
-    explanation: "Facets partition rows before panel stats; color identity is shared.",
-    chapterTitle: "Facets and coordinates",
-    href: "/guide/facets-coordinates#facet-a-comparison",
-  },
-  {
-    id: "choose-a-chart-theme",
-    title: "Choose a chart theme",
-    outcome: "Set theme without changing mappings or category colors.",
-    fragment: 'theme="economist"',
-    explanation: "Theme is independent of site appearance and data color scales.",
-    chapterTitle: "Themes and color",
-    href: "/guide/themes-color#choose-a-chart-theme",
-  },
-  {
-    id: "enable-inspect-and-pin",
-    title: "Enable inspect and pin",
-    outcome: "Inspect/pin with keyboard and pointer; stable key required.",
-    fragment: 'key="id"\ninspect={{ mode: "exact", pin: true }}',
-    explanation: "Inspection is chart-local unless a shared controller is passed.",
-    chapterTitle: "Inspect and pin",
-    href: "/guide/inspect-pin#inspect-and-pin",
-  },
-] as const satisfies readonly QuickstartLessonStep[];
-
-export function quickstartLessonMarkdown(): string {
-  return QUICKSTART_LESSON_STEPS.map(
-    (step) =>
-      `### ${step.title}\n\n${step.outcome}\n\n\`\`\`svelte fragment\n${step.fragment}\n\`\`\`\n\n${step.explanation}\n\n[Read ${step.chapterTitle}](${step.href}).`,
-  ).join("\n\n");
-}
-
-export const QUICKSTART_PAGE_SVELTE = `<script lang="ts">
-  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
-
-  const cars = [
-    { weight: 1.8, economy: 37 },
-    { weight: 2.4, economy: 31 },
-    { weight: 3.1, economy: 25 },
-    { weight: 4.0, economy: 19 },
-  ];
-</script>
-
-<svelte:head><title>My first ggsvelte chart</title></svelte:head>
-
-<h1>Fuel economy by vehicle weight</h1>
-<GGPlot
-  data={cars}
-  aes={{ x: "weight", y: "economy" }}
-  ariaLabel="Fuel economy decreases as vehicle weight increases"
->
-  <GeomPoint />
-</GGPlot>`;
+export const QUICKSTART_CLI_FRAGMENT = "ggsvelte-render spec.json > chart.svg 2> diagnostics.jsonl";

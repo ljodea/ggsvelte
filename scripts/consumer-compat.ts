@@ -358,8 +358,8 @@ export function writeConsumerFixture(
 import { existsSync, readFileSync } from "node:fs";
 
 const html = readFileSync("build/index.html", "utf8");
-assert.match(html, /<title>My first ggsvelte chart<\\/title>/);
-assert.match(html, /aria-label="Fuel economy decreases as vehicle weight increases"/);
+assert.match(html, /<title>Kyoto cherry blossom<\\/title>/);
+assert.match(html, /aria-label="Peak cherry-blossom dates in Kyoto/);
 assert.match(html, /class="gg-plot-root[^"]*gg-container-width"/);
 assert.match(html, /data-gg-ready="false"/);
 assert.match(html, /width="640" height="400"/);
@@ -376,6 +376,13 @@ console.log("prerendered Quickstart verified");
     `import { strict as assert } from "node:assert";
 import { coord_equal, coord_fixed, coord_transform, coordEqual, coordFixed, coordTransform, guideColorsteps, guideLegend, guide_legend, SpecModule, normalize, scaleColorBinned, scaleColourBinned, scaleShapeDiscrete, scaleSizeContinuous, scaleXBinned, scaleXLog10, scale_colour_binned, scale_shape_discrete, scale_x_log10, validate } from "@ggsvelte/spec";
 import { renderToSVGString, runPipeline } from "@ggsvelte/core";
+import { KYOTO_SAKURA_CITATION, kyotoSakura } from "@ggsvelte/svelte/data";
+
+// The bundled dataset resolves from the packed tarball's subpath export, which
+// is what makes the copy-pasted quickstart file build in a bare app.
+assert.equal(kyotoSakura.length, 838);
+assert.equal(kyotoSakura[0].year, 812);
+assert.match(KYOTO_SAKURA_CITATION, /Aono/);
 
 const pointParamsSchema = SpecModule.Import("PointParams");
 void pointParamsSchema;

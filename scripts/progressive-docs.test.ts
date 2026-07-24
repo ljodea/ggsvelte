@@ -4,12 +4,13 @@ import { DOCS_ROUTES } from "../apps/docs/src/lib/generated/routes.ts";
 import lifecycle from "../lifecycle.json";
 import { createDocsRouteInventory } from "./docs-route-inventory.ts";
 import { GETTING_STARTED_MD, guidePages, type LifecycleDoc } from "./gen-llms.ts";
+import { extractMarkdownHeadings } from "./llms-markdown.ts";
 import {
   QUICKSTART_BUILDER_FRAGMENT,
   QUICKSTART_CLI_FRAGMENT,
   QUICKSTART_HEADLESS_FRAGMENT,
-  QUICKSTART_LESSON_STEPS,
   QUICKSTART_PORTABLE_SPEC_FRAGMENT,
+  SAKURA_STEPS,
 } from "./quickstart.ts";
 
 describe("progressive Docs journey", () => {
@@ -30,79 +31,26 @@ describe("progressive Docs journey", () => {
     expect(page?.markdown).toContain("/examples/point/scatter-color");
   });
 
-  it("lands Layers and marks before the second lesson adds its deep link", () => {
-    expect(
-      createDocsRouteInventory().find((route) => route.path === "/guide/layers-marks"),
-    ).toMatchObject({
-      navigation: { section: "Core grammar", label: "Layers and marks", order: 11 },
-    });
-    expect(QUICKSTART_LESSON_STEPS[1]).toEqual({
-      id: "add-a-second-layer",
-      title: "Add a second layer",
-      outcome: "Line under points; both layers share plot aes.",
-      fragment: "<GeomLine />\n<GeomPoint />",
-      explanation: "Layers paint in source order; a layer may override mapping or data.",
-      chapterTitle: "Layers and marks",
-      href: "/guide/layers-marks#compose-layers",
-    });
-  });
-
-  it("lands every remaining lesson chapter before its literal deep link", () => {
-    const expected = [
-      [
-        "/guide/scales-guides",
-        { section: "Core grammar", label: "Scales and guides", order: 13 },
-        {
-          id: "make-color-meaning-explicit",
-          title: "Make color meaning explicit",
-          href: "/guide/scales-guides#categorical-color",
-        },
-      ],
-      [
-        "/guide/statistics-positions",
-        { section: "Core grammar", label: "Statistics and positions", order: 12 },
-        {
-          id: "add-a-statistical-smoother",
-          title: "Add a statistical smoother",
-          href: "/guide/statistics-positions#statistical-summaries",
-        },
-      ],
-      [
-        "/guide/facets-coordinates",
-        { section: "Core grammar", label: "Facets and coordinates", order: 15 },
-        {
-          id: "facet-the-comparison",
-          title: "Facet the comparison",
-          href: "/guide/facets-coordinates#facet-a-comparison",
-        },
-      ],
-      [
-        "/guide/themes-color",
-        { section: "Core grammar", label: "Themes and color", order: 16 },
-        {
-          id: "choose-a-chart-theme",
-          title: "Choose a chart theme",
-          href: "/guide/themes-color#choose-a-chart-theme",
-        },
-      ],
-      [
-        "/guide/inspect-pin",
-        { section: "Interaction", label: "Inspect and pin", order: 21 },
-        {
-          id: "enable-inspect-and-pin",
-          title: "Enable inspect and pin",
-          href: "/guide/inspect-pin#inspect-and-pin",
-        },
-      ],
-    ] as const;
+  it("lands a real chapter behind every lesson deep link", () => {
+    // The lesson teaches by accretion, so each step hands the reader off to
+    // the chapter that owns the element it just added. Those links are checked
+    // structurally — chapter exists, is navigable, and really has the anchor —
+    // rather than by restating step titles that the lesson is free to reword.
     const inventory = createDocsRouteInventory();
-    for (const [path, navigation, step] of expected) {
-      expect(inventory.find((route) => route.path === path)?.navigation).toEqual(navigation);
-      expect(
-        QUICKSTART_LESSON_STEPS.some(
-          (entry) => entry.id === step.id && entry.title === step.title && entry.href === step.href,
-        ),
-      ).toBe(true);
+    const pages = guidePages(lifecycle as unknown as LifecycleDoc);
+    expect(SAKURA_STEPS.length).toBeGreaterThanOrEqual(6);
+
+    for (const step of SAKURA_STEPS) {
+      const [path, anchor] = step.href.split("#") as [string, string];
+      const route = inventory.find((entry) => entry.path === path);
+      expect(route, `no route for ${step.href}`).toBeDefined();
+      expect(route?.navigation?.label, `${path} is not navigable`).toBeTruthy();
+      expect(route?.navigation?.label).toBe(step.chapterTitle);
+
+      const page = pages.find((entry) => `/guide/${entry.slug}` === path);
+      expect(page, `no guide page for ${path}`).toBeDefined();
+      const anchors = extractMarkdownHeadings(page!.markdown).map((heading) => heading.id);
+      expect(anchors, `${path} has no #${anchor}`).toContain(anchor);
     }
   });
 
@@ -137,30 +85,23 @@ describe("progressive Docs journey", () => {
   });
 
   it("keeps every lesson anchor and title aligned with generated route headings", () => {
-    const stepIds: ReadonlySet<string> = new Set(QUICKSTART_LESSON_STEPS.map((step) => step.id));
+    const stepIds: ReadonlySet<string> = new Set(SAKURA_STEPS.map((step) => step.id));
     const route = DOCS_ROUTES.find((entry) => entry.path === "/guide/getting-started");
     expect(
       route?.headings
         ?.filter((heading) => stepIds.has(heading.id))
         .map(({ id, title }) => ({ id, title })),
-    ).toEqual(QUICKSTART_LESSON_STEPS.map(({ id, title }) => ({ id, title })));
+    ).toEqual(SAKURA_STEPS.map(({ id, title }) => ({ id, title })));
   });
 
-  it("uses one catalog for the first observable lesson delta and generated markdown", () => {
-    expect(QUICKSTART_LESSON_STEPS[0]).toEqual({
-      id: "map-fields-to-position",
-      title: "Map fields to position",
-      outcome: "Map fields to x and y; source rows stay unchanged.",
-      fragment: 'aes={{ x: "weight", y: "economy" }}',
-      explanation: "aes names channels; it does not reshape the data.",
-      chapterTitle: "Data and mappings",
-      href: "/guide/data-mappings#map-fields-to-position",
-    });
-    expect(GETTING_STARTED_MD).toContain("## Build the grammar one change at a time");
-    expect(GETTING_STARTED_MD).toContain("### Map fields to position");
-    expect(GETTING_STARTED_MD).toContain('```svelte fragment\naes={{ x: "weight", y: "economy" }}');
-    expect(GETTING_STARTED_MD).toContain(
-      "[Read Data and mappings](/guide/data-mappings#map-fields-to-position)",
-    );
+  it("keeps the human lesson out of the agent surface", () => {
+    // D6: /llms.txt is the agent path and no longer mirrors the walkthrough.
+    // The shared facts (install, complete file, spec, headless) still come
+    // from one catalog — asserted above — but the narrative does not.
+    for (const step of SAKURA_STEPS) {
+      expect(GETTING_STARTED_MD).not.toContain(`### ${step.title}`);
+      expect(GETTING_STARTED_MD).not.toContain(step.outcome);
+    }
+    expect(GETTING_STARTED_MD).toContain("/guide/getting-started");
   });
 });

@@ -1,34 +1,78 @@
 <script lang="ts">
+  /**
+   * The getting-started walkthrough: one editorial chart, built one grammar
+   * element at a time.
+   *
+   * Every chart on this page renders from `foldSakura(n)` in scripts/quickstart
+   * — the same fold that produces the fragments beside them and the finished
+   * file at the end. Nothing here re-derives a spec, so nothing here can drift
+   * from what the reader copies.
+   */
   import { base } from "$app/paths";
-  import { GeomLine, GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
+  import { GGPlot } from "@ggsvelte/svelte";
+  import { kyotoSakura } from "@ggsvelte/svelte/data";
   import { onMount } from "svelte";
 
   import {
-    QUICKSTART_BUILDER_FRAGMENT,
+    foldSakura,
     QUICKSTART_CLI_FRAGMENT,
     QUICKSTART_HEADLESS_FRAGMENT,
-    QUICKSTART_LESSON_STEPS,
     QUICKSTART_PAGE_SVELTE,
     QUICKSTART_PORTABLE_SPEC_FRAGMENT,
+    SAKURA_EPOCHS,
+    SAKURA_FINISHED_SVELTE,
+    SAKURA_RECORDS,
+    SAKURA_STEPS,
   } from "$scripts/quickstart";
   import { nextRovingTabIndex } from "$lib/tab-roving";
 
   import CopyCode from "./CopyCode.svelte";
 
-  const cars = [
-    { weight: 1.8, economy: 37 },
-    { weight: 2.4, economy: 31 },
-    { weight: 3.1, economy: 25 },
-    { weight: 4, economy: 19 },
-  ];
+  const rows = kyotoSakura.map((row) => ({ ...row }));
+
+  /**
+   * Below this chart width, hand-placed callouts collide with the data, so the
+   * records move to the caption under the chart (the bands, trend and points
+   * never move). Measured on the chart container, never on the viewport.
+   */
+  const NARROW_CHART = 560;
+
   const lessonSurfaces = ["output", "svelte"] as const;
   let lessonEnhanced = $state(false);
+  let narrowChart = $state(false);
   let lessonSurface = $state<"output" | "svelte">("output");
   let outputTab = $state<HTMLButtonElement>();
   let svelteTab = $state<HTMLButtonElement>();
+  let stepColumn = $state<HTMLElement>();
+
+  const firstRender = foldSakura(0, rows);
+  const finished = foldSakura(SAKURA_STEPS.length, rows);
+
+  // The chart beside each step: everything taught so far, and nothing after.
+  const accumulated = $derived(
+    SAKURA_STEPS.map((_, index) =>
+      foldSakura(index + 1, rows, { annotations: !narrowChart }),
+    ),
+  );
+
+  const epochNames = SAKURA_EPOCHS.map((band) => band.epoch).join(", ");
+  const recordNames = SAKURA_RECORDS.map((record) => record.label).join("; ");
 
   onMount(() => {
     lessonEnhanced = true;
+    // Measure a real chart, not the page: the ladder is about how much room the
+    // plot has, which in this two-pane layout is roughly half the column.
+    const target = stepColumn?.querySelector(".lesson-output");
+    if (target === null || target === undefined) return;
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width;
+      if (width !== undefined) narrowChart = width < NARROW_CHART;
+    });
+    observer.observe(target);
+    return () => {
+      observer.disconnect();
+    };
   });
 
   function selectLessonSurface(
@@ -46,46 +90,31 @@
     event.preventDefault();
     selectLessonSurface(lessonSurfaces[next]!, true);
   }
-
-  const lessonCars = [
-    { id: "compact-1", weight: 1.8, economy: 37, vehicleClass: "Compact" },
-    { id: "compact-2", weight: 2.1, economy: 34, vehicleClass: "Compact" },
-    { id: "compact-3", weight: 2.4, economy: 31, vehicleClass: "Compact" },
-    { id: "compact-4", weight: 2.7, economy: 29, vehicleClass: "Compact" },
-    { id: "utility-1", weight: 2.8, economy: 28, vehicleClass: "Utility" },
-    { id: "utility-2", weight: 3.2, economy: 25, vehicleClass: "Utility" },
-    { id: "utility-3", weight: 3.6, economy: 22, vehicleClass: "Utility" },
-    { id: "utility-4", weight: 4, economy: 19, vehicleClass: "Utility" },
-  ];
 </script>
 
 <article class="guide getting-started-guide">
   <h1>Getting started</h1>
   <p class="lede">
-    Install, render one chart from a Svelte file, then add aes, layers, scales,
-    facets, theme, and inspect one step at a time.
+    Twelve centuries of Kyoto cherry-blossom dates, from a scatter you can
+    barely read to a chart that states what happened — one grammar element per
+    step, on real data that ships with the package.
   </p>
 
-  <h2 id="create-a-sveltekit-app">Create a SvelteKit app</h2>
-  <p>Start with Node.js 22 or newer in an empty directory.</p>
+  <h2 id="install">Install</h2>
+  <p>Node.js 22 or newer, in an empty directory.</p>
   <CopyCode
     class="lesson-source"
     language="bash"
     accessibleLabel="Copy create command"
-    code={`npx sv create my-chart --template minimal --types ts --no-add-ons --install npm\ncd my-chart`}
-  />
-
-  <h2 id="install-ggsvelte">Install ggsvelte</h2>
-  <p>Choose the package manager already used by the app.</p>
-  <CopyCode
-    class="lesson-source"
-    language="bash"
-    accessibleLabel="Copy install"
-    code="npm install @ggsvelte/svelte"
+    code={`npx sv create my-chart --template minimal --types ts --no-add-ons --install npm\ncd my-chart\nnpm install @ggsvelte/svelte`}
   />
 
   <h2 id="draw-your-first-chart">Draw your first chart</h2>
-  <p><code>src/routes/+page.svelte</code> (complete file)</p>
+  <p>
+    <code>{`src/routes/+page.svelte`}</code>, in full. The 838 observations come
+    from
+    <code>@ggsvelte/svelte/data</code>, so there is nothing to download.
+  </p>
   {#if lessonEnhanced}
     <div
       class="lesson-surface-tabs"
@@ -129,19 +158,14 @@
         ? "first-output-tab"
         : "first-output-heading"}
     >
-      <div class="lesson-label" id="first-output-heading">
-        Output · real GGPlot
-      </div>
+      <div class="lesson-label" id="first-output-heading">Output</div>
       <GGPlot
-        data={cars}
-        aes={{ x: "weight", y: "economy" }}
-        ariaLabel="Fuel economy decreases as vehicle weight increases"
-      >
-        <GeomPoint />
-      </GGPlot>
+        spec={firstRender.spec}
+        ariaLabel="Peak cherry-blossom dates in Kyoto, 812 to 2026, as an unstyled scatter"
+      />
       <p>
-        Four rows become four points. Width follows the container; omitted
-        height is 400px.
+        Twelve hundred years of spring, and the scatter says almost nothing.
+        Every step below removes one reason for that.
       </p>
     </section>
     <section
@@ -152,9 +176,7 @@
         ? "first-svelte-tab"
         : "first-code-heading"}
     >
-      <div class="lesson-label" id="first-code-heading">
-        Svelte · complete file
-      </div>
+      <div class="lesson-label" id="first-code-heading">Svelte</div>
       <CopyCode
         class="lesson-source lesson-source--file"
         language="svelte"
@@ -164,72 +186,84 @@
     </section>
   </div>
 
-  <h2 id="you-have-a-chart">You have a chart</h2>
+  <h2 id="build-the-chart">Build the chart</h2>
   <p>
-    <code>GGPlot</code> owns the chart, <code>data</code> supplies rows,
-    <code>aes</code>
-    maps fields, and <code>GeomPoint</code> adds the first layer.
+    Each step adds one element and re-renders the accumulated chart. Paste the
+    fragment where it belongs in the file above; the finished file is at the
+    end.
   </p>
 
-  <h2 id="build-the-grammar-one-change-at-a-time">
-    Build the grammar one change at a time
-  </h2>
-  {#each QUICKSTART_LESSON_STEPS as step, stepIndex (step.id)}
-    <section class="progressive-step" aria-labelledby={step.id}>
-      <div class="step-copy">
-        <h3 id={step.id}>{step.title}</h3>
-        <p>{step.outcome}</p>
-        <CopyCode
-          class="lesson-source"
-          language="svelte"
-          accessibleLabel={`Copy ${step.title} fragment`}
-          code={step.fragment}
-        />
-        <p>{step.explanation}</p>
-        <a href={`${base}${step.href}`}>Read {step.chapterTitle}</a>
-      </div>
-      <div class="lesson-output">
-        <div class="lesson-label">Current accumulated result</div>
-        <GGPlot
-          data={lessonCars}
-          aes={stepIndex >= 2
-            ? { x: "weight", y: "economy", color: "vehicleClass" }
-            : { x: "weight", y: "economy" }}
-          scales={stepIndex >= 2
-            ? { color: { type: "ordinal", scheme: "observable10" } }
-            : undefined}
-          facet={stepIndex >= 4 ? { wrap: "vehicleClass", ncol: 2 } : undefined}
-          theme={stepIndex >= 5 ? "economist" : undefined}
-          key={stepIndex >= 6 ? "id" : undefined}
-          inspect={stepIndex >= 6 ? { mode: "exact", pin: true } : undefined}
-          ariaLabel={`${step.title}: accumulated fuel economy lesson`}
-        >
-          {#if stepIndex >= 1}<GeomLine />{/if}
-          <GeomPoint />
-          {#if stepIndex >= 3}<GeomSmooth method="lm" />{/if}
-        </GGPlot>
-      </div>
-    </section>
-  {/each}
+  <div class="lesson-steps" bind:this={stepColumn}>
+    {#each SAKURA_STEPS as step, index (step.id)}
+      <section class="progressive-step" aria-labelledby={step.id}>
+        <div class="step-copy">
+          <h3 id={step.id}>{step.title}</h3>
+          <p>{step.outcome}</p>
+          <CopyCode
+            class="lesson-source"
+            language="svelte"
+            accessibleLabel={`Copy ${step.title} fragment`}
+            code={step.fragment}
+          />
+          <p>{step.explanation}</p>
+          <a href={`${base}${step.href}`}>Read {step.chapterTitle}</a>
+        </div>
+        <div class="lesson-output" class:lesson-output--live={index === 5}>
+          <GGPlot
+            spec={accumulated[index]!.spec}
+            key={accumulated[index]!.key}
+            inspect={accumulated[index]!.inspect}
+            ariaLabel={`Kyoto cherry blossom after step ${index + 1}: ${step.outcome}`}
+          />
+          {#if index >= 2}
+            <p class="chart-note">Bands, left to right: {epochNames}.</p>
+          {/if}
+        </div>
+      </section>
+    {/each}
+  </div>
 
-  <h2 id="choose-another-surface-only-when-you-need-it">
-    Choose another surface only when you need it
-  </h2>
+  <h2 id="the-chart">The chart</h2>
   <p>
-    After the first render, choose a secondary form only for a concrete job.
+    The same accumulated spec, with room to breathe. Hover it, or tab into it:
+    every one of the 838 observations answers.
   </p>
-  <h3 id="fluent-builder">Fluent builder</h3>
-  <p>Use the builder to construct specs programmatically in TypeScript.</p>
+  <div class="finished-chart lesson-output">
+    <GGPlot
+      spec={finished.spec}
+      key={finished.key}
+      inspect={finished.inspect}
+      ariaLabel={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
+    />
+    <p class="chart-note">
+      Bands, left to right: {epochNames}. Called out: {recordNames}.
+    </p>
+  </div>
+
+  <h2 id="the-finished-file">The finished file</h2>
+  <p>
+    Every fragment above, in place. This is the whole chart — no build step, no
+    wrapper component, no escape hatch.
+  </p>
   <CopyCode
-    class="lesson-source"
-    language="typescript"
-    accessibleLabel="Copy builder fragment"
-    code={QUICKSTART_BUILDER_FRAGMENT}
+    class="lesson-source lesson-source--file"
+    language="svelte"
+    accessibleLabel="Copy finished file"
+    code={SAKURA_FINISHED_SVELTE}
   />
-  <h3 id="portablespec-json">Spec (JSON)</h3>
+
+  <h2 id="built-for-agents">Built for agents</h2>
   <p>
-    Use Spec (JSON) to save, transmit, validate, or generate a chart without
-    executable accessors.
+    The chart above is also a JSON document. Every ggsvelte plot normalizes to a
+    PortableSpec: no functions, no closures, nothing that has to be executed to
+    be understood. That is the surface an agent writes to.
+  </p>
+  <p>
+    Data has three forms. Inline <code>values</code> for tables small enough to
+    read; <code>columns</code> under a named <code>datasets</code> entry for
+    anything large or reused; <code>{`{ "name": ... }`}</code> to point a layer
+    at one. The 838 Kyoto rows are served whole at
+    <a href={`${base}/kyoto-sakura.json`}>/kyoto-sakura.json</a>.
   </p>
   <CopyCode
     class="lesson-source"
@@ -237,12 +271,19 @@
     accessibleLabel="Copy Spec (JSON) fragment"
     code={QUICKSTART_PORTABLE_SPEC_FRAGMENT}
   />
-
-  <h2 id="headless-and-server-rendering">Headless and server rendering</h2>
   <p>
-    <code>renderToSVGString</code> is the pure no-DOM path. The installed
-    <code>ggsvelte-render</code> CLI writes SVG to stdout and JSON Lines diagnostics
-    to stderr.
+    <code>validate(spec)</code> is the correction loop, and it was built for
+    this audience: every error carries a stable <code>code</code>, a JSON
+    <code>path</code>
+    into the spec, and a <code>fix</code> naming the change to make. An agent
+    emits, validates, applies the fix, and re-emits without a human in the loop.
+    The
+    <a href={`${base}/guide/errors`}>errors reference</a> is the full catalog.
+  </p>
+  <p>
+    Rendering never needs a browser. <code>renderToSVGString</code> is pure, and
+    the installed <code>ggsvelte-render</code> CLI writes SVG to stdout with JSON
+    Lines diagnostics on stderr.
   </p>
   <CopyCode
     class="lesson-source"
@@ -256,19 +297,33 @@
     accessibleLabel="Copy CLI fragment"
     code={QUICKSTART_CLI_FRAGMENT}
   />
-
-  <h2 id="validating-specs">Validating specs</h2>
   <p>
-    <code>validate(spec)</code> checks schema shape. Every validation error has a
-    stable code, path, message, and fix.
+    Agents working in this codebase should read
+    <a href={`${base}/llms.txt`}>/llms.txt</a> first: it is the same grammar, written
+    for a reader that emits specs instead of typing them.
   </p>
+
+  <h2 id="the-rest-of-the-grammar">The rest of the grammar</h2>
+  <ul>
+    <li>
+      <a href={`${base}/guide/themes-color`}>Color scales</a> — categorical schemes,
+      sequential ramps, manual palettes.
+    </li>
+    <li>
+      <a href={`${base}/guide/facets-coordinates`}>Facets and coordinates</a> — small
+      multiples, flipped and fixed-aspect coordinates.
+    </li>
+    <li>
+      <a href={`${base}/guide/statistics-positions`}>Statistics and positions</a
+      > — bins, summaries, jitter, stacking and dodging.
+    </li>
+  </ul>
 
   <h2 id="where-next">Where next</h2>
   <ul>
     <li><a href={`${base}/examples`}>Examples</a></li>
     <li><a href={`${base}/guide/interactions`}>Interaction</a></li>
     <li><a href={`${base}/guide/compatibility`}>Compatibility</a></li>
-    <li><a href={`${base}/guide/errors`}>Diagnostics</a></li>
   </ul>
 </article>
 
@@ -308,6 +363,14 @@
     color: #172033;
   }
 
+  /*
+   * The inspect step gains a tooltip and a pinned-value rail on hydration.
+   * Reserving the space here keeps the page from moving under the reader.
+   */
+  .lesson-output--live {
+    min-height: 30rem;
+  }
+
   .lesson-output p {
     margin: 0.75rem 0 0;
     color: #5e6878;
@@ -318,9 +381,6 @@
     margin-bottom: 0.75rem;
     color: var(--muted);
     font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
   }
 
   .lesson-code,
@@ -339,6 +399,17 @@
 
   .getting-started-guide :global(.lesson-source .code-body pre) {
     white-space: pre;
+  }
+
+  /*
+   * Translucent band fills do not survive forced-colors mode. The epoch
+   * boundaries are drawn as hairline rules and the names live in the note
+   * under each chart, so nothing is carried by fill alone.
+   */
+  @media (forced-colors: active) {
+    .lesson-output :global(.gg-marks rect) {
+      fill: none;
+    }
   }
 
   @media (max-width: 63.99rem) {

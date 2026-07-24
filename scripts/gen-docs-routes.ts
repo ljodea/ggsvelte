@@ -12,6 +12,7 @@ import {
   type DocsRouteRecord,
   type RouteHeading,
 } from "./docs-route-inventory.ts";
+import { GETTING_STARTED_PAGE_HEADINGS } from "./quickstart.ts";
 
 const OUTPUT_PATH = join(
   import.meta.dir,
@@ -30,6 +31,12 @@ function withGuideHeadings(inventory: readonly DocsRouteRecord[]): DocsRouteReco
   );
   return inventory.map((route) => {
     if (!route.path.startsWith("/guide/")) return route;
+    // The human getting-started page is a component, not guide markdown: the
+    // markdown at that slug is the agent doc served from /llms.txt. Its
+    // on-this-page nav comes from the lesson catalog instead.
+    if (route.path === "/guide/getting-started") {
+      return { ...route, headings: GETTING_STARTED_PAGE_HEADINGS.map((h) => ({ ...h })) };
+    }
     const page = pages.get(route.path.slice("/guide/".length));
     if (page === undefined) throw new Error(`No guide prose for route ${route.path}.`);
     const headings: RouteHeading[] = extractMarkdownHeadings(page.markdown)
