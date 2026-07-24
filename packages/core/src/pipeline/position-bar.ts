@@ -16,8 +16,9 @@ export function barSlotKeys(frame: LayerFrame): (number | string)[] | null {
   // A binned position scale groups by the stable integer bin id, NOT the
   // rendered float center: raw source values inside one bin stack/dodge
   // together with no float-equality fragility and no id leak into geometry.
-  if (frame.binding?.xBinning !== undefined && frame.bin?.xId != null) {
-    return Array.from(frame.bin.xId);
+  const xBinId = frame.bin === null ? null : frame.bin.xId;
+  if (frame.binding?.xBinning !== undefined && xBinId !== null) {
+    return Array.from(xBinId);
   }
   if (frame.xValues !== null) return frame.xValues.map((v) => encodeKey(v));
   if (frame.xNumeric !== null) return Array.from(frame.xNumeric);

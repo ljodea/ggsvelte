@@ -22,7 +22,6 @@ export { CANVAS_AUTO_THRESHOLD, PipelineError } from "./types-public.js";
 
 export type {
   BinPayload,
-  BoxFrame,
   BoxPayload,
   ColorBinding,
   DodgePayload,

@@ -24,9 +24,6 @@ export interface BoxPayload {
   outlierRow: Uint32Array;
 }
 
-/** @deprecated Prefer {@link BoxPayload}. */
-export type BoxFrame = BoxPayload;
-
 /**
  * Discrete bin identity per post-stat row (owned by bin/count + rect slots).
  * −1 = unbinned / out-of-range. Separate from rendered `xNumeric`/`yNumeric`

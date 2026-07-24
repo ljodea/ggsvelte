@@ -9,7 +9,6 @@ export { NO_ROW } from "./types-no-row.js";
 export type { ColorBinding, LayerBinding, RuleForm, StyleBinding } from "./types-binding.js";
 export type {
   BinPayload,
-  BoxFrame,
   BoxPayload,
   DodgePayload,
   FinalizedLayerFrame,
