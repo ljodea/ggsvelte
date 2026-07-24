@@ -430,7 +430,7 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
         id: "starter-scatter",
       },
       spec: {
-        edition: 1,
+        edition: 2,
         data: {
           values: [
             {
@@ -503,7 +503,7 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
       },
     },
     fragment:
-      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoic3RhcnRlci1zY2F0dGVyIn0sInNwZWMiOnsiZWRpdGlvbiI6MSwiZGF0YSI6eyJ2YWx1ZXMiOlt7ImlkIjoiYTEiLCJzcGVjaWVzIjoiQWRlbGllIiwiZmxpcHBlciI6MTgxLCJtYXNzIjozNzUwfSx7ImlkIjoiYTIiLCJzcGVjaWVzIjoiQWRlbGllIiwiZmxpcHBlciI6MTg2LCJtYXNzIjozODAwfSx7ImlkIjoiYzEiLCJzcGVjaWVzIjoiQ2hpbnN0cmFwIiwiZmxpcHBlciI6MTk2LCJtYXNzIjo0MDUwfSx7ImlkIjoiYzIiLCJzcGVjaWVzIjoiQ2hpbnN0cmFwIiwiZmxpcHBlciI6MjAxLCJtYXNzIjo0MzAwfSx7ImlkIjoiZzEiLCJzcGVjaWVzIjoiR2VudG9vIiwiZmxpcHBlciI6MjExLCJtYXNzIjo1MDAwfSx7ImlkIjoiZzIiLCJzcGVjaWVzIjoiR2VudG9vIiwiZmxpcHBlciI6MjIxLCJtYXNzIjo1NTUwfV19LCJsYXllcnMiOlt7Imdlb20iOiJwb2ludCIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoiaWRlbnRpdHkiLCJhZXMiOnsieCI6eyJmaWVsZCI6ImZsaXBwZXIifSwieSI6eyJmaWVsZCI6Im1hc3MifSwiY29sb3IiOnsiZmllbGQiOiJzcGVjaWVzIn19LCJwYXJhbXMiOnsic2l6ZSI6NCwiYWxwaGEiOjAuODJ9fV0sImxhYnMiOnsidGl0bGUiOiJQZW5ndWluIGZsaXBwZXJzIGFuZCBib2R5IG1hc3MiLCJ4IjoiRmxpcHBlciBsZW5ndGggKG1tKSIsInkiOiJCb2R5IG1hc3MgKGcpIiwiY29sb3IiOiJTcGVjaWVzIn0sImhlaWdodCI6NDAwfX0",
+      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoic3RhcnRlci1zY2F0dGVyIn0sInNwZWMiOnsiZWRpdGlvbiI6MiwiZGF0YSI6eyJ2YWx1ZXMiOlt7ImlkIjoiYTEiLCJzcGVjaWVzIjoiQWRlbGllIiwiZmxpcHBlciI6MTgxLCJtYXNzIjozNzUwfSx7ImlkIjoiYTIiLCJzcGVjaWVzIjoiQWRlbGllIiwiZmxpcHBlciI6MTg2LCJtYXNzIjozODAwfSx7ImlkIjoiYzEiLCJzcGVjaWVzIjoiQ2hpbnN0cmFwIiwiZmxpcHBlciI6MTk2LCJtYXNzIjo0MDUwfSx7ImlkIjoiYzIiLCJzcGVjaWVzIjoiQ2hpbnN0cmFwIiwiZmxpcHBlciI6MjAxLCJtYXNzIjo0MzAwfSx7ImlkIjoiZzEiLCJzcGVjaWVzIjoiR2VudG9vIiwiZmxpcHBlciI6MjExLCJtYXNzIjo1MDAwfSx7ImlkIjoiZzIiLCJzcGVjaWVzIjoiR2VudG9vIiwiZmxpcHBlciI6MjIxLCJtYXNzIjo1NTUwfV19LCJsYXllcnMiOlt7Imdlb20iOiJwb2ludCIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoiaWRlbnRpdHkiLCJhZXMiOnsieCI6eyJmaWVsZCI6ImZsaXBwZXIifSwieSI6eyJmaWVsZCI6Im1hc3MifSwiY29sb3IiOnsiZmllbGQiOiJzcGVjaWVzIn19LCJwYXJhbXMiOnsic2l6ZSI6NCwiYWxwaGEiOjAuODJ9fV0sImxhYnMiOnsidGl0bGUiOiJQZW5ndWluIGZsaXBwZXJzIGFuZCBib2R5IG1hc3MiLCJ4IjoiRmxpcHBlciBsZW5ndGggKG1tKSIsInkiOiJCb2R5IG1hc3MgKGcpIiwiY29sb3IiOiJTcGVjaWVzIn0sImhlaWdodCI6NDAwfX0",
   },
   {
     id: "monthly-line",
@@ -516,7 +516,7 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
         id: "monthly-line",
       },
       spec: {
-        edition: 1,
+        edition: 2,
         data: {
           values: [
             {
@@ -570,7 +570,7 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
       },
     },
     fragment:
-      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoibW9udGhseS1saW5lIn0sInNwZWMiOnsiZWRpdGlvbiI6MSwiZGF0YSI6eyJ2YWx1ZXMiOlt7ImRhdGUiOiIyMDI0LTAxLTAxIiwidmFsdWUiOjR9LHsiZGF0ZSI6IjIwMjQtMDItMDEiLCJ2YWx1ZSI6N30seyJkYXRlIjoiMjAyNC0wMy0wMSIsInZhbHVlIjo1fSx7ImRhdGUiOiIyMDI0LTA0LTAxIiwidmFsdWUiOjl9XX0sImxheWVycyI6W3siZ2VvbSI6ImxpbmUiLCJzdGF0IjoiaWRlbnRpdHkiLCJwb3NpdGlvbiI6ImlkZW50aXR5IiwiYWVzIjp7IngiOnsiZmllbGQiOiJkYXRlIn0sInkiOnsiZmllbGQiOiJ2YWx1ZSJ9fSwicGFyYW1zIjp7ImxpbmV3aWR0aCI6MS44fX1dLCJzY2FsZXMiOnsieCI6eyJ0eXBlIjoidGltZSIsInBhcnNlIjoieW1kIn19LCJsYWJzIjp7InRpdGxlIjoiTW9udGhseSBzZXJpZXMiLCJ4IjoiTW9udGgiLCJ5IjoiVmFsdWUifSwiaGVpZ2h0Ijo0MDB9fQ",
+      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoibW9udGhseS1saW5lIn0sInNwZWMiOnsiZWRpdGlvbiI6MiwiZGF0YSI6eyJ2YWx1ZXMiOlt7ImRhdGUiOiIyMDI0LTAxLTAxIiwidmFsdWUiOjR9LHsiZGF0ZSI6IjIwMjQtMDItMDEiLCJ2YWx1ZSI6N30seyJkYXRlIjoiMjAyNC0wMy0wMSIsInZhbHVlIjo1fSx7ImRhdGUiOiIyMDI0LTA0LTAxIiwidmFsdWUiOjl9XX0sImxheWVycyI6W3siZ2VvbSI6ImxpbmUiLCJzdGF0IjoiaWRlbnRpdHkiLCJwb3NpdGlvbiI6ImlkZW50aXR5IiwiYWVzIjp7IngiOnsiZmllbGQiOiJkYXRlIn0sInkiOnsiZmllbGQiOiJ2YWx1ZSJ9fSwicGFyYW1zIjp7ImxpbmV3aWR0aCI6MS44fX1dLCJzY2FsZXMiOnsieCI6eyJ0eXBlIjoidGltZSIsInBhcnNlIjoieW1kIn19LCJsYWJzIjp7InRpdGxlIjoiTW9udGhseSBzZXJpZXMiLCJ4IjoiTW9udGgiLCJ5IjoiVmFsdWUifSwiaGVpZ2h0Ijo0MDB9fQ",
   },
   {
     id: "raw-years",
@@ -583,7 +583,7 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
         id: "raw-years",
       },
       spec: {
-        edition: 1,
+        edition: 2,
         data: {
           values: [
             {
@@ -627,7 +627,7 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
       },
     },
     fragment:
-      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoicmF3LXllYXJzIn0sInNwZWMiOnsiZWRpdGlvbiI6MSwiZGF0YSI6eyJ2YWx1ZXMiOlt7InllYXIiOiIxODM1IiwidmFsdWUiOjEyfSx7InllYXIiOiIxOTAwIiwidmFsdWUiOjE5fSx7InllYXIiOiIyMDI2IiwidmFsdWUiOjMxfV19LCJsYXllcnMiOlt7Imdlb20iOiJsaW5lIiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoieWVhciJ9LCJ5Ijp7ImZpZWxkIjoidmFsdWUifX0sInBhcmFtcyI6eyJsaW5ld2lkdGgiOjEuOH19XSwibGFicyI6eyJ0aXRsZSI6IlJhdyB5ZWFyIGluZmVyZW5jZSIsIngiOiJZZWFyIiwieSI6IlZhbHVlIn0sImhlaWdodCI6NDAwfX0",
+      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoicmF3LXllYXJzIn0sInNwZWMiOnsiZWRpdGlvbiI6MiwiZGF0YSI6eyJ2YWx1ZXMiOlt7InllYXIiOiIxODM1IiwidmFsdWUiOjEyfSx7InllYXIiOiIxOTAwIiwidmFsdWUiOjE5fSx7InllYXIiOiIyMDI2IiwidmFsdWUiOjMxfV19LCJsYXllcnMiOlt7Imdlb20iOiJsaW5lIiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoieWVhciJ9LCJ5Ijp7ImZpZWxkIjoidmFsdWUifX0sInBhcmFtcyI6eyJsaW5ld2lkdGgiOjEuOH19XSwibGFicyI6eyJ0aXRsZSI6IlJhdyB5ZWFyIGluZmVyZW5jZSIsIngiOiJZZWFyIiwieSI6IlZhbHVlIn0sImhlaWdodCI6NDAwfX0",
   },
   {
     id: "iso-dates",
@@ -640,7 +640,7 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
         id: "iso-dates",
       },
       spec: {
-        edition: 1,
+        edition: 2,
         data: {
           values: [
             {
@@ -684,7 +684,7 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
       },
     },
     fragment:
-      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoiaXNvLWRhdGVzIn0sInNwZWMiOnsiZWRpdGlvbiI6MSwiZGF0YSI6eyJ2YWx1ZXMiOlt7ImRhdGUiOiIyMDI0LTAxLTAxIiwidmFsdWUiOjR9LHsiZGF0ZSI6IjIwMjQtMDItMDEiLCJ2YWx1ZSI6N30seyJkYXRlIjoiMjAyNC0wMy0wMSIsInZhbHVlIjo1fV19LCJsYXllcnMiOlt7Imdlb20iOiJsaW5lIiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoiZGF0ZSJ9LCJ5Ijp7ImZpZWxkIjoidmFsdWUifX0sInBhcmFtcyI6eyJsaW5ld2lkdGgiOjEuOH19XSwibGFicyI6eyJ0aXRsZSI6IklTTyBkYXRlIGluZmVyZW5jZSIsIngiOiJEYXRlIiwieSI6IlZhbHVlIn0sImhlaWdodCI6NDAwfX0",
+      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoiaXNvLWRhdGVzIn0sInNwZWMiOnsiZWRpdGlvbiI6MiwiZGF0YSI6eyJ2YWx1ZXMiOlt7ImRhdGUiOiIyMDI0LTAxLTAxIiwidmFsdWUiOjR9LHsiZGF0ZSI6IjIwMjQtMDItMDEiLCJ2YWx1ZSI6N30seyJkYXRlIjoiMjAyNC0wMy0wMSIsInZhbHVlIjo1fV19LCJsYXllcnMiOlt7Imdlb20iOiJsaW5lIiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoiZGF0ZSJ9LCJ5Ijp7ImZpZWxkIjoidmFsdWUifX0sInBhcmFtcyI6eyJsaW5ld2lkdGgiOjEuOH19XSwibGFicyI6eyJ0aXRsZSI6IklTTyBkYXRlIGluZmVyZW5jZSIsIngiOiJEYXRlIiwieSI6IlZhbHVlIn0sImhlaWdodCI6NDAwfX0",
   },
   {
     id: "ambiguous-dates",
@@ -697,7 +697,7 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
         id: "ambiguous-dates",
       },
       spec: {
-        edition: 1,
+        edition: 2,
         data: {
           values: [
             {
@@ -741,7 +741,7 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
       },
     },
     fragment:
-      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoiYW1iaWd1b3VzLWRhdGVzIn0sInNwZWMiOnsiZWRpdGlvbiI6MSwiZGF0YSI6eyJ2YWx1ZXMiOlt7ImRhdGUiOiIwMy8wNC8yMDI0IiwidmFsdWUiOjR9LHsiZGF0ZSI6IjA1LzA2LzIwMjQiLCJ2YWx1ZSI6N30seyJkYXRlIjoiMDcvMDgvMjAyNCIsInZhbHVlIjo1fV19LCJsYXllcnMiOlt7Imdlb20iOiJsaW5lIiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoiZGF0ZSJ9LCJ5Ijp7ImZpZWxkIjoidmFsdWUifX0sInBhcmFtcyI6eyJsaW5ld2lkdGgiOjEuOH19XSwibGFicyI6eyJ0aXRsZSI6IkFtYmlndW91cyBkYXRlcyBzdGF5IGRpc2NyZXRlIiwieCI6IkRhdGUiLCJ5IjoiVmFsdWUifSwiaGVpZ2h0Ijo0MDB9fQ",
+      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoiYW1iaWd1b3VzLWRhdGVzIn0sInNwZWMiOnsiZWRpdGlvbiI6MiwiZGF0YSI6eyJ2YWx1ZXMiOlt7ImRhdGUiOiIwMy8wNC8yMDI0IiwidmFsdWUiOjR9LHsiZGF0ZSI6IjA1LzA2LzIwMjQiLCJ2YWx1ZSI6N30seyJkYXRlIjoiMDcvMDgvMjAyNCIsInZhbHVlIjo1fV19LCJsYXllcnMiOlt7Imdlb20iOiJsaW5lIiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoiZGF0ZSJ9LCJ5Ijp7ImZpZWxkIjoidmFsdWUifX0sInBhcmFtcyI6eyJsaW5ld2lkdGgiOjEuOH19XSwibGFicyI6eyJ0aXRsZSI6IkFtYmlndW91cyBkYXRlcyBzdGF5IGRpc2NyZXRlIiwieCI6IkRhdGUiLCJ5IjoiVmFsdWUifSwiaGVpZ2h0Ijo0MDB9fQ",
   },
   {
     id: "post-stat-coordinate",
@@ -1025,7 +1025,7 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
         id: "category-columns",
       },
       spec: {
-        edition: 1,
+        edition: 2,
         data: {
           values: [
             {
@@ -1070,6 +1070,6 @@ export const PLAYGROUND_SAMPLES: readonly GeneratedPlaygroundSample[] = [
       },
     },
     fragment:
-      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoiY2F0ZWdvcnktY29sdW1ucyJ9LCJzcGVjIjp7ImVkaXRpb24iOjEsImRhdGEiOnsidmFsdWVzIjpbeyJjYXRlZ29yeSI6Ik5vcnRoIiwidmFsdWUiOjE0fSx7ImNhdGVnb3J5IjoiU291dGgiLCJ2YWx1ZSI6OX0seyJjYXRlZ29yeSI6IkVhc3QiLCJ2YWx1ZSI6MTd9LHsiY2F0ZWdvcnkiOiJXZXN0IiwidmFsdWUiOjEyfV19LCJsYXllcnMiOlt7Imdlb20iOiJjb2wiLCJzdGF0IjoiaWRlbnRpdHkiLCJwb3NpdGlvbiI6InN0YWNrIiwiYWVzIjp7IngiOnsiZmllbGQiOiJjYXRlZ29yeSJ9LCJ5Ijp7ImZpZWxkIjoidmFsdWUifX19XSwibGFicyI6eyJ0aXRsZSI6IkNhdGVnb3J5IHRvdGFscyIsIngiOiJSZWdpb24iLCJ5IjoiVmFsdWUifSwiaGVpZ2h0Ijo0MDB9fQ",
+      "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6InNhbXBsZSIsImlkIjoiY2F0ZWdvcnktY29sdW1ucyJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJjYXRlZ29yeSI6Ik5vcnRoIiwidmFsdWUiOjE0fSx7ImNhdGVnb3J5IjoiU291dGgiLCJ2YWx1ZSI6OX0seyJjYXRlZ29yeSI6IkVhc3QiLCJ2YWx1ZSI6MTd9LHsiY2F0ZWdvcnkiOiJXZXN0IiwidmFsdWUiOjEyfV19LCJsYXllcnMiOlt7Imdlb20iOiJjb2wiLCJzdGF0IjoiaWRlbnRpdHkiLCJwb3NpdGlvbiI6InN0YWNrIiwiYWVzIjp7IngiOnsiZmllbGQiOiJjYXRlZ29yeSJ9LCJ5Ijp7ImZpZWxkIjoidmFsdWUifX19XSwibGFicyI6eyJ0aXRsZSI6IkNhdGVnb3J5IHRvdGFscyIsIngiOiJSZWdpb24iLCJ5IjoiVmFsdWUifSwiaGVpZ2h0Ijo0MDB9fQ",
   },
 ];

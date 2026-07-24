@@ -3,9 +3,13 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import type { PortableSpec } from "@ggsvelte/spec";
+import { CURRENT_EDITION, type PortableSpec } from "@ggsvelte/spec";
 
 import { EXAMPLES } from "../examples/manifest";
+import {
+  playgroundBuilderOutput,
+  playgroundSvelteOutput,
+} from "../apps/docs/src/lib/playground-output";
 import { PLAYGROUND_SAMPLES } from "../apps/docs/src/lib/playground-samples";
 import { evaluatePlaygroundCompatibility, generatePlaygroundSeeds } from "./gen-playground-seeds";
 
@@ -119,4 +123,29 @@ describe("generated playground seeds", () => {
         "This example is larger than the 12 KiB share limit. Open a smaller example or sample.",
     });
   }, 15_000); // Full Linux coverage consistently takes ~5.35s; keep the integrity check intact.
+
+  test("authors every sample against the current defaults edition", async () => {
+    // A sample that pins an older edition freezes THAT edition's default look
+    // into every seed and copied snippet it produces (#709).
+    expect(PLAYGROUND_SAMPLES.map((sample) => [sample.id, sample.spec.edition])).toEqual(
+      PLAYGROUND_SAMPLES.map((sample) => [sample.id, CURRENT_EDITION]),
+    );
+
+    const generated = await import("../apps/docs/src/lib/generated/playground-seeds");
+    expect(
+      generated.PLAYGROUND_SAMPLES.map((sample) => [sample.id, sample.seed.spec.edition]),
+    ).toEqual(generated.PLAYGROUND_SAMPLES.map((sample) => [sample.id, CURRENT_EDITION]));
+  });
+
+  test("hands copied snippets the current defaults edition", async () => {
+    const generated = await import("../apps/docs/src/lib/generated/playground-seeds");
+    const starter = generated.PLAYGROUND_SAMPLES.find((sample) => sample.id === "starter-scatter");
+    if (starter === undefined) throw new Error("the default starter-scatter sample is missing");
+    const spec = starter.seed.spec;
+
+    expect(playgroundSvelteOutput(spec)).toContain(`"edition": ${String(CURRENT_EDITION)}`);
+    const builder = playgroundBuilderOutput(spec);
+    expect(builder.supported).toBe(true);
+    expect(builder.code).toContain(`"edition": ${String(CURRENT_EDITION)}`);
+  });
 });

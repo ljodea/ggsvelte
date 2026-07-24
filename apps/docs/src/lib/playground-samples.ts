@@ -1,4 +1,4 @@
-import type { PortableSpec } from "@ggsvelte/spec";
+import { CURRENT_EDITION, type PortableSpec } from "@ggsvelte/spec";
 
 export interface PlaygroundSample {
   readonly id: string;
@@ -13,7 +13,7 @@ export const PLAYGROUND_SAMPLES = [
     title: "Penguin scatter",
     description: "Compare flipper length and body mass by species.",
     spec: {
-      edition: 1,
+      edition: CURRENT_EDITION,
       data: {
         values: [
           { id: "a1", species: "Adelie", flipper: 181, mass: 3750 },
@@ -51,7 +51,7 @@ export const PLAYGROUND_SAMPLES = [
     title: "Monthly line",
     description: "Edit a compact time series with an explicit date parser.",
     spec: {
-      edition: 1,
+      edition: CURRENT_EDITION,
       data: {
         values: [
           { date: "2024-01-01", value: 4 },
@@ -79,7 +79,7 @@ export const PLAYGROUND_SAMPLES = [
     title: "Raw years",
     description: "Infer a calendar axis from unprocessed four-digit year strings.",
     spec: {
-      edition: 1,
+      edition: CURRENT_EDITION,
       data: {
         values: [
           { year: "1835", value: 12 },
@@ -105,7 +105,7 @@ export const PLAYGROUND_SAMPLES = [
     title: "ISO dates",
     description: "Infer a calendar axis from unprocessed ISO date strings.",
     spec: {
-      edition: 1,
+      edition: CURRENT_EDITION,
       data: {
         values: [
           { date: "2024-01-01", value: 4 },
@@ -131,7 +131,7 @@ export const PLAYGROUND_SAMPLES = [
     title: "Ambiguous dates",
     description: "Keep ambiguous day/month strings discrete until a parser is explicit.",
     spec: {
-      edition: 1,
+      edition: CURRENT_EDITION,
       data: {
         values: [
           { date: "03/04/2024", value: 4 },
@@ -157,7 +157,7 @@ export const PLAYGROUND_SAMPLES = [
     title: "Post-stat coordinate transform",
     description: "Fit in ordinary scale space, then project the final x coordinate through log10.",
     spec: {
-      edition: 2,
+      edition: CURRENT_EDITION,
       data: {
         values: [
           { exposure: 1, response: 2.2 },
@@ -204,7 +204,7 @@ export const PLAYGROUND_SAMPLES = [
     description:
       "Fit an equal-unit data rectangle after chart chrome so a unit circle stays circular.",
     spec: {
-      edition: 2,
+      edition: CURRENT_EDITION,
       data: {
         values: [
           { x: 1, y: 0 },
@@ -241,7 +241,7 @@ export const PLAYGROUND_SAMPLES = [
     title: "Binned colorsteps",
     description: "Translate quantitative values into deterministic semantic color intervals.",
     spec: {
-      edition: 2,
+      edition: CURRENT_EDITION,
       data: {
         values: [
           { hour: 0, pm25: 4 },
@@ -285,7 +285,7 @@ export const PLAYGROUND_SAMPLES = [
     title: "Category columns",
     description: "Compare a few named categories with direct values.",
     spec: {
-      edition: 1,
+      edition: CURRENT_EDITION,
       data: {
         values: [
           { category: "North", value: 14 },
