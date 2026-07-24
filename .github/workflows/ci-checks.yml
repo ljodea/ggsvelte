@@ -1,0 +1,30 @@
+# Reusable CI domain job(s) — called from ci.yml (issue #392).
+# Do not trigger on push/PR directly; the orchestrator owns concurrency + routing.
+name: CI · checks
+
+on:
+  workflow_call:
+
+permissions: {}
+
+jobs:
+  checks:
+    name: checks (pre-commit stage)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/ci-setup-bun
+      - uses: ./.github/actions/ci-bun-install
+        with:
+          cache_key_prefix: bun
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+      - run: uv tool install pre-commit
+      # Pre-commit stage only. Pre-push parity (build, unit, svelte-check, knip,
+      # type-aware lint, examples/docs check) is covered by dedicated jobs so we
+      # do not pay for them twice on every PR.
+      - name: pre-commit stage (parity)
+        run: pre-commit run --all-files --show-diff-on-failure

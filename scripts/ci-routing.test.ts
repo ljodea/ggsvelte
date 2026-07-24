@@ -37,6 +37,14 @@ describe("matchPathPattern", () => {
     expect(matchPathPattern("tsconfig*.json", "tsconfig.json")).toBe(true);
     expect(matchPathPattern("tsconfig*.json", "tsconfig.base.json")).toBe(true);
     expect(matchPathPattern("tsconfig*.json", "packages/core/tsconfig.json")).toBe(false);
+    // Domain reusable CI workflows (issue #392): basename wildcard under a fixed dir.
+    expect(matchPathPattern(".github/workflows/ci-*.yml", ".github/workflows/ci-unit.yml")).toBe(
+      true,
+    );
+    expect(matchPathPattern(".github/workflows/ci-*.yml", ".github/workflows/ci.yml")).toBe(false);
+    expect(matchPathPattern(".github/workflows/ci-*.yml", ".github/workflows/vr-compare.yml")).toBe(
+      false,
+    );
   });
 });
 

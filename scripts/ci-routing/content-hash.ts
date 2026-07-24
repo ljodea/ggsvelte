@@ -64,6 +64,8 @@ export const CACHEABLE_EXECUTIONS: readonly CacheableExecution[] = [
  */
 const UNIVERSAL_CONTENT_INPUTS: readonly string[] = [
   ".github/workflows/ci.yml",
+  // Domain job bodies live in reusable workflows (issue #392).
+  ".github/workflows/ci-*.yml",
   // Composite actions hold the success-marker protocol after extraction from ci.yml.
   ".github/actions/**",
   "scripts/ci-routing.ts",

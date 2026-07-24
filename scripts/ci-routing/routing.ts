@@ -172,7 +172,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "scripts/actionlint.ts",
     "scripts/actionlint.test.ts",
   ],
-  ci_workflow: [".github/workflows/ci.yml"],
+  // Orchestrator + every reusable domain workflow called from it.
+  ci_workflow: [".github/workflows/ci.yml", ".github/workflows/ci-*.yml"],
   ci_routing: ["scripts/ci-routing.ts", "scripts/ci-routing.test.ts", "scripts/ci-routing/**"],
   // Local composite actions used by ci.yml (content-hash restore/write). A change
   // here is a CI recipe change: bypass content-hash caches, schedule
@@ -292,14 +293,17 @@ export function matchPathPattern(pattern: string, filePath: string): boolean {
   }
 
   if (pat.includes("*")) {
-    if (pat.includes("/")) return false;
+    // No `**` here (handled above). Each `*` is a single path segment fragment
+    // (`[^/]*`), so `.github/workflows/ci-*.yml` matches domain reusable files
+    // without treating `*` as a cross-directory wildcard.
+    if (pat.includes("**")) return false;
     const re = new RegExp(
       `^${pat
         .split("*")
         .map((part) => escapeRegExp(part))
-        .join(".*")}$`,
+        .join("[^/]*")}$`,
     );
-    return re.test(path) && !path.includes("/");
+    return re.test(path);
   }
 
   return path === pat;

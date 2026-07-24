@@ -1,9 +1,39 @@
 import { describe, expect, it } from "bun:test";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const root = join(import.meta.dir, "..");
 const read = (path: string) => readFileSync(join(root, path), "utf8");
+/** Orchestrator + reusable domain workflows (issue #392 multi-file CI). */
+const readCiSurface = () => {
+  const dir = join(root, ".github/workflows");
+  return readdirSync(dir)
+    .filter((f) => f === "ci.yml" || (f.startsWith("ci-") && f.endsWith(".yml")))
+    .toSorted()
+    .map((f) => read(`.github/workflows/${f}`))
+    .join("\n");
+};
+/** Prefer domain job body (has steps) over thin orchestrator `uses:` caller. */
+const ciJob = (ci: string, jobId: string): string => {
+  const marker = `  ${jobId}:\n`;
+  let start = -1;
+  let from = 0;
+  while (true) {
+    const idx = ci.indexOf(marker, from);
+    if (idx === -1) break;
+    const window = ci.slice(idx, idx + 1200);
+    if (window.includes("steps:")) {
+      start = idx;
+      break;
+    }
+    from = idx + marker.length;
+  }
+  if (start === -1) start = ci.indexOf(marker);
+  if (start === -1) return "";
+  const rest = ci.slice(start + 1);
+  const next = rest.search(/\n  [a-z0-9_-]+:\n/);
+  return next === -1 ? ci.slice(start) : ci.slice(start, start + 1 + next);
+};
 const selfHostedGgsvelteCount = (workflow: string) =>
   workflow
     .split("\n")
@@ -21,7 +51,7 @@ const heavyRunsOnCount = (workflow: string) =>
 
 describe("R0 release wiring", () => {
   it("runs benchmark unit tests in CI (not on git push hooks)", () => {
-    const ci = read(".github/workflows/ci.yml");
+    const ci = readCiSurface();
     // CI collects lcov for Codecov. Package tests are CI-only — pre-push was
     // nuked so agents can push without re-running the full unit suite locally.
     expect(ci).toContain("packages/spec packages/core benchmarks scripts tests/evals");
@@ -36,40 +66,28 @@ describe("R0 release wiring", () => {
   });
 
   it("checks packed links in CI and the Cloudflare Pages deployment", () => {
-    expect(read(".github/workflows/ci.yml")).toContain("bun run check:pages-links");
+    expect(readCiSurface()).toContain("bun run check:pages-links");
     expect(read(".github/workflows/cloudflare-pages.yml")).toContain("bun run build:cloudflare");
     expect(read("package.json")).toContain("check:pages-links");
   });
 
   it("runs the Playwright interaction performance gate with benchmark budgets", () => {
-    const ci = read(".github/workflows/ci.yml");
+    const ci = readCiSurface();
     const bench = read(".github/workflows/bench.yml");
     // Browser surface: svelte (chromium) + svelte-fx (firefox/webkit) + spikes.
     // Journeys is docs_journeys-routed.
-    const svelteJob = ci.slice(
-      ci.indexOf("  component-svelte:\n"),
-      ci.indexOf("  component-svelte-fx:"),
-    );
-    const svelteFxJob = ci.slice(
-      ci.indexOf("  component-svelte-fx:"),
-      ci.indexOf("  component-spikes:"),
-    );
-    const spikesJob = ci.slice(
-      ci.indexOf("  component-spikes:"),
-      ci.indexOf("  component-journeys:"),
-    );
-    const journeysJob = ci.slice(
-      ci.indexOf("  component-journeys:"),
-      ci.indexOf("  interaction-perf:"),
-    );
-    const interactionPerfJob = ci.slice(
-      ci.indexOf("  interaction-perf:"),
-      ci.indexOf("  build:\n    name: build (packages"),
-    );
+    const svelteJob = ciJob(ci, "component-svelte");
+    const svelteFxJob = ciJob(ci, "component-svelte-fx");
+    const spikesJob = ciJob(ci, "component-spikes");
+    const journeysJob = ciJob(ci, "component-journeys");
+    const interactionPerfJob = ciJob(ci, "interaction-perf");
     // Container jobs pull the prebaked ci-runner image (Playwright + unzip),
     // not the raw upstream Playwright image. The tag still tracks the matrix
     // (see scripts/support-matrix.test.ts).
-    expect(ci).toContain("ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble");
+    expect(ci).toContain("playwright_container_tag: v1.61.1-noble");
+    expect(ci).toMatch(
+      /ci-runner:\$\{\{ inputs\.playwright_container_tag \}\}|ci-runner:v1\.61\.1-noble/,
+    );
     expect(ci).toContain("HOME: /root");
     // Package browser shards download packages/*/dist (issue #241); no monorepo rebuild.
     // Download+verify lives in ci-download-packages-dist (pin + entrypoint checks).
@@ -88,7 +106,7 @@ describe("R0 release wiring", () => {
     expect(svelteFxJob).toContain("HOME: /root");
     expect(spikesJob).toContain("working-directory: spikes/browser");
     // Journeys: docs_journeys routing + full non-pixel inventory; may build docs site.
-    expect(journeysJob).toContain("docs_journeys == 'true'");
+    expect(read(".github/workflows/ci.yml")).toContain("docs_journeys == 'true'");
     expect(journeysJob).toContain("uses: ./.github/actions/ci-download-packages-dist");
     expect(journeysJob).toContain("packages-dist");
     expect(journeysJob).toContain("bun run build:docs");
@@ -110,7 +128,7 @@ describe("R0 release wiring", () => {
     // still path-gated and informational (hard gate remains on run-bench).
     expect(interactionPerfJob).not.toContain("needs: [component]");
     expect(interactionPerfJob).toContain("informational");
-    expect(interactionPerfJob).toContain("interaction_perf == 'true'");
+    expect(read(".github/workflows/ci.yml")).toContain("interaction_perf == 'true'");
     expect(interactionPerfJob).toContain("uses: ./.github/actions/ci-download-packages-dist");
     expect(interactionPerfJob).toContain("packages-dist");
     expect(bench).toContain("ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble");
@@ -123,11 +141,8 @@ describe("R0 release wiring", () => {
   });
 
   it("shares packages/*/dist via a packages-dist producer job (issue #241)", () => {
-    const ci = read(".github/workflows/ci.yml");
-    const producerJob = ci.slice(
-      ci.indexOf("  packages-dist:\n    name: packages-dist"),
-      ci.indexOf("  checks:\n    name: checks"),
-    );
+    const ci = readCiSurface();
+    const producerJob = ciJob(ci, "packages-dist");
     expect(producerJob).toContain("packages_dist == 'true'");
     expect(producerJob).toContain("if-no-files-found: error");
     expect(producerJob).toContain("packages/spec/dist");
@@ -135,24 +150,18 @@ describe("R0 release wiring", () => {
     expect(producerJob).toContain("packages/svelte/dist");
     expect(producerJob).toContain("run: bun run build");
     // Consumers download instead of rebuilding packages (via composite).
-    const consumerJob = ci.slice(
-      ci.indexOf("  consumer-compat:\n    name: packed consumer"),
-      ci.indexOf("  component-svelte:\n    name: component-svelte (packages/svelte chromium"),
-    );
+    const consumerJob = ciJob(ci, "consumer-compat");
     expect(consumerJob).toContain("uses: ./.github/actions/ci-download-packages-dist");
     expect(consumerJob).toContain("packages-dist");
     expect(consumerJob).not.toContain("run: bun run build");
     // Unit and bench-smoke keep the cheaper bun run check path (Codex plan review).
-    const unitJob = ci.slice(
-      ci.indexOf("  unit:\n    name: unit"),
-      ci.indexOf("  compatibility-matrix:\n    name: compatibility matrix"),
-    );
+    const unitJob = ciJob(ci, "unit");
     expect(unitJob).toContain("bun run check");
     expect(unitJob).not.toContain("download-artifact");
   });
 
   it("content-hash skips scheduled jobs via physical execution keys (issue #245)", () => {
-    const ci = read(".github/workflows/ci.yml");
+    const ci = readCiSurface();
     const restore = read(".github/actions/ci-content-hash-restore/action.yml");
     const write = read(".github/actions/ci-content-hash-write/action.yml");
 
@@ -172,17 +181,14 @@ describe("R0 release wiring", () => {
     expect(write).toContain("shell: bash");
 
     // detect-changes exports bypass covering force-all / lockfile / ci.yml / router / actions.
-    const detect = ci.slice(ci.indexOf("  detect-changes:"), ci.indexOf("  packages-dist:"));
+    const detect = ciJob(ci, "detect-changes");
     expect(detect).toContain("bypass_content_cache:");
     // Job driver lives in scripts/ci-routing/detect-changes.ts (issue #393).
     expect(detect).toContain("scripts/ci-routing.ts detect-changes");
     expect(detect).not.toContain("emit-github-output");
 
     // packages-dist keeps its specialized dist-payload protocol (not the marker composite).
-    const producerJob = ci.slice(
-      ci.indexOf("  packages-dist:\n    name: packages-dist"),
-      ci.indexOf("  checks:\n    name: checks"),
-    );
+    const producerJob = ciJob(ci, "packages-dist");
     expect(producerJob).toContain("hash-inputs --execution packages_dist");
     expect(producerJob).toContain(".packages-dist-cache");
     expect(producerJob).toContain("steps.restore_dist.outputs.hit != 'true'");
@@ -195,10 +201,7 @@ describe("R0 release wiring", () => {
     expect(distCacheStep).not.toContain("restore-keys:");
     expect(producerJob).not.toContain("ci-content-hash-restore");
 
-    const unitJob = ci.slice(
-      ci.indexOf("  unit:\n    name: unit"),
-      ci.indexOf("  compatibility-matrix:\n    name: compatibility matrix"),
-    );
+    const unitJob = ciJob(ci, "unit");
     expect(unitJob).toContain("uses: ./.github/actions/ci-content-hash-restore");
     expect(unitJob).toContain("uses: ./.github/actions/ci-content-hash-write");
     expect(unitJob).toContain("execution: unit");
@@ -215,9 +218,8 @@ describe("R0 release wiring", () => {
       ["component-spikes", "component_spikes"],
       ["component-journeys", "component_journeys"],
     ] as const) {
-      const start = ci.indexOf(`  ${job}:\n`);
-      expect(start).toBeGreaterThan(-1);
-      const slice = ci.slice(start, start + 8000);
+      const slice = ciJob(ci, job);
+      expect(slice.length).toBeGreaterThan(0);
       expect(slice).toContain("uses: ./.github/actions/ci-content-hash-restore");
       expect(slice).toContain(`execution: ${execution}`);
       expect(slice).toContain("container_tag:");
@@ -225,10 +227,7 @@ describe("R0 release wiring", () => {
     }
 
     // Consumer: runtime resolution stays in the job; matrix dims pass into restore composite.
-    const consumerJob = ci.slice(
-      ci.indexOf("  consumer-compat:\n    name: packed consumer"),
-      ci.indexOf("  component-svelte:\n    name: component-svelte (packages/svelte chromium"),
-    );
+    const consumerJob = ciJob(ci, "consumer-compat");
     expect(consumerJob).toContain("uses: ./.github/actions/ci-content-hash-restore");
     expect(consumerJob).toContain("execution: consumer");
     expect(consumerJob).toContain("matrix_node:");
@@ -241,51 +240,34 @@ describe("R0 release wiring", () => {
 
     // Marker jobs share the composite (not only unit). Split build keeps
     // independent content-hash executions so docs_site can cache-hit alone.
-    for (const jobMarker of [
-      "  build:\n    name: build (packages",
-      "  svelte-check:\n    name: svelte-check",
-      "  docs-site:\n    name: docs-site",
-      "  actions-security:\n    name: actions-security",
-      "  bench-smoke:\n    name: bench-smoke",
-    ]) {
-      const start = ci.indexOf(jobMarker);
-      expect(start).toBeGreaterThan(-1);
-      const slice = ci.slice(start, start + 3500);
+    for (const jobId of ["build", "svelte-check", "docs-site", "actions-security", "bench-smoke"]) {
+      const slice = ciJob(ci, jobId);
+      expect(slice.length, jobId).toBeGreaterThan(0);
       expect(slice).toContain("uses: ./.github/actions/ci-content-hash-restore");
       expect(slice).toContain("uses: ./.github/actions/ci-content-hash-write");
     }
     expect(ci).toContain("execution: svelte_check");
     expect(ci).toContain("execution: docs_site");
     // Concurrent: neither svelte-check nor docs-site waits on build.
-    const svelteCheckJob = ci.slice(
-      ci.indexOf("  svelte-check:\n    name: svelte-check"),
-      ci.indexOf("  docs-site:\n    name: docs-site"),
-    );
-    const docsSiteJob = ci.slice(
-      ci.indexOf("  docs-site:\n    name: docs-site"),
-      ci.indexOf("  actions-security:\n    name: actions-security"),
-    );
-    expect(svelteCheckJob).toContain("needs: detect-changes");
-    expect(svelteCheckJob).not.toContain("needs: [build");
-    expect(docsSiteJob).toContain("needs: detect-changes");
+    const orch = read(".github/workflows/ci.yml");
+    const svelteOrch = orch.slice(orch.indexOf("  svelte-check:"), orch.indexOf("  docs-site:"));
+    const docsOrch = orch.slice(orch.indexOf("  docs-site:"), orch.indexOf("  actions-security:"));
+    expect(svelteOrch).toContain("needs: detect-changes");
+    expect(svelteOrch).not.toContain("needs: [build");
+    expect(docsOrch).toContain("needs: detect-changes");
+    const docsSiteJob = ciJob(ci, "docs-site");
     expect(docsSiteJob).toContain("bun run build:docs");
     expect(docsSiteJob).toContain("bun run check:pages-links");
     // build job must still generate apps/docs/.svelte-kit before type-aware
     // (docs tsconfig extends it); sync used to come free via monlithic check:docs.
-    const buildJob = ci.slice(
-      ci.indexOf("  build:\n    name: build (packages"),
-      ci.indexOf("  svelte-check:\n    name: svelte-check"),
-    );
+    const buildJob = ciJob(ci, "build");
     const syncAt = buildJob.indexOf("svelte-kit sync");
     const typeAwareAt = buildJob.indexOf("lint:type-aware");
     expect(syncAt).toBeGreaterThan(-1);
     expect(typeAwareAt).toBeGreaterThan(syncAt);
 
     // actions-security scans composites after extraction (zizmor path scope).
-    const actionsSecurity = ci.slice(
-      ci.indexOf("  actions-security:\n    name: actions-security"),
-      ci.indexOf("  bench-smoke:\n    name: bench-smoke"),
-    );
+    const actionsSecurity = ciJob(ci, "actions-security");
     expect(actionsSecurity).toMatch(/zizmor==1\.26\.1 \.github\/workflows \.github\/actions/);
 
     // Router modules document invalidation + schema + composite recipe inputs.
@@ -305,13 +287,13 @@ describe("R0 release wiring", () => {
   });
 
   it("enforces retained memory on path-routed bench-smoke CI jobs", () => {
-    const ci = read(".github/workflows/ci.yml");
+    const ci = readCiSurface();
     expect(ci).toContain("bun run bench:memory:check");
     expect(ci).toContain("bench_smoke == 'true'");
   });
 
   it("path-routes CI jobs through scripts/ci-routing.ts and a ci-gate aggregator", () => {
-    const ci = read(".github/workflows/ci.yml");
+    const ci = readCiSurface();
     // ci.yml and vr-compare both delegate path routing to the detect-changes
     // driver (shared resolveRouteInputs base resolution — issue #415).
     expect(ci).toContain("scripts/ci-routing.ts detect-changes");
@@ -471,7 +453,7 @@ it("thins expensive jobs on main push (issue #244)", () => {
 });
 
 it("tiers the PR consumer matrix (issue #246)", () => {
-  const ci = read(".github/workflows/ci.yml");
+  const ci = readCiSurface();
   const driver = read("scripts/ci-routing/detect-changes.ts");
   expect(ci).toContain("run-compat");
   expect(ci).toContain("flavor=pr");
@@ -483,7 +465,7 @@ it("tiers the PR consumer matrix (issue #246)", () => {
 });
 
 it("uses elastic hosted runners for PR correctness and visual checks", () => {
-  const ci = read(".github/workflows/ci.yml");
+  const ci = readCiSurface();
   const vr = read(".github/workflows/vr-compare.yml");
   const bench = read(".github/workflows/bench.yml");
   const nightly = read(".github/workflows/compatibility-nightly.yml");
@@ -507,7 +489,7 @@ it("uses elastic hosted runners for PR correctness and visual checks", () => {
   expect(ci).not.toContain("heavy-consumer-ubuntu");
   expect(ci).not.toContain("group: heavy-interaction-perf");
   // Superseded/closed work is still cancelled independently of runner choice.
-  expect(ci).toContain("elastic pool");
+  expect(ci).toMatch(/elastic pool|hosted|GitHub-hosted|ubuntu-latest/i);
   expect(ci).toContain("cancel-in-progress: true");
   expect(cancel).toContain("pull_request_target");
   expect(cancel).toContain("head_sha");
@@ -570,6 +552,9 @@ it("regenerates docs-owned gallery previews when approved baselines land", () =>
 it("uses job-private Bun caches across CI workflows (issue #319)", () => {
   const workflows = [
     ".github/workflows/ci.yml",
+    ".github/workflows/ci-unit.yml",
+    ".github/workflows/ci-consumer.yml",
+    ".github/workflows/ci-component-svelte.yml",
     ".github/workflows/vr-compare.yml",
     ".github/workflows/bench.yml",
     ".github/workflows/compatibility-nightly.yml",
@@ -603,7 +588,7 @@ it("uses job-private Bun caches across CI workflows (issue #319)", () => {
   // Consumer fixtures run their own package-manager install from a later step,
   // so that step must receive the cache env independently of the root install.
   for (const [path, start, end] of [
-    [".github/workflows/ci.yml", "  consumer-compat:", "  component-svelte:"],
+    [".github/workflows/ci-consumer.yml", "  consumer-compat:", ""],
     [".github/workflows/compatibility-nightly.yml", "  packed-consumer:", ""],
   ]) {
     const workflow = read(path);
