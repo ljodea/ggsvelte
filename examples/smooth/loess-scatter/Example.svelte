@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomPoint,
+    GeomSmooth,
+    GGPlot,
+    scaleSizeContinuous,
+  } from "@ggsvelte/svelte";
 
   import { gammaVirginis } from "./data.js";
 </script>
@@ -8,7 +13,7 @@
   data={gammaVirginis}
   aes={{ x: "year", y: "angle" }}
   theme="tufte"
-  scales={{ x: { labels: "d" }, size: { type: "continuous", range: [3, 8] } }}
+  scales={{ x: { labels: "d" }, ...scaleSizeContinuous({ range: [3, 8] }) }}
   labs={{
     title: "The first scatterplot, redrawn",
     subtitle:
