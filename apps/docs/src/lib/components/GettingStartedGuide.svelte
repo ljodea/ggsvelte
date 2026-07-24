@@ -226,15 +226,15 @@
     accessibleLabel="Copy builder fragment"
     code={QUICKSTART_BUILDER_FRAGMENT}
   />
-  <h3 id="portablespec-json">PortableSpec JSON</h3>
+  <h3 id="portablespec-json">Spec (JSON)</h3>
   <p>
-    Use PortableSpec to save, transmit, validate, or generate a chart without
+    Use Spec (JSON) to save, transmit, validate, or generate a chart without
     executable accessors.
   </p>
   <CopyCode
     class="lesson-source"
     language="json"
-    accessibleLabel="Copy PortableSpec fragment"
+    accessibleLabel="Copy Spec (JSON) fragment"
     code={QUICKSTART_PORTABLE_SPEC_FRAGMENT}
   />
 
