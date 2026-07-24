@@ -25,8 +25,8 @@ export function trainColor(
   config: OrdinalColorConfig = {},
 ): ColorScale {
   const baseRange = resolveOrdinalPaletteStops({
-    range: config.range,
-    scheme: config.scheme,
+    ...(config.range !== undefined && { range: config.range }),
+    ...(config.scheme !== undefined && { scheme: config.scheme }),
   });
   const range = config.reverse === true ? baseRange.toReversed() : baseRange;
   const scheme =
