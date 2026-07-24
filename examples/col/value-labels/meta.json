@@ -1,6 +1,6 @@
 {
-  "title": "Columns with value labels",
-  "description": "A text layer composed over a column layer: the label channel reads a preformatted field, and a dy offset lifts each label just above its bar.",
-  "tags": ["col", "text", "labels", "layers"],
+  "title": "Column chart with value labels",
+  "description": "A text layer above each column turns the bars into a table you can read directly. The 1954 Salk vaccine trial supplies the numbers the trial existed to produce: the vaccinated rate is about a third of the placebo rate.",
+  "tags": ["col", "text", "labels", "annotation", "theme"],
   "docsSection": "Bars & columns"
 }

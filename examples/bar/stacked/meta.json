@@ -1,6 +1,6 @@
 {
   "title": "Stacked bar chart",
-  "description": "geom bar counts rows per x value — no y mapping — and the default stack position piles the fill groups. The legend comes from the fill scale.",
-  "tags": ["bar", "count", "stack", "fill", "legend"],
+  "description": "position stack piles the fill groups within each band. The Trial of the Pyx supplies a real frequency table, so the weight channel makes the count stat sum counts instead of counting rows — 72 rows standing in for 10,000 sovereigns — and flexoki's eight keys map one-to-one onto the eight ordered deviation bins.",
+  "tags": ["bar", "stack", "fill", "legend", "weight", "theme", "palette"],
   "docsSection": "Bars & columns"
 }

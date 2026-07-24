@@ -1,16 +1,18 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { languages } from "./data.js";
+import { armadaTonnage } from "./data.js";
 
 export default defineExample(
-  gg(languages, aes({ x: "language", y: "respondents" }))
+  gg(armadaTonnage, aes({ x: "squadron", y: "tons" }))
     .geomCol()
     .coordFlip()
+    .theme("fivethirtyeight")
     .labs({
-      title: "Survey responses by language",
-      x: "Language",
-      y: "Respondents",
+      title: "Armada tonnage by squadron, 1588",
+      subtitle: "Ordered smallest to largest, so coord flip reads bottom-up",
+      x: "Squadron",
+      y: "Tons",
     })
     .spec(),
 );

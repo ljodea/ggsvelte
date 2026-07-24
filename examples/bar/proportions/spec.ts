@@ -1,18 +1,23 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { sessions } from "./data.js";
+import { armadaCrews } from "./data.js";
 
 export default defineExample(
-  gg(sessions, aes({ x: "age", fill: "genre" }))
+  gg(armadaCrews, aes({ x: "squadron", fill: "role", weight: "men" }))
     .geomBar({ position: "fill" })
+    .scaleFillManual({
+      domain: ["Soldiers", "Sailors"],
+      values: ["#c14a3d", "#3c6e8f"],
+    })
     .scales({ y: { labels: ".0%" } })
-    .legend({ order: "sorted" })
+    .theme("fivethirtyeight")
     .labs({
-      title: "What each age group streams",
-      x: "Age group",
-      y: "Share of sessions",
-      fill: "Genre",
+      title: "Who sailed with the Armada, 1588",
+      subtitle: "Soldiers outnumber sailors everywhere except the galleys and the light pataches",
+      x: "Squadron",
+      y: "Share of complement",
+      fill: "Role",
     })
     .spec(),
 );
