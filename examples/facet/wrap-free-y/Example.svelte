@@ -1,21 +1,37 @@
 <script lang="ts">
-  import { GeomLine, GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import { GeomLine, GGPlot } from "@ggsvelte/svelte";
 
-  import { metrics } from "./data.js";
+  import { londonBills } from "./data.js";
 </script>
 
 <GGPlot
-  data={metrics}
-  aes={{ x: "month", y: "value" }}
-  facet={{ wrap: "metric", ncol: 3, scales: "free_y" }}
+  data={londonBills}
+  aes={{ x: "year", y: "value", color: "measure" }}
+  theme="fivethirtyeight"
+  facet={{
+    wrap: {
+      field: "measure",
+      levels: [
+        "Male / female ratio",
+        "Male christenings",
+        "All burials",
+        "Plague deaths",
+      ],
+    },
+    ncol: 2,
+    scales: "free_y",
+  }}
+  scales={{ x: { labels: "d" } }}
+  guides={{ color: { type: "none" } }}
   labs={{
-    title: "Twelve months, three magnitudes",
-    x: "Month",
-    y: "Value",
+    title: "London's bills of mortality, 1629–1710",
+    subtitle:
+      "The ratio never once falls below 1 — Arbuthnot's argument, on its own scale",
+    x: "Year",
+    y: "",
   }}
   width={640}
   height={400}
 >
-  <GeomLine />
-  <GeomPoint size={2} />
+  <GeomLine linewidth={1.6} />
 </GGPlot>

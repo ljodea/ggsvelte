@@ -1,6 +1,6 @@
 {
   "title": "Faceted histograms (facet wrap)",
-  "description": "facet.wrap partitions the data BEFORE the bin stat: each panel bins its own service's response times over one shared break grid, and fixed scales share both axes (edge axes only).",
-  "tags": ["facet", "histogram", "bin", "wrap"],
+  "description": "facet.wrap partitions the data BEFORE the bin stat: each panel bins its own parent-child table over one shared break grid, and fixed scales share both axes (edge axes only). The weight channel lets Pearson and Lee's published frequency table stand in for 4,892 measured children.",
+  "tags": ["facet", "histogram", "bin", "wrap", "weight"],
   "docsSection": "Facets"
 }

@@ -2430,7 +2430,7 @@ export const DOCS_ROUTES = [
     path: "/examples/errorbar/mean-se",
     title: "Errorbars (mean ± se) over raw data — ggsvelte gallery",
     description:
-      "The summary stat computes mean ± standard error per group (ggplot2's mean_se default), drawn as errorbars over the seeded-jitter raw observations.",
+      'The summary stat computes mean ± standard error per group (ggplot2\'s mean_se default), drawn as errorbars over the seeded-jitter raw observations — here the 1905 soporific trial that "Student" used to introduce the t-distribution.',
     canonicalPath: "/examples/errorbar/mean-se",
     kind: "page",
     index: true,
@@ -2441,7 +2441,7 @@ export const DOCS_ROUTES = [
     path: "/examples/facet/ordered-side-strips",
     title: "Ordered small multiples with side strips — ggsvelte gallery",
     description:
-      'facet.wrap.levels locks a closed west→midwest→south→northeast panel order independent of row order; labels supply human strip text; strip.position: "left" reserves a measured band beside each panel instead of above it.',
+      'facet.wrap.levels locks Gosset\'s authored A→D sample order independent of row order; labels supply human strip text; strip.position: "left" reserves a measured band beside each panel instead of above it. Fill comes from an ordinal palette scale with its legend suppressed, because the strips already name every panel.',
     canonicalPath: "/examples/facet/ordered-side-strips",
     kind: "page",
     index: true,
@@ -2452,7 +2452,7 @@ export const DOCS_ROUTES = [
     path: "/examples/facet/wrap",
     title: "Faceted histograms (facet wrap) — ggsvelte gallery",
     description:
-      "facet.wrap partitions the data BEFORE the bin stat: each panel bins its own service's response times over one shared break grid, and fixed scales share both axes (edge axes only).",
+      "facet.wrap partitions the data BEFORE the bin stat: each panel bins its own parent-child table over one shared break grid, and fixed scales share both axes (edge axes only). The weight channel lets Pearson and Lee's published frequency table stand in for 4,892 measured children.",
     canonicalPath: "/examples/facet/wrap",
     kind: "page",
     index: true,
@@ -2463,7 +2463,7 @@ export const DOCS_ROUTES = [
     path: "/examples/facet/wrap-free-y",
     title: "Free y scales per panel — ggsvelte gallery",
     description:
-      'scales: "free_y" trains the y domain per panel — each metric fills its panel at its own magnitude, every panel gets its own left axis, and x stays shared. Discrete color assignments would still be global (one legend).',
+      'scales: "free_y" trains the y domain per panel — Arbuthnot\'s four measures span five orders of magnitude, from a ratio near 1.1 to the 68,596 plague deaths of 1665, and each fills its panel at its own magnitude. Every panel gets its own left axis; x stays shared.',
     canonicalPath: "/examples/facet/wrap-free-y",
     kind: "page",
     index: true,
@@ -2727,7 +2727,7 @@ export const DOCS_ROUTES = [
     path: "/examples/smooth/loess-scatter",
     title: "Loess smooth with confidence ribbon — ggsvelte gallery",
     description:
-      "A loess trend (R-parity local regression, degree 2) fitted over a scatter, with its 95% confidence ribbon drawn under the line — ggplot2's geom_smooth.",
+      "A loess trend (R-parity local regression, degree 2) fitted over a scatter, with its 95% confidence ribbon drawn under the line — ggplot2's geom_smooth, applied to the first scatterplot ever published. A continuous size scale carries Herschel's own weighting of each observation.",
     canonicalPath: "/examples/smooth/loess-scatter",
     kind: "page",
     index: true,

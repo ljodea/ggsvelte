@@ -1,16 +1,22 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { samples } from "./data.js";
+import { familyHeights } from "./data.js";
 
 export default defineExample(
-  gg(samples, aes({ x: "ms" }))
+  gg(familyHeights, aes({ x: "child", weight: "n" }))
+    // The source is Pearson and Lee's frequency table, not one row per child:
+    // the weight channel makes the bin stat sum counts instead of counting
+    // rows, so 81 rows stand in for 4,892 measured children.
     .geomHistogram({ bins: 18 })
-    .facet({ wrap: "service", ncol: 3 })
+    .facet({ wrap: "pair", ncol: 2 })
+    .theme("ggplot2")
     .labs({
-      title: "Response time by service",
-      x: "Response time (ms)",
-      y: "Requests",
+      title: "4,892 English children, measured by Pearson and Lee",
+      subtitle:
+        "Sons stand four and a half inches taller; the two daughter panels are the same girls, tabulated against each parent",
+      x: "Child's height (inches)",
+      y: "Children",
     })
     .spec(),
 );

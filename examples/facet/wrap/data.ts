@@ -1,17 +1,96 @@
-/** Seeded response-time samples for three services (facet panels). */
-import { mulberry32 } from "../../rng.js";
-
-const rnd = mulberry32(0xfa11);
-
-export const samples: { ms: number; service: string }[] = [];
-const centers: Record<string, number> = { api: 140, web: 210, batch: 320 };
-for (const service of ["api", "web", "batch"]) {
-  for (let i = 0; i < 90; i++) {
-    let sum = 0;
-    for (let k = 0; k < 6; k++) sum += rnd();
-    samples.push({
-      ms: Math.round((centers[service]! * 0.6 + sum * centers[service]! * 0.13) * 10) / 10,
-      service,
-    });
-  }
-}
+/**
+ * Karl Pearson and Alice Lee's family-height study (1903): 4,892 measured
+ * parent-child pairs from English families, as the frequency table they
+ * published. Heights are in inches.
+ *
+ * Transcribed from HistData::PearsonLee (see NOTICE). The source is one row per
+ * (parent height, child height) cell; because this chart bins the CHILD height
+ * only, the counts are summed over parent height, which is exact and collapses
+ * 746 source rows to 81 without losing a single observation.
+ *
+ * `n` is a count, so the weight channel makes the bin stat sum counts rather
+ * than count rows.
+ */
+export const familyHeights: { pair: string; child: number; n: number }[] = [
+  { pair: "Father \u2192 Son", child: 59.5, n: 2 },
+  { pair: "Father \u2192 Son", child: 60.5, n: 1.5 },
+  { pair: "Father \u2192 Son", child: 61.5, n: 3.5 },
+  { pair: "Father \u2192 Son", child: 62.5, n: 20.5 },
+  { pair: "Father \u2192 Son", child: 63.5, n: 38.5 },
+  { pair: "Father \u2192 Son", child: 64.5, n: 61.5 },
+  { pair: "Father \u2192 Son", child: 65.5, n: 89.5 },
+  { pair: "Father \u2192 Son", child: 66.5, n: 148 },
+  { pair: "Father \u2192 Son", child: 67.5, n: 173.5 },
+  { pair: "Father \u2192 Son", child: 68.5, n: 149.5 },
+  { pair: "Father \u2192 Son", child: 69.5, n: 128 },
+  { pair: "Father \u2192 Son", child: 70.5, n: 108 },
+  { pair: "Father \u2192 Son", child: 71.5, n: 63 },
+  { pair: "Father \u2192 Son", child: 72.5, n: 42 },
+  { pair: "Father \u2192 Son", child: 73.5, n: 29 },
+  { pair: "Father \u2192 Son", child: 74.5, n: 8.5 },
+  { pair: "Father \u2192 Son", child: 75.5, n: 4 },
+  { pair: "Father \u2192 Son", child: 76.5, n: 4 },
+  { pair: "Father \u2192 Son", child: 77.5, n: 3 },
+  { pair: "Father \u2192 Son", child: 78.5, n: 0.5 },
+  { pair: "Father \u2192 Daughter", child: 52.5, n: 0.5 },
+  { pair: "Father \u2192 Daughter", child: 53.5, n: 0.5 },
+  { pair: "Father \u2192 Daughter", child: 55.5, n: 1 },
+  { pair: "Father \u2192 Daughter", child: 56.5, n: 4.5 },
+  { pair: "Father \u2192 Daughter", child: 57.5, n: 14.5 },
+  { pair: "Father \u2192 Daughter", child: 58.5, n: 15.5 },
+  { pair: "Father \u2192 Daughter", child: 59.5, n: 48.5 },
+  { pair: "Father \u2192 Daughter", child: 60.5, n: 99 },
+  { pair: "Father \u2192 Daughter", child: 61.5, n: 141.5 },
+  { pair: "Father \u2192 Daughter", child: 62.5, n: 190.5 },
+  { pair: "Father \u2192 Daughter", child: 63.5, n: 213 },
+  { pair: "Father \u2192 Daughter", child: 64.5, n: 198.5 },
+  { pair: "Father \u2192 Daughter", child: 65.5, n: 159.5 },
+  { pair: "Father \u2192 Daughter", child: 66.5, n: 140.5 },
+  { pair: "Father \u2192 Daughter", child: 67.5, n: 77.5 },
+  { pair: "Father \u2192 Daughter", child: 68.5, n: 37 },
+  { pair: "Father \u2192 Daughter", child: 69.5, n: 19.5 },
+  { pair: "Father \u2192 Daughter", child: 70.5, n: 9.5 },
+  { pair: "Father \u2192 Daughter", child: 71.5, n: 4 },
+  { pair: "Father \u2192 Daughter", child: 72.5, n: 1 },
+  { pair: "Mother \u2192 Son", child: 59.5, n: 1 },
+  { pair: "Mother \u2192 Son", child: 60.5, n: 1.5 },
+  { pair: "Mother \u2192 Son", child: 61.5, n: 1.5 },
+  { pair: "Mother \u2192 Son", child: 62.5, n: 8 },
+  { pair: "Mother \u2192 Son", child: 63.5, n: 30 },
+  { pair: "Mother \u2192 Son", child: 64.5, n: 49 },
+  { pair: "Mother \u2192 Son", child: 65.5, n: 74 },
+  { pair: "Mother \u2192 Son", child: 66.5, n: 114.5 },
+  { pair: "Mother \u2192 Son", child: 67.5, n: 163 },
+  { pair: "Mother \u2192 Son", child: 68.5, n: 175.5 },
+  { pair: "Mother \u2192 Son", child: 69.5, n: 124 },
+  { pair: "Mother \u2192 Son", child: 70.5, n: 122 },
+  { pair: "Mother \u2192 Son", child: 71.5, n: 78 },
+  { pair: "Mother \u2192 Son", child: 72.5, n: 47.5 },
+  { pair: "Mother \u2192 Son", child: 73.5, n: 36 },
+  { pair: "Mother \u2192 Son", child: 74.5, n: 17 },
+  { pair: "Mother \u2192 Son", child: 75.5, n: 6.5 },
+  { pair: "Mother \u2192 Son", child: 76.5, n: 3.5 },
+  { pair: "Mother \u2192 Son", child: 77.5, n: 1.5 },
+  { pair: "Mother \u2192 Son", child: 78.5, n: 2 },
+  { pair: "Mother \u2192 Son", child: 79.5, n: 1 },
+  { pair: "Mother \u2192 Daughter", child: 52.5, n: 0.5 },
+  { pair: "Mother \u2192 Daughter", child: 53.5, n: 0.5 },
+  { pair: "Mother \u2192 Daughter", child: 55.5, n: 1 },
+  { pair: "Mother \u2192 Daughter", child: 56.5, n: 4.5 },
+  { pair: "Mother \u2192 Daughter", child: 57.5, n: 14.5 },
+  { pair: "Mother \u2192 Daughter", child: 58.5, n: 15.5 },
+  { pair: "Mother \u2192 Daughter", child: 59.5, n: 48.5 },
+  { pair: "Mother \u2192 Daughter", child: 60.5, n: 100 },
+  { pair: "Mother \u2192 Daughter", child: 61.5, n: 143 },
+  { pair: "Mother \u2192 Daughter", child: 62.5, n: 190.5 },
+  { pair: "Mother \u2192 Daughter", child: 63.5, n: 212.5 },
+  { pair: "Mother \u2192 Daughter", child: 64.5, n: 199 },
+  { pair: "Mother \u2192 Daughter", child: 65.5, n: 156.5 },
+  { pair: "Mother \u2192 Daughter", child: 66.5, n: 141.5 },
+  { pair: "Mother \u2192 Daughter", child: 67.5, n: 79 },
+  { pair: "Mother \u2192 Daughter", child: 68.5, n: 41 },
+  { pair: "Mother \u2192 Daughter", child: 69.5, n: 18.5 },
+  { pair: "Mother \u2192 Daughter", child: 70.5, n: 9.5 },
+  { pair: "Mother \u2192 Daughter", child: 71.5, n: 4 },
+  { pair: "Mother \u2192 Daughter", child: 73.5, n: 1 },
+];
