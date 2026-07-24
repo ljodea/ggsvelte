@@ -19,6 +19,14 @@
   --surface: #f6f8fa;
   --border: #d0d7de;
   --accent: #4269d0;
+  /* Tool-rail / status chrome sit in the frame, not on chart paper. Site
+     appearance is independent of chart theme, so publish consumer color
+     overrides here — otherwise --gg-theme-toolActive follows the (often
+     light) chart ink and fails contrast on a dark frame (#651).
+     --gg-interactionMuted is the inactive *color* override (not the numeric
+     --gg-theme-interactionMuted mark-opacity token). */
+  --gg-toolActive: var(--fg);
+  --gg-interactionMuted: var(--muted);
 
   min-width: 0;
   overflow: hidden;
