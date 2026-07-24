@@ -1,12 +1,15 @@
 <script lang="ts">
   import { base } from "$app/paths";
+  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
 
-  import SignaturePlot from "$examples/interaction/tooltip/Example.svelte";
+  import { penguins } from "$examples/point/scatter-color/data";
   import { QUICKSTART_PAGE_SVELTE } from "$scripts/quickstart";
   import CodeTabs from "$lib/CodeTabs.svelte";
   import { FEATURED_EXAMPLES, galleryEntryFor } from "$lib/catalog/gallery";
   import CopyCode from "$lib/components/CopyCode.svelte";
   import GrammarDemo from "$lib/components/GrammarDemo.svelte";
+  import UiButton from "$lib/components/UiButton.svelte";
+  import { contrastChartTheme } from "$lib/docs-appearance-state.svelte";
   import { EXAMPLES } from "$lib/examples";
 
   const install = "npm install @ggsvelte/svelte";
@@ -14,6 +17,7 @@
   const featured = FEATURED_EXAMPLES.map((item) =>
     entries.find((entry) => entry.id === item.id)!,
   );
+  const heroTheme = $derived(contrastChartTheme());
   const tabs = [
     { label: "Svelte", code: QUICKSTART_PAGE_SVELTE, language: "svelte" },
     {
@@ -24,53 +28,74 @@
     {
       label: "Spec (JSON)",
       language: "json",
-      code: `{"data":{"values":[{"weight":1.8,"economy":37}]},"layers":[{"geom":"point","aes":{"x":{"field":"weight"},"y":{"field":"economy"}}}]}`,
+      code: `{
+  "data": {
+    "values": [{ "weight": 1.8, "economy": 37 }]
+  },
+  "layers": [
+    {
+      "geom": "point",
+      "aes": {
+        "x": { "field": "weight" },
+        "y": { "field": "economy" }
+      }
+    }
+  ]
+}`,
     },
   ];
 </script>
 
 <section class="home-hero" aria-labelledby="home-heading">
   <div class="hero-claim">
-    <p class="eyebrow">Open source · Svelte 5</p>
-    <h1 id="home-heading">ggplot2 for Svelte.</h1>
+    <h1 id="home-heading">
+      An agent-first implementation of the layered grammar of graphics in Svelte
+      5
+    </h1>
     <p>
-      A layered grammar of graphics — aes, geoms, stats, scales, facets, themes
-      — as Svelte components, with PortableSpec JSON at the center. Built for
-      people who already know visualization, and for agents trained on eighteen
-      years of ggplot2.
+      ggplot2's layered grammar and defaults as Svelte components, a TypeScript
+      builder, and a validated JSON spec agents can write. Inspection,
+      selection, and zoom are part of the spec.
     </p>
   </div>
 
   <div class="hero-plot">
-    <div class="specimen-label">
-      <span>Live chart</span>
-      <a href={`${base}/examples/interactions/inspection`}>Example source</a>
-    </div>
-    <SignaturePlot />
+    <GGPlot
+      data={penguins}
+      aes={{ x: "flipper", y: "mass", color: "species" }}
+      inspect={{ mode: "x", pin: true, maxDistance: 24 }}
+      theme={heroTheme}
+      labs={{
+        title: "Penguin body mass by flipper length",
+        x: "Flipper length (mm)",
+        y: "Body mass (g)",
+        color: "Species",
+      }}
+      width="container"
+      height={400}
+      ariaLabel="Penguin mass increases with flipper length, grouped by species"
+    >
+      <GeomPoint size={4} alpha={0.85} />
+    </GGPlot>
   </div>
 
   <div class="hero-actions">
     <CopyCode code={install} language="bash" accessibleLabel="Copy install" />
     <div class="cta-row">
-      <a class="primary-action" href={`${base}/guide/getting-started`}
-        >Getting started</a
+      <UiButton variant="primary" href={`${base}/guide/getting-started`}>
+        Getting started
+      </UiButton>
+      <UiButton href={`${base}/examples`}>Examples</UiButton>
+      <UiButton variant="ghost" href={`${base}/playground`}>Playground</UiButton
       >
-      <a class="secondary-action" href={`${base}/examples`}>Examples</a>
     </div>
-    <p>
-      MIT. No account or hosted service.
-      <a href={`${base}/playground`}>Playground</a>
-    </p>
   </div>
 </section>
 
 <section class="home-featured" aria-labelledby="home-featured-heading">
   <header>
-    <div>
-      <p class="eyebrow">Examples</p>
-      <h2 id="home-featured-heading">Featured</h2>
-    </div>
-    <a href={`${base}/examples`}>All {entries.length}</a>
+    <h2 id="home-featured-heading">Examples</h2>
+    <a href={`${base}/examples`}>Gallery</a>
   </header>
   <ol>
     {#each featured as entry (entry.id)}
@@ -96,11 +121,11 @@
 
 <section class="code-path" aria-labelledby="code-path-heading">
   <div>
-    <p class="eyebrow">Surfaces</p>
     <h2 id="code-path-heading">Svelte, builder, or JSON.</h2>
     <p>
-      Same chart as a complete Svelte component, a TypeScript builder, or
-      PortableSpec JSON for validation, agents, and headless render.
+      Three surfaces, one spec. Svelte components inside an app, the TypeScript
+      builder anywhere else, and PortableSpec JSON — the surface agents write:
+      validated on the way in, rendered to SVG without a DOM.
     </p>
   </div>
   <CodeTabs {tabs} />
@@ -108,14 +133,13 @@
 
 <section class="evidence" aria-labelledby="evidence-heading">
   <header>
-    <p class="eyebrow">Docs</p>
-    <h2 id="evidence-heading">Contracts</h2>
+    <h2 id="evidence-heading">Docs</h2>
   </header>
   <dl>
     <div>
-      <dt>Compatibility</dt>
+      <dt>Getting started</dt>
       <dd>
-        <a href={`${base}/guide/compatibility`}>Node, Svelte, browsers, OS</a>
+        <a href={`${base}/guide/getting-started`}>Install and render a chart</a>
       </dd>
     </div>
     <div>
@@ -131,12 +155,6 @@
       </dd>
     </div>
     <div>
-      <dt>Diagnostics</dt>
-      <dd>
-        <a href={`${base}/guide/errors`}>Validation and pipeline codes</a>
-      </dd>
-    </div>
-    <div>
       <dt>Headless SVG</dt>
       <dd>
         <a href={`${base}/guide/getting-started#headless-and-server-rendering`}
@@ -144,26 +162,10 @@
         >
       </dd>
     </div>
-    <div>
-      <dt>PortableSpec</dt>
-      <dd>
-        <a href={`${base}/schema/v0.json`}>JSON Schema</a>
-      </dd>
-    </div>
   </dl>
 </section>
 
 <style>
-  .eyebrow,
-  .specimen-label span {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
   .home-hero {
     display: grid;
     grid-template-areas: "claim plot" "actions plot";
@@ -179,10 +181,10 @@
   }
 
   .hero-claim h1 {
-    max-width: 12ch;
+    max-width: 14ch;
     margin: 0.35rem 0 1.25rem;
-    font-size: clamp(4rem, 7.6vw, 8rem);
-    line-height: 0.82;
+    font-size: clamp(3.2rem, 6vw, 6rem);
+    line-height: 0.9;
     letter-spacing: -0.045em;
   }
 
@@ -197,39 +199,9 @@
     max-width: 34rem;
   }
 
-  .hero-actions > p {
-    color: var(--muted);
-    font-size: 0.82rem;
-  }
-
   .hero-plot {
     grid-area: plot;
     min-width: 0;
-    border: 1px solid var(--line);
-    background: #fff;
-    color: #172033;
-  }
-
-  .hero-plot :global(.event-status) {
-    min-height: 2.7rem;
-    margin: 0;
-    padding: 0.75rem 1rem;
-    border-top: 1px solid #d9dee8;
-    color: #5e6878;
-  }
-
-  .specimen-label {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #d9dee8;
-  }
-
-  .specimen-label a {
-    color: inherit;
-    font-size: 0.82rem;
-    font-weight: 600;
   }
 
   .cta-row {
@@ -237,26 +209,6 @@
     flex-wrap: wrap;
     gap: 0.75rem;
     margin-top: 1rem;
-  }
-
-  .cta-row a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    padding: 0.65rem 1rem;
-    border: 1px solid var(--ink);
-    border-radius: 4px;
-    font-weight: 600;
-    text-decoration: none;
-  }
-
-  .primary-action {
-    background: var(--ink);
-    color: var(--paper);
-  }
-
-  .secondary-action {
-    color: var(--ink);
   }
 
   .home-featured {
@@ -300,13 +252,16 @@
     text-decoration: none;
   }
 
+  .home-featured header a {
+    font-weight: 600;
+    text-decoration: underline;
+  }
+
   .preview-paper {
     display: grid;
     aspect-ratio: 4 / 3;
     place-items: center;
     overflow: hidden;
-    border: 1px solid var(--line);
-    background: #fff;
   }
 
   .preview-paper img {
@@ -358,10 +313,6 @@
       grid-template-columns: 1fr;
     }
 
-    .hero-claim h1 {
-      max-width: 12ch;
-    }
-
     .home-featured ol {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -374,12 +325,7 @@
     }
 
     .hero-claim h1 {
-      font-size: clamp(3.4rem, 17vw, 5rem);
-    }
-
-    .specimen-label {
-      align-items: start;
-      flex-direction: column;
+      font-size: clamp(2.6rem, 12vw, 4rem);
     }
 
     .home-featured {

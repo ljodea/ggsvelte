@@ -830,7 +830,7 @@ export const DOCS_ROUTES = [
   {
     path: "/guide/compatibility",
     title: "Compatibility — ggsvelte",
-    description: "Tested Node, Svelte, package-manager, browser, and OS boundaries.",
+    description: "Tested Node, Svelte, browser, and OS versions.",
     canonicalPath: "/guide/compatibility",
     kind: "page",
     index: true,
@@ -841,13 +841,7 @@ export const DOCS_ROUTES = [
       label: "Compatibility",
       order: 40,
     },
-    headings: [
-      {
-        id: "supported-consumers",
-        title: "Supported consumers",
-        level: 2,
-      },
-    ],
+    headings: [],
   },
   {
     path: "/guide/interaction-reference",

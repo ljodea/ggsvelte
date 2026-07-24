@@ -51,8 +51,8 @@
   <button
     id="guide-chapters-trigger"
     type="button"
-    aria-label="Open guide chapters"
-    onclick={openChapters}>Chapters</button
+    aria-label="Open docs navigation"
+    onclick={openChapters}>Menu</button
   >
   {#if headings.length > 0}
     <details>
@@ -85,10 +85,10 @@
 >
   <div class="chapter-dialog__panel">
     <div class="chapter-dialog__heading">
-      <span>Guide chapters</span>
+      <span>Docs</span>
       <button
         type="button"
-        aria-label="Close guide chapters"
+        aria-label="Close docs navigation"
         onclick={closeChapters}>Close</button
       >
     </div>

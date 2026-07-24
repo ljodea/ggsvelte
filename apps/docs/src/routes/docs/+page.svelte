@@ -7,19 +7,19 @@
     "/guide/themes-color": "Themes and color",
     "/guide/server-rendering-export": "Server rendering and export",
   };
+
+  // Diagnostics stays in the sidebar and search; it is a lookup page, not a
+  // starting point.
+  const tasks = DOCS_TASKS.filter((task) => task.label !== "Diagnostics");
 </script>
 
 <article class="docs-landing" aria-labelledby="docs-heading">
   <header>
     <h1 id="docs-heading">Documentation</h1>
-    <p>
-      Install, compose the grammar, add interaction, ship, and read the public
-      contracts.
-    </p>
   </header>
 
   <nav aria-label="Documentation tasks">
-    {#each DOCS_TASKS as task (task.label)}
+    {#each tasks as task (task.label)}
       <section>
         <a class="task-primary" href={`${base}${task.hrefs[0]}`}>
           <strong>{task.label}</strong>
@@ -63,13 +63,6 @@
     font-size: clamp(2.7rem, 7vw, 5.75rem);
     line-height: 0.94;
     letter-spacing: -0.035em;
-  }
-
-  header p {
-    max-width: 42rem;
-    margin: 1.25rem 0 0;
-    color: var(--muted);
-    font-size: 1.05rem;
   }
 
   nav {

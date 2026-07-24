@@ -11,10 +11,14 @@
   } from "$lib/gallery-filter";
   import { EXAMPLES } from "$lib/examples";
 
-  const entries = EXAMPLES.map((entry) => galleryEntryFor(entry));
-  const featured = FEATURED_EXAMPLES.map((item) =>
-    entries.find((entry) => entry.id === item.id)!,
-  );
+  // One flat grid; the former featured six lead, the rest follow in
+  // manifest order.
+  const all = EXAMPLES.map((entry) => galleryEntryFor(entry));
+  const leadIds = new Set<string>(FEATURED_EXAMPLES.map((item) => item.id));
+  const entries = [
+    ...[...leadIds].map((id) => all.find((entry) => entry.id === id)!),
+    ...all.filter((entry) => !leadIds.has(entry.id)),
+  ];
   const categories = [
     ...new Set(entries.map((entry) => entry.category)),
   ].toSorted();
@@ -89,53 +93,10 @@
 <svelte:head><meta name="theme-color" content="#ffffff" /></svelte:head>
 
 <header class="gallery-intro">
-  <p class="eyebrow">Gallery</p>
   <h1>Examples</h1>
-  <p>
-    {entries.length} runnable charts from the same outputs used in visual regression.
-  </p>
 </header>
 
-<section class="featured-gallery" aria-labelledby="featured-heading">
-  <div class="section-heading">
-    <div>
-      <p class="eyebrow">Featured</p>
-      <h2 id="featured-heading">Featured</h2>
-    </div>
-    <a href="#all-examples">All {entries.length}</a>
-  </div>
-  <ol>
-    {#each featured as entry (entry.id)}
-      <li>
-        <a href={`${base}/examples/${entry.id}`} aria-label={entry.title}>
-          <figure>
-            <div class="preview-paper">
-              <img
-                src={`${base}${entry.previewPath}`}
-                alt=""
-                width="640"
-                height={entry.vrHeight ?? 400}
-                loading="eager"
-              />
-            </div>
-          </figure>
-        </a>
-      </li>
-    {/each}
-  </ol>
-</section>
-
-<section id="all-examples" class="catalog" aria-labelledby="catalog-heading">
-  <div class="section-heading">
-    <div>
-      <p class="eyebrow">Catalog</p>
-      <h2 id="catalog-heading">All examples</h2>
-    </div>
-    <p class="result-count" aria-live="polite">
-      {results.length} of {entries.length}
-    </p>
-  </div>
-
+<section class="catalog" aria-label="Examples">
   <form class="filters" onsubmit={(event) => event.preventDefault()}>
     <label>
       <span>Filter</span>
@@ -208,54 +169,24 @@
 
   .gallery-intro h1 {
     max-width: 12ch;
-    margin: 0.25rem 0 1rem;
+    margin: 0.25rem 0 0;
     font-size: clamp(3rem, 8vw, 6.5rem);
     line-height: 0.88;
   }
 
-  .gallery-intro > p:last-child {
-    max-width: 42rem;
-    color: var(--muted);
-    font-size: 1.08rem;
-  }
-
-  .eyebrow {
-    color: var(--muted);
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .section-heading {
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 1rem;
-  }
-
-  .section-heading :is(p, h2) {
-    margin: 0;
-  }
-
-  .featured-gallery ol,
   .example-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1.25rem;
     margin: 0;
     padding: 0;
     list-style: none;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
   }
 
   figure {
     margin: 0;
   }
 
-  .featured-gallery a,
   .example-grid a {
     color: inherit;
     text-decoration: none;
@@ -266,8 +197,6 @@
     aspect-ratio: 4 / 3;
     place-items: center;
     overflow: hidden;
-    border: 1px solid var(--line);
-    background: #fff;
   }
 
   img {
@@ -275,11 +204,6 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-  }
-
-  .catalog {
-    margin-top: clamp(4rem, 9vw, 8rem);
-    scroll-margin-top: 6rem;
   }
 
   .filters {
@@ -290,9 +214,8 @@
     align-items: end;
     gap: 0.75rem;
     margin-bottom: 2rem;
-    padding: 1rem;
+    padding: 1rem 0;
     border-block: 1px solid var(--line);
-    background: var(--wash);
   }
 
   .filters label {
@@ -324,15 +247,6 @@
     cursor: pointer;
   }
 
-  .example-grid {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
-  }
-
-  .result-count {
-    color: var(--muted);
-    white-space: nowrap;
-  }
-
   .filter-notice,
   .zero-results {
     margin: 1.5rem 0;
@@ -344,10 +258,6 @@
   }
 
   @media (max-width: 64rem) {
-    .featured-gallery ol {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
     .filters {
       grid-template-columns: 1fr 1fr;
     }
@@ -358,37 +268,8 @@
       padding-top: 2rem;
     }
 
-    .section-heading {
-      align-items: start;
-    }
-
-    .featured-gallery {
-      margin-inline: -1rem;
-    }
-
-    .featured-gallery .section-heading {
-      margin-inline: 1rem;
-    }
-
-    .featured-gallery ol {
-      grid-auto-columns: min(85vw, 21rem);
-      grid-template-columns: none;
-      grid-auto-flow: column;
-      gap: 1rem;
-      overflow-x: auto;
-      scroll-padding-inline: 1rem;
-      scroll-snap-type: x mandatory;
-      padding-inline: 1rem;
-    }
-
-    .featured-gallery li {
-      scroll-snap-align: start;
-    }
-
     .filters {
       grid-template-columns: 1fr;
-      margin-inline: -1rem;
-      padding-inline: 1rem;
     }
   }
 </style>

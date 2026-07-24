@@ -9,7 +9,9 @@ async function expectNoOverflow(page: import("@playwright/test").Page): Promise<
 test("homepage first viewport leads with a live chart and two actions", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=light");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("ggplot2 for Svelte.");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "An agent-first implementation of the layered grammar of graphics in Svelte 5",
+  );
   await expect(page.locator(".home-hero .gg-plot-root")).toBeVisible();
   await expect(page.getByRole("link", { name: "Getting started" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Examples" }).first()).toBeVisible();
@@ -27,32 +29,31 @@ test("homepage preserves SSR chart output and hydrates its keyboard interaction"
   await page.goto("/");
   const plot = page.locator(".home-hero .gg-plot-root");
   await expect(plot).toHaveAttribute("data-gg-ready", "true");
-  const status = page.locator(".home-hero .event-status");
-  const initialStatus = await status.textContent();
   const capture = page.locator(".home-hero .gg-capture");
   await capture.focus();
   await capture.press("ArrowRight");
   await expect(page.locator(".home-hero .gg-tooltip")).toBeVisible();
-  await expect(status).not.toHaveText(initialStatus ?? "");
 });
 
 test("homepage grammar steps change real chart structure in place", async ({ page }) => {
   await page.goto("/");
   const output = page.locator(".grammar-output");
+  // The demo opens on the last step: layers, legend, and inspection all live.
   await expect(output.locator(".gg-points")).toHaveCount(1);
+  await expect(output.locator(".gg-legend")).toHaveCount(1);
+  await expect(output.locator(".gg-paths")).toHaveCount(1);
+  await expect(output.locator(".gg-capture")).toBeVisible();
+
+  await page.getByRole("button", { name: /Data/ }).click();
   await expect(output.locator(".gg-legend")).toHaveCount(0);
+  await expect(output.locator(".gg-paths")).toHaveCount(0);
 
   await page.getByRole("button", { name: /Mappings/ }).click();
   await expect(output.locator(".gg-legend")).toHaveCount(1);
-  await expect(output.locator(".grammar-status")).toHaveText("Step 2: Mappings");
+  await expect(output.locator(".gg-paths")).toHaveCount(0);
 
   await page.getByRole("button", { name: /Layers/ }).click();
   await expect(output.locator(".gg-paths")).toHaveCount(1);
-  await expect(output.locator(".grammar-status")).toHaveText("Step 3: Layers");
-
-  await page.getByRole("button", { name: /Interaction/ }).click();
-  await expect(output.locator(".gg-capture")).toBeVisible();
-  await expect(output.locator(".grammar-status")).toHaveText("Step 4: Interaction");
 });
 
 test("homepage mobile order is claim, specimen, then install", async ({ page }) => {
@@ -95,14 +96,12 @@ test("install copy and code tabs share the manual-copy fallback", async ({ page 
   await expect(tabs.first()).toHaveText("Svelte");
 });
 
-test("gallery exposes six featured previews and all generated previews", async ({ page }) => {
+test("gallery exposes every generated preview exactly once", async ({ page }) => {
   await page.goto("/examples");
-  await expect(page.locator(".featured-gallery li")).toHaveCount(6);
   // One meta.json per example under examples/ (grows when new specimens land).
   const exampleCount = 44; // +segment +layer-data-bands +fixed-aspect +facet/ordered-side-strips +ribbon/paint +col/mixed-outlier-labels
   await expect(page.locator(".example-grid li")).toHaveCount(exampleCount);
-  await expect(page.locator('img[src*="/previews/"]')).toHaveCount(6 + exampleCount);
-  await expect(page.getByText(`${String(exampleCount)} of ${String(exampleCount)}`)).toBeVisible();
+  await expect(page.locator('img[src*="/previews/"]')).toHaveCount(exampleCount);
 });
 
 test("gallery filtering is URL-addressable, preserves theme, and restores history", async ({
@@ -117,7 +116,6 @@ test("gallery filtering is URL-addressable, preserves theme, and restores histor
   expect(linkedCount).toBeGreaterThan(0);
   await page.getByLabel("Category").selectOption("bar");
   await expect(page).toHaveURL(/category=bar/);
-  await expect(page.getByText(/of \d+/)).toBeVisible();
   await page.goBack();
   await expect(page.getByLabel("Category")).toHaveValue("");
   await expect(page.locator(".example-grid li").first()).toBeVisible();

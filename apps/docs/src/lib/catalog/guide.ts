@@ -153,7 +153,7 @@ export const GUIDE_CATALOG = [
   {
     slug: "compatibility",
     title: "Compatibility",
-    description: "Tested Node, Svelte, package-manager, browser, and OS boundaries.",
+    description: "Tested Node, Svelte, browser, and OS versions.",
     section: "Production",
     navigationOrder: 40,
   },

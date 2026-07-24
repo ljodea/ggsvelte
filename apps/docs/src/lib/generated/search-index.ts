@@ -1040,20 +1040,10 @@ export const DOCS_SEARCH_INDEX = [
     id: "page:guide-compatibility",
     kind: "page",
     title: "Compatibility",
-    summary: "Tested Node, Svelte, package-manager, browser, and OS boundaries.",
+    summary: "Tested Node, Svelte, browser, and OS versions.",
     href: "/guide/compatibility",
     keywords: ["Production"],
     exact: ["Compatibility"],
-  },
-  {
-    id: "heading:guide-compatibility:supported-consumers",
-    kind: "heading",
-    title: "Supported consumers",
-    summary:
-      "Supported consumers in Compatibility. Tested Node, Svelte, package-manager, browser, and OS boundaries.",
-    href: "/guide/compatibility#supported-consumers",
-    keywords: ["Compatibility", "Production"],
-    exact: ["Supported consumers"],
   },
   {
     id: "page:guide-interaction-reference",
