@@ -37,7 +37,7 @@ function yTicks(spec: unknown): { label: string; pos: number }[] {
 describe("the sakura lesson folds to renderable specs", () => {
   it("starts from a plain scatter of every observation", () => {
     const start = foldSakura(0, rows);
-    expect(start.spec.layers).toEqual([{ geom: "point" }]);
+    expect(start.spec.layers).toEqual([{ geom: "point", render: "canvas" }]);
     expect(start.spec.scales).toBeUndefined();
     expect(start.spec.theme).toBeUndefined();
     expect(start.key).toBeUndefined();

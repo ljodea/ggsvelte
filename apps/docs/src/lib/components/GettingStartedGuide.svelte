@@ -25,6 +25,11 @@
     SAKURA_STEPS,
   } from "$scripts/quickstart";
   import { nextRovingTabIndex } from "$lib/tab-roving";
+  import {
+    LESSON_CHART_HEIGHT,
+    LESSON_CHART_WIDTH,
+    LIVE_STEP_INDEXES,
+  } from "$lib/generated/lesson-charts";
 
   import CopyCode from "./CopyCode.svelte";
 
@@ -45,8 +50,17 @@
   let svelteTab = $state<HTMLButtonElement>();
   let stepColumn = $state<HTMLElement>();
 
-  const firstRender = foldSakura(0, rows);
   const finished = foldSakura(SAKURA_STEPS.length, rows);
+
+  /**
+   * Steps 1–5 are illustrations of one delta, so they ship as SVG the library
+   * rendered at build time (scripts/gen-lesson-charts.ts) — eight live
+   * 838-point plots cost about three seconds of hydration each. The inspect
+   * step and the finished chart stay live: interaction is what they show.
+   */
+  const isLive = (index: number): boolean => LIVE_STEP_INDEXES.includes(index);
+  const chartSrc = (step: number): string =>
+    `${base}/lesson/${step < 0 ? "first-render.svg" : `step-${String(step + 1)}.svg`}`;
 
   // The chart beside each step: everything taught so far, and nothing after.
   const accumulated = $derived(
@@ -114,6 +128,8 @@
     <code>{`src/routes/+page.svelte`}</code>, in full. The 838 observations come
     from
     <code>@ggsvelte/svelte/data</code>, so there is nothing to download.
+    <code>bloomRefDate</code> is each bloom day projected onto one shared calendar
+    year — comparing across twelve centuries needs a common one.
   </p>
   {#if lessonEnhanced}
     <div
@@ -159,13 +175,17 @@
         : "first-output-heading"}
     >
       <div class="lesson-label" id="first-output-heading">Output</div>
-      <GGPlot
-        spec={firstRender.spec}
-        ariaLabel="Peak cherry-blossom dates in Kyoto, 812 to 2026, as an unstyled scatter"
+      <img
+        class="lesson-chart"
+        src={chartSrc(-1)}
+        width={LESSON_CHART_WIDTH}
+        height={LESSON_CHART_HEIGHT}
+        alt="Peak cherry-blossom dates in Kyoto, 812 to 2026, as an unstyled scatter"
       />
       <p>
-        Twelve hundred years of spring, and the scatter says almost nothing.
-        Every step below removes one reason for that.
+        Twelve hundred years of spring, and the scatter says almost nothing —
+        down to the axis, which is a date the library inferred and formatted on
+        its own. Every step below removes one reason for that.
       </p>
     </section>
     <section
@@ -208,13 +228,23 @@
           <p>{step.explanation}</p>
           <a href={`${base}${step.href}`}>Read {step.chapterTitle}</a>
         </div>
-        <div class="lesson-output" class:lesson-output--live={index === 5}>
-          <GGPlot
-            spec={accumulated[index]!.spec}
-            key={accumulated[index]!.key}
-            inspect={accumulated[index]!.inspect}
-            ariaLabel={`Kyoto cherry blossom after step ${index + 1}: ${step.outcome}`}
-          />
+        <div class="lesson-output" class:lesson-output--live={isLive(index)}>
+          {#if isLive(index)}
+            <GGPlot
+              spec={accumulated[index]!.spec}
+              key={accumulated[index]!.key}
+              inspect={accumulated[index]!.inspect}
+              ariaLabel={`Kyoto cherry blossom after step ${index + 1}: ${step.outcome}`}
+            />
+          {:else}
+            <img
+              class="lesson-chart"
+              src={chartSrc(index)}
+              width={LESSON_CHART_WIDTH}
+              height={LESSON_CHART_HEIGHT}
+              alt={`Kyoto cherry blossom after step ${index + 1}: ${step.outcome}`}
+            />
+          {/if}
           {#if index >= 2}
             <p class="chart-note">Bands, left to right: {epochNames}.</p>
           {/if}
@@ -337,10 +367,20 @@
     display: none;
   }
 
-  .first-result,
-  .progressive-step {
+  .first-result {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    margin: 1.5rem 0 3rem;
+    border-block: 1px solid var(--line);
+  }
+
+  /*
+   * Steps stack: the delta is only readable if the chart gets the whole
+   * column, and a chart squeezed beside the prose renders its axis text at
+   * half size.
+   */
+  .progressive-step {
+    display: grid;
     margin: 1.5rem 0 3rem;
     border-block: 1px solid var(--line);
   }
@@ -351,9 +391,18 @@
     padding: 1rem;
   }
 
-  .first-result > section + section,
-  .progressive-step > div + div {
+  .first-result > section + section {
     border-left: 1px solid var(--line);
+  }
+
+  .progressive-step > div + div {
+    border-top: 1px solid var(--line);
+  }
+
+  .lesson-chart {
+    display: block;
+    width: 100%;
+    height: auto;
   }
 
   .lesson-output {
@@ -449,23 +498,13 @@
       display: none;
     }
 
-    .first-result,
-    .progressive-step {
+    .first-result {
       grid-template-columns: 1fr;
     }
 
-    .first-result > section + section,
-    .progressive-step > div + div {
+    .first-result > section + section {
       border-top: 1px solid var(--line);
       border-left: 0;
-    }
-
-    .progressive-step .step-copy {
-      order: 2;
-    }
-
-    .progressive-step .lesson-output {
-      order: 1;
     }
   }
 </style>

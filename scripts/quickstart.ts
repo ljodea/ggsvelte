@@ -138,7 +138,8 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     outcome: "A fitted trend rises out of eight centuries of scatter.",
     explanation:
       "GeomSmooth is a stat layer: the library fits the loess locally and draws the result. Nothing is precomputed, and the points stay exactly as they were — only their alpha changes, so the fit has something to sit on.",
-    fragment: `<GeomPoint aes={{ color: { value: "#777777" } }} alpha={0.5} size={1.6} />
+    fragment: `<GeomPoint render="canvas" alpha={0.5} size={1.6}
+  aes={{ color: { value: "#777777" } }} />
 <GeomSmooth method="loess" span={0.4} se={false} linewidth={1.8}
   aes={{ color: { value: "#262626" } }} />`,
     chapterTitle: "Statistics and positions",
@@ -147,6 +148,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       layers: {
         points: {
           geom: "point",
+          render: "canvas",
           aes: { color: { value: "#777777" } },
           params: { alpha: 0.5, size: 1.6 },
         },
@@ -161,7 +163,12 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     source: {
       components: ["GeomSmooth"],
       children: {
-        points: `  <GeomPoint aes={{ color: { value: "#777777" } }} alpha={0.5} size={1.6} />`,
+        points: `  <GeomPoint
+    render="canvas"
+    alpha={0.5}
+    size={1.6}
+    aes={{ color: { value: "#777777" } }}
+  />`,
         trend: `  <GeomSmooth
     method="loess"
     span={${SAKURA_LOESS_SPAN}}
@@ -201,7 +208,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           dateLabels: "%b %d",
           domain: [Y_BOTTOM, Y_TOP],
         },
-        x: { type: "linear", domain: [800, 2040] },
+        x: { type: "linear", domain: [800, 2030] },
       },
       labs: { x: "Year", y: "Peak bloom" },
     },
@@ -216,7 +223,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       dateLabels: "%b %d",
       domain: ["${Y_BOTTOM}", "${Y_TOP}"],
     },
-    x: { type: "linear", domain: [800, 2040] },
+    x: { type: "linear", domain: [800, 2030] },
     fill: {
       type: "manual",
       domain: [${SAKURA_EPOCHS.map((e) => `"${e.epoch}"`).join(", ")}],
@@ -468,9 +475,9 @@ export interface SakuraFold {
   readonly inspect: { mode: "exact"; pin: true } | undefined;
 }
 
-const BASE_LAYERS: Record<string, LayerSpec> = { points: { geom: "point" } };
+const BASE_LAYERS: Record<string, LayerSpec> = { points: { geom: "point", render: "canvas" } };
 const BASE_ORDER = ["points"];
-const BASE_CHILDREN: Record<string, string> = { points: "  <GeomPoint />" };
+const BASE_CHILDREN: Record<string, string> = { points: '  <GeomPoint render="canvas" />' };
 
 /** Layers that only make sense when the chart is wide enough to place text. */
 export const SAKURA_ANNOTATION_LAYERS = ["leaders", "callouts"] as const;
