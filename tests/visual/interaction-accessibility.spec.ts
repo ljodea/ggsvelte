@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import axe from "axe-core";
 
+import { penguins } from "../../examples/interaction/linked-views/data.js";
 import { settleVisualState } from "./helpers/deterministic";
 
 for (const route of [
@@ -34,9 +35,16 @@ test("linked views share external selection and emphasis without callback loops"
   await page.goto("/examples/interaction/linked-views");
   await settleVisualState(page, 2);
 
+  // One row per Gentoo, and a selected ring per Gentoo in each of the two
+  // linked plots. Counted from the example's own data so a dataset change moves
+  // the expectation with it — what this proves is that selection crosses both
+  // views, not that the corpus holds any particular number of birds.
+  const gentooCount = penguins.filter((row) => row.species === "Gentoo").length;
+  expect(gentooCount).toBeGreaterThan(0);
+
   await page.getByRole("button", { name: "Select Gentoo" }).click();
-  await expect(page.locator("tbody tr[aria-selected='true']")).toHaveCount(4);
-  await expect(page.locator(".gg-selected-ring")).toHaveCount(8);
+  await expect(page.locator("tbody tr[aria-selected='true']")).toHaveCount(gentooCount);
+  await expect(page.locator(".gg-selected-ring")).toHaveCount(gentooCount * 2);
 
   const emphasis = page.getByRole("button", { name: "Emphasize Adelie 2" });
   await emphasis.click();

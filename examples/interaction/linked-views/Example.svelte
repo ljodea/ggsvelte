@@ -4,6 +4,16 @@
   import { penguins, type PenguinRow } from "./data.js";
 
   const scope = { keys: "penguin-id", x: "flipper-mm", y: "mass-g" } as const;
+
+  // The emphasis control targets the second Adelie row. Derive it rather than
+  // naming a key: an id that no longer exists would leave the button reading as
+  // pressed while emphasizing nothing at all.
+  const emphasisTarget = penguins.filter((row) => row.species === "Adelie")[1];
+  if (emphasisTarget === undefined) {
+    throw new Error(
+      "linked-views needs at least two Adelie rows for the emphasis control",
+    );
+  }
   let rows = $state<readonly PenguinRow[]>(penguins);
   let showingAllRows = $state(true);
   let status = $state("Select a point in either plot, or use a control below.");
@@ -113,8 +123,8 @@
       >
       <button
         type="button"
-        aria-pressed={emphasized.includes("adelie-2")}
-        onclick={() => emphasize("adelie-2")}>Emphasize Adelie 2</button
+        aria-pressed={emphasized.includes(emphasisTarget.id)}
+        onclick={() => emphasize(emphasisTarget.id)}>Emphasize Adelie 2</button
       >
       <button type="button" onclick={replaceRows}>
         {showingAllRows ? "Remove Chinstrap rows" : "Restore all rows"}
