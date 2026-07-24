@@ -128,7 +128,9 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
   // with no JavaScript at all — only the inspect step loses its interaction.
   await expect(page.locator(".first-result .lesson-output")).toBeVisible();
   await expect(page.locator("img.lesson-chart")).toHaveCount(6);
-  await expect(page.getByText("Separate the signal from the noise")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Separate the signal from the noise" }),
+  ).toBeVisible();
   await context.close();
 });
 

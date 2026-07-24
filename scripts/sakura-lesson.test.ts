@@ -37,7 +37,7 @@ function yTicks(spec: unknown): { label: string; pos: number }[] {
 describe("the sakura lesson folds to renderable specs", () => {
   it("starts from a plain scatter of every observation", () => {
     const start = foldSakura(0, rows);
-    expect(start.spec.layers).toEqual([{ geom: "point", render: "canvas" }]);
+    expect(start.spec.layers).toEqual([{ geom: "point" }]);
     expect(start.spec.scales).toBeUndefined();
     expect(start.spec.theme).toBeUndefined();
     expect(start.key).toBeUndefined();
@@ -115,6 +115,34 @@ describe("the sakura lesson folds to renderable specs", () => {
     }
     // key/inspect are runtime props, not spec fields — assert them there.
     expect(finished.key).toBe("year");
+  });
+
+  it("uses only attributes the geom components actually accept", () => {
+    // The finished file is copied into a consumer's own type-checked app, so
+    // a spec-level field spelled as a component prop (`render`) type-errors
+    // there and nowhere else. Keep the two vocabularies apart.
+    const componentProps = new Set([
+      "data",
+      "aes",
+      "alpha",
+      "size",
+      "linewidth",
+      "method",
+      "span",
+      "se",
+      "yintercept",
+      "position",
+      "positionParams",
+    ]);
+    const children = SAKURA_STEPS.flatMap((step) =>
+      Object.values(step.source.children ?? {}),
+    ).concat("  <GeomPoint />");
+    for (const child of children) {
+      for (const [, attribute] of child.matchAll(/^\s{4}([a-zA-Z]+)=/gm)) {
+        expect(componentProps.has(attribute), `<Geom…> has no ${attribute} prop`).toBe(true);
+      }
+      expect(child, "spec-level render hint spelled as a prop").not.toContain("render=");
+    }
   });
 
   it("keeps every step's chapter link resolvable", () => {

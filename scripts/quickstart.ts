@@ -138,7 +138,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     outcome: "A fitted trend rises out of eight centuries of scatter.",
     explanation:
       "GeomSmooth is a stat layer: the library fits the loess locally and draws the result. Nothing is precomputed, and the points stay exactly as they were — only their alpha changes, so the fit has something to sit on.",
-    fragment: `<GeomPoint render="canvas" alpha={0.5} size={1.6}
+    fragment: `<GeomPoint alpha={0.5} size={1.6}
   aes={{ color: { value: "#777777" } }} />
 <GeomSmooth method="loess" span={0.4} se={false} linewidth={1.8}
   aes={{ color: { value: "#262626" } }} />`,
@@ -148,7 +148,6 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       layers: {
         points: {
           geom: "point",
-          render: "canvas",
           aes: { color: { value: "#777777" } },
           params: { alpha: 0.5, size: 1.6 },
         },
@@ -164,7 +163,6 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       components: ["GeomSmooth"],
       children: {
         points: `  <GeomPoint
-    render="canvas"
     alpha={0.5}
     size={1.6}
     aes={{ color: { value: "#777777" } }}
@@ -475,9 +473,9 @@ export interface SakuraFold {
   readonly inspect: { mode: "exact"; pin: true } | undefined;
 }
 
-const BASE_LAYERS: Record<string, LayerSpec> = { points: { geom: "point", render: "canvas" } };
+const BASE_LAYERS: Record<string, LayerSpec> = { points: { geom: "point" } };
 const BASE_ORDER = ["points"];
-const BASE_CHILDREN: Record<string, string> = { points: '  <GeomPoint render="canvas" />' };
+const BASE_CHILDREN: Record<string, string> = { points: "  <GeomPoint />" };
 
 /** Layers that only make sense when the chart is wide enough to place text. */
 export const SAKURA_ANNOTATION_LAYERS = ["leaders", "callouts"] as const;

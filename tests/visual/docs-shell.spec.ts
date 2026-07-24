@@ -31,25 +31,36 @@ for (const route of [
   });
 }
 
-test("getting started presents one complete Svelte file before secondary surfaces", async ({
-  page,
-}) => {
+test("getting started presents the complete file, then the agent surface", async ({ page }) => {
   await page.goto(GUIDE_ROUTE);
   const article = page.locator("article.guide");
-  await expect(article).toContainText("src/routes/+page.svelte (complete file)");
-  const text = await article.textContent();
-  expect(text?.indexOf("Draw your first chart")).toBeLessThan(
-    text?.indexOf("You have a chart") ?? 0,
-  );
-  expect(text?.indexOf("You have a chart")).toBeLessThan(text?.indexOf("Fluent builder") ?? 0);
-  const firstFile = article.locator(".lesson-source--file code");
+  const text = (await article.textContent()) ?? "";
+
+  // The reader gets a complete, runnable file before anything is decomposed,
+  // and the agent surface comes after the chart is finished — not before it.
+  const order = [
+    "Draw your first chart",
+    "Build the chart",
+    "The finished file",
+    "Built for agents",
+  ];
+  let previous = -1;
+  for (const heading of order) {
+    const at = text.indexOf(heading);
+    expect(at, `missing "${heading}"`).toBeGreaterThan(previous);
+    previous = at;
+  }
+
+  const firstFile = article.locator(".lesson-source--file code").first();
   await expect(firstFile).toContainText("import { GeomPoint, GGPlot }");
+  await expect(firstFile).toContainText('from "@ggsvelte/svelte/data"');
   await expect(firstFile).toContainText("ariaLabel=");
+  // Width follows the container and height defaults; neither belongs in the
+  // file a reader copies.
   await expect(firstFile).not.toContainText("width=");
   await expect(firstFile).not.toContainText("height=");
-  await expect(
-    article.locator(".copy-code code").filter({ hasText: "import { aes, gg }" }),
-  ).toBeVisible();
+
+  // The agent section shows the spec form, not a second walkthrough.
   await expect(
     article.locator(".copy-code code").filter({ hasText: '"geom": "point"' }),
   ).toBeVisible();
