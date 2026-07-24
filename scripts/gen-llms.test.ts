@@ -20,7 +20,7 @@ import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/inter
 import { EXAMPLES } from "../examples/manifest.ts";
 import supportMatrix from "../support-matrix.json";
 import type { LifecycleDoc } from "./gen-llms.ts";
-import { QUICKSTART_PAGE_SVELTE } from "./quickstart.ts";
+import { QUICKSTART_PAGE_SVELTE, SAKURA_STEPS } from "./quickstart.ts";
 import {
   buildAdvisoriesMd,
   buildDiagnosticDocs,
@@ -161,21 +161,43 @@ describe("guide sections cover their catalogs", () => {
     expect(md).not.toContain("stamps `edition: 1`");
   });
 
-  it("getting-started leads with the exact complete responsive SvelteKit page", () => {
-    expect(GETTING_STARTED_MD).toContain("`src/routes/+page.svelte` (complete file)");
+  it("carries the exact complete SvelteKit page", () => {
     expect(GETTING_STARTED_MD).toContain(QUICKSTART_PAGE_SVELTE);
     expect(GETTING_STARTED_MD.match(/```svelte complete/g)).toHaveLength(1);
-    expect(GETTING_STARTED_MD.match(/```svelte fragment/g)?.length).toBeGreaterThanOrEqual(7);
     expect(QUICKSTART_PAGE_SVELTE).toContain("import { GeomPoint, GGPlot }");
-    expect(QUICKSTART_PAGE_SVELTE).toContain("const cars = [");
-    expect(QUICKSTART_PAGE_SVELTE).toContain('ariaLabel="Fuel economy decreases');
+    expect(QUICKSTART_PAGE_SVELTE).toContain('import { kyotoSakura } from "@ggsvelte/svelte/data"');
+    expect(QUICKSTART_PAGE_SVELTE).toContain('aes={{ x: "year", y: "bloomRefDate" }}');
+    expect(QUICKSTART_PAGE_SVELTE).toMatch(/ariaLabel="[^"]{20,}"/);
     expect(QUICKSTART_PAGE_SVELTE).not.toMatch(/\bwidth=/);
     expect(QUICKSTART_PAGE_SVELTE).not.toMatch(/\bheight=/);
+  });
 
-    const chartCheckpoint = GETTING_STARTED_MD.indexOf("## You have a chart");
-    expect(chartCheckpoint).toBeGreaterThan(-1);
-    expect(GETTING_STARTED_MD.indexOf("Fluent builder")).toBeGreaterThan(chartCheckpoint);
-    expect(GETTING_STARTED_MD.indexOf("PortableSpec JSON")).toBeGreaterThan(chartCheckpoint);
+  it("is written for agents, not mirrored from the human walkthrough", () => {
+    // The agent doc leads with the contract and the correction loop, and it
+    // keeps the headless path (its audience is CI and code, not a reader).
+    const order = ["## Install", "## The PortableSpec contract", "## The validate loop"];
+    let previous = -1;
+    for (const heading of order) {
+      const at = GETTING_STARTED_MD.indexOf(heading);
+      expect(at, `missing ${heading}`).toBeGreaterThan(previous);
+      previous = at;
+    }
+    expect(GETTING_STARTED_MD).toContain("renderToSVGString");
+    expect(GETTING_STARTED_MD).toContain("ggsvelte-render");
+    expect(GETTING_STARTED_MD).toContain("/guide/getting-started");
+
+    // And it does NOT restate the human page's visual narrative.
+    for (const humanNarrative of [
+      "You have a chart",
+      "one change at a time",
+      "Choose another surface",
+      "Separate the signal",
+    ]) {
+      expect(GETTING_STARTED_MD).not.toContain(humanNarrative);
+    }
+    for (const step of SAKURA_STEPS) {
+      expect(GETTING_STARTED_MD).not.toContain(step.title);
+    }
   });
 
   it("documents zero-config years, strict temporal overrides, and inspection", () => {

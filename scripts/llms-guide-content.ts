@@ -13,7 +13,6 @@ import {
   QUICKSTART_PAGE_FILENAME,
   QUICKSTART_PAGE_SVELTE,
   QUICKSTART_PORTABLE_SPEC_FRAGMENT,
-  quickstartLessonMarkdown,
 } from "./quickstart";
 
 // Guide sections (markdown; single source for docs pages AND llms surfaces)
@@ -21,24 +20,16 @@ import {
 
 export const GETTING_STARTED_MD = `# Getting started
 
-Install, render one chart from a Svelte file, then add aes, layers, scales,
-facets, theme, and inspect. The TypeScript builder and portable JSON form are
-secondary surfaces for generation, validation, and headless export.
+ggsvelte is ggplot2's layered grammar for Svelte 5. A plot is data + an
+aesthetic mapping + one or more layers, and every plot normalizes to a
+PortableSpec: strict JSON, no functions, no closures. That JSON is the surface
+to generate, validate, and correct against.
 
-## Create a SvelteKit app
+This page is written for code that emits specs. The human walkthrough — the
+same grammar, built up one element at a time on a real dataset — is at
+/guide/getting-started.
 
-Node.js 22+ in an empty directory:
-
-\`\`\`sh complete
-npx sv create my-chart --template minimal --types ts --no-add-ons --install npm
-cd my-chart
-\`\`\`
-
-Skip this section if the app already exists.
-
-## Install ggsvelte
-
-Use the app's package manager:
+## Install
 
 \`\`\`sh complete
 npm install @ggsvelte/svelte
@@ -46,84 +37,121 @@ npm install @ggsvelte/svelte
 # or: bun add @ggsvelte/svelte
 \`\`\`
 
-\`@ggsvelte/spec\` and \`@ggsvelte/core\` are dependencies of the Svelte
-package. Install them directly only for spec-only or headless use.
+\`@ggsvelte/spec\` (schema, validate, builder) and \`@ggsvelte/core\`
+(pipeline, headless render, CLI) are dependencies of the Svelte package.
+Install them directly for spec-only or headless work. Bundled teaching data
+lives at \`@ggsvelte/svelte/data\`.
 
-## Draw your first chart
+## A complete Svelte file
 
-\`${QUICKSTART_PAGE_FILENAME}\` (complete file)
+\`${QUICKSTART_PAGE_FILENAME}\`:
 
 \`\`\`svelte complete
 ${QUICKSTART_PAGE_SVELTE}
 \`\`\`
 
-Run the package manager's dev command and open the printed local URL. Omitted
-width follows the container; default height is 400px. No chart CSS required.
+Omitted width follows the container; default height is 400px. No chart CSS is
+required. During server rendering the plot uses a deterministic 640 x 400
+fallback, then measures the real container after hydration; inside
+\`display: none\` or a zero-width track it stays not-ready until the container
+has positive width.
 
-## You have a chart
+## The PortableSpec contract
 
-\`GGPlot\` owns the chart, \`data\` supplies rows, \`aes\` maps fields, and
-\`GeomPoint\` is the first layer. Edit the rows or the \`x\` / \`y\` field names.
-
-## Build the grammar one change at a time
-
-${quickstartLessonMarkdown()}
-
-If the chart is inside \`display: none\`, a zero-width grid track, or another
-collapsed container, it stays not-ready until the container receives a
-positive width. During server rendering it uses a deterministic 640 × 400
-fallback, then measures the real container after hydration. A blank chart,
-hydration warning, or TypeScript package mismatch is covered in the
-[Errors reference](/guide/errors#quickstart-troubleshooting).
-
-## Choose another surface only when you need it
-
-### Fluent builder
-
-TypeScript builder for programmatic specs (\`cars\` from the complete file):
-
-\`\`\`ts fragment
-${QUICKSTART_BUILDER_FRAGMENT}
-\`\`\`
-
-### PortableSpec JSON
-
-PortableSpec for save, transmit, validate, or generate without executable
-accessors. Equivalent to the first chart:
+The same chart as JSON. This is the canonical form — the Svelte component and
+the TypeScript builder both normalize to it.
 
 \`\`\`json fragment
 ${QUICKSTART_PORTABLE_SPEC_FRAGMENT}
 \`\`\`
 
-## Headless and server rendering
+Rules that matter when generating specs:
 
-\`renderToSVGString\` is the pure no-DOM path. \`ggsvelte-render\` writes SVG to
-stdout and JSON Lines diagnostics to stderr. Fragments below; pass the
-PortableSpec above as \`spec\` or \`spec.json\`.
+- Channels are objects, never bare strings: \`{"field": "year"}\` maps a
+  column, \`{"value": "#777777"}\` sets a constant, \`null\` unsets a channel
+  inherited from the plot-level \`aes\`.
+- Data has three forms. \`{"values": [...]}\` inlines rows; \`{"columns": {...}}\`
+  is the columnar form; \`{"name": "..."}\` refers to a \`datasets\` entry.
+  Inline \`values\` for data small enough to read, \`datasets\` + \`columns\`
+  for anything large or shared between layers. Never truncate rows silently —
+  say so, or point at the full source.
+- \`layers\` is ordered bottom to top and must hold at least one layer. A layer
+  may carry its own \`data\`, which then replaces the plot's for that layer.
+- Stats are declarative. \`{"geom": "smooth", "params": {"method": "loess"}}\`
+  fits in the pipeline; do not precompute a trend column and pass it off as
+  raw data.
+
+The full machine-readable contract is /schema/v0.json.
+
+## The validate loop
+
+\`validate(spec)\` checks schema shape; \`validate(spec, { profile })\` adds
+data-aware checks without shipping data; \`{ lint: true }\` also returns
+advisories for valid-but-questionable specs.
+
+Every error carries a stable \`code\`, a JSON \`path\` into the spec, a
+\`message\`, and a \`fix\` naming the change to make. That is the correction
+loop: emit, validate, apply the fix at the path, re-emit. Do not guess, and do
+not fall back to a different chart — the fix says what is wrong.
+
+\`\`\`ts fragment
+import { validate } from "@ggsvelte/spec";
+
+const result = validate(spec);
+if (!result.ok) {
+  for (const error of result.errors) {
+    console.error(error.code, error.path, error.fix);
+  }
+}
+\`\`\`
+
+The complete error catalog, with the fix for each code, is at /guide/errors;
+advisories are at /guide/advisories.
+
+## Headless rendering
+
+No browser, no DOM. \`renderToSVGString\` is pure:
 
 \`\`\`ts fragment
 ${QUICKSTART_HEADLESS_FRAGMENT}
 \`\`\`
 
+The installed CLI writes SVG to stdout and JSON Lines diagnostics to stderr,
+with exit classes documented at /reference/cli:
+
 \`\`\`sh fragment
 ${QUICKSTART_CLI_FRAGMENT}
 \`\`\`
 
-## Validating specs
+## Building specs in TypeScript
 
-\`validate(spec)\` checks schema shape. \`validate(spec, { profile })\` adds
-data-aware checks without shipping data. Errors carry stable code, path,
-message, and fix. \`{ lint: true }\` also returns advisories for
-valid-but-questionable specs.
+The fluent builder produces the same PortableSpec, with types:
 
-## Where next
+\`\`\`ts fragment
+${QUICKSTART_BUILDER_FRAGMENT}
+\`\`\`
 
-- [Examples](/examples)
-- [Interactions](/guide/interactions)
-- [Playground](/playground) — local PortableSpec only
-- [Compatibility](/guide/compatibility)
-- [Errors reference](/guide/errors)
-- [JSON Schema](/schema/v0.json)
+## Bundled data
+
+\`@ggsvelte/svelte/data\` exports \`kyotoSakura\`: 838 peak cherry-blossom
+dates for Kyoto, 812-2026 CE, with \`year\`, \`bloomDate\`, \`bloomDoy\` and
+\`bloomRefDate\` (the bloom day projected onto a common non-leap year so a date
+axis can draw it). The docs site serves the same rows as JSON at
+/kyoto-sakura.json. Data copyright Yasuyuki Aono; cite
+\`KYOTO_SAKURA_CITATION\` when publishing charts made from it.
+
+## Grammar vocabulary
+
+- [Data and mappings](/guide/data-mappings) — channels, constants, per-layer data
+- [Layers and marks](/guide/layers-marks) — every geom and its parameters
+- [Statistics and positions](/guide/statistics-positions) — stats, jitter, stacking
+- [Scales and guides](/guide/scales-guides) — continuous, discrete, manual, temporal
+- [Facets and coordinates](/guide/facets-coordinates) — small multiples, flip, fixed aspect
+- [Themes and color](/guide/themes-color) — named themes, palettes, roles
+- [Interactions](/guide/interactions) — inspect, pin, selection, zoom, linked views
+- [Server rendering and export](/guide/server-rendering-export) — SSR, SVG, PNG
+- [Compatibility](/guide/compatibility) — ggplot2 parity and known gaps
+- [Lifecycle](/guide/lifecycle) — what is stable and what is not
 `;
 
 export const DATA_MAPPINGS_MD = `# Data and mappings

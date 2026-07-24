@@ -6,70 +6,79 @@ async function expectNoDocumentOverflow(page: import("@playwright/test").Page): 
   );
 }
 
-test("Getting Started renders the packed file and first live grammar delta", async ({ page }) => {
+test("Getting Started renders the packed file and the built-up chart", async ({ page }) => {
   await page.goto("/guide/getting-started?theme=light");
 
   const guide = page.locator("article.getting-started-guide");
   await expect(guide.getByRole("heading", { level: 1 })).toHaveText("Getting started");
-  await expect(guide.locator(".first-result .gg-plot-root")).toHaveAttribute(
-    "data-gg-ready",
-    "true",
-  );
-  await expect(guide.locator(".first-result .gg-points circle")).toHaveCount(4);
-  await expect(guide.locator(".lesson-source--file code")).toContainText(
-    'import { GeomPoint, GGPlot } from "@ggsvelte/svelte"',
-  );
 
-  const step = guide.locator(".progressive-step").first();
-  await expect(step.getByRole("heading", { level: 3 })).toHaveText("Map fields to position");
-  await expect(step.locator(".guide-code-classification")).toHaveCount(0);
-  await expect(step.locator(".gg-points circle")).toHaveCount(8);
-  await expect(step.getByRole("link", { name: "Read Data and mappings" })).toHaveAttribute(
-    "href",
-    /\/guide\/data-mappings#map-fields-to-position$/,
+  // The first render is the honest starting chart: every observation, no
+  // styling. It is a build-time render, so it is an image, not a live plot.
+  const firstChart = guide.locator(".first-result img.lesson-chart");
+  await expect(firstChart).toBeVisible();
+  await expect(firstChart).toHaveJSProperty("naturalWidth", 660);
+
+  await expect(guide.locator(".lesson-source--file code").first()).toContainText(
+    'import { kyotoSakura } from "@ggsvelte/svelte/data"',
   );
   await expectNoDocumentOverflow(page);
 });
 
-test("each progressive step changes the real chart through its public contract", async ({
-  page,
-}) => {
+test("each step shows its own delta and the finished chart is live", async ({ page }) => {
   await page.goto("/guide/getting-started?theme=light");
   const steps = page.locator(".progressive-step");
-  await expect(steps).toHaveCount(7);
+  await expect(steps).toHaveCount(6);
   await expect(steps.getByRole("heading", { level: 3 })).toHaveText([
-    "Map fields to position",
-    "Add a second layer",
-    "Make color meaning explicit",
-    "Add a statistical smoother",
-    "Facet the comparison",
-    "Choose a chart theme",
-    "Enable inspect and pin",
+    "Separate the signal from the noise",
+    "Put earlier bloom on top",
+    "Put the climate behind the data",
+    "Name the records",
+    "Finish it",
+    "Make it answer questions — and notice it is data",
   ]);
 
-  await expect(steps.nth(0).locator(".gg-paths path")).toHaveCount(0);
-  await expect(steps.nth(1).locator(".gg-paths path")).toHaveCount(1);
-  await expect(steps.nth(2).locator(".gg-paths path")).toHaveCount(2);
-  await expect(steps.nth(2).locator(".gg-points circle").first()).toHaveAttribute(
-    "fill",
-    "#4269d0",
-  );
-  await expect(steps.nth(3).locator(".gg-paths path")).toHaveCount(4);
-  for (const index of [4, 5, 6]) {
-    await expect(steps.nth(index).locator(".gg-panel")).toHaveCount(2);
-    await expect(steps.nth(index).locator(".gg-paths path")).toHaveCount(4);
-    await expect(steps.nth(index).locator(".gg-points circle").first()).toHaveAttribute(
-      "fill",
-      "#4269d0",
-    );
-  }
-  for (const index of [5, 6]) {
-    await expect(steps.nth(index).locator(".gg-paper")).toHaveAttribute(
-      "fill",
-      "var(--gg-paper, #d5e4eb)",
-    );
-  }
-  await expect(steps.nth(6).locator(".gg-capture")).toBeVisible();
+  // Every step chart is a build-time render; the page carries exactly one
+  // live plot, the finished chart, where inspection is worth demonstrating.
+  await expect(steps.locator("img.lesson-chart")).toHaveCount(6);
+  await expect(steps.locator(".gg-plot-root")).toHaveCount(0);
+  const finished = page.locator(".finished-chart .gg-plot-root");
+  await expect(finished).toHaveAttribute("data-gg-ready", "true");
+  await expect(page.locator(".gg-plot-root")).toHaveCount(1);
+  await expectNoDocumentOverflow(page);
+});
+
+test("the finished chart answers keyboard inspection", async ({ page }) => {
+  await page.goto("/guide/getting-started?theme=light");
+  const capture = page.locator(".finished-chart .gg-capture");
+  await expect(capture).toBeVisible();
+  await capture.focus();
+  await capture.press("ArrowRight");
+  await expect(page.locator(".finished-chart .gg-tooltip")).toBeVisible();
+});
+
+/*
+ * The library sets `forced-color-adjust: none` on `.gg-plot`, so nothing in a
+ * chart adapts on its own. The epoch bands are the one mark carried by fill
+ * alone, so under a requested palette they drop and the names in the note
+ * under the chart do the work instead. Asserted through `emulateMedia`: this
+ * config sets `contextOptions`, which clobbers Playwright's `forcedColors`
+ * fixture, so `test.use` would silently measure a normal page.
+ */
+test("the finished chart drops its band fills and names the epochs in forced colors", async ({
+  page,
+}) => {
+  await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
+  await page.goto("/guide/getting-started?theme=light");
+  const finished = page.locator(".finished-chart");
+  await expect(finished.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
+  expect(await page.evaluate(() => matchMedia("(forced-colors: active)").matches)).toBe(true);
+
+  const fills = await finished
+    .locator(".gg-marks rect")
+    .evaluateAll((rects) => rects.map((rect) => getComputedStyle(rect).fill));
+  expect(fills.length).toBeGreaterThan(0);
+  expect(new Set(fills)).toEqual(new Set(["none"]));
+  await expect(finished.locator(".chart-note")).toContainText("Bands, left to right:");
 });
 
 test("Docs landing and sidebar expose the full path without duplicate Reference", async ({
@@ -134,11 +143,16 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
     "Getting started",
   );
   await page.goto("/guide/getting-started?theme=light");
-  await expect(page.locator(".lesson-source--file code")).toContainText(
-    'import { GeomPoint, GGPlot } from "@ggsvelte/svelte"',
+  await expect(page.locator(".lesson-source--file code").first()).toContainText(
+    'import { kyotoSakura } from "@ggsvelte/svelte/data"',
   );
+  // Every step chart is a build-time render, so the whole lesson is readable
+  // with no JavaScript at all — only the inspect step loses its interaction.
   await expect(page.locator(".first-result .lesson-output")).toBeVisible();
-  await expect(page.getByText("Map fields to x and y", { exact: false })).toBeVisible();
+  await expect(page.locator("img.lesson-chart")).toHaveCount(7);
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Separate the signal from the noise" }),
+  ).toBeVisible();
   await context.close();
 });
 
