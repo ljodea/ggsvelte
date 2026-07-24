@@ -116,15 +116,16 @@ describe("discard confirm gates", () => {
     expect(shouldConfirmDiscardForUndo(edited)).toBe(true);
   });
 
-  test("sample load confirms when desynchronized, pending candidate, or custom source", () => {
+  test("sample load confirms for custom source or pending candidate (not mere draft desync)", () => {
     const sampleState = createPlaygroundState(sampleSeed());
     expect(shouldConfirmDiscardForSampleLoad(sampleState)).toBe(false);
 
     const custom = createPlaygroundState({ version: 1, source: { kind: "custom" }, spec });
     expect(shouldConfirmDiscardForSampleLoad(custom)).toBe(true);
 
+    // Without the JSON editor, a desynced draft alone is not a confirm trigger.
     const edited = editPlaygroundDraft(sampleState, sampleState.draft + "\n");
-    expect(shouldConfirmDiscardForSampleLoad(edited)).toBe(true);
+    expect(shouldConfirmDiscardForSampleLoad(edited)).toBe(false);
 
     const pending = stagePlaygroundDraft(
       editPlaygroundDraft(
@@ -145,11 +146,12 @@ describe("discard confirm gates", () => {
 });
 
 describe("shouldClearPlayHashAfterPromotion", () => {
-  test("clears only apply/source/reset/undo origins when hash is a play fragment", () => {
+  test("clears apply/source/reset/undo/agent origins when hash is a play fragment", () => {
     expect(shouldClearPlayHashAfterPromotion("apply", "#play=v1.abc")).toBe(true);
     expect(shouldClearPlayHashAfterPromotion("source", "#play=v1.abc")).toBe(true);
     expect(shouldClearPlayHashAfterPromotion("reset", "#play=v1.abc")).toBe(true);
     expect(shouldClearPlayHashAfterPromotion("undo", "#play=v1.abc")).toBe(true);
+    expect(shouldClearPlayHashAfterPromotion("agent", "#play=v1.abc")).toBe(true);
     expect(shouldClearPlayHashAfterPromotion("initial-navigation", "#play=v1.abc")).toBe(false);
     expect(shouldClearPlayHashAfterPromotion("popstate", "#play=v1.abc")).toBe(false);
     expect(shouldClearPlayHashAfterPromotion("apply", "#other")).toBe(false);

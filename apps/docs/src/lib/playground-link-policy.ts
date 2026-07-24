@@ -62,30 +62,34 @@ export function shouldConfirmDiscardForUndo(state: PlaygroundState): boolean {
 
 /**
  * Confirm-gate only; empty id / missing sample lookup stay in the component.
- * Confirms when the draft is dirty, a candidate is pending, or the source is custom.
+ * Guards an unshared agent-generated (custom) chart or an in-flight candidate.
  */
 export function shouldConfirmDiscardForSampleLoad(state: PlaygroundState): boolean {
-  return !state.synchronized || state.candidate !== null || state.seed.source.kind === "custom";
+  return state.candidate !== null || state.seed.source.kind === "custom";
 }
 
-/** window.confirm body when undo would discard a dirty draft. */
+/** window.confirm body when undo would discard the current chart. */
 export const PLAYGROUND_UNDO_DISCARD_CONFIRM =
-  "Discard the current draft and undo to the previous rendered chart? Copy it first if you need to keep it.";
+  "Go back to the previous chart? Share the current one first if you need to keep it.";
 
 /** window.confirm body when loading a sample would discard local work. */
 export const PLAYGROUND_SAMPLE_DISCARD_CONFIRM =
-  "Discard the current draft and load this sample? Copy it first if you need to keep it.";
+  "Load this sample and replace the current chart? Share it first if you need to keep it.";
 
 /** Status after the active chart fails safely (last valid retained). */
 export const PLAYGROUND_ACTIVE_FAILED_STATUS =
-  "The current chart stopped safely. Reset the source to recover.";
+  "The current chart stopped safely. Try a sample chart to recover.";
 
 export function shouldClearPlayHashAfterPromotion(
   origin: PlaygroundCandidateOrigin | undefined,
   locationHash: string,
 ): boolean {
   return (
-    (origin === "apply" || origin === "source" || origin === "reset" || origin === "undo") &&
+    (origin === "apply" ||
+      origin === "source" ||
+      origin === "reset" ||
+      origin === "undo" ||
+      origin === "agent") &&
     locationHash.startsWith("#play=")
   );
 }

@@ -8,6 +8,7 @@ import {
   playgroundSvelteOutput,
   rebuildPlaygroundSpecWithBuilder,
 } from "../apps/docs/src/lib/playground-output";
+import { defaultPlaygroundInteractions } from "../apps/docs/src/lib/playground-agent-envelope";
 
 const spec: PortableSpec = {
   edition: 1,
@@ -28,7 +29,7 @@ const spec: PortableSpec = {
 };
 
 describe("playground outputs", () => {
-  test("derives exact Svelte, Builder, and PortableSpec outputs from one committed spec", () => {
+  test("derives exact Svelte, Builder, and Spec (JSON) outputs from one committed spec", () => {
     const current: PortableSpec = { ...spec, height: 400 };
     const outputs = playgroundOutputs(current);
 
@@ -37,7 +38,7 @@ describe("playground outputs", () => {
     expect(outputs[1]?.supported).toBe(true);
     expect(outputs[2]).toEqual({
       kind: "portable-spec",
-      label: "PortableSpec",
+      label: "Spec (JSON)",
       supported: true,
       code: JSON.stringify(current, null, 2),
     });
@@ -64,7 +65,7 @@ describe("playground outputs", () => {
       width: 640,
       height: 360,
     });
-    const builder = playgroundOutputs(rich)[1];
+    const builder = playgroundOutputs(rich).find((o) => o.kind === "builder");
 
     expect(rebuildPlaygroundSpecWithBuilder(rich)).toEqual(rich);
     expect(builder?.supported).toBe(true);
@@ -75,33 +76,23 @@ describe("playground outputs", () => {
     expect(builder?.code).toContain('"height": 360');
   });
 
-  test("turns an unexpected public Builder rejection into an unsupported result", () => {
+  test("hides Builder tab when round-trip fails (OV6-A)", () => {
     const malformed: PortableSpec = { ...spec, layers: [] };
     expect(rebuildPlaygroundSpecWithBuilder(malformed)).toBeNull();
-    const builder = playgroundOutputs(malformed)[1];
-    expect(builder).toMatchObject({
-      kind: "builder",
-      supported: false,
-      code: "",
-    });
-    expect(builder?.reason).toContain("cannot reproduce");
+    const outputs = playgroundOutputs(malformed);
+    expect(outputs.map((o) => o.kind)).toEqual(["svelte", "portable-spec"]);
+    expect(outputs.find((o) => o.kind === "builder")).toBeUndefined();
   });
 
-  test("refuses Builder output when the public builder would lose committed meaning", () => {
+  test("hides Builder tab for named datasets that would lose meaning", () => {
     const named: PortableSpec = {
       ...spec,
       edition: 2,
       data: { name: "rows" },
       datasets: { rows: { values: [{ label: "A", value: 1 }] } },
     };
-    const builder = playgroundOutputs(named)[1];
-
-    expect(builder).toMatchObject({
-      kind: "builder",
-      supported: false,
-      code: "",
-    });
-    expect(builder?.reason).toContain("named inline datasets");
+    const outputs = playgroundOutputs(named);
+    expect(outputs.map((o) => o.kind)).toEqual(["svelte", "portable-spec"]);
     expect(rebuildPlaygroundSpecWithBuilder(named)).toBeNull();
   });
 
@@ -110,8 +101,34 @@ describe("playground outputs", () => {
     expect(output).toContain('import { GGPlot, type PortableSpec } from "@ggsvelte/svelte";');
     expect(output).not.toContain('from "@ggsvelte/spec";');
     expect(output).toContain("const spec: PortableSpec =");
-    expect(output).toContain("<GGPlot {spec} />");
+    expect(output).toContain("← replace with your rows");
+    expect(output).toContain("<GGPlot {spec} inspect />");
     expect(parseSpecFromSvelteOutput(output)).toEqual(spec);
+  });
+
+  test("emits non-default interaction props and keys the memo on interactions", () => {
+    const interactive = playgroundSvelteOutput(spec, {
+      inspect: true,
+      select: "interval",
+      zoom: false,
+      legendFilter: true,
+      legendFocus: false,
+    });
+    expect(interactive).toContain('select="interval"');
+    expect(interactive).toContain("legendFilter");
+    expect(interactive).not.toContain(" zoom");
+
+    const a = playgroundOutputs(spec, defaultPlaygroundInteractions());
+    const b = playgroundOutputs(spec, {
+      inspect: true,
+      select: "point",
+      zoom: true,
+      legendFilter: false,
+      legendFocus: false,
+    });
+    expect(a).not.toBe(b);
+    expect(b[0]?.code).toContain('select="point"');
+    expect(b[0]?.code).toContain("zoom");
   });
 
   test("cannot terminate the component script or embed raw JS separators", () => {

@@ -32,7 +32,7 @@ describe("playgroundShareCopyStatus", () => {
 
 describe("playground discard and failure copy", () => {
   test("locks confirm and active-fail status strings", () => {
-    expect(PLAYGROUND_UNDO_DISCARD_CONFIRM).toContain("undo");
+    expect(PLAYGROUND_UNDO_DISCARD_CONFIRM).toContain("previous chart");
     expect(PLAYGROUND_SAMPLE_DISCARD_CONFIRM).toContain("sample");
     expect(PLAYGROUND_ACTIVE_FAILED_STATUS).toContain("stopped safely");
   });

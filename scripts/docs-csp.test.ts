@@ -103,7 +103,7 @@ describe("docs CSP validation", () => {
       "/*\n  Content-Security-Policy: frame-ancestors 'none'\n",
     );
     const policy =
-      "default-src 'self'; base-uri 'self'; connect-src 'self' https://cloudflareinsights.com; font-src 'self'; form-action 'self'; frame-src 'none'; img-src 'self' data:; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self'; style-src-attr 'unsafe-inline'; upgrade-insecure-requests";
+      "default-src 'self'; base-uri 'self'; connect-src 'self' https://cloudflareinsights.com https://playground-api.ggsvelte.sh; font-src 'self'; form-action 'self'; frame-src 'none'; img-src 'self' data:; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self'; style-src-attr 'unsafe-inline'; upgrade-insecure-requests";
     writeFileSync(
       join(directory, "index.html"),
       `<meta http-equiv="content-security-policy" content="${policy}">`,

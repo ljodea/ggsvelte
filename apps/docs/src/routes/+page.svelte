@@ -124,7 +124,7 @@
     <h2 id="code-path-heading">Svelte, builder, or JSON.</h2>
     <p>
       Three surfaces, one spec. Svelte components inside an app, the TypeScript
-      builder anywhere else, and PortableSpec JSON — the surface agents write:
+      builder anywhere else, and Spec (JSON) — the surface agents write:
       validated on the way in, rendered to SVG without a DOM.
     </p>
   </div>

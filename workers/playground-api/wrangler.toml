@@ -1,0 +1,39 @@
+name = "ggsvelte-playground-api"
+main = "src/index.ts"
+compatibility_date = "2025-11-01"
+workers_dev = true
+
+# Custom domain (configure DNS + wrangler routes at deploy time):
+# playground-api.ggsvelte.sh
+
+# Import SKILL.md (and any other .md) as text modules if needed at deploy.
+[[rules]]
+type = "Text"
+globs = ["**/*.md"]
+fallthrough = true
+
+[vars]
+# Comma-separated free-tier OpenRouter model ids (config, not code — free models churn).
+MODEL_ALLOWLIST = "google/gemini-2.0-flash-exp:free,meta-llama/llama-3.3-70b-instruct:free"
+# Kill switch: set to "true" to refuse generation without deploying code.
+DISABLED = "false"
+
+# Rate limiting bindings (Workers Rate Limiting — traffic shaping only).
+# The $1 spend cap on the dedicated OpenRouter account is the hard backstop.
+# The handler FAILS CLOSED when OPENROUTER_API_KEY is set but a binding is
+# missing, so these must stay enabled in any deploy that holds the key.
+
+[[unsafe.bindings]]
+name = "RATE_LIMIT_IP"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 6, period = 60 }
+
+[[unsafe.bindings]]
+name = "RATE_LIMIT_GLOBAL"
+type = "ratelimit"
+namespace_id = "1002"
+simple = { limit = 60, period = 60 }
+
+# Secret (set once per environment — do NOT commit):
+#   wrangler secret put OPENROUTER_API_KEY

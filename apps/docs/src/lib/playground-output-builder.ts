@@ -4,7 +4,7 @@ import type { PlaygroundOutput } from "./playground-output-types";
 
 function builderUnsupportedReason(spec: PortableSpec): string | null {
   if (spec.datasets !== undefined) {
-    return "Builder output cannot preserve named inline datasets yet. Copy Svelte or PortableSpec instead.";
+    return "Builder output cannot preserve named inline datasets yet. Copy Svelte or Spec (JSON) instead.";
   }
   return null;
 }
@@ -79,7 +79,7 @@ export function playgroundBuilderOutput(spec: PortableSpec): PlaygroundOutput {
       supported: false,
       code: "",
       reason:
-        "The public Builder cannot reproduce this normalized PortableSpec exactly. Copy Svelte or PortableSpec instead.",
+        "The public Builder cannot reproduce this normalized PortableSpec exactly. Copy Svelte or Spec (JSON) instead.",
     };
   }
 

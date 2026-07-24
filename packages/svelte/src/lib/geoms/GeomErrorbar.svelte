@@ -6,11 +6,13 @@
    * with fun/funMin/funMax). Same contract and z-order constraint as
    * <GeomPoint> (decision 0001).
    */
-  import type { AesInput, ErrorbarParams } from "@ggsvelte/spec";
+  import type { DataInput, AesInput, ErrorbarParams } from "@ggsvelte/spec";
 
   import { createGeomLayer } from "./factory.svelte.js";
 
   interface Props extends ErrorbarParams {
+    /** Optional layer-local data (#589); inherits plot data when omitted. */
+    data?: DataInput | readonly Record<string, unknown>[];
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
     aes?: AesInput;
     /** The layer's stat: "identity" (default, ymin/ymax mapped) | "summary". */
