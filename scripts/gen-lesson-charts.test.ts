@@ -20,13 +20,15 @@ import { SAKURA_STEPS } from "./quickstart.ts";
 const DIR = new URL("../apps/docs/static/lesson", import.meta.url).pathname;
 
 describe("lesson step charts", () => {
-  it("covers the first render and every non-live step", () => {
-    expect(staticLessonSteps()).toEqual([-1, 0, 1, 2, 3, 4]);
+  it("covers the first render and every step", () => {
+    expect(staticLessonSteps()).toEqual([-1, 0, 1, 2, 3, 4, 5]);
     expect(LESSON_CHARTS.map((entry) => entry.filename)).toEqual(
       staticLessonSteps().map((step) => lessonChartFilename(step)),
     );
-    // The inspect step stays live: interaction is the thing it demonstrates.
-    expect(LIVE_STEP_INDEXES).toEqual([SAKURA_STEPS.length - 1]);
+    // No step chart is live: the finished chart below them is, and one live
+    // 838-point plot per page is the budget.
+    expect(LIVE_STEP_INDEXES).toEqual([]);
+    expect(LESSON_CHARTS).toHaveLength(SAKURA_STEPS.length + 1);
   });
 
   it("ships nothing but the charts it declares", () => {

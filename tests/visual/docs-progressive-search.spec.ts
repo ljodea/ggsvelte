@@ -37,16 +37,13 @@ test("each step shows its own delta and the finished chart is live", async ({ pa
     "Make it answer questions — and notice it is data",
   ]);
 
-  // Steps 1-5 are build-time renders; the inspect step is live, because
-  // interaction is the thing it demonstrates.
-  await expect(steps.locator("img.lesson-chart")).toHaveCount(5);
-  const live = steps.nth(5);
-  await expect(live.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
-  await expect(live.locator(".gg-capture")).toBeVisible();
-
-  // The finished chart is live too, and every observation is inspectable.
+  // Every step chart is a build-time render; the page carries exactly one
+  // live plot, the finished chart, where inspection is worth demonstrating.
+  await expect(steps.locator("img.lesson-chart")).toHaveCount(6);
+  await expect(steps.locator(".gg-plot-root")).toHaveCount(0);
   const finished = page.locator(".finished-chart .gg-plot-root");
   await expect(finished).toHaveAttribute("data-gg-ready", "true");
+  await expect(page.locator(".gg-plot-root")).toHaveCount(1);
   await expectNoDocumentOverflow(page);
 });
 
@@ -127,7 +124,7 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
   // Every step chart is a build-time render, so the whole lesson is readable
   // with no JavaScript at all — only the inspect step loses its interaction.
   await expect(page.locator(".first-result .lesson-output")).toBeVisible();
-  await expect(page.locator("img.lesson-chart")).toHaveCount(6);
+  await expect(page.locator("img.lesson-chart")).toHaveCount(7);
   await expect(
     page.getByRole("heading", { level: 3, name: "Separate the signal from the noise" }),
   ).toBeVisible();

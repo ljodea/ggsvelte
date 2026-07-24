@@ -28,7 +28,6 @@
   import {
     LESSON_CHART_HEIGHT,
     LESSON_CHART_WIDTH,
-    LIVE_STEP_INDEXES,
   } from "$lib/generated/lesson-charts";
 
   import CopyCode from "./CopyCode.svelte";
@@ -48,36 +47,36 @@
   let lessonSurface = $state<"output" | "svelte">("output");
   let outputTab = $state<HTMLButtonElement>();
   let svelteTab = $state<HTMLButtonElement>();
-  let stepColumn = $state<HTMLElement>();
-
-  const finished = foldSakura(SAKURA_STEPS.length, rows);
+  let finishedChart = $state<HTMLElement>();
 
   /**
-   * Steps 1–5 are illustrations of one delta, so they ship as SVG the library
-   * rendered at build time (scripts/gen-lesson-charts.ts) — eight live
-   * 838-point plots cost about three seconds of hydration each. The inspect
-   * step and the finished chart stay live: interaction is what they show.
+   * The finished chart is the page's only live plot, so it is the one the
+   * annotation ladder applies to: below NARROW_CHART the record callouts
+   * would collide with the data, and the records move to the caption instead.
    */
-  const isLive = (index: number): boolean => LIVE_STEP_INDEXES.includes(index);
+  const finished = $derived(
+    foldSakura(SAKURA_STEPS.length, rows, { annotations: !narrowChart }),
+  );
+
+  /**
+   * Every step chart ships as SVG the library rendered at build time
+   * (scripts/gen-lesson-charts.ts): each one illustrates a single delta, and a
+   * live 838-point plot costs about three seconds of hydration. The finished
+   * chart below the steps is the live one, which is where inspection is worth
+   * demonstrating.
+   */
   const chartSrc = (step: number): string =>
     `${base}/lesson/${step < 0 ? "first-render.svg" : `step-${String(step + 1)}.svg`}`;
-
-  // The chart beside each step: everything taught so far, and nothing after.
-  const accumulated = $derived(
-    SAKURA_STEPS.map((_, index) =>
-      foldSakura(index + 1, rows, { annotations: !narrowChart }),
-    ),
-  );
 
   const epochNames = SAKURA_EPOCHS.map((band) => band.epoch).join(", ");
   const recordNames = SAKURA_RECORDS.map((record) => record.label).join("; ");
 
   onMount(() => {
     lessonEnhanced = true;
-    // Measure a real chart, not the page: the ladder is about how much room the
-    // plot has, which in this two-pane layout is roughly half the column.
-    const target = stepColumn?.querySelector(".lesson-output");
-    if (target === null || target === undefined) return;
+    // Measure the chart itself, not the page: the ladder is about how much
+    // room the plot has.
+    const target = finishedChart;
+    if (target === undefined) return;
     if (typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver((entries) => {
       const width = entries[0]?.contentRect.width;
@@ -213,7 +212,7 @@
     end.
   </p>
 
-  <div class="lesson-steps" bind:this={stepColumn}>
+  <div class="lesson-steps">
     {#each SAKURA_STEPS as step, index (step.id)}
       <section class="progressive-step" aria-labelledby={step.id}>
         <div class="step-copy">
@@ -228,23 +227,14 @@
           <p>{step.explanation}</p>
           <a href={`${base}${step.href}`}>Read {step.chapterTitle}</a>
         </div>
-        <div class="lesson-output" class:lesson-output--live={isLive(index)}>
-          {#if isLive(index)}
-            <GGPlot
-              spec={accumulated[index]!.spec}
-              key={accumulated[index]!.key}
-              inspect={accumulated[index]!.inspect}
-              ariaLabel={`Kyoto cherry blossom after step ${index + 1}: ${step.outcome}`}
-            />
-          {:else}
-            <img
-              class="lesson-chart"
-              src={chartSrc(index)}
-              width={LESSON_CHART_WIDTH}
-              height={LESSON_CHART_HEIGHT}
-              alt={`Kyoto cherry blossom after step ${index + 1}: ${step.outcome}`}
-            />
-          {/if}
+        <div class="lesson-output">
+          <img
+            class="lesson-chart"
+            src={chartSrc(index)}
+            width={LESSON_CHART_WIDTH}
+            height={LESSON_CHART_HEIGHT}
+            alt={`Kyoto cherry blossom after step ${index + 1}: ${step.outcome}`}
+          />
           {#if index >= 2}
             <p class="chart-note">Bands, left to right: {epochNames}.</p>
           {/if}
@@ -258,7 +248,7 @@
     The same accumulated spec, with room to breathe. Hover it, or tab into it:
     every one of the 838 observations answers.
   </p>
-  <div class="finished-chart lesson-output">
+  <div class="finished-chart lesson-output" bind:this={finishedChart}>
     <GGPlot
       spec={finished.spec}
       key={finished.key}
@@ -266,7 +256,8 @@
       ariaLabel={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
     />
     <p class="chart-note">
-      Bands, left to right: {epochNames}. Called out: {recordNames}.
+      Bands, left to right: {epochNames}.{#if narrowChart}
+        Called out: {recordNames}.{/if}
     </p>
   </div>
 
@@ -413,11 +404,11 @@
   }
 
   /*
-   * The inspect step gains a tooltip and a pinned-value rail on hydration.
+   * The finished chart gains a tooltip and a pinned-value rail on hydration.
    * Reserving the space here keeps the page from moving under the reader.
    */
-  .lesson-output--live {
-    min-height: 30rem;
+  .finished-chart {
+    min-height: 32rem;
   }
 
   .lesson-output p {

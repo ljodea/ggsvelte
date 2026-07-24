@@ -27,8 +27,14 @@ const ROOT = resolve(import.meta.dir, "..");
 const OUTPUT_DIR = join(ROOT, "apps", "docs", "static", "lesson");
 const PROJECTION = join(ROOT, "apps", "docs", "src", "lib", "generated", "lesson-charts.ts");
 
-/** Steps rendered live in the browser, by index into SAKURA_STEPS. */
-export const LIVE_STEP_INDEXES: readonly number[] = [SAKURA_STEPS.length - 1];
+/**
+ * Steps rendered live in the browser, by index into SAKURA_STEPS.
+ *
+ * None: the finished chart directly below the steps is live and full width,
+ * which is where inspection is worth demonstrating. A second live copy of the
+ * same 838 points bought nothing and cost another three seconds of hydration.
+ */
+export const LIVE_STEP_INDEXES: readonly number[] = [];
 
 /** Nominal size; the SVG scales to its container via viewBox. */
 export const LESSON_CHART_WIDTH = 660;

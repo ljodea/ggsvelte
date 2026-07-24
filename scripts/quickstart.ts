@@ -441,7 +441,8 @@ labs={{
   {
     id: "and-it-is-data",
     title: "Make it answer questions — and notice it is data",
-    outcome: "Inspect and pin any of the 838 observations, by pointer or keyboard.",
+    outcome:
+      "Inspect and pin any of the 838 observations, by pointer or keyboard — try it on the finished chart below.",
     explanation:
       "Inspection needs a stable identity per row; year is unique here. Everything above is also a JSON PortableSpec — the same chart an agent can emit, validate, and correct without opening this file.",
     fragment: `key="year"
