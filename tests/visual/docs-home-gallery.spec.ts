@@ -20,6 +20,42 @@ test("homepage first viewport leads with a live chart and two actions", async ({
   await expectNoOverflow(page);
 });
 
+/*
+ * The library sets `forced-color-adjust: none` on `.gg-plot`, so nothing in a
+ * chart adapts on its own — the page has to hand the surface back. The epoch
+ * bands are the one mark whose meaning is carried by fill alone and which this
+ * page never names, so under a requested palette they drop rather than paint
+ * over it. Asserted through `emulateMedia`: the config's `contextOptions`
+ * clobbers Playwright's `forcedColors` fixture, so `test.use` would silently
+ * measure a normal page.
+ */
+test("homepage hero yields its surface and drops decorative fills in forced colors", async ({
+  page,
+}) => {
+  await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
+  await page.goto("/?theme=light");
+  const hero = page.locator(".hero-plot");
+  await expect(hero.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
+  expect(await page.evaluate(() => matchMedia("(forced-colors: active)").matches)).toBe(true);
+
+  const fills = await hero
+    .locator(".gg-marks rect")
+    .evaluateAll((rects) => rects.map((rect) => getComputedStyle(rect).fill));
+  expect(fills.length).toBeGreaterThan(0);
+  expect(new Set(fills)).toEqual(new Set(["none"]));
+
+  const surface = await hero.evaluate((el) => getComputedStyle(el).backgroundColor);
+  const canvas = await page.evaluate(() => {
+    const probe = document.createElement("div");
+    probe.style.backgroundColor = "canvas";
+    document.body.append(probe);
+    const value = getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    return value;
+  });
+  expect(surface).toBe(canvas);
+});
+
 test("homepage preserves SSR chart output and hydrates its keyboard interaction", async ({
   page,
   request,

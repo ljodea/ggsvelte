@@ -196,6 +196,24 @@
     color: #172033;
   }
 
+  /*
+   * Forced colors: the hero pins its own light surface, and the epoch bands
+   * are decorative context this page never names — neither should override a
+   * requested palette. Hand the surface back and drop the fills; the points,
+   * the trend and the record annotations carry the chart on their own. The
+   * lesson page does the same to the same chart.
+   */
+  @media (forced-colors: active) {
+    .hero-plot {
+      color: canvastext;
+      background: canvas;
+    }
+
+    .hero-plot :global(.gg-marks rect) {
+      fill: none;
+    }
+  }
+
   .hero-actions {
     display: flex;
     flex-wrap: wrap;
