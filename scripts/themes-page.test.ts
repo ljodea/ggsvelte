@@ -6,6 +6,7 @@ import {
   VIRIDIS_COLORS,
 } from "../apps/docs/src/lib/catalog/themes.ts";
 import { colorBehaviorEvidence } from "../apps/docs/src/lib/color-evidence.ts";
+import { RASTER_Z_DOMAIN, THEME_SPECIMENS } from "../apps/docs/src/lib/theme-specimens/catalog.ts";
 
 describe("themes catalog", () => {
   it("projects every public theme and categorical palette without docs-owned colors", () => {
@@ -119,6 +120,24 @@ describe("themes catalog", () => {
       "#b5de2b",
       "#fde725",
     ]);
+  });
+
+  it("lists every public theme as a full-width specimen with a real chart kind", () => {
+    expect(THEME_SPECIMENS.map((specimen) => specimen.name)).toEqual(
+      THEME_OPTIONS.map((theme) => theme.name),
+    );
+    for (const specimen of THEME_SPECIMENS) {
+      expect(specimen.caption.length).toBeGreaterThan(12);
+      expect(specimen.caption.length).toBeLessThanOrEqual(96);
+      expect(specimen.scheme).toBe(
+        THEME_OPTIONS.find((theme) => theme.name === specimen.name)!.scheme,
+      );
+    }
+    expect(new Set(THEME_SPECIMENS.map((specimen) => specimen.kind)).size).toBeGreaterThanOrEqual(
+      6,
+    );
+    expect(RASTER_Z_DOMAIN[0]).toBeLessThan(RASTER_Z_DOMAIN[1]);
+    expect(RASTER_Z_DOMAIN[1]).toBeLessThanOrEqual(1);
   });
 
   it("reports incompatible schemes and palette exhaustion through public boundaries", () => {

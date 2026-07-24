@@ -1,46 +1,76 @@
 <script lang="ts">
-  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import { GeomLine, GeomPoint, GGPlot } from "@ggsvelte/svelte";
   import type { ThemeName } from "@ggsvelte/spec";
   import { onMount } from "svelte";
 
-  import { THEME_OPTIONS } from "$lib/catalog/themes";
+  import { CATEGORICAL_PALETTES, THEME_OPTIONS } from "$lib/catalog/themes";
   import CopyCode from "$lib/components/CopyCode.svelte";
   import {
     readDocsAppearance,
     watchDocsAppearance,
     type DocsAppearance,
   } from "$lib/docs-appearance";
+  import { MONTH_BREAKS } from "$lib/theme-specimens/catalog";
+  import { temperaturesKeyed } from "$lib/theme-specimens/data";
 
-  const rows = [
-    { quarter: 1, value: 24, group: "Observed" },
-    { quarter: 2, value: 38, group: "Observed" },
-    { quarter: 3, value: 45, group: "Observed" },
-    { quarter: 4, value: 63, group: "Observed" },
-    { quarter: 1, value: 31, group: "Expected" },
-    { quarter: 2, value: 41, group: "Expected" },
-    { quarter: 3, value: 54, group: "Expected" },
-    { quarter: 4, value: 70, group: "Expected" },
-  ];
+  type SchemeName = (typeof CATEGORICAL_PALETTES)[number]["name"];
 
   let explicitTheme = $state<ThemeName>("default");
+  let scheme = $state<SchemeName>("observable10");
   let followDocs = $state(false);
   let siteAppearance = $state<DocsAppearance>("light");
+
   const resolvedTheme = $derived<ThemeName>(
     followDocs ? siteAppearance : explicitTheme,
   );
-  const scheme = $derived(
-    THEME_OPTIONS.find((theme) => theme.name === resolvedTheme)?.scheme ??
-      "observable10",
-  );
+
+  const scriptClose = "</" + "script>";
+
+  /** Compact inline rows for the consumer-facing snippet only. */
   const code = $derived(
-    `<GGPlot
-  data={rows}
-  aes={{ x: "quarter", y: "value", color: "group" }}
-  theme="${resolvedTheme}"
-  scales={{ color: { scheme: "${scheme}" } }}
->
-  <GeomPoint size={4} />
-</GGPlot>`,
+    [
+      `<script lang="ts">`,
+      `  import { GeomLine, GeomPoint, GGPlot } from "@ggsvelte/svelte";`,
+      ``,
+      `  const temperatures = [`,
+      `    { city: "Reykjavik", month: 1, temp: -0.5 },`,
+      `    { city: "Reykjavik", month: 7, temp: 10.6 },`,
+      `    { city: "Berlin", month: 1, temp: 0.6 },`,
+      `    { city: "Berlin", month: 7, temp: 19.0 },`,
+      `    { city: "Singapore", month: 1, temp: 26.5 },`,
+      `    { city: "Singapore", month: 7, temp: 27.9 },`,
+      `    // …full series in your app`,
+      `  ];`,
+      scriptClose,
+      ``,
+      `<GGPlot`,
+      `  data={temperatures}`,
+      `  aes={{ x: "month", y: "temp", color: "city" }}`,
+      `  theme="${resolvedTheme}"`,
+      `  scales={{`,
+      `    x: { breaks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },`,
+      `    color: { type: "ordinal", scheme: "${scheme}" },`,
+      `  }}`,
+      `  labs={{`,
+      `    title: "Monthly mean temperature",`,
+      `    x: "Month",`,
+      `    y: "Temperature (°C)",`,
+      `    color: "City",`,
+      `  }}`,
+      `  inspect={{ mode: "x" }}`,
+      `  legendFocus`,
+      `  height={400}`,
+      `>`,
+      `  <GeomLine linewidth={2} />`,
+      `  <GeomPoint size={2.5} />`,
+      `</GGPlot>`,
+    ].join("\n"),
+  );
+
+  const statusText = $derived(
+    followDocs
+      ? `theme follows site appearance (${siteAppearance}) · scheme="${scheme}" remains yours`
+      : `theme="${resolvedTheme}" · scheme="${scheme}"`,
   );
 
   function syncSiteAppearance(): void {
@@ -60,62 +90,79 @@
   });
 </script>
 
-<section class="theme-lab" aria-label="Chart theme lab">
-  <div class="lab-output">
+<section class="theme-lab" aria-label="Chart theme and palette lab">
+  <p class="eyebrow">Live</p>
+  <h2>Try theme and palette</h2>
+  <p class="lede">
+    <code>theme</code> styles paper, grid, axes, and type.
+    <code>scales.color.scheme</code> colors series. Docs light/dark only applies when
+    Follow docs appearance is on.
+  </p>
+
+  <div class="plot-panel">
     <GGPlot
-      data={rows}
-      aes={{ x: "quarter", y: "value", color: "group" }}
+      data={temperaturesKeyed}
+      aes={{ x: "month", y: "temp", color: "city" }}
       theme={resolvedTheme}
-      scales={{ color: { type: "ordinal", scheme } }}
-      height={360}
-      ariaLabel={`${resolvedTheme} chart theme`}
+      scales={{
+        x: { breaks: [...MONTH_BREAKS] },
+        color: { type: "ordinal", scheme },
+      }}
+      labs={{
+        title: "Monthly mean temperature",
+        x: "Month",
+        y: "Temperature (°C)",
+        color: "City",
+      }}
+      key="id"
+      inspect={{ mode: "x" }}
+      legendFocus
+      height={400}
+      ariaLabel={`${resolvedTheme} theme with ${scheme} palette`}
     >
-      <GeomPoint size={4} />
+      <GeomLine linewidth={2} />
+      <GeomPoint size={2.5} />
     </GGPlot>
+  </div>
+
+  <div class="controls">
+    <div class="select-control">
+      <label for="chart-theme">Chart theme</label>
+      <select id="chart-theme" bind:value={explicitTheme} disabled={followDocs}>
+        {#each THEME_OPTIONS as theme (theme.name)}
+          <option value={theme.name}>{theme.label}</option>
+        {/each}
+      </select>
+    </div>
+    <div class="select-control">
+      <label for="chart-palette">Categorical palette</label>
+      <select id="chart-palette" bind:value={scheme}>
+        {#each CATEGORICAL_PALETTES as palette (palette.name)}
+          <option value={palette.name}>{palette.label}</option>
+        {/each}
+      </select>
+    </div>
+    <label class="follow-control">
+      <input type="checkbox" checked={followDocs} onchange={changeFollow} />
+      <span>Follow docs appearance</span>
+    </label>
+  </div>
+
+  <p class="resolved" role="status">{statusText}</p>
+
+  <div class="code-footer">
     <CopyCode
       {code}
       language="svelte"
-      accessibleLabel="Copy selected theme code"
+      accessibleLabel="Copy selected theme and palette code"
     />
-  </div>
-
-  <div class="lab-copy">
-    <p class="eyebrow">Live</p>
-    <h2>Pick a theme</h2>
-    <p>
-      <code>theme</code> is set on the plot. Site appearance is separate unless you
-      wire them yourself.
-    </p>
-    <div class="controls">
-      <div class="select-control">
-        <label for="chart-theme">Chart theme</label>
-        <select
-          id="chart-theme"
-          bind:value={explicitTheme}
-          disabled={followDocs}
-        >
-          {#each THEME_OPTIONS as theme (theme.name)}
-            <option value={theme.name}>{theme.label}</option>
-          {/each}
-        </select>
-      </div>
-      <label class="follow-control">
-        <input type="checkbox" checked={followDocs} onchange={changeFollow} />
-        <span>Follow docs appearance</span>
-      </label>
-    </div>
-    <p class="resolved" role="status">
-      theme="{resolvedTheme}"{followDocs ? " · following docs" : ""}
-    </p>
   </div>
 </section>
 
 <style>
   .theme-lab {
     display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
-    gap: clamp(1.5rem, 4vw, 3rem);
-    align-items: start;
+    gap: 0.85rem;
     min-width: 0;
     padding-block: clamp(1.5rem, 4vw, 2.5rem) clamp(2.5rem, 6vw, 4rem);
   }
@@ -130,31 +177,42 @@
   }
 
   h2 {
-    margin: 0.25rem 0 0.65rem;
+    margin: 0;
     font-size: clamp(1.5rem, 3vw, 2rem);
     line-height: 1.05;
     letter-spacing: -0.02em;
   }
 
-  .lab-copy {
-    min-width: 0;
+  .lede {
+    margin: 0;
+    max-width: 40rem;
+    color: var(--muted);
+    font-size: 0.98rem;
+    line-height: 1.45;
   }
 
-  .lab-copy > p:not(.eyebrow, .resolved) {
-    margin: 0;
-    max-width: 28rem;
-    color: var(--muted);
+  .lede code {
+    font-size: 0.9em;
+  }
+
+  .plot-panel {
+    width: min(100%, 52rem);
+    min-width: 0;
+    margin-top: 0.5rem;
   }
 
   .controls {
-    display: grid;
-    gap: 0.85rem;
-    margin-top: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem 1.25rem;
+    align-items: end;
+    width: min(100%, 52rem);
   }
 
   .select-control {
     display: grid;
     gap: 0.4rem;
+    min-width: min(100%, 12rem);
     font-size: 0.82rem;
     font-weight: 650;
   }
@@ -168,6 +226,11 @@
     background: var(--paper);
     color: var(--ink);
     font: inherit;
+  }
+
+  select:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
   }
 
   .follow-control {
@@ -186,26 +249,15 @@
 
   .resolved {
     min-height: 1.5rem;
-    margin: 0.75rem 0 0;
+    margin: 0;
+    width: min(100%, 52rem);
     color: var(--muted);
     font-size: 0.82rem;
     font-family: var(--code-font);
   }
 
-  .lab-output {
-    display: grid;
-    gap: 0.75rem;
+  .code-footer {
+    width: min(100%, 52rem);
     min-width: 0;
-  }
-
-  @media (max-width: 50rem) {
-    .theme-lab {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    .lab-output {
-      grid-row: 1;
-    }
   }
 </style>

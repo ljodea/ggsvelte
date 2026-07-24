@@ -1,57 +1,74 @@
 <script lang="ts">
-  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import { GeomRaster, GGPlot } from "@ggsvelte/svelte";
   import type { ColorScaleSpec } from "@ggsvelte/spec";
 
   import { VIRIDIS_COLORS } from "$lib/catalog/themes";
   import CopyCode from "$lib/components/CopyCode.svelte";
+  import { RASTER_Z_DOMAIN } from "$lib/theme-specimens/catalog";
+  import { grid } from "$lib/theme-specimens/data";
 
   interface SequentialExample {
     label: string;
     scale: ColorScaleSpec;
-    setting: string;
   }
-
-  const rows = [
-    { sequence: 1, score: 18, intensity: 0 },
-    { sequence: 2, score: 28, intensity: 20 },
-    { sequence: 3, score: 39, intensity: 40 },
-    { sequence: 4, score: 53, intensity: 60 },
-    { sequence: 5, score: 67, intensity: 80 },
-    { sequence: 6, score: 82, intensity: 100 },
-  ];
 
   const examples: readonly SequentialExample[] = [
     {
       label: "Viridis",
       scale: { type: "sequential", scheme: "viridis" },
-      setting: 'scheme: "viridis"',
     },
     {
       label: "Reversed",
       scale: { type: "sequential", scheme: "viridis", reverse: true },
-      setting: 'scheme: "viridis", reverse: true',
     },
     {
       label: "Custom range",
-      scale: { type: "sequential", range: ["#2d1e2f", "#3d5a80", "#e76f51"] },
-      setting: 'range: ["#2d1e2f", "#3d5a80", "#e76f51"]',
+      scale: {
+        type: "sequential",
+        range: ["#2d1e2f", "#3d5a80", "#e76f51"],
+      },
     },
     {
       label: "Pinned domain",
-      scale: { type: "sequential", scheme: "viridis", domain: [0, 100] },
-      setting: 'scheme: "viridis", domain: [0, 100]',
+      scale: {
+        type: "sequential",
+        scheme: "viridis",
+        domain: [...RASTER_Z_DOMAIN],
+      },
     },
   ];
 
-  function snippet(example: SequentialExample): string {
-    return `<GGPlot
-  data={rows}
-  aes={{ x: "sequence", y: "score", color: "intensity" }}
-  scales={{ color: { ${example.setting} } }}
->
-  <GeomPoint size={4} />
-</GGPlot>`;
-  }
+  const scriptClose = "</" + "script>";
+
+  /** Single section-level authoring fragment — not repeated per ramp. */
+  const sectionFragment = [
+    `<script lang="ts">`,
+    `  import { GeomRaster, GGPlot } from "@ggsvelte/svelte";`,
+    ``,
+    `  // Regular x/y/z surface (48 cells in the live demos).`,
+    `  const grid = [`,
+    `    { x: 0, y: 0, z: 0.12 },`,
+    `    { x: 1, y: 0, z: 0.45 },`,
+    `    { x: 2, y: 0, z: 0.88 },`,
+    `    // …`,
+    `  ];`,
+    scriptClose,
+    ``,
+    `<GGPlot`,
+    `  data={grid}`,
+    `  aes={{ x: "x", y: "y", fill: "z" }}`,
+    `  scales={{`,
+    `    fill: { type: "sequential", scheme: "viridis" },`,
+    `    // reverse: true`,
+    `    // domain: [0.3, 0.7]  // pin inside actual z`,
+    `    // range: ["#2d1e2f", "#3d5a80", "#e76f51"]`,
+    `  }}`,
+    `  labs={{ title: "Density surface", x: "x", y: "y" }}`,
+    `  height={400}`,
+    `>`,
+    `  <GeomRaster />`,
+    `</GGPlot>`,
+  ].join("\n");
 </script>
 
 <section class="sequential-lab" aria-label="Sequential color scales">
@@ -70,6 +87,11 @@
     </ol>
   </header>
 
+  <p class="lede">
+    Continuous fill on a density surface. Reverse, custom range, and pinned
+    domain should read clearly on the colorbar — not only on a few dots.
+  </p>
+
   <ol class="examples" aria-label="Sequential scale examples">
     {#each examples as example (example.label)}
       <li>
@@ -77,27 +99,38 @@
           <header>
             <h3>{example.label}</h3>
           </header>
-          <div class="plot">
+          <div class="plot-panel">
             <GGPlot
-              data={rows}
-              aes={{ x: "sequence", y: "score", color: "intensity" }}
-              scales={{ color: example.scale }}
+              data={grid}
+              aes={{ x: "x", y: "y", fill: "z" }}
+              scales={{ fill: example.scale }}
               theme="light"
-              height={280}
+              labs={{
+                title: `${example.label} density surface`,
+                x: "x",
+                y: "y",
+                fill: "z",
+              }}
+              inspect={{ mode: "xy" }}
+              height={360}
               ariaLabel={`${example.label} sequential color example`}
             >
-              <GeomPoint size={4} />
+              <GeomRaster />
             </GGPlot>
           </div>
-          <CopyCode
-            code={snippet(example)}
-            language="svelte"
-            accessibleLabel={`Copy ${example.label} code`}
-          />
         </article>
       </li>
     {/each}
   </ol>
+
+  <div class="section-code">
+    <p class="fragment-label">Authoring fragment</p>
+    <CopyCode
+      code={sectionFragment}
+      language="svelte"
+      accessibleLabel="Copy sequential raster authoring fragment"
+    />
+  </div>
 </section>
 
 <style>
@@ -122,7 +155,7 @@
     justify-content: space-between;
     gap: 1rem 2rem;
     min-width: 0;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
   }
 
   h2 {
@@ -130,6 +163,14 @@
     font-size: clamp(1.75rem, 3.5vw, 2.5rem);
     line-height: 1;
     letter-spacing: -0.02em;
+  }
+
+  .lede {
+    margin: 0 0 1.5rem;
+    max-width: 40rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.45;
   }
 
   .viridis-ramp {
@@ -149,8 +190,8 @@
 
   .examples {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2.5rem);
+    grid-template-columns: 1fr;
+    gap: clamp(2.5rem, 5vw, 4rem);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -158,7 +199,7 @@
 
   article {
     display: grid;
-    gap: 0.75rem;
+    gap: 0.65rem;
     min-width: 0;
   }
 
@@ -168,13 +209,22 @@
     letter-spacing: -0.01em;
   }
 
-  .plot {
+  .plot-panel {
+    width: min(100%, 52rem);
     min-width: 0;
   }
 
-  @media (max-width: 50rem) {
-    .examples {
-      grid-template-columns: 1fr;
-    }
+  .section-code {
+    width: min(100%, 52rem);
+    margin-top: clamp(2rem, 4vw, 3rem);
+  }
+
+  .fragment-label {
+    margin: 0 0 0.5rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 </style>

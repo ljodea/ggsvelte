@@ -116,8 +116,8 @@
 
   ol {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2.5rem);
+    grid-template-columns: 1fr;
+    gap: clamp(2.5rem, 5vw, 4rem);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -125,11 +125,5 @@
 
   ol > li {
     min-width: 0;
-  }
-
-  @media (max-width: 50rem) {
-    ol {
-      grid-template-columns: 1fr;
-    }
   }
 </style>
