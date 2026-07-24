@@ -12,8 +12,10 @@ export { carriedColumns, deriveLayerGroups } from "./frame-group-columns.js";
 /** Fresh all-null frame extras (each stat branch fills what it uses). */
 export function emptyFrameExtras(): Pick<
   LayerFrame,
-  | "xBinId"
-  | "yBinId"
+  | "bin"
+  | "dodge"
+  | "box"
+  | "smooth"
   | "ymin"
   | "ymax"
   | "xmin"
@@ -22,18 +24,16 @@ export function emptyFrameExtras(): Pick<
   | "yend"
   | "xendValues"
   | "yendValues"
-  | "dodgeSlot"
-  | "dodgeSlotCounts"
   | "offsetX"
   | "offsetY"
-  | "box"
-  | "smoothBand"
   | "xIntercepts"
   | "yIntercepts"
 > {
   return {
-    xBinId: null,
-    yBinId: null,
+    bin: null,
+    dodge: null,
+    box: null,
+    smooth: null,
     ymin: null,
     ymax: null,
     xmin: null,
@@ -42,12 +42,8 @@ export function emptyFrameExtras(): Pick<
     yend: null,
     xendValues: null,
     yendValues: null,
-    dodgeSlot: null,
-    dodgeSlotCounts: null,
     offsetX: null,
     offsetY: null,
-    box: null,
-    smoothBand: false,
     xIntercepts: [],
     yIntercepts: [],
   };

@@ -39,10 +39,10 @@ export function layoutBoxplotBodyRow(input: {
   }
   let center = tc;
   let w = widthFrac;
-  if (frame.dodgeSlot !== null && frame.dodgeSlotCounts !== null) {
-    const slotCount = Math.max(1, frame.dodgeSlotCounts[row]!);
+  if (frame.dodge !== null) {
+    const slotCount = Math.max(1, frame.dodge.slotCounts[row]!);
     w = widthFrac / slotCount;
-    center = tc + widthFrac * ((frame.dodgeSlot[row]! + 0.5) / slotCount - 0.5);
+    center = tc + widthFrac * ((frame.dodge.slot[row]! + 0.5) / slotCount - 0.5);
   }
   const cx = center * fx.innerWidth;
   const half = (w / 2) * fx.innerWidth;

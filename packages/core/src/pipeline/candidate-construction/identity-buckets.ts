@@ -5,7 +5,7 @@ import { ColumnTable } from "../../table.js";
 import { assignBinId } from "../binned-scale.js";
 import { shouldAggregateOnSemanticTemporalX } from "../frame-stats-shared.js";
 import { positionColumn, xConversionOf } from "../temporal-position.js";
-import type { LayerBinding, LayerFrame } from "../types.js";
+import type { FinalizedLayerFrame, LayerBinding } from "../types.js";
 import { globalSourceRowForInputRow } from "../source-row-lineage.js";
 
 /** Key used for count/summary/boxplot group×x lineage buckets (matches frame xValues). */
@@ -15,7 +15,7 @@ export function aggregateLineageXKey(
   localRow: number,
   binding: LayerBinding,
 ): string {
-  // Only count aggregates on bin ids (frame.xBinId). Summary/boxplot still
+  // Only count aggregates on bin ids (frame.bin.xId). Summary/boxplot still
   // aggregate on actual x values even when a binned scale is attached.
   if (binding.xBinning !== undefined && (binding.layer.stat ?? "identity") === "count") {
     const transformed = positionColumn(table, field, xConversionOf(binding), binding.xTransform);
@@ -75,7 +75,7 @@ interface BinEdge {
  * collected once per group and shared across that group's frame rows (O(n+k)).
  */
 export function buildBinLineageBuckets(input: {
-  frame: LayerFrame;
+  frame: FinalizedLayerFrame;
   panelIndex: number;
   layerIndex: number;
   sourceRowsByGroupBin: Map<string, number[]>;

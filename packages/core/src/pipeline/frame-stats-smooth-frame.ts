@@ -52,6 +52,6 @@ export function packSmoothLayerFrame(
     ...emptyFrameExtras(),
     ymin: result.ymin,
     ymax: result.ymax,
-    smoothBand: result.hasBand,
+    smooth: { band: result.hasBand },
   };
 }

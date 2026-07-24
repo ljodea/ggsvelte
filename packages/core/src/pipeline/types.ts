@@ -22,6 +22,7 @@ export { CANVAS_AUTO_THRESHOLD, PipelineError } from "./types-public.js";
 
 export type {
   ColorBinding,
+  FinalizedLayerFrame,
   LayerBinding,
   LayerFrame,
   RuleForm,

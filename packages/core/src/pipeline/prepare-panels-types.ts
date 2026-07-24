@@ -6,7 +6,7 @@ import type { ColumnTable } from "../table.js";
 import type { FacetPanelDef, FacetStripConfig } from "./facets.js";
 import type { PositionConversionContext } from "./temporal-position.js";
 import type { SourceRegistry } from "./source-registry.js";
-import type { LayerBinding, LayerFrame, ScaleDecision, ScaleDiagnostic } from "./types.js";
+import type { FinalizedLayerFrame, LayerBinding, ScaleDecision, ScaleDiagnostic } from "./types.js";
 
 /** Per-layer bound source + filter remap (#589). */
 export interface LayerDataContext {
@@ -34,7 +34,7 @@ export interface PreparedPanels {
   strip: FacetStripConfig;
   facetPanels: FacetPanelDef[];
   bindings: LayerBinding[];
-  panelFrames: LayerFrame[][];
+  panelFrames: FinalizedLayerFrame[][];
   scaleDecisions: ScaleDecision[];
   scaleDiagnostics: ScaleDiagnostic[];
   xConversion: PositionConversionContext;

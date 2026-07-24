@@ -16,7 +16,12 @@ import { createLazyIdentityIndex } from "./candidate-construction/identity-index
 import type { FacetPanelDef } from "./facets.js";
 import { candidateAutoMode } from "./frame-candidates-auto-mode.js";
 import { deriveLayerGroups } from "./frame-helpers.js";
-import type { LayerBinding, LayerFrame, MappedField, ResolvedColorScale } from "./types.js";
+import type {
+  FinalizedLayerFrame,
+  LayerBinding,
+  MappedField,
+  ResolvedColorScale,
+} from "./types.js";
 
 function createRawCandidateDatumResolver(
   bindings: readonly LayerBinding[],
@@ -99,7 +104,7 @@ function buildIdentityIndexedCandidates(input: {
   runId: number;
   flip: boolean;
   bindings: readonly LayerBinding[];
-  panelFrames: readonly (readonly LayerFrame[])[];
+  panelFrames: readonly (readonly FinalizedLayerFrame[])[];
   facetPanels: readonly FacetPanelDef[];
   table: ColumnTable;
   layerFields: readonly MappedField[][];
@@ -149,7 +154,7 @@ export function buildPipelineCandidates(input: {
   runId: number;
   flip: boolean;
   bindings: readonly LayerBinding[];
-  panelFrames: readonly (readonly LayerFrame[])[];
+  panelFrames: readonly (readonly FinalizedLayerFrame[])[];
   facetPanels: readonly FacetPanelDef[];
   table: ColumnTable;
   layerFields: readonly MappedField[][];

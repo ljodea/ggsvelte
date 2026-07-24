@@ -115,6 +115,7 @@ export function buildCountFrame(
     ...styleColumns(binding, col, { count: result.count }),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),
-    xBinId: binned === null ? null : Int32Array.from(result.x, (id) => id as number),
+    bin:
+      binned === null ? null : { xId: Int32Array.from(result.x, (id) => id as number), yId: null },
   };
 }

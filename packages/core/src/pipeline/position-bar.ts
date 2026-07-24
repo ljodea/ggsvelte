@@ -16,8 +16,10 @@ export function barSlotKeys(frame: LayerFrame): (number | string)[] | null {
   // A binned position scale groups by the stable integer bin id, NOT the
   // rendered float center: raw source values inside one bin stack/dodge
   // together with no float-equality fragility and no id leak into geometry.
-  if (frame.binding?.xBinning !== undefined && frame.xBinId !== null) {
-    return Array.from(frame.xBinId);
+  const bin = frame.bin;
+  const xBinId = bin === undefined || bin === null ? null : bin.xId;
+  if (frame.binding?.xBinning !== undefined && xBinId !== null) {
+    return Array.from(xBinId);
   }
   if (frame.xValues !== null) return frame.xValues.map((v) => encodeKey(v));
   if (frame.xNumeric !== null) return Array.from(frame.xNumeric);
@@ -55,8 +57,7 @@ export function applyBarLikePosition(frame: LayerFrame): boolean {
   frame.ymax = ymax;
   if (position === "dodge") {
     const dodge = positionDodge({ slots, groups: frame.groups });
-    frame.dodgeSlot = dodge.slot;
-    frame.dodgeSlotCounts = dodge.slotCount;
+    frame.dodge = { slot: dodge.slot, slotCounts: dodge.slotCount };
   }
   return true;
 }

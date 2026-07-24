@@ -172,8 +172,8 @@ function emitTransformDomainWarnings(
 }
 import type {
   Advisory,
+  FinalizedLayerFrame,
   LayerBinding,
-  LayerFrame,
   PipelineWarning,
   ScaleDecision,
   ScaleDiagnostic,
@@ -197,7 +197,8 @@ export function buildPanelFrames(input: {
   conversions: Readonly<{ x: PositionConversionContext; y: PositionConversionContext }>;
 }): {
   bindings: LayerBinding[];
-  panelFrames: LayerFrame[][];
+  /** All frames are lineage-finalized (annotation frames use an empty map). */
+  panelFrames: FinalizedLayerFrame[][];
   scaleDecisions: ScaleDecision[];
   scaleDiagnostics: ScaleDiagnostic[];
   xConversion: PositionConversionContext;
@@ -217,7 +218,7 @@ export function buildPanelFrames(input: {
   } = input;
 
   const bindings: LayerBinding[] = [];
-  const panelFrames: LayerFrame[][] = facetPanels.map(() => []);
+  const panelFrames: FinalizedLayerFrame[][] = facetPanels.map(() => []);
   // Per-layer filtered tables: binned extents, bin ranges, and transform
   // diagnostics must read each layer's own filtered rows (#609).
   const filteredLayerTables = layerContexts.map((ctx) => ctx.filteredTable);
@@ -335,11 +336,17 @@ export function buildPanelFrames(input: {
       applyPosition(frame, advisories, slice.table);
       // Annotation frames are rowless — do not retain the full panel source-row
       // array (can be huge under facets) when there is no lineage to resolve.
-      if (bindings[index]!.ruleForm !== "annotation") {
-        finalizeFrameSourceRows(frame, slice);
+      // Still mark lineage finalized (empty) so panelFrames is FinalizedLayerFrame[].
+      let finalized: FinalizedLayerFrame;
+      if (bindings[index]!.ruleForm === "annotation") {
+        // Rowless — empty lineage map (do not retain huge panel source-row arrays).
+        frame.inputSourceRows = [];
+        finalized = frame as FinalizedLayerFrame;
+      } else {
+        finalized = finalizeFrameSourceRows(frame, slice);
       }
-      assertRibbonBounds(frame);
-      panelFrames[p]!.push(frame);
+      assertRibbonBounds(finalized);
+      panelFrames[p]!.push(finalized);
     }
   }
   warnEmptyLayers(bindings, panelFrames, warnings);

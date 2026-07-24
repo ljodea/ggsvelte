@@ -1,6 +1,6 @@
 import type { FacetPanelDef } from "../facets.js";
 import { positionColumn, xConversionOf, yConversionOf } from "../temporal-position.js";
-import type { LayerFrame } from "../types.js";
+import type { FinalizedLayerFrame } from "../types.js";
 import { NO_ROW } from "../types.js";
 import {
   aggregateLineageXKey,
@@ -37,7 +37,7 @@ export interface CandidateIdentityIndex {
 }
 
 export function buildCandidateIdentityIndex(
-  panelFrames: readonly (readonly LayerFrame[])[],
+  panelFrames: readonly (readonly FinalizedLayerFrame[])[],
   _facetPanels: readonly FacetPanelDef[],
 ): CandidateIdentityIndex {
   const seriesByRow = new Map<string, number>();
@@ -143,7 +143,7 @@ export function buildCandidateIdentityIndex(
 }
 
 export function createLazyIdentityIndex(
-  panelFrames: readonly (readonly LayerFrame[])[],
+  panelFrames: readonly (readonly FinalizedLayerFrame[])[],
   facetPanels: readonly FacetPanelDef[],
 ): () => CandidateIdentityIndex {
   let identityIndex: CandidateIdentityIndex | null = null;

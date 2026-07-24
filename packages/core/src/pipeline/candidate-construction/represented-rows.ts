@@ -116,11 +116,13 @@ export function filterRepresentedSourceRows(input: {
   // Indexed group×x: buckets are the final represented membership (count: all
   // rows; summary/boxplot: finite-y only). Return the frozen array as-is so
   // LineageStore can WeakMap-intern once — no clone, no per-mark y re-filter.
-  // Binned counts key by integer bin id (frame.xBinId), not inverse centers.
+  // Binned counts key by integer bin id (frame.bin.xId), not inverse centers.
   if (needsX && indexKeyPrefix !== null && input.sourceRowsByGroupX !== undefined) {
+    const bin = frame.bin;
+    const xBinId = bin === undefined || bin === null ? null : bin.xId;
     const xKey =
-      frame.binding.xBinning !== undefined && frame.xBinId !== null
-        ? bandKey(frame.xBinId[frameRow]!)
+      frame.binding.xBinning !== undefined && xBinId !== null
+        ? bandKey(xBinId[frameRow]!)
         : bandKey(outputX);
     const indexed = input.sourceRowsByGroupX.get(`${indexKeyPrefix}:${xKey}`);
     if (indexed !== undefined) return indexed;

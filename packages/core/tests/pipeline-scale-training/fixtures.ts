@@ -17,12 +17,12 @@ export function emptyExtras(): Pick<
   | "yend"
   | "xendValues"
   | "yendValues"
-  | "dodgeSlot"
-  | "dodgeSlotCounts"
+  | "bin"
+  | "dodge"
+  | "box"
+  | "smooth"
   | "offsetX"
   | "offsetY"
-  | "box"
-  | "smoothBand"
   | "xIntercepts"
   | "yIntercepts"
 > {
@@ -35,12 +35,12 @@ export function emptyExtras(): Pick<
     yend: null,
     xendValues: null,
     yendValues: null,
-    dodgeSlot: null,
-    dodgeSlotCounts: null,
+    bin: null,
+    dodge: null,
+    box: null,
+    smooth: null,
     offsetX: null,
     offsetY: null,
-    box: null,
-    smoothBand: false,
     xIntercepts: [],
     yIntercepts: [],
   };
