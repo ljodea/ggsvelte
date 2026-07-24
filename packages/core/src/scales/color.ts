@@ -6,31 +6,16 @@
  * interpolation, no d3-scale-chromatic dependency; perceptual uniformity is
  * inherited from the sampled stops, not re-derived).
  */
+import { normalizeColor } from "./normalize-color.js";
+import { padDegenerateDomain, resolveMissingColors } from "./engine.js";
+import { scaleTransform } from "./transform.js";
+import { VIRIDIS_RAMP_10 } from "./viridis-ramp.js";
+
+/** Normalize #rgb / #rrggbb color stops to lowercase #rrggbb. */
+export { normalizeColor } from "./normalize-color.js";
 
 /** 10 stops sampled evenly from the viridis colormap (dark -> bright). */
-export const VIRIDIS_RAMP_10: readonly string[] = [
-  "#440154",
-  "#482878",
-  "#3e4989",
-  "#31688e",
-  "#26828e",
-  "#1f9e89",
-  "#35b779",
-  "#6ece58",
-  "#b5de2b",
-  "#fde725",
-];
-
-export function normalizeColor(stop: string): string {
-  const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(stop);
-  if (match === null) {
-    throw new RangeError(`Sequential color stops must use #rgb or #rrggbb syntax (got "${stop}").`);
-  }
-  const digits = match[1]!.toLowerCase();
-  return digits.length === 3
-    ? `#${digits[0]}${digits[0]}${digits[1]}${digits[1]}${digits[2]}${digits[2]}`
-    : `#${digits}`;
-}
+export { VIRIDIS_RAMP_10 } from "./viridis-ramp.js";
 
 function hexChannel(hex: string, i: number): number {
   return Number.parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
@@ -102,16 +87,11 @@ export function trainSequential(
   config: SequentialConfig = {},
 ): SequentialColorScale {
   let [min, max] = config.domain ?? extent ?? [0, 1];
-  if (min === max) {
-    min -= 0.5;
-    max += 0.5;
-  }
+  [min, max] = padDegenerateDomain(min, max);
   const transform = config.transform ?? "identity";
-  const forward = (value: number): number => {
-    if (transform === "log10") return value > 0 ? Math.log10(value) : Number.NaN;
-    if (transform === "sqrt") return value >= 0 ? Math.sqrt(value) : Number.NaN;
-    return value;
-  };
+  const scaleTx = scaleTransform(transform);
+  const forward = (value: number): number =>
+    scaleTx.valid(value) ? scaleTx.forward(value) : Number.NaN;
   const transformedMin = forward(min);
   const transformedMax = forward(max);
   if (!Number.isFinite(transformedMin) || !Number.isFinite(transformedMax)) {
@@ -123,8 +103,7 @@ export function trainSequential(
   const stops = config.reverse === true ? base.toReversed() : [...base];
   const span = transformedMax - transformedMin;
   const at = (t: number) => rampColor(stops, t);
-  const naValue = normalizeColor(config.naValue ?? "#999999");
-  const unknownValue = normalizeColor(config.unknownValue ?? "#999999");
+  const { naValue, unknownValue } = resolveMissingColors(config);
   return {
     type: "sequential",
     domain: [min, max],

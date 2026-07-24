@@ -1,7 +1,7 @@
 /** Shared helpers for manual, identity, and binned color/fill families. */
 import type { ColorScaleSpec } from "@ggsvelte/spec";
 
-import { normalizeColor } from "../scales/color.js";
+import { resolveMissingColors } from "../scales/engine.js";
 
 import type { PipelineWarning } from "./types.js";
 
@@ -21,8 +21,5 @@ export function fallbackColors(config: ColorScaleSpec | undefined): {
   naValue: string;
   unknownValue: string;
 } {
-  return {
-    naValue: normalizeColor(config?.naValue ?? "#999999"),
-    unknownValue: normalizeColor(config?.unknownValue ?? "#999999"),
-  };
+  return resolveMissingColors(config);
 }

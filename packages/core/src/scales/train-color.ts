@@ -5,17 +5,10 @@
  * spec surface through trainDiscrete: explicit domain = pinned mode
  * (suspends stored assignments), domainMode, scheme/range, onExhaust.
  */
-import { VIRIDIS_RAMP_10 } from "./color.js";
-import { CATEGORICAL_PALETTE_10, CATEGORICAL_SCHEMES } from "./categorical-palettes.js";
+import { resolveOrdinalPaletteStops } from "./engine.js";
 import type { ScaleState, TrainResult } from "./state.js";
 import { trainDiscrete } from "./state.js";
 import type { ColorScale } from "./train-types.js";
-
-function rangeForScheme(scheme: string | undefined): readonly string[] | undefined {
-  if (scheme === "viridis") return VIRIDIS_RAMP_10;
-  if (scheme === undefined) return undefined;
-  return CATEGORICAL_SCHEMES[scheme as keyof typeof CATEGORICAL_SCHEMES];
-}
 
 export interface OrdinalColorConfig {
   domain?: readonly unknown[];
@@ -31,7 +24,10 @@ export function trainColor(
   prevState?: ScaleState | null,
   config: OrdinalColorConfig = {},
 ): ColorScale {
-  const baseRange = config.range ?? rangeForScheme(config.scheme) ?? CATEGORICAL_PALETTE_10;
+  const baseRange = resolveOrdinalPaletteStops({
+    ...(config.range !== undefined && { range: config.range }),
+    ...(config.scheme !== undefined && { scheme: config.scheme }),
+  });
   const range = config.reverse === true ? baseRange.toReversed() : baseRange;
   const scheme =
     config.range === undefined

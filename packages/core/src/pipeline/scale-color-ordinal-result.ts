@@ -3,7 +3,7 @@
  */
 import type { ColorScaleSpec } from "@ggsvelte/spec";
 import { disambiguatedLabels } from "../legend.js";
-import { normalizeColor } from "../scales/color.js";
+import { resolveMissingColors } from "../scales/engine.js";
 import type { ColorScale } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 
@@ -29,8 +29,7 @@ export function ordinalColorResolution(input: {
       howToOverride: `Set scales.${name}.scheme, scales.${name}.range, or scales.${name}.domain.`,
     });
   }
-  const naValue = normalizeColor(config?.naValue ?? "#999999");
-  const unknownValue = normalizeColor(config?.unknownValue ?? "#999999");
+  const { naValue, unknownValue } = resolveMissingColors(config);
   const resolvedScale: ColorScale = {
     ...scale,
     naValue,
