@@ -38,7 +38,7 @@ export type BucketBoundary = Readonly<{
   series: readonly SeriesBoundary[];
 }>;
 
-/** Compact typed-array indexes + traversal/group tables for an eager candidate store. */
+/** Compact typed-array indexes + traversal/group tables for an assembled candidate store. */
 export type CandidateStoreIndexes = {
   readonly scene: Scene;
   readonly epoch: number;
