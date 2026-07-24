@@ -300,9 +300,16 @@ jobs:
   interaction-perf:
     name: interaction-perf (p50/p95, informational)
     needs: [detect-changes, packages-dist]
+    # Opt-in only. The job is informational (its exit code is swallowed) but it
+    # still sits pending for ~15 min on every PR, so agents and humans waiting
+    # on "all checks reported" are blocked by a check that can never fail them.
+    # Budgets are still enforced — bench.yml's bench-label job runs the same
+    # `bun run test:interaction-perf` un-suppressed on 'run-bench' PRs — so this
+    # gate loses no coverage, it just stops taxing every unrelated PR.
     if: >-
       needs.detect-changes.outputs.interaction_perf == 'true' &&
-      needs.packages-dist.result == 'success'
+      needs.packages-dist.result == 'success' &&
+      contains(github.event.pull_request.labels.*.name, 'run-bench')
     uses: ./.github/workflows/ci-interaction-perf.yml
     permissions:
       contents: read
