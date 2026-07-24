@@ -16,8 +16,14 @@
  * Redistributed here with attribution for teaching and research use; see NOTICE.
  */
 
-/** One observation: the peak-bloom date recorded for a single year. */
-export interface KyotoSakuraRow {
+/**
+ * One observation: the peak-bloom date recorded for a single year.
+ *
+ * Declared as a type alias, not an interface, on purpose: only aliases get an
+ * implicit index signature, and without one these rows cannot be passed to
+ * `<GGPlot data={...}>` in a consumer's own type-checked app.
+ */
+export type KyotoSakuraRow = {
   /** Year CE. Unique across the series, so it works as a row `key`. */
   year: number;
   /** ISO date of peak bloom in that year, e.g. "1409-03-27". */
@@ -30,7 +36,7 @@ export interface KyotoSakuraRow {
    * shared calendar year; nothing else about the observation is changed.
    */
   bloomRefDate: string;
-}
+};
 
 /**
  * 838 observations, 812-2026 CE, ordered by year.
