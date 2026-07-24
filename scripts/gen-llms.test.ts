@@ -18,6 +18,7 @@ import { ERROR_CATALOG, LINT_CATALOG } from "@ggsvelte/spec";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction/interaction.ts";
 
 import { EXAMPLES } from "../examples/manifest.ts";
+import supportMatrix from "../support-matrix.json";
 import type { LifecycleDoc } from "./gen-llms.ts";
 import { QUICKSTART_PAGE_SVELTE } from "./quickstart.ts";
 import {
@@ -174,12 +175,14 @@ describe("guide sections cover their catalogs", () => {
   });
 
   it("documents the machine-checked packed-consumer support contract", () => {
-    expect(COMPATIBILITY_MD).toContain("Node.js 22");
-    expect(COMPATIBILITY_MD).toContain("Svelte 5.33.1");
-    expect(COMPATIBILITY_MD).toContain("npm bundled with Node");
-    expect(COMPATIBILITY_MD).toContain("pnpm 11.13.0");
-    expect(COMPATIBILITY_MD).toContain("Bun 1.3.14");
-    expect(COMPATIBILITY_MD).toContain("packed tarballs");
+    expect(COMPATIBILITY_MD).toContain(`Node.js \`${supportMatrix.node.range}\``);
+    expect(COMPATIBILITY_MD).toContain(`Svelte \`${supportMatrix.svelte.range}\``);
+    expect(COMPATIBILITY_MD).toContain(`current ${supportMatrix.svelte.current}`);
+    expect(COMPATIBILITY_MD).toContain(`npm ${supportMatrix.packageManagers.npm}`);
+    expect(COMPATIBILITY_MD).toContain(`pnpm ${supportMatrix.packageManagers.pnpm}`);
+    expect(COMPATIBILITY_MD).toContain(`Bun ${supportMatrix.packageManagers.bun}`);
+    expect(COMPATIBILITY_MD).toContain(`Playwright ${supportMatrix.browsers.playwright}`);
+    expect(COMPATIBILITY_MD).toContain("support-matrix.json");
   });
 
   it("documents the complete interaction capability and event contracts", () => {
