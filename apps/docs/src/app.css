@@ -63,10 +63,10 @@ html[data-vr] .example-prose,
 html[data-vr] .skip-link,
 html[data-vr] .site-menu,
 html[data-vr] .chapter-dialog,
-html[data-vr] .gg-demo-chrome,
-html[data-visual-test] .gg-demo-chrome {
+html[data-vr] .gg-demo-chrome {
   /* Example demo furniture (status banners, external controls, notes, tables)
-     belongs on the live page — not in VR/gallery chart captures (#650). */
+     belongs on the live page — not in VR/gallery chart captures (#650).
+     Only under data-vr: data-visual-test journeys still need the controls. */
   display: none !important;
 }
 
