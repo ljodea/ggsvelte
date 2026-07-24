@@ -16,7 +16,6 @@ export function applyBoxplotPosition(frame: LayerFrame): boolean {
     slots: frame.xValues.map((v) => encodeKey(v)),
     groups: frame.groups,
   });
-  frame.dodgeSlot = dodge.slot;
-  frame.dodgeSlotCounts = dodge.slotCount;
+  frame.dodge = { slot: dodge.slot, slotCounts: dodge.slotCount };
   return true;
 }

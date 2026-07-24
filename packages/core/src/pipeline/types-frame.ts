@@ -7,7 +7,16 @@ import type { ResolvedColorScale } from "./types-public.js";
 
 export { NO_ROW } from "./types-no-row.js";
 export type { ColorBinding, LayerBinding, RuleForm, StyleBinding } from "./types-binding.js";
-export type { LayerFrame } from "./types-layer-frame.js";
+export type {
+  BinPayload,
+  BoxFrame,
+  BoxPayload,
+  DodgePayload,
+  FinalizedLayerFrame,
+  LayerFrame,
+  LayerFrameCore,
+  SmoothPayload,
+} from "./types-layer-frame.js";
 
 /** Per-mark color lookup over a resolved scale with distinct NA/unknown fallbacks. */
 export function colorOf(resolved: ResolvedColorScale, value: CellValue): string {

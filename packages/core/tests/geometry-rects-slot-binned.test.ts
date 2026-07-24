@@ -1,5 +1,5 @@
 /**
- * Binned identity/count rect slots: recover edges via stable `xBinId`, not
+ * Binned identity/count rect slots: recover edges via stable `bin.xId`, not
  * O(R·B) `centers.findIndex` scans.
  */
 import { fromAny, fromPartial } from "@total-typescript/shoehorn";
@@ -33,10 +33,10 @@ function identityFx(): Frame {
   });
 }
 
-describe("resolveRectSlot — binned identity prefers xBinId over centers.findIndex", () => {
+describe("resolveRectSlot — binned identity prefers bin.xId over centers.findIndex", () => {
   it("uses integer bin id when it disagrees with Object.is center scan", () => {
     // Centers [5, 15] for edges [0,10,20]. Row 0's xNumeric equals center 0,
-    // but xBinId claims bin 1 — integer id is the discrete source of truth.
+    // but bin.xId claims bin 1 — integer id is the discrete source of truth.
     const frame = fromAny<LayerFrame>({
       n: 1,
       binding: {
@@ -47,13 +47,12 @@ describe("resolveRectSlot — binned identity prefers xBinId over centers.findIn
         },
       },
       xNumeric: Float64Array.of(5),
-      xBinId: Int32Array.of(1),
+      bin: { xId: Int32Array.of(1), yId: null },
       ymin: Float64Array.of(0),
       ymax: Float64Array.of(1),
       xmin: null,
       xmax: null,
-      dodgeSlot: null,
-      dodgeSlotCounts: null,
+      dodge: null,
     });
     const slot = resolveRectSlot({
       frame,
@@ -68,7 +67,7 @@ describe("resolveRectSlot — binned identity prefers xBinId over centers.findIn
     expect(slot!.w).toBeCloseTo(10 / 30, 12);
   });
 
-  it("drops rows with xBinId −1 (out of range)", () => {
+  it("drops rows with bin.xId −1 (out of range)", () => {
     const frame = fromAny<LayerFrame>({
       n: 1,
       binding: {
@@ -79,13 +78,12 @@ describe("resolveRectSlot — binned identity prefers xBinId over centers.findIn
         },
       },
       xNumeric: Float64Array.of(5),
-      xBinId: Int32Array.of(-1),
+      bin: { xId: Int32Array.of(-1), yId: null },
       ymin: Float64Array.of(0),
       ymax: Float64Array.of(1),
       xmin: null,
       xmax: null,
-      dodgeSlot: null,
-      dodgeSlotCounts: null,
+      dodge: null,
     });
     expect(
       resolveRectSlot({

@@ -90,10 +90,9 @@ describe("applyPosition — stack/fill/dodge on bars", () => {
     );
     const frame = buildFrame(binding, table, [], []);
     applyPosition(frame, [], table);
-    const slots = frame.dodgeSlot;
-    expect(slots).not.toBeNull();
-    expect(frame.dodgeSlotCounts).not.toBeNull();
-    expect(new Set(slots ?? []).size).toBeGreaterThan(1);
+    expect(frame.dodge).not.toBeNull();
+    expect(frame.dodge!.slotCounts).toBeDefined();
+    expect(new Set(frame.dodge!.slot).size).toBeGreaterThan(1);
   });
 });
 

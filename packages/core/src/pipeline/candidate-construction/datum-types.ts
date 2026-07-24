@@ -5,14 +5,19 @@
 import type { LineageStore } from "../../identity.js";
 import type { CellValue, ColumnTable } from "../../table.js";
 import type { FacetPanelDef } from "../facets.js";
-import type { LayerBinding, LayerFrame, MappedField, ResolvedColorScale } from "../types.js";
+import type {
+  FinalizedLayerFrame,
+  LayerBinding,
+  MappedField,
+  ResolvedColorScale,
+} from "../types.js";
 import type { Scene } from "../../scene.js";
 import type { CandidateIdentityIndex } from "./identity-index.js";
 
 export interface IdentityCandidateResolveContext {
   scene: Scene;
   bindings: readonly LayerBinding[];
-  panelFrames: readonly (readonly LayerFrame[])[];
+  panelFrames: readonly (readonly FinalizedLayerFrame[])[];
   facetPanels: readonly FacetPanelDef[];
   table: ColumnTable;
   layerFields: readonly MappedField[][];
@@ -25,7 +30,7 @@ export interface IdentityCandidateResolveContext {
 /** Intermediate locate result before series/logical/lineage assembly. */
 export interface LocatedIdentityCandidate {
   sourceRow: number | null;
-  frame: LayerFrame | undefined;
+  frame: FinalizedLayerFrame | undefined;
   outlierSourceRow: number | null;
   frameRow: number;
   derivedGroup: number;

@@ -83,14 +83,29 @@ export function buildIdentityFrame(
     linetypeValues: binding.linetype.field === null ? null : table.column(binding.linetype.field),
     labelValues: binding.labelField === null ? null : table.column(binding.labelField),
     ...emptyFrameExtras(),
-    xBinId:
-      binding.xField === null
-        ? null
-        : binIdOf(table, binding.xField, binding.xConversion, binding.xTransform, binding.xBinning),
-    yBinId:
-      binding.yField === null
-        ? null
-        : binIdOf(table, binding.yField, binding.yConversion, binding.yTransform, binding.yBinning),
+    bin: (() => {
+      const xId =
+        binding.xField === null
+          ? null
+          : binIdOf(
+              table,
+              binding.xField,
+              binding.xConversion,
+              binding.xTransform,
+              binding.xBinning,
+            );
+      const yId =
+        binding.yField === null
+          ? null
+          : binIdOf(
+              table,
+              binding.yField,
+              binding.yConversion,
+              binding.yTransform,
+              binding.yBinning,
+            );
+      return xId === null && yId === null ? null : { xId, yId };
+    })(),
     ymin:
       binding.yminField === null
         ? null

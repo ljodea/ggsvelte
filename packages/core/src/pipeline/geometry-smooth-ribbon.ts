@@ -19,7 +19,7 @@ export function buildSmoothRibbonBatch(input: {
 }): GeometryBatch | null {
   const { frame, fx, color, fill, groupRows, styles } = input;
   const { binding } = frame;
-  if (!frame.smoothBand || frame.ymin === null || frame.ymax === null) return null;
+  if (!frame.smooth?.band || frame.ymin === null || frame.ymax === null) return null;
 
   const bandRows = groupRows
     .map((rows) =>

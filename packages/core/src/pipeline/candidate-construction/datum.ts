@@ -9,7 +9,13 @@ import type { LineageStore } from "../../identity.js";
 import type { Scene } from "../../scene.js";
 import type { CellValue, ColumnTable } from "../../table.js";
 import type { FacetPanelDef } from "../facets.js";
-import type { LayerBinding, LayerFrame, MappedField, ResolvedColorScale } from "../types.js";
+import type {
+  FinalizedLayerFrame,
+  LayerBinding,
+  LayerFrame,
+  MappedField,
+  ResolvedColorScale,
+} from "../types.js";
 import { candidateAutoMode } from "../frame-candidates-auto-mode.js";
 import { resolveCandidateLogicalValues } from "./datum-values.js";
 import { locateIdentityCandidate } from "./datum-locate.js";
@@ -242,7 +248,7 @@ function resolveIdentityCandidateDatum(
 export function createIdentityCandidateDatumResolver(input: {
   scene: Scene;
   bindings: readonly LayerBinding[];
-  panelFrames: readonly (readonly LayerFrame[])[];
+  panelFrames: readonly (readonly FinalizedLayerFrame[])[];
   facetPanels: readonly FacetPanelDef[];
   table: ColumnTable;
   layerFields: readonly MappedField[][];

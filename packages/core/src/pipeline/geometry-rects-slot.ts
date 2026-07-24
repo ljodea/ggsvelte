@@ -28,11 +28,11 @@ export function resolveRectSlot(input: {
     }
     center = tc;
     w = widthFrac;
-    if (frame.dodgeSlot !== null && frame.dodgeSlotCounts !== null) {
-      const slotCount = Math.max(1, frame.dodgeSlotCounts[row]!);
+    if (frame.dodge !== null) {
+      const slotCount = Math.max(1, frame.dodge.slotCounts[row]!);
       const full = w;
       w = full / slotCount;
-      center += full * ((frame.dodgeSlot[row]! + 0.5) / slotCount - 0.5);
+      center += full * ((frame.dodge.slot[row]! + 0.5) / slotCount - 0.5);
     }
   } else {
     let sourceLeft: number;
@@ -46,15 +46,15 @@ export function resolveRectSlot(input: {
         // A binned position scale snaps identity/count rows to a transformed
         // center. Recover edges via the stable integer bin id (built once at
         // frame construction) — Θ(1) per row, not centers.findIndex (Θ(B)).
-        // xBinId is the discrete source of truth for stack/dodge/count too;
+        // bin.xId is the discrete source of truth for stack/dodge/count too;
         // float-center Object.is is only a defensive fallback when ids are absent.
         const boundaries = frame.binding.xBinning;
         const transformedCenter = frame.xNumeric?.[row];
         if (boundaries === undefined || transformedCenter === undefined) return null;
         const index =
-          frame.xBinId === null
+          frame.bin?.xId == null
             ? boundaries.centers.findIndex((value) => Object.is(value, transformedCenter))
-            : frame.xBinId[row]!;
+            : frame.bin.xId[row]!;
         if (index < 0) return null;
         sourceLeft = boundaries.edges[index]!;
         sourceRight = boundaries.edges[index + 1]!;
@@ -74,9 +74,9 @@ export function resolveRectSlot(input: {
       sourceRight = transformedCenter + half;
     }
     // Dodge in scale space, then project both final edges independently.
-    if (frame.dodgeSlot !== null && frame.dodgeSlotCounts !== null) {
-      const slotCount = Math.max(1, frame.dodgeSlotCounts[row]!);
-      const slot = frame.dodgeSlot[row]!;
+    if (frame.dodge !== null) {
+      const slotCount = Math.max(1, frame.dodge.slotCounts[row]!);
+      const slot = frame.dodge.slot[row]!;
       const full = sourceRight - sourceLeft;
       sourceRight = sourceLeft + (full * (slot + 1)) / slotCount;
       sourceLeft += (full * slot) / slotCount;

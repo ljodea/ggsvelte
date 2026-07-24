@@ -21,8 +21,8 @@ import type { LayerDataContext, PreparedPanels } from "./prepare-panels-types.js
 import { SourceRegistry } from "./source-registry.js";
 import type {
   Advisory,
+  FinalizedLayerFrame,
   LayerBinding,
-  LayerFrame,
   PipelineWarning,
   RunOptions,
   ScaleDecision,
@@ -224,7 +224,7 @@ export function preparePanels(
   const facetFields = facetFieldNames(normalized.facet);
 
   let bindings: LayerBinding[] = [];
-  let panelFrames: LayerFrame[][] = facetPanels.map(() => []);
+  let panelFrames: FinalizedLayerFrame[][] = facetPanels.map(() => []);
   let scaleDecisions: ScaleDecision[] = [];
   let scaleDiagnostics: ScaleDiagnostic[] = [];
   let resolvedConversions = conversions;
