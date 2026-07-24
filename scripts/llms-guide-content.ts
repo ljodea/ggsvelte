@@ -1614,7 +1614,10 @@ Before:
 \`\`\`svelte fragment
 <script lang="ts">
   import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
-  import type { InteractionDiagnostic, PlotDiagnostic } from "@ggsvelte/svelte";
+  import type {
+    InteractionDiagnostic,
+    PlotDiagnostic,
+  } from "@ggsvelte/svelte";
 
   const rows = [
     { x: 1, y: 2 },

@@ -8,6 +8,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import GGPlot from "../../src/lib/GGPlot.svelte";
 import { createPlotInteraction } from "../../src/lib/interaction/controller.svelte.js";
+import type { InteractionDiagnostic } from "../../src/lib/interaction/interaction.js";
 import type { PlotDiagnostic } from "../../src/lib/diagnostics/deprecation.js";
 import { render } from "../helpers/render.js";
 
@@ -84,7 +85,12 @@ describe("handler-without-capability advisory", () => {
         () => diagnostics.filter((d) => d.code === "INTERACTION_HANDLER_WITHOUT_CAPABILITY").length,
       )
       .toBe(2);
-    const dead = diagnostics.filter((d) => d.code === "INTERACTION_HANDLER_WITHOUT_CAPABILITY");
+    // Narrowing predicate, not a cast: `actual` exists only on the interaction
+    // variant, so under the widened PlotDiagnostic union a plain filter leaves
+    // `d.actual` resolving to an error type.
+    const dead = diagnostics.filter(
+      (d): d is InteractionDiagnostic => d.code === "INTERACTION_HANDLER_WITHOUT_CAPABILITY",
+    );
     expect(new Set(dead.map((d) => d.prop))).toEqual(new Set(["onselect", "onzoom"]));
     expect(new Set(dead.map((d) => d.actual))).toEqual(new Set(["select", "zoom"]));
     for (const diagnostic of dead) expect(diagnostic.severity).toBe("advisory");

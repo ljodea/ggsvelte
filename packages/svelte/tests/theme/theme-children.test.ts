@@ -268,7 +268,7 @@ describe("Theme* export parity with THEME_NAMES", () => {
     const actualThemeExports = Object.keys(pkg).filter(
       (key) =>
         key === "Theme" ||
-        (key.startsWith("Theme") && key[5] !== undefined && key[5] === key[5]!.toUpperCase()),
+        (key.startsWith("Theme") && key[5] !== undefined && key[5] === key[5].toUpperCase()),
     );
 
     for (const name of expectedExports) {
@@ -279,7 +279,7 @@ describe("Theme* export parity with THEME_NAMES", () => {
     for (const themeName of THEME_NAMES) {
       const exportName = nameToExport[themeName];
       expect(exportName, `THEME_NAMES entry "${themeName}" has no Theme* shell`).toBeDefined();
-      expect(pkg[exportName!], `export ${exportName} missing for theme "${themeName}"`).toBeTypeOf(
+      expect(pkg[exportName], `export ${exportName} missing for theme "${themeName}"`).toBeTypeOf(
         "function",
       );
     }
