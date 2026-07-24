@@ -10,7 +10,7 @@ test("homepage first viewport leads with a live chart and two actions", async ({
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=light");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "An agent-first implementation of the layered grammar of graphics in Svelte 5",
+    "The layered grammar of graphics, in Svelte 5 — and in JSON",
   );
   await expect(page.locator(".home-hero .gg-plot-root")).toBeVisible();
   await expect(page.getByRole("link", { name: "Getting started" })).toBeVisible();
@@ -56,7 +56,7 @@ test("homepage grammar steps change real chart structure in place", async ({ pag
   await expect(output.locator(".gg-paths")).toHaveCount(1);
 });
 
-test("homepage mobile order is claim, specimen, then install", async ({ page }) => {
+test("homepage mobile order is masthead, specimen, then actions", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/?theme=light");
   const order = await page.locator(".home-hero > div").evaluateAll((nodes) =>
@@ -70,7 +70,7 @@ test("homepage mobile order is claim, specimen, then install", async ({ page }) 
     expect(item, `${className} is present`).toBeDefined();
     return item?.top ?? Number.POSITIVE_INFINITY;
   };
-  expect(topFor("hero-claim")).toBeLessThan(topFor("hero-plot"));
+  expect(topFor("hero-masthead")).toBeLessThan(topFor("hero-plot"));
   expect(topFor("hero-plot")).toBeLessThan(topFor("hero-actions"));
   await expectNoOverflow(page);
 });

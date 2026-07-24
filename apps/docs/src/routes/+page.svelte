@@ -1,15 +1,20 @@
 <script lang="ts">
   import { base } from "$app/paths";
-  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import { GGPlot } from "@ggsvelte/svelte";
+  import { kyotoSakura } from "@ggsvelte/svelte/data";
 
-  import { penguins } from "$examples/point/scatter-color/data";
-  import { QUICKSTART_PAGE_SVELTE } from "$scripts/quickstart";
+  import {
+    foldSakura,
+    QUICKSTART_BUILDER_FRAGMENT,
+    QUICKSTART_PORTABLE_SPEC_FRAGMENT,
+    SAKURA_FINISHED_SVELTE,
+    SAKURA_STEPS,
+  } from "$scripts/quickstart";
   import CodeTabs from "$lib/CodeTabs.svelte";
   import { FEATURED_EXAMPLES, galleryEntryFor } from "$lib/catalog/gallery";
   import CopyCode from "$lib/components/CopyCode.svelte";
   import GrammarDemo from "$lib/components/GrammarDemo.svelte";
   import UiButton from "$lib/components/UiButton.svelte";
-  import { contrastChartTheme } from "$lib/docs-appearance-state.svelte";
   import { EXAMPLES } from "$lib/examples";
 
   const install = "npm install @ggsvelte/svelte";
@@ -17,70 +22,56 @@
   const featured = FEATURED_EXAMPLES.map((item) =>
     entries.find((entry) => entry.id === item.id)!,
   );
-  const heroTheme = $derived(contrastChartTheme());
+  // The hero is the getting-started chart, finished: same fold, same spec.
+  const hero = foldSakura(
+    SAKURA_STEPS.length,
+    kyotoSakura.map((row) => ({ ...row })),
+  );
   const tabs = [
-    { label: "Svelte", code: QUICKSTART_PAGE_SVELTE, language: "svelte" },
+    { label: "Svelte", code: SAKURA_FINISHED_SVELTE, language: "svelte" },
     {
       label: "Builder (TS)",
       language: "typescript",
-      code: `import { aes, gg } from "@ggsvelte/svelte";\n\nconst spec = gg(cars, aes({ x: "weight", y: "economy" }))\n  .geomPoint()\n  .spec();`,
+      code: QUICKSTART_BUILDER_FRAGMENT,
     },
     {
       label: "Spec (JSON)",
       language: "json",
-      code: `{
-  "data": {
-    "values": [{ "weight": 1.8, "economy": 37 }]
-  },
-  "layers": [
-    {
-      "geom": "point",
-      "aes": {
-        "x": { "field": "weight" },
-        "y": { "field": "economy" }
-      }
-    }
-  ]
-}`,
+      code: QUICKSTART_PORTABLE_SPEC_FRAGMENT,
     },
   ];
 </script>
 
 <section class="home-hero" aria-labelledby="home-heading">
-  <div class="hero-claim">
+  <div class="hero-masthead">
     <h1 id="home-heading">
-      An agent-first implementation of the layered grammar of graphics in Svelte
-      5
+      The layered grammar of graphics, in Svelte 5 — and in JSON
     </h1>
     <p>
-      ggplot2's layered grammar and defaults as Svelte components, a TypeScript
-      builder, and a validated JSON spec agents can write. Inspection,
-      selection, and zoom are part of the spec.
+      ggplot2's grammar and defaults as Svelte components, a TypeScript builder,
+      and a validated spec agents can write. Inspection, selection and zoom are
+      part of the spec.
     </p>
+    <CopyCode code={install} language="bash" accessibleLabel="Copy install" />
   </div>
 
   <div class="hero-plot">
     <GGPlot
-      data={penguins}
-      aes={{ x: "flipper", y: "mass", color: "species" }}
-      inspect={{ mode: "x", pin: true, maxDistance: 24 }}
-      theme={heroTheme}
-      labs={{
-        title: "Penguin body mass by flipper length",
-        x: "Flipper length (mm)",
-        y: "Body mass (g)",
-        color: "Species",
-      }}
+      spec={hero.spec}
+      key={hero.key}
+      inspect={hero.inspect}
       width="container"
-      height={400}
-      ariaLabel="Penguin mass increases with flipper length, grouped by species"
-    >
-      <GeomPoint size={4} alpha={0.85} />
-    </GGPlot>
+      height={480}
+      ariaLabel={"Kyoto peak cherry-blossom dates, 812 to 2026: stable near " +
+        "mid-April for a millennium, then about a week earlier since 1850"}
+    />
   </div>
 
   <div class="hero-actions">
-    <CopyCode code={install} language="bash" accessibleLabel="Copy install" />
+    <p class="hero-caption">
+      838 observations, six grammar elements, one file — built step by step in
+      <a href={`${base}/guide/getting-started`}>Getting started</a>.
+    </p>
     <div class="cta-row">
       <UiButton variant="primary" href={`${base}/guide/getting-started`}>
         Getting started
@@ -168,47 +159,61 @@
 <style>
   .home-hero {
     display: grid;
-    grid-template-areas: "claim plot" "actions plot";
-    grid-template-columns: minmax(18rem, 0.85fr) minmax(30rem, 1.15fr);
-    gap: 1.5rem clamp(2rem, 6vw, 6rem);
-    align-items: start;
-    min-height: calc(100svh - 8rem);
-    padding: clamp(3rem, 7vw, 7rem) 0 4rem;
+    gap: 2rem;
+    padding: clamp(2.5rem, 6vw, 5rem) 0 4rem;
   }
 
-  .hero-claim {
-    grid-area: claim;
+  /* Masthead row: claim, then the one thing to type, side by side. */
+  .hero-masthead {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 1rem clamp(2rem, 6vw, 5rem);
+    align-items: end;
   }
 
-  .hero-claim h1 {
-    max-width: 14ch;
-    margin: 0.35rem 0 1.25rem;
-    font-size: clamp(3.2rem, 6vw, 6rem);
-    line-height: 0.9;
+  .hero-masthead h1 {
+    grid-row: span 2;
+    max-width: 18ch;
+    margin: 0;
+    font-size: clamp(2.8rem, 5.5vw, 5rem);
+    line-height: 0.92;
     letter-spacing: -0.045em;
   }
 
-  .hero-claim > p:last-child {
-    max-width: 36rem;
+  .hero-masthead p {
+    max-width: 40rem;
+    margin: 0;
     color: var(--muted);
-    font-size: 1.08rem;
+    font-size: 1.05rem;
+  }
+
+  /* The chart is the argument, so it gets the full width of the page. */
+  .hero-plot {
+    min-width: 0;
+    margin-inline: calc(-1 * clamp(1rem, 4vw, 4rem));
+    padding: 1.5rem clamp(1rem, 4vw, 4rem);
+    background: #fff;
+    color: #172033;
   }
 
   .hero-actions {
-    grid-area: actions;
-    max-width: 34rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 2rem;
   }
 
-  .hero-plot {
-    grid-area: plot;
-    min-width: 0;
+  .hero-caption {
+    max-width: 40rem;
+    margin: 0;
+    color: var(--muted);
   }
 
   .cta-row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
-    margin-top: 1rem;
   }
 
   .home-featured {
@@ -308,9 +313,13 @@
   }
 
   @media (max-width: 64rem) {
-    .home-hero {
-      grid-template-areas: "claim" "plot" "actions";
+    .hero-masthead {
       grid-template-columns: 1fr;
+      align-items: start;
+    }
+
+    .hero-masthead h1 {
+      grid-row: auto;
     }
 
     .home-featured ol {
@@ -324,8 +333,8 @@
       padding-top: 2rem;
     }
 
-    .hero-claim h1 {
-      font-size: clamp(2.6rem, 12vw, 4rem);
+    .hero-masthead h1 {
+      font-size: clamp(2.4rem, 11vw, 3.6rem);
     }
 
     .home-featured {
