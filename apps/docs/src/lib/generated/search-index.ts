@@ -3774,9 +3774,18 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Stacked area chart",
     summary:
-      "Areas stack by default: the fill groups pile from the zero baseline, showing total and composition over time. First-seen group order stays on top.",
+      "Areas stack by default: the fill groups pile from the zero baseline, showing total and composition over time. First-seen group order stays on top. Nightingale's 1858 Crimean mortality data supplies the composition, and the economist theme's tinted paper forces an explicit manual fill scale chosen for contrast against it.",
     href: "/examples/area/stacked",
-    keywords: ["Stacked area chart", "Areas", "area", "stack", "fill", "legend"],
+    keywords: [
+      "Stacked area chart",
+      "Areas",
+      "area",
+      "stack",
+      "fill",
+      "legend",
+      "theme",
+      "palette",
+    ],
     exact: ["Stacked area chart"],
   },
   {
@@ -4142,7 +4151,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Multi-series line chart",
     summary:
-      "One line per group, derived from the discrete color mapping — plus a point layer on top showing how layers compose. Explicit breaks pin one tick per month.",
+      "One line per group, derived from the discrete color mapping — plus a point layer on top showing how layers compose. Playfair's 1821 wheat-and-wages plate supplies the two series, and a manual color scale picks the economist theme's own red and ink so both clear contrast on its tinted paper — the shorter wage series ends early because the original records no 1821 wage.",
     href: "/examples/line/multi-series",
     keywords: [
       "Multi-series line chart",
@@ -4152,6 +4161,8 @@ export const DOCS_SEARCH_INDEX = [
       "color",
       "legend",
       "layers",
+      "theme",
+      "palette",
     ],
     exact: ["Multi-series line chart"],
   },
@@ -4160,7 +4171,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Raw-year time-axis line chart",
     summary:
-      "A long-run series over untouched four-digit year strings. Value-driven inference selects a UTC calendar scale automatically; no preprocessing or explicit time scale is required.",
+      "A long-run series over untouched four-digit year strings. Value-driven inference selects a UTC calendar scale automatically; no preprocessing or explicit time scale is required. Bowley's 1855–99 British export series supplies the trend, drawn on the fivethirtyeight theme's newsprint paper with white gridlines.",
     href: "/examples/line/time-axis",
     keywords: [
       "Raw-year time-axis line chart",
@@ -4169,6 +4180,7 @@ export const DOCS_SEARCH_INDEX = [
       "time",
       "scales",
       "inference",
+      "theme",
     ],
     exact: ["Raw-year time-axis line chart"],
   },
