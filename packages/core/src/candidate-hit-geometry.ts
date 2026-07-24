@@ -19,7 +19,7 @@ import {
 import type { CandidateStoreIndexes } from "./candidate-store-indexes.js";
 import type { GeometryBatch } from "./scene.js";
 
-export type Aabb = readonly [minX: number, minY: number, maxX: number, maxY: number];
+type Aabb = readonly [minX: number, minY: number, maxX: number, maxY: number];
 
 export type HitGeometry = {
   distance(
@@ -394,7 +394,7 @@ const pathsOps: KindOps = {
 };
 
 /** Dispatch table: one ops object per mark kind. */
-export const MARK_HIT_GEOMETRY = {
+const MARK_HIT_GEOMETRY = {
   points: pointsOps,
   rects: rectsOps,
   segments: segmentsOps,

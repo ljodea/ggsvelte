@@ -12,7 +12,7 @@ import { closestPathEdge } from "./candidate-path-geometry.js";
 import type { CandidateFacts } from "./candidate-store-types.js";
 import type { Scene } from "./scene.js";
 
-export type PointBatchIndex = {
+type PointBatchIndex = {
   readonly batchIndex: number;
   readonly ids: number[];
   readonly spatial: {
@@ -45,19 +45,20 @@ export function resolveTopmostHit(
   px: number,
   py: number,
 ): CandidateFacts | null {
-  const {
-    scene,
-    hitTolerance,
-    batchIds,
-    primitiveIds,
-    panelIds,
-    xs,
-    ys,
-    pointBatchIndexes,
-    addExtendedIntersecting,
-    exactDistance,
-    fact,
-  } = ctx;
+  const { scene, hitTolerance, batchIds, primitiveIds, panelIds, xs, ys, pointBatchIndexes } = ctx;
+  // Bind via arrows so type-aware unbound-method is satisfied.
+  const addExtendedIntersecting = (
+    loX: number,
+    loY: number,
+    hiX: number,
+    hiY: number,
+    into: number[],
+  ): void => {
+    ctx.addExtendedIntersecting(loX, loY, hiX, hiY, into);
+  };
+  const exactDistance = (id: number, x: number, y: number, pathContainment: Map<string, boolean>) =>
+    ctx.exactDistance(id, x, y, pathContainment);
+  const fact = (id: number) => ctx.fact(id);
 
   let best = -1;
   let bestBatch = -1;

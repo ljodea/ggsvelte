@@ -18,8 +18,10 @@ function resolve(plot: ReturnType<typeof scene>, px: number, py: number, hitTole
       xs: indexes.xs,
       ys: indexes.ys,
       pointBatchIndexes: query.pointBatchIndexes,
-      addExtendedIntersecting: query.addExtendedIntersecting,
-      exactDistance: query.exactDistance,
+      addExtendedIntersecting: (loX, loY, hiX, hiY, into) => {
+        query.addExtendedIntersecting(loX, loY, hiX, hiY, into);
+      },
+      exactDistance: (id, x, y, pathContainment) => query.exactDistance(id, x, y, pathContainment),
       fact: (id) => indexes.fact(id),
     },
     px,

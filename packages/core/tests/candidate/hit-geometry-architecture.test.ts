@@ -13,7 +13,7 @@ describe("Candidate hit-geometry architecture", () => {
     const build = readFileSync(join(srcDir, "candidate-store-build.ts"), "utf8");
     const facade = readFileSync(join(srcDir, "candidate-store.ts"), "utf8");
 
-    expect(geometry).toMatch(/export const MARK_HIT_GEOMETRY/);
+    expect(geometry).toMatch(/const MARK_HIT_GEOMETRY/);
     expect(geometry).toMatch(/export function createHitGeometry/);
     expect(resolve).toMatch(/export function resolveTopmostHit/);
     // Refine is a thin adapter over the table — no kind-switches of its own.
