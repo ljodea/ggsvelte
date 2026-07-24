@@ -12,7 +12,7 @@ import type { LayerBinding } from "./types-binding.js";
 type StyleValueColumn = readonly CellValue[] | Float64Array;
 
 /** Boxplot-stat extras (owned by boxplot geometry + outlier lineage). */
-export interface BoxPayload {
+interface BoxPayload {
   lower: Float64Array;
   middle: Float64Array;
   upper: Float64Array;
@@ -30,20 +30,20 @@ export interface BoxPayload {
  * centers: this is the discrete identity for count aggregation and stack /
  * fill / dodge grouping. Never serialized into the public model.
  */
-export interface BinPayload {
+interface BinPayload {
   xId: Int32Array | null;
   yId: Int32Array | null;
 }
 
 /** Dodge position slots (owned by bar/boxplot position + rect layout). */
-export interface DodgePayload {
+interface DodgePayload {
   slot: Uint32Array;
   /** Per-row dodge slot count (per-x, ggplot2 preserve="total"). */
   slotCounts: Uint32Array;
 }
 
 /** Smooth-stat ribbon flag (owned by smooth geometry). */
-export interface SmoothPayload {
+interface SmoothPayload {
   /** Layer draws an SE ribbon (ymin/ymax are the band). */
   band: boolean;
 }
@@ -52,7 +52,7 @@ export interface SmoothPayload {
  * Shared fields every stage may read: binding, table, positions, styles,
  * groups, and pre-finalize lineage placeholders.
  */
-export interface LayerFrameCore {
+interface LayerFrameCore {
   binding: LayerBinding;
   /** The (facet-panel) table this frame was computed from. */
   table: ColumnTable;
