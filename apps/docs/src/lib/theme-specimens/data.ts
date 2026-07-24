@@ -29,12 +29,12 @@ export const languages: { language: string; respondents: number }[] = [
 
 /** Quarterly revenue with pre-formatted value labels. */
 export const revenue: { quarter: string; amount: number; label: string }[] = [
-  { quarter: "Q1 2025", amount: 118, label: "\u20ac118k" },
-  { quarter: "Q2 2025", amount: 142, label: "\u20ac142k" },
-  { quarter: "Q3 2025", amount: 171, label: "\u20ac171k" },
-  { quarter: "Q4 2025", amount: 205, label: "\u20ac205k" },
-  { quarter: "Q1 2026", amount: 248, label: "\u20ac248k" },
-  { quarter: "Q2 2026", amount: 290, label: "\u20ac290k" },
+  { quarter: "Q1 2025", amount: 118, label: "€118k" },
+  { quarter: "Q2 2025", amount: 142, label: "€142k" },
+  { quarter: "Q3 2025", amount: 171, label: "€171k" },
+  { quarter: "Q4 2025", amount: 205, label: "€205k" },
+  { quarter: "Q1 2026", amount: 248, label: "€248k" },
+  { quarter: "Q2 2026", amount: 290, label: "€290k" },
 ];
 
 /** Daily transit ridership by mode. */
