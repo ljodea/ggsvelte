@@ -1,8 +1,8 @@
 /**
- * Spatial shortlist indexes + geometry refine helpers for an eager candidate store.
+ * Spatial shortlist indexes + geometry refine helpers for an assembled candidate store.
  *
  * - candidate-store-spatial-index.ts — build trees + shortlist APIs
- * - candidate-store-spatial-refine.ts — exactDistance / intersects
+ * - candidate-store-spatial-refine.ts — exactDistance / intersects via hit-geometry table
  */
 import type { CandidateStoreIndexes } from "./candidate-store-indexes.js";
 import { buildSpatialIndex, type SpatialIndex } from "./candidate-store-spatial-index.js";

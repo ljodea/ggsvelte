@@ -1,11 +1,10 @@
 /**
- * Spatial shortlist indexes for an eager candidate store: anchor quadtree,
+ * Spatial shortlist indexes for an assembled candidate store: anchor quadtree,
  * per-batch point trees, size-classed extended AABB trees, and shortlist APIs.
  * Size-class layout stays closure-private.
  */
 import { StaticQuadtree } from "./dom/quadtree.js";
-import { pathRange } from "./candidate-geometry.js";
-import { pathSubpathAabb, pathVertexStrokeAabb } from "./candidate-path-geometry.js";
+import { createHitGeometry } from "./candidate-hit-geometry.js";
 import type { CandidateInspectMode } from "./candidate-store-types.js";
 import type { CandidateStoreIndexes } from "./candidate-store-indexes.js";
 
@@ -37,7 +36,8 @@ export type SpatialIndex = {
 
 /** Build shortlist indexes and shortlist helpers for an eager store. */
 export function buildSpatialIndex(indexes: CandidateStoreIndexes): SpatialIndex {
-  const { scene, n, hitTolerance, flip, batchIds, primitiveIds, panelIds, xs, ys } = indexes;
+  const { scene, n, hitTolerance, flip, batchIds, primitiveIds, xs, ys } = indexes;
+  const hit = createHitGeometry(indexes);
 
   // Spatial index over plot-px anchors (reuse StaticQuadtree). Point-like
   // candidates shortlist via the tree; rects/segments/paths/glyphs use
@@ -72,112 +72,8 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes): SpatialIndex 
       continue;
     }
     extendedIds.push(id);
-    const panel = scene.panels[panelIds[id]!]!;
-    const i = primitiveIds[id]!;
-    let minX: number;
-    let minY: number;
-    let maxX: number;
-    let maxY: number;
-    if (batch.kind === "rects") {
-      const rx = panel.x + batch.rects[i * 4]!;
-      const ry = panel.y + batch.rects[i * 4 + 1]!;
-      const rw = batch.rects[i * 4 + 2]!;
-      const rh = batch.rects[i * 4 + 3]!;
-      minX = Math.min(rx, rx + rw);
-      minY = Math.min(ry, ry + rh);
-      maxX = Math.max(rx, rx + rw);
-      maxY = Math.max(ry, ry + rh);
-    } else if (batch.kind === "segments") {
-      const pad = (batch.linewidths?.[i] ?? batch.linewidth) / 2 + hitTolerance;
-      const renderStart = batch.renderPathOffsets?.[i];
-      const renderEnd = batch.renderPathOffsets?.[i + 1];
-      if (
-        batch.renderPositions !== undefined &&
-        renderStart !== undefined &&
-        renderEnd !== undefined &&
-        renderEnd > renderStart
-      ) {
-        minX = Infinity;
-        minY = Infinity;
-        maxX = -Infinity;
-        maxY = -Infinity;
-        for (let vertex = renderStart; vertex < renderEnd; vertex++) {
-          const x = panel.x + batch.renderPositions[vertex * 2]!;
-          const y = panel.y + batch.renderPositions[vertex * 2 + 1]!;
-          minX = Math.min(minX, x);
-          minY = Math.min(minY, y);
-          maxX = Math.max(maxX, x);
-          maxY = Math.max(maxY, y);
-        }
-        minX -= pad;
-        minY -= pad;
-        maxX += pad;
-        maxY += pad;
-      } else {
-        const x1 = panel.x + batch.segments[i * 4]!;
-        const y1 = panel.y + batch.segments[i * 4 + 1]!;
-        const x2 = panel.x + batch.segments[i * 4 + 2]!;
-        const y2 = panel.y + batch.segments[i * 4 + 3]!;
-        minX = Math.min(x1, x2) - pad;
-        minY = Math.min(y1, y2) - pad;
-        maxX = Math.max(x1, x2) + pad;
-        maxY = Math.max(y1, y2) + pad;
-      }
-    } else if (batch.kind === "paths") {
-      // Filled paths: full subpath AABB (containment far from any vertex).
-      // Stroked paths: AABB of incident edges only — a plot-spanning series
-      // used to tag every vertex with the same giant box, forcing Θ(V) refine
-      // on nearest/exact (hit-index already edge-shortlists strokes).
-      const range = pathRange(batch, i);
-      if (range === null) {
-        minX = xs[id]!;
-        minY = ys[id]!;
-        maxX = minX;
-        maxY = minY;
-      } else if (batch.fills === undefined) {
-        const box = pathVertexStrokeAabb(
-          batch,
-          panel.x,
-          panel.y,
-          i,
-          range[0],
-          range[1],
-          hitTolerance,
-        );
-        minX = box[0];
-        minY = box[1];
-        maxX = box[2];
-        maxY = box[3];
-      } else {
-        const cacheKey = `${batchIds[id]}:${range[0]}:${range[1]}`;
-        let box = pathAabbCache.get(cacheKey);
-        if (box === undefined) {
-          box = pathSubpathAabb(
-            batch,
-            panel.x,
-            panel.y,
-            range[0],
-            range[1],
-            xs[id]!,
-            ys[id]!,
-            hitTolerance,
-          );
-          pathAabbCache.set(cacheKey, box);
-        }
-        minX = box[0];
-        minY = box[1];
-        maxX = box[2];
-        maxY = box[3];
-      }
-    } else {
-      // glyphs: text is not a hit target (hit-index), but still needs a finite
-      // AABB so store init never pathRange()'s a non-path batch (Codex P1).
-      const pad = batch.size + hitTolerance;
-      minX = xs[id]! - pad;
-      minY = ys[id]! - pad;
-      maxX = xs[id]! + pad;
-      maxY = ys[id]! + pad;
-    }
+    // glyphs still need a finite AABB for index init even though they never hit.
+    const [minX, minY, maxX, maxY] = hit.aabb(id, pathAabbCache);
     extMinXBuild.push(minX);
     extMinYBuild.push(minY);
     extMaxXBuild.push(maxX);
