@@ -21,14 +21,11 @@ function continuousEdit(
 }
 
 function bandEdit(rawDomain: readonly CellValue[]): AxisEditModel {
-  return {
+  return fromPartial<AxisEditModel>({
     kind: "band",
     rawDomain,
     reversed: false,
-    slice() {
-      return undefined;
-    },
-  };
+  });
 }
 
 describe("precise plot bounds adapters", () => {

@@ -173,10 +173,13 @@ function axisEditModelForScale(scale: PositionScale): AxisEditModel {
       slice(bounds) {
         const first = scale.indexOf(bounds[0]);
         const last = scale.indexOf(bounds[1]);
-        if (first === undefined || last === undefined) return undefined;
-        const lower = Math.min(first, last);
-        const upper = Math.max(first, last);
-        return scale.rawDomain.slice(lower, upper + 1) as readonly CellValue[];
+        let values: readonly CellValue[] | undefined;
+        if (first !== undefined && last !== undefined) {
+          const lower = Math.min(first, last);
+          const upper = Math.max(first, last);
+          values = scale.rawDomain.slice(lower, upper + 1) as readonly CellValue[];
+        }
+        return values;
       },
     };
   }

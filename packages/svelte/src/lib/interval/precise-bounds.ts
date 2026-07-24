@@ -31,7 +31,7 @@ export function boundsEditorInputForScale(
     // collisions so the two <select> options stay distinguishable.
     const labels = disambiguatedLabels(scale.rawDomain);
     const categories = scale.rawDomain.map((value, index) => ({
-      value: value as BoundsCategoryValue,
+      value,
       label: labels[index] ?? String(value),
     }));
     const requested = options.bounds;

@@ -2099,6 +2099,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "AxisEditModel": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "AxisGuidePlan": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2456,6 +2460,10 @@
           "lifecycle": "experimental"
         },
         "NamedData": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "NormalizedSpan": {
           "kind": "type",
           "lifecycle": "experimental"
         },
