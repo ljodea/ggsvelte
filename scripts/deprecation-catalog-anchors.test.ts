@@ -26,15 +26,20 @@ function guideAnchors(): Map<string, Set<string>> {
   return anchors;
 }
 
-/** Anchors emitted by deprecatedPropDiagnostic for live advisories this release. */
-const RUNTIME_DEPRECATION_URLS = [
+/**
+ * Anchors emitted by live runtime advisories this release — deprecation
+ * (deprecatedPropDiagnostic) and composition (duplicateScaleChannelDiagnostic)
+ * alike. Both ship a docUrl, so both need the anchor to actually resolve.
+ */
+const RUNTIME_ADVISORY_URLS = [
   "https://ggsvelte.sh/guide/upgrading#compose-the-theme-as-a-child-layer",
+  "https://ggsvelte.sh/guide/upgrading#compose-scales-as-child-layers",
 ] as const;
 
-describe("deprecation catalog runtime docUrl anchors", () => {
-  it("every live deprecation advisory docUrl anchor resolves in the rendered guide", () => {
+describe("diagnostic catalog runtime docUrl anchors", () => {
+  it("every live runtime advisory docUrl anchor resolves in the rendered guide", () => {
     const anchors = guideAnchors();
-    for (const url of RUNTIME_DEPRECATION_URLS) {
+    for (const url of RUNTIME_ADVISORY_URLS) {
       expect(url).toStartWith(GUIDE_URL_BASE);
       const [slug = "", fragment] = url.slice(GUIDE_URL_BASE.length).split("#");
       expect([...anchors.keys()], `unknown guide page "${slug}"`).toContain(slug);

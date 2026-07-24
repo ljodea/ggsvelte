@@ -1602,6 +1602,76 @@ After:
 \`LayerDescriptor\` is also renamed to \`MarkLayerDescriptor\` (the old name
 remains a type-only alias until 0.13.0).
 
+### Compose scales as child layers
+
+The \`scales\` prop on \`<GGPlot>\` is deprecated since 0.11.0 (removable in
+0.13.0). Compose scales as declaration-only children instead — named shells
+for every color/fill helper (\`<ScaleColorDiscrete/>\`, \`<ScaleFillManual/>\`,
+British \`Colour\` aliases, …), or the generic \`<Scale value={…}>\` escape hatch
+for raw fragments, computed scales, and families without shells yet
+(position/style ship in a later slice). When both a prop and a child configure
+the same channel, the child wins. Two children on one channel emit a
+\`DUPLICATE_SCALE_CHANNEL\` advisory (last child still wins).
+
+Named shells route through the matching helpers, so migrating a raw fragment
+like \`scales={{color:{scheme:"colorblind"}}}\` to
+\`<ScaleColorDiscrete scheme="colorblind"/>\` adds \`type:"ordinal"\` to the
+PortableSpec (rendering is unchanged). Use \`<Scale value={…}>\` when you need
+byte-identical PortableSpec.
+
+Before:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import {
+    GeomPoint,
+    GGPlot,
+    scaleColorDiscrete,
+  } from "@ggsvelte/svelte";
+
+  const rows = [
+    { x: 1, y: 2, c: "a" },
+    { x: 2, y: 4, c: "b" },
+  ];
+</script>
+
+<!-- Before 0.11: scales was a top-level GGPlot prop. -->
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y", color: "c" }}
+  scales={scaleColorDiscrete({ scheme: "colorblind" })}
+>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+After:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import {
+    GeomPoint,
+    GGPlot,
+    ScaleColorDiscrete,
+  } from "@ggsvelte/svelte";
+
+  const rows = [
+    { x: 1, y: 2, c: "a" },
+    { x: 2, y: 4, c: "b" },
+  ];
+</script>
+
+<!-- After 0.11: compose scales as declaration-only child layers. -->
+<GGPlot data={rows} aes={{ x: "x", y: "y", color: "c" }}>
+  <ScaleColorDiscrete scheme="colorblind" />
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+\`PlotDiagnostic\` also widens to include \`CompositionDiagnostic\`
+(\`DUPLICATE_SCALE_CHANNEL\`). Exhaustive \`switch\` on \`.code\` needs a new arm;
+handlers annotated \`PlotDiagnostic\` keep compiling.
+
 ### Diagnostic handlers receive \`PlotDiagnostic\`
 
 \`ondiagnostic\` now receives the \`PlotDiagnostic\` union

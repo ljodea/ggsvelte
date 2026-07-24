@@ -2127,13 +2127,13 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-429",
-        title: "experimental (429)",
+        id: "experimental-434",
+        title: "experimental (434)",
         level: 3,
       },
       {
-        id: "stable-intent-19",
-        title: "stable-intent (19)",
+        id: "stable-intent-47",
+        title: "stable-intent (47)",
         level: 3,
       },
     ],
@@ -2166,6 +2166,11 @@ export const DOCS_ROUTES = [
       {
         id: "compose-the-theme-as-a-child-layer",
         title: "Compose the theme as a child layer",
+        level: 3,
+      },
+      {
+        id: "compose-scales-as-child-layers",
+        title: "Compose scales as child layers",
         level: 3,
       },
       {

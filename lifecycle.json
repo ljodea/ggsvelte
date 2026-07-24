@@ -3293,6 +3293,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "COMPOSITION_DIAGNOSTIC_CATALOG": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "ChannelValue": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3334,6 +3338,14 @@
           "lifecycle": "experimental"
         },
         "ColorstepsGuideStep": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CompositionDiagnostic": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CompositionDiagnosticCode": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3893,9 +3905,85 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "Scale": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleCapability": {
           "kind": "type",
           "lifecycle": "experimental"
+        },
+        "ScaleColorBinned": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorContinuous": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorDate": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorDatetime": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorIdentity": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorLog10": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorManual": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorSqrt": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourBinned": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourContinuous": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourDate": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourDatetime": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourIdentity": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourLog10": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourManual": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourSqrt": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
         },
         "ScaleDecision": {
           "kind": "type",
@@ -3912,6 +4000,42 @@
         "ScaleExpansion": {
           "kind": "type",
           "lifecycle": "experimental"
+        },
+        "ScaleFillBinned": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillContinuous": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillDate": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillDatetime": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillIdentity": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillLog10": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillManual": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillSqrt": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
         },
         "ScaleState": {
           "kind": "type",
@@ -4217,6 +4341,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "duplicateScaleChannelDiagnostic": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "dym": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4282,6 +4410,10 @@
           "lifecycle": "experimental"
         },
         "guides": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "isCompositionDiagnostic": {
           "kind": "value",
           "lifecycle": "experimental"
         },
