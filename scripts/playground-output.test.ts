@@ -9,6 +9,7 @@ import {
   rebuildPlaygroundSpecWithBuilder,
 } from "../apps/docs/src/lib/playground-output";
 import { defaultPlaygroundInteractions } from "../apps/docs/src/lib/playground-agent-envelope";
+import { PLAYGROUND_DATASET_SCHEMAS } from "../apps/docs/src/lib/playground-dataset-schemas";
 
 const spec: PortableSpec = {
   edition: 1,
@@ -129,6 +130,65 @@ describe("playground outputs", () => {
     expect(a).not.toBe(b);
     expect(b[0]?.code).toContain('select="point"');
     expect(b[0]?.code).toContain("zoom");
+  });
+
+  test("names the data seam after the dataset the caller selected", () => {
+    for (const schema of PLAYGROUND_DATASET_SCHEMAS) {
+      const dataset: PortableSpec = { ...spec, data: { values: [...schema.sampleRows] } };
+      const output = playgroundSvelteOutput(dataset, defaultPlaygroundInteractions(), schema.id);
+
+      expect(output).toContain(`const ${schema.id} = `);
+      expect(output).toContain(`"values": ${schema.id}`);
+      expect(parseSpecFromSvelteOutput(output)).toEqual(dataset);
+    }
+  });
+
+  test("trusts the dataset id over the column names in the rows", () => {
+    const penguinShaped: PortableSpec = {
+      ...spec,
+      data: { values: [{ id: "a1", species: "Adelie", flipper: 181, mass: 3750 }] },
+    };
+    const output = playgroundSvelteOutput(
+      penguinShaped,
+      defaultPlaygroundInteractions(),
+      "monthly",
+    );
+
+    expect(output).toContain("const monthly = ");
+    expect(output).not.toContain("const penguins = ");
+  });
+
+  test("falls back to rows for an omitted or unknown dataset id without sniffing columns", () => {
+    const penguinShaped: PortableSpec = {
+      ...spec,
+      data: { values: [{ id: "a1", species: "Adelie", flipper: 181, mass: 3750 }] },
+    };
+
+    for (const output of [
+      playgroundSvelteOutput(penguinShaped),
+      playgroundSvelteOutput(penguinShaped, defaultPlaygroundInteractions(), "not-a-dataset"),
+    ]) {
+      expect(output).toContain("const rows = ");
+      expect(output).not.toContain("const penguins = ");
+    }
+  });
+
+  test("keys the memo on the dataset id as well as the interactions", () => {
+    const dataset: PortableSpec = { ...spec, data: { values: [{ id: "m1", value: 1 }] } };
+    const interactions = defaultPlaygroundInteractions();
+    const asMonthly = playgroundOutputs(dataset, interactions, "monthly");
+    const asCategories = playgroundOutputs(dataset, interactions, "categories");
+
+    expect(asMonthly).not.toBe(asCategories);
+    expect(asMonthly[0]?.code).toContain("const monthly = ");
+    expect(asCategories[0]?.code).toContain("const categories = ");
+    expect(playgroundOutputs(dataset, interactions, "monthly")).toBe(asMonthly);
+  });
+
+  test("every curated dataset id is usable as a JavaScript identifier", () => {
+    for (const schema of PLAYGROUND_DATASET_SCHEMAS) {
+      expect(schema.id).toMatch(/^[A-Za-z_$][\w$]*$/u);
+    }
   });
 
   test("cannot terminate the component script or embed raw JS separators", () => {

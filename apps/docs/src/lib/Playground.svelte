@@ -119,7 +119,7 @@
   let mockNotice = $state(false);
 
   const outputs = $derived(
-    playgroundOutputs(workbench.committed, interactions),
+    playgroundOutputs(workbench.committed, interactions, datasetId),
   );
   const sampleLinks = $derived(
     PLAYGROUND_SAMPLES.map((s) => ({ id: s.id, title: s.title })),
