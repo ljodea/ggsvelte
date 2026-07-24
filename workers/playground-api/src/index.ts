@@ -15,14 +15,16 @@ export default {
     if (url.pathname === "/health" || url.pathname === "/") {
       return new Response(JSON.stringify({ ok: true, service: "ggsvelte-playground-api" }), {
         status: 200,
-        headers: { "Content-Type": "application/json; charset=utf-8" },
+        headers: { "Content-Type": "application/json; charset=utf-8", Vary: "Origin" },
       });
     }
+    // Cross-origin callers cannot read this body (no ACAO by design) — the
+    // shipped client only calls /v1/generate.
     return new Response(
       JSON.stringify({ ok: false, error: { code: "bad_request", message: "Not found." } }),
       {
         status: 404,
-        headers: { "Content-Type": "application/json; charset=utf-8" },
+        headers: { "Content-Type": "application/json; charset=utf-8", Vary: "Origin" },
       },
     );
   },

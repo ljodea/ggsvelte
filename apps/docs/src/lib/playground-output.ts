@@ -68,9 +68,19 @@ export function playgroundSvelteOutput(
     };
     let specLiteral = scriptSafeJSON(withPlaceholder);
     // `"values": "<placeholder>"` → `"values": varName` (identifier, not a string).
+    // A spec value could forge the sentinel string elsewhere; exactly one
+    // occurrence is required or we fall back to plain inline output below.
     const quoted = `"values": ${JSON.stringify(placeholder)}`;
-    if (!specLiteral.includes(quoted)) {
-      throw new Error("playgroundSvelteOutput: data seam placeholder missing");
+    const occurrences = specLiteral.split(quoted).length - 1;
+    if (occurrences !== 1) {
+      return `<script lang="ts">
+  import { GGPlot, type PortableSpec } from "@ggsvelte/svelte";
+
+  const spec: PortableSpec = ${scriptSafeJSON(spec)};
+</script>
+
+<GGPlot {spec}${props} />
+`;
     }
     specLiteral = specLiteral.replace(quoted, `"values": ${varName}`);
     return `<script lang="ts">
@@ -96,8 +106,11 @@ export function playgroundSvelteOutput(
 }
 
 interface OutputCacheEntry {
-  readonly interactionsKey: string;
-  readonly outputs: readonly PlaygroundOutput[];
+  /** Spec-keyed outputs that do not depend on interactions. */
+  builder: PlaygroundOutput | null;
+  specJson: string | null;
+  /** Interaction-dependent Svelte snippet + assembled tab list per key. */
+  readonly byInteractions: Map<string, readonly PlaygroundOutput[]>;
 }
 
 const outputCache = new WeakMap<PortableSpec, OutputCacheEntry>();
@@ -111,12 +124,15 @@ export function playgroundOutputs(
   interactions: PlaygroundInteractions = defaultPlaygroundInteractions(),
 ): readonly PlaygroundOutput[] {
   const key = interactionsKey(interactions);
-  const cached = outputCache.get(spec);
-  if (cached !== undefined && cached.interactionsKey === key) {
-    return cached.outputs;
+  let entry = outputCache.get(spec);
+  if (entry === undefined) {
+    entry = { builder: null, specJson: null, byInteractions: new Map() };
+    outputCache.set(spec, entry);
   }
+  const hit = entry.byInteractions.get(key);
+  if (hit !== undefined) return hit;
 
-  const builder = playgroundBuilderOutput(spec);
+  const builder = (entry.builder ??= playgroundBuilderOutput(spec));
   // OV6-A: hide Builder tab when round-trip fails (never show unsupported panel).
   const outputs: PlaygroundOutput[] = [
     {
@@ -133,11 +149,11 @@ export function playgroundOutputs(
     kind: "portable-spec",
     label: "Spec (JSON)",
     supported: true,
-    code: JSON.stringify(spec, null, 2),
+    code: (entry.specJson ??= JSON.stringify(spec, null, 2)),
   });
 
   const frozen = outputs as readonly PlaygroundOutput[];
-  outputCache.set(spec, { interactionsKey: key, outputs: frozen });
+  entry.byInteractions.set(key, frozen);
   return frozen;
 }
 

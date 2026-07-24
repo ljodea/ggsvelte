@@ -6,6 +6,7 @@
 import type { SpecError } from "@ggsvelte/spec";
 
 import type { PlaygroundAgentEnvelope } from "./playground-agent-envelope";
+import { PLAYGROUND_PROMPT_MAX_CHARS } from "./playground-dataset-schemas";
 
 export type PlaygroundAgentPhase =
   | "idle"
@@ -139,10 +140,6 @@ export function failAgent(
   };
 }
 
-export function resetAgentToIdle(): PlaygroundAgentState {
-  return createPlaygroundAgentState();
-}
-
 /** Escalated wait copy after ~10s (free-tier honesty). */
 export function escalatedPhaseLine(
   state: PlaygroundAgentState,
@@ -181,7 +178,7 @@ export function messageForAgentError(code: PlaygroundAgentErrorCode, fallback?: 
     case "origin_forbidden":
       return "This origin cannot call live generation. Use a sample or copy the agent prompt.";
     case "prompt_too_long":
-      return "Prompt is too long (max 500 characters).";
+      return `Prompt is too long (max ${PLAYGROUND_PROMPT_MAX_CHARS} characters).`;
     case "unknown_dataset":
       return "Unknown dataset.";
     default:

@@ -136,3 +136,6 @@ export function playgroundDatasetSchema(id: string): PlaygroundDatasetSchema | u
 export function isPlaygroundDatasetId(id: string): id is PlaygroundDatasetId {
   return PLAYGROUND_DATASET_SCHEMAS.some((entry) => entry.id === id);
 }
+
+/** Shared prompt cap — enforced by the worker, the client message, and the textarea. */
+export const PLAYGROUND_PROMPT_MAX_CHARS = 500;

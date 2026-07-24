@@ -106,3 +106,85 @@ describe("playground agent client", () => {
     expect(result.code).toBe("aborted");
   });
 });
+
+describe("generateChart live-mode response handling", () => {
+  test("200 ok body parses envelope and model", async () => {
+    const envelope = {
+      spec: { edition: 2, data: { name: "penguins" }, layers: [{ geom: "point" }] },
+      interactions: { inspect: true },
+      title: "T",
+    };
+    const result = await generateChart(
+      { prompt: "hi", datasetId: "penguins" },
+      {
+        mode: "live",
+        apiUrl: "https://example.test",
+        fetchFn: () =>
+          Promise.resolve(
+            new Response(JSON.stringify({ ok: true, model: "m/x", envelope }), { status: 200 }),
+          ),
+      },
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.model).toBe("m/x");
+    expect(result.envelope.interactions.inspect).toBe(true);
+  });
+
+  test("429 error body maps code and passes retryAfterSeconds through", async () => {
+    const result = await generateChart(
+      { prompt: "hi", datasetId: "penguins" },
+      {
+        mode: "live",
+        apiUrl: "https://example.test",
+        fetchFn: () =>
+          Promise.resolve(
+            new Response(
+              JSON.stringify({
+                ok: false,
+                error: { code: "rate_limited", message: "slow down", retryAfterSeconds: 42 },
+              }),
+              { status: 429 },
+            ),
+          ),
+      },
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.code).toBe("rate_limited");
+    expect(result.retryAfterSeconds).toBe(42);
+  });
+
+  test("unrecognized error codes fall back to upstream_error", async () => {
+    const result = await generateChart(
+      { prompt: "hi", datasetId: "penguins" },
+      {
+        mode: "live",
+        apiUrl: "https://example.test",
+        fetchFn: () =>
+          Promise.resolve(
+            new Response(JSON.stringify({ ok: false, error: { code: "mystery" } }), {
+              status: 500,
+            }),
+          ),
+      },
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.code).toBe("upstream_error");
+  });
+
+  test("non-JSON response body maps to bad_output", async () => {
+    const result = await generateChart(
+      { prompt: "hi", datasetId: "penguins" },
+      {
+        mode: "live",
+        apiUrl: "https://example.test",
+        fetchFn: () => Promise.resolve(new Response("<html>oops</html>", { status: 200 })),
+      },
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.code).toBe("bad_output");
+  });
+});

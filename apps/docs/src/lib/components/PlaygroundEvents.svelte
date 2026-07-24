@@ -80,6 +80,17 @@
     border-top: 1px solid var(--line);
   }
 
+  summary::before {
+    content: "▸";
+    margin-right: 0.4rem;
+    color: var(--muted);
+    font-size: 0.7rem;
+  }
+
+  details[open] summary::before {
+    content: "▾";
+  }
+
   summary {
     display: flex;
     min-height: 44px;
@@ -145,7 +156,7 @@
     font: 0.7rem/1.5 var(--code-font);
   }
 
-  @media (max-width: 47.99rem) {
+  @media (max-width: 44.99rem) {
     .event-intro {
       display: grid;
     }

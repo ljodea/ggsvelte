@@ -10,6 +10,11 @@ import {
   totalMessageTokens,
 } from "../src/prompt";
 
+const okLimiters = {
+  RATE_LIMIT_IP: { limit: async () => ({ success: true }) },
+  RATE_LIMIT_GLOBAL: { limit: async () => ({ success: true }) },
+};
+
 function request(body: unknown, init: { origin?: string | null; method?: string } = {}): Request {
   const headers = new Headers({ "Content-Type": "application/json" });
   if (init.origin !== null && init.origin !== undefined) {
@@ -100,11 +105,13 @@ describe("handleGenerate", () => {
   test("prompt too long and unknown dataset", async () => {
     const long = await handleGenerate(request({ prompt: "x".repeat(501), datasetId: "penguins" }), {
       OPENROUTER_API_KEY: "sk-test",
+      ...okLimiters,
     });
     expect(((await long.json()) as { error: { code: string } }).error.code).toBe("prompt_too_long");
 
     const unknown = await handleGenerate(request({ prompt: "hi", datasetId: "nope" }), {
       OPENROUTER_API_KEY: "sk-test",
+      ...okLimiters,
     });
     expect(((await unknown.json()) as { error: { code: string } }).error.code).toBe(
       "unknown_dataset",
@@ -115,6 +122,7 @@ describe("handleGenerate", () => {
     const disabled = await handleGenerate(request({ prompt: "hi", datasetId: "penguins" }), {
       DISABLED: "true",
       OPENROUTER_API_KEY: "sk-test",
+      ...okLimiters,
     });
     expect(disabled.status).toBe(503);
     expect(((await disabled.json()) as { error: { code: string } }).error.code).toBe("disabled");
@@ -129,6 +137,7 @@ describe("handleGenerate", () => {
       RATE_LIMIT_IP: {
         limit: async () => ({ success: false }),
       },
+      RATE_LIMIT_GLOBAL: okLimiters.RATE_LIMIT_GLOBAL,
     });
     expect(res.status).toBe(429);
     const body = (await res.json()) as {
@@ -142,6 +151,7 @@ describe("handleGenerate", () => {
     const logs: Record<string, unknown>[] = [];
     const rate = await handleGenerate(request({ prompt: "hi", datasetId: "penguins" }), {
       OPENROUTER_API_KEY: "sk-live-secret-key-material",
+      ...okLimiters,
       log: (line) => logs.push(line),
       fetch: async () =>
         new Response(JSON.stringify({ error: { message: "Bearer sk-live-secret" } }), {
@@ -156,6 +166,7 @@ describe("handleGenerate", () => {
 
     const bad = await handleGenerate(request({ prompt: "hi", datasetId: "penguins" }), {
       OPENROUTER_API_KEY: "sk-live-secret-key-material",
+      ...okLimiters,
       log: (line) => logs.push(line),
       fetch: async () =>
         new Response("not-json", {
@@ -183,6 +194,7 @@ describe("handleGenerate", () => {
     };
     const res = await handleGenerate(request({ prompt: "scatter", datasetId: "penguins" }), {
       OPENROUTER_API_KEY: "sk-test-key",
+      ...okLimiters,
       fetch: async () =>
         new Response(
           JSON.stringify({
@@ -215,6 +227,7 @@ describe("handleGenerate", () => {
       }),
       {
         OPENROUTER_API_KEY: "sk-test",
+        ...okLimiters,
         fetch: async () => {
           called = true;
           return new Response("{}", { status: 200 });
@@ -225,11 +238,98 @@ describe("handleGenerate", () => {
     expect(res.status).toBe(400);
   });
 
-  test("token budget is enforced on assembled messages", () => {
+  test("token budget stays sane for a plain prompt", () => {
     const { messages } = buildChatMessages({
       datasetId: "penguins",
       prompt: "hello",
     });
     expect(totalMessageTokens(messages)).toBeLessThan(6000);
+  });
+
+  test("rejects requests whose assembled messages exceed MAX_INPUT_TOKENS", async () => {
+    let called = false;
+    const big = "x".repeat(7 * 1024);
+    const res = await handleGenerate(
+      request({
+        prompt: "fix",
+        datasetId: "penguins",
+        currentSpec: { pad: big },
+        priorSpec: { pad: big },
+        priorErrors: [
+          { code: "x", path: "/", message: "m".repeat(4000) },
+          { code: "y", path: "/", message: "m".repeat(4000) },
+        ],
+      }),
+      {
+        OPENROUTER_API_KEY: "sk-test",
+        ...okLimiters,
+        fetch: async () => {
+          called = true;
+          return new Response("{}", { status: 200 });
+        },
+      },
+    );
+    expect(res.status).toBe(400);
+    expect(called).toBe(false);
+  });
+
+  test("fails closed when the key is set but a limiter binding is missing", async () => {
+    let called = false;
+    const res = await handleGenerate(request({ prompt: "hi", datasetId: "penguins" }), {
+      OPENROUTER_API_KEY: "sk-test",
+      RATE_LIMIT_IP: okLimiters.RATE_LIMIT_IP,
+      // RATE_LIMIT_GLOBAL deliberately missing.
+      fetch: async () => {
+        called = true;
+        return new Response("{}", { status: 200 });
+      },
+    });
+    expect(res.status).toBe(503);
+    expect(((await res.json()) as { error: { code: string } }).error.code).toBe("disabled");
+    expect(called).toBe(false);
+  });
+
+  test("global limiter exhaustion returns 429", async () => {
+    const res = await handleGenerate(request({ prompt: "hi", datasetId: "penguins" }), {
+      OPENROUTER_API_KEY: "sk-test",
+      RATE_LIMIT_IP: okLimiters.RATE_LIMIT_IP,
+      RATE_LIMIT_GLOBAL: { limit: async () => ({ success: false }) },
+    });
+    expect(res.status).toBe(429);
+    expect(((await res.json()) as { error: { code: string } }).error.code).toBe("rate_limited");
+  });
+
+  test("origin-less requests (curl, eval tooling) are deliberately allowed", async () => {
+    // No Origin header: proceeds past CORS to the no-key disabled path.
+    const res = await handleGenerate(
+      request({ prompt: "hi", datasetId: "penguins" }, { origin: null }),
+      {},
+    );
+    expect(res.status).toBe(503);
+    expect(((await res.json()) as { error: { code: string } }).error.code).toBe("disabled");
+  });
+
+  test("oversized Content-Length is refused before parsing", async () => {
+    const headers = new Headers({
+      "Content-Type": "application/json",
+      "Content-Length": String(1024 * 1024),
+      Origin: "https://ggsvelte.sh",
+    });
+    const req = new Request("https://playground-api.ggsvelte.sh/v1/generate", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ prompt: "hi", datasetId: "penguins" }),
+    });
+    const res = await handleGenerate(req, { OPENROUTER_API_KEY: "sk-test", ...okLimiters });
+    expect(res.status).toBe(400);
+  });
+
+  test("unsupported methods return 405 with Allow", async () => {
+    const res = await handleGenerate(
+      request({ prompt: "hi", datasetId: "penguins" }, { method: "PUT" }),
+      {},
+    );
+    expect(res.status).toBe(405);
+    expect(res.headers.get("Allow")).toBe("POST, OPTIONS");
   });
 });

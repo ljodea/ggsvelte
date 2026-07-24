@@ -3,7 +3,7 @@
  */
 
 import { isPlaygroundDatasetId } from "../../../apps/docs/src/lib/playground-dataset-schemas";
-import { matchCorsOrigin } from "./cors";
+import { corsHeaders, matchCorsOrigin } from "./cors";
 import { apiError, SAFE_MESSAGES, statusForError, type PlaygroundApiResponse } from "./errors";
 import {
   buildChatMessages,
@@ -41,14 +41,26 @@ export interface GenerateRequestBody {
 }
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODELS = [
+/** One request body ceiling checked before parsing (cheap DoS guard). */
+const MAX_REQUEST_BODY_BYTES = 64 * 1024;
+export const DEFAULT_MODELS = [
   "google/gemini-2.0-flash-exp:free",
   "meta-llama/llama-3.3-70b-instruct:free",
 ];
 
-function byteLength(value: unknown): number {
-  return new TextEncoder().encode(typeof value === "string" ? value : JSON.stringify(value))
-    .byteLength;
+function byteLength(value: unknown): number | null {
+  // JSON.stringify can throw RangeError on adversarially deep input — treat as oversized.
+  try {
+    return new TextEncoder().encode(typeof value === "string" ? value : JSON.stringify(value))
+      .byteLength;
+  } catch {
+    return null;
+  }
+}
+
+function exceedsBytes(value: unknown, max: number): boolean {
+  const bytes = byteLength(value);
+  return bytes === null || bytes > max;
 }
 
 function parseAllowlist(raw: string | undefined): string[] {
@@ -81,7 +93,12 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-/** Never leak secrets or upstream bodies into responses (contract test). */
+/**
+ * Best-effort belt-and-braces leak check on the serialized response.
+ * The key never enters model context, so this mainly guards future refactors;
+ * a legitimate envelope matching these patterns is dropped as bad_output —
+ * an accepted false-positive cost (contract test).
+ */
 export function sanitizeForLeak(text: string): boolean {
   if (/sk-[a-zA-Z0-9_-]{10,}/u.test(text)) return false;
   if (/Authorization/iu.test(text) && /Bearer/iu.test(text)) return false;
@@ -94,17 +111,7 @@ export async function handleGenerate(request: Request, env: PlaygroundApiEnv): P
   const origin = request.headers.get("Origin");
   const matchedOrigin = matchCorsOrigin(origin);
   // CORS headers only when origin matched; missing Origin (same-origin tools) allowed.
-  const cors: HeadersInit =
-    origin === null
-      ? { Vary: "Origin" }
-      : matchedOrigin === null
-        ? { Vary: "Origin" }
-        : {
-            "Access-Control-Allow-Origin": matchedOrigin,
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-            Vary: "Origin",
-          };
+  const cors = corsHeaders(matchedOrigin);
 
   if (request.method === "OPTIONS") {
     if (origin !== null && matchedOrigin === null) {
@@ -114,11 +121,35 @@ export async function handleGenerate(request: Request, env: PlaygroundApiEnv): P
   }
 
   if (request.method !== "POST") {
-    return jsonResponse(apiError("bad_request", SAFE_MESSAGES.bad_request), 400, cors);
+    return jsonResponse(apiError("bad_request", SAFE_MESSAGES.bad_request), 405, {
+      ...cors,
+      Allow: "POST, OPTIONS",
+    });
   }
 
   if (origin !== null && matchedOrigin === null) {
     return jsonResponse(apiError("origin_forbidden", SAFE_MESSAGES.origin_forbidden), 403, cors);
+  }
+
+  // Fail CLOSED: a key with no rate limiting is an unshaped public proxy.
+  // Config drift (missing/misspelled binding) must pause generation loudly,
+  // never silently disable traffic shaping.
+  if (
+    env.OPENROUTER_API_KEY !== undefined &&
+    env.OPENROUTER_API_KEY !== "" &&
+    (env.RATE_LIMIT_IP === undefined || env.RATE_LIMIT_GLOBAL === undefined)
+  ) {
+    logOutcome(env, {
+      model: null,
+      outcome: "disabled",
+      repair_used: false,
+      duration: (env.now ?? Date.now)() - started,
+    });
+    return jsonResponse(
+      apiError("disabled", SAFE_MESSAGES.disabled),
+      statusForError("disabled"),
+      cors,
+    );
   }
 
   if (env.DISABLED === "1" || env.DISABLED === "true") {
@@ -168,6 +199,11 @@ export async function handleGenerate(request: Request, env: PlaygroundApiEnv): P
     }
   }
 
+  const contentLength = Number(request.headers.get("Content-Length") ?? "0");
+  if (Number.isFinite(contentLength) && contentLength > MAX_REQUEST_BODY_BYTES) {
+    return jsonResponse(apiError("bad_request", SAFE_MESSAGES.oversized_input), 400, cors);
+  }
+
   let body: GenerateRequestBody;
   try {
     body = (await request.json()) as GenerateRequestBody;
@@ -189,10 +225,10 @@ export async function handleGenerate(request: Request, env: PlaygroundApiEnv): P
     return jsonResponse(apiError("unknown_dataset", SAFE_MESSAGES.unknown_dataset), 400, cors);
   }
 
-  if (body.currentSpec !== undefined && byteLength(body.currentSpec) > CURRENT_SPEC_MAX_BYTES) {
+  if (body.currentSpec !== undefined && exceedsBytes(body.currentSpec, CURRENT_SPEC_MAX_BYTES)) {
     return jsonResponse(apiError("bad_request", SAFE_MESSAGES.oversized_input), 400, cors);
   }
-  if (body.priorSpec !== undefined && byteLength(body.priorSpec) > PRIOR_SPEC_MAX_BYTES) {
+  if (body.priorSpec !== undefined && exceedsBytes(body.priorSpec, PRIOR_SPEC_MAX_BYTES)) {
     return jsonResponse(apiError("bad_request", SAFE_MESSAGES.oversized_input), 400, cors);
   }
 

@@ -118,11 +118,23 @@
     );
   }
 
-  // Crossfade on promote: brief opacity when candidate clears after paint.
+  // Crossfade on promote: one 150–200ms opacity beat when the candidate
+  // clears after a successful paint (design decision 6A). Reduced motion is
+  // handled in CSS; everything else on the page stays deliberately still.
+  let hadCandidate = false;
   $effect(() => {
-    if (candidate === null) return;
-    // When candidate appears, prepare; promote is handled by parent remount.
-    promoteFade = false;
+    if (candidate !== null) {
+      hadCandidate = true;
+      promoteFade = false;
+      return;
+    }
+    if (!hadCandidate) return;
+    hadCandidate = false;
+    promoteFade = true;
+    const id = setTimeout(() => {
+      promoteFade = false;
+    }, 220);
+    return () => clearTimeout(id);
   });
 </script>
 
@@ -325,6 +337,10 @@
     color: var(--accent);
   }
 
+  .cap:hover:not(:disabled):not(.active) {
+    color: var(--accent);
+  }
+
   .cap:disabled {
     opacity: 0.45;
     cursor: not-allowed;
@@ -403,6 +419,11 @@
     .capability-row {
       display: grid;
       grid-template-columns: 1fr;
+    }
+
+    /* Full-width mode rows stay left-aligned like every other row. */
+    .cap {
+      text-align: left;
     }
 
     .cap.undo {

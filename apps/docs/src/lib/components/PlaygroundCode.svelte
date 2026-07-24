@@ -19,14 +19,15 @@
     outputs,
     rendered,
     enabled,
-    handoffText,
+    getHandoffText,
     onShare,
     shareStatus = "",
   }: {
     outputs: readonly PlaygroundOutput[];
     rendered: PortableSpec;
     enabled: boolean;
-    handoffText: string;
+    /** Lazy — the ~10KB prompt is assembled only when the user copies it. */
+    getHandoffText: () => string;
     onShare: () => void;
     shareStatus?: string;
   } = $props();
@@ -79,7 +80,7 @@
   async function copyHandoff(): Promise<void> {
     await tick();
     if (handoffSource === undefined) return;
-    const result = await copyText(handoffText, handoffSource);
+    const result = await copyText(getHandoffText(), handoffSource);
     handoffStatus = playgroundShareCopyStatus(result);
   }
 </script>

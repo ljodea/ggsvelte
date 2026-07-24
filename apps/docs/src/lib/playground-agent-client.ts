@@ -47,6 +47,17 @@ export interface GenerateChartOptions {
 
 function resolveMode(explicit?: "live" | "mock"): "live" | "mock" {
   if (explicit !== undefined) return explicit;
+  // Test/rollout hook: ?gg-api=live|mock overrides the build-time mode.
+  // Transport-only switch — validation and the pipeline are identical.
+  try {
+    if (typeof window !== "undefined") {
+      const param = new URLSearchParams(window.location.search).get("gg-api");
+      if (param === "live") return "live";
+      if (param === "mock") return "mock";
+    }
+  } catch {
+    // ignore
+  }
   try {
     const env = (
       import.meta as ImportMeta & {
@@ -120,6 +131,15 @@ export async function generateChart(
   const apiUrl = resolveApiUrl(options.apiUrl);
   const fetchFn = options.fetchFn ?? fetch;
 
+  // 30s client ceiling so a hung worker cannot leave the UI busy forever;
+  // a timeout rejection maps to the degraded "network" path below.
+  const signal =
+    options.signal === undefined
+      ? AbortSignal.timeout(30_000)
+      : typeof AbortSignal.any === "function"
+        ? AbortSignal.any([options.signal, AbortSignal.timeout(30_000)])
+        : options.signal;
+
   let response: Response;
   try {
     response = await fetchFn(`${apiUrl}/v1/generate`, {
@@ -132,17 +152,11 @@ export async function generateChart(
         ...(request.priorSpec === undefined ? {} : { priorSpec: request.priorSpec }),
         ...(request.priorErrors === undefined ? {} : { priorErrors: request.priorErrors }),
       }),
-      signal: options.signal,
+      signal,
     });
   } catch (error) {
     // CSP block, DNS, offline, AbortError — TypeError before HTTP status (OV8-2).
-    if (error instanceof DOMException && error.name === "AbortError") {
-      return {
-        ok: false,
-        code: "aborted",
-        message: messageForAgentError("aborted"),
-      };
-    }
+    // DOMException extends Error, so one branch covers both.
     if (error instanceof Error && error.name === "AbortError") {
       return {
         ok: false,

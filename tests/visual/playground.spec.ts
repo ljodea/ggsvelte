@@ -237,14 +237,19 @@ test("example prompts generate instantly without network (canned envelopes)", as
   await expect(page.locator(".active-chart .gg-title")).toContainText(/Penguin/u);
 });
 
-test("free-text agent happy path via page.route stub", async ({ page }) => {
+test("free-text agent happy path exercises the live request path", async ({ page }) => {
   await installCandidatePhaseLog(page);
+  let networkHits = 0;
+  const seenBodies: Array<{ prompt?: string; datasetId?: string; currentSpec?: unknown }> = [];
   await page.route("**/v1/generate", async (route) => {
+    networkHits += 1;
     const body = route.request().postDataJSON() as {
       prompt?: string;
       datasetId?: string;
+      currentSpec?: unknown;
       priorErrors?: unknown;
     };
+    seenBodies.push(body);
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -287,10 +292,9 @@ test("free-text agent happy path via page.route stub", async ({ page }) => {
     });
   });
 
-  // The client defaults to mock mode when VITE_PLAYGROUND_API_MODE is unset,
-  // so free-text generation resolves from the canned mock envelope; the
-  // page.route stub above covers builds configured for live mode.
-  await page.goto("/playground");
+  // ?gg-api=live forces the live transport so the route stub is actually
+  // exercised (the static test build otherwise defaults to mock mode).
+  await page.goto("/playground?gg-api=live");
   await settleVisualState(page);
   await page.getByLabel("Rewrite this chart").fill("Make a custom scatter for testing");
   const before = await candidatePhaseLog(page);
@@ -306,26 +310,120 @@ test("free-text agent happy path via page.route stub", async ({ page }) => {
     })
     .toBe(true);
 
-  // Mock mode uses canned penguin envelope — title from mock.
-  await expect(page.locator(".active-chart .gg-title")).toBeVisible();
+  // The stub must actually be hit with the typed prompt. The first request's
+  // currentSpec carries the sample-seeded chart (sample rows are not a curated
+  // dataset, so they ship inline — nothing to elide yet).
+  expect(networkHits).toBe(1);
+  expect(seenBodies[0]?.prompt).toBe("Make a custom scatter for testing");
+  expect(seenBodies[0]?.datasetId).toBe("penguins");
+  expect(seenBodies[0]?.currentSpec).toBeDefined();
+
+  await expect(page.locator(".active-chart .gg-title")).toHaveText("Stubbed agent chart");
   await expect(page.getByRole("tab", { name: "Svelte" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Spec (JSON)" })).toBeVisible();
+
+  // A refinement of the agent chart (curated rows now inlined in committed)
+  // must elide back to named data — never contradicting the system prompt.
+  await page.getByLabel("Rewrite this chart").fill("Now facet it by species");
+  await page.getByRole("button", { name: "Generate" }).click();
+  await expect.poll(() => networkHits).toBe(2);
+  expect(seenBodies[1]?.currentSpec).toMatchObject({ data: { name: "penguins" } });
 });
 
-test("degraded mode on aborted fetch shows alert and keeps samples usable", async ({ page }) => {
-  // Force live client by intercepting... mock mode won't hit network.
-  // Simulate failure by running generate in live via evaluating a path is hard.
-  // Instead exercise example path + sample links remain after failed state by
-  // using the agent's fail path through Abort on Cancel.
+test("repair round sends raw SpecError contract in the second request", async ({ page }) => {
+  await installCandidatePhaseLog(page);
+  const bodies: Array<{ priorSpec?: unknown; priorErrors?: Array<Record<string, unknown>> }> = [];
+  await page.route("**/v1/generate", async (route) => {
+    const body = route.request().postDataJSON() as (typeof bodies)[number];
+    bodies.push(body);
+    const goodSpec = {
+      edition: 2,
+      data: { name: "penguins" },
+      layers: [{ geom: "point", aes: { x: { field: "flipper" }, y: { field: "mass" } } }],
+      labs: { title: "Repaired chart" },
+      height: 400,
+    };
+    const badSpec = {
+      ...goodSpec,
+      layers: [{ geom: "point", aes: { x: { field: "no_such_field" }, y: { field: "mass" } } }],
+    };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        model: "stub/model",
+        envelope: {
+          spec: bodies.length === 1 ? badSpec : goodSpec,
+          interactions: {
+            inspect: true,
+            select: false,
+            zoom: false,
+            legendFilter: false,
+            legendFocus: false,
+          },
+          title: "Repaired chart",
+        },
+      }),
+    });
+  });
 
-  await page.goto("/playground");
+  await page.goto("/playground?gg-api=live");
+  await settleVisualState(page);
+  await page.getByLabel("Rewrite this chart").fill("Chart something that needs repair");
+  await page.getByRole("button", { name: "Generate" }).click();
+
+  await expect(page.locator(".active-chart .gg-title")).toHaveText("Repaired chart");
+  expect(bodies.length).toBe(2);
+  // The repair request carries the prior envelope and the raw SpecError
+  // agent contract (code/path/message survive; never stripped diagnostics).
+  expect(bodies[1]?.priorSpec).toBeDefined();
+  const firstError = bodies[1]?.priorErrors?.[0];
+  expect(firstError).toBeDefined();
+  expect(firstError).toHaveProperty("code");
+  expect(firstError).toHaveProperty("path");
+  expect(firstError).toHaveProperty("message");
+});
+
+test("degraded mode on failed fetch shows alert and keeps samples usable", async ({ page }) => {
+  await page.route("**/v1/generate", async (route) => {
+    await route.abort("failed");
+  });
+
+  await page.goto("/playground?gg-api=live");
   await settleVisualState(page);
   await page.getByLabel("Rewrite this chart").fill("Something novel that uses the generator");
-  // Cancel immediately after generate (race); if too fast may not matter.
-  // Use sample after: always works.
-  await loadSample(page, "Monthly line");
+  await page.getByRole("button", { name: "Generate" }).click();
+
+  // One degradation design: quiet alert, previous chart intact, samples primary.
+  const alert = page.getByRole("alert");
+  await expect(alert).toBeVisible();
+  await expect(alert).toContainText("Could not reach the generate service");
+  await expect(page.locator(".active-chart .gg-title")).toBeVisible();
+  await expect(alert.getByRole("button", { name: "Monthly line" })).toBeVisible();
+
+  // Samples still work from the failed state (the alert's primary next action).
+  await alert.getByRole("button", { name: "Monthly line" }).click();
   await expect(page.getByText("Rendered monthly-line.")).toBeVisible();
   await expect(page.locator(".active-chart .gg-title")).toHaveText("Monthly series");
+});
+
+test("cancel during generation reaches the aborted state", async ({ page }) => {
+  await page.route("**/v1/generate", async () => {
+    // Never fulfil — the request hangs until the client aborts it.
+    await new Promise(() => {});
+  });
+
+  await page.goto("/playground?gg-api=live");
+  await settleVisualState(page);
+  await page.getByLabel("Rewrite this chart").fill("Slow generation to cancel");
+  await page.getByRole("button", { name: "Generate" }).click();
+  await expect(page.getByRole("button", { name: "Cancel" })).toBeVisible();
+  await page.getByRole("button", { name: "Cancel" }).click();
+
+  await expect(page.getByRole("alert")).toContainText("Generation cancelled");
+  // The machine is idle again — Generate is clickable.
+  await expect(page.getByRole("button", { name: "Generate" })).toBeEnabled();
 });
 
 test("capability toggles change codegen output", async ({ page }) => {

@@ -195,20 +195,6 @@ export const PLAYGROUND_DEFAULT_PROMPT = "Make the points larger and facet by sp
 
 export const PLAYGROUND_DEFAULT_DATASET: PlaygroundDatasetId = "penguins";
 
-export function findExamplePrompt(id: string): PlaygroundExamplePrompt | undefined {
-  return PLAYGROUND_EXAMPLE_PROMPTS.find((entry) => entry.id === id);
-}
-
-export function findExamplePromptByText(
-  prompt: string,
-  datasetId: string,
-): PlaygroundExamplePrompt | undefined {
-  const normalized = prompt.trim().toLowerCase();
-  return PLAYGROUND_EXAMPLE_PROMPTS.find(
-    (entry) => entry.datasetId === datasetId && entry.prompt.trim().toLowerCase() === normalized,
-  );
-}
-
 /** Mock/dev canned envelope when the worker is not called. */
 export function mockGenerateEnvelope(
   datasetId: PlaygroundDatasetId = "penguins",

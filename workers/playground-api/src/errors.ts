@@ -1,3 +1,5 @@
+import { PLAYGROUND_PROMPT_MAX_CHARS } from "../../../apps/docs/src/lib/playground-dataset-schemas";
+
 export type PlaygroundApiErrorCode =
   | "bad_request"
   | "prompt_too_long"
@@ -48,8 +50,10 @@ export function statusForError(code: PlaygroundApiErrorCode): number {
     case "bad_request":
     case "prompt_too_long":
     case "unknown_dataset":
-    case "bad_output":
       return 400;
+    case "bad_output":
+      // Upstream returned unusable output — server-class, not a client error.
+      return 502;
     case "origin_forbidden":
       return 403;
     case "rate_limited":
@@ -65,7 +69,7 @@ export function statusForError(code: PlaygroundApiErrorCode): number {
 /** User-facing messages — never echo upstream bodies. */
 export const SAFE_MESSAGES = {
   bad_request: "The request is invalid.",
-  prompt_too_long: "Prompt is too long (max 500 characters).",
+  prompt_too_long: `Prompt is too long (max ${PLAYGROUND_PROMPT_MAX_CHARS} characters).`,
   unknown_dataset: "Unknown dataset.",
   origin_forbidden: "Origin is not allowed.",
   rate_limited: "Too many requests. Try again shortly.",

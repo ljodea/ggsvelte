@@ -5,6 +5,7 @@
  */
 
 import {
+  PLAYGROUND_PROMPT_MAX_CHARS,
   playgroundDatasetSchema,
   type PlaygroundDatasetSchema,
 } from "../../../apps/docs/src/lib/playground-dataset-schemas";
@@ -12,7 +13,7 @@ import {
 /** Hard byte budget for the assembled system prompt (test-asserted). */
 export const SYSTEM_PROMPT_MAX_BYTES = 12_000;
 
-export const PROMPT_MAX_CHARS = 500;
+export const PROMPT_MAX_CHARS = PLAYGROUND_PROMPT_MAX_CHARS;
 export const PRIOR_SPEC_MAX_BYTES = 8 * 1024;
 export const CURRENT_SPEC_MAX_BYTES = 8 * 1024;
 export const PRIOR_ERRORS_MAX = 5;
@@ -91,7 +92,12 @@ Sample rows (do not copy into the spec — use data:{"name":"${schema.id}"}):
 ${samples}`;
 }
 
+// Prompt content is static per dataset — assemble (and budget-check) once.
+const assembledPrompts = new Map<string, string>();
+
 export function assembleSystemPrompt(datasetId: string): string {
+  const cached = assembledPrompts.get(datasetId);
+  if (cached !== undefined) return cached;
   const schema = playgroundDatasetSchema(datasetId);
   if (schema === undefined) {
     throw new Error(`unknown dataset: ${datasetId}`);
@@ -101,22 +107,8 @@ export function assembleSystemPrompt(datasetId: string): string {
   if (bytes > SYSTEM_PROMPT_MAX_BYTES) {
     throw new Error(`system prompt exceeds budget: ${bytes} > ${SYSTEM_PROMPT_MAX_BYTES}`);
   }
+  assembledPrompts.set(datasetId, prompt);
   return prompt;
-}
-
-/** Trimmed contract reused by the client agent-handoff copy button. */
-export function trimmedHandoffContract(): string {
-  return `You emit ggsvelte PortableSpec JSON charts.
-
-Rules:
-- data is either {"values":[rows]} (your data) or {"name":"dataset"} when using a named set.
-- Aes uses {"field":"col"} only — bare strings are invalid in JSON specs.
-- layers: [{geom, stat?, position?, aes?, params?}]
-- Geoms: point, line, col, bar, histogram, area, rule, text, smooth, boxplot, density.
-- Interactions are GGPlot props, not spec fields: inspect, select ("point"|"interval"), zoom, legendFilter, legendFocus.
-- Prefer minimal complete specs with labs.title/x/y.
-
-When refining an existing chart, return the full modified spec.`;
 }
 
 export function estimateTokens(text: string): number {

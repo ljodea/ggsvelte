@@ -4,6 +4,7 @@ import { normalize, validate } from "@ggsvelte/spec";
 
 import { PLAYGROUND_DATASET_SCHEMAS } from "../apps/docs/src/lib/playground-dataset-schemas";
 import {
+  elidePlaygroundDatasetRows,
   inlinePlaygroundDatasetRows,
   playgroundDatasetRows,
 } from "../apps/docs/src/lib/playground-datasets";
@@ -63,7 +64,7 @@ describe("playground datasets", () => {
     }
   });
 
-  test("named data alone fails data-aware checks until inlined", () => {
+  test("named dataset validates after inlining", () => {
     const shape = validate({
       edition: 2,
       data: { name: "penguins" },
@@ -74,14 +75,59 @@ describe("playground datasets", () => {
         },
       ],
     });
-    // Shape may pass; after normalize + limits without rows, unknown fields may fire.
-    if (shape.ok) {
-      const normalized = normalize(shape.spec);
-      // Without rows, field existence is not always checked — just ensure inlining works.
-      const inlined = inlinePlaygroundDatasetRows(normalized, "penguins");
-      const checked = validate(inlined);
-      expect(checked.ok).toBe(true);
-    }
+    // Assert explicitly — a silent shape rejection must fail this test,
+    // not skip its body (testing review).
+    expect(shape.ok).toBe(true);
+    if (!shape.ok) return;
+    const normalized = normalize(shape.spec);
+    const inlined = inlinePlaygroundDatasetRows(normalized, "penguins");
+    const checked = validate(inlined);
+    expect(checked.ok).toBe(true);
+  });
+
+  test("elidePlaygroundDatasetRows is the inverse of inlining", () => {
+    const named = {
+      edition: 2,
+      data: { name: "penguins" },
+      layers: [{ geom: "point", aes: { x: { field: "flipper" }, y: { field: "mass" } } }],
+    };
+    const shape = validate(named);
+    expect(shape.ok).toBe(true);
+    if (!shape.ok) return;
+    const inlined = inlinePlaygroundDatasetRows(normalize(shape.spec), "penguins");
+    const elided = elidePlaygroundDatasetRows(inlined, "penguins");
+    expect(elided.data).toEqual({ name: "penguins" });
+    // Rows that do NOT match the curated dataset pass through untouched.
+    const custom = { ...inlined, data: { values: [{ flipper: 1, mass: 2, species: "x" }] } };
+    expect(elidePlaygroundDatasetRows(custom, "penguins")).toBe(custom);
+  });
+
+  test("invalid envelope keeps raw SpecError contract for the repair round", () => {
+    const result = validateAgentEnvelope(
+      {
+        spec: {
+          edition: 2,
+          data: { name: "penguins" },
+          layers: [{ geom: "point", aes: { x: { field: "not_a_field" }, y: { field: "mass" } } }],
+        },
+        interactions: {
+          inspect: true,
+          select: false,
+          zoom: false,
+          legendFilter: false,
+          legendFocus: false,
+        },
+        title: null,
+      },
+      "penguins",
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.errors.length).toBeGreaterThan(0);
+    // The raw SpecError agent contract survives to the repair payload.
+    expect(result.errors[0]).toHaveProperty("code");
+    expect(result.errors[0]).toHaveProperty("path");
+    expect(result.errors[0]).toHaveProperty("message");
   });
 });
 
@@ -106,5 +152,25 @@ describe("agent handoff prompt", () => {
     expect(text).toContain("Current chart");
     expect(text).toContain("Make it interactive");
     expect(text.length).toBeLessThanOrEqual(AGENT_HANDOFF_MAX_CHARS);
+  });
+});
+
+describe("agent handoff size cap", () => {
+  test("large specs stay under AGENT_HANDOFF_MAX_CHARS", () => {
+    const rows = Array.from({ length: 400 }, (_, i) => ({
+      x: i,
+      y: i * 2,
+      label: `row-${i}-padding-padding-padding`,
+    }));
+    const text = agentHandoffPrompt({
+      currentSpec: {
+        edition: 2,
+        data: { values: rows },
+        layers: [{ geom: "point", aes: { x: { field: "x" }, y: { field: "y" } } }],
+      },
+      userGoal: "continue from this chart",
+    });
+    expect(text.length).toBeLessThanOrEqual(AGENT_HANDOFF_MAX_CHARS);
+    expect(text).toContain("bun add @ggsvelte/svelte");
   });
 });

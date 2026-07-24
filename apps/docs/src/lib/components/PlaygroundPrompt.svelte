@@ -2,6 +2,7 @@
   import UiButton from "$lib/components/UiButton.svelte";
   import {
     PLAYGROUND_DATASET_SCHEMAS,
+    PLAYGROUND_PROMPT_MAX_CHARS,
     type PlaygroundDatasetId,
   } from "$lib/playground-dataset-schemas";
   import {
@@ -76,8 +77,11 @@
         id="playground-prompt"
         class="prompt-input"
         rows="1"
+        maxlength={PLAYGROUND_PROMPT_MAX_CHARS}
         bind:value={prompt}
-        aria-describedby="playground-phase playground-alert"></textarea>
+        aria-describedby={failure !== null
+          ? "playground-phase playground-alert"
+          : "playground-phase"}></textarea>
     </div>
     <div class="dataset-field">
       <label class="dataset-label" for="playground-dataset">Dataset</label>
@@ -307,8 +311,13 @@
   }
 
   @media (max-width: 44.99rem) {
-    .prompt-input {
+    /* Stack: full-width prompt, then dataset + Generate on one row. */
+    .prompt-field {
       flex: 1 1 100%;
+    }
+
+    .dataset-field {
+      flex: 1 1 auto;
     }
   }
 </style>

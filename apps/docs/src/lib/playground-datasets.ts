@@ -132,14 +132,21 @@ export function inlinePlaygroundDatasetRows(spec: PortableSpec, datasetId: strin
   };
 }
 
-/** Variable name used in emitted Svelte snippets for a dataset. */
-export function playgroundDatasetVarName(id: PlaygroundDatasetId): string {
-  switch (id) {
-    case "penguins":
-      return "penguins";
-    case "monthly":
-      return "monthly";
-    case "categories":
-      return "categories";
+/**
+ * Inverse of inlinePlaygroundDatasetRows for outgoing refinement requests:
+ * when data.values matches a curated dataset verbatim, collapse back to
+ * `data: { name }` so the request stays small and never contradicts the
+ * system prompt's "never inline rows" rule. Non-matching specs pass through
+ * (the worker's byte caps still apply).
+ */
+export function elidePlaygroundDatasetRows(spec: PortableSpec, datasetId: string): PortableSpec {
+  const data = spec.data;
+  if (data === undefined || !("values" in data) || !Array.isArray(data.values)) {
+    return spec;
   }
+  const id = resolvePlaygroundDatasetId(datasetId);
+  if (id === null) return spec;
+  const rows = playgroundDatasetRows(id);
+  if (JSON.stringify(data.values) !== JSON.stringify(rows)) return spec;
+  return { ...spec, data: { name: id } };
 }

@@ -19,6 +19,7 @@ import { isPlaygroundDatasetId } from "../../../apps/docs/src/lib/playground-dat
 import { inlinePlaygroundDatasetRows } from "../../../apps/docs/src/lib/playground-datasets";
 import { parsePlaygroundAgentEnvelope } from "../../../apps/docs/src/lib/playground-agent-envelope";
 import { buildChatMessages } from "../src/prompt";
+import { DEFAULT_MODELS } from "../src/handler";
 
 const GATE = 0.7;
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -128,10 +129,7 @@ async function main(): Promise<void> {
     process.exit(2);
   }
 
-  const models = (
-    process.env.MODEL_ALLOWLIST ??
-    "google/gemini-2.0-flash-exp:free,meta-llama/llama-3.3-70b-instruct:free"
-  )
+  const models = (process.env.MODEL_ALLOWLIST ?? DEFAULT_MODELS.join(","))
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);

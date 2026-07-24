@@ -1,4 +1,8 @@
-/** CORS allowlist for the playground generate API. */
+/**
+ * CORS allowlist for the playground generate API.
+ * localhost origins ship in production deliberately: the endpoint is public
+ * (CORS is UX hygiene, not auth) and local docs dev needs the live worker.
+ */
 
 export const CORS_ALLOWLIST = [
   "https://ggsvelte.sh",
