@@ -175,7 +175,7 @@ describe("assemblePortableSpec", () => {
     ).toBeNull();
   });
 
-  it("folds non-mark plotLayers after gates; props win over children this slice", () => {
+  it("folds non-mark plotLayers after props; children win over props (D2)", () => {
     const assembled = assemblePortableSpec({
       data: rows,
       aes: { x: "x", y: "y" },
@@ -195,11 +195,12 @@ describe("assemblePortableSpec", () => {
         },
       ],
       labs: { title: "from-prop" },
+      theme: "light",
     });
     expect(assembled).not.toBeNull();
+    // Children-last: child theme/labs win over prop theme/labs.
     expect(assembled!.theme).toBe("dark");
-    // Props-last: prop labs win over plot-layer labs this slice.
-    expect(assembled!.labs?.title).toBe("from-prop");
+    expect(assembled!.labs?.title).toBe("from-child");
   });
 
   it("spec prop wins over non-mark plotLayers (gate)", () => {

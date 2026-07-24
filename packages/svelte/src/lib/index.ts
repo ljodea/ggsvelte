@@ -95,9 +95,55 @@ export { default as GeomRaster } from "./geoms/GeomRaster.svelte";
 export { default as GeomRibbon } from "./geoms/GeomRibbon.svelte";
 export { default as GeomSegment } from "./geoms/GeomSegment.svelte";
 export { registerLayer, registerPlotLayer } from "./geoms/registry.svelte.js";
-export type { Layer, LayerDescriptor, LayerRegistry } from "./geoms/registry.svelte.js";
+export type {
+  Layer,
+  LayerDescriptor,
+  LayerRegistry,
+  MarkLayerDescriptor,
+} from "./geoms/registry.svelte.js";
 export { createGeomLayer } from "./geoms/factory.svelte.js";
 export type { GeomProps } from "./geoms/factory.svelte.js";
+
+// Theme children (#659 slice 2) — stable-intent: 1:1 mirror of ThemeSpec /
+// THEME_NAMES; destination for the deprecated `theme` prop (since 0.11.0).
+/** @lifecycle stable-intent */
+export { default as Theme } from "./theme/Theme.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeDefault } from "./theme/ThemeDefault.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeLight } from "./theme/ThemeLight.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeDark } from "./theme/ThemeDark.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeMinimal } from "./theme/ThemeMinimal.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeGgplot2 } from "./theme/ThemeGgplot2.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeClassic } from "./theme/ThemeClassic.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeHrbr } from "./theme/ThemeHrbr.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeFew } from "./theme/ThemeFew.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeClean } from "./theme/ThemeClean.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeFivethirtyeight } from "./theme/ThemeFivethirtyeight.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeEconomist } from "./theme/ThemeEconomist.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeTufte } from "./theme/ThemeTufte.svelte";
+
+// Deprecation diagnostics (sibling union to InteractionDiagnostic)
+export {
+  DEPRECATION_DIAGNOSTIC_CATALOG,
+  deprecatedPropDiagnostic,
+  isDeprecationDiagnostic,
+} from "./diagnostics/deprecation.js";
+export type {
+  DeprecationDiagnostic,
+  DeprecationDiagnosticCode,
+  PlotDiagnostic,
+} from "./diagnostics/deprecation.js";
 
 // Spec surface (builder + canonicalizer + validation)
 export {
@@ -336,6 +382,7 @@ export {
   LINETYPE_NAMES,
   POINT_SHAPE_NAMES,
   STYLE_AESTHETIC_GEOMS,
+  THEME_NAMES,
   scaleAlpha,
   scaleAlphaBinned,
   scaleAlphaContinuous,

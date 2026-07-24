@@ -24,10 +24,10 @@ import { gg, normalize } from "@ggsvelte/spec";
 import type { PlotInteractionScope, ZoomInput } from "../interaction/interaction.js";
 
 /**
- * Structural registry descriptor (live getters allowed). Kept local so this
+ * Structural mark-layer descriptor (live getters allowed). Kept local so this
  * module does not import `registry.svelte.ts`.
  */
-export type LayerDescriptorLike = {
+export type MarkLayerDescriptorLike = {
   readonly geom: GeomName;
   readonly stat?: StatName | undefined;
   readonly aes?: AesInput | undefined;
@@ -40,12 +40,12 @@ export type LayerDescriptorLike = {
 
 /**
  * Structural non-mark (and optional mark) plot layer. Same discipline as
- * LayerDescriptorLike: no import of the `.svelte.ts` registry module.
+ * MarkLayerDescriptorLike: no import of the `.svelte.ts` registry module.
  * Live getters allowed on `value`. Module-private (structural callers pass
  * compatible objects; not a public export).
  */
 type PlotLayerLike =
-  | { readonly kind: "mark"; readonly descriptor: LayerDescriptorLike }
+  | { readonly kind: "mark"; readonly descriptor: MarkLayerDescriptorLike }
   | { readonly kind: "scale"; readonly value: Scales }
   | { readonly kind: "theme"; readonly value: ThemeName | ThemeSpec }
   | { readonly kind: "coord"; readonly value: CoordSpec | "flip" }
@@ -82,7 +82,7 @@ function layerDataRef(
 }
 
 /** Convert a registry descriptor into a LayerInput (reads live getters). */
-export function toLayerInput(descriptor: LayerDescriptorLike): LayerInput {
+export function toLayerInput(descriptor: MarkLayerDescriptorLike): LayerInput {
   return {
     geom: descriptor.geom,
     ...(descriptor.stat !== undefined && { stat: descriptor.stat }),
@@ -107,8 +107,9 @@ export type AssemblePortableSpecInput = {
   readonly layers: LayerInput[];
   /**
    * Non-mark registry layers (theme/scale/coord/facet/labs/guides/legend).
-   * Folded after both gates, in registration order, then props win over them
-   * this slice (child-wins precedence lands later with the advisory channel).
+   * Folded after both gates and after props, in registration order — children
+   * win over props so mid-migration files that keep the deprecated prop still
+   * pick up the destination child form (D2 / #659).
    */
   readonly plotLayers?: readonly PlotLayerLike[];
   readonly facet?: FacetInput;
@@ -189,10 +190,9 @@ export function assemblePortableSpec(input: AssemblePortableSpecInput): Portable
   if (input.layers.length === 0) return null;
   let builder = gg(input.data as DataInput, input.aes);
   for (const layer of input.layers) builder = builder.layer(layer);
-  // Non-mark layers first (registration order), then props — props win this slice.
-  for (const plotLayer of input.plotLayers ?? []) {
-    builder = applyPlotLayer(builder, plotLayer);
-  }
+  // Props first, then non-mark children (registration order) — children win (D2).
+  // REPLACE families (theme/coord/facet): last write wins.
+  // MERGE families (scales/guides/labs/legend): {...prev, ...next} puts child last.
   if (input.facet !== undefined) builder = builder.facet(input.facet);
   if (input.coord !== undefined) builder = builder.coord(input.coord);
   if (input.a11y !== undefined) builder = builder.a11y(input.a11y);
@@ -201,6 +201,9 @@ export function assemblePortableSpec(input: AssemblePortableSpecInput): Portable
   if (input.legend !== undefined) builder = builder.legend(input.legend);
   if (input.theme !== undefined) builder = builder.theme(input.theme);
   if (input.labs !== undefined) builder = builder.labs(input.labs);
+  for (const plotLayer of input.plotLayers ?? []) {
+    builder = applyPlotLayer(builder, plotLayer);
+  }
   return builder.spec();
 }
 

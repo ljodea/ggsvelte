@@ -6,7 +6,7 @@
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
-import { LayerRegistry, type LayerDescriptor } from "../../src/lib/geoms/registry.svelte.js";
+import { LayerRegistry, type MarkLayerDescriptor } from "../../src/lib/geoms/registry.svelte.js";
 import PlotLayerLiveTheme from "../fixtures/PlotLayerLiveTheme.svelte";
 import PlotLayerRegisterChild from "../fixtures/PlotLayerRegisterChild.svelte";
 import PlotLayerRegistryPair from "../fixtures/PlotLayerRegistryPair.svelte";
@@ -16,7 +16,7 @@ import RegistryPair from "../fixtures/RegistryPair.svelte";
 import { render } from "../helpers/render.js";
 import { trackLayerCount } from "../helpers/track-layers.svelte.js";
 
-function desc(geom: LayerDescriptor["geom"], tag?: string): LayerDescriptor {
+function desc(geom: MarkLayerDescriptor["geom"], tag?: string): MarkLayerDescriptor {
   return {
     geom,
     ...(tag === undefined ? {} : { params: { tag } }),

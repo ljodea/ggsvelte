@@ -3377,6 +3377,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "DEPRECATION_DIAGNOSTIC_CATALOG": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "DataInput": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3390,6 +3394,14 @@
           "lifecycle": "experimental"
         },
         "DensityParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DeprecationDiagnostic": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DeprecationDiagnosticCode": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3709,6 +3721,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "MarkLayerDescriptor": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "NonEmptyReadonlyArray": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3734,6 +3750,10 @@
           "lifecycle": "experimental"
         },
         "PlotDatum": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PlotDiagnostic": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3985,6 +4005,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "THEME_NAMES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "TemporalColorScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4037,6 +4061,54 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "Theme": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeClassic": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeClean": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeDark": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeDefault": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeEconomist": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeFew": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeFivethirtyeight": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeGgplot2": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeHrbr": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeLight": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeMinimal": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ThemeName": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4048,6 +4120,10 @@
         "ThemeTokens": {
           "kind": "type",
           "lifecycle": "experimental"
+        },
+        "ThemeTufte": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
         },
         "Tooltip": {
           "kind": "value",
@@ -4122,6 +4198,10 @@
           "lifecycle": "experimental"
         },
         "createPlotInteraction": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "deprecatedPropDiagnostic": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4202,6 +4282,10 @@
           "lifecycle": "experimental"
         },
         "guides": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "isDeprecationDiagnostic": {
           "kind": "value",
           "lifecycle": "experimental"
         },

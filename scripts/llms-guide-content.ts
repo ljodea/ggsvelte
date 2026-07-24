@@ -1319,8 +1319,10 @@ focused callbacks. Narrow on \`type\` and \`phase\`.
 
 ### \`ondiagnostic\`
 
-Receives structured \`InteractionDiagnostic\` objects with \`severity\`,
-\`code\`, \`message\`, \`prop\`, \`suggestions\`, and \`docUrl\`.
+Receives structured \`PlotDiagnostic\` objects (\`InteractionDiagnostic\` or
+\`DeprecationDiagnostic\`) with \`severity\`, \`code\`, \`message\`, \`prop\`,
+\`suggestions\`, and \`docUrl\`. Deprecation advisories also carry \`since\`
+and \`removeIn\`.
 
 \`\`\`svelte fragment
 <GGPlot
@@ -1549,6 +1551,115 @@ migration note here. The pre-release API has its own page:
 The accepted lifecycle and deprecation policy remains in
 [Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
 rather than creating a second policy.
+
+## 0.10 to 0.11
+
+### Compose the theme as a child layer
+
+The \`theme\` prop on \`<GGPlot>\` is deprecated since 0.11.0 (removable in
+0.13.0). Compose the theme as a declaration-only child instead — named shells
+for every built-in theme, or the generic \`<Theme>\` escape hatch for dynamic
+names and role overrides. When both a prop and a child are present, the child
+wins.
+
+Before:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+
+  const rows = [
+    { x: 1, y: 2 },
+    { x: 2, y: 4 },
+  ];
+</script>
+
+<!-- Before 0.11: theme was a top-level GGPlot prop. -->
+<GGPlot data={rows} aes={{ x: "x", y: "y" }} theme="dark">
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+After:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GeomPoint, GGPlot, ThemeDark } from "@ggsvelte/svelte";
+
+  const rows = [
+    { x: 1, y: 2 },
+    { x: 2, y: 4 },
+  ];
+</script>
+
+<!-- After 0.11: compose the theme as a declaration-only child layer. -->
+<GGPlot data={rows} aes={{ x: "x", y: "y" }}>
+  <ThemeDark />
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+\`LayerDescriptor\` is also renamed to \`MarkLayerDescriptor\` (the old name
+remains a type-only alias until 0.13.0).
+
+### Diagnostic handlers receive \`PlotDiagnostic\`
+
+\`ondiagnostic\` now receives the \`PlotDiagnostic\` union
+(\`InteractionDiagnostic | DeprecationDiagnostic\`). Explicitly annotated
+handlers that named \`InteractionDiagnostic\` alone need a one-line type
+widening; inline arrow props continue to infer.
+
+Before:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import type {
+    InteractionDiagnostic,
+    PlotDiagnostic,
+  } from "@ggsvelte/svelte";
+
+  const rows = [
+    { x: 1, y: 2 },
+    { x: 2, y: 4 },
+  ];
+
+  function legacy(diagnostic: InteractionDiagnostic): void {
+    console.warn(diagnostic.code, diagnostic.message);
+  }
+
+  // @ts-expect-error Pre-0.11 InteractionDiagnostic-only handlers are not assignable to PlotDiagnostic.
+  const ondiagnostic: (diagnostic: PlotDiagnostic) => void = legacy;
+</script>
+
+<!-- Before 0.11: ondiagnostic was typed as InteractionDiagnostic only. -->
+<GGPlot data={rows} aes={{ x: "x", y: "y" }} {ondiagnostic}>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+After:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import type { PlotDiagnostic } from "@ggsvelte/svelte";
+
+  const rows = [
+    { x: 1, y: 2 },
+    { x: 2, y: 4 },
+  ];
+
+  function ondiagnostic(diagnostic: PlotDiagnostic): void {
+    console.warn(diagnostic.code, diagnostic.message);
+  }
+</script>
+
+<!-- After 0.11: ondiagnostic receives PlotDiagnostic (interaction ∪ deprecation). -->
+<GGPlot data={rows} aes={{ x: "x", y: "y" }} {ondiagnostic}>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
 
 ## 0.7 to 0.8
 

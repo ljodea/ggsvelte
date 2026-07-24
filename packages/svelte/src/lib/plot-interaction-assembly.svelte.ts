@@ -12,6 +12,11 @@ import type { CellValue } from "@ggsvelte/core";
 import type { PortableSpec } from "@ggsvelte/spec";
 
 import type { OrchestratorInputs } from "./plot-orchestrator.svelte.js";
+import {
+  deprecatedPropDiagnostic,
+  type DeprecationDiagnostic,
+  type PlotDiagnostic,
+} from "./diagnostics/deprecation.js";
 import type {
   InteractionDiagnostic,
   PlotInteractionScope,
@@ -58,7 +63,7 @@ export function createPlotInteractionAssembly<
     typeof window === "undefined" ? deps.assembled() : assembledDerived;
   const interactionConfig = $derived(deps.interactionConfig());
   const resolvedInteractionScope = $derived(deps.resolvedInteractionScope());
-  function deliverDiagnostic(diagnostic: InteractionDiagnostic): void {
+  function deliverDiagnostic(diagnostic: PlotDiagnostic): void {
     const ondiagnostic = inputs.ondiagnostic();
     ondiagnostic?.(diagnostic);
     const nodeEnvironment = (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process
@@ -101,12 +106,43 @@ export function createPlotInteractionAssembly<
     }
     return list;
   });
-  const deliveredWiring = new Set<string>();
+  // Shared once-per-code-per-prop Set for wiring + deprecation advisories.
+  const deliveredAdvisories = new Set<string>();
   $effect(() => {
     for (const diagnostic of wiringDiagnostics) {
       const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
-      if (deliveredWiring.has(dedupKey)) continue;
-      deliveredWiring.add(dedupKey);
+      if (deliveredAdvisories.has(dedupKey)) continue;
+      deliveredAdvisories.add(dedupKey);
+      deliverDiagnostic(diagnostic);
+    }
+  });
+
+  // Grammar-prop deprecations (#659): one advisory per deprecated prop that is
+  // !== undefined. Decidable from raw props — assembly does not participate.
+  // Reuses deliverDiagnostic and the same code:prop dedup Set as wiring.
+  const deprecationDiagnostics = $derived.by((): DeprecationDiagnostic[] => {
+    const list: DeprecationDiagnostic[] = [];
+    if (inputs.theme() !== undefined) {
+      list.push(
+        deprecatedPropDiagnostic({
+          prop: "theme",
+          since: "0.11.0",
+          removeIn: "0.13.0",
+          suggestions: [
+            'Replace theme="dark" with <ThemeDark /> (or <Theme name="dark" />)',
+            'Role overrides stay as props on the child: <ThemeDark ink="#eee" />',
+          ],
+          anchor: "compose-the-theme-as-a-child-layer",
+        }),
+      );
+    }
+    return list;
+  });
+  $effect(() => {
+    for (const diagnostic of deprecationDiagnostics) {
+      const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
+      if (deliveredAdvisories.has(dedupKey)) continue;
+      deliveredAdvisories.add(dedupKey);
       deliverDiagnostic(diagnostic);
     }
   });

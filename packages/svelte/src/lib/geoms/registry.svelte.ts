@@ -47,11 +47,8 @@ import type {
  *
  * `params` is a plain record: each geom component narrows its own props
  * (typed per-geom), and normalize()/validate() enforce the per-geom schema.
- *
- * Name stays `LayerDescriptor` this slice (the MarkLayerDescriptor rename
- * ships with the deprecation guide anchor in a later slice).
  */
-export interface LayerDescriptor {
+export interface MarkLayerDescriptor {
   readonly geom: GeomName;
   readonly stat?: StatName | undefined;
   readonly aes?: AesInput | undefined;
@@ -64,6 +61,13 @@ export interface LayerDescriptor {
 }
 
 /**
+ * @deprecated since 0.11.0 — use MarkLayerDescriptor.
+ * Kept as a source migration alias only:
+ * https://ggsvelte.sh/guide/upgrading#0-10-to-0-11
+ */
+export type LayerDescriptor = MarkLayerDescriptor;
+
+/**
  * Everything a declaration-only child may contribute to a plot.
  * Mark/geom layers map onto `spec.layers`; other kinds fold into top-level
  * portable-spec fields (theme/scale/coord/facet/labs/guides/legend).
@@ -73,7 +77,7 @@ export interface LayerDescriptor {
  * plot's `$derived` with zero re-registration.
  */
 export type Layer =
-  | { readonly kind: "mark"; readonly descriptor: LayerDescriptor }
+  | { readonly kind: "mark"; readonly descriptor: MarkLayerDescriptor }
   | { readonly kind: "scale"; get value(): Scales }
   | { readonly kind: "theme"; get value(): ThemeName | ThemeSpec }
   | { readonly kind: "coord"; get value(): CoordSpec | "flip" }
@@ -92,7 +96,7 @@ export class LayerRegistry {
   #registrationCount = 0;
 
   /** Register a mark/geom descriptor (wraps as `{ kind: "mark", descriptor }`). */
-  register(descriptor: LayerDescriptor): number {
+  register(descriptor: MarkLayerDescriptor): number {
     return this.registerPlotLayer({ kind: "mark", descriptor });
   }
 
@@ -120,9 +124,9 @@ export class LayerRegistry {
    * Mark/geom descriptors only, unwrapped, in registration order.
    * Consumers that need `.data` / `toLayerInput` must use this — not `layers`.
    */
-  get markLayers(): readonly LayerDescriptor[] {
+  get markLayers(): readonly MarkLayerDescriptor[] {
     void this.#version;
-    const out: LayerDescriptor[] = [];
+    const out: MarkLayerDescriptor[] = [];
     for (const layer of this.#byId.values()) {
       if (layer.kind === "mark") out.push(layer.descriptor);
     }
@@ -149,10 +153,18 @@ export function provideRegistry(): LayerRegistry {
 }
 
 /**
+ * Read the ancestor <GGPlot> LayerRegistry, if any. Used by tests that assert
+ * ADR 0001 registrationCount under live child updates; inert outside a plot.
+ */
+export function getLayerRegistry(): LayerRegistry | undefined {
+  return getContext<LayerRegistry | undefined>(KEY);
+}
+
+/**
  * Called by geom components during component init. Inert (no-op) when there
  * is no <GGPlot> ancestor.
  */
-export function registerLayer(descriptor: LayerDescriptor): void {
+export function registerLayer(descriptor: MarkLayerDescriptor): void {
   const registry = getContext<LayerRegistry | undefined>(KEY);
   if (!registry) return;
   const id = registry.register(descriptor);
