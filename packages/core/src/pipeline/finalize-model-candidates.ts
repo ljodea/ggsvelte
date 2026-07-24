@@ -31,6 +31,7 @@ export function buildFinalizeCandidates(input: {
     // Candidate sourceRow indexes and lineage rows are source-table based
     // (runtime filters preserve identity), so value lookups must be too.
     table: prepared.sourceTable,
+    sources: prepared.sourceRegistry,
     layerFields,
     color: trained.colorResolution.resolved,
     fill: trained.fillResolution.resolved,

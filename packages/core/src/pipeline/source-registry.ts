@@ -37,22 +37,34 @@ export class SourceRegistry {
     return this.#bases[sourceId]! + localRow;
   }
 
-  /** Look up a global source-row id produced by {@link toGlobal}. */
-  row(globalIndex: number): Record<string, CellValue> | null {
+  /**
+   * Resolve a global source-row id to the table that owns it and the local
+   * index within it. Value reads must go through this: a layer with its own
+   * DataRef has fields the plot's table does not (#589).
+   */
+  locate(globalIndex: number): { table: ColumnTable; localRow: number } | null {
     if (globalIndex === NO_ROW || globalIndex < 0) return null;
     // Linear search is fine: layer count is small; binary search over bases
     // would only matter for pathological source counts.
     for (let sourceId = this.#tables.length - 1; sourceId >= 0; sourceId--) {
       const base = this.#bases[sourceId]!;
       if (globalIndex < base) continue;
-      const local = globalIndex - base;
+      const localRow = globalIndex - base;
       const table = this.#tables[sourceId]!;
-      if (local >= table.rowCount) return null;
-      const out: Record<string, CellValue> = {};
-      for (const field of table.fields) out[field] = table.column(field)[local]!;
-      return out;
+      if (localRow >= table.rowCount) return null;
+      return { table, localRow };
     }
     return null;
+  }
+
+  /** Look up a global source-row id produced by {@link toGlobal}. */
+  row(globalIndex: number): Record<string, CellValue> | null {
+    const located = this.locate(globalIndex);
+    if (located === null) return null;
+    const { table, localRow } = located;
+    const out: Record<string, CellValue> = {};
+    for (const field of table.fields) out[field] = table.column(field)[localRow]!;
+    return out;
   }
 
   getTable(sourceId: number): ColumnTable | undefined {

@@ -22,6 +22,7 @@ import { locateIdentityCandidate } from "./datum-locate.js";
 import { resolveIdentitySeriesAndMode } from "./datum-series.js";
 import type { IdentityCandidateResolveContext, LocatedIdentityCandidate } from "./datum-types.js";
 import type { CandidateIdentityIndex } from "./identity-index.js";
+import type { SourceRegistry } from "../source-registry.js";
 import { filterRepresentedSourceRows } from "./represented-rows.js";
 
 // Public re-exports for characterization tests and external callers.
@@ -251,6 +252,7 @@ export function createIdentityCandidateDatumResolver(input: {
   panelFrames: readonly (readonly FinalizedLayerFrame[])[];
   facetPanels: readonly FacetPanelDef[];
   table: ColumnTable;
+  sources: SourceRegistry;
   layerFields: readonly MappedField[][];
   color: ResolvedColorScale | null;
   fill: ResolvedColorScale | null;

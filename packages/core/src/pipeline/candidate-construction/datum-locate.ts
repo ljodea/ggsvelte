@@ -3,7 +3,8 @@
  */
 import type { CandidateBuildFacts } from "../../candidate-store.js";
 import type { GeometryBatch } from "../../scene.js";
-import type { CellValue, ColumnTable } from "../../table.js";
+import type { CellValue } from "../../table.js";
+import type { SourceRegistry } from "../source-registry.js";
 import type { LayerFrame, MappedField } from "../types.js";
 import { resolveCandidateFrameRow } from "./frame-row.js";
 import type { IdentityCandidateResolveContext, LocatedIdentityCandidate } from "./datum-types.js";
@@ -22,12 +23,23 @@ function resolveCandidateFieldChannels(fields: readonly MappedField[]): {
   };
 }
 
+/**
+ * Read a mapped field for one candidate row.
+ *
+ * The row id is global across every registered source, and a layer carrying
+ * its own `data` has its own table with its own fields (#589) — so the table
+ * is resolved from the row, never assumed to be the plot's.
+ */
 function makeSourceValueLookup(
-  table: ColumnTable,
+  sources: SourceRegistry,
   sourceRow: number | null,
 ): (field: string | undefined) => CellValue {
-  return (field) =>
-    sourceRow === null || field === undefined ? null : table.column(field)[sourceRow]!;
+  return (field) => {
+    if (sourceRow === null || field === undefined) return null;
+    const located = sources.locate(sourceRow);
+    if (located === null) return null;
+    return located.table.column(field)[located.localRow]!;
+  };
 }
 
 /**
@@ -79,7 +91,7 @@ export function locateIdentityCandidate(
     orderedGroups,
     outlierLocalRow,
   });
-  const sourceValue = makeSourceValueLookup(ctx.table, sourceRow);
+  const sourceValue = makeSourceValueLookup(ctx.sources, sourceRow);
   const { xField, yField, colorField, fillField } = resolveCandidateFieldChannels(fields);
   return {
     sourceRow,

@@ -10,6 +10,7 @@ import type { CandidateBuildFacts, CandidateDatum, CandidateStore } from "../can
 import type { LineageStore } from "../identity.js";
 import type { Scene } from "../scene.js";
 import type { CellValue, ColumnTable } from "../table.js";
+import type { SourceRegistry } from "./source-registry.js";
 import { createIdentityCandidateDatumResolver } from "./candidate-construction/datum.js";
 import { ordinalColorRank } from "./candidate-construction/datum-values.js";
 import { createLazyIdentityIndex } from "./candidate-construction/identity-index.js";
@@ -26,6 +27,7 @@ import type {
 function createRawCandidateDatumResolver(
   bindings: readonly LayerBinding[],
   table: ColumnTable,
+  sources: SourceRegistry,
   color: ResolvedColorScale | null,
   fill: ResolvedColorScale | null,
   lineage: LineageStore<number>,
@@ -44,8 +46,13 @@ function createRawCandidateDatumResolver(
     const binding = bindings[facts.layerIndex];
     const sourceRow = facts.rowIndex;
     if (binding === undefined || sourceRow === null) return {};
-    const value = (field: string | null): CellValue =>
-      field === null ? null : table.column(field)[sourceRow]!;
+    // Global row id -> the table that owns it: a layer with its own DataRef
+    // has fields the plot table does not (#589).
+    const value = (field: string | null): CellValue => {
+      if (field === null) return null;
+      const located = sources.locate(sourceRow);
+      return located === null ? null : located.table.column(field)[located.localRow]!;
+    };
     const styleValue = (style: LayerBinding["size"]): CellValue =>
       style.field === null ? (style.scaledConstant ?? style.constant) : value(style.field);
     const group = groupsFor(facts.layerIndex)[sourceRow] ?? 0;
@@ -87,15 +94,16 @@ function buildSourceBackedCandidates(input: {
   flip: boolean;
   bindings: readonly LayerBinding[];
   table: ColumnTable;
+  sources: SourceRegistry;
   color: ResolvedColorScale | null;
   fill: ResolvedColorScale | null;
   lineage: LineageStore<number>;
 }): CandidateStore {
-  const { scene, runId, flip, bindings, table, color, fill, lineage } = input;
+  const { scene, runId, flip, bindings, table, sources, color, fill, lineage } = input;
   return buildCandidateStore(scene, {
     epoch: runId,
     flip,
-    datum: createRawCandidateDatumResolver(bindings, table, color, fill, lineage),
+    datum: createRawCandidateDatumResolver(bindings, table, sources, color, fill, lineage),
   });
 }
 
@@ -107,6 +115,7 @@ function buildIdentityIndexedCandidates(input: {
   panelFrames: readonly (readonly FinalizedLayerFrame[])[];
   facetPanels: readonly FacetPanelDef[];
   table: ColumnTable;
+  sources: SourceRegistry;
   layerFields: readonly MappedField[][];
   color: ResolvedColorScale | null;
   fill: ResolvedColorScale | null;
@@ -120,6 +129,7 @@ function buildIdentityIndexedCandidates(input: {
     panelFrames,
     facetPanels,
     table,
+    sources,
     layerFields,
     color,
     fill,
@@ -137,6 +147,7 @@ function buildIdentityIndexedCandidates(input: {
       panelFrames,
       facetPanels,
       table,
+      sources,
       layerFields,
       color,
       fill,
@@ -157,6 +168,7 @@ export function buildPipelineCandidates(input: {
   panelFrames: readonly (readonly FinalizedLayerFrame[])[];
   facetPanels: readonly FacetPanelDef[];
   table: ColumnTable;
+  sources: SourceRegistry;
   layerFields: readonly MappedField[][];
   color: ResolvedColorScale | null;
   fill: ResolvedColorScale | null;

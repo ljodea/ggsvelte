@@ -13,6 +13,7 @@ import type {
 } from "../types.js";
 import type { Scene } from "../../scene.js";
 import type { CandidateIdentityIndex } from "./identity-index.js";
+import type { SourceRegistry } from "../source-registry.js";
 
 export interface IdentityCandidateResolveContext {
   scene: Scene;
@@ -20,6 +21,8 @@ export interface IdentityCandidateResolveContext {
   panelFrames: readonly (readonly FinalizedLayerFrame[])[];
   facetPanels: readonly FacetPanelDef[];
   table: ColumnTable;
+  /** Resolves a global source-row id to the table that actually owns it. */
+  sources: SourceRegistry;
   layerFields: readonly MappedField[][];
   color: ResolvedColorScale | null;
   fill: ResolvedColorScale | null;
