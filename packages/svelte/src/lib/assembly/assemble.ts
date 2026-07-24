@@ -38,6 +38,22 @@ export type LayerDescriptorLike = {
   readonly params?: Record<string, unknown> | undefined;
 };
 
+/**
+ * Structural non-mark (and optional mark) plot layer. Same discipline as
+ * LayerDescriptorLike: no import of the `.svelte.ts` registry module.
+ * Live getters allowed on `value`. Module-private (structural callers pass
+ * compatible objects; not a public export).
+ */
+type PlotLayerLike =
+  | { readonly kind: "mark"; readonly descriptor: LayerDescriptorLike }
+  | { readonly kind: "scale"; readonly value: Scales }
+  | { readonly kind: "theme"; readonly value: ThemeName | ThemeSpec }
+  | { readonly kind: "coord"; readonly value: CoordSpec | "flip" }
+  | { readonly kind: "facet"; readonly value: FacetInput }
+  | { readonly kind: "labs"; readonly value: Labs }
+  | { readonly kind: "guides"; readonly value: GuidesSpec }
+  | { readonly kind: "legend"; readonly value: LegendSpec };
+
 /** True when an object is already a single-key DataRef container. */
 function isWrappedDataRef(data: object): data is NonNullable<LayerInput["data"]> {
   const keys = Object.keys(data);
@@ -89,6 +105,12 @@ export type AssemblePortableSpecInput = {
   readonly aes?: AesInput;
   /** Already-resolved layers (caller maps registry descriptors if needed). */
   readonly layers: LayerInput[];
+  /**
+   * Non-mark registry layers (theme/scale/coord/facet/labs/guides/legend).
+   * Folded after both gates, in registration order, then props win over them
+   * this slice (child-wins precedence lands later with the advisory channel).
+   */
+  readonly plotLayers?: readonly PlotLayerLike[];
   readonly facet?: FacetInput;
   readonly coord?: CoordSpec | "flip";
   readonly scales?: Scales;
@@ -103,28 +125,74 @@ export type AssemblePortableSpecInput = {
  * Whether this plot instance should take the faceted interaction path
  * (disable brush zoom / interval select with a diagnostic).
  *
- * True when either:
+ * True when any of:
  * - the raw `facet` prop is set (covers declaration-only children before layers
- *   register and `assembled` is still null), or
+ *   register and `assembled` is still null),
+ * - a `kind: "facet"` registry plot layer is present (future `<FacetWrap/>`),
  * - `assembled.facet` is set (covers portable-`spec` plots that embed facet
  *   without a separate prop).
  */
 export function isFacetedPlotIntent(input: {
   readonly facet?: FacetInput | undefined;
+  readonly plotLayers?: readonly { readonly kind: string }[] | undefined;
   readonly assembled: PortableSpec | null;
 }): boolean {
-  return input.facet !== undefined || input.assembled?.facet !== undefined;
+  return (
+    input.facet !== undefined ||
+    input.plotLayers?.some((layer) => layer.kind === "facet") === true ||
+    input.assembled?.facet !== undefined
+  );
+}
+
+/** Apply one non-mark plot layer onto the fluent builder. */
+function applyPlotLayer(
+  builder: ReturnType<typeof gg>,
+  layer: PlotLayerLike,
+): ReturnType<typeof gg> {
+  switch (layer.kind) {
+    case "mark":
+      // Marks travel through `input.layers` (toLayerInput); ignore if present.
+      return builder;
+    case "scale":
+      return builder.scales(layer.value);
+    case "theme":
+      return builder.theme(layer.value);
+    case "coord":
+      return builder.coord(layer.value);
+    case "facet":
+      return builder.facet(layer.value);
+    case "labs":
+      return builder.labs(layer.value);
+    case "guides":
+      return builder.guides(layer.value);
+    case "legend":
+      return builder.legend(layer.value);
+    default: {
+      // Exhaustiveness: a new Layer kind must be handled here, not silently
+      // dropped. `never` makes that a compile error; the throw makes an
+      // unforeseen runtime kind loud instead of a missing spec field.
+      const unhandled: never = layer;
+      throw new TypeError(`Unhandled plot layer kind: ${String(unhandled)}`);
+    }
+  }
 }
 
 /**
  * Build the normalized PortableSpec for GGPlot.
- * Explicit `spec` wins; empty `layers` yields null (no plot).
+ * Explicit `spec` wins over everything (including non-mark children).
+ * Empty mark `layers` yields null even when non-mark plotLayers exist —
+ * a theme-only plot must not paint an empty axis frame, and PortableSpec.layers
+ * is minItems: 1.
  */
 export function assemblePortableSpec(input: AssemblePortableSpecInput): PortableSpec | null {
   if (input.spec !== undefined) return normalize(input.spec);
   if (input.layers.length === 0) return null;
   let builder = gg(input.data as DataInput, input.aes);
   for (const layer of input.layers) builder = builder.layer(layer);
+  // Non-mark layers first (registration order), then props — props win this slice.
+  for (const plotLayer of input.plotLayers ?? []) {
+    builder = applyPlotLayer(builder, plotLayer);
+  }
   if (input.facet !== undefined) builder = builder.facet(input.facet);
   if (input.coord !== undefined) builder = builder.coord(input.coord);
   if (input.a11y !== undefined) builder = builder.a11y(input.a11y);

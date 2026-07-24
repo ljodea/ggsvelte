@@ -3522,14 +3522,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/svelte"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-419",
+    id: "heading:guide-lifecycle:experimental-421",
     kind: "heading",
-    title: "experimental (419)",
+    title: "experimental (421)",
     summary:
-      "experimental (419) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-419",
+      "experimental (421) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-421",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (419)"],
+    exact: ["experimental (421)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-6",
@@ -12420,6 +12420,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Labs"],
   },
   {
+    id: "api:ggsvelte-svelte:Layer",
+    kind: "api",
+    title: "Layer",
+    summary: "@ggsvelte/svelte · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "type", "experimental"],
+    exact: ["Layer"],
+  },
+  {
     id: "api:ggsvelte-svelte:LayerBackend",
     kind: "api",
     title: "LayerBackend",
@@ -13921,6 +13930,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-svelte",
     keywords: ["@ggsvelte/svelte", ".", "value", "experimental"],
     exact: ["registerLayer"],
+  },
+  {
+    id: "api:ggsvelte-svelte:registerPlotLayer",
+    kind: "api",
+    title: "registerPlotLayer",
+    summary: "@ggsvelte/svelte · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "experimental"],
+    exact: ["registerPlotLayer"],
   },
   {
     id: "api:ggsvelte-svelte:renderToSVGString",

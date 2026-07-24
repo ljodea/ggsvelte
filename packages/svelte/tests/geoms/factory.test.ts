@@ -26,8 +26,8 @@ describe("createGeomLayer", () => {
       },
     });
     expect(registry).toBeDefined();
-    expect(registry.layers).toHaveLength(1);
-    const layer = toLayerInput(registry.layers[0]);
+    expect(registry.markLayers).toHaveLength(1);
+    const layer = toLayerInput(registry.markLayers[0]);
     expect(layer.geom).toBe("point");
     expect(layer.aes).toEqual({ color: "cls" });
     expect(layer.position).toBe("jitter");
@@ -47,7 +47,7 @@ describe("createGeomLayer", () => {
       },
     });
     expect(registry).toBeDefined();
-    const layer = toLayerInput(registry.layers[0]);
+    const layer = toLayerInput(registry.markLayers[0]);
     expect(layer.params).toEqual({ linewidth: 2 });
   });
 
@@ -61,7 +61,7 @@ describe("createGeomLayer", () => {
       },
     });
     expect(registry).toBeDefined();
-    const layer = toLayerInput(registry.layers[0]);
+    const layer = toLayerInput(registry.markLayers[0]);
     expect(layer.params).toBeUndefined();
   });
 
@@ -76,8 +76,8 @@ describe("createGeomLayer", () => {
       },
     });
     expect(registry).toBeDefined();
-    expect(registry.layers).toHaveLength(1);
-    const descriptor = registry.layers[0];
+    expect(registry.markLayers).toHaveLength(1);
+    const descriptor = registry.markLayers[0];
     expect(toLayerInput(descriptor).params).toEqual({ size: 3 });
 
     await view.rerender({
@@ -89,9 +89,9 @@ describe("createGeomLayer", () => {
         registry = r;
       },
     });
-    expect(registry.layers).toHaveLength(1);
+    expect(registry.markLayers).toHaveLength(1);
     // Same descriptor instance when host is stable; getters see new props.
-    expect(registry.layers[0]).toBe(descriptor);
-    expect(toLayerInput(registry.layers[0]).params).toEqual({ size: 9, alpha: 0.25 });
+    expect(registry.markLayers[0]).toBe(descriptor);
+    expect(toLayerInput(registry.markLayers[0]).params).toEqual({ size: 9, alpha: 0.25 });
   });
 });

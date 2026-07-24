@@ -198,7 +198,10 @@ export function createPlotOrchestrator<
     return assemblePortableSpec({
       ...(data !== undefined && { data }),
       ...(mapping !== undefined && { aes: mapping }),
-      layers: layers ?? inputs.registry.layers.map(toLayerInput),
+      // Mark layers only: a `layers={[…]}` prop suppresses registry marks, not
+      // non-mark plot layers (theme/scale/coord/facet/labs/guides/legend).
+      layers: layers ?? inputs.registry.markLayers.map(toLayerInput),
+      plotLayers: inputs.registry.layers.filter((layer) => layer.kind !== "mark"),
       ...(facet !== undefined && { facet }),
       ...(coord !== undefined && { coord }),
       ...(scales !== undefined && { scales }),
@@ -216,10 +219,14 @@ export function createPlotOrchestrator<
   const currentAssembled = (): PortableSpec | null =>
     typeof window === "undefined" ? assembleCurrentSpec() : assembled;
 
-  // Facet intent: raw prop (declaration-only children before layers register)
-  // OR assembled.facet (portable-spec plots that embed facet without a prop).
+  // Facet intent: raw prop (before layers register), registry facet plot layer
+  // (future <FacetWrap/>), OR assembled.facet (portable-spec embeds).
   const facetedPlot = $derived(
-    isFacetedPlotIntent({ facet: inputs.facet(), assembled: currentAssembled() }),
+    isFacetedPlotIntent({
+      facet: inputs.facet(),
+      plotLayers: inputs.registry.layers,
+      assembled: currentAssembled(),
+    }),
   );
 
   const resolvedInteractionScope: PlotInteractionScope = $derived(
