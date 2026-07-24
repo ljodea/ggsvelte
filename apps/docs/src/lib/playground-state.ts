@@ -113,7 +113,7 @@ function invalidDraft(
     candidate: null,
     diagnostics,
     lastValid: true,
-    status: "The draft was not applied. The last valid result is still shown.",
+    status: "The new chart was not applied. The last valid result is still shown.",
     navigationRecovery: null,
     historyIntent: "none",
   });
@@ -198,7 +198,7 @@ export function promotePlaygroundCandidate(
     undoSnapshots: nextUndoSnapshots,
     diagnostics: [],
     lastValid: false,
-    status: `Rendered ${next.seed.source.kind === "custom" ? "custom draft" : next.seed.source.id}.`,
+    status: `Rendered ${next.seed.source.kind === "custom" ? "custom chart" : next.seed.source.id}.`,
     navigationRecovery: null,
     historyIntent: "none",
   });

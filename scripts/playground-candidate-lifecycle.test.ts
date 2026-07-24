@@ -48,7 +48,7 @@ describe("playground candidate lifecycle", () => {
 
     const promoted = acceptCandidatePhase(
       tracker,
-      detail({ phase: "promoted", status: "Rendered custom draft." }),
+      detail({ phase: "promoted", status: "Rendered custom chart." }),
     );
     expect(promoted).not.toBeNull();
     tracker = promoted!.tracker;

@@ -154,6 +154,17 @@
     border-top: 1px solid var(--line);
   }
 
+  /* The playground inlines the dataset rows into the snippet, so this block
+     grows with the data: a 48-row dataset renders ~5600px of code against a
+     ~460px chart, inverting DESIGN.md's "the plot is always the strongest
+     visual anchor". Scroll the code locally instead (the page itself still
+     never scrolls horizontally). Scoped here, not in CodeTabs, because every
+     other code block on the site is hand-sized prose. */
+  .code-section :global(.scroll-region) {
+    max-height: clamp(18rem, 60vh, 36rem);
+    overflow-y: auto;
+  }
+
   .section-heading {
     margin: 0;
     font-size: 1.15rem;
