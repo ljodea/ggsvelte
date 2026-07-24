@@ -1,6 +1,6 @@
 {
   "title": "Focus and link discrete legend groups",
-  "description": "Opt-in legend controls preview locally, commit stable row keys to a shared controller, and de-emphasize unrelated marks without changing scales, statistics, layout, or color identity. The same semantic mask drives SVG and canvas views.",
+  "description": "Opt-in legend controls preview locally, commit stable row keys to a shared controller, and de-emphasize unrelated marks without changing scales, statistics, layout, or color identity. The same semantic mask drives SVG and canvas views. The three series are Playfair's stock, bread and export indices, 1770–1824, which read as both a scatter and a connected line.",
   "tags": [
     "interaction",
     "legend",
@@ -19,8 +19,14 @@
     "keyboard": "Tab to a legend entry, use arrow keys or Home and End to move, press Enter or Space to pin, and Escape to clear.",
     "touch": "Tap a legend entry to pin it across the SVG and canvas views; tap the active entry or Clear legend focus to reset.",
     "references": [
-      { "label": "Interaction guide", "href": "/guide/interactions" },
-      { "label": "Linked views", "href": "/examples/interaction/linked-views" }
+      {
+        "label": "Interaction guide",
+        "href": "/guide/interactions"
+      },
+      {
+        "label": "Linked views",
+        "href": "/examples/interaction/linked-views"
+      }
     ],
     "svelteFirst": true,
     "fullWidth": true

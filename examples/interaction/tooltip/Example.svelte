@@ -11,6 +11,7 @@
 <GGPlot
   data={penguins}
   aes={{ x: "flipper", y: "mass", color: "species" }}
+  theme="light"
   key="id"
   inspect={{ mode: "x", pin: true, maxDistance: 24 }}
   oninspect={(event) => {
@@ -21,6 +22,8 @@
   }}
   labs={{
     title: "Inspect a shared x value, then pin",
+    subtitle:
+      "333 Palmer Archipelago penguins; flipper length is measured to the millimetre, so many birds share one",
     x: "Flipper length (mm)",
     y: "Body mass (g)",
     color: "Species",

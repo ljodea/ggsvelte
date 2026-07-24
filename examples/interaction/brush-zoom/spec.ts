@@ -4,13 +4,15 @@ import { defineExample } from "../../define.js";
 import { field } from "./data.js";
 
 export default defineExample(
-  gg(field, aes({ x: "x", y: "y", color: "group" }))
+  gg(field, aes({ x: "bill", y: "mass", color: "species" }))
     .geomPoint({ size: 2.5, alpha: 0.8 })
+    .theme("light")
     .labs({
       title: "Select an interval or brush to zoom",
-      x: "x",
-      y: "y",
-      color: "Group",
+      subtitle: "333 Palmer penguins; brush a rectangle to select, or zoom into the crowded middle",
+      x: "Bill length (mm)",
+      y: "Body mass (g)",
+      color: "Species",
     })
     .spec(),
 );

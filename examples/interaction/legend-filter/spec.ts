@@ -1,17 +1,20 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { ridership } from "./data.js";
+import { britishFinances } from "./data.js";
 
 export default defineExample(
-  gg(ridership, aes({ x: "month", y: "riders", color: "mode" }))
+  gg(britishFinances, aes({ x: "year", y: "value", color: "series" }))
     .geomLine({ linewidth: 2.2 })
-    .geomPoint({ size: 3.2 })
+    .geomPoint({ size: 2.6 })
+    .scales({ x: { labels: "d" } })
+    .theme("fivethirtyeight")
     .labs({
-      title: "Filter the data without losing color identity",
-      x: "Month",
-      y: "Daily riders (thousands)",
-      color: "Mode",
+      title: "Playfair's fiscal three, 1770–1824",
+      subtitle: "Filter any series; restored groups keep their original color",
+      x: "Year",
+      y: "Playfair's index units",
+      color: "Series",
     })
     .spec(),
 );

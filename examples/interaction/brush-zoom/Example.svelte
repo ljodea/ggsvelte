@@ -13,7 +13,8 @@
      group colors NEVER shift while zooming. Double-click resets. -->
 <GGPlot
   data={field}
-  aes={{ x: "x", y: "y", color: "group" }}
+  aes={{ x: "bill", y: "mass", color: "species" }}
+  theme="light"
   key="id"
   inspect={true}
   select={{ type: "interval", mode: "xy", persistent: true }}

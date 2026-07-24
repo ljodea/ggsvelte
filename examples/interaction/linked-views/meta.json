@@ -1,6 +1,6 @@
 {
   "title": "Link plots, controls, and a table",
-  "description": "A shared Svelte 5 interaction controller coordinates semantic selection, lightweight emphasis, and zoom domains without callback loops. Stable row keys link two plots to ordinary accessible DOM, while explicit reconciliation makes data replacement predictable.",
+  "description": "A shared Svelte 5 interaction controller coordinates semantic selection, lightweight emphasis, and zoom domains without callback loops. Stable row keys link two plots to ordinary accessible DOM, while explicit reconciliation makes data replacement predictable. Five Palmer penguins per species, evenly sampled, so every linked row fits in the table alongside the plots.",
   "tags": ["interaction", "controller", "linked-views", "select", "emphasis", "table", "svelte"],
   "docsSection": "Interaction",
   "vrHeight": 1140,
@@ -9,8 +9,14 @@
     "keyboard": "Tab to a plot and press Enter or Space to select its focused point. Continue into the table to toggle or emphasize rows with ordinary buttons.",
     "touch": "Tap points in either plot or use the large external controls; linked selection updates both plots and the table.",
     "references": [
-      { "label": "Interaction guide and controller reference", "href": "/guide/interactions" },
-      { "label": "Chart-local inspection and tooltip", "href": "/examples/interaction/tooltip" }
+      {
+        "label": "Interaction guide and controller reference",
+        "href": "/guide/interactions"
+      },
+      {
+        "label": "Chart-local inspection and tooltip",
+        "href": "/examples/interaction/tooltip"
+      }
     ],
     "svelteFirst": true,
     "fullWidth": true
