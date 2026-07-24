@@ -2,11 +2,17 @@
 /**
  * Canvas path (and path-subset) drawers.
  */
-import { LINETYPE_NAMES } from "@ggsvelte/spec";
-
-import { canvasGradientStyle, subpathBounds, type ResolvedGradientPaint } from "../mark-paint.js";
+import {
+  areaOutlineActive,
+  canvasGradientStyle,
+  linetypeDash,
+  markLinetype,
+  resolvePathMark,
+  subpathBounds,
+  type ResolvedGradientPaint,
+} from "../mark-paint.js";
 import type { PathsBatch, RectsBatch, SegmentsBatch } from "../scene.js";
-import { LINETYPE_DASHES, type Linetype } from "../scales/style.js";
+import type { Linetype } from "../scales/style.js";
 import type { ThemeTokens } from "../theme.js";
 import { themeVar } from "../theme.js";
 import type { ColorResolver } from "./canvas-dom.js";
@@ -67,14 +73,12 @@ function traceSubpath(
 }
 
 function linetypeAt(batch: PathsBatch | SegmentsBatch | RectsBatch, index: number): Linetype {
-  return batch.linetypeIndexes === undefined
-    ? (batch.linetype ?? "solid")
-    : LINETYPE_NAMES[batch.linetypeIndexes[index]!]!;
+  return markLinetype(batch, index);
 }
 
 function applyDash(ctx: CanvasRenderingContext2D, linetype: Linetype): void {
   if (typeof ctx.setLineDash !== "function") return;
-  ctx.setLineDash(LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? []);
+  ctx.setLineDash([...linetypeDash(linetype)]);
 }
 
 function strokePath(
@@ -102,37 +106,43 @@ export function drawPaths(
   const subpaths = batch.pathOffsets.length - 1;
   const baseAlpha = ctx.globalAlpha;
   const restoreGlow = applyGlow(ctx, batch.glow);
+  const themeColors = { ink: themeVar("ink", theme), accent: themeVar("accent", theme) };
   for (let s = 0; s < subpaths; s++) {
     const start = batch.pathOffsets[s]!;
     const end = batch.pathOffsets[s + 1]!;
     if (end <= start) continue;
     const bounds = subpathBounds(batch.positions, start, end);
+    const style = resolvePathMark(batch, s, themeColors);
     ctx.beginPath();
     traceSubpath(ctx, batch, start, end);
-    ctx.globalAlpha = baseAlpha * (batch.alphas?.[s] ?? 1);
+    ctx.globalAlpha = baseAlpha * style.alpha;
     if (isArea) {
-      const solid = batch.fills![s] ?? batch.fillPaint?.fallback ?? themeVar("accent", theme);
+      const solid = style.fill === "none" ? themeColors.accent : style.fill;
       ctx.fillStyle = resolvePaintStyle(ctx, solid, batch.fillPaint, bounds, resolve);
       ctx.fill();
-      const strokeColor = batch.strokes[s];
-      const linewidth = batch.linewidths?.[s] ?? batch.linewidth;
-      if (strokeColor !== null && strokeColor !== undefined && linewidth > 0) {
-        const strokeStyle = resolvePaintStyle(ctx, strokeColor, batch.strokePaint, bounds, resolve);
+      if (style.stroke !== "none") {
+        const strokeStyle = resolvePaintStyle(
+          ctx,
+          style.stroke,
+          batch.strokePaint,
+          bounds,
+          resolve,
+        );
         ctx.strokeStyle = strokeStyle;
-        ctx.lineWidth = linewidth;
-        applyDash(ctx, linetypeAt(batch, s));
-        ctx.lineJoin = batch.linejoin ?? "round";
-        ctx.lineCap = batch.linecap ?? "round";
+        ctx.lineWidth = style.width;
+        if (typeof ctx.setLineDash === "function") ctx.setLineDash([...style.dash]);
+        ctx.lineJoin = style.linejoin;
+        ctx.lineCap = style.linecap;
         ctx.stroke();
       }
     } else {
-      const solid = batch.strokes[s] ?? batch.strokePaint?.fallback ?? themeVar("ink", theme);
+      const solid = style.stroke === "none" ? themeColors.ink : style.stroke;
       const strokeStyle = resolvePaintStyle(ctx, solid, batch.strokePaint, bounds, resolve);
       ctx.strokeStyle = strokeStyle;
-      ctx.lineWidth = batch.linewidths?.[s] ?? batch.linewidth;
-      applyDash(ctx, linetypeAt(batch, s));
-      ctx.lineJoin = batch.linejoin ?? "round";
-      ctx.lineCap = batch.linecap ?? "round";
+      ctx.lineWidth = style.width;
+      if (typeof ctx.setLineDash === "function") ctx.setLineDash([...style.dash]);
+      ctx.lineJoin = style.linejoin;
+      ctx.lineCap = style.linecap;
       ctx.stroke();
     }
   }
@@ -165,7 +175,7 @@ export function drawPathsSubset(
       ctx.fill();
       const strokeColor = batch.strokes[s];
       const linewidth = batch.linewidths?.[s] ?? batch.linewidth;
-      if (strokeColor !== null && strokeColor !== undefined && linewidth > 0) {
+      if (areaOutlineActive(strokeColor, linewidth)) {
         strokePath(ctx, batch, s, strokeColor, resolve);
       }
     } else {

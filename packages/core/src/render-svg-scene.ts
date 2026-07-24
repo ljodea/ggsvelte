@@ -2,17 +2,19 @@
  * Scene-level SVG assembly: panel chrome + sceneLabel + sceneToSVGString.
  * Chrome helpers stay file-private (only used by sceneToSVGString).
  */
-import { LINETYPE_NAMES } from "@ggsvelte/spec";
-
 import { groupBatchesByPanel } from "./group-batches-by-panel.js";
 import { letterboxGutterRects } from "./letterbox-gutters.js";
-import { LINETYPE_DASHES } from "./scales/style.js";
 import type { Scene, SceneLegend, SceneLegendEntry, ScenePanel } from "./scene.js";
 import { STRIP_BAND } from "./scene.js";
 import { LEGEND_ROW_HEIGHT } from "./legend.js";
 import type { ThemeTokens } from "./theme.js";
 import { themeVar } from "./theme.js";
-import { paintDefsSvg, type ResolvedGlow, type ResolvedGradientPaint } from "./mark-paint.js";
+import {
+  linetypeDash,
+  paintDefsSvg,
+  type ResolvedGlow,
+  type ResolvedGradientPaint,
+} from "./mark-paint.js";
 import { escapeXML, px } from "./render-svg-format.js";
 import { pointShape, renderBatch, type PaintRenderMode } from "./render-svg-marks.js";
 
@@ -300,7 +302,7 @@ function renderDiscreteLegendKey(
   }
   if (entry.linetype !== undefined || entry.linewidth !== undefined) {
     const linetype = entry.linetype ?? "solid";
-    const dash = LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? [];
+    const dash = linetypeDash(linetype);
     const dashAttr = dash.length === 0 ? "" : ` stroke-dasharray="${dash.join(" ")}"`;
     return `<line class="gg-legend-key" x1="${px(x)}" y1="${px(centerY)}" x2="${px(x + size)}" y2="${px(centerY)}" stroke="${keyColor}" stroke-width="${px(entry.linewidth ?? 1.5)}"${dashAttr}${opacity}/>`;
   }

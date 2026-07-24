@@ -3,7 +3,16 @@
  * Public: countMarks, pathData. Internal: renderBatch.
  */
 import { renderPrimitiveCount } from "./candidate-geometry.js";
-import type { ResolvedGlow, ResolvedGradientPaint } from "./mark-paint.js";
+import {
+  linetypeDash,
+  markLinetype,
+  pointShapeGeometry,
+  pointShapePathD,
+  resolvePathMark,
+  resolvePointMark,
+  type ResolvedGlow,
+  type ResolvedGradientPaint,
+} from "./mark-paint.js";
 import type {
   GlyphsBatch,
   PathsBatch,
@@ -12,8 +21,7 @@ import type {
   Scene,
   SegmentsBatch,
 } from "./scene.js";
-import { LINETYPE_DASHES, type Linetype, type PointShape } from "./scales/style.js";
-import { LINETYPE_NAMES, POINT_SHAPE_NAMES } from "@ggsvelte/spec";
+import type { PointShape } from "./scales/style.js";
 import type { ThemeTokens } from "./theme.js";
 import { themeVar } from "./theme.js";
 import { escapeXML, px } from "./render-svg-format.js";
@@ -58,19 +66,20 @@ export function pointShape(
   fill: string,
 ): string {
   const className = `gg-shape-${shape}`;
-  switch (shape) {
-    case "square":
-      return `<rect class="${className}" x="${px(x - size)}" y="${px(y - size)}" width="${px(size * 2)}" height="${px(size * 2)}" fill="${fill}"/>`;
-    case "triangle":
-      return `<path class="${className}" d="M${px(x)} ${px(y - size * 1.2)}L${px(x + size * 1.1)} ${px(y + size * 0.9)}L${px(x - size * 1.1)} ${px(y + size * 0.9)}Z" fill="${fill}"/>`;
-    case "diamond":
-      return `<path class="${className}" d="M${px(x)} ${px(y - size * 1.25)}L${px(x + size)} ${px(y)}L${px(x)} ${px(y + size * 1.25)}L${px(x - size)} ${px(y)}Z" fill="${fill}"/>`;
-    case "plus":
-      return `<path class="${className}" d="M${px(x - size)} ${px(y)}H${px(x + size)}M${px(x)} ${px(y - size)}V${px(y + size)}" fill="none" stroke="${fill}" stroke-width="${px(Math.max(1, size / 2))}"/>`;
-    case "cross":
-      return `<path class="${className}" d="M${px(x - size * 0.75)} ${px(y - size * 0.75)}L${px(x + size * 0.75)} ${px(y + size * 0.75)}M${px(x + size * 0.75)} ${px(y - size * 0.75)}L${px(x - size * 0.75)} ${px(y + size * 0.75)}" fill="none" stroke="${fill}" stroke-width="${px(Math.max(1, size / 2))}"/>`;
-    default:
-      return `<circle class="${className}" cx="${px(x)}" cy="${px(y)}" r="${px(size)}" fill="${fill}"/>`;
+  const geometry = pointShapeGeometry(shape, x, y, size);
+  switch (geometry.kind) {
+    case "rect":
+      return `<rect class="${className}" x="${px(geometry.x)}" y="${px(geometry.y)}" width="${px(geometry.width)}" height="${px(geometry.height)}" fill="${fill}"/>`;
+    case "polygon":
+      return `<path class="${className}" d="${pointShapePathD(geometry, px)}" fill="${fill}"/>`;
+    case "lines":
+      return `<path class="${className}" d="${pointShapePathD(geometry, px)}" fill="none" stroke="${fill}" stroke-width="${px(geometry.strokeWidth)}"/>`;
+    case "circle":
+      return `<circle class="${className}" cx="${px(geometry.cx)}" cy="${px(geometry.cy)}" r="${px(geometry.r)}" fill="${fill}"/>`;
+    default: {
+      const exhaustive: never = geometry;
+      throw new Error(`unknown point shape geometry: ${JSON.stringify(exhaustive)}`);
+    }
   }
 }
 
@@ -85,17 +94,14 @@ function renderPoints(batch: PointsBatch, theme: ThemeTokens): string {
   const n = batch.rowIndex.length;
   const themeInk = themeVar("ink", theme);
   for (let j = 0; j < n; j++) {
-    const fill = batch.colors?.[j] ?? batch.fill ?? themeInk;
-    const shape =
-      batch.shapeIndexes === undefined ? batch.shape : POINT_SHAPE_NAMES[batch.shapeIndexes[j]!]!;
-    const size = batch.sizes?.[j] ?? batch.size;
-    const opacity = batch.alphas === undefined ? "" : alphaAttr(batch.alphas[j]!);
+    const style = resolvePointMark(batch, j, themeInk);
+    const opacity = batch.alphas === undefined ? "" : alphaAttr(style.alpha);
     const mark = pointShape(
-      shape,
+      style.shape,
       batch.positions[j * 2]!,
       batch.positions[j * 2 + 1]!,
-      size,
-      fill,
+      style.size,
+      style.fill,
     );
     parts.push(opacity === "" ? mark : mark.replace("/>", `${opacity}/>`));
   }
@@ -128,8 +134,7 @@ export function pathData(
   return parts.join("");
 }
 
-function dashAttr(linetype: Linetype): string {
-  const dash = LINETYPE_DASHES[LINETYPE_NAMES.indexOf(linetype)] ?? [];
+function dashAttrFromDash(dash: readonly number[]): string {
   return dash.length === 0 ? "" : ` stroke-dasharray="${dash.join(" ")}"`;
 }
 
@@ -142,6 +147,7 @@ function renderPaths(
   const parts: string[] = [
     `<g class="gg-batch ${isArea ? "gg-areas" : "gg-paths"}" data-layer="${batch.layerIndex}"${alphaAttr(batch.alpha)}${glowAttr(batch.glow, mode)}>`,
   ];
+  const themeColors = { ink: themeVar("ink", theme), accent: themeVar("accent", theme) };
   const subpaths = batch.pathOffsets.length - 1;
   for (let s = 0; s < subpaths; s++) {
     const d = pathData(
@@ -152,42 +158,32 @@ function renderPaths(
       batch.closed === true,
     );
     if (d === "") continue;
+    const style = resolvePathMark(batch, s, themeColors);
+    const alpha = batch.alphas?.[s];
     if (isArea) {
-      const solidFill = batch.fills![s] ?? batch.fillPaint?.fallback ?? themeVar("accent", theme);
-      const fill = paintFill(solidFill, batch.fillPaint, mode);
-      const alpha = batch.alphas?.[s];
-      const strokeColor = batch.strokes[s];
-      const linewidth = batch.linewidths?.[s] ?? batch.linewidth;
-      const strokeActive = strokeColor !== null && strokeColor !== undefined && linewidth > 0;
-      if (strokeActive) {
-        const linetype =
-          batch.linetypeIndexes === undefined
-            ? (batch.linetype ?? "solid")
-            : LINETYPE_NAMES[batch.linetypeIndexes[s]!]!;
-        const linejoin = batch.linejoin ?? "round";
-        const linecap = batch.linecap ?? "round";
-        const stroke = paintStroke(strokeColor, batch.strokePaint, mode);
-        parts.push(
-          `<path d="${d}" fill="${fill}" stroke="${stroke}" stroke-width="${px(linewidth)}"${dashAttr(linetype)}${alpha === undefined ? "" : alphaAttr(alpha)} stroke-linejoin="${linejoin}" stroke-linecap="${linecap}"/>`,
-        );
-      } else {
+      const fill = paintFill(
+        style.fill === "none" ? themeColors.accent : style.fill,
+        batch.fillPaint,
+        mode,
+      );
+      if (style.stroke === "none") {
         parts.push(
           `<path d="${d}" fill="${fill}" stroke="none"${alpha === undefined ? "" : alphaAttr(alpha)}/>`,
         );
+      } else {
+        const stroke = paintStroke(style.stroke, batch.strokePaint, mode);
+        parts.push(
+          `<path d="${d}" fill="${fill}" stroke="${stroke}" stroke-width="${px(style.width)}"${dashAttrFromDash(style.dash)}${alpha === undefined ? "" : alphaAttr(alpha)} stroke-linejoin="${style.linejoin}" stroke-linecap="${style.linecap}"/>`,
+        );
       }
     } else {
-      const solidStroke = batch.strokes[s] ?? batch.strokePaint?.fallback ?? themeVar("ink", theme);
-      const stroke = paintStroke(solidStroke, batch.strokePaint, mode);
-      const linewidth = batch.linewidths?.[s] ?? batch.linewidth;
-      const alpha = batch.alphas?.[s];
-      const linetype =
-        batch.linetypeIndexes === undefined
-          ? (batch.linetype ?? "solid")
-          : LINETYPE_NAMES[batch.linetypeIndexes[s]!]!;
-      const linejoin = batch.linejoin ?? "round";
-      const linecap = batch.linecap ?? "round";
+      const stroke = paintStroke(
+        style.stroke === "none" ? themeColors.ink : style.stroke,
+        batch.strokePaint,
+        mode,
+      );
       parts.push(
-        `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${px(linewidth)}"${dashAttr(linetype)}${alpha === undefined ? "" : alphaAttr(alpha)} stroke-linejoin="${linejoin}" stroke-linecap="${linecap}"/>`,
+        `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${px(style.width)}"${dashAttrFromDash(style.dash)}${alpha === undefined ? "" : alphaAttr(alpha)} stroke-linejoin="${style.linejoin}" stroke-linecap="${style.linecap}"/>`,
       );
     }
   }
@@ -203,10 +199,6 @@ function renderRects(batch: RectsBatch, theme: ThemeTokens): string {
   const themeFill = themeVar(batch.fillRole ?? "accent", theme);
   for (let j = 0; j < n; j++) {
     const fill = batch.fills?.[j] ?? batch.fill ?? themeFill;
-    const linetype =
-      batch.linetypeIndexes === undefined
-        ? (batch.linetype ?? "solid")
-        : LINETYPE_NAMES[batch.linetypeIndexes[j]!]!;
     const strokeColor =
       batch.strokes?.[j] ??
       (batch.stroke === undefined && batch.strokes === undefined
@@ -215,7 +207,7 @@ function renderRects(batch: RectsBatch, theme: ThemeTokens): string {
     const strokeAttr =
       strokeColor === undefined
         ? ""
-        : ` stroke="${strokeColor}" stroke-width="${px(batch.strokeWidths?.[j] ?? batch.strokeWidth ?? 1)}"${dashAttr(linetype)}`;
+        : ` stroke="${strokeColor}" stroke-width="${px(batch.strokeWidths?.[j] ?? batch.strokeWidth ?? 1)}"${dashAttrFromDash(linetypeDash(markLinetype(batch, j)))}`;
     const alpha = batch.alphas?.[j];
     parts.push(
       `<rect x="${px(batch.rects[j * 4]!)}" y="${px(batch.rects[j * 4 + 1]!)}" width="${px(batch.rects[j * 4 + 2]!)}" height="${px(batch.rects[j * 4 + 3]!)}" fill="${fill}"${strokeAttr}${alpha === undefined ? "" : alphaAttr(alpha)}/>`,
@@ -235,12 +227,8 @@ function renderSegments(batch: SegmentsBatch, theme: ThemeTokens): string {
     const stroke = batch.strokes?.[j] ?? batch.stroke ?? themeInk;
     const linewidth = batch.linewidths?.[j] ?? batch.linewidth;
     const alpha = batch.alphas?.[j];
-    const linetype =
-      batch.linetypeIndexes === undefined
-        ? (batch.linetype ?? "solid")
-        : LINETYPE_NAMES[batch.linetypeIndexes[j]!]!;
     const linecap = batch.linecap === undefined ? "" : ` stroke-linecap="${batch.linecap}"`;
-    const style = `${dashAttr(linetype)}${alpha === undefined ? "" : alphaAttr(alpha)}${linecap}`;
+    const style = `${dashAttrFromDash(linetypeDash(markLinetype(batch, j)))}${alpha === undefined ? "" : alphaAttr(alpha)}${linecap}`;
     if (batch.renderPositions !== undefined && batch.renderPathOffsets !== undefined) {
       const d = pathData(
         batch.renderPositions,
@@ -296,7 +284,9 @@ export function renderBatch(
       return renderSegments(batch, theme);
     case "glyphs":
       return renderGlyphs(batch, theme);
-    default:
-      return "";
+    default: {
+      const exhaustive: never = batch;
+      throw new Error(`unknown batch kind: ${JSON.stringify(exhaustive)}`);
+    }
   }
 }
