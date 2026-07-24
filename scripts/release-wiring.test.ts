@@ -420,11 +420,15 @@ describe("R0 release wiring", () => {
 
   it("versions only publishable packages", () => {
     const config = JSON.parse(read(".changeset/config.json")) as {
+      fixed?: string[][];
       linked?: string[][];
       privatePackages?: boolean | { version?: boolean; tag?: boolean };
     };
     expect(config.privatePackages).toBe(false);
-    expect(config.linked).toEqual([["@ggsvelte/spec", "@ggsvelte/core", "@ggsvelte/svelte"]]);
+    // fixed (not linked): any release bumps all three so package-identity
+    // lockstep versions stay equal even when only one package has a changeset.
+    expect(config.fixed).toEqual([["@ggsvelte/spec", "@ggsvelte/core", "@ggsvelte/svelte"]]);
+    expect(config.linked ?? []).toEqual([]);
   });
 
   it("keeps internal dependencies installable in npm-published manifests", () => {
