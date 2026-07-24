@@ -42,18 +42,20 @@ const INTERACTION_HANDLERS: Record<
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await expect(page.locator(".gg-tooltip")).toBeVisible();
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-    await expect(page.locator(".event-status")).toContainText("Pinned");
+    // Chart-owned pin state — demo `.event-status` is hidden under ?vr (#650).
+    await expect(page.locator(".gg-tooltip-pinned")).toBeVisible();
     await expect(page.locator(".gg-example-frame")).toHaveScreenshot(scenario.basename);
   },
 
   async "legend-focus-committed"(page, scenario) {
+    // Match example vrWidth (960) so the three-up layout stays in-viewport for clicks.
+    await page.setViewportSize({ width: 1000, height: 720 });
     await page.goto("/examples/interaction/legend-focus?vr&theme=light");
     await settleVisualState(page, 3);
     const firstLegendEntry = page.locator(".gg-legend-target").first();
     await firstLegendEntry.click();
     await expect(firstLegendEntry).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByText("3 rows focused")).toBeVisible();
-    await expect(page.getByRole("status")).toContainText("pinned across three views");
+    // Demo status/summary chrome is hidden under ?vr; assert chart focus only (#650).
     await expect(page.locator("[data-gg-focused='true']")).toHaveCount(7);
     await expect(page.locator(".gg-example-frame")).toHaveScreenshot(scenario.basename);
   },

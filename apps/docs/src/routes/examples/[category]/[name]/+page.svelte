@@ -11,7 +11,7 @@
 
   const { data }: PageProps = $props();
   const Example = $derived(data.component);
-  const frameWidth = 640;
+  const frameWidth = $derived(data.entry.vrWidth ?? 640);
   const frameHeight = $derived(data.entry.vrHeight ?? 400);
   const galleryEntries = EXAMPLES.map((entry) => galleryEntryFor(entry));
   const related = $derived(

@@ -13,6 +13,7 @@
   ],
   "docsSection": "Interaction",
   "vrHeight": 980,
+  "vrWidth": 960,
   "journey": {
     "pointer": "Hover a discrete legend entry to preview one plot, then click to pin the group across all three views.",
     "keyboard": "Tab to a legend entry, use arrow keys or Home and End to move, press Enter or Space to pin, and Escape to clear.",

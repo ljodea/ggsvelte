@@ -45,7 +45,7 @@
 </GGPlot>
 
 <!-- Visual callback evidence only. GGPlot owns the single concise live region. -->
-<div class="event-status">
+<div class="event-status gg-demo-chrome">
   <p><strong>Selection:</strong> {selectionStatus}</p>
   <p><strong>Zoom:</strong> {zoomStatus}</p>
 </div>

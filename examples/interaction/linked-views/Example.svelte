@@ -97,7 +97,10 @@
     </GGPlot>
   </div>
 
-  <section class="controls" aria-labelledby="linked-controls-heading">
+  <section
+    class="controls gg-demo-chrome"
+    aria-labelledby="linked-controls-heading"
+  >
     <div>
       <p class="eyebrow" id="linked-controls-heading">External controls</p>
       <p class="status">{status}</p>
@@ -118,7 +121,7 @@
     </div>
   </section>
 
-  <div class="table-wrap">
+  <div class="table-wrap gg-demo-chrome">
     <table>
       <caption>
         Linked semantic rows — {selected.length} selected, {emphasized.length} emphasized

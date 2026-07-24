@@ -26,7 +26,7 @@
 </script>
 
 <div class="legend-focus-demo">
-  <p class="status" role="status" aria-live="polite">{status}</p>
+  <p class="status gg-demo-chrome" role="status" aria-live="polite">{status}</p>
   <div class="plots">
     <GGPlot
       data={rows}
@@ -68,7 +68,7 @@
       onlegendfocus={describe}
     />
   </div>
-  <div class="summary">
+  <div class="summary gg-demo-chrome">
     <strong>{emphasized.length} rows focused</strong>
     <button
       type="button"

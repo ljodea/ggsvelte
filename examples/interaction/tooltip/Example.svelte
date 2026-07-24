@@ -32,7 +32,7 @@
 </GGPlot>
 
 <!-- Visual callback evidence only. GGPlot owns the single concise live region. -->
-<p class="event-status">{inspectionStatus}</p>
+<p class="event-status gg-demo-chrome">{inspectionStatus}</p>
 
 <style>
   .event-status {

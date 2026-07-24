@@ -21,7 +21,7 @@
 </script>
 
 <div class="facet-interval-demo">
-  <fieldset>
+  <fieldset class="gg-demo-chrome">
     <legend>Facet interval behavior</legend>
     {#each presets as option}
       <label>
@@ -35,8 +35,8 @@
       </label>
     {/each}
   </fieldset>
-  <p class="explanation">{descriptions[preset]}</p>
-  <p class="status" role="status" aria-live="polite">{status}</p>
+  <p class="explanation gg-demo-chrome">{descriptions[preset]}</p>
+  <p class="status gg-demo-chrome" role="status" aria-live="polite">{status}</p>
   <GGPlot
     data={observations}
     aes={{ x: "x", y: "y" }}

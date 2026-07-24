@@ -9,7 +9,7 @@
 </script>
 
 <div class="legend-filter-demo">
-  <p class="status" role="status" aria-live="polite">{status}</p>
+  <p class="status gg-demo-chrome" role="status" aria-live="polite">{status}</p>
   <GGPlot
     data={ridership}
     aes={{ x: "month", y: "riders", color: "mode" }}
@@ -34,7 +34,7 @@
     <GeomLine linewidth={2.2} />
     <GeomPoint size={3.2} />
   </GGPlot>
-  <p class="note">
+  <p class="note gg-demo-chrome">
     <strong>Why this is filtering:</strong> statistics, facets, and domains see
     only the visible rows. For visual comparison without changing data, use
     <code>legendFocus</code> instead.

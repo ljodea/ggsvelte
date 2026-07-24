@@ -5,7 +5,7 @@
  *
  * Contract per example: examples/<category>/<name>/{spec.ts, Example.svelte,
  * meta.json, data.ts?}. meta.json carries {title, description, tags,
- * docsSection, vrHeight?, journey?}. Output ordering is stable (codepoint sort by
+ * docsSection, vrHeight?, vrWidth?, journey?}. Output ordering is stable (codepoint sort by
  * category, then name), ids are collision-checked, and metas are validated —
  * all unit-tested in gen-manifest.test.ts.
  *
@@ -27,6 +27,7 @@ export interface ExampleMeta {
   tags: readonly string[];
   docsSection: string;
   vrHeight?: number;
+  vrWidth?: number;
   journey?: ExampleJourney;
 }
 
@@ -66,7 +67,15 @@ export class ManifestError extends Error {
 // Meta validation (pure — unit-tested)
 // ---------------------------------------------------------------------------
 
-const META_KEYS = new Set(["title", "description", "tags", "docsSection", "vrHeight", "journey"]);
+const META_KEYS = new Set([
+  "title",
+  "description",
+  "tags",
+  "docsSection",
+  "vrHeight",
+  "vrWidth",
+  "journey",
+]);
 const JOURNEY_KEYS = new Set([
   "pointer",
   "keyboard",
@@ -155,6 +164,13 @@ export function validateMeta(meta: unknown, id: string): string[] {
   ) {
     problems.push(`${id}: meta.json "vrHeight" must be a positive number when present`);
   }
+  const vrWidth = m["vrWidth"];
+  if (
+    vrWidth !== undefined &&
+    (typeof vrWidth !== "number" || !Number.isFinite(vrWidth) || vrWidth <= 0)
+  ) {
+    problems.push(`${id}: meta.json "vrWidth" must be a positive number when present`);
+  }
   const journey = m["journey"];
   if (journey !== undefined) problems.push(...validateJourney(journey, id));
   return problems;
@@ -213,6 +229,7 @@ export function buildManifestSource(examples: readonly DiscoveredExample[]): str
         `    tags: [${ex.tags.map((t) => JSON.stringify(t)).join(", ")}],`,
         `    docsSection: ${JSON.stringify(ex.docsSection)},`,
         ...(ex.vrHeight === undefined ? [] : [`    vrHeight: ${String(ex.vrHeight)},`]),
+        ...(ex.vrWidth === undefined ? [] : [`    vrWidth: ${String(ex.vrWidth)},`]),
         ...(ex.journey === undefined
           ? []
           : [
@@ -268,6 +285,8 @@ export interface ExampleManifestEntry {
   readonly docsSection: string;
   /** VR frame height in px (default 400). */
   readonly vrHeight?: number;
+  /** VR frame width in px (default 640). */
+  readonly vrWidth?: number;
   /** Optional guided interaction journey for runnable examples. */
   readonly journey?: ExampleJourney;
   /** Whether the example ships a data.ts module. */
@@ -329,6 +348,7 @@ export function discoverExamples(examplesDir: string): DiscoveredExample[] {
         tags: m.tags,
         docsSection: m.docsSection,
         ...(m.vrHeight === undefined ? {} : { vrHeight: m.vrHeight }),
+        ...(m.vrWidth === undefined ? {} : { vrWidth: m.vrWidth }),
         ...(m.journey === undefined ? {} : { journey: m.journey }),
         hasData: existsSync(join(dir, "data.ts")),
       });
