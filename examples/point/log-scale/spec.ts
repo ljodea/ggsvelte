@@ -1,18 +1,25 @@
 import { aes, gg, scaleXLog10 } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { countries } from "./data.js";
+import { londonCholera } from "./data.js";
 
 export default defineExample(
-  gg(countries, aes({ x: "gdp", y: "lifeExp", color: "region" }))
+  gg(londonCholera, aes({ x: "density", y: "deathRate", color: "water" }))
     .geomPoint({ size: 3.5 })
-    .geomSmooth({ method: "lm", se: false })
     .scales(scaleXLog10({ labels: "~s" }))
+    // Three keys picked against the economist theme's #d5e4eb paper, where most
+    // palette entries fall below 3:1 contrast.
+    .scaleColorManual({
+      domain: ["Battersea", "New River", "Kew"],
+      values: ["#d14d41", "#014d64", "#4385be"],
+    })
+    .theme("economist")
     .labs({
-      title: "Income and life expectancy",
-      x: "GDP per capita (USD, log scale)",
-      y: "Life expectancy (years)",
-      color: "Region",
+      title: "Cholera, crowding and water in London, 1849",
+      subtitle: "Death rate against population density, by water company",
+      x: "People per acre (log scale)",
+      y: "Cholera deaths per 10,000",
+      color: "Water supply",
     })
     .spec(),
 );

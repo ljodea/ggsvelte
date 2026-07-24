@@ -1,25 +1,32 @@
 <script lang="ts">
-  import { GeomPoint, GeomSmooth, GGPlot, scaleXLog10 } from "@ggsvelte/svelte";
+  import { GeomPoint, GGPlot, scaleXLog10 } from "@ggsvelte/svelte";
 
-  import { countries } from "./data.js";
+  import { londonCholera } from "./data.js";
 </script>
 
 <GGPlot
-  data={countries}
-  aes={{ x: "gdp", y: "lifeExp", color: "region" }}
-  scales={scaleXLog10({ labels: "~s" })}
-  key="country"
+  data={londonCholera}
+  aes={{ x: "density", y: "deathRate", color: "water" }}
+  theme="economist"
+  scales={{
+    ...scaleXLog10({ labels: "~s" }),
+    color: {
+      type: "manual",
+      domain: ["Battersea", "New River", "Kew"],
+      range: ["#d14d41", "#014d64", "#4385be"],
+    },
+  }}
+  key="district"
   inspect={{ mode: "xy", pin: true }}
-  zoom={{ mode: "x" }}
   labs={{
-    title: "Income and life expectancy",
-    x: "GDP per capita (USD, log scale)",
-    y: "Life expectancy (years)",
-    color: "Region",
+    title: "Cholera, crowding and water in London, 1849",
+    subtitle: "Death rate against population density, by water company",
+    x: "People per acre (log scale)",
+    y: "Cholera deaths per 10,000",
+    color: "Water supply",
   }}
   width="container"
   height={400}
 >
   <GeomPoint size={3.5} />
-  <GeomSmooth method="lm" se={false} />
 </GGPlot>

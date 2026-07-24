@@ -1,17 +1,26 @@
 <script lang="ts">
   import { GeomDensity, GGPlot } from "@ggsvelte/svelte";
 
-  import { sessions } from "./data.js";
+  import { galtonChildren } from "./data.js";
 </script>
 
 <GGPlot
-  data={sessions}
-  aes={{ x: "minutes", fill: "cohort" }}
+  data={galtonChildren}
+  aes={{ x: "height", fill: "gender" }}
+  theme="minimal"
+  scales={{
+    fill: {
+      type: "manual",
+      domain: ["Daughters", "Sons"],
+      range: ["#8b7ec8", "#3aa99f"],
+    },
+  }}
   labs={{
-    title: "Session length by cohort",
-    x: "Session length (minutes)",
+    title: "Heights of Galton's 934 adult children",
+    subtitle: "Two overlapping distributions, separated at the means",
+    x: "Height (inches)",
     y: "Density",
-    fill: "Cohort",
+    fill: "Child",
   }}
   width={640}
   height={400}

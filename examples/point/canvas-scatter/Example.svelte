@@ -7,6 +7,14 @@
 <GGPlot
   data={cloud}
   aes={{ x: "x", y: "y", color: "cluster" }}
+  theme="dark"
+  scales={{
+    color: {
+      type: "manual",
+      domain: ["a", "b"],
+      range: ["#da702c", "#4385be"],
+    },
+  }}
   labs={{
     title: "10,000 points on a canvas stratum",
     x: "x",

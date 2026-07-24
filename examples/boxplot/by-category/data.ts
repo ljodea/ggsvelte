@@ -1,25 +1,115 @@
-/** Seeded measurement spreads per instrument, with planted outliers. */
-import { mulberry32 } from "../../rng.js";
-
-const rnd = mulberry32(0xb0c5);
-
-function noisy(center: number, spread: number): number {
-  // Sum of three uniforms: symmetric, light tails.
-  const u = rnd() + rnd() + rnd();
-  return Math.round((center + (u - 1.5) * spread) * 100) / 100;
-}
-
-export const readings: { instrument: string; value: number }[] = [];
-for (const [instrument, center, spread] of [
-  ["alpha", 40, 8],
-  ["beta", 55, 16],
-  ["gamma", 47, 5],
-] as const) {
-  for (let i = 0; i < 40; i++) readings.push({ instrument, value: noisy(center, spread) });
-}
-// Planted outliers (beyond 1.5 x IQR).
-readings.push(
-  { instrument: "alpha", value: 78 },
-  { instrument: "alpha", value: 5 },
-  { instrument: "gamma", value: 71.5 },
-);
+/**
+ * Albert Michelson's 1879 measurements of the speed of light, made at the US
+ * Naval Academy in five experimental runs of twenty. Values are km/s less
+ * 299,000, so 710 means 299,710 km/s.
+ *
+ * The modern accepted value on Michelson's own distance scale is 734.5, which
+ * sits above the centre of every run: the experiment was precise and biased at
+ * the same time, and the spread between runs is the reason Stigler uses it to
+ * teach measurement error.
+ *
+ * Michelson (1882), via Stigler, "Do Robust Estimators Work with Real Data?"
+ * (1977). Transcribed from HistData::MichelsonSets (see NOTICE); 5 runs x 20.
+ */
+export const michelsonRuns = [
+  { run: "Jun 5", velocity: 850 },
+  { run: "Jun 5", velocity: 850 },
+  { run: "Jun 5", velocity: 1000 },
+  { run: "Jun 5", velocity: 810 },
+  { run: "Jun 5", velocity: 960 },
+  { run: "Jun 5", velocity: 800 },
+  { run: "Jun 5", velocity: 830 },
+  { run: "Jun 5", velocity: 830 },
+  { run: "Jun 5", velocity: 880 },
+  { run: "Jun 5", velocity: 720 },
+  { run: "Jun 5", velocity: 880 },
+  { run: "Jun 5", velocity: 840 },
+  { run: "Jun 5", velocity: 890 },
+  { run: "Jun 5", velocity: 770 },
+  { run: "Jun 5", velocity: 910 },
+  { run: "Jun 5", velocity: 720 },
+  { run: "Jun 5", velocity: 890 },
+  { run: "Jun 5", velocity: 810 },
+  { run: "Jun 5", velocity: 870 },
+  { run: "Jun 5", velocity: 940 },
+  { run: "Jun 7", velocity: 740 },
+  { run: "Jun 7", velocity: 950 },
+  { run: "Jun 7", velocity: 980 },
+  { run: "Jun 7", velocity: 1000 },
+  { run: "Jun 7", velocity: 940 },
+  { run: "Jun 7", velocity: 850 },
+  { run: "Jun 7", velocity: 790 },
+  { run: "Jun 7", velocity: 800 },
+  { run: "Jun 7", velocity: 880 },
+  { run: "Jun 7", velocity: 620 },
+  { run: "Jun 7", velocity: 910 },
+  { run: "Jun 7", velocity: 850 },
+  { run: "Jun 7", velocity: 810 },
+  { run: "Jun 7", velocity: 760 },
+  { run: "Jun 7", velocity: 920 },
+  { run: "Jun 7", velocity: 840 },
+  { run: "Jun 7", velocity: 840 },
+  { run: "Jun 7", velocity: 790 },
+  { run: "Jun 7", velocity: 870 },
+  { run: "Jun 7", velocity: 950 },
+  { run: "Jun 9", velocity: 900 },
+  { run: "Jun 9", velocity: 980 },
+  { run: "Jun 9", velocity: 930 },
+  { run: "Jun 9", velocity: 1000 },
+  { run: "Jun 9", velocity: 960 },
+  { run: "Jun 9", velocity: 880 },
+  { run: "Jun 9", velocity: 810 },
+  { run: "Jun 9", velocity: 790 },
+  { run: "Jun 9", velocity: 880 },
+  { run: "Jun 9", velocity: 860 },
+  { run: "Jun 9", velocity: 850 },
+  { run: "Jun 9", velocity: 840 },
+  { run: "Jun 9", velocity: 810 },
+  { run: "Jun 9", velocity: 740 },
+  { run: "Jun 9", velocity: 890 },
+  { run: "Jun 9", velocity: 850 },
+  { run: "Jun 9", velocity: 780 },
+  { run: "Jun 9", velocity: 810 },
+  { run: "Jun 9", velocity: 810 },
+  { run: "Jun 9", velocity: 800 },
+  { run: "Jun 12", velocity: 1070 },
+  { run: "Jun 12", velocity: 980 },
+  { run: "Jun 12", velocity: 650 },
+  { run: "Jun 12", velocity: 960 },
+  { run: "Jun 12", velocity: 940 },
+  { run: "Jun 12", velocity: 900 },
+  { run: "Jun 12", velocity: 880 },
+  { run: "Jun 12", velocity: 760 },
+  { run: "Jun 12", velocity: 860 },
+  { run: "Jun 12", velocity: 970 },
+  { run: "Jun 12", velocity: 870 },
+  { run: "Jun 12", velocity: 840 },
+  { run: "Jun 12", velocity: 820 },
+  { run: "Jun 12", velocity: 750 },
+  { run: "Jun 12", velocity: 860 },
+  { run: "Jun 12", velocity: 850 },
+  { run: "Jun 12", velocity: 810 },
+  { run: "Jun 12", velocity: 820 },
+  { run: "Jun 12", velocity: 740 },
+  { run: "Jun 12", velocity: 810 },
+  { run: "Jul 2", velocity: 930 },
+  { run: "Jul 2", velocity: 880 },
+  { run: "Jul 2", velocity: 760 },
+  { run: "Jul 2", velocity: 960 },
+  { run: "Jul 2", velocity: 880 },
+  { run: "Jul 2", velocity: 840 },
+  { run: "Jul 2", velocity: 880 },
+  { run: "Jul 2", velocity: 800 },
+  { run: "Jul 2", velocity: 720 },
+  { run: "Jul 2", velocity: 950 },
+  { run: "Jul 2", velocity: 840 },
+  { run: "Jul 2", velocity: 840 },
+  { run: "Jul 2", velocity: 800 },
+  { run: "Jul 2", velocity: 760 },
+  { run: "Jul 2", velocity: 880 },
+  { run: "Jul 2", velocity: 780 },
+  { run: "Jul 2", velocity: 760 },
+  { run: "Jul 2", velocity: 850 },
+  { run: "Jul 2", velocity: 810 },
+  { run: "Jul 2", velocity: 870 },
+] as const;

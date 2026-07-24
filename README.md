@@ -100,17 +100,26 @@ live output and complete source.
 <script lang="ts">
   import { GeomDensity, GGPlot } from "@ggsvelte/svelte";
 
-  import { sessions } from "./data.js";
+  import { galtonChildren } from "./data.js";
 </script>
 
 <GGPlot
-  data={sessions}
-  aes={{ x: "minutes", fill: "cohort" }}
+  data={galtonChildren}
+  aes={{ x: "height", fill: "gender" }}
+  theme="minimal"
+  scales={{
+    fill: {
+      type: "manual",
+      domain: ["Daughters", "Sons"],
+      range: ["#8b7ec8", "#3aa99f"],
+    },
+  }}
   labs={{
-    title: "Session length by cohort",
-    x: "Session length (minutes)",
+    title: "Heights of Galton's 934 adult children",
+    subtitle: "Two overlapping distributions, separated at the means",
+    x: "Height (inches)",
     y: "Density",
-    fill: "Cohort",
+    fill: "Child",
   }}
   width={640}
   height={400}
@@ -119,7 +128,7 @@ live output and complete source.
 </GGPlot>
 ```
 
-[![Session-length density estimates overlaid by cohort](apps/docs/static/previews/density-overlay-light.png)](https://ggsvelte.sh/examples/density/overlay)
+[![Heights of Galton's adult children as overlaid density estimates](apps/docs/static/previews/density-overlay-light.png)](https://ggsvelte.sh/examples/density/overlay)
 
 ### [Log scale, fit, and inspection](https://ggsvelte.sh/examples/point/log-scale)
 
@@ -127,33 +136,40 @@ live output and complete source.
 
 ```svelte
 <script lang="ts">
-  import { GeomPoint, GeomSmooth, GGPlot, scaleXLog10 } from "@ggsvelte/svelte";
+  import { GeomPoint, GGPlot, scaleXLog10 } from "@ggsvelte/svelte";
 
-  import { countries } from "./data.js";
+  import { londonCholera } from "./data.js";
 </script>
 
 <GGPlot
-  data={countries}
-  aes={{ x: "gdp", y: "lifeExp", color: "region" }}
-  scales={scaleXLog10({ labels: "~s" })}
-  key="country"
+  data={londonCholera}
+  aes={{ x: "density", y: "deathRate", color: "water" }}
+  theme="economist"
+  scales={{
+    ...scaleXLog10({ labels: "~s" }),
+    color: {
+      type: "manual",
+      domain: ["Battersea", "New River", "Kew"],
+      range: ["#d14d41", "#014d64", "#4385be"],
+    },
+  }}
+  key="district"
   inspect={{ mode: "xy", pin: true }}
-  zoom={{ mode: "x" }}
   labs={{
-    title: "Income and life expectancy",
-    x: "GDP per capita (USD, log scale)",
-    y: "Life expectancy (years)",
-    color: "Region",
+    title: "Cholera, crowding and water in London, 1849",
+    subtitle: "Death rate against population density, by water company",
+    x: "People per acre (log scale)",
+    y: "Cholera deaths per 10,000",
+    color: "Water supply",
   }}
   width="container"
   height={400}
 >
   <GeomPoint size={3.5} />
-  <GeomSmooth method="lm" se={false} />
 </GGPlot>
 ```
 
-[![Income and life expectancy on a logarithmic GDP scale](apps/docs/static/previews/point-log-scale-light.png)](https://ggsvelte.sh/examples/point/log-scale)
+[![London cholera death rates against population density on a log scale](apps/docs/static/previews/point-log-scale-light.png)](https://ggsvelte.sh/examples/point/log-scale)
 
 ### [Faceted histograms](https://ggsvelte.sh/examples/facet/wrap)
 
@@ -268,16 +284,20 @@ complete accessible labels and unchanged scale assignments.
 <script lang="ts">
   import { GeomBoxplot, GGPlot } from "@ggsvelte/svelte";
 
-  import { readings } from "./data.js";
+  import { michelsonRuns } from "./data.js";
 </script>
 
 <GGPlot
-  data={readings}
-  aes={{ x: "instrument", y: "value" }}
+  data={michelsonRuns}
+  aes={{ x: "run", y: "velocity" }}
+  theme="few"
+  scales={{ x: { domain: ["Jun 5", "Jun 7", "Jun 9", "Jun 12", "Jul 2"] } }}
   labs={{
-    title: "Reading spread by instrument",
-    x: "Instrument",
-    y: "Reading",
+    title: "Michelson's five runs, 1879",
+    subtitle:
+      "Twenty measurements each — the runs disagree more than the readings within them",
+    x: "Run",
+    y: "Velocity (km/s − 299,000)",
   }}
   width={640}
   height={400}
@@ -286,7 +306,7 @@ complete accessible labels and unchanged scale assignments.
 </GGPlot>
 ```
 
-[![Reading distributions summarized by instrument](apps/docs/static/previews/boxplot-by-category-light.png)](https://ggsvelte.sh/examples/boxplot/by-category)
+[![Michelson's five speed-of-light runs summarized as boxplots](apps/docs/static/previews/boxplot-by-category-light.png)](https://ggsvelte.sh/examples/boxplot/by-category)
 
 ### [Calendar time from raw years](https://ggsvelte.sh/examples/line/time-axis)
 

@@ -1,6 +1,6 @@
 {
-  "title": "Canvas scatter (10k points)",
-  "description": "Above the 2,000-mark threshold, render: \"auto\" moves the layer onto a canvas stratum (advisory `canvas-auto`): axes, grid, and the legend stay SVG; the marks raster into one canvas sized by the DPR recipe, paired with an off-screen description block and a data-table toggle. Set render: \"svg\" or a11y: \"force-svg\" to opt out.",
-  "tags": ["point", "canvas", "performance", "strata"],
-  "docsSection": "Scatter plots"
+  "title": "Canvas scatter (10,000 points)",
+  "description": "Above the canvas threshold the marks render to a canvas stratum while axes, grid, and legend stay SVG. This is the one example that keeps generated data deliberately — its subject is the rendering path under load, not a dataset — and the dark theme is where overplotting at low alpha actually reads.",
+  "tags": ["point", "canvas", "performance", "theme"],
+  "docsSection": "Points & scatter"
 }

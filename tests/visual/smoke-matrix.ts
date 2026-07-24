@@ -70,7 +70,11 @@ function interaction(
  */
 export const SMOKE_SCENARIOS: readonly SmokeScenario[] = [
   example("point/scatter-color", "light"),
-  example("point/scatter-color", "dark"),
+  // point/canvas-scatter declares .theme("dark"), so this seat captures a
+  // genuinely dark chart. The old point/scatter-color dark seat did not: no
+  // example set a theme, the docs shell never defines --gg-*, and the frame is
+  // container-only — its baseline was byte-identical to the light one.
+  example("point/canvas-scatter", "dark"),
   example("line/multi-series", "light"),
   example("bar/stacked", "light"),
   example("area/basic", "light"),

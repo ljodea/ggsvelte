@@ -1,16 +1,22 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { sessions } from "./data.js";
+import { galtonChildren } from "./data.js";
 
 export default defineExample(
-  gg(sessions, aes({ x: "minutes", fill: "cohort" }))
+  gg(galtonChildren, aes({ x: "height", fill: "gender" }))
     .geomDensity({ alpha: 0.45 })
+    .scaleFillManual({
+      domain: ["Daughters", "Sons"],
+      values: ["#8b7ec8", "#3aa99f"],
+    })
+    .theme("minimal")
     .labs({
-      title: "Session length by cohort",
-      x: "Session length (minutes)",
+      title: "Heights of Galton's 934 adult children",
+      subtitle: "Two overlapping distributions, separated at the means",
+      x: "Height (inches)",
       y: "Density",
-      fill: "Cohort",
+      fill: "Child",
     })
     .spec(),
 );
