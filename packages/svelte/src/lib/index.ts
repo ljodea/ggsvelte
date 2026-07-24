@@ -133,7 +133,67 @@ export { default as ThemeEconomist } from "./theme/ThemeEconomist.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeTufte } from "./theme/ThemeTufte.svelte";
 
-// Deprecation diagnostics (sibling union to InteractionDiagnostic)
+// Scale children (#659 slice 3) — stable-intent: color/fill shells + <Scale>
+// escape hatch; destination for the deprecated `scales` prop (since 0.11.0).
+// Colour aliases re-export Color shells (D3). Position/style shells: slice 4.
+/** @lifecycle stable-intent */
+export { default as Scale } from "./scale/Scale.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorContinuous } from "./scale/ScaleColorContinuous.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorDiscrete } from "./scale/ScaleColorDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorBinned } from "./scale/ScaleColorBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorLog10 } from "./scale/ScaleColorLog10.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorSqrt } from "./scale/ScaleColorSqrt.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorDate } from "./scale/ScaleColorDate.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorDatetime } from "./scale/ScaleColorDatetime.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorManual } from "./scale/ScaleColorManual.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorIdentity } from "./scale/ScaleColorIdentity.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillContinuous } from "./scale/ScaleFillContinuous.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillDiscrete } from "./scale/ScaleFillDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillBinned } from "./scale/ScaleFillBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillLog10 } from "./scale/ScaleFillLog10.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillSqrt } from "./scale/ScaleFillSqrt.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillDate } from "./scale/ScaleFillDate.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillDatetime } from "./scale/ScaleFillDatetime.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillManual } from "./scale/ScaleFillManual.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillIdentity } from "./scale/ScaleFillIdentity.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourContinuous } from "./scale/ScaleColorContinuous.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourDiscrete } from "./scale/ScaleColorDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourBinned } from "./scale/ScaleColorBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourLog10 } from "./scale/ScaleColorLog10.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourSqrt } from "./scale/ScaleColorSqrt.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourDate } from "./scale/ScaleColorDate.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourDatetime } from "./scale/ScaleColorDatetime.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourManual } from "./scale/ScaleColorManual.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourIdentity } from "./scale/ScaleColorIdentity.svelte";
+
+// Deprecation + composition diagnostics (sibling unions to InteractionDiagnostic)
 export {
   DEPRECATION_DIAGNOSTIC_CATALOG,
   deprecatedPropDiagnostic,
@@ -144,6 +204,15 @@ export type {
   DeprecationDiagnosticCode,
   PlotDiagnostic,
 } from "./diagnostics/deprecation.js";
+export {
+  COMPOSITION_DIAGNOSTIC_CATALOG,
+  duplicateScaleChannelDiagnostic,
+  isCompositionDiagnostic,
+} from "./diagnostics/composition.js";
+export type {
+  CompositionDiagnostic,
+  CompositionDiagnosticCode,
+} from "./diagnostics/composition.js";
 
 // Spec surface (builder + canonicalizer + validation)
 export {

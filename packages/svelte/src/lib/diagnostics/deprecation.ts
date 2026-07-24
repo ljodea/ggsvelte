@@ -12,6 +12,7 @@
  * not an oversight.
  */
 import type { InteractionDiagnostic } from "../interaction/interaction-diagnostics.js";
+import type { CompositionDiagnostic } from "./composition.js";
 
 export type DeprecationDiagnosticCode = "DEPRECATED_PLOT_PROP";
 
@@ -28,9 +29,12 @@ export interface DeprecationDiagnostic {
 
 /**
  * Union of every diagnostic the plot may deliver through `ondiagnostic`.
- * Interaction capability/key/lineage checks plus grammar-prop deprecations.
+ * Interaction capability/key/lineage checks, grammar-prop deprecations, and
+ * composition collisions (duplicate scale channels). Additive: handlers
+ * annotated `PlotDiagnostic` (the 0.11 form) remain valid. Exhaustive
+ * `switch` on `.code` needs a new arm for `DUPLICATE_SCALE_CHANNEL`.
  */
-export type PlotDiagnostic = InteractionDiagnostic | DeprecationDiagnostic;
+export type PlotDiagnostic = InteractionDiagnostic | DeprecationDiagnostic | CompositionDiagnostic;
 
 export function isDeprecationDiagnostic(d: PlotDiagnostic): d is DeprecationDiagnostic {
   return d.code === "DEPRECATED_PLOT_PROP";

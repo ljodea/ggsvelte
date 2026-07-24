@@ -64,7 +64,14 @@ export interface GGPlotProps<
   facet?: FacetInput;
   /** Coordinate system ("flip" shorthand accepted). */
   coord?: CoordSpec | "flip";
-  /** Per-scale configuration (types, domains, schemes, breaks, labels). */
+  /**
+   * Per-scale configuration (types, domains, schemes, breaks, labels).
+   *
+   * @deprecated since 0.11.0 — compose scales as declaration-only child layers
+   * instead (`<ScaleColorDiscrete scheme="colorblind"/>`, `<Scale value={…}/>`,
+   * …). Removable in 0.13.0.
+   * https://ggsvelte.sh/guide/upgrading#compose-scales-as-child-layers
+   */
   scales?: Scales;
   /** Appearance-only guide configuration keyed by aesthetic. */
   guides?: GuidesSpec;

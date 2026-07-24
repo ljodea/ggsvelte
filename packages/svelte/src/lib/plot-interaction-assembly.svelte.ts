@@ -13,6 +13,10 @@ import type { PortableSpec } from "@ggsvelte/spec";
 
 import type { OrchestratorInputs } from "./plot-orchestrator.svelte.js";
 import {
+  duplicateScaleChannelDiagnostic,
+  type CompositionDiagnostic,
+} from "./diagnostics/composition.js";
+import {
   deprecatedPropDiagnostic,
   type DeprecationDiagnostic,
   type PlotDiagnostic,
@@ -136,11 +140,53 @@ export function createPlotInteractionAssembly<
         }),
       );
     }
+    if (inputs.scales() !== undefined) {
+      list.push(
+        deprecatedPropDiagnostic({
+          prop: "scales",
+          since: "0.11.0",
+          removeIn: "0.13.0",
+          suggestions: [
+            'Replace scales={scaleColorDiscrete({scheme:"colorblind"})} with <ScaleColorDiscrete scheme="colorblind" />',
+            "Use <Scale value={…} /> for raw fragments, computed scales, or families without shells yet",
+            "Color/fill shells ship in 0.11; position/style shells follow in a later slice",
+          ],
+          anchor: "compose-scales-as-child-layers",
+        }),
+      );
+    }
     return list;
   });
   $effect(() => {
     for (const diagnostic of deprecationDiagnostics) {
       const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
+      if (deliveredAdvisories.has(dedupKey)) continue;
+      deliveredAdvisories.add(dedupKey);
+      deliverDiagnostic(diagnostic);
+    }
+  });
+
+  // Composition advisories (#659 slice 3): duplicate scale channels across
+  // kind:"scale" registry layers. Per-channel, once per instance (dedup key
+  // `${code}:${channel}`). Last child still wins via shallow merge.
+  const compositionDiagnostics = $derived.by((): CompositionDiagnostic[] => {
+    const seen = new Set<string>();
+    const duplicates = new Set<string>();
+    for (const layer of inputs.registry.layers) {
+      if (layer.kind !== "scale") continue;
+      for (const channel of Object.keys(layer.value)) {
+        if (seen.has(channel)) {
+          duplicates.add(channel);
+        } else {
+          seen.add(channel);
+        }
+      }
+    }
+    return [...duplicates].map((channel) => duplicateScaleChannelDiagnostic(channel));
+  });
+  $effect(() => {
+    for (const diagnostic of compositionDiagnostics) {
+      const dedupKey = `${diagnostic.code}:${diagnostic.channel}`;
       if (deliveredAdvisories.has(dedupKey)) continue;
       deliveredAdvisories.add(dedupKey);
       deliverDiagnostic(diagnostic);
