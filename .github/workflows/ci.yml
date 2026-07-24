@@ -1,34 +1,15 @@
-# ggsvelte CI (plan M0b + path routing). Parallel jobs after a cached bun install.
-# All third-party actions pinned by full commit SHA (zizmor-enforced).
-#
-# PR and main-branch correctness jobs use standard GitHub-hosted runners. This
-# public repository receives hosted execution without consuming the owner's
-# private-repository minute allowance, and the elastic pool avoids serializing
-# the job graph behind a handful of persistent runner services. Explicit,
-# hardware-sensitive benchmark/nightly workflows may still use the repo's
-# self-hosted pool; privileged write/OIDC workflows remain GitHub-hosted.
+# ggsvelte CI orchestrator (path routing + gate). Domain job bodies live in
+# ci-*.yml reusable workflows (issue #392) so this file stays navigable.
 #
 # Path routing: scripts/ci-routing.ts classifies the changed file set and
 # emits per-job flags. Expensive jobs are skipped when their inputs did not
-# change (docs-only, workflow-only, markdown-only, …). The `ci-gate` job is
-# the single required aggregator so skipped jobs do not look like missing
-# checks. Product force (lockfile / ci-routing) schedules browser+package
-# surfaces; pure CI plumbing (this file's action pins, .github/actions) only
-# runs the cheap security/lint surface — see forceProduct in routing.ts.
+# change. The `ci-gate` job is the single required aggregator so skipped jobs
+# do not look like missing checks.
 #
-# Content-hash skip (issue #245): when a job is still scheduled, it may
-# early-exit success if a validated success marker / packages-dist cache
-# exists for the same physical execution identity (content hash of
-# JOB_CONTENT_INPUTS + recipe). Success-marker jobs use local composites
-# (.github/actions/ci-content-hash-restore|write); packages-dist keeps its
-# specialized dist-payload path. bypass_content_cache disables short-circuit
-# under force-all / lockfile / ci.yml / ci-routing / .github/actions changes
-# so recipe pin bumps re-execute jobs that *are* scheduled; the next product
-# PR also misses cache because those paths are UNIVERSAL_CONTENT_INPUTS.
-# Invalidate by bumping CONTENT_HASH_SCHEMA, editing a matched input, or
-# setting repo variable CI_DISABLE_CONTENT_HASH=1. GHA cache is ref-scoped
-# (not a cross-PR registry). Exact cache keys only — no restore-keys for
-# job markers.
+# Content-hash skip (issue #245): domain jobs may early-exit on a success
+# marker. bypass_content_cache disables short-circuit under force-all /
+# lockfile / ci*.yml / ci-routing / .github/actions changes.
+# Invalidate via CONTENT_HASH_SCHEMA, matched inputs, or CI_DISABLE_CONTENT_HASH=1.
 name: CI
 
 on:
@@ -41,29 +22,15 @@ permissions: {}
 
 concurrency:
   group: ci-${{ github.ref }}
-  # Cancel superseded runs on every ref — including main. Rapid merges used to
-  # stack full suites behind a 2-slot heavy lane; only the latest commit per
-  # ref is worth finishing. PR close/merge is handled by cancel-on-pr-close.yml
-  # (concurrency alone does not cancel when no replacement run starts).
+  # Cancel superseded runs on every ref — including main. Hosted elastic
+  # pool (not self-hosted) keeps the job graph from serializing.
   cancel-in-progress: true
 
-# Hosted execution is deliberate: this workflow fans out into more jobs than
-# the four-runner self-hosted pool can admit concurrently. The former pool made
-# queue time dominate execution time and caused independent PRs to block one
-# another even on a 16-vCPU host. Path routing and content hashes still reduce
-# unnecessary work, but no longer sit behind a repo-local four-job ceiling.
-
 env:
-  # Keep in sync with: support-matrix.json browsers.playwright, package pins
-  # (@playwright/test / playwright), and every hardcoded ci-runner: image line
-  # below (asserted in scripts/support-matrix.test.ts + per-job pin steps).
-  # Container jobs pull the prebaked ghcr.io/<repo>/ci-runner:<tag> image
-  # (Playwright + unzip), published ONLY on main by build-ci-image.yml.
+  # Keep in sync with: support-matrix.json browsers.playwright, package pins,
+  # and every ci-runner image input below (asserted in support-matrix.test.ts).
   # Bumping this tag is step 2 of a two-step process (issue #610): first
-  # prepublish the image by landing a publisher-only bump of PLAYWRIGHT_TAG in
-  # build-ci-image.yml (and the Dockerfile ARG default), then point consumers
-  # here at the published tag. Single-PR lockstep deadlocks PR CI on a missing
-  # pull. See CONTRIBUTING.md "Bumping Playwright / the CI runner image".
+  # prepublish via build-ci-image.yml, then point consumers here.
   PLAYWRIGHT_CONTAINER_TAG: v1.61.1-noble
 
 jobs:
@@ -118,6 +85,7 @@ jobs:
   # Early package build shared by component / consumer / interaction-perf
   # (issue #241). Unit and bench-smoke keep the cheaper `bun run check`
   # (spec/core only) and do not wait on this job.
+
   packages-dist:
     name: packages-dist (build + upload packages/*/dist)
     needs: detect-changes
@@ -237,840 +205,173 @@ jobs:
     name: checks (pre-commit stage)
     needs: detect-changes
     if: needs.detect-changes.outputs.checks == 'true'
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/ci-checks.yml
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-bun-install
-        with:
-          cache_key_prefix: bun
-      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
-      - run: uv tool install pre-commit
-      # Pre-commit stage only. Pre-push parity (build, unit, svelte-check, knip,
-      # type-aware lint, examples/docs check) is covered by dedicated jobs so we
-      # do not pay for them twice on every PR.
-      - name: pre-commit stage (parity)
-        run: pre-commit run --all-files --show-diff-on-failure
 
   unit:
     name: unit (bun test spec + core)
     needs: detect-changes
     if: needs.detect-changes.outputs.unit == 'true'
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/ci-unit.yml
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          # Full history: packages/spec manual-AT alias audit tests git-show
-          # hard-coded historical commits (shallow clone would fail unit).
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
-        with:
-          execution: unit
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun
-      - name: build spec/core dist (package exports point at dist/)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check
-      # lcov for Codecov; text reporter still prints a summary in the log.
-      - if: steps.content_hash.outputs.hit != 'true'
-        run: >
-          bun test --coverage --coverage-reporter=lcov
-          --coverage-dir=coverage/unit
-          packages/spec packages/core benchmarks scripts tests/evals
-      - name: Upload unit coverage to Codecov
-        # Custom if overrides default success() — keep the success gate so a
-        # failed suite does not upload a partial report or count as green.
-        if: success() && steps.content_hash.outputs.hit != 'true'
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage/unit/lcov.info
-          flags: unit
-          name: unit
-          # Pin the uploader binary; the action's default is "latest".
-          version: v11.3.1
-          disable_search: true
-          fail_ci_if_error: true
-      - uses: ./.github/actions/ci-content-hash-write
-        # Require success so a Codecov upload failure cannot green-cache the job.
-        if: success() && steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: unit
-          hash: ${{ steps.content_hash.outputs.hash }}
-
-  compatibility-matrix:
-    name: compatibility matrix (machine-checked source)
-    needs: detect-changes
-    if: needs.detect-changes.outputs.consumer == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      matrix: ${{ steps.matrix.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - id: matrix
-        name: emit packed-consumer matrix (PR default vs full required)
-        # Issue #246: PRs run one Linux consumer row by default; full required
-        # matrix when labeled run-compat (detect-changes also forces consumer
-        # + packages_dist so the label works on docs-only PRs). Main push stays
-        # thinned per #244 (consumer PR-primary). Nightly covers expanded rows.
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          flavor=required
-          if [ "${EVENT_NAME}" = "pull_request" ]; then
-            flavor=pr
-            if printf '%s' "${PR_LABELS}" | tr ',' '\n' | grep -qx 'run-compat'; then
-              flavor=required
-            fi
-          fi
-          echo "support-matrix flavor=${flavor} labels=${PR_LABELS:-}"
-          echo "matrix=$(bun scripts/support-matrix.ts "${flavor}")" >> "$GITHUB_OUTPUT"
+    with:
+      bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   consumer-compat:
-    name: packed consumer (${{ matrix.os }}, Node ${{ matrix.node }}, ${{ matrix.packageManager }}, Svelte ${{ matrix.svelte }})
-    needs: [detect-changes, compatibility-matrix, packages-dist]
+    name: packed consumer matrix
+    needs: [detect-changes, packages-dist]
     if: >-
       needs.detect-changes.outputs.consumer == 'true' &&
-      needs.compatibility-matrix.result == 'success' &&
       needs.packages-dist.result == 'success'
-    strategy:
-      fail-fast: false
-      max-parallel: 4
-      matrix: ${{ fromJSON(needs.compatibility-matrix.outputs.matrix) }}
-    # Every matrix row uses its standard GitHub-hosted image.
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
+    uses: ./.github/workflows/ci-consumer.yml
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: ${{ matrix.node }}
-      - uses: ./.github/actions/ci-setup-bun
-      # Resolved toolchain versions (not matrix majors alone) — Node/npm patch
-      # bumps must miss the consumer success-marker cache (Codex P2 on #245).
-      # Keep resolution in the job so the content-hash composite stays protocol-only.
-      - id: consumer_runtime
-        name: resolve consumer runtime toolchain versions
-        shell: bash
-        env:
-          # env-indirection: matrix values must not expand into the script body (zizmor).
-          MATRIX_PM: ${{ matrix.packageManager }}
-          MATRIX_PM_VERSION: ${{ matrix.packageManagerVersion }}
-        run: |
-          set -euo pipefail
-          RUNTIME_NODE="$(node -v)"
-          case "${MATRIX_PM}" in
-            npm) RUNTIME_PM_VER="$(npm -v)" ;;
-            bun) RUNTIME_PM_VER="$(bun -v)" ;;
-            pnpm)
-              if command -v pnpm >/dev/null 2>&1; then
-                RUNTIME_PM_VER="$(pnpm -v)"
-              else
-                RUNTIME_PM_VER="${MATRIX_PM_VERSION}"
-              fi
-              ;;
-            *) RUNTIME_PM_VER="${MATRIX_PM_VERSION}" ;;
-          esac
-          {
-            echo "runtime_node=${RUNTIME_NODE}"
-            echo "runtime_pm_ver=${RUNTIME_PM_VER}"
-          } >> "$GITHUB_OUTPUT"
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
-        with:
-          execution: consumer
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-          matrix_node: ${{ matrix.node }}
-          matrix_pm: ${{ matrix.packageManager }}
-          matrix_pm_version: ${{ matrix.packageManagerVersion }}
-          matrix_svelte: ${{ matrix.svelte }}
-          runtime_node_version: ${{ steps.consumer_runtime.outputs.runtime_node }}
-          runtime_pm_version: ${{ steps.consumer_runtime.outputs.runtime_pm_ver }}
-      - if: steps.content_hash.outputs.hit != 'true'
-        run: bun install --frozen-lockfile
-        env:
-          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
-      - uses: ./.github/actions/ci-download-packages-dist
-        if: steps.content_hash.outputs.hit != 'true'
-      - name: type-check Svelte package source
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check:svelte
-      - name: install tarballs in a clean consumer and exercise types, build, SSR, Node, and CLI
-        if: steps.content_hash.outputs.hit != 'true'
-        env:
-          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
-          PACKAGE_MANAGER: ${{ matrix.packageManager }}
-          PACKAGE_MANAGER_VERSION: ${{ matrix.packageManagerVersion }}
-          SVELTE_VERSION: ${{ matrix.svelte }}
-        run: bun scripts/consumer-compat.ts
+    with:
+      bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+      event_name: ${{ github.event_name }}
+      pr_labels: ${{ join(github.event.pull_request.labels.*.name, ',') }}
 
-      # Component surface is split for wall-clock (issue #243). All three schedule
-      # when routing sets component=true; ci-gate requires every shard to succeed.
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: consumer
-          hash: ${{ steps.content_hash.outputs.hash }}
-
-  # packages/svelte browser surface is two parallel jobs so chromium+coverage
-  # and firefox+webkit do not serialize (~90s wall-clock savings on the
-  # component path). Coverage + Codecov stay on the chromium job only.
   component-svelte:
     name: component-svelte (packages/svelte chromium + coverage + ssr)
-
     needs: [detect-changes, packages-dist]
     if: >-
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: ubuntu-latest
-    container:
-      # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above.
-      image: ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble
-    defaults:
-      run:
-        # The container's /bin/sh is dash, which rejects `set -o pipefail`.
-        shell: bash
+    uses: ./.github/workflows/ci-component-svelte.yml
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
-        with:
-          execution: component_svelte
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun-container
-      - uses: ./.github/actions/ci-download-packages-dist
-        if: steps.content_hash.outputs.hit != 'true'
-      - name: assert playwright npm/container version sync (packages/svelte)
-        if: steps.content_hash.outputs.hit != 'true'
-        uses: ./.github/actions/ci-assert-playwright-version-sync
-        with:
-          working_directory: packages/svelte
-          package: playwright
-          scope: packages/svelte
-          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
-      # Chromium collects browser v8 coverage (CDP; works under bun) and enforces
-      # thresholds. SSR runs under bun without --coverage: @vitest/coverage-v8
-      # needs Node inspector Coverage APIs that bun does not implement
-      # ("Coverage APIs are not supported"). Local `test:coverage` can still
-      # collect SSR lcov under node for offline use. Firefox/webkit run in the
-      # parallel component-svelte-fx job (coverage-free).
-      #
-      # One shell retry: vitest `retry` only re-runs failed *tests*, not suite
-      # import / iframe / coverage-v8 dynamic-import harness failures (PR #440).
-      - name: component tests (packages/svelte, chromium + coverage)
-        if: steps.content_hash.outputs.hit != 'true'
-        working-directory: packages/svelte
-        run: |
-          set -euo pipefail
-          if bunx --bun vitest run --coverage --project chromium; then
-            exit 0
-          fi
-          echo "::warning::chromium+coverage failed once; retrying once for browser harness flake"
-          bunx --bun vitest run --coverage --project chromium
-      - name: component tests (packages/svelte, SSR)
-        if: steps.content_hash.outputs.hit != 'true'
-        working-directory: packages/svelte
-        run: bunx --bun vitest run --config vitest.ssr.config.ts
-      - name: rewrite svelte lcov paths to monorepo root
-        # vitest writes SF:src/lib/... relative to packages/svelte; Codecov
-        # components filter packages/svelte/** so paths must be repo-rooted.
-        if: success() && steps.content_hash.outputs.hit != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          f=packages/svelte/coverage/browser/lcov.info
-          if [ ! -f "${f}" ]; then
-            echo "::error::missing coverage file ${f}"
-            exit 1
-          fi
-          # Idempotent: only prefix bare package-relative src/ paths.
-          sed -i 's|^SF:src/|SF:packages/svelte/src/|' "${f}"
-          sed -i 's|^SF:\./src/|SF:packages/svelte/src/|' "${f}"
-      - name: ensure gpg for Codecov uploader (Playwright image)
-        if: success() && steps.content_hash.outputs.hit != 'true'
-        run: |
-          set -euo pipefail
-          if ! command -v gpg >/dev/null 2>&1; then
-            apt-get update
-            apt-get install -y --no-install-recommends gnupg
-          fi
-      - name: Upload packages/svelte coverage to Codecov
-        # Custom if overrides default success() — keep the success gate so a
-        # failed suite does not upload a partial report or count as green.
-        if: success() && steps.content_hash.outputs.hit != 'true'
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: packages/svelte/coverage/browser/lcov.info
-          flags: svelte
-          name: svelte
-          # Pin the uploader binary; the action's default is "latest".
-          version: v11.3.1
-          disable_search: true
-          fail_ci_if_error: true
-      - uses: ./.github/actions/ci-content-hash-write
-        # Require success so a Codecov upload failure cannot green-cache the job.
-        if: success() && steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: component_svelte
-          hash: ${{ steps.content_hash.outputs.hash }}
-      - name: upload packages/svelte failure artifacts
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: component-svelte-failure-artifacts
-          path: packages/svelte/test-results/
-          if-no-files-found: ignore
-          retention-days: 7
+    with:
+      bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+      # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above (env context is
+      # unavailable on reusable-workflow `with:` inputs — actionlint).
+      playwright_container_tag: v1.61.1-noble
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  # Parallel sibling of component-svelte: firefox + webkit only (no coverage).
-  # Distinct content-hash execution so a chromium cache hit cannot skip these
-  # engines, and vice versa.
   component-svelte-fx:
     name: component-svelte-fx (packages/svelte firefox + webkit)
-
     needs: [detect-changes, packages-dist]
     if: >-
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: ubuntu-latest
-    env:
-      # GitHub runs the container as root, while /github/home belongs to
-      # pwuser. Firefox refuses that ownership mismatch.
-      HOME: /root
-    container:
-      # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above.
-      image: ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble
-    defaults:
-      run:
-        # The container's /bin/sh is dash, which rejects `set -o pipefail`.
-        shell: bash
+    uses: ./.github/workflows/ci-component-svelte-fx.yml
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
-        with:
-          execution: component_svelte_fx
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun-container
-      - uses: ./.github/actions/ci-download-packages-dist
-        if: steps.content_hash.outputs.hit != 'true'
-      - name: assert playwright npm/container version sync (packages/svelte)
-        if: steps.content_hash.outputs.hit != 'true'
-        uses: ./.github/actions/ci-assert-playwright-version-sync
-        with:
-          working_directory: packages/svelte
-          package: playwright
-          scope: packages/svelte
-          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
-      - name: component tests (packages/svelte, firefox + webkit)
-        if: steps.content_hash.outputs.hit != 'true'
-        working-directory: packages/svelte
-        run: bunx --bun vitest run --project firefox --project webkit
-      - uses: ./.github/actions/ci-content-hash-write
-        if: success() && steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: component_svelte_fx
-          hash: ${{ steps.content_hash.outputs.hash }}
-      - name: upload packages/svelte-fx failure artifacts
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: component-svelte-fx-failure-artifacts
-          path: packages/svelte/test-results/
-          if-no-files-found: ignore
-          retention-days: 7
+    with:
+      bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+      # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above (env context is
+      # unavailable on reusable-workflow `with:` inputs — actionlint).
+      playwright_container_tag: v1.61.1-noble
 
   component-spikes:
     name: component-spikes (spikes/browser vitest)
-
     needs: [detect-changes, packages-dist]
     if: >-
       needs.detect-changes.outputs.component == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: ubuntu-latest
-    env:
-      # GitHub runs the container as root, while /github/home belongs to
-      # pwuser. Firefox refuses that ownership mismatch.
-      HOME: /root
-    container:
-      # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above.
-      image: ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble
-    defaults:
-      run:
-        # The container's /bin/sh is dash, which rejects `set -o pipefail`.
-        shell: bash
+    uses: ./.github/workflows/ci-component-spikes.yml
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
-        with:
-          execution: component_spikes
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun-container
-      - uses: ./.github/actions/ci-download-packages-dist
-        if: steps.content_hash.outputs.hit != 'true'
-      - name: assert playwright npm/container version sync (spikes/browser)
-        if: steps.content_hash.outputs.hit != 'true'
-        uses: ./.github/actions/ci-assert-playwright-version-sync
-        with:
-          working_directory: spikes/browser
-          package: playwright
-          scope: spikes/browser
-          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
-      - name: retired spike suites (browser + ssr projects)
-        if: steps.content_hash.outputs.hit != 'true'
-        working-directory: spikes/browser
-        run: bun run --bun test
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: component_spikes
-          hash: ${{ steps.content_hash.outputs.hash }}
-      - name: upload spikes failure artifacts
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: component-spikes-failure-artifacts
-          path: spikes/browser/test-results/
-          if-no-files-found: ignore
-          retention-days: 7
+    with:
+      bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+      # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above (env context is
+      # unavailable on reusable-workflow `with:` inputs — actionlint).
+      playwright_container_tag: v1.61.1-noble
 
   component-journeys:
-    # Non-pixel docs/structure/a11y journeys. Routed via docs_journeys so
-    # content-only PRs still get structure coverage without VR pixels.
     name: component-journeys (docs a11y playwright)
-
     needs: [detect-changes, packages-dist]
     if: >-
       needs.detect-changes.outputs.docs_journeys == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: ubuntu-latest
-    env:
-      # GitHub runs the container as root, while /github/home belongs to
-      # pwuser. Firefox refuses that ownership mismatch.
-      HOME: /root
-    container:
-      # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above.
-      image: ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble
-    defaults:
-      run:
-        # The container's /bin/sh is dash, which rejects `set -o pipefail`.
-        shell: bash
+    uses: ./.github/workflows/ci-component-journeys.yml
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
-        with:
-          execution: component_journeys
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun-container
-      - uses: ./.github/actions/ci-download-packages-dist
-        if: steps.content_hash.outputs.hit != 'true'
-      - name: assert playwright npm/container version sync (root @playwright/test)
-        if: steps.content_hash.outputs.hit != 'true'
-        uses: ./.github/actions/ci-assert-playwright-version-sync
-        with:
-          working_directory: .
-          package: "@playwright/test"
-          scope: root @playwright/test (VR suite)
-          container_tag: ${{ env.PLAYWRIGHT_CONTAINER_TAG }}
-      - name: build packaged interaction test target
-        if: steps.content_hash.outputs.hit != 'true'
-        run: DOCS_BUILD_MODE=cloudflare-preview bun run build:docs
-      - name: docs shell, home/gallery, progressive, themes, interaction, playground journeys
-        if: steps.content_hash.outputs.hit != 'true'
-        # Enumerate every non-pixel docs journey. --grep-invert drops visual-contract
-        # screenshots so content PRs never pay full-page goldens here.
-        run: >-
-          bun run test:visual --
-          docs-shell.spec.ts
-          docs-home-gallery.spec.ts
-          docs-progressive-search.spec.ts
-          docs-themes.spec.ts
-          interaction-accessibility.spec.ts
-          playground.spec.ts
-          --grep-invert 'visual contract'
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: component_journeys
-          hash: ${{ steps.content_hash.outputs.hash }}
-      - name: upload journey failure artifacts
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: component-journeys-failure-artifacts
-          path: |
-            tests/visual/test-results/
-            tests/visual/playwright-report/
-          if-no-files-found: ignore
-          retention-days: 7
+    with:
+      bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
+      # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above (env context is
+      # unavailable on reusable-workflow `with:` inputs — actionlint).
+      playwright_container_tag: v1.61.1-noble
 
-  # Informational only — not a required status check (excluded from ci-gate).
-  # Hard gate remains on `run-bench` PRs via bench.yml.
   interaction-perf:
     name: interaction-perf (p50/p95, informational)
     needs: [detect-changes, packages-dist]
     if: >-
       needs.detect-changes.outputs.interaction_perf == 'true' &&
       needs.packages-dist.result == 'success'
-    runs-on: ubuntu-latest
-    env:
-      HOME: /root
-    container:
-      image: ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble
-    defaults:
-      run:
-        shell: bash
+    uses: ./.github/workflows/ci-interaction-perf.yml
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-bun-install
-        with:
-          cache_key_prefix: bun-container
-      - uses: ./.github/actions/ci-download-packages-dist
-      - name: build docs for interaction performance fixtures
-        run: DOCS_BUILD_MODE=cloudflare-preview bun run build:docs
-      - name: interaction performance p50/p95 (informational — never fail the check)
-        id: perf
-        # Wall-clock budgets flake on the shared self-hosted host. Hard gate is
-        # bench.yml on `run-bench` PRs. Soft-fail here so branch protection that
-        # requires all checks cannot block merges; ci-gate also ignores this job.
-        run: |
-          set +e
-          bun run test:interaction-perf
-          code=$?
-          echo "code=${code}" >> "$GITHUB_OUTPUT"
-          if [ "${code}" -ne 0 ]; then
-            echo "::warning::interaction-perf budgets failed (informational; exit ${code})"
-          fi
-          exit 0
-      - name: upload interaction-perf failure artifacts
-        if: steps.perf.outputs.code != '0'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: interaction-perf-failure-artifacts
-          path: tests/performance/test-results/
-          if-no-files-found: ignore
-          retention-days: 7
+    with:
+      # Keep in sync with env.PLAYWRIGHT_CONTAINER_TAG above (env context is
+      # unavailable on reusable-workflow `with:` inputs — actionlint).
+      playwright_container_tag: v1.61.1-noble
 
-  # Former monolithic "build" is three concurrent jobs (fail-fast / no serial wait):
-  #   build        — packages + knip + type-aware + publint (scripts tests land here)
-  #   svelte-check — packages/svelte + apps/docs svelte-check (product surface only)
-  #   docs-site    — vite adapter-static + pages-links (product surface only)
-  # scripts/**/*.test.ts schedules build + unit only — never docs site.
   build:
     name: build (packages + knip + type-aware + publint)
     needs: detect-changes
     if: needs.detect-changes.outputs.build == 'true'
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/ci-build.yml
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
-        with:
-          execution: build
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun
-      - name: build packages (tsc -b + svelte-package)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run build
-      - name: tsc examples corpus
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check:examples
-      # apps/docs/tsconfig.json extends ./.svelte-kit/tsconfig.json. Pre-split,
-      # check:docs (svelte-kit sync) ran in this job before oxlint; keep the
-      # sync here so type-aware lint does not fail with Invalid tsconfig when
-      # svelte-check runs as a concurrent sibling (pre-commit documents the
-      # same order dependency).
-      - name: svelte-kit sync (apps/docs tsconfig for type-aware oxlint)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: cd apps/docs && bun x svelte-kit sync
-      - name: oxlint --type-aware
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run lint:type-aware
-      - name: knip
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run knip
-      - name: publint + attw (real gate — exports point at dist/)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run lint:package
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: build
-          hash: ${{ steps.content_hash.outputs.hash }}
-      # packages/*/dist for consumers is produced by packages-dist (issue #241).
-      # This job keeps an independent build so publint/attw always re-validate
-      # a fresh tree alongside knip/type-aware analysis.
+    with:
+      bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
 
   svelte-check:
     name: svelte-check (packages/svelte + apps/docs)
     needs: detect-changes
     if: needs.detect-changes.outputs.svelte_check == 'true'
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/ci-svelte-check.yml
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
-        with:
-          execution: svelte_check
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun
-      - name: build packages (svelte-check imports package types)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run build
-      - name: svelte-check (packages/svelte)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check:svelte
-      - name: svelte-check (apps/docs)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check:docs
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: svelte_check
-          hash: ${{ steps.content_hash.outputs.hash }}
+    with:
+      bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
 
   docs-site:
     name: docs-site (adapter-static build + pages links)
     needs: detect-changes
     if: needs.detect-changes.outputs.docs_site == 'true'
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/ci-docs-site.yml
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
-        with:
-          execution: docs_site
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun
-      - name: build packages (docs import workspace packages)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run build
-      - name: build static docs site (adapter-static; the deployable/VR target)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run build:docs
-      - name: verify packed Pages links and required R0 journeys
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check:pages-links
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: docs_site
-          hash: ${{ steps.content_hash.outputs.hash }}
+    with:
+      bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
 
   actions-security:
     name: actions-security (actionlint + zizmor)
     needs: detect-changes
     if: needs.detect-changes.outputs.actions_security == 'true'
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/ci-actions-security.yml
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
-        with:
-          execution: actions_security
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun
-      - name: actionlint (lockfile-installed wasm build)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run lint:actions
-      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
-        if: steps.content_hash.outputs.hit != 'true'
-      - name: zizmor
-        if: steps.content_hash.outputs.hit != 'true'
-        run: uvx zizmor==1.26.1 .github/workflows .github/actions
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: actions_security
-          hash: ${{ steps.content_hash.outputs.hash }}
+    with:
+      bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
 
   bench-smoke:
     name: bench-smoke (mitata, 1k workload)
     needs: detect-changes
     if: needs.detect-changes.outputs.bench_smoke == 'true'
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/ci-bench-smoke.yml
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/ci-setup-bun
-      - uses: ./.github/actions/ci-content-hash-restore
-        id: content_hash
-        with:
-          execution: bench_smoke
-          bypass: ${{ needs.detect-changes.outputs.bypass_content_cache }}
-          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
-      - uses: ./.github/actions/ci-bun-install
-        if: steps.content_hash.outputs.hit != 'true'
-        with:
-          cache_key_prefix: bun
-      - name: build spec/core dist (benchmarks import the packages)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run check
-      - name: bench smoke (1k points; informal numbers, not a gate on values)
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run bench:smoke
-      - name: retained-memory absolute and 20% regression gate
-        if: steps.content_hash.outputs.hit != 'true'
-        run: bun run bench:memory:check
-      - uses: ./.github/actions/ci-content-hash-write
-        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
-        with:
-          execution: bench_smoke
-          hash: ${{ steps.content_hash.outputs.hash }}
+    with:
+      bypass_content_cache: ${{ needs.detect-changes.outputs.bypass_content_cache }}
 
   vr-baseline-guard:
-    # Same-PR smoke baselines allowed when paired with render-relevant paths
-    # (packages/examples/visual tests/docs_render). Content-only docs paths do
-    # not qualify. Legacy vr-update/pr-<n> bot path still allowed.
     name: vr-baseline-guard (same-PR smoke baselines)
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/ci-vr-baseline-guard.yml
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - uses: ./.github/actions/ci-setup-bun
-      - name: refuse baseline-only / content-only-justified smoke baseline diffs
-        env:
-          # env-indirection: branch names / repo names are PR-controlled text
-          # and must never be interpolated into the script itself.
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
-          BASE_REPO: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-          git fetch --no-tags origin "${BASE_REF}"
-          changed="$(git diff --name-only "origin/${BASE_REF}"...HEAD)"
-          vr_update_args=()
-          if [ "${HEAD_REPO}" = "${BASE_REPO}" ] && printf '%s' "${HEAD_REF}" | grep -Eq '^vr-update/pr-[0-9]+$'; then
-            vr_update_args=(--vr-update-branch)
-          fi
-          # Pure helper reuses docs_render vs content-only classification (Codex P2).
-          if ! printf '%s\n' "${changed}" | bun scripts/vr-baseline-guard.ts "${vr_update_args[@]+"${vr_update_args[@]}"}"; then
-            echo "::error::same-PR smoke baselines require packages/, examples/, tests/visual/ (not __screenshots__/ alone), or apps/docs *render* paths — not guide content/catalogs. Or use a vr-update/pr-<n> branch."
-            exit 1
-          fi
 
   # Single required aggregator. Skipped jobs are OK when routing disabled them;
   # a required job that is skipped/failed/cancelled fails the gate.
   # interaction-perf is intentionally excluded (informational only).
+  # compatibility-matrix lives inside ci-consumer.yml; gate watches consumer-compat.
   ci-gate:
     name: ci-gate (required aggregator)
     if: always()
@@ -1079,7 +380,6 @@ jobs:
       - packages-dist
       - checks
       - unit
-      - compatibility-matrix
       - consumer-compat
       - component-svelte
       - component-svelte-fx
@@ -1129,11 +429,6 @@ jobs:
           VR_GUARD_RES: ${{ needs.vr-baseline-guard.result }}
           EVENT_NAME: ${{ github.event_name }}
         shell: bash
-        # Gate logic (required-job plan, component-shard rollup, PR-only
-        # vr-baseline-guard rule) lives in scripts/ci-routing/ci-gate.ts,
-        # unit-tested by scripts/ci-routing/ci-gate.test.ts and the CLI-level
-        # test in scripts/ci-routing.test.ts. This step only short-circuits
-        # on an untrustworthy detect-changes result before delegating.
         run: |
           set -euo pipefail
           if [ "${DETECT_RESULT}" != "success" ]; then

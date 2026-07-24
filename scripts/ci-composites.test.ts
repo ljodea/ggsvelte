@@ -3,7 +3,7 @@
  * from ci.yml (packages-dist download/verify, setup-bun pin, bun-install cache).
  */
 import { describe, expect, it } from "bun:test";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const root = join(import.meta.dir, "..");
@@ -79,8 +79,34 @@ const CONTAINER_BUN_INSTALL_JOBS = new Set([
   "interaction-perf",
 ]);
 
+/** Orchestrator + every reusable domain workflow (issue #392). */
+function readCiSurface(): string {
+  const dir = join(root, ".github/workflows");
+  const files = readdirSync(dir)
+    .filter((f) => f === "ci.yml" || (f.startsWith("ci-") && f.endsWith(".yml")))
+    .toSorted();
+  return files.map((f) => read(`.github/workflows/${f}`)).join("\n");
+}
+
 function jobSlice(ci: string, jobId: string): string {
-  const start = ci.indexOf(`  ${jobId}:\n`);
+  // Prefer the domain job body (has steps) over the thin orchestrator caller.
+  const marker = `  ${jobId}:\n`;
+  let start = -1;
+  let from = 0;
+  while (true) {
+    const idx = ci.indexOf(marker, from);
+    if (idx === -1) break;
+    const window = ci.slice(idx, idx + 800);
+    if (window.includes("    steps:") || window.includes("\n    steps:")) {
+      start = idx;
+      break;
+    }
+    // reusable caller uses: — keep looking
+    from = idx + marker.length;
+  }
+  if (start === -1) {
+    start = ci.indexOf(marker);
+  }
   expect(start, `job ${jobId} missing`).toBeGreaterThan(-1);
   const rest = ci.slice(start + 1);
   const next = rest.search(/\n  [a-z0-9_-]+:\n/);
@@ -101,7 +127,7 @@ describe("ci-download-packages-dist composite", () => {
   });
 
   it("is the sole packages-dist download path for the six consumer jobs", () => {
-    const ci = read(".github/workflows/ci.yml");
+    const ci = readCiSurface();
     for (const jobId of PACKAGES_DIST_CONSUMERS) {
       const job = jobSlice(ci, jobId);
       expect(job, jobId).toContain("uses: ./.github/actions/ci-download-packages-dist");
@@ -127,7 +153,7 @@ describe("ci-setup-bun composite", () => {
   });
 
   it("is used by every CI job that previously inlined setup-bun", () => {
-    const ci = read(".github/workflows/ci.yml");
+    const ci = readCiSurface();
     for (const jobId of SETUP_BUN_JOBS) {
       const job = jobSlice(ci, jobId);
       expect(job, jobId).toContain("uses: ./.github/actions/ci-setup-bun");
@@ -152,7 +178,7 @@ describe("ci-bun-install composite", () => {
   });
 
   it("wires host vs container cache prefixes for the cache+install jobs", () => {
-    const ci = read(".github/workflows/ci.yml");
+    const ci = readCiSurface();
     for (const jobId of BUN_INSTALL_JOBS) {
       const job = jobSlice(ci, jobId);
       expect(job, jobId).toContain("uses: ./.github/actions/ci-bun-install");
@@ -187,7 +213,7 @@ describe("ci-assert-playwright-version-sync composite", () => {
   });
 
   it("is the sole playwright version-sync path for the four container jobs", () => {
-    const ci = read(".github/workflows/ci.yml");
+    const ci = readCiSurface();
     for (const jobId of PLAYWRIGHT_VERSION_SYNC_JOBS) {
       const job = jobSlice(ci, jobId);
       expect(job, jobId).toContain("uses: ./.github/actions/ci-assert-playwright-version-sync");
@@ -201,7 +227,7 @@ describe("ci-assert-playwright-version-sync composite", () => {
   });
 
   it("wires scope/package inputs for svelte, spikes, and VR root", () => {
-    const ci = read(".github/workflows/ci.yml");
+    const ci = readCiSurface();
     const svelte = jobSlice(ci, "component-svelte");
     expect(svelte).toMatch(/working_directory:\s*packages\/svelte/);
     expect(svelte).toMatch(/package:\s*playwright/);

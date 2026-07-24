@@ -1,0 +1,50 @@
+# Reusable CI domain job(s) — called from ci.yml (issue #392).
+# Do not trigger on push/PR directly; the orchestrator owns concurrency + routing.
+name: CI · bench-smoke
+
+on:
+  workflow_call:
+    inputs:
+      bypass_content_cache:
+        description: Bypass content-hash short-circuit
+        type: string
+        required: false
+        default: "false"
+
+permissions: {}
+
+jobs:
+  bench-smoke:
+    name: bench-smoke (mitata, 1k workload)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/ci-setup-bun
+      - uses: ./.github/actions/ci-content-hash-restore
+        id: content_hash
+        with:
+          execution: bench_smoke
+          bypass: ${{ inputs.bypass_content_cache }}
+          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+      - uses: ./.github/actions/ci-bun-install
+        if: steps.content_hash.outputs.hit != 'true'
+        with:
+          cache_key_prefix: bun
+      - name: build spec/core dist (benchmarks import the packages)
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run check
+      - name: bench smoke (1k points; informal numbers, not a gate on values)
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run bench:smoke
+      - name: retained-memory absolute and 20% regression gate
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run bench:memory:check
+      - uses: ./.github/actions/ci-content-hash-write
+        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        with:
+          execution: bench_smoke
+          hash: ${{ steps.content_hash.outputs.hash }}

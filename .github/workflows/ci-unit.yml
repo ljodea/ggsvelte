@@ -1,0 +1,71 @@
+# Reusable CI domain job(s) — called from ci.yml (issue #392).
+# Do not trigger on push/PR directly; the orchestrator owns concurrency + routing.
+name: CI · unit
+
+on:
+  workflow_call:
+    inputs:
+      bypass_content_cache:
+        description: Bypass content-hash short-circuit
+        type: string
+        required: false
+        default: "false"
+    secrets:
+      CODECOV_TOKEN:
+        required: false
+
+permissions: {}
+
+jobs:
+  unit:
+    name: unit (bun test spec + core)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history: packages/spec manual-AT alias audit tests git-show
+          # hard-coded historical commits (shallow clone would fail unit).
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/ci-setup-bun
+      - uses: ./.github/actions/ci-content-hash-restore
+        id: content_hash
+        with:
+          execution: unit
+          bypass: ${{ inputs.bypass_content_cache }}
+          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+      - uses: ./.github/actions/ci-bun-install
+        if: steps.content_hash.outputs.hit != 'true'
+        with:
+          cache_key_prefix: bun
+      - name: build spec/core dist (package exports point at dist/)
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run check
+      # lcov for Codecov; text reporter still prints a summary in the log.
+      - if: steps.content_hash.outputs.hit != 'true'
+        run: >
+          bun test --coverage --coverage-reporter=lcov
+          --coverage-dir=coverage/unit
+          packages/spec packages/core benchmarks scripts tests/evals
+      - name: Upload unit coverage to Codecov
+        # Custom if overrides default success() — keep the success gate so a
+        # failed suite does not upload a partial report or count as green.
+        if: success() && steps.content_hash.outputs.hit != 'true'
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/unit/lcov.info
+          flags: unit
+          name: unit
+          # Pin the uploader binary; the action's default is "latest".
+          version: v11.3.1
+          disable_search: true
+          fail_ci_if_error: true
+      - uses: ./.github/actions/ci-content-hash-write
+        # Require success so a Codecov upload failure cannot green-cache the job.
+        if: success() && steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        with:
+          execution: unit
+          hash: ${{ steps.content_hash.outputs.hash }}

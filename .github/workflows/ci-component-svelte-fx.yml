@@ -1,0 +1,84 @@
+# Reusable CI domain job(s) — called from ci.yml (issue #392).
+# Do not trigger on push/PR directly; the orchestrator owns concurrency + routing.
+name: CI · component-svelte-fx
+
+on:
+  workflow_call:
+    inputs:
+      bypass_content_cache:
+        description: Bypass content-hash short-circuit
+        type: string
+        required: false
+        default: "false"
+      playwright_container_tag:
+        description: ci-runner image tag (Playwright)
+        type: string
+        required: false
+        default: "v1.61.1-noble"
+
+permissions: {}
+
+env:
+  PLAYWRIGHT_CONTAINER_TAG: ${{ inputs.playwright_container_tag }}
+
+jobs:
+  component-svelte-fx:
+    name: component-svelte-fx (packages/svelte firefox + webkit)
+
+    runs-on: ubuntu-latest
+    env:
+      # GitHub runs the container as root, while /github/home belongs to
+      # pwuser. Firefox refuses that ownership mismatch.
+      HOME: /root
+    container:
+      # Keep in sync with inputs.playwright_container_tag above.
+      image: ghcr.io/${{ github.repository }}/ci-runner:${{ inputs.playwright_container_tag }}
+    defaults:
+      run:
+        # The container's /bin/sh is dash, which rejects `set -o pipefail`.
+        shell: bash
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/ci-setup-bun
+      - uses: ./.github/actions/ci-content-hash-restore
+        id: content_hash
+        with:
+          execution: component_svelte_fx
+          bypass: ${{ inputs.bypass_content_cache }}
+          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+          container_tag: ${{ inputs.playwright_container_tag }}
+      - uses: ./.github/actions/ci-bun-install
+        if: steps.content_hash.outputs.hit != 'true'
+        with:
+          cache_key_prefix: bun-container
+      - uses: ./.github/actions/ci-download-packages-dist
+        if: steps.content_hash.outputs.hit != 'true'
+      - name: assert playwright npm/container version sync (packages/svelte)
+        if: steps.content_hash.outputs.hit != 'true'
+        uses: ./.github/actions/ci-assert-playwright-version-sync
+        with:
+          working_directory: packages/svelte
+          package: playwright
+          scope: packages/svelte
+          container_tag: ${{ inputs.playwright_container_tag }}
+      - name: component tests (packages/svelte, firefox + webkit)
+        if: steps.content_hash.outputs.hit != 'true'
+        working-directory: packages/svelte
+        run: bunx --bun vitest run --project firefox --project webkit
+      - uses: ./.github/actions/ci-content-hash-write
+        if: success() && steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        with:
+          execution: component_svelte_fx
+          hash: ${{ steps.content_hash.outputs.hash }}
+      - name: upload packages/svelte-fx failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: component-svelte-fx-failure-artifacts
+          path: packages/svelte/test-results/
+          if-no-files-found: ignore
+          retention-days: 7

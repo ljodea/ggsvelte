@@ -1,0 +1,67 @@
+# Reusable CI domain job(s) — called from ci.yml (issue #392).
+# Do not trigger on push/PR directly; the orchestrator owns concurrency + routing.
+name: CI · build
+
+on:
+  workflow_call:
+    inputs:
+      bypass_content_cache:
+        description: Bypass content-hash short-circuit
+        type: string
+        required: false
+        default: "false"
+
+permissions: {}
+
+jobs:
+  build:
+    name: build (packages + knip + type-aware + publint)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/ci-setup-bun
+      - uses: ./.github/actions/ci-content-hash-restore
+        id: content_hash
+        with:
+          execution: build
+          bypass: ${{ inputs.bypass_content_cache }}
+          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+      - uses: ./.github/actions/ci-bun-install
+        if: steps.content_hash.outputs.hit != 'true'
+        with:
+          cache_key_prefix: bun
+      - name: build packages (tsc -b + svelte-package)
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run build
+      - name: tsc examples corpus
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run check:examples
+      # apps/docs/tsconfig.json extends ./.svelte-kit/tsconfig.json. Pre-split,
+      # check:docs (svelte-kit sync) ran in this job before oxlint; keep the
+      # sync here so type-aware lint does not fail with Invalid tsconfig when
+      # svelte-check runs as a concurrent sibling (pre-commit documents the
+      # same order dependency).
+      - name: svelte-kit sync (apps/docs tsconfig for type-aware oxlint)
+        if: steps.content_hash.outputs.hit != 'true'
+        run: cd apps/docs && bun x svelte-kit sync
+      - name: oxlint --type-aware
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run lint:type-aware
+      - name: knip
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run knip
+      - name: publint + attw (real gate — exports point at dist/)
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run lint:package
+      - uses: ./.github/actions/ci-content-hash-write
+        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        with:
+          execution: build
+          hash: ${{ steps.content_hash.outputs.hash }}
+      # packages/*/dist for consumers is produced by packages-dist (issue #241).
+      # This job keeps an independent build so publint/attw always re-validate
+      # a fresh tree alongside knip/type-aware analysis.

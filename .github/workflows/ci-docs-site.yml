@@ -1,0 +1,50 @@
+# Reusable CI domain job(s) — called from ci.yml (issue #392).
+# Do not trigger on push/PR directly; the orchestrator owns concurrency + routing.
+name: CI · docs-site
+
+on:
+  workflow_call:
+    inputs:
+      bypass_content_cache:
+        description: Bypass content-hash short-circuit
+        type: string
+        required: false
+        default: "false"
+
+permissions: {}
+
+jobs:
+  docs-site:
+    name: docs-site (adapter-static build + pages links)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/ci-setup-bun
+      - uses: ./.github/actions/ci-content-hash-restore
+        id: content_hash
+        with:
+          execution: docs_site
+          bypass: ${{ inputs.bypass_content_cache }}
+          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+      - uses: ./.github/actions/ci-bun-install
+        if: steps.content_hash.outputs.hit != 'true'
+        with:
+          cache_key_prefix: bun
+      - name: build packages (docs import workspace packages)
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run build
+      - name: build static docs site (adapter-static; the deployable/VR target)
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run build:docs
+      - name: verify packed Pages links and required R0 journeys
+        if: steps.content_hash.outputs.hit != 'true'
+        run: bun run check:pages-links
+      - uses: ./.github/actions/ci-content-hash-write
+        if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
+        with:
+          execution: docs_site
+          hash: ${{ steps.content_hash.outputs.hash }}
