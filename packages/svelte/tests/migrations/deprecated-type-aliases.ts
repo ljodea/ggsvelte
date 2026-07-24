@@ -1,12 +1,13 @@
 /**
- * Migration fixture: the pre-0.1 type aliases (deprecated since 0.1.0) must
- * keep compiling — and staying assignable to their replacements — until their
- * removal release per the migration policy (ADR 0013).
+ * Migration fixture: deprecated type aliases must keep compiling — and stay
+ * assignable to their replacements — until their removal release (ADR 0013).
  */
 /* oxlint-disable typescript/no-deprecated -- exercising the deprecated aliases is the point */
 import type {
   BrushSelection,
   IntervalSelection,
+  LayerDescriptor,
+  MarkLayerDescriptor,
   PlotInspectionChange,
   ReadonlyZoomDomains,
   TooltipContext,
@@ -22,3 +23,4 @@ export const inspectionCompat: TooltipContext<Row, string> extends PlotInspectio
   ? true
   : never = true;
 export const zoomCompat: ZoomDomains extends ReadonlyZoomDomains ? true : never = true;
+export const markLayerCompat: LayerDescriptor extends MarkLayerDescriptor ? true : never = true;

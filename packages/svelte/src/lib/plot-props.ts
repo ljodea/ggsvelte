@@ -22,9 +22,9 @@ import type {
 } from "@ggsvelte/spec";
 import type { CellValue, RenderModel } from "@ggsvelte/core";
 
+import type { PlotDiagnostic } from "./diagnostics/deprecation.js";
 import type {
   InspectInput,
-  InteractionDiagnostic,
   InteractionTool,
   LegendFocusEvent,
   LegendFocusInput,
@@ -70,7 +70,13 @@ export interface GGPlotProps<
   guides?: GuidesSpec;
   /** Legacy legend entry ordering. */
   legend?: LegendSpec;
-  /** Theme: a registered name or an object with role overrides. */
+  /**
+   * Theme: a registered name or an object with role overrides.
+   *
+   * @deprecated since 0.11.0 — compose the theme as a child layer instead
+   * (`<ThemeDark/>`, `<Theme name="dark"/>`, …). Removable in 0.13.0.
+   * https://ggsvelte.sh/guide/upgrading#compose-the-theme-as-a-child-layer
+   */
   theme?: ThemeName | ThemeSpec;
   /** Titles and axis labels. */
   labs?: Labs;
@@ -106,7 +112,7 @@ export interface GGPlotProps<
   onlegendfocus?: (event: LegendFocusEvent<PublicKey<Row, Identity>>) => void;
   onlegendfilter?: (event: LegendFilterEvent) => void;
   oninteraction?: (event: PlotInteractionEvent<Row, PublicKey<Row, Identity>>) => void;
-  ondiagnostic?: (diagnostic: InteractionDiagnostic) => void;
+  ondiagnostic?: (diagnostic: PlotDiagnostic) => void;
   ontoolchange?: (tool: InteractionTool) => void;
   /** Called after each committed render with the model (warnings,
    *  advisories, scales) and the normalized PortableSpec. */

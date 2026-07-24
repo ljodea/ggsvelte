@@ -4,9 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { RenderModel } from "@ggsvelte/core";
 
+import type { PlotDiagnostic } from "../src/lib/diagnostics/deprecation.js";
 import GGPlot from "../src/lib/GGPlot.svelte";
 import type {
-  InteractionDiagnostic,
   IntervalSelection,
   PlotInspection,
   PlotSelection,
@@ -223,7 +223,7 @@ describe("final R-1/R0 evidence locks", () => {
   });
 
   it("diagnoses an unstable key accessor for a surviving source row", async () => {
-    const diagnostics: InteractionDiagnostic[] = [];
+    const diagnostics: PlotDiagnostic[] = [];
     const row = { id: "row", x: 1, y: 2 };
     const unstable = render(GGPlot, {
       data: [row],
@@ -231,7 +231,7 @@ describe("final R-1/R0 evidence locks", () => {
       layers: [{ geom: "point" }],
       key: () => "row-1",
       inspect: true,
-      ondiagnostic: (diagnostic: InteractionDiagnostic) => diagnostics.push(diagnostic),
+      ondiagnostic: (diagnostic: PlotDiagnostic) => diagnostics.push(diagnostic),
       ...size,
     });
     await unstable.rerender(fromPartial({ key: () => "row-2" }));
@@ -241,13 +241,13 @@ describe("final R-1/R0 evidence locks", () => {
   });
 
   it("diagnoses missing lineage for a synthetic candidate", async () => {
-    const diagnostics: InteractionDiagnostic[] = [];
+    const diagnostics: PlotDiagnostic[] = [];
     render(GGPlot, {
       data: [],
       layers: [{ geom: "rule", params: { yintercept: 1 } }],
       key: "id",
       inspect: true,
-      ondiagnostic: (diagnostic: InteractionDiagnostic) => diagnostics.push(diagnostic),
+      ondiagnostic: (diagnostic: PlotDiagnostic) => diagnostics.push(diagnostic),
       ...size,
     });
     await expect
