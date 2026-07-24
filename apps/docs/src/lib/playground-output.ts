@@ -4,6 +4,7 @@ import {
   defaultPlaygroundInteractions,
   type PlaygroundInteractions,
 } from "./playground-agent-envelope";
+import { isPlaygroundDatasetId } from "./playground-dataset-schemas";
 import { playgroundBuilderOutput } from "./playground-output-builder";
 import type { PlaygroundOutput } from "./playground-output-types";
 
@@ -20,17 +21,13 @@ function scriptSafeJSON(value: unknown): string {
     .replaceAll("\u2029", "\\u2029");
 }
 
-function guessDatasetVarName(spec: PortableSpec): string {
-  const data = spec.data;
-  if (data === undefined || !("values" in data) || !Array.isArray(data.values)) {
-    return "rows";
-  }
-  const first = data.values[0];
-  if (first !== null && typeof first === "object") {
-    if ("species" in first) return "penguins";
-    if ("date" in first && "value" in first) return "monthly";
-    if ("region" in first) return "categories";
-  }
+/**
+ * The data seam is named after the curated dataset the caller selected — never
+ * after the shape of the rows (#694). Dataset ids are the single source of
+ * truth for dataset identity; an unknown or omitted id is a generic `rows`.
+ */
+function datasetVarName(datasetId: string | undefined): string {
+  if (datasetId !== undefined && isPlaygroundDatasetId(datasetId)) return datasetId;
   return "rows";
 }
 
@@ -53,12 +50,13 @@ function interactionPropsSource(interactions: PlaygroundInteractions): string {
 export function playgroundSvelteOutput(
   spec: PortableSpec,
   interactions: PlaygroundInteractions = defaultPlaygroundInteractions(),
+  datasetId?: string,
 ): string {
   const props = interactionPropsSource(interactions);
   const data = spec.data;
 
   if (data !== undefined && "values" in data && Array.isArray(data.values)) {
-    const varName = guessDatasetVarName(spec);
+    const varName = datasetVarName(datasetId);
     const rowsLiteral = scriptSafeJSON(data.values);
     // Spec JSON with a sentinel string as data.values — replaced with the variable name.
     const placeholder = "__GG_PLAYGROUND_DATA_VALUES__";
@@ -109,27 +107,28 @@ interface OutputCacheEntry {
   /** Spec-keyed outputs that do not depend on interactions. */
   builder: PlaygroundOutput | null;
   specJson: string | null;
-  /** Interaction-dependent Svelte snippet + assembled tab list per key. */
-  readonly byInteractions: Map<string, readonly PlaygroundOutput[]>;
+  /** Svelte snippet + assembled tab list per interactions/dataset key. */
+  readonly byVariant: Map<string, readonly PlaygroundOutput[]>;
 }
 
 const outputCache = new WeakMap<PortableSpec, OutputCacheEntry>();
 
-function interactionsKey(interactions: PlaygroundInteractions): string {
-  return JSON.stringify(interactions);
+function variantKey(interactions: PlaygroundInteractions, datasetId: string | undefined): string {
+  return JSON.stringify([interactions, datasetId ?? null]);
 }
 
 export function playgroundOutputs(
   spec: PortableSpec,
   interactions: PlaygroundInteractions = defaultPlaygroundInteractions(),
+  datasetId?: string,
 ): readonly PlaygroundOutput[] {
-  const key = interactionsKey(interactions);
+  const key = variantKey(interactions, datasetId);
   let entry = outputCache.get(spec);
   if (entry === undefined) {
-    entry = { builder: null, specJson: null, byInteractions: new Map() };
+    entry = { builder: null, specJson: null, byVariant: new Map() };
     outputCache.set(spec, entry);
   }
-  const hit = entry.byInteractions.get(key);
+  const hit = entry.byVariant.get(key);
   if (hit !== undefined) return hit;
 
   const builder = (entry.builder ??= playgroundBuilderOutput(spec));
@@ -139,7 +138,7 @@ export function playgroundOutputs(
       kind: "svelte",
       label: "Svelte",
       supported: true,
-      code: playgroundSvelteOutput(spec, interactions),
+      code: playgroundSvelteOutput(spec, interactions, datasetId),
     },
   ];
   if (builder.supported) {
@@ -153,7 +152,7 @@ export function playgroundOutputs(
   });
 
   const frozen = outputs as readonly PlaygroundOutput[];
-  entry.byInteractions.set(key, frozen);
+  entry.byVariant.set(key, frozen);
   return frozen;
 }
 
