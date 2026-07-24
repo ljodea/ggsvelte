@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomLine, GeomRibbon, GGPlot } from "@ggsvelte/svelte";
+  import { GeomLine, GeomRibbon, GGPlot, scaleYSqrt } from "@ggsvelte/svelte";
 
   import { breslauBurials } from "./data.js";
 </script>
@@ -8,7 +8,7 @@
   data={breslauBurials}
   aes={{ x: "age", ymin: "lo", ymax: "hi" }}
   theme="clean"
-  scales={{ y: { type: "sqrt" } }}
+  scales={scaleYSqrt()}
   labs={{
     title: "Halley's Breslau burials, 1687–1691",
     subtitle:

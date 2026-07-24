@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomTile, GGPlot } from "@ggsvelte/svelte";
+  import { GeomTile, GGPlot, scaleFillContinuous } from "@ggsvelte/svelte";
 
   import { cholera1849 } from "./data.js";
 </script>
@@ -14,7 +14,7 @@
       type: "band",
       domain: ["Sat", "Fri", "Thu", "Wed", "Tue", "Mon", "Sun"],
     },
-    fill: { type: "continuous", scheme: "viridis" },
+    ...scaleFillContinuous({ scheme: "viridis" }),
   }}
   labs={{
     title: "Cholera in England and Wales, 1849",

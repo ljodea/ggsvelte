@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomRaster, GGPlot } from "@ggsvelte/svelte";
+  import { GeomRaster, GGPlot, scaleFillContinuous } from "@ggsvelte/svelte";
 
   import { criminalStature } from "./data.js";
 </script>
@@ -8,7 +8,7 @@
   data={criminalStature}
   aes={{ x: "finger", y: "height", fill: "men" }}
   theme="few"
-  scales={{ fill: { type: "continuous", scheme: "viridis" } }}
+  scales={scaleFillContinuous({ scheme: "viridis" })}
   labs={{
     title: "Three thousand criminals, measured",
     subtitle:

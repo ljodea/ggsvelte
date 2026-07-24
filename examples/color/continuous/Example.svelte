@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import { GeomPoint, GGPlot, scaleColorContinuous } from "@ggsvelte/svelte";
 
   import { greatLakesSurveys, greatLakesTruth } from "./data.js";
 </script>
@@ -9,7 +9,7 @@
   aes={{ x: "long", y: "lat", color: "year" }}
   theme="dark"
   coord={{ type: "fixed" }}
-  scales={{ color: { type: "continuous", scheme: "viridis", labels: "d" } }}
+  scales={scaleColorContinuous({ scheme: "viridis", labels: "d" })}
   labs={{
     title: "Eleven maps of the Great Lakes, 1688–1818",
     subtitle:
