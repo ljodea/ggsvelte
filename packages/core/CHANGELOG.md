@@ -1,5 +1,36 @@
 # @ggsvelte/core
 
+## 0.10.2
+
+### Patch Changes
+
+- fb100fd: <!-- markdownlint-disable MD041 -->
+
+  fix: finish semantic viewport encapsulation for zoom + bounds edit
+
+  Add `normalizedSpan` and `axisEditModel` on the model-owned semantic
+  viewport so zoom degeneracy guards and interval bounds editing no longer
+  reconstruct pixel normalization, axis reversal, or band slicing from raw
+  `PositionScale` details.
+
+  Migration: none for plot authors. Interaction callers that previously
+  read `model.scales` for bounds-edit math should use
+  `viewport.panel(id).axisEditModel(axis)` and `panel.normalizedSpan(rect)`.
+
+- 0fafeb3: # One mark-paint resolver for three serializers
+
+  Consolidate point/path paint style resolution (shapes, dash, stroke-null) into one `mark-paint` module shared by the SVG, canvas, and Svelte serializers.
+
+  Migration: none — additive public helpers; renderers keep the same visual output.
+
+- 288eaad: # Narrow LayerFrame into core + per-geom payloads
+
+  Nest bin/dodge/smooth/box behind optional payloads so geometry modules own
+  their extras, and introduce FinalizedLayerFrame so post-assembly candidate
+  construction reads non-null lineage at the type level instead of a runtime
+  null throw on every call.
+  - @ggsvelte/spec@0.10.2
+
 ## 0.10.1
 
 ### Patch Changes
