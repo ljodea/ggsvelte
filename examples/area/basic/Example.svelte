@@ -1,16 +1,23 @@
 <script lang="ts">
   import { GeomArea, GeomLine, GGPlot } from "@ggsvelte/svelte";
 
-  import { rainfall } from "./data.js";
+  import { halleyLifeTable } from "./data.js";
 </script>
 
 <GGPlot
-  data={rainfall}
-  aes={{ x: "month", y: "mm" }}
+  data={halleyLifeTable}
+  aes={{ x: "age", y: "survivors" }}
+  theme="classic"
   scales={{
-    x: { breaks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], nice: false },
+    x: { breaks: [1, 10, 20, 30, 40, 50, 60, 70, 80], nice: false },
+    y: { breaks: [0, 200, 400, 600, 800, 1000] },
   }}
-  labs={{ title: "Monthly rainfall", x: "Month", y: "Rainfall (mm)" }}
+  labs={{
+    title: "Halley's life table, 1693",
+    subtitle: "Survivors from a cohort of 1,000 born in Breslau",
+    x: "Age",
+    y: "Surviving",
+  }}
   width={640}
   height={400}
 >

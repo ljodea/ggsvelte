@@ -3764,9 +3764,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Area chart",
     summary:
-      "A single filled area from the zero baseline (the theme's accent role) with a line layer tracing its upper edge — layer order is paint order.",
+      "A single filled area from the zero baseline (the theme's accent role) with a line layer tracing its upper edge — layer order is paint order. Halley's 1693 Breslau life table gives the monotone survivorship curve, and the classic theme drops the grid for black axis lines and ticks.",
     href: "/examples/area/basic",
-    keywords: ["Area chart", "Areas", "area", "line", "layers"],
+    keywords: ["Area chart", "Areas", "area", "line", "layers", "theme"],
     exact: ["Area chart"],
   },
   {
