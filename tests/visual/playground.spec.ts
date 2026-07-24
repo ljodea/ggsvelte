@@ -585,7 +585,7 @@ test("semantic event inspection is local, bounded, clearable, and reset by promo
   await expect(page.getByRole("list", { name: "Semantic event log" })).toBeVisible();
 
   await page.getByRole("button", { name: "Interactive scatterplot" }).click();
-  await expect(page.getByText(/Rendered custom draft|Loading example|Drawing/u)).toBeVisible({
+  await expect(page.getByText(/Rendered custom chart|Loading example|Drawing/u)).toBeVisible({
     timeout: 15_000,
   });
   await expect.poll(() => page.locator(".active-chart .gg-title").textContent()).not.toBe("");
