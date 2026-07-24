@@ -46,12 +46,23 @@ export function areaBatch(
     binding.layer.geom === "area" || binding.layer.geom === "density"
       ? (binding.layer.params ?? {})
       : {};
-  const alphas = numericStyleVector(
+  const mappedAlphas = numericStyleVector(
     frame,
     "alpha",
     groupRows.map((rows) => rows[0]!),
     styles,
   );
+  const subpathCount = pathOffsets.length - 1;
+  const constantAlpha =
+    typeof binding.alpha.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1);
+  // Multi-group closed fills must carry alpha per subpath. SVG group opacity
+  // composites opaque siblings into an offscreen buffer first, so a shared
+  // <g opacity> would occlude the rear distribution in the overlap region.
+  const alphas =
+    mappedAlphas ??
+    (subpathCount > 1 && constantAlpha !== 1
+      ? Float32Array.from({ length: subpathCount }, () => constantAlpha)
+      : undefined);
   return {
     kind: "paths",
     layerIndex: binding.index,
@@ -64,12 +75,7 @@ export function areaBatch(
     fills,
     closed: true,
     linewidth: 0,
-    alpha:
-      alphas === undefined
-        ? typeof binding.alpha.constant === "number"
-          ? binding.alpha.constant
-          : (params.alpha ?? 1)
-        : 1,
+    alpha: alphas === undefined ? constantAlpha : 1,
     ...(alphas !== undefined && { alphas }),
     curve: "linear",
     ...(fillPaintResolved !== undefined && { fillPaint: fillPaintResolved }),
