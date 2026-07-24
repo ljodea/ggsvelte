@@ -249,14 +249,9 @@ export function resolveBrushZoomDomains(
   mode: ZoomMode,
   current: ContinuousZoomDomains | null,
 ): ContinuousZoomDomains | null {
-  const width = panel.bounds.x1 - panel.bounds.x0;
-  const height = panel.bounds.y1 - panel.bounds.y0;
-  const th0 = Math.max(0, Math.min(1, (rect.x0 - panel.bounds.x0) / width));
-  const th1 = Math.max(0, Math.min(1, (rect.x1 - panel.bounds.x0) / width));
-  const tv0 = Math.max(0, Math.min(1, 1 - (rect.y1 - panel.bounds.y0) / height));
-  const tv1 = Math.max(0, Math.min(1, 1 - (rect.y0 - panel.bounds.y0) / height));
+  const span = panel.normalizedSpan(rect);
   // Guard uses raw screen fractions, not flip-remapped domains.
-  if (th1 - th0 <= 0 && tv1 - tv0 <= 0) return null;
+  if (span.x <= 0 && span.y <= 0) return null;
   const inverted = panel.invert(rect);
   const next: ContinuousZoomDomains = { ...current };
   if (

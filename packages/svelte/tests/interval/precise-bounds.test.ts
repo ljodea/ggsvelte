@@ -1,7 +1,7 @@
 import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
-import { trainBand, type PositionScale } from "@ggsvelte/core";
+import { trainBand, type AxisEditModel, type CellValue } from "@ggsvelte/core";
 
 import {
   boundsEditorInputForScale,
@@ -11,6 +11,25 @@ import {
   consumeIntervalKeys,
   recomputePanelIntervalKeys,
 } from "../../src/lib/interval/consumption.js";
+
+function continuousEdit(
+  type: "linear" | "time",
+  transform: "identity" | "log10" | "sqrt",
+  domain: readonly [number, number] = [1, 100],
+): AxisEditModel {
+  return { kind: "continuous", type, transform, domain, reversed: false };
+}
+
+function bandEdit(rawDomain: readonly CellValue[]): AxisEditModel {
+  return {
+    kind: "band",
+    rawDomain,
+    reversed: false,
+    slice() {
+      return undefined;
+    },
+  };
+}
 
 describe("precise plot bounds adapters", () => {
   it.each([
@@ -24,7 +43,7 @@ describe("precise plot bounds adapters", () => {
       const input = boundsEditorInputForScale({
         axis: "x",
         action: "select",
-        scale: fromPartial<PositionScale>({ type, transform, domain: [1, 100] }),
+        scale: continuousEdit(type, transform),
         bounds: [90, 10],
         reversed: true,
       });
@@ -43,11 +62,10 @@ describe("precise plot bounds adapters", () => {
     const input = boundsEditorInputForScale({
       axis: "y",
       action: "select",
-      scale: fromPartial<PositionScale>({
-        type: "band",
-        domain: ["north", "south"],
+      scale: fromPartial<AxisEditModel>({
+        kind: "band",
         rawDomain: ["north", "south"],
-        step: 0.5,
+        reversed: false,
       }),
     });
     expect(input).toMatchObject({
@@ -61,7 +79,7 @@ describe("precise plot bounds adapters", () => {
   });
 
   it("returns null for band bounds missing from the current scale", () => {
-    const scale = trainBand([["north", "south"]]);
+    const scale = bandEdit(trainBand([["north", "south"]]).rawDomain as readonly CellValue[]);
     // A stored endpoint whose category disappeared (data update, linked plot
     // with a different catalog) must not silently map to the first option.
     expect(
@@ -84,7 +102,9 @@ describe("precise plot bounds adapters", () => {
 
   it("round-trips typed band categories through precise and cross-panel selection", () => {
     const date = new Date("2025-01-02T00:00:00.000Z");
-    const scale = trainBand([[1, "1", true, false, null, date]]);
+    const scale = bandEdit(
+      trainBand([[1, "1", true, false, null, date]]).rawDomain as readonly CellValue[],
+    );
     const input = boundsEditorInputForScale({
       axis: "x",
       action: "select",

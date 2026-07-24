@@ -273,24 +273,24 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     if (boundsEditor === null || deps.model() === null) return null;
     const model = deps.model()!;
     if (boundsEditor.action === "zoom") {
-      const scale = model.scales[boundsEditor.axis];
-      if (scale.type === "band") return null;
+      const viewportPanel = model.viewport.panels[0];
+      if (viewportPanel === undefined) return null;
+      const scale = viewportPanel.axisEditModel(boundsEditor.axis);
+      if (scale.kind === "band") return null;
       const bounds = deps.effectiveZoomDomains()?.[boundsEditor.axis] ?? scale.domain;
       return boundsEditorInputForScale({
         axis: boundsEditor.axis,
         action: "zoom",
         scale,
         bounds,
-        reversed: scale.normalize(scale.domain[0]) > scale.normalize(scale.domain[1]),
       });
     }
     const record = currentIntervalRecord;
     const targetPanelId = record?.panelId ?? boundsEditor.panelId;
     if (targetPanelId === undefined) return null;
-    const panelIndex = model.scene.panels.findIndex((panel) => panel.id === targetPanelId);
-    if (panelIndex < 0) return null;
-    const scale =
-      model.scales.panels[panelIndex]?.[boundsEditor.axis] ?? model.scales[boundsEditor.axis];
+    const viewportPanel = model.viewport.panel(targetPanelId);
+    if (viewportPanel === null) return null;
+    const scale = viewportPanel.axisEditModel(boundsEditor.axis);
     const semantic = record?.domains[boundsEditor.axis];
     const bounds =
       semantic?.kind === "band"
@@ -301,9 +301,6 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
       action: "select",
       scale,
       ...(bounds !== undefined && { bounds }),
-      reversed:
-        scale.type !== "band" &&
-        scale.normalize(scale.domain[0]) > scale.normalize(scale.domain[1]),
     });
   });
 
@@ -376,24 +373,20 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   }
 
   function semanticAxis(
-    panelIndex: number,
+    panelId: string,
     axis: "x" | "y",
     bounds: readonly [unknown, unknown] | undefined,
   ): SemanticIntervalAxis | undefined {
     if (bounds === undefined || deps.model() === null) return undefined;
-    const model = deps.model()!;
-    const scale = model.scales.panels[panelIndex]?.[axis] ?? model.scales[axis];
-    if (scale.type === "band") {
-      const first = scale.indexOf(bounds[0]);
-      const last = scale.indexOf(bounds[1]);
-      if (first === undefined || last === undefined) return undefined;
-      const lower = Math.min(first, last);
-      const upper = Math.max(first, last);
+    const viewportPanel = deps.model()!.viewport.panel(panelId);
+    if (viewportPanel === null) return undefined;
+    const scale = viewportPanel.axisEditModel(axis);
+    if (scale.kind === "band") {
+      const values = scale.slice(bounds);
+      if (values === undefined) return undefined;
       return Object.freeze({
         kind: "band",
-        values: Object.freeze(
-          scale.rawDomain.slice(lower, upper + 1).map((value) => encodeKey(value)),
-        ),
+        values: Object.freeze(values.map((value) => encodeKey(value))),
       });
     }
     return semanticAxisFromBounds(scale.type, scale.transform, [
@@ -432,10 +425,9 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     const targetPanelId = event.panelId;
     if (targetPanelId === null || deps.model() === null) return;
     const model = deps.model()!;
-    const panelIndex = model.scene.panels.findIndex((panel) => panel.id === targetPanelId);
-    if (panelIndex < 0) return;
-    const x = semanticAxis(panelIndex, "x", event.domain.x);
-    const y = semanticAxis(panelIndex, "y", event.domain.y);
+    if (model.viewport.panel(targetPanelId) === null) return;
+    const x = semanticAxis(targetPanelId, "x", event.domain.x);
+    const y = semanticAxis(targetPanelId, "y", event.domain.y);
     // An empty facet panel trains no band domain, so no semantic axis
     // survives the selection mode. The controller rejects axis-less
     // intervals (TypeError) — treat the brush as an empty selection.
@@ -513,9 +505,8 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     const targetPanelId = prior?.panelId ?? boundsEditor?.panelId;
     if (targetPanelId === null || targetPanelId === undefined || deps.model() === null) return;
     const model = deps.model()!;
-    const panelIndex = model.scene.panels.findIndex((candidate) => candidate.id === targetPanelId);
-    if (panelIndex < 0) return;
-    const axis = semanticAxis(panelIndex, event.axis, event.bounds);
+    if (model.viewport.panel(targetPanelId) === null) return;
+    const axis = semanticAxis(targetPanelId, event.axis, event.bounds);
     if (axis === undefined) return;
     const domains = Object.freeze({
       ...prior?.domains,
