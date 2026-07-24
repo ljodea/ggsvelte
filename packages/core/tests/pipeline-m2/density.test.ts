@@ -37,8 +37,25 @@ describe("density geom", () => {
     const batch = model.scene.batches[0] as PathsBatch;
     expect(batch.pathOffsets.length - 1).toBe(2);
     expect(new Set(batch.fills).size).toBe(2);
-    expect(batch.alpha).toBe(0.5);
+    // Constant alpha must land on each subpath — SVG <g opacity> composites
+    // siblings into an offscreen buffer first, so group alpha would occlude
+    // the rear density even when the declared alpha is translucent.
+    expect(batch.alpha).toBe(1);
+    expect(batch.alphas).toEqual(Float32Array.from([0.5, 0.5]));
     expect(model.scene.legends).toHaveLength(1);
+  });
+
+  it("keeps a single density fill's constant alpha on the batch", () => {
+    const model = runPipeline(
+      gg({ x: data.x }, aes({ x: "x" }))
+        .geomDensity({ alpha: 0.45 })
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PathsBatch;
+    expect(batch.pathOffsets.length - 1).toBe(1);
+    expect(batch.alpha).toBe(0.45);
+    expect(batch.alphas).toBeUndefined();
   });
 
   it("warns and drops sub-two-point groups", () => {

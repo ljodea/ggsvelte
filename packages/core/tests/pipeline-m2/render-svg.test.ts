@@ -41,4 +41,24 @@ describe("renderToSVGString — M2 geoms", () => {
       expect(svg.length).toBeGreaterThan(500);
     }
   });
+
+  it("puts overlaid density alpha on each path, not the group", () => {
+    const data = scatter(80);
+    const svg = renderToSVGString(
+      gg(data, aes({ x: "x", fill: "g" }))
+        .geomDensity({ alpha: 0.45 })
+        .spec(),
+      size,
+    );
+    const areasOpen = svg.match(/<g class="gg-batch gg-areas"[^>]*>/);
+    expect(areasOpen?.[0]).toBeDefined();
+    expect(areasOpen![0]).not.toContain("opacity=");
+    const areaPaths = [...svg.matchAll(/<path d="[^"]+" fill="[^"]+" stroke="none"[^/]*\/>/g)].map(
+      (match) => match[0],
+    );
+    expect(areaPaths.length).toBe(2);
+    for (const path of areaPaths) {
+      expect(path).toContain('opacity="0.45"');
+    }
+  });
 });
