@@ -167,6 +167,13 @@ function applyPlotLayer(
       return builder.guides(layer.value);
     case "legend":
       return builder.legend(layer.value);
+    default: {
+      // Exhaustiveness: a new Layer kind must be handled here, not silently
+      // dropped. `never` makes that a compile error; the throw makes an
+      // unforeseen runtime kind loud instead of a missing spec field.
+      const unhandled: never = layer;
+      throw new TypeError(`Unhandled plot layer kind: ${String(unhandled)}`);
+    }
   }
 }
 

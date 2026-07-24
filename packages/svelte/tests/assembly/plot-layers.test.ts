@@ -31,7 +31,7 @@ describe("plotLayers via orchestrator", () => {
     });
     await expect.poll(() => assembled !== null).toBe(true);
     expect(assembled!.layers).toHaveLength(1);
-    expect(assembled!.layers[0]!.geom).toBe("line");
+    expect(assembled!.layers[0].geom).toBe("line");
     expect(assembled!.theme).toBe("dark");
   });
 

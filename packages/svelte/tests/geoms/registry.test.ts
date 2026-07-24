@@ -162,9 +162,9 @@ describe("registerPlotLayer (non-mark)", () => {
       },
     });
     expect(hostA!.layers).toHaveLength(1);
-    expect(hostA!.layers[0]!.kind).toBe("theme");
+    expect(hostA!.layers[0].kind).toBe("theme");
     expect(hostB!.layers).toHaveLength(1);
-    expect(hostB!.layers[0]!.kind).toBe("labs");
+    expect(hostB!.layers[0].kind).toBe("labs");
 
     await viewA.rerender({
       plotLayers: [],
@@ -176,7 +176,7 @@ describe("registerPlotLayer (non-mark)", () => {
     expect(hostA!.layers).toEqual([]);
     // Sibling host untouched.
     expect(hostB!.layers).toHaveLength(1);
-    expect(hostB!.layers[0]!.kind).toBe("labs");
+    expect(hostB!.layers[0].kind).toBe("labs");
   });
 
   it("is inert without a provideRegistry ancestor", () => {
@@ -202,7 +202,7 @@ describe("registerPlotLayer (non-mark)", () => {
     });
     expect(host).toBeDefined();
     expect(host!.layers).toHaveLength(1);
-    const layer = host!.layers[0]!;
+    const layer = host!.layers[0];
     expect(layer.kind).toBe("theme");
     if (layer.kind !== "theme") throw new Error("expected theme layer");
     expect(layer.value).toBe("light");
@@ -218,8 +218,8 @@ describe("registerPlotLayer (non-mark)", () => {
     flushSync();
     expect(host!.layers).toHaveLength(1);
     expect(host!.layers[0]).toBe(layer);
-    if (host!.layers[0]!.kind !== "theme") throw new Error("expected theme layer");
-    expect(host!.layers[0]!.value).toBe("dark");
+    if (host!.layers[0].kind !== "theme") throw new Error("expected theme layer");
+    expect(host!.layers[0].value).toBe("dark");
     // ADR 0001: prop updates must not re-register.
     expect(host!.registrationCount).toBe(countAfterInit);
   });
