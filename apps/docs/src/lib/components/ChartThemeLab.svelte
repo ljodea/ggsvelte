@@ -12,6 +12,7 @@
   } from "$lib/docs-appearance";
   import { MONTH_BREAKS } from "$lib/theme-specimens/catalog";
   import { temperaturesKeyed } from "$lib/theme-specimens/data";
+  import { heroThemePaletteSnippet } from "$lib/theme-specimens/snippets";
 
   type SchemeName = (typeof CATEGORICAL_PALETTES)[number]["name"];
 
@@ -24,48 +25,7 @@
     followDocs ? siteAppearance : explicitTheme,
   );
 
-  const scriptClose = "</" + "script>";
-
-  /** Compact inline rows for the consumer-facing snippet only. */
-  const code = $derived(
-    [
-      `<script lang="ts">`,
-      `  import { GeomLine, GeomPoint, GGPlot } from "@ggsvelte/svelte";`,
-      ``,
-      `  const temperatures = [`,
-      `    { city: "Reykjavik", month: 1, temp: -0.5 },`,
-      `    { city: "Reykjavik", month: 7, temp: 10.6 },`,
-      `    { city: "Berlin", month: 1, temp: 0.6 },`,
-      `    { city: "Berlin", month: 7, temp: 19.0 },`,
-      `    { city: "Singapore", month: 1, temp: 26.5 },`,
-      `    { city: "Singapore", month: 7, temp: 27.9 },`,
-      `    // …full series in your app`,
-      `  ];`,
-      scriptClose,
-      ``,
-      `<GGPlot`,
-      `  data={temperatures}`,
-      `  aes={{ x: "month", y: "temp", color: "city" }}`,
-      `  theme="${resolvedTheme}"`,
-      `  scales={{`,
-      `    x: { breaks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },`,
-      `    color: { type: "ordinal", scheme: "${scheme}" },`,
-      `  }}`,
-      `  labs={{`,
-      `    title: "Monthly mean temperature",`,
-      `    x: "Month",`,
-      `    y: "Temperature (°C)",`,
-      `    color: "City",`,
-      `  }}`,
-      `  inspect={{ mode: "x" }}`,
-      `  legendFocus`,
-      `  height={400}`,
-      `>`,
-      `  <GeomLine linewidth={2} />`,
-      `  <GeomPoint size={2.5} />`,
-      `</GGPlot>`,
-    ].join("\n"),
-  );
+  const code = $derived(heroThemePaletteSnippet(resolvedTheme, scheme));
 
   const statusText = $derived(
     followDocs

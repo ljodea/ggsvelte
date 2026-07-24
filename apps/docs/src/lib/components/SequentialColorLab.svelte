@@ -6,6 +6,7 @@
   import CopyCode from "$lib/components/CopyCode.svelte";
   import { RASTER_Z_DOMAIN } from "$lib/theme-specimens/catalog";
   import { grid } from "$lib/theme-specimens/data";
+  import { SEQUENTIAL_RASTER_SNIPPET } from "$lib/theme-specimens/snippets";
 
   interface SequentialExample {
     label: string;
@@ -37,38 +38,6 @@
       },
     },
   ];
-
-  const scriptClose = "</" + "script>";
-
-  /** Single section-level authoring fragment — not repeated per ramp. */
-  const sectionFragment = [
-    `<script lang="ts">`,
-    `  import { GeomRaster, GGPlot } from "@ggsvelte/svelte";`,
-    ``,
-    `  // Regular x/y/z surface (48 cells in the live demos).`,
-    `  const grid = [`,
-    `    { x: 0, y: 0, z: 0.12 },`,
-    `    { x: 1, y: 0, z: 0.45 },`,
-    `    { x: 2, y: 0, z: 0.88 },`,
-    `    // …`,
-    `  ];`,
-    scriptClose,
-    ``,
-    `<GGPlot`,
-    `  data={grid}`,
-    `  aes={{ x: "x", y: "y", fill: "z" }}`,
-    `  scales={{`,
-    `    fill: { type: "sequential", scheme: "viridis" },`,
-    `    // reverse: true`,
-    `    // domain: [0.3, 0.7]  // pin inside actual z`,
-    `    // range: ["#2d1e2f", "#3d5a80", "#e76f51"]`,
-    `  }}`,
-    `  labs={{ title: "Density surface", x: "x", y: "y" }}`,
-    `  height={400}`,
-    `>`,
-    `  <GeomRaster />`,
-    `</GGPlot>`,
-  ].join("\n");
 </script>
 
 <section class="sequential-lab" aria-label="Sequential color scales">
@@ -126,7 +95,7 @@
   <div class="section-code">
     <p class="fragment-label">Authoring fragment</p>
     <CopyCode
-      code={sectionFragment}
+      code={SEQUENTIAL_RASTER_SNIPPET}
       language="svelte"
       accessibleLabel="Copy sequential raster authoring fragment"
     />

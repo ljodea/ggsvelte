@@ -25,18 +25,18 @@ test("theme code uses the shared manual-copy fallback", async ({ page }) => {
     });
   });
   await page.goto("/themes?theme=light");
-  const defaultCard = page
-    .getByRole("list", { name: "Built-in chart themes" })
-    .locator(":scope > li")
-    .first();
-  await defaultCard.getByRole("button", { name: "Copy Default theme code" }).click();
-  await expect(defaultCard.getByRole("status")).toHaveText(
+  // Only the hero lab retains a CopyCode block after the showcase overhaul.
+  const lab = page.getByRole("region", { name: "Chart theme and palette lab" });
+  await lab.getByRole("button", { name: "Copy selected theme and palette code" }).click();
+  await expect(lab.getByRole("status").filter({ hasText: "Clipboard unavailable" })).toHaveText(
     "Clipboard unavailable. Code selected for manual copy.",
   );
   expect(await page.evaluate(() => getSelection()?.toString())).toContain('theme="default"');
 });
 
-test("themes compares all built-in chart themes on the same live chart", async ({ page }) => {
+test("themes compares all built-in chart themes as full-width interactive portraits", async ({
+  page,
+}) => {
   await page.goto("/themes?theme=light");
 
   const list = page.getByRole("list", { name: "Built-in chart themes" });
@@ -59,8 +59,10 @@ test("themes compares all built-in chart themes on the same live chart", async (
 
   for (const specimen of await specimens.all()) {
     await expect(specimen.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
-    await expect(specimen.locator(".gg-points circle")).toHaveCount(8);
-    await expect(specimen.getByRole("button", { name: /^Copy .+ theme code$/ })).toBeVisible();
+    // No per-specimen CopyCode after the redesign.
+    await expect(specimen.getByRole("button", { name: /^Copy / })).toHaveCount(0);
+    // Charts use real corpora — never the old 8-dot synthetic scatter.
+    await expect(specimen.locator(".gg-plot-root")).toBeVisible();
   }
 });
 
@@ -68,8 +70,9 @@ test("chart theme stays separate until follow-docs appearance is explicit", asyn
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/themes?theme=light");
 
-  const lab = page.getByRole("region", { name: "Chart theme lab" });
+  const lab = page.getByRole("region", { name: "Chart theme and palette lab" });
   const chartTheme = lab.getByLabel("Chart theme", { exact: true });
+  const palette = lab.getByLabel("Categorical palette", { exact: true });
   const follow = lab.getByRole("checkbox", { name: "Follow docs appearance" });
   const plot = lab.locator(".gg-plot-root");
   const chartPaper = () => plot.locator(".gg-paper").getAttribute("fill");
@@ -77,11 +80,19 @@ test("chart theme stays separate until follow-docs appearance is explicit", asyn
   await chartTheme.selectOption("economist");
   await expect(lab.locator(".copy-code code")).toContainText('theme="economist"');
   await expect.poll(chartPaper).toBe("var(--gg-paper, #d5e4eb)");
+  // Palette is independent of theme.
+  await palette.selectOption("tableau10");
+  await expect(lab.locator(".copy-code code")).toContainText('scheme: "tableau10"');
+  await expect(lab.locator(".copy-code code")).toContainText('theme="economist"');
+
   await page.getByRole("button", { name: "Dark appearance" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect.poll(chartPaper).toBe("var(--gg-paper, #d5e4eb)");
 
   await follow.check();
+  await expect(lab.getByRole("status").filter({ hasText: "follows site" })).toContainText(
+    'scheme="tableau10"',
+  );
   await expect(lab.locator(".copy-code code")).toContainText('theme="dark"');
   await expect.poll(chartPaper).toBe("var(--gg-paper, #16181d)");
   await page.getByRole("button", { name: "Light appearance" }).click();
@@ -89,10 +100,13 @@ test("chart theme stays separate until follow-docs appearance is explicit", asyn
 
   await follow.uncheck();
   await expect(chartTheme).toHaveValue("economist");
+  await expect(palette).toHaveValue("tableau10");
   await expect.poll(chartPaper).toBe("var(--gg-paper, #d5e4eb)");
 });
 
-test("categorical palettes show exact ordered colors and reverse", async ({ page }) => {
+test("categorical palettes show ordered swatches and reverse without hex code chrome", async ({
+  page,
+}) => {
   await page.goto("/themes?theme=light");
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
@@ -114,38 +128,35 @@ test("categorical palettes show exact ordered colors and reverse", async ({ page
   ]);
 
   const observable = cards.first();
-  await expect(
-    observable.getByRole("list", { name: "Observable 10 ordered colors" }).getByRole("listitem"),
-  ).toHaveText([
-    "#4269d0",
-    "#efb118",
-    "#ff725c",
-    "#6cc5b0",
-    "#3ca951",
-    "#ff8ab7",
-    "#a463f2",
-    "#97bbf5",
-    "#9c6b4e",
-    "#9498a0",
-  ]);
-  const firstMark = observable.locator(".gg-points circle").first();
-  await expect(firstMark).toHaveAttribute("fill", "#4269d0");
-
-  await region.getByRole("checkbox", { name: "Reverse" }).check();
-  const reversedSwatches = observable
+  const swatches = observable
     .getByRole("list", { name: "Observable 10 ordered colors" })
     .getByRole("listitem");
-  await expect(reversedSwatches.first()).toHaveText("#9498a0");
-  await expect(reversedSwatches.last()).toHaveText("#4269d0");
-  await expect(firstMark).toHaveAttribute("fill", "#9498a0");
-  await expect(observable.locator(".copy-code code")).toContainText("reverse: true");
+  await expect(swatches).toHaveCount(10);
+  // Hex lives in accessible names only — not as visible code under every chip.
+  await expect(swatches.first()).toHaveAttribute("aria-label", "1: #4269d0");
+  await expect(swatches.last()).toHaveAttribute("aria-label", "10: #9498a0");
+  await expect(swatches.first().locator("code")).toHaveCount(0);
+
+  // Col chart uses fill (not the old 5-point scatter).
+  await expect(observable.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
+  const firstMark = observable.locator(".gg-plot-root [fill='#4269d0']").first();
+  await expect(firstMark).toBeVisible();
+
+  await region.getByRole("checkbox", { name: "Reverse" }).check();
+  await expect(swatches.first()).toHaveAttribute("aria-label", "1: #9498a0");
+  await expect(swatches.last()).toHaveAttribute("aria-label", "10: #4269d0");
+  await expect(observable.locator(".gg-plot-root [fill='#9498a0']").first()).toBeVisible();
+
+  // No per-palette CopyCode.
+  await expect(observable.getByRole("button", { name: /^Copy / })).toHaveCount(0);
+
   await region.getByLabel("Chart paper", { exact: true }).selectOption("dark");
   await expect(observable.locator(".gg-paper")).toHaveAttribute("fill", "var(--gg-paper, #16181d)");
-  await expect(observable.locator(".copy-code code")).toContainText('theme="dark"');
-  await expect(firstMark).toHaveAttribute("fill", "#9498a0");
 });
 
-test("sequential color compares direction, custom stops, and a pinned domain", async ({ page }) => {
+test("sequential color compares direction, custom stops, and a pinned domain on raster", async ({
+  page,
+}) => {
   await page.goto("/themes?theme=light");
 
   const region = page.getByRole("region", { name: "Sequential color scales" });
@@ -160,22 +171,25 @@ test("sequential color compares direction, custom stops, and a pinned domain", a
     "Pinned domain",
   ]);
 
-  const normalMarks = cards.nth(0).locator(".gg-points circle");
-  await expect(normalMarks.first()).toHaveAttribute("fill", "#440154");
-  await expect(normalMarks.last()).toHaveAttribute("fill", "#fde725");
-  const reversedMarks = cards.nth(1).locator(".gg-points circle");
-  await expect(reversedMarks.first()).toHaveAttribute("fill", "#fde725");
-  await expect(reversedMarks.last()).toHaveAttribute("fill", "#440154");
-  const customMarks = cards.nth(2).locator(".gg-points circle");
-  await expect(customMarks.first()).toHaveAttribute("fill", "#2d1e2f");
-  await expect(customMarks.last()).toHaveAttribute("fill", "#e76f51");
-  await expect(cards.nth(3).locator(".gg-legend-label").first()).toHaveText("0");
-  await expect(cards.nth(3).locator(".gg-legend-label").last()).toHaveText("100");
+  for (const card of await cards.all()) {
+    await expect(card.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
+    // Raster surface, not the old 6-point scatter.
+    await expect(card.locator(".gg-points circle")).toHaveCount(0);
+  }
 
-  await expect(cards.nth(0).locator(".copy-code code")).toContainText('scheme: "viridis"');
-  await expect(cards.nth(1).locator(".copy-code code")).toContainText("reverse: true");
-  await expect(cards.nth(2).locator(".copy-code code")).toContainText('range: ["#2d1e2f"');
-  await expect(cards.nth(3).locator(".copy-code code")).toContainText("domain: [0, 100]");
+  // Pinned domain uses actual density z (~0.3–0.7), not the old [0, 100] point lab.
+  const pinnedLabels = cards.nth(3).locator(".gg-legend-label");
+  await expect(pinnedLabels.first()).toBeVisible();
+  await expect(pinnedLabels.last()).toBeVisible();
+  const firstLabel = (await pinnedLabels.first().textContent()) ?? "";
+  const lastLabel = (await pinnedLabels.last().textContent()) ?? "";
+  expect(Number(firstLabel)).toBeLessThan(Number(lastLabel));
+  expect(Number(lastLabel)).toBeLessThanOrEqual(1);
+
+  // One section-level authoring fragment only (not four per-ramp code blocks).
+  await expect(region.getByRole("button", { name: /Copy sequential/ })).toHaveCount(1);
+  await expect(region.locator(".copy-code code")).toContainText('scheme: "viridis"');
+  await expect(region.locator(".copy-code code")).toContainText("GeomRaster");
 });
 
 for (const width of [375, 768, 1024, 1280, 1600]) {

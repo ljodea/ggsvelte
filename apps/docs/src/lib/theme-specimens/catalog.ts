@@ -1,7 +1,9 @@
 import type { ThemeName } from "@ggsvelte/spec";
 import { CATEGORICAL_SCHEME_NAMES } from "@ggsvelte/spec";
 
-import { THEME_OPTIONS } from "$lib/catalog/themes";
+// Relative import so bun unit tests (scripts/themes-page.test.ts) resolve without
+// the SvelteKit `$lib` alias.
+import { THEME_OPTIONS } from "../catalog/themes.js";
 
 export type SchemeName = (typeof CATEGORICAL_SCHEME_NAMES)[number];
 
