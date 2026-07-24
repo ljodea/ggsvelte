@@ -9,6 +9,7 @@
  *  - log refuses non-positive domains (ScaleConfigError).
  */
 import { tickStep } from "../layout/ticks.js";
+import { padDegenerateDomain } from "./engine.js";
 import { ScaleConfigError } from "./scale-error.js";
 import type { ContinuousScale } from "./train-types.js";
 import type { ScaleTransform } from "./transform.js";
@@ -19,7 +20,8 @@ export function niceLinearDomain(min: number, max: number, count = 10): [number,
   if (!Number.isFinite(min) || !Number.isFinite(max)) return [0, 1];
   if (min === max) {
     // Zero-variance domain: ggplot2-style symmetric padding.
-    return niceLinearDomain(min - 0.5, max + 0.5, count);
+    const [lo, hi] = padDegenerateDomain(min, max);
+    return niceLinearDomain(lo, hi, count);
   }
   let lo = min;
   let hi = max;
@@ -132,9 +134,8 @@ export function trainContinuous(
       }
     } else if (nice) {
       [t0, t1] = niceLinearDomain(t0, t1);
-    } else if (t0 === t1) {
-      t0 -= 0.5;
-      t1 += 0.5;
+    } else {
+      [t0, t1] = padDegenerateDomain(t0, t1);
     }
   }
 

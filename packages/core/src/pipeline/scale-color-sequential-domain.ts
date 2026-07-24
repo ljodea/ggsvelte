@@ -4,7 +4,7 @@
 import { parseTemporalColumn, type ColorScaleSpec, type TemporalParserSpec } from "@ggsvelte/spec";
 
 import type { EditionDefaults } from "../editions.js";
-import { VIRIDIS_RAMP_10 } from "../scales/color.js";
+import { resolveSequentialPipelineRange } from "../scales/engine.js";
 import type { CellValue } from "../table.js";
 import { cellToNumber } from "../table.js";
 
@@ -32,8 +32,5 @@ export function resolveSequentialRange(
   config: ColorScaleSpec | undefined,
   editionDefaults: EditionDefaults,
 ): readonly string[] | undefined {
-  const editionRamp =
-    editionDefaults.sequentialRamp === VIRIDIS_RAMP_10 ? undefined : editionDefaults.sequentialRamp;
-  const namedSchemeRamp = config?.scheme === "viridis" ? VIRIDIS_RAMP_10 : undefined;
-  return config?.range ?? namedSchemeRamp ?? editionRamp;
+  return resolveSequentialPipelineRange(config, editionDefaults.sequentialRamp);
 }

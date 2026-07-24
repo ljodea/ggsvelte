@@ -4,10 +4,10 @@
 import type { ColorScaleSpec } from "@ggsvelte/spec";
 
 import type { EditionDefaults } from "../editions.js";
+import { resolveOrdinalPipelineRange } from "../scales/engine.js";
 import type { ScaleState } from "../scales/state.js";
 import type { CellValue } from "../table.js";
 
-import { resolveOrdinalColorRange } from "./scale-color-ordinal-range.js";
 import { ordinalColorResolution } from "./scale-color-ordinal-result.js";
 import { trainOrdinalColorScale } from "./scale-color-ordinal-train.js";
 import type { ColorResolution } from "./scale-color-types.js";
@@ -26,7 +26,7 @@ export function resolveOrdinalColorScale(input: {
   const { name, values, config, prevState, legendTitle, warnings, advisories, editionDefaults } =
     input;
 
-  const range = resolveOrdinalColorRange(config, editionDefaults);
+  const range = resolveOrdinalPipelineRange(config, editionDefaults.categoricalPalette);
   const scale = trainOrdinalColorScale({ name, values, config, prevState, range });
   return ordinalColorResolution({
     name,
