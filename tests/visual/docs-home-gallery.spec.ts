@@ -140,16 +140,17 @@ test("detail is specimen-first and always orders Svelte, builder, then JSON", as
   await expect(page.locator(".related li")).toHaveCount(3);
 });
 
-for (const [path, height] of [
-  ["point/scatter-color", 400],
-  ["interaction/linked-views", 1140],
+for (const [path, width, height] of [
+  ["point/scatter-color", 640, 400],
+  ["interaction/linked-views", 640, 1140],
+  ["interaction/legend-focus", 960, 320],
 ] as const) {
   test(`VR detail isolates ${path} at canonical geometry`, async ({ page }) => {
     await page.goto(`/examples/${path}?vr&theme=light`);
     await expect(page.locator(".example-prose:visible")).toHaveCount(0);
     const frame = page.locator(".gg-example-frame");
     await expect(frame).toBeVisible();
-    await expect(frame).toHaveCSS("width", "640px");
+    await expect(frame).toHaveCSS("width", `${String(width)}px`);
     await expect(frame).toHaveCSS("height", `${String(height)}px`);
   });
 }

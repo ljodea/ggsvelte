@@ -306,7 +306,7 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     description: "Opt-in legend controls preview locally, commit stable row keys to a shared controller, and de-emphasize unrelated marks without changing scales, statistics, layout, or color identity. The same semantic mask drives SVG and canvas views.",
     tags: ["interaction", "legend", "focus", "controller", "linked-views", "canvas", "keyboard", "touch"],
     docsSection: "Interaction",
-    vrHeight: 980,
+    vrHeight: 320,
     vrWidth: 960,
     journey: {
       pointer: "Hover a discrete legend entry to preview one plot, then click to pin the group across all three views.",
