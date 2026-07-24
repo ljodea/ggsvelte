@@ -21,7 +21,6 @@
   <p>
     Pass one JSON file or omit it to read stdin. SVG is the only stdout output.
   </p>
-  <p class="guide-code-classification">Fragment</p>
   <CopyCode
     class="cli-command"
     language="bash"
@@ -109,15 +108,6 @@
 
   dd p + p {
     margin-top: 0.5rem;
-  }
-
-  .guide-code-classification {
-    margin: 1rem 0 0.35rem;
-    color: var(--muted);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
   }
 
   .cli-reference :global(.cli-command code) {

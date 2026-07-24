@@ -187,7 +187,7 @@ for (const chapter of [
       page.getByRole("navigation", { name: "Previous and next chapters" }),
     ).toBeVisible();
     await expect(page.locator(`a[href$="${chapter.evidence}"]`).first()).toBeVisible();
-    await expect(page.locator(".guide-code-classification").first()).toHaveText("Fragment");
+    await expect(page.locator(".guide-code-classification")).toHaveCount(0);
     await expectNoDocumentOverflow(page);
   });
 }

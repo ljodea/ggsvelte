@@ -4,7 +4,6 @@
  * surfaces via gen-llms.
  */
 import { GUIDE_COPY_ICON_SVG } from "../apps/docs/src/lib/guide-code-copy";
-import { type CodeClassification } from "./guide-code-contract";
 import { highlightCodeToHtml } from "./highlight-code";
 
 // Minimal markdown renderer (headings, paragraphs, fenced code, inline code,
@@ -82,7 +81,6 @@ export function renderMarkdown(md: string, base = ""): string {
   let code: string[] | null = null;
   let codeLang = "";
   let codeCopy = false;
-  let codeClassification: CodeClassification = "fragment";
   let copyCodeCount = 0;
   const headingId = createHeadingId();
 
@@ -101,19 +99,10 @@ export function renderMarkdown(md: string, base = ""): string {
   const renderCode = (source: string): string => {
     const languageClass = codeLang === "" ? ' class="hljs"' : ` class="hljs language-${codeLang}"`;
     const highlighted = highlightCodeToHtml(source, codeLang);
-    const classificationLabel =
-      codeClassification === "fragment"
-        ? "Fragment"
-        : codeLang === "svelte"
-          ? "Complete file"
-          : codeLang === "sh"
-            ? "Complete command"
-            : "Complete example";
-    const label = `<p class="guide-code-classification">${classificationLabel}</p>`;
     const pre = `<pre><code${languageClass}>${highlighted}</code></pre>`;
-    if (!codeCopy) return `${label}${pre}`;
+    if (!codeCopy) return pre;
     const id = `guide-code-${String(++copyCodeCount)}`;
-    return `${label}<div class="guide-code-copy"><button type="button" data-copy-code="${id}" aria-label="Copy code" aria-describedby="${id}-status">${GUIDE_COPY_ICON_SVG}</button><pre id="${id}"><code${languageClass}>${highlighted}</code></pre><span id="${id}-status" role="status" class="visually-hidden"></span></div>`;
+    return `<div class="guide-code-copy"><button type="button" data-copy-code="${id}" aria-label="Copy code" aria-describedby="${id}-status">${GUIDE_COPY_ICON_SVG}</button><pre id="${id}"><code${languageClass}>${highlighted}</code></pre><span id="${id}-status" role="status" class="visually-hidden"></span></div>`;
   };
 
   for (const line of lines) {
@@ -132,7 +121,6 @@ export function renderMarkdown(md: string, base = ""): string {
       const [language = "", ...flags] = line.slice(3).trim().split(/\s+/);
       codeLang = /^[a-z0-9-]*$/i.test(language) ? language : "";
       codeCopy = flags.includes("copy");
-      codeClassification = flags.includes("complete") ? "complete" : "fragment";
       code = [];
       continue;
     }
