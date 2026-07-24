@@ -14,6 +14,7 @@
    */
   import type {
     AesInput,
+    DataInput,
     PointParams,
     PointPosition,
     PositionParams,
@@ -22,6 +23,8 @@
   import { createGeomLayer } from "./factory.svelte.js";
 
   interface Props extends PointParams {
+    /** Optional layer-local data (#589); inherits plot data when omitted. */
+    data?: DataInput | readonly Record<string, unknown>[];
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
     aes?: AesInput;
     /** Position adjustment: "identity" (default) | "jitter" (seeded) | "nudge". */
