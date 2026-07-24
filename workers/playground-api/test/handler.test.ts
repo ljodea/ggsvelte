@@ -11,8 +11,8 @@ import {
 } from "../src/prompt";
 
 const okLimiters = {
-  RATE_LIMIT_IP: { limit: async () => ({ success: true }) },
-  RATE_LIMIT_GLOBAL: { limit: async () => ({ success: true }) },
+  RATE_LIMIT_IP: { limit: () => Promise.resolve({ success: true }) },
+  RATE_LIMIT_GLOBAL: { limit: () => Promise.resolve({ success: true }) },
 };
 
 function request(body: unknown, init: { origin?: string | null; method?: string } = {}): Request {
@@ -135,7 +135,7 @@ describe("handleGenerate", () => {
     const res = await handleGenerate(request({ prompt: "hi", datasetId: "penguins" }), {
       OPENROUTER_API_KEY: "sk-test",
       RATE_LIMIT_IP: {
-        limit: async () => ({ success: false }),
+        limit: () => Promise.resolve({ success: false }),
       },
       RATE_LIMIT_GLOBAL: okLimiters.RATE_LIMIT_GLOBAL,
     });
@@ -152,11 +152,15 @@ describe("handleGenerate", () => {
     const rate = await handleGenerate(request({ prompt: "hi", datasetId: "penguins" }), {
       OPENROUTER_API_KEY: "sk-live-secret-key-material",
       ...okLimiters,
-      log: (line) => logs.push(line),
-      fetch: async () =>
-        new Response(JSON.stringify({ error: { message: "Bearer sk-live-secret" } }), {
-          status: 429,
-        }),
+      log: (line) => {
+        logs.push(line);
+      },
+      fetch: () =>
+        Promise.resolve(
+          new Response(JSON.stringify({ error: { message: "Bearer sk-live-secret" } }), {
+            status: 429,
+          }),
+        ),
     });
     const rateText = await rate.text();
     expect(rate.status).toBe(429);
@@ -167,12 +171,16 @@ describe("handleGenerate", () => {
     const bad = await handleGenerate(request({ prompt: "hi", datasetId: "penguins" }), {
       OPENROUTER_API_KEY: "sk-live-secret-key-material",
       ...okLimiters,
-      log: (line) => logs.push(line),
-      fetch: async () =>
-        new Response("not-json", {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        }),
+      log: (line) => {
+        logs.push(line);
+      },
+      fetch: () =>
+        Promise.resolve(
+          new Response("not-json", {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+        ),
     });
     const badBody = (await bad.json()) as { error: { code: string } };
     expect(badBody.error.code).toBe("bad_output");
@@ -195,13 +203,15 @@ describe("handleGenerate", () => {
     const res = await handleGenerate(request({ prompt: "scatter", datasetId: "penguins" }), {
       OPENROUTER_API_KEY: "sk-test-key",
       ...okLimiters,
-      fetch: async () =>
-        new Response(
-          JSON.stringify({
-            model: "test/model",
-            choices: [{ message: { content: JSON.stringify(envelope) } }],
-          }),
-          { status: 200 },
+      fetch: () =>
+        Promise.resolve(
+          new Response(
+            JSON.stringify({
+              model: "test/model",
+              choices: [{ message: { content: JSON.stringify(envelope) } }],
+            }),
+            { status: 200 },
+          ),
         ),
     });
     expect(res.status).toBe(200);
@@ -228,9 +238,9 @@ describe("handleGenerate", () => {
       {
         OPENROUTER_API_KEY: "sk-test",
         ...okLimiters,
-        fetch: async () => {
+        fetch: () => {
           called = true;
-          return new Response("{}", { status: 200 });
+          return Promise.resolve(new Response("{}", { status: 200 }));
         },
       },
     );
@@ -263,9 +273,9 @@ describe("handleGenerate", () => {
       {
         OPENROUTER_API_KEY: "sk-test",
         ...okLimiters,
-        fetch: async () => {
+        fetch: () => {
           called = true;
-          return new Response("{}", { status: 200 });
+          return Promise.resolve(new Response("{}", { status: 200 }));
         },
       },
     );
@@ -279,9 +289,9 @@ describe("handleGenerate", () => {
       OPENROUTER_API_KEY: "sk-test",
       RATE_LIMIT_IP: okLimiters.RATE_LIMIT_IP,
       // RATE_LIMIT_GLOBAL deliberately missing.
-      fetch: async () => {
+      fetch: () => {
         called = true;
-        return new Response("{}", { status: 200 });
+        return Promise.resolve(new Response("{}", { status: 200 }));
       },
     });
     expect(res.status).toBe(503);
@@ -293,7 +303,7 @@ describe("handleGenerate", () => {
     const res = await handleGenerate(request({ prompt: "hi", datasetId: "penguins" }), {
       OPENROUTER_API_KEY: "sk-test",
       RATE_LIMIT_IP: okLimiters.RATE_LIMIT_IP,
-      RATE_LIMIT_GLOBAL: { limit: async () => ({ success: false }) },
+      RATE_LIMIT_GLOBAL: { limit: () => Promise.resolve({ success: false }) },
     });
     expect(res.status).toBe(429);
     expect(((await res.json()) as { error: { code: string } }).error.code).toBe("rate_limited");

@@ -45,25 +45,23 @@ export function apiError(
   };
 }
 
+// Keyed by the full union, so adding an error code is a compile error until it
+// gets a status — the same exhaustiveness a switch gave, with a single return.
+const ERROR_STATUS: Record<PlaygroundApiErrorCode, number> = {
+  bad_request: 400,
+  prompt_too_long: 400,
+  unknown_dataset: 400,
+  origin_forbidden: 403,
+  rate_limited: 429,
+  upstream_rate_limited: 429,
+  disabled: 503,
+  upstream_error: 502,
+  // Upstream returned unusable output — server-class, not a client error.
+  bad_output: 502,
+};
+
 export function statusForError(code: PlaygroundApiErrorCode): number {
-  switch (code) {
-    case "bad_request":
-    case "prompt_too_long":
-    case "unknown_dataset":
-      return 400;
-    case "bad_output":
-      // Upstream returned unusable output — server-class, not a client error.
-      return 502;
-    case "origin_forbidden":
-      return 403;
-    case "rate_limited":
-    case "upstream_rate_limited":
-      return 429;
-    case "disabled":
-      return 503;
-    case "upstream_error":
-      return 502;
-  }
+  return ERROR_STATUS[code];
 }
 
 /** User-facing messages — never echo upstream bodies. */

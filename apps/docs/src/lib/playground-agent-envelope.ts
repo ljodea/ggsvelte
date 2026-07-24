@@ -148,7 +148,7 @@ function aesHasDiscreteLegendChannel(aes: unknown): boolean {
       mapping !== null &&
       typeof mapping === "object" &&
       !Array.isArray(mapping) &&
-      "field" in (mapping as object)
+      "field" in mapping
     ) {
       return true;
     }

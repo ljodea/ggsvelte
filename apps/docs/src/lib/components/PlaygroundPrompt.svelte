@@ -58,9 +58,9 @@
             ? `\n  fix: ${error.fix.description}`
             : "";
         const allowed =
-          error.allowed !== undefined
-            ? `\n  allowed: ${error.allowed.join(", ")}`
-            : "";
+          error.allowed === undefined
+            ? ""
+            : `\n  allowed: ${error.allowed.join(", ")}`;
         return `${error.code} @ ${error.path}\n  ${error.message}${allowed}${fix}`;
       })
       .join("\n\n");

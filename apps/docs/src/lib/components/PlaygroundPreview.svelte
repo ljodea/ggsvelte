@@ -71,12 +71,12 @@
 
   // Candidate must render with the same interaction props as the promoted chart.
   const candidateInteractions = $derived(
-    candidate !== null
-      ? coerceInteractionsForChart(
+    candidate === null
+      ? effective
+      : coerceInteractionsForChart(
           interactions,
           chartHasDiscreteLegend(candidate.next.rendered),
-        )
-      : effective,
+        ),
   );
 
   function setCapability(patch: Partial<PlaygroundInteractions>): void {

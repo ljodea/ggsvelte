@@ -36,7 +36,7 @@ describe("playground agent envelope", () => {
   });
 
   test("defaults missing interactions", () => {
-    expect(normalizePlaygroundInteractions(undefined)).toEqual(defaultPlaygroundInteractions());
+    expect(normalizePlaygroundInteractions()).toEqual(defaultPlaygroundInteractions());
     expect(normalizePlaygroundInteractions({ select: true }).select).toBe("point");
   });
 

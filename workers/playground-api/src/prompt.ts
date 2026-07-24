@@ -142,14 +142,10 @@ export function buildChatMessages(input: {
   ];
 
   if (input.priorEnvelope !== undefined && input.priorErrors !== undefined) {
-    messages.push({
-      role: "assistant",
-      content: JSON.stringify(input.priorEnvelope),
-    });
-    messages.push({
-      role: "user",
-      content: formatRepairUserMessage(input.priorErrors),
-    });
+    messages.push(
+      { role: "assistant", content: JSON.stringify(input.priorEnvelope) },
+      { role: "user", content: formatRepairUserMessage(input.priorErrors) },
+    );
   }
 
   return {

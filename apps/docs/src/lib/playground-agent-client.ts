@@ -68,7 +68,7 @@ function resolveMode(explicit?: "live" | "mock"): "live" | "mock" {
     if (mode === "live") return "live";
     if (mode === "mock") return "mock";
     // Dev default is mock so bun dev never needs the worker.
-    if (env?.DEV === true || env?.MODE === "development") return "mock";
+    if ((env?.DEV ?? false) || env?.MODE === "development") return "mock";
   } catch {
     // ignore
   }
@@ -186,7 +186,7 @@ export async function generateChart(
     body !== null &&
     typeof body === "object" &&
     (body as { ok?: unknown }).ok === true &&
-    "envelope" in (body as object)
+    "envelope" in body
   ) {
     const record = body as { model?: unknown; envelope: unknown };
     const parsed = parsePlaygroundAgentEnvelope(record.envelope);
@@ -206,7 +206,7 @@ export async function generateChart(
   }
 
   const error =
-    body !== null && typeof body === "object" && "error" in (body as object)
+    body !== null && typeof body === "object" && "error" in body
       ? (body as { error: Record<string, unknown> }).error
       : null;
   const code = mapApiErrorCode(error?.code);

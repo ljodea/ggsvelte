@@ -72,7 +72,7 @@ describe("playground agent client", () => {
       {
         mode: "live",
         apiUrl: "https://example.invalid",
-        fetchFn: async () => {
+        fetchFn: () => {
           throw new TypeError("Failed to fetch");
         },
       },
@@ -91,13 +91,13 @@ describe("playground agent client", () => {
         mode: "live",
         apiUrl: "https://example.test",
         signal: controller.signal,
-        fetchFn: async (_url, init) => {
-          if (init?.signal?.aborted) {
+        fetchFn: (_url, init) => {
+          if (init?.signal?.aborted === true) {
             const err = new Error("aborted");
             err.name = "AbortError";
             throw err;
           }
-          return new Response("{}", { status: 200 });
+          return Promise.resolve(new Response("{}", { status: 200 }));
         },
       },
     );

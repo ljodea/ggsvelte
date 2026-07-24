@@ -588,7 +588,7 @@ test("semantic event inspection is local, bounded, clearable, and reset by promo
   await expect(page.getByText(/Rendered custom draft|Loading example|Drawing/u)).toBeVisible({
     timeout: 15_000,
   });
-  await expect.poll(async () => page.locator(".active-chart .gg-title").textContent()).not.toBe("");
+  await expect.poll(() => page.locator(".active-chart .gg-title").textContent()).not.toBe("");
 });
 
 test("pipeline-failing shared links restore truthful URL and keep last valid chart", async ({

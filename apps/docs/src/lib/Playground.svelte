@@ -125,15 +125,15 @@
     PLAYGROUND_SAMPLES.map((s) => ({ id: s.id, title: s.title })),
   );
   const busy = $derived(agentIsBusy(agent));
-  const phaseLine = $derived(
-    resolvePhaseLine(agent, nowTick) !== ""
-      ? resolvePhaseLine(agent, nowTick)
-      : mockNotice
-        ? "Instant sample — live generation isn't enabled yet."
-        : "",
-  );
+  const phaseLine = $derived.by(() => {
+    const resolved = resolvePhaseLine(agent, nowTick);
+    if (resolved !== "") return resolved;
+    return mockNotice
+      ? "Instant sample — live generation isn't enabled yet."
+      : "";
+  });
   const generateLabel = $derived(
-    rateLimitLabel !== "" ? rateLimitLabel : "Generate",
+    rateLimitLabel === "" ? "Generate" : rateLimitLabel,
   );
   const generateDisabled = $derived(
     rateLimitUntil !== null && nowTick < rateLimitUntil,
@@ -318,17 +318,8 @@
       let rawEnvelope: unknown;
       let envelope: PlaygroundAgentEnvelope;
 
-      if (options.example !== undefined) {
-        // Instant canned path (OV2-A) — brief phase line, then validate/stage.
-        await new Promise((r) => setTimeout(r, 120));
-        if (stale()) return;
-        envelope = options.example.envelope;
-        rawEnvelope = {
-          spec: envelope.spec,
-          interactions: envelope.interactions,
-          title: envelope.title,
-        };
-      } else {
+      const example = options.example;
+      if (example === undefined) {
         const first = await generateChart(
           {
             prompt: userPrompt,
@@ -363,6 +354,18 @@
         if (first.model === "mock") mockNotice = true;
         envelope = first.envelope;
         rawEnvelope = first.rawEnvelope;
+      } else {
+        // Instant canned path (OV2-A) — brief phase line, then validate/stage.
+        await new Promise((resolve) => {
+          setTimeout(resolve, 120);
+        });
+        if (stale()) return;
+        envelope = example.envelope;
+        rawEnvelope = {
+          spec: envelope.spec,
+          interactions: envelope.interactions,
+          title: envelope.title,
+        };
       }
 
       agent = setAgentValidating(agent);
@@ -464,7 +467,7 @@
     await tick();
     // Prefer a transient element for clipboard binding.
     const el = document.createElement("button");
-    document.body.appendChild(el);
+    document.body.append(el);
     try {
       await copyText(currentHandoffText(), el);
     } finally {

@@ -2,11 +2,15 @@
   // Root project for repo tooling scripts only. The publishable packages use
   // `tsc -b` project references (packages/spec, packages/core); the svelte
   // package is checked by svelte-check from its own directory. This config
-  // exists so oxlint --type-aware has type information for scripts/.
+  // exists so oxlint --type-aware has type information for scripts/ and the
+  // Cloudflare workers under workers/ (which have no build step of their own —
+  // wrangler bundles them straight from source, so this is their only
+  // typecheck). The worker code uses web-standard APIs only (Request,
+  // Response, URL); bun's types cover them, so no @cloudflare/workers-types.
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
     "types": ["bun"]
   },
-  "include": ["scripts/**/*.ts"]
+  "include": ["scripts/**/*.ts", "workers/**/*.ts"]
 }

@@ -74,7 +74,7 @@ function parseAllowlist(raw: string | undefined): string[] {
 function jsonResponse(
   body: PlaygroundApiResponse,
   status: number,
-  extraHeaders: HeadersInit = {},
+  extraHeaders: Record<string, string> = {},
 ): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -440,7 +440,9 @@ function extractContent(completion: unknown): string | null {
   if (!isObject(completion)) return null;
   const choices = completion.choices;
   if (!Array.isArray(choices) || choices.length === 0) return null;
-  const first = choices[0];
+  // Array.isArray() narrows `unknown` to `any[]`, so re-annotate to keep the
+  // element unknown until isObject() proves its shape.
+  const first: unknown = choices[0];
   if (!isObject(first)) return null;
   const message = first.message;
   if (!isObject(message)) return null;

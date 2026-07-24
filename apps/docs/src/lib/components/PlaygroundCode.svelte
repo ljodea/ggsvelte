@@ -54,7 +54,7 @@
   const specTabActiveNote =
     "This is the portable spec — the JSON contract AI agents use to create and edit ggsvelte charts. Validated by /schema/v0.json.";
 
-  async function downloadSvg(): Promise<void> {
+  function downloadSvg(): void {
     if (!enabled) return;
     const result = playgroundSVGExport(rendered);
     if (!result.ok) {

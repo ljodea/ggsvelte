@@ -21,7 +21,10 @@ export function matchCorsOrigin(origin: string | null): string | null {
   return null;
 }
 
-export function corsHeaders(matchedOrigin: string | null): HeadersInit {
+// Returns a plain record, not the wider `HeadersInit` union: callers spread
+// the result into response-header literals, and `HeadersInit` also admits
+// `string[][]`, which would spread to numeric indices.
+export function corsHeaders(matchedOrigin: string | null): Record<string, string> {
   if (matchedOrigin === null) {
     return { Vary: "Origin" };
   }
