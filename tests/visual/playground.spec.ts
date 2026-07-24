@@ -10,6 +10,7 @@ import {
   type PlaygroundCandidatePhaseDetail,
 } from "../../apps/docs/src/lib/playground-candidate-lifecycle";
 import { encodePlaygroundSeed } from "../../apps/docs/src/lib/playground-codec";
+import scatterColorSpec from "../../examples/point/scatter-color/spec.js";
 import { settleVisualState } from "./helpers/deterministic";
 
 type CandidatePhaseLog = PlaygroundCandidatePhaseDetail[];
@@ -155,9 +156,15 @@ test("compatible gallery details open the exact fragment while oversized example
   await handoff.click();
   await expect(page).toHaveURL(/\/playground#play=v1\./u);
   await expect(page.getByText("Rendered point/scatter-color.")).toBeVisible();
-  await expect(page.locator(".active-chart .gg-title")).toContainText(
-    /Penguin flippers vs body mass|Penguin/u,
-  );
+  // Read the expected title from the example itself: what this proves is that
+  // the handoff carried *that* example's chart across, not that scatter-color
+  // happens to plot any particular dataset. No fallback — an example that lost
+  // its title should fail here rather than assert against an empty string.
+  const expectedTitle = scatterColorSpec.labs?.title;
+  if (expectedTitle === undefined) {
+    throw new Error("point/scatter-color must declare labs.title for this handoff assertion");
+  }
+  await expect(page.locator(".active-chart .gg-title")).toHaveText(expectedTitle);
 
   const oversized = await (await page.request.get("/examples/point/canvas-scatter")).text();
   expect(oversized).not.toMatch(/class="[^"]*playground-link/);
