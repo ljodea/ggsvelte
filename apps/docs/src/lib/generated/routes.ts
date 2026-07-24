@@ -2276,7 +2276,7 @@ export const DOCS_ROUTES = [
     path: "/examples/area/basic",
     title: "Area chart — ggsvelte gallery",
     description:
-      "A single filled area from the zero baseline (the theme's accent role) with a line layer tracing its upper edge — layer order is paint order.",
+      "A single filled area from the zero baseline (the theme's accent role) with a line layer tracing its upper edge — layer order is paint order. Halley's 1693 Breslau life table gives the monotone survivorship curve, and the classic theme drops the grid for black axis lines and ticks.",
     canonicalPath: "/examples/area/basic",
     kind: "page",
     index: true,

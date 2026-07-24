@@ -26,3 +26,26 @@ Binning, boxplot, density, and summary algorithms are independent ports of
 the published ggplot2 (MIT) and R (GPL — algorithms only, no code copied)
 semantics, verified against R-generated fixtures; see
 docs/decisions/0010-m2-stats-notes.md.
+
+Example gallery datasets
+------------------------
+Several datasets under examples/*/*/data.ts are transcribed from HistData
+(https://github.com/friendly/HistData), an R package of historical datasets
+in the history of statistics and data visualization, maintained by Michael
+Friendly. The HistData package is distributed under the GPL; each dataset's
+`data.ts` header names the dataset and its original source.
+
+The underlying tables are digitizations of works published before 1930 —
+among them Halley (1693), Playfair (1821, 1824), Quetelet (1846), Farr
+(1852), Snow (1855), Nightingale (1858), Minard (1869), Guerry (1833),
+Darwin (1876), Michelson (1879), Galton (1886) and Herschel (1833) — whose
+originals are long out of copyright. ggsvelte makes no public-domain claim
+about the HistData package itself; this notice credits HistData and its
+maintainer as the proximate source of the transcriptions.
+
+Individual datasets carrying additional provenance, credited where used:
+  - Snow.* — modern digitization of Snow's Broad Street map by Rusty Dodson
+    and Waldo Tobler
+  - Guerry — digitization by Stephane Dray and Michael Friendly
+  - Langren — reconstruction by Michael Friendly
+  - Cholera — transcription by Nicholas Verlander
