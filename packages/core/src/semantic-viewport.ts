@@ -2,6 +2,7 @@
  * Model-owned panel projection from plot pixels into semantic axis values.
  */
 import type { PositionScale } from "./scales/train.js";
+import type { PositionTransformName } from "./scales/transform.js";
 import type { ScenePanel } from "./scene.js";
 import type { PanelCoordProjector } from "./coord-projector.js";
 import type { CellValue } from "./table.js";
@@ -29,9 +30,33 @@ export interface SemanticViewportSelection {
   readonly y?: SemanticViewportAxisSelection;
 }
 
+export interface NormalizedSpan {
+  readonly x: number;
+  readonly y: number;
+}
+
+export type AxisEditModel =
+  | {
+      readonly kind: "continuous";
+      readonly type: "linear" | "time";
+      readonly transform: PositionTransformName;
+      readonly domain: readonly [number, number];
+      readonly reversed: boolean;
+    }
+  | {
+      readonly kind: "band";
+      readonly rawDomain: readonly CellValue[];
+      readonly reversed: boolean;
+      slice(bounds: readonly [unknown, unknown]): readonly CellValue[] | undefined;
+    };
+
 export interface SemanticViewportPanel {
   readonly id: string;
   readonly bounds: PlotRect;
+  /** Pre-flip screen-normalized axis widths of `rect` within panel bounds. */
+  normalizedSpan(rect: PlotRect): NormalizedSpan;
+  /** Per-axis edit surface for bounds editors (domain, reversal, band slicing). */
+  axisEditModel(axis: "x" | "y"): AxisEditModel;
   invert(rect: PlotRect): SemanticViewportDomains;
   project(selection: SemanticViewportSelection): PlotRect;
   resolve(selection: SemanticViewportSelection): SemanticViewportDomains;
@@ -138,6 +163,35 @@ function projectedSpan(
   ];
 }
 
+function axisEditModelForScale(scale: PositionScale): AxisEditModel {
+  if (scale.type === "band") {
+    const reversed = scale.rawDomain.length > 1 && (scale.normalize(scale.rawDomain[0]) ?? 0) > 0.5;
+    return {
+      kind: "band",
+      rawDomain: scale.rawDomain as readonly CellValue[],
+      reversed,
+      slice(bounds) {
+        const first = scale.indexOf(bounds[0]);
+        const last = scale.indexOf(bounds[1]);
+        let values: readonly CellValue[] | undefined;
+        if (first !== undefined && last !== undefined) {
+          const lower = Math.min(first, last);
+          const upper = Math.max(first, last);
+          values = scale.rawDomain.slice(lower, upper + 1) as readonly CellValue[];
+        }
+        return values;
+      },
+    };
+  }
+  return {
+    kind: "continuous",
+    type: scale.type,
+    transform: scale.transform,
+    domain: scale.domain,
+    reversed: scale.normalize(scale.domain[0]) > scale.normalize(scale.domain[1]),
+  };
+}
+
 function createPanel(
   panel: ScenePanel,
   scales: Readonly<{ x: PositionScale; y: PositionScale }>,
@@ -154,6 +208,16 @@ function createPanel(
       y0: panel.y,
       x1: panel.x + panel.width,
       y1: panel.y + panel.height,
+    },
+    normalizedSpan(rect) {
+      const th0 = clamp((rect.x0 - panel.x) / panel.width);
+      const th1 = clamp((rect.x1 - panel.x) / panel.width);
+      const tv0 = clamp(1 - (rect.y1 - panel.y) / panel.height);
+      const tv1 = clamp(1 - (rect.y0 - panel.y) / panel.height);
+      return { x: th1 - th0, y: tv1 - tv0 };
+    },
+    axisEditModel(axis) {
+      return axisEditModelForScale(scales[axis]);
     },
     invert(rect) {
       const screenX0 = clamp((rect.x0 - panel.x) / panel.width);

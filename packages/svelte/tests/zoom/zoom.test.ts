@@ -2,7 +2,7 @@ import { fromAny, fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import type { PortableSpec } from "@ggsvelte/spec";
-import type { CellValue, SemanticViewport, SemanticViewportPanel } from "@ggsvelte/core";
+import type { CellValue, PlotRect, SemanticViewport, SemanticViewportPanel } from "@ggsvelte/core";
 
 import {
   applyZoomToSpec,
@@ -39,6 +39,14 @@ const viewportPanel = (domains: {
     id: "panel",
     bounds: { x0: 0, y0: 0, x1: 100, y1: 100 },
     invert: () => domains,
+    normalizedSpan: (rect: PlotRect) => {
+      const clamp = (value: number) => Math.max(0, Math.min(1, value));
+      const th0 = clamp(rect.x0 / 100);
+      const th1 = clamp(rect.x1 / 100);
+      const tv0 = clamp(1 - rect.y1 / 100);
+      const tv1 = clamp(1 - rect.y0 / 100);
+      return { x: th1 - th0, y: tv1 - tv0 };
+    },
   });
 
 describe("filterZoomDomainsByMode", () => {

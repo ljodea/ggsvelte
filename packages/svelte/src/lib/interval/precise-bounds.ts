@@ -1,7 +1,7 @@
 import {
   disambiguatedLabels,
   encodeKey,
-  type PositionScale,
+  type AxisEditModel,
   type PositionTransformName,
 } from "@ggsvelte/core";
 
@@ -17,7 +17,7 @@ import type { SemanticIntervalAxis } from "../interaction/interaction.js";
 export interface BoundsEditorInputForScaleOptions {
   readonly axis: BoundsAxis;
   readonly action: BoundsAction;
-  readonly scale: PositionScale;
+  readonly scale: AxisEditModel;
   readonly bounds?: readonly [number, number] | readonly [BoundsCategoryValue, BoundsCategoryValue];
   readonly reversed?: boolean;
 }
@@ -26,12 +26,12 @@ export function boundsEditorInputForScale(
   options: BoundsEditorInputForScaleOptions,
 ): BoundsEditorInput | null {
   const { scale } = options;
-  if (scale.type === "band") {
+  if (scale.kind === "band") {
     // Typed categories can share a presentation label (1 and "1"); qualify
     // collisions so the two <select> options stay distinguishable.
     const labels = disambiguatedLabels(scale.rawDomain);
     const categories = scale.rawDomain.map((value, index) => ({
-      value: value as BoundsCategoryValue,
+      value,
       label: labels[index] ?? String(value),
     }));
     const requested = options.bounds;
@@ -60,7 +60,7 @@ export function boundsEditorInputForScale(
       scale: "band",
       bounds,
       categories,
-      reversed: options.reversed ?? false,
+      reversed: options.reversed ?? scale.reversed,
     };
   }
   const requested = (options.bounds as readonly [number, number] | undefined) ?? scale.domain;
@@ -74,7 +74,7 @@ export function boundsEditorInputForScale(
       action: options.action,
       scale: "time",
       bounds,
-      reversed: options.reversed ?? false,
+      reversed: options.reversed ?? scale.reversed,
     };
   }
   return {
@@ -83,7 +83,7 @@ export function boundsEditorInputForScale(
     scale: "linear",
     transform: scale.transform,
     bounds,
-    reversed: options.reversed ?? false,
+    reversed: options.reversed ?? scale.reversed,
   };
 }
 
