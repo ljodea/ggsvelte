@@ -134,7 +134,7 @@ test("mobile header and docs navigation are explicit, reachable controls", async
   await page.keyboard.press("Escape");
   await expect(siteMenu).toBeFocused();
 
-  const chapterMenu = page.getByRole("button", { name: "Open guide chapters" });
+  const chapterMenu = page.getByRole("button", { name: "Open docs navigation" });
   await expect(chapterMenu).toBeVisible();
   await expect(page.getByRole("link", { name: "Skip to docs navigation" })).toHaveAttribute(
     "href",
@@ -145,7 +145,7 @@ test("mobile header and docs navigation are explicit, reachable controls", async
   await expect(chapterDialog.getByRole("navigation", { name: "Guide chapters" })).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 760 });
   await expect(chapterDialog).toBeVisible();
-  await chapterDialog.getByRole("button", { name: "Close guide chapters" }).click();
+  await chapterDialog.getByRole("button", { name: "Close docs navigation" }).click();
   await expectNoHorizontalOverflow(page);
 });
 

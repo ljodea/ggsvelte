@@ -1,30 +1,26 @@
 <script lang="ts">
   import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
+
   import { penguins } from "$examples/point/scatter-color/data";
+  import { contrastChartTheme } from "$lib/docs-appearance-state.svelte";
 
   const steps = [
     { label: "Data", note: "Rows as plain objects." },
-    {
-      label: "Mappings",
-      note: "aes for x, y, and color identity.",
-    },
-    {
-      label: "Layers",
-      note: "GeomSmooth on top of GeomPoint.",
-    },
-    {
-      label: "Interaction",
-      note: "inspect after the layers work.",
-    },
+    { label: "Mappings", note: "aes for x, y, and color." },
+    { label: "Layers", note: "GeomSmooth over GeomPoint." },
+    { label: "Interaction", note: "inspect is a prop, not event plumbing." },
   ] as const;
-  let active = $state(0);
+  let active = $state(steps.length - 1);
+  const chartTheme = $derived(contrastChartTheme());
 </script>
 
 <section class="grammar-demo" aria-labelledby="grammar-heading">
   <div class="grammar-copy">
-    <p class="eyebrow">Composition</p>
-    <h2 id="grammar-heading">Data, aes, layers, inspect.</h2>
-    <p>One real chart. Each step adds grammar.</p>
+    <h2 id="grammar-heading">Interaction is declarative.</h2>
+    <p>
+      The grammar you know from ggplot2, plus a step it never had. Mouse over
+      the chart: inspection, pinning, selection, and zoom are spec fields.
+    </p>
     <ol>
       {#each steps as step, index (step.label)}
         <li class:active={active === index}>
@@ -42,9 +38,6 @@
     </ol>
   </div>
   <div class="grammar-output">
-    <div class="grammar-status" aria-live="polite">
-      Step {active + 1}: {steps[active]!.label}
-    </div>
     <GGPlot
       data={penguins}
       aes={{
@@ -53,6 +46,7 @@
         ...(active >= 1 && { color: "species" }),
       }}
       inspect={active >= 3}
+      theme={chartTheme}
       ariaLabel="Penguin mass increases with flipper length, grouped by species"
     >
       <GeomPoint alpha={0.72} />
@@ -78,13 +72,9 @@
     line-height: 0.95;
   }
 
-  .eyebrow {
-    margin: 0;
+  .grammar-copy > p {
+    max-width: 34rem;
     color: var(--muted);
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
   }
 
   ol {
@@ -123,6 +113,10 @@
     font-size: 1.2rem;
   }
 
+  button:hover strong {
+    text-decoration: underline;
+  }
+
   button small {
     opacity: 0;
     transition: opacity 120ms ease;
@@ -130,6 +124,11 @@
 
   li.active button {
     color: var(--ink);
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+
+  li.active button {
+    padding-left: 0.75rem;
   }
 
   li.active button small {
@@ -138,17 +137,6 @@
 
   .grammar-output {
     min-width: 0;
-    border: 1px solid var(--line);
-    background: #fff;
-  }
-
-  .grammar-status {
-    min-height: 44px;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #d9dee8;
-    color: #172033;
-    font-size: 0.85rem;
-    font-weight: 600;
   }
 
   @media (prefers-reduced-motion: reduce) {

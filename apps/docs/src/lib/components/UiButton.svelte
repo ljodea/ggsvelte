@@ -9,6 +9,7 @@
     class: className = "",
     type = "button",
     disabled = false,
+    href,
     onclick,
     children,
   }: {
@@ -16,19 +17,25 @@
     class?: string;
     type?: "button" | "submit" | "reset";
     disabled?: boolean;
+    href?: string;
     onclick?: (event: MouseEvent) => void;
     children: Snippet;
   } = $props();
+
+  const classes = $derived(
+    `ui-button ui-button--${variant}${className !== "" ? ` ${className}` : ""}`,
+  );
 </script>
 
-<Button.Root
-  class={`ui-button ui-button--${variant}${className !== "" ? ` ${className}` : ""}`}
-  {type}
-  {disabled}
-  {onclick}
->
-  {@render children()}
-</Button.Root>
+{#if href !== undefined}
+  <Button.Root class={classes} {href}>
+    {@render children()}
+  </Button.Root>
+{:else}
+  <Button.Root class={classes} {type} {disabled} {onclick}>
+    {@render children()}
+  </Button.Root>
+{/if}
 
 <style>
   :global(.ui-button) {

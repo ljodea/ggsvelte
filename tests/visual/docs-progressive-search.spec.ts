@@ -94,10 +94,9 @@ test("Docs landing and sidebar expose the full path without duplicate Reference"
     "href",
     /\/guide\/responsive-charts$/,
   );
-  await expect(tasks.getByRole("link", { name: /Diagnostics/ })).toHaveAttribute(
-    "href",
-    /\/guide\/errors$/,
-  );
+  // Diagnostics is deliberately absent from the landing tasks; it stays in
+  // the sidebar and search.
+  await expect(tasks.getByRole("link", { name: /Diagnostics/ })).toHaveCount(0);
 
   const sidebar = page.getByRole("navigation", { name: "Guide chapters" });
   await expect(sidebar.getByRole("heading", { level: 2 })).toHaveText([
