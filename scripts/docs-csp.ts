@@ -84,7 +84,7 @@ export function validateHtmlCsp(path: string, html: string): string[] {
 const PAGE_DIRECTIVES = {
   "default-src": ["'self'"],
   "base-uri": ["'self'"],
-  "connect-src": ["'self'", "https://cloudflareinsights.com"],
+  "connect-src": ["'self'", "https://cloudflareinsights.com", "https://playground-api.ggsvelte.sh"],
   "font-src": ["'self'"],
   "form-action": ["'self'"],
   "frame-src": ["'none'"],

@@ -27,15 +27,14 @@ export {
 function finalize(
   state: Omit<PlaygroundState, "synchronized" | "canCopyOrShare">,
 ): PlaygroundState {
+  // Without the JSON editor, draft stays in sync with committed after promotion.
+  // canCopyOrShare: chart promoted, no in-flight candidate, no diagnostics.
   const synchronized = state.draft === serializePlaygroundSpec(state.committed);
   return {
     ...state,
     synchronized,
     canCopyOrShare:
-      synchronized &&
-      state.renderConfirmed &&
-      state.candidate === null &&
-      state.diagnostics.length === 0,
+      state.renderConfirmed && state.candidate === null && state.diagnostics.length === 0,
   };
 }
 
@@ -139,7 +138,7 @@ export function stagePlaygroundDraft(state: PlaygroundState): PlaygroundState {
 export function stagePlaygroundSeed(
   state: PlaygroundState,
   seed: PlaygroundSeedV1,
-  origin: Exclude<PlaygroundCandidateOrigin, "apply" | "undo">,
+  origin: Exclude<PlaygroundCandidateOrigin, "apply" | "undo"> | "agent",
   targetHash?: string | null,
 ): PlaygroundState {
   const bounded = validatePlaygroundSeed(seed);

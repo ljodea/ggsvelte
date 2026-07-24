@@ -14,11 +14,30 @@
   } = $props();
 
   const newestFirst = $derived(entries.toReversed());
+  let open = $state(false);
+  let hasAutoExpanded = $state(false);
+
+  // OV4-A: auto-expand the first time a real interaction event fires.
+  $effect(() => {
+    if (hasAutoExpanded || entries.length === 0) return;
+    const reduce =
+      typeof matchMedia === "function" &&
+      matchMedia("(prefers-reduced-motion: reduce)").matches;
+    hasAutoExpanded = true;
+    if (reduce) {
+      open = true;
+      return;
+    }
+    // Non-jarring: open on next frame without animation thrash.
+    requestAnimationFrame(() => {
+      open = true;
+    });
+  });
 </script>
 
-<details class="event-inspector">
+<details class="event-inspector" bind:open>
   <summary>
-    <span>Semantic events</span>
+    <span>Interaction events</span>
     <span class="count"
       >{entries.length} / {PLAYGROUND_MAX_EVENTS} local records</span
     >
@@ -56,7 +75,8 @@
 
 <style>
   .event-inspector {
-    margin-top: 1rem;
+    margin-top: 3rem;
+    padding-top: 1rem;
     border-top: 1px solid var(--line);
   }
 
@@ -66,9 +86,9 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 0.6rem 0;
+    padding: 0.35rem 0;
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .count,
@@ -76,7 +96,7 @@
   .empty,
   li header span {
     color: var(--muted);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
   }
 
   .event-body {
@@ -122,16 +142,10 @@
     padding: 0.65rem;
     background: var(--code-paper);
     color: var(--code-ink);
-    font: 0.7rem/1.5 var(--mono-font);
+    font: 0.7rem/1.5 var(--code-font);
   }
 
   @media (max-width: 47.99rem) {
-    summary,
-    .event-intro,
-    li header {
-      align-items: start;
-    }
-
     .event-intro {
       display: grid;
     }

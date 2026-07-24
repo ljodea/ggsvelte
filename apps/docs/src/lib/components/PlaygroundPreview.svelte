@@ -8,6 +8,13 @@
     type PlaygroundCandidateIsolation,
   } from "$lib/playground-candidate-lifecycle";
   import { pipelineErrorToPlaygroundDiagnostic } from "$lib/playground-pipeline-diagnostic";
+  import {
+    chartHasDiscreteLegend,
+    coerceInteractionsForChart,
+    defaultPlaygroundInteractions,
+    interactionInvitationLine,
+    type PlaygroundInteractions,
+  } from "$lib/playground-agent-envelope";
   import type {
     PlaygroundCandidate,
     PlaygroundDiagnostic,
@@ -19,16 +26,23 @@
     candidate,
     lastValid,
     status,
+    interactions = defaultPlaygroundInteractions(),
+    onInteractionsChange,
     onCandidateReady,
     onCandidateFailed,
     onActiveRendered,
     onActiveFailed,
     onInteraction,
+    canUndo = false,
+    undoDisabled = false,
+    onUndo,
   }: {
     rendered: PortableSpec;
     candidate: PlaygroundCandidate | null;
     lastValid: boolean;
     status: string;
+    interactions?: PlaygroundInteractions;
+    onInteractionsChange?: (next: PlaygroundInteractions) => void;
     onCandidateReady: (
       generation: number,
       isolation: PlaygroundCandidateIsolation,
@@ -40,10 +54,43 @@
     onActiveRendered: (model: RenderModel) => void;
     onActiveFailed: (diagnostic: PlaygroundDiagnostic) => void;
     onInteraction: (event: PlaygroundInteractionEvent) => void;
+    canUndo?: boolean;
+    undoDisabled?: boolean;
+    onUndo?: () => void;
   } = $props();
 
   let activeChartEl = $state<HTMLDivElement | undefined>();
   let candidateChartEl = $state<HTMLDivElement | undefined>();
+  let promoteFade = $state(false);
+
+  const hasLegend = $derived(chartHasDiscreteLegend(rendered));
+  const effective = $derived(
+    coerceInteractionsForChart(interactions, hasLegend),
+  );
+  const invitation = $derived(interactionInvitationLine(effective));
+
+  // Candidate must render with the same interaction props as the promoted chart.
+  const candidateInteractions = $derived(
+    candidate !== null
+      ? coerceInteractionsForChart(
+          interactions,
+          chartHasDiscreteLegend(candidate.next.rendered),
+        )
+      : effective,
+  );
+
+  function setCapability(patch: Partial<PlaygroundInteractions>): void {
+    if (onInteractionsChange === undefined) return;
+    let next: PlaygroundInteractions = { ...effective, ...patch };
+    // Locked matrix: interval XOR zoom; select point XOR interval.
+    if (patch.select === "interval") {
+      next = { ...next, zoom: false };
+    }
+    if (patch.zoom === true && next.select === "interval") {
+      next = { ...next, select: false };
+    }
+    onInteractionsChange(coerceInteractionsForChart(next, hasLegend));
+  }
 
   function candidatePainted(generation: number): void {
     const candidateRoot =
@@ -70,126 +117,266 @@
       snapshotCandidateIsolation(candidateRoot, activeChartEl ?? null, probe),
     );
   }
+
+  // Crossfade on promote: brief opacity when candidate clears after paint.
+  $effect(() => {
+    if (candidate === null) return;
+    // When candidate appears, prepare; promote is handled by parent remount.
+    promoteFade = false;
+  });
 </script>
 
-<div class="panel-heading">
-  <div>
-    <p class="panel-number">01</p>
-    <h2>Preview</h2>
-  </div>
-  {#if lastValid}<strong class="last-valid">Last valid result</strong>{/if}
-</div>
-
-{#if status !== ""}
-  <p class="status" role="status" aria-live="polite">{status}</p>
-{/if}
-
-<div class="chart-stack" aria-busy={candidate !== null}>
-  <div class="active-chart" bind:this={activeChartEl}>
-    {#key rendered}
-      <svelte:boundary
-        onerror={(error) =>
-          onActiveFailed(pipelineErrorToPlaygroundDiagnostic(error))}
+<div class="preview">
+  <div class="capability-row" role="group" aria-label="Enabled interactions">
+    <span class="capability-label">Enabled interactions</span>
+    <button
+      type="button"
+      class="cap"
+      class:active={effective.inspect}
+      aria-pressed={effective.inspect}
+      onclick={() => setCapability({ inspect: !effective.inspect })}
+    >
+      Inspect
+    </button>
+    <button
+      type="button"
+      class="cap"
+      class:active={effective.select === "point"}
+      aria-pressed={effective.select === "point"}
+      onclick={() =>
+        setCapability({
+          select: effective.select === "point" ? false : "point",
+        })}
+    >
+      Select point
+    </button>
+    <button
+      type="button"
+      class="cap"
+      class:active={effective.select === "interval"}
+      aria-pressed={effective.select === "interval"}
+      onclick={() =>
+        setCapability({
+          select: effective.select === "interval" ? false : "interval",
+          zoom: false,
+        })}
+    >
+      Select interval
+    </button>
+    <button
+      type="button"
+      class="cap"
+      class:active={effective.zoom}
+      aria-pressed={effective.zoom}
+      disabled={effective.select === "interval"}
+      onclick={() =>
+        setCapability({
+          zoom: !effective.zoom,
+          select: effective.select === "interval" ? false : effective.select,
+        })}
+    >
+      Zoom
+    </button>
+    {#if hasLegend}
+      <button
+        type="button"
+        class="cap"
+        class:active={effective.legendFilter}
+        aria-pressed={effective.legendFilter}
+        onclick={() => setCapability({ legendFilter: !effective.legendFilter })}
       >
-        <GGPlot
-          spec={rendered}
-          width="container"
-          inspect={true}
-          oninteraction={onInteraction}
-          onrender={onActiveRendered}
-        />
-        {#snippet failed()}
-          <div class="render-error" role="status">
-            The last valid chart could not be painted. Reset the source to
-            recover.
-          </div>
-        {/snippet}
-      </svelte:boundary>
-    {/key}
+        Legend filter
+      </button>
+      <button
+        type="button"
+        class="cap"
+        class:active={effective.legendFocus}
+        aria-pressed={effective.legendFocus}
+        onclick={() => setCapability({ legendFocus: !effective.legendFocus })}
+      >
+        Legend focus
+      </button>
+    {/if}
+    {#if canUndo && onUndo !== undefined}
+      <button
+        type="button"
+        class="cap undo"
+        disabled={undoDisabled}
+        onclick={onUndo}
+      >
+        Previous chart
+      </button>
+    {/if}
   </div>
 
-  {#if candidate !== null}
-    {#key candidate.generation}
-      <div
-        class="candidate-chart"
-        aria-hidden="true"
-        inert
-        bind:this={candidateChartEl}
-      >
+  {#if invitation !== ""}
+    <p class="invitation">{invitation}</p>
+  {/if}
+
+  {#if lastValid}
+    <p class="last-valid" role="status">Last valid result</p>
+  {/if}
+
+  {#if status !== ""}
+    <p class="status" role="status" aria-live="polite">{status}</p>
+  {/if}
+
+  <div
+    class="chart-stack"
+    class:fade={promoteFade}
+    aria-busy={candidate !== null}
+  >
+    <div class="active-chart" bind:this={activeChartEl}>
+      {#key rendered}
         <svelte:boundary
           onerror={(error) =>
-            onCandidateFailed(
-              candidate.generation,
-              pipelineErrorToPlaygroundDiagnostic(error),
-            )}
+            onActiveFailed(pipelineErrorToPlaygroundDiagnostic(error))}
         >
           <GGPlot
-            spec={candidate.next.rendered}
+            spec={rendered}
             width="container"
-            onrender={() => candidatePainted(candidate.generation)}
+            inspect={effective.inspect}
+            select={effective.select === false ? undefined : effective.select}
+            zoom={effective.zoom}
+            legendFilter={effective.legendFilter}
+            legendFocus={effective.legendFocus}
+            oninteraction={onInteraction}
+            onrender={onActiveRendered}
           />
-          {#snippet failed()}{/snippet}
+          {#snippet failed()}
+            <div class="render-error" role="status">
+              The last valid chart could not be painted. Try a sample to
+              recover.
+            </div>
+          {/snippet}
         </svelte:boundary>
-      </div>
-    {/key}
-  {/if}
+      {/key}
+    </div>
+
+    {#if candidate !== null}
+      {#key candidate.generation}
+        <div
+          class="candidate-chart"
+          aria-hidden="true"
+          inert
+          bind:this={candidateChartEl}
+        >
+          <svelte:boundary
+            onerror={(error) =>
+              onCandidateFailed(
+                candidate.generation,
+                pipelineErrorToPlaygroundDiagnostic(error),
+              )}
+          >
+            <GGPlot
+              spec={candidate.next.rendered}
+              width="container"
+              inspect={candidateInteractions.inspect}
+              select={candidateInteractions.select === false
+                ? undefined
+                : candidateInteractions.select}
+              zoom={candidateInteractions.zoom}
+              legendFilter={candidateInteractions.legendFilter}
+              legendFocus={candidateInteractions.legendFocus}
+              onrender={() => candidatePainted(candidate.generation)}
+            />
+            {#snippet failed()}{/snippet}
+          </svelte:boundary>
+        </div>
+      {/key}
+    {/if}
+  </div>
 </div>
 
 <style>
-  :global(.preview-surface) {
-    padding: 1rem 1.1rem 1.15rem;
+  .preview {
+    display: grid;
+    gap: 0.5rem;
   }
 
-  .panel-heading {
+  .capability-row {
     display: flex;
-    min-height: 2rem;
-    align-items: start;
-    justify-content: space-between;
-    gap: 1rem;
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 0.6rem;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.15rem 0.35rem;
+    min-height: 44px;
   }
 
-  .panel-heading h2,
-  .panel-heading p,
-  .status {
-    margin: 0;
+  .capability-label {
+    margin-right: 0.5rem;
+    color: var(--muted);
+    font-size: 0.8rem;
   }
 
-  .panel-heading h2 {
-    margin-top: 0.15rem;
-    font-size: 1.05rem;
+  .cap {
+    appearance: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    min-height: 44px;
+    padding: 0.35rem 0.5rem;
+    color: var(--ink);
+    font: 0.9rem/1.2 var(--body-font);
+    cursor: pointer;
   }
 
-  .panel-number {
+  .cap.active {
+    border-bottom-color: var(--accent);
     color: var(--accent);
-    font: 700 0.7rem/1 var(--body-font);
-    letter-spacing: 0.08em;
+  }
+
+  .cap:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .cap.undo {
+    margin-left: auto;
+    color: var(--muted);
+  }
+
+  .invitation {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.875rem;
   }
 
   .last-valid {
-    border: 1px solid currentColor;
-    border-radius: 0.35rem;
-    padding: 0.3rem 0.45rem;
-    color: #9b2c20;
-    font-size: 0.72rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    margin: 0;
+    color: var(--error);
+    font-size: 0.8rem;
   }
 
   .status {
-    padding-block: 0.55rem 0.35rem;
+    margin: 0;
     color: var(--muted);
     font-size: 0.8rem;
   }
 
   .chart-stack {
     display: grid;
-    min-height: 28rem;
+    min-height: clamp(16rem, 56vh, 28rem);
     overflow: hidden;
-    border: 1px solid var(--line);
-    border-radius: 0.35rem;
     background: var(--paper);
+  }
+
+  .chart-stack.fade .active-chart {
+    animation: promote-fade 180ms ease;
+  }
+
+  @keyframes promote-fade {
+    from {
+      opacity: 0.35;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chart-stack.fade .active-chart {
+      animation: none;
+    }
   }
 
   .active-chart,
@@ -205,20 +392,21 @@
 
   .render-error {
     display: grid;
-    min-height: 28rem;
+    min-height: clamp(16rem, 56vh, 28rem);
     place-items: center;
     padding: 1rem;
-    color: #9b2c20;
+    color: var(--error);
     text-align: center;
   }
 
-  @media (max-width: 47.99rem) {
-    :global(.preview-surface) {
-      padding: 0.85rem 0.75rem;
+  @media (max-width: 34.99rem) {
+    .capability-row {
+      display: grid;
+      grid-template-columns: 1fr;
     }
 
-    .chart-stack {
-      min-height: 22rem;
+    .cap.undo {
+      margin-left: 0;
     }
   }
 </style>

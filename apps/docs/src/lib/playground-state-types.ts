@@ -17,6 +17,7 @@ export type PlaygroundCandidateOrigin =
   | "source"
   | "reset"
   | "undo"
+  | "agent"
   | "initial-navigation"
   | "popstate";
 

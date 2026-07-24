@@ -3,17 +3,16 @@
   import { onMount, tick } from "svelte";
 
   import type { RenderModel } from "@ggsvelte/core";
+  import type { SpecError } from "@ggsvelte/spec";
 
   import { copyText } from "$lib/clipboard";
-  import PlaygroundEditor from "$lib/components/PlaygroundEditor.svelte";
+  import PlaygroundCode from "$lib/components/PlaygroundCode.svelte";
   import PlaygroundEvents from "$lib/components/PlaygroundEvents.svelte";
-  import PlaygroundOutput from "$lib/components/PlaygroundOutput.svelte";
   import PlaygroundPreview from "$lib/components/PlaygroundPreview.svelte";
-  import PlaygroundShell from "$lib/components/PlaygroundShell.svelte";
-  import UiButton from "$lib/components/UiButton.svelte";
+  import PlaygroundPrompt from "$lib/components/PlaygroundPrompt.svelte";
   import {
-    PLAYGROUND_EXAMPLES,
     PLAYGROUND_SAMPLES,
+    PLAYGROUND_EXAMPLES,
   } from "$lib/generated/playground-seeds";
   import {
     acceptCandidatePhase,
@@ -52,17 +51,42 @@
   import {
     confirmPlaygroundRendered,
     createPlaygroundState,
-    editPlaygroundDraft,
     failPlaygroundCandidate,
     promotePlaygroundCandidate,
     reportPlaygroundDiagnostic,
-    resetPlaygroundSource,
     setPlaygroundHistoryHash,
-    stagePlaygroundDraft,
     stagePlaygroundSeed,
     stagePlaygroundUndo,
     type PlaygroundDiagnostic,
   } from "$lib/playground-state";
+  import {
+    defaultPlaygroundInteractions,
+    type PlaygroundAgentEnvelope,
+    type PlaygroundInteractions,
+  } from "$lib/playground-agent-envelope";
+  import { generateChart } from "$lib/playground-agent-client";
+  import { agentHandoffPrompt } from "$lib/playground-agent-handoff";
+  import {
+    agentIsBusy,
+    beginAgentRequest,
+    completeAgentSuccess,
+    createPlaygroundAgentState,
+    failAgent,
+    messageForAgentError,
+    resolvePhaseLine,
+    setAgentDrawing,
+    setAgentRepairing,
+    setAgentValidating,
+    type PlaygroundAgentState,
+  } from "$lib/playground-agent-state";
+  import { validateAgentEnvelope } from "$lib/playground-agent-validate";
+  import type { PlaygroundDatasetId } from "$lib/playground-dataset-schemas";
+  import {
+    PLAYGROUND_DEFAULT_DATASET,
+    PLAYGROUND_DEFAULT_PROMPT,
+    type PlaygroundExamplePrompt,
+  } from "$lib/playground-prompts";
+
   const initialSample = PLAYGROUND_SAMPLES[0]!;
   const initialSeed: PlaygroundSeedV1 = initialSample.seed;
   const shareCatalogs = {
@@ -71,11 +95,43 @@
   };
 
   let workbench = $state(createPlaygroundState(initialSeed));
+  let agent = $state<PlaygroundAgentState>(createPlaygroundAgentState());
+  let interactions = $state<PlaygroundInteractions>(
+    defaultPlaygroundInteractions(),
+  );
+  let pendingInteractions = $state<PlaygroundInteractions | null>(null);
+  let prompt = $state(PLAYGROUND_DEFAULT_PROMPT);
+  let datasetId = $state<PlaygroundDatasetId>(PLAYGROUND_DEFAULT_DATASET);
   let shareUrl = $state("");
   let shareStatus = $state("");
   let shareSource = $state<HTMLElement>();
   let events = $state<readonly PlaygroundEventEntry[]>([]);
   let lifecycleTracker = $state(createCandidateLifecycleTracker());
+  let abortController = $state<AbortController | null>(null);
+  let rateLimitUntil = $state<number | null>(null);
+  let rateLimitLabel = $state("");
+  let nowTick = $state(Date.now());
+
+  const outputs = $derived(
+    playgroundOutputs(workbench.committed, interactions),
+  );
+  const sampleLinks = $derived(
+    PLAYGROUND_SAMPLES.map((s) => ({ id: s.id, title: s.title })),
+  );
+  const busy = $derived(agentIsBusy(agent));
+  const phaseLine = $derived(resolvePhaseLine(agent, nowTick));
+  const generateLabel = $derived(
+    rateLimitLabel !== "" ? rateLimitLabel : "Generate",
+  );
+  const generateDisabled = $derived(
+    rateLimitUntil !== null && nowTick < rateLimitUntil,
+  );
+  const handoffText = $derived(
+    agentHandoffPrompt({
+      currentSpec: workbench.committed,
+      userGoal: prompt,
+    }),
+  );
 
   function noteCandidatePhase(detail: PlaygroundCandidatePhaseDetail): void {
     const accepted = acceptCandidatePhase(lifecycleTracker, detail);
@@ -103,11 +159,6 @@
       : { generation: candidate.generation, origin: candidate.origin };
   }
 
-  const outputs = $derived(playgroundOutputs(workbench.committed));
-  const selectedSample = $derived(
-    workbench.seed.source.kind === "sample" ? workbench.seed.source.id : "",
-  );
-
   function replaceLocationHash(hash: string | null): void {
     const url = new URL(window.location.href);
     url.hash = hash ?? "";
@@ -122,7 +173,6 @@
     );
     if (decision.kind === "noop") return;
     if (decision.kind === "reject") {
-      // Truthful URL first: drop the malformed fragment before reporting.
       replaceLocationHash(workbench.historyHash);
     }
     const previous = activeCandidate();
@@ -147,41 +197,25 @@
 
   onMount(() => {
     restoreLocation("initial-navigation");
+    const id = window.setInterval(() => {
+      nowTick = Date.now();
+      if (rateLimitUntil !== null) {
+        const remaining = Math.ceil((rateLimitUntil - nowTick) / 1000);
+        if (remaining <= 0) {
+          rateLimitUntil = null;
+          rateLimitLabel = "";
+        } else {
+          rateLimitLabel = `Try again in ${remaining}s`;
+        }
+      }
+    }, 500);
+    return () => window.clearInterval(id);
   });
-
-  function editDraft(draft: string): void {
-    const previous = activeCandidate();
-    const edited = editPlaygroundDraft(workbench, draft);
-    workbench = edited;
-    for (const detail of phaseNotesForCandidateTransition(previous, {
-      candidate: edited.candidate,
-      status: edited.status,
-    })) {
-      noteCandidatePhase(detail);
-    }
-    if (!edited.synchronized) {
-      shareUrl = "";
-      shareStatus = "";
-    }
-  }
-
-  function applyDraft(): void {
-    const previous = activeCandidate();
-    const next = stagePlaygroundDraft(workbench);
-    workbench = next;
-    noteStagedCandidate(previous, next);
-  }
-
-  function resetSource(): void {
-    const previous = activeCandidate();
-    const next = resetPlaygroundSource(workbench);
-    workbench = next;
-    noteStagedCandidate(previous, next);
-  }
 
   function undoChart(): void {
     if (workbench.undoSnapshots.length === 0 || workbench.candidate !== null)
       return;
+    if (busy) return;
     if (shouldConfirmDiscardForUndo(workbench)) {
       const discard = window.confirm(PLAYGROUND_UNDO_DISCARD_CONFIRM);
       if (!discard) return;
@@ -203,8 +237,175 @@
     const previous = activeCandidate();
     const next = stagePlaygroundSeed(workbench, sample.seed, "source");
     workbench = next;
+    interactions = defaultPlaygroundInteractions();
+    pendingInteractions = null;
+    agent = createPlaygroundAgentState();
     noteStagedCandidate(previous, next);
     return true;
+  }
+
+  function stageAgentSeed(
+    seed: PlaygroundSeedV1,
+    nextInteractions: PlaygroundInteractions,
+  ): void {
+    const previous = activeCandidate();
+    pendingInteractions = nextInteractions;
+    const next = stagePlaygroundSeed(workbench, seed, "agent");
+    workbench = next;
+    agent = setAgentDrawing(agent);
+    noteStagedCandidate(previous, next);
+  }
+
+  async function runAgentPipeline(
+    userPrompt: string,
+    dataset: PlaygroundDatasetId,
+    options: {
+      readonly example?: PlaygroundExamplePrompt;
+      readonly signal?: AbortSignal;
+    } = {},
+  ): Promise<void> {
+    agent = beginAgentRequest(agent, {
+      exampleMode: options.example !== undefined,
+    });
+
+    let rawEnvelope: unknown;
+    let envelope: PlaygroundAgentEnvelope;
+
+    if (options.example !== undefined) {
+      // Instant canned path (OV2-A) — brief phase line, then validate/stage.
+      await new Promise((r) => setTimeout(r, 120));
+      if (options.signal?.aborted) {
+        agent = failAgent(agent, {
+          code: "aborted",
+          message: messageForAgentError("aborted"),
+        });
+        return;
+      }
+      envelope = options.example.envelope;
+      rawEnvelope = {
+        spec: envelope.spec,
+        interactions: envelope.interactions,
+        title: envelope.title,
+      };
+    } else {
+      const first = await generateChart(
+        {
+          prompt: userPrompt,
+          datasetId: dataset,
+          currentSpec: workbench.committed,
+        },
+        { signal: options.signal },
+      );
+      if (!first.ok) {
+        if (
+          first.code === "rate_limited" ||
+          first.code === "upstream_rate_limited"
+        ) {
+          const seconds = first.retryAfterSeconds ?? 60;
+          rateLimitUntil = Date.now() + seconds * 1000;
+          rateLimitLabel = `Try again in ${seconds}s`;
+        }
+        agent = failAgent(agent, {
+          code: first.code,
+          message: first.message,
+          ...(first.retryAfterSeconds === undefined
+            ? {}
+            : { retryAfterSeconds: first.retryAfterSeconds }),
+        });
+        return;
+      }
+      envelope = first.envelope;
+      rawEnvelope = first.rawEnvelope;
+    }
+
+    agent = setAgentValidating(agent);
+    let validated = validateAgentEnvelope(envelope, dataset);
+
+    if (!validated.ok && options.example === undefined) {
+      // One repair round with raw SpecError[].
+      agent = setAgentRepairing(agent);
+      const repair = await generateChart(
+        {
+          prompt: userPrompt,
+          datasetId: dataset,
+          currentSpec: workbench.committed,
+          priorSpec: rawEnvelope,
+          priorErrors: validated.errors as SpecError[],
+        },
+        { signal: options.signal },
+      );
+      if (!repair.ok) {
+        agent = failAgent(agent, {
+          code: repair.code,
+          message: repair.message,
+          details: validated.errors,
+        });
+        return;
+      }
+      envelope = repair.envelope;
+      rawEnvelope = repair.rawEnvelope;
+      validated = validateAgentEnvelope(envelope, dataset);
+    }
+
+    if (!validated.ok) {
+      agent = failAgent(agent, {
+        code: "validation",
+        message: validated.message,
+        details: validated.errors,
+      });
+      return;
+    }
+
+    stageAgentSeed(validated.seed, validated.interactions);
+    agent = completeAgentSuccess(agent, {
+      spec: validated.spec,
+      interactions: validated.interactions,
+      title: validated.title,
+    });
+  }
+
+  function onGenerate(): void {
+    if (busy || generateDisabled) return;
+    if (prompt.trim() === "") return;
+    abortController?.abort();
+    const controller = new AbortController();
+    abortController = controller;
+    void runAgentPipeline(prompt, datasetId, { signal: controller.signal });
+  }
+
+  function onExample(example: PlaygroundExamplePrompt): void {
+    if (busy) return;
+    prompt = example.prompt;
+    datasetId = example.datasetId;
+    abortController?.abort();
+    const controller = new AbortController();
+    abortController = controller;
+    void runAgentPipeline(example.prompt, example.datasetId, {
+      example,
+      signal: controller.signal,
+    });
+  }
+
+  function onCancel(): void {
+    abortController?.abort();
+    abortController = null;
+    agent = failAgent(agent, {
+      code: "aborted",
+      message: messageForAgentError("aborted"),
+    });
+  }
+
+  async function onCopyHandoff(): Promise<void> {
+    await tick();
+    const text = agentHandoffPrompt({
+      currentSpec: workbench.committed,
+      userGoal: prompt,
+    });
+    // Prefer a transient element for clipboard binding.
+    const el = document.createElement("button");
+    document.body.appendChild(el);
+    await copyText(text, el);
+    el.remove();
   }
 
   function candidateReady(
@@ -221,7 +422,6 @@
       status: current.status,
       isolation,
     });
-    // Microtask boundary: avoid re-entrant Svelte updates from GGPlot onrender.
     queueMicrotask(() => {
       promoteAcceptedCandidate(generation);
     });
@@ -233,9 +433,13 @@
     const promoted = promotePlaygroundCandidate(current, generation);
     if (!candidateTransitionAccepted(current, promoted)) return;
     workbench = promoted;
+    if (pendingInteractions !== null) {
+      interactions = pendingInteractions;
+      pendingInteractions = null;
+    }
     noteCandidatePhase({
       generation,
-      origin: origin ?? "apply",
+      origin: origin ?? "agent",
       phase: "promoted",
       status: promoted.status,
     });
@@ -256,12 +460,19 @@
     const failed = failPlaygroundCandidate(current, generation, diagnostic);
     if (!candidateTransitionAccepted(current, failed)) return;
     workbench = failed;
+    pendingInteractions = null;
     noteCandidatePhase({
       generation,
-      origin: origin ?? "apply",
+      origin: origin ?? "agent",
       phase: "failed",
       status: failed.status,
     });
+    if (origin === "agent") {
+      agent = failAgent(agent, {
+        code: "pipeline",
+        message: diagnostic.message,
+      });
+    }
     if (failed.navigationRecovery !== null) {
       replaceLocationHash(failed.navigationRecovery.replaceHash);
     }
@@ -300,7 +511,13 @@
     workbench = setPlaygroundHistoryHash(workbench, hash);
     shareUrl = url.href;
     await tick();
-    if (shareSource === undefined) return;
+    if (shareSource === undefined) {
+      // PlaygroundCode triggers share; status via shareStatus only.
+      shareStatus = playgroundShareCopyStatus(
+        await copyText(shareUrl, document.body),
+      );
+      return;
+    }
     const result = await copyText(shareUrl, shareSource);
     shareStatus = playgroundShareCopyStatus(result);
   }
@@ -310,16 +527,59 @@
 
 <section class="playground" aria-labelledby="playground-heading">
   <header class="playground-intro">
+    <p class="eyebrow">Playground</p>
     <h1 id="playground-heading">Playground</h1>
-    <UiButton
-      type="button"
-      variant="primary"
-      onclick={share}
-      disabled={!workbench.canCopyOrShare}
-    >
-      Share this chart
-    </UiButton>
+    <p class="pitch">
+      Ask for a chart in plain language. ggsvelte is agent-first — the JSON spec
+      is how models create interactive charts on demand.
+    </p>
   </header>
+
+  <PlaygroundPrompt
+    bind:prompt
+    bind:datasetId
+    {phaseLine}
+    failure={agent.phase === "failed" ? agent.failure : null}
+    {busy}
+    {generateDisabled}
+    {generateLabel}
+    samples={sampleLinks}
+    {onGenerate}
+    {onCancel}
+    {onExample}
+    onLoadSample={(id) => {
+      loadSample(id);
+    }}
+    {onCopyHandoff}
+  />
+
+  <PlaygroundPreview
+    rendered={workbench.rendered}
+    candidate={workbench.candidate}
+    lastValid={workbench.lastValid}
+    status={workbench.status}
+    {interactions}
+    onInteractionsChange={(next) => {
+      interactions = next;
+    }}
+    onCandidateReady={candidateReady}
+    onCandidateFailed={reconcileCandidateFailure}
+    onActiveRendered={activeRendered}
+    onActiveFailed={activeFailed}
+    onInteraction={recordInteraction}
+    canUndo={workbench.undoSnapshots.length > 0}
+    undoDisabled={busy || workbench.candidate !== null}
+    onUndo={undoChart}
+  />
+
+  <PlaygroundCode
+    {outputs}
+    rendered={workbench.rendered}
+    enabled={workbench.canCopyOrShare}
+    {handoffText}
+    onShare={share}
+    {shareStatus}
+  />
 
   {#if shareUrl !== ""}
     <div class="share-result">
@@ -328,66 +588,41 @@
     </div>
   {/if}
 
-  <PlaygroundShell>
-    {#snippet preview()}
-      <PlaygroundPreview
-        rendered={workbench.rendered}
-        candidate={workbench.candidate}
-        lastValid={workbench.lastValid}
-        status={workbench.status}
-        onCandidateReady={candidateReady}
-        onCandidateFailed={reconcileCandidateFailure}
-        onActiveRendered={activeRendered}
-        onActiveFailed={activeFailed}
-        onInteraction={recordInteraction}
-      />
-    {/snippet}
-    {#snippet editor()}
-      <PlaygroundEditor
-        draft={workbench.draft}
-        samples={PLAYGROUND_SAMPLES}
-        {selectedSample}
-        diagnostics={workbench.diagnostics}
-        pending={workbench.candidate !== null}
-        canUndo={workbench.undoSnapshots.length > 0}
-        onEdit={editDraft}
-        onApply={applyDraft}
-        onUndo={undoChart}
-        onReset={resetSource}
-        onLoadSample={loadSample}
-      />
-    {/snippet}
-    {#snippet output()}
-      <PlaygroundOutput
-        {outputs}
-        rendered={workbench.rendered}
-        enabled={workbench.canCopyOrShare}
-      />
-      <PlaygroundEvents entries={events} onClear={() => (events = [])} />
-    {/snippet}
-  </PlaygroundShell>
+  <PlaygroundEvents entries={events} onClear={() => (events = [])} />
 </section>
 
 <style>
   .playground {
-    width: min(100% - 2rem, 96rem);
+    width: min(100% - 2rem, 72rem);
     margin: 0 auto;
-    padding-block: 1rem 2rem;
+    padding-block: 1rem 2.5rem;
   }
 
   .playground-intro {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.35rem;
+    color: var(--accent);
+    font: 700 0.75rem/1 var(--body-font);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   h1 {
     margin: 0;
-    font-size: clamp(1.35rem, 2.4vw, 1.75rem);
+    font-size: clamp(1.5rem, 2.8vw, 2rem);
     line-height: 1.15;
     letter-spacing: -0.03em;
+  }
+
+  .pitch {
+    margin: 0.65rem 0 0;
+    max-width: 40rem;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.5;
   }
 
   .share-result {
@@ -413,8 +648,7 @@
 
   @media (max-width: 47.99rem) {
     .playground {
-      width: min(100% - 1.25rem, 96rem);
-      padding-block: 0.75rem 1.5rem;
+      width: min(100% - 1.25rem, 72rem);
     }
 
     .share-result {
