@@ -805,7 +805,7 @@ export const SpecDeclarations = {
           exclusiveMinimum: 0,
           maximum: 1,
           description:
-            "Box width as a fraction of the band step. Must be greater than 0 and at most 1. Default 0.9.",
+            "Box width as a fraction of the band step. Must be greater than 0 and at most 1. Default 0.75 (ggplot2). When omitted, width is also capped at 15% of the panel so few categories do not read as slabs.",
         }),
       ),
       coef: Type.Optional(

@@ -5,7 +5,11 @@ import type { BoxplotParams } from "@ggsvelte/spec";
 
 import type { LayerFrame, PipelineWarning } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
-import { DEFAULT_BAR_WIDTH, removedWarning } from "./geometry-shared.js";
+import {
+  DEFAULT_BOXPLOT_WIDTH,
+  MAX_BOXPLOT_PANEL_FRAC,
+  removedWarning,
+} from "./geometry-shared.js";
 import {
   createBoxplotBodyBuffers,
   pushKeptBoxplotRow,
@@ -36,7 +40,13 @@ export function layoutBoxplotBody(
     return null;
   }
   const params = (binding.layer.params ?? {}) as BoxplotParams;
-  const widthFrac = (params.width ?? DEFAULT_BAR_WIDTH) * fx.xScale.step;
+  const widthParam = params.width ?? DEFAULT_BOXPLOT_WIDTH;
+  let widthFrac = widthParam * fx.xScale.step;
+  // Few categories make band.step large; cap the default so boxes stay
+  // distribution-shaped. Authors who set `width` keep the uncapped fraction.
+  if (params.width === undefined) {
+    widthFrac = Math.min(widthFrac, MAX_BOXPLOT_PANEL_FRAC);
+  }
   const linewidth =
     typeof binding.linewidth.constant === "number"
       ? binding.linewidth.constant

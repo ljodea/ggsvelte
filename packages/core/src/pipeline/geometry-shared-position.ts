@@ -10,6 +10,14 @@ export const DEFAULT_POINT_SIZE = 2.5;
 export const DEFAULT_LINEWIDTH = 1.5;
 export const DEFAULT_RULE_LINEWIDTH = 1;
 export const DEFAULT_BAR_WIDTH = 0.9;
+/** ggplot2 geom_boxplot default (`width = 0.75`), distinct from bar's 0.9. */
+export const DEFAULT_BOXPLOT_WIDTH = 0.75;
+/**
+ * Default boxplot boxes never exceed this fraction of the panel width. With
+ * few categories, `width * band.step` otherwise grows into blocky slabs (#653).
+ * Explicit `params.width` bypasses the cap.
+ */
+export const MAX_BOXPLOT_PANEL_FRAC = 0.15;
 export const DEFAULT_TEXT_SIZE = 11;
 
 /** Panel-local frame extents + trained positional scales for batch builders. */

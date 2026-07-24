@@ -81,8 +81,45 @@ describe("boxplot geom", () => {
     );
     expect(model.warnings.some((w) => w.code === "removed-missing")).toBe(true);
   });
-});
 
-// ---------------------------------------------------------------------------
-// density
-// ---------------------------------------------------------------------------
+  it("defaults to ggplot2 box width 0.75 and caps panel fraction for few categories (#653)", () => {
+    const three = runPipeline(
+      gg(rows, aes({ x: "cat", y: "v" }))
+        .geomBoxplot()
+        .spec(),
+      size,
+    );
+    const threeBoxes = three.scene.batches.find((b) => b.kind === "rects") as RectsBatch;
+    const threeWidth = threeBoxes.rects[2]!; // rect layout: x,y,w,h
+    const threePanel = three.scene.panels[0]!;
+    // step=1/3, 0.75*step≈0.25 of panel — must cap so 3-category charts stay readable
+    expect(threeWidth).toBeLessThanOrEqual(threePanel.width * 0.15 + 1e-6);
+    expect(threeWidth).toBeGreaterThan(0);
+
+    const manyCats = ["a", "b", "c", "d", "e", "f", "g", "h"];
+    const manyRows = manyCats.flatMap((cat) =>
+      Array.from({ length: 12 }, (_, i) => ({ cat, v: i + (cat.codePointAt(0)! % 5), side: "l" })),
+    );
+    const eight = runPipeline(
+      gg(manyRows, aes({ x: "cat", y: "v" }))
+        .geomBoxplot()
+        .spec(),
+      size,
+    );
+    const eightBoxes = eight.scene.batches.find((b) => b.kind === "rects") as RectsBatch;
+    const eightWidth = eightBoxes.rects[2]!;
+    // 0.75 / 8 = 0.09375 of panel — under the cap, so uncapped ggplot2 fraction
+    const eightPanel = eight.scene.panels[0]!;
+    expect(eightWidth).toBeCloseTo(0.75 * (1 / 8) * eightPanel.width, 5);
+
+    const wide = runPipeline(
+      gg(rows, aes({ x: "cat", y: "v" }))
+        .geomBoxplot({ width: 1 })
+        .spec(),
+      size,
+    );
+    const wideBoxes = wide.scene.batches.find((b) => b.kind === "rects") as RectsBatch;
+    // Explicit width bypasses the few-category cap (full step).
+    expect(wideBoxes.rects[2]!).toBeCloseTo((1 / 3) * threePanel.width, 5);
+  });
+});
