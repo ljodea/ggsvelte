@@ -6,13 +6,11 @@ import { describe, expect, it } from "bun:test";
 const docsAppCss = readFileSync(join(import.meta.dir, "../apps/docs/src/app.css"), "utf8");
 
 describe("docs VR demo-chrome hide (#650)", () => {
-  it("hides .gg-demo-chrome under data-vr and data-visual-test", () => {
+  it("hides .gg-demo-chrome under data-vr only (not data-visual-test journeys)", () => {
     expect(docsAppCss).toMatch(
       /html\[data-vr\]\s+\.gg-demo-chrome[\s\S]*?display:\s*none\s*!important/s,
     );
-    expect(docsAppCss).toMatch(
-      /html\[data-visual-test\]\s+\.gg-demo-chrome[\s\S]*?display:\s*none\s*!important/s,
-    );
+    expect(docsAppCss).not.toMatch(/html\[data-visual-test\]\s+\.gg-demo-chrome/);
   });
 });
 
