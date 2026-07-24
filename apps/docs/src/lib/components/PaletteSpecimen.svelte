@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import { GeomCol, GGPlot } from "@ggsvelte/svelte";
   import type { ThemeName } from "@ggsvelte/spec";
 
-  import CopyCode from "$lib/components/CopyCode.svelte";
+  import { languages } from "$lib/theme-specimens/data";
 
   const {
     name,
@@ -20,78 +20,59 @@
     paperTheme: ThemeName;
   } = $props();
 
-  const rows = [
-    { signal: 1, value: 22, category: "Alpha" },
-    { signal: 2, value: 37, category: "Beta" },
-    { signal: 3, value: 29, category: "Gamma" },
-    { signal: 4, value: 55, category: "Delta" },
-    { signal: 5, value: 46, category: "Epsilon" },
-  ];
   const displayColors = $derived(reverse ? colors.toReversed() : colors);
-  const code = $derived(
-    `<GGPlot
-  data={rows}
-  aes={{ x: "signal", y: "value", color: "category" }}
-  scales={{ color: { scheme: "${name}", reverse: ${String(reverse)} } }}
-  theme="${paperTheme}"
->
-  <GeomPoint size={4} />
-</GGPlot>`,
-  );
 </script>
 
-<article>
+<article class="specimen">
   <header>
     <div>
       <h3>{label}</h3>
-      <code>scheme="{name}"</code>
+      <span class="capacity">{capacity} colors</span>
     </div>
-    <span class="capacity">{capacity} colors</span>
   </header>
 
   <ul class="swatches" aria-label={`${label} ordered colors`}>
     {#each displayColors as color, index (`${color}-${String(index)}`)}
       <li
         style={`--swatch:${color}`}
+        title={color}
         aria-label={`${String(index + 1)}: ${color}`}
       >
-        <span aria-hidden="true"></span><code>{color}</code>
+        <span aria-hidden="true"></span>
       </li>
     {/each}
   </ul>
 
-  <div class="plot">
+  <div class="plot-panel">
     <GGPlot
-      data={rows}
-      aes={{ x: "signal", y: "value", color: "category" }}
-      scales={{ color: { type: "ordinal", scheme: name, reverse } }}
+      data={languages}
+      aes={{ x: "language", y: "respondents", fill: "language" }}
+      scales={{ fill: { type: "ordinal", scheme: name, reverse } }}
+      guides={{ fill: { type: "none" } }}
       theme={paperTheme}
-      height={260}
+      labs={{
+        title: "Survey respondents by language",
+        x: "Language",
+        y: "Respondents",
+      }}
+      inspect={{ mode: "xy" }}
+      height={340}
       ariaLabel={`${label} palette on ${paperTheme} paper`}
     >
-      <GeomPoint size={4} />
+      <GeomCol width={0.75} />
     </GGPlot>
   </div>
-
-  <CopyCode
-    {code}
-    language="svelte"
-    accessibleLabel={`Copy ${label} palette code`}
-  />
 </article>
 
 <style>
-  article {
+  .specimen {
     display: grid;
     gap: 0.75rem;
     min-width: 0;
   }
 
   header {
-    display: flex;
-    align-items: start;
-    justify-content: space-between;
-    gap: 1rem;
+    min-width: 0;
   }
 
   h3 {
@@ -100,33 +81,28 @@
     letter-spacing: -0.01em;
   }
 
-  header code {
+  .capacity {
     display: block;
     margin-top: 0.2rem;
     color: var(--muted);
     font-size: 0.78rem;
-  }
-
-  .capacity {
-    color: var(--muted);
-    font-size: 0.78rem;
     font-variant-numeric: tabular-nums;
-    white-space: nowrap;
   }
 
   .swatches {
     display: flex;
+    width: min(100%, 52rem);
     min-width: 0;
     margin: 0;
     padding: 0;
     overflow-x: auto;
     list-style: none;
+    gap: 2px;
   }
 
   .swatches li {
-    display: grid;
-    flex: 0 0 3.5rem;
-    gap: 0.35rem;
+    flex: 1 1 0;
+    min-width: 1.25rem;
   }
 
   .swatches span {
@@ -135,12 +111,8 @@
     background: var(--swatch);
   }
 
-  .swatches code {
-    color: var(--muted);
-    font-size: 0.6rem;
-  }
-
-  .plot {
+  .plot-panel {
+    width: min(100%, 52rem);
     min-width: 0;
   }
 </style>
