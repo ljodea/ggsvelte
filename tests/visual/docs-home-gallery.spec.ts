@@ -10,7 +10,7 @@ test("homepage first viewport leads with a live chart and two actions", async ({
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=light");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "A grammar of graphics for Svelte.",
+    "An agent-first implementation of the layered grammar of graphics in Svelte 5",
   );
   await expect(page.locator(".home-hero .gg-plot-root")).toBeVisible();
   await expect(page.getByRole("link", { name: "Getting started" })).toBeVisible();
