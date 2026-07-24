@@ -1,13 +1,119 @@
-/** Mean monthly temperature (°C) for three cities — classic climate normals. */
-const monthly: Record<string, readonly number[]> = {
-  Reykjavik: [-0.5, 0.4, 0.5, 2.9, 6.3, 9.0, 10.6, 10.3, 7.4, 4.4, 1.1, -0.2],
-  Berlin: [0.6, 1.4, 4.8, 9.0, 14.0, 17.0, 19.0, 18.9, 14.7, 9.9, 5.0, 1.9],
-  Singapore: [26.5, 27.1, 27.5, 28.0, 28.3, 28.3, 27.9, 27.9, 27.6, 27.6, 27.0, 26.4],
-};
-
-export const temperatures: { city: string; month: number; temp: number }[] = [];
-for (const [city, temps] of Object.entries(monthly)) {
-  temps.forEach((temp, i) => {
-    temperatures.push({ city, month: i + 1, temp });
-  });
-}
+/**
+ * William Playfair's "Chart Shewing at One View the Price of the Quarter of
+ * Wheat & Wages of Labour by the Week" (1821) - the closing plate of his
+ * Letter on our Agricultural Distresses, and one of the first charts drawn to
+ * carry an argument rather than a table.
+ *
+ * Wheat price in shillings per quarter against a labourer's weekly wage, at
+ * five-year intervals from 1565 to 1821. Playfair's point was the ratio: how
+ * many weeks' wages a quarter of wheat cost.
+ *
+ * Transcribed from HistData::Wheat (see NOTICE); 53 years, 103 rows in long
+ * form. The 1821 wage is absent from the original and is left out of the wage
+ * series rather than imputed.
+ */
+export const wheatAndWages = [
+  { year: 1565, series: "Wheat price", value: 41 },
+  { year: 1565, series: "Weekly wage", value: 5 },
+  { year: 1570, series: "Wheat price", value: 45 },
+  { year: 1570, series: "Weekly wage", value: 5.05 },
+  { year: 1575, series: "Wheat price", value: 42 },
+  { year: 1575, series: "Weekly wage", value: 5.08 },
+  { year: 1580, series: "Wheat price", value: 49 },
+  { year: 1580, series: "Weekly wage", value: 5.12 },
+  { year: 1585, series: "Wheat price", value: 41.5 },
+  { year: 1585, series: "Weekly wage", value: 5.15 },
+  { year: 1590, series: "Wheat price", value: 47 },
+  { year: 1590, series: "Weekly wage", value: 5.25 },
+  { year: 1595, series: "Wheat price", value: 64 },
+  { year: 1595, series: "Weekly wage", value: 5.54 },
+  { year: 1600, series: "Wheat price", value: 27 },
+  { year: 1600, series: "Weekly wage", value: 5.61 },
+  { year: 1605, series: "Wheat price", value: 33 },
+  { year: 1605, series: "Weekly wage", value: 5.69 },
+  { year: 1610, series: "Wheat price", value: 32 },
+  { year: 1610, series: "Weekly wage", value: 5.78 },
+  { year: 1615, series: "Wheat price", value: 33 },
+  { year: 1615, series: "Weekly wage", value: 5.94 },
+  { year: 1620, series: "Wheat price", value: 35 },
+  { year: 1620, series: "Weekly wage", value: 6.01 },
+  { year: 1625, series: "Wheat price", value: 33 },
+  { year: 1625, series: "Weekly wage", value: 6.12 },
+  { year: 1630, series: "Wheat price", value: 45 },
+  { year: 1630, series: "Weekly wage", value: 6.22 },
+  { year: 1635, series: "Wheat price", value: 33 },
+  { year: 1635, series: "Weekly wage", value: 6.3 },
+  { year: 1640, series: "Wheat price", value: 39 },
+  { year: 1640, series: "Weekly wage", value: 6.37 },
+  { year: 1645, series: "Wheat price", value: 53 },
+  { year: 1645, series: "Weekly wage", value: 6.45 },
+  { year: 1650, series: "Wheat price", value: 42 },
+  { year: 1650, series: "Weekly wage", value: 6.5 },
+  { year: 1655, series: "Wheat price", value: 40.5 },
+  { year: 1655, series: "Weekly wage", value: 6.6 },
+  { year: 1660, series: "Wheat price", value: 46.5 },
+  { year: 1660, series: "Weekly wage", value: 6.75 },
+  { year: 1665, series: "Wheat price", value: 32 },
+  { year: 1665, series: "Weekly wage", value: 6.8 },
+  { year: 1670, series: "Wheat price", value: 37 },
+  { year: 1670, series: "Weekly wage", value: 6.9 },
+  { year: 1675, series: "Wheat price", value: 43 },
+  { year: 1675, series: "Weekly wage", value: 7 },
+  { year: 1680, series: "Wheat price", value: 35 },
+  { year: 1680, series: "Weekly wage", value: 7.3 },
+  { year: 1685, series: "Wheat price", value: 27 },
+  { year: 1685, series: "Weekly wage", value: 7.6 },
+  { year: 1690, series: "Wheat price", value: 40 },
+  { year: 1690, series: "Weekly wage", value: 8 },
+  { year: 1695, series: "Wheat price", value: 50 },
+  { year: 1695, series: "Weekly wage", value: 8.5 },
+  { year: 1700, series: "Wheat price", value: 30 },
+  { year: 1700, series: "Weekly wage", value: 9 },
+  { year: 1705, series: "Wheat price", value: 32 },
+  { year: 1705, series: "Weekly wage", value: 10 },
+  { year: 1710, series: "Wheat price", value: 44 },
+  { year: 1710, series: "Weekly wage", value: 11 },
+  { year: 1715, series: "Wheat price", value: 33 },
+  { year: 1715, series: "Weekly wage", value: 11.75 },
+  { year: 1720, series: "Wheat price", value: 29 },
+  { year: 1720, series: "Weekly wage", value: 12.5 },
+  { year: 1725, series: "Wheat price", value: 39 },
+  { year: 1725, series: "Weekly wage", value: 13 },
+  { year: 1730, series: "Wheat price", value: 26 },
+  { year: 1730, series: "Weekly wage", value: 13.3 },
+  { year: 1735, series: "Wheat price", value: 32 },
+  { year: 1735, series: "Weekly wage", value: 13.6 },
+  { year: 1740, series: "Wheat price", value: 27 },
+  { year: 1740, series: "Weekly wage", value: 14 },
+  { year: 1745, series: "Wheat price", value: 27.5 },
+  { year: 1745, series: "Weekly wage", value: 14.5 },
+  { year: 1750, series: "Wheat price", value: 31 },
+  { year: 1750, series: "Weekly wage", value: 15 },
+  { year: 1755, series: "Wheat price", value: 35.5 },
+  { year: 1755, series: "Weekly wage", value: 15.7 },
+  { year: 1760, series: "Wheat price", value: 31 },
+  { year: 1760, series: "Weekly wage", value: 16.5 },
+  { year: 1765, series: "Wheat price", value: 43 },
+  { year: 1765, series: "Weekly wage", value: 17.6 },
+  { year: 1770, series: "Wheat price", value: 47 },
+  { year: 1770, series: "Weekly wage", value: 18.5 },
+  { year: 1775, series: "Wheat price", value: 44 },
+  { year: 1775, series: "Weekly wage", value: 19.5 },
+  { year: 1780, series: "Wheat price", value: 46 },
+  { year: 1780, series: "Weekly wage", value: 21 },
+  { year: 1785, series: "Wheat price", value: 42 },
+  { year: 1785, series: "Weekly wage", value: 23 },
+  { year: 1790, series: "Wheat price", value: 47.5 },
+  { year: 1790, series: "Weekly wage", value: 25.5 },
+  { year: 1795, series: "Wheat price", value: 76 },
+  { year: 1795, series: "Weekly wage", value: 27.5 },
+  { year: 1800, series: "Wheat price", value: 79 },
+  { year: 1800, series: "Weekly wage", value: 28.5 },
+  { year: 1805, series: "Wheat price", value: 81 },
+  { year: 1805, series: "Weekly wage", value: 29.5 },
+  { year: 1810, series: "Wheat price", value: 99 },
+  { year: 1810, series: "Weekly wage", value: 30 },
+  { year: 1815, series: "Wheat price", value: 78 },
+  { year: 1820, series: "Wheat price", value: 54 },
+  { year: 1821, series: "Wheat price", value: 54 },
+] as const;

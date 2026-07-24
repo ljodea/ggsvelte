@@ -2287,7 +2287,7 @@ export const DOCS_ROUTES = [
     path: "/examples/area/stacked",
     title: "Stacked area chart — ggsvelte gallery",
     description:
-      "Areas stack by default: the fill groups pile from the zero baseline, showing total and composition over time. First-seen group order stays on top.",
+      "Areas stack by default: the fill groups pile from the zero baseline, showing total and composition over time. First-seen group order stays on top. Nightingale's 1858 Crimean mortality data supplies the composition, and the economist theme's tinted paper forces an explicit manual fill scale chosen for contrast against it.",
     canonicalPath: "/examples/area/stacked",
     kind: "page",
     index: true,
@@ -2551,7 +2551,7 @@ export const DOCS_ROUTES = [
     path: "/examples/line/multi-series",
     title: "Multi-series line chart — ggsvelte gallery",
     description:
-      "One line per group, derived from the discrete color mapping — plus a point layer on top showing how layers compose. Explicit breaks pin one tick per month.",
+      "One line per group, derived from the discrete color mapping — plus a point layer on top showing how layers compose. Playfair's 1821 wheat-and-wages plate supplies the two series, and a manual color scale picks the economist theme's own red and ink so both clear contrast on its tinted paper — the shorter wage series ends early because the original records no 1821 wage.",
     canonicalPath: "/examples/line/multi-series",
     kind: "page",
     index: true,
@@ -2562,7 +2562,7 @@ export const DOCS_ROUTES = [
     path: "/examples/line/time-axis",
     title: "Raw-year time-axis line chart — ggsvelte gallery",
     description:
-      "A long-run series over untouched four-digit year strings. Value-driven inference selects a UTC calendar scale automatically; no preprocessing or explicit time scale is required.",
+      "A long-run series over untouched four-digit year strings. Value-driven inference selects a UTC calendar scale automatically; no preprocessing or explicit time scale is required. Bowley's 1855–99 British export series supplies the trend, drawn on the fivethirtyeight theme's newsprint paper with white gridlines.",
     canonicalPath: "/examples/line/time-axis",
     kind: "page",
     index: true,

@@ -1,14 +1,88 @@
-/** Electricity generation mix (TWh) for a fictional grid, 2014–2025. */
-const bySource: Record<string, readonly number[]> = {
-  //     2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025
-  fossil: [92, 90, 87, 85, 80, 74, 66, 60, 55, 48, 41, 35],
-  nuclear: [30, 30, 29, 29, 28, 28, 27, 26, 26, 25, 25, 24],
-  renewables: [14, 17, 21, 26, 32, 39, 45, 54, 63, 74, 86, 99],
-};
-
-export const generation: { year: number; source: string; twh: number }[] = [];
-for (const [source, series] of Object.entries(bySource)) {
-  series.forEach((twh, i) => {
-    generation.push({ year: 2014 + i, source, twh });
-  });
-}
+/**
+ * Florence Nightingale's Crimean War mortality data, April 1854 - March 1856:
+ * monthly deaths in the British army split by cause. Nightingale drew it as the
+ * polar-area "coxcomb"; plotted as a stacked area over time the same argument
+ * reads directly, and the collapse after the March 1855 Sanitary Commission is
+ * unmistakable.
+ *
+ * Nightingale, "Notes on Matters Affecting the Health, Efficiency, and Hospital
+ * Administration of the British Army", 1858. Transcribed from
+ * HistData::Nightingale (see NOTICE); 24 months x 3 causes = 72 rows.
+ *
+ * `deaths` is the annual rate per 1,000 (Nightingale's own measure), so months
+ * stay comparable even though the army's size more than tripled.
+ */
+export const crimeanMortality = [
+  { month: "1854-04-01", cause: "Disease", deaths: 1.4 },
+  { month: "1854-04-01", cause: "Wounds", deaths: 0 },
+  { month: "1854-04-01", cause: "Other", deaths: 7 },
+  { month: "1854-05-01", cause: "Disease", deaths: 6.2 },
+  { month: "1854-05-01", cause: "Wounds", deaths: 0 },
+  { month: "1854-05-01", cause: "Other", deaths: 4.6 },
+  { month: "1854-06-01", cause: "Disease", deaths: 4.7 },
+  { month: "1854-06-01", cause: "Wounds", deaths: 0 },
+  { month: "1854-06-01", cause: "Other", deaths: 2.5 },
+  { month: "1854-07-01", cause: "Disease", deaths: 150 },
+  { month: "1854-07-01", cause: "Wounds", deaths: 0 },
+  { month: "1854-07-01", cause: "Other", deaths: 9.6 },
+  { month: "1854-08-01", cause: "Disease", deaths: 328.5 },
+  { month: "1854-08-01", cause: "Wounds", deaths: 0.4 },
+  { month: "1854-08-01", cause: "Other", deaths: 11.9 },
+  { month: "1854-09-01", cause: "Disease", deaths: 312.2 },
+  { month: "1854-09-01", cause: "Wounds", deaths: 32.1 },
+  { month: "1854-09-01", cause: "Other", deaths: 27.7 },
+  { month: "1854-10-01", cause: "Disease", deaths: 197 },
+  { month: "1854-10-01", cause: "Wounds", deaths: 51.7 },
+  { month: "1854-10-01", cause: "Other", deaths: 50.1 },
+  { month: "1854-11-01", cause: "Disease", deaths: 340.6 },
+  { month: "1854-11-01", cause: "Wounds", deaths: 115.8 },
+  { month: "1854-11-01", cause: "Other", deaths: 42.8 },
+  { month: "1854-12-01", cause: "Disease", deaths: 631.5 },
+  { month: "1854-12-01", cause: "Wounds", deaths: 41.7 },
+  { month: "1854-12-01", cause: "Other", deaths: 48 },
+  { month: "1855-01-01", cause: "Disease", deaths: 1022.8 },
+  { month: "1855-01-01", cause: "Wounds", deaths: 30.7 },
+  { month: "1855-01-01", cause: "Other", deaths: 120 },
+  { month: "1855-02-01", cause: "Disease", deaths: 822.8 },
+  { month: "1855-02-01", cause: "Wounds", deaths: 16.3 },
+  { month: "1855-02-01", cause: "Other", deaths: 140.1 },
+  { month: "1855-03-01", cause: "Disease", deaths: 480.3 },
+  { month: "1855-03-01", cause: "Wounds", deaths: 12.8 },
+  { month: "1855-03-01", cause: "Other", deaths: 68.6 },
+  { month: "1855-04-01", cause: "Disease", deaths: 177.5 },
+  { month: "1855-04-01", cause: "Wounds", deaths: 17.9 },
+  { month: "1855-04-01", cause: "Other", deaths: 21.2 },
+  { month: "1855-05-01", cause: "Disease", deaths: 171.8 },
+  { month: "1855-05-01", cause: "Wounds", deaths: 16.6 },
+  { month: "1855-05-01", cause: "Other", deaths: 12.5 },
+  { month: "1855-06-01", cause: "Disease", deaths: 247.6 },
+  { month: "1855-06-01", cause: "Wounds", deaths: 64.5 },
+  { month: "1855-06-01", cause: "Other", deaths: 9.6 },
+  { month: "1855-07-01", cause: "Disease", deaths: 107.5 },
+  { month: "1855-07-01", cause: "Wounds", deaths: 37.7 },
+  { month: "1855-07-01", cause: "Other", deaths: 9.3 },
+  { month: "1855-08-01", cause: "Disease", deaths: 129.9 },
+  { month: "1855-08-01", cause: "Wounds", deaths: 44.1 },
+  { month: "1855-08-01", cause: "Other", deaths: 6.7 },
+  { month: "1855-09-01", cause: "Disease", deaths: 47.5 },
+  { month: "1855-09-01", cause: "Wounds", deaths: 69.4 },
+  { month: "1855-09-01", cause: "Other", deaths: 5 },
+  { month: "1855-10-01", cause: "Disease", deaths: 32.8 },
+  { month: "1855-10-01", cause: "Wounds", deaths: 13.6 },
+  { month: "1855-10-01", cause: "Other", deaths: 4.6 },
+  { month: "1855-11-01", cause: "Disease", deaths: 56.4 },
+  { month: "1855-11-01", cause: "Wounds", deaths: 10.5 },
+  { month: "1855-11-01", cause: "Other", deaths: 10.1 },
+  { month: "1855-12-01", cause: "Disease", deaths: 25.3 },
+  { month: "1855-12-01", cause: "Wounds", deaths: 5 },
+  { month: "1855-12-01", cause: "Other", deaths: 7.8 },
+  { month: "1856-01-01", cause: "Disease", deaths: 11.4 },
+  { month: "1856-01-01", cause: "Wounds", deaths: 0.5 },
+  { month: "1856-01-01", cause: "Other", deaths: 13 },
+  { month: "1856-02-01", cause: "Disease", deaths: 6.6 },
+  { month: "1856-02-01", cause: "Wounds", deaths: 0 },
+  { month: "1856-02-01", cause: "Other", deaths: 5.2 },
+  { month: "1856-03-01", cause: "Disease", deaths: 3.9 },
+  { month: "1856-03-01", cause: "Wounds", deaths: 0 },
+  { month: "1856-03-01", cause: "Other", deaths: 9.1 },
+] as const;
