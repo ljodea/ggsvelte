@@ -22,6 +22,7 @@
     "docs:search:check": "bun scripts/gen-docs-search.ts --check",
     "gallery:previews:gen": "bun scripts/gen-gallery-previews.ts",
     "gallery:previews:check": "bun scripts/gen-gallery-previews.ts --check",
+    "gallery:previews:capture-interaction": "bun scripts/capture-interaction-gallery-lights.ts",
     "playground:seeds:gen": "bun scripts/gen-playground-seeds.ts",
     "playground:seeds:check": "bun scripts/gen-playground-seeds.ts --check",
     "check:docs-metadata": "bun scripts/check-docs-metadata.ts",

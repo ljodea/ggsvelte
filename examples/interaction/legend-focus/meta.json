@@ -12,7 +12,7 @@
     "touch"
   ],
   "docsSection": "Interaction",
-  "vrHeight": 980,
+  "vrHeight": 320,
   "vrWidth": 960,
   "journey": {
     "pointer": "Hover a discrete legend entry to preview one plot, then click to pin the group across all three views.",
