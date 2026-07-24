@@ -1,17 +1,19 @@
 <script lang="ts">
   import { GeomCol, GGPlot } from "@ggsvelte/svelte";
 
-  import { languages } from "./data.js";
+  import { armadaTonnage } from "./data.js";
 </script>
 
 <GGPlot
-  data={languages}
-  aes={{ x: "language", y: "respondents" }}
-  coord="flip"
+  data={armadaTonnage}
+  aes={{ x: "squadron", y: "tons" }}
+  theme="fivethirtyeight"
+  coord={{ type: "flip" }}
   labs={{
-    title: "Survey responses by language",
-    x: "Language",
-    y: "Respondents",
+    title: "Armada tonnage by squadron, 1588",
+    subtitle: "Ordered smallest to largest, so coord flip reads bottom-up",
+    x: "Squadron",
+    y: "Tons",
   }}
   width={640}
   height={400}

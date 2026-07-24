@@ -1,6 +1,6 @@
 {
   "title": "Column chart",
-  "description": "Pre-computed bar heights with geom col (ggplot2's geom_col): a band x scale, a zero-based linear y scale, and the theme's accent role filling the unmapped bars.",
-  "tags": ["col", "band", "bars"],
+  "description": "geom col draws one bar per row at the height you supply — no statistic. Quetelet's 5,738 Scottish militiamen give the shape that made the normal curve a claim about people, under the classic theme's black axis lines and bare panel.",
+  "tags": ["col", "bars", "identity", "theme"],
   "docsSection": "Bars & columns"
 }

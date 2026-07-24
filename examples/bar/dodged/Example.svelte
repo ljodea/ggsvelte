@@ -1,17 +1,21 @@
 <script lang="ts">
   import { GeomBar, GGPlot } from "@ggsvelte/svelte";
 
-  import { attendees } from "./data.js";
+  import { edgeworthDeaths } from "./data.js";
 </script>
 
 <GGPlot
-  data={attendees}
-  aes={{ x: "track", fill: "level" }}
+  data={edgeworthDeaths}
+  aes={{ x: "year", fill: "county", weight: "deaths" }}
+  theme="few"
+  scales={{ fill: { type: "ordinal", scheme: "tableau10" } }}
   labs={{
-    title: "Conference attendees by track and experience",
-    x: "Track",
-    y: "Attendees",
-    fill: "Experience",
+    title: "Deaths in six English counties, 1876–82",
+    subtitle:
+      "Edgeworth's two-way table, decades before Fisher named the method",
+    x: "Year",
+    y: "Deaths per million",
+    fill: "County",
   }}
   width={640}
   height={400}

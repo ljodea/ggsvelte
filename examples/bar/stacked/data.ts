@@ -1,21 +1,88 @@
 /**
- * One row per support ticket (the bar geom COUNTS rows — ggplot2's geom_bar).
- * Seeded so the corpus is byte-reproducible.
+ * The Trial of the Pyx, 1848: 10,000 gold sovereigns drawn from the Royal
+ * Mint's production, weighed, and tabulated by the bag they came from and how
+ * far they deviated from the standard weight. One of the oldest continuous
+ * sampling-inspection schemes in existence, run by the Mint since the 13th
+ * century.
+ *
+ * Stigler, "Statistics on the Table" (1999), table 21.1. Transcribed from
+ * HistData::Pyx (see NOTICE); 72 rows summing to 10,000 sovereigns.
+ *
+ * Two deviation labels are corrected here: HistData's factor levels read
+ * "(-.2 to -.l)" and "(0 to .l)" with a lowercase L where the digit 1 belongs,
+ * an OCR artifact of the source table.
  */
-import { mulberry32 } from "../../rng.js";
-
-const random = mulberry32(42);
-const days = ["Mon", "Tue", "Wed", "Thu", "Fri"] as const;
-const channels = ["email", "chat", "phone"] as const;
-// Chat share grows through the week; phone stays a slim slice.
-const chatShare = [0.25, 0.3, 0.35, 0.45, 0.55];
-const volume = [28, 24, 26, 30, 34];
-
-export const tickets: { day: string; channel: string }[] = [];
-days.forEach((day, i) => {
-  for (let n = 0; n < volume[i]!; n += 1) {
-    const r = random();
-    const channel = r < chatShare[i]! ? channels[1] : r < 0.85 ? channels[0] : channels[2];
-    tickets.push({ day, channel });
-  }
-});
+export const pyxTrial = [
+  { bag: "1 and 2", group: "near std", deviation: "Below -R", count: 34 },
+  { bag: "3", group: "near std", deviation: "Below -R", count: 11 },
+  { bag: "4", group: "near std", deviation: "Below -R", count: 20 },
+  { bag: "5", group: "below std", deviation: "Below -R", count: 30 },
+  { bag: "6", group: "below std", deviation: "Below -R", count: 32 },
+  { bag: "7", group: "below std", deviation: "Below -R", count: 47 },
+  { bag: "8", group: "above std", deviation: "Below -R", count: 11 },
+  { bag: "9", group: "above std", deviation: "Below -R", count: 10 },
+  { bag: "10", group: "above std", deviation: "Below -R", count: 14 },
+  { bag: "1 and 2", group: "near std", deviation: "(-R to -.2)", count: 57 },
+  { bag: "3", group: "near std", deviation: "(-R to -.2)", count: 17 },
+  { bag: "4", group: "near std", deviation: "(-R to -.2)", count: 22 },
+  { bag: "5", group: "below std", deviation: "(-R to -.2)", count: 102 },
+  { bag: "6", group: "below std", deviation: "(-R to -.2)", count: 27 },
+  { bag: "7", group: "below std", deviation: "(-R to -.2)", count: 65 },
+  { bag: "8", group: "above std", deviation: "(-R to -.2)", count: 21 },
+  { bag: "9", group: "above std", deviation: "(-R to -.2)", count: 38 },
+  { bag: "10", group: "above std", deviation: "(-R to -.2)", count: 13 },
+  { bag: "1 and 2", group: "near std", deviation: "(-.2 to -.1)", count: 172 },
+  { bag: "3", group: "near std", deviation: "(-.2 to -.1)", count: 100 },
+  { bag: "4", group: "near std", deviation: "(-.2 to -.1)", count: 135 },
+  { bag: "5", group: "below std", deviation: "(-.2 to -.1)", count: 107 },
+  { bag: "6", group: "below std", deviation: "(-.2 to -.1)", count: 267 },
+  { bag: "7", group: "below std", deviation: "(-.2 to -.1)", count: 141 },
+  { bag: "8", group: "above std", deviation: "(-.2 to -.1)", count: 110 },
+  { bag: "9", group: "above std", deviation: "(-.2 to -.1)", count: 103 },
+  { bag: "10", group: "above std", deviation: "(-.2 to -.1)", count: 126 },
+  { bag: "1 and 2", group: "near std", deviation: "(-.1 to 0)", count: 630 },
+  { bag: "3", group: "near std", deviation: "(-.1 to 0)", count: 412 },
+  { bag: "4", group: "near std", deviation: "(-.1 to 0)", count: 350 },
+  { bag: "5", group: "below std", deviation: "(-.1 to 0)", count: 289 },
+  { bag: "6", group: "below std", deviation: "(-.1 to 0)", count: 210 },
+  { bag: "7", group: "below std", deviation: "(-.1 to 0)", count: 380 },
+  { bag: "8", group: "above std", deviation: "(-.1 to 0)", count: 215 },
+  { bag: "9", group: "above std", deviation: "(-.1 to 0)", count: 228 },
+  { bag: "10", group: "above std", deviation: "(-.1 to 0)", count: 309 },
+  { bag: "1 and 2", group: "near std", deviation: "(0 to .1)", count: 597 },
+  { bag: "3", group: "near std", deviation: "(0 to .1)", count: 172 },
+  { bag: "4", group: "near std", deviation: "(0 to .1)", count: 184 },
+  { bag: "5", group: "below std", deviation: "(0 to .1)", count: 209 },
+  { bag: "6", group: "below std", deviation: "(0 to .1)", count: 236 },
+  { bag: "7", group: "below std", deviation: "(0 to .1)", count: 157 },
+  { bag: "8", group: "above std", deviation: "(0 to .1)", count: 361 },
+  { bag: "9", group: "above std", deviation: "(0 to .1)", count: 425 },
+  { bag: "10", group: "above std", deviation: "(0 to .1)", count: 290 },
+  { bag: "1 and 2", group: "near std", deviation: "(.1 to .2)", count: 366 },
+  { bag: "3", group: "near std", deviation: "(.1 to .2)", count: 218 },
+  { bag: "4", group: "near std", deviation: "(.1 to .2)", count: 222 },
+  { bag: "5", group: "below std", deviation: "(.1 to .2)", count: 184 },
+  { bag: "6", group: "below std", deviation: "(.1 to .2)", count: 144 },
+  { bag: "7", group: "below std", deviation: "(.1 to .2)", count: 135 },
+  { bag: "8", group: "above std", deviation: "(.1 to .2)", count: 156 },
+  { bag: "9", group: "above std", deviation: "(.1 to .2)", count: 140 },
+  { bag: "10", group: "above std", deviation: "(.1 to .2)", count: 168 },
+  { bag: "1 and 2", group: "near std", deviation: "(.2 to R)", count: 116 },
+  { bag: "3", group: "near std", deviation: "(.2 to R)", count: 57 },
+  { bag: "4", group: "near std", deviation: "(.2 to R)", count: 50 },
+  { bag: "5", group: "below std", deviation: "(.2 to R)", count: 50 },
+  { bag: "6", group: "below std", deviation: "(.2 to R)", count: 56 },
+  { bag: "7", group: "below std", deviation: "(.2 to R)", count: 50 },
+  { bag: "8", group: "above std", deviation: "(.2 to R)", count: 71 },
+  { bag: "9", group: "above std", deviation: "(.2 to R)", count: 36 },
+  { bag: "10", group: "above std", deviation: "(.2 to R)", count: 50 },
+  { bag: "1 and 2", group: "near std", deviation: "Above R", count: 28 },
+  { bag: "3", group: "near std", deviation: "Above R", count: 13 },
+  { bag: "4", group: "near std", deviation: "Above R", count: 17 },
+  { bag: "5", group: "below std", deviation: "Above R", count: 29 },
+  { bag: "6", group: "below std", deviation: "Above R", count: 28 },
+  { bag: "7", group: "below std", deviation: "Above R", count: 25 },
+  { bag: "8", group: "above std", deviation: "Above R", count: 55 },
+  { bag: "9", group: "above std", deviation: "Above R", count: 20 },
+  { bag: "10", group: "above std", deviation: "Above R", count: 30 },
+] as const;

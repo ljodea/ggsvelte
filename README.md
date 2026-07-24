@@ -192,19 +192,28 @@ live output and complete source.
 <script lang="ts">
   import { GeomBar, GGPlot } from "@ggsvelte/svelte";
 
-  import { sessions } from "./data.js";
+  import { armadaCrews } from "./data.js";
 </script>
 
 <GGPlot
-  data={sessions}
-  aes={{ x: "age", fill: "genre" }}
-  scales={{ y: { labels: ".0%" } }}
-  legend={{ order: "sorted" }}
+  data={armadaCrews}
+  aes={{ x: "squadron", fill: "role", weight: "men" }}
+  theme="fivethirtyeight"
+  scales={{
+    y: { labels: ".0%" },
+    fill: {
+      type: "manual",
+      domain: ["Soldiers", "Sailors"],
+      range: ["#c14a3d", "#3c6e8f"],
+    },
+  }}
   labs={{
-    title: "What each age group streams",
-    x: "Age group",
-    y: "Share of sessions",
-    fill: "Genre",
+    title: "Who sailed with the Armada, 1588",
+    subtitle:
+      "Soldiers outnumber sailors everywhere except the galleys and the light pataches",
+    x: "Squadron",
+    y: "Share of complement",
+    fill: "Role",
   }}
   width={640}
   height={400}
@@ -213,7 +222,7 @@ live output and complete source.
 </GGPlot>
 ```
 
-[![Streaming genre shares shown as proportional bars](apps/docs/static/previews/bar-proportions-light.png)](https://ggsvelte.sh/examples/bar/proportions)
+[![Spanish Armada squadron complements shown as proportional bars](apps/docs/static/previews/bar-proportions-light.png)](https://ggsvelte.sh/examples/bar/proportions)
 
 ### [Continuous color](https://ggsvelte.sh/examples/color/continuous)
 
@@ -317,26 +326,29 @@ complete accessible labels and unchanged scale assignments.
 <script lang="ts">
   import { GeomCol, GeomText, GGPlot } from "@ggsvelte/svelte";
 
-  import { revenue } from "./data.js";
+  import { polioTrial } from "./data.js";
 </script>
 
 <GGPlot
-  data={revenue}
-  aes={{ x: "quarter", y: "amount" }}
+  data={polioTrial}
+  aes={{ x: "group", y: "rate" }}
+  theme="fivethirtyeight"
+  scales={{ x: { domain: ["Vaccinated", "Placebo", "Not inoculated"] } }}
   labs={{
-    title: "Quarterly revenue",
-    x: "Quarter",
-    y: "Revenue (€ thousands)",
+    title: "The Salk vaccine field trial, 1954",
+    subtitle: "Paralytic polio per 100,000 children in the randomised arm",
+    x: "Group",
+    y: "Cases per 100,000",
   }}
   width={640}
   height={400}
 >
   <GeomCol width={0.7} />
-  <GeomText aes={{ label: "label" }} dy={-8} size={11} />
+  <GeomText aes={{ label: "label" }} dy={-8} />
 </GGPlot>
 ```
 
-[![Quarterly revenue columns with a text layer for value labels](apps/docs/static/previews/col-value-labels-light.png)](https://ggsvelte.sh/examples/col/value-labels)
+[![Salk vaccine trial polio rates with a text layer for value labels](apps/docs/static/previews/col-value-labels-light.png)](https://ggsvelte.sh/examples/col/value-labels)
 
 ## Themes
 

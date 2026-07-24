@@ -2313,7 +2313,7 @@ export const DOCS_ROUTES = [
     path: "/examples/bar/dodged",
     title: "Dodged bar chart — ggsvelte gallery",
     description:
-      'position dodge places the fill groups side by side within each band: groups present at an x split the band evenly (ggplot2\'s preserve = "total").',
+      "position dodge places the fill groups side by side within each band: groups present at an x split the band evenly (ggplot2's preserve = \"total\"). Edgeworth's 1885 county mortality table supplies six counties over seven years, weighted by deaths, on the few theme with tableau10.",
     canonicalPath: "/examples/bar/dodged",
     kind: "page",
     index: true,
@@ -2324,7 +2324,7 @@ export const DOCS_ROUTES = [
     path: "/examples/bar/horizontal",
     title: "Horizontal bar chart (coord flip) — ggsvelte gallery",
     description:
-      'coord: {"type": "flip"} is THE horizontal-composition mechanism: map x to the category and y to the value as usual, then flip — the band axis moves to the left (first category at the bottom, like ggplot2), the measure runs rightward, and stacking/dodging would follow.',
+      'coord: {"type": "flip"} is THE horizontal-composition mechanism: map x to the category and y to the value as usual, then flip — the band axis moves to the left (first category at the bottom, like ggplot2), the measure runs rightward, and stacking/dodging would follow. Armada squadron tonnage, pre-sorted so the flip reads smallest-up.',
     canonicalPath: "/examples/bar/horizontal",
     kind: "page",
     index: true,
@@ -2333,9 +2333,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/bar/proportions",
-    title: "Proportion bars (position fill) — ggsvelte gallery",
+    title: "Proportional bar chart — ggsvelte gallery",
     description:
-      "position fill stacks each band to 1 so bars compare composition, with percent tick labels and a sorted legend (ordering never reassigns colors).",
+      "position fill normalises each band to 1, turning counts into shares. The Armada's 1588 muster splits each squadron's complement into soldiers and sailors, weighted by men, with a manual two-key fill.",
     canonicalPath: "/examples/bar/proportions",
     kind: "page",
     index: true,
@@ -2346,7 +2346,7 @@ export const DOCS_ROUTES = [
     path: "/examples/bar/stacked",
     title: "Stacked bar chart — ggsvelte gallery",
     description:
-      "geom bar counts rows per x value — no y mapping — and the default stack position piles the fill groups. The legend comes from the fill scale.",
+      "position stack piles the fill groups within each band. The Trial of the Pyx supplies a real frequency table, so the weight channel makes the count stat sum counts instead of counting rows — 72 rows standing in for 10,000 sovereigns — and flexoki's eight keys map one-to-one onto the eight ordered deviation bins.",
     canonicalPath: "/examples/bar/stacked",
     kind: "page",
     index: true,
@@ -2368,7 +2368,7 @@ export const DOCS_ROUTES = [
     path: "/examples/col/basic",
     title: "Column chart — ggsvelte gallery",
     description:
-      "Pre-computed bar heights with geom col (ggplot2's geom_col): a band x scale, a zero-based linear y scale, and the theme's accent role filling the unmapped bars.",
+      "geom col draws one bar per row at the height you supply — no statistic. Quetelet's 5,738 Scottish militiamen give the shape that made the normal curve a claim about people, under the classic theme's black axis lines and bare panel.",
     canonicalPath: "/examples/col/basic",
     kind: "page",
     index: true,
@@ -2399,9 +2399,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/col/value-labels",
-    title: "Columns with value labels — ggsvelte gallery",
+    title: "Column chart with value labels — ggsvelte gallery",
     description:
-      "A text layer composed over a column layer: the label channel reads a preformatted field, and a dy offset lifts each label just above its bar.",
+      "A text layer above each column turns the bars into a table you can read directly. The 1954 Salk vaccine trial supplies the numbers the trial existed to produce: the vaccinated rate is about a third of the placebo rate.",
     canonicalPath: "/examples/col/value-labels",
     kind: "page",
     index: true,
