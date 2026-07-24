@@ -157,7 +157,7 @@
     <div>
       <dt>Headless SVG</dt>
       <dd>
-        <a href={`${base}/guide/getting-started#headless-and-server-rendering`}
+        <a href={`${base}/guide/server-rendering-export`}
           >No-DOM renderer and CLI</a
         >
       </dd>
