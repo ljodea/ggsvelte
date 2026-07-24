@@ -70,7 +70,8 @@
     opacity: 0.45;
   }
 
-  :global(.ui-button--primary) {
+  :global(.ui-button--primary),
+  :global(a.ui-button--primary:visited) {
     border-color: var(--accent);
     background: var(--accent);
     color: #fff;
@@ -109,7 +110,8 @@
     background: color-mix(in srgb, var(--ink) 6%, transparent);
   }
 
-  :root[data-theme="dark"] :global(.ui-button--primary) {
+  :root[data-theme="dark"] :global(.ui-button--primary),
+  :root[data-theme="dark"] :global(a.ui-button--primary:visited) {
     color: #0b1020;
   }
 </style>

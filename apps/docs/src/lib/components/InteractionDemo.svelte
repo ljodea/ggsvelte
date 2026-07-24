@@ -113,6 +113,9 @@ ${closeScript}
 
 <style>
   .interaction-demo {
+    --gg-toolActive: var(--ink);
+    --gg-interactionMuted: var(--muted);
+
     display: grid;
     gap: 1rem;
     min-width: 0;
