@@ -73,7 +73,7 @@ describe("<ToolRail> dark-host contrast (#651)", () => {
     rail.style.setProperty("--gg-theme-interactionInk", "#262626");
     // Docs .gg-example-frame bridge (site appearance ≠ chart theme).
     rail.style.setProperty("--gg-toolActive", "#e6e8eb");
-    rail.style.setProperty("--gg-interactionMuted", "#9aa2ab");
+    rail.style.setProperty("--gg-toolInactive", "#9aa2ab");
 
     const active = container.querySelector<HTMLButtonElement>("button.active")!;
     const inactive = [...container.querySelectorAll<HTMLButtonElement>("button")].find(

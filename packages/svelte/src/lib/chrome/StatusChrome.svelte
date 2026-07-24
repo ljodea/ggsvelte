@@ -81,8 +81,8 @@
     top: 50%;
     transform: translate(-50%, -50%);
     /* --gg-theme-interactionMuted is a numeric alpha token — invalid in a
-       color position (see ToolRail.svelte). */
-    color: var(--gg-interactionMuted, currentColor);
+       color position (see ToolRail.svelte). Inactive chrome uses --gg-toolInactive. */
+    color: var(--gg-toolInactive, currentColor);
     font: 12px/1.4 var(--gg-font-family, sans-serif);
     pointer-events: none;
   }
@@ -93,7 +93,7 @@
     left: 0;
     margin: 0;
     /* Numeric alpha token — invalid in a color position (see ToolRail). */
-    color: var(--gg-interactionMuted, currentColor);
+    color: var(--gg-toolInactive, currentColor);
     font: 11px/1.4 var(--gg-font-family, sans-serif);
   }
 

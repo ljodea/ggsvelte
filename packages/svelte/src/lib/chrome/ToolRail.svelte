@@ -213,10 +213,9 @@
     padding: 0 10px;
     background: transparent;
     /* --gg-theme-interactionMuted is a NUMERIC alpha token (theme.ts
-       interactionMuted: 0.36) — substituting it here made this declaration
-       invalid at computed-value time, so only --gg-interactionMuted (a
-       consumer-supplied color) may appear in a color position. */
-    color: var(--gg-interactionMuted, currentColor);
+       interactionMuted: 0.36). Inactive chrome ink uses --gg-toolInactive so
+       it never collides with --gg-interactionMuted (themeVar opacity). */
+    color: var(--gg-toolInactive, currentColor);
     font: inherit;
     font-size: 14px;
     white-space: nowrap;

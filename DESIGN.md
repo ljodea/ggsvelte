@@ -160,6 +160,13 @@ properties:
 | `tooltipBorder`    | Tooltip hairline keyline            | grid, then panel border |
 | `toolActive`       | Active tool text and underline      | theme ink               |
 
+`interactionMuted` is a **number** (mark alpha). Host pages that restyle the
+tool rail / status chrome should override **`--gg-toolActive`** and
+**`--gg-toolInactive`** (colors), not `--gg-interactionMuted` — that custom
+property is reserved for `themeVar("interactionMuted")` opacity fallbacks.
+`--gg-theme-interactionMuted` on the plot root is the same numeric token
+published for interaction chrome CSS.
+
 Custom theme objects may override any relationship. Prefer relational defaults over a
 universal black, white, or blue because each theme must remain internally coherent.
 
