@@ -76,6 +76,10 @@ export function pointShape(
       return `<path class="${className}" d="${pointShapePathD(geometry, px)}" fill="none" stroke="${fill}" stroke-width="${px(geometry.strokeWidth)}"/>`;
     case "circle":
       return `<circle class="${className}" cx="${px(geometry.cx)}" cy="${px(geometry.cy)}" r="${px(geometry.r)}" fill="${fill}"/>`;
+    default: {
+      const exhaustive: never = geometry;
+      throw new Error(`unknown point shape geometry: ${JSON.stringify(exhaustive)}`);
+    }
   }
 }
 
@@ -282,7 +286,7 @@ export function renderBatch(
       return renderGlyphs(batch, theme);
     default: {
       const exhaustive: never = batch;
-      throw new Error(`unknown batch kind: ${String((exhaustive as { kind: string }).kind)}`);
+      throw new Error(`unknown batch kind: ${JSON.stringify(exhaustive)}`);
     }
   }
 }

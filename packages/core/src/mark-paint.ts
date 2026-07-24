@@ -140,8 +140,8 @@ export interface ResolvedPointMark {
 }
 
 export interface ResolvedPathMark {
-  fill: string | "none";
-  stroke: string | "none";
+  fill: string;
+  stroke: string;
   width: number;
   dash: readonly number[];
   alpha: number;

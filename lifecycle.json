@@ -2527,6 +2527,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "PointShapeGeometry": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "PointsBatch": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2572,6 +2576,14 @@
           "lifecycle": "experimental"
         },
         "ResolvedGradientPaint": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ResolvedPathMark": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ResolvedPointMark": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2819,6 +2831,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "areaOutlineActive": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "bandKey": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2971,6 +2987,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "linetypeDash": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "linetypeIndex": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2980,6 +3000,10 @@
           "lifecycle": "experimental"
         },
         "marginDelta": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "markLinetype": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3023,7 +3047,15 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "pointShapeGeometry": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "pointShapeIndex": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "pointShapePathD": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3048,6 +3080,14 @@
           "lifecycle": "experimental"
         },
         "resolveLegendFocusKeys": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "resolvePathMark": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "resolvePointMark": {
           "kind": "value",
           "lifecycle": "experimental"
         },
