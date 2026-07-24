@@ -149,9 +149,13 @@ export function createPlotInteractionAssembly<
     const spec = inputs.spec();
     const layers = inputs.layers();
     // Declaration children expose live data getters via the registry.
+    // MUST use markLayers (not layers): the widened Layer union has no `.data`
+    // at the top level, so reading registry.layers would silently drop
+    // layer-local data from the #609 epoch and make a theme-only plot
+    // look "ready".
     const layerDescriptors =
       layers === undefined
-        ? inputs.registry.layers
+        ? inputs.registry.markLayers
         : layers.map((layer) => ({ data: (layer as { data?: unknown }).data }));
     const layerCount = layerDescriptors.length;
     // Ready without reading `assembled` so chrome-only respecs do not re-enter.

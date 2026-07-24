@@ -174,6 +174,71 @@ describe("assemblePortableSpec", () => {
       }),
     ).toBeNull();
   });
+
+  it("folds non-mark plotLayers after gates; props win over children this slice", () => {
+    const assembled = assemblePortableSpec({
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      plotLayers: [
+        {
+          kind: "theme",
+          get value() {
+            return "dark" as const;
+          },
+        },
+        {
+          kind: "labs",
+          get value() {
+            return { title: "from-child" };
+          },
+        },
+      ],
+      labs: { title: "from-prop" },
+    });
+    expect(assembled).not.toBeNull();
+    expect(assembled!.theme).toBe("dark");
+    // Props-last: prop labs win over plot-layer labs this slice.
+    expect(assembled!.labs?.title).toBe("from-prop");
+  });
+
+  it("spec prop wins over non-mark plotLayers (gate)", () => {
+    const assembled = assemblePortableSpec({
+      spec: {
+        data: { values: rows },
+        layers: [{ geom: "point", aes: { x: "x", y: "y" } }],
+        labs: { title: "from-spec" },
+      },
+      layers: [],
+      plotLayers: [
+        {
+          kind: "labs",
+          get value() {
+            return { title: "from-child" };
+          },
+        },
+      ],
+    });
+    expect(assembled!.labs?.title).toBe("from-spec");
+  });
+
+  it("empty mark layers returns null even with non-mark plotLayers (gate)", () => {
+    expect(
+      assemblePortableSpec({
+        data: rows,
+        aes: { x: "x", y: "y" },
+        layers: [],
+        plotLayers: [
+          {
+            kind: "theme",
+            get value() {
+              return "dark" as const;
+            },
+          },
+        ],
+      }),
+    ).toBeNull();
+  });
 });
 
 describe("mappedChannelField", () => {
@@ -260,6 +325,22 @@ describe("isFacetedPlotIntent", () => {
       }),
     ).toBe(false);
     expect(isFacetedPlotIntent({ assembled: null })).toBe(false);
+  });
+
+  it("is true from a kind:facet plot layer with no facet prop and no assembled facet", () => {
+    expect(
+      isFacetedPlotIntent({
+        plotLayers: [
+          {
+            kind: "facet",
+            get value() {
+              return { wrap: "g" };
+            },
+          },
+        ],
+        assembled: null,
+      }),
+    ).toBe(true);
   });
 });
 
