@@ -1,17 +1,18 @@
 <script lang="ts">
   import { GeomLine, GGPlot } from "@ggsvelte/svelte";
 
-  import { longRunSeries } from "./data.js";
+  import { britishExports } from "./data.js";
 </script>
 
 <GGPlot
-  data={longRunSeries}
+  data={britishExports}
   aes={{ x: "year", y: "value" }}
+  theme="fivethirtyeight"
   labs={{
-    title: "Long-run index, 1835–2025",
+    title: "British and Irish exports, 1855–1899",
     subtitle: "Raw four-digit strings infer a calendar scale",
     x: "Year",
-    y: "Index",
+    y: "£ millions",
   }}
   width="container"
   height={400}

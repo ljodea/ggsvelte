@@ -61,18 +61,27 @@ live output and complete source.
 <script lang="ts">
   import { GeomArea, GGPlot } from "@ggsvelte/svelte";
 
-  import { generation } from "./data.js";
+  import { crimeanMortality } from "./data.js";
 </script>
 
 <GGPlot
-  data={generation}
-  aes={{ x: "year", y: "twh", fill: "source" }}
-  scales={{ x: { labels: "d", nice: false } }}
+  data={crimeanMortality}
+  aes={{ x: "month", y: "deaths", fill: "cause" }}
+  theme="economist"
+  scales={{
+    x: { labels: "%b %Y" },
+    fill: {
+      type: "manual",
+      domain: ["Disease", "Wounds", "Other"],
+      range: ["#d14d41", "#014d64", "#4385be"],
+    },
+  }}
   labs={{
-    title: "Electricity generation mix",
-    x: "Year",
-    y: "Generation (TWh)",
-    fill: "Source",
+    title: "Deaths in the Crimea, 1854–56",
+    subtitle: "Annual rate per 1,000 — disease dwarfs combat, then collapses",
+    x: "Month",
+    y: "Deaths per 1,000 per year",
+    fill: "Cause",
   }}
   width={640}
   height={400}
@@ -81,7 +90,7 @@ live output and complete source.
 </GGPlot>
 ```
 
-[![Electricity generation mix as a stacked area chart](apps/docs/static/previews/area-stacked-light.png)](https://ggsvelte.sh/examples/area/stacked)
+[![Crimean War deaths by cause as a stacked area chart](apps/docs/static/previews/area-stacked-light.png)](https://ggsvelte.sh/examples/area/stacked)
 
 ### [Density estimates](https://ggsvelte.sh/examples/density/overlay)
 
@@ -278,17 +287,18 @@ complete accessible labels and unchanged scale assignments.
 <script lang="ts">
   import { GeomLine, GGPlot } from "@ggsvelte/svelte";
 
-  import { longRunSeries } from "./data.js";
+  import { britishExports } from "./data.js";
 </script>
 
 <GGPlot
-  data={longRunSeries}
+  data={britishExports}
   aes={{ x: "year", y: "value" }}
+  theme="fivethirtyeight"
   labs={{
-    title: "Long-run index, 1835–2025",
+    title: "British and Irish exports, 1855–1899",
     subtitle: "Raw four-digit strings infer a calendar scale",
     x: "Year",
-    y: "Index",
+    y: "£ millions",
   }}
   width="container"
   height={400}
@@ -297,7 +307,7 @@ complete accessible labels and unchanged scale assignments.
 </GGPlot>
 ```
 
-[![Long-run index plotted on an inferred calendar scale](apps/docs/static/previews/line-time-axis-light.png)](https://ggsvelte.sh/examples/line/time-axis)
+[![British and Irish exports plotted on an inferred calendar scale](apps/docs/static/previews/line-time-axis-light.png)](https://ggsvelte.sh/examples/line/time-axis)
 
 ### [Layered value labels](https://ggsvelte.sh/examples/col/value-labels)
 
