@@ -549,6 +549,73 @@ it("regenerates docs-owned gallery previews when approved baselines land", () =>
   expect(approve).toContain("apps/docs/src/lib/generated/gallery-previews.ts");
 });
 
+it("opens the vr-update PR instead of stranding baselines on a branch (issue #717)", () => {
+  const approve = read(".github/workflows/vr-approve.yml");
+
+  // Least privilege: PR write is added for `gh pr create`, nothing else moves.
+  expect(approve).toContain("pull-requests: write");
+  expect(approve).toContain("contents: write");
+  expect(approve).not.toContain("issues: write");
+
+  // The decision itself lives in a unit-tested script, not in YAML shell.
+  expect(approve).toContain("bun tools/scripts/vr-approve-decision.ts action");
+  expect(approve).toContain("bun tools/scripts/vr-approve-decision.ts pr-create");
+  // …run from the default branch, so recovering an old merged PR never depends
+  // on the rendered commit predating this script.
+  expect(approve).toContain("ref: ${{ github.event.repository.default_branch }}");
+  expect(approve).toContain("sparse-checkout: scripts/vr-approve-decision.ts");
+
+  // Open-PR existence is a fact the decision consumes, not a branch-tip guess.
+  expect(approve).toContain("-f state=open");
+  expect(approve).toContain('-f head="${REPO%%/*}:${branch}"');
+  expect(approve).not.toContain('echo "skip=true"');
+
+  // Render and the two PR-creation steps are gated on the script's verdicts.
+  expect(approve).toContain("steps.decide.outputs.action == 'render'");
+  expect(approve).toContain("steps.decide.outputs.action != 'skip'");
+  expect(approve).toContain("steps.pr_decide.outputs.create == 'true'");
+  expect(approve).toContain("gh pr create --repo");
+  expect(approve).toContain('--head "${branch}"');
+  expect(approve).toContain('--base "${DEFAULT_BRANCH}"');
+  // A push that changed nothing must not claim a branch worth reviewing.
+  expect(approve).toContain('echo "pushed=true"');
+  expect(approve).toContain('echo "pushed=false"');
+
+  const decide = approve.indexOf("bun tools/scripts/vr-approve-decision.ts action");
+  const checkout = approve.indexOf("checkout exact verified merged commit from base repo");
+  const push = approve.indexOf("commit and push verified baselines to vr-update/pr-<n>");
+  const create = approve.indexOf("gh pr create --repo");
+  expect(decide).toBeGreaterThan(-1);
+  expect(checkout).toBeGreaterThan(decide);
+  expect(create).toBeGreaterThan(push);
+});
+
+it("keeps the write credential out of every vr-approve step that runs repo code", () => {
+  const approve = read(".github/workflows/vr-approve.yml");
+  const steps = approve.split("\n      - name: ").slice(1);
+  expect(steps.length).toBeGreaterThan(8);
+
+  for (const step of steps) {
+    const label = step.split("\n")[0];
+    // The credential is *supplied* by an env assignment; a comment naming it
+    // (the generator step explains its absence) is not the same thing.
+    if (!/^\s+GH_TOKEN: /m.test(step)) continue;
+    // Credentialed steps stay script-free: `gh`/`git` only, never repository
+    // code from the checkout (invariant 1).
+    expect(step, `credentialed step runs repo code: ${label}`).not.toMatch(/\brun: bun\b/);
+    expect(step, `credentialed step runs repo code: ${label}`).not.toMatch(/\n\s+bun \S/);
+  }
+
+  const decideSteps = steps.filter((step) =>
+    step.includes("bun tools/scripts/vr-approve-decision.ts"),
+  );
+  expect(decideSteps.length).toBe(2);
+  for (const step of decideSteps) {
+    expect(step).not.toContain("GH_TOKEN");
+    expect(step).not.toContain("GITHUB_TOKEN");
+  }
+});
+
 it("uses job-private Bun caches across CI workflows (issue #319)", () => {
   const workflows = [
     ".github/workflows/ci.yml",
