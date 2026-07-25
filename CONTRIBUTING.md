@@ -412,24 +412,43 @@ without `GH_TOKEN` in its environment. Every step that holds the write
 credential is script-free (`gh`/`git` only): the commit/push and the
 `gh pr create` that opens the baseline PR.
 
-The source-first landing order is deliberate:
+### Pixel changes land with their own baselines (issue #742)
 
-1. Inspect the source PR's candidate report. For an intentional pixel change,
-   the red VR comparison is expected; keep VR Compare non-required so it cannot
-   deadlock this flow. `ci-gate`, code review, and the baseline evidence still
-   gate the source merge.
-2. Merge the source PR into the default branch.
-3. Comment `/approve-visuals` on the **merged** PR. A pre-merge command is
-   rejected, including one recorded in the same second as the merge.
-4. Review and merge the generated `vr-update/pr-<n>` PR. The approve workflow
-   opens it for you, and **close + reopen it once** so the required checks
-   run — GitHub starts no workflow runs for pull requests opened by the
-   Actions token.
+`vr-gate (required pixel aggregator)` is a **required status check**. A PR whose
+rendering changed cannot merge until the comparison is green against baselines
+committed in that same PR:
 
-This creates a short, explicit window where source has landed but its approved
-baselines have not. Finish step 4 promptly. Never merge an unexplained visual
-diff, and do not make VR Compare a required branch-protection check without
-redesigning this source-first protocol.
+1. The compare job goes red and uploads a `vr-baselines` artifact containing the
+   candidate PNGs the pinned container just rendered.
+2. Inspect the diff in the `vr-playwright-report` artifact. If the change is
+   intentional, download `vr-baselines`, copy its `__screenshots__/*.png` over
+   `tests/visual/__screenshots__/`, and commit them alongside the source change.
+   `vr-baseline-guard` allows exactly this pairing.
+3. The compare re-runs on the new head and must go green. That is the point:
+   a green required compare _proves_ the committed PNGs are byte-identical to
+   the pinned container's render of that commit (`maxDiffPixels` is 0), so a
+   hand-edited or partial baseline cannot land.
+
+Until this gate existed, VR Compare was advisory and the source-first
+`/approve-visuals` order below was the normal path. That order let an example
+merge ahead of its baseline (#732), and every later PR then inherited a red
+comparison it had not caused. Same-PR landing removes the window entirely.
+
+`/approve-visuals` remains for the two cases same-PR landing cannot serve:
+
+- **Bootstrap** — `tests/visual/__screenshots__/` is empty, so there is nothing
+  to compare and the compare job generates candidates instead.
+- **Repair** — baselines on the default branch are already stale (a pixel change
+  that merged before this gate, or a rendering change reaching an example whose
+  own PR did not touch it).
+
+For those, comment `/approve-visuals` on a **merged** PR (a pre-merge command is
+rejected, including one recorded in the same second as the merge), then review
+and merge the generated `vr-update/pr-<n>` PR — **close and reopen it once** so
+the required checks run, since GitHub starts no workflow runs for pull requests
+opened by the Actions token.
+
+Never merge an unexplained visual diff.
 
 Idempotency keys on the **open PR**, not the branch (issue #717): re-running
 `/approve-visuals` while the baseline PR is open is a no-op, but a

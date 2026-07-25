@@ -158,6 +158,9 @@ bench-smoke unchanged.
   leave VR Compare red, so it is not a required branch-protection check; making
   it required would deadlock this order. This prevents docs-owned previews from
   publishing ahead of their source.
+  **Superseded by [0021](0021-required-pixel-gate.md)** (issue #742): the
+  comparison is now required and pixel changes land their own baselines, so
+  there is no post-merge window left to deadlock against.
 - `release.yml`: changesets/action, `id-token: write`, npm trusted
   publishing (OIDC + provenance via publishConfig; NO tokens), publish =
   `changeset publish` after `bun run build`; setup-node 24 for npm OIDC.
@@ -212,8 +215,8 @@ LICENSE (MIT, Liam O'Dea) at root + copied into each package; READMEs (root
    publishing only.
 4. **First CI run**: inspect VR candidates, merge source to the default branch,
    comment `/approve-visuals` on that merged PR, then merge the generated
-   `vr-update/pr-<n>` PR. Enable required checks afterward, but keep VR Compare
-   non-required because source-first approval would otherwise deadlock.
+   `vr-update/pr-<n>` PR. Enable required checks afterward, including
+   `vr-gate (required pixel aggregator)` once those baselines are green (0021).
 5. **Domain** (`ggsvelte.dev` or equivalent): optional pre-0.1.0; schema
    stays served from the repo/docs build until then.
 6. **Publish**: merge the changesets "Version Packages" PR → release.yml
