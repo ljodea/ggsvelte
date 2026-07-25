@@ -51,6 +51,7 @@ jobs:
     name: detect-changes (path routing)
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     outputs:
@@ -83,6 +84,7 @@ jobs:
     needs: detect-changes
     if: github.event_name == 'pull_request' && needs.detect-changes.outputs.vr == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     container:
@@ -186,6 +188,7 @@ jobs:
     # ubuntu-latest, absent on the self-hosted ggsvelte runners) and runs no
     # checked-out code. vr-approve.yml already runs on ubuntu-latest.
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: read # resolve the merged PR via `gh api` (read-only)
@@ -264,6 +267,7 @@ jobs:
     needs: approve-gate
     if: needs.approve-gate.outputs.match == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read # checkout only; this job can write nothing
     container:

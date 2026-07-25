@@ -11,6 +11,7 @@ jobs:
   checks:
     name: checks (pre-commit stage)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:

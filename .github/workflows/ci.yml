@@ -37,6 +37,7 @@ jobs:
   detect-changes:
     name: detect-changes (path routing)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       actions: read
       contents: read
@@ -91,6 +92,7 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.packages_dist == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -399,6 +401,7 @@ jobs:
       - bench-smoke
       - vr-baseline-guard
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:

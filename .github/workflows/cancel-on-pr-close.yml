@@ -23,6 +23,7 @@ jobs:
   cancel:
     name: cancel in-flight runs for closed PR
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       actions: write
       contents: read

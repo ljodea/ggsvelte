@@ -25,6 +25,7 @@ jobs:
       group: bench-label-${{ github.ref }}
       cancel-in-progress: true
     runs-on: [self-hosted, ggsvelte]
+    timeout-minutes: 30
     container:
       image: ghcr.io/${{ github.repository }}/ci-runner:v1.61.1-noble
     defaults:

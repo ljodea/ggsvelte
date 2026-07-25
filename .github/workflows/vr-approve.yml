@@ -59,6 +59,7 @@ jobs:
     # GitHub-hosted: privileged write path (pushes vr-update branches); keep off
     # the self-hosted pool that runs untrusted PR code.
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: write # push the verified vr-update/pr-<n> branch
       actions: read # download the triggering run's artifact
