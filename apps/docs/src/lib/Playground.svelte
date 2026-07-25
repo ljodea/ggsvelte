@@ -80,7 +80,10 @@
     setAgentValidating,
     type PlaygroundAgentState,
   } from "$lib/playground-agent-state";
-  import { validateAgentEnvelope } from "$lib/playground-agent-validate";
+  import {
+    agentFailureIsRepairable,
+    validateAgentEnvelope,
+  } from "$lib/playground-agent-validate";
   import type { PlaygroundDatasetId } from "$lib/playground-dataset-schemas";
   import {
     PLAYGROUND_DEFAULT_DATASET,
@@ -371,8 +374,13 @@
       agent = setAgentValidating(agent);
       let validated = validateAgentEnvelope(envelope, dataset);
 
-      if (!validated.ok && options.example === undefined) {
-        // One repair round with raw SpecError[].
+      // One repair round, and only with raw SpecError[] to repair from: a
+      // seed-bound failure carries none, so repairing would spend a second
+      // model call and double the wait for nothing (#697).
+      if (
+        options.example === undefined &&
+        agentFailureIsRepairable(validated)
+      ) {
         agent = setAgentRepairing(agent);
         const repair = await generateChart(
           {

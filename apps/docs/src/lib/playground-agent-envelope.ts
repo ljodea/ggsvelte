@@ -3,6 +3,9 @@
  * Shape: { spec, interactions?, title? }
  */
 
+import { discretenessOf, inferFieldType, type CellValue } from "@ggsvelte/core";
+import { configuredColorScaleType } from "@ggsvelte/spec";
+
 export interface PlaygroundInteractions {
   readonly inspect: boolean;
   readonly select: false | "point" | "interval";
@@ -137,42 +140,94 @@ export function parsePlaygroundAgentEnvelope(input: unknown): ParseEnvelopeResul
   };
 }
 
-function aesHasDiscreteLegendChannel(aes: unknown): boolean {
-  if (aes === null || typeof aes !== "object" || Array.isArray(aes)) {
-    return false;
-  }
-  const a = aes as Record<string, unknown>;
-  for (const channel of ["color", "fill", "colour"] as const) {
-    const mapping = a[channel];
-    if (
-      mapping !== null &&
-      typeof mapping === "object" &&
-      !Array.isArray(mapping) &&
-      "field" in mapping
-    ) {
-      return true;
-    }
-    if (typeof mapping === "string" && mapping.length > 0) return true;
-  }
-  return false;
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-/** Whether the chart appears to carry a discrete color/fill legend channel. */
-export function chartHasDiscreteLegend(spec: unknown): boolean {
-  if (spec === null || typeof spec !== "object" || Array.isArray(spec)) {
-    return false;
+const COLOR_CHANNELS = ["color", "fill", "colour"] as const;
+type ColorChannel = (typeof COLOR_CHANNELS)[number];
+
+/** Families that draw a keyed legend; `sequential`/`binned` draw a ramp/steps. */
+const DISCRETE_COLOR_FAMILIES: ReadonlySet<string> = new Set(["ordinal", "manual", "identity"]);
+
+/**
+ * Field a color channel maps to, or null for constants (`{value}`) and absent
+ * channels. Bare strings are not valid channel values, but models emit them,
+ * so they are read leniently as field names.
+ */
+function colorChannelField(aes: unknown, channel: ColorChannel): string | null {
+  if (!isRecord(aes)) return null;
+  const mapping = aes[channel];
+  if (isRecord(mapping) && typeof mapping.field === "string" && mapping.field !== "") {
+    return mapping.field;
   }
-  const record = spec as Record<string, unknown>;
-  if (aesHasDiscreteLegendChannel(record.aes)) return true;
-  const layers = record.layers;
+  if (typeof mapping === "string" && mapping !== "") return mapping;
+  return null;
+}
+
+/** One column's cells from inline rows or inline columns; null when absent. */
+function columnValues(data: unknown, field: string): CellValue[] | null {
+  if (!isRecord(data)) return null;
+  const rows = data.values;
+  if (Array.isArray(rows)) {
+    const column: CellValue[] = [];
+    for (const row of rows) {
+      if (isRecord(row) && field in row) column.push(row[field] as CellValue);
+    }
+    return column.length > 0 ? column : null;
+  }
+  const columns = data.columns;
+  if (isRecord(columns) && Array.isArray(columns[field])) {
+    const column = columns[field] as CellValue[];
+    return column.length > 0 ? column : null;
+  }
+  return null;
+}
+
+/**
+ * Whether one color channel resolves to a discrete legend, mirroring the
+ * pipeline: an authored family wins, otherwise the field's inferred type
+ * decides (quantitative and temporal fields train a continuous ramp).
+ */
+function channelDrawsDiscreteLegend(
+  spec: Record<string, unknown>,
+  layerData: unknown,
+  aes: unknown,
+  channel: ColorChannel,
+): boolean {
+  const field = colorChannelField(aes, channel);
+  if (field === null) return false;
+
+  const scales = spec.scales;
+  const config = isRecord(scales) ? scales[channel === "colour" ? "color" : channel] : undefined;
+  const family = configuredColorScaleType(isRecord(config) ? config : undefined);
+  if (family !== undefined) return DISCRETE_COLOR_FAMILIES.has(family);
+
+  const column = columnValues(layerData, field) ?? columnValues(spec.data, field);
+  // Named or absent data: the runtime may still draw a keyed legend, so keep
+  // the affordance rather than silently dropping it.
+  if (column === null) return true;
+  return discretenessOf(inferFieldType(column)) === "discrete";
+}
+
+/**
+ * Whether the chart draws a discrete color/fill legend — the only kind that
+ * can be filtered or focused. Field presence alone is not enough: a
+ * quantitative field renders a colorbar with no keys to click (#697).
+ */
+export function chartHasDiscreteLegend(spec: unknown): boolean {
+  if (!isRecord(spec)) return false;
+  for (const channel of COLOR_CHANNELS) {
+    if (channelDrawsDiscreteLegend(spec, spec.data, spec.aes, channel)) return true;
+  }
+  const layers = spec.layers;
   if (Array.isArray(layers)) {
     for (const layer of layers) {
-      if (
-        layer !== null &&
-        typeof layer === "object" &&
-        aesHasDiscreteLegendChannel((layer as Record<string, unknown>).aes)
-      ) {
-        return true;
+      if (!isRecord(layer)) continue;
+      for (const channel of COLOR_CHANNELS) {
+        if (channelDrawsDiscreteLegend(spec, layer.data ?? spec.data, layer.aes, channel)) {
+          return true;
+        }
       }
     }
   }

@@ -21,6 +21,20 @@ export function matchCorsOrigin(origin: string | null): string | null {
   return null;
 }
 
+/**
+ * Headers for a refused or not-found response (403 origin_forbidden, 404).
+ *
+ * These bodies carry no data — only a typed error code — so they echo the
+ * requesting origin. Without `Access-Control-Allow-Origin` the browser blocks
+ * the body, `fetch` rejects with a TypeError, and the client can only report a
+ * generic network failure, which made `origin_forbidden` unreachable (#697).
+ * Never grants credentials: the allowlist still gates every success response.
+ */
+export function errorCorsHeaders(origin: string | null): Record<string, string> {
+  if (origin === null || origin === "") return { Vary: "Origin" };
+  return { "Access-Control-Allow-Origin": origin, Vary: "Origin" };
+}
+
 // Returns a plain record, not the wider `HeadersInit` union: callers spread
 // the result into response-header literals, and `HeadersInit` also admits
 // `string[][]`, which would spread to numeric indices.

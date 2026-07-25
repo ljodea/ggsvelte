@@ -5,6 +5,8 @@ export type PlaygroundApiErrorCode =
   | "prompt_too_long"
   | "unknown_dataset"
   | "origin_forbidden"
+  | "not_found"
+  | "method_not_allowed"
   | "rate_limited"
   | "upstream_rate_limited"
   | "upstream_error"
@@ -24,7 +26,8 @@ export interface PlaygroundApiErrorResponse {
 
 export interface PlaygroundApiSuccessResponse {
   readonly ok: true;
-  readonly model: string;
+  /** null when the completion did not name the model that answered (#697). */
+  readonly model: string | null;
   readonly envelope: unknown;
 }
 
@@ -52,6 +55,8 @@ const ERROR_STATUS: Record<PlaygroundApiErrorCode, number> = {
   prompt_too_long: 400,
   unknown_dataset: 400,
   origin_forbidden: 403,
+  not_found: 404,
+  method_not_allowed: 405,
   rate_limited: 429,
   upstream_rate_limited: 429,
   disabled: 503,
@@ -70,6 +75,8 @@ export const SAFE_MESSAGES = {
   prompt_too_long: `Prompt is too long (max ${PLAYGROUND_PROMPT_MAX_CHARS} characters).`,
   unknown_dataset: "Unknown dataset.",
   origin_forbidden: "Origin is not allowed.",
+  not_found: "No such endpoint.",
+  method_not_allowed: "Method not allowed.",
   rate_limited: "Too many requests. Try again shortly.",
   upstream_rate_limited: "The model provider is rate-limiting. Try again shortly.",
   upstream_error: "The model provider failed. Try again or use a sample chart.",

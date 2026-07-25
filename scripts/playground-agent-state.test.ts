@@ -46,6 +46,17 @@ describe("playground agent state", () => {
     expect(messageForAgentError("network")).toContain("Could not reach");
   });
 
+  test("every code has copy that does not blame the model for an infra failure", () => {
+    // A service outage must not tell the user to rephrase their prompt, and a
+    // misrouted client must not read as a model failure (#697).
+    expect(messageForAgentError("service_error")).not.toContain("model");
+    expect(messageForAgentError("service_error")).toContain("sample");
+    for (const code of ["not_found", "method_not_allowed"] as const) {
+      expect(messageForAgentError(code)).not.toContain("model returned");
+      expect(messageForAgentError(code).length).toBeGreaterThan(0);
+    }
+  });
+
   test("failAgent records taxonomy", () => {
     const state = failAgent(beginAgentRequest(createPlaygroundAgentState()), {
       code: "rate_limited",
@@ -186,5 +197,129 @@ describe("generateChart live-mode response handling", () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.code).toBe("bad_output");
+  });
+});
+
+// bad_output means "the worker gave us a chart we cannot use" and tells the
+// user to rephrase. An edge outage or captive portal is neither the model's
+// fault nor fixable by rephrasing, so status is read before the body (#697).
+describe("generateChart separates infrastructure failures from bad output", () => {
+  const infraBody = "<html><title>1101 Worker threw exception</title></html>";
+
+  test("edge 5xx HTML is a service failure, not unusable model output", async () => {
+    for (const status of [500, 502, 503]) {
+      const result = await generateChart(
+        { prompt: "hi", datasetId: "penguins" },
+        {
+          mode: "live",
+          apiUrl: "https://example.test",
+          fetchFn: () => Promise.resolve(new Response(infraBody, { status })),
+        },
+      );
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.code).toBe("service_error");
+      expect(result.message).not.toContain("rephrase");
+    }
+  });
+
+  test("worker-shaped 502 keeps the code the worker declared", async () => {
+    for (const code of ["upstream_error", "bad_output"] as const) {
+      const result = await generateChart(
+        { prompt: "hi", datasetId: "penguins" },
+        {
+          mode: "live",
+          apiUrl: "https://example.test",
+          fetchFn: () =>
+            Promise.resolve(
+              new Response(JSON.stringify({ ok: false, error: { code, message: "m" } }), {
+                status: 502,
+              }),
+            ),
+        },
+      );
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.code).toBe(code);
+    }
+  });
+
+  test("an intermediary 429 with no worker body still throttles the UI", async () => {
+    const result = await generateChart(
+      { prompt: "hi", datasetId: "penguins" },
+      {
+        mode: "live",
+        apiUrl: "https://example.test",
+        fetchFn: () =>
+          Promise.resolve(
+            new Response("<html>rate limited</html>", {
+              status: 429,
+              headers: { "Retry-After": "30" },
+            }),
+          ),
+      },
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.code).toBe("rate_limited");
+    expect(result.retryAfterSeconds).toBe(30);
+  });
+
+  test("a 404 from a misrouted client is not reported as a model failure", async () => {
+    const result = await generateChart(
+      { prompt: "hi", datasetId: "penguins" },
+      {
+        mode: "live",
+        apiUrl: "https://example.test",
+        fetchFn: () =>
+          Promise.resolve(
+            new Response(
+              JSON.stringify({ ok: false, error: { code: "not_found", message: "No such." } }),
+              { status: 404 },
+            ),
+          ),
+      },
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.code).toBe("not_found");
+  });
+
+  test("a 200 worker body with no envelope is still bad_output", async () => {
+    const result = await generateChart(
+      { prompt: "hi", datasetId: "penguins" },
+      {
+        mode: "live",
+        apiUrl: "https://example.test",
+        fetchFn: () => Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 })),
+      },
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.code).toBe("bad_output");
+  });
+
+  test("a null model (worker could not attribute the completion) reads as unknown", async () => {
+    const result = await generateChart(
+      { prompt: "hi", datasetId: "penguins" },
+      {
+        mode: "live",
+        apiUrl: "https://example.test",
+        fetchFn: () =>
+          Promise.resolve(
+            new Response(
+              JSON.stringify({
+                ok: true,
+                model: null,
+                envelope: { spec: { edition: 2, data: { name: "penguins" }, layers: [] } },
+              }),
+              { status: 200 },
+            ),
+          ),
+      },
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.model).toBe("unknown");
   });
 });

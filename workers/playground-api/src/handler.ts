@@ -3,7 +3,7 @@
  */
 
 import { isPlaygroundDatasetId } from "../../../apps/docs/src/lib/playground-dataset-schemas";
-import { corsHeaders, matchCorsOrigin } from "./cors";
+import { corsHeaders, errorCorsHeaders, matchCorsOrigin } from "./cors";
 import { apiError, SAFE_MESSAGES, statusForError, type PlaygroundApiResponse } from "./errors";
 import {
   buildChatMessages,
@@ -116,21 +116,27 @@ export async function handleGenerate(request: Request, env: PlaygroundApiEnv): P
   const cors = corsHeaders(matchedOrigin);
 
   if (request.method === "OPTIONS") {
-    if (origin !== null && matchedOrigin === null) {
-      return jsonResponse(apiError("origin_forbidden", SAFE_MESSAGES.origin_forbidden), 403, cors);
-    }
-    return new Response(null, { status: 204, headers: cors });
+    // Preflight is approved for every origin, including unlisted ones. The
+    // allowlist is enforced on the actual request below; a 403 preflight is a
+    // browser-level network error, which would leave the typed origin_forbidden
+    // body unreadable and force the client into a bogus `network` code (#697).
+    return new Response(null, { status: 204, headers: corsHeaders(matchedOrigin ?? origin) });
   }
 
   if (request.method !== "POST") {
-    return jsonResponse(apiError("bad_request", SAFE_MESSAGES.bad_request), 405, {
-      ...cors,
-      Allow: "POST, OPTIONS",
-    });
+    return jsonResponse(
+      apiError("method_not_allowed", SAFE_MESSAGES.method_not_allowed),
+      statusForError("method_not_allowed"),
+      { ...cors, Allow: "POST, OPTIONS" },
+    );
   }
 
   if (origin !== null && matchedOrigin === null) {
-    return jsonResponse(apiError("origin_forbidden", SAFE_MESSAGES.origin_forbidden), 403, cors);
+    return jsonResponse(
+      apiError("origin_forbidden", SAFE_MESSAGES.origin_forbidden),
+      statusForError("origin_forbidden"),
+      errorCorsHeaders(origin),
+    );
   }
 
   // Fail CLOSED: a key with no rate limiting is an unshaped public proxy.
@@ -369,8 +375,13 @@ export async function handleGenerate(request: Request, env: PlaygroundApiEnv): P
     );
   }
 
+  // `models` requests provider-side fallback, so the first entry is not
+  // necessarily what answered. Attributing output — and the outcome log that
+  // tunes MODEL_ALLOWLIST — to a guess is worse than reporting null (#697).
   const model =
-    isObject(completion) && typeof completion.model === "string" ? completion.model : models[0]!;
+    isObject(completion) && typeof completion.model === "string" && completion.model !== ""
+      ? completion.model
+      : null;
 
   const content = extractContent(completion);
   if (content === null) {

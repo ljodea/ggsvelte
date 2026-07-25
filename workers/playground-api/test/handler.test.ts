@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
 import { matchCorsOrigin } from "../src/cors";
+import { statusForError } from "../src/errors";
 import { DEFAULT_MODELS, handleGenerate, sanitizeForLeak } from "../src/handler";
+import worker from "../src/index";
 import {
   assembleSystemPrompt,
   buildChatMessages,
@@ -100,6 +102,49 @@ describe("handleGenerate", () => {
     expect(res.status).toBe(403);
     const body = (await res.json()) as { error: { code: string } };
     expect(body.error.code).toBe("origin_forbidden");
+  });
+
+  // Without these two the typed 403 is undeliverable: the browser blocks a
+  // preflight that is not 2xx, and blocks a response with no ACAO, so the
+  // client reports `network` and the origin_forbidden arm is dead code (#697).
+  test("forbidden origin can read the 403 body (echoed ACAO, no credentials)", async () => {
+    const res = await handleGenerate(
+      request({ prompt: "hi", datasetId: "penguins" }, { origin: "https://evil.example" }),
+      { OPENROUTER_API_KEY: "sk-test" },
+    );
+    expect(res.status).toBe(403);
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://evil.example");
+    expect(res.headers.get("Vary")).toBe("Origin");
+    expect(res.headers.get("Access-Control-Allow-Credentials")).toBeNull();
+  });
+
+  test("preflight succeeds for an unlisted origin so the POST can be refused in JSON", async () => {
+    const res = await handleGenerate(
+      request({}, { method: "OPTIONS", origin: "https://evil.example" }),
+      {},
+    );
+    expect(res.status).toBe(204);
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://evil.example");
+    expect(res.headers.get("Access-Control-Allow-Methods")).toBe("POST, OPTIONS");
+    expect(res.headers.get("Access-Control-Allow-Headers")).toBe("Content-Type");
+    expect(res.headers.get("Access-Control-Allow-Credentials")).toBeNull();
+  });
+
+  test("preflight approval does not let an unlisted origin generate", async () => {
+    let called = false;
+    const res = await handleGenerate(
+      request({ prompt: "hi", datasetId: "penguins" }, { origin: "https://evil.example" }),
+      {
+        OPENROUTER_API_KEY: "sk-test",
+        ...okLimiters,
+        fetch: () => {
+          called = true;
+          return Promise.resolve(new Response("{}", { status: 200 }));
+        },
+      },
+    );
+    expect(res.status).toBe(403);
+    expect(called).toBe(false);
   });
 
   test("prompt too long and unknown dataset", async () => {
@@ -225,6 +270,66 @@ describe("handleGenerate", () => {
     expect(body.envelope).toEqual(envelope);
   });
 
+  // models[] enables provider-side fallback, so models[0] is a guess, not a
+  // fact — and that guess also feeds the outcome log used to tune the
+  // allowlist. Unknown must stay unknown (#697).
+  test("model is null when the completion omits it", async () => {
+    const logs: Record<string, unknown>[] = [];
+    const res = await handleGenerate(request({ prompt: "scatter", datasetId: "penguins" }), {
+      OPENROUTER_API_KEY: "sk-test-key",
+      MODEL_ALLOWLIST: "vendor/free-a, vendor/free-b",
+      ...okLimiters,
+      log: (line) => {
+        logs.push(line);
+      },
+      fetch: () =>
+        Promise.resolve(
+          new Response(JSON.stringify({ choices: [{ message: { content: "{}" } }] }), {
+            status: 200,
+          }),
+        ),
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { ok: boolean; model: string | null };
+    expect(body.ok).toBe(true);
+    expect(body.model).toBeNull();
+    expect(logs.at(-1)?.["model"]).toBeNull();
+  });
+
+  test("blank or non-string model is reported as unknown, not as the first allowlist entry", async () => {
+    const res = await handleGenerate(request({ prompt: "scatter", datasetId: "penguins" }), {
+      OPENROUTER_API_KEY: "sk-test-key",
+      ...okLimiters,
+      fetch: () =>
+        Promise.resolve(
+          new Response(JSON.stringify({ model: "", choices: [{ message: { content: "{}" } }] }), {
+            status: 200,
+          }),
+        ),
+    });
+    expect(((await res.json()) as { model: string | null }).model).toBeNull();
+  });
+
+  test("bad_output logs the real model when the completion names one", async () => {
+    const logs: Record<string, unknown>[] = [];
+    await handleGenerate(request({ prompt: "scatter", datasetId: "penguins" }), {
+      OPENROUTER_API_KEY: "sk-test-key",
+      ...okLimiters,
+      log: (line) => {
+        logs.push(line);
+      },
+      fetch: () =>
+        Promise.resolve(
+          new Response(
+            JSON.stringify({ model: "vendor/fallback", choices: [{ message: { content: "[]" } }] }),
+            { status: 200 },
+          ),
+        ),
+    });
+    expect(logs.at(-1)?.["outcome"]).toBe("bad_output");
+    expect(logs.at(-1)?.["model"]).toBe("vendor/fallback");
+  });
+
   test("refuses oversized priorSpec before calling OpenRouter", async () => {
     let called = false;
     const huge = "x".repeat(9 * 1024);
@@ -341,6 +446,11 @@ describe("handleGenerate", () => {
     );
     expect(res.status).toBe(405);
     expect(res.headers.get("Allow")).toBe("POST, OPTIONS");
+    // The status must be reproducible from the code alone — bad_request would
+    // canonicalize to 400 and misreport the failure to any client that maps it.
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe("method_not_allowed");
+    expect(statusForError("method_not_allowed")).toBe(405);
   });
 
   // The outbound call is the only place money is spent. Without these
@@ -478,5 +588,41 @@ describe("handleGenerate", () => {
     );
     expect(res.status).toBe(400);
     expect(called).toBe(false);
+  });
+});
+
+describe("worker routing", () => {
+  test("health responds without touching the generate path", async () => {
+    const res = await worker.fetch(new Request("https://playground-api.ggsvelte.sh/health"), {});
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { ok: boolean }).ok).toBe(true);
+  });
+
+  test("unknown paths return a typed not_found body at 404", async () => {
+    const res = await worker.fetch(
+      new Request("https://playground-api.ggsvelte.sh/v2/generate", {
+        headers: { Origin: "https://ggsvelte.sh" },
+      }),
+      {},
+    );
+    expect(res.status).toBe(404);
+    expect(statusForError("not_found")).toBe(404);
+    const body = (await res.json()) as { ok: boolean; error: { code: string } };
+    expect(body.ok).toBe(false);
+    expect(body.error.code).toBe("not_found");
+    // Allowed origins must be able to read the body they were sent.
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://ggsvelte.sh");
+  });
+
+  test("unknown paths from an unlisted origin stay readable but uncredentialed", async () => {
+    const res = await worker.fetch(
+      new Request("https://playground-api.ggsvelte.sh/nope", {
+        headers: { Origin: "https://evil.example" },
+      }),
+      {},
+    );
+    expect(res.status).toBe(404);
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://evil.example");
+    expect(res.headers.get("Access-Control-Allow-Credentials")).toBeNull();
   });
 });

@@ -21,11 +21,15 @@ export type PlaygroundAgentErrorCode =
   | "prompt_too_long"
   | "unknown_dataset"
   | "origin_forbidden"
+  | "not_found"
+  | "method_not_allowed"
   | "rate_limited"
   | "upstream_rate_limited"
   | "upstream_error"
   | "bad_output"
   | "disabled"
+  /** The service itself failed or was intercepted — no worker body came back. */
+  | "service_error"
   | "network"
   | "validation"
   | "pipeline"
@@ -175,6 +179,12 @@ export function messageForAgentError(code: PlaygroundAgentErrorCode, fallback?: 
       return "The model returned an unusable chart. Try a sample or rephrase.";
     case "upstream_error":
       return "The model provider failed. Try again or use a sample chart.";
+    case "service_error":
+      // Edge outage, proxy, or captive portal: nothing the user can rephrase.
+      return "The generate service is unavailable. Try again shortly, or use a sample chart.";
+    case "not_found":
+    case "method_not_allowed":
+      return "The generate service is misconfigured. Use a sample chart or copy the agent prompt.";
     case "origin_forbidden":
       return "This origin cannot call live generation. Use a sample or copy the agent prompt.";
     case "prompt_too_long":

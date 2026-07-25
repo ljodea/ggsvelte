@@ -29,6 +29,12 @@ const VALIDATE_LIMITS = {
   maxDiagnostics: 100,
 } as const;
 
+export interface AgentValidateFailure {
+  readonly ok: false;
+  readonly errors: readonly SpecError[];
+  readonly message: string;
+}
+
 export type AgentValidateResult =
   | {
       readonly ok: true;
@@ -37,11 +43,20 @@ export type AgentValidateResult =
       readonly interactions: PlaygroundInteractions;
       readonly title: string | null;
     }
-  | {
-      readonly ok: false;
-      readonly errors: readonly SpecError[];
-      readonly message: string;
-    };
+  | AgentValidateFailure;
+
+/**
+ * Whether a failure carries diagnostics a repair round could act on.
+ *
+ * Seed bounds are share-codec limits, not SpecError codes, so those failures
+ * return `errors: []`. Repairing on an empty list spends a second model call —
+ * and doubles the user's wait — on a prompt with no diagnostic signal (#697).
+ */
+export function agentFailureIsRepairable(
+  result: AgentValidateResult,
+): result is AgentValidateFailure {
+  return !result.ok && result.errors.length > 0;
+}
 
 export function validateAgentEnvelope(
   envelope: PlaygroundAgentEnvelope,

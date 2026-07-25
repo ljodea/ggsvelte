@@ -82,6 +82,11 @@ Response:
 }
 ```
 
+`model` is `null` when the completion does not name the model that answered:
+`models[]` requests provider-side fallback, so the first allowlist entry is a
+guess, and that guess would also pollute the outcome log used to tune
+`MODEL_ALLOWLIST`.
+
 or
 
 ```json
@@ -91,11 +96,32 @@ or
 }
 ```
 
-Error codes: `bad_request | prompt_too_long | unknown_dataset | origin_forbidden |
-rate_limited | upstream_rate_limited | upstream_error | bad_output | disabled`.
+Error codes and their canonical statuses:
+
+| Code                                                | Status |
+| --------------------------------------------------- | ------ |
+| `bad_request`, `prompt_too_long`, `unknown_dataset` | 400    |
+| `origin_forbidden`                                  | 403    |
+| `not_found`                                         | 404    |
+| `method_not_allowed`                                | 405    |
+| `rate_limited`, `upstream_rate_limited`             | 429    |
+| `upstream_error`, `bad_output`                      | 502    |
+| `disabled`                                          | 503    |
+
+`statusForError(code)` reproduces the status from the code alone, and every
+error body — including the router's 404 — comes from `apiError()`.
 
 Semantic validation is **client-side**. The worker only checks that the model
 returned a JSON object.
+
+## CORS
+
+Success responses require an allowlisted origin (`src/cors.ts`). Refusals do
+not: preflight is approved for every origin and the 403 `origin_forbidden` body
+echoes the requesting origin in `Access-Control-Allow-Origin`, so the client
+reads a typed error instead of an opaque browser-level network failure.
+Credentials are never allowed, and the allowlist still gates generation itself —
+an unlisted origin gets the 403 without any upstream call.
 
 ## Logging
 
