@@ -126,7 +126,7 @@ function validateEnvelope(
 }
 
 async function main(): Promise<void> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env["OPENROUTER_API_KEY"];
   if (apiKey === undefined || apiKey === "") {
     console.error(
       "OPENROUTER_API_KEY is not set. This eval is maintainer-only; canned envelopes are validated by unit tests without a key.",
@@ -134,7 +134,7 @@ async function main(): Promise<void> {
     process.exit(2);
   }
 
-  const models = (process.env.MODEL_ALLOWLIST ?? DEFAULT_MODELS.join(","))
+  const models = (process.env["MODEL_ALLOWLIST"] ?? DEFAULT_MODELS.join(","))
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);

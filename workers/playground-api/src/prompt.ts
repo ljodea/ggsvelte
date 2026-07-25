@@ -131,7 +131,10 @@ export function buildChatMessages(input: {
   readonly prompt: string;
   readonly currentSpec?: unknown;
   readonly priorEnvelope?: unknown;
-  readonly priorErrors?: unknown[];
+  // Explicit `| undefined`: under exactOptionalPropertyTypes the callers pass an
+  // `unknown[] | undefined` local rather than omitting the key, and the body
+  // below already branches on `!== undefined`.
+  readonly priorErrors?: unknown[] | undefined;
 }): { readonly messages: readonly ChatMessage[]; readonly systemBytes: number } {
   const system = assembleSystemPrompt(input.datasetId);
   let userContent = input.prompt.trim();
