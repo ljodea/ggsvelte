@@ -25,10 +25,9 @@ export function formatTooltipCell(value: CellValue): string {
 
 /**
  * Lab keys that may title a default-tooltip field row (#752).
- * Matches {@link import("@ggsvelte/spec").Labs} aesthetic titles (not
- * plot title/subtitle/caption).
+ * Matches plot labs aesthetic titles (not plot title/subtitle/caption).
  */
-export type TooltipLabChannel =
+type TooltipLabChannel =
   | "x"
   | "y"
   | "color"
@@ -54,7 +53,7 @@ const TOOLTIP_LAB_CHANNELS = new Set<string>([
   "linetype",
 ]);
 
-export function isTooltipLabChannel(channel: string): channel is TooltipLabChannel {
+function isTooltipLabChannel(channel: string): channel is TooltipLabChannel {
   return TOOLTIP_LAB_CHANNELS.has(channel);
 }
 
