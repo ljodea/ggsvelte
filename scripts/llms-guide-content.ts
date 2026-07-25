@@ -1697,8 +1697,29 @@ After:
 \`\`\`
 
 \`PlotDiagnostic\` also widens to include \`CompositionDiagnostic\`
-(\`DUPLICATE_SCALE_CHANNEL\`). Exhaustive \`switch\` on \`.code\` needs a new arm;
-handlers annotated \`PlotDiagnostic\` keep compiling.
+(\`DUPLICATE_SCALE_CHANNEL\`, \`DUPLICATE_PLOT_LAYER\`). Exhaustive \`switch\` on
+\`.code\` needs new arms; handlers annotated \`PlotDiagnostic\` keep compiling.
+
+### Compose coord as a child layer
+
+The \`coord\` prop on \`<GGPlot>\` is deprecated since 0.11.0 (removable in
+0.13.0). Compose the coordinate system as a declaration-only child instead —
+\`<CoordFlip/>\`, \`<CoordFixed/>\` / \`<CoordEqual/>\`, \`<CoordTransform/>\`,
+\`<CoordCartesian/>\`, or the generic \`<Coord value={…}>\` escape hatch. When
+both a prop and a child are present, the child fully replaces the prop
+(REPLACE family). Two coord children emit a \`DUPLICATE_PLOT_LAYER\` advisory
+(last child still wins).
+
+### Compose facet as a child layer
+
+The \`facet\` prop on \`<GGPlot>\` is deprecated since 0.11.0 (removable in
+0.13.0). Compose facets as declaration-only children instead — \`<FacetWrap
+field="g"/>\`, \`<FacetGrid rows="a" cols="b"/>\`, or the complete
+\`<Facet wrap={…} />\` surface. Keep \`strip\` nested
+(\`strip={{position,show}}\`). When both a prop and a child are present, the
+child fully replaces the prop (REPLACE family). Two facet children emit a
+\`DUPLICATE_PLOT_LAYER\` advisory (last child still wins). Bare \`<Facet/>\`
+with no wrap/rows/cols fails validation (\`facet-form-missing\`).
 
 ### Diagnostic handlers receive \`PlotDiagnostic\`
 

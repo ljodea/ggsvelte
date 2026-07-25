@@ -32,7 +32,8 @@ export interface DeprecationDiagnostic {
  * Interaction capability/key/lineage checks, grammar-prop deprecations, and
  * composition collisions (duplicate scale channels). Additive: handlers
  * annotated `PlotDiagnostic` (the 0.11 form) remain valid. Exhaustive
- * `switch` on `.code` needs a new arm for `DUPLICATE_SCALE_CHANNEL`.
+ * `switch` on `.code` needs arms for `DUPLICATE_SCALE_CHANNEL` and
+ * `DUPLICATE_PLOT_LAYER`.
  */
 export type PlotDiagnostic = InteractionDiagnostic | DeprecationDiagnostic | CompositionDiagnostic;
 
