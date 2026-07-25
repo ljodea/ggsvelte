@@ -26,21 +26,35 @@ import type {
 
 function createRawCandidateDatumResolver(
   bindings: readonly LayerBinding[],
-  table: ColumnTable,
   sources: SourceRegistry,
   color: ResolvedColorScale | null,
   fill: ResolvedColorScale | null,
   lineage: LineageStore<number>,
 ): (facts: CandidateBuildFacts) => CandidateDatum {
-  const groupsByLayer = new Map<number, readonly number[]>();
-  const groupsFor = (layerIndex: number): readonly number[] => {
-    let groups = groupsByLayer.get(layerIndex);
-    if (groups === undefined) {
-      const binding = bindings[layerIndex];
-      groups = binding === undefined ? [] : deriveLayerGroups(binding, table);
-      groupsByLayer.set(layerIndex, groups);
+  // Grouping is derived per (layer, owning table) and indexed by the LOCAL row,
+  // for the same reason `value()` below routes through `sources.locate`: a layer
+  // with its own DataRef (#589) has fields the plot's table does not. Deriving
+  // from the plot table threw `deriveGroups: unknown field "…"` for any such
+  // layer, and — where it happened not to throw — indexed a plot-length array
+  // with a global row id, silently collapsing those rows into one group.
+  const groupsByLayer = new Map<number, WeakMap<ColumnTable, readonly number[]>>();
+  const groupFor = (layerIndex: number, sourceRow: number): number => {
+    const binding = bindings[layerIndex];
+    const located = sources.locate(sourceRow);
+    // Group 0 is the single-group default, which is what a primitive with no
+    // locatable source row (annotations, synthesized marks) should carry.
+    if (binding === undefined || located === null) return 0;
+    let byTable = groupsByLayer.get(layerIndex);
+    if (byTable === undefined) {
+      byTable = new WeakMap<ColumnTable, readonly number[]>();
+      groupsByLayer.set(layerIndex, byTable);
     }
-    return groups;
+    let groups = byTable.get(located.table);
+    if (groups === undefined) {
+      groups = deriveLayerGroups(binding, located.table);
+      byTable.set(located.table, groups);
+    }
+    return groups[located.localRow] ?? 0;
   };
   return (facts) => {
     const binding = bindings[facts.layerIndex];
@@ -55,7 +69,7 @@ function createRawCandidateDatumResolver(
     };
     const styleValue = (style: LayerBinding["size"]): CellValue =>
       style.field === null ? (style.scaledConstant ?? style.constant) : value(style.field);
-    const group = groupsFor(facts.layerIndex)[sourceRow] ?? 0;
+    const group = groupFor(facts.layerIndex, sourceRow);
     const colorRank = ordinalColorRank(color, binding.color.field, () =>
       value(binding.color.field),
     );
@@ -88,22 +102,23 @@ function isAllSourceBacked(bindings: readonly LayerBinding[]): boolean {
   );
 }
 
+// No plot `table` here: every value and every group this strategy resolves is
+// read through `sources`, which owns the per-layer tables.
 function buildSourceBackedCandidates(input: {
   scene: Scene;
   runId: number;
   flip: boolean;
   bindings: readonly LayerBinding[];
-  table: ColumnTable;
   sources: SourceRegistry;
   color: ResolvedColorScale | null;
   fill: ResolvedColorScale | null;
   lineage: LineageStore<number>;
 }): CandidateStore {
-  const { scene, runId, flip, bindings, table, sources, color, fill, lineage } = input;
+  const { scene, runId, flip, bindings, sources, color, fill, lineage } = input;
   return buildCandidateStore(scene, {
     epoch: runId,
     flip,
-    datum: createRawCandidateDatumResolver(bindings, table, sources, color, fill, lineage),
+    datum: createRawCandidateDatumResolver(bindings, sources, color, fill, lineage),
   });
 }
 
