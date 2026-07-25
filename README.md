@@ -34,7 +34,10 @@ live output and complete source.
     GeomPoint,
     GeomSmooth,
     GGPlot,
-    scaleSizeContinuous,
+    Labs,
+    ScaleSizeContinuous,
+    ScaleXContinuous,
+    ThemeTufte,
   } from "@ggsvelte/svelte";
 
   import { gammaVirginis } from "./data.js";
@@ -43,19 +46,19 @@ live output and complete source.
 <GGPlot
   data={gammaVirginis}
   aes={{ x: "year", y: "angle" }}
-  theme="tufte"
-  scales={{ x: { labels: "d" }, ...scaleSizeContinuous({ range: [3, 8] }) }}
-  labs={{
-    title: "The first scatterplot, redrawn",
-    subtitle:
-      "Herschel plotted γ Virginis in 1833 and fitted the curve by hand",
-    x: "Year",
-    y: "Position angle (°)",
-    size: "Herschel's weight",
-  }}
   width={640}
   height={400}
 >
+  <ThemeTufte />
+  <ScaleXContinuous labels="d" />
+  <ScaleSizeContinuous range={[3, 8]} />
+  <Labs
+    title="The first scatterplot, redrawn"
+    subtitle="Herschel plotted γ Virginis in 1833 and fitted the curve by hand"
+    x="Year"
+    y="Position angle (°)"
+    size="Herschel's weight"
+  />
   <GeomSmooth method="loess" span={0.75} />
   <GeomPoint aes={{ size: "weight" }} alpha={0.85} />
 </GGPlot>
@@ -69,7 +72,14 @@ live output and complete source.
 
 ```svelte
 <script lang="ts">
-  import { GeomArea, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomArea,
+    GGPlot,
+    Labs,
+    ScaleFillManual,
+    ScaleXDate,
+    ThemeEconomist,
+  } from "@ggsvelte/svelte";
 
   import { crimeanMortality } from "./data.js";
 </script>
@@ -77,25 +87,22 @@ live output and complete source.
 <GGPlot
   data={crimeanMortality}
   aes={{ x: "month", y: "deaths", fill: "cause" }}
-  theme="economist"
-  scales={{
-    x: { labels: "%b %Y" },
-    fill: {
-      type: "manual",
-      domain: ["Disease", "Wounds", "Other"],
-      range: ["#d14d41", "#014d64", "#4385be"],
-    },
-  }}
-  labs={{
-    title: "Deaths in the Crimea, 1854–56",
-    subtitle: "Annual rate per 1,000 — disease dwarfs combat, then collapses",
-    x: "Month",
-    y: "Deaths per 1,000 per year",
-    fill: "Cause",
-  }}
   width={640}
   height={400}
 >
+  <ThemeEconomist />
+  <ScaleXDate labels="%b %Y" />
+  <ScaleFillManual
+    domain={["Disease", "Wounds", "Other"]}
+    values={["#d14d41", "#014d64", "#4385be"]}
+  />
+  <Labs
+    title="Deaths in the Crimea, 1854–56"
+    subtitle="Annual rate per 1,000 — disease dwarfs combat, then collapses"
+    x="Month"
+    y="Deaths per 1,000 per year"
+    fill="Cause"
+  />
   <GeomArea alpha={0.9} />
 </GGPlot>
 ```
@@ -108,7 +115,13 @@ live output and complete source.
 
 ```svelte
 <script lang="ts">
-  import { GeomDensity, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomDensity,
+    GGPlot,
+    Labs,
+    ScaleFillManual,
+    ThemeMinimal,
+  } from "@ggsvelte/svelte";
 
   import { galtonChildren } from "./data.js";
 </script>
@@ -116,24 +129,21 @@ live output and complete source.
 <GGPlot
   data={galtonChildren}
   aes={{ x: "height", fill: "gender" }}
-  theme="minimal"
-  scales={{
-    fill: {
-      type: "manual",
-      domain: ["Daughters", "Sons"],
-      range: ["#8b7ec8", "#3aa99f"],
-    },
-  }}
-  labs={{
-    title: "Heights of Galton's 934 adult children",
-    subtitle: "Two overlapping distributions, separated at the means",
-    x: "Height (inches)",
-    y: "Density",
-    fill: "Child",
-  }}
   width={640}
   height={400}
 >
+  <ThemeMinimal />
+  <ScaleFillManual
+    domain={["Daughters", "Sons"]}
+    values={["#8b7ec8", "#3aa99f"]}
+  />
+  <Labs
+    title="Heights of Galton's 934 adult children"
+    subtitle="Two overlapping distributions, separated at the means"
+    x="Height (inches)"
+    y="Density"
+    fill="Child"
+  />
   <GeomDensity alpha={0.45} />
 </GGPlot>
 ```
@@ -146,7 +156,14 @@ live output and complete source.
 
 ```svelte
 <script lang="ts">
-  import { GeomPoint, GGPlot, scaleXLog10 } from "@ggsvelte/svelte";
+  import {
+    GeomPoint,
+    GGPlot,
+    Labs,
+    ScaleColorManual,
+    ScaleXLog10,
+    ThemeEconomist,
+  } from "@ggsvelte/svelte";
 
   import { londonCholera } from "./data.js";
 </script>
@@ -154,27 +171,24 @@ live output and complete source.
 <GGPlot
   data={londonCholera}
   aes={{ x: "density", y: "deathRate", color: "water" }}
-  theme="economist"
-  scales={{
-    ...scaleXLog10({ labels: "~s" }),
-    color: {
-      type: "manual",
-      domain: ["Battersea", "New River", "Kew"],
-      range: ["#d14d41", "#014d64", "#4385be"],
-    },
-  }}
   key="district"
   inspect={{ mode: "xy", pin: true }}
-  labs={{
-    title: "Cholera, crowding and water in London, 1849",
-    subtitle: "Death rate against population density, by water company",
-    x: "People per acre (log scale)",
-    y: "Cholera deaths per 10,000",
-    color: "Water supply",
-  }}
   width="container"
   height={400}
 >
+  <ThemeEconomist />
+  <ScaleXLog10 labels="~s" />
+  <ScaleColorManual
+    domain={["Battersea", "New River", "Kew"]}
+    values={["#d14d41", "#014d64", "#4385be"]}
+  />
+  <Labs
+    title="Cholera, crowding and water in London, 1849"
+    subtitle="Death rate against population density, by water company"
+    x="People per acre (log scale)"
+    y="Cholera deaths per 10,000"
+    color="Water supply"
+  />
   <GeomPoint size={3.5} />
 </GGPlot>
 ```
@@ -187,7 +201,13 @@ live output and complete source.
 
 ```svelte
 <script lang="ts">
-  import { GeomHistogram, GGPlot } from "@ggsvelte/svelte";
+  import {
+    FacetWrap,
+    GeomHistogram,
+    GGPlot,
+    Labs,
+    ThemeGgplot2,
+  } from "@ggsvelte/svelte";
 
   import { familyHeights } from "./data.js";
 </script>
@@ -195,18 +215,17 @@ live output and complete source.
 <GGPlot
   data={familyHeights}
   aes={{ x: "child", weight: "n" }}
-  theme="ggplot2"
-  facet={{ wrap: "pair", ncol: 2 }}
-  labs={{
-    title: "4,892 English children, measured by Pearson and Lee",
-    subtitle:
-      "Sons stand four and a half inches taller; the two daughter panels are the same girls, tabulated against each parent",
-    x: "Child's height (inches)",
-    y: "Children",
-  }}
   width={640}
   height={400}
 >
+  <ThemeGgplot2 />
+  <FacetWrap field="pair" ncol={2} />
+  <Labs
+    title="4,892 English children, measured by Pearson and Lee"
+    subtitle="Sons stand four and a half inches taller; the two daughter panels are the same girls, tabulated against each parent"
+    x="Child's height (inches)"
+    y="Children"
+  />
   <GeomHistogram bins={18} />
 </GGPlot>
 ```
@@ -219,7 +238,14 @@ live output and complete source.
 
 ```svelte
 <script lang="ts">
-  import { GeomBar, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomBar,
+    GGPlot,
+    Labs,
+    ScaleFillManual,
+    ScaleYContinuous,
+    ThemeFivethirtyeight,
+  } from "@ggsvelte/svelte";
 
   import { armadaCrews } from "./data.js";
 </script>
@@ -227,26 +253,22 @@ live output and complete source.
 <GGPlot
   data={armadaCrews}
   aes={{ x: "squadron", fill: "role", weight: "men" }}
-  theme="fivethirtyeight"
-  scales={{
-    y: { labels: ".0%" },
-    fill: {
-      type: "manual",
-      domain: ["Soldiers", "Sailors"],
-      range: ["#c14a3d", "#3c6e8f"],
-    },
-  }}
-  labs={{
-    title: "Who sailed with the Armada, 1588",
-    subtitle:
-      "Soldiers outnumber sailors everywhere except the galleys and the light pataches",
-    x: "Squadron",
-    y: "Share of complement",
-    fill: "Role",
-  }}
   width={640}
   height={400}
 >
+  <ThemeFivethirtyeight />
+  <ScaleYContinuous labels=".0%" />
+  <ScaleFillManual
+    domain={["Soldiers", "Sailors"]}
+    values={["#c14a3d", "#3c6e8f"]}
+  />
+  <Labs
+    title="Who sailed with the Armada, 1588"
+    subtitle="Soldiers outnumber sailors everywhere except the galleys and the light pataches"
+    x="Squadron"
+    y="Share of complement"
+    fill="Role"
+  />
   <GeomBar position="fill" />
 </GGPlot>
 ```
@@ -259,7 +281,14 @@ live output and complete source.
 
 ```svelte
 <script lang="ts">
-  import { GeomPoint, GGPlot, scaleColorContinuous } from "@ggsvelte/svelte";
+  import {
+    CoordFixed,
+    GeomPoint,
+    GGPlot,
+    Labs,
+    ScaleColorContinuous,
+    ThemeDark,
+  } from "@ggsvelte/svelte";
 
   import { greatLakesSurveys, greatLakesTruth } from "./data.js";
 </script>
@@ -267,20 +296,19 @@ live output and complete source.
 <GGPlot
   data={greatLakesSurveys}
   aes={{ x: "long", y: "lat", color: "year" }}
-  theme="dark"
-  coord={{ type: "fixed" }}
-  scales={scaleColorContinuous({ scheme: "viridis", labels: "d" })}
-  labs={{
-    title: "Eleven maps of the Great Lakes, 1688–1818",
-    subtitle:
-      "White crosses are the 39 true positions; each dot is one map's attempt at one of them",
-    x: "Longitude (°)",
-    y: "Latitude (°)",
-    color: "Map year",
-  }}
   width={640}
   height={400}
 >
+  <ThemeDark />
+  <CoordFixed />
+  <ScaleColorContinuous scheme="viridis" labels="d" />
+  <Labs
+    title="Eleven maps of the Great Lakes, 1688–1818"
+    subtitle="White crosses are the 39 true positions; each dot is one map's attempt at one of them"
+    x="Longitude (°)"
+    y="Latitude (°)"
+    color="Map year"
+  />
   <GeomPoint size={2.6} alpha={0.75} />
   <GeomPoint
     data={greatLakesTruth}
@@ -293,11 +321,12 @@ live output and complete source.
 
 [![Eleven old maps of the Great Lakes coloured by publication year against the true positions](apps/docs/static/previews/color-continuous-light.png)](https://ggsvelte.sh/examples/color/continuous)
 
-Guide presentation stays separate from scale math. Use `guides={{ color:
-guideColorbar({ position: "bottom" }) }}` (or fluent `.guides()`) to title,
-orient, place, suppress, or force axes and non-position guides. Automatic legends use
-the right side only while at least 320px of panel remains, then move below with
-complete accessible labels and unchanged scale assignments.
+Guide presentation stays separate from scale math. Use
+`<GuideColorbar channel="color" position="bottom" />` (or
+`<GuideLegend channel="color" position="bottom" />`, `<GuideNone channel="size" />`)
+to title, orient, place, suppress, or force axes and non-position guides. Automatic
+legends use the right side only while at least 320px of panel remains, then move below
+with complete accessible labels and unchanged scale assignments.
 
 ### [Boxplots](https://ggsvelte.sh/examples/boxplot/by-category)
 
@@ -305,7 +334,13 @@ complete accessible labels and unchanged scale assignments.
 
 ```svelte
 <script lang="ts">
-  import { GeomBoxplot, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomBoxplot,
+    GGPlot,
+    Labs,
+    ScaleXDiscrete,
+    ThemeFew,
+  } from "@ggsvelte/svelte";
 
   import { michelsonRuns } from "./data.js";
 </script>
@@ -313,18 +348,17 @@ complete accessible labels and unchanged scale assignments.
 <GGPlot
   data={michelsonRuns}
   aes={{ x: "run", y: "velocity" }}
-  theme="few"
-  scales={{ x: { domain: ["Jun 5", "Jun 7", "Jun 9", "Jun 12", "Jul 2"] } }}
-  labs={{
-    title: "Michelson's five runs, 1879",
-    subtitle:
-      "Twenty measurements each — the runs disagree more than the readings within them",
-    x: "Run",
-    y: "Velocity (km/s − 299,000)",
-  }}
   width={640}
   height={400}
 >
+  <ThemeFew />
+  <ScaleXDiscrete domain={["Jun 5", "Jun 7", "Jun 9", "Jun 12", "Jul 2"]} />
+  <Labs
+    title="Michelson's five runs, 1879"
+    subtitle="Twenty measurements each — the runs disagree more than the readings within them"
+    x="Run"
+    y="Velocity (km/s − 299,000)"
+  />
   <GeomBoxplot />
 </GGPlot>
 ```
@@ -337,7 +371,12 @@ complete accessible labels and unchanged scale assignments.
 
 ```svelte
 <script lang="ts">
-  import { GeomLine, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomLine,
+    GGPlot,
+    Labs,
+    ThemeFivethirtyeight,
+  } from "@ggsvelte/svelte";
 
   import { britishExports } from "./data.js";
 </script>
@@ -345,16 +384,16 @@ complete accessible labels and unchanged scale assignments.
 <GGPlot
   data={britishExports}
   aes={{ x: "year", y: "value" }}
-  theme="fivethirtyeight"
-  labs={{
-    title: "British and Irish exports, 1855–1899",
-    subtitle: "Raw four-digit strings infer a calendar scale",
-    x: "Year",
-    y: "£ millions",
-  }}
   width="container"
   height={400}
 >
+  <ThemeFivethirtyeight />
+  <Labs
+    title="British and Irish exports, 1855–1899"
+    subtitle="Raw four-digit strings infer a calendar scale"
+    x="Year"
+    y="£ millions"
+  />
   <GeomLine linewidth={1.5} />
 </GGPlot>
 ```
@@ -367,7 +406,14 @@ complete accessible labels and unchanged scale assignments.
 
 ```svelte
 <script lang="ts">
-  import { GeomCol, GeomText, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomCol,
+    GeomText,
+    GGPlot,
+    Labs,
+    ScaleXDiscrete,
+    ThemeFivethirtyeight,
+  } from "@ggsvelte/svelte";
 
   import { polioTrial } from "./data.js";
 </script>
@@ -375,17 +421,17 @@ complete accessible labels and unchanged scale assignments.
 <GGPlot
   data={polioTrial}
   aes={{ x: "group", y: "rate" }}
-  theme="fivethirtyeight"
-  scales={{ x: { domain: ["Vaccinated", "Placebo", "Not inoculated"] } }}
-  labs={{
-    title: "The Salk vaccine field trial, 1954",
-    subtitle: "Paralytic polio per 100,000 children in the randomised arm",
-    x: "Group",
-    y: "Cases per 100,000",
-  }}
   width={640}
   height={400}
 >
+  <ThemeFivethirtyeight />
+  <ScaleXDiscrete domain={["Vaccinated", "Placebo", "Not inoculated"]} />
+  <Labs
+    title="The Salk vaccine field trial, 1954"
+    subtitle="Paralytic polio per 100,000 children in the randomised arm"
+    x="Group"
+    y="Cases per 100,000"
+  />
   <GeomCol width={0.7} />
   <GeomText aes={{ label: "label" }} dy={-8} />
 </GGPlot>

@@ -1,5 +1,12 @@
 <script lang="ts">
-  import { GeomPoint, GGPlot, scaleColorContinuous } from "@ggsvelte/svelte";
+  import {
+    CoordFixed,
+    GeomPoint,
+    GGPlot,
+    Labs,
+    ScaleColorContinuous,
+    ThemeDark,
+  } from "@ggsvelte/svelte";
 
   import { greatLakesSurveys, greatLakesTruth } from "./data.js";
 </script>
@@ -7,20 +14,19 @@
 <GGPlot
   data={greatLakesSurveys}
   aes={{ x: "long", y: "lat", color: "year" }}
-  theme="dark"
-  coord={{ type: "fixed" }}
-  scales={scaleColorContinuous({ scheme: "viridis", labels: "d" })}
-  labs={{
-    title: "Eleven maps of the Great Lakes, 1688–1818",
-    subtitle:
-      "White crosses are the 39 true positions; each dot is one map's attempt at one of them",
-    x: "Longitude (°)",
-    y: "Latitude (°)",
-    color: "Map year",
-  }}
   width={640}
   height={400}
 >
+  <ThemeDark />
+  <CoordFixed />
+  <ScaleColorContinuous scheme="viridis" labels="d" />
+  <Labs
+    title="Eleven maps of the Great Lakes, 1688–1818"
+    subtitle="White crosses are the 39 true positions; each dot is one map's attempt at one of them"
+    x="Longitude (°)"
+    y="Latitude (°)"
+    color="Map year"
+  />
   <GeomPoint size={2.6} alpha={0.75} />
   <GeomPoint
     data={greatLakesTruth}

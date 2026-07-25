@@ -9,6 +9,9 @@
  *
  * So the duplication is allowed, but it is not allowed to disagree. Guard for
  * #656, which is the first change to make theme load-bearing in examples/**.
+ *
+ * Theme may be declared either as the deprecated `theme="…"` GGPlot prop or as
+ * a declaration-only child (`<ThemeDark />`, `<Theme name="dark" />`, …).
  */
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -26,8 +29,35 @@ const PASSTHROUGH = /<GGPlot\b[^>]*\{spec\}/g;
 const GGPLOT_TAG = /<GGPlot\b/g;
 const ANY_THEME_PROP = /\btheme=/g;
 
+/** Named theme shells exported from `@ggsvelte/svelte` (ThemeName → component). */
+const THEME_SHELL: Readonly<Record<string, string>> = {
+  default: "ThemeDefault",
+  light: "ThemeLight",
+  dark: "ThemeDark",
+  minimal: "ThemeMinimal",
+  ggplot2: "ThemeGgplot2",
+  classic: "ThemeClassic",
+  hrbr: "ThemeHrbr",
+  few: "ThemeFew",
+  clean: "ThemeClean",
+  fivethirtyeight: "ThemeFivethirtyeight",
+  economist: "ThemeEconomist",
+  tufte: "ThemeTufte",
+};
+
+const ANY_THEME_SHELL = new RegExp(`<(?:${Object.values(THEME_SHELL).join("|")})\\b`, "g");
+
 function countMatches(source: string, pattern: RegExp): number {
   return source.match(pattern)?.length ?? 0;
+}
+
+/** Count how many times `theme` is declared on hand-written plots (prop or child). */
+function themeDeclarations(source: string, theme: string): number {
+  const shell = THEME_SHELL[theme];
+  const propForm = countMatches(source, new RegExp(`\\btheme="${theme}"`, "g"));
+  const shellForm = shell === undefined ? 0 : countMatches(source, new RegExp(`<${shell}\\b`, "g"));
+  const genericForm = countMatches(source, new RegExp(`<Theme\\b[^>]*\\bname="${theme}"`, "g"));
+  return propForm + shellForm + genericForm;
 }
 
 async function loadSpec(id: string): Promise<PortableSpec> {
@@ -51,6 +81,7 @@ describe("example theme parity (spec.ts vs Example.svelte)", () => {
         // No theme in the spec means the renderer resolves the built-in
         // default; the component must not quietly assert something else.
         expect(countMatches(source, ANY_THEME_PROP)).toBe(0);
+        expect(countMatches(source, ANY_THEME_SHELL)).toBe(0);
         return;
       }
 
@@ -65,10 +96,12 @@ describe("example theme parity (spec.ts vs Example.svelte)", () => {
         return;
       }
 
-      // Every hand-written <GGPlot> must name the spec's theme, and no plot may
-      // carry a theme the spec does not declare.
-      expect(countMatches(source, new RegExp(`\\btheme="${theme}"`, "g"))).toBe(handWritten);
-      expect(countMatches(source, ANY_THEME_PROP)).toBe(handWritten);
+      // Every hand-written <GGPlot> must name the spec's theme (prop or child),
+      // and no plot may carry a theme the spec does not declare.
+      expect(themeDeclarations(source, theme)).toBe(handWritten);
+      expect(countMatches(source, ANY_THEME_PROP) + countMatches(source, ANY_THEME_SHELL)).toBe(
+        handWritten,
+      );
     });
   }
 });
