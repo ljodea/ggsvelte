@@ -24,7 +24,13 @@
 #      still lands through a human-reviewed PR.)
 #   5. Writes ONLY to a `vr-update/pr-<n>` branch in the base repo (never to
 #      the PR branch, never to a fork), idempotent per rendered merge SHA.
-#   6. `contents: write` is job-scoped; the workflow default is no permissions.
+#      The unit of idempotency is the OPEN PR, not the branch: a branch whose
+#      PR was never opened gets one instead of a silent skip (issue #717).
+#   6. `contents: write` and `pull-requests: write` are job-scoped (the latter
+#      only to open the vr-update PR); the workflow default is no permissions.
+#   7. Credential separation: every step holding GH_TOKEN is script-free
+#      (`gh`/`git` only). Repository code — the preview generator and the
+#      decision script — runs with no token in the environment.
 #
 # Companion guard: ci.yml's `vr-baseline-guard` job rejects any PR diff that
 # touches tests/visual/__screenshots__/ unless it comes from a same-repo
@@ -48,7 +54,7 @@ concurrency:
 
 jobs:
   approve:
-    name: verify candidate baselines, commit to vr-update branch
+    name: verify candidate baselines, commit to vr-update branch, open its PR
     if: github.event.workflow_run.conclusion == 'success'
     # GitHub-hosted: privileged write path (pushes vr-update branches); keep off
     # the self-hosted pool that runs untrusted PR code.
@@ -56,7 +62,7 @@ jobs:
     permissions:
       contents: write # push the verified vr-update/pr-<n> branch
       actions: read # download the triggering run's artifact
-      pull-requests: read # re-verify the approval comment / merged PR via API
+      pull-requests: write # re-verify the approval via API + open the vr-update PR (#717)
     steps:
       - name: flavor gate — only /approve-visuals (issue_comment) runs proceed
         id: gate
@@ -234,30 +240,75 @@ jobs:
           fi
           echo "approval verified: ${author} approved merged PR #${PR_NUMBER} @ ${RENDER_SHA}"
 
-      - name: idempotency — skip if this render SHA is already on the branch
-        id: idem
+      - name: read vr-update branch state (script-free, credentialed)
+        id: branch_state
         if: steps.gate.outputs.approved == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ steps.verify.outputs.pr }}
-          RENDER_SHA: ${{ steps.verify.outputs.render_sha }}
+          TIP_MESSAGE_FILE: ${{ runner.temp }}/vr-branch-tip-message.txt
         run: |
           set -euo pipefail
           branch="vr-update/pr-${PR_NUMBER}"
           tip="$(git ls-remote "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "refs/heads/${branch}" | cut -f1)"
+          landed=false
+          open_pr=""
+          : > "${TIP_MESSAGE_FILE}"
           if [ -n "${tip}" ]; then
-            message="$(gh api "repos/${REPO}/commits/${tip}" --jq .commit.message)"
-            if printf '%s' "${message}" | grep -qF "${RENDER_SHA}"; then
-              echo "::notice::${branch} tip already carries baselines for ${RENDER_SHA} — nothing to do"
-              echo "skip=true" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
+            # The tip message is arbitrary text, so it travels by file — never
+            # through GITHUB_OUTPUT (delimiter forgery) or a run: interpolation.
+            gh api "repos/${REPO}/commits/${tip}" --jq .commit.message > "${TIP_MESSAGE_FILE}"
+            default_branch="$(gh api "repos/${REPO}" --jq .default_branch)"
+            default_sha="$(gh api --method GET "repos/${REPO}/commits" -f sha="${default_branch}" -f per_page=1 --jq '.[0].sha')"
+            # ahead/identical means the tip is already contained in the default
+            # branch — its PR merged, so there is nothing left to open.
+            case "$(gh api "repos/${REPO}/compare/${tip}...${default_sha}" --jq .status)" in
+              identical|ahead) landed=true ;;
+            esac
+            open_pr="$(gh api --method GET "repos/${REPO}/pulls" -f state=open -f head="${REPO%%/*}:${branch}" --jq '.[0].number // empty')"
           fi
-          echo "skip=false" >> "$GITHUB_OUTPUT"
+          {
+            echo "tip=${tip}"
+            echo "landed=${landed}"
+            echo "open_pr=${open_pr}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: checkout the decision script from the default branch
+        if: steps.gate.outputs.approved == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Workflow control flow belongs to the default branch, like this file:
+          # recovering a PR merged before the script existed must still work.
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: scripts/vr-approve-decision.ts
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+          path: tools
+
+      - name: setup Bun for the decision script and merged-commit generator
+        if: steps.gate.outputs.approved == 'true'
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+
+      - name: decide — skip, open the missing PR, or render (issue #717)
+        id: decide
+        if: steps.gate.outputs.approved == 'true'
+        env:
+          RENDER_SHA: ${{ steps.verify.outputs.render_sha }}
+          BRANCH_TIP_SHA: ${{ steps.branch_state.outputs.tip }}
+          BRANCH_TIP_LANDED: ${{ steps.branch_state.outputs.landed }}
+          OPEN_PR_NUMBER: ${{ steps.branch_state.outputs.open_pr }}
+          TIP_MESSAGE_FILE: ${{ runner.temp }}/vr-branch-tip-message.txt
+        run: |
+          set -euo pipefail
+          # No token in this environment: the decision is repository code.
+          BRANCH_TIP_MESSAGE="$(cat "${TIP_MESSAGE_FILE}")" \
+            bun tools/scripts/vr-approve-decision.ts action
 
       - name: checkout exact verified merged commit from base repo
-        if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
+        if: steps.gate.outputs.approved == 'true' && steps.decide.outputs.action == 'render'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Pin trusted generation to the exact commit used for screenshots;
@@ -266,21 +317,15 @@ jobs:
           persist-credentials: false
           path: base
 
-      - name: setup Bun for verified merged-commit generator
-        if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version: 1.3.14
-
       - name: install dependencies at verified merged commit
-        if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
+        if: steps.gate.outputs.approved == 'true' && steps.decide.outputs.action == 'render'
         working-directory: base
         run: bun install --frozen-lockfile
         env:
           BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
 
       - name: materialize verified baseline branch without write credentials
-        if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
+        if: steps.gate.outputs.approved == 'true' && steps.decide.outputs.action == 'render'
         env:
           PR_NUMBER: ${{ steps.verify.outputs.pr }}
         run: |
@@ -303,7 +348,8 @@ jobs:
             apps/docs/src/lib/generated/gallery-previews.ts
 
       - name: commit and push verified baselines to vr-update/pr-<n>
-        if: steps.gate.outputs.approved == 'true' && steps.idem.outputs.skip != 'true'
+        id: push
+        if: steps.gate.outputs.approved == 'true' && steps.decide.outputs.action == 'render'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
@@ -323,9 +369,76 @@ jobs:
           old_tip="$(git ls-remote "${push_url}" "refs/heads/${branch}" | cut -f1)"
           if git diff --cached --quiet; then
             echo "no baseline changes — nothing to commit (idempotent per render SHA)"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git commit -m "vr: update baselines for PR #${pr} @ ${APPROVED_RENDER_SHA}"
           git push --force-with-lease="refs/heads/${branch}:${old_tip}" \
             "${push_url}" "HEAD:refs/heads/${branch}"
           echo "pushed verified baselines to ${branch}"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      - name: re-read open PRs for the branch (script-free, credentialed)
+        id: pr_state
+        if: steps.gate.outputs.approved == 'true' && steps.decide.outputs.action != 'skip'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.verify.outputs.pr }}
+        run: |
+          set -euo pipefail
+          # Re-read rather than reuse the earlier fact: a maintainer may have
+          # opened the PR by hand while this run was rendering.
+          branch="vr-update/pr-${PR_NUMBER}"
+          open_pr="$(gh api --method GET "repos/${REPO}/pulls" -f state=open -f head="${REPO%%/*}:${branch}" --jq '.[0].number // empty')"
+          echo "open_pr=${open_pr}" >> "$GITHUB_OUTPUT"
+
+      - name: decide whether the vr-update PR still needs opening
+        id: pr_decide
+        if: steps.gate.outputs.approved == 'true' && steps.decide.outputs.action != 'skip'
+        env:
+          ACTION: ${{ steps.decide.outputs.action }}
+          PUSHED: ${{ steps.push.outputs.pushed == 'true' }}
+          OPEN_PR_NUMBER: ${{ steps.pr_state.outputs.open_pr }}
+        run: |
+          set -euo pipefail
+          bun tools/scripts/vr-approve-decision.ts pr-create
+
+      - name: open the vr-update PR (script-free, credentialed)
+        if: steps.gate.outputs.approved == 'true' && steps.pr_decide.outputs.create == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.verify.outputs.pr }}
+          RENDER_SHA: ${{ steps.verify.outputs.render_sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          branch="vr-update/pr-${PR_NUMBER}"
+          # printf, not a heredoc: block-scalar indentation would otherwise
+          # prefix every body line and render the whole thing as a code block.
+          body="$(printf '%s\n' \
+            "Baselines rendered by the pinned VR container at ${RENDER_SHA} — the merged" \
+            "commit for #${PR_NUMBER} — and verified by .github/workflows/vr-approve.yml" \
+            "(approver permission, merged default-branch commit, PNG-only artifact)." \
+            "" \
+            "Opened automatically so approved baselines cannot strand on an unreachable" \
+            "branch (issue #717)." \
+            "" \
+            "> [!IMPORTANT]" \
+            "> GitHub does not start workflow runs for pull requests opened by the" \
+            "> Actions token, so the required checks are absent here. Close and reopen" \
+            "> this PR to run them before merging.")"
+          url="$(gh pr create --repo "${REPO}" \
+            --base "${DEFAULT_BRANCH}" \
+            --head "${branch}" \
+            --title "vr: update baselines for PR #${PR_NUMBER} @ ${RENDER_SHA}" \
+            --body "${body}")"
+          echo "::notice::opened ${url} — close and reopen it to run the required checks"
+          {
+            echo "## VR baselines ready for review"
+            echo ""
+            echo "${url}"
+            echo ""
+            echo "Close and reopen it to run the required checks (Actions-opened PRs get none)."
+          } >> "$GITHUB_STEP_SUMMARY"

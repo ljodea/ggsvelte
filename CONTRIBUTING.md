@@ -407,8 +407,9 @@ uploads inert PNG candidates. After source lands, `vr-approve.yml` independently
 verifies the comment, permission, default-branch merge, timestamp, and immutable
 `merge_commit_sha`. It checks out only that already-merged base-repository
 commit, verifies the PNG artifact, and runs the matching preview generator
-without `GH_TOKEN` in its environment. Only the final script-free commit/push
-step receives the write credential.
+without `GH_TOKEN` in its environment. Every step that holds the write
+credential is script-free (`gh`/`git` only): the commit/push and the
+`gh pr create` that opens the baseline PR.
 
 The source-first landing order is deliberate:
 
@@ -419,12 +420,22 @@ The source-first landing order is deliberate:
 2. Merge the source PR into the default branch.
 3. Comment `/approve-visuals` on the **merged** PR. A pre-merge command is
    rejected, including one recorded in the same second as the merge.
-4. Review and merge the generated `vr-update/pr-<n>` PR.
+4. Review and merge the generated `vr-update/pr-<n>` PR. The approve workflow
+   opens it for you, and **close + reopen it once** so the required checks
+   run — GitHub starts no workflow runs for pull requests opened by the
+   Actions token.
 
 This creates a short, explicit window where source has landed but its approved
 baselines have not. Finish step 4 promptly. Never merge an unexplained visual
 diff, and do not make VR Compare a required branch-protection check without
 redesigning this source-first protocol.
+
+Idempotency keys on the **open PR**, not the branch (issue #717): re-running
+`/approve-visuals` while the baseline PR is open is a no-op, but a
+`vr-update/pr-<n>` branch that already carries the right render and has no open
+PR gets one opened rather than a silent skip. The three-way decision
+(skip / open the PR / render, push, open the PR) lives in
+`scripts/vr-approve-decision.ts` and is unit-tested.
 
 ## Lifecycle policy (Hadley lesson 13)
 
