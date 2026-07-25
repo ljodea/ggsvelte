@@ -9,6 +9,7 @@
  * - retries 0: a flaky screenshot is a bug, not a retry candidate
  * - colorScheme pinned: the page theme comes ONLY from ?theme= (?vr mode
  *   ignores prefers-color-scheme by design)
+ * - reduced motion pinned through contextOptions (see vrContextOptions)
  * - snapshotPathTemplate WITHOUT any platform suffix: the pinned Playwright
  *   container (mcr.microsoft.com/playwright:v1.61.1-noble) is the ONLY
  *   baseline platform, so platform-suffixed names would be a lie
@@ -24,9 +25,30 @@
  *   VR_SNAPSHOT_DIR=.local-baselines bun run test:visual -- --update-snapshots
  *   VR_SNAPSHOT_DIR=.local-baselines bun run test:visual
  */
-import { defineConfig } from "@playwright/test";
+import { type BrowserContextOptions, defineConfig } from "@playwright/test";
 
 const snapshotDir = process.env["VR_SNAPSHOT_DIR"] ?? "__screenshots__";
+
+/**
+ * Project-wide browser-context media state (issue #718).
+ *
+ * `forcedColors`, `reducedMotion` and `contrast` exist on BrowserContextOptions
+ * but NOT on Playwright's TestOptions (checked in 1.61.1, the pinned version,
+ * and still absent in 1.62), so `contextOptions` is the only way to set them
+ * from a config — and `test.use({ forcedColors: "active" })` is dropped by the
+ * runner without an error. `colorScheme` IS a test option and composes fine:
+ * the real fixtures are spread over `contextOptions`, not replaced by it.
+ *
+ * Two supported ways to change media state for one test:
+ * - `page.emulateMedia({ forcedColors: "active" })` — what this suite uses,
+ *   composes with everything below;
+ * - `test.use({ contextOptions: { ...vrContextOptions, forcedColors: "active" } })`
+ *   — `contextOptions` REPLACES rather than merges, so the spread is what
+ *   keeps reduced motion on; a bare object silently drops it.
+ *
+ * tests/visual/media-emulation.spec.ts pins all of the above.
+ */
+export const vrContextOptions: BrowserContextOptions = { reducedMotion: "reduce" };
 
 export default defineConfig({
   testDir: ".",
@@ -51,7 +73,7 @@ export default defineConfig({
     deviceScaleFactor: 1,
     viewport: { width: 800, height: 640 },
     colorScheme: "light",
-    contextOptions: { reducedMotion: "reduce" },
+    contextOptions: vrContextOptions,
     locale: "en-US",
     timezoneId: "UTC",
     trace: "retain-on-failure",

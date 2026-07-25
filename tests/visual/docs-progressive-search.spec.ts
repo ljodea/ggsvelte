@@ -60,9 +60,10 @@ test("the finished chart answers keyboard inspection", async ({ page }) => {
  * The library sets `forced-color-adjust: none` on `.gg-plot`, so nothing in a
  * chart adapts on its own. The epoch bands are the one mark carried by fill
  * alone, so under a requested palette they drop and the names in the note
- * under the chart do the work instead. Asserted through `emulateMedia`: this
- * config sets `contextOptions`, which clobbers Playwright's `forcedColors`
- * fixture, so `test.use` would silently measure a normal page.
+ * under the chart do the work instead. Asserted through `emulateMedia`:
+ * `forcedColors` is not a Playwright test option, so `test.use` would be
+ * dropped by the runner and this would silently measure a normal page
+ * (issue #718 — see playwright.config.ts).
  */
 test("the finished chart drops its band fills and names the epochs in forced colors", async ({
   page,
