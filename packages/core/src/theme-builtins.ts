@@ -222,6 +222,7 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     tickColor: "#b3b3b3",
     fontSize: 11,
     // Was 8.8 — homepage hero and light charts forced squinting (#753).
+    // Smoke VR baselines refreshed with this token change (PR #755).
     axisTextSize: 12,
     titleSize: 15,
     subtitleSize: 12,
