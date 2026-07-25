@@ -5,11 +5,18 @@
  * in Europe.
  *
  * Guerry's finding was the uncomfortable one - departments with more literate
- * conscripts did not have less crime. Ranks run 1 = worst, 86 = best, so higher
- * is better throughout.
+ * conscripts did not have less crime.
  *
- * Transcribed from HistData::Guerry (see NOTICE); 86 rows. Corsica has no
- * region in the source and is omitted rather than shown as an unlabelled group.
+ * The columns are HistData's own units, not ranks: `literacy` is the percentage
+ * of military conscripts who could read and write (12-74 here) and
+ * `crimePersons` is the population per crime against persons (5883-37014), so a
+ * larger number means fewer such crimes per head. `wealth` is the one rank -
+ * Guerry's ranked index of per-capita tax on personal property, 1 = highest
+ * (Seine, i.e. Paris).
+ *
+ * Transcribed from HistData::Guerry (see NOTICE); 85 rows. Corsica has no
+ * region in the source and is omitted rather than shown as an unlabelled group,
+ * which is why `wealth` reaches 86 across 85 departments.
  */
 export const guerry = [
   { department: "Ain", region: "East", literacy: 37, crimePersons: 28870, wealth: 73 },
