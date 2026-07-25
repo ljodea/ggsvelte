@@ -286,6 +286,30 @@ export { default as ScaleColourManual } from "./scale/ScaleColorManual.svelte";
 export { default as ScaleColourIdentity } from "./scale/ScaleColorIdentity.svelte";
 // </generated:scale-children>
 
+// Coord children (#659 slice 5) — stable-intent: named shells + <Coord>
+// escape hatch; destination for the deprecated `coord` prop (since 0.11.0).
+/** @lifecycle stable-intent */
+export { default as Coord } from "./coord/Coord.svelte";
+/** @lifecycle stable-intent */
+export { default as CoordFlip } from "./coord/CoordFlip.svelte";
+/** @lifecycle stable-intent */
+export { default as CoordCartesian } from "./coord/CoordCartesian.svelte";
+/** @lifecycle stable-intent */
+export { default as CoordTransform } from "./coord/CoordTransform.svelte";
+/** @lifecycle stable-intent */
+export { default as CoordFixed } from "./coord/CoordFixed.svelte";
+/** @lifecycle stable-intent */
+export { default as CoordEqual } from "./coord/CoordFixed.svelte";
+
+// Facet children (#659 slice 5) — stable-intent: complete <Facet> surface +
+// ggplot2-spelling shells; destination for the deprecated `facet` prop.
+/** @lifecycle stable-intent */
+export { default as Facet } from "./facet/Facet.svelte";
+/** @lifecycle stable-intent */
+export { default as FacetWrap } from "./facet/FacetWrap.svelte";
+/** @lifecycle stable-intent */
+export { default as FacetGrid } from "./facet/FacetGrid.svelte";
+
 // Deprecation + composition diagnostics (sibling unions to InteractionDiagnostic)
 export {
   DEPRECATION_DIAGNOSTIC_CATALOG,
@@ -299,12 +323,18 @@ export type {
 } from "./diagnostics/deprecation.js";
 export {
   COMPOSITION_DIAGNOSTIC_CATALOG,
+  duplicatePlotLayerDiagnostic,
   duplicateScaleChannelDiagnostic,
   isCompositionDiagnostic,
+  isDuplicatePlotLayerDiagnostic,
+  isDuplicateScaleChannelDiagnostic,
 } from "./diagnostics/composition.js";
 export type {
   CompositionDiagnostic,
   CompositionDiagnosticCode,
+  DuplicatePlotLayerDiagnostic,
+  DuplicatePlotLayerKind,
+  DuplicateScaleChannelDiagnostic,
 } from "./diagnostics/composition.js";
 
 // Spec surface (builder + canonicalizer + validation)

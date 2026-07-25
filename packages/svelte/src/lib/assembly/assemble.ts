@@ -129,7 +129,7 @@ export type AssemblePortableSpecInput = {
  * True when any of:
  * - the raw `facet` prop is set (covers declaration-only children before layers
  *   register and `assembled` is still null),
- * - a `kind: "facet"` registry plot layer is present (future `<FacetWrap/>`),
+ * - a `kind: "facet"` registry plot layer is present (`<FacetWrap/>` / …),
  * - `assembled.facet` is set (covers portable-`spec` plots that embed facet
  *   without a separate prop).
  */

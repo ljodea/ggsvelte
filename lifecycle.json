@@ -3353,6 +3353,22 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "Coord": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "CoordCartesian": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "CoordEqual": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "CoordFixed": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "CoordFixedOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3361,9 +3377,17 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "CoordFlip": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "CoordSpec": {
           "kind": "type",
           "lifecycle": "experimental"
+        },
+        "CoordTransform": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
         },
         "CoordTransformAxisOptions": {
           "kind": "type",
@@ -3441,9 +3465,29 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "DuplicatePlotLayerDiagnostic": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DuplicatePlotLayerKind": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DuplicateScaleChannelDiagnostic": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ErrorbarParams": {
           "kind": "type",
           "lifecycle": "experimental"
+        },
+        "Facet": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "FacetGrid": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
         },
         "FacetInput": {
           "kind": "type",
@@ -3460,6 +3504,10 @@
         "FacetSpec": {
           "kind": "type",
           "lifecycle": "experimental"
+        },
+        "FacetWrap": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
         },
         "FiniteStyleScaleOptions": {
           "kind": "type",
@@ -4521,6 +4569,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "duplicatePlotLayerDiagnostic": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "duplicateScaleChannelDiagnostic": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4598,6 +4650,14 @@
           "lifecycle": "experimental"
         },
         "isDeprecationDiagnostic": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "isDuplicatePlotLayerDiagnostic": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "isDuplicateScaleChannelDiagnostic": {
           "kind": "value",
           "lifecycle": "experimental"
         },

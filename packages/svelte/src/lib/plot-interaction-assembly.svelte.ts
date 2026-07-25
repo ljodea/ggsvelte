@@ -13,8 +13,11 @@ import type { PortableSpec } from "@ggsvelte/spec";
 
 import type { OrchestratorInputs } from "./plot-orchestrator.svelte.js";
 import {
+  duplicatePlotLayerDiagnostic,
   duplicateScaleChannelDiagnostic,
+  isDuplicateScaleChannelDiagnostic,
   type CompositionDiagnostic,
+  type DuplicatePlotLayerKind,
 } from "./diagnostics/composition.js";
 import {
   deprecatedPropDiagnostic,
@@ -155,6 +158,34 @@ export function createPlotInteractionAssembly<
         }),
       );
     }
+    if (inputs.coord() !== undefined) {
+      list.push(
+        deprecatedPropDiagnostic({
+          prop: "coord",
+          since: "0.11.0",
+          removeIn: "0.13.0",
+          suggestions: [
+            'Replace coord="flip" with <CoordFlip />',
+            "Use <CoordFixed ratio={…} />, <CoordTransform />, or <Coord value={…} /> for other systems",
+          ],
+          anchor: "compose-coord-as-a-child-layer",
+        }),
+      );
+    }
+    if (inputs.facet() !== undefined) {
+      list.push(
+        deprecatedPropDiagnostic({
+          prop: "facet",
+          since: "0.11.0",
+          removeIn: "0.13.0",
+          suggestions: [
+            'Replace facet={{wrap:"g"}} with <FacetWrap field="g" />',
+            'Use <FacetGrid rows="a" cols="b" /> for a grid, or <Facet wrap={…} /> for the full FacetInput surface',
+          ],
+          anchor: "compose-facet-as-a-child-layer",
+        }),
+      );
+    }
     return list;
   });
   $effect(() => {
@@ -166,27 +197,50 @@ export function createPlotInteractionAssembly<
     }
   });
 
-  // Composition advisories (#659 slice 3): duplicate scale channels across
-  // kind:"scale" registry layers. Per-channel, once per instance (dedup key
-  // `${code}:${channel}`). Last child still wins via shallow merge.
+  // Composition advisories (#659 slices 3+5):
+  // - scale MERGE: duplicate aesthetic channels (dedup `${code}:${channel}`)
+  // - coord/facet/theme REPLACE: more than one child of that kind
+  //   (dedup `${code}:${kind}` so coord + facet dups deliver two advisories)
+  // Last child still wins (shallow merge / last write).
   const compositionDiagnostics = $derived.by((): CompositionDiagnostic[] => {
-    const seen = new Set<string>();
-    const duplicates = new Set<string>();
+    const list: CompositionDiagnostic[] = [];
+    const seenChannels = new Set<string>();
+    const duplicateChannels = new Set<string>();
+    const replaceCounts: Record<DuplicatePlotLayerKind, number> = {
+      coord: 0,
+      facet: 0,
+      theme: 0,
+    };
     for (const layer of inputs.registry.layers) {
-      if (layer.kind !== "scale") continue;
-      for (const channel of Object.keys(layer.value)) {
-        if (seen.has(channel)) {
-          duplicates.add(channel);
-        } else {
-          seen.add(channel);
+      if (layer.kind === "scale") {
+        for (const channel of Object.keys(layer.value)) {
+          if (seenChannels.has(channel)) {
+            duplicateChannels.add(channel);
+          } else {
+            seenChannels.add(channel);
+          }
         }
+        continue;
+      }
+      if (layer.kind === "coord" || layer.kind === "facet" || layer.kind === "theme") {
+        replaceCounts[layer.kind] += 1;
       }
     }
-    return [...duplicates].map((channel) => duplicateScaleChannelDiagnostic(channel));
+    for (const channel of duplicateChannels) {
+      list.push(duplicateScaleChannelDiagnostic(channel));
+    }
+    for (const kind of ["coord", "facet", "theme"] as const) {
+      if (replaceCounts[kind] > 1) {
+        list.push(duplicatePlotLayerDiagnostic(kind));
+      }
+    }
+    return list;
   });
   $effect(() => {
     for (const diagnostic of compositionDiagnostics) {
-      const dedupKey = `${diagnostic.code}:${diagnostic.channel}`;
+      const dedupKey = isDuplicateScaleChannelDiagnostic(diagnostic)
+        ? `${diagnostic.code}:${diagnostic.channel}`
+        : `${diagnostic.code}:${diagnostic.kind}`;
       if (deliveredAdvisories.has(dedupKey)) continue;
       deliveredAdvisories.add(dedupKey);
       deliverDiagnostic(diagnostic);

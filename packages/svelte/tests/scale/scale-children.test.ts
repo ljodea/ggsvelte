@@ -10,7 +10,10 @@ import { SCALE_CAPABILITIES, scaleXLog10, type PortableSpec } from "../../src/li
 import * as SveltePkg from "../../src/lib/index.js";
 import type { PlotDiagnostic } from "../../src/lib/diagnostics/deprecation.js";
 import { isDeprecationDiagnostic } from "../../src/lib/diagnostics/deprecation.js";
-import { isCompositionDiagnostic } from "../../src/lib/diagnostics/composition.js";
+import {
+  isCompositionDiagnostic,
+  isDuplicateScaleChannelDiagnostic,
+} from "../../src/lib/diagnostics/composition.js";
 import type { LayerRegistry } from "../../src/lib/geoms/registry.svelte.js";
 import ScaleChildrenPlot from "../fixtures/ScaleChildrenPlot.svelte";
 import { render } from "../helpers/render.js";
@@ -353,6 +356,8 @@ describe("definedProps + composition diagnostics", () => {
     const advisory = diagnostics.find((d) => d.code === "DUPLICATE_SCALE_CHANNEL")!;
     expect(isCompositionDiagnostic(advisory)).toBe(true);
     if (!isCompositionDiagnostic(advisory)) throw new Error("expected composition");
+    expect(isDuplicateScaleChannelDiagnostic(advisory)).toBe(true);
+    if (!isDuplicateScaleChannelDiagnostic(advisory)) throw new Error("expected scale variant");
     expect(advisory.channel).toBe("color");
     expect(advisory.kind).toBe("scale");
     expect(advisory.severity).toBe("advisory");

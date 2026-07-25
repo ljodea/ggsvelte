@@ -34,6 +34,8 @@ function guideAnchors(): Map<string, Set<string>> {
 const RUNTIME_ADVISORY_URLS = [
   "https://ggsvelte.sh/guide/upgrading#compose-the-theme-as-a-child-layer",
   "https://ggsvelte.sh/guide/upgrading#compose-scales-as-child-layers",
+  "https://ggsvelte.sh/guide/upgrading#compose-coord-as-a-child-layer",
+  "https://ggsvelte.sh/guide/upgrading#compose-facet-as-a-child-layer",
 ] as const;
 
 describe("diagnostic catalog runtime docUrl anchors", () => {

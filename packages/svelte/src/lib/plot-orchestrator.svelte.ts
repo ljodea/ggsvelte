@@ -220,7 +220,7 @@ export function createPlotOrchestrator<
     typeof window === "undefined" ? assembleCurrentSpec() : assembled;
 
   // Facet intent: raw prop (before layers register), registry facet plot layer
-  // (future <FacetWrap/>), OR assembled.facet (portable-spec embeds).
+  // (<FacetWrap/> / <FacetGrid/> / <Facet/>), OR assembled.facet (portable-spec embeds).
   const facetedPlot = $derived(
     isFacetedPlotIntent({
       facet: inputs.facet(),

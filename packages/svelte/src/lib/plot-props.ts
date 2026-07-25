@@ -60,9 +60,23 @@ export interface GGPlotProps<
   aes?: AesInput;
   /** Layers (props-first canonical form). Wins over declaration-only children. */
   layers?: LayerInput[];
-  /** Facet into small multiples (wrap or rows/cols grid). */
+  /**
+   * Facet into small multiples (wrap or rows/cols grid).
+   *
+   * @deprecated since 0.11.0 — compose facets as declaration-only child layers
+   * instead (`<FacetWrap field="g"/>`, `<FacetGrid rows="a" cols="b"/>`,
+   * `<Facet wrap={…}/>`). Removable in 0.13.0.
+   * https://ggsvelte.sh/guide/upgrading#compose-facet-as-a-child-layer
+   */
   facet?: FacetInput;
-  /** Coordinate system ("flip" shorthand accepted). */
+  /**
+   * Coordinate system ("flip" shorthand accepted).
+   *
+   * @deprecated since 0.11.0 — compose the coordinate system as a child layer
+   * instead (`<CoordFlip/>`, `<CoordFixed/>`, `<Coord value={…}/>`, …).
+   * Removable in 0.13.0.
+   * https://ggsvelte.sh/guide/upgrading#compose-coord-as-a-child-layer
+   */
   coord?: CoordSpec | "flip";
   /**
    * Per-scale configuration (types, domains, schemes, breaks, labels).
