@@ -28,9 +28,11 @@ export type NonPositionGuideChannel = Exclude<GuideChannel, "x" | "y">;
 
 /**
  * Copy own enumerable keys whose value is not `undefined`. No whitelist.
- * Same contract as the coord/facet/scale/labs factories' definedProps.
+ * Same contract as the coord/facet/scale/labs factories' definedProps, but
+ * module-private: guide shells reach it through {@link splitChannel}, which
+ * they must use anyway to keep `channel` out of the guide object.
  */
-export function definedProps<T extends object>(props: T): T {
+function definedProps<T extends object>(props: T): T {
   const out: Record<string, unknown> = {};
   for (const key of Object.keys(props)) {
     const value = (props as Record<string, unknown>)[key];
