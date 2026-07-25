@@ -206,7 +206,9 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           dateLabels: "%b %d",
           domain: [Y_BOTTOM, Y_TOP],
         },
-        x: { type: "linear", domain: [800, 2030] },
+        // `labels: "d"` because a year is not a quantity: the default numeric
+        // formatter groups thousands, which renders 1000 CE as "1,000".
+        x: { type: "linear", domain: [800, 2030], labels: "d" },
       },
       labs: { x: "Year", y: "Peak bloom" },
     },
@@ -221,7 +223,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       dateLabels: "%b %d",
       domain: ["${Y_BOTTOM}", "${Y_TOP}"],
     },
-    x: { type: "linear", domain: [800, 2030] },
+    x: { type: "linear", domain: [800, 2030], labels: "d" },
     fill: {
       type: "manual",
       domain: [${SAKURA_EPOCHS.map((e) => `"${e.epoch}"`).join(", ")}],
