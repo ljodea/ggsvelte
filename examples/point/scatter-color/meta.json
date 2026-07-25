@@ -1,6 +1,5 @@
 {
   "title": "Scatter plot with color mapping",
-  "description": "A discrete color mapping splits the points into groups and produces the legend. Guerry's 1833 moral statistics of France put 85 departments on the axes, coloured by region on the few theme with tableau10 — Corsica is dropped because the source gives it no region.",
   "tags": ["point", "color", "legend", "scatter", "theme", "palette"],
   "docsSection": "Points & scatter"
 }

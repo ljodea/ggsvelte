@@ -53,7 +53,7 @@ describe("gallery filter URL contract", () => {
 
   test("searches manifest titles, descriptions, and tags", () => {
     const curated = filterGallery(entries, {
-      query: "wheat wages",
+      query: "multi-series line",
       categories: [],
       tags: [],
     });

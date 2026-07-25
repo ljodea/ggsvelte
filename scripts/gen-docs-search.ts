@@ -113,7 +113,10 @@ export function createDocsSearchEntries(): DocsSearchEntry[] {
       id: `example:${example.id.replaceAll("/", ":")}`,
       kind: "example",
       title: example.title,
-      summary: example.description,
+      summary:
+        example.description.trim() === ""
+          ? `${example.title} (${example.docsSection})`
+          : example.description,
       href: examplePublicHref(example.id),
       keywords: [example.title, example.docsSection, ...example.tags],
       exact: [example.title],

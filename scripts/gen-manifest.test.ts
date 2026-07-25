@@ -113,7 +113,7 @@ describe("meta validation", () => {
     expect(validateMeta([], "x/y")).toHaveLength(1);
     const missing = validateMeta({}, "x/y");
     expect(missing.join("\n")).toContain('"title"');
-    expect(missing.join("\n")).toContain('"description"');
+    expect(missing.join("\n")).not.toContain('"description"');
     expect(missing.join("\n")).toContain('"docsSection"');
     expect(missing.join("\n")).toContain('"tags"');
     expect(
@@ -124,6 +124,14 @@ describe("meta validation", () => {
     ).toHaveLength(1);
     expect(
       validateMeta({ title: "T", description: "D", tags: [1], docsSection: "S" }, "x/y"),
+    ).toHaveLength(1);
+    // Empty / omitted description is allowed (delete-not-rewrite for page subtitles).
+    expect(validateMeta({ title: "T", tags: ["a"], docsSection: "S" }, "x/y")).toHaveLength(0);
+    expect(
+      validateMeta({ title: "T", description: "", tags: ["a"], docsSection: "S" }, "x/y"),
+    ).toHaveLength(0);
+    expect(
+      validateMeta({ title: "T", description: 1, tags: ["a"], docsSection: "S" }, "x/y"),
     ).toHaveLength(1);
     expect(
       validateMeta(

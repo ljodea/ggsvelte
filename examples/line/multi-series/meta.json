@@ -1,6 +1,5 @@
 {
   "title": "Multi-series line chart",
-  "description": "One line per group, derived from the discrete color mapping — plus a point layer on top showing how layers compose. Playfair's 1821 wheat-and-wages plate supplies the two series, and a manual color scale picks the economist theme's own red and ink so both clear contrast on its tinted paper — the shorter wage series ends early because the original records no 1821 wage.",
   "tags": ["line", "point", "color", "legend", "layers", "theme", "palette"],
   "docsSection": "Lines & time"
 }

@@ -8,6 +8,11 @@ Generated for the gallery/interaction structural PR that:
 - Removes example-page playground handoff + "Local PortableSpec only…"
 - Leaves per-example Svelte API + description cleanup for later PRs
 
+## Status
+
+- **Page subtitles (`meta.json` description)**: deleted corpus-wide (omit key; empty lede). Do not rewrite.
+- **Svelte prop → child API**: still open per checklist below.
+
 ## Scope rules (every example page)
 
 1. **AI-slot litmus** — delete Barnum/slop description text (delete, do not rewrite)
@@ -39,57 +44,57 @@ Generated for the gallery/interaction structural PR that:
 - - `facet=`: **4**
 - - `coord=`: **3**
 - Already using Geom children: **42**
-- Description likely needs deletion (long / em-dash essay): **42**
+- Description likely needs deletion (long / em-dash essay): **0** (deleted; optional empty)
 - Journey / demo-chrome pages: **6**
 
 ## Per-example checklist
 
 | id                            | route                                 | delete description | API props → children            | notes                                                            |
 | ----------------------------- | ------------------------------------- | ------------------ | ------------------------------- | ---------------------------------------------------------------- |
-| `area/basic`                  | `/examples/area/basic`                | YES                | labs=, theme=, scales=          | —                                                                |
-| `area/stacked`                | `/examples/area/stacked`              | YES                | labs=, theme=, scales=          | —                                                                |
-| `bar/dodged`                  | `/examples/bar/dodged`                | YES                | labs=, theme=, scales=          | —                                                                |
-| `bar/horizontal`              | `/examples/bar/horizontal`            | YES                | labs=, theme=, coord=           | —                                                                |
-| `bar/proportions`             | `/examples/bar/proportions`           | YES                | labs=, theme=, scales=          | —                                                                |
-| `bar/stacked`                 | `/examples/bar/stacked`               | YES                | labs=, theme=, scales=          | —                                                                |
-| `boxplot/by-category`         | `/examples/boxplot/by-category`       | YES                | labs=, theme=, scales=          | —                                                                |
-| `col/basic`                   | `/examples/col/basic`                 | YES                | labs=, theme=, scales=          | —                                                                |
-| `col/long-labels`             | `/examples/col/long-labels`           | YES                | labs=                           | —                                                                |
-| `col/mixed-outlier-labels`    | `/examples/col/mixed-outlier-labels`  | YES                | labs=                           | —                                                                |
-| `col/value-labels`            | `/examples/col/value-labels`          | YES                | labs=, theme=, scales=          | —                                                                |
-| `color/binned`                | `/examples/color/binned`              | YES                | labs=, theme=, scales=          | —                                                                |
-| `color/continuous`            | `/examples/color/continuous`          | YES                | labs=, theme=, scales=, coord=  | —                                                                |
-| `density/overlay`             | `/examples/density/overlay`           | YES                | labs=, theme=, scales=          | —                                                                |
-| `errorbar/mean-se`            | `/examples/errorbar/mean-se`          | YES                | labs=, theme=, scales=          | —                                                                |
-| `facet/ordered-side-strips`   | `/examples/facet/ordered-side-strips` | YES                | labs=, theme=, scales=, facet=  | —                                                                |
-| `facet/wrap`                  | `/examples/facet/wrap`                | YES                | labs=, theme=, facet=           | —                                                                |
-| `facet/wrap-free-y`           | `/examples/facet/wrap-free-y`         | YES                | labs=, theme=, scales=, facet=  | —                                                                |
-| `histogram/basic`             | `/examples/histogram/basic`           | YES                | labs=, theme=                   | —                                                                |
-| `interaction/brush-zoom`      | `/interactions/brush-zoom`            | YES                | labs=, theme=                   | exposition (not gallery); gg-demo-chrome; journey meta           |
-| `interaction/facet-intervals` | `/interactions/facet-intervals`       | YES                | labs=, theme=, facet=           | exposition (not gallery); gg-demo-chrome; journey meta           |
-| `interaction/legend-filter`   | `/examples/interaction/legend-filter` | YES                | labs=, theme=, scales=          | gg-demo-chrome; journey meta                                     |
-| `interaction/legend-focus`    | `/examples/interaction/legend-focus`  | YES                | layers=, labs=, theme=, scales= | gg-demo-chrome; journey meta; **layers= prop**; no Geom children |
-| `interaction/linked-views`    | `/interactions/linked-views`          | YES                | labs=, theme=                   | exposition (not gallery); gg-demo-chrome; journey meta           |
-| `interaction/tooltip`         | `/examples/interaction/tooltip`       | YES                | labs=, theme=                   | gg-demo-chrome; journey meta                                     |
-| `line/multi-series`           | `/examples/line/multi-series`         | YES                | labs=, theme=, scales=          | —                                                                |
-| `line/time-axis`              | `/examples/line/time-axis`            | YES                | labs=, theme=                   | —                                                                |
-| `point/canvas-scatter`        | `/examples/point/canvas-scatter`      | YES                | labs=, theme=, scales=          | —                                                                |
-| `point/fixed-aspect`          | `/examples/point/fixed-aspect`        | review             | labs=, coord=                   | —                                                                |
-| `point/jitter`                | `/examples/point/jitter`              | YES                | labs=, theme=                   | —                                                                |
-| `point/layer-data-bands`      | `/examples/point/layer-data-bands`    | YES                | labs=                           | —                                                                |
-| `point/log-scale`             | `/examples/point/log-scale`           | YES                | labs=, theme=, scales=          | —                                                                |
-| `point/scatter-color`         | `/examples/point/scatter-color`       | YES                | labs=, theme=, scales=          | —                                                                |
-| `point/style-scales`          | `/examples/point/style-scales`        | review             | labs=, scales=                  | —                                                                |
-| `raster/grid`                 | `/examples/raster/grid`               | YES                | labs=, theme=, scales=          | —                                                                |
-| `rect/regions`                | `/examples/rect/regions`              | YES                | labs=, theme=, scales=          | —                                                                |
-| `ribbon/bounds`               | `/examples/ribbon/bounds`             | YES                | labs=, theme=, scales=          | —                                                                |
-| `ribbon/paint`                | `/examples/ribbon/paint`              | YES                | — (geom children only?)         | no Geom children                                                 |
-| `rule/annotation`             | `/examples/rule/annotation`           | YES                | labs=, theme=                   | —                                                                |
-| `rule/data-driven`            | `/examples/rule/data-driven`          | YES                | labs=, theme=                   | —                                                                |
-| `segment/annotations`         | `/examples/segment/annotations`       | YES                | labs=, theme=, scales=          | —                                                                |
-| `smooth/loess-scatter`        | `/examples/smooth/loess-scatter`      | YES                | labs=, theme=, scales=          | —                                                                |
-| `text/labels`                 | `/examples/text/labels`               | YES                | labs=, theme=, scales=          | —                                                                |
-| `tile/heatmap`                | `/examples/tile/heatmap`              | YES                | labs=, theme=, scales=          | —                                                                |
+| `area/basic`                  | `/examples/area/basic`                | DONE               | labs=, theme=, scales=          | —                                                                |
+| `area/stacked`                | `/examples/area/stacked`              | DONE               | labs=, theme=, scales=          | —                                                                |
+| `bar/dodged`                  | `/examples/bar/dodged`                | DONE               | labs=, theme=, scales=          | —                                                                |
+| `bar/horizontal`              | `/examples/bar/horizontal`            | DONE               | labs=, theme=, coord=           | —                                                                |
+| `bar/proportions`             | `/examples/bar/proportions`           | DONE               | labs=, theme=, scales=          | —                                                                |
+| `bar/stacked`                 | `/examples/bar/stacked`               | DONE               | labs=, theme=, scales=          | —                                                                |
+| `boxplot/by-category`         | `/examples/boxplot/by-category`       | DONE               | labs=, theme=, scales=          | —                                                                |
+| `col/basic`                   | `/examples/col/basic`                 | DONE               | labs=, theme=, scales=          | —                                                                |
+| `col/long-labels`             | `/examples/col/long-labels`           | DONE               | labs=                           | —                                                                |
+| `col/mixed-outlier-labels`    | `/examples/col/mixed-outlier-labels`  | DONE               | labs=                           | —                                                                |
+| `col/value-labels`            | `/examples/col/value-labels`          | DONE               | labs=, theme=, scales=          | —                                                                |
+| `color/binned`                | `/examples/color/binned`              | DONE               | labs=, theme=, scales=          | —                                                                |
+| `color/continuous`            | `/examples/color/continuous`          | DONE               | labs=, theme=, scales=, coord=  | —                                                                |
+| `density/overlay`             | `/examples/density/overlay`           | DONE               | labs=, theme=, scales=          | —                                                                |
+| `errorbar/mean-se`            | `/examples/errorbar/mean-se`          | DONE               | labs=, theme=, scales=          | —                                                                |
+| `facet/ordered-side-strips`   | `/examples/facet/ordered-side-strips` | DONE               | labs=, theme=, scales=, facet=  | —                                                                |
+| `facet/wrap`                  | `/examples/facet/wrap`                | DONE               | labs=, theme=, facet=           | —                                                                |
+| `facet/wrap-free-y`           | `/examples/facet/wrap-free-y`         | DONE               | labs=, theme=, scales=, facet=  | —                                                                |
+| `histogram/basic`             | `/examples/histogram/basic`           | DONE               | labs=, theme=                   | —                                                                |
+| `interaction/brush-zoom`      | `/interactions/brush-zoom`            | DONE               | labs=, theme=                   | exposition (not gallery); gg-demo-chrome; journey meta           |
+| `interaction/facet-intervals` | `/interactions/facet-intervals`       | DONE               | labs=, theme=, facet=           | exposition (not gallery); gg-demo-chrome; journey meta           |
+| `interaction/legend-filter`   | `/examples/interaction/legend-filter` | DONE               | labs=, theme=, scales=          | gg-demo-chrome; journey meta                                     |
+| `interaction/legend-focus`    | `/examples/interaction/legend-focus`  | DONE               | layers=, labs=, theme=, scales= | gg-demo-chrome; journey meta; **layers= prop**; no Geom children |
+| `interaction/linked-views`    | `/interactions/linked-views`          | DONE               | labs=, theme=                   | exposition (not gallery); gg-demo-chrome; journey meta           |
+| `interaction/tooltip`         | `/examples/interaction/tooltip`       | DONE               | labs=, theme=                   | gg-demo-chrome; journey meta                                     |
+| `line/multi-series`           | `/examples/line/multi-series`         | DONE               | labs=, theme=, scales=          | —                                                                |
+| `line/time-axis`              | `/examples/line/time-axis`            | DONE               | labs=, theme=                   | —                                                                |
+| `point/canvas-scatter`        | `/examples/point/canvas-scatter`      | DONE               | labs=, theme=, scales=          | —                                                                |
+| `point/fixed-aspect`          | `/examples/point/fixed-aspect`        | DONE               | labs=, coord=                   | —                                                                |
+| `point/jitter`                | `/examples/point/jitter`              | DONE               | labs=, theme=                   | —                                                                |
+| `point/layer-data-bands`      | `/examples/point/layer-data-bands`    | DONE               | labs=                           | —                                                                |
+| `point/log-scale`             | `/examples/point/log-scale`           | DONE               | labs=, theme=, scales=          | —                                                                |
+| `point/scatter-color`         | `/examples/point/scatter-color`       | DONE               | labs=, theme=, scales=          | —                                                                |
+| `point/style-scales`          | `/examples/point/style-scales`        | DONE               | labs=, scales=                  | —                                                                |
+| `raster/grid`                 | `/examples/raster/grid`               | DONE               | labs=, theme=, scales=          | —                                                                |
+| `rect/regions`                | `/examples/rect/regions`              | DONE               | labs=, theme=, scales=          | —                                                                |
+| `ribbon/bounds`               | `/examples/ribbon/bounds`             | DONE               | labs=, theme=, scales=          | —                                                                |
+| `ribbon/paint`                | `/examples/ribbon/paint`              | DONE               | — (geom children only?)         | no Geom children                                                 |
+| `rule/annotation`             | `/examples/rule/annotation`           | DONE               | labs=, theme=                   | —                                                                |
+| `rule/data-driven`            | `/examples/rule/data-driven`          | DONE               | labs=, theme=                   | —                                                                |
+| `segment/annotations`         | `/examples/segment/annotations`       | DONE               | labs=, theme=, scales=          | —                                                                |
+| `smooth/loess-scatter`        | `/examples/smooth/loess-scatter`      | DONE               | labs=, theme=, scales=          | —                                                                |
+| `text/labels`                 | `/examples/text/labels`               | DONE               | labs=, theme=, scales=          | —                                                                |
+| `tile/heatmap`                | `/examples/tile/heatmap`              | DONE               | labs=, theme=, scales=          | —                                                                |
 
 ## Suggested fix batches (dependency order, not calendar)
 

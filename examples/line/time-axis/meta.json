@@ -1,6 +1,5 @@
 {
   "title": "Raw-year time-axis line chart",
-  "description": "A long-run series over untouched four-digit year strings. Value-driven inference selects a UTC calendar scale automatically; no preprocessing or explicit time scale is required. Bowley's 1855–99 British export series supplies the trend, drawn on the fivethirtyeight theme's newsprint paper with white gridlines.",
   "tags": ["line", "time", "scales", "inference", "theme"],
   "docsSection": "Lines & time"
 }

@@ -27,7 +27,9 @@
     </p>
     <p class="eyebrow">Interaction</p>
     <h1>{data.entry.title}</h1>
-    <p class="lede">{data.entry.description}</p>
+    {#if data.entry.description.trim() !== ""}
+      <p class="lede">{data.entry.description}</p>
+    {/if}
   </header>
 
   {#if data.entry.journey}

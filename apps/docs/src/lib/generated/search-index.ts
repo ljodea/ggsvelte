@@ -3813,8 +3813,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "page:interactions-brush-zoom",
     kind: "page",
     title: "Interval selection and zoom",
-    summary:
-      "The tool rail separates rectangular selection from brush zoom. Selection reports start, change, end, and clear phases with semantic keys and domain bounds; zoom reports explicit domains and a clear event on reset, while inspection remains available alongside both. The field is the 333 complete Palmer Archipelago penguin records.",
+    summary: "Interval selection and zoom",
     href: "/interactions/brush-zoom",
     keywords: [
       "Interval selection and zoom",
@@ -3832,8 +3831,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "page:interactions-facet-intervals",
     kind: "page",
     title: "Coordinate intervals across facets",
-    summary:
-      "Choose independent, union, or cross-panel interval semantics, then draw inside a facet. Stable panel identities keep selections attached to their facet even when rows reorder or a panel temporarily disappears. Panels are the three Palmer Archipelago islands; Biscoe holds every Gentoo, so the panels have genuinely different shapes.",
+    summary: "Coordinate intervals across facets",
     href: "/interactions/facet-intervals",
     keywords: [
       "Coordinate intervals across facets",
@@ -3851,8 +3849,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "page:interactions-linked-views",
     kind: "page",
     title: "Link plots, controls, and a table",
-    summary:
-      "A shared Svelte 5 interaction controller coordinates semantic selection, lightweight emphasis, and zoom domains without callback loops. Stable row keys link two plots to ordinary accessible DOM, while explicit reconciliation makes data replacement predictable. Five Palmer penguins per species, evenly sampled, so every linked row fits in the table alongside the plots.",
+    summary: "Link plots, controls, and a table",
     href: "/interactions/linked-views",
     keywords: [
       "Link plots, controls, and a table",
@@ -3871,8 +3868,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:area:basic",
     kind: "example",
     title: "Area chart",
-    summary:
-      "A single filled area from the zero baseline (the theme's accent role) with a line layer tracing its upper edge — layer order is paint order. Halley's 1693 Breslau life table gives the monotone survivorship curve, and the classic theme drops the grid for black axis lines and ticks.",
+    summary: "Area chart (Areas)",
     href: "/examples/area/basic",
     keywords: ["Area chart", "Areas", "area", "line", "layers", "theme"],
     exact: ["Area chart"],
@@ -3881,8 +3877,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:area:stacked",
     kind: "example",
     title: "Stacked area chart",
-    summary:
-      "Areas stack by default: the fill groups pile from the zero baseline, showing total and composition over time. First-seen group order stays on top. Nightingale's 1858 Crimean mortality data supplies the composition, and the economist theme's tinted paper forces an explicit manual fill scale chosen for contrast against it.",
+    summary: "Stacked area chart (Areas)",
     href: "/examples/area/stacked",
     keywords: [
       "Stacked area chart",
@@ -3900,8 +3895,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:bar:dodged",
     kind: "example",
     title: "Dodged bar chart",
-    summary:
-      "position dodge places the fill groups side by side within each band: groups present at an x split the band evenly (ggplot2's preserve = \"total\"). Edgeworth's 1885 county mortality table supplies six counties over seven years, weighted by deaths, on the few theme with tableau10.",
+    summary: "Dodged bar chart (Bars & columns)",
     href: "/examples/bar/dodged",
     keywords: [
       "Dodged bar chart",
@@ -3921,8 +3915,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:bar:horizontal",
     kind: "example",
     title: "Horizontal bar chart (coord flip)",
-    summary:
-      'coord: {"type": "flip"} is THE horizontal-composition mechanism: map x to the category and y to the value as usual, then flip — the band axis moves to the left (first category at the bottom, like ggplot2), the measure runs rightward, and stacking/dodging would follow. Armada squadron tonnage, pre-sorted so the flip reads smallest-up.',
+    summary: "Horizontal bar chart (coord flip) (Bars & columns)",
     href: "/examples/bar/horizontal",
     keywords: [
       "Horizontal bar chart (coord flip)",
@@ -3940,8 +3933,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:bar:proportions",
     kind: "example",
     title: "Proportional bar chart",
-    summary:
-      "position fill normalises each band to 1, turning counts into shares. The Armada's 1588 muster splits each squadron's complement into soldiers and sailors, weighted by men, with a manual two-key fill.",
+    summary: "Proportional bar chart (Bars & columns)",
     href: "/examples/bar/proportions",
     keywords: [
       "Proportional bar chart",
@@ -3959,8 +3951,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:bar:stacked",
     kind: "example",
     title: "Stacked bar chart",
-    summary:
-      "position stack piles the fill groups within each band. The Trial of the Pyx supplies a real frequency table, so the weight channel makes the count stat sum counts instead of counting rows — 72 rows standing in for 10,000 sovereigns — and flexoki's eight keys map one-to-one onto the eight ordered deviation bins.",
+    summary: "Stacked bar chart (Bars & columns)",
     href: "/examples/bar/stacked",
     keywords: [
       "Stacked bar chart",
@@ -3979,8 +3970,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:boxplot:by-category",
     kind: "example",
     title: "Boxplot by category",
-    summary:
-      "Five-number summaries per category, with outliers past 1.5 IQR drawn individually. Michelson's five experimental runs of twenty disagree with each other more than the readings within any one of them — the reason the dataset is used to teach measurement error.",
+    summary: "Boxplot by category (Distributions)",
     href: "/examples/boxplot/by-category",
     keywords: [
       "Boxplot by category",
@@ -3997,8 +3987,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:col:basic",
     kind: "example",
     title: "Column chart",
-    summary:
-      "geom col draws one bar per row at the height you supply — no statistic. Quetelet's 5,738 Scottish militiamen give the shape that made the normal curve a claim about people, under the classic theme's black axis lines and bare panel.",
+    summary: "Column chart (Bars & columns)",
     href: "/examples/col/basic",
     keywords: ["Column chart", "Bars & columns", "col", "bars", "identity", "theme"],
     exact: ["Column chart"],
@@ -4007,8 +3996,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:col:long-labels",
     kind: "example",
     title: "Columns with long i18n category labels",
-    summary:
-      "Narrow (480px) column chart with long Spanish multi-word and German single-token category labels — exercises measured band-axis wrap/rotate/truncate layout.",
+    summary: "Columns with long i18n category labels (Bars & columns)",
     href: "/examples/col/long-labels",
     keywords: [
       "Columns with long i18n category labels",
@@ -4025,8 +4013,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:col:mixed-outlier-labels",
     kind: "example",
     title: "Columns with one multi-word category outlier",
-    summary:
-      "Desktop-width (640px) column chart: mostly short labels plus one four-token Spanish outlier — band planner should wrap, not fall to −90° + truncate (#634).",
+    summary: "Columns with one multi-word category outlier (Bars & columns)",
     href: "/examples/col/mixed-outlier-labels",
     keywords: [
       "Columns with one multi-word category outlier",
@@ -4043,8 +4030,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:col:value-labels",
     kind: "example",
     title: "Column chart with value labels",
-    summary:
-      "A text layer above each column turns the bars into a table you can read directly. The 1954 Salk vaccine trial supplies the numbers the trial existed to produce: the vaccinated rate is about a third of the placebo rate.",
+    summary: "Column chart with value labels (Bars & columns)",
     href: "/examples/col/value-labels",
     keywords: [
       "Column chart with value labels",
@@ -4061,8 +4047,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:color:binned",
     kind: "example",
     title: "Binned color (colorsteps)",
-    summary:
-      "A quantitative color mapping split into deterministic intervals with a colorsteps guide. Color carries a third variable — how often each (actual, estimated) pairing came up across Jevons' 1,027 throws — rather than restating x or y.",
+    summary: "Binned color (colorsteps) (Color & legends)",
     href: "/examples/color/binned",
     keywords: [
       "Binned color (colorsteps)",
@@ -4079,8 +4064,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:color:continuous",
     kind: "example",
     title: "Continuous color (ramp legend)",
-    summary:
-      "A quantitative color mapping through the viridis sequential ramp, with a gradient ramp legend instead of discrete swatches, under coord_fixed so the map keeps its shape. A second layer draws the true positions the ramp is read against.",
+    summary: "Continuous color (ramp legend) (Color & legends)",
     href: "/examples/color/continuous",
     keywords: [
       "Continuous color (ramp legend)",
@@ -4098,8 +4082,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:density:overlay",
     kind: "example",
     title: "Overlaid density estimates",
-    summary:
-      "Kernel density estimates for two groups, drawn semi-transparent so the overlap stays readable. Galton's 934 adult children from 1886 give two distributions that overlap heavily but separate cleanly at the means.",
+    summary: "Overlaid density estimates (Distributions)",
     href: "/examples/density/overlay",
     keywords: [
       "Overlaid density estimates",
@@ -4117,8 +4100,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:errorbar:mean-se",
     kind: "example",
     title: "Errorbars (mean ± se) over raw data",
-    summary:
-      'The summary stat computes mean ± standard error per group (ggplot2\'s mean_se default), drawn as errorbars over the seeded-jitter raw observations — here the 1905 soporific trial that "Student" used to introduce the t-distribution.',
+    summary: "Errorbars (mean ± se) over raw data (Statistical summaries)",
     href: "/examples/errorbar/mean-se",
     keywords: [
       "Errorbars (mean ± se) over raw data",
@@ -4134,8 +4116,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:facet:ordered-side-strips",
     kind: "example",
     title: "Ordered small multiples with side strips",
-    summary:
-      'facet.wrap.levels locks Gosset\'s authored A→D sample order independent of row order; labels supply human strip text; strip.position: "left" reserves a measured band beside each panel instead of above it. Fill comes from an ordinal palette scale with its legend suppressed, because the strips already name every panel.',
+    summary: "Ordered small multiples with side strips (Facets)",
     href: "/examples/facet/ordered-side-strips",
     keywords: [
       "Ordered small multiples with side strips",
@@ -4153,8 +4134,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:facet:wrap",
     kind: "example",
     title: "Faceted histograms (facet wrap)",
-    summary:
-      "facet.wrap partitions the data BEFORE the bin stat: each panel bins its own parent-child table over one shared break grid, and fixed scales share both axes (edge axes only). The weight channel lets Pearson and Lee's published frequency table stand in for 4,892 measured children.",
+    summary: "Faceted histograms (facet wrap) (Facets)",
     href: "/examples/facet/wrap",
     keywords: [
       "Faceted histograms (facet wrap)",
@@ -4171,8 +4151,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:facet:wrap-free-y",
     kind: "example",
     title: "Free y scales per panel",
-    summary:
-      'scales: "free_y" trains the y domain per panel — Arbuthnot\'s four measures span five orders of magnitude, from a ratio near 1.1 to the 68,596 plague deaths of 1665, and each fills its panel at its own magnitude. Every panel gets its own left axis; x stays shared.',
+    summary: "Free y scales per panel (Facets)",
     href: "/examples/facet/wrap-free-y",
     keywords: ["Free y scales per panel", "Facets", "facet", "free-scales", "line", "wrap"],
     exact: ["Free y scales per panel"],
@@ -4181,8 +4160,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:histogram:basic",
     kind: "example",
     title: "Histogram",
-    summary:
-      "The bin stat buckets a continuous variable and counts what lands in each bucket. Michelson's 100 speed-of-light runs from 1879 supply the distribution, and a rule at the modern accepted value shows the whole thing sitting above it: precise and biased at once.",
+    summary: "Histogram (Distributions)",
     href: "/examples/histogram/basic",
     keywords: [
       "Histogram",
@@ -4200,8 +4178,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:interaction:legend-filter",
     kind: "example",
     title: "Filter with a stable-color legend",
-    summary:
-      "Accessible legend checkboxes explicitly include or exclude data before statistics and scales are trained. Hidden groups remain available in the legend, and each group keeps its original color when it returns. The three series are Playfair's national debt, revenue and expenditure, 1770–1824 — the same source faceted over disjoint commodity series in facet/wrap-free-y.",
+    summary: "Filter with a stable-color legend (Interaction)",
     href: "/examples/interaction/legend-filter",
     keywords: [
       "Filter with a stable-color legend",
@@ -4219,8 +4196,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:interaction:legend-focus",
     kind: "example",
     title: "Focus and link discrete legend groups",
-    summary:
-      "Opt-in legend controls preview locally, commit stable row keys to a shared controller, and de-emphasize unrelated marks without changing scales, statistics, layout, or color identity. The same semantic mask drives SVG and canvas views. The three series are Playfair's stock, bread and export indices, 1770–1824, which read as both a scatter and a connected line.",
+    summary: "Focus and link discrete legend groups (Interaction)",
     href: "/examples/interaction/legend-focus",
     keywords: [
       "Focus and link discrete legend groups",
@@ -4240,8 +4216,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:interaction:tooltip",
     kind: "example",
     title: "Inspect and pin data",
-    summary:
-      "Chart-local, private inspection state adds a semantic crosshair, a complete HTML tooltip, keyboard traversal, and click-or-Enter pinning. The concise live announcement reports the shared x value and group count once, while every member remains navigable in ordinary DOM. Measurements are the 333 complete Palmer Archipelago penguin records; flipper length is recorded to the millimetre, so many birds genuinely share an x value.",
+    summary: "Inspect and pin data (Interaction)",
     href: "/examples/interaction/tooltip",
     keywords: [
       "Inspect and pin data",
@@ -4259,8 +4234,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:line:multi-series",
     kind: "example",
     title: "Multi-series line chart",
-    summary:
-      "One line per group, derived from the discrete color mapping — plus a point layer on top showing how layers compose. Playfair's 1821 wheat-and-wages plate supplies the two series, and a manual color scale picks the economist theme's own red and ink so both clear contrast on its tinted paper — the shorter wage series ends early because the original records no 1821 wage.",
+    summary: "Multi-series line chart (Lines & time)",
     href: "/examples/line/multi-series",
     keywords: [
       "Multi-series line chart",
@@ -4279,8 +4253,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:line:time-axis",
     kind: "example",
     title: "Raw-year time-axis line chart",
-    summary:
-      "A long-run series over untouched four-digit year strings. Value-driven inference selects a UTC calendar scale automatically; no preprocessing or explicit time scale is required. Bowley's 1855–99 British export series supplies the trend, drawn on the fivethirtyeight theme's newsprint paper with white gridlines.",
+    summary: "Raw-year time-axis line chart (Lines & time)",
     href: "/examples/line/time-axis",
     keywords: [
       "Raw-year time-axis line chart",
@@ -4297,8 +4270,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:point:canvas-scatter",
     kind: "example",
     title: "Canvas scatter (10,000 points)",
-    summary:
-      "Above the canvas threshold the marks render to a canvas stratum while axes, grid, and legend stay SVG. This is the one example that keeps generated data deliberately — its subject is the rendering path under load, not a dataset — and the dark theme is where overplotting at low alpha actually reads.",
+    summary: "Canvas scatter (10,000 points) (Points & scatter)",
     href: "/examples/point/canvas-scatter",
     keywords: [
       "Canvas scatter (10,000 points)",
@@ -4314,8 +4286,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:point:fixed-aspect",
     kind: "example",
     title: "Fixed aspect ratio",
-    summary:
-      "A unit circle remains circular through responsive width changes because coord_fixed fits a centered equal-unit data rectangle.",
+    summary: "Fixed aspect ratio (Scatter plots)",
     href: "/examples/point/fixed-aspect",
     keywords: [
       "Fixed aspect ratio",
@@ -4331,8 +4302,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:point:jitter",
     kind: "example",
     title: "Jittered scatter",
-    summary:
-      "position jitter offsets overlapping marks so ties stay countable. Pearson's 1910 survey of 70 trades has many sharing a wage class, and the clean theme's dashed horizontal grid keeps the eye on the vertical spread.",
+    summary: "Jittered scatter (Points & scatter)",
     href: "/examples/point/jitter",
     keywords: [
       "Jittered scatter",
@@ -4349,8 +4319,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:point:layer-data-bands",
     kind: "example",
     title: "Per-layer data (bands + callout)",
-    summary:
-      "A large observation table layered with a small background-band table and a one-row annotation table. Each geom supplies its own data; the plot has no shared table.",
+    summary: "Per-layer data (bands + callout) (Scatter plots)",
     href: "/examples/point/layer-data-bands",
     keywords: [
       "Per-layer data (bands + callout)",
@@ -4367,8 +4336,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:point:log-scale",
     kind: "example",
     title: "Log-scale scatter with a fitted line",
-    summary:
-      "scaleXLog10 compresses a multiplicative axis. Farr's 1849 London cholera districts span two orders of magnitude in population density, and colouring by water company separates them the way the epidemic did — the economist theme's tinted paper forces a manual three-key scale.",
+    summary: "Log-scale scatter with a fitted line (Points & scatter)",
     href: "/examples/point/log-scale",
     keywords: [
       "Log-scale scatter with a fitted line",
@@ -4386,8 +4354,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:point:scatter-color",
     kind: "example",
     title: "Scatter plot with color mapping",
-    summary:
-      "A discrete color mapping splits the points into groups and produces the legend. Guerry's 1833 moral statistics of France put 85 departments on the axes, coloured by region on the few theme with tableau10 — Corsica is dropped because the source gives it no region.",
+    summary: "Scatter plot with color mapping (Points & scatter)",
     href: "/examples/point/scatter-color",
     keywords: [
       "Scatter plot with color mapping",
@@ -4405,8 +4372,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:point:style-scales",
     kind: "example",
     title: "Complete style scales",
-    summary:
-      "Map size, alpha, linewidth, shape, and linetype with stable legends across SVG and Canvas.",
+    summary: "Complete style scales (Scales & guides)",
     href: "/examples/point/style-scales",
     keywords: [
       "Complete style scales",
@@ -4426,8 +4392,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:raster:grid",
     kind: "example",
     title: "Regular density grid (geom raster)",
-    summary:
-      "Equal-cell raster from a regular (x, y) grid with fill — dense heatmaps without per-cell strokes. The grid must be complete, so the source's 22 × 42 table is cropped to its largest complete 15 × 33 sub-rectangle.",
+    summary: "Regular density grid (geom raster) (Rectangles & grids)",
     href: "/examples/raster/grid",
     keywords: [
       "Regular density grid (geom raster)",
@@ -4442,8 +4407,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:rect:regions",
     kind: "example",
     title: "Shaded time bands (geom rect)",
-    summary:
-      "Arbitrary rectangles from xmin/xmax/ymin/ymax — background time bands or regions without image injection. Two layers over two unrelated datasets, so neither inherits a plot-level mapping: the rects are Playfair's twelve reigns, the line is his wheat-price series.",
+    summary: "Shaded time bands (geom rect) (Rectangles & grids)",
     href: "/examples/rect/regions",
     keywords: [
       "Shaded time bands (geom rect)",
@@ -4459,8 +4423,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:ribbon:bounds",
     kind: "example",
     title: "Ribbon interval",
-    summary:
-      "A filled band between precomputed lower and upper bounds along x — the canonical geom_ribbon contract (not a zero-baseline area). The bounds are observed rather than modelled: the smallest and largest of Halley's five annual counts at each age.",
+    summary: "Ribbon interval (Areas)",
     href: "/examples/ribbon/bounds",
     keywords: ["Ribbon interval", "Areas", "ribbon", "interval", "bounds", "sqrt"],
     exact: ["Ribbon interval"],
@@ -4469,8 +4432,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:ribbon:paint",
     kind: "example",
     title: "Ribbon paint",
-    summary:
-      "Portable within-mark linear gradients for fill and stroke plus a bounded glow, with required solid fallbacks — not theme decoration and not a data color scale.",
+    summary: "Ribbon paint (Areas)",
     href: "/examples/ribbon/paint",
     keywords: ["Ribbon paint", "Areas", "ribbon", "interval", "gradient", "glow", "paint"],
     exact: ["Ribbon paint"],
@@ -4479,8 +4441,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:rule:annotation",
     kind: "example",
     title: "Reference-line annotations",
-    summary:
-      "The rule geom's annotation form: fixed x/y intercepts drawn under a line layer. Annotation rules inherit no plot aes and still train the scales, exactly like ggplot2's vline/hline. Both intercepts here come from the source's own documentation — the apparatus change after Cavendish's sixth determination, and the modern value of the earth's density.",
+    summary: "Reference-line annotations (Annotations & rules)",
     href: "/examples/rule/annotation",
     keywords: [
       "Reference-line annotations",
@@ -4496,8 +4457,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:rule:data-driven",
     kind: "example",
     title: "Data-driven rules (rug)",
-    summary:
-      "The rule geom's data-driven form: mapping aes.x (and only x) draws one vertical panel-spanning rule per row — a rug plot of the distribution. Semi-transparent strokes reveal density. Van Langren's 1644 chart, believed to be the first graph of statistical data, was exactly this.",
+    summary: "Data-driven rules (rug) (Annotations & rules)",
     href: "/examples/rule/data-driven",
     keywords: ["Data-driven rules (rug)", "Annotations & rules", "rule", "distribution", "rug"],
     exact: ["Data-driven rules (rug)"],
@@ -4506,8 +4466,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:segment:annotations",
     kind: "example",
     title: "Segment annotations",
-    summary:
-      "Finite data-driven segments from (x,y) to (xend,yend) — leader lines and range ticks that do not span the panel (unlike rule). Here each segment runs from a pair's self-fertilised height to its cross-fertilised one, so the direction of the segment carries Darwin's result.",
+    summary: "Segment annotations (Lines & rules)",
     href: "/examples/segment/annotations",
     keywords: ["Segment annotations", "Lines & rules", "segment", "annotation", "leader", "slope"],
     exact: ["Segment annotations"],
@@ -4516,8 +4475,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:smooth:loess-scatter",
     kind: "example",
     title: "Loess smooth with confidence ribbon",
-    summary:
-      "A loess trend (R-parity local regression, degree 2) fitted over a scatter, with its 95% confidence ribbon drawn under the line — ggplot2's geom_smooth, applied to the first scatterplot ever published. A continuous size scale carries Herschel's own weighting of each observation.",
+    summary: "Loess smooth with confidence ribbon (Statistical summaries)",
     href: "/examples/smooth/loess-scatter",
     keywords: [
       "Loess smooth with confidence ribbon",
@@ -4534,8 +4492,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:text:labels",
     kind: "example",
     title: "Text labels on a scatter",
-    summary:
-      "A text layer labels each point from a data field, start-anchored and offset with dx. Labels draw exactly where they are placed — there is no collision detection — so the twelve names are staggered down the panel by rank.",
+    summary: "Text labels on a scatter (Labels & text)",
     href: "/examples/text/labels",
     keywords: ["Text labels on a scatter", "Labels & text", "text", "point", "labels"],
     exact: ["Text labels on a scatter"],
@@ -4544,8 +4501,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "example:tile:heatmap",
     kind: "example",
     title: "Categorical heatmap (geom tile)",
-    summary:
-      "Center-sized tiles on discrete x/y with fill — the ordinary heatmap contract without raster grid constraints. Fifty-three week columns against seven weekday rows lay a whole year out as a calendar.",
+    summary: "Categorical heatmap (geom tile) (Rectangles & grids)",
     href: "/examples/tile/heatmap",
     keywords: [
       "Categorical heatmap (geom tile)",

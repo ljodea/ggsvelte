@@ -1,6 +1,5 @@
 {
   "title": "Stacked area chart",
-  "description": "Areas stack by default: the fill groups pile from the zero baseline, showing total and composition over time. First-seen group order stays on top. Nightingale's 1858 Crimean mortality data supplies the composition, and the economist theme's tinted paper forces an explicit manual fill scale chosen for contrast against it.",
   "tags": ["area", "stack", "fill", "legend", "theme", "palette"],
   "docsSection": "Areas"
 }

@@ -1,6 +1,5 @@
 {
   "title": "Histogram",
-  "description": "The bin stat buckets a continuous variable and counts what lands in each bucket. Michelson's 100 speed-of-light runs from 1879 supply the distribution, and a rule at the modern accepted value shows the whole thing sitting above it: precise and biased at once.",
   "tags": ["histogram", "bins", "stat", "rule", "annotation", "theme"],
   "docsSection": "Distributions"
 }

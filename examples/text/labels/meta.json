@@ -1,6 +1,5 @@
 {
   "title": "Text labels on a scatter",
-  "description": "A text layer labels each point from a data field, start-anchored and offset with dx. Labels draw exactly where they are placed — there is no collision detection — so the twelve names are staggered down the panel by rank.",
   "tags": ["text", "point", "labels"],
   "docsSection": "Labels & text"
 }

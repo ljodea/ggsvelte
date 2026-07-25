@@ -1,6 +1,5 @@
 {
   "title": "Inspect and pin data",
-  "description": "Chart-local, private inspection state adds a semantic crosshair, a complete HTML tooltip, keyboard traversal, and click-or-Enter pinning. The concise live announcement reports the shared x value and group count once, while every member remains navigable in ordinary DOM. Measurements are the 333 complete Palmer Archipelago penguin records; flipper length is recorded to the millimetre, so many birds genuinely share an x value.",
   "tags": ["interaction", "inspect", "tooltip", "crosshair", "keyboard", "pin"],
   "docsSection": "Interaction",
   "vrHeight": 740,
