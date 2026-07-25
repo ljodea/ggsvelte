@@ -56,6 +56,16 @@ function examplePublicHref(id: string): string {
   return `/examples/${id}`;
 }
 
+/** Manifest keywords for /interactions/<slug> demos (no nav section in routes). */
+function interactionExpositionKeywords(path: string): readonly string[] {
+  if (!path.startsWith("/interactions/")) return [];
+  const name = path.slice("/interactions/".length);
+  if (name === "" || name.includes("/")) return [];
+  const example = EXAMPLES.find((entry) => entry.id === `interaction/${name}`);
+  if (example === undefined) return [];
+  return [example.title, example.docsSection, ...example.tags];
+}
+
 function lifecycleAnchor(packageName: string, entry: string): string {
   return slug(`${packageName}${entry === "." ? "" : ` ${entry}`}`);
 }
@@ -67,13 +77,17 @@ export function createDocsSearchEntries(): DocsSearchEntry[] {
   for (const route of routes) {
     if (!route.index || route.kind !== "page" || route.path.startsWith("/examples/")) continue;
     const pageTitle = cleanTitle(route.title);
+    const expositionKeywords = interactionExpositionKeywords(route.path);
     entries.push({
       id: `page:${routeId(route.path)}`,
       kind: "page",
       title: pageTitle,
       summary: route.description,
       href: route.path,
-      keywords: route.navigation === undefined ? [] : [route.navigation.section],
+      keywords:
+        route.navigation === undefined
+          ? [...expositionKeywords]
+          : [route.navigation.section, ...expositionKeywords],
       exact: [pageTitle, ...(SEARCH_EXACT_ALIASES[route.path] ?? [])],
     });
     for (const heading of route.headings ?? []) {
@@ -84,15 +98,16 @@ export function createDocsSearchEntries(): DocsSearchEntry[] {
         title: heading.title,
         summary: `${heading.title} in ${pageTitle}. ${route.description}`,
         href: `${route.path}#${heading.id}`,
-        keywords: [pageTitle, route.navigation?.section ?? "documentation"],
+        keywords: [pageTitle, route.navigation?.section ?? "documentation", ...expositionKeywords],
         exact: [heading.title, ...(SEARCH_EXACT_ALIASES[`${route.path}#${heading.id}`] ?? [])],
       });
     }
   }
 
   for (const example of EXAMPLES) {
-    // Interaction expositions are indexed as /interactions/* pages above.
-    // Emitting a second example entry with the same href/title fails validation.
+    // Interaction expositions are indexed as /interactions/* pages above (with
+    // manifest tags/docsSection as keywords). A second example entry with the
+    // same href/title fails validation.
     if (typeof interactionExpositionSlug(example.id) === "string") continue;
     entries.push({
       id: `example:${example.id.replaceAll("/", ":")}`,

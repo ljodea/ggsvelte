@@ -3816,7 +3816,16 @@ export const DOCS_SEARCH_INDEX = [
     summary:
       "The tool rail separates rectangular selection from brush zoom. Selection reports start, change, end, and clear phases with semantic keys and domain bounds; zoom reports explicit domains and a clear event on reset, while inspection remains available alongside both. The field is the 333 complete Palmer Archipelago penguin records.",
     href: "/interactions/brush-zoom",
-    keywords: [],
+    keywords: [
+      "Interval selection and zoom",
+      "Interaction",
+      "interaction",
+      "select",
+      "interval",
+      "brush",
+      "zoom",
+      "events",
+    ],
     exact: ["Interval selection and zoom"],
   },
   {
@@ -3826,7 +3835,16 @@ export const DOCS_SEARCH_INDEX = [
     summary:
       "Choose independent, union, or cross-panel interval semantics, then draw inside a facet. Stable panel identities keep selections attached to their facet even when rows reorder or a panel temporarily disappears. Panels are the three Palmer Archipelago islands; Biscoe holds every Gentoo, so the panels have genuinely different shapes.",
     href: "/interactions/facet-intervals",
-    keywords: [],
+    keywords: [
+      "Coordinate intervals across facets",
+      "Interaction",
+      "interaction",
+      "facet",
+      "select",
+      "interval",
+      "brush",
+      "keyboard",
+    ],
     exact: ["Coordinate intervals across facets"],
   },
   {
@@ -3836,7 +3854,17 @@ export const DOCS_SEARCH_INDEX = [
     summary:
       "A shared Svelte 5 interaction controller coordinates semantic selection, lightweight emphasis, and zoom domains without callback loops. Stable row keys link two plots to ordinary accessible DOM, while explicit reconciliation makes data replacement predictable. Five Palmer penguins per species, evenly sampled, so every linked row fits in the table alongside the plots.",
     href: "/interactions/linked-views",
-    keywords: [],
+    keywords: [
+      "Link plots, controls, and a table",
+      "Interaction",
+      "interaction",
+      "controller",
+      "linked-views",
+      "select",
+      "emphasis",
+      "table",
+      "svelte",
+    ],
     exact: ["Link plots, controls, and a table"],
   },
   {
