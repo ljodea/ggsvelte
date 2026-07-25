@@ -246,6 +246,14 @@ describe("<Legend> child → assembled PortableSpec", () => {
     expect(assembled.legend?.order).toBe("present-first-seen");
   });
 
+  it("4d: an undefined order is stripped, never emitted as an undefined key", async () => {
+    // <Legend order={undefined}/> is what a caller writing
+    // `<Legend order={maybeUndefined}/>` produces. The key must not survive:
+    // LegendSpec is additionalProperties:false under exactOptionalPropertyTypes.
+    const assembled = await assembleWithProps({ useBareLegend: true });
+    expect(assembled.legend ?? {}).not.toHaveProperty("order");
+  });
+
   it("4c: <Legend order> and <GuideLegend order> are unrelated — entry sort vs placement rank", async () => {
     const assembled = await assembleWithProps({
       useLegend: true,

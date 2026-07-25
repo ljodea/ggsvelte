@@ -58,6 +58,7 @@
     colorScaleType,
     scaleLocalGuideTitle,
     useLegend = false,
+    useBareLegend = false,
     legendOrder = "sorted",
     guideOrder,
     useSpec = false,
@@ -91,6 +92,7 @@
     colorScaleType?: "binned" | "sequential";
     scaleLocalGuideTitle?: string;
     useLegend?: boolean;
+    useBareLegend?: boolean;
     legendOrder?: LegendSpec["order"];
     guideOrder?: number;
     useSpec?: boolean;
@@ -159,6 +161,9 @@
     {/if}
     {#if useLegend}
       <Legend order={legendOrder} />
+    {/if}
+    {#if useBareLegend}
+      <Legend order={undefined} />
     {/if}
     {#if useGuideAxis}
       <GuideAxis channel={guideChannel as PositionGuideChannel} />
