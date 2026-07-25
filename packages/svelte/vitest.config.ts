@@ -32,6 +32,13 @@ export default defineConfig({
     coverage: {
       ...coverageBase,
       reportsDirectory: "coverage/browser",
+      // The codemod is a node-only build tool: it imports svelte/compiler and
+      // walks source text, and nothing in a browser component test can reach
+      // it. Its own suite lives in the SSR lane (tests/codemod/*.ssr.test.ts),
+      // which CI runs without --coverage because coverage-v8 cannot collect
+      // under bun there. Leaving it in this denominator would tax the browser
+      // threshold with ~400 statements the browser lane can never execute.
+      exclude: [...(coverageBase.exclude ?? []), "src/lib/codemod/**"],
       // Browser-only gate: keep thresholds on this config (not coverageBase)
       // so the structurally-low SSR report is not blocked. Values sit ≥5pp
       // under current mature browser totals to ratchet regressions without
