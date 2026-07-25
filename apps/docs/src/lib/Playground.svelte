@@ -6,6 +6,7 @@
   import type { SpecError } from "@ggsvelte/spec";
 
   import { copyText } from "$lib/clipboard";
+  import PlaygroundBrowseLinks from "$lib/components/PlaygroundBrowseLinks.svelte";
   import PlaygroundCode from "$lib/components/PlaygroundCode.svelte";
   import PlaygroundEvents from "$lib/components/PlaygroundEvents.svelte";
   import PlaygroundPreview from "$lib/components/PlaygroundPreview.svelte";
@@ -626,7 +627,6 @@
     samples={sampleLinks}
     {onGenerate}
     {onCancel}
-    {onExample}
     onLoadSample={(id) => {
       loadSample(id);
     }}
@@ -650,6 +650,15 @@
     canUndo={workbench.undoSnapshots.length > 0}
     undoDisabled={busy || workbench.candidate !== null}
     onUndo={undoChart}
+  />
+
+  <PlaygroundBrowseLinks
+    samples={sampleLinks}
+    {busy}
+    {onExample}
+    onLoadSample={(id) => {
+      loadSample(id);
+    }}
   />
 
   <PlaygroundCode
