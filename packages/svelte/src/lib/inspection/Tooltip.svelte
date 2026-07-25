@@ -9,6 +9,7 @@
     fieldsForDefaultTooltip,
     formatTooltipCell,
     tooltipFieldLabel,
+    type TooltipFieldLabs,
   } from "./display-members.js";
 
   const {
@@ -22,6 +23,8 @@
     onleave,
     id,
     docked = false,
+    labs = null,
+    fontSizePx = 12.5,
   }: {
     inspection: PlotInspectionChange<Record<string, CellValue>, PropertyKey>;
     width: number;
@@ -35,6 +38,13 @@
     onleave?: () => void;
     id?: string;
     docked?: boolean;
+    /** Plot labs used for default tooltip field labels (#752). */
+    labs?: TooltipFieldLabs | null;
+    /**
+     * Theme body type size (px). Default tooltips track plot chrome rather
+     * than a hard-coded 16px scale (#753 residual).
+     */
+    fontSizePx?: number;
   } = $props();
 
   const anchor = $derived(inspection.focus.anchor);
@@ -57,9 +67,12 @@
     return () => observer.disconnect();
   });
 
+  // Track theme fontSize so tooltips sit with axis/legend chrome (#753).
+  const fontStyle = $derived(`font-size:${fontSizePx}px;`);
+
   const style = $derived(
     docked
-      ? ""
+      ? fontStyle
       : (() => {
           const tooltipWidth = Math.min(
             measuredWidth || 280,
@@ -85,7 +98,7 @@
             EDGE,
             Math.min(preferredY, height - tooltipHeight - EDGE),
           );
-          return `left:${left}px;top:${top}px;`;
+          return `left:${left}px;top:${top}px;${fontStyle}`;
         })(),
   );
 
@@ -135,7 +148,9 @@
       {#each shownMembers as member, index (`${member.layerIndex}:${String(member.key)}:${index}`)}
         <dl class:gg-tooltip-focus={member === inspection.focus}>
           {#each fieldsForDefaultTooltip(member.fields, inspection.mode) as field (field.channel)}
-            <dt>{tooltipFieldLabel(field.field)}</dt>
+            <dt>
+              {tooltipFieldLabel(field.field, { channel: field.channel, labs })}
+            </dt>
             <dd>{formatTooltipCell(field.value)}</dd>
           {/each}
         </dl>
@@ -184,7 +199,8 @@
     border-radius: var(--gg-tooltip-radius, 3px);
     padding: 8px 10px;
     font-family: var(--gg-font-family, inherit);
-    /* Track plot chrome, not a second oversized type scale (#753). */
+    /* Default only — runtime size is set from theme.fontSize via style (#753).
+       Smoke interaction VR baselines track this size (same-PR). */
     font-size: 12.5px;
     line-height: 1.4;
     max-width: min(280px, calc(100% - 16px));

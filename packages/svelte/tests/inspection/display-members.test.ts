@@ -60,6 +60,38 @@ describe("tooltipFieldLabel (#752)", () => {
     expect(tooltipFieldLabel("flipper_length")).toBe("flipper length");
     expect(tooltipFieldLabel("Region")).toBe("Region");
   });
+
+  it("prefers the matching lab title when the channel has an explicit lab", () => {
+    const labs = {
+      x: "Literate conscripts (%)",
+      y: "Population per crime against persons",
+      color: "Region",
+    };
+    expect(tooltipFieldLabel("literacy", { channel: "x", labs })).toBe("Literate conscripts (%)");
+    expect(tooltipFieldLabel("crimePersons", { channel: "y", labs })).toBe(
+      "Population per crime against persons",
+    );
+    expect(tooltipFieldLabel("region", { channel: "color", labs })).toBe("Region");
+  });
+
+  it("falls back to humanized field names when the channel has no lab", () => {
+    const labs = { x: "Literate conscripts (%)" };
+    expect(tooltipFieldLabel("crimePersons", { channel: "y", labs })).toBe("crime persons");
+    expect(tooltipFieldLabel("crimePersons", { channel: "y" })).toBe("crime persons");
+    expect(tooltipFieldLabel("crimePersons", { channel: "y", labs: null })).toBe("crime persons");
+  });
+
+  it("ignores empty lab strings so hidden axis titles do not blank the tooltip", () => {
+    expect(tooltipFieldLabel("literacy", { channel: "x", labs: { x: "" } })).toBe("literacy");
+    expect(tooltipFieldLabel("crimePersons", { channel: "y", labs: { y: "   " } })).toBe(
+      "crime persons",
+    );
+  });
+
+  it("does not invent labels for channels outside Labs (e.g. group)", () => {
+    const labs = { x: "Year", color: "Series" };
+    expect(tooltipFieldLabel("series_id", { channel: "group", labs })).toBe("series id");
+  });
 });
 
 describe("fieldsForDefaultTooltip (#754)", () => {

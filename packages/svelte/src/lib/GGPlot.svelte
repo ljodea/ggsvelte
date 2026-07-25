@@ -366,6 +366,8 @@
             inspectionState: currentInspection.state,
             widthPx: runtime.resolvedWidth,
           })}
+          labs={engine.assembled?.labs ?? null}
+          fontSizePx={currentModel.scene.theme.fontSize}
           onenter={() => (engine.tooltipHovered = true)}
           onleave={() => {
             engine.tooltipHovered = false;

@@ -24,11 +24,68 @@ export function formatTooltipCell(value: CellValue): string {
 }
 
 /**
- * Default tooltip `<dt>` text when no lab title is available (#752).
- * Light humanization only — camelCase / snake_case → spaced words. Does not
- * invent domain semantics ("crimePersons" stays "crime persons", not "count").
+ * Lab keys that may title a default-tooltip field row (#752).
+ * Matches plot labs aesthetic titles (not plot title/subtitle/caption).
  */
-export function tooltipFieldLabel(fieldName: string): string {
+type TooltipLabChannel =
+  | "x"
+  | "y"
+  | "color"
+  | "fill"
+  | "size"
+  | "linewidth"
+  | "alpha"
+  | "shape"
+  | "linetype";
+
+/** Subset of plot labs used when resolving default tooltip `<dt>` text. */
+export type TooltipFieldLabs = Readonly<Partial<Record<TooltipLabChannel, string>>>;
+
+const TOOLTIP_LAB_CHANNELS = new Set<string>([
+  "x",
+  "y",
+  "color",
+  "fill",
+  "size",
+  "linewidth",
+  "alpha",
+  "shape",
+  "linetype",
+]);
+
+function isTooltipLabChannel(channel: string): channel is TooltipLabChannel {
+  return TOOLTIP_LAB_CHANNELS.has(channel);
+}
+
+/**
+ * Default tooltip `<dt>` text (#752).
+ *
+ * Preference order:
+ * 1. Explicit lab for the field's channel (x/y/color/…), when non-empty
+ * 2. Light humanization of the column name (camelCase / snake_case → words)
+ * 3. Raw field name as last resort (empty input)
+ *
+ * Does not invent domain semantics ("crimePersons" stays "crime persons").
+ */
+export function tooltipFieldLabel(
+  fieldName: string,
+  options?: {
+    readonly channel?: string;
+    readonly labs?: TooltipFieldLabs | null | undefined;
+  },
+): string {
+  const channel = options?.channel;
+  const labs = options?.labs;
+  if (
+    channel !== undefined &&
+    labs !== undefined &&
+    labs !== null &&
+    isTooltipLabChannel(channel)
+  ) {
+    const lab = labs[channel];
+    if (typeof lab === "string" && lab.trim() !== "") return lab;
+  }
+
   if (fieldName.length === 0) return fieldName;
   const spaced = fieldName
     .replaceAll("_", " ")
