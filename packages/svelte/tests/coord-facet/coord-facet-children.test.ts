@@ -99,6 +99,85 @@ describe("Coord/Facet children → assembled PortableSpec", () => {
     expect(fromChild.facet?.cols).toEqual({ field: "b" });
   });
 
+  it("1f: <Coord value/> escape hatch matches the equivalent coord prop", async () => {
+    const fromChild = await assembleWithProps({
+      useCoordValue: true,
+      coordValue: { type: "fixed", ratio: 3 },
+    });
+    const fromProp = await assembleWithProps({
+      coordProp: coordFixed({ ratio: 3 }),
+    });
+    expect(fromChild.coord).toEqual({ type: "fixed", ratio: 3 });
+    expect(fromChild.coord).toEqual(fromProp.coord);
+  });
+
+  it('1g: <Coord value="flip"/> canonicalises the bare string like <CoordFlip/>', async () => {
+    const fromValue = await assembleWithProps({
+      useCoordValue: true,
+      coordValue: "flip",
+    });
+    const fromShell = await assembleWithProps({ useCoordFlip: true });
+    expect(fromValue.coord).toEqual({ type: "flip" });
+    expect(fromValue.coord).toEqual(fromShell.coord);
+  });
+
+  it("1h: <FacetWrap ncol/scales/strip> forwards every optional prop", async () => {
+    const fromChild = await assembleWithProps({
+      useFacetWrap: true,
+      facetField: "g",
+      facetNcol: 2,
+      facetScales: "free_y",
+      facetStrip: { position: "bottom", show: true },
+    });
+    const fromProp = await assembleWithProps({
+      facetProp: {
+        wrap: "g",
+        ncol: 2,
+        scales: "free_y",
+        strip: { position: "bottom", show: true },
+      },
+    });
+    expect(fromChild.facet).toEqual(fromProp.facet);
+    expect(fromChild.facet?.ncol).toBe(2);
+    expect(fromChild.facet?.scales).toBe("free_y");
+    // strip stays NESTED — it is not flattened onto the facet root.
+    expect(fromChild.facet?.strip).toEqual({ position: "bottom", show: true });
+  });
+
+  it("1i: <FacetGrid scales/strip> forwards every optional prop", async () => {
+    const fromChild = await assembleWithProps({
+      useFacetGrid: true,
+      facetRows: "a",
+      facetCols: "b",
+      facetScales: "free",
+      facetStrip: { position: "top", show: false },
+    });
+    const fromProp = await assembleWithProps({
+      facetProp: {
+        rows: "a",
+        cols: "b",
+        scales: "free",
+        strip: { position: "top", show: false },
+      },
+    });
+    expect(fromChild.facet).toEqual(fromProp.facet);
+    expect(fromChild.facet?.scales).toBe("free");
+    expect(fromChild.facet?.strip).toEqual({ position: "top", show: false });
+  });
+
+  it("1j: facet fields accept the object form, not just a bare string", async () => {
+    const fromObject = await assembleWithProps({
+      useFacetWrap: true,
+      facetField: { field: "g" },
+    });
+    const fromString = await assembleWithProps({
+      useFacetWrap: true,
+      facetField: "g",
+    });
+    expect(fromObject.facet?.wrap).toEqual({ field: "g" });
+    expect(fromObject.facet).toEqual(fromString.facet);
+  });
+
   it("2: <CoordCartesian/> → assembled coord is ABSENT", async () => {
     const spec = await assembleWithProps({ useCoordCartesian: true });
     expect(spec.coord).toBeUndefined();
