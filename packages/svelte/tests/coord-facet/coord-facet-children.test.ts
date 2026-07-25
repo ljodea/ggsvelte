@@ -35,7 +35,7 @@ async function waitAssembled(get: () => PortableSpec | null): Promise<PortableSp
   return get()!;
 }
 
-async function assembleWithProps(props: Record<string, unknown>): Promise<PortableSpec> {
+function assembleWithProps(props: Record<string, unknown>): Promise<PortableSpec> {
   let assembled: PortableSpec | null = null;
   render(CoordFacetChildrenPlot, {
     ...props,
@@ -269,7 +269,9 @@ describe("Coord/Facet children → assembled PortableSpec", () => {
     const kinds = diagnostics
       .filter((d) => d.code === "DUPLICATE_PLOT_LAYER")
       .map((d) => (isDuplicatePlotLayerDiagnostic(d) ? d.kind : null));
-    expect(kinds.toSorted()).toEqual(["coord", "facet"]);
+    // Set comparison rather than sort(): the repo's lint config wants
+    // Array#toSorted, which this TS lib target does not declare.
+    expect(new Set(kinds)).toEqual(new Set(["coord", "facet"]));
   });
 
   it("8: live prop update changes assembled spec without re-registration", async () => {
