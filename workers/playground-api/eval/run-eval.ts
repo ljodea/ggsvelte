@@ -23,6 +23,8 @@ import { DEFAULT_MODELS } from "../src/handler";
 
 const GATE = 0.7;
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+/** Row label when the completion does not say which model answered. */
+const UNATTRIBUTED_MODEL = "(unattributed)";
 
 interface EvalCase {
   readonly id: string;
@@ -97,7 +99,10 @@ async function callOpenRouter(
   };
   const content = json.choices?.[0]?.message?.content;
   if (typeof content !== "string") return { error: "empty content" };
-  return { model: json.model ?? models[0]!, content };
+  // The eval exists to pick models: attributing a row to models[0] when the
+  // completion did not name one would corrupt the very statistic it produces,
+  // since `models` requests provider-side fallback (#697).
+  return { model: json.model ?? UNATTRIBUTED_MODEL, content };
 }
 
 function validateEnvelope(

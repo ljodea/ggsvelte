@@ -97,6 +97,8 @@ function mapApiErrorCode(code: unknown): PlaygroundAgentErrorCode {
     "prompt_too_long",
     "unknown_dataset",
     "origin_forbidden",
+    "not_found",
+    "method_not_allowed",
     "rate_limited",
     "upstream_rate_limited",
     "upstream_error",
@@ -107,6 +109,41 @@ function mapApiErrorCode(code: unknown): PlaygroundAgentErrorCode {
     return code as PlaygroundAgentErrorCode;
   }
   return "upstream_error";
+}
+
+/**
+ * A body only counts as an error the worker sent when it carries the contract
+ * shape `{ ok: false, error: {…} }`. Cloudflare 1101 pages, proxy errors, and
+ * captive portals do not, and must not be reported as model output (#697).
+ */
+function workerErrorBody(body: unknown): Record<string, unknown> | null {
+  if (body === null || typeof body !== "object") return null;
+  const record = body as { ok?: unknown; error?: unknown };
+  if (record.ok !== false) return null;
+  if (record.error === null || typeof record.error !== "object" || Array.isArray(record.error)) {
+    return null;
+  }
+  return record.error as Record<string, unknown>;
+}
+
+/** Seconds from a `Retry-After` delta header; absent/date forms are ignored. */
+function retryAfterSeconds(response: Response): number | undefined {
+  const raw = response.headers.get("Retry-After");
+  if (raw === null) return undefined;
+  const seconds = Number(raw.trim());
+  return Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined;
+}
+
+/**
+ * Failures with no worker body: the transport reached *something*, but not the
+ * generate contract. Status is the only signal, so it decides the code.
+ */
+function codeForStatuslessBody(status: number): PlaygroundAgentErrorCode {
+  if (status === 429) return "rate_limited";
+  // 2xx means the worker answered with a body it should never produce; every
+  // other status means the request never reached a working worker.
+  if (status >= 200 && status < 300) return "bad_output";
+  return "service_error";
 }
 
 export async function generateChart(
@@ -175,10 +212,14 @@ export async function generateChart(
   try {
     body = await response.json();
   } catch {
+    // Not JSON at all: an edge error page, a proxy, or a captive portal.
+    const code = codeForStatuslessBody(response.status);
+    const retryAfter = retryAfterSeconds(response);
     return {
       ok: false,
-      code: "bad_output",
-      message: messageForAgentError("bad_output"),
+      code,
+      message: messageForAgentError(code),
+      ...(retryAfter === undefined ? {} : { retryAfterSeconds: retryAfter }),
     };
   }
 
@@ -205,17 +246,26 @@ export async function generateChart(
     };
   }
 
-  const error =
-    body !== null && typeof body === "object" && "error" in body
-      ? (body as { error: Record<string, unknown> }).error
-      : null;
-  const code = mapApiErrorCode(error?.code);
+  const error = workerErrorBody(body);
+  if (error === null) {
+    // JSON, but not the generate contract — status is the only honest signal.
+    const code = codeForStatuslessBody(response.status);
+    const retryAfter = retryAfterSeconds(response);
+    return {
+      ok: false,
+      code,
+      message: messageForAgentError(code),
+      ...(retryAfter === undefined ? {} : { retryAfterSeconds: retryAfter }),
+    };
+  }
+
+  const code = mapApiErrorCode(error.code);
   const retryAfter =
-    typeof error?.retryAfterSeconds === "number" ? error.retryAfterSeconds : undefined;
+    typeof error.retryAfterSeconds === "number" ? error.retryAfterSeconds : undefined;
   return {
     ok: false,
     code,
-    message: typeof error?.message === "string" ? error.message : messageForAgentError(code),
+    message: typeof error.message === "string" ? error.message : messageForAgentError(code),
     ...(retryAfter === undefined ? {} : { retryAfterSeconds: retryAfter }),
   };
 }

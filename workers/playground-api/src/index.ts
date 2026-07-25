@@ -2,6 +2,8 @@
  * Cloudflare Worker entry — playground generate API.
  */
 
+import { errorCorsHeaders } from "./cors";
+import { apiError, SAFE_MESSAGES, statusForError } from "./errors";
 import { handleGenerate, type PlaygroundApiEnv } from "./handler";
 
 export interface Env extends PlaygroundApiEnv {}
@@ -18,14 +20,15 @@ export default {
         headers: { "Content-Type": "application/json; charset=utf-8", Vary: "Origin" },
       });
     }
-    // Cross-origin callers cannot read this body (no ACAO by design) — the
-    // shipped client only calls /v1/generate.
-    return new Response(
-      JSON.stringify({ ok: false, error: { code: "bad_request", message: "Not found." } }),
-      {
-        status: 404,
-        headers: { "Content-Type": "application/json; charset=utf-8", Vary: "Origin" },
+    // One taxonomy: the 404 body comes from apiError() with a code whose
+    // canonical status is 404, and it echoes the origin so a misrouted client
+    // reads `not_found` instead of an opaque CORS failure (#697).
+    return new Response(JSON.stringify(apiError("not_found", SAFE_MESSAGES.not_found)), {
+      status: statusForError("not_found"),
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        ...errorCorsHeaders(request.headers.get("Origin")),
       },
-    );
+    });
   },
 };
