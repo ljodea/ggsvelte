@@ -56,8 +56,8 @@ describe("progressive Docs journey", () => {
 
   it("publishes the remaining interaction and production chapters as navigable evidence paths", () => {
     const expected = [
-      ["/guide/selection-zoom", "Interaction", 22, "/examples/interaction/brush-zoom"],
-      ["/guide/linked-views", "Interaction", 23, "/examples/interaction/linked-views"],
+      ["/guide/selection-zoom", "Interaction", 22, "/interactions/brush-zoom"],
+      ["/guide/linked-views", "Interaction", 23, "/interactions/linked-views"],
       ["/guide/accessibility", "Interaction", 24, "/examples/interaction/tooltip"],
       ["/guide/responsive-charts", "Production", 30, "/guide/errors#quickstart-troubleshooting"],
       ["/guide/rendering-performance", "Production", 31, "/examples/point/canvas-scatter"],

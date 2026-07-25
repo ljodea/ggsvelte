@@ -2,7 +2,7 @@
   import { base } from "$app/paths";
   import { onMount } from "svelte";
 
-  import { FEATURED_EXAMPLES, galleryEntryFor } from "$lib/catalog/gallery";
+  import { FEATURED_EXAMPLES, galleryCatalog } from "$lib/catalog/gallery";
   import {
     filterGallery,
     parseGalleryFilter,
@@ -12,8 +12,8 @@
   import { EXAMPLES } from "$lib/examples";
 
   // One flat grid; the former featured six lead, the rest follow in
-  // manifest order.
-  const all = EXAMPLES.map((entry) => galleryEntryFor(entry));
+  // manifest order. Interaction expositions are not gallery specimens.
+  const all = galleryCatalog(EXAMPLES);
   const leadIds = new Set<string>(FEATURED_EXAMPLES.map((item) => item.id));
   const entries = [
     ...[...leadIds].map((id) => all.find((entry) => entry.id === id)!),

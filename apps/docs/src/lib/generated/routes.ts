@@ -2507,28 +2507,6 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
-    path: "/examples/interaction/brush-zoom",
-    title: "Interval selection and zoom — ggsvelte gallery",
-    description:
-      "The tool rail separates rectangular selection from brush zoom. Selection reports start, change, end, and clear phases with semantic keys and domain bounds; zoom reports explicit domains and a clear event on reset, while inspection remains available alongside both. The field is the 333 complete Palmer Archipelago penguin records.",
-    canonicalPath: "/examples/interaction/brush-zoom",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "site",
-  },
-  {
-    path: "/examples/interaction/facet-intervals",
-    title: "Coordinate intervals across facets — ggsvelte gallery",
-    description:
-      "Choose independent, union, or cross-panel interval semantics, then draw inside a facet. Stable panel identities keep selections attached to their facet even when rows reorder or a panel temporarily disappears. Panels are the three Palmer Archipelago islands; Biscoe holds every Gentoo, so the panels have genuinely different shapes.",
-    canonicalPath: "/examples/interaction/facet-intervals",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "site",
-  },
-  {
     path: "/examples/interaction/legend-filter",
     title: "Filter with a stable-color legend — ggsvelte gallery",
     description:
@@ -2545,17 +2523,6 @@ export const DOCS_ROUTES = [
     description:
       "Opt-in legend controls preview locally, commit stable row keys to a shared controller, and de-emphasize unrelated marks without changing scales, statistics, layout, or color identity. The same semantic mask drives SVG and canvas views. The three series are Playfair's stock, bread and export indices, 1770–1824, which read as both a scatter and a connected line.",
     canonicalPath: "/examples/interaction/legend-focus",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "site",
-  },
-  {
-    path: "/examples/interaction/linked-views",
-    title: "Link plots, controls, and a table — ggsvelte gallery",
-    description:
-      "A shared Svelte 5 interaction controller coordinates semantic selection, lightweight emphasis, and zoom domains without callback loops. Stable row keys link two plots to ordinary accessible DOM, while explicit reconciliation makes data replacement predictable. Five Palmer penguins per species, evenly sampled, so every linked row fits in the table alongside the plots.",
-    canonicalPath: "/examples/interaction/linked-views",
     kind: "page",
     index: true,
     sitemap: true,
@@ -2782,6 +2749,72 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/interactions/brush-zoom",
+    title: "Interval selection and zoom — ggsvelte interactions",
+    description:
+      "The tool rail separates rectangular selection from brush zoom. Selection reports start, change, end, and clear phases with semantic keys and domain bounds; zoom reports explicit domains and a clear event on reset, while inspection remains available alongside both. The field is the 333 complete Palmer Archipelago penguin records.",
+    canonicalPath: "/interactions/brush-zoom",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/interactions/facet-intervals",
+    title: "Coordinate intervals across facets — ggsvelte interactions",
+    description:
+      "Choose independent, union, or cross-panel interval semantics, then draw inside a facet. Stable panel identities keep selections attached to their facet even when rows reorder or a panel temporarily disappears. Panels are the three Palmer Archipelago islands; Biscoe holds every Gentoo, so the panels have genuinely different shapes.",
+    canonicalPath: "/interactions/facet-intervals",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/interactions/linked-views",
+    title: "Link plots, controls, and a table — ggsvelte interactions",
+    description:
+      "A shared Svelte 5 interaction controller coordinates semantic selection, lightweight emphasis, and zoom domains without callback loops. Stable row keys link two plots to ordinary accessible DOM, while explicit reconciliation makes data replacement predictable. Five Palmer penguins per species, evenly sampled, so every linked row fits in the table alongside the plots.",
+    canonicalPath: "/interactions/linked-views",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/interaction/brush-zoom",
+    title: "Interval selection and zoom — ggsvelte interactions",
+    description:
+      "The tool rail separates rectangular selection from brush zoom. Selection reports start, change, end, and clear phases with semantic keys and domain bounds; zoom reports explicit domains and a clear event on reset, while inspection remains available alongside both. The field is the 333 complete Palmer Archipelago penguin records.",
+    canonicalPath: "/interactions/brush-zoom",
+    kind: "alias",
+    index: false,
+    sitemap: false,
+    shell: "site",
+  },
+  {
+    path: "/examples/interaction/facet-intervals",
+    title: "Coordinate intervals across facets — ggsvelte interactions",
+    description:
+      "Choose independent, union, or cross-panel interval semantics, then draw inside a facet. Stable panel identities keep selections attached to their facet even when rows reorder or a panel temporarily disappears. Panels are the three Palmer Archipelago islands; Biscoe holds every Gentoo, so the panels have genuinely different shapes.",
+    canonicalPath: "/interactions/facet-intervals",
+    kind: "alias",
+    index: false,
+    sitemap: false,
+    shell: "site",
+  },
+  {
+    path: "/examples/interaction/linked-views",
+    title: "Link plots, controls, and a table — ggsvelte interactions",
+    description:
+      "A shared Svelte 5 interaction controller coordinates semantic selection, lightweight emphasis, and zoom domains without callback loops. Stable row keys link two plots to ordinary accessible DOM, while explicit reconciliation makes data replacement predictable. Five Palmer penguins per species, evenly sampled, so every linked row fits in the table alongside the plots.",
+    canonicalPath: "/interactions/linked-views",
+    kind: "alias",
+    index: false,
+    sitemap: false,
+    shell: "site",
+  },
+  {
     path: "/examples/interactions/inspection",
     title: "Inspect and pin data — ggsvelte gallery",
     description:
@@ -2794,10 +2827,10 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/interactions/interval-selection",
-    title: "Interval selection and zoom — ggsvelte gallery",
+    title: "Interval selection and zoom — ggsvelte interactions",
     description:
       "The tool rail separates rectangular selection from brush zoom. Selection reports start, change, end, and clear phases with semantic keys and domain bounds; zoom reports explicit domains and a clear event on reset, while inspection remains available alongside both. The field is the 333 complete Palmer Archipelago penguin records.",
-    canonicalPath: "/examples/interaction/brush-zoom",
+    canonicalPath: "/interactions/brush-zoom",
     kind: "alias",
     index: false,
     sitemap: false,

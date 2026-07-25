@@ -1,5 +1,10 @@
 import { EXAMPLES } from "../examples/manifest.ts";
 import { EXAMPLE_ALIASES } from "../apps/docs/src/lib/example-aliases.ts";
+import {
+  INTERACTION_EXPOSITION_IDS,
+  interactionExpositionSlug,
+  isInteractionExposition,
+} from "../apps/docs/src/lib/catalog/interaction-exposition.ts";
 import { CLI_REFERENCE_OPTIONS } from "./cli-docs.ts";
 import { GUIDE_CATALOG, type GuideCatalogEntry } from "../apps/docs/src/lib/catalog/guide.ts";
 
@@ -205,7 +210,9 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
           },
         }),
   }));
-  const examples: DocsRouteRecord[] = EXAMPLES.map((entry) => ({
+  const examples: DocsRouteRecord[] = EXAMPLES.filter(
+    (entry) => !isInteractionExposition(entry.id),
+  ).map((entry) => ({
     path: `/examples/${entry.id}`,
     title: `${entry.title} — ggsvelte gallery`,
     description: entry.description,
@@ -215,18 +222,56 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
     sitemap: true,
     shell: "site",
   }));
-  const aliases: DocsRouteRecord[] = Object.entries(EXAMPLE_ALIASES).map(([alias, canonical]) => {
-    const target = EXAMPLES.find((entry) => entry.id === canonical);
+  const interactionExpositions: DocsRouteRecord[] = INTERACTION_EXPOSITION_IDS.map((id) => {
+    const entry = EXAMPLES.find((example) => example.id === id);
+    if (entry === undefined) {
+      throw new Error(`Missing interaction exposition in manifest: ${id}`);
+    }
+    const slug = interactionExpositionSlug(id)!;
     return {
-      path: `/examples/${alias}`,
-      title: `${target?.title ?? "Example"} — ggsvelte gallery`,
+      path: `/interactions/${slug}`,
+      title: `${entry.title} — ggsvelte interactions`,
+      description: entry.description,
+      canonicalPath: `/interactions/${slug}`,
+      kind: "page" as const,
+      index: true,
+      sitemap: true,
+      shell: "site" as const,
+    };
+  });
+  // Former gallery URLs for interaction expositions — redirect targets keep
+  // stable deep links while the public catalog stays chart specimens only.
+  const expositionGalleryAliases: DocsRouteRecord[] = INTERACTION_EXPOSITION_IDS.map((id) => {
+    const entry = EXAMPLES.find((example) => example.id === id);
+    const slug = interactionExpositionSlug(id)!;
+    return {
+      path: `/examples/${id}`,
+      title: `${entry?.title ?? "Interaction demo"} — ggsvelte interactions`,
       description:
-        target?.description ?? "A legacy ggsvelte example route preserved for compatibility.",
-      canonicalPath: `/examples/${canonical}`,
-      kind: "alias",
+        entry?.description ??
+        "A chart-local interaction demo relocated from the gallery to /interactions.",
+      canonicalPath: `/interactions/${slug}`,
+      kind: "alias" as const,
       index: false,
       sitemap: false,
-      shell: "site",
+      shell: "site" as const,
+    };
+  });
+  const aliases: DocsRouteRecord[] = Object.entries(EXAMPLE_ALIASES).map(([alias, canonical]) => {
+    const target = EXAMPLES.find((entry) => entry.id === canonical);
+    const expositionSlug = interactionExpositionSlug(canonical);
+    const canonicalPath =
+      expositionSlug !== undefined ? `/interactions/${expositionSlug}` : `/examples/${canonical}`;
+    return {
+      path: `/examples/${alias}`,
+      title: `${target?.title ?? "Example"} — ggsvelte ${expositionSlug !== undefined ? "interactions" : "gallery"}`,
+      description:
+        target?.description ?? "A legacy ggsvelte example route preserved for compatibility.",
+      canonicalPath,
+      kind: "alias" as const,
+      index: false,
+      sitemap: false,
+      shell: "site" as const,
     };
   });
 
@@ -234,6 +279,8 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
     ...TOP_LEVEL_ROUTES,
     ...guides,
     ...examples,
+    ...interactionExpositions,
+    ...expositionGalleryAliases,
     ...aliases,
     ...ENDPOINT_ROUTES,
     ...PERFORMANCE_ROUTES,

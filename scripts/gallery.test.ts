@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { EXAMPLES } from "../examples/manifest.js";
 import {
   FEATURED_EXAMPLES,
+  galleryCatalog,
   galleryEntryFor,
   type GalleryEntry,
 } from "../apps/docs/src/lib/catalog/gallery.js";
@@ -18,7 +19,7 @@ describe("gallery editorial catalog", () => {
     expect(FEATURED_EXAMPLES.map((entry) => entry.id)).toEqual([
       "line/multi-series",
       "smooth/loess-scatter",
-      "interaction/linked-views",
+      "point/scatter-color",
       "facet/wrap",
       "color/continuous",
       "point/canvas-scatter",
@@ -29,11 +30,17 @@ describe("gallery editorial catalog", () => {
     expect(FEATURED_EXAMPLES.every((entry) => entry.id.includes("/"))).toBe(true);
   });
 
-  test("projects every manifest entry without changing canonical identity", () => {
+  test("projects every gallery catalog entry without changing canonical identity", () => {
+    const projected = galleryCatalog(EXAMPLES);
+    expect(projected.length).toBe(EXAMPLES.length - 3);
+    expect(projected.some((entry) => entry.id === "interaction/linked-views")).toBe(false);
+    expect(projected.filter((entry) => entry.featured)).toHaveLength(6);
+  });
+
+  test("projects every manifest entry when asked explicitly", () => {
     const projected = EXAMPLES.map((entry) => galleryEntryFor(entry));
     expect(projected).toHaveLength(EXAMPLES.length);
     expect(projected.map((entry) => entry.id)).toEqual(EXAMPLES.map((entry) => entry.id));
-    expect(projected.filter((entry) => entry.featured)).toHaveLength(6);
   });
 });
 
@@ -46,11 +53,11 @@ describe("gallery filter URL contract", () => {
 
   test("searches manifest titles, descriptions, and tags", () => {
     const curated = filterGallery(entries, {
-      query: "linked selection",
+      query: "wheat wages",
       categories: [],
       tags: [],
     });
-    expect(curated.some((entry) => entry.id === "interaction/linked-views")).toBe(true);
+    expect(curated.some((entry) => entry.id === "line/multi-series")).toBe(true);
   });
 
   test("composes category, tag, and text with AND semantics", () => {

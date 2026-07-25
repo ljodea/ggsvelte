@@ -16,6 +16,7 @@ import { ADVISORY_CATALOG } from "@ggsvelte/core";
 import { CURRENT_EDITION, LINT_CATALOG, THEME_NAMES } from "@ggsvelte/spec";
 import sveltePackage from "../packages/svelte/package.json";
 import { GUIDE_CATALOG, type GuideSlug } from "../apps/docs/src/lib/catalog/guide";
+import { interactionExpositionSlug } from "../apps/docs/src/lib/catalog/interaction-exposition";
 import {
   buildDiagnosticDocs,
   type DiagnosticDocEntry,
@@ -411,7 +412,10 @@ export function buildLlmsIndex(
       section = ex.docsSection;
       lines.push("", `### ${section}`, "");
     }
-    lines.push(`- [${ex.title}](/examples/${ex.id}): ${ex.description}`);
+    const expositionSlug = interactionExpositionSlug(ex.id);
+    const href =
+      expositionSlug !== undefined ? `/interactions/${expositionSlug}` : `/examples/${ex.id}`;
+    lines.push(`- [${ex.title}](${href}): ${ex.description}`);
   }
   lines.push("");
   return absoluteMarkdownLinks(lines.join("\n"), facts.canonicalBase);

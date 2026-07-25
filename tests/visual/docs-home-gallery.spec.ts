@@ -196,7 +196,7 @@ test("install copy and code tabs share the manual-copy fallback", async ({ page 
 test("gallery exposes every generated preview exactly once", async ({ page }) => {
   await page.goto("/examples");
   // One meta.json per example under examples/ (grows when new specimens land).
-  const exampleCount = 44; // +segment +layer-data-bands +fixed-aspect +facet/ordered-side-strips +ribbon/paint +col/mixed-outlier-labels
+  const exampleCount = 41; // corpus 44 minus 3 interaction expositions under /interactions
   await expect(page.locator(".example-grid li")).toHaveCount(exampleCount);
   await expect(page.locator('img[src*="/previews/"]')).toHaveCount(exampleCount);
 });
@@ -206,8 +206,8 @@ test("gallery filtering is URL-addressable, preserves theme, and restores histor
 }) => {
   await page.goto("/examples?theme=dark");
   const search = page.getByRole("searchbox", { name: "Filter" });
-  await search.fill("linked");
-  await expect(page).toHaveURL(/theme=dark.*q=linked|q=linked.*theme=dark/);
+  await search.fill("wheat");
+  await expect(page).toHaveURL(/theme=dark.*q=wheat|q=wheat.*theme=dark/);
   await expect(page.locator(".example-grid li").first()).toBeVisible();
   const linkedCount = await page.locator(".example-grid li").count();
   expect(linkedCount).toBeGreaterThan(0);
@@ -230,20 +230,18 @@ test("detail is specimen-first and always orders Svelte, builder, then JSON", as
   await expect(page.locator(".gg-example-frame")).toBeVisible();
   const tabs = page.getByRole("tablist", { name: "Code representations" }).getByRole("tab");
   await expect(tabs).toHaveText(["Svelte", "Builder (TS)", "Spec (JSON)"]);
-  await expect(page.getByRole("link", { name: "Open in Playground" })).toHaveAttribute(
-    "href",
-    /\/playground#play=v1\./,
-  );
+  await expect(page.getByRole("link", { name: "Open in Playground" })).toHaveCount(0);
   await expect(page.locator(".related li")).toHaveCount(3);
 });
 
 for (const [path, width, height] of [
-  ["point/scatter-color", 640, 400],
-  ["interaction/linked-views", 640, 1140],
-  ["interaction/legend-focus", 960, 320],
+  ["/examples/point/scatter-color", 640, 400],
+  ["/interactions/linked-views", 640, 1140],
+  ["/examples/interaction/legend-focus", 960, 320],
 ] as const) {
   test(`VR detail isolates ${path} at canonical geometry`, async ({ page }) => {
-    await page.goto(`/examples/${path}?vr&theme=light`);
+    await page.goto(`${path}?vr&theme=light`);
+    // Under ?vr, page prose chrome is hidden; the frame stays measurable.
     await expect(page.locator(".example-prose:visible")).toHaveCount(0);
     const frame = page.locator(".gg-example-frame");
     await expect(frame).toBeVisible();

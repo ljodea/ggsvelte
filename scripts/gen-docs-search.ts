@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 
 import { format } from "oxfmt";
 
+import { interactionExpositionSlug } from "../apps/docs/src/lib/catalog/interaction-exposition.ts";
 import { DOCS_ROUTES } from "../apps/docs/src/lib/generated/routes.ts";
 import type { DocsRouteMetadata } from "../apps/docs/src/lib/route-types.ts";
 import type { DocsSearchEntry } from "../apps/docs/src/lib/search-types.ts";
@@ -46,7 +47,12 @@ function routeId(path: string): string {
 }
 
 function cleanTitle(title: string): string {
-  return title.replace(/ — ggsvelte(?: gallery)?$/, "");
+  return title.replace(/ — ggsvelte(?: gallery| interactions)?$/, "");
+}
+
+function examplePublicHref(id: string): string {
+  const expositionSlug = interactionExpositionSlug(id);
+  return expositionSlug !== undefined ? `/interactions/${expositionSlug}` : `/examples/${id}`;
 }
 
 function lifecycleAnchor(packageName: string, entry: string): string {
@@ -84,12 +90,15 @@ export function createDocsSearchEntries(): DocsSearchEntry[] {
   }
 
   for (const example of EXAMPLES) {
+    // Interaction expositions are indexed as /interactions/* pages above.
+    // Emitting a second example entry with the same href/title fails validation.
+    if (interactionExpositionSlug(example.id) !== undefined) continue;
     entries.push({
       id: `example:${example.id.replaceAll("/", ":")}`,
       kind: "example",
       title: example.title,
       summary: example.description,
-      href: `/examples/${example.id}`,
+      href: examplePublicHref(example.id),
       keywords: [example.title, example.docsSection, ...example.tags],
       exact: [example.title],
     });

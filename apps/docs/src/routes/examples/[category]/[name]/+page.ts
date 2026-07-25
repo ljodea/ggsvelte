@@ -1,5 +1,6 @@
-import { error } from "@sveltejs/kit";
+import { error, redirect } from "@sveltejs/kit";
 
+import { interactionExpositionSlug } from "$lib/catalog/interaction-exposition";
 import { EXAMPLE_ALIASES, resolveExampleId } from "$lib/example-aliases";
 import { EXAMPLES, loadExample } from "$lib/examples";
 
@@ -14,9 +15,16 @@ export const entries: EntryGenerator = () => [
   }),
 ];
 
-export const load: PageLoad = async ({ params }) => {
+export const load: PageLoad = async ({ params, url }) => {
   const requestedId = `${params.category}/${params.name}`;
   const id = resolveExampleId(requestedId);
+  const expositionSlug = interactionExpositionSlug(id);
+  if (expositionSlug !== undefined) {
+    // Chart-local interaction expositions live under /interactions, not the gallery.
+    // Preserve ?vr (and other query) for visual-regression capture paths.
+    const search = url.search;
+    redirect(308, `/interactions/${expositionSlug}${search}`);
+  }
   const entry = EXAMPLES.find((e) => e.id === id);
   if (entry === undefined) {
     error(404, `No example "${requestedId}" — see /examples for the gallery.`);
