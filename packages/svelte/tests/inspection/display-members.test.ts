@@ -8,8 +8,10 @@ import { runPipeline, type CellValue } from "@ggsvelte/core";
 
 import {
   collapseIdenticalDisplayMembers,
+  fieldsForDefaultTooltip,
   formatTooltipCell,
   tooltipDisplayPayloadToken,
+  tooltipFieldLabel,
 } from "../../src/lib/inspection/display-members.js";
 import type { PlotDatum, TooltipField } from "../../src/lib/interaction/interaction.js";
 import { resolveInspection } from "../../src/lib/inspection/resolver.js";
@@ -48,6 +50,39 @@ describe("formatTooltipCell", () => {
 
   it("does not throw on invalid Date (live-text tokens)", () => {
     expect(formatTooltipCell(new Date(Number.NaN))).toBe("–");
+  });
+});
+
+describe("tooltipFieldLabel (#752)", () => {
+  it("humanizes camelCase and snake_case column names for default tooltip dt text", () => {
+    expect(tooltipFieldLabel("crimePersons")).toBe("crime persons");
+    expect(tooltipFieldLabel("literacy")).toBe("literacy");
+    expect(tooltipFieldLabel("flipper_length")).toBe("flipper length");
+    expect(tooltipFieldLabel("Region")).toBe("Region");
+  });
+});
+
+describe("fieldsForDefaultTooltip (#754)", () => {
+  const fields = [
+    field("x", "literacy", 67),
+    field("y", "crimePersons", 35203),
+    field("color", "region", "North"),
+  ];
+
+  it("omits the shared axis channel when inspection mode is x or y", () => {
+    expect(fieldsForDefaultTooltip(fields, "x").map((f) => f.field)).toEqual([
+      "crimePersons",
+      "region",
+    ]);
+    expect(fieldsForDefaultTooltip(fields, "y").map((f) => f.field)).toEqual([
+      "literacy",
+      "region",
+    ]);
+  });
+
+  it("keeps every field for exact and xy point inspection", () => {
+    expect(fieldsForDefaultTooltip(fields, "exact")).toEqual(fields);
+    expect(fieldsForDefaultTooltip(fields, "xy")).toEqual(fields);
   });
 });
 

@@ -93,7 +93,8 @@ describe("boxplot geom", () => {
     const threeWidth = threeBoxes.rects[2]!; // rect layout: x,y,w,h
     const threePanel = three.scene.panels[0]!;
     // step=1/3, 0.75*step≈0.25 of panel — must cap so 3-category charts stay readable
-    expect(threeWidth).toBeLessThanOrEqual(threePanel.width * 0.15 + 1e-6);
+    // Float32 rect storage + theme chrome can sit ~1e-6 outside a pure *0.15 bound.
+    expect(threeWidth).toBeLessThanOrEqual(threePanel.width * 0.15 + 1e-5);
     expect(threeWidth).toBeGreaterThan(0);
 
     const manyCats = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -110,7 +111,9 @@ describe("boxplot geom", () => {
     const eightWidth = eightBoxes.rects[2]!;
     // 0.75 / 8 = 0.09375 of panel — under the cap, so uncapped ggplot2 fraction
     const eightPanel = eight.scene.panels[0]!;
-    expect(eightWidth).toBeCloseTo(0.75 * (1 / 8) * eightPanel.width, 5);
+    // Float32 rect storage vs theme chrome (axis title size) — 4 dp is enough
+    // to lock the ggplot2 width fraction without flaking on sub-pixel epsilon.
+    expect(eightWidth).toBeCloseTo(0.75 * (1 / 8) * eightPanel.width, 4);
 
     const wide = runPipeline(
       gg(rows, aes({ x: "cat", y: "v" }))
@@ -120,6 +123,6 @@ describe("boxplot geom", () => {
     );
     const wideBoxes = wide.scene.batches.find((b) => b.kind === "rects") as RectsBatch;
     // Explicit width bypasses the few-category cap (full step).
-    expect(wideBoxes.rects[2]!).toBeCloseTo((1 / 3) * threePanel.width, 5);
+    expect(wideBoxes.rects[2]!).toBeCloseTo((1 / 3) * threePanel.width, 4);
   });
 });

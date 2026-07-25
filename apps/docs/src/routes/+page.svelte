@@ -1,5 +1,6 @@
 <script lang="ts">
   import { base } from "$app/paths";
+  import type { PlotInspectionChange } from "@ggsvelte/svelte";
   import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
 
   import { guerry } from "$examples/point/scatter-color/data";
@@ -11,6 +12,8 @@
   import { contrastChartTheme } from "$lib/docs-appearance-state.svelte";
   import { EXAMPLES } from "$lib/examples";
   import { HOME_CODE_PATH_TABS } from "$lib/home-code-path";
+
+  type GuerryRow = (typeof guerry)[number];
 
   const install = "bun install @ggsvelte/svelte";
   const entries = EXAMPLES.map((entry) => galleryEntryFor(entry));
@@ -34,21 +37,52 @@
   </div>
 
   <div class="hero-plot">
+    <!--
+      Exact point inspection (not mode "x"): no vertical axis guide, one
+      department at a time. Custom content names the department and uses
+      readable labels — default tooltips still show raw column names for
+      unmapped identity fields (#752).
+    -->
+    {#snippet heroTooltip(
+      inspection: PlotInspectionChange<Record<string, unknown>, PropertyKey>,
+    )}
+      {@const row = inspection.focus.row as GuerryRow | null}
+      {#if row}
+        <div class="hero-tooltip">
+          <div class="hero-tooltip-title">{row.department}</div>
+          <dl>
+            <dt>literacy</dt>
+            <dd>{row.literacy}%</dd>
+            <dt>pop. per crime</dt>
+            <dd>{row.crimePersons}</dd>
+            <dt>region</dt>
+            <dd>{row.region}</dd>
+          </dl>
+        </div>
+      {/if}
+    {/snippet}
     <GGPlot
       data={guerry}
       aes={{ x: "literacy", y: "crimePersons", color: "region" }}
-      inspect={{ mode: "x", pin: true, maxDistance: 24 }}
+      inspect={{
+        mode: "exact",
+        pin: true,
+        maxDistance: 24,
+        content: heroTooltip,
+      }}
       theme={heroTheme}
       scales={{ color: { type: "ordinal", scheme: "tableau10" } }}
       labs={{
         title: "Literacy and crime in France, 1833",
-        x: "Literacy (rank)",
-        y: "Crimes against persons (rank)",
+        subtitle:
+          "85 French departments — higher y means fewer crimes per head",
+        x: "Literate conscripts (%)",
+        y: "Population per crime against persons",
         color: "Region",
       }}
       width="container"
       height={400}
-      ariaLabel="Literacy rank against rank of crimes against persons for 85 French departments, coloured by region"
+      ariaLabel="Literacy percentage against population per crime against persons for 85 French departments, coloured by region"
     >
       <GeomPoint size={4} alpha={0.85} />
     </GGPlot>
@@ -183,6 +217,28 @@
   .hero-plot {
     grid-area: plot;
     min-width: 0;
+  }
+
+  .hero-tooltip-title {
+    margin-bottom: 0.35rem;
+    font-weight: 650;
+  }
+
+  .hero-tooltip dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 0 0.75rem;
+  }
+
+  .hero-tooltip dt {
+    font-weight: 600;
+  }
+
+  .hero-tooltip dd {
+    margin: 0;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
   }
 
   .cta-row {

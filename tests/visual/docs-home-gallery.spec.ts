@@ -89,6 +89,49 @@ test("homepage preserves SSR chart output and hydrates its keyboard interaction"
   await expect(page.locator(".home-hero .gg-tooltip")).toBeVisible();
 });
 
+/**
+ * Hero tooltip contract: one department at a time, named identity, no vertical
+ * axis guide, no raw camelCase wall of multi-member x-group rows.
+ */
+test("homepage hero tooltip names a single department without axis crosshair noise", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/?theme=light");
+  const plot = page.locator(".home-hero .gg-plot-root");
+  await expect(plot).toHaveAttribute("data-gg-ready", "true");
+
+  const hero = page.locator(".home-hero");
+  // Axis titles use real units (not the old mistaken "rank" labels).
+  // Scope to the plot so code-tab JSON string literals don't match.
+  await expect(
+    hero.locator(".gg-axis-title", { hasText: "Literate conscripts (%)" }),
+  ).toBeVisible();
+  await expect(
+    hero.locator(".gg-axis-title", { hasText: "Population per crime against persons" }),
+  ).toBeVisible();
+
+  // Readable tick size floor (light/dark themes were 8.8px on several presets).
+  const axisFontSize = await hero
+    .locator(".gg-axis .gg-tick text")
+    .first()
+    .evaluate((el) => Number(el.getAttribute("font-size") ?? "0"));
+  expect(axisFontSize).toBeGreaterThanOrEqual(11);
+
+  const capture = hero.locator(".gg-capture");
+  await capture.focus();
+  await capture.press("ArrowRight");
+  const tooltip = hero.locator(".gg-tooltip");
+  await expect(tooltip).toBeVisible();
+  await expect(tooltip.locator(".hero-tooltip-title")).toBeVisible();
+  await expect(tooltip.getByText("pop. per crime")).toBeVisible();
+  await expect(tooltip.getByText("crimePersons")).toHaveCount(0);
+  // Exact mode: no full-panel vertical/horizontal crosshair guides.
+  await expect(hero.locator(".gg-crosshair")).toHaveCount(0);
+  // Single focus member — not an x-group stack of departments.
+  await expect(tooltip.locator(".hero-tooltip")).toHaveCount(1);
+});
+
 test("homepage grammar steps change real chart structure in place", async ({ page }) => {
   await page.goto("/");
   const output = page.locator(".grammar-output");
