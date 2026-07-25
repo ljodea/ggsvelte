@@ -20,10 +20,7 @@ import * as Spec from "@ggsvelte/spec";
 
 import { gg, SCALE_CAPABILITIES, type Scales } from "../../src/lib/index.js";
 import * as SveltePkg from "../../src/lib/index.js";
-import {
-  isCompositionDiagnostic,
-  type CompositionDiagnostic,
-} from "../../src/lib/diagnostics/composition.js";
+import { isCompositionDiagnostic } from "../../src/lib/diagnostics/composition.js";
 import type { PlotDiagnostic } from "../../src/lib/diagnostics/deprecation.js";
 import type { LayerRegistry } from "../../src/lib/geoms/registry.svelte.js";
 import type { PortableSpec } from "../../src/lib/index.js";
@@ -103,7 +100,7 @@ function representativeProps(helper: string): Record<string, unknown> {
 function callHelper(helper: string, props: Record<string, unknown>): Scales {
   const fn = (Spec as Record<string, unknown>)[helper];
   if (typeof fn !== "function") {
-    throw new Error(`helper ${helper} is not a function export of @ggsvelte/spec`);
+    throw new TypeError(`helper ${helper} is not a function export of @ggsvelte/spec`);
   }
   return (fn as (opts: Record<string, unknown>) => Scales)(props);
 }
@@ -321,7 +318,7 @@ describe("cross-family DUPLICATE_SCALE_CHANNEL", () => {
       shellProps: {},
       ShellB: SveltePkg.ScaleXLog10 as Component,
       shellBProps: {},
-      ondiagnostic: (d) => {
+      ondiagnostic: (d: PlotDiagnostic) => {
         diagnostics.push(d);
       },
       onrender: (_model: unknown, spec: PortableSpec) => {
@@ -336,9 +333,9 @@ describe("cross-family DUPLICATE_SCALE_CHANNEL", () => {
       .toHaveLength(1);
     const advisory = diagnostics.find((d) => d.code === "DUPLICATE_SCALE_CHANNEL")!;
     expect(isCompositionDiagnostic(advisory)).toBe(true);
-    if (!isCompositionDiagnostic(advisory)) throw new Error("expected composition");
-    const composition = advisory as CompositionDiagnostic;
-    expect(composition.channel).toBe("x");
-    expect(composition.kind).toBe("scale");
+    if (!isCompositionDiagnostic(advisory)) throw new TypeError("expected composition");
+    // `advisory` is narrowed by the guard above — no assertion needed.
+    expect(advisory.channel).toBe("x");
+    expect(advisory.kind).toBe("scale");
   });
 });
