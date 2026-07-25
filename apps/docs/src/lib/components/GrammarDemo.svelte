@@ -22,8 +22,7 @@
     <h2 id="grammar-heading">The missing layer.</h2>
     <p>
       Zero D3.js. Built for human-agent teams who want good default chart
-      interactions that just work, instead of endless complexity and
-      footgun-rework loops.
+      interactions that just work.
     </p>
     <ol>
       {#each steps as step, index (step.label)}

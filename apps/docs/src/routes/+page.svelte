@@ -30,9 +30,8 @@
       A layered grammar of graphics implemented for agents
     </h1>
     <p>
-      ggplot2's layered grammar and defaults as Svelte components, a TypeScript
-      builder, and a validated JSON spec agents can write. Inspection,
-      selection, and zoom are part of the spec.
+      Made for human-agent teams building embedded agents who need to make
+      reliable interactive visualizations on-demand.
     </p>
   </div>
 
@@ -130,12 +129,13 @@
 
 <section class="code-path" aria-labelledby="code-path-heading">
   <div>
-    <h2 id="code-path-heading">Svelte for builders, JSON for operations.</h2>
+    <h2 id="code-path-heading">
+      Svelte for builders, JSON for embedded agents.
+    </h2>
     <p>
-      Svelte components help human-agent teams reason about viz work together,
-      thanks to ggplot2 naming conventions that have been around for 18 years.
-      JSON specs allow agents operating in webapps to make interactive charts on
-      demand for rendering on-the-fly.
+      Svelte components help human-agent teams reason about visualizations
+      together. JSON specs allow agents operating in webapps to make interactive
+      charts on demand for rendering on-the-fly.
     </p>
   </div>
   <CodeTabs {tabs} />
