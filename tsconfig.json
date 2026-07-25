@@ -8,11 +8,15 @@
   // web-standard APIs only (Request, Response, URL); bun's types cover them,
   // so no @cloudflare/workers-types.
   //
-  // tsc is NOT run on this config: scripts/** still has ~200 errors it has
-  // never been held to (#725). The worker slice was split out into
-  // workers/playground-api/tsconfig.json, which `bun run check:workers` does
-  // run — and which is the more accurate program of the two, since scripts/**
-  // membership here drags in @types/node and shadows the global fetch types.
+  // tsc is NOT run on this config: it still reports ~190 errors nothing has
+  // ever been held to — the rest of scripts/**, plus the apps/docs modules
+  // those scripts import, which svelte-check covers under a config that does
+  // not extend tsconfig.base.json (#734). Two slices have been split out into their own
+  // projects, which `check` does run — workers/playground-api/tsconfig.json via
+  // check:workers (#725) and scripts/ci-routing/tsconfig.json via
+  // check:scripts-ci-routing (#734). The worker one is also the more accurate
+  // program of the two, since scripts/** membership here drags in @types/node
+  // and shadows the global fetch types.
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,

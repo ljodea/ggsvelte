@@ -213,8 +213,8 @@ describe("buildDetectChangesOutputs interactions", () => {
     expect(plan.consumer).toBe(true);
     expect(plan.packages_dist).toBe(true);
     const parsed = parseOutput(body);
-    expect(parsed.unit).toBe("true");
-    expect(parsed.bypass_content_cache).toBe("true");
+    expect(parsed["unit"]).toBe("true");
+    expect(parsed["bypass_content_cache"]).toBe("true");
     // JOB_NAMES order: 14 jobs then bypass
     const lines = body.trimEnd().split("\n");
     expect(lines[0]).toBe("checks=true");
@@ -343,7 +343,7 @@ describe("runDetectChanges end-to-end (injected io)", () => {
     runDetectChanges(baseInput({ baseSha: "" }), io);
     expect(io.outputs.length).toBe(1);
     expect(io.logs.some((l) => l.includes("force-all"))).toBe(true);
-    expect(parseOutput(io.outputs[0]!).unit).toBe("true");
+    expect(parseOutput(io.outputs[0]!)["unit"]).toBe("true");
   });
 
   test("main package change: one write, thinned flags", () => {
@@ -353,11 +353,11 @@ describe("runDetectChanges end-to-end (injected io)", () => {
     runDetectChanges(baseInput({ eventName: "push", githubRef: "refs/heads/main" }), io);
     expect(io.outputs.length).toBe(1);
     const o = parseOutput(io.outputs[0]!);
-    expect(o.unit).toBe("true");
-    expect(o.consumer).toBe("false");
-    expect(o.bench_smoke).toBe("false");
-    expect(o.interaction_perf).toBe("false");
-    expect(o.packages_dist).toBe("true");
+    expect(o["unit"]).toBe("true");
+    expect(o["consumer"]).toBe("false");
+    expect(o["bench_smoke"]).toBe("false");
+    expect(o["interaction_perf"]).toBe("false");
+    expect(o["packages_dist"]).toBe("true");
     expect(io.logs.some((l) => l.includes("thinned consumer/bench"))).toBe(true);
   });
 
@@ -366,8 +366,8 @@ describe("runDetectChanges end-to-end (injected io)", () => {
     runDetectChanges(baseInput({ prLabels: "run-compat" }), io);
     expect(io.logs.some((l) => l.includes("run-compat: forced"))).toBe(true);
     const o = parseOutput(io.outputs[0]!);
-    expect(o.consumer).toBe("true");
-    expect(o.packages_dist).toBe("true");
+    expect(o["consumer"]).toBe("true");
+    expect(o["packages_dist"]).toBe("true");
   });
 });
 

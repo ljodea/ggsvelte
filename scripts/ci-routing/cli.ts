@@ -59,7 +59,7 @@ export async function runCiRoutingCli(argv: string[]): Promise<void> {
     const plan = planJobs(changes, { forceAll });
     const bypassContentCache = shouldBypassContentCache(changes, { forceAll });
     const body = formatGithubOutputs(plan, { bypassContentCache });
-    const outPath = process.env.GITHUB_OUTPUT;
+    const outPath = process.env["GITHUB_OUTPUT"];
     if (typeof outPath === "string" && outPath.length > 0) {
       appendFileSync(outPath, body);
     }
@@ -212,12 +212,12 @@ export function lastSuccessfulMainHeadJq(headSha: string): string {
 function runDetectChangesCli(): void {
   const env = process.env;
   const input: DetectChangesInput = {
-    eventName: env.EVENT_NAME ?? "",
-    githubRef: env.GITHUB_REF ?? "",
-    baseSha: env.BASE_SHA ?? "",
-    headSha: env.HEAD_SHA ?? "",
-    prLabels: env.PR_LABELS ?? "",
-    repo: env.REPO ?? "",
+    eventName: env["EVENT_NAME"] ?? "",
+    githubRef: env["GITHUB_REF"] ?? "",
+    baseSha: env["BASE_SHA"] ?? "",
+    headSha: env["HEAD_SHA"] ?? "",
+    prLabels: env["PR_LABELS"] ?? "",
+    repo: env["REPO"] ?? "",
   };
   if (input.eventName.length === 0) {
     throw new Error("detect-changes requires EVENT_NAME");
@@ -228,7 +228,7 @@ function runDetectChangesCli(): void {
   if (input.repo.length === 0) {
     throw new Error("detect-changes requires REPO");
   }
-  const outPath = env.GITHUB_OUTPUT;
+  const outPath = env["GITHUB_OUTPUT"];
   if (typeof outPath !== "string" || outPath.length === 0) {
     throw new Error("detect-changes requires GITHUB_OUTPUT (job outputs path)");
   }
@@ -260,26 +260,26 @@ function runCiGateCli(): void {
     docs_journeys: req("DOCS_JOURNEYS_REQ"),
   };
   const gate = evaluateCiGate({
-    eventName: env.EVENT_NAME ?? "",
+    eventName: env["EVENT_NAME"] ?? "",
     required,
     results: {
-      checks: env.CHECKS_RES,
-      unit: env.UNIT_RES,
-      consumer: env.CONSUMER_RES,
-      build: env.BUILD_RES,
-      svelte_check: env.SVELTE_CHECK_RES,
-      docs_site: env.DOCS_SITE_RES,
-      actions_security: env.ACTIONS_RES,
-      bench_smoke: env.BENCH_RES,
-      packages_dist: env.PACKAGES_DIST_RES,
-      docs_journeys: env.DOCS_JOURNEYS_RES,
+      checks: env["CHECKS_RES"],
+      unit: env["UNIT_RES"],
+      consumer: env["CONSUMER_RES"],
+      build: env["BUILD_RES"],
+      svelte_check: env["SVELTE_CHECK_RES"],
+      docs_site: env["DOCS_SITE_RES"],
+      actions_security: env["ACTIONS_RES"],
+      bench_smoke: env["BENCH_RES"],
+      packages_dist: env["PACKAGES_DIST_RES"],
+      docs_journeys: env["DOCS_JOURNEYS_RES"],
     },
     componentShardResults: [
-      env.COMPONENT_SVELTE_RES,
-      env.COMPONENT_SVELTE_FX_RES,
-      env.COMPONENT_SPIKES_RES,
+      env["COMPONENT_SVELTE_RES"],
+      env["COMPONENT_SVELTE_FX_RES"],
+      env["COMPONENT_SPIKES_RES"],
     ],
-    vrBaselineGuardResult: env.VR_GUARD_RES,
+    vrBaselineGuardResult: env["VR_GUARD_RES"],
   });
   if (!gate.ok) {
     process.stderr.write(`ci-gate failed: ${gate.failures.join(", ")}\n`);
@@ -303,7 +303,7 @@ function parseCacheableExecution(raw: string | undefined): CacheableExecution {
 
 async function runHashInputsCli(args: string[]): Promise<void> {
   const execution = parseCacheableExecution(flagValue(args, "--execution"));
-  const os = flagValue(args, "--os") ?? process.env.RUNNER_OS ?? "unknown";
+  const os = flagValue(args, "--os") ?? process.env["RUNNER_OS"] ?? "unknown";
   const containerTag = flagValue(args, "--container-tag");
   const matrixNode = flagValue(args, "--matrix-node");
   const matrixPm = flagValue(args, "--matrix-pm");
@@ -340,13 +340,16 @@ async function runHashInputsCli(args: string[]): Promise<void> {
     );
   }
 
+  // Absent flags are omitted rather than passed as explicit `undefined`:
+  // contentHashCacheKey's optional dimensions are omit-or-provide by contract
+  // (exactOptionalPropertyTypes), and each one it sees adds a key segment.
   const cacheKey = contentHashCacheKey({
     execution,
     hash,
     os,
-    containerTag: containerTag ?? undefined,
-    matrix,
-    runtime,
+    ...(containerTag === undefined ? {} : { containerTag }),
+    ...(matrix === undefined ? {} : { matrix }),
+    ...(runtime === undefined ? {} : { runtime }),
   });
   const marker = successMarkerPath(execution);
   const body = [
@@ -357,7 +360,7 @@ async function runHashInputsCli(args: string[]): Promise<void> {
     `execution=${execution}`,
   ].join("\n");
 
-  const outPath = process.env.GITHUB_OUTPUT;
+  const outPath = process.env["GITHUB_OUTPUT"];
   if (typeof outPath === "string" && outPath.length > 0) {
     appendFileSync(outPath, `${body}\n`);
   }
@@ -406,7 +409,7 @@ async function runValidateSuccessMarkerCli(args: string[]): Promise<void> {
 }
 
 function writeGithubOutput(body: string): void {
-  const outPath = process.env.GITHUB_OUTPUT;
+  const outPath = process.env["GITHUB_OUTPUT"];
   if (typeof outPath === "string" && outPath.length > 0) {
     appendFileSync(outPath, body);
   }

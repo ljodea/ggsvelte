@@ -130,6 +130,35 @@ describe("R0 release wiring", () => {
     ).toContain("apps/docs/src/lib/playground-agent-envelope");
   });
 
+  it("typechecks scripts/ci-routing inside `bun run check` (issue #734)", () => {
+    // Same gap as the worker (#725), one directory further in: scripts/** is in
+    // the root tsconfig.json only so oxlint --type-aware has type information,
+    // and tsc has never been run on it. ci-routing decides which jobs CI runs,
+    // so it is the slice where a silent type error costs the most.
+    const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
+    expect(pkg.scripts["check:scripts-ci-routing"]).toContain("tsc -p scripts/ci-routing");
+    // Chained into `check`, which ci-unit.yml runs and `build` re-enters.
+    expect(pkg.scripts["check"]).toContain("bun run check:scripts-ci-routing");
+    // Whole-line: `bun run check:pages-links` &c must not satisfy this.
+    expect(read(".github/workflows/ci-unit.yml")).toMatch(/^\s*run: bun run check$/mu);
+
+    const project = read("scripts/ci-routing/tsconfig.json");
+    // Base strictness is the point — the gate is worthless under looser options.
+    expect(project).toContain('"extends"');
+    expect(project).toContain("tsconfig.base.json");
+    // Assert on the include list, not the whole file — `extends` legitimately
+    // escapes upwards to the repo root.
+    const include = /"include"\s*:\s*\[[^\]]*\]/u.exec(project)?.[0] ?? "";
+    // Every .ts in the directory, tests included: the suites are where the
+    // module's contracts are asserted, so leaving them out would half-check it.
+    expect(include, "tsconfig includes the directory's .ts files").toContain('"./**/*.ts"');
+    // Scoped to this directory only. The rest of scripts/** (and apps/**) still
+    // carries unchecked errors tracked on #734; widening the include here would
+    // fail `check` on code this PR never fixed.
+    expect(include, "include stays inside scripts/ci-routing").not.toContain("..");
+    expect(include).not.toContain("apps/");
+  });
+
   it("checks packed links in CI and the Cloudflare Pages deployment", () => {
     expect(readCiSurface()).toContain("bun run check:pages-links");
     expect(read(".github/workflows/cloudflare-pages.yml")).toContain("bun run build:cloudflare");
