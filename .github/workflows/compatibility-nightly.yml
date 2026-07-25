@@ -18,6 +18,7 @@ jobs:
   matrix:
     name: compatibility matrix (required + nightly)
     runs-on: [self-hosted, ggsvelte]
+    timeout-minutes: 30
     permissions:
       contents: read
     outputs:

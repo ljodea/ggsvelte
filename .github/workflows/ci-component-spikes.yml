@@ -26,6 +26,7 @@ jobs:
     name: component-spikes (spikes/browser vitest)
 
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.

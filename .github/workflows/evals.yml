@@ -46,6 +46,7 @@ jobs:
       (github.event.label.name == 'run-evals' &&
        github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: [self-hosted, ggsvelte]
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:

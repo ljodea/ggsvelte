@@ -20,6 +20,7 @@ jobs:
   interaction-perf:
     name: interaction-perf (p50/p95, informational)
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     env:
       HOME: /root
     container:

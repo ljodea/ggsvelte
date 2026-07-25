@@ -17,6 +17,7 @@ jobs:
   bench-smoke:
     name: bench-smoke (mitata, 1k workload)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
     steps:

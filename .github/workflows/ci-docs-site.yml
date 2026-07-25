@@ -17,6 +17,7 @@ jobs:
   docs-site:
     name: docs-site (adapter-static build + pages links)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:

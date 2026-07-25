@@ -28,6 +28,7 @@ jobs:
     name: component-journeys (docs a11y playwright)
 
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     env:
       # GitHub runs the container as root, while /github/home belongs to
       # pwuser. Firefox refuses that ownership mismatch.

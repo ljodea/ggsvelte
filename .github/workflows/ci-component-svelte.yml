@@ -29,6 +29,7 @@ jobs:
     name: component-svelte (packages/svelte chromium + coverage + ssr)
 
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     container:
       # Keep in sync with inputs.playwright_container_tag above.
       image: ghcr.io/${{ github.repository }}/ci-runner:${{ inputs.playwright_container_tag }}

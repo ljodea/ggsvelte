@@ -32,6 +32,7 @@ jobs:
     name: build immutable artifact
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
     # Same environment as deploy so DOCS_ANALYTICS_TOKEN (and other env secrets)
@@ -88,6 +89,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     concurrency:
