@@ -46,9 +46,23 @@ const THEME_SHELL: Readonly<Record<string, string>> = {
 };
 
 const ANY_THEME_SHELL = new RegExp(`<(?:${Object.values(THEME_SHELL).join("|")})\\b`, "g");
+/**
+ * Generic `<Theme …>` shell only. `<Theme\b` does not match `ThemeDark` etc.
+ * because the next character after `Theme` is still a word char (no boundary).
+ */
+const ANY_GENERIC_THEME = /<Theme\b/g;
 
 function countMatches(source: string, pattern: RegExp): number {
   return source.match(pattern)?.length ?? 0;
+}
+
+/** Every theme declaration form (prop, named shell, or generic `<Theme name>`). */
+function totalThemeDeclarations(source: string): number {
+  return (
+    countMatches(source, ANY_THEME_PROP) +
+    countMatches(source, ANY_THEME_SHELL) +
+    countMatches(source, ANY_GENERIC_THEME)
+  );
 }
 
 /** Count how many times `theme` is declared on hand-written plots (prop or child). */
@@ -80,8 +94,7 @@ describe("example theme parity (spec.ts vs Example.svelte)", () => {
       if (theme === undefined) {
         // No theme in the spec means the renderer resolves the built-in
         // default; the component must not quietly assert something else.
-        expect(countMatches(source, ANY_THEME_PROP)).toBe(0);
-        expect(countMatches(source, ANY_THEME_SHELL)).toBe(0);
+        expect(totalThemeDeclarations(source)).toBe(0);
         return;
       }
 
@@ -97,11 +110,10 @@ describe("example theme parity (spec.ts vs Example.svelte)", () => {
       }
 
       // Every hand-written <GGPlot> must name the spec's theme (prop or child),
-      // and no plot may carry a theme the spec does not declare.
+      // and no plot may carry a theme the spec does not declare. Both counters
+      // include prop / named shell / generic `<Theme name="…">` so they agree.
       expect(themeDeclarations(source, theme)).toBe(handWritten);
-      expect(countMatches(source, ANY_THEME_PROP) + countMatches(source, ANY_THEME_SHELL)).toBe(
-        handWritten,
-      );
+      expect(totalThemeDeclarations(source)).toBe(handWritten);
     });
   }
 });
