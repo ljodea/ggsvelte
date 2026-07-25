@@ -140,8 +140,9 @@ describe("R-1/R0 release matrix", () => {
       layerModes.add(candidate.autoMode);
       modes.set(candidate.layerIndex, layerModes);
     }
+    // Points default to exact (hover ring); line/area keep axis modes (#754).
     expect([...modes.entries()].map(([layer, values]) => [layer, [...values]])).toEqual([
-      [0, ["xy"]],
+      [0, ["exact"]],
       [1, ["x"]],
       [2, ["x"]],
     ]);

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { base } from "$app/paths";
+  import type { PlotInspectionChange } from "@ggsvelte/svelte";
   import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
 
   import { guerry } from "$examples/point/scatter-color/data";
@@ -12,6 +13,8 @@
   import { EXAMPLES } from "$lib/examples";
 
   import type { PageProps } from "./$types";
+
+  type GuerryRow = (typeof guerry)[number];
 
   const { data }: PageProps = $props();
 
@@ -51,10 +54,10 @@
       readable labels — default tooltips still show raw column names for
       unmapped identity fields (#752).
     -->
-    {#snippet heroTooltip(inspection: {
-      focus: { row: (typeof guerry)[number] | null };
-    })}
-      {@const row = inspection.focus.row}
+    {#snippet heroTooltip(
+      inspection: PlotInspectionChange<Record<string, unknown>, PropertyKey>,
+    )}
+      {@const row = inspection.focus.row as GuerryRow | null}
       {#if row}
         <div class="hero-tooltip">
           <div class="hero-tooltip-title">{row.department}</div>

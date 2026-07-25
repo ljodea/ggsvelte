@@ -31,13 +31,13 @@ export function formatTooltipCell(value: CellValue): string {
 export function tooltipFieldLabel(fieldName: string): string {
   if (fieldName.length === 0) return fieldName;
   const spaced = fieldName
-    .replace(/_/g, " ")
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
+    .replaceAll("_", " ")
+    .replaceAll(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replaceAll(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
   // Preserve intentional Title Case single tokens (e.g. "Region"); only fold
   // multi-word camelCase into lowercase words for scanability.
   if (!/\s/.test(spaced)) return spaced;
-  return spaced.replace(/\S+/g, (word) => word.toLowerCase());
+  return spaced.replaceAll(/\S+/g, (word) => word.toLowerCase());
 }
 
 /**

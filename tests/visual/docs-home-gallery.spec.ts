@@ -115,7 +115,7 @@ test("homepage hero tooltip names a single department without axis crosshair noi
   const axisFontSize = await hero
     .locator(".gg-axis .gg-tick text")
     .first()
-    .evaluate((el) => Number.parseFloat(el.getAttribute("font-size") ?? "0"));
+    .evaluate((el) => Number(el.getAttribute("font-size") ?? "0"));
   expect(axisFontSize).toBeGreaterThanOrEqual(11);
 
   const capture = hero.locator(".gg-capture");

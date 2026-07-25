@@ -7,12 +7,21 @@ import { until } from "../helpers/until.js";
 import { requireModel, rows, size } from "./interaction-harness.js";
 
 describe("hover + tooltip (overlays, never a pipeline re-run)", () => {
+  /**
+   * Map plot-pixel coordinates onto the capture surface. Uses the live SVG
+   * width/height so container-responsive and non-`size` plots hit correctly
+   * under exact inspection (hardcoded 480×320 scaled misses after layout
+   * chrome changes).
+   */
   function pointerMoveAt(capture: Element, x: number, y: number): void {
     const rect = capture.getBoundingClientRect();
+    const svg = capture.ownerDocument?.querySelector("svg.gg-plot");
+    const plotW = Number(svg?.getAttribute("width")) || size.width;
+    const plotH = Number(svg?.getAttribute("height")) || size.height;
     capture.dispatchEvent(
       new PointerEvent("pointermove", {
-        clientX: rect.left + (x / size.width) * rect.width,
-        clientY: rect.top + (y / size.height) * rect.height,
+        clientX: rect.left + (x / plotW) * rect.width,
+        clientY: rect.top + (y / plotH) * rect.height,
         bubbles: true,
       }),
     );
