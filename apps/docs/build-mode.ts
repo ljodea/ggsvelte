@@ -1,4 +1,4 @@
-const DOCS_BUILD_MODES = ["dev", "cloudflare-preview", "cloudflare-production"] as const;
+export const DOCS_BUILD_MODES = ["dev", "cloudflare-preview", "cloudflare-production"] as const;
 
 type DocsBuildMode = (typeof DOCS_BUILD_MODES)[number];
 

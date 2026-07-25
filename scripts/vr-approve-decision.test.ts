@@ -169,7 +169,7 @@ describe("parseBooleanFlag", () => {
 
 /** Run the CLI exactly as the workflow does: env in, GITHUB_OUTPUT out. */
 const run = async (args: string[], env: Record<string, string>) => {
-  const outputFile = `${process.env.TMPDIR ?? "/tmp"}/vr-approve-decision-${args[0]}-${Bun.hash(JSON.stringify(env)).toString(16)}.txt`;
+  const outputFile = `${process.env["TMPDIR"] ?? "/tmp"}/vr-approve-decision-${args[0]}-${Bun.hash(JSON.stringify(env)).toString(16)}.txt`;
   await Bun.write(outputFile, "");
   const proc = Bun.spawn(["bun", `${import.meta.dir}/vr-approve-decision.ts`, ...args], {
     env: { ...process.env, ...env, GITHUB_OUTPUT: outputFile },

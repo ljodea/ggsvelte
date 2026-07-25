@@ -120,7 +120,10 @@ describe("consumer support matrix", () => {
   test("covers every installer, Svelte boundary, supported OS, and Node boundary", () => {
     const matrix = loadSupportMatrix(root);
     const rows = [...requiredConsumerRows(matrix), ...nightlyConsumerRows(matrix)];
-    expect(new Set(rows.map((row) => row.packageManager))).toEqual(
+    // Set<string> on both sides: the expected side is Object.keys, which cannot
+    // narrow to the PackageManager union, and the point of the assertion is that
+    // the two key sets are equal.
+    expect(new Set<string>(rows.map((row) => row.packageManager))).toEqual(
       new Set(Object.keys(matrix.packageManagers)),
     );
     expect(new Set(rows.map((row) => row.svelte))).toEqual(
@@ -154,8 +157,8 @@ describe("consumer support matrix", () => {
     const publisherTag = extractWorkflowEnvTag(buildCiImage, "PLAYWRIGHT_TAG");
     expect(rootManifest.packageManager).toBe(`bun@${matrix.packageManagers.bun}`);
     expect(rootManifest.devDependencies["@playwright/test"]).toBe(matrix.browsers.playwright);
-    expect(rootManifest.devDependencies.pnpm).toBe(matrix.packageManagers.pnpm);
-    expect(svelteManifest.devDependencies.playwright).toBe(matrix.browsers.playwright);
+    expect(rootManifest.devDependencies["pnpm"]).toBe(matrix.packageManagers.pnpm);
+    expect(svelteManifest.devDependencies["playwright"]).toBe(matrix.browsers.playwright);
     expect(ci).toContain(`PLAYWRIGHT_CONTAINER_TAG: ${consumerTag}`);
     expect(comparePlaywrightContainerTags(publisherTag, consumerTag)).toBeGreaterThanOrEqual(0);
     // Dockerfile ARG default tracks the publisher (build-arg overrides it;

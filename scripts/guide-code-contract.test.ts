@@ -28,7 +28,14 @@ describe("guide code truth contract", () => {
         assertGuideCodeContract(page.markdown, page.slug);
       }).not.toThrow();
       for (const block of codeBlocks(page.markdown)) {
-        expect(["complete", "fragment"]).toContain(block.classification);
+        // Optional on CodeBlock — a fence carrying no complete/fragment flag is
+        // exactly the failure this asserts, and saying so beats toContain
+        // reporting undefined as a bad classification.
+        const { classification } = block;
+        if (classification === undefined) {
+          throw new Error(`${page.slug}: guide fence has no complete/fragment classification`);
+        }
+        expect(["complete", "fragment"]).toContain(classification);
       }
     }
   });

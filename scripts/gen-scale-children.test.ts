@@ -69,15 +69,17 @@ describe("SHELL_MANIFEST completeness", () => {
     expect(byFamily.get("color-fill")).toBe(18);
     expect(byFamily.get("numeric-style")).toBe(21);
     expect(byFamily.get("finite-style")).toBe(8);
-    // Families in the ledger match.
-    const ledgerFamilies = new Set(SCALE_CAPABILITIES.map((c) => c.family));
+    // Families in the ledger match. Set<string>, not the inferred literal union:
+    // ShellSpec.family is a plain string, and whether it names a real family is
+    // the thing under test — a narrower set would reject the input instead.
+    const ledgerFamilies = new Set<string>(SCALE_CAPABILITIES.map((c) => c.family));
     for (const family of byFamily.keys()) {
       expect(ledgerFamilies.has(family), `unknown family ${family}`).toBe(true);
     }
   });
 
   it("every family matches a SCALE_CAPABILITIES family string", () => {
-    const ledger = new Set(SCALE_CAPABILITIES.map((c) => c.family));
+    const ledger = new Set<string>(SCALE_CAPABILITIES.map((c) => c.family));
     for (const s of SHELL_MANIFEST) {
       expect(ledger.has(s.family), `${s.helper} family ${s.family}`).toBe(true);
     }

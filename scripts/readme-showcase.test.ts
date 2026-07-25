@@ -14,10 +14,27 @@ interface ReadmeExample {
   readonly source: string;
 }
 
+/**
+ * Both capture groups are mandatory in the pattern, so a match always carries
+ * them — but only at runtime. Assert it rather than coercing: a group that came
+ * back undefined would otherwise flow into `join(root, "examples", id, …)` and
+ * surface as an unrelated ENOENT several assertions later.
+ */
+function bothCaptures(match: RegExpExecArray): readonly [string, string] {
+  const [, first, second] = match;
+  if (first === undefined || second === undefined) {
+    throw new Error(`Malformed README.md block, expected two captures: ${match[0]}`);
+  }
+  return [first, second];
+}
+
 function readmeExamples(): readonly ReadmeExample[] {
   return [
     ...readme.matchAll(/<!-- example-source: ([^ ]+) -->\n\n```svelte\n([\s\S]*?)\n```/g),
-  ].map(([, id, source]) => ({ id, source }));
+  ].map((match) => {
+    const [id, source] = bothCaptures(match);
+    return { id, source };
+  });
 }
 
 function linkedPreviews(): ReadonlyMap<string, string> {
@@ -26,7 +43,10 @@ function linkedPreviews(): ReadonlyMap<string, string> {
       ...readme.matchAll(
         /\[!\[[^\]]+\]\((apps\/docs\/static\/previews\/[^)]+)\)\]\(https:\/\/ggsvelte\.sh\/examples\/([^)]+)\)/g,
       ),
-    ].map(([, path, id]) => [id, path]),
+    ].map((match) => {
+      const [path, id] = bothCaptures(match);
+      return [id, path] as const;
+    }),
   );
 }
 
@@ -41,7 +61,12 @@ describe("README visual showcase", () => {
     expect(categories.size).toBeGreaterThanOrEqual(8);
     expect([...previews.keys()].toSorted()).toEqual(examples.map(({ id }) => id).toSorted());
 
-    const generatedById = new Map(GALLERY_PREVIEWS.map((preview) => [preview.id, preview]));
+    // Keyed by string, not by the generated literal union: the lookup key comes
+    // out of the README, and "this id has no generated preview" is the failure
+    // this loop is here to report.
+    const generatedById = new Map<string, (typeof GALLERY_PREVIEWS)[number]>(
+      GALLERY_PREVIEWS.map((preview) => [preview.id, preview]),
+    );
     for (const [id, path] of previews) {
       const generated = generatedById.get(id);
       expect(generated, `${id} must have a generated gallery preview`).toBeDefined();

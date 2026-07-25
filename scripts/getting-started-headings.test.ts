@@ -51,7 +51,11 @@ describe("getting-started page navigation", () => {
 
   it("is what the generated route publishes", () => {
     const route = DOCS_ROUTES.find((entry) => entry.path === "/guide/getting-started");
-    expect(route?.headings).toEqual(
+    // Widened off the generated literal tuple: DOCS_ROUTES is const-asserted, so
+    // matching it exactly would demand a 14-element tuple on the expected side.
+    const published: readonly { id: string; title: string; level: number }[] | undefined =
+      route?.headings;
+    expect(published).toEqual(
       GETTING_STARTED_PAGE_HEADINGS.map(({ id, title, level }) => ({ id, title, level })),
     );
   });

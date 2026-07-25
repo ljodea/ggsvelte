@@ -14,7 +14,12 @@ function inspectEvent(key: PropertyKey, phase: "change" | "clear" = "change") {
       source: "keyboard",
     } as const satisfies PlaygroundInteractionEvent;
   }
-  return {
+  // Bound to a const before the `satisfies`, deliberately. PlaygroundInteractionEvent
+  // is the minimal structural shape (type/phase/source) and callers hand it whole
+  // interaction events — carrying that payload into `json` is what this fixture
+  // exists to prove. Applying `satisfies` to the fresh literal instead invokes
+  // excess-property checking, which rejects every field past the required three.
+  const changeEvent = {
     type: "inspect",
     phase,
     state: "transient",
@@ -43,7 +48,8 @@ function inspectEvent(key: PropertyKey, phase: "change" | "clear" = "change") {
         anchor: { x: 10, y: 20 },
       },
     ],
-  } as const satisfies PlaygroundInteractionEvent;
+  } as const;
+  return changeEvent satisfies PlaygroundInteractionEvent;
 }
 
 describe("playground semantic event log", () => {

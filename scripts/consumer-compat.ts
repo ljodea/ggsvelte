@@ -52,10 +52,10 @@ export function resolveConsumerOptions(
   environment: Record<string, string | undefined>,
 ) {
   return {
-    packageManager: (args[0] ?? environment.PACKAGE_MANAGER ?? "npm") as PackageManager,
+    packageManager: (args[0] ?? environment["PACKAGE_MANAGER"] ?? "npm") as PackageManager,
     // Single-sourced from support-matrix.json — the floor lives in one place.
-    svelteVersion: args[1] ?? environment.SVELTE_VERSION ?? loadSupportMatrix().svelte.minimum,
-    packageManagerVersion: args[2] ?? environment.PACKAGE_MANAGER_VERSION,
+    svelteVersion: args[1] ?? environment["SVELTE_VERSION"] ?? loadSupportMatrix().svelte.minimum,
+    packageManagerVersion: args[2] ?? environment["PACKAGE_MANAGER_VERSION"],
   };
 }
 

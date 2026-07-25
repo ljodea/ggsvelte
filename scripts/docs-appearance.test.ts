@@ -11,7 +11,7 @@ import {
 
 function root(theme?: string): { dataset: DOMStringMap } {
   const dataset: DOMStringMap = {};
-  if (theme !== undefined) dataset.theme = theme;
+  if (theme !== undefined) dataset["theme"] = theme;
   return { dataset };
 }
 
@@ -53,7 +53,7 @@ describe("docs appearance", () => {
     const el = root("light");
     const storage = memoryStorage();
     writeDocsAppearance("dark", el, storage);
-    expect(el.dataset.theme).toBe("dark");
+    expect(el.dataset["theme"]).toBe("dark");
     expect(storage.store[DOCS_THEME_STORAGE_KEY]).toBe("dark");
   });
 
@@ -61,19 +61,19 @@ describe("docs appearance", () => {
     const el = root("light");
     const storage = memoryStorage({}, { throwOnSet: true });
     writeDocsAppearance("dark", el, storage);
-    expect(el.dataset.theme).toBe("dark");
+    expect(el.dataset["theme"]).toBe("dark");
   });
 
   test("write with null storage only mutates dataset", () => {
     const el = root("dark");
     writeDocsAppearance("light", el, null);
-    expect(el.dataset.theme).toBe("light");
+    expect(el.dataset["theme"]).toBe("light");
   });
 
   test("write with two args uses the lazy default storage resolver", () => {
     const el = root("light");
     writeDocsAppearance("dark", el);
-    expect(el.dataset.theme).toBe("dark");
+    expect(el.dataset["theme"]).toBe("dark");
   });
 });
 
@@ -86,12 +86,12 @@ describe("watchDocsAppearance", () => {
       return;
     }
     const el = document.createElement("div");
-    el.dataset.theme = "light";
+    el.dataset["theme"] = "light";
     const seen: string[] = [];
     const stop = watchDocsAppearance((appearance) => {
       seen.push(appearance);
     }, el);
-    el.dataset.theme = "dark";
+    el.dataset["theme"] = "dark";
     // MutationObserver is async; force a microtask flush is not always enough.
     // At least destroy must be callable.
     stop();

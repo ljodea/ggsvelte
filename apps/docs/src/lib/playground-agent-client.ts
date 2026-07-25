@@ -39,10 +39,19 @@ export type GenerateChartResult =
       readonly retryAfterSeconds?: number;
     };
 
+/**
+ * The transport seam generateChart actually uses: one call, one Response.
+ * Narrower than `typeof fetch` on purpose — that type also carries the static
+ * `preconnect` member, which nothing here calls but which every injected stub
+ * would otherwise have to reproduce to typecheck. The global `fetch` still
+ * satisfies this.
+ */
+export type GenerateChartFetch = (input: string, init?: RequestInit) => Promise<Response>;
+
 export interface GenerateChartOptions {
   readonly apiUrl?: string;
   readonly mode?: "live" | "mock";
-  readonly fetchFn?: typeof fetch;
+  readonly fetchFn?: GenerateChartFetch;
   readonly signal?: AbortSignal;
 }
 
@@ -248,13 +257,13 @@ export async function generateChart(
     };
   }
 
-  const code = mapApiErrorCode(error.code);
+  const code = mapApiErrorCode(error["code"]);
   const retryAfter =
-    typeof error.retryAfterSeconds === "number" ? error.retryAfterSeconds : undefined;
+    typeof error["retryAfterSeconds"] === "number" ? error["retryAfterSeconds"] : undefined;
   return {
     ok: false,
     code,
-    message: typeof error.message === "string" ? error.message : messageForAgentError(code),
+    message: typeof error["message"] === "string" ? error["message"] : messageForAgentError(code),
     ...(retryAfter === undefined ? {} : { retryAfterSeconds: retryAfter }),
   };
 }

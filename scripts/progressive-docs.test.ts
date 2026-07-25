@@ -87,11 +87,11 @@ describe("progressive Docs journey", () => {
   it("keeps every lesson anchor and title aligned with generated route headings", () => {
     const stepIds: ReadonlySet<string> = new Set(SAKURA_STEPS.map((step) => step.id));
     const route = DOCS_ROUTES.find((entry) => entry.path === "/guide/getting-started");
-    expect(
-      route?.headings
-        ?.filter((heading) => stepIds.has(heading.id))
-        .map(({ id, title }) => ({ id, title })),
-    ).toEqual(SAKURA_STEPS.map(({ id, title }) => ({ id, title })));
+    // Widened off the generated literal union — see getting-started-headings.
+    const stepHeadings: { id: string; title: string }[] | undefined = route?.headings
+      ?.filter((heading) => stepIds.has(heading.id))
+      .map(({ id, title }) => ({ id, title }));
+    expect(stepHeadings).toEqual(SAKURA_STEPS.map(({ id, title }) => ({ id, title })));
   });
 
   it("keeps the human lesson out of the agent surface", () => {

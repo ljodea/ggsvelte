@@ -43,30 +43,30 @@ export function defaultPlaygroundInteractions(): PlaygroundInteractions {
  * - zoom is mutually exclusive with interval select (both use brush)
  * - legendFilter / legendFocus only when discrete legend is present (caller gates UI)
  */
-export function normalizePlaygroundInteractions(raw: unknown): PlaygroundInteractions {
+export function normalizePlaygroundInteractions(raw?: unknown): PlaygroundInteractions {
   const defaults = defaultPlaygroundInteractions();
   if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
     return defaults;
   }
   const input = raw as Record<string, unknown>;
 
-  const inspect = input.inspect !== false;
+  const inspect = input["inspect"] !== false;
 
   let select: false | "point" | "interval" = false;
-  if (input.select === "point" || input.select === "interval") {
-    select = input.select;
-  } else if (input.select === true) {
+  if (input["select"] === "point" || input["select"] === "interval") {
+    select = input["select"];
+  } else if (input["select"] === true) {
     select = "point";
   }
 
-  let zoom = input.zoom === true;
+  let zoom = input["zoom"] === true;
   // Interval select and zoom both use brush — interval wins.
   if (select === "interval" && zoom) {
     zoom = false;
   }
 
-  const legendFilter = input.legendFilter === true;
-  const legendFocus = input.legendFocus === true;
+  const legendFilter = input["legendFilter"] === true;
+  const legendFocus = input["legendFocus"] === true;
 
   return { inspect, select, zoom, legendFilter, legendFocus };
 }
@@ -115,7 +115,7 @@ export function parsePlaygroundAgentEnvelope(input: unknown): ParseEnvelopeResul
   }
 
   const record = value as Record<string, unknown>;
-  if (!("spec" in record) || record.spec === undefined) {
+  if (!("spec" in record) || record["spec"] === undefined) {
     // Allow bare PortableSpec as a lenient fallback only when it looks like one.
     if ("layers" in record && "data" in record) {
       return {
@@ -133,9 +133,9 @@ export function parsePlaygroundAgentEnvelope(input: unknown): ParseEnvelopeResul
   return {
     ok: true,
     envelope: {
-      spec: record.spec,
-      interactions: normalizePlaygroundInteractions(record.interactions),
-      title: normalizeTitle(record.title),
+      spec: record["spec"],
+      interactions: normalizePlaygroundInteractions(record["interactions"]),
+      title: normalizeTitle(record["title"]),
     },
   };
 }
@@ -158,8 +158,8 @@ const DISCRETE_COLOR_FAMILIES: ReadonlySet<string> = new Set(["ordinal", "manual
 function colorChannelField(aes: unknown, channel: ColorChannel): string | null {
   if (!isRecord(aes)) return null;
   const mapping = aes[channel];
-  if (isRecord(mapping) && typeof mapping.field === "string" && mapping.field !== "") {
-    return mapping.field;
+  if (isRecord(mapping) && typeof mapping["field"] === "string" && mapping["field"] !== "") {
+    return mapping["field"];
   }
   if (typeof mapping === "string" && mapping !== "") return mapping;
   return null;
@@ -168,7 +168,7 @@ function colorChannelField(aes: unknown, channel: ColorChannel): string | null {
 /** One column's cells from inline rows or inline columns; null when absent. */
 function columnValues(data: unknown, field: string): CellValue[] | null {
   if (!isRecord(data)) return null;
-  const rows = data.values;
+  const rows = data["values"];
   if (Array.isArray(rows)) {
     const column: CellValue[] = [];
     for (const row of rows) {
@@ -176,7 +176,7 @@ function columnValues(data: unknown, field: string): CellValue[] | null {
     }
     return column.length > 0 ? column : null;
   }
-  const columns = data.columns;
+  const columns = data["columns"];
   if (isRecord(columns) && Array.isArray(columns[field])) {
     const column = columns[field] as CellValue[];
     return column.length > 0 ? column : null;
@@ -198,12 +198,12 @@ function channelDrawsDiscreteLegend(
   const field = colorChannelField(aes, channel);
   if (field === null) return false;
 
-  const scales = spec.scales;
+  const scales = spec["scales"];
   const config = isRecord(scales) ? scales[channel === "colour" ? "color" : channel] : undefined;
   const family = configuredColorScaleType(isRecord(config) ? config : undefined);
   if (family !== undefined) return DISCRETE_COLOR_FAMILIES.has(family);
 
-  const column = columnValues(layerData, field) ?? columnValues(spec.data, field);
+  const column = columnValues(layerData, field) ?? columnValues(spec["data"], field);
   // Named or absent data: the runtime may still draw a keyed legend, so keep
   // the affordance rather than silently dropping it.
   if (column === null) return true;
@@ -218,14 +218,16 @@ function channelDrawsDiscreteLegend(
 export function chartHasDiscreteLegend(spec: unknown): boolean {
   if (!isRecord(spec)) return false;
   for (const channel of COLOR_CHANNELS) {
-    if (channelDrawsDiscreteLegend(spec, spec.data, spec.aes, channel)) return true;
+    if (channelDrawsDiscreteLegend(spec, spec["data"], spec["aes"], channel)) return true;
   }
-  const layers = spec.layers;
+  const layers = spec["layers"];
   if (Array.isArray(layers)) {
     for (const layer of layers) {
       if (!isRecord(layer)) continue;
       for (const channel of COLOR_CHANNELS) {
-        if (channelDrawsDiscreteLegend(spec, layer.data ?? spec.data, layer.aes, channel)) {
+        if (
+          channelDrawsDiscreteLegend(spec, layer["data"] ?? spec["data"], layer["aes"], channel)
+        ) {
           return true;
         }
       }

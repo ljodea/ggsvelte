@@ -6,14 +6,14 @@
   // errors slipped through unseen. Run by `bun run check:scripts-ci-routing`
   // (chained into `check`), mirroring the worker gate from #725.
   //
-  // ci-routing is the first slice to be pulled in because it decides what CI
+  // ci-routing was the first slice to be pulled in because it decides what CI
   // runs: a type error here silently mis-routes every job on every PR. The rest
-  // of scripts/** still carries unchecked errors and stays on #734.
+  // of scripts/** followed in #734 and is now covered by scripts/tsconfig.json
+  // (check:scripts), which includes this directory as well.
   //
-  // Scoped to this directory only, and deliberately not to scripts/**: the
-  // sibling scripts/ci-routing.test.ts (the public re-export suite one level
-  // up) is outside the include, so widening this to the parent would drag in
-  // the unfixed remainder and fail `check` on code no one has held to tsc yet.
+  // This narrower project is kept rather than folded into that one: it fails on
+  // routing alone, without the tree's other 120-odd files in the program, so the
+  // gate that decides what CI runs stays legible and independently runnable.
   //
   // "types": ["bun"] matches how these scripts actually run — `bun scripts/…`,
   // with Bun.spawn and bun:test in the suites.
