@@ -5,6 +5,7 @@
  */
 import { expect, test, type Page } from "@playwright/test";
 
+import { rows as legendFocusRows } from "../../examples/interaction/legend-focus/data.js";
 import { settleVisualState } from "./helpers/deterministic";
 import {
   SMOKE_SCENARIOS,
@@ -53,10 +54,24 @@ const INTERACTION_HANDLERS: Record<
     await page.goto("/examples/interaction/legend-focus?vr&theme=light");
     await settleVisualState(page, 3);
     const firstLegendEntry = page.locator(".gg-legend-target").first();
+    const focusedSeries = (await firstLegendEntry.innerText()).trim();
     await firstLegendEntry.click();
     await expect(firstLegendEntry).toHaveAttribute("aria-pressed", "true");
     // Demo status/summary chrome is hidden under ?vr; assert chart focus only (#650).
-    await expect(page.locator("[data-gg-focused='true']")).toHaveCount(7);
+    //
+    // Scoped to the first plot (SVG points) and counted from the example's own
+    // data. A page-wide count would be `2 * series + 1` across the three plots —
+    // the canvas plot contributes no DOM marks and the third adds a line path —
+    // which encodes layout trivia instead of the property under test. A hard
+    // assertion here also blocks baselines from landing (#421), so it must not
+    // restate a row count that any dataset change invalidates.
+    const focusedRows = legendFocusRows.filter((row) => row.series === focusedSeries).length;
+    expect(
+      focusedRows,
+      `legend entry "${focusedSeries}" must match rows in the data`,
+    ).toBeGreaterThan(0);
+    const firstPlot = page.locator(".gg-plot-root").first();
+    await expect(firstPlot.locator("[data-gg-focused='true']")).toHaveCount(focusedRows);
     await expect(page.locator(".gg-example-frame")).toHaveScreenshot(scenario.basename);
   },
 
