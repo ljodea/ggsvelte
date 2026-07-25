@@ -11,4 +11,4 @@ const HERO_EXAMPLE_ID = "point/scatter-color";
  * Inlining them in the page is what let the tabs drift into showing a
  * different dataset from the plot beside them.
  */
-export const load: PageLoad = async () => await loadExample(HERO_EXAMPLE_ID);
+export const load: PageLoad = () => loadExample(HERO_EXAMPLE_ID);
