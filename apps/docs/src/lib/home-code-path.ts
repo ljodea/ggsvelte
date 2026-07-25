@@ -1,10 +1,18 @@
 /**
  * Home code-path triptych: the same penguins chart as GrammarDemo, shown as
- * Svelte children, the TypeScript builder, and a named-data PortableSpec.
+ * Svelte children, the TypeScript builder, and agent JSON.
  *
  * Hand-authored (not loadExample) so the JSON tab can use data: { name } and
  * never dump every row into a mile-tall panel. Matches the interactive demo
  * above the fold — not the hero Guerry chart.
+ *
+ * Interaction: GrammarDemo step 4 is only `inspect` (nearest-point hover/pin
+ * tooltips). That is a GGPlot host prop — not a PortableSpec field and not a
+ * builder method.
+ * - Svelte / builder: set `inspect` on <GGPlot>
+ * - JSON: agent envelope `{ interactions, spec }` (playground host maps
+ *   interactions onto GGPlot props; bare PortableSpec is also accepted and
+ *   defaults inspect on)
  */
 
 export const HOME_CODE_PATH_SVELTE = `<script lang="ts">
@@ -25,51 +33,65 @@ export const HOME_CODE_PATH_SVELTE = `<script lang="ts">
 </GGPlot>
 `;
 
-export const HOME_CODE_PATH_BUILDER = `import { aes, gg } from "@ggsvelte/spec";
+/** Builder produces PortableSpec; inspect is enabled on the host GGPlot. */
+export const HOME_CODE_PATH_BUILDER = `<script lang="ts">
+  import { aes, gg } from "@ggsvelte/spec";
+  import { GGPlot } from "@ggsvelte/svelte";
 
-import { penguins } from "./penguins.js";
+  import { penguins } from "./penguins.js";
 
-export const spec = gg(
-  penguins,
-  aes({ x: "flipper", y: "mass", color: "species" }),
-)
-  .geomPoint({ alpha: 0.72 })
-  .geomSmooth({ method: "loess", span: 0.75, se: false })
-  .spec();
+  const spec = gg(
+    penguins,
+    aes({ x: "flipper", y: "mass", color: "species" }),
+  )
+    .geomPoint({ alpha: 0.72 })
+    .geomSmooth({ method: "loess", span: 0.75, se: false })
+    .spec();
+</script>
+
+<GGPlot {spec} inspect width={640} height={400} />
 `;
 
-/** Named-data form agents emit when rows are supplied separately at render time. */
+/**
+ * Agent envelope: host interaction flags + named-data PortableSpec.
+ * `spec` alone is valid PortableSpec; interactions are applied by the host.
+ */
 export const HOME_CODE_PATH_SPEC_JSON = `{
-  "edition": 2,
-  "data": { "name": "penguins" },
-  "layers": [
-    {
-      "geom": "point",
-      "stat": "identity",
-      "position": "identity",
-      "aes": {
-        "x": { "field": "flipper" },
-        "y": { "field": "mass" },
-        "color": { "field": "species" }
+  "interactions": {
+    "inspect": true
+  },
+  "spec": {
+    "edition": 2,
+    "data": { "name": "penguins" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "flipper" },
+          "y": { "field": "mass" },
+          "color": { "field": "species" }
+        },
+        "params": { "alpha": 0.72 }
       },
-      "params": { "alpha": 0.72 }
-    },
-    {
-      "geom": "smooth",
-      "stat": "smooth",
-      "position": "identity",
-      "aes": {
-        "x": { "field": "flipper" },
-        "y": { "field": "mass" },
-        "color": { "field": "species" }
-      },
-      "params": {
-        "method": "loess",
-        "span": 0.75,
-        "se": false
+      {
+        "geom": "smooth",
+        "stat": "smooth",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "flipper" },
+          "y": { "field": "mass" },
+          "color": { "field": "species" }
+        },
+        "params": {
+          "method": "loess",
+          "span": 0.75,
+          "se": false
+        }
       }
-    }
-  ]
+    ]
+  }
 }
 `;
 
@@ -82,7 +104,7 @@ export const HOME_CODE_PATH_TABS: {
   {
     label: "Builder (TS)",
     code: HOME_CODE_PATH_BUILDER,
-    language: "typescript",
+    language: "svelte",
   },
   {
     label: "Spec (JSON)",
