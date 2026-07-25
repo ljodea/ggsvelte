@@ -10,8 +10,9 @@
   ],
   "type": "module",
   "scripts": {
-    "check": "tsc -b packages/spec packages/core && bun run check:type-contracts && bun run check:workers",
+    "check": "tsc -b packages/spec packages/core && bun run check:type-contracts && bun run check:workers && bun run check:scripts-ci-routing",
     "check:workers": "bun node_modules/.bin/tsc -p workers/playground-api --noEmit",
+    "check:scripts-ci-routing": "bun node_modules/.bin/tsc -p scripts/ci-routing --noEmit",
     "check:type-contracts": "tsc -p packages/spec/type-tests/tsconfig.json",
     "check:svelte": "cd packages/svelte && bun run --bun check",
     "check:examples": "bun node_modules/.bin/tsc -p examples --noEmit",

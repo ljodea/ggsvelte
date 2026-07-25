@@ -1,0 +1,26 @@
+{
+  // The only tsc coverage this directory gets. scripts/** sits in the root
+  // tsconfig.json purely so oxlint --type-aware has type information — tsc has
+  // never been run on that config (#734), and type-aware lint rules are a
+  // strict subset of tsc's diagnostics, so index-signature and optionality
+  // errors slipped through unseen. Run by `bun run check:scripts-ci-routing`
+  // (chained into `check`), mirroring the worker gate from #725.
+  //
+  // ci-routing is the first slice to be pulled in because it decides what CI
+  // runs: a type error here silently mis-routes every job on every PR. The rest
+  // of scripts/** still carries unchecked errors and stays on #734.
+  //
+  // Scoped to this directory only, and deliberately not to scripts/**: the
+  // sibling scripts/ci-routing.test.ts (the public re-export suite one level
+  // up) is outside the include, so widening this to the parent would drag in
+  // the unfixed remainder and fail `check` on code no one has held to tsc yet.
+  //
+  // "types": ["bun"] matches how these scripts actually run — `bun scripts/…`,
+  // with Bun.spawn and bun:test in the suites.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["bun"]
+  },
+  "include": ["./**/*.ts"]
+}

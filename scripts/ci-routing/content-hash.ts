@@ -167,6 +167,8 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/svelte/**",
     "apps/docs/**",
     "examples/**",
+    // check:scripts-ci-routing tsc covers scripts/ci-routing/** (#734); the
+    // rest of scripts/** is still type-aware lint + knip only.
     "scripts/**",
     "tests/evals/**",
     // build re-enters `bun run check`, which now runs check:workers tsc (#725)
@@ -450,14 +452,14 @@ export function parseSuccessMarker(body: string): SuccessMarker | null {
     const parsed: unknown = JSON.parse(body);
     if (parsed === null || typeof parsed !== "object") return null;
     const obj = parsed as Record<string, unknown>;
-    if (typeof obj.schema !== "number") return null;
-    if (typeof obj.execution !== "string") return null;
-    if (typeof obj.hash !== "string" || obj.hash.length === 0) return null;
-    if (!(CACHEABLE_EXECUTIONS as readonly string[]).includes(obj.execution)) return null;
+    if (typeof obj["schema"] !== "number") return null;
+    if (typeof obj["execution"] !== "string") return null;
+    if (typeof obj["hash"] !== "string" || obj["hash"].length === 0) return null;
+    if (!(CACHEABLE_EXECUTIONS as readonly string[]).includes(obj["execution"])) return null;
     return {
-      schema: obj.schema,
-      execution: obj.execution as CacheableExecution,
-      hash: obj.hash,
+      schema: obj["schema"],
+      execution: obj["execution"] as CacheableExecution,
+      hash: obj["hash"],
     };
   } catch {
     return null;
@@ -530,7 +532,7 @@ async function ensureGitSafeDirectory(): Promise<void> {
   const dirs = new Set<string>();
   const cwd = process.cwd();
   if (cwd.length > 0) dirs.add(cwd);
-  const workspace = process.env.GITHUB_WORKSPACE;
+  const workspace = process.env["GITHUB_WORKSPACE"];
   if (workspace !== undefined && workspace.length > 0) dirs.add(workspace);
 
   for (const dir of dirs) {

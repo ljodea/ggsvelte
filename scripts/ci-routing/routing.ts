@@ -165,9 +165,10 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "README.md",
     "packages/svelte/README.md",
   ],
-  // Cloudflare workers (issue #720). They own a bun test suite and are only
-  // type-covered by the repo-wide oxlint --type-aware / knip pass in `build`;
-  // nothing here renders charts, so no browser/docs surface.
+  // Cloudflare workers (issue #720). They own a bun test suite and are
+  // type-covered by check:workers tsc (#725) plus the repo-wide oxlint
+  // --type-aware / knip pass; nothing here renders charts, so no browser/docs
+  // surface.
   workers: ["workers/**"],
   evals: ["tests/evals/**"],
   workflows: [
