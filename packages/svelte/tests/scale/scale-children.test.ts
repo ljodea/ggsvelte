@@ -232,10 +232,14 @@ describe("scales prop deprecation advisories", () => {
     expect(advisory.docUrl).toContain("https://ggsvelte.sh/guide/upgrading#");
     expect(advisory.docUrl).toContain("compose-scales-as-child-layers");
     expect(advisory.suggestions.length).toBeGreaterThan(0);
-    // Suggestions name only shells shipped this slice (no ScaleSize*/ScaleX*).
+    // Slice 4: every family has a shell; suggestions name representative ones
+    // plus the <Scale value={…}/> escape hatch for raw/computed fragments.
     const joined = advisory.suggestions.join(" ");
-    expect(joined).toMatch(/ScaleColor|Scale value/);
-    expect(joined).not.toMatch(/ScaleSize|ScaleShape|ScaleX/);
+    expect(joined).toMatch(/ScaleColorDiscrete/);
+    expect(joined).toMatch(/ScaleXContinuous|ScaleSizeContinuous|ScaleShapeDiscrete/);
+    expect(joined).toMatch(/Scale value/);
+    expect(joined).not.toMatch(/families without shells yet/);
+    expect(joined).not.toMatch(/later slice/);
   });
 
   it("11: dev console.warn fallback with no handler; silent under production", async () => {
@@ -285,16 +289,16 @@ describe("scales prop deprecation advisories", () => {
   });
 });
 
-describe("Scale* export parity with color-fill helpers", () => {
-  it("13: exported Scale* set === camelCase color-fill helpers ∪ {Scale}", () => {
-    const colorFill = SCALE_CAPABILITIES.find((cap) => cap.family === "color-fill");
-    expect(colorFill).toBeDefined();
-    const camelHelpers = colorFill!.helpers.filter((h) => !h.includes("_"));
-    // scaleFoo → ScaleFoo
-    const expectedFromHelpers = camelHelpers.map(
-      (h) => "S" + h.slice(1), // scaleColorDiscrete → ScaleColorDiscrete
-    );
-    // scaleColour* helpers map to ScaleColour* aliases (same as Color shells).
+describe("Scale* export parity with all SCALE_CAPABILITIES families", () => {
+  it("13: exported Scale* set === all families ∪ {Scale} ∪ Colour aliases", () => {
+    const expectedFromHelpers: string[] = [];
+    for (const cap of SCALE_CAPABILITIES) {
+      for (const h of cap.helpers) {
+        if (h.includes("_")) continue;
+        // scaleFoo → ScaleFoo (includes Colour aliases and every family)
+        expectedFromHelpers.push("S" + h.slice(1));
+      }
+    }
     const expectedExports = new Set(["Scale", ...expectedFromHelpers]);
 
     const pkg = SveltePkg as Record<string, unknown>;
@@ -308,6 +312,8 @@ describe("Scale* export parity with color-fill helpers", () => {
       expect(pkg[name], `missing export ${name}`).toBeTypeOf("function");
     }
     expect(new Set(actualScaleExports)).toEqual(expectedExports);
+    // 63 shells + 9 Colour aliases + hand-written Scale
+    expect(expectedExports.size).toBe(63 + 9 + 1);
   });
 });
 

@@ -1,0 +1,178 @@
+/**
+ * gen-scale-children unit tests + the scale-children staleness guard
+ * (CI parity for `bun run scale:children:check`).
+ */
+import { describe, expect, it } from "bun:test";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+import { SCALE_CAPABILITIES } from "@ggsvelte/spec";
+
+import {
+  expectedCamelHelpers,
+  expectedColourAliases,
+  GENERATED_HEADER,
+  INDEX_PATH,
+  manifestAliases,
+  manifestHelpers,
+  REGION_END,
+  REGION_START,
+  renderIndexRegion,
+  renderShell,
+  rewriteIndexRegion,
+  SHELL_MANIFEST,
+  shellRelPath,
+} from "./gen-scale-children.ts";
+
+const repoRoot = join(import.meta.dir, "..");
+const read = (rel: string) => readFileSync(join(repoRoot, rel), "utf8");
+
+describe("SHELL_MANIFEST completeness", () => {
+  it("helper set equals camelCase non-Colour helpers across SCALE_CAPABILITIES", () => {
+    const expected = expectedCamelHelpers();
+    const actual = manifestHelpers();
+    // Both directions so a ledger addition without a shell fails, and a
+    // shell without a ledger entry fails.
+    for (const h of expected) {
+      expect(actual.has(h), `missing shell for helper ${h}`).toBe(true);
+    }
+    for (const h of actual) {
+      expect(expected.has(h), `orphan shell helper ${h} not in SCALE_CAPABILITIES`).toBe(true);
+    }
+    expect(actual).toEqual(expected);
+  });
+
+  it("aliases equal Colour-spelled camelCase helpers mapped to component names", () => {
+    const expected = expectedColourAliases();
+    const actual = manifestAliases();
+    for (const a of expected) {
+      expect(actual.has(a), `missing alias ${a}`).toBe(true);
+    }
+    for (const a of actual) {
+      expect(expected.has(a), `orphan alias ${a}`).toBe(true);
+    }
+    expect(actual).toEqual(expected);
+  });
+
+  it("cardinality: 63 component files + 9 aliases", () => {
+    expect(SHELL_MANIFEST).toHaveLength(63);
+    expect(manifestAliases().size).toBe(9);
+    // Cross-check family buckets against the verified ledger.
+    const byFamily = new Map<string, number>();
+    for (const s of SHELL_MANIFEST) {
+      byFamily.set(s.family, (byFamily.get(s.family) ?? 0) + 1);
+    }
+    expect(byFamily.get("position-continuous")).toBe(8);
+    expect(byFamily.get("position-binned")).toBe(2);
+    expect(byFamily.get("position-temporal")).toBe(4);
+    expect(byFamily.get("position-discrete")).toBe(2);
+    expect(byFamily.get("color-fill")).toBe(18);
+    expect(byFamily.get("numeric-style")).toBe(21);
+    expect(byFamily.get("finite-style")).toBe(8);
+    // Families in the ledger match.
+    const ledgerFamilies = new Set(SCALE_CAPABILITIES.map((c) => c.family));
+    for (const family of byFamily.keys()) {
+      expect(ledgerFamilies.has(family), `unknown family ${family}`).toBe(true);
+    }
+  });
+
+  it("every family matches a SCALE_CAPABILITIES family string", () => {
+    const ledger = new Set(SCALE_CAPABILITIES.map((c) => c.family));
+    for (const s of SHELL_MANIFEST) {
+      expect(ledger.has(s.family), `${s.helper} family ${s.family}`).toBe(true);
+    }
+  });
+});
+
+describe("renderShell", () => {
+  it("emits the generated header + verbatimModuleSyntax type import", () => {
+    const src = renderShell(SHELL_MANIFEST[0]!);
+    expect(src.startsWith(GENERATED_HEADER)).toBe(true);
+    expect(src).toContain("type ContinuousPositionScaleOptions");
+    expect(src).toContain("createScaleLayer(() => scaleXContinuous(definedProps(props)))");
+    expect(src).toContain('from "@ggsvelte/spec"');
+    expect(src).toContain('from "./factory.svelte.js"');
+    // ContinuousPositionScaleOptions is long enough that prettier multi-lines it.
+    expect(src).toContain(
+      "  import {\n    scaleXContinuous,\n    type ContinuousPositionScaleOptions,\n  }",
+    );
+    // Short names stay single-line (TemporalScaleOptions fits printWidth 80).
+    const date = SHELL_MANIFEST.find((s) => s.helper === "scaleXDate")!;
+    expect(renderShell(date)).toContain(
+      'import { scaleXDate, type TemporalScaleOptions } from "@ggsvelte/spec";',
+    );
+  });
+
+  it("emits the Omit expression for reverse shells (not ContinuousPositionScaleOptions alone)", () => {
+    const rev = SHELL_MANIFEST.find((s) => s.helper === "scaleXReverse")!;
+    const src = renderShell(rev);
+    expect(src).toContain('Omit<ContinuousPositionScaleOptions, "transform" | "reverse">');
+    // Must not widen the props annotation to the full continuous type.
+    expect(src).not.toMatch(/const props: ContinuousPositionScaleOptions = \$props\(\)/);
+  });
+
+  it("pins finite-style generics (PointShapeName / LinetypeName)", () => {
+    const shape = SHELL_MANIFEST.find((s) => s.helper === "scaleShapeManual")!;
+    const line = SHELL_MANIFEST.find((s) => s.helper === "scaleLinetypeManual")!;
+    expect(renderShell(shape)).toContain("ManualFiniteStyleScaleOptions<PointShapeName>");
+    expect(renderShell(shape)).toContain("type PointShapeName");
+    expect(renderShell(line)).toContain("ManualFiniteStyleScaleOptions<LinetypeName>");
+    expect(renderShell(line)).toContain("type LinetypeName");
+  });
+});
+
+describe("index region rewrite", () => {
+  it("fails hard when either marker is missing", () => {
+    expect(() => rewriteIndexRegion("export const x = 1;\n")).toThrow(/markers missing/);
+    expect(() => rewriteIndexRegion(`${REGION_START}\nexport { foo };\n`)).toThrow(
+      /markers missing/,
+    );
+    expect(() => rewriteIndexRegion(`export { foo };\n${REGION_END}\n`)).toThrow(/markers missing/);
+  });
+
+  it("replaces only the delimited region", () => {
+    const before = `// keep\n${REGION_START}\nold\n${REGION_END}\n// after\n`;
+    const out = rewriteIndexRegion(before, `${REGION_START}\nnew\n${REGION_END}`);
+    expect(out).toBe(`// keep\n${REGION_START}\nnew\n${REGION_END}\n// after\n`);
+  });
+
+  it("emits one lifecycle-tagged export per shell + alias", () => {
+    const region = renderIndexRegion();
+    expect(region.startsWith(REGION_START)).toBe(true);
+    expect(region.endsWith(REGION_END)).toBe(true);
+    const exportCount = (region.match(/^export \{ default as /gm) ?? []).length;
+    expect(exportCount).toBe(63 + 9);
+    expect(region).toContain(
+      'export { default as ScaleColourContinuous } from "./scale/ScaleColorContinuous.svelte";',
+    );
+    // No ScaleColour*.svelte files — aliases point at Color components.
+    expect(region).not.toMatch(/ScaleColour\w+\.svelte/);
+  });
+});
+
+describe("scale children on disk are current", () => {
+  it("every shell file matches renderShell (regenerate with bun run scale:children:gen)", () => {
+    for (const spec of SHELL_MANIFEST) {
+      const rel = shellRelPath(spec.component);
+      expect(read(rel), rel).toBe(renderShell(spec));
+    }
+  });
+
+  it("index region matches renderIndexRegion", () => {
+    const index = read(INDEX_PATH);
+    const start = index.indexOf(REGION_START);
+    const end = index.indexOf(REGION_END);
+    expect(start, "start marker present").toBeGreaterThanOrEqual(0);
+    expect(end, "end marker present").toBeGreaterThan(start);
+    const onDisk = index.slice(start, end + REGION_END.length);
+    expect(onDisk).toBe(renderIndexRegion());
+  });
+
+  it("hand-written <Scale> export stays outside the generated region", () => {
+    const index = read(INDEX_PATH);
+    const scaleExport = index.indexOf('export { default as Scale } from "./scale/Scale.svelte"');
+    const regionStart = index.indexOf(REGION_START);
+    expect(scaleExport).toBeGreaterThanOrEqual(0);
+    expect(regionStart).toBeGreaterThan(scaleExport);
+  });
+});

@@ -133,11 +133,45 @@ export { default as ThemeEconomist } from "./theme/ThemeEconomist.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeTufte } from "./theme/ThemeTufte.svelte";
 
-// Scale children (#659 slice 3) — stable-intent: color/fill shells + <Scale>
-// escape hatch; destination for the deprecated `scales` prop (since 0.11.0).
-// Colour aliases re-export Color shells (D3). Position/style shells: slice 4.
+// Scale children (#659) — stable-intent shells for every SCALE_CAPABILITIES
+// family + <Scale> escape hatch; destination for the deprecated `scales` prop
+// (since 0.11.0). Generated shells live between the markers; run
+// `bun run scale:children:gen` to regenerate. Colour aliases re-export Color.
 /** @lifecycle stable-intent */
 export { default as Scale } from "./scale/Scale.svelte";
+// <generated:scale-children> — bun run scale:children:gen
+/** @lifecycle stable-intent */
+export { default as ScaleXContinuous } from "./scale/ScaleXContinuous.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleYContinuous } from "./scale/ScaleYContinuous.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleXLog10 } from "./scale/ScaleXLog10.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleYLog10 } from "./scale/ScaleYLog10.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleXSqrt } from "./scale/ScaleXSqrt.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleYSqrt } from "./scale/ScaleYSqrt.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleXReverse } from "./scale/ScaleXReverse.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleYReverse } from "./scale/ScaleYReverse.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleXBinned } from "./scale/ScaleXBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleYBinned } from "./scale/ScaleYBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleXDate } from "./scale/ScaleXDate.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleXDatetime } from "./scale/ScaleXDatetime.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleYDate } from "./scale/ScaleYDate.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleYDatetime } from "./scale/ScaleYDatetime.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleXDiscrete } from "./scale/ScaleXDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleYDiscrete } from "./scale/ScaleYDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColorContinuous } from "./scale/ScaleColorContinuous.svelte";
 /** @lifecycle stable-intent */
@@ -175,6 +209,64 @@ export { default as ScaleFillManual } from "./scale/ScaleFillManual.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleFillIdentity } from "./scale/ScaleFillIdentity.svelte";
 /** @lifecycle stable-intent */
+export { default as ScaleSizeContinuous } from "./scale/ScaleSizeContinuous.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleSizeDiscrete } from "./scale/ScaleSizeDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleSizeBinned } from "./scale/ScaleSizeBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleSizeDate } from "./scale/ScaleSizeDate.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleSizeDatetime } from "./scale/ScaleSizeDatetime.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleSizeManual } from "./scale/ScaleSizeManual.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleSizeIdentity } from "./scale/ScaleSizeIdentity.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleLinewidthContinuous } from "./scale/ScaleLinewidthContinuous.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleLinewidthDiscrete } from "./scale/ScaleLinewidthDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleLinewidthBinned } from "./scale/ScaleLinewidthBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleLinewidthDate } from "./scale/ScaleLinewidthDate.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleLinewidthDatetime } from "./scale/ScaleLinewidthDatetime.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleLinewidthManual } from "./scale/ScaleLinewidthManual.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleLinewidthIdentity } from "./scale/ScaleLinewidthIdentity.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleAlphaContinuous } from "./scale/ScaleAlphaContinuous.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleAlphaDiscrete } from "./scale/ScaleAlphaDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleAlphaBinned } from "./scale/ScaleAlphaBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleAlphaDate } from "./scale/ScaleAlphaDate.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleAlphaDatetime } from "./scale/ScaleAlphaDatetime.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleAlphaManual } from "./scale/ScaleAlphaManual.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleAlphaIdentity } from "./scale/ScaleAlphaIdentity.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleShapeDiscrete } from "./scale/ScaleShapeDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleShapeBinned } from "./scale/ScaleShapeBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleShapeManual } from "./scale/ScaleShapeManual.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleShapeIdentity } from "./scale/ScaleShapeIdentity.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleLinetypeDiscrete } from "./scale/ScaleLinetypeDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleLinetypeBinned } from "./scale/ScaleLinetypeBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleLinetypeManual } from "./scale/ScaleLinetypeManual.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleLinetypeIdentity } from "./scale/ScaleLinetypeIdentity.svelte";
+/** @lifecycle stable-intent */
 export { default as ScaleColourContinuous } from "./scale/ScaleColorContinuous.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourDiscrete } from "./scale/ScaleColorDiscrete.svelte";
@@ -192,6 +284,7 @@ export { default as ScaleColourDatetime } from "./scale/ScaleColorDatetime.svelt
 export { default as ScaleColourManual } from "./scale/ScaleColorManual.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourIdentity } from "./scale/ScaleColorIdentity.svelte";
+// </generated:scale-children>
 
 // Deprecation + composition diagnostics (sibling unions to InteractionDiagnostic)
 export {

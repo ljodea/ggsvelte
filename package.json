@@ -47,6 +47,8 @@
     "manifest:check": "bun scripts/gen-manifest.ts --check",
     "lifecycle:gen": "bun scripts/gen-lifecycle.ts",
     "lifecycle:check": "bun scripts/gen-lifecycle.ts --check",
+    "scale:children:gen": "bun scripts/gen-scale-children.ts",
+    "scale:children:check": "bun scripts/gen-scale-children.ts --check",
     "knip": "bun node_modules/.bin/knip",
     "lint:package": "bun scripts/package-lint.ts",
     "lint:actions": "bun scripts/actionlint.ts",
