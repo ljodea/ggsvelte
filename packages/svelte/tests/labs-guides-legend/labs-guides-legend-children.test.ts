@@ -13,6 +13,11 @@ import { describe, expect, it } from "vitest";
 import type { PortableSpec } from "../../src/lib/index.js";
 import type { PlotDiagnostic } from "../../src/lib/diagnostics/deprecation.js";
 import type { LayerRegistry } from "../../src/lib/geoms/registry.svelte.js";
+import {
+  duplicateMergeKeyDiagnostic,
+  isCompositionDiagnostic,
+  isDuplicateMergeKeyDiagnostic,
+} from "../../src/lib/index.js";
 import LabsGuidesLegendPlot from "../fixtures/LabsGuidesLegendPlot.svelte";
 import { render } from "../helpers/render.js";
 
@@ -478,6 +483,21 @@ describe("ADR 0001 live getters", () => {
       flushSync();
     }
     expect(diagnostics.filter((d) => d.code === "DUPLICATE_MERGE_KEY")).toHaveLength(1);
+  });
+});
+
+describe("public composition-diagnostic surface", () => {
+  it("5f: the merge-key guard and factory are exported and narrow the union", () => {
+    // Parity with the scale and plot-layer families: a consumer handling this
+    // advisory needs the same guard/type the siblings ship, not just switch().
+    const advisory = duplicateMergeKeyDiagnostic("guides", "color");
+    expect(isCompositionDiagnostic(advisory)).toBe(true);
+    expect(isDuplicateMergeKeyDiagnostic(advisory)).toBe(true);
+    if (isDuplicateMergeKeyDiagnostic(advisory)) {
+      expect(advisory.key).toBe("color");
+      expect(advisory.kind).toBe("guides");
+    }
+    expect(isDuplicateMergeKeyDiagnostic({ code: "DUPLICATE_SCALE_CHANNEL" })).toBe(false);
   });
 });
 

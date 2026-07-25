@@ -362,15 +362,19 @@ export type {
 } from "./diagnostics/deprecation.js";
 export {
   COMPOSITION_DIAGNOSTIC_CATALOG,
+  duplicateMergeKeyDiagnostic,
   duplicatePlotLayerDiagnostic,
   duplicateScaleChannelDiagnostic,
   isCompositionDiagnostic,
+  isDuplicateMergeKeyDiagnostic,
   isDuplicatePlotLayerDiagnostic,
   isDuplicateScaleChannelDiagnostic,
 } from "./diagnostics/composition.js";
 export type {
   CompositionDiagnostic,
   CompositionDiagnosticCode,
+  DuplicateMergeKeyDiagnostic,
+  DuplicateMergeKeyKind,
   DuplicatePlotLayerDiagnostic,
   DuplicatePlotLayerKind,
   DuplicateScaleChannelDiagnostic,

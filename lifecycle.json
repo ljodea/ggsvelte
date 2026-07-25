@@ -3465,6 +3465,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "DuplicateMergeKeyDiagnostic": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DuplicateMergeKeyKind": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "DuplicatePlotLayerDiagnostic": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4613,6 +4621,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "duplicateMergeKeyDiagnostic": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "duplicatePlotLayerDiagnostic": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4694,6 +4706,10 @@
           "lifecycle": "experimental"
         },
         "isDeprecationDiagnostic": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "isDuplicateMergeKeyDiagnostic": {
           "kind": "value",
           "lifecycle": "experimental"
         },
