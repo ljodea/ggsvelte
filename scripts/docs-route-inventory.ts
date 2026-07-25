@@ -260,11 +260,13 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
   const aliases: DocsRouteRecord[] = Object.entries(EXAMPLE_ALIASES).map(([alias, canonical]) => {
     const target = EXAMPLES.find((entry) => entry.id === canonical);
     const expositionSlug = interactionExpositionSlug(canonical);
-    const canonicalPath =
-      expositionSlug !== undefined ? `/interactions/${expositionSlug}` : `/examples/${canonical}`;
+    const isExposition = typeof expositionSlug === "string";
+    const canonicalPath = isExposition
+      ? `/interactions/${expositionSlug}`
+      : `/examples/${canonical}`;
     return {
       path: `/examples/${alias}`,
-      title: `${target?.title ?? "Example"} — ggsvelte ${expositionSlug !== undefined ? "interactions" : "gallery"}`,
+      title: `${target?.title ?? "Example"} — ggsvelte ${isExposition ? "interactions" : "gallery"}`,
       description:
         target?.description ?? "A legacy ggsvelte example route preserved for compatibility.",
       canonicalPath,

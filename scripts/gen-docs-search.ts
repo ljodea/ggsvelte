@@ -52,7 +52,8 @@ function cleanTitle(title: string): string {
 
 function examplePublicHref(id: string): string {
   const expositionSlug = interactionExpositionSlug(id);
-  return expositionSlug !== undefined ? `/interactions/${expositionSlug}` : `/examples/${id}`;
+  if (typeof expositionSlug === "string") return `/interactions/${expositionSlug}`;
+  return `/examples/${id}`;
 }
 
 function lifecycleAnchor(packageName: string, entry: string): string {
@@ -92,7 +93,7 @@ export function createDocsSearchEntries(): DocsSearchEntry[] {
   for (const example of EXAMPLES) {
     // Interaction expositions are indexed as /interactions/* pages above.
     // Emitting a second example entry with the same href/title fails validation.
-    if (interactionExpositionSlug(example.id) !== undefined) continue;
+    if (typeof interactionExpositionSlug(example.id) === "string") continue;
     entries.push({
       id: `example:${example.id.replaceAll("/", ":")}`,
       kind: "example",

@@ -414,7 +414,7 @@ export function buildLlmsIndex(
     }
     const expositionSlug = interactionExpositionSlug(ex.id);
     const href =
-      expositionSlug !== undefined ? `/interactions/${expositionSlug}` : `/examples/${ex.id}`;
+      typeof expositionSlug === "string" ? `/interactions/${expositionSlug}` : `/examples/${ex.id}`;
     lines.push(`- [${ex.title}](${href}): ${ex.description}`);
   }
   lines.push("");

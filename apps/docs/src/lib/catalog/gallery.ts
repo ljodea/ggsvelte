@@ -31,5 +31,10 @@ export function galleryEntryFor(entry: ExampleManifestEntry): GalleryEntry {
 
 /** Manifest entries that belong on the public gallery (not interaction expositions). */
 export function galleryCatalog(examples: readonly ExampleManifestEntry[]): GalleryEntry[] {
-  return examples.filter((entry) => !isInteractionExposition(entry.id)).map(galleryEntryFor);
+  const catalog: GalleryEntry[] = [];
+  for (const entry of examples) {
+    if (isInteractionExposition(entry.id)) continue;
+    catalog.push(galleryEntryFor(entry));
+  }
+  return catalog;
 }

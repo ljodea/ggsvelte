@@ -15,15 +15,15 @@ export const entries: EntryGenerator = () => [
   }),
 ];
 
-export const load: PageLoad = async ({ params, url }) => {
+export const load: PageLoad = async ({ params }) => {
   const requestedId = `${params.category}/${params.name}`;
   const id = resolveExampleId(requestedId);
   const expositionSlug = interactionExpositionSlug(id);
-  if (expositionSlug !== undefined) {
-    // Chart-local interaction expositions live under /interactions, not the gallery.
-    // Preserve ?vr (and other query) for visual-regression capture paths.
-    const search = url.search;
-    redirect(308, `/interactions/${expositionSlug}${search}`);
+  // Chart-local interaction expositions live under /interactions, not the gallery.
+  // adapter-static prerender forbids reading url.search, so this redirect is
+  // path-only; VR capture paths already target /interactions/* directly.
+  if (typeof expositionSlug === "string") {
+    redirect(308, `/interactions/${expositionSlug}`);
   }
   const entry = EXAMPLES.find((e) => e.id === id);
   if (entry === undefined) {
