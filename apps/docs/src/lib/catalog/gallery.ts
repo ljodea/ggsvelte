@@ -1,5 +1,6 @@
 import type { ExampleManifestEntry } from "../../../../../examples/manifest.js";
 import { GALLERY_PREVIEWS } from "../generated/gallery-previews.js";
+import { isInteractionExposition } from "./interaction-exposition.js";
 
 export interface GalleryEntry extends ExampleManifestEntry {
   previewPath: string;
@@ -10,7 +11,7 @@ export interface GalleryEntry extends ExampleManifestEntry {
 export const FEATURED_EXAMPLES = [
   { id: "line/multi-series" },
   { id: "smooth/loess-scatter" },
-  { id: "interaction/linked-views" },
+  { id: "point/scatter-color" },
   { id: "facet/wrap" },
   { id: "color/continuous" },
   { id: "point/canvas-scatter" },
@@ -26,4 +27,14 @@ export function galleryEntryFor(entry: ExampleManifestEntry): GalleryEntry {
   const previewPath = previewById.get(entry.id);
   if (previewPath === undefined) throw new Error(`Missing generated preview for ${entry.id}`);
   return { ...entry, previewPath, featured: featuredIds.has(entry.id) };
+}
+
+/** Manifest entries that belong on the public gallery (not interaction expositions). */
+export function galleryCatalog(examples: readonly ExampleManifestEntry[]): GalleryEntry[] {
+  const catalog: GalleryEntry[] = [];
+  for (const entry of examples) {
+    if (isInteractionExposition(entry.id)) continue;
+    catalog.push(galleryEntryFor(entry));
+  }
+  return catalog;
 }

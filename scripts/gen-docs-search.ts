@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 
 import { format } from "oxfmt";
 
+import { interactionExpositionSlug } from "../apps/docs/src/lib/catalog/interaction-exposition.ts";
 import { DOCS_ROUTES } from "../apps/docs/src/lib/generated/routes.ts";
 import type { DocsRouteMetadata } from "../apps/docs/src/lib/route-types.ts";
 import type { DocsSearchEntry } from "../apps/docs/src/lib/search-types.ts";
@@ -46,7 +47,23 @@ function routeId(path: string): string {
 }
 
 function cleanTitle(title: string): string {
-  return title.replace(/ — ggsvelte(?: gallery)?$/, "");
+  return title.replace(/ — ggsvelte(?: gallery| interactions)?$/, "");
+}
+
+function examplePublicHref(id: string): string {
+  const expositionSlug = interactionExpositionSlug(id);
+  if (typeof expositionSlug === "string") return `/interactions/${expositionSlug}`;
+  return `/examples/${id}`;
+}
+
+/** Manifest keywords for /interactions/<slug> demos (no nav section in routes). */
+function interactionExpositionKeywords(path: string): readonly string[] {
+  if (!path.startsWith("/interactions/")) return [];
+  const name = path.slice("/interactions/".length);
+  if (name === "" || name.includes("/")) return [];
+  const example = EXAMPLES.find((entry) => entry.id === `interaction/${name}`);
+  if (example === undefined) return [];
+  return [example.title, example.docsSection, ...example.tags];
 }
 
 function lifecycleAnchor(packageName: string, entry: string): string {
@@ -60,13 +77,17 @@ export function createDocsSearchEntries(): DocsSearchEntry[] {
   for (const route of routes) {
     if (!route.index || route.kind !== "page" || route.path.startsWith("/examples/")) continue;
     const pageTitle = cleanTitle(route.title);
+    const expositionKeywords = interactionExpositionKeywords(route.path);
     entries.push({
       id: `page:${routeId(route.path)}`,
       kind: "page",
       title: pageTitle,
       summary: route.description,
       href: route.path,
-      keywords: route.navigation === undefined ? [] : [route.navigation.section],
+      keywords:
+        route.navigation === undefined
+          ? [...expositionKeywords]
+          : [route.navigation.section, ...expositionKeywords],
       exact: [pageTitle, ...(SEARCH_EXACT_ALIASES[route.path] ?? [])],
     });
     for (const heading of route.headings ?? []) {
@@ -77,19 +98,23 @@ export function createDocsSearchEntries(): DocsSearchEntry[] {
         title: heading.title,
         summary: `${heading.title} in ${pageTitle}. ${route.description}`,
         href: `${route.path}#${heading.id}`,
-        keywords: [pageTitle, route.navigation?.section ?? "documentation"],
+        keywords: [pageTitle, route.navigation?.section ?? "documentation", ...expositionKeywords],
         exact: [heading.title, ...(SEARCH_EXACT_ALIASES[`${route.path}#${heading.id}`] ?? [])],
       });
     }
   }
 
   for (const example of EXAMPLES) {
+    // Interaction expositions are indexed as /interactions/* pages above (with
+    // manifest tags/docsSection as keywords). A second example entry with the
+    // same href/title fails validation.
+    if (typeof interactionExpositionSlug(example.id) === "string") continue;
     entries.push({
       id: `example:${example.id.replaceAll("/", ":")}`,
       kind: "example",
       title: example.title,
       summary: example.description,
-      href: `/examples/${example.id}`,
+      href: examplePublicHref(example.id),
       keywords: [example.title, example.docsSection, ...example.tags],
       exact: [example.title],
     });

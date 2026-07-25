@@ -7,7 +7,7 @@ import { settleVisualState } from "./helpers/deterministic";
 for (const route of [
   "/examples/interactions/inspection",
   "/examples/interactions/interval-selection",
-  "/examples/interaction/linked-views",
+  "/interactions/linked-views",
 ]) {
   test(`${route} has no automated accessibility violations`, async ({ page }) => {
     // Init scripts bypass the page CSP; post-load addScriptTag does not
@@ -17,13 +17,14 @@ for (const route of [
     await settleVisualState(page, route.endsWith("linked-views") ? 2 : 1);
     const violations = await page.evaluate(async () => {
       const runner = (globalThis as typeof globalThis & { axe: typeof axe }).axe;
-      return (await runner.run(document.querySelector(".example-page")!)).violations.map(
-        ({ id, impact, nodes }) => ({
-          id,
-          impact,
-          targets: nodes.map((node) => node.target.join(" ")),
-        }),
-      );
+      const root =
+        document.querySelector(".example-page") ?? document.querySelector(".interaction-demo-page");
+      if (root === null) throw new Error("expected example or interaction demo root");
+      return (await runner.run(root)).violations.map(({ id, impact, nodes }) => ({
+        id,
+        impact,
+        targets: nodes.map((node) => node.target.join(" ")),
+      }));
     });
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
   });
@@ -32,7 +33,7 @@ for (const route of [
 test("linked views share external selection and emphasis without callback loops", async ({
   page,
 }) => {
-  await page.goto("/examples/interaction/linked-views");
+  await page.goto("/interactions/linked-views");
   await settleVisualState(page, 2);
 
   // One row per Gentoo, and a selected ring per Gentoo in each of the two

@@ -18,13 +18,25 @@ const EXPECTED_PLOTS: Readonly<Record<string, number>> = {
   "interaction/legend-focus": 3,
 };
 
+function exampleVrPath(exampleId: string): string {
+  // Interaction expositions live under /interactions; chart specimens stay in gallery.
+  if (
+    exampleId === "interaction/brush-zoom" ||
+    exampleId === "interaction/facet-intervals" ||
+    exampleId === "interaction/linked-views"
+  ) {
+    return `/interactions/${exampleId.slice("interaction/".length)}`;
+  }
+  return `/examples/${exampleId}`;
+}
+
 async function shotExample(
   page: Page,
   exampleId: string,
   theme: "light" | "dark",
   basename: string,
 ): Promise<void> {
-  await page.goto(`/examples/${exampleId}?vr&theme=${theme}`);
+  await page.goto(`${exampleVrPath(exampleId)}?vr&theme=${theme}`);
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
   await settleVisualState(page, EXPECTED_PLOTS[exampleId] ?? 1);
   await expect(page.locator(".gg-example-frame")).toHaveScreenshot(basename);
@@ -76,7 +88,7 @@ const INTERACTION_HANDLERS: Record<
   },
 
   async "interval-selected"(page, scenario) {
-    await page.goto("/examples/interaction/brush-zoom?vr&theme=light");
+    await page.goto("/interactions/brush-zoom?vr&theme=light");
     await settleVisualState(page);
     const selectArea = page.getByRole("button", { name: "Select area" });
     await selectArea.click();
@@ -94,7 +106,7 @@ const INTERACTION_HANDLERS: Record<
 
   async "tool-rail"(page, scenario) {
     await page.setViewportSize({ width: 460, height: 820 });
-    await page.goto("/examples/interaction/brush-zoom?vr&theme=light");
+    await page.goto("/interactions/brush-zoom?vr&theme=light");
     await settleVisualState(page);
     await page.locator(".gg-example-frame").evaluate((element) => {
       (element as HTMLElement).style.setProperty("width", "440px", "important");
@@ -124,7 +136,7 @@ const INTERACTION_HANDLERS: Record<
 
   async "forced-colors"(page, scenario) {
     await page.emulateMedia({ forcedColors: "active" });
-    await page.goto("/examples/interaction/brush-zoom?vr&theme=light");
+    await page.goto("/interactions/brush-zoom?vr&theme=light");
     await settleVisualState(page);
     const zoomArea = page.getByRole("button", { name: "Zoom area" });
     await zoomArea.click();

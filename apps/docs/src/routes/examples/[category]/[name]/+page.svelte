@@ -2,10 +2,9 @@
   import { base } from "$app/paths";
 
   import CodeTabs from "$lib/CodeTabs.svelte";
-  import { galleryEntryFor } from "$lib/catalog/gallery";
+  import { galleryCatalog } from "$lib/catalog/gallery";
   import { EXAMPLES } from "$lib/examples";
   import { rankRelatedExamples } from "$lib/gallery-filter";
-  import { PLAYGROUND_EXAMPLES } from "$lib/generated/playground-seeds";
 
   import type { PageProps } from "./$types";
 
@@ -13,13 +12,9 @@
   const Example = $derived(data.component);
   const frameWidth = $derived(data.entry.vrWidth ?? 640);
   const frameHeight = $derived(data.entry.vrHeight ?? 400);
-  const galleryEntries = EXAMPLES.map((entry) => galleryEntryFor(entry));
+  const galleryEntries = galleryCatalog(EXAMPLES);
   const related = $derived(
     rankRelatedExamples(data.entry.id, galleryEntries, 3),
-  );
-  const playgroundCompatibility = $derived(
-    PLAYGROUND_EXAMPLES.find((entry) => entry.id === data.entry.id)
-      ?.compatibility,
   );
   const tabs = $derived([
     { label: "Svelte", code: data.svelteSource, language: "svelte" },
@@ -79,23 +74,7 @@
         <p class="eyebrow">Source</p>
         <h2 id="example-code-heading">Svelte, builder, JSON</h2>
       </div>
-      {#if playgroundCompatibility?.supported}
-        <a
-          class="playground-link"
-          href={`${base}/playground${playgroundCompatibility.fragment}`}
-          >Open in Playground</a
-        >
-      {/if}
     </div>
-    {#if playgroundCompatibility?.supported}
-      <p class="handoff-note">
-        Local PortableSpec only — no upload or remote execution.
-      </p>
-    {:else if playgroundCompatibility !== undefined}
-      <p class="handoff-note unsupported">
-        Playground unavailable: {playgroundCompatibility.reason}
-      </p>
-    {/if}
     <CodeTabs {tabs} />
   </section>
 
@@ -146,7 +125,7 @@
         <p class="eyebrow">Related</p>
         <h2 id="related-heading">More examples</h2>
       </div>
-      <a href={`${base}/examples`}>All {EXAMPLES.length}</a>
+      <a href={`${base}/examples`}>All {galleryEntries.length}</a>
     </div>
     <ul>
       {#each related as entry (entry.id)}
@@ -263,28 +242,6 @@
   .section-heading h2,
   .implementation h2 {
     margin: 0.25rem 0 0;
-  }
-
-  .playground-link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    padding: 0.6rem 0.9rem;
-    border: 1px solid var(--ink);
-    border-radius: 4px;
-    color: var(--ink);
-    font-weight: 600;
-    text-decoration: none;
-  }
-
-  .handoff-note {
-    color: var(--muted);
-    font-size: 0.85rem;
-  }
-
-  .handoff-note.unsupported {
-    border-left: 3px solid var(--line);
-    padding-left: 0.75rem;
   }
 
   .implementation {

@@ -25,7 +25,7 @@
       },
       {
         "label": "Linked views",
-        "href": "/examples/interaction/linked-views"
+        "href": "/interactions/linked-views"
       }
     ],
     "svelteFirst": true,

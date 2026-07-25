@@ -29,6 +29,10 @@ describe("primaryNavLinks", () => {
     expect(
       primaryNavLinks("/interactions").find((link) => link.href === "/interactions")?.active,
     ).toBe(true);
+    expect(
+      primaryNavLinks("/interactions/linked-views").find((link) => link.href === "/interactions")
+        ?.active,
+    ).toBe(true);
   });
 
   test("marks reference owner", () => {

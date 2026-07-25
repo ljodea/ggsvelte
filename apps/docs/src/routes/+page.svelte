@@ -5,7 +5,7 @@
 
   import { guerry } from "$examples/point/scatter-color/data";
   import CodeTabs from "$lib/CodeTabs.svelte";
-  import { FEATURED_EXAMPLES, galleryEntryFor } from "$lib/catalog/gallery";
+  import { FEATURED_EXAMPLES, galleryCatalog } from "$lib/catalog/gallery";
   import CopyCode from "$lib/components/CopyCode.svelte";
   import GrammarDemo from "$lib/components/GrammarDemo.svelte";
   import UiButton from "$lib/components/UiButton.svelte";
@@ -16,7 +16,7 @@
   type GuerryRow = (typeof guerry)[number];
 
   const install = "bun install @ggsvelte/svelte";
-  const entries = EXAMPLES.map((entry) => galleryEntryFor(entry));
+  const entries = galleryCatalog(EXAMPLES);
   const featured = FEATURED_EXAMPLES.map((item) =>
     entries.find((entry) => entry.id === item.id)!,
   );

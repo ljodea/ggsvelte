@@ -17,6 +17,9 @@ export const entries: EntryGenerator = () => [
 export const load: PageLoad = async ({ params }) => {
   const requestedId = `${params.category}/${params.name}`;
   const id = resolveExampleId(requestedId);
+  // Interaction expositions stay loadable at /examples/interaction/* so the
+  // static build emits full SEO HTML (aliases in the route inventory). Gallery
+  // listing excludes them; canonical points at /interactions/* via inventory.
   const entry = EXAMPLES.find((e) => e.id === id);
   if (entry === undefined) {
     error(404, `No example "${requestedId}" — see /examples for the gallery.`);

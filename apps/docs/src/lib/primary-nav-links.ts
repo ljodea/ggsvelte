@@ -32,7 +32,7 @@ export function primaryNavLinks(path: string, owner?: PrimaryNavOwner): readonly
     {
       label: "Interactions",
       href: "/interactions",
-      active: path === "/interactions",
+      active: path === "/interactions" || path.startsWith("/interactions/"),
     },
     {
       label: "Reference",

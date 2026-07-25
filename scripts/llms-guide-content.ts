@@ -655,7 +655,7 @@ Stable keys; events carry semantic identities, not renderer indices.
 
 Interval selection and brush zoom are separate tools with domain bounds, clear
 paths, and keyboard-editable bounds.
-[Selection and zoom](/examples/interaction/brush-zoom).
+[Selection and zoom](/interactions/brush-zoom).
 `;
 
 export const LINKED_VIEWS_MD = `# Linked views
@@ -671,7 +671,7 @@ const scope = { keys: "record-id", x: "weight", y: "economy" } as const;
 \`\`\`
 
 Same controller + scope on every consumer. Passive plots render without re-emitting.
-[Linked views](/examples/interaction/linked-views): two plots, buttons, table.
+[Linked views](/interactions/linked-views): two plots, buttons, table.
 
 ## Keep local state local
 
@@ -909,10 +909,10 @@ semantic state (required, stable semantic scope via \`interactionScope\`).
 
 Examples: [inspect](/examples/interactions/inspection),
 [interval/zoom](/examples/interactions/interval-selection),
-[linked views](/examples/interaction/linked-views),
+[linked views](/interactions/linked-views),
 [legend focus](/examples/interaction/legend-focus),
 [legend filter](/examples/interaction/legend-filter),
-[facet intervals](/examples/interaction/facet-intervals),
+[facet intervals](/interactions/facet-intervals),
 [playground](/playground).
 Contracts: [interaction reference](/guide/interaction-reference).
 
@@ -998,7 +998,7 @@ indices. Choose a preset for the relationship between panels:
 \`cross-panel\` intersects the interval with each panel's domain when facet
 scales are free; a disjoint panel selects nothing instead of clamping to an
 unrelated edge. Panel identity survives row reordering and temporary absence.
-See the [runnable facet example](/examples/interaction/facet-intervals).
+See the [runnable facet example](/interactions/facet-intervals).
 
 ## Shared controlled state
 
@@ -1303,7 +1303,7 @@ Every mutation returns one immutable transition or \`null\` for a no-op. Passive
 consumers never republish controller state, preventing linked-view feedback
 loops. Do not mutate the controller inside its synchronous \`onchange\`
 callback; schedule a later Svelte application update instead. See the
-[linked views example](/examples/interaction/linked-views).
+[linked views example](/interactions/linked-views).
 
 ## Identity
 
@@ -2324,7 +2324,7 @@ Shared controller (new in 0.2, optional):
 <p>{selected.length} selected</p>
 \`\`\`
 
-See the [linked views example](/examples/interaction/linked-views) and
+See the [linked views example](/interactions/linked-views) and
 [Interactions](/guide/interactions) for the full controller contract.
 
 ### Deprecated type aliases
