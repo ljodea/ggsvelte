@@ -39,9 +39,9 @@
   <div class="hero-plot">
     <!--
       Exact point inspection (not mode "x"): no vertical axis guide, one
-      department at a time. Custom content names the department and uses
-      readable labels — default tooltips still show raw column names for
-      unmapped identity fields (#752).
+      department at a time. Custom content names the department (identity
+      column not on a mapped channel). Default tooltips use labs titles
+      for mapped channels (#752).
     -->
     {#snippet heroTooltip(
       inspection: PlotInspectionChange<Record<string, unknown>, PropertyKey>,
