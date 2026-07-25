@@ -149,17 +149,19 @@ test("interaction reference filters the exact public contract", async ({ page })
 test("gallery and interaction detail pages do not embed playground handoff", async ({ page }) => {
   // Product decision: example/interaction pages are specimens only — no
   // playground deep-link chrome. Fragment handoff coverage lives in the
-  // playground hash-restore tests below.
+  // playground hash-restore tests below. Assert on prerendered HTML so we
+  // do not burn the suite timeout on three full navigations.
   for (const path of [
     "/examples/point/scatter-color",
     "/examples/point/canvas-scatter",
     "/interactions/linked-views",
   ]) {
-    await page.goto(path);
-    await expect(page.getByRole("link", { name: "Open in Playground" })).toHaveCount(0);
-    const html = await page.content();
-    expect(html).not.toMatch(/class="[^"]*playground-link/);
-    expect(html).not.toMatch(/more than 500 inline rows/);
+    const res = await page.request.get(path);
+    expect(res.ok(), `${path} should be reachable`).toBe(true);
+    const html = await res.text();
+    expect(html, path).not.toMatch(/Open in Playground/);
+    expect(html, path).not.toMatch(/class="[^"]*playground-link/);
+    expect(html, path).not.toMatch(/more than 500 inline rows/);
   }
 });
 
