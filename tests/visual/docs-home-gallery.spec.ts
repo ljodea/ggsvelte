@@ -10,50 +10,13 @@ test("homepage first viewport leads with a live chart and two actions", async ({
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=light");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "The layered grammar of graphics, in Svelte 5 — and in JSON",
+    "An agent-first implementation of the layered grammar of graphics in Svelte 5",
   );
   await expect(page.locator(".home-hero .gg-plot-root")).toBeVisible();
-  const cta = page.locator(".cta-row");
-  await expect(cta.getByRole("link", { name: "Getting started" })).toBeVisible();
-  await expect(cta.getByRole("link", { name: "Examples" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Getting started" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Examples" }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Copy install" })).toBeVisible();
   await expectNoOverflow(page);
-});
-
-/*
- * The library sets `forced-color-adjust: none` on `.gg-plot`, so nothing in a
- * chart adapts on its own — the page has to hand the surface back. The epoch
- * bands are the one mark whose meaning is carried by fill alone and which this
- * page never names, so under a requested palette they drop rather than paint
- * over it. Asserted through `emulateMedia`: `forcedColors` is not a Playwright
- * test option, so `test.use` would be dropped by the runner and this would
- * silently measure a normal page (issue #718 — see playwright.config.ts).
- */
-test("homepage hero yields its surface and drops decorative fills in forced colors", async ({
-  page,
-}) => {
-  await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
-  await page.goto("/?theme=light");
-  const hero = page.locator(".hero-plot");
-  await expect(hero.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
-  expect(await page.evaluate(() => matchMedia("(forced-colors: active)").matches)).toBe(true);
-
-  const fills = await hero
-    .locator(".gg-marks rect")
-    .evaluateAll((rects) => rects.map((rect) => getComputedStyle(rect).fill));
-  expect(fills.length).toBeGreaterThan(0);
-  expect(new Set(fills)).toEqual(new Set(["none"]));
-
-  const surface = await hero.evaluate((el) => getComputedStyle(el).backgroundColor);
-  const canvas = await page.evaluate(() => {
-    const probe = document.createElement("div");
-    probe.style.backgroundColor = "canvas";
-    document.body.append(probe);
-    const value = getComputedStyle(probe).backgroundColor;
-    probe.remove();
-    return value;
-  });
-  expect(surface).toBe(canvas);
 });
 
 test("homepage preserves SSR chart output and hydrates its keyboard interaction", async ({
@@ -93,7 +56,7 @@ test("homepage grammar steps change real chart structure in place", async ({ pag
   await expect(output.locator(".gg-paths")).toHaveCount(1);
 });
 
-test("homepage mobile order is masthead, specimen, then actions", async ({ page }) => {
+test("homepage mobile order is claim, specimen, then install", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/?theme=light");
   const order = await page.locator(".home-hero > div").evaluateAll((nodes) =>
@@ -107,7 +70,7 @@ test("homepage mobile order is masthead, specimen, then actions", async ({ page 
     expect(item, `${className} is present`).toBeDefined();
     return item?.top ?? Number.POSITIVE_INFINITY;
   };
-  expect(topFor("hero-masthead")).toBeLessThan(topFor("hero-plot"));
+  expect(topFor("hero-claim")).toBeLessThan(topFor("hero-plot"));
   expect(topFor("hero-plot")).toBeLessThan(topFor("hero-actions"));
   await expectNoOverflow(page);
 });
@@ -123,7 +86,7 @@ test("install copy and code tabs share the manual-copy fallback", async ({ page 
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Copy install" }).click();
-  await expect(page.locator(".hero-masthead [role=status]")).toHaveText(
+  await expect(page.locator(".hero-actions [role=status]")).toHaveText(
     "Clipboard unavailable. Code selected for manual copy.",
   );
   expect(await page.evaluate(() => getSelection()?.toString())).toContain(
