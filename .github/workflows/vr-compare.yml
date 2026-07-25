@@ -175,6 +175,37 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  vr-gate:
+    # The single required status check for pixels (#742). ci.yml's `ci-gate`
+    # cannot cover the compare job: this workflow is deliberately separate and
+    # unprivileged, so it is unreachable from `needs`. Before this job existed
+    # the only job that measures pixels was advisory, and #732 merged an
+    # example whose baseline no longer matched it — leaving every later PR
+    # red for a reason its author did not cause.
+    #
+    # `always()` matters: a required context that never reports leaves the PR
+    # permanently unmergeable. This job reports on every pull request and
+    # decides the verdict from needs results.
+    name: vr-gate (required pixel aggregator)
+    if: always() && github.event_name == 'pull_request'
+    needs: [detect-changes, compare]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+      - name: evaluate the pixel gate
+        env:
+          DETECT_RESULT: ${{ needs.detect-changes.result }}
+          VR_ROUTED: ${{ needs.detect-changes.outputs.vr }}
+          COMPARE_RESULT: ${{ needs.compare.result }}
+        run: bun scripts/ci-routing.ts vr-gate
+
   approve-gate:
     name: /approve-visuals — verify merge, resolve rendered commit (read-only)
     # Only comments ON a PR, only from commenters whose association implies

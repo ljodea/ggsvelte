@@ -16,6 +16,7 @@ import {
   type JobPlan,
 } from "./routing";
 import { evaluateCiGate } from "./ci-gate";
+import { evaluateVrGate } from "./vr-gate";
 import {
   CACHEABLE_EXECUTIONS,
   CONTENT_HASH_SCHEMA,
@@ -92,6 +93,11 @@ export async function runCiRoutingCli(argv: string[]): Promise<void> {
     return;
   }
 
+  if (cmd === "vr-gate") {
+    runVrGateCli();
+    return;
+  }
+
   if (cmd === "gate") {
     const requiredPath = flagValue(args, "--required");
     const resultsPath = flagValue(args, "--results");
@@ -124,6 +130,7 @@ function printHelp(): void {
   bun scripts/ci-routing.ts validate-success-marker --execution <name> --hash <hex>
   bun scripts/ci-routing.ts gate --required <file|-> --results <file|->
   bun scripts/ci-routing.ts ci-gate
+  bun scripts/ci-routing.ts vr-gate
 
   detect-changes reads EVENT_NAME, GITHUB_REF, BASE_SHA, HEAD_SHA, PR_LABELS,
   REPO, GITHUB_OUTPUT (and uses gh/git for main base widening).
@@ -134,6 +141,9 @@ function printHelp(): void {
   .. DOCS_JOURNEYS_REQ, CHECKS_RES .. VR_GUARD_RES, EVENT_NAME) and evaluates
   the required-jobs gate, including component-shard rollup and the PR-only
   vr-baseline-guard rule. Prints "ci-gate ok" or "ci-gate failed: <list>".
+  vr-gate reads vr-compare.yml's DETECT_RESULT, VR_ROUTED and COMPARE_RESULT
+  and decides the required pixel check: routed pixel compares must succeed,
+  unrouted ones need nothing (#742).
 `);
 }
 
@@ -287,6 +297,22 @@ function runCiGateCli(): void {
     return;
   }
   process.stdout.write("ci-gate ok\n");
+}
+
+/** vr-compare.yml's `vr-gate` job — the required pixel status check (#742). */
+function runVrGateCli(): void {
+  const env = process.env;
+  const verdict = evaluateVrGate({
+    detectChangesResult: env["DETECT_RESULT"],
+    vrRouted: env["VR_ROUTED"] === "true",
+    compareResult: env["COMPARE_RESULT"],
+  });
+  if (!verdict.ok) {
+    process.stderr.write(`vr-gate failed: ${verdict.reason}\n`);
+    process.exitCode = 1;
+    return;
+  }
+  process.stdout.write(`vr-gate ok: ${verdict.reason}\n`);
 }
 
 function parseCacheableExecution(raw: string | undefined): CacheableExecution {
