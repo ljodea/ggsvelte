@@ -119,7 +119,7 @@
     class="lesson-source"
     language="bash"
     accessibleLabel="Copy create command"
-    code={`npx sv create my-chart --template minimal --types ts --no-add-ons --install npm\ncd my-chart\nnpm install @ggsvelte/svelte`}
+    code={`bunx sv create my-chart --template minimal --types ts --no-add-ons --install bun\ncd my-chart\nbun install @ggsvelte/svelte`}
   />
 
   <h2 id="draw-your-first-chart">Draw your first chart</h2>

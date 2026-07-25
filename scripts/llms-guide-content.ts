@@ -32,9 +32,10 @@ same grammar, built up one element at a time on a real dataset — is at
 ## Install
 
 \`\`\`sh complete
-npm install @ggsvelte/svelte
-# or: pnpm add @ggsvelte/svelte
+bun install @ggsvelte/svelte
 # or: bun add @ggsvelte/svelte
+# or: npm install @ggsvelte/svelte
+# or: pnpm add @ggsvelte/svelte
 \`\`\`
 
 \`@ggsvelte/spec\` (schema, validate, builder) and \`@ggsvelte/core\`
