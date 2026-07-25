@@ -76,6 +76,22 @@ describe("classifyChangedPaths", () => {
     expect(flags.markdown).toBe(true);
   });
 
+  test("worker sources sit on the workers lane only (issue #720)", () => {
+    const flags = classifyChangedPaths([
+      "workers/playground-api/src/handler.ts",
+      "workers/playground-api/test/handler.test.ts",
+      "workers/playground-api/wrangler.toml",
+    ]);
+    expect(flags.workers).toBe(true);
+    expect(flags.spec).toBe(false);
+    expect(flags.core).toBe(false);
+    expect(flags.svelte).toBe(false);
+    expect(flags.docs).toBe(false);
+    expect(flags.docs_render).toBe(false);
+    expect(flags.scripts).toBe(false);
+    expect(flags.visual).toBe(false);
+  });
+
   test("docs-only prose does not flip package lanes", () => {
     const flags = classifyChangedPaths([
       "docs/decisions/0001-declaration-only-children.md",
@@ -459,6 +475,26 @@ describe("planJobs", () => {
     expect(plan.component).toBe(false);
   });
 
+  test("worker changes schedule unit + build without the browser/docs surface (issue #720)", () => {
+    // workers/playground-api ships its own bun test suite; build carries the only
+    // type coverage the worker has (oxlint --type-aware + knip over the repo).
+    const plan = planJobs(classifyChangedPaths(["workers/playground-api/src/handler.ts"]));
+    expect(plan.checks).toBe(true);
+    expect(plan.unit).toBe(true);
+    expect(plan.build).toBe(true);
+    expect(plan.vr).toBe(false);
+    expect(plan.component).toBe(false);
+    expect(plan.consumer).toBe(false);
+    expect(plan.svelte_check).toBe(false);
+    expect(plan.docs_site).toBe(false);
+    expect(plan.docs_journeys).toBe(false);
+    expect(plan.pages).toBe(false);
+    expect(plan.packages_dist).toBe(false);
+    expect(plan.bench_smoke).toBe(false);
+    expect(plan.interaction_perf).toBe(false);
+    expect(plan.actions_security).toBe(false);
+  });
+
   test("scripts test-only changes never rebuild docs site or run svelte-check", () => {
     // release-wiring.test.ts (and other scripts/**/*.test.ts) used to force the
     // monolithic build job, which always ran vite build:docs.
@@ -504,6 +540,13 @@ describe("planJobs", () => {
 describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
   test("build hash still includes apps/docs for knip/type-aware coverage", () => {
     expect(JOB_CONTENT_INPUTS.build).toContain("apps/docs/**");
+  });
+
+  test("unit and build hash the workers tree so worker edits miss the cache (issue #720)", () => {
+    const workerPath = "workers/playground-api/src/handler.ts";
+    for (const execution of ["unit", "build"] as const) {
+      expect(listJobContentPaths(execution, [workerPath]), execution).toEqual([workerPath]);
+    }
   });
 
   test("svelte_check and docs_site hash docs generators and $scripts imports", () => {
