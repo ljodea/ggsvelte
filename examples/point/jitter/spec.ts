@@ -1,20 +1,17 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { ratings } from "./data.js";
+import { drinksWages } from "./data.js";
 
 export default defineExample(
-  gg(ratings, aes({ x: "team", y: "score" }))
-    .geomPoint({
-      position: "jitter",
-      positionParams: { width: 0.16, height: 0.12 },
-      alpha: 0.45,
-      size: 2.5,
-    })
+  gg(drinksWages, aes({ x: "wageClass", y: "wage" }))
+    .geomPoint({ position: "jitter", positionParams: { width: 0.22, height: 0 }, alpha: 0.75 })
+    .theme("clean")
     .labs({
-      title: "Score spread by team (seeded jitter)",
-      x: "Team",
-      y: "Score",
+      title: "Wages across 70 trades, 1910",
+      subtitle: "Jitter separates trades that share a wage class",
+      x: "Wage class",
+      y: "Weekly wage (shillings)",
     })
     .spec(),
 );

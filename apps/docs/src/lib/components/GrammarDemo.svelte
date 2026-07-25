@@ -1,7 +1,10 @@
 <script lang="ts">
   import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
 
-  import { penguins } from "$examples/point/scatter-color/data";
+  // Docs-owned specimen corpus, not the gallery example: point/scatter-color
+  // now carries Guerry's 1833 moral statistics, and the hero wants a scatter
+  // with three colour groups. See lib/theme-specimens/data.ts.
+  import { penguins } from "$lib/theme-specimens/data";
   import { contrastChartTheme } from "$lib/docs-appearance-state.svelte";
 
   const steps = [

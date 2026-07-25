@@ -1,6 +1,6 @@
 {
-  "title": "Jittered points",
-  "description": "Seeded jitter spreads overplotted discrete values apart. ggsvelte jitter is ALWAYS seeded (default seed 42) so renders are reproducible — a deliberate divergence from ggplot2's random jitter, surfaced as an advisory.",
-  "tags": ["point", "jitter", "position", "overplotting"],
-  "docsSection": "Scatter plots"
+  "title": "Jittered scatter",
+  "description": "position jitter offsets overlapping marks so ties stay countable. Pearson's 1910 survey of 70 trades has many sharing a wage class, and the clean theme's dashed horizontal grid keeps the eye on the vertical spread.",
+  "tags": ["point", "jitter", "position", "overplotting", "theme"],
+  "docsSection": "Points & scatter"
 }

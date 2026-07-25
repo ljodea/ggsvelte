@@ -43,7 +43,7 @@ describe("SMOKE_SCENARIOS inventory", () => {
   test("exact ordered basename fixture (do not sort)", () => {
     expect(SMOKE_BASE_NAMES).toEqual([
       "point-scatter-color-light.png",
-      "point-scatter-color-dark.png",
+      "point-canvas-scatter-dark.png",
       "line-multi-series-light.png",
       "bar-stacked-light.png",
       "area-basic-light.png",

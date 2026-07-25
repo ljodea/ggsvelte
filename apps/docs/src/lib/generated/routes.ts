@@ -2342,7 +2342,7 @@ export const DOCS_ROUTES = [
     path: "/examples/boxplot/by-category",
     title: "Boxplot by category — ggsvelte gallery",
     description:
-      "Five-number summaries per category: type-7 quantile hinges (the R default), whiskers to the furthest point within 1.5 × IQR, and outliers drawn individually.",
+      "Five-number summaries per category, with outliers past 1.5 IQR drawn individually. Michelson's five experimental runs of twenty disagree with each other more than the readings within any one of them — the reason the dataset is used to teach measurement error.",
     canonicalPath: "/examples/boxplot/by-category",
     kind: "page",
     index: true,
@@ -2417,9 +2417,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/density/overlay",
-    title: "Density overlay — ggsvelte gallery",
+    title: "Overlaid density estimates — ggsvelte gallery",
     description:
-      "Gaussian kernel density estimates (bw.nrd0 bandwidth, 512-point grid) overlaid per group with translucent fills — the smoothed alternative to overlapping histograms.",
+      "Kernel density estimates for two groups, drawn semi-transparent so the overlap stays readable. Galton's 934 adult children from 1886 give two distributions that overlap heavily but separate cleanly at the means.",
     canonicalPath: "/examples/density/overlay",
     kind: "page",
     index: true,
@@ -2474,7 +2474,7 @@ export const DOCS_ROUTES = [
     path: "/examples/histogram/basic",
     title: "Histogram — ggsvelte gallery",
     description:
-      "A continuous variable divided into fixed-width bins (the histogram geom is canonicalized to bar + stat bin). Set binwidth deliberately — the bins = 30 default emits an advisory.",
+      "The bin stat buckets a continuous variable and counts what lands in each bucket. Michelson's 100 speed-of-light runs from 1879 supply the distribution, and a rule at the modern accepted value shows the whole thing sitting above it: precise and biased at once.",
     canonicalPath: "/examples/histogram/basic",
     kind: "page",
     index: true,
@@ -2571,9 +2571,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/canvas-scatter",
-    title: "Canvas scatter (10k points) — ggsvelte gallery",
+    title: "Canvas scatter (10,000 points) — ggsvelte gallery",
     description:
-      'Above the 2,000-mark threshold, render: "auto" moves the layer onto a canvas stratum (advisory `canvas-auto`): axes, grid, and the legend stay SVG; the marks raster into one canvas sized by the DPR recipe, paired with an off-screen description block and a data-table toggle. Set render: "svg" or a11y: "force-svg" to opt out.',
+      "Above the canvas threshold the marks render to a canvas stratum while axes, grid, and legend stay SVG. This is the one example that keeps generated data deliberately — its subject is the rendering path under load, not a dataset — and the dark theme is where overplotting at low alpha actually reads.",
     canonicalPath: "/examples/point/canvas-scatter",
     kind: "page",
     index: true,
@@ -2593,9 +2593,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/jitter",
-    title: "Jittered points — ggsvelte gallery",
+    title: "Jittered scatter — ggsvelte gallery",
     description:
-      "Seeded jitter spreads overplotted discrete values apart. ggsvelte jitter is ALWAYS seeded (default seed 42) so renders are reproducible — a deliberate divergence from ggplot2's random jitter, surfaced as an advisory.",
+      "position jitter offsets overlapping marks so ties stay countable. Pearson's 1910 survey of 70 trades has many sharing a wage class, and the clean theme's dashed horizontal grid keeps the eye on the vertical spread.",
     canonicalPath: "/examples/point/jitter",
     kind: "page",
     index: true,
@@ -2615,9 +2615,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/log-scale",
-    title: "Pre-stat log10 scale and fit — ggsvelte gallery",
+    title: "Log-scale scatter with a fitted line — ggsvelte gallery",
     description:
-      "A scatter and linear fit computed after a base-10 x transform, with semantic SI-prefix ticks across three decades of GDP per capita.",
+      "scaleXLog10 compresses a multiplicative axis. Farr's 1849 London cholera districts span two orders of magnitude in population density, and colouring by water company separates them the way the epidemic did — the economist theme's tinted paper forces a manual three-key scale.",
     canonicalPath: "/examples/point/log-scale",
     kind: "page",
     index: true,
@@ -2626,9 +2626,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/scatter-color",
-    title: "Scatter plot with color — ggsvelte gallery",
+    title: "Scatter plot with color mapping — ggsvelte gallery",
     description:
-      "A classic scatter plot: two quantitative channels plus a discrete color mapping with a value-stable categorical palette and an automatic legend.",
+      "A discrete color mapping splits the points into groups and produces the legend. Guerry's 1833 moral statistics of France put 85 departments on the axes, coloured by region on the few theme with tableau10 — Corsica is dropped because the source gives it no region.",
     canonicalPath: "/examples/point/scatter-color",
     kind: "page",
     index: true,

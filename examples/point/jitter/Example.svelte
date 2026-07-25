@@ -1,24 +1,25 @@
 <script lang="ts">
   import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
 
-  import { ratings } from "./data.js";
+  import { drinksWages } from "./data.js";
 </script>
 
 <GGPlot
-  data={ratings}
-  aes={{ x: "team", y: "score" }}
+  data={drinksWages}
+  aes={{ x: "wageClass", y: "wage" }}
+  theme="clean"
   labs={{
-    title: "Score spread by team (seeded jitter)",
-    x: "Team",
-    y: "Score",
+    title: "Wages across 70 trades, 1910",
+    subtitle: "Jitter separates trades that share a wage class",
+    x: "Wage class",
+    y: "Weekly wage (shillings)",
   }}
   width={640}
   height={400}
 >
   <GeomPoint
     position="jitter"
-    positionParams={{ width: 0.16, height: 0.12 }}
-    alpha={0.45}
-    size={2.5}
+    positionParams={{ width: 0.22, height: 0 }}
+    alpha={0.75}
   />
 </GGPlot>

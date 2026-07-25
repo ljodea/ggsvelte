@@ -1,20 +1,24 @@
 <script lang="ts">
   import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
 
-  import { penguins } from "./data.js";
+  import { guerry } from "./data.js";
 </script>
 
 <GGPlot
-  data={penguins}
-  aes={{ x: "flipper", y: "mass", color: "species" }}
+  data={guerry}
+  aes={{ x: "literacy", y: "crimePersons", color: "region" }}
+  theme="few"
+  scales={{ color: { type: "ordinal", scheme: "tableau10" } }}
   labs={{
-    title: "Penguin flippers vs body mass",
-    x: "Flipper length (mm)",
-    y: "Body mass (g)",
-    color: "Species",
+    title: "Literacy and crime in France, 1833",
+    subtitle:
+      "Guerry found no tidy relationship — higher ranks are better on both axes",
+    x: "Literacy (rank)",
+    y: "Crimes against persons (rank)",
+    color: "Region",
   }}
   width={640}
   height={400}
 >
-  <GeomPoint size={3.5} alpha={0.85} />
+  <GeomPoint size={3} />
 </GGPlot>
