@@ -24,6 +24,36 @@ export function formatTooltipCell(value: CellValue): string {
 }
 
 /**
+ * Default tooltip `<dt>` text when no lab title is available (#752).
+ * Light humanization only — camelCase / snake_case → spaced words. Does not
+ * invent domain semantics ("crimePersons" stays "crime persons", not "count").
+ */
+export function tooltipFieldLabel(fieldName: string): string {
+  if (fieldName.length === 0) return fieldName;
+  const spaced = fieldName
+    .replace(/_/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
+  // Preserve intentional Title Case single tokens (e.g. "Region"); only fold
+  // multi-word camelCase into lowercase words for scanability.
+  if (!/\s/.test(spaced)) return spaced;
+  return spaced.replace(/\S+/g, (word) => word.toLowerCase());
+}
+
+/**
+ * Fields shown in the default tooltip body for a member (#754).
+ * Axis-mode inspections already print the shared axis value as a header, so
+ * repeating the matching channel under every member is pure noise.
+ */
+export function fieldsForDefaultTooltip(
+  fields: readonly TooltipField[],
+  mode: "exact" | "xy" | "x" | "y",
+): readonly TooltipField[] {
+  if (mode !== "x" && mode !== "y") return fields;
+  return fields.filter((field) => field.channel !== mode);
+}
+
+/**
  * Stable token for one member's default-tooltip body.
  * Uses field *names* (dt text) + formatted values (dd text), not channel —
  * channels are not shown and must not split visually identical rows.

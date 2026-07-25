@@ -48,7 +48,8 @@ describe("pipeline semantic identity", () => {
       return modes;
     }, {});
 
-    expect([...modesByLayer[0]!]).toEqual(["xy"]);
+    // Points default to exact (hover ring only); lines/areas keep axis modes (#754).
+    expect([...modesByLayer[0]!]).toEqual(["exact"]);
     expect([...modesByLayer[1]!]).toEqual(["x"]);
     expect([...modesByLayer[2]!]).toEqual(["x"]);
     expect([...modesByLayer[3]!]).toEqual(["exact"]);

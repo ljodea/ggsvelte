@@ -83,6 +83,16 @@ describe("theme registry", () => {
     expect(resolveTheme("light").gridWidth).toBe(0.25);
   });
 
+  it("keeps axis tick labels readable on light/minimal family themes (#753)", () => {
+    // 8.8px was unreadable next to 15px titles and ~12–16px tooltips on the
+    // docs homepage hero. Floor is intentionally above 11 so axis chrome is
+    // not fine print at 640×400.
+    for (const name of ["light", "minimal", "ggplot2", "classic", "few"] as const) {
+      expect(resolveTheme(name).axisTextSize, name).toBeGreaterThanOrEqual(12);
+    }
+    expect(resolveTheme("default").axisTitleSize).toBeGreaterThanOrEqual(11);
+  });
+
   it("object themes override roles over a named base", () => {
     const tokens = resolveTheme({
       name: "dark",

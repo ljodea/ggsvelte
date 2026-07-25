@@ -6,7 +6,9 @@
   import type { PlotInspectionChange } from "../interaction/interaction.js";
   import {
     collapseIdenticalDisplayMembers,
+    fieldsForDefaultTooltip,
     formatTooltipCell,
+    tooltipFieldLabel,
   } from "./display-members.js";
 
   const {
@@ -132,8 +134,8 @@
     <div class="gg-tooltip-members">
       {#each shownMembers as member, index (`${member.layerIndex}:${String(member.key)}:${index}`)}
         <dl class:gg-tooltip-focus={member === inspection.focus}>
-          {#each member.fields as field (field.channel)}
-            <dt>{field.field}</dt>
+          {#each fieldsForDefaultTooltip(member.fields, inspection.mode) as field (field.channel)}
+            <dt>{tooltipFieldLabel(field.field)}</dt>
             <dd>{formatTooltipCell(field.value)}</dd>
           {/each}
         </dl>
@@ -182,7 +184,8 @@
     border-radius: var(--gg-tooltip-radius, 3px);
     padding: 8px 10px;
     font-family: var(--gg-font-family, inherit);
-    font-size: 16px;
+    /* Track plot chrome, not a second oversized type scale (#753). */
+    font-size: 12.5px;
     line-height: 1.4;
     max-width: min(280px, calc(100% - 16px));
     max-height: min(320px, calc(100% - 16px));

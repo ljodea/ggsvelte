@@ -76,7 +76,8 @@ export function defaultAutoMode(batch: GeometryBatch, i: number): ResolvedCandid
     const dy = Math.abs(batch.segments[i * 4 + 3]! - batch.segments[i * 4 + 1]!);
     return dx <= dy ? "x" : "y";
   }
-  return "xy";
+  // Glyphs / points: ring-only exact hit (#754). Full crosshair (`xy`) is opt-in.
+  return "exact";
 }
 
 export function segmentDistance(

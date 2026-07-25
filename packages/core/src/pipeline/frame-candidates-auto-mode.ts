@@ -15,9 +15,12 @@ export function candidateAutoMode(
   primitiveIndex: number,
 ): ResolvedCandidateInspectMode | undefined {
   switch (binding.layer.geom) {
+    // Points/text: exact focus + hover ring only. Axis grouping (`x`/`y`/`xy`)
+    // is opt-in — auto→xy drew a full crosshair and multi-member tooltips on
+    // dense scatters without adding much (#754).
     case "point":
     case "text":
-      return "xy";
+      return "exact";
     case "col":
     case "bar":
     case "rect":
