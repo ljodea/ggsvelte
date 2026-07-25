@@ -135,6 +135,8 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "benchmarks/**",
     "scripts/**",
     "tests/evals/**",
+    // workers/playground-api runs in the unit suite (issue #720).
+    "workers/**",
     "docs/accessibility/**",
     ".github/ISSUE_TEMPLATE/**",
     ".github/DISCUSSION_TEMPLATE/**",
@@ -167,6 +169,8 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "examples/**",
     "scripts/**",
     "tests/evals/**",
+    // oxlint --type-aware + knip are the only type coverage workers get (#720).
+    "workers/**",
     "skills/**",
     "lifecycle.json",
     "support-matrix.json",

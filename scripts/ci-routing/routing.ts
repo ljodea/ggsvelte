@@ -26,6 +26,7 @@ export type ChangeLane =
   | "examples"
   | "benchmarks"
   | "scripts"
+  | "workers"
   | "evals"
   | "workflows"
   | "ci_workflow"
@@ -164,6 +165,10 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "README.md",
     "packages/svelte/README.md",
   ],
+  // Cloudflare workers (issue #720). They own a bun test suite and are only
+  // type-covered by the repo-wide oxlint --type-aware / knip pass in `build`;
+  // nothing here renders charts, so no browser/docs surface.
+  workers: ["workers/**"],
   evals: ["tests/evals/**"],
   workflows: [
     ".github/workflows/**",
@@ -349,6 +354,7 @@ export type PlanOptions = {
  * - docs generators (gen-llms / lifecycle.json) sit on the docs lane → pages
  * - pixel VR follows package surface, examples, visual tests, or docs_render only
  * - docs_journeys covers non-pixel Playwright structure/a11y for docs content PRs
+ * - workers run unit (own bun suite) + build (repo-wide type-aware lint / knip)
  *
  * Force tiers (do not collapse these):
  * - `forceProduct`: lockfile or ci-routing self-change — full package/browser surface.
@@ -377,7 +383,12 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
   // - docs_site: vite adapter-static + pages-links (product surface only)
   // A scripts/**/*.test.ts change must NOT schedule svelte_check or docs_site.
   const staticAnalysisSurface =
-    packageSurface || docsSurface || changes.scripts || changes.evals || forceProduct;
+    packageSurface ||
+    docsSurface ||
+    changes.scripts ||
+    changes.evals ||
+    changes.workers ||
+    forceProduct;
   const svelteCheckSurface = packageSurface || docsSurface || forceProduct;
   const docsSiteSurface = packageSurface || docsSurface || forceProduct;
 
@@ -412,6 +423,8 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
       changes.scripts ||
       changes.benchmarks ||
       changes.evals ||
+      // workers/playground-api ships its own bun test suite in the unit job.
+      changes.workers ||
       changes.docs ||
       changes.examples ||
       changes.workflows ||

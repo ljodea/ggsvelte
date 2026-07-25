@@ -34,6 +34,16 @@ const ciJob = (ci: string, jobId: string): string => {
   const next = rest.search(/\n  [a-z0-9_-]+:\n/);
   return next === -1 ? ci.slice(start) : ci.slice(start, start + 1 + next);
 };
+/** Suite path arguments of a `bun test …` invocation (flags and values dropped). */
+const suiteArgs = (command: string): string[] => {
+  const start = command.indexOf("bun test");
+  if (start === -1) return [];
+  return command
+    .slice(start + "bun test".length)
+    .trim()
+    .split(/\s+/)
+    .filter((arg) => arg.length > 0 && !arg.startsWith("-"));
+};
 const selfHostedGgsvelteCount = (workflow: string) =>
   workflow
     .split("\n")
@@ -63,6 +73,29 @@ describe("R0 release wiring", () => {
     expect(read("codecov.yml")).toContain("component_id: packages-spec");
     expect(read(".pre-commit-config.yaml")).not.toContain("bun test packages/spec");
     expect(read(".pre-commit-config.yaml")).not.toContain("pre-push");
+  });
+
+  it("runs every root `bun test` suite in the CI unit job (issue #720)", () => {
+    // The root `test` script is the canonical suite list. Anything present there
+    // but absent from ci-unit.yml is a local-only suite that merges green.
+    const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
+    const rootSuites = suiteArgs(pkg.scripts.test ?? "");
+    expect(rootSuites).toContain("workers/playground-api");
+
+    // Folded (`run: >`) scalar — collapse whitespace, then take the single
+    // coverage invocation up to the next step. Anchored on `--coverage` so the
+    // job's display name ("unit (bun test spec + core)") cannot match instead.
+    const unit = read(".github/workflows/ci-unit.yml").replaceAll(/\s+/g, " ");
+    const invocations = unit.match(/bun test --coverage/g) ?? [];
+    expect(invocations.length, "ci-unit.yml has exactly one coverage bun test").toBe(1);
+    const start = unit.indexOf("bun test --coverage");
+    const end = unit.indexOf(" - name: Upload unit coverage", start);
+    expect(end, "ci-unit.yml uploads unit coverage after bun test").toBeGreaterThan(start);
+    const ciSuites = suiteArgs(unit.slice(start, end));
+
+    for (const suite of rootSuites) {
+      expect(ciSuites, `ci-unit.yml runs ${suite}`).toContain(suite);
+    }
   });
 
   it("checks packed links in CI and the Cloudflare Pages deployment", () => {
