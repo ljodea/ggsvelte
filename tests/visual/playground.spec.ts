@@ -10,7 +10,6 @@ import {
   type PlaygroundCandidatePhaseDetail,
 } from "../../apps/docs/src/lib/playground-candidate-lifecycle";
 import { encodePlaygroundSeed } from "../../apps/docs/src/lib/playground-codec";
-import scatterColorSpec from "../../examples/point/scatter-color/spec.js";
 import { settleVisualState } from "./helpers/deterministic";
 
 type CandidatePhaseLog = PlaygroundCandidatePhaseDetail[];
@@ -147,28 +146,21 @@ test("interaction reference filters the exact public contract", async ({ page })
   await expect(page.getByRole("link", { name: /Inspect and pin/ })).toHaveCount(0);
 });
 
-test("compatible gallery details open the exact fragment while oversized examples explain why", async ({
-  page,
-}) => {
-  await page.goto("/examples/point/scatter-color");
-  const handoff = page.getByRole("link", { name: "Open in Playground" });
-  await expect(handoff).toHaveAttribute("href", /\/playground#play=v1\.[A-Za-z0-9_-]+$/u);
-  await handoff.click();
-  await expect(page).toHaveURL(/\/playground#play=v1\./u);
-  await expect(page.getByText("Rendered point/scatter-color.")).toBeVisible();
-  // Read the expected title from the example itself: what this proves is that
-  // the handoff carried *that* example's chart across, not that scatter-color
-  // happens to plot any particular dataset. No fallback — an example that lost
-  // its title should fail here rather than assert against an empty string.
-  const expectedTitle = scatterColorSpec.labs?.title;
-  if (expectedTitle === undefined) {
-    throw new Error("point/scatter-color must declare labs.title for this handoff assertion");
+test("gallery and interaction detail pages do not embed playground handoff", async ({ page }) => {
+  // Product decision: example/interaction pages are specimens only — no
+  // playground deep-link chrome. Fragment handoff coverage lives in the
+  // playground hash-restore tests below.
+  for (const path of [
+    "/examples/point/scatter-color",
+    "/examples/point/canvas-scatter",
+    "/interactions/linked-views",
+  ]) {
+    await page.goto(path);
+    await expect(page.getByRole("link", { name: "Open in Playground" })).toHaveCount(0);
+    const html = await page.content();
+    expect(html).not.toMatch(/class="[^"]*playground-link/);
+    expect(html).not.toMatch(/more than 500 inline rows/);
   }
-  await expect(page.locator(".active-chart .gg-title")).toHaveText(expectedTitle);
-
-  const oversized = await (await page.request.get("/examples/point/canvas-scatter")).text();
-  expect(oversized).not.toMatch(/class="[^"]*playground-link/);
-  expect(oversized).toMatch(/more than 500 inline rows/);
 });
 
 test("first paint shows a seeded interactive chart, not an empty form", async ({ page }) => {
