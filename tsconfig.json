@@ -4,9 +4,15 @@
   // package is checked by svelte-check from its own directory. This config
   // exists so oxlint --type-aware has type information for scripts/ and the
   // Cloudflare workers under workers/ (which have no build step of their own —
-  // wrangler bundles them straight from source, so this is their only
-  // typecheck). The worker code uses web-standard APIs only (Request,
-  // Response, URL); bun's types cover them, so no @cloudflare/workers-types.
+  // wrangler bundles them straight from source). The worker code uses
+  // web-standard APIs only (Request, Response, URL); bun's types cover them,
+  // so no @cloudflare/workers-types.
+  //
+  // tsc is NOT run on this config: scripts/** still has ~200 errors it has
+  // never been held to (#725). The worker slice was split out into
+  // workers/playground-api/tsconfig.json, which `bun run check:workers` does
+  // run — and which is the more accurate program of the two, since scripts/**
+  // membership here drags in @types/node and shadows the global fetch types.
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,

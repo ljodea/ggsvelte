@@ -20,6 +20,15 @@ export interface RateLimitBinding {
   limit(options: { key: string }): Promise<{ success: boolean }>;
 }
 
+/**
+ * The outbound-call seam. Structural on purpose: the handler only ever *calls*
+ * it, never touching runtime-specific members of the global `fetch` function
+ * object (bun's carries `preconnect`, workerd's does not). Typing the seam as
+ * `typeof fetch` would make every test stub owe whichever runtime's lib happens
+ * to be in scope a property the worker never uses (#725).
+ */
+export type FetchLike = (input: string, init: RequestInit) => Promise<Response>;
+
 export interface PlaygroundApiEnv {
   readonly OPENROUTER_API_KEY?: string;
   readonly MODEL_ALLOWLIST?: string;
@@ -27,7 +36,7 @@ export interface PlaygroundApiEnv {
   readonly RATE_LIMIT_IP?: RateLimitBinding;
   readonly RATE_LIMIT_GLOBAL?: RateLimitBinding;
   /** Injectable for tests. */
-  readonly fetch?: typeof fetch;
+  readonly fetch?: FetchLike;
   readonly log?: (line: Record<string, unknown>) => void;
   readonly now?: () => number;
 }
@@ -215,20 +224,24 @@ export async function handleGenerate(request: Request, env: PlaygroundApiEnv): P
     return jsonResponse(apiError("bad_request", SAFE_MESSAGES.oversized_input), 400, cors);
   }
 
-  let body: GenerateRequestBody;
+  let parsed: unknown;
   try {
     const raw = await request.arrayBuffer();
     if (raw.byteLength > MAX_REQUEST_BODY_BYTES) {
       return jsonResponse(apiError("bad_request", SAFE_MESSAGES.oversized_input), 400, cors);
     }
-    body = JSON.parse(new TextDecoder().decode(raw)) as GenerateRequestBody;
+    parsed = JSON.parse(new TextDecoder().decode(raw)) as unknown;
   } catch {
     return jsonResponse(apiError("bad_request", SAFE_MESSAGES.bad_request), 400, cors);
   }
 
-  if (!isObject(body)) {
+  if (!isObject(parsed)) {
     return jsonResponse(apiError("bad_request", SAFE_MESSAGES.bad_request), 400, cors);
   }
+  // Narrow once here rather than casting the JSON.parse result: the interface
+  // names the fields this handler reads, it is not evidence they are present or
+  // well-typed — every one is validated below.
+  const body: GenerateRequestBody = parsed;
 
   if (typeof body.prompt !== "string") {
     return jsonResponse(apiError("bad_request", SAFE_MESSAGES.bad_request), 400, cors);
@@ -378,10 +391,8 @@ export async function handleGenerate(request: Request, env: PlaygroundApiEnv): P
   // `models` requests provider-side fallback, so the first entry is not
   // necessarily what answered. Attributing output — and the outcome log that
   // tunes MODEL_ALLOWLIST — to a guess is worse than reporting null (#697).
-  const model =
-    isObject(completion) && typeof completion.model === "string" && completion.model !== ""
-      ? completion.model
-      : null;
+  const reported: unknown = isObject(completion) ? completion["model"] : undefined;
+  const model = typeof reported === "string" && reported !== "" ? reported : null;
 
   const content = extractContent(completion);
   if (content === null) {
@@ -468,15 +479,15 @@ export async function handleGenerate(request: Request, env: PlaygroundApiEnv): P
 
 function extractContent(completion: unknown): string | null {
   if (!isObject(completion)) return null;
-  const choices = completion.choices;
+  const choices = completion["choices"];
   if (!Array.isArray(choices) || choices.length === 0) return null;
   // Array.isArray() narrows `unknown` to `any[]`, so re-annotate to keep the
   // element unknown until isObject() proves its shape.
   const first: unknown = choices[0];
   if (!isObject(first)) return null;
-  const message = first.message;
+  const message = first["message"];
   if (!isObject(message)) return null;
-  const content = message.content;
+  const content = message["content"];
   if (typeof content === "string" && content.trim() !== "") return content;
   return null;
 }

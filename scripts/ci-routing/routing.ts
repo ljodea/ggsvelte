@@ -354,7 +354,7 @@ export type PlanOptions = {
  * - docs generators (gen-llms / lifecycle.json) sit on the docs lane → pages
  * - pixel VR follows package surface, examples, visual tests, or docs_render only
  * - docs_journeys covers non-pixel Playwright structure/a11y for docs content PRs
- * - workers run unit (own bun suite) + build (repo-wide type-aware lint / knip)
+ * - workers run unit (own bun suite + check:workers tsc) + build (type-aware lint / knip)
  *
  * Force tiers (do not collapse these):
  * - `forceProduct`: lockfile or ci-routing self-change — full package/browser surface.

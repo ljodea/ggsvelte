@@ -169,7 +169,8 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "examples/**",
     "scripts/**",
     "tests/evals/**",
-    // oxlint --type-aware + knip are the only type coverage workers get (#720).
+    // build re-enters `bun run check`, which now runs check:workers tsc (#725)
+    // on top of the repo-wide type-aware lint + knip.
     "workers/**",
     "skills/**",
     "lifecycle.json",

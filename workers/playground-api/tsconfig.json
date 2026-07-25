@@ -1,0 +1,28 @@
+{
+  // The only tsc coverage the worker gets: wrangler bundles it straight from
+  // source, so there is no build step and it is not in the `tsc -b` graph. Run
+  // by `bun run check:workers` (chained into `check`) — see issue #725, where
+  // the root tsconfig.json turned out to exist only for oxlint --type-aware,
+  // whose type-aware rules are a strict subset of tsc's diagnostics.
+  //
+  // "types": ["bun"] stands in for the workerd runtime — bun's lib covers the
+  // web-standard Request/Response/URL surface the worker actually uses. This
+  // narrower program is a *truer* type environment than the root config, whose
+  // scripts/** members drag in @types/node and shadow the global fetch types.
+  // Injected seams are typed structurally (FetchLike in src/handler.ts) so no
+  // bun-specific shape leaks into the worker's own contract.
+  //
+  // eval/** is deliberately out: run-eval.ts is a maintainer-only harness that
+  // imports the docs client's envelope parser, and apps/docs is checked by
+  // svelte-check under apps/docs/tsconfig.json, which does NOT extend
+  // tsconfig.base.json. Including it would enforce base strictness on the docs
+  // app through a worker gate, so docs edits would fail here instead of in
+  // check:docs. src/** reaches only playground-dataset-schemas.ts, which is
+  // dependency-free by contract and clean under these options.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["bun"]
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

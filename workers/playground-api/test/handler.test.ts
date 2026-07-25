@@ -463,8 +463,8 @@ describe("handleGenerate", () => {
       OPENROUTER_API_KEY: "sk-test-key",
       ...okLimiters,
       fetch: (url, init) => {
-        seenUrl = typeof url === "string" ? url : url instanceof URL ? url.href : url.url;
-        seenBody = JSON.parse(typeof init?.body === "string" ? init.body : "{}") as Record<
+        seenUrl = url;
+        seenBody = JSON.parse(typeof init.body === "string" ? init.body : "{}") as Record<
           string,
           unknown
         >;
@@ -488,7 +488,7 @@ describe("handleGenerate", () => {
       MODEL_ALLOWLIST: "vendor/free-a, vendor/free-b",
       ...okLimiters,
       fetch: (_url, init) => {
-        seenBody = JSON.parse(typeof init?.body === "string" ? init.body : "{}") as Record<
+        seenBody = JSON.parse(typeof init.body === "string" ? init.body : "{}") as Record<
           string,
           unknown
         >;
@@ -553,7 +553,9 @@ describe("handleGenerate", () => {
           controller.close();
         },
       }),
-      // @ts-expect-error duplex is required for a streaming request body.
+      // Required for a streaming request body. The suppression this used to
+      // carry was an artifact of the root tsconfig, where scripts/** pulls in
+      // @types/node and its RequestInit (no `duplex`) shadows bun's (#725).
       duplex: "half",
     });
     const res = await handleGenerate(req, {
