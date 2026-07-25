@@ -6,7 +6,10 @@
 import type { SpecError } from "@ggsvelte/spec";
 
 import type { PlaygroundAgentEnvelope } from "./playground-agent-envelope";
-import { PLAYGROUND_PROMPT_MAX_CHARS } from "./playground-dataset-schemas";
+import {
+  type PlaygroundApiErrorCode,
+  SHARED_API_ERROR_MESSAGES,
+} from "./playground-api-error-codes";
 
 export type PlaygroundAgentPhase =
   | "idle"
@@ -16,24 +19,20 @@ export type PlaygroundAgentPhase =
   | "drawing"
   | "failed";
 
-export type PlaygroundAgentErrorCode =
-  | "bad_request"
-  | "prompt_too_long"
-  | "unknown_dataset"
-  | "origin_forbidden"
-  | "not_found"
-  | "method_not_allowed"
-  | "rate_limited"
-  | "upstream_rate_limited"
-  | "upstream_error"
-  | "bad_output"
-  | "disabled"
-  /** The service itself failed or was intercepted — no worker body came back. */
+/**
+ * Failures the client raises on its own — never sent by the worker.
+ * `service_error`: the service failed or was intercepted, so no worker body
+ * came back at all.
+ */
+export type PlaygroundAgentLocalErrorCode =
   | "service_error"
   | "network"
   | "validation"
   | "pipeline"
   | "aborted";
+
+/** Every wire code (#695) plus the client-only ones. */
+export type PlaygroundAgentErrorCode = PlaygroundApiErrorCode | PlaygroundAgentLocalErrorCode;
 
 export interface PlaygroundAgentFailure {
   readonly code: PlaygroundAgentErrorCode;
@@ -164,9 +163,9 @@ export function messageForAgentError(code: PlaygroundAgentErrorCode, fallback?: 
   switch (code) {
     case "rate_limited":
     case "upstream_rate_limited":
-      return fallback ?? "Too many requests. Try again shortly.";
+      return fallback ?? SHARED_API_ERROR_MESSAGES.rate_limited;
     case "disabled":
-      return "Live generation is paused — the copy-to-your-agent path always works.";
+      return SHARED_API_ERROR_MESSAGES.disabled;
     case "network":
       return "Could not reach the generate service. Check your connection, or try a sample chart.";
     case "validation":
@@ -178,7 +177,7 @@ export function messageForAgentError(code: PlaygroundAgentErrorCode, fallback?: 
     case "bad_output":
       return "The model returned an unusable chart. Try a sample or rephrase.";
     case "upstream_error":
-      return "The model provider failed. Try again or use a sample chart.";
+      return SHARED_API_ERROR_MESSAGES.upstream_error;
     case "service_error":
       // Edge outage, proxy, or captive portal: nothing the user can rephrase.
       return "The generate service is unavailable. Try again shortly, or use a sample chart.";
@@ -188,9 +187,9 @@ export function messageForAgentError(code: PlaygroundAgentErrorCode, fallback?: 
     case "origin_forbidden":
       return "This origin cannot call live generation. Use a sample or copy the agent prompt.";
     case "prompt_too_long":
-      return `Prompt is too long (max ${PLAYGROUND_PROMPT_MAX_CHARS} characters).`;
+      return SHARED_API_ERROR_MESSAGES.prompt_too_long;
     case "unknown_dataset":
-      return "Unknown dataset.";
+      return SHARED_API_ERROR_MESSAGES.unknown_dataset;
     default:
       return fallback ?? "Generation failed. Try a sample chart or copy the agent prompt.";
   }

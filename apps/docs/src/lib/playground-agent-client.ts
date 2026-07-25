@@ -11,6 +11,7 @@ import {
 } from "./playground-agent-envelope";
 import type { PlaygroundAgentErrorCode } from "./playground-agent-state";
 import { messageForAgentError } from "./playground-agent-state";
+import { isPlaygroundApiErrorCode } from "./playground-api-error-codes";
 import type { PlaygroundDatasetId } from "./playground-dataset-schemas";
 import { mockGenerateEnvelope } from "./playground-prompts";
 
@@ -91,24 +92,12 @@ function resolveApiUrl(explicit?: string): string {
   return DEFAULT_PLAYGROUND_API_URL;
 }
 
+/**
+ * Recognised against the shared wire union (#695), so a new server code is
+ * carried through instead of being mislabelled as a provider outage.
+ */
 function mapApiErrorCode(code: unknown): PlaygroundAgentErrorCode {
-  const known: PlaygroundAgentErrorCode[] = [
-    "bad_request",
-    "prompt_too_long",
-    "unknown_dataset",
-    "origin_forbidden",
-    "not_found",
-    "method_not_allowed",
-    "rate_limited",
-    "upstream_rate_limited",
-    "upstream_error",
-    "bad_output",
-    "disabled",
-  ];
-  if (typeof code === "string" && (known as string[]).includes(code)) {
-    return code as PlaygroundAgentErrorCode;
-  }
-  return "upstream_error";
+  return isPlaygroundApiErrorCode(code) ? code : "upstream_error";
 }
 
 /**
