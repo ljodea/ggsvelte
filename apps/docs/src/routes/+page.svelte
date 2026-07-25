@@ -2,8 +2,7 @@
   import { base } from "$app/paths";
   import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
 
-  import { penguins } from "$examples/point/scatter-color/data";
-  import { QUICKSTART_PAGE_SVELTE } from "$scripts/quickstart";
+  import { guerry } from "$examples/point/scatter-color/data";
   import CodeTabs from "$lib/CodeTabs.svelte";
   import { FEATURED_EXAMPLES, galleryEntryFor } from "$lib/catalog/gallery";
   import CopyCode from "$lib/components/CopyCode.svelte";
@@ -12,38 +11,25 @@
   import { contrastChartTheme } from "$lib/docs-appearance-state.svelte";
   import { EXAMPLES } from "$lib/examples";
 
+  import type { PageProps } from "./$types";
+
+  const { data }: PageProps = $props();
+
   const install = "npm install @ggsvelte/svelte";
   const entries = EXAMPLES.map((entry) => galleryEntryFor(entry));
   const featured = FEATURED_EXAMPLES.map((item) =>
     entries.find((entry) => entry.id === item.id)!,
   );
   const heroTheme = $derived(contrastChartTheme());
-  const tabs = [
-    { label: "Svelte", code: QUICKSTART_PAGE_SVELTE, language: "svelte" },
-    {
-      label: "Builder (TS)",
-      language: "typescript",
-      code: `import { aes, gg } from "@ggsvelte/svelte";\n\nconst spec = gg(cars, aes({ x: "weight", y: "economy" }))\n  .geomPoint()\n  .spec();`,
-    },
+  const tabs = $derived([
+    { label: "Svelte", code: data.svelteSource, language: "svelte" },
+    { label: "Builder (TS)", code: data.specSource, language: "typescript" },
     {
       label: "Spec (JSON)",
+      code: JSON.stringify(data.spec, null, 2),
       language: "json",
-      code: `{
-  "data": {
-    "values": [{ "weight": 1.8, "economy": 37 }]
-  },
-  "layers": [
-    {
-      "geom": "point",
-      "aes": {
-        "x": { "field": "weight" },
-        "y": { "field": "economy" }
-      }
-    }
-  ]
-}`,
     },
-  ];
+  ]);
 </script>
 
 <section class="home-hero" aria-labelledby="home-heading">
@@ -61,19 +47,20 @@
 
   <div class="hero-plot">
     <GGPlot
-      data={penguins}
-      aes={{ x: "flipper", y: "mass", color: "species" }}
+      data={guerry}
+      aes={{ x: "literacy", y: "crimePersons", color: "region" }}
       inspect={{ mode: "x", pin: true, maxDistance: 24 }}
       theme={heroTheme}
+      scales={{ color: { type: "ordinal", scheme: "tableau10" } }}
       labs={{
-        title: "Penguin body mass by flipper length",
-        x: "Flipper length (mm)",
-        y: "Body mass (g)",
-        color: "Species",
+        title: "Literacy and crime in France, 1833",
+        x: "Literacy (rank)",
+        y: "Crimes against persons (rank)",
+        color: "Region",
       }}
       width="container"
       height={400}
-      ariaLabel="Penguin mass increases with flipper length, grouped by species"
+      ariaLabel="Literacy rank against rank of crimes against persons for 85 French departments, coloured by region"
     >
       <GeomPoint size={4} alpha={0.85} />
     </GGPlot>
