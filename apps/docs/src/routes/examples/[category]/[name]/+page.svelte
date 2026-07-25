@@ -125,7 +125,7 @@
         <p class="eyebrow">Related</p>
         <h2 id="related-heading">More examples</h2>
       </div>
-      <a href={`${base}/examples`}>All {EXAMPLES.length}</a>
+      <a href={`${base}/examples`}>All {galleryEntries.length}</a>
     </div>
     <ul>
       {#each related as entry (entry.id)}

@@ -1,6 +1,5 @@
-import { error, redirect } from "@sveltejs/kit";
+import { error } from "@sveltejs/kit";
 
-import { interactionExpositionSlug } from "$lib/catalog/interaction-exposition";
 import { EXAMPLE_ALIASES, resolveExampleId } from "$lib/example-aliases";
 import { EXAMPLES, loadExample } from "$lib/examples";
 
@@ -18,13 +17,9 @@ export const entries: EntryGenerator = () => [
 export const load: PageLoad = async ({ params }) => {
   const requestedId = `${params.category}/${params.name}`;
   const id = resolveExampleId(requestedId);
-  const expositionSlug = interactionExpositionSlug(id);
-  // Chart-local interaction expositions live under /interactions, not the gallery.
-  // adapter-static prerender forbids reading url.search, so this redirect is
-  // path-only; VR capture paths already target /interactions/* directly.
-  if (typeof expositionSlug === "string") {
-    redirect(308, `/interactions/${expositionSlug}`);
-  }
+  // Interaction expositions stay loadable at /examples/interaction/* so the
+  // static build emits full SEO HTML (aliases in the route inventory). Gallery
+  // listing excludes them; canonical points at /interactions/* via inventory.
   const entry = EXAMPLES.find((e) => e.id === id);
   if (entry === undefined) {
     error(404, `No example "${requestedId}" — see /examples for the gallery.`);

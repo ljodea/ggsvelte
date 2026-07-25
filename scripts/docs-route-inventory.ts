@@ -239,8 +239,8 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
       shell: "site" as const,
     };
   });
-  // Former gallery URLs for interaction expositions — redirect targets keep
-  // stable deep links while the public catalog stays chart specimens only.
+  // Former gallery URLs for interaction expositions — full HTML aliases keep
+  // stable deep links (noindex, canonical → /interactions/*); gallery excludes them.
   const expositionGalleryAliases: DocsRouteRecord[] = INTERACTION_EXPOSITION_IDS.map((id) => {
     const entry = EXAMPLES.find((example) => example.id === id);
     const slug = interactionExpositionSlug(id)!;
