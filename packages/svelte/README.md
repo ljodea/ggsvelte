@@ -78,6 +78,22 @@ from right to bottom at narrow widths without retraining scales; merged exact-va
 entries keep keyboard focus and filtering across every represented aesthetic. The
 same planned scene renders in browser SVG, headless SVG, and SSR.
 
+## Upgrading
+
+The grammar props on `<GGPlot>` (`facet`, `coord`, `scales`, `guides`,
+`legend`, `theme`, `labs`) are deprecated since 0.11.0 in favour of child
+layers. A codemod ships with the package; it prints a diff and writes nothing
+until you ask it to:
+
+```sh
+npx ggsvelte-codemod src          # show what would change
+npx ggsvelte-codemod --write src  # apply
+```
+
+Shapes it will not rewrite mechanically are printed as `manual change
+required` with a link to the [upgrading
+guide](https://ggsvelte.sh/guide/upgrading), never half-migrated.
+
 ## Links
 
 - [Documentation](https://ggsvelte.sh/)
