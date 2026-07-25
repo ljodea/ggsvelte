@@ -11,12 +11,9 @@
   import UiButton from "$lib/components/UiButton.svelte";
   import { contrastChartTheme } from "$lib/docs-appearance-state.svelte";
   import { EXAMPLES } from "$lib/examples";
-
-  import type { PageProps } from "./$types";
+  import { HOME_CODE_PATH_TABS } from "$lib/home-code-path";
 
   type GuerryRow = (typeof guerry)[number];
-
-  const { data }: PageProps = $props();
 
   const install = "bun install @ggsvelte/svelte";
   const entries = EXAMPLES.map((entry) => galleryEntryFor(entry));
@@ -24,15 +21,7 @@
     entries.find((entry) => entry.id === item.id)!,
   );
   const heroTheme = $derived(contrastChartTheme());
-  const tabs = $derived([
-    { label: "Svelte", code: data.svelteSource, language: "svelte" },
-    { label: "Builder (TS)", code: data.specSource, language: "typescript" },
-    {
-      label: "Spec (JSON)",
-      code: JSON.stringify(data.spec, null, 2),
-      language: "json",
-    },
-  ]);
+  const tabs = HOME_CODE_PATH_TABS;
 </script>
 
 <section class="home-hero" aria-labelledby="home-heading">
@@ -141,11 +130,12 @@
 
 <section class="code-path" aria-labelledby="code-path-heading">
   <div>
-    <h2 id="code-path-heading">Svelte, builder, or JSON.</h2>
+    <h2 id="code-path-heading">Svelte for builders, JSON for operations.</h2>
     <p>
-      Three surfaces, one spec. Svelte components inside an app, the TypeScript
-      builder anywhere else, and Spec (JSON) — the surface agents write:
-      validated on the way in, rendered to SVG without a DOM.
+      Svelte components help human-agent teams reason about viz work together,
+      thanks to ggplot2 naming conventions that have been around for 18 years.
+      JSON specs allow agents operating in webapps to make interactive charts on
+      demand for rendering on-the-fly.
     </p>
   </div>
   <CodeTabs {tabs} />
@@ -273,9 +263,15 @@
   }
 
   .home-featured h2,
-  .code-path h2,
   .evidence h2 {
     max-width: 13ch;
+    margin: 0.25rem 0 0;
+    font-size: clamp(2.5rem, 5vw, 4.75rem);
+    line-height: 0.94;
+  }
+
+  .code-path h2 {
+    max-width: 14ch;
     margin: 0.25rem 0 0;
     font-size: clamp(2.5rem, 5vw, 4.75rem);
     line-height: 0.94;
