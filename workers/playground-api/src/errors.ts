@@ -1,17 +1,11 @@
-import { PLAYGROUND_PROMPT_MAX_CHARS } from "../../../apps/docs/src/lib/playground-dataset-schemas";
+import {
+  type PlaygroundApiErrorCode,
+  SHARED_API_ERROR_MESSAGES,
+} from "../../../apps/docs/src/lib/playground-api-error-codes";
 
-export type PlaygroundApiErrorCode =
-  | "bad_request"
-  | "prompt_too_long"
-  | "unknown_dataset"
-  | "origin_forbidden"
-  | "not_found"
-  | "method_not_allowed"
-  | "rate_limited"
-  | "upstream_rate_limited"
-  | "upstream_error"
-  | "bad_output"
-  | "disabled";
+// The union lives with the wire contract in apps/docs so the client cannot
+// drift from it (#695); the status map and safe copy below stay worker-only.
+export type { PlaygroundApiErrorCode };
 
 export interface PlaygroundApiErrorBody {
   readonly code: PlaygroundApiErrorCode;
@@ -69,18 +63,25 @@ export function statusForError(code: PlaygroundApiErrorCode): number {
   return ERROR_STATUS[code];
 }
 
-/** User-facing messages — never echo upstream bodies. */
+/**
+ * User-facing messages — never echo upstream bodies. Keyed by the full union
+ * plus `oversized_input`, which is copy rather than a code: the handler sends
+ * it under `bad_request`, so it must never reach the wire union.
+ *
+ * Entries pulled from SHARED_API_ERROR_MESSAGES are the ones the client also
+ * has to say; the rest are worker-only wording.
+ */
 export const SAFE_MESSAGES = {
   bad_request: "The request is invalid.",
-  prompt_too_long: `Prompt is too long (max ${PLAYGROUND_PROMPT_MAX_CHARS} characters).`,
-  unknown_dataset: "Unknown dataset.",
+  prompt_too_long: SHARED_API_ERROR_MESSAGES.prompt_too_long,
+  unknown_dataset: SHARED_API_ERROR_MESSAGES.unknown_dataset,
   origin_forbidden: "Origin is not allowed.",
   not_found: "No such endpoint.",
   method_not_allowed: "Method not allowed.",
-  rate_limited: "Too many requests. Try again shortly.",
+  rate_limited: SHARED_API_ERROR_MESSAGES.rate_limited,
   upstream_rate_limited: "The model provider is rate-limiting. Try again shortly.",
-  upstream_error: "The model provider failed. Try again or use a sample chart.",
+  upstream_error: SHARED_API_ERROR_MESSAGES.upstream_error,
   bad_output: "The model returned an unusable response.",
-  disabled: "Live generation is paused — the copy-to-your-agent path always works.",
+  disabled: SHARED_API_ERROR_MESSAGES.disabled,
   oversized_input: "Request body is too large.",
-} as const;
+} as const satisfies Record<PlaygroundApiErrorCode | "oversized_input", string>;
