@@ -137,7 +137,7 @@ async function runEmitCli(args: string[]): Promise<void> {
   const decision = decideChangesetComment(files, discoverPublishedPackages(process.cwd()));
   writeFileSync(bodyOut, renderComment(decision));
   const outputs = `verdict=${decision.verdict}\n`;
-  const githubOutput = process.env.GITHUB_OUTPUT;
+  const githubOutput = process.env["GITHUB_OUTPUT"];
   if (typeof githubOutput === "string" && githubOutput.length > 0) {
     appendFileSync(githubOutput, outputs);
   }

@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
 
-import type { PortableSpec } from "@ggsvelte/spec";
+import type { InlineData, PortableSpec } from "@ggsvelte/spec";
+
+import type { PlaygroundCodecErrorCode } from "../apps/docs/src/lib/playground-codec-contract";
 
 import {
   assertPlaygroundDraftSize,
@@ -35,7 +37,9 @@ const seed = (nextSpec: PortableSpec = spec): PlaygroundSeedV1 => ({
   spec: nextSpec,
 });
 
-function expectCode(hash: string, code: string): void {
+// Typed to the wire union, not string: a caller naming a code the codec cannot
+// emit is a stale test, and this is where that shows up.
+function expectCode(hash: string, code: PlaygroundCodecErrorCode): void {
   const result = decodePlaygroundHash(hash);
   expect(result.status).toBe("error");
   if (result.status === "error") expect(result.error.code).toBe(code);
@@ -159,13 +163,15 @@ describe("playground fragment codec", () => {
     Object.defineProperty(unsafeRow, "__proto__", { value: 1, enumerable: true });
     expectCode(rawHash(seed({ ...spec, data: { values: [unsafeRow] } })), "UNSAFE_FIELD");
 
-    const unsafeColumns: Record<string, readonly (string | number | boolean | null)[]> = {
+    const unsafeColumns: Record<string, (string | number | boolean | null)[]> = {
       value: [2],
     };
     Object.defineProperty(unsafeColumns, "constructor", { value: [1], enumerable: true });
     expectCode(rawHash(seed({ ...spec, data: { columns: unsafeColumns } })), "UNSAFE_FIELD");
 
-    const datasets = Object.create(null) as Record<string, PortableSpec["data"]>;
+    // Record<string, InlineData>, matching PortableSpec.datasets. PortableSpec["data"]
+    // also admits DataRef and undefined, neither of which a datasets entry may be.
+    const datasets = Object.create(null) as Record<string, InlineData>;
     datasets["__proto__"] = { values: [{ value: 2 }] };
     expectCode(rawHash(seed({ ...spec, data: { name: "__proto__" }, datasets })), "UNSAFE_FIELD");
   });

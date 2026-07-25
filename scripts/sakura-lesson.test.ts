@@ -28,7 +28,14 @@ const finished = foldSakura(SAKURA_STEPS.length, rows);
 /** Tick labels of one axis, top-to-bottom in screen order. */
 function yTicks(spec: unknown): { label: string; pos: number }[] {
   const model = runPipeline(spec as never, { width: 900, height: 480 });
-  return model.scene.panels[0]!.axisY.map((tick) => ({
+  // SceneTick[] | null — a panel renders no y-axis when placement says so. G1
+  // (earlier dates sit above later ones) is asserted against these ticks, so a
+  // missing axis has to say that, not die inside .map on null.
+  const axisY = model.scene.panels[0]?.axisY;
+  if (axisY === undefined || axisY === null) {
+    throw new Error("expected the first panel to render a y-axis");
+  }
+  return axisY.map((tick) => ({
     label: tick.label,
     pos: tick.pos,
   }));
@@ -138,7 +145,9 @@ describe("the sakura lesson folds to renderable specs", () => {
       Object.values(step.source.children ?? {}),
     ).concat("  <GeomPoint />");
     for (const child of children) {
-      for (const [, attribute] of child.matchAll(/^\s{4}([a-zA-Z]+)=/gm)) {
+      for (const match of child.matchAll(/^\s{4}([a-zA-Z]+)=/gm)) {
+        const attribute = match[1];
+        if (attribute === undefined) throw new Error(`unparsed prop line: ${match[0]}`);
         expect(componentProps.has(attribute), `<Geom…> has no ${attribute} prop`).toBe(true);
       }
       expect(child, "spec-level render hint spelled as a prop").not.toContain("render=");

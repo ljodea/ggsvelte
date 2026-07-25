@@ -15,7 +15,7 @@ export type DocsAppearanceStorage = {
 export function readDocsAppearance(
   root: { dataset: DOMStringMap } = document.documentElement,
 ): DocsAppearance {
-  return root.dataset.theme === "dark" ? "dark" : "light";
+  return root.dataset["theme"] === "dark" ? "dark" : "light";
 }
 
 export function toggleDocsAppearance(current: DocsAppearance): DocsAppearance {
@@ -44,7 +44,7 @@ export function writeDocsAppearance(
   root: { dataset: DOMStringMap } = document.documentElement,
   storage?: DocsAppearanceStorage | null,
 ): void {
-  root.dataset.theme = appearance;
+  root.dataset["theme"] = appearance;
   const store = resolveDocsAppearanceStorage(storage);
   if (store === null) return;
   try {

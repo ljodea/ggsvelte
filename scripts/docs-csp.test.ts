@@ -3,18 +3,22 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { DOCS_BUILD_MODES } from "../apps/docs/build-mode";
 import { docsCspDirectives } from "../apps/docs/csp";
 import { validateDocsCsp, validateHtmlCsp } from "./docs-csp";
 
 describe("docs CSP validation", () => {
+  // Driven off DOCS_BUILD_MODES rather than a literal list: the previous list
+  // still named "legacy-full" and "legacy-migration", which resolveDocsBuildConfig
+  // has rejected since the GitHub Pages modes were dropped. Those two iterations
+  // passed on nothing — docsCspDirectives only branches on `mode === "dev"`, so
+  // any unrecognised string satisfies the assertion. Deriving the list means a
+  // new mode fails here until its CSP behaviour is decided.
   it("upgrades insecure requests only for HTTPS publication modes", () => {
     expect(docsCspDirectives("dev")).not.toHaveProperty("upgrade-insecure-requests");
-    for (const mode of [
-      "legacy-full",
-      "cloudflare-preview",
-      "cloudflare-production",
-      "legacy-migration",
-    ] as const) {
+    const httpsModes = DOCS_BUILD_MODES.filter((mode) => mode !== "dev");
+    expect(httpsModes).toEqual(["cloudflare-preview", "cloudflare-production"]);
+    for (const mode of httpsModes) {
       expect(docsCspDirectives(mode)).toHaveProperty("upgrade-insecure-requests", true);
     }
   });

@@ -69,14 +69,12 @@ export async function smokeImmutableAssets(input: {
 }): Promise<AssetSmokeProblem[]> {
   const origin = new URL(input.baseUrl).origin;
   const timeoutMs = input.timeoutMs ?? ASSET_SMOKE_FETCH_TIMEOUT_MS;
-  const fetchImpl: FetchLike =
-    input.fetchImpl ??
-    ((url, init) =>
-      fetch(url, {
-        redirect: init?.redirect,
-        headers: init?.headers,
-        signal: init?.signal,
-      }));
+  // Forward init as-is. Re-listing the fields set each one to an explicit
+  // `undefined` when the caller omitted it, which is not the same request as
+  // omitting the key — `headers: undefined` is not a valid RequestInit under
+  // exactOptionalPropertyTypes, and FetchLike's init is already a structural
+  // subset of RequestInit.
+  const fetchImpl: FetchLike = input.fetchImpl ?? ((url, init) => fetch(url, init));
   const problems: AssetSmokeProblem[] = [];
 
   for (const path of input.paths) {

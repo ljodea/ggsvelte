@@ -157,7 +157,10 @@ export function validateDocsSearchEntries<Entry extends DocsSearchEntry>(
       .filter((route) => route.index && route.kind === "page")
       .map((route) => [route.path, route] as const),
   );
-  const cliAnchors = new Set(CLI_REFERENCE_OPTIONS.map((option) => option.anchor));
+  // Set<string>, not the inferred union of the known anchors: this is looked up
+  // with anchors parsed out of arbitrary hrefs, and Set.has on a literal-union
+  // set rejects the very inputs the check exists to reject.
+  const cliAnchors = new Set<string>(CLI_REFERENCE_OPTIONS.map((option) => option.anchor));
   const ids = new Set<string>();
   const hrefTitles = new Set<string>();
   for (const entry of entries) {

@@ -43,7 +43,12 @@ function validateForm(path: string, issue: boolean): void {
   const ids = form.body!.flatMap((field) => (field.id === undefined ? [] : [field.id]));
   expect(new Set(ids).size, `${path} has duplicate field ids`).toBe(ids.length);
   for (const field of form.body!) {
-    expect(["markdown", "textarea", "input", "dropdown", "checkboxes"], path).toContain(field.type);
+    // `type` is optional on FormField because the YAML may omit it; GitHub
+    // rejects such a form outright, so say that here rather than letting
+    // toContain(undefined) report it as an unrecognised type.
+    const { type } = field;
+    if (type === undefined) throw new Error(`${path}: form field is missing "type"`);
+    expect(["markdown", "textarea", "input", "dropdown", "checkboxes"], path).toContain(type);
     expect(field.attributes, path).toBeObject();
     if (field.type !== "markdown") expect(field.id, path).toMatch(/^[a-z0-9_-]+$/);
     if (field.type === "dropdown") {

@@ -119,7 +119,7 @@ export function createGuideCodeCopyAttachment(
       }
       const button = (target as Element).closest<HTMLButtonElement>("button[data-copy-code]");
       if (button === null || !node.contains(button)) return;
-      const codeId = button.dataset.copyCode;
+      const codeId = button.dataset["copyCode"];
       if (codeId === undefined) return;
       const doc = node.ownerDocument;
       const block = doc.querySelector(`#${cssEscapeIdent(codeId)}`);

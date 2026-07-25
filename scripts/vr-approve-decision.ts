@@ -130,7 +130,7 @@ function emit(outputs: Record<string, string>): void {
     .map(([key, value]) => `${key}=${value}\n`)
     .join("");
   process.stdout.write(rendered);
-  const target = process.env.GITHUB_OUTPUT;
+  const target = process.env["GITHUB_OUTPUT"];
   if (target !== undefined && target !== "") {
     // Values are enum-ish verdicts and single-line reasons — no delimiter needed.
     appendFileSync(target, rendered);
@@ -140,22 +140,22 @@ function emit(outputs: Record<string, string>): void {
 if (import.meta.main) {
   const [subcommand] = process.argv.slice(2);
   if (subcommand === "action") {
-    const decision = decideApproveAction(process.env.RENDER_SHA ?? "", {
-      tipSha: (process.env.BRANCH_TIP_SHA ?? "").trim(),
-      tipMessage: process.env.BRANCH_TIP_MESSAGE ?? "",
-      tipLandedOnDefault: parseBooleanFlag(process.env.BRANCH_TIP_LANDED, "branch tip landed"),
-      openPrNumber: parseOpenPrNumber(process.env.OPEN_PR_NUMBER),
+    const decision = decideApproveAction(process.env["RENDER_SHA"] ?? "", {
+      tipSha: (process.env["BRANCH_TIP_SHA"] ?? "").trim(),
+      tipMessage: process.env["BRANCH_TIP_MESSAGE"] ?? "",
+      tipLandedOnDefault: parseBooleanFlag(process.env["BRANCH_TIP_LANDED"], "branch tip landed"),
+      openPrNumber: parseOpenPrNumber(process.env["OPEN_PR_NUMBER"]),
     });
     emit({ action: decision.action, reason: decision.reason });
   } else if (subcommand === "pr-create") {
-    const action = process.env.ACTION ?? "";
+    const action = process.env["ACTION"] ?? "";
     if (action !== "skip" && action !== "open-pr" && action !== "render") {
-      throw new Error(`invalid action: ${JSON.stringify(process.env.ACTION)}`);
+      throw new Error(`invalid action: ${JSON.stringify(process.env["ACTION"])}`);
     }
     const decision = decidePrCreation({
       action,
-      pushed: parseBooleanFlag(process.env.PUSHED, "pushed"),
-      openPrNumber: parseOpenPrNumber(process.env.OPEN_PR_NUMBER),
+      pushed: parseBooleanFlag(process.env["PUSHED"], "pushed"),
+      openPrNumber: parseOpenPrNumber(process.env["OPEN_PR_NUMBER"]),
     });
     emit({ create: String(decision.create), reason: decision.reason });
   } else {

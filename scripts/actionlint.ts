@@ -28,7 +28,7 @@ const ACTIONLINT_YAML = ".github/actionlint.yaml";
  * `CI=true` and `GITHUB_ACTIONS=true`; local manual runs have neither.
  */
 export function allowSoftSkipLoadFailure(env: NodeJS.ProcessEnv = process.env): boolean {
-  return env.CI !== "true" && env.GITHUB_ACTIONS !== "true";
+  return env["CI"] !== "true" && env["GITHUB_ACTIONS"] !== "true";
 }
 
 /**

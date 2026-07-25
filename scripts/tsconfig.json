@@ -1,0 +1,35 @@
+{
+  // tsc coverage for the whole repo-tooling tree. Until #734 these files sat in
+  // the root tsconfig.json purely so oxlint --type-aware had type information —
+  // tsc had never been run on that config, and type-aware lint rules are a
+  // strict subset of tsc's diagnostics, so assignability and optionality errors
+  // passed unseen. Run by `bun run check:scripts` (chained into `check`),
+  // following the worker gate from #725 and the ci-routing gate from #737.
+  //
+  // scripts/ci-routing keeps its own narrower project (check:scripts-ci-routing)
+  // because it decides what CI runs and is worth failing on independently; its
+  // files are inside this include too, which costs a second pass over seven
+  // files and keeps the routing gate meaningful when this one is skipped.
+  //
+  // "types": ["bun"] matches how these scripts actually run — `bun scripts/…`,
+  // with Bun.spawn and bun:test in the suites. "allowImportingTsExtensions" for
+  // the same reason: bun resolves `./foo.ts` directly and the tree imports that
+  // way throughout. Neither relaxes a strictness flag — tsconfig.base.json's
+  // exactOptionalPropertyTypes / noUncheckedIndexedAccess /
+  // noPropertyAccessFromIndexSignature all apply here in full.
+  //
+  // This program also pulls in the apps/docs/src/lib modules these scripts
+  // import, so those are held to tsconfig.base.json even though
+  // apps/docs/tsconfig.json extends ./.svelte-kit/tsconfig.json and svelte-check
+  // (`check:docs`) is the app's own gate. That is deliberate (#734): the
+  // imported lib modules are a shared surface, and the whole cost of holding
+  // them to the base config was 33 index-signature accesses. A new apps/docs
+  // module only enters this program once a script imports it.
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "types": ["bun"]
+  },
+  "include": ["./**/*.ts"]
+}

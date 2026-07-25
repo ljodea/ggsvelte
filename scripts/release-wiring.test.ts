@@ -79,7 +79,7 @@ describe("R0 release wiring", () => {
     // The root `test` script is the canonical suite list. Anything present there
     // but absent from ci-unit.yml is a local-only suite that merges green.
     const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
-    const rootSuites = suiteArgs(pkg.scripts.test ?? "");
+    const rootSuites = suiteArgs(pkg.scripts["test"] ?? "");
     expect(rootSuites).toContain("workers/playground-api");
 
     // Folded (`run: >`) scalar — collapse whitespace, then take the single
@@ -152,11 +152,53 @@ describe("R0 release wiring", () => {
     // Every .ts in the directory, tests included: the suites are where the
     // module's contracts are asserted, so leaving them out would half-check it.
     expect(include, "tsconfig includes the directory's .ts files").toContain('"./**/*.ts"');
-    // Scoped to this directory only. The rest of scripts/** (and apps/**) still
-    // carries unchecked errors tracked on #734; widening the include here would
-    // fail `check` on code this PR never fixed.
+    // Scoped to this directory only, so the routing gate keeps failing on its own
+    // terms — scripts/tsconfig.json now covers this code as well, and a narrow
+    // project that cannot be skipped past is the point of keeping both.
     expect(include, "include stays inside scripts/ci-routing").not.toContain("..");
     expect(include).not.toContain("apps/");
+  });
+
+  it("typechecks the whole scripts tree inside `bun run check` (issue #734)", () => {
+    // Closes the gap #725 and #737 each took a slice of: scripts/** sat in the
+    // root tsconfig.json only so oxlint --type-aware had type information, and
+    // tsc was never run on it. Type-aware lint rules are a strict subset of tsc
+    // diagnostics, so 103 assignability, optionality and index-signature errors
+    // stood unseen — including a null-deref in the sakura G1 render assertion
+    // and two CSP assertions naming build modes that were deleted.
+    const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
+    // Right-boundary anchored throughout: "check:scripts" is a prefix of the
+    // sibling "check:scripts-ci-routing", so a plain toContain passes on the
+    // routing gate alone and this whole assertion goes vacuous.
+    expect(pkg.scripts["check:scripts"]).toMatch(/tsc -p scripts(?![\w./-])/u);
+    // Chained into `check`, which ci-unit.yml runs and `build` re-enters.
+    expect(pkg.scripts["check"]).toMatch(/bun run check:scripts(?![\w:-])/u);
+    // Whole-line: `bun run check:pages-links` &c must not satisfy this.
+    expect(read(".github/workflows/ci-unit.yml")).toMatch(/^\s*run: bun run check$/mu);
+
+    const project = read("scripts/tsconfig.json");
+    // Base strictness is the point — the gate is worthless under looser options,
+    // and relaxing them for this tree was the option #734 rejected.
+    expect(project).toContain('"extends"');
+    expect(project).toContain("tsconfig.base.json");
+    // compilerOptions only — the surrounding comment names these flags to explain
+    // why they are inherited, and prose must not satisfy or fail the assertion.
+    const options = /"compilerOptions"\s*:\s*\{[^}]*\}/u.exec(project)?.[0] ?? "";
+    expect(options, "scripts/tsconfig.json declares compilerOptions").not.toBe("");
+    for (const relaxed of [
+      "noPropertyAccessFromIndexSignature",
+      "exactOptionalPropertyTypes",
+      "noUncheckedIndexedAccess",
+      "strict",
+    ]) {
+      expect(options, `scripts/tsconfig.json must not re-open ${relaxed}`).not.toContain(relaxed);
+    }
+    // Assert on the include list, not the whole file — `extends` legitimately
+    // escapes upwards to the repo root.
+    const include = /"include"\s*:\s*\[[^\]]*\]/u.exec(project)?.[0] ?? "";
+    // The whole tree, tests included: the suites are where these scripts'
+    // contracts are asserted, and 70 of the 103 errors were in them.
+    expect(include, "tsconfig includes the tree's .ts files").toContain('"./**/*.ts"');
   });
 
   it("checks packed links in CI and the Cloudflare Pages deployment", () => {
@@ -751,7 +793,7 @@ it("uses job-private Bun caches across CI workflows (issue #319)", () => {
   for (const [path, start, end] of [
     [".github/workflows/ci-consumer.yml", "  consumer-compat:", ""],
     [".github/workflows/compatibility-nightly.yml", "  packed-consumer:", ""],
-  ]) {
+  ] as const) {
     const workflow = read(path);
     const jobStart = workflow.indexOf(start);
     const jobEnd = end.length > 0 ? workflow.indexOf(end, jobStart) : workflow.length;

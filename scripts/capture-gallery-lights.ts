@@ -34,7 +34,7 @@ const targets =
 async function settle(page: Page): Promise<void> {
   await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
   await page.evaluate(async () => {
-    document.documentElement.dataset.visualTest = "";
+    document.documentElement.dataset["visualTest"] = "";
     await document.fonts.ready;
     await new Promise<void>((resolveFrame) => {
       requestAnimationFrame(() => {

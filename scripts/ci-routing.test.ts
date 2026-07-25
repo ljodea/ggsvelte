@@ -956,7 +956,10 @@ async function spawnCiRoutingCli(
 }> {
   const proc = Bun.spawn(["bun", "scripts/ci-routing.ts", ...args], {
     cwd: join(import.meta.dir, ".."),
-    env: env === undefined ? undefined : { ...process.env, ...env },
+    // Omit the key entirely when there is no override — `env: undefined` means
+    // "an env I am declining to describe" to SpawnOptions under
+    // exactOptionalPropertyTypes, not "inherit the parent's".
+    ...(env === undefined ? {} : { env: { ...process.env, ...env } }),
     stdout: "pipe",
     stderr: "pipe",
   });
@@ -1047,8 +1050,8 @@ describe("ci-routing module tree (split-safe)", () => {
     const plan = await spawnCiRoutingCli(["plan", "--force-all"]);
     expect(plan.exitCode).toBe(0);
     const planJson = JSON.parse(plan.stdout) as Record<string, boolean>;
-    expect(planJson.unit).toBe(true);
-    expect(planJson.pages).toBe(true);
+    expect(planJson["unit"]).toBe(true);
+    expect(planJson["pages"]).toBe(true);
 
     const emit = Bun.spawn(["bun", "scripts/ci-routing.ts", "emit-github-output", "--stdin"], {
       cwd: join(import.meta.dir, ".."),

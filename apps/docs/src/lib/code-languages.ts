@@ -31,7 +31,7 @@ const LANGUAGE_MODULES: Record<string, LanguageType<string>> = {
 };
 
 /** Resolve a language name (or empty) to a svelte-highlight language module. */
-export function resolveCodeLanguage(lang: string | undefined): LanguageType<string> {
+export function resolveCodeLanguage(lang?: string): LanguageType<string> {
   if (lang === undefined || lang.trim() === "") return plaintext;
   return LANGUAGE_MODULES[lang.trim().toLowerCase()] ?? plaintext;
 }
@@ -40,7 +40,7 @@ export function resolveCodeLanguage(lang: string | undefined): LanguageType<stri
  * Infer a highlight language from a code-tab label when no explicit language prop is set
  * (e.g. "Builder (TS)", "Spec (JSON)", "Svelte").
  */
-export function languageFromCodeTabLabel(label: string | undefined): string {
+export function languageFromCodeTabLabel(label?: string): string {
   if (label === undefined) return "plaintext";
   const lower = label.toLowerCase();
   if (lower.includes("svelte")) return "svelte";

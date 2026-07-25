@@ -45,7 +45,7 @@ describe("diagnostic catalog runtime docUrl anchors", () => {
       expect(url).toStartWith(GUIDE_URL_BASE);
       const [slug = "", fragment] = url.slice(GUIDE_URL_BASE.length).split("#");
       expect([...anchors.keys()], `unknown guide page "${slug}"`).toContain(slug);
-      expect(fragment, `${url}: missing fragment`).toBeDefined();
+      if (fragment === undefined) throw new Error(`${url}: missing fragment`);
       expect(
         [...(anchors.get(slug) ?? [])],
         `${url}: anchor #${fragment} missing from guide/${slug}`,
