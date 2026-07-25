@@ -25,9 +25,9 @@ test("homepage first viewport leads with a live chart and two actions", async ({
  * chart adapts on its own — the page has to hand the surface back. The epoch
  * bands are the one mark whose meaning is carried by fill alone and which this
  * page never names, so under a requested palette they drop rather than paint
- * over it. Asserted through `emulateMedia`: the config's `contextOptions`
- * clobbers Playwright's `forcedColors` fixture, so `test.use` would silently
- * measure a normal page.
+ * over it. Asserted through `emulateMedia`: `forcedColors` is not a Playwright
+ * test option, so `test.use` would be dropped by the runner and this would
+ * silently measure a normal page (issue #718 — see playwright.config.ts).
  */
 test("homepage hero yields its surface and drops decorative fills in forced colors", async ({
   page,
