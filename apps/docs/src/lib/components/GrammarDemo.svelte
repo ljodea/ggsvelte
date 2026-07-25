@@ -11,7 +11,7 @@
     { label: "Data", note: "Rows as plain objects." },
     { label: "Mappings", note: "aes for x, y, and color." },
     { label: "Layers", note: "GeomSmooth over GeomPoint." },
-    { label: "Interaction", note: "inspect is a prop, not event plumbing." },
+    { label: "Interaction", note: "just one more layer" },
   ] as const;
   let active = $state(steps.length - 1);
   const chartTheme = $derived(contrastChartTheme());
@@ -19,10 +19,11 @@
 
 <section class="grammar-demo" aria-labelledby="grammar-heading">
   <div class="grammar-copy">
-    <h2 id="grammar-heading">Interaction is declarative.</h2>
+    <h2 id="grammar-heading">The missing layer.</h2>
     <p>
-      The grammar you know from ggplot2, plus a step it never had. Mouse over
-      the chart: inspection, pinning, selection, and zoom are spec fields.
+      Zero D3.js. Built for human-agent teams who want good default chart
+      interactions that just work, instead of endless complexity and
+      footgun-rework loops.
     </p>
     <ol>
       {#each steps as step, index (step.label)}
