@@ -19,14 +19,21 @@ function pngSize(path: string): { width: number; height: number } {
   };
 }
 
-describe("interaction gallery lights match VR frame geometry (#652/#668)", () => {
-  const interaction = EXAMPLES.filter((entry) => entry.id.startsWith("interaction/"));
-
-  it("covers every interaction example", () => {
-    expect(interaction.length).toBeGreaterThanOrEqual(6);
+/**
+ * Every gallery light is a capture of that example's own `?vr` frame
+ * (#652/#668), so its pixel size must be the frame geometry the manifest
+ * declares. Five previews had drifted off it — 641×441, 800×760, 640×480,
+ * 640×401, 640×360 — because they were captured ad hoc rather than by the
+ * capture script, and drifted geometry is a reliable tell that a preview no
+ * longer shows the example behind it (#656). Checking the whole corpus rather
+ * than the interaction subset is what makes that fail loudly.
+ */
+describe("gallery lights match VR frame geometry (#652/#668)", () => {
+  it("covers the whole example corpus", () => {
+    expect(EXAMPLES.length).toBeGreaterThanOrEqual(44);
   });
 
-  for (const entry of interaction) {
+  for (const entry of EXAMPLES) {
     const filename = canonicalPreviewFilename(entry.id);
     const path = join(PREVIEWS, filename);
     const expectedWidth = entry.vrWidth ?? 640;
