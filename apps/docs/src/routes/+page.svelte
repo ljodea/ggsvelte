@@ -15,7 +15,7 @@
 
   const { data }: PageProps = $props();
 
-  const install = "npm install @ggsvelte/svelte";
+  const install = "bun install @ggsvelte/svelte";
   const entries = EXAMPLES.map((entry) => galleryEntryFor(entry));
   const featured = FEATURED_EXAMPLES.map((item) =>
     entries.find((entry) => entry.id === item.id)!,
@@ -35,8 +35,7 @@
 <section class="home-hero" aria-labelledby="home-heading">
   <div class="hero-claim">
     <h1 id="home-heading">
-      An agent-first implementation of the layered grammar of graphics in Svelte
-      5
+      A layered grammar of graphics implemented for agents
     </h1>
     <p>
       ggplot2's layered grammar and defaults as Svelte components, a TypeScript
@@ -153,14 +152,19 @@
 </section>
 
 <style>
+  /*
+   * Stack by default: the chart is the hero and owns a full-width row until
+   * the viewport is wide enough for a true two-column composition.
+   * Never pin min-height to 100svh — a two-row grid under that rule stretches
+   * empty space between claim and actions into a multi-hundred-px void.
+   */
   .home-hero {
     display: grid;
-    grid-template-areas: "claim plot" "actions plot";
-    grid-template-columns: minmax(18rem, 0.85fr) minmax(30rem, 1.15fr);
-    gap: 1.5rem clamp(2rem, 6vw, 6rem);
+    grid-template-areas: "claim" "plot" "actions";
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
     align-items: start;
-    min-height: calc(100svh - 8rem);
-    padding: clamp(3rem, 7vw, 7rem) 0 4rem;
+    padding: clamp(2rem, 5vw, 4rem) 0 3rem;
   }
 
   .hero-claim {
@@ -168,11 +172,11 @@
   }
 
   .hero-claim h1 {
-    max-width: 14ch;
+    max-width: 16ch;
     margin: 0.35rem 0 1.25rem;
-    font-size: clamp(3.2rem, 6vw, 6rem);
-    line-height: 0.9;
-    letter-spacing: -0.045em;
+    font-size: clamp(2.8rem, 5.5vw, 4.75rem);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
   }
 
   .hero-claim > p:last-child {
@@ -294,12 +298,16 @@
     color: var(--muted);
   }
 
-  @media (max-width: 64rem) {
+  /* Side-by-side only when claim + chart can coexist without squeezing the hero. */
+  @media (min-width: 72rem) {
     .home-hero {
-      grid-template-areas: "claim" "plot" "actions";
-      grid-template-columns: 1fr;
+      grid-template-areas: "claim plot" "actions plot";
+      grid-template-columns: minmax(16rem, 0.85fr) minmax(0, 1.15fr);
+      gap: 1.25rem clamp(1.5rem, 3vw, 3rem);
     }
+  }
 
+  @media (max-width: 64rem) {
     .home-featured ol {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -307,12 +315,11 @@
 
   @media (max-width: 42rem) {
     .home-hero {
-      min-height: 0;
-      padding-top: 2rem;
+      padding-top: 1.5rem;
     }
 
     .hero-claim h1 {
-      font-size: clamp(2.6rem, 12vw, 4rem);
+      font-size: clamp(2.4rem, 11vw, 3.5rem);
     }
 
     .home-featured {

@@ -10,13 +10,67 @@ test("homepage first viewport leads with a live chart and two actions", async ({
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=light");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "An agent-first implementation of the layered grammar of graphics in Svelte 5",
+    "A layered grammar of graphics implemented for agents",
   );
   await expect(page.locator(".home-hero .gg-plot-root")).toBeVisible();
   await expect(page.getByRole("link", { name: "Getting started" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Examples" }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Copy install" })).toBeVisible();
   await expectNoOverflow(page);
+});
+
+/**
+ * Narrow-ish desktop (below the wide side-by-side breakpoint): the hero chart
+ * is the product, so it owns a full-width row instead of sharing a horizontal
+ * plane with the claim. Also: the hero must size to content — a viewport-tall
+ * min-height stretched a two-row grid and left a multi-hundred-px void between
+ * claim and install.
+ */
+test("homepage mid-width stacks the hero chart full-width without empty void", async ({ page }) => {
+  await page.setViewportSize({ width: 960, height: 900 });
+  await page.goto("/?theme=light");
+  const metrics = await page.locator(".home-hero").evaluate((hero) => {
+    const claim = hero.querySelector(".hero-claim")!.getBoundingClientRect();
+    const plot = hero.querySelector(".hero-plot")!.getBoundingClientRect();
+    const actions = hero.querySelector(".hero-actions")!.getBoundingClientRect();
+    const box = hero.getBoundingClientRect();
+    return {
+      claimBottom: claim.bottom,
+      claimLeft: claim.left,
+      plotTop: plot.top,
+      plotLeft: plot.left,
+      plotWidth: plot.width,
+      actionsTop: actions.top,
+      heroWidth: box.width,
+      gapAfterPlot: actions.top - plot.bottom,
+    };
+  });
+  // Chart sits below the claim on its own horizontal plane.
+  expect(metrics.plotTop).toBeGreaterThan(metrics.claimBottom - 1);
+  expect(Math.abs(metrics.plotLeft - metrics.claimLeft)).toBeLessThan(24);
+  expect(metrics.plotWidth / metrics.heroWidth).toBeGreaterThan(0.9);
+  // Install follows the chart tightly — no viewport-filling void.
+  // (Hero height itself can exceed the viewport when claim + 400px plot stack;
+  // the failure mode was empty space between plot and actions, not total height.)
+  expect(metrics.gapAfterPlot).toBeLessThan(64);
+});
+
+/** Wide layout may share a row with claim, but must not invent empty vertical space. */
+test("homepage wide layout keeps install adjacent to claim without hero void", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/?theme=light");
+  const metrics = await page.locator(".home-hero").evaluate((hero) => {
+    const claim = hero.querySelector(".hero-claim")!.getBoundingClientRect();
+    const actions = hero.querySelector(".hero-actions")!.getBoundingClientRect();
+    return {
+      claimBottom: claim.bottom,
+      actionsTop: actions.top,
+      gapClaimToActions: actions.top - claim.bottom,
+    };
+  });
+  // claim → actions is a short stack on the left; no 100svh stretch between them.
+  expect(metrics.gapClaimToActions).toBeLessThan(96);
+  expect(metrics.actionsTop).toBeGreaterThan(metrics.claimBottom - 1);
 });
 
 test("homepage preserves SSR chart output and hydrates its keyboard interaction", async ({
@@ -90,7 +144,7 @@ test("install copy and code tabs share the manual-copy fallback", async ({ page 
     "Clipboard unavailable. Code selected for manual copy.",
   );
   expect(await page.evaluate(() => getSelection()?.toString())).toContain(
-    "npm install @ggsvelte/svelte",
+    "bun install @ggsvelte/svelte",
   );
   const tabs = page.getByRole("tablist", { name: "Code representations" }).getByRole("tab");
   await expect(tabs.first()).toHaveText("Svelte");
