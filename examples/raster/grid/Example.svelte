@@ -1,16 +1,21 @@
 <script lang="ts">
-  import { GeomRaster, GGPlot } from "@ggsvelte/svelte";
+  import { GeomRaster, GGPlot, scaleFillContinuous } from "@ggsvelte/svelte";
 
-  import { grid } from "./data.js";
+  import { criminalStature } from "./data.js";
 </script>
 
 <GGPlot
-  data={grid}
-  aes={{ x: "x", y: "y", fill: "z" }}
+  data={criminalStature}
+  aes={{ x: "finger", y: "height", fill: "men" }}
+  theme="few"
+  scales={scaleFillContinuous({ scheme: "viridis" })}
   labs={{
-    title: "Regular density surface (geom raster)",
-    x: "x",
-    y: "y",
+    title: "Three thousand criminals, measured",
+    subtitle:
+      "Macdonell, 1902: stature against left middle-finger length, 495 cells of a complete grid",
+    x: "Left middle finger (cm)",
+    y: "Height (feet)",
+    fill: "Men",
   }}
   width={640}
   height={400}

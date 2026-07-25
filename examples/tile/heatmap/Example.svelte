@@ -1,16 +1,28 @@
 <script lang="ts">
-  import { GeomTile, GGPlot } from "@ggsvelte/svelte";
+  import { GeomTile, GGPlot, scaleFillContinuous } from "@ggsvelte/svelte";
 
-  import { staffing } from "./data.js";
+  import { cholera1849 } from "./data.js";
 </script>
 
 <GGPlot
-  data={staffing}
-  aes={{ x: "dept", y: "shift", fill: "n" }}
+  data={cholera1849}
+  aes={{ x: "week", y: "weekday", fill: "deaths" }}
+  theme="dark"
+  scales={{
+    x: { type: "band" },
+    y: {
+      type: "band",
+      domain: ["Sat", "Fri", "Thu", "Wed", "Tue", "Mon", "Sun"],
+    },
+    ...scaleFillContinuous({ scheme: "viridis" }),
+  }}
   labs={{
-    title: "Staffing intensity by department and shift",
-    x: "Department",
-    y: "Shift",
+    title: "Cholera in England and Wales, 1849",
+    subtitle:
+      "Registered deaths every day of the year; 53,293 in all, peaking at 1,121 on 6 September",
+    x: "Week of 1849",
+    y: "",
+    fill: "Deaths",
   }}
   width={640}
   height={400}

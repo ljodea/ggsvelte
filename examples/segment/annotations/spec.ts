@@ -1,20 +1,28 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { annotations } from "./data.js";
+import { darwinMaize } from "./data.js";
 
 export default defineExample(
-  // Finite segments — one line per row from (x,y) to (xend,yend). Unlike rule,
-  // endpoints are data-mapped and do not span the panel.
-  gg(annotations, aes({ x: "x", y: "y", xend: "xend", yend: "yend", color: "kind" }))
-    .geomSegment({ linewidth: 1.75, lineend: "round", alpha: 0.9 })
-    .geomPoint({ size: 2.5 })
-    .geomPoint({ aes: { x: "xend", y: "yend" }, size: 2 })
+  // Finite segments - one line per row from (x,y) to (xend,yend). Unlike rule,
+  // endpoints are data-mapped and do not span the panel. Here each segment runs
+  // from a pair's self-fertilised height to its cross-fertilised height, so the
+  // direction of the segment is Darwin's finding.
+  gg(darwinMaize, aes({ x: "pair", y: "self", xend: "pair", yend: "cross", color: "winner" }))
+    .geomSegment({ linewidth: 2, lineend: "round", alpha: 0.9 })
+    .geomPoint({ size: 2.5, alpha: 0.6 })
+    .geomPoint({ aes: { x: "pair", y: "cross" }, size: 3.2 })
+    .scaleColorManual({
+      domain: ["Cross-fertilised taller", "Self-fertilised taller"],
+      values: ["#3a7d44", "#bc5215"],
+    })
+    .theme("classic")
     .labs({
-      title: "Finite segment annotations",
-      subtitle: "Data-driven leaders from start points to end anchors",
-      x: "x",
-      y: "y",
+      title: "Darwin's maize, 1876",
+      subtitle: "Fifteen pairs grown side by side; the segment runs self → cross",
+      x: "Pair",
+      y: "Final height (inches)",
+      color: "",
     })
     .spec(),
 );

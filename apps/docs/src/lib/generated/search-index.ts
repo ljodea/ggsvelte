@@ -3954,7 +3954,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Binned color (colorsteps)",
     summary:
-      "A quantitative color mapping split into deterministic intervals with a colorsteps guide.",
+      "A quantitative color mapping split into deterministic intervals with a colorsteps guide. Color carries a third variable — how often each (actual, estimated) pairing came up across Jevons' 1,027 throws — rather than restating x or y.",
     href: "/examples/color/binned",
     keywords: [
       "Binned color (colorsteps)",
@@ -3972,7 +3972,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Continuous color (ramp legend)",
     summary:
-      "A quantitative color mapping through the viridis sequential ramp, with a gradient ramp legend instead of discrete swatches.",
+      "A quantitative color mapping through the viridis sequential ramp, with a gradient ramp legend instead of discrete swatches, under coord_fixed so the map keeps its shape. A second layer draws the true positions the ramp is read against.",
     href: "/examples/color/continuous",
     keywords: [
       "Continuous color (ramp legend)",
@@ -3982,6 +3982,7 @@ export const DOCS_SEARCH_INDEX = [
       "sequential",
       "viridis",
       "legend",
+      "coord-fixed",
     ],
     exact: ["Continuous color (ramp legend)"],
   },
@@ -4376,7 +4377,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Regular density grid (geom raster)",
     summary:
-      "Equal-cell raster from a regular (x, y) grid with fill — dense heatmaps without per-cell strokes.",
+      "Equal-cell raster from a regular (x, y) grid with fill — dense heatmaps without per-cell strokes. The grid must be complete, so the source's 22 × 42 table is cropped to its largest complete 15 × 33 sub-rectangle.",
     href: "/examples/raster/grid",
     keywords: [
       "Regular density grid (geom raster)",
@@ -4392,9 +4393,16 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Shaded time bands (geom rect)",
     summary:
-      "Arbitrary rectangles from xmin/xmax/ymin/ymax — background time bands or regions without image injection.",
+      "Arbitrary rectangles from xmin/xmax/ymin/ymax — background time bands or regions without image injection. Two layers over two unrelated datasets, so neither inherits a plot-level mapping: the rects are Playfair's twelve reigns, the line is his wheat-price series.",
     href: "/examples/rect/regions",
-    keywords: ["Shaded time bands (geom rect)", "Rectangles & grids", "rect", "regions", "bands"],
+    keywords: [
+      "Shaded time bands (geom rect)",
+      "Rectangles & grids",
+      "rect",
+      "regions",
+      "bands",
+      "layers",
+    ],
     exact: ["Shaded time bands (geom rect)"],
   },
   {
@@ -4402,9 +4410,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Ribbon interval",
     summary:
-      "A filled band between precomputed lower and upper bounds along x — the canonical geom_ribbon contract (not a zero-baseline area).",
+      "A filled band between precomputed lower and upper bounds along x — the canonical geom_ribbon contract (not a zero-baseline area). The bounds are observed rather than modelled: the smallest and largest of Halley's five annual counts at each age.",
     href: "/examples/ribbon/bounds",
-    keywords: ["Ribbon interval", "Areas", "ribbon", "interval", "bounds"],
+    keywords: ["Ribbon interval", "Areas", "ribbon", "interval", "bounds", "sqrt"],
     exact: ["Ribbon interval"],
   },
   {
@@ -4422,7 +4430,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Reference-line annotations",
     summary:
-      "The rule geom's annotation form: fixed x/y intercepts drawn under a line layer. Annotation rules inherit no plot aes and still train the scales, exactly like ggplot2's vline/hline.",
+      "The rule geom's annotation form: fixed x/y intercepts drawn under a line layer. Annotation rules inherit no plot aes and still train the scales, exactly like ggplot2's vline/hline. Both intercepts here come from the source's own documentation — the apparatus change after Cavendish's sixth determination, and the modern value of the earth's density.",
     href: "/examples/rule/annotation",
     keywords: [
       "Reference-line annotations",
@@ -4439,7 +4447,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Data-driven rules (rug)",
     summary:
-      "The rule geom's data-driven form: mapping aes.x (and only x) draws one vertical panel-spanning rule per row — a rug plot of the distribution. Semi-transparent strokes reveal density.",
+      "The rule geom's data-driven form: mapping aes.x (and only x) draws one vertical panel-spanning rule per row — a rug plot of the distribution. Semi-transparent strokes reveal density. Van Langren's 1644 chart, believed to be the first graph of statistical data, was exactly this.",
     href: "/examples/rule/data-driven",
     keywords: ["Data-driven rules (rug)", "Annotations & rules", "rule", "distribution", "rug"],
     exact: ["Data-driven rules (rug)"],
@@ -4449,9 +4457,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Segment annotations",
     summary:
-      "Finite data-driven segments from (x,y) to (xend,yend) — leader lines and range ticks that do not span the panel (unlike rule).",
+      "Finite data-driven segments from (x,y) to (xend,yend) — leader lines and range ticks that do not span the panel (unlike rule). Here each segment runs from a pair's self-fertilised height to its cross-fertilised one, so the direction of the segment carries Darwin's result.",
     href: "/examples/segment/annotations",
-    keywords: ["Segment annotations", "Lines & rules", "segment", "annotation", "leader"],
+    keywords: ["Segment annotations", "Lines & rules", "segment", "annotation", "leader", "slope"],
     exact: ["Segment annotations"],
   },
   {
@@ -4477,7 +4485,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Text labels on a scatter",
     summary:
-      "A text layer labels each point from a data field, offset with dy. Labels draw exactly where placed — no collision detection in M1.",
+      "A text layer labels each point from a data field, start-anchored and offset with dx. Labels draw exactly where they are placed — there is no collision detection — so the twelve names are staggered down the panel by rank.",
     href: "/examples/text/labels",
     keywords: ["Text labels on a scatter", "Labels & text", "text", "point", "labels"],
     exact: ["Text labels on a scatter"],
@@ -4487,7 +4495,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Categorical heatmap (geom tile)",
     summary:
-      "Center-sized tiles on discrete x/y with fill — the ordinary heatmap contract without raster grid constraints.",
+      "Center-sized tiles on discrete x/y with fill — the ordinary heatmap contract without raster grid constraints. Fifty-three week columns against seven weekday rows lay a whole year out as a calendar.",
     href: "/examples/tile/heatmap",
     keywords: [
       "Categorical heatmap (geom tile)",
@@ -4495,6 +4503,7 @@ export const DOCS_SEARCH_INDEX = [
       "tile",
       "heatmap",
       "categorical",
+      "calendar",
     ],
     exact: ["Categorical heatmap (geom tile)"],
   },

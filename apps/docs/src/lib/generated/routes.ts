@@ -2397,7 +2397,7 @@ export const DOCS_ROUTES = [
     path: "/examples/color/binned",
     title: "Binned color (colorsteps) — ggsvelte gallery",
     description:
-      "A quantitative color mapping split into deterministic intervals with a colorsteps guide.",
+      "A quantitative color mapping split into deterministic intervals with a colorsteps guide. Color carries a third variable — how often each (actual, estimated) pairing came up across Jevons' 1,027 throws — rather than restating x or y.",
     canonicalPath: "/examples/color/binned",
     kind: "page",
     index: true,
@@ -2408,7 +2408,7 @@ export const DOCS_ROUTES = [
     path: "/examples/color/continuous",
     title: "Continuous color (ramp legend) — ggsvelte gallery",
     description:
-      "A quantitative color mapping through the viridis sequential ramp, with a gradient ramp legend instead of discrete swatches.",
+      "A quantitative color mapping through the viridis sequential ramp, with a gradient ramp legend instead of discrete swatches, under coord_fixed so the map keeps its shape. A second layer draws the true positions the ramp is read against.",
     canonicalPath: "/examples/color/continuous",
     kind: "page",
     index: true,
@@ -2650,7 +2650,7 @@ export const DOCS_ROUTES = [
     path: "/examples/raster/grid",
     title: "Regular density grid (geom raster) — ggsvelte gallery",
     description:
-      "Equal-cell raster from a regular (x, y) grid with fill — dense heatmaps without per-cell strokes.",
+      "Equal-cell raster from a regular (x, y) grid with fill — dense heatmaps without per-cell strokes. The grid must be complete, so the source's 22 × 42 table is cropped to its largest complete 15 × 33 sub-rectangle.",
     canonicalPath: "/examples/raster/grid",
     kind: "page",
     index: true,
@@ -2661,7 +2661,7 @@ export const DOCS_ROUTES = [
     path: "/examples/rect/regions",
     title: "Shaded time bands (geom rect) — ggsvelte gallery",
     description:
-      "Arbitrary rectangles from xmin/xmax/ymin/ymax — background time bands or regions without image injection.",
+      "Arbitrary rectangles from xmin/xmax/ymin/ymax — background time bands or regions without image injection. Two layers over two unrelated datasets, so neither inherits a plot-level mapping: the rects are Playfair's twelve reigns, the line is his wheat-price series.",
     canonicalPath: "/examples/rect/regions",
     kind: "page",
     index: true,
@@ -2672,7 +2672,7 @@ export const DOCS_ROUTES = [
     path: "/examples/ribbon/bounds",
     title: "Ribbon interval — ggsvelte gallery",
     description:
-      "A filled band between precomputed lower and upper bounds along x — the canonical geom_ribbon contract (not a zero-baseline area).",
+      "A filled band between precomputed lower and upper bounds along x — the canonical geom_ribbon contract (not a zero-baseline area). The bounds are observed rather than modelled: the smallest and largest of Halley's five annual counts at each age.",
     canonicalPath: "/examples/ribbon/bounds",
     kind: "page",
     index: true,
@@ -2694,7 +2694,7 @@ export const DOCS_ROUTES = [
     path: "/examples/rule/annotation",
     title: "Reference-line annotations — ggsvelte gallery",
     description:
-      "The rule geom's annotation form: fixed x/y intercepts drawn under a line layer. Annotation rules inherit no plot aes and still train the scales, exactly like ggplot2's vline/hline.",
+      "The rule geom's annotation form: fixed x/y intercepts drawn under a line layer. Annotation rules inherit no plot aes and still train the scales, exactly like ggplot2's vline/hline. Both intercepts here come from the source's own documentation — the apparatus change after Cavendish's sixth determination, and the modern value of the earth's density.",
     canonicalPath: "/examples/rule/annotation",
     kind: "page",
     index: true,
@@ -2705,7 +2705,7 @@ export const DOCS_ROUTES = [
     path: "/examples/rule/data-driven",
     title: "Data-driven rules (rug) — ggsvelte gallery",
     description:
-      "The rule geom's data-driven form: mapping aes.x (and only x) draws one vertical panel-spanning rule per row — a rug plot of the distribution. Semi-transparent strokes reveal density.",
+      "The rule geom's data-driven form: mapping aes.x (and only x) draws one vertical panel-spanning rule per row — a rug plot of the distribution. Semi-transparent strokes reveal density. Van Langren's 1644 chart, believed to be the first graph of statistical data, was exactly this.",
     canonicalPath: "/examples/rule/data-driven",
     kind: "page",
     index: true,
@@ -2716,7 +2716,7 @@ export const DOCS_ROUTES = [
     path: "/examples/segment/annotations",
     title: "Segment annotations — ggsvelte gallery",
     description:
-      "Finite data-driven segments from (x,y) to (xend,yend) — leader lines and range ticks that do not span the panel (unlike rule).",
+      "Finite data-driven segments from (x,y) to (xend,yend) — leader lines and range ticks that do not span the panel (unlike rule). Here each segment runs from a pair's self-fertilised height to its cross-fertilised one, so the direction of the segment carries Darwin's result.",
     canonicalPath: "/examples/segment/annotations",
     kind: "page",
     index: true,
@@ -2738,7 +2738,7 @@ export const DOCS_ROUTES = [
     path: "/examples/text/labels",
     title: "Text labels on a scatter — ggsvelte gallery",
     description:
-      "A text layer labels each point from a data field, offset with dy. Labels draw exactly where placed — no collision detection in M1.",
+      "A text layer labels each point from a data field, start-anchored and offset with dx. Labels draw exactly where they are placed — there is no collision detection — so the twelve names are staggered down the panel by rank.",
     canonicalPath: "/examples/text/labels",
     kind: "page",
     index: true,
@@ -2749,7 +2749,7 @@ export const DOCS_ROUTES = [
     path: "/examples/tile/heatmap",
     title: "Categorical heatmap (geom tile) — ggsvelte gallery",
     description:
-      "Center-sized tiles on discrete x/y with fill — the ordinary heatmap contract without raster grid constraints.",
+      "Center-sized tiles on discrete x/y with fill — the ordinary heatmap contract without raster grid constraints. Fifty-three week columns against seven weekday rows lay a whole year out as a calendar.",
     canonicalPath: "/examples/tile/heatmap",
     kind: "page",
     index: true,

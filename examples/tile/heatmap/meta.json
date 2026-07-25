@@ -1,6 +1,6 @@
 {
   "title": "Categorical heatmap (geom tile)",
-  "description": "Center-sized tiles on discrete x/y with fill — the ordinary heatmap contract without raster grid constraints.",
-  "tags": ["tile", "heatmap", "categorical"],
+  "description": "Center-sized tiles on discrete x/y with fill — the ordinary heatmap contract without raster grid constraints. Fifty-three week columns against seven weekday rows lay a whole year out as a calendar.",
+  "tags": ["tile", "heatmap", "categorical", "calendar"],
   "docsSection": "Rectangles & grids"
 }

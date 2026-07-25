@@ -1,6 +1,6 @@
 {
   "title": "Binned color (colorsteps)",
-  "description": "A quantitative color mapping split into deterministic intervals with a colorsteps guide.",
+  "description": "A quantitative color mapping split into deterministic intervals with a colorsteps guide. Color carries a third variable — how often each (actual, estimated) pairing came up across Jevons' 1,027 throws — rather than restating x or y.",
   "tags": ["point", "color", "binned", "colorsteps", "legend"],
   "docsSection": "Color & legends"
 }

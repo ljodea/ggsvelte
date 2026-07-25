@@ -261,27 +261,37 @@ live output and complete source.
 <script lang="ts">
   import { GeomPoint, GGPlot, scaleColorContinuous } from "@ggsvelte/svelte";
 
-  import { stations } from "./data.js";
+  import { greatLakesSurveys, greatLakesTruth } from "./data.js";
 </script>
 
 <GGPlot
-  data={stations}
-  aes={{ x: "elevation", y: "julyTemp", color: "elevation" }}
-  scales={scaleColorContinuous({ scheme: "viridis" })}
+  data={greatLakesSurveys}
+  aes={{ x: "long", y: "lat", color: "year" }}
+  theme="dark"
+  coord={{ type: "fixed" }}
+  scales={scaleColorContinuous({ scheme: "viridis", labels: "d" })}
   labs={{
-    title: "It gets colder as you climb",
-    x: "Elevation (m)",
-    y: "July mean temperature (°C)",
-    color: "Elevation (m)",
+    title: "Eleven maps of the Great Lakes, 1688–1818",
+    subtitle:
+      "White crosses are the 39 true positions; each dot is one map's attempt at one of them",
+    x: "Longitude (°)",
+    y: "Latitude (°)",
+    color: "Map year",
   }}
-  width="container"
+  width={640}
   height={400}
 >
-  <GeomPoint size={4} />
+  <GeomPoint size={2.6} alpha={0.75} />
+  <GeomPoint
+    data={greatLakesTruth}
+    aes={{ x: "long", y: "lat", color: { value: "#ffffff" } }}
+    size={3.4}
+    shape="cross"
+  />
 </GGPlot>
 ```
 
-[![Temperature and elevation with a continuous viridis color scale](apps/docs/static/previews/color-continuous-light.png)](https://ggsvelte.sh/examples/color/continuous)
+[![Eleven old maps of the Great Lakes coloured by publication year against the true positions](apps/docs/static/previews/color-continuous-light.png)](https://ggsvelte.sh/examples/color/continuous)
 
 Guide presentation stays separate from scale math. Use `guides={{ color:
 guideColorbar({ position: "bottom" }) }}` (or fluent `.guides()`) to title,
