@@ -3909,6 +3909,34 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleAlphaBinned": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleAlphaContinuous": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleAlphaDate": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleAlphaDatetime": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleAlphaDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleAlphaIdentity": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleAlphaManual": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleCapability": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4037,9 +4065,161 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleLinetypeBinned": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleLinetypeDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleLinetypeIdentity": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleLinetypeManual": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleLinewidthBinned": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleLinewidthContinuous": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleLinewidthDate": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleLinewidthDatetime": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleLinewidthDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleLinewidthIdentity": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleLinewidthManual": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleShapeBinned": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleShapeDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleShapeIdentity": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleShapeManual": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleSizeBinned": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleSizeContinuous": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleSizeDate": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleSizeDatetime": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleSizeDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleSizeIdentity": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleSizeManual": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleState": {
           "kind": "type",
           "lifecycle": "experimental"
+        },
+        "ScaleXBinned": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleXContinuous": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleXDate": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleXDatetime": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleXDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleXLog10": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleXReverse": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleXSqrt": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleYBinned": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleYContinuous": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleYDate": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleYDatetime": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleYDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleYLog10": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleYReverse": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleYSqrt": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
         },
         "Scales": {
           "kind": "type",

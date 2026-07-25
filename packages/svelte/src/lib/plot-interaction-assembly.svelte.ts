@@ -148,8 +148,8 @@ export function createPlotInteractionAssembly<
           removeIn: "0.13.0",
           suggestions: [
             'Replace scales={scaleColorDiscrete({scheme:"colorblind"})} with <ScaleColorDiscrete scheme="colorblind" />',
-            "Use <Scale value={…} /> for raw fragments, computed scales, or families without shells yet",
-            "Color/fill shells ship in 0.11; position/style shells follow in a later slice",
+            "Prefer named shells (<ScaleXContinuous/>, <ScaleSizeContinuous/>, <ScaleShapeDiscrete/>, …) for every family",
+            "Use <Scale value={…} /> as the escape hatch for raw/computed scale fragments",
           ],
           anchor: "compose-scales-as-child-layers",
         }),

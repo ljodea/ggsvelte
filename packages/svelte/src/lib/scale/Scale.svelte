@@ -2,9 +2,9 @@
   /**
    * <Scale> — declaration-only scale layer for <GGPlot> (#659).
    * Escape hatch: pass a whole `Scales` fragment via `value`. Named shells
-   * (<ScaleColorDiscrete/>, …) are preferred when the helper is known at
-   * authoring time; use this form for computed fragments, variable
-   * references, and families without shells yet (position/style — slice 4).
+   * (<ScaleColorDiscrete/>, <ScaleXContinuous/>, <ScaleSizeContinuous/>, …)
+   * are preferred when the helper is known at authoring time; use this form
+   * for raw fragments, computed scales, and variable references.
    *
    * Emits NO markup; registers a live scale layer during component init and
    * unregisters on destroy. Inert without a <GGPlot> ancestor.
