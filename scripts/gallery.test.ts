@@ -95,6 +95,7 @@ describe("gallery filter URL contract", () => {
 
 describe("related example ranking", () => {
   const entries: GalleryEntry[] = EXAMPLES.map((entry) => galleryEntryFor(entry));
+  const catalog = galleryCatalog(EXAMPLES);
 
   test("excludes self, ranks overlap, uses manifest ties, and caps output", () => {
     const related = rankRelatedExamples("bar/stacked", entries, 3);
@@ -111,5 +112,23 @@ describe("related example ranking", () => {
     expect(
       rankRelatedExamples(synthetic.at(-1)!.id, synthetic, 2).map((entry) => entry.id),
     ).toEqual([synthetic[0]!.id, synthetic[1]!.id]);
+  });
+
+  test("without a seed, id outside the candidate catalog returns empty", () => {
+    // Exposition aliases use galleryCatalog (excludes expositions) as candidates.
+    expect(rankRelatedExamples("interaction/linked-views", catalog, 3)).toEqual([]);
+  });
+
+  test("with a seed outside the catalog, ranks gallery neighbours by category/tags", () => {
+    // Old /examples/interaction/* alias pages still render the shared template;
+    // their id is not in galleryCatalog, so ranking needs the manifest seed.
+    const seed = EXAMPLES.find((entry) => entry.id === "interaction/linked-views");
+    expect(seed).toBeDefined();
+    const related = rankRelatedExamples(seed!.id, catalog, 3, seed);
+    expect(related).toHaveLength(3);
+    expect(related.every((entry) => entry.id !== seed!.id)).toBe(true);
+    expect(related.every((entry) => catalog.some((c) => c.id === entry.id))).toBe(true);
+    // Prefer remaining gallery interaction examples over unrelated families.
+    expect(related[0]?.category).toBe("interaction");
   });
 });

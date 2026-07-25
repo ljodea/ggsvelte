@@ -80,19 +80,31 @@ export function serializeGalleryFilter(
   return next;
 }
 
+/** Minimal seed for ranking when the current page is not itself a candidate. */
+export type RelatedSeed = Pick<GalleryEntry, "id" | "category" | "tags">;
+
+/**
+ * Rank related gallery cards for a detail page.
+ *
+ * `entries` is the candidate pool (usually `galleryCatalog`). When the current
+ * page is outside that pool — e.g. an interaction exposition still rendered at
+ * its old `/examples/interaction/*` alias — pass `seed` from the manifest so
+ * category/tag overlap still yields gallery neighbours instead of an empty list.
+ */
 export function rankRelatedExamples(
   currentId: string,
   entries: readonly GalleryEntry[],
   limit = 3,
+  seed?: RelatedSeed,
 ): GalleryEntry[] {
-  const current = entries.find((entry) => entry.id === currentId);
+  const current = seed ?? entries.find((entry) => entry.id === currentId);
   if (current === undefined || limit <= 0) return [];
   const ranked = entries
     .map((entry, index) => ({
       entry,
       index,
       score:
-        entry.id === currentId
+        entry.id === current.id
           ? -1
           : (entry.category === current.category ? 2 : 0) +
             entry.tags.filter((tag) => current.tags.includes(tag)).length,
