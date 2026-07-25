@@ -681,7 +681,8 @@ test("playground is chart-first, operable, and axe-clean at a touch-size viewpor
   page,
 }) => {
   await page.addInitScript({ content: axe.source });
-  await page.setViewportSize({ width: 390, height: 844 });
+  const viewport = { width: 390, height: 844 };
+  await page.setViewportSize(viewport);
   await page.goto("/playground");
   await settleVisualState(page);
 
@@ -691,6 +692,26 @@ test("playground is chart-first, operable, and axe-clean at a touch-size viewpor
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   );
   expect(horizontalOverflow).toBeLessThanOrEqual(1);
+  // Chart-first is a layout claim, not a slogan (#708): the chart's top edge
+  // must land inside the first screen, and the browse catalogue sits BELOW it.
+  const layout = await page.evaluate(() => {
+    const top = (selector: string): number => {
+      const element = document.querySelector(selector);
+      return element === null ? Number.NaN : element.getBoundingClientRect().top + window.scrollY;
+    };
+    return { chart: top(".active-chart"), browse: top(".quiet-links") };
+  });
+  expect(layout.chart).toBeLessThan(viewport.height);
+  expect(layout.browse).toBeGreaterThan(layout.chart);
+  // Every example and sample stays in the DOM and clickable, just lower down.
+  for (const name of ["Raw years", "ISO dates", "Ambiguous dates"]) {
+    const box = await page
+      .locator(".quiet-links")
+      .getByRole("button", { name, exact: true })
+      .boundingBox();
+    expect(box, name).not.toBeNull();
+    expect(box!.height, name).toBeGreaterThanOrEqual(44);
+  }
   // Primary controls must meet 44px; skip icon-only copy buttons inside CodeTabs.
   for (const name of ["Generate", "Share this chart", "Download SVG", "Inspect"]) {
     const box = await page.getByRole("button", { name, exact: true }).first().boundingBox();

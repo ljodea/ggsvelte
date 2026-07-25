@@ -5,10 +5,6 @@
     PLAYGROUND_PROMPT_MAX_CHARS,
     type PlaygroundDatasetId,
   } from "$lib/playground-dataset-schemas";
-  import {
-    PLAYGROUND_EXAMPLE_PROMPTS,
-    type PlaygroundExamplePrompt,
-  } from "$lib/playground-prompts";
   import type { PlaygroundAgentFailure } from "$lib/playground-agent-state";
   import type { SpecError } from "@ggsvelte/spec";
 
@@ -23,7 +19,6 @@
     samples = [],
     onGenerate,
     onCancel,
-    onExample,
     onLoadSample,
     onCopyHandoff,
   }: {
@@ -37,7 +32,6 @@
     samples?: readonly { id: string; title: string }[];
     onGenerate: () => void;
     onCancel: () => void;
-    onExample: (example: PlaygroundExamplePrompt) => void;
     onLoadSample: (id: string) => void;
     onCopyHandoff: () => void;
   } = $props();
@@ -147,31 +141,6 @@
       </button>
     </div>
   {/if}
-
-  <div class="quiet-links">
-    <span class="quiet-label">Examples</span>
-    {#each PLAYGROUND_EXAMPLE_PROMPTS as example (example.id)}
-      <button
-        type="button"
-        class="text-link"
-        onclick={() => onExample(example)}
-        disabled={busy}
-      >
-        {example.label}
-      </button>
-    {/each}
-    <span class="quiet-label samples-label">Samples</span>
-    {#each samples as sample (sample.id)}
-      <button
-        type="button"
-        class="text-link"
-        onclick={() => onLoadSample(sample.id)}
-        disabled={busy}
-      >
-        {sample.title}
-      </button>
-    {/each}
-  </div>
 </div>
 
 <style>
@@ -304,22 +273,6 @@
     font: 0.75rem/1.45 var(--code-font);
     border-radius: 4px;
     white-space: pre-wrap;
-  }
-
-  .quiet-links {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.15rem 0.85rem;
-  }
-
-  .quiet-label {
-    color: var(--muted);
-    font-size: 0.8rem;
-  }
-
-  .samples-label {
-    margin-left: 0.5rem;
   }
 
   @media (max-width: 44.99rem) {
