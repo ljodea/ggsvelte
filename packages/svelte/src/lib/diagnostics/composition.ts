@@ -4,16 +4,24 @@
  * Sibling union to InteractionDiagnostic and DeprecationDiagnostic, delivered
  * through the existing `ondiagnostic` channel as PlotDiagnostic.
  *
- * Two families:
- * - keyed MERGE (`kind: "scale"`): duplicate aesthetic channels after shallow
- *   per-key merge → `DUPLICATE_SCALE_CHANNEL`
+ * Three families:
+ * - keyed MERGE, scales (`kind: "scale"`): duplicate aesthetic channels after
+ *   shallow per-key merge → `DUPLICATE_SCALE_CHANNEL`
+ * - keyed MERGE, everything else (`kind: "labs" | "guides" | "legend"`, #659
+ *   slice 6): duplicate keys in the same shallow merge → `DUPLICATE_MERGE_KEY`
  * - REPLACE (`kind: "coord" | "facet" | "theme"`): two children of the same
  *   kind → one silently wins → `DUPLICATE_PLOT_LAYER`
  *
- * Guides/labs/legend (keyed merge) are slice 6's problem.
+ * The scale family keeps its own code rather than folding into
+ * DUPLICATE_MERGE_KEY: it shipped in 0.11.0, its `channel` field and its
+ * spelling-alias suggestion are scale-specific, and renaming a live advisory
+ * code would break consumer `switch`es for no behavioural gain.
  */
 
-export type CompositionDiagnosticCode = "DUPLICATE_SCALE_CHANNEL" | "DUPLICATE_PLOT_LAYER";
+export type CompositionDiagnosticCode =
+  | "DUPLICATE_SCALE_CHANNEL"
+  | "DUPLICATE_MERGE_KEY"
+  | "DUPLICATE_PLOT_LAYER";
 
 /**
  * `suggestions` and `docUrl` are NOT optional: both sibling members of
@@ -32,6 +40,25 @@ export interface DuplicateScaleChannelDiagnostic {
   readonly docUrl: string;
 }
 
+/** Keyed-MERGE families other than scales (#659 slice 6). */
+export type DuplicateMergeKeyKind = "labs" | "guides" | "legend";
+
+/**
+ * Two children of one keyed-MERGE family wrote the same key. Unlike the
+ * REPLACE families nothing is wholesale lost — only that one key, where the
+ * later child's value silently overwrites the earlier one's.
+ */
+export interface DuplicateMergeKeyDiagnostic {
+  readonly severity: "advisory";
+  readonly code: "DUPLICATE_MERGE_KEY";
+  readonly message: string;
+  readonly kind: DuplicateMergeKeyKind;
+  /** The colliding key: a labs/legend option name, or a guides channel. */
+  readonly key: string;
+  readonly suggestions: ReadonlyArray<string>;
+  readonly docUrl: string;
+}
+
 export type DuplicatePlotLayerKind = "coord" | "facet" | "theme";
 
 export interface DuplicatePlotLayerDiagnostic {
@@ -43,10 +70,17 @@ export interface DuplicatePlotLayerDiagnostic {
   readonly docUrl: string;
 }
 
-export type CompositionDiagnostic = DuplicateScaleChannelDiagnostic | DuplicatePlotLayerDiagnostic;
+export type CompositionDiagnostic =
+  | DuplicateScaleChannelDiagnostic
+  | DuplicateMergeKeyDiagnostic
+  | DuplicatePlotLayerDiagnostic;
 
 export function isCompositionDiagnostic(d: { readonly code: string }): d is CompositionDiagnostic {
-  return d.code === "DUPLICATE_SCALE_CHANNEL" || d.code === "DUPLICATE_PLOT_LAYER";
+  return (
+    d.code === "DUPLICATE_SCALE_CHANNEL" ||
+    d.code === "DUPLICATE_MERGE_KEY" ||
+    d.code === "DUPLICATE_PLOT_LAYER"
+  );
 }
 
 /** Narrow to the scale variant so `.channel` consumers stay type-safe. */
@@ -54,6 +88,13 @@ export function isDuplicateScaleChannelDiagnostic(
   d: CompositionDiagnostic | { readonly code: string },
 ): d is DuplicateScaleChannelDiagnostic {
   return d.code === "DUPLICATE_SCALE_CHANNEL";
+}
+
+/** Narrow to the non-scale keyed-MERGE variant so `.key` consumers stay safe. */
+export function isDuplicateMergeKeyDiagnostic(
+  d: CompositionDiagnostic | { readonly code: string },
+): d is DuplicateMergeKeyDiagnostic {
+  return d.code === "DUPLICATE_MERGE_KEY";
 }
 
 /** Narrow to the REPLACE-family plot-layer variant. */
@@ -69,10 +110,34 @@ const GUIDE_FACET_CHILDREN = "https://ggsvelte.sh/guide/upgrading#compose-facet-
 const GUIDE_THEME_CHILDREN =
   "https://ggsvelte.sh/guide/upgrading#compose-the-theme-as-a-child-layer";
 
+const GUIDE_LABS_CHILDREN = "https://ggsvelte.sh/guide/upgrading#compose-labs-as-a-child-layer";
+const GUIDE_GUIDES_CHILDREN = "https://ggsvelte.sh/guide/upgrading#compose-guides-as-child-layers";
+const GUIDE_LEGEND_CHILDREN = "https://ggsvelte.sh/guide/upgrading#compose-legend-as-a-child-layer";
+
 const PLOT_LAYER_DOC_URL: Readonly<Record<DuplicatePlotLayerKind, string>> = {
   coord: GUIDE_COORD_CHILDREN,
   facet: GUIDE_FACET_CHILDREN,
   theme: GUIDE_THEME_CHILDREN,
+};
+
+const MERGE_KEY_DOC_URL: Readonly<Record<DuplicateMergeKeyKind, string>> = {
+  labs: GUIDE_LABS_CHILDREN,
+  guides: GUIDE_GUIDES_CHILDREN,
+  legend: GUIDE_LEGEND_CHILDREN,
+};
+
+/** How each merge-key family names the thing that collided, for the message. */
+const MERGE_KEY_NOUN: Readonly<Record<DuplicateMergeKeyKind, string>> = {
+  labs: "label",
+  guides: "channel",
+  legend: "option",
+};
+
+/** The child element authors should look for when a key collides. */
+const MERGE_KEY_CHILD: Readonly<Record<DuplicateMergeKeyKind, string>> = {
+  labs: "<Labs>",
+  guides: "<Guide*>",
+  legend: "<Legend>",
 };
 
 /**
@@ -92,6 +157,12 @@ export const COMPOSITION_DIAGNOSTIC_CATALOG: Readonly<
     code: "DUPLICATE_SCALE_CHANNEL",
     messageTemplate: (channel) =>
       `Multiple scale children configure channel "${channel}"; later children overwrite earlier ones.`,
+  },
+  DUPLICATE_MERGE_KEY: {
+    severity: "advisory",
+    code: "DUPLICATE_MERGE_KEY",
+    messageTemplate: (key) =>
+      `Multiple children set "${key}"; later children overwrite earlier ones.`,
   },
   DUPLICATE_PLOT_LAYER: {
     severity: "advisory",
@@ -115,6 +186,26 @@ export function duplicateScaleChannelDiagnostic(channel: string): DuplicateScale
       `British and American spellings write the same channel: <ScaleColorDiscrete/> and <ScaleColourContinuous/> both configure "color"`,
     ],
     docUrl: GUIDE_SCALE_CHILDREN,
+  };
+}
+
+/** Build a fully-populated duplicate merge-key advisory (labs/guides/legend). */
+export function duplicateMergeKeyDiagnostic(
+  kind: DuplicateMergeKeyKind,
+  key: string,
+): DuplicateMergeKeyDiagnostic {
+  const entry = COMPOSITION_DIAGNOSTIC_CATALOG.DUPLICATE_MERGE_KEY;
+  return {
+    severity: entry.severity,
+    code: "DUPLICATE_MERGE_KEY",
+    message: entry.messageTemplate(key),
+    kind,
+    key,
+    suggestions: [
+      `Set the ${MERGE_KEY_NOUN[kind]} "${key}" on exactly one ${MERGE_KEY_CHILD[kind]} child`,
+      `${kind} is a MERGE family: siblings that touch different ${MERGE_KEY_NOUN[kind]}s all survive — only "${key}" is overwritten`,
+    ],
+    docUrl: MERGE_KEY_DOC_URL[kind],
   };
 }
 

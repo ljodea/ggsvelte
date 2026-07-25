@@ -1722,6 +1722,50 @@ child fully replaces the prop (REPLACE family). Two facet children emit a
 \`DUPLICATE_PLOT_LAYER\` advisory (last child still wins). Bare \`<Facet/>\`
 with no wrap/rows/cols fails validation (\`facet-form-missing\`).
 
+### Compose labs as a child layer
+
+The \`labs\` prop on \`<GGPlot>\` is deprecated since 0.11.0 (removable in
+0.13.0). Compose labels as a declaration-only child instead —
+\`<Labs title="Sales" subtitle="FY25" x="Quarter" color="Region"/>\`. There is
+no \`<Labs value={…}>\` escape hatch because Labs is a flat bag of strings:
+\`<Labs {...computed} />\` already covers the computed case.
+
+labs is a MERGE family, so a child adds to (rather than replaces) the prop and
+its siblings: two \`<Labs/>\` children setting different keys both survive. Two
+children setting the SAME key emit a \`DUPLICATE_MERGE_KEY\` advisory and the
+later one wins.
+
+### Compose guides as child layers
+
+The \`guides\` prop on \`<GGPlot>\` is deprecated since 0.11.0 (removable in
+0.13.0). Guides are keyed by aesthetic, so the child form is one shell per
+guide TYPE taking a \`channel\` prop — the aesthetic is a key, never part of the
+component name: \`<GuideAxis channel="x" showTicks={false}/>\`,
+\`<GuideLegend channel="color" position="bottom"/>\`,
+\`<GuideColorbar channel="fill"/>\`, \`<GuideColorsteps channel="color"/>\`,
+\`<GuideNone channel="size"/>\`, plus \`<Guides value={…}>\` for raw or computed
+guide bags.
+
+guides is a MERGE family keyed by channel, but the value AT a channel is
+replaced whole — a child never field-merges into a prop's guide object. Two
+guide children on one channel emit a \`DUPLICATE_MERGE_KEY\` advisory (last
+child still wins). A top-level guide child still wins over a scale-local
+\`guide\` on the same channel, exactly as the \`guides\` prop did.
+
+The shells carry no scale knowledge and do not guess: \`<GuideColorbar/>\` over
+a discrete color scale fails loudly rather than silently degrading to a legend.
+
+### Compose legend as a child layer
+
+The \`legend\` prop on \`<GGPlot>\` is deprecated since 0.11.0 (removable in
+0.13.0). Compose it as \`<Legend order="sorted"/>\`.
+
+\`<Legend order>\` is the plot-wide entry-SORT enum
+(\`"stable-domain"\` | \`"present-first-seen"\` | \`"sorted"\`); ordering never
+changes color assignments. It is NOT \`<GuideLegend order={2}/>\`, which is a
+per-aesthetic INTEGER placement rank. Same word, unrelated concepts — the two
+compose independently on one plot.
+
 ### Diagnostic handlers receive \`PlotDiagnostic\`
 
 \`ondiagnostic\` now receives the \`PlotDiagnostic\` union

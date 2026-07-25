@@ -87,9 +87,23 @@ export interface GGPlotProps<
    * https://ggsvelte.sh/guide/upgrading#compose-scales-as-child-layers
    */
   scales?: Scales;
-  /** Appearance-only guide configuration keyed by aesthetic. */
+  /**
+   * Appearance-only guide configuration keyed by aesthetic.
+   *
+   * @deprecated since 0.11.0 — compose guides as declaration-only child layers
+   * instead (`<GuideLegend channel="color" position="bottom"/>`,
+   * `<GuideAxis channel="x"/>`, `<GuideNone channel="size"/>`,
+   * `<Guides value={…}/>`). Removable in 0.13.0.
+   * https://ggsvelte.sh/guide/upgrading#compose-guides-as-child-layers
+   */
   guides?: GuidesSpec;
-  /** Legacy legend entry ordering. */
+  /**
+   * Legend entry ordering (plot-wide sort enum).
+   *
+   * @deprecated since 0.11.0 — compose legend options as a child layer instead
+   * (`<Legend order="sorted"/>`). Removable in 0.13.0.
+   * https://ggsvelte.sh/guide/upgrading#compose-legend-as-a-child-layer
+   */
   legend?: LegendSpec;
   /**
    * Theme: a registered name or an object with role overrides.
@@ -99,7 +113,13 @@ export interface GGPlotProps<
    * https://ggsvelte.sh/guide/upgrading#compose-the-theme-as-a-child-layer
    */
   theme?: ThemeName | ThemeSpec;
-  /** Titles and axis labels. */
+  /**
+   * Titles and axis labels.
+   *
+   * @deprecated since 0.11.0 — compose labels as a declaration-only child layer
+   * instead (`<Labs title="Sales" x="Quarter"/>`). Removable in 0.13.0.
+   * https://ggsvelte.sh/guide/upgrading#compose-labs-as-a-child-layer
+   */
   labs?: Labs;
   /** Accessibility mode ("force-svg" keeps every layer as SVG marks). */
   a11y?: A11yMode;
