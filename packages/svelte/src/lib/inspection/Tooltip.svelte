@@ -199,7 +199,8 @@
     border-radius: var(--gg-tooltip-radius, 3px);
     padding: 8px 10px;
     font-family: var(--gg-font-family, inherit);
-    /* Default only — runtime size is set from theme.fontSize via style (#753). */
+    /* Default only — runtime size is set from theme.fontSize via style (#753).
+       Smoke interaction VR baselines track this size (same-PR). */
     font-size: 12.5px;
     line-height: 1.4;
     max-width: min(280px, calc(100% - 16px));

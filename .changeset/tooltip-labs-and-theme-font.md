@@ -12,4 +12,5 @@ fix: default tooltips use labs titles and theme font size
   (residual of #753 hierarchy work).
 
 Migration: none. Charts with `labs` get more readable default tooltips; custom
-`inspect.content` snippets remain fully author-controlled.
+`inspect.content` snippets remain fully author-controlled. Smoke interaction
+VR baselines refresh for the smaller theme-driven tooltip type size.
