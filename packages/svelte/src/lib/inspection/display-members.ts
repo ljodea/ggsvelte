@@ -77,7 +77,12 @@ export function tooltipFieldLabel(
 ): string {
   const channel = options?.channel;
   const labs = options?.labs;
-  if (channel !== undefined && labs != null && isTooltipLabChannel(channel)) {
+  if (
+    channel !== undefined &&
+    labs !== undefined &&
+    labs !== null &&
+    isTooltipLabChannel(channel)
+  ) {
     const lab = labs[channel];
     if (typeof lab === "string" && lab.trim() !== "") return lab;
   }
