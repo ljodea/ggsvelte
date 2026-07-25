@@ -261,6 +261,57 @@ describe("live prop update (one per family, ADR-0001 getter)", () => {
   }
 });
 
+/**
+ * The 63-shell sweep above runs on ScaleRegistryHost, which provides the
+ * registry WITHOUT mounting <GGPlot> — pipeline training rejects many
+ * scale+data combinations that are orthogonal to shell→helper parity. That
+ * leaves the sweep proving "the shell registers the right fragment" but not
+ * "GGPlot assembles it". Slice 3 proved the full path for color/fill only, and
+ * the DUPLICATE_SCALE_CHANNEL case below covers position-continuous. These
+ * cases close the remaining gap for the style families, which slice 4
+ * introduces and nothing else exercises end to end.
+ */
+describe("end-to-end through <GGPlot> (families new in slice 4)", () => {
+  const cases = [
+    {
+      family: "numeric-style",
+      component: "ScaleSizeContinuous",
+      props: { range: [2, 9] },
+      read: (s: PortableSpec) => s.scales?.size?.range,
+      expected: [2, 9],
+    },
+    {
+      family: "finite-style",
+      component: "ScaleShapeDiscrete",
+      props: { range: ["square", "diamond"] },
+      read: (s: PortableSpec) => s.scales?.shape?.range,
+      expected: ["square", "diamond"],
+    },
+    {
+      family: "position-continuous (y axis)",
+      component: "ScaleYContinuous",
+      props: { domain: [0, 42] },
+      read: (s: PortableSpec) => s.scales?.y?.domain,
+      expected: [0, 42],
+    },
+  ] as const;
+
+  for (const c of cases) {
+    it(`${c.family}: <${c.component}/> reaches the assembled PortableSpec`, async () => {
+      let assembled: PortableSpec | null = null;
+      render(ScaleShellHost, {
+        Shell: (SveltePkg as Record<string, unknown>)[c.component] as Component,
+        shellProps: c.props,
+        onrender: (_model: unknown, spec: PortableSpec) => {
+          assembled = spec;
+        },
+      });
+      await expect.poll(() => assembled !== null).toBe(true);
+      expect(c.read(assembled!)).toEqual(c.expected);
+    });
+  }
+});
+
 describe("cross-family DUPLICATE_SCALE_CHANNEL", () => {
   it("<ScaleXContinuous/> + <ScaleXLog10/> → one advisory on channel x", async () => {
     const diagnostics: PlotDiagnostic[] = [];
