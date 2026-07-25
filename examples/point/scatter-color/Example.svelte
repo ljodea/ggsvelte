@@ -12,9 +12,9 @@
   labs={{
     title: "Literacy and crime in France, 1833",
     subtitle:
-      "Guerry found no tidy relationship — higher ranks are better on both axes",
-    x: "Literacy (rank)",
-    y: "Crimes against persons (rank)",
+      "Guerry found no tidy relationship — higher means fewer crimes per head",
+    x: "Literate conscripts (%)",
+    y: "Population per crime against persons",
     color: "Region",
   }}
   width={640}
