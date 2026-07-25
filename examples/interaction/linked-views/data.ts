@@ -1,17 +1,32 @@
-/** Small, deterministic Palmer-penguins-style dataset for linked-view demos. */
-export const penguins = [
-  { id: "adelie-1", species: "Adelie", flipper: 181, mass: 3750 },
-  { id: "adelie-2", species: "Adelie", flipper: 190, mass: 3650 },
-  { id: "adelie-3", species: "Adelie", flipper: 198, mass: 4400 },
-  { id: "adelie-4", species: "Adelie", flipper: 193, mass: 3450 },
-  { id: "chinstrap-1", species: "Chinstrap", flipper: 192, mass: 3500 },
-  { id: "chinstrap-2", species: "Chinstrap", flipper: 196, mass: 3900 },
-  { id: "chinstrap-3", species: "Chinstrap", flipper: 202, mass: 4150 },
-  { id: "chinstrap-4", species: "Chinstrap", flipper: 205, mass: 4300 },
-  { id: "gentoo-1", species: "Gentoo", flipper: 211, mass: 4500 },
-  { id: "gentoo-2", species: "Gentoo", flipper: 230, mass: 5700 },
-  { id: "gentoo-3", species: "Gentoo", flipper: 218, mass: 5700 },
-  { id: "gentoo-4", species: "Gentoo", flipper: 215, mass: 5400 },
-] as const;
+/**
+ * The Palmer Archipelago penguins: body measurements for 344 adult foraging
+ * penguins of three species, collected by Dr Kristen Gorman at Palmer Station,
+ * Antarctica, between 2007 and 2009 as part of the Long Term Ecological
+ * Research network. Released by Allison Horst, Alison Hill and Kristen Gorman
+ * as the palmerpenguins R package under CC0 (see NOTICE).
+ *
+ * This example links two plots to a row-per-penguin table, so it takes an
+ * evenly spaced sample of five birds per species rather than all 333 - a
+ * table of every penguin would be unreadable and is not what is being
+ * demonstrated. `id` is stable and unique, which is what the interaction key
+ * contract needs.
+ */
+export const penguins: { id: string; species: string; flipper: number; mass: number }[] = [
+  { id: "adelie-001", species: "Adelie", flipper: 181, mass: 3750 },
+  { id: "adelie-030", species: "Adelie", flipper: 195, mass: 3325 },
+  { id: "adelie-059", species: "Adelie", flipper: 184, mass: 2850 },
+  { id: "adelie-088", species: "Adelie", flipper: 186, mass: 4450 },
+  { id: "adelie-117", species: "Adelie", flipper: 176, mass: 3450 },
+  { id: "chinstrap-001", species: "Chinstrap", flipper: 192, mass: 3500 },
+  { id: "chinstrap-014", species: "Chinstrap", flipper: 201, mass: 4050 },
+  { id: "chinstrap-027", species: "Chinstrap", flipper: 200, mass: 3400 },
+  { id: "chinstrap-040", species: "Chinstrap", flipper: 205, mass: 4500 },
+  { id: "chinstrap-053", species: "Chinstrap", flipper: 193, mass: 3600 },
+  { id: "gentoo-001", species: "Gentoo", flipper: 211, mass: 4500 },
+  { id: "gentoo-024", species: "Gentoo", flipper: 215, mass: 5050 },
+  { id: "gentoo-047", species: "Gentoo", flipper: 225, mass: 5400 },
+  { id: "gentoo-070", species: "Gentoo", flipper: 221, mass: 5000 },
+  { id: "gentoo-093", species: "Gentoo", flipper: 214, mass: 4850 },
+];
 
 export type PenguinRow = (typeof penguins)[number];

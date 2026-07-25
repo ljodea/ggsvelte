@@ -73,3 +73,12 @@ Individual datasets carrying additional provenance, credited where used:
   - Guerry — digitization by Stephane Dray and Michael Friendly
   - Langren — reconstruction by Michael Friendly
   - Cholera — transcription by Nicholas Verlander
+
+The Palmer Archipelago penguin measurements under examples/interaction/*/data.ts
+come from the palmerpenguins R package (https://allisonhorst.github.io/palmerpenguins/)
+by Allison Horst, Alison Hill and Kristen Gorman, released under CC0 1.0
+(public domain dedication). The underlying data were collected by Dr Kristen
+Gorman at Palmer Station, Antarctica, as part of the Palmer Long Term
+Ecological Research programme, and are published by the Environmental Data
+Initiative. The package authors ask that the LTER programme be acknowledged
+in any publication using the data, which this notice does.

@@ -39,17 +39,18 @@
   <p class="status gg-demo-chrome" role="status" aria-live="polite">{status}</p>
   <GGPlot
     data={observations}
-    aes={{ x: "x", y: "y" }}
-    facet={{ wrap: "region", ncol: 3 }}
+    aes={{ x: "bill", y: "mass" }}
+    theme="clean"
+    facet={{ wrap: "island", ncol: 3 }}
     key="id"
     select={{ type: "interval", mode: "xy", persistent: true, preset }}
     width="container"
     height={430}
     labs={{
-      title: "Response by region",
+      title: "Palmer penguins by island",
       subtitle: `${preset} interval semantics`,
-      x: "Input",
-      y: "Response",
+      x: "Bill length (mm)",
+      y: "Body mass (g)",
     }}
     onselect={(event) => {
       if (event.mode === "point") return;

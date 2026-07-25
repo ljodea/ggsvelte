@@ -4093,7 +4093,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Interval selection and zoom",
     summary:
-      "The tool rail separates rectangular selection from brush zoom. Selection reports start, change, end, and clear phases with semantic keys and domain bounds; zoom reports explicit domains and a clear event on reset, while inspection remains available alongside both.",
+      "The tool rail separates rectangular selection from brush zoom. Selection reports start, change, end, and clear phases with semantic keys and domain bounds; zoom reports explicit domains and a clear event on reset, while inspection remains available alongside both. The field is the 333 complete Palmer Archipelago penguin records.",
     href: "/examples/interaction/brush-zoom",
     keywords: [
       "Interval selection and zoom",
@@ -4112,7 +4112,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Coordinate intervals across facets",
     summary:
-      "Choose independent, union, or cross-panel interval semantics, then draw inside a facet. Stable panel identities keep selections attached to their facet even when rows reorder or a panel temporarily disappears.",
+      "Choose independent, union, or cross-panel interval semantics, then draw inside a facet. Stable panel identities keep selections attached to their facet even when rows reorder or a panel temporarily disappears. Panels are the three Palmer Archipelago islands; Biscoe holds every Gentoo, so the panels have genuinely different shapes.",
     href: "/examples/interaction/facet-intervals",
     keywords: [
       "Coordinate intervals across facets",
@@ -4131,7 +4131,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Filter with a stable-color legend",
     summary:
-      "Accessible legend checkboxes explicitly include or exclude data before statistics and scales are trained. Hidden groups remain available in the legend, and each group keeps its original color when it returns.",
+      "Accessible legend checkboxes explicitly include or exclude data before statistics and scales are trained. Hidden groups remain available in the legend, and each group keeps its original color when it returns. The three series are Playfair's national debt, revenue and expenditure, 1770–1824 — the same source faceted over disjoint commodity series in facet/wrap-free-y.",
     href: "/examples/interaction/legend-filter",
     keywords: [
       "Filter with a stable-color legend",
@@ -4150,7 +4150,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Focus and link discrete legend groups",
     summary:
-      "Opt-in legend controls preview locally, commit stable row keys to a shared controller, and de-emphasize unrelated marks without changing scales, statistics, layout, or color identity. The same semantic mask drives SVG and canvas views.",
+      "Opt-in legend controls preview locally, commit stable row keys to a shared controller, and de-emphasize unrelated marks without changing scales, statistics, layout, or color identity. The same semantic mask drives SVG and canvas views. The three series are Playfair's stock, bread and export indices, 1770–1824, which read as both a scatter and a connected line.",
     href: "/examples/interaction/legend-focus",
     keywords: [
       "Focus and link discrete legend groups",
@@ -4171,7 +4171,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Link plots, controls, and a table",
     summary:
-      "A shared Svelte 5 interaction controller coordinates semantic selection, lightweight emphasis, and zoom domains without callback loops. Stable row keys link two plots to ordinary accessible DOM, while explicit reconciliation makes data replacement predictable.",
+      "A shared Svelte 5 interaction controller coordinates semantic selection, lightweight emphasis, and zoom domains without callback loops. Stable row keys link two plots to ordinary accessible DOM, while explicit reconciliation makes data replacement predictable. Five Palmer penguins per species, evenly sampled, so every linked row fits in the table alongside the plots.",
     href: "/examples/interaction/linked-views",
     keywords: [
       "Link plots, controls, and a table",
@@ -4191,7 +4191,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Inspect and pin data",
     summary:
-      "Chart-local, private inspection state adds a semantic crosshair, a complete HTML tooltip, keyboard traversal, and click-or-Enter pinning. The concise live announcement reports the shared x value and group count once, while every member remains navigable in ordinary DOM.",
+      "Chart-local, private inspection state adds a semantic crosshair, a complete HTML tooltip, keyboard traversal, and click-or-Enter pinning. The concise live announcement reports the shared x value and group count once, while every member remains navigable in ordinary DOM. Measurements are the 333 complete Palmer Archipelago penguin records; flipper length is recorded to the millimetre, so many birds genuinely share an x value.",
     href: "/examples/interaction/tooltip",
     keywords: [
       "Inspect and pin data",

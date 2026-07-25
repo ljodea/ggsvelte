@@ -1,34 +1,36 @@
 <script lang="ts">
   import { GeomLine, GeomPoint, GGPlot } from "@ggsvelte/svelte";
 
-  import { ridership } from "./data.js";
+  import { britishFinances } from "./data.js";
 
   let status = $state(
-    "All four modes are included. Toggle a checkbox to filter the grammar pipeline.",
+    "All three series are included. Toggle a checkbox to filter the grammar pipeline.",
   );
 </script>
 
 <div class="legend-filter-demo">
   <p class="status gg-demo-chrome" role="status" aria-live="polite">{status}</p>
   <GGPlot
-    data={ridership}
-    aes={{ x: "month", y: "riders", color: "mode" }}
+    data={britishFinances}
+    aes={{ x: "year", y: "value", color: "series" }}
+    theme="fivethirtyeight"
+    scales={{ x: { labels: "d" } }}
     key="id"
     legendFilter
     width="container"
     height={430}
     labs={{
-      title: "Daily transit ridership",
-      subtitle: "Filter any mode; restored groups keep their original color",
-      x: "Month",
-      y: "Daily riders (thousands)",
-      color: "Mode",
+      title: "Playfair's fiscal three, 1770–1824",
+      subtitle: "Filter any series; restored groups keep their original color",
+      x: "Year",
+      y: "Playfair's index units",
+      color: "Series",
     }}
     onlegendfilter={(event) => {
       status =
         event.phase === "clear" || event.clause === null
-          ? "All modes restored. Color identity did not change."
-          : `${String(event.clause.values.length)} ${event.clause.values.length === 1 ? "mode is" : "modes are"} hidden; the legend keeps every mode available.`;
+          ? "All series restored. Color identity did not change."
+          : `${String(event.clause.values.length)} ${event.clause.values.length === 1 ? "series is" : "series are"} hidden; the legend keeps every series available.`;
     }}
   >
     <GeomLine linewidth={2.2} />

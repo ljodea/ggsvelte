@@ -4,7 +4,7 @@
   import { rows } from "./data.js";
 
   const scope = { keys: "legend-focus-rows" } as const;
-  const mapping = { x: "x", y: "y", color: "group" } as const;
+  const mapping = { x: "year", y: "value", color: "series" } as const;
   const interaction = createPlotInteraction<string>();
   const emphasized = $derived(interaction.emphasized(scope));
   let status = $state(
@@ -31,6 +31,8 @@
     <GGPlot
       data={rows}
       aes={mapping}
+      theme="few"
+      scales={{ x: { labels: "d" } }}
       layers={[{ geom: "point", params: { size: 4 } }]}
       key="id"
       legendFocus
@@ -38,12 +40,19 @@
       interactionScope={scope}
       width="container"
       height={310}
-      labs={{ title: "SVG points", x: "Time", y: "Value", color: "Group" }}
+      labs={{
+        title: "SVG points",
+        x: "Year",
+        y: "Index units",
+        color: "Series",
+      }}
       onlegendfocus={describe}
     />
     <GGPlot
       data={rows}
       aes={mapping}
+      theme="few"
+      scales={{ x: { labels: "d" } }}
       layers={[{ geom: "point", render: "canvas", params: { size: 4 } }]}
       key="id"
       legendFocus
@@ -51,12 +60,19 @@
       interactionScope={scope}
       width="container"
       height={310}
-      labs={{ title: "Canvas points", x: "Time", y: "Value", color: "Group" }}
+      labs={{
+        title: "Canvas points",
+        x: "Year",
+        y: "Index units",
+        color: "Series",
+      }}
       onlegendfocus={describe}
     />
     <GGPlot
       data={rows}
       aes={mapping}
+      theme="few"
+      scales={{ x: { labels: "d" } }}
       layers={[{ geom: "line", params: { linewidth: 2 } }, { geom: "point" }]}
       key="id"
       legendFocus
@@ -64,7 +80,12 @@
       interactionScope={scope}
       width="container"
       height={310}
-      labs={{ title: "SVG lines", x: "Time", y: "Value", color: "Group" }}
+      labs={{
+        title: "SVG lines",
+        x: "Year",
+        y: "Index units",
+        color: "Series",
+      }}
       onlegendfocus={describe}
     />
   </div>
