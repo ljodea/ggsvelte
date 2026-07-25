@@ -4009,7 +4009,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Errorbars (mean ± se) over raw data",
     summary:
-      "The summary stat computes mean ± standard error per group (ggplot2's mean_se default), drawn as errorbars over the seeded-jitter raw observations.",
+      'The summary stat computes mean ± standard error per group (ggplot2\'s mean_se default), drawn as errorbars over the seeded-jitter raw observations — here the 1905 soporific trial that "Student" used to introduce the t-distribution.',
     href: "/examples/errorbar/mean-se",
     keywords: [
       "Errorbars (mean ± se) over raw data",
@@ -4026,7 +4026,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Ordered small multiples with side strips",
     summary:
-      'facet.wrap.levels locks a closed west→midwest→south→northeast panel order independent of row order; labels supply human strip text; strip.position: "left" reserves a measured band beside each panel instead of above it.',
+      'facet.wrap.levels locks Gosset\'s authored A→D sample order independent of row order; labels supply human strip text; strip.position: "left" reserves a measured band beside each panel instead of above it. Fill comes from an ordinal palette scale with its legend suppressed, because the strips already name every panel.',
     href: "/examples/facet/ordered-side-strips",
     keywords: [
       "Ordered small multiples with side strips",
@@ -4045,9 +4045,17 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Faceted histograms (facet wrap)",
     summary:
-      "facet.wrap partitions the data BEFORE the bin stat: each panel bins its own service's response times over one shared break grid, and fixed scales share both axes (edge axes only).",
+      "facet.wrap partitions the data BEFORE the bin stat: each panel bins its own parent-child table over one shared break grid, and fixed scales share both axes (edge axes only). The weight channel lets Pearson and Lee's published frequency table stand in for 4,892 measured children.",
     href: "/examples/facet/wrap",
-    keywords: ["Faceted histograms (facet wrap)", "Facets", "facet", "histogram", "bin", "wrap"],
+    keywords: [
+      "Faceted histograms (facet wrap)",
+      "Facets",
+      "facet",
+      "histogram",
+      "bin",
+      "wrap",
+      "weight",
+    ],
     exact: ["Faceted histograms (facet wrap)"],
   },
   {
@@ -4055,7 +4063,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Free y scales per panel",
     summary:
-      'scales: "free_y" trains the y domain per panel — each metric fills its panel at its own magnitude, every panel gets its own left axis, and x stays shared. Discrete color assignments would still be global (one legend).',
+      'scales: "free_y" trains the y domain per panel — Arbuthnot\'s four measures span five orders of magnitude, from a ratio near 1.1 to the 68,596 plague deaths of 1665, and each fills its panel at its own magnitude. Every panel gets its own left axis; x stays shared.',
     href: "/examples/facet/wrap-free-y",
     keywords: ["Free y scales per panel", "Facets", "facet", "free-scales", "line", "wrap"],
     exact: ["Free y scales per panel"],
@@ -4451,7 +4459,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Loess smooth with confidence ribbon",
     summary:
-      "A loess trend (R-parity local regression, degree 2) fitted over a scatter, with its 95% confidence ribbon drawn under the line — ggplot2's geom_smooth.",
+      "A loess trend (R-parity local regression, degree 2) fitted over a scatter, with its 95% confidence ribbon drawn under the line — ggplot2's geom_smooth, applied to the first scatterplot ever published. A continuous size scale carries Herschel's own weighting of each observation.",
     href: "/examples/smooth/loess-scatter",
     keywords: [
       "Loess smooth with confidence ribbon",
@@ -4460,6 +4468,7 @@ export const DOCS_SEARCH_INDEX = [
       "loess",
       "ribbon",
       "scatter",
+      "size",
     ],
     exact: ["Loess smooth with confidence ribbon"],
   },

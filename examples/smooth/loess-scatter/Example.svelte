@@ -1,20 +1,30 @@
 <script lang="ts">
-  import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomPoint,
+    GeomSmooth,
+    GGPlot,
+    scaleSizeContinuous,
+  } from "@ggsvelte/svelte";
 
-  import { trend } from "./data.js";
+  import { gammaVirginis } from "./data.js";
 </script>
 
 <GGPlot
-  data={trend}
-  aes={{ x: "dose", y: "effect" }}
+  data={gammaVirginis}
+  aes={{ x: "year", y: "angle" }}
+  theme="tufte"
+  scales={{ x: { labels: "d" }, ...scaleSizeContinuous({ range: [3, 8] }) }}
   labs={{
-    title: "Dose response with a loess trend",
-    x: "Dose",
-    y: "Effect",
+    title: "The first scatterplot, redrawn",
+    subtitle:
+      "Herschel plotted γ Virginis in 1833 and fitted the curve by hand",
+    x: "Year",
+    y: "Position angle (°)",
+    size: "Herschel's weight",
   }}
   width={640}
   height={400}
 >
-  <GeomPoint alpha={0.55} size={2.5} />
   <GeomSmooth method="loess" span={0.75} />
+  <GeomPoint aes={{ size: "weight" }} alpha={0.85} />
 </GGPlot>

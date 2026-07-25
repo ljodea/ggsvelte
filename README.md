@@ -30,28 +30,38 @@ live output and complete source.
 
 ```svelte
 <script lang="ts">
-  import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomPoint,
+    GeomSmooth,
+    GGPlot,
+    scaleSizeContinuous,
+  } from "@ggsvelte/svelte";
 
-  import { trend } from "./data.js";
+  import { gammaVirginis } from "./data.js";
 </script>
 
 <GGPlot
-  data={trend}
-  aes={{ x: "dose", y: "effect" }}
+  data={gammaVirginis}
+  aes={{ x: "year", y: "angle" }}
+  theme="tufte"
+  scales={{ x: { labels: "d" }, ...scaleSizeContinuous({ range: [3, 8] }) }}
   labs={{
-    title: "Dose response with a loess trend",
-    x: "Dose",
-    y: "Effect",
+    title: "The first scatterplot, redrawn",
+    subtitle:
+      "Herschel plotted γ Virginis in 1833 and fitted the curve by hand",
+    x: "Year",
+    y: "Position angle (°)",
+    size: "Herschel's weight",
   }}
   width={640}
   height={400}
 >
-  <GeomPoint alpha={0.55} size={2.5} />
   <GeomSmooth method="loess" span={0.75} />
+  <GeomPoint aes={{ size: "weight" }} alpha={0.85} />
 </GGPlot>
 ```
 
-[![Dose response observations with a loess trend and confidence ribbon](apps/docs/static/previews/smooth-loess-scatter-light.png)](https://ggsvelte.sh/examples/smooth/loess-scatter)
+[![The position angle of gamma Virginis from 1718 to 1830 with a loess trend and confidence ribbon](apps/docs/static/previews/smooth-loess-scatter-light.png)](https://ggsvelte.sh/examples/smooth/loess-scatter)
 
 ### [Stacked area](https://ggsvelte.sh/examples/area/stacked)
 
@@ -179,17 +189,20 @@ live output and complete source.
 <script lang="ts">
   import { GeomHistogram, GGPlot } from "@ggsvelte/svelte";
 
-  import { samples } from "./data.js";
+  import { familyHeights } from "./data.js";
 </script>
 
 <GGPlot
-  data={samples}
-  aes={{ x: "ms" }}
-  facet={{ wrap: "service", ncol: 3 }}
+  data={familyHeights}
+  aes={{ x: "child", weight: "n" }}
+  theme="ggplot2"
+  facet={{ wrap: "pair", ncol: 2 }}
   labs={{
-    title: "Response time by service",
-    x: "Response time (ms)",
-    y: "Requests",
+    title: "4,892 English children, measured by Pearson and Lee",
+    subtitle:
+      "Sons stand four and a half inches taller; the two daughter panels are the same girls, tabulated against each parent",
+    x: "Child's height (inches)",
+    y: "Children",
   }}
   width={640}
   height={400}
@@ -198,7 +211,7 @@ live output and complete source.
 </GGPlot>
 ```
 
-[![Response-time histograms faceted by service](apps/docs/static/previews/facet-wrap-light.png)](https://ggsvelte.sh/examples/facet/wrap)
+[![Child-height histograms faceted by the four parent-child pairings Pearson and Lee tabulated](apps/docs/static/previews/facet-wrap-light.png)](https://ggsvelte.sh/examples/facet/wrap)
 
 ### [Proportional bars](https://ggsvelte.sh/examples/bar/proportions)
 

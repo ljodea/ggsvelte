@@ -1,17 +1,20 @@
 <script lang="ts">
   import { GeomHistogram, GGPlot } from "@ggsvelte/svelte";
 
-  import { samples } from "./data.js";
+  import { familyHeights } from "./data.js";
 </script>
 
 <GGPlot
-  data={samples}
-  aes={{ x: "ms" }}
-  facet={{ wrap: "service", ncol: 3 }}
+  data={familyHeights}
+  aes={{ x: "child", weight: "n" }}
+  theme="ggplot2"
+  facet={{ wrap: "pair", ncol: 2 }}
   labs={{
-    title: "Response time by service",
-    x: "Response time (ms)",
-    y: "Requests",
+    title: "4,892 English children, measured by Pearson and Lee",
+    subtitle:
+      "Sons stand four and a half inches taller; the two daughter panels are the same girls, tabulated against each parent",
+    x: "Child's height (inches)",
+    y: "Children",
   }}
   width={640}
   height={400}
