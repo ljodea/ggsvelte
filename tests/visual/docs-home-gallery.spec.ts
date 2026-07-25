@@ -42,7 +42,6 @@ test("homepage mid-width stacks the hero chart full-width without empty void", a
       plotWidth: plot.width,
       actionsTop: actions.top,
       heroWidth: box.width,
-      heroHeight: box.height,
       gapAfterPlot: actions.top - plot.bottom,
     };
   });
