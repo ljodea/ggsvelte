@@ -2107,13 +2107,13 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-440",
-        title: "experimental (440)",
+        id: "experimental-444",
+        title: "experimental (444)",
         level: 3,
       },
       {
-        id: "stable-intent-101",
-        title: "stable-intent (101)",
+        id: "stable-intent-112",
+        title: "stable-intent (112)",
         level: 3,
       },
     ],
@@ -2161,6 +2161,21 @@ export const DOCS_ROUTES = [
       {
         id: "compose-facet-as-a-child-layer",
         title: "Compose facet as a child layer",
+        level: 3,
+      },
+      {
+        id: "compose-labs-as-a-child-layer",
+        title: "Compose labs as a child layer",
+        level: 3,
+      },
+      {
+        id: "compose-guides-as-child-layers",
+        title: "Compose guides as child layers",
+        level: 3,
+      },
+      {
+        id: "compose-legend-as-a-child-layer",
+        title: "Compose legend as a child layer",
         level: 3,
       },
       {

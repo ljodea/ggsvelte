@@ -310,6 +310,45 @@ export { default as FacetWrap } from "./facet/FacetWrap.svelte";
 /** @lifecycle stable-intent */
 export { default as FacetGrid } from "./facet/FacetGrid.svelte";
 
+// Labs child (#659 slice 6) — stable-intent: the whole flat Labs surface as
+// named props; destination for the deprecated `labs` prop (since 0.11.0).
+// No <Labs value> escape hatch — `<Labs {...computed} />` already covers it.
+/** @lifecycle stable-intent */
+export { default as Labs } from "./labs/Labs.svelte";
+// Name collision, resolved in favour of the component: every grammar child is
+// named for the PortableSpec field it fills (Theme, Scale, Coord, Facet,
+// Guides, Legend), and Labs is the only spec type without a Spec/Input suffix.
+// So <Labs> keeps the bare name here and the type is re-exported as LabsSpec.
+// `import type { Labs } from "@ggsvelte/spec"` is unchanged and still canonical.
+export type { Labs as LabsSpec } from "@ggsvelte/spec";
+
+// Guide children (#659 slice 6) — stable-intent: one shell per guide TYPE,
+// each keyed by a `channel` prop (the aesthetic is a key, not a helper), plus
+// the <Guides value> escape hatch. Destination for the deprecated `guides` prop.
+/** @lifecycle stable-intent */
+export { default as Guides } from "./guides/Guides.svelte";
+/** @lifecycle stable-intent */
+export { default as GuideAxis } from "./guides/GuideAxis.svelte";
+/** @lifecycle stable-intent */
+export { default as GuideLegend } from "./guides/GuideLegend.svelte";
+/** @lifecycle stable-intent */
+export { default as GuideColorbar } from "./guides/GuideColorbar.svelte";
+/** @lifecycle stable-intent */
+export { default as GuideColorsteps } from "./guides/GuideColorsteps.svelte";
+/** @lifecycle stable-intent */
+export { default as GuideNone } from "./guides/GuideNone.svelte";
+/** @lifecycle stable-intent */
+export type {
+  GuideChannel,
+  NonPositionGuideChannel,
+  PositionGuideChannel,
+} from "./guides/factory.svelte.js";
+
+// Legend child (#659 slice 6) — stable-intent: the plot-wide entry-SORT enum.
+// Not the per-aesthetic placement rank; that is <GuideLegend order={…}/>.
+/** @lifecycle stable-intent */
+export { default as Legend } from "./legend/Legend.svelte";
+
 // Deprecation + composition diagnostics (sibling unions to InteractionDiagnostic)
 export {
   DEPRECATION_DIAGNOSTIC_CATALOG,
@@ -323,15 +362,19 @@ export type {
 } from "./diagnostics/deprecation.js";
 export {
   COMPOSITION_DIAGNOSTIC_CATALOG,
+  duplicateMergeKeyDiagnostic,
   duplicatePlotLayerDiagnostic,
   duplicateScaleChannelDiagnostic,
   isCompositionDiagnostic,
+  isDuplicateMergeKeyDiagnostic,
   isDuplicatePlotLayerDiagnostic,
   isDuplicateScaleChannelDiagnostic,
 } from "./diagnostics/composition.js";
 export type {
   CompositionDiagnostic,
   CompositionDiagnosticCode,
+  DuplicateMergeKeyDiagnostic,
+  DuplicateMergeKeyKind,
   DuplicatePlotLayerDiagnostic,
   DuplicatePlotLayerKind,
   DuplicateScaleChannelDiagnostic,
@@ -529,7 +572,6 @@ export type {
   LegendGuideOptions,
   LegendGuideSpec,
   NoneGuideSpec,
-  Labs,
   LayerInput,
   LayerSpec,
   LegendSpec,

@@ -28,14 +28,18 @@ function guideAnchors(): Map<string, Set<string>> {
 
 /**
  * Anchors emitted by live runtime advisories this release — deprecation
- * (deprecatedPropDiagnostic) and composition (duplicateScaleChannelDiagnostic)
- * alike. Both ship a docUrl, so both need the anchor to actually resolve.
+ * (deprecatedPropDiagnostic) and composition (duplicateScaleChannelDiagnostic,
+ * duplicateMergeKeyDiagnostic, duplicatePlotLayerDiagnostic) alike. All ship a
+ * docUrl, so all need the anchor to actually resolve.
  */
 const RUNTIME_ADVISORY_URLS = [
   "https://ggsvelte.sh/guide/upgrading#compose-the-theme-as-a-child-layer",
   "https://ggsvelte.sh/guide/upgrading#compose-scales-as-child-layers",
   "https://ggsvelte.sh/guide/upgrading#compose-coord-as-a-child-layer",
   "https://ggsvelte.sh/guide/upgrading#compose-facet-as-a-child-layer",
+  "https://ggsvelte.sh/guide/upgrading#compose-labs-as-a-child-layer",
+  "https://ggsvelte.sh/guide/upgrading#compose-guides-as-child-layers",
+  "https://ggsvelte.sh/guide/upgrading#compose-legend-as-a-child-layer",
 ] as const;
 
 describe("diagnostic catalog runtime docUrl anchors", () => {

@@ -13,10 +13,13 @@ import type { PortableSpec } from "@ggsvelte/spec";
 
 import type { OrchestratorInputs } from "./plot-orchestrator.svelte.js";
 import {
+  duplicateMergeKeyDiagnostic,
   duplicatePlotLayerDiagnostic,
   duplicateScaleChannelDiagnostic,
+  isDuplicateMergeKeyDiagnostic,
   isDuplicateScaleChannelDiagnostic,
   type CompositionDiagnostic,
+  type DuplicateMergeKeyKind,
   type DuplicatePlotLayerKind,
 } from "./diagnostics/composition.js";
 import {
@@ -186,6 +189,49 @@ export function createPlotInteractionAssembly<
         }),
       );
     }
+    if (inputs.guides() !== undefined) {
+      list.push(
+        deprecatedPropDiagnostic({
+          prop: "guides",
+          since: "0.11.0",
+          removeIn: "0.13.0",
+          suggestions: [
+            'Replace guides={{color:guideLegend({position:"bottom"})}} with <GuideLegend channel="color" position="bottom" />',
+            'The aesthetic is the channel prop: <GuideAxis channel="x"/>, <GuideNone channel="size"/>, …',
+            "Use <Guides value={…} /> as the escape hatch for raw/computed guide bags",
+          ],
+          anchor: "compose-guides-as-child-layers",
+        }),
+      );
+    }
+    if (inputs.legend() !== undefined) {
+      list.push(
+        deprecatedPropDiagnostic({
+          prop: "legend",
+          since: "0.11.0",
+          removeIn: "0.13.0",
+          suggestions: [
+            'Replace legend={{order:"sorted"}} with <Legend order="sorted" />',
+            "<Legend order> is the plot-wide entry-sort enum; <GuideLegend order={2}/> is a per-aesthetic placement rank",
+          ],
+          anchor: "compose-legend-as-a-child-layer",
+        }),
+      );
+    }
+    if (inputs.labs() !== undefined) {
+      list.push(
+        deprecatedPropDiagnostic({
+          prop: "labs",
+          since: "0.11.0",
+          removeIn: "0.13.0",
+          suggestions: [
+            'Replace labs={{title:"Sales"}} with <Labs title="Sales" />',
+            'Per-aesthetic titles stay named props on the child: <Labs x="Quarter" color="Region" />',
+          ],
+          anchor: "compose-labs-as-a-child-layer",
+        }),
+      );
+    }
     return list;
   });
   $effect(() => {
@@ -197,8 +243,10 @@ export function createPlotInteractionAssembly<
     }
   });
 
-  // Composition advisories (#659 slices 3+5):
+  // Composition advisories (#659 slices 3+5+6):
   // - scale MERGE: duplicate aesthetic channels (dedup `${code}:${channel}`)
+  // - labs/guides/legend MERGE: duplicate keys in the same shallow merge
+  //   (dedup `${code}:${kind}:${key}`)
   // - coord/facet/theme REPLACE: more than one child of that kind
   //   (dedup `${code}:${kind}` so coord + facet dups deliver two advisories)
   // Last child still wins (shallow merge / last write).
@@ -206,6 +254,18 @@ export function createPlotInteractionAssembly<
     const list: CompositionDiagnostic[] = [];
     const seenChannels = new Set<string>();
     const duplicateChannels = new Set<string>();
+    // One scan over every keyed-MERGE family. Scales keep their own advisory
+    // code (0.11.0 surface); labs/guides/legend share DUPLICATE_MERGE_KEY.
+    const mergeSeen: Record<DuplicateMergeKeyKind, Set<string>> = {
+      labs: new Set(),
+      guides: new Set(),
+      legend: new Set(),
+    };
+    const mergeDuplicates: Record<DuplicateMergeKeyKind, Set<string>> = {
+      labs: new Set(),
+      guides: new Set(),
+      legend: new Set(),
+    };
     const replaceCounts: Record<DuplicatePlotLayerKind, number> = {
       coord: 0,
       facet: 0,
@@ -222,12 +282,27 @@ export function createPlotInteractionAssembly<
         }
         continue;
       }
+      if (layer.kind === "labs" || layer.kind === "guides" || layer.kind === "legend") {
+        for (const key of Object.keys(layer.value)) {
+          if (mergeSeen[layer.kind].has(key)) {
+            mergeDuplicates[layer.kind].add(key);
+          } else {
+            mergeSeen[layer.kind].add(key);
+          }
+        }
+        continue;
+      }
       if (layer.kind === "coord" || layer.kind === "facet" || layer.kind === "theme") {
         replaceCounts[layer.kind] += 1;
       }
     }
     for (const channel of duplicateChannels) {
       list.push(duplicateScaleChannelDiagnostic(channel));
+    }
+    for (const kind of ["labs", "guides", "legend"] as const) {
+      for (const key of mergeDuplicates[kind]) {
+        list.push(duplicateMergeKeyDiagnostic(kind, key));
+      }
     }
     for (const kind of ["coord", "facet", "theme"] as const) {
       if (replaceCounts[kind] > 1) {
@@ -240,7 +315,9 @@ export function createPlotInteractionAssembly<
     for (const diagnostic of compositionDiagnostics) {
       const dedupKey = isDuplicateScaleChannelDiagnostic(diagnostic)
         ? `${diagnostic.code}:${diagnostic.channel}`
-        : `${diagnostic.code}:${diagnostic.kind}`;
+        : isDuplicateMergeKeyDiagnostic(diagnostic)
+          ? `${diagnostic.code}:${diagnostic.kind}:${diagnostic.key}`
+          : `${diagnostic.code}:${diagnostic.kind}`;
       if (deliveredAdvisories.has(dedupKey)) continue;
       deliveredAdvisories.add(dedupKey);
       deliverDiagnostic(diagnostic);

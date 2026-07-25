@@ -3465,6 +3465,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "DuplicateMergeKeyDiagnostic": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DuplicateMergeKeyKind": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "DuplicatePlotLayerDiagnostic": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3593,6 +3601,30 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GuideAxis": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "GuideChannel": {
+          "kind": "type",
+          "lifecycle": "stable-intent"
+        },
+        "GuideColorbar": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "GuideColorsteps": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "GuideLegend": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "GuideNone": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "GuidePlan": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3604,6 +3636,10 @@
         "GuideThemeSpec": {
           "kind": "type",
           "lifecycle": "experimental"
+        },
+        "Guides": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
         },
         "GuidesSpec": {
           "kind": "type",
@@ -3662,6 +3698,10 @@
           "lifecycle": "experimental"
         },
         "Labs": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "LabsSpec": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3688,6 +3728,10 @@
         "LayerSpec": {
           "kind": "type",
           "lifecycle": "experimental"
+        },
+        "Legend": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
         },
         "LegendFilterClause": {
           "kind": "type",
@@ -3789,6 +3833,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "NonPositionGuideChannel": {
+          "kind": "type",
+          "lifecycle": "stable-intent"
+        },
         "NoneGuideSpec": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3886,6 +3934,10 @@
           "lifecycle": "experimental"
         },
         "PortableSpec": {
+          "kind": "type",
+          "lifecycle": "stable-intent"
+        },
+        "PositionGuideChannel": {
           "kind": "type",
           "lifecycle": "stable-intent"
         },
@@ -4569,6 +4621,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "duplicateMergeKeyDiagnostic": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "duplicatePlotLayerDiagnostic": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4650,6 +4706,10 @@
           "lifecycle": "experimental"
         },
         "isDeprecationDiagnostic": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "isDuplicateMergeKeyDiagnostic": {
           "kind": "value",
           "lifecycle": "experimental"
         },
