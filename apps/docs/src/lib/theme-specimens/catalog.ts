@@ -88,6 +88,14 @@ export const THEME_SPECIMENS: readonly ThemeSpecimenConfig[] = [
     legendFocus: true,
   },
   {
+    name: "bw",
+    label: BY_NAME.bw.label,
+    caption: "White panel, grey grid, dark border — print-friendly scatter.",
+    kind: "countries-scatter",
+    scheme: BY_NAME.bw.scheme,
+    legendFocus: true,
+  },
+  {
     name: "hrbr",
     label: BY_NAME.hrbr.label,
     caption: "Same quiet hierarchy as default; ipsum series colors.",

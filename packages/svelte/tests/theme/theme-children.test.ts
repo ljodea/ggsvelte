@@ -255,6 +255,7 @@ describe("Theme* export parity with THEME_NAMES", () => {
       minimal: "ThemeMinimal",
       ggplot2: "ThemeGgplot2",
       classic: "ThemeClassic",
+      bw: "ThemeBw",
       hrbr: "ThemeHrbr",
       few: "ThemeFew",
       clean: "ThemeClean",

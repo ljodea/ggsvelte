@@ -135,6 +135,35 @@ describe("theme registry", () => {
     expect(tokens.grid).not.toBe(resolveTheme("classic").grid);
   });
 
+  it("registers theme_bw as a white-panel print theme distinct from light and ggplot2 (#820)", () => {
+    // Independent contract from ggplot2's published complete-theme role:
+    // white panel + grey grid + rectangular border (not grey-panel/white-grid
+    // ggplot2, and not light's thinner/lighter chrome).
+    expect(THEME_NAMES).toContain("bw");
+    const bw = resolveTheme("bw");
+    const light = resolveTheme("light");
+    const ggplot2 = resolveTheme("ggplot2");
+
+    expect(bw.paper).toBe("#ffffff");
+    expect(bw.panel).toBe("#ffffff");
+    expect(bw.grid).not.toBe("none");
+    expect(bw.grid).not.toBe("#ffffff");
+    expect(bw.showPanelBorder).toBe(true);
+    expect(bw.ticksX).toBe(true);
+    expect(bw.ticksY).toBe(true);
+    expect(bw.axisLineX).toBe(false);
+    expect(bw.axisLineY).toBe(false);
+    expect(bw.axisTextSize).toBeGreaterThanOrEqual(12);
+    expect(bw.panelBorder).toBe("#333333");
+    expect(bw.grid).toBe("#e5e5e5");
+
+    // Distinct from cousins that already ship.
+    expect(bw.panel).not.toBe(ggplot2.panel);
+    expect(bw.grid).not.toBe(ggplot2.grid);
+    expect(bw.panelBorder).not.toBe(light.panelBorder);
+    expect(bw.gridWidth).not.toBe(light.gridWidth);
+  });
+
   it("keeps axis tick labels readable on light/minimal family themes (#753)", () => {
     // 8.8px was unreadable next to 15px titles and ~12–16px tooltips on the
     // docs homepage hero. Floor is intentionally above 11 so axis chrome is
@@ -145,6 +174,7 @@ describe("theme registry", () => {
       "ggplot2",
       "classic",
       "few",
+      "bw",
       "grey",
       "gray",
       "test",

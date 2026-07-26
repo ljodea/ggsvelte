@@ -58,8 +58,8 @@
     },
     "color/binned": {
       "filename": "color-binned-light.png",
-      "sourceSha256": "3c47fda3f247d471e0be6c0f02d72d2aa6ebdd1daa233487969cc96a7d3d1aa8",
-      "pngSha256": "61049cd4a16b2959b48e1d5b73c5a3407df1743d60d502a50c2c274589e9f532"
+      "sourceSha256": "baec62a3befea5befb391e10c82d5d686722817856a16072cdb5b52c54e752f7",
+      "pngSha256": "f62ab13b36cd7a0f17fe1f0452517c1a21335b47e894fb9700deb84381513f79"
     },
     "color/continuous": {
       "filename": "color-continuous-light.png",

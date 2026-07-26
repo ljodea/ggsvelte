@@ -37,6 +37,7 @@ const THEME_SHELL: Readonly<Record<string, string>> = {
   minimal: "ThemeMinimal",
   ggplot2: "ThemeGgplot2",
   classic: "ThemeClassic",
+  bw: "ThemeBw",
   hrbr: "ThemeHrbr",
   few: "ThemeFew",
   clean: "ThemeClean",

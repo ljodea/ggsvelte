@@ -5154,6 +5154,10 @@
         },
         {
           "type": "string",
+          "const": "bw"
+        },
+        {
+          "type": "string",
           "const": "hrbr"
         },
         {
@@ -5189,7 +5193,7 @@
           "const": "test"
         }
       ],
-      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"grey\", \"gray\", \"test\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"grey\", \"gray\", \"test\"."
     },
     "ThemeSpec": {
       "type": "object",

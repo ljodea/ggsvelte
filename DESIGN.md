@@ -134,6 +134,7 @@ Built-in themes are structural presets, not color aliases:
 - `dark`: low-glare dark surface with restrained blue accent.
 - `ggplot2`: gray panel, white grid, ggplot2-like sizing and ticks.
 - `classic`: no grid, visible black axes and ticks.
+- `bw`: white panel, grey grid, dark rectangular border (print-friendly).
 - `few`, `clean`, `fivethirtyeight`, `economist`, and `tufte`: retain the defining
   structural relationships of their references.
 - `test`: pinned high-contrast chrome for package tests and visual snapshots.
