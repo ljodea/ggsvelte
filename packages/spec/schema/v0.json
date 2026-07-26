@@ -3357,8 +3357,9 @@
     },
     "BlankParams": {
       "type": "object",
-      "properties": {},
-      "additionalProperties": false,
+      "additionalProperties": {
+        "not": {}
+      },
       "description": "Blank layers have no paint/stat params; the object exists only so LayerSpec has a uniform optional params field."
     },
     "BlankLayer": {

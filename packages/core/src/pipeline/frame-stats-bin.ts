@@ -1,6 +1,8 @@
 /**
  * Bin (histogram) stat → LayerFrame with shared or free break grids.
  */
+import type { BarParams } from "@ggsvelte/spec";
+
 import { statBin } from "../stats/bin.js";
 import type { ColumnTable } from "../table.js";
 
@@ -26,7 +28,7 @@ export function buildBinFrame(
     groups,
     weights: binding.weightField === null ? null : table.numeric(binding.weightField),
     carried,
-    params: layer.params ?? {},
+    params: (layer.params ?? {}) as BarParams,
     // Fixed-x facets share one break grid across panels (ggplot2 derives
     // breaks from the shared scale dimension); free_x omits this.
     ...(binRange !== undefined && { range: binRange }),

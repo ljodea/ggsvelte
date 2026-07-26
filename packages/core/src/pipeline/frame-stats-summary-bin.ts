@@ -7,7 +7,7 @@
  */
 import type { ColumnTable } from "../table.js";
 
-import { statSummaryBin } from "../stats/summary-bin.js";
+import { statSummaryBin, type SummaryBinParamsInput } from "../stats/summary-bin.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
 import { makeColumnOf, styleColumns } from "./frame-stats-shared.js";
@@ -31,7 +31,7 @@ export function buildSummaryBinFrame(
     y: positionColumn(table, binding.yField!, binding.yConversion, binding.yTransform),
     groups,
     carried,
-    params: layer.params ?? {},
+    params: (layer.params ?? {}) as SummaryBinParamsInput,
     ...(binRange !== undefined && { range: binRange }),
   });
   removedStatWarning(

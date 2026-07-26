@@ -3204,14 +3204,12 @@ export const SpecDeclarations = {
     },
   ),
 
-  BlankParams: Type.Object(
-    {},
-    {
-      additionalProperties: false,
-      description:
-        "Blank layers have no paint/stat params; the object exists only so LayerSpec has a uniform optional params field.",
-    },
-  ),
+  // Record<string, never> (not Type.Object({})) so Static<> is index-signature-
+  // compatible with SemanticKeyLayer.params and other Record consumers.
+  BlankParams: Type.Record(Type.String(), Type.Never(), {
+    description:
+      "Blank layers have no paint/stat params; the object exists only so LayerSpec has a uniform optional params field.",
+  }),
 
   BlankLayer: Type.Object(
     {
