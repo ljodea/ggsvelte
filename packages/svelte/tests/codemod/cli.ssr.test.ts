@@ -136,6 +136,31 @@ describe("runCodemodCLI", () => {
     expect(h.files.get("src/ok.svelte")).toBe(PLOT);
   });
 
+  it("diffs a file with no trailing newline whose plot gains lines", () => {
+    // Regression: the resync scan advanced neither index once `before` was
+    // exhausted while `after` still had lines, so the default (diff) mode
+    // hung forever. Reachable through the codemod's own self-closing
+    // conversion at EOF — every other case has a shared trailing blank line
+    // that happens to resync the scan.
+    const h = harness({
+      "src/Tail.svelte": [
+        '<script lang="ts">',
+        '  import { GGPlot } from "@ggsvelte/svelte";',
+        "</script>",
+        "",
+        '<GGPlot data={rows} theme="dark" />',
+      ].join("\n"),
+    });
+
+    const code = runCodemodCLI(["src/Tail.svelte"], h.io);
+
+    expect(code).toBe(0);
+    const diff = h.out.join("\n");
+    expect(diff).toContain('+  <Theme name="dark" />');
+    expect(diff).toContain("+</GGPlot>");
+    expect(diff).toContain("1 file would change");
+  });
+
   it("prints help and exits 0", () => {
     const h = harness({});
     expect(runCodemodCLI(["--help"], h.io)).toBe(0);
