@@ -1,19 +1,42 @@
 /**
- * Synthetic scatter with fanning residual spread so quantile lines at 0.25 /
- * 0.5 / 0.75 separate visibly (seeded; no Math.random).
+ * Compact hand-authored scatter with increasing residual spread so the three
+ * default RQ lines (0.25 / 0.5 / 0.75) separate. Fixed decimals only — no
+ * floating RNG (playground seed fragments must be byte-stable across hosts).
  */
-import { mulberry32 } from "../../rng.js";
-
-function normal(rng: () => number): number {
-  // Box–Muller
-  const u = Math.max(1e-12, rng());
-  const v = rng();
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-}
-
-const rng = mulberry32(805);
-export const fanningScatter: { x: number; y: number }[] = Array.from({ length: 80 }, () => {
-  const x = rng() * 10;
-  const y = 1 + 0.8 * x + normal(rng) * (0.4 + 0.25 * x);
-  return { x, y };
-});
+export const fanningScatter: { x: number; y: number }[] = [
+  { x: 0.5, y: 1.2 },
+  { x: 1, y: 1.6 },
+  { x: 1.5, y: 2.9 },
+  { x: 2, y: 2.1 },
+  { x: 2.5, y: 3.8 },
+  { x: 3, y: 3.2 },
+  { x: 3.5, y: 5.1 },
+  { x: 4, y: 4.4 },
+  { x: 4.5, y: 6.2 },
+  { x: 5, y: 5.0 },
+  { x: 5.5, y: 7.4 },
+  { x: 6, y: 6.1 },
+  { x: 6.5, y: 8.8 },
+  { x: 7, y: 7.0 },
+  { x: 7.5, y: 9.9 },
+  { x: 8, y: 8.2 },
+  { x: 8.5, y: 11.2 },
+  { x: 9, y: 9.1 },
+  { x: 9.5, y: 12.4 },
+  { x: 10, y: 10.3 },
+  { x: 1.2, y: 0.9 },
+  { x: 2.2, y: 4.6 },
+  { x: 3.2, y: 2.4 },
+  { x: 4.2, y: 6.9 },
+  { x: 5.2, y: 4.1 },
+  { x: 6.2, y: 8.5 },
+  { x: 7.2, y: 5.6 },
+  { x: 8.2, y: 10.8 },
+  { x: 9.2, y: 7.8 },
+  { x: 0.8, y: 2.5 },
+  { x: 3.8, y: 7.2 },
+  { x: 6.8, y: 11.5 },
+  { x: 2.8, y: 5.5 },
+  { x: 5.8, y: 9.6 },
+  { x: 8.8, y: 13.0 },
+];
