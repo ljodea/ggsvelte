@@ -11,6 +11,7 @@ import type {
   ColParams,
   DensityParams,
   Density2dParams,
+  DotplotParams,
   ErrorbarParams,
   RibbonParams,
   LineParams,
@@ -133,6 +134,12 @@ export interface GeomDensityOptions extends DensityParams, GeomDataOption {
 
 /** 2D density isoline sugar options (#802). */
 export interface GeomDensity2dOptions extends Density2dParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Dotplot-layer sugar options (histodot + stack; #803). */
+export interface GeomDotplotOptions extends DotplotParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

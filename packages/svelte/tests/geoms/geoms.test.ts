@@ -14,6 +14,7 @@ import GeomBar from "../../src/lib/geoms/GeomBar.svelte";
 import GeomBoxplot from "../../src/lib/geoms/GeomBoxplot.svelte";
 import GeomCol from "../../src/lib/geoms/GeomCol.svelte";
 import GeomDensity from "../../src/lib/geoms/GeomDensity.svelte";
+import GeomDotplot from "../../src/lib/geoms/GeomDotplot.svelte";
 import GeomErrorbar from "../../src/lib/geoms/GeomErrorbar.svelte";
 import GeomHistogram from "../../src/lib/geoms/GeomHistogram.svelte";
 import GeomLine from "../../src/lib/geoms/GeomLine.svelte";
@@ -182,6 +183,17 @@ const cases: readonly GeomCase[] = [
     paramKey: "width",
     paramValue: 0.5,
     markSelector: ".gg-rects rect",
+  },
+  {
+    name: "GeomDotplot",
+    Component: GeomDotplot,
+    geom: "dotplot",
+    data: xy,
+    aes: { x: "x" },
+    geomProps: { binwidth: 1, stackdir: "up", alpha: 0.85 },
+    paramKey: "binwidth",
+    paramValue: 1,
+    markSelector: ".gg-points circle",
   },
   {
     name: "GeomDensity",

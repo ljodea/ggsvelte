@@ -1076,6 +1076,115 @@
       "additionalProperties": false,
       "description": "Styling parameters for the boxplot geom."
     },
+    "DotplotParams": {
+      "type": "object",
+      "properties": {
+        "bins": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of bins (integer ≥ 1). Default 30 — advisory when neither bins nor binwidth is set. Overridden by binwidth."
+        },
+        "binwidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Histodot bin width in data units (must be greater than 0). Takes precedence over bins. Also drives default point diameter via the x scale."
+        },
+        "boundary": {
+          "type": "number",
+          "description": "Align a bin edge to this value (mutually exclusive with center)."
+        },
+        "center": {
+          "type": "number",
+          "description": "Align a bin center to this value (mutually exclusive with boundary)."
+        },
+        "closed": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "right"
+            },
+            {
+              "type": "string",
+              "const": "left"
+            }
+          ],
+          "description": "Which side of each bin is closed: \"right\" (default, (lo, hi]) or \"left\" ([lo, hi))."
+        },
+        "stackdir": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "up"
+            },
+            {
+              "type": "string",
+              "const": "down"
+            },
+            {
+              "type": "string",
+              "const": "center"
+            },
+            {
+              "type": "string",
+              "const": "centerwhole"
+            }
+          ],
+          "description": "Stack direction: \"up\" (default), \"down\", \"center\", or \"centerwhole\" (integer-aligned center)."
+        },
+        "stackratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Relative spacing between stacked dots (must be greater than 0). Default 1."
+        },
+        "dotsize": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Multiplier on diameter derived from binwidth × x-scale (must be greater than 0). Default 1. Ignored when params.size is set."
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Point radius in px (must be greater than 0). When set, overrides binwidth-derived sizing."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Point opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "shape": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "circle"
+            },
+            {
+              "type": "string",
+              "const": "triangle"
+            },
+            {
+              "type": "string",
+              "const": "square"
+            },
+            {
+              "type": "string",
+              "const": "diamond"
+            },
+            {
+              "type": "string",
+              "const": "plus"
+            },
+            {
+              "type": "string",
+              "const": "cross"
+            }
+          ],
+          "description": "Point shape. One of \"circle\", \"triangle\", \"square\", \"diamond\", \"plus\", \"cross\". Default \"circle\"."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom_dotplot (histodot binning + stacked dots; #803). method=dotdensity and binaxis=y are not in v1."
+    },
     "DensityParams": {
       "type": "object",
       "properties": {
@@ -2308,6 +2417,44 @@
       "additionalProperties": false,
       "description": "A boxplot layer. Requires a discrete x channel and a quantitative y channel."
     },
+    "DotplotLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "dotplot",
+          "description": "Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions."
+        },
+        "stat": {
+          "type": "string",
+          "const": "bindot",
+          "description": "Histodot bindot: fixed bins, one mark per observation stacked within (group × bin). y defaults to {\"stat\": \"stackpos\"}."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Dotplot layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/DotplotParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A stacked-dot layer. Requires continuous x; y is stackpos from bindot. Map fill/color for groups. v1: method histodot only."
+    },
     "DensityLayer": {
       "type": "object",
       "required": [
@@ -2891,6 +3038,9 @@
         },
         {
           "$ref": "#/$defs/Density2dFilledLayer"
+        },
+        {
+          "$ref": "#/$defs/DotplotLayer"
         },
         {
           "$ref": "#/$defs/ErrorbarLayer"

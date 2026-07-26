@@ -26,6 +26,7 @@ import type {
   GeomDensityOptions,
   GeomDensity2dOptions,
   GeomDensity2dFilledOptions,
+  GeomDotplotOptions,
   GeomErrorbarOptions,
   GeomRibbonOptions,
   GeomHistogramOptions,
@@ -224,6 +225,11 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'density_2d', ... }) — bivariate KDE isolines (#802). */
   geomDensity2d(options: GeomDensity2dOptions = {}): GGBuilder {
     return this.layer(layerFrom("density_2d", options));
+  }
+
+  /** Sugar for .layer({ geom: 'dotplot', ... }) — histodot stacked dots (#803). */
+  geomDotplot(options: GeomDotplotOptions = {}): GGBuilder {
+    return this.layer(layerFrom("dotplot", options));
   }
 
   /** Sugar for filled 2D KDE rings (#802 phase 2). */

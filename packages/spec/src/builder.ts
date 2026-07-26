@@ -39,6 +39,7 @@ export type {
   GeomDensityOptions,
   GeomDensity2dOptions,
   GeomDensity2dFilledOptions,
+  GeomDotplotOptions,
   GeomErrorbarOptions,
   GeomHistogramOptions,
   GeomFreqpolyOptions,

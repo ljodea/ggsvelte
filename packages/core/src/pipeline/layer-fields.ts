@@ -39,8 +39,13 @@ export function resolveLayerFields(
       // Synthesized stat rows have no source row. Advertise only semantic
       // generated channels that CandidateFacts can resolve truthfully.
       if (binding.xField !== null) push("x", "x", "stat");
-      if (stat === "count" || stat === "bin" || stat === "density") {
-        push("y", binding.yStatColumn ?? (stat === "density" ? "density" : "count"), "stat");
+      if (stat === "count" || stat === "bin" || stat === "density" || stat === "bindot") {
+        push(
+          "y",
+          binding.yStatColumn ??
+            (stat === "density" ? "density" : stat === "bindot" ? "stackpos" : "count"),
+          "stat",
+        );
       } else if (stat === "boxplot") {
         push("y", "middle", "stat");
       } else if (

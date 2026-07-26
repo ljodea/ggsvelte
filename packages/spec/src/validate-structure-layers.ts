@@ -43,6 +43,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   quantile: ["x", "y"],
   density_2d: ["x", "y"],
   density_2d_filled: ["x", "y"],
+  dotplot: ["x"],
 };
 
 function hasIntercepts(layer: Record<string, unknown>): boolean {
@@ -242,18 +243,41 @@ export function layerStructuralErrors(
     }
   }
 
+  if (geom === "dotplot" || stat === "bindot") {
+    const y = mapped("y");
+    if (y !== undefined && !("stat" in y)) {
+      errors.push({
+        code: "computed-y-mapped",
+        path: `${layerPath}/aes/y`,
+        message:
+          "The dotplot geom computes y stack positions with the bindot stat, so aes.y must not map data. Map only x, or unset y with null.",
+        fix: {
+          description: "Remove the y mapping (or unset an inherited one with null).",
+          example: { geom: "dotplot", aes: { y: null } },
+        },
+      });
+    }
+  }
+
   if (
     geom === "bar" ||
     geom === "histogram" ||
     geom === "freqpoly" ||
+    geom === "dotplot" ||
     (geom === "line" && (stat === "bin" || stat === "summary_bin")) ||
     (geom === "point" && stat === "summary_bin") ||
     (geom === "errorbar" && stat === "summary_bin") ||
-    stat === "summary_bin"
+    stat === "summary_bin" ||
+    stat === "bindot"
   ) {
     const params = isRecord(layer["params"]) ? layer["params"] : {};
     const binStat =
-      geom === "histogram" || geom === "freqpoly" || stat === "bin" || stat === "summary_bin";
+      geom === "histogram" ||
+      geom === "freqpoly" ||
+      geom === "dotplot" ||
+      stat === "bin" ||
+      stat === "summary_bin" ||
+      stat === "bindot";
     if (binStat && params["center"] !== undefined && params["boundary"] !== undefined) {
       errors.push({
         code: "bin-center-and-boundary",
@@ -315,6 +339,7 @@ export function layerStructuralErrors(
         geom === "histogram" ||
         geom === "freqpoly" ||
         geom === "density" ||
+        geom === "dotplot" ||
         (geom === "line" && stat === "bin")) &&
       channel !== "x"
     ) {

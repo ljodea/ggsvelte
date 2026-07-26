@@ -96,6 +96,11 @@
       "sourceSha256": "6f9dd6edb1662b969a7ff67916cb419aeb90096aeec8e738e70227aa2878a342",
       "pngSha256": "a13b8429c32efa4815fcf3c617fd8197e518e7173a5fd893a191dbe9d45e93e3"
     },
+    "dotplot/histodot": {
+      "filename": "dotplot-histodot-light.png",
+      "sourceSha256": "1e6a0f5e94f41d8884d5e289138efa9f35ea9fd7ddc6868db5bf82edb19608ae",
+      "pngSha256": "6d45f51f3e3f4aac7a30d7924075751119c086186187993a071dbbb7fcaea198"
+    },
     "errorbar/mean-se": {
       "filename": "errorbar-mean-se-light.png",
       "sourceSha256": "533b58881bdadce8d3d0b46c2d18ff430b157efa8f9cf0c3958ada94f411e6bf",

@@ -368,6 +368,22 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "DotplotLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DotplotLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DotplotLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "DotplotParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ERROR_CATALOG": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -493,6 +509,10 @@
           "lifecycle": "experimental"
         },
         "GeomDensityOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomDotplotOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1013,6 +1033,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeDensityLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeDotplotLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3998,6 +4022,10 @@
           "lifecycle": "experimental"
         },
         "GeomDensity2dFilled": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomDotplot": {
           "kind": "value",
           "lifecycle": "experimental"
         },

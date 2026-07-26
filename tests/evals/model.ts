@@ -414,6 +414,27 @@ export class MockResponder implements Responder {
       }
       spec.layers.push(layer);
       xField = x;
+    } else if (/\bdotplot\b|\bhistodot\b|\bbindot\b/.test(prompt)) {
+      // geom_dotplot / stat_bindot histodot stacks (#803).
+      const x =
+        fieldNamed("measurement") ??
+        fieldNamed("value") ??
+        fieldNamed("x") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "x";
+      const layer: MockLayer = {
+        geom: "dotplot",
+        stat: "bindot",
+        aes: { x: f(x) },
+      };
+      const params: Record<string, unknown> = {};
+      const bw = prompt.match(/\bbinwidth\s+(\d+(?:\.\d+)?)\b/);
+      if (bw !== null) params.binwidth = Number(bw[1]);
+      if (/\bcenter-stacked\b|stackdir\s+center\b/.test(prompt)) params.stackdir = "center";
+      if (Object.keys(params).length > 0) layer.params = params;
+      spec.layers.push(layer);
+      xField = x;
     } else if (/\bdensity[_ ]?2d\b|\bbivariate kde\b|\bkde isolines?\b/.test(prompt)) {
       // geom_density_2d / stat_density_2d product Gaussian isolines (#802).
       const x =

@@ -43,6 +43,7 @@ export const STAT_COLUMNS: Record<string, readonly string[]> = {
   count: ["count"],
   bin: ["count", "density", "ncount", "ndensity"],
   density: ["density", "count", "scaled", "ndensity"],
+  bindot: ["stackpos"],
   smooth: ["y", "ymin", "ymax", "se"],
   boxplot: ["ymin", "lower", "middle", "upper", "ymax"],
   summary: ["y", "ymin", "ymax"],
