@@ -94,13 +94,12 @@ export const SpecModule = {
 };
 
 /**
- * Inlined declaration bag for Static<> extraction (not for JSON emission).
- * Annotated as TModule<> so composite .d.ts keeps a short type alias instead of
- * expanding the full instantiate surface (TS7056 once LayerSpec includes many geoms).
+ * Static<> extraction surface (not for JSON emission).
+ * `TModule<>` is a short type alias TypeBox expands during check — avoids
+ * `const SpecStatic = Type.Module(...)` which hits TS7056 on composite .d.ts
+ * once LayerSpec includes many geoms (dotplot + sf).
  */
 type SpecModule = TModule<typeof SpecDeclarations>;
-const SpecStatic: SpecModule = Type.Module(SpecDeclarations);
-
 type SpecType<K extends keyof SpecModule> = Static<SpecModule[K]>;
 
 // ---------------------------------------------------------------------------
