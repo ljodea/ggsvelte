@@ -357,6 +357,38 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     gridX: false,
     gridY: false,
   }),
+  // ggplot2 theme_bw: white panel, grey grid, rectangular black frame (print-friendly).
+  // Clean-room from published contract — not R source; not a light palette swap.
+  bw: themed({
+    ink: "#000000",
+    paper: "#ffffff",
+    panel: "#ffffff",
+    grid: "#cccccc",
+    axisText: "#000000",
+    axisLine: "#000000",
+    tickColor: "#000000",
+    panelBorder: "#000000",
+    fontSize: 11,
+    axisTextSize: 12,
+    fontWeight: 400,
+    titleSize: 13.2,
+    subtitleSize: 11,
+    axisTitleSize: 11,
+    captionSize: 8.8,
+    stripSize: 8.8,
+    axisLineWidth: 0.5,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.5,
+    panelBorderWidth: 0.5,
+    axisLineX: true,
+    axisLineY: true,
+    ticksX: true,
+    ticksY: true,
+    gridX: true,
+    gridY: true,
+    showPanelBorder: true,
+  }),
 });
 
 const LEGACY_BASE = themed({

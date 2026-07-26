@@ -14,6 +14,7 @@ const THEME_LABELS = {
   fivethirtyeight: "FiveThirtyEight",
   economist: "Economist",
   tufte: "Tufte",
+  bw: "BW",
 } as const satisfies Record<ThemeName, string>;
 
 const PALETTE_LABELS = {
@@ -38,6 +39,7 @@ const THEME_DEMO_SCHEMES = {
   fivethirtyeight: "tableau10",
   economist: "flexoki",
   tufte: "colorblind",
+  bw: "tableau10",
 } as const satisfies Record<ThemeName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
 
 export const THEME_OPTIONS = THEME_NAMES.map((name) => ({

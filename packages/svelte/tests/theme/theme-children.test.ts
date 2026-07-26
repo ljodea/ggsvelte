@@ -261,6 +261,7 @@ describe("Theme* export parity with THEME_NAMES", () => {
       fivethirtyeight: "ThemeFivethirtyeight",
       economist: "ThemeEconomist",
       tufte: "ThemeTufte",
+      bw: "ThemeBw",
     };
 
     const expectedExports = new Set(["Theme", ...Object.values(nameToExport)]);

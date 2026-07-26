@@ -4970,9 +4970,13 @@
         {
           "type": "string",
           "const": "tufte"
+        },
+        {
+          "type": "string",
+          "const": "bw"
         }
       ],
-      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"bw\"."
     },
     "ThemeSpec": {
       "type": "object",

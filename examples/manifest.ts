@@ -121,6 +121,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "col/bw-print",
+    category: "col",
+    name: "bw-print",
+    title: "BW theme — white panel with grey grid",
+    description: "",
+    tags: ["col", "theme", "bw", "print"],
+    docsSection: "Bars & columns",
+    hasData: true,
+  },
+  {
     id: "col/long-labels",
     category: "col",
     name: "long-labels",

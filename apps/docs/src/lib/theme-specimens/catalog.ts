@@ -135,6 +135,14 @@ export const THEME_SPECIMENS: readonly ThemeSpecimenConfig[] = [
     scheme: BY_NAME.tufte.scheme,
     legendFocus: false,
   },
+  {
+    name: "bw",
+    label: BY_NAME.bw.label,
+    caption: "White panel, grey grid, rectangular border — print-friendly.",
+    kind: "countries-scatter",
+    scheme: BY_NAME.bw.scheme,
+    legendFocus: true,
+  },
 ];
 
 /** Month breaks shared by climate multi-series charts. */

@@ -87,6 +87,7 @@ export const THEME_NAMES = [
   "fivethirtyeight",
   "economist",
   "tufte",
+  "bw",
 ] as const;
 
 type ThemeNameValue = (typeof THEME_NAMES)[number];

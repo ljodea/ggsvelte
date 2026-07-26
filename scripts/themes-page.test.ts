@@ -23,6 +23,7 @@ describe("themes catalog", () => {
       { name: "fivethirtyeight", scheme: "tableau10" },
       { name: "economist", scheme: "flexoki" },
       { name: "tufte", scheme: "colorblind" },
+      { name: "bw", scheme: "tableau10" },
     ]);
 
     expect(CATEGORICAL_PALETTES).toEqual([

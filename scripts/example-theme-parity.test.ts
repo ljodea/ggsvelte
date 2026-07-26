@@ -43,6 +43,7 @@ const THEME_SHELL: Readonly<Record<string, string>> = {
   fivethirtyeight: "ThemeFivethirtyeight",
   economist: "ThemeEconomist",
   tufte: "ThemeTufte",
+  bw: "ThemeBw",
 };
 
 const ANY_THEME_SHELL = new RegExp(`<(?:${Object.values(THEME_SHELL).join("|")})\\b`, "g");
