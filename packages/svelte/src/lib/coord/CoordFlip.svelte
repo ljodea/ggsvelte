@@ -5,7 +5,7 @@
    * bare string), matching `builder.coord("flip")` / `coordFlip()`.
    * Emits NO markup.
    */
-  import { createCoordLayer } from "./factory.svelte.js";
+  import { createPlotLayer } from "../layers/plot-layer.svelte.js";
 
-  createCoordLayer(() => ({ type: "flip" }));
+  createPlotLayer("coord", () => ({ type: "flip" }));
 </script>

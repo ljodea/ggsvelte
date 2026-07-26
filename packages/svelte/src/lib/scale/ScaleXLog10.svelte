@@ -4,8 +4,11 @@
     scaleXLog10,
     type TransformedPositionScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: TransformedPositionScaleOptions = $props();
-  createScaleLayer(() => scaleXLog10(definedProps(props)));
+  createPlotLayer("scale", () => scaleXLog10(definedProps(props)));
 </script>

@@ -7,8 +7,11 @@
    */
   import { coordFixed, type CoordFixedOptions } from "@ggsvelte/spec";
 
-  import { createCoordLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: CoordFixedOptions = $props();
-  createCoordLayer(() => coordFixed(definedProps(props)));
+  createPlotLayer("coord", () => coordFixed(definedProps(props)));
 </script>

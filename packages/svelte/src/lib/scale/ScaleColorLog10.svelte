@@ -4,8 +4,11 @@
     scaleColorLog10,
     type TransformedColorScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: TransformedColorScaleOptions = $props();
-  createScaleLayer(() => scaleColorLog10(definedProps(props)));
+  createPlotLayer("scale", () => scaleColorLog10(definedProps(props)));
 </script>

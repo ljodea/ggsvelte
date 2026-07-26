@@ -4,8 +4,11 @@
     scaleLinewidthBinned,
     type SequentialStyleScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: SequentialStyleScaleOptions = $props();
-  createScaleLayer(() => scaleLinewidthBinned(definedProps(props)));
+  createPlotLayer("scale", () => scaleLinewidthBinned(definedProps(props)));
 </script>

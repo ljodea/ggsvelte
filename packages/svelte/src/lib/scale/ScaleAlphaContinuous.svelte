@@ -4,8 +4,11 @@
     scaleAlphaContinuous,
     type SequentialStyleScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: SequentialStyleScaleOptions = $props();
-  createScaleLayer(() => scaleAlphaContinuous(definedProps(props)));
+  createPlotLayer("scale", () => scaleAlphaContinuous(definedProps(props)));
 </script>

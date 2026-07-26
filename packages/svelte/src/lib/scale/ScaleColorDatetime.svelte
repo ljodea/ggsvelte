@@ -4,8 +4,11 @@
     scaleColorDatetime,
     type TemporalColorScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: TemporalColorScaleOptions = $props();
-  createScaleLayer(() => scaleColorDatetime(definedProps(props)));
+  createPlotLayer("scale", () => scaleColorDatetime(definedProps(props)));
 </script>

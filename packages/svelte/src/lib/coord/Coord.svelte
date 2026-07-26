@@ -10,12 +10,12 @@
    */
   import type { CoordSpec } from "@ggsvelte/spec";
 
-  import { createCoordLayer } from "./factory.svelte.js";
+  import { createPlotLayer } from "../layers/plot-layer.svelte.js";
 
   type Props = {
     value: CoordSpec | "flip";
   };
 
   const props: Props = $props();
-  createCoordLayer(() => props.value);
+  createPlotLayer("coord", () => props.value);
 </script>

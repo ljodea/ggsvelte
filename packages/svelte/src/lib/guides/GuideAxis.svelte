@@ -7,16 +7,13 @@
    */
   import { guideAxis, type AxisGuideOptions } from "@ggsvelte/spec";
 
-  import {
-    createGuidesLayer,
-    splitChannel,
-    type PositionGuideChannel,
-  } from "./factory.svelte.js";
+  import { createPlotLayer } from "../layers/plot-layer.svelte.js";
+  import { splitChannel, type PositionGuideChannel } from "./factory.svelte.js";
 
   type Props = AxisGuideOptions & { channel: PositionGuideChannel };
 
   const props: Props = $props();
-  createGuidesLayer(() => {
+  createPlotLayer("guides", () => {
     const { channel, options } = splitChannel(props);
     return { [channel]: guideAxis(options) };
   });

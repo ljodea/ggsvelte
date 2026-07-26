@@ -15,12 +15,12 @@
    */
   import type { Scales } from "@ggsvelte/spec";
 
-  import { createScaleLayer } from "./factory.svelte.js";
+  import { createPlotLayer } from "../layers/plot-layer.svelte.js";
 
   type Props = {
     value: Scales;
   };
 
   const props: Props = $props();
-  createScaleLayer(() => props.value);
+  createPlotLayer("scale", () => props.value);
 </script>

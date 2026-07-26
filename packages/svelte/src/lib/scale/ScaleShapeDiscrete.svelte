@@ -5,8 +5,11 @@
     type DiscreteFiniteStyleScaleOptions,
     type PointShapeName,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: DiscreteFiniteStyleScaleOptions<PointShapeName> = $props();
-  createScaleLayer(() => scaleShapeDiscrete(definedProps(props)));
+  createPlotLayer("scale", () => scaleShapeDiscrete(definedProps(props)));
 </script>

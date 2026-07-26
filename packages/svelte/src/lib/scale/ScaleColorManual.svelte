@@ -4,8 +4,11 @@
     scaleColorManual,
     type ManualColorScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: ManualColorScaleOptions = $props();
-  createScaleLayer(() => scaleColorManual(definedProps(props)));
+  createPlotLayer("scale", () => scaleColorManual(definedProps(props)));
 </script>

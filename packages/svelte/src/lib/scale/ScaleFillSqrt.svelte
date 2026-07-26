@@ -4,8 +4,11 @@
     scaleFillSqrt,
     type TransformedColorScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: TransformedColorScaleOptions = $props();
-  createScaleLayer(() => scaleFillSqrt(definedProps(props)));
+  createPlotLayer("scale", () => scaleFillSqrt(definedProps(props)));
 </script>

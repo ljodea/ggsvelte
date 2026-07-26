@@ -6,8 +6,8 @@
    */
   import { guideColorbar, type ColorbarGuideOptions } from "@ggsvelte/spec";
 
+  import { createPlotLayer } from "../layers/plot-layer.svelte.js";
   import {
-    createGuidesLayer,
     splitChannel,
     type NonPositionGuideChannel,
   } from "./factory.svelte.js";
@@ -15,7 +15,7 @@
   type Props = ColorbarGuideOptions & { channel: NonPositionGuideChannel };
 
   const props: Props = $props();
-  createGuidesLayer(() => {
+  createPlotLayer("guides", () => {
     const { channel, options } = splitChannel(props);
     return { [channel]: guideColorbar(options) };
   });

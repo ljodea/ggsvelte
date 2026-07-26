@@ -6,16 +6,13 @@
    */
   import { guideNone } from "@ggsvelte/spec";
 
-  import {
-    createGuidesLayer,
-    splitChannel,
-    type GuideChannel,
-  } from "./factory.svelte.js";
+  import { createPlotLayer } from "../layers/plot-layer.svelte.js";
+  import { splitChannel, type GuideChannel } from "./factory.svelte.js";
 
   type Props = { channel: GuideChannel };
 
   const props: Props = $props();
-  createGuidesLayer(() => {
+  createPlotLayer("guides", () => {
     const { channel } = splitChannel(props);
     return { [channel]: guideNone() };
   });

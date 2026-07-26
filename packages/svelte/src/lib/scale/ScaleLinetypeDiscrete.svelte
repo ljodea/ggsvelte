@@ -5,8 +5,11 @@
     type DiscreteFiniteStyleScaleOptions,
     type LinetypeName,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: DiscreteFiniteStyleScaleOptions<LinetypeName> = $props();
-  createScaleLayer(() => scaleLinetypeDiscrete(definedProps(props)));
+  createPlotLayer("scale", () => scaleLinetypeDiscrete(definedProps(props)));
 </script>

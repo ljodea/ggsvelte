@@ -4,8 +4,11 @@
     scaleFillContinuous,
     type SequentialColorScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: SequentialColorScaleOptions = $props();
-  createScaleLayer(() => scaleFillContinuous(definedProps(props)));
+  createPlotLayer("scale", () => scaleFillContinuous(definedProps(props)));
 </script>

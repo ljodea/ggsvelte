@@ -13,8 +13,11 @@
    */
   import type { FacetInput } from "@ggsvelte/spec";
 
-  import { createFacetLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: FacetInput = $props();
-  createFacetLayer(() => definedProps(props));
+  createPlotLayer("facet", () => definedProps(props));
 </script>

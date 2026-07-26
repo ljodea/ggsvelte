@@ -5,7 +5,7 @@
    * when bare (no other keys). Useful mid-migration under REPLACE so a child
    * can clear a prior `coord="flip"` prop. Emits NO markup.
    */
-  import { createCoordLayer } from "./factory.svelte.js";
+  import { createPlotLayer } from "../layers/plot-layer.svelte.js";
 
-  createCoordLayer(() => ({ type: "cartesian" }));
+  createPlotLayer("coord", () => ({ type: "cartesian" }));
 </script>

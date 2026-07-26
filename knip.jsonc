@@ -51,6 +51,9 @@
         // filesystem by the harness, never imported.
         "tests/codemod/fixtures/**",
         "src/lib/data/data-contract.ts",
+        // Compile-time kind→value guard for createPlotLayer (#786); never
+        // imported at runtime — same story as data-contract.ts.
+        "src/lib/layers/plot-layer-contract.ts",
         "src/lib/codemod/index.ts",
       ],
       "project": ["src/**", "tests/**"],

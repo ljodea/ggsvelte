@@ -19,8 +19,11 @@
   // collides with it in every consumer's svelte-check.
   import type { Labs as LabsSpec } from "@ggsvelte/spec";
 
-  import { createLabsLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: LabsSpec = $props();
-  createLabsLayer(() => definedProps(props));
+  createPlotLayer("labs", () => definedProps(props));
 </script>

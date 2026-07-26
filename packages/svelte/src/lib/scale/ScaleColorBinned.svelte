@@ -4,8 +4,11 @@
     scaleColorBinned,
     type BinnedColorScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: BinnedColorScaleOptions = $props();
-  createScaleLayer(() => scaleColorBinned(definedProps(props)));
+  createPlotLayer("scale", () => scaleColorBinned(definedProps(props)));
 </script>

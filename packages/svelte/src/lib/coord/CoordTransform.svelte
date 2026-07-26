@@ -6,8 +6,11 @@
    */
   import { coordTransform, type CoordTransformOptions } from "@ggsvelte/spec";
 
-  import { createCoordLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: CoordTransformOptions = $props();
-  createCoordLayer(() => coordTransform(definedProps(props)));
+  createPlotLayer("coord", () => coordTransform(definedProps(props)));
 </script>

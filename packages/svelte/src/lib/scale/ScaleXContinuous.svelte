@@ -4,8 +4,11 @@
     scaleXContinuous,
     type ContinuousPositionScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: ContinuousPositionScaleOptions = $props();
-  createScaleLayer(() => scaleXContinuous(definedProps(props)));
+  createPlotLayer("scale", () => scaleXContinuous(definedProps(props)));
 </script>
