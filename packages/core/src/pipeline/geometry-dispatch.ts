@@ -35,8 +35,10 @@ export function dispatchGeometryBatch(
 ): GeometryBatch[] {
   switch (frame.binding.layer.geom) {
     case "point":
-    case "dotplot":
       return single(pointsBatch(frame, fx, color, styles, warnings));
+    case "dotplot":
+      // Pass fill so histodot dots honor aes.fill (ggplot2 fill grouping; #900).
+      return single(pointsBatch(frame, fx, color, styles, warnings, fill));
     case "line": {
       // stat_connect emits tied-x step corners; a post-stat x-sort would
       // scramble elbows (#816). Identity line still sorts by x.
