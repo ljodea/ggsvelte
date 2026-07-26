@@ -154,15 +154,15 @@ describe("assertLegendBlockFitsPlacedArea", () => {
       720,
       Number.POSITIVE_INFINITY,
     );
-    expect(() =>
+    expect(() => {
       assertLegendBlockFitsPlacedArea({
         block,
         inputs,
         viewportHeight: 40,
         rightTop: 0,
         bottomInset: 0,
-      }),
-    ).toThrow(expect.objectContaining({ scale: "color", name: "LegendLayoutError" }));
+      });
+    }).toThrow(expect.objectContaining({ scale: "color", name: "LegendLayoutError" }));
   });
 
   it("allows overflow when collision is not error", () => {
@@ -187,14 +187,14 @@ describe("assertLegendBlockFitsPlacedArea", () => {
       720,
       Number.POSITIVE_INFINITY,
     );
-    expect(() =>
+    expect(() => {
       assertLegendBlockFitsPlacedArea({
         block,
         inputs,
         viewportHeight: 40,
         rightTop: 0,
         bottomInset: 0,
-      }),
-    ).not.toThrow();
+      });
+    }).not.toThrow();
   });
 });
