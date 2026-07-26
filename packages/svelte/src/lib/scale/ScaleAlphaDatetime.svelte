@@ -4,8 +4,11 @@
     scaleAlphaDatetime,
     type TemporalNumericStyleScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: TemporalNumericStyleScaleOptions = $props();
-  createScaleLayer(() => scaleAlphaDatetime(definedProps(props)));
+  createPlotLayer("scale", () => scaleAlphaDatetime(definedProps(props)));
 </script>

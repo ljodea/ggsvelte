@@ -14,8 +14,11 @@
    */
   import type { LegendSpec } from "@ggsvelte/spec";
 
-  import { createLegendLayer, definedProps } from "./layer-factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: LegendSpec = $props();
-  createLegendLayer(() => definedProps(props));
+  createPlotLayer("legend", () => definedProps(props));
 </script>

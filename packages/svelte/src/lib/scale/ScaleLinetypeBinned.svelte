@@ -5,8 +5,11 @@
     type BinnedFiniteStyleScaleOptions,
     type LinetypeName,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: BinnedFiniteStyleScaleOptions<LinetypeName> = $props();
-  createScaleLayer(() => scaleLinetypeBinned(definedProps(props)));
+  createPlotLayer("scale", () => scaleLinetypeBinned(definedProps(props)));
 </script>

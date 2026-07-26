@@ -4,8 +4,11 @@
     scaleAlphaDiscrete,
     type DiscreteNumericStyleScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: DiscreteNumericStyleScaleOptions = $props();
-  createScaleLayer(() => scaleAlphaDiscrete(definedProps(props)));
+  createPlotLayer("scale", () => scaleAlphaDiscrete(definedProps(props)));
 </script>

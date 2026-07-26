@@ -4,8 +4,11 @@
     scaleAlphaIdentity,
     type IdentityNumericStyleScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: IdentityNumericStyleScaleOptions = $props();
-  createScaleLayer(() => scaleAlphaIdentity(definedProps(props)));
+  createPlotLayer("scale", () => scaleAlphaIdentity(definedProps(props)));
 </script>

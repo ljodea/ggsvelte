@@ -91,9 +91,13 @@ describe("renderShell", () => {
     const src = renderShell(SHELL_MANIFEST[0]!);
     expect(src.startsWith(GENERATED_HEADER)).toBe(true);
     expect(src).toContain("type ContinuousPositionScaleOptions");
-    expect(src).toContain("createScaleLayer(() => scaleXContinuous(definedProps(props)))");
+    expect(src).toContain('createPlotLayer("scale", () => scaleXContinuous(definedProps(props)))');
     expect(src).toContain('from "@ggsvelte/spec"');
-    expect(src).toContain('from "./factory.svelte.js"');
+    expect(src).toContain('from "../layers/plot-layer.svelte.js"');
+    // Factory import is multi-line so it stays under printWidth 80.
+    expect(src).toContain(
+      '  import {\n    createPlotLayer,\n    definedProps,\n  } from "../layers/plot-layer.svelte.js";',
+    );
     // ContinuousPositionScaleOptions is long enough that prettier multi-lines it.
     expect(src).toContain(
       "  import {\n    scaleXContinuous,\n    type ContinuousPositionScaleOptions,\n  }",
@@ -103,6 +107,18 @@ describe("renderShell", () => {
     expect(renderShell(date)).toContain(
       'import { scaleXDate, type TemporalScaleOptions } from "@ggsvelte/spec";',
     );
+  });
+
+  it("every script line of every generated shell is ≤ printWidth 80", () => {
+    // Header comment is intentionally long; prettier only wraps script body.
+    for (const spec of SHELL_MANIFEST) {
+      const src = renderShell(spec);
+      const script = src.match(/<script[^>]*>([\s\S]*?)<\/script>/)?.[1] ?? "";
+      for (const line of script.split("\n")) {
+        if (line.length === 0) continue;
+        expect(line.length, `${spec.component}: ${line}`).toBeLessThanOrEqual(80);
+      }
+    }
   });
 
   it("emits the Omit expression for reverse shells (not ContinuousPositionScaleOptions alone)", () => {

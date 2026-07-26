@@ -322,14 +322,25 @@ export function renderShell(spec: ShellSpec): string {
   const propsSingle = `  const props: ${spec.optionsType} = $props();`;
   const propsBlock =
     propsSingle.length > 80 ? `  const props: ${spec.optionsType} =\n    $props();` : propsSingle;
+  // Multi-line factory import: single-line form exceeds prettier printWidth 80
+  // (`createPlotLayer, definedProps` from `../layers/plot-layer.svelte.js`).
+  const factoryImport = [
+    `  import {`,
+    `    createPlotLayer,`,
+    `    definedProps,`,
+    `  } from "../layers/plot-layer.svelte.js";`,
+  ].join("\n");
+  // createPlotLayer("scale", () => helper(definedProps(props))) — longest
+  // helper names still fit printWidth 80 (e.g. scaleLinewidthContinuous).
+  const createCall = `  createPlotLayer("scale", () => ${spec.helper}(definedProps(props)));`;
   return [
     GENERATED_HEADER,
     `<script lang="ts">`,
     importBlock,
-    `  import { createScaleLayer, definedProps } from "./factory.svelte.js";`,
+    factoryImport,
     ``,
     propsBlock,
-    `  createScaleLayer(() => ${spec.helper}(definedProps(props)));`,
+    createCall,
     `</script>`,
     ``,
   ].join("\n");

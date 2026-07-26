@@ -4,8 +4,11 @@
     scaleYSqrt,
     type TransformedPositionScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: TransformedPositionScaleOptions = $props();
-  createScaleLayer(() => scaleYSqrt(definedProps(props)));
+  createPlotLayer("scale", () => scaleYSqrt(definedProps(props)));
 </script>

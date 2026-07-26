@@ -4,9 +4,12 @@
     scaleXReverse,
     type ContinuousPositionScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: Omit<ContinuousPositionScaleOptions, "transform" | "reverse"> =
     $props();
-  createScaleLayer(() => scaleXReverse(definedProps(props)));
+  createPlotLayer("scale", () => scaleXReverse(definedProps(props)));
 </script>

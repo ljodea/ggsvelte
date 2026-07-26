@@ -4,8 +4,11 @@
     scaleLinewidthManual,
     type ManualNumericStyleScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: ManualNumericStyleScaleOptions = $props();
-  createScaleLayer(() => scaleLinewidthManual(definedProps(props)));
+  createPlotLayer("scale", () => scaleLinewidthManual(definedProps(props)));
 </script>

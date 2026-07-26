@@ -7,7 +7,10 @@
    */
   import type { FacetFieldInput, FacetInput } from "@ggsvelte/spec";
 
-  import { createFacetLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   type Props = {
     rows?: FacetFieldInput;
@@ -17,7 +20,7 @@
   };
 
   const props: Props = $props();
-  createFacetLayer(() => {
+  createPlotLayer("facet", () => {
     const defined = definedProps(props);
     return {
       ...(defined.rows !== undefined && { rows: defined.rows }),

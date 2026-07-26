@@ -7,8 +7,8 @@
    */
   import type { GuidesSpec } from "@ggsvelte/spec";
 
-  import { createGuidesLayer } from "./factory.svelte.js";
+  import { createPlotLayer } from "../layers/plot-layer.svelte.js";
 
   const { value }: { value: GuidesSpec } = $props();
-  createGuidesLayer(() => value);
+  createPlotLayer("guides", () => value);
 </script>

@@ -4,8 +4,11 @@
     scaleYDiscrete,
     type DiscretePositionScaleOptions,
   } from "@ggsvelte/spec";
-  import { createScaleLayer, definedProps } from "./factory.svelte.js";
+  import {
+    createPlotLayer,
+    definedProps,
+  } from "../layers/plot-layer.svelte.js";
 
   const props: DiscretePositionScaleOptions = $props();
-  createScaleLayer(() => scaleYDiscrete(definedProps(props)));
+  createPlotLayer("scale", () => scaleYDiscrete(definedProps(props)));
 </script>
