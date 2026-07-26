@@ -174,6 +174,22 @@ export type {
 } from "./guide-helpers.js";
 
 // Checked public capability ledger
+export {
+  CIVIDIS_RAMP_10,
+  INFERNO_RAMP_10,
+  MAGMA_RAMP_10,
+  PLASMA_RAMP_10,
+  SEQUENTIAL_SCHEME_RAMPS,
+  sequentialSchemeRamp,
+  TURBO_RAMP_10,
+  VIRIDIS_RAMP_10,
+} from "./sequential-ramps.js";
+export type { SequentialSchemeName } from "./sequential-ramps.js";
+export type {
+  ViridisContinuousOptions,
+  ViridisDiscreteOptions,
+  ViridisOption,
+} from "./scale-color-helpers.js";
 export { SCALE_CAPABILITIES, STYLE_AESTHETIC_GEOMS } from "./capabilities.js";
 export type { ScaleCapability, StyleAesthetic } from "./capabilities.js";
 
@@ -275,6 +291,9 @@ export {
   scaleColorLog10,
   scaleColorManual,
   scaleColorSqrt,
+  scaleColorViridisB,
+  scaleColorViridisC,
+  scaleColorViridisD,
   scaleColourBinned,
   scaleColourContinuous,
   scaleColourDate,
@@ -284,6 +303,9 @@ export {
   scaleColourLog10,
   scaleColourManual,
   scaleColourSqrt,
+  scaleColourViridisB,
+  scaleColourViridisC,
+  scaleColourViridisD,
   scaleFillBinned,
   scaleFillContinuous,
   scaleFillDate,
@@ -293,6 +315,9 @@ export {
   scaleFillLog10,
   scaleFillManual,
   scaleFillSqrt,
+  scaleFillViridisB,
+  scaleFillViridisC,
+  scaleFillViridisD,
   scale_color_binned,
   scale_color_continuous,
   scale_color_date,
@@ -302,6 +327,9 @@ export {
   scale_color_log10,
   scale_color_manual,
   scale_color_sqrt,
+  scale_color_viridis_b,
+  scale_color_viridis_c,
+  scale_color_viridis_d,
   scale_colour_binned,
   scale_colour_continuous,
   scale_colour_date,
@@ -311,6 +339,9 @@ export {
   scale_colour_log10,
   scale_colour_manual,
   scale_colour_sqrt,
+  scale_colour_viridis_b,
+  scale_colour_viridis_c,
+  scale_colour_viridis_d,
   scale_fill_binned,
   scale_fill_continuous,
   scale_fill_date,
@@ -320,6 +351,9 @@ export {
   scale_fill_log10,
   scale_fill_manual,
   scale_fill_sqrt,
+  scale_fill_viridis_b,
+  scale_fill_viridis_c,
+  scale_fill_viridis_d,
   scaleXBinned,
   scaleXContinuous,
   scaleXDate,

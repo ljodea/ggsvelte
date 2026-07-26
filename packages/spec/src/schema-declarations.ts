@@ -2219,7 +2219,7 @@ export const SpecDeclarations = {
         scheme: Type.Optional(
           Type.Union(COLOR_SCHEME_NAME_SCHEMAS, {
             description:
-              'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "tableau10", and "colorblind"; or sequential "viridis" (default). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
+              'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "tableau10", and "colorblind"; or sequential viridis family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo". When type is omitted, the named scheme selects its ordinal or sequential scale family.',
           }),
         ),
         reverse: Type.Optional(

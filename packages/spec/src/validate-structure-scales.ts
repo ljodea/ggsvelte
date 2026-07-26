@@ -87,7 +87,8 @@ export function colorScaleStructuralErrors(scales: Record<string, unknown>): Spe
         path: `/scales/${channel}/scheme`,
         message: `The categorical scheme "${scheme}" cannot be used with a ${type} color scale.`,
         fix: {
-          description: 'Use "viridis" or provide a sequential range of #rgb/#rrggbb stops.',
+          description:
+            'Use a viridis-family scheme ("viridis", "magma", "plasma", "inferno", "cividis", "turbo") or provide a sequential range of #rgb/#rrggbb stops.',
           example: "viridis",
         },
       });
@@ -101,10 +102,11 @@ export function colorScaleStructuralErrors(scales: Record<string, unknown>): Spe
         path: `/scales/${channel}/scheme`,
         message:
           type === "ordinal"
-            ? 'The sequential scheme "viridis" cannot be used with an ordinal color scale.'
-            : 'The sequential scheme "viridis" cannot be used with a manual color scale.',
+            ? `The sequential scheme "${scheme}" cannot be used with an ordinal color scale.`
+            : `The sequential scheme "${scheme}" cannot be used with a manual color scale.`,
         fix: {
-          description: "Use a categorical scheme or provide an ordinal range of CSS colors.",
+          description:
+            "Use a categorical scheme, provide an ordinal range of CSS colors, or use scale_*_viridis_d (bakes a discrete range).",
           example: "observable10",
         },
       });

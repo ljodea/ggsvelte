@@ -2699,9 +2699,29 @@
                 {
                   "type": "string",
                   "const": "viridis"
+                },
+                {
+                  "type": "string",
+                  "const": "magma"
+                },
+                {
+                  "type": "string",
+                  "const": "plasma"
+                },
+                {
+                  "type": "string",
+                  "const": "inferno"
+                },
+                {
+                  "type": "string",
+                  "const": "cividis"
+                },
+                {
+                  "type": "string",
+                  "const": "turbo"
                 }
               ],
-              "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\", \"flexoki\", \"tableau10\", and \"colorblind\"; or sequential \"viridis\" (default). When type is omitted, the named scheme selects its ordinal or sequential scale family."
+              "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\", \"flexoki\", \"tableau10\", and \"colorblind\"; or sequential viridis family \"viridis\" (default), \"magma\", \"plasma\", \"inferno\", \"cividis\", \"turbo\". When type is omitted, the named scheme selects its ordinal or sequential scale family."
             },
             "reverse": {
               "type": "boolean",

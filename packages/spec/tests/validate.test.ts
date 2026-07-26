@@ -160,7 +160,8 @@ describe("validate — agent errors (snapshot-tested messages)", () => {
         path: "/scales/color/scheme",
         message: 'The categorical scheme "ipsum" cannot be used with a sequential color scale.',
         fix: {
-          description: 'Use "viridis" or provide a sequential range of #rgb/#rrggbb stops.',
+          description:
+            'Use a viridis-family scheme ("viridis", "magma", "plasma", "inferno", "cividis", "turbo") or provide a sequential range of #rgb/#rrggbb stops.',
           example: "viridis",
         },
       },
@@ -179,7 +180,8 @@ describe("validate — agent errors (snapshot-tested messages)", () => {
         path: "/scales/fill/scheme",
         message: 'The sequential scheme "viridis" cannot be used with an ordinal color scale.',
         fix: {
-          description: "Use a categorical scheme or provide an ordinal range of CSS colors.",
+          description:
+            "Use a categorical scheme, provide an ordinal range of CSS colors, or use scale_*_viridis_d (bakes a discrete range).",
           example: "observable10",
         },
       },

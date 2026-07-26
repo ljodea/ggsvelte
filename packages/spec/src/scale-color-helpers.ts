@@ -5,6 +5,7 @@
 
 import type { ColorScaleSpec, Scales } from "./schema.js";
 import { SEQUENTIAL_SCHEME_NAMES } from "./schema-names.js";
+import { sequentialSchemeRamp, type SequentialSchemeName } from "./sequential-ramps.js";
 
 const SEQUENTIAL_SCHEMES = new Set<string>(SEQUENTIAL_SCHEME_NAMES);
 
@@ -188,3 +189,84 @@ export const scale_fill_date = scaleFillDate;
 export const scale_fill_datetime = scaleFillDatetime;
 export const scale_fill_manual = scaleFillManual;
 export const scale_fill_identity = scaleFillIdentity;
+
+// --- viridis family constructors (#828) ------------------------------------
+// option maps to a named sequential scheme; _c sequential, _b binned, _d
+// ordinal with range baked from the shared 10-stop table (validator still
+// rejects raw ordinal+sequential-scheme JSON).
+
+/** ggplot2 scale_*_viridis_* `option` names. */
+export type ViridisOption = SequentialSchemeName;
+
+export type ViridisContinuousOptions = Omit<SequentialColorScaleOptions, "scheme"> & {
+  /** Viridis-family colormap (default `"viridis"`). */
+  option?: ViridisOption;
+  /** ggplot2 `direction`: `-1` reverses the ramp (equivalent to `reverse: true`). */
+  direction?: 1 | -1;
+};
+
+export type ViridisDiscreteOptions = Omit<DiscreteColorScaleOptions, "scheme" | "range"> & {
+  option?: ViridisOption;
+  direction?: 1 | -1;
+  reverse?: boolean;
+};
+
+function resolveViridisReverse(
+  reverse: boolean | undefined,
+  direction: 1 | -1 | undefined,
+): boolean {
+  if (reverse !== undefined) return reverse;
+  return direction === -1;
+}
+
+function viridisContinuousConfig(options: ViridisContinuousOptions): SequentialColorScaleOptions {
+  const { option = "viridis", direction, reverse, ...rest } = options;
+  return {
+    ...rest,
+    scheme: option,
+    reverse: resolveViridisReverse(reverse, direction),
+  };
+}
+
+function viridisDiscreteConfig(options: ViridisDiscreteOptions): DiscreteColorScaleOptions {
+  const { option = "viridis", direction, reverse, ...rest } = options;
+  const ramp = sequentialSchemeRamp(option);
+  if (ramp === undefined) {
+    throw new Error(`Unknown viridis option "${option}".`);
+  }
+  const stops = resolveViridisReverse(reverse, direction) ? [...ramp].toReversed() : [...ramp];
+  return { ...rest, range: stops };
+}
+
+export function scaleColorViridisC(options: ViridisContinuousOptions = {}): Scales {
+  return colorScale("color", "sequential", viridisContinuousConfig(options));
+}
+export function scaleColorViridisD(options: ViridisDiscreteOptions = {}): Scales {
+  return colorScale("color", "ordinal", viridisDiscreteConfig(options));
+}
+export function scaleColorViridisB(options: ViridisContinuousOptions = {}): Scales {
+  return colorScale("color", "binned", viridisContinuousConfig(options));
+}
+
+export function scaleFillViridisC(options: ViridisContinuousOptions = {}): Scales {
+  return colorScale("fill", "sequential", viridisContinuousConfig(options));
+}
+export function scaleFillViridisD(options: ViridisDiscreteOptions = {}): Scales {
+  return colorScale("fill", "ordinal", viridisDiscreteConfig(options));
+}
+export function scaleFillViridisB(options: ViridisContinuousOptions = {}): Scales {
+  return colorScale("fill", "binned", viridisContinuousConfig(options));
+}
+
+export const scaleColourViridisC = scaleColorViridisC;
+export const scaleColourViridisD = scaleColorViridisD;
+export const scaleColourViridisB = scaleColorViridisB;
+export const scale_color_viridis_c = scaleColorViridisC;
+export const scale_color_viridis_d = scaleColorViridisD;
+export const scale_color_viridis_b = scaleColorViridisB;
+export const scale_colour_viridis_c = scaleColorViridisC;
+export const scale_colour_viridis_d = scaleColorViridisD;
+export const scale_colour_viridis_b = scaleColorViridisB;
+export const scale_fill_viridis_c = scaleFillViridisC;
+export const scale_fill_viridis_d = scaleFillViridisD;
+export const scale_fill_viridis_b = scaleFillViridisB;

@@ -65,11 +65,11 @@ function colourAliases(stem: string): string[] {
  *   position-binned      2
  *   position-temporal    4
  *   position-discrete    2
- *   color-fill          18
+ *   color-fill          24
  *   numeric-style       21
  *   finite-style         8
  *   ----------------------
- *   63 component files + 9 Colour aliases
+ *   69 component files + 12 Colour aliases
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
@@ -127,7 +127,7 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscretePositionScaleOptions",
   ]),
 
-  // --- color-fill (18 components + 9 Colour aliases) -----------------------
+  // --- color-fill (24 components + 12 Colour aliases) ----------------------
   // optionsTypes match the slice-3 hand-written shells exactly.
   shell(
     "scaleColorContinuous",
@@ -149,6 +149,27 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "BinnedColorScaleOptions",
     ["BinnedColorScaleOptions"],
     colourAliases("Binned"),
+  ),
+  shell(
+    "scaleColorViridisC",
+    "color-fill",
+    "ViridisContinuousOptions",
+    ["ViridisContinuousOptions"],
+    colourAliases("ViridisC"),
+  ),
+  shell(
+    "scaleColorViridisD",
+    "color-fill",
+    "ViridisDiscreteOptions",
+    ["ViridisDiscreteOptions"],
+    colourAliases("ViridisD"),
+  ),
+  shell(
+    "scaleColorViridisB",
+    "color-fill",
+    "ViridisContinuousOptions",
+    ["ViridisContinuousOptions"],
+    colourAliases("ViridisB"),
   ),
   shell(
     "scaleColorLog10",
@@ -199,6 +220,13 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscreteColorScaleOptions",
   ]),
   shell("scaleFillBinned", "color-fill", "BinnedColorScaleOptions", ["BinnedColorScaleOptions"]),
+  shell("scaleFillViridisC", "color-fill", "ViridisContinuousOptions", [
+    "ViridisContinuousOptions",
+  ]),
+  shell("scaleFillViridisD", "color-fill", "ViridisDiscreteOptions", ["ViridisDiscreteOptions"]),
+  shell("scaleFillViridisB", "color-fill", "ViridisContinuousOptions", [
+    "ViridisContinuousOptions",
+  ]),
   shell("scaleFillLog10", "color-fill", "TransformedColorScaleOptions", [
     "TransformedColorScaleOptions",
   ]),

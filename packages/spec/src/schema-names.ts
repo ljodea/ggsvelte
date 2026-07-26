@@ -29,8 +29,15 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "colorblind",
 ] as const;
 
-/** Named sequential color schemes known to this schema version. */
-export const SEQUENTIAL_SCHEME_NAMES = ["viridis"] as const;
+/** Named sequential color schemes known to this schema version (viridis family). */
+export const SEQUENTIAL_SCHEME_NAMES = [
+  "viridis",
+  "magma",
+  "plasma",
+  "inferno",
+  "cividis",
+  "turbo",
+] as const;
 
 export const COLOR_SCHEME_NAMES = [
   ...CATEGORICAL_SCHEME_NAMES,

@@ -457,6 +457,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "point/viridis-continuous",
+    category: "point",
+    name: "viridis-continuous",
+    title: "Viridis continuous color scale",
+    description: "",
+    tags: ["point", "color", "viridis", "sequential", "scale"],
+    docsSection: "Points & scatter",
+    hasData: true,
+  },
+  {
     id: "raster/grid",
     category: "raster",
     name: "grid",

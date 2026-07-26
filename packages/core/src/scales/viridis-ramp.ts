@@ -1,13 +1,14 @@
-/** 10 stops sampled evenly from the viridis colormap (dark -> bright). */
-export const VIRIDIS_RAMP_10: readonly string[] = [
-  "#440154",
-  "#482878",
-  "#3e4989",
-  "#31688e",
-  "#26828e",
-  "#1f9e89",
-  "#35b779",
-  "#6ece58",
-  "#b5de2b",
-  "#fde725",
-];
+/**
+ * Viridis-family sequential ramps live in @ggsvelte/spec so authoring helpers
+ * and the pipeline share one table (viridis_d bakes range from the same stops).
+ */
+export {
+  CIVIDIS_RAMP_10,
+  INFERNO_RAMP_10,
+  MAGMA_RAMP_10,
+  PLASMA_RAMP_10,
+  SEQUENTIAL_SCHEME_RAMPS,
+  sequentialSchemeRamp,
+  TURBO_RAMP_10,
+  VIRIDIS_RAMP_10,
+} from "@ggsvelte/spec";

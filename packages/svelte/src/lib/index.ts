@@ -179,6 +179,12 @@ export { default as ScaleColorDiscrete } from "./scale/ScaleColorDiscrete.svelte
 /** @lifecycle stable-intent */
 export { default as ScaleColorBinned } from "./scale/ScaleColorBinned.svelte";
 /** @lifecycle stable-intent */
+export { default as ScaleColorViridisC } from "./scale/ScaleColorViridisC.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorViridisD } from "./scale/ScaleColorViridisD.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorViridisB } from "./scale/ScaleColorViridisB.svelte";
+/** @lifecycle stable-intent */
 export { default as ScaleColorLog10 } from "./scale/ScaleColorLog10.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColorSqrt } from "./scale/ScaleColorSqrt.svelte";
@@ -196,6 +202,12 @@ export { default as ScaleFillContinuous } from "./scale/ScaleFillContinuous.svel
 export { default as ScaleFillDiscrete } from "./scale/ScaleFillDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleFillBinned } from "./scale/ScaleFillBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillViridisC } from "./scale/ScaleFillViridisC.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillViridisD } from "./scale/ScaleFillViridisD.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillViridisB } from "./scale/ScaleFillViridisB.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleFillLog10 } from "./scale/ScaleFillLog10.svelte";
 /** @lifecycle stable-intent */
@@ -272,6 +284,12 @@ export { default as ScaleColourContinuous } from "./scale/ScaleColorContinuous.s
 export { default as ScaleColourDiscrete } from "./scale/ScaleColorDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourBinned } from "./scale/ScaleColorBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourViridisC } from "./scale/ScaleColorViridisC.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourViridisD } from "./scale/ScaleColorViridisD.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourViridisB } from "./scale/ScaleColorViridisB.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourLog10 } from "./scale/ScaleColorLog10.svelte";
 /** @lifecycle stable-intent */
