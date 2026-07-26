@@ -38,6 +38,13 @@ describe("statUnique", () => {
     expect(result.keep).toEqual([0, 1]);
   });
 
+  it("collapses -0 with +0 (signed zero is not a distinct key)", () => {
+    const result = statUnique({
+      keys: [[0], [-0], [0]],
+    });
+    expect(result.keep).toEqual([0]);
+  });
+
   it("keeps all rows when every key is unique", () => {
     const result = statUnique({
       keys: [[0], [1], [2]],

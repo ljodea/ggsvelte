@@ -20,8 +20,8 @@ function keyToken(value: unknown): string {
   if (value === null) return "n";
   if (value === undefined) return "u";
   if (typeof value === "number") {
-    if (Object.is(value, -0)) return "z-";
     if (Number.isNaN(value)) return "nan";
+    // `${-0}` and `${0}` are both "0" — collapse signed zero (Object.is would not).
     return `d:${value}`;
   }
   if (typeof value === "boolean") return value ? "t" : "f";
