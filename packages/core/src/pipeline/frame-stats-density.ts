@@ -27,7 +27,7 @@ export function buildDensityFrame(
     groups,
     weights: binding.weightField === null ? null : table.numeric(binding.weightField),
     carried,
-    params: (layer.params ?? {}) as { bw?: number; adjust?: number; n?: number; cut?: number },
+    params: layer.params ?? {},
   });
   removedStatWarning(result.dropped, index, "missing or non-finite x", warnings);
   if (result.droppedGroups > 0) {

@@ -1,0 +1,48 @@
+{
+  "id": "89-blank-with-points",
+  "kind": "chart",
+  "prompt": "Scatter x against y and expand the domain with a blank layer on x2 and y2.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "x2", "type": "quantitative" },
+      { "name": "y2", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 0, "x2": 0, "y2": 0 },
+      { "x": 1, "y": 1, "x2": 100, "y2": 50 },
+      { "x": 0.5, "y": 0.5, "x2": 50, "y2": 25 },
+      { "x": 0.2, "y": 0.8, "x2": 80, "y2": 40 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" }
+        }
+      },
+      {
+        "geom": "blank",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x2" },
+          "y": { "field": "y2" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_blank expands domains beyond co-layered points (#791)."
+}

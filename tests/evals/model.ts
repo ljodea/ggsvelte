@@ -377,6 +377,32 @@ export class MockResponder implements Responder {
 
     // --- geom selection (keyword templates, most specific first) -----------
     if (
+      /\bgeom[_\s]?blank\b|\bblank layer\b|\bblank geom\b|\btrain(?:s|ing)? (?:the )?scales?\b.*\bblank\b|\bblank\b.*\bno marks\b/.test(
+        prompt,
+      ) ||
+      (/\bblank\b/.test(prompt) &&
+        (/\bdomain\b/.test(prompt) || /\bexpand\b/.test(prompt) || /\bno marks\b/.test(prompt)))
+    ) {
+      // geom_blank: scale training without marks (#791).
+      const aes: MockAes = {};
+      if (/\bx2\b/.test(prompt) && fieldNamed("x2") !== undefined) {
+        aes.x = f("x2");
+        if (fieldNamed("y2") !== undefined) aes.y = f("y2");
+        // Point layer first when co-layering with primary x/y.
+        if (fieldNamed("x") !== undefined && fieldNamed("y") !== undefined) {
+          spec.layers.push({
+            geom: "point",
+            aes: { x: f("x"), y: f("y") },
+          });
+        }
+      } else {
+        const x = fieldNamed("x") ?? pick.quant() ?? "x";
+        const y = fieldNamed("y") ?? pick.quant() ?? "y";
+        aes.x = f(x);
+        aes.y = f(y);
+      }
+      spec.layers.push({ geom: "blank", aes });
+    } else if (
       (/\bgeom[_\s]?sf[_\s]?label\b|\bsf_label\b|\bsf label\b|\bboxed labels?\b/.test(prompt) ||
         (fieldNamed("geometry") !== undefined &&
           /\blabel\b/.test(prompt) &&

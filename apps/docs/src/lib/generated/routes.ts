@@ -362,6 +362,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "blank-layers-geom-blank",
+        title: "Blank layers (geom_blank)",
+        level: 2,
+      },
+      {
         id: "simple-features-geom-sf",
         title: "Simple features (geom_sf)",
         level: 2,
@@ -2252,8 +2257,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-643",
-        title: "experimental (643)",
+        id: "experimental-648",
+        title: "experimental (648)",
         level: 3,
       },
       {
@@ -2292,8 +2297,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-474",
-        title: "experimental (474)",
+        id: "experimental-475",
+        title: "experimental (475)",
         level: 3,
       },
       {

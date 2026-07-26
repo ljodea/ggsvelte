@@ -1,0 +1,37 @@
+{
+  "id": "88-blank-domain",
+  "kind": "chart",
+  "prompt": "Train the plot scales from x and y using a blank layer only — no marks.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 1 },
+      { "x": 10, "y": 5 },
+      { "x": 3, "y": 2 },
+      { "x": 7, "y": 4 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "blank",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_blank trains scales with no geometry batches (#791)."
+}

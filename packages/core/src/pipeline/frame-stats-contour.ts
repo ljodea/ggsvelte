@@ -5,8 +5,6 @@
  * level is carried for after_stat / tooltips (color-by-level deferred — ColorBinding
  * has no statColumn yet).
  */
-import type { ContourParams } from "@ggsvelte/spec";
-
 import { statContour } from "../stats/contour.js";
 import type { ColumnTable } from "../table.js";
 
@@ -32,7 +30,7 @@ export function buildContourFrame(
     z: table.numeric(zField),
     groups,
     carried,
-    params: (layer.params ?? {}) as ContourParams,
+    params: layer.params ?? {},
   });
   removedStatWarning(result.dropped, index, "missing or non-finite x/y/z before contour", warnings);
   if (result.droppedGroups > 0) {

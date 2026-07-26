@@ -369,6 +369,27 @@ weights. Mapping aes.y fails loud (\`computed-y-mapped\`).
 
 [Dotplot histodot](/examples/dotplot/histodot): stacked points in fixed bins.
 
+## Blank layers (\`geom_blank\`)
+
+\`geom_blank\` (ggplot2 \`geom_blank\`) trains scales and layout from mapped
+aesthetics **without drawing marks or hit targets**. Use it to expand domains
+(e.g. force a second series into the axis range) or reserve plot space before
+data arrives. No channels are required; whatever is mapped trains its scale.
+Default stat/position: identity/identity. Builder \`.geomBlank()\` and
+\`<GeomBlank />\`.
+
+\`\`\`svelte fragment
+<GeomPoint />
+<GeomBlank aes={{ x: "x2", y: "y2" }} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y" }))
+  .geomPoint()
+  .geomBlank({ aes: aes({ x: "x2", y: "y2" }) })
+  .spec();
+\`\`\`
+
 ## Simple features (\`geom_sf\`)
 
 \`geom_sf\` draws already-projected GeoJSON **Geometry** values stored as JSON
