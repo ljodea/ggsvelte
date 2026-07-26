@@ -23,6 +23,9 @@ import type {
   ColLayer,
   DensityLayer,
   ErrorbarLayer,
+  LinerangeLayer,
+  PointrangeLayer,
+  CrossbarLayer,
   HistogramLayer,
   FreqpolyLayer,
   HlineLayer,
@@ -108,6 +111,9 @@ export interface RuntimeQuantileLayer extends WithRuntimeAes<QuantileLayer> {}
 export interface RuntimeBoxplotLayer extends WithRuntimeAes<BoxplotLayer> {}
 export interface RuntimeDensityLayer extends WithRuntimeAes<DensityLayer> {}
 export interface RuntimeErrorbarLayer extends WithRuntimeAes<ErrorbarLayer> {}
+export interface RuntimeLinerangeLayer extends WithRuntimeAes<LinerangeLayer> {}
+export interface RuntimePointrangeLayer extends WithRuntimeAes<PointrangeLayer> {}
+export interface RuntimeCrossbarLayer extends WithRuntimeAes<CrossbarLayer> {}
 export interface RuntimeRectLayer extends WithRuntimeAes<RectLayer> {}
 export interface RuntimeTileLayer extends WithRuntimeAes<TileLayer> {}
 export interface RuntimeBin2dLayer extends WithRuntimeAes<Bin2dLayer> {}
@@ -153,6 +159,9 @@ export type RuntimeLayerSpec =
   | RuntimeBoxplotLayer
   | RuntimeDensityLayer
   | RuntimeErrorbarLayer
+  | RuntimeLinerangeLayer
+  | RuntimePointrangeLayer
+  | RuntimeCrossbarLayer
   | RuntimeRectLayer
   | RuntimeTileLayer
   | RuntimeBin2dLayer

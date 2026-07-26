@@ -13,6 +13,9 @@ import type {
   Density2dParams,
   DotplotParams,
   ErrorbarParams,
+  LinerangeParams,
+  PointrangeParams,
+  CrossbarParams,
   RibbonParams,
   LineParams,
   PathParams,
@@ -172,6 +175,27 @@ export interface GeomErrorbarOptions extends ErrorbarParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
   stat?: "identity" | "unique" | "summary" | "summary_bin";
+}
+
+/** Linerange sugar options (stem without caps). */
+export interface GeomLinerangeOptions extends LinerangeParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+  stat?: "identity" | "summary";
+}
+
+/** Pointrange sugar options (stem + mid point). */
+export interface GeomPointrangeOptions extends PointrangeParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+  stat?: "identity" | "summary";
+}
+
+/** Crossbar sugar options (interval box + mid line). */
+export interface GeomCrossbarOptions extends CrossbarParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+  stat?: "identity" | "summary";
 }
 
 /** Rect-layer sugar options: params plus optional layer-level aes. */

@@ -49,6 +49,9 @@ export function candidateAutoMode(
     case "quantile":
     case "density_2d":
     case "errorbar":
+    case "linerange":
+    case "pointrange":
+    case "crossbar":
     case "boxplot":
       return "x";
     case "ribbon":
