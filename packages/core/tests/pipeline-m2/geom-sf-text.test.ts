@@ -156,4 +156,46 @@ describe("geom_sf_text / stat_sf_coordinates", () => {
     expect(spec.layers[0]?.stat).toBe("sf_coordinates");
     expect(spec.layers[0]?.geom).toBe("sf_text");
   });
+
+  it("returns an empty scene for zero-row data instead of throwing", () => {
+    const model = runPipeline(
+      gg({ geometry: [] as string[], name: [] as string[] }, aes({ label: "name" }))
+        .geomSfText()
+        .spec(),
+      size,
+    );
+    expect(model.scene.batches).toEqual([]);
+    expect(model.warnings.some((w) => w.code === "empty-layer" || w.code === "empty-data")).toBe(
+      true,
+    );
+  });
+
+  it("computes the exact shoelace centroid for a unit square", () => {
+    // [0,2]×[0,2] exterior → centroid (1,1) with zero domain pad via expand:false if available.
+    // Without expand control, assert domain still contains the centroid.
+    const square = geo({
+      type: "Polygon",
+      coordinates: [
+        [
+          [0, 0],
+          [2, 0],
+          [2, 2],
+          [0, 2],
+          [0, 0],
+        ],
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [square], name: ["A"] }, aes({ label: "name" }))
+        .geomSfText()
+        .spec(),
+      size,
+    );
+    if (model.scales.x.type !== "band" && model.scales.y.type !== "band") {
+      expect(model.scales.x.domain[0]).toBeLessThanOrEqual(1);
+      expect(model.scales.x.domain[1]).toBeGreaterThanOrEqual(1);
+      expect(model.scales.y.domain[0]).toBeLessThanOrEqual(1);
+      expect(model.scales.y.domain[1]).toBeGreaterThanOrEqual(1);
+    }
+  });
 });

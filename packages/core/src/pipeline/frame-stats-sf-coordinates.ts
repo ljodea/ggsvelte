@@ -23,6 +23,35 @@ function styleColumn(
   return valueRows.map((row) => col[row]!);
 }
 
+function emptySfCoordinatesFrame(
+  binding: LayerBinding,
+  table: ColumnTable,
+  groups: readonly number[],
+): LayerFrame {
+  return {
+    binding,
+    table,
+    n: 0,
+    xValues: null,
+    xNumeric: new Float64Array(0),
+    yValues: null,
+    yNumeric: new Float64Array(0),
+    groups: [],
+    inputGroups: groups,
+    inputSourceRows: null,
+    rowIndex: new Uint32Array(0),
+    colorValues: null,
+    fillValues: null,
+    sizeValues: null,
+    linewidthValues: null,
+    alphaValues: null,
+    shapeValues: null,
+    linetypeValues: null,
+    labelValues: null,
+    ...emptyFrameExtras(),
+  };
+}
+
 export function buildSfCoordinatesFrame(
   binding: LayerBinding,
   table: ColumnTable,
@@ -38,6 +67,11 @@ export function buildSfCoordinatesFrame(
       `/layers/${index}/params/geometry`,
       `stat_sf_coordinates requires a geometry column "${field}" of GeoJSON Geometry JSON strings.`,
     );
+  }
+
+  // Empty panel / zero-row data: match geom_sf and other marks (warnEmptyLayers).
+  if (table.rowCount === 0) {
+    return emptySfCoordinatesFrame(binding, table, groups);
   }
 
   const geomCol = table.column(field);
@@ -71,12 +105,10 @@ export function buildSfCoordinatesFrame(
     });
   }
 
+  // All features dropped (or empty after filters): empty frame, not a hard error,
+  // so faceted panels and filtered datasets still render.
   if (outX.length === 0) {
-    throw new PipelineError(
-      "sf-geometry-invalid",
-      `/layers/${index}`,
-      "stat_sf_coordinates produced no finite representative points from the geometry column.",
-    );
+    return emptySfCoordinatesFrame(binding, table, groups);
   }
 
   return {
