@@ -20,8 +20,8 @@ const HANDLER_CAPABILITY_PAIRS = [
   ["onlegendfilter", "legendFilter"],
 ] as const;
 
-export type WiringHandlerName = (typeof HANDLER_CAPABILITY_PAIRS)[number][0];
-export type WiringCapabilityName = (typeof HANDLER_CAPABILITY_PAIRS)[number][1];
+type WiringHandlerName = (typeof HANDLER_CAPABILITY_PAIRS)[number][0];
+type WiringCapabilityName = (typeof HANDLER_CAPABILITY_PAIRS)[number][1];
 
 /**
  * Full handler/capability bags (not Partial): missing keys would silently
