@@ -1753,6 +1753,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "quantile-empty",
+        title: "quantile-empty",
+        level: 3,
+      },
+      {
+        id: "quantile-group-dropped",
+        title: "quantile-group-dropped",
+        level: 3,
+      },
+      {
         id: "palette-exhausted-warning",
         title: "palette-exhausted — warning",
         level: 3,

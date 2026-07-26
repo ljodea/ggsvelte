@@ -2824,6 +2824,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["smooth-group-dropped"],
   },
   {
+    id: "heading:guide-errors:quantile-empty",
+    kind: "heading",
+    title: "quantile-empty",
+    summary:
+      "quantile-empty in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#quantile-empty",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["quantile-empty"],
+  },
+  {
+    id: "heading:guide-errors:quantile-group-dropped",
+    kind: "heading",
+    title: "quantile-group-dropped",
+    summary:
+      "quantile-group-dropped in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#quantile-group-dropped",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["quantile-group-dropped"],
+  },
+  {
     id: "heading:guide-errors:palette-exhausted-warning",
     kind: "heading",
     title: "palette-exhausted — warning",
@@ -19766,6 +19786,32 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["smooth-group-dropped", "warning:smooth-group-dropped"],
+  },
+  {
+    id: "diagnostic:warning:quantile-empty",
+    kind: "diagnostic",
+    title: "quantile-empty · warning",
+    summary: "No valid quantiles in (0,1) after filtering; nothing drawn.",
+    href: "/guide/errors#quantile-empty",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["quantile-empty", "warning:quantile-empty"],
+  },
+  {
+    id: "diagnostic:warning:quantile-group-dropped",
+    kind: "diagnostic",
+    title: "quantile-group-dropped · warning",
+    summary: "A quantile group was too small or had constant x and was dropped.",
+    href: "/guide/errors#quantile-group-dropped",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["quantile-group-dropped", "warning:quantile-group-dropped"],
   },
   {
     id: "diagnostic:warning:palette-exhausted",
