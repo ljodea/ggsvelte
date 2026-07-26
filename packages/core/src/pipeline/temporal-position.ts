@@ -63,18 +63,24 @@ export function yConversionOf(binding: {
  * Read a position column as scale-space numbers. With a pre-stat transform the
  * cached transformed view (OOB/NA/forward) is returned; otherwise the semantic
  * numeric view (identity). The two coincide for identity + unpinned + no-NA.
+ *
+ * When `requestedKind === "time"`, values are projected into time-of-day scale
+ * space (epoch ms on 1970-01-01Z) so marks, domains, and axis ticks share one
+ * coordinate system — portable numbers are seconds since midnight (#831).
  */
 export function positionColumn(
   table: ColumnTable,
   field: string,
   conversion: PositionConversionContext,
-  transform: ColumnTransformConfig | undefined,
+  transform?: ColumnTransformConfig,
 ): Float64Array {
-  if (transform === undefined) {
-    return table.numeric(field, conversion.sourceParser, conversion.options);
-  }
-  return table.transformed(field, conversion.sourceParser, conversion.options, transform)
-    .transformed;
+  const base =
+    transform === undefined
+      ? table.numeric(field, conversion.sourceParser, conversion.options)
+      : table.transformed(field, conversion.sourceParser, conversion.options, transform)
+          .transformed;
+  if (conversion.requestedKind !== "time") return base;
+  return mapToTimeOfDayMs(table.column(field), base);
 }
 
 export function positionFieldType(
