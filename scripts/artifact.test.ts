@@ -40,7 +40,7 @@ describe("defineArtifact check/write", () => {
       build: () => "fresh\n",
       regenerateWith: "demo:gen",
     });
-    await expect(artifact.check()).resolves.toBeUndefined();
+    await artifact.check();
   });
 
   test("check fails MISSING when the file is absent", async () => {
@@ -148,6 +148,48 @@ describe("defineArtifact dependsOn", () => {
       expect(e.message).toContain("bun run dep:gen");
       // Do not only blame the child when the dep is the cause.
       expect(e.message).toMatch(/because/i);
+    }
+  });
+
+  test("multi-hop dependsOn keeps intermediate gens in the fix chain", async () => {
+    const dir = tempDir();
+    const rootPath = join(dir, "root.txt");
+    const midPath = join(dir, "mid.txt");
+    const leafPath = join(dir, "leaf.txt");
+    writeFileSync(rootPath, "old-root\n");
+    writeFileSync(midPath, "mid-ok\n");
+    writeFileSync(leafPath, "leaf-ok\n");
+    const root = defineArtifact({
+      path: rootPath,
+      build: () => "new-root\n",
+      regenerateWith: "root:gen",
+      label: "root.txt",
+    });
+    const mid = defineArtifact({
+      path: midPath,
+      build: () => "mid-ok\n",
+      regenerateWith: "mid:gen",
+      label: "mid.txt",
+      dependsOn: [root],
+    });
+    const leaf = defineArtifact({
+      path: leafPath,
+      build: () => "leaf-ok\n",
+      regenerateWith: "leaf:gen",
+      label: "leaf.txt",
+      dependsOn: [mid],
+    });
+    try {
+      await leaf.check();
+      expect.unreachable("expected ArtifactError");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ArtifactError);
+      const e = error as ArtifactError;
+      expect(e.because?.regenerateWith).toBe("mid:gen");
+      expect(e.because?.because?.regenerateWith).toBe("root:gen");
+      // Full order: root first, then mid, then leaf — not root then leaf alone.
+      expect(e.message).toContain("bun run root:gen && bun run mid:gen && bun run leaf:gen");
+      expect(e.message).toContain("root.txt");
     }
   });
 

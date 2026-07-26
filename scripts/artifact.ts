@@ -23,6 +23,7 @@ export class ArtifactError extends Error {
   readonly status: ArtifactStatus;
   readonly artifactPath: string;
   readonly regenerateWith: string;
+  readonly label: string;
   readonly because?: ArtifactError;
 
   constructor(opts: {
@@ -32,31 +33,47 @@ export class ArtifactError extends Error {
     label: string;
     because?: ArtifactError;
   }) {
-    const fix = `Run: bun run ${opts.regenerateWith}`;
-    let message: string;
-    if (opts.because) {
-      message =
-        `${opts.label} is ${opts.status} because ${labelOf(opts.because)} is ${opts.because.status}. ` +
-        `Run: bun run ${opts.because.regenerateWith}` +
-        (opts.because.regenerateWith === opts.regenerateWith
-          ? "."
-          : ` (then bun run ${opts.regenerateWith}).`);
-    } else {
-      message = `${opts.label} is ${opts.status}. ${fix}`;
-    }
-    super(message);
+    super(formatArtifactMessage(opts));
     this.name = "ArtifactError";
     this.status = opts.status;
     this.artifactPath = opts.path;
     this.regenerateWith = opts.regenerateWith;
+    this.label = opts.label;
     if (opts.because !== undefined) this.because = opts.because;
   }
 }
 
-function labelOf(error: ArtifactError): string {
-  // Message starts with "<label> is STATUS..."
-  const match = /^(.*?) is (?:MISSING|STALE)/.exec(error.message);
-  return match?.[1] ?? error.artifactPath;
+/** Root-cause first, then intermediates, then the leaf — full regen order. */
+function regenerateChain(leaf: { regenerateWith: string; because?: ArtifactError }): string[] {
+  const scripts: string[] = [];
+  const walk = (err: { regenerateWith: string; because?: ArtifactError }) => {
+    if (err.because) walk(err.because);
+    if (!scripts.includes(err.regenerateWith)) scripts.push(err.regenerateWith);
+  };
+  walk(leaf);
+  return scripts;
+}
+
+function formatArtifactMessage(opts: {
+  status: ArtifactStatus;
+  regenerateWith: string;
+  label: string;
+  because?: ArtifactError;
+}): string {
+  if (!opts.because) {
+    return `${opts.label} is ${opts.status}. Run: bun run ${opts.regenerateWith}`;
+  }
+  const root = (() => {
+    let cur: ArtifactError = opts.because;
+    while (cur.because) cur = cur.because;
+    return cur;
+  })();
+  const chain = regenerateChain({
+    regenerateWith: opts.regenerateWith,
+    because: opts.because,
+  });
+  const run = chain.map((script) => `bun run ${script}`).join(" && ");
+  return `${opts.label} is ${opts.status} because ${root.label} is ${root.status}. Run: ${run}.`;
 }
 
 export type ArtifactDef = {
@@ -101,12 +118,14 @@ function wrapDepFailure(
   self: { path: string; regenerateWith: string; label: string },
 ): never {
   if (error instanceof ArtifactError) {
+    // Keep the immediate dependency so multi-hop DAGs retain the full chain
+    // (search → routes → lifecycle). Flattening dropped intermediate gens.
     throw new ArtifactError({
       status: error.status,
       path: self.path,
       regenerateWith: self.regenerateWith,
       label: self.label,
-      because: error.because ?? error,
+      because: error,
     });
   }
   throw error;
