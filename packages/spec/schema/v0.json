@@ -1357,6 +1357,63 @@
       "additionalProperties": false,
       "description": "Styling parameters for the segment geom (finite line from (x,y) to (xend,yend))."
     },
+    "CurveParams": {
+      "type": "object",
+      "properties": {
+        "curvature": {
+          "type": "number",
+          "description": "Amount of bend away from the straight chord. 0 is a straight line; ggplot2 default 0.5. Positive bows to the right of the start→end direction when angle is 90."
+        },
+        "angle": {
+          "type": "number",
+          "description": "Control-point direction relative to the chord, in degrees. ggplot2 default 90 (perpendicular)."
+        },
+        "ncp": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "description": "Smoothness density knob (ggplot2 ncp). Maps to tessellation sample count = max(8, ncp×8); not multi-control xspline. Default 5."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Curve opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px. Must be greater than 0. Default 1."
+        },
+        "lineend": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "butt"
+            },
+            {
+              "type": "string",
+              "const": "round"
+            },
+            {
+              "type": "string",
+              "const": "square"
+            }
+          ],
+          "description": "SVG stroke-linecap for curve ends. Default \"butt\"."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom curve: curvature/angle/ncp plus segment-like stroke styling."
+    },
     "TextParams": {
       "type": "object",
       "properties": {
@@ -2303,6 +2360,44 @@
       "additionalProperties": false,
       "description": "A finite segment layer (ggplot2's geom_segment). Requires x, y, xend, and yend channels."
     },
+    "CurveLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "curve",
+          "description": "Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Curve layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Curve layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/CurveParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A curved-segment layer. Requires x, y, xend, and yend field channels (like geom segment)."
+    },
     "LayerSpec": {
       "anyOf": [
         {
@@ -2364,6 +2459,9 @@
         },
         {
           "$ref": "#/$defs/SegmentLayer"
+        },
+        {
+          "$ref": "#/$defs/CurveLayer"
         }
       ],
       "description": "One plot layer. The `geom` field selects the geometry and determines which stat, position, and params are allowed."

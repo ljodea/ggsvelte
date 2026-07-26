@@ -607,6 +607,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "curve/connectors",
+    category: "curve",
+    name: "connectors",
+    title: "Curve connectors",
+    description: "",
+    tags: ["curve", "annotation", "connector", "bezier"],
+    docsSection: "Lines & rules",
+    hasData: true,
+  },
+  {
     id: "smooth/loess-scatter",
     category: "smooth",
     name: "loess-scatter",

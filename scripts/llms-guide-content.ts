@@ -314,6 +314,27 @@ gg(data, aes({ x: "x", y: "y" }))
 [Connect hv path](/examples/path/connect-hv): three data points expand to a
 horizontal-then-vertical polyline.
 
+## Curve connectors
+
+Curved connectors (ggplot2 \`geom_curve\`): one quadratic Bezier per row from
+\`(x,y)\` to \`(xend,yend)\`, tessellated in **panel px** so curvature is not
+aspect-skewed. Params: \`curvature\` (default 0.5), \`angle\` (degrees, default
+90), \`ncp\` (control-point density). Same required channels as segment;
+\`lineend\` maps to SVG stroke-linecap (default butt).
+
+\`\`\`svelte fragment
+<GeomCurve curvature={0.4} lineend="round" />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y", xend: "xend", yend: "yend" }))
+  .geomCurve({ curvature: 0.5, angle: 90, ncp: 5 })
+  .spec();
+\`\`\`
+
+Intentional subset: quadratic approximation, not full grid xspline.
+[Curve connectors](/examples/curve/connectors): Darwin maize pairs as arcs.
+
 ## Positions
 
 Stack sums, dodge side-by-side groups, fill normalizes each stack to one, jitter

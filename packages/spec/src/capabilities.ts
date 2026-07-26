@@ -278,6 +278,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "tile",
     "ribbon",
     "segment",
+    "curve",
   ],
   alpha: [
     "point",
@@ -300,6 +301,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "raster",
     "ribbon",
     "segment",
+    "curve",
   ],
   shape: ["point"],
   linetype: [
@@ -315,6 +317,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "tile",
     "ribbon",
     "segment",
+    "curve",
   ],
 } as const;
 

@@ -113,6 +113,7 @@ export const FreqpolyLayerSchema = SpecModule.Import("FreqpolyLayer");
 export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
+export const CurveLayerSchema = SpecModule.Import("CurveLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
@@ -198,6 +199,8 @@ export type AreaParams = SpecType<"AreaParams">;
 export type RuleParams = SpecType<"RuleParams">;
 /** Segment layer params (styling + lineend). */
 export type SegmentParams = SpecType<"SegmentParams">;
+/** Curve layer params (curvature/angle/ncp + stroke). */
+export type CurveParams = SpecType<"CurveParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
@@ -265,6 +268,8 @@ export type RasterLayer = LayerWithDataRef<SpecType<"RasterLayer">>;
 export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 /** A finite segment layer ((x,y)→(xend,yend)). */
 export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
+/** A curve layer (curved connectors). */
+export type CurveLayer = LayerWithDataRef<SpecType<"CurveLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -277,6 +282,7 @@ export type LayerSpec =
   | AreaLayer
   | RibbonLayer
   | SegmentLayer
+  | CurveLayer
   | RuleLayer
   | TextLayer
   | SmoothLayer

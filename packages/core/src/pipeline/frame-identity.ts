@@ -151,9 +151,10 @@ export function buildIdentityFrame(
             binding.xBinning,
           )
         : null,
-    // Segment only — keep xend/yend off other geoms so scale training stays clean.
+    // Segment / curve only — keep xend/yend off other geoms so scale training stays clean.
     xend:
-      binding.layer.geom === "segment" && binding.xendField !== null
+      (binding.layer.geom === "segment" || binding.layer.geom === "curve") &&
+      binding.xendField !== null
         ? positionNumeric(
             table,
             binding.xendField,
@@ -163,7 +164,8 @@ export function buildIdentityFrame(
           )
         : null,
     yend:
-      binding.layer.geom === "segment" && binding.yendField !== null
+      (binding.layer.geom === "segment" || binding.layer.geom === "curve") &&
+      binding.yendField !== null
         ? positionNumeric(
             table,
             binding.yendField,
@@ -173,11 +175,13 @@ export function buildIdentityFrame(
           )
         : null,
     xendValues:
-      binding.layer.geom === "segment" && binding.xendField !== null
+      (binding.layer.geom === "segment" || binding.layer.geom === "curve") &&
+      binding.xendField !== null
         ? table.column(binding.xendField)
         : null,
     yendValues:
-      binding.layer.geom === "segment" && binding.yendField !== null
+      (binding.layer.geom === "segment" || binding.layer.geom === "curve") &&
+      binding.yendField !== null
         ? table.column(binding.yendField)
         : null,
   };
