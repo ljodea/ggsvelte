@@ -130,9 +130,7 @@ describe("GRAMMAR_FAMILIES completeness", () => {
 
 describe("grammarDeprecationInputs", () => {
   it("emits only defined props in DEPRECATION_EMIT_ORDER", () => {
-    const absent = (): unknown => {
-      return;
-    };
+    const absent = (): unknown => undefined;
     const inputs = grammarDeprecationInputs({
       theme: () => "dark",
       scales: absent,

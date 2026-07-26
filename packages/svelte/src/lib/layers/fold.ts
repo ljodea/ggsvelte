@@ -4,8 +4,8 @@
  */
 import { gg } from "@ggsvelte/spec";
 
-import { GRAMMAR_FAMILIES } from "./grammar-families.js";
-import type { GrammarLayerKind, PlotLayerLike } from "./types.js";
+import { GRAMMAR_FAMILIES, type GrammarFamilyMeta } from "./grammar-families.js";
+import type { PlotLayerLike } from "./types.js";
 
 type GgBuilder = ReturnType<typeof gg>;
 
@@ -17,10 +17,13 @@ export function foldPlotLayer(builder: GgBuilder, layer: PlotLayerLike): GgBuild
   if (layer.kind === "mark") {
     return builder;
   }
-  const family = GRAMMAR_FAMILIES[layer.kind as GrammarLayerKind];
+  // Index via string map so unforeseen runtime kinds are undefined (not a
+  // silent miss). Typed callers already exhaust GrammarLayerKind.
+  const family = (GRAMMAR_FAMILIES as Readonly<Record<string, GrammarFamilyMeta | undefined>>)[
+    layer.kind
+  ];
   if (family === undefined) {
-    const unhandled: never = layer as never;
-    throw new TypeError(`Unhandled plot layer kind: ${String(unhandled)}`);
+    throw new TypeError(`Unhandled plot layer kind: ${layer.kind}`);
   }
   // Per-kind value types are checked by Layer / PlotLayerLike; one cast at the
   // fold boundary keeps the table free of builder imports.

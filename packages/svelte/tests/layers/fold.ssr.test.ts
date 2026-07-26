@@ -62,7 +62,7 @@ describe("foldPlotLayer", () => {
   });
 
   it("throws TypeError for an unknown kind at runtime", () => {
-    expect(() => foldPlotLayer(base(), { kind: "nope", value: {} } as never)).toThrowError(
+    expect(() => foldPlotLayer(base(), { kind: "nope", value: {} } as never)).toThrow(
       /Unhandled plot layer kind/,
     );
   });
