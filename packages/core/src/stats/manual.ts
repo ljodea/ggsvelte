@@ -25,7 +25,7 @@ export function isManualFun(value: unknown): value is ManualFunName {
   return typeof value === "string" && (MANUAL_FUNS as readonly string[]).includes(value);
 }
 
-export function isManualKeepFun(fun: ManualFunName): fun is ManualKeepFun {
+function isManualKeepFun(fun: ManualFunName): fun is ManualKeepFun {
   return fun === "first" || fun === "last";
 }
 
