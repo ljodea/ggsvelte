@@ -474,6 +474,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Unique (first-wins aesthetic dedupe)"],
   },
   {
+    id: "heading:guide-statistics-positions:blank-scale-training-without-marks",
+    kind: "heading",
+    title: "Blank (scale training without marks)",
+    summary:
+      "Blank (scale training without marks) in Statistics and positions. Compute summaries and control how derived marks occupy the same coordinate space.",
+    href: "/guide/statistics-positions#blank-scale-training-without-marks",
+    keywords: ["Statistics and positions", "Core grammar"],
+    exact: ["Blank (scale training without marks)"],
+  },
+  {
     id: "heading:guide-statistics-positions:manual-portable-named-per-group-transforms",
     kind: "heading",
     title: "Manual (portable named per-group transforms)",

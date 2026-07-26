@@ -392,6 +392,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "blank-scale-training-without-marks",
+        title: "Blank (scale training without marks)",
+        level: 2,
+      },
+      {
         id: "manual-portable-named-per-group-transforms",
         title: "Manual (portable named per-group transforms)",
         level: 2,

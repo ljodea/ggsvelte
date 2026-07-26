@@ -492,6 +492,30 @@ col, area, rect, ribbon, rule, segment, errorbar).
 [stat unique overplotting](/examples/point/stat-unique): stacked identical
 \`(x, y, series)\` triples collapse to one mark.
 
+## Blank (scale training without marks)
+
+\`geom: "blank"\` (ggplot2 \`geom_blank\`) contributes mapped aesthetics to
+**scale training and layout only** — no paint, no hit targets. Use it to expand
+domains, force axes open for sparse marks, or reserve layout without drawing.
+
+\`\`\`svelte fragment
+<GeomBlank />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y" }))
+  .geomPoint()
+  .geomBlank({ aes: aes({ x: "x2", y: "y2" }) }) // expands domains only
+  .spec();
+\`\`\`
+
+No channels are required. Mapped style channels (color, size, …) train their
+scales without drawing marks. Surfaces: \`.geomBlank()\`, \`<GeomBlank />\`.
+
+[Blank domain expand](/examples/blank/domain-expand): co-layer blank rows stretch
+axes past the plotted points. [Blank axes only](/examples/blank/axes-only): axes
+and scales with no marks.
+
 ## Manual (portable named per-group transforms)
 
 \`stat: "manual"\` (ggplot2 \`stat_manual\`, portable v1) applies a **named**
