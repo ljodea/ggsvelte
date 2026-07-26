@@ -3452,14 +3452,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-591",
+    id: "heading:guide-lifecycle:experimental-592",
     kind: "heading",
-    title: "experimental (591)",
+    title: "experimental (592)",
     summary:
-      "experimental (591) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-591",
+      "experimental (592) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-592",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (591)"],
+    exact: ["experimental (592)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -6845,6 +6845,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
     exact: ["RuntimePointLayer"],
+  },
+  {
+    id: "api:ggsvelte-spec:RuntimeQuantileLayer",
+    kind: "api",
+    title: "RuntimeQuantileLayer",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["RuntimeQuantileLayer"],
   },
   {
     id: "api:ggsvelte-spec:RuntimeRasterLayer",
