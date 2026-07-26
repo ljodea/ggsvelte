@@ -228,7 +228,8 @@ export const ERROR_CATALOG = {
     fix: "Use one of the columns the stat generates (the error lists them), or change the layer's stat.",
   },
   "manual-fun-required": {
-    tier: 1,
+    // Structural grammar (layerStructuralErrors) — opt-in tier-2 only; not plain validate().
+    tier: 2,
     summary: "A layer uses stat manual without params.fun.",
     fix: "Set params.fun to one of first|last|mean|median|min|max|sum (portable named registry; #814).",
   },

@@ -302,6 +302,33 @@ col, area, rect, ribbon, rule, segment, errorbar).
 [stat unique overplotting](/examples/point/stat-unique): stacked identical
 \`(x, y, series)\` triples collapse to one mark.
 
+## Manual (portable named per-group transforms)
+
+\`stat: "manual"\` (ggplot2 \`stat_manual\`, portable v1) applies a **named**
+per-group transform — no JS callbacks (PortableSpec only). Required
+\`params.fun\`:
+
+| fun | Behavior |
+|-----|----------|
+| \`first\` / \`last\` | Keep one source row per aesthetic group |
+| \`mean\` / \`median\` / \`min\` / \`max\` / \`sum\` | One synthetic row; x and y aggregated independently |
+
+Surfaces: **point**, **line**, **path**. Missing \`fun\` fails with
+\`manual-fun-required\`; unknown names are schema \`invalid-enum-value\`.
+
+\`\`\`svelte fragment
+<GeomPoint stat="manual" fun="mean" />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y", color: "g" }))
+  .geomPoint({ stat: "manual", fun: "mean" })
+  .spec();
+\`\`\`
+
+[stat manual mean centroids](/examples/point/stat-manual-mean): identity
+scatter under large mean points per series.
+
 ## Align (shared continuous-x grid for stack)
 
 \`stat: "align"\` (ggplot2 \`stat_align\`) is for continuous-x \`area\` / \`line\`

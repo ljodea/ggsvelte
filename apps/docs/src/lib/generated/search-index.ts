@@ -394,6 +394,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Unique (first-wins aesthetic dedupe)"],
   },
   {
+    id: "heading:guide-statistics-positions:manual-portable-named-per-group-transforms",
+    kind: "heading",
+    title: "Manual (portable named per-group transforms)",
+    summary:
+      "Manual (portable named per-group transforms) in Statistics and positions. Compute summaries and control how derived marks occupy the same coordinate space.",
+    href: "/guide/statistics-positions#manual-portable-named-per-group-transforms",
+    keywords: ["Statistics and positions", "Core grammar"],
+    exact: ["Manual (portable named per-group transforms)"],
+  },
+  {
     id: "heading:guide-statistics-positions:align-shared-continuous-x-grid-for-stack",
     kind: "heading",
     title: "Align (shared continuous-x grid for stack)",
@@ -1854,6 +1864,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["unknown-stat-column"],
   },
   {
+    id: "heading:guide-errors:manual-fun-required",
+    kind: "heading",
+    title: "manual-fun-required",
+    summary:
+      "manual-fun-required in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#manual-fun-required",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["manual-fun-required"],
+  },
+  {
     id: "heading:guide-errors:invalid-data-profile",
     kind: "heading",
     title: "invalid-data-profile",
@@ -2514,6 +2534,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["stat-channel-unsupported"],
   },
   {
+    id: "heading:guide-errors:manual-fun-required-pipeline",
+    kind: "heading",
+    title: "manual-fun-required — pipeline",
+    summary:
+      "manual-fun-required — pipeline in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#manual-fun-required-pipeline",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["manual-fun-required — pipeline"],
+  },
+  {
+    id: "heading:guide-errors:manual-fun-unknown",
+    kind: "heading",
+    title: "manual-fun-unknown",
+    summary:
+      "manual-fun-unknown in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#manual-fun-unknown",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["manual-fun-unknown"],
+  },
+  {
     id: "heading:guide-errors:unknown-theme",
     kind: "heading",
     title: "unknown-theme",
@@ -2862,6 +2902,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/errors#quantile-group-dropped",
     keywords: ["Errors reference", "Reference"],
     exact: ["quantile-group-dropped"],
+  },
+  {
+    id: "heading:guide-errors:manual-group-dropped",
+    kind: "heading",
+    title: "manual-group-dropped",
+    summary:
+      "manual-group-dropped in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#manual-group-dropped",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["manual-group-dropped"],
   },
   {
     id: "heading:guide-errors:palette-exhausted-warning",
@@ -4616,6 +4666,24 @@ export const DOCS_SEARCH_INDEX = [
       "palette",
     ],
     exact: ["Scatter plot with color mapping"],
+  },
+  {
+    id: "example:point:stat-manual-mean",
+    kind: "example",
+    title: "stat manual mean centroids",
+    summary: "stat manual mean centroids (Points & scatter)",
+    href: "/examples/point/stat-manual-mean",
+    keywords: [
+      "stat manual mean centroids",
+      "Points & scatter",
+      "point",
+      "manual",
+      "stat",
+      "mean",
+      "group",
+      "theme",
+    ],
+    exact: ["stat manual mean centroids"],
   },
   {
     id: "example:point:stat-unique",
@@ -18660,6 +18728,19 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["unknown-stat-column", "validation:unknown-stat-column"],
   },
   {
+    id: "diagnostic:validation:manual-fun-required",
+    kind: "diagnostic",
+    title: "manual-fun-required · validation",
+    summary: "A layer uses stat manual without params.fun.",
+    href: "/guide/errors#manual-fun-required",
+    keywords: [
+      "validation",
+      "error",
+      "Set params.fun to one of first|last|mean|median|min|max|sum (portable named registry; #814).",
+    ],
+    exact: ["manual-fun-required", "validation:manual-fun-required"],
+  },
+  {
     id: "diagnostic:validation:invalid-data-profile",
     kind: "diagnostic",
     title: "invalid-data-profile · validation",
@@ -19479,6 +19560,33 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["stat-channel-unsupported", "pipeline:stat-channel-unsupported"],
   },
   {
+    id: "diagnostic:pipeline:manual-fun-required",
+    kind: "diagnostic",
+    title: "manual-fun-required · pipeline",
+    summary: "A layer uses stat manual without params.fun.",
+    href: "/guide/errors#manual-fun-required-pipeline",
+    keywords: [
+      "pipeline",
+      "error",
+      "Set params.fun to one of first|last|mean|median|min|max|sum (portable named registry; #814).",
+    ],
+    exact: ["manual-fun-required", "pipeline:manual-fun-required"],
+  },
+  {
+    id: "diagnostic:pipeline:manual-fun-unknown",
+    kind: "diagnostic",
+    title: "manual-fun-unknown · pipeline",
+    summary:
+      "A layer uses stat manual with an unregistered params.fun (defense for unvalidated specs).",
+    href: "/guide/errors#manual-fun-unknown",
+    keywords: [
+      "pipeline",
+      "error",
+      "Use a registered name: first, last, mean, median, min, max, sum.",
+    ],
+    exact: ["manual-fun-unknown", "pipeline:manual-fun-unknown"],
+  },
+  {
     id: "diagnostic:pipeline:unknown-theme",
     kind: "diagnostic",
     title: "unknown-theme · pipeline",
@@ -19931,6 +20039,19 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["quantile-group-dropped", "warning:quantile-group-dropped"],
+  },
+  {
+    id: "diagnostic:warning:manual-group-dropped",
+    kind: "diagnostic",
+    title: "manual-group-dropped · warning",
+    summary: "A manual-stat group had no finite x or y under an aggregate fun and was dropped.",
+    href: "/guide/errors#manual-group-dropped",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["manual-group-dropped", "warning:manual-group-dropped"],
   },
   {
     id: "diagnostic:warning:palette-exhausted",

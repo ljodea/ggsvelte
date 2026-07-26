@@ -261,6 +261,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "db5bc0297f0c6d3f194271b375cdac7627b151e43755945be5180b19bdaedd7d",
   },
   {
+    id: "point/stat-manual-mean",
+    filename: "point-stat-manual-mean-light.png",
+    path: "/previews/point-stat-manual-mean-light.png",
+    sha256: "7795cd797aa8457d6ea63b2364ff8e43f0ca871250b0f13d09ecada951b5b142",
+  },
+  {
     id: "point/stat-unique",
     filename: "point-stat-unique-light.png",
     path: "/previews/point-stat-unique-light.png",
