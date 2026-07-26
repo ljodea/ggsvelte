@@ -2077,8 +2077,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-520",
-        title: "experimental (520)",
+        id: "experimental-541",
+        title: "experimental (541)",
         level: 3,
       },
       {
@@ -2122,8 +2122,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "stable-intent-114",
-        title: "stable-intent (114)",
+        id: "stable-intent-123",
+        title: "stable-intent (123)",
         level: 3,
       },
     ],
@@ -2587,6 +2587,16 @@ export const DOCS_ROUTES = [
     title: "Fixed aspect ratio — ggsvelte gallery",
     description: "Fixed aspect ratio",
     canonicalPath: "/examples/point/fixed-aspect",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/point/gradient-continuous",
+    title: "Two-stop gradient colour scale — ggsvelte gallery",
+    description: "Two-stop gradient colour scale",
+    canonicalPath: "/examples/point/gradient-continuous",
     kind: "page",
     index: true,
     sitemap: true,

@@ -94,6 +94,14 @@ function representativeProps(helper: string): Record<string, unknown> {
   if (helper === "scaleShapeDiscrete") {
     return { range: ["circle", "triangle"] as const };
   }
+  // gradientn requires ≥2 explicit stops (no defaults; #826).
+  if (
+    helper === "scaleColorGradientn" ||
+    helper === "scaleFillGradientn" ||
+    helper === "scaleColourGradientn"
+  ) {
+    return { colours: ["#000000", "#ffffff"] as const };
+  }
   return {};
 }
 
