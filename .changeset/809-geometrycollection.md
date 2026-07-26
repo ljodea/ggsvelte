@@ -11,5 +11,4 @@ Flatten GeoJSON GeometryCollection (recursively) to leaf point/line/polygon
 geometries for draw and labels. Homogeneous collections render; mixed families
 still raise sf-geometry-mixed. Compatible with even-odd holes and Multi* labels.
 
-Migration: none — additive; former GeometryCollection errors now expand when
-homogeneous.
+Migration: none — additive

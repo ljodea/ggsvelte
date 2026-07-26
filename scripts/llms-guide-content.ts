@@ -392,6 +392,8 @@ gg(regions, aes({ fill: "rate" })).geomSf().spec();
 \`\`\`
 
 [SF polygons](/examples/sf/basic): three triangles filled by a rate field.
+[GeometryCollection expand](/examples/sf/geometry-collection): one GC cell
+renders as two polygon parts.
 
 ### SF text labels (\`geom_sf_text\`)
 
