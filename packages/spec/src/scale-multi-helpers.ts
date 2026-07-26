@@ -122,11 +122,12 @@ function assignChannels(
   channels: readonly MultiScaleChannel[],
   entry: Record<string, unknown>,
 ): Scales {
-  const scales: Partial<Record<MultiScaleChannel, unknown>> = {};
+  const scales: Record<string, unknown> = {};
   for (const channel of channels) {
     scales[channel] = cloneScaleEntry(entry);
   }
-  return scales;
+  // Expanded subset of Scales keys; entries are identity/manual JSON objects.
+  return scales as Scales;
 }
 
 /**
