@@ -1,5 +1,5 @@
 {
-  "id": "78-ellipse-rings",
+  "id": "80-ellipse-rings",
   "kind": "chart",
   "prompt": "Scatter x against y colored by group and overlay bivariate normal confidence ellipses at level 0.95.",
   "dataProfile": {

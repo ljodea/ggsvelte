@@ -188,8 +188,9 @@ export function statEllipse(input: StatEllipseInput): StatEllipseResult {
     const rows = byGroup.get(g)!;
     const cov = sampleCov2(x, y, rows);
     if (cov === null) {
+      // Finite points that fail n/variance gates are not "missing" rows —
+      // only `droppedGroups` reports those (do not inflate `dropped`).
       droppedGroups++;
-      dropped += rows.length;
       continue;
     }
     const ring = ellipsePerimeter(cov, level, segments);

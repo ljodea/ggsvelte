@@ -1,5 +1,5 @@
 {
-  "id": "79-ellipse-only",
+  "id": "81-ellipse-only",
   "kind": "chart",
   "prompt": "Draw bivariate normal confidence ellipse rings for x and y with path geometry.",
   "dataProfile": {

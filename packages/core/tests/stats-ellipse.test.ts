@@ -47,6 +47,23 @@ describe("sampleCov2 / ellipsePerimeter", () => {
       params: { level: 0.95, segments: 8 },
     });
     expect(result.droppedGroups).toBe(1);
+    // Finite singleton groups must not look like missing x/y rows.
+    expect(result.dropped).toBe(0);
     expect(result.x.length).toBe(9); // 8 + close for group 0 only
+  });
+
+  it("counts only non-finite rows as dropped (not zero-variance groups)", () => {
+    const result = statEllipse({
+      x: Float64Array.of(0, 1, 2, 5, 5, Number.NaN),
+      y: Float64Array.of(0, 1, 2, 9, 9, 1),
+      // g0: ok; g1: zero var; g2: NaN already counted in dropped
+      groups: [0, 0, 0, 1, 1, 2],
+      carried: {},
+      params: { level: 0.95, segments: 8 },
+    });
+    // NaN row never enters byGroup, so only zero-var g1 is a dropped group.
+    expect(result.droppedGroups).toBe(1);
+    expect(result.dropped).toBe(1); // only the NaN x row
+    expect(result.x.length).toBe(9); // group 0 ring only
   });
 });

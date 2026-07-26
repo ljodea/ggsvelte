@@ -81,4 +81,23 @@ describe("stat ellipse (#812)", () => {
         .spec(),
     ).toThrow();
   });
+
+  it("singleton groups warn ellipse-group-dropped only (not false missing)", () => {
+    // One viable group + one finite singleton — must not claim "missing x/y".
+    const model = runPipeline(
+      gg(
+        {
+          x: [0, 1, 2, 9],
+          y: [0, 1, 0, 9],
+          g: ["a", "a", "a", "b"],
+        },
+        aes({ x: "x", y: "y", color: "g" }),
+      )
+        .geomPath({ stat: "ellipse", level: 0.95, segments: 12 })
+        .spec(),
+      size,
+    );
+    expect(model.warnings.some((w) => w.code === "ellipse-group-dropped")).toBe(true);
+    expect(model.warnings.some((w) => w.code === "removed-missing")).toBe(false);
+  });
 });
