@@ -213,7 +213,7 @@ test("install copy and code tabs share the manual-copy fallback", async ({ page 
     "Clipboard unavailable. Code selected for manual copy.",
   );
   expect(await page.evaluate(() => getSelection()?.toString())).toContain(
-    "bun install @ggsvelte/svelte",
+    "bun add @ggsvelte/svelte",
   );
   const tabs = page.getByRole("tablist", { name: "Code representations" }).getByRole("tab");
   await expect(tabs.first()).toHaveText("Svelte");
