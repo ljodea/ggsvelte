@@ -92,10 +92,16 @@ export const SpecModule = {
   },
 };
 
-/** Inlined declaration bag for Static<> extraction (not for JSON emission). */
-const SpecStatic = Type.Module(SpecDeclarations);
-
-type SpecType<K extends keyof typeof SpecStatic> = Static<(typeof SpecStatic)[K]>;
+/**
+ * Spec type bag for Static<> extraction (not for JSON emission).
+ *
+ * Prefer `ReturnType<typeof Type.Module<...>>` over a `const SpecStatic =
+ * Type.Module(...)` value: once LayerSpec includes density_2d_filled + map the
+ * Module instance exceeds TS7056 declaration-serialize limits under composite
+ * emit. The type-level Module is enough for SpecType / Static<>.
+ */
+type SpecModuleStatic = ReturnType<typeof Type.Module<typeof SpecDeclarations>>;
+type SpecType<K extends keyof SpecModuleStatic> = Static<SpecModuleStatic[K]>;
 
 // ---------------------------------------------------------------------------
 // Imported (validatable) schemas — Cyclic `$defs`+`$ref` for runtime/artifact
@@ -114,6 +120,7 @@ export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
 export const CurveLayerSchema = SpecModule.Import("CurveLayer");
+export const MapLayerSchema = SpecModule.Import("MapLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
@@ -205,6 +212,8 @@ export type RuleParams = SpecType<"RuleParams">;
 export type SegmentParams = SpecType<"SegmentParams">;
 /** Curve layer params (curvature/angle/ncp + stroke). */
 export type CurveParams = SpecType<"CurveParams">;
+/** Map layer params (fortified map DataRef + styling; #808). */
+export type MapParams = SpecType<"MapParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
@@ -288,6 +297,8 @@ export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
 /** A curve layer (curved connectors). */
 export type CurveLayer = LayerWithDataRef<SpecType<"CurveLayer">>;
+/** A choropleth/map layer (#808). */
+export type MapLayer = LayerWithDataRef<SpecType<"MapLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -301,6 +312,7 @@ export type LayerSpec =
   | RibbonLayer
   | SegmentLayer
   | CurveLayer
+  | MapLayer
   | RuleLayer
   | TextLayer
   | SmoothLayer

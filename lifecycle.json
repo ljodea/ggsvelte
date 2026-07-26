@@ -532,6 +532,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomMapOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomName": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -785,6 +789,18 @@
           "lifecycle": "experimental"
         },
         "ManualNumericStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "MapLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "MapLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "MapParams": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1057,6 +1073,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeLineLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeMapLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4042,6 +4062,10 @@
           "lifecycle": "experimental"
         },
         "GeomLine": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomMap": {
           "kind": "value",
           "lifecycle": "experimental"
         },

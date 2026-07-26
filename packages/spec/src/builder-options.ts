@@ -27,6 +27,7 @@ import type {
   QuantileParams,
   CurveParams,
   ContourParams,
+  MapParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -212,6 +213,12 @@ export interface GeomSegmentOptions extends SegmentParams, GeomDataOption {
 
 /** Curve-layer sugar: curvature/angle/ncp + stroke styling. */
 export interface GeomCurveOptions extends CurveParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Map-layer sugar options (fortified join; #808). map is required. */
+export interface GeomMapOptions extends MapParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

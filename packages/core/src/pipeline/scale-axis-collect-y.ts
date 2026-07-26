@@ -77,6 +77,12 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
     if (fieldType === "nominal") acc.anyDiscrete = true;
     if (fieldType !== "temporal") acc.allTemporal = false;
     acc.sawContinuousEvidence = true;
+  } else if (frame.yNumeric !== null) {
+    // Synthesized continuous y without aes.y (e.g. geom_map fortified vertices).
+    acc.numeric.push(frame.yNumeric);
+    acc.typeParts.add("quantitative");
+    acc.allTemporal = false;
+    acc.sawContinuousEvidence = true;
   }
   // Segment end y: dual evidence (numeric + discrete) even when yField is set.
   // Guard undefined partial fixtures (not only null).

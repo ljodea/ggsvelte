@@ -260,6 +260,10 @@
         "z": {
           "$ref": "#/$defs/ChannelValue",
           "description": "Surface height for geom contour / stat contour (quantitative grid values over continuous x×y; #801)."
+        },
+        "map_id": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Region join key for geom_map (value-table column matched to the map data id column; #808)."
         }
       },
       "additionalProperties": false,
@@ -1805,6 +1809,48 @@
       "additionalProperties": false,
       "description": "Parameters for geom curve: curvature/angle/ncp plus segment-like stroke styling."
     },
+    "MapParams": {
+      "type": "object",
+      "required": [
+        "map"
+      ],
+      "properties": {
+        "map": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Fortified map coordinates ({ values }, { columns }, or { name } against spec.datasets). Must include long+lat or x+y, plus a region id column."
+        },
+        "mapId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Join column name in the map data (matched to aes.map_id). Default: \"region\", then \"id\"."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Region fill opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Region outline stroke width in px. Must be greater than 0. Default 1.5."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale)."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale)."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom_map (#808): fortified map DataRef plus optional join column and polygon styling."
+    },
     "TextParams": {
       "type": "object",
       "properties": {
@@ -2983,6 +3029,45 @@
       "additionalProperties": false,
       "description": "A curved-segment layer. Requires x, y, xend, and yend field channels (like geom segment)."
     },
+    "MapLayer": {
+      "type": "object",
+      "required": [
+        "geom",
+        "params"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "map",
+          "description": "Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808)."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Map layers expand joins then draw as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Map layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local value data (region ids + fill aesthetics). When omitted, inherits plot data."
+        },
+        "params": {
+          "$ref": "#/$defs/MapParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A choropleth/map layer. Requires aes.map_id and params.map. Coordinates come from the map data (long/lat or x/y)."
+    },
     "LayerSpec": {
       "anyOf": [
         {
@@ -3044,6 +3129,9 @@
         },
         {
           "$ref": "#/$defs/ErrorbarLayer"
+        },
+        {
+          "$ref": "#/$defs/MapLayer"
         },
         {
           "$ref": "#/$defs/RectLayer"

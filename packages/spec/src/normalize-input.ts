@@ -33,6 +33,7 @@ import type {
   RuleParams,
   SegmentParams,
   CurveParams,
+  MapParams,
   Scales,
   QuantileParams,
   ContourParams,
@@ -70,6 +71,7 @@ export interface AesInput {
   width?: ChannelInput;
   height?: ChannelInput;
   z?: ChannelInput;
+  map_id?: ChannelInput;
 }
 
 interface LayerInputBase {
@@ -286,6 +288,13 @@ export interface CurveLayerInput extends LayerInputBase {
   params?: CurveParams;
 }
 
+export interface MapLayerInput extends LayerInputBase {
+  geom: "map";
+  stat?: "identity";
+  position?: "identity";
+  params: MapParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -312,7 +321,8 @@ export type LayerInput =
   | TileLayerInput
   | RasterLayerInput
   | SegmentLayerInput
-  | CurveLayerInput;
+  | CurveLayerInput
+  | MapLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {
