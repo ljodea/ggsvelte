@@ -115,7 +115,7 @@ must survive filtering, reordering, or data refreshes.
 
 ```svelte
 <script lang="ts">
-  import { createPlotInteraction, GGPlot } from "@ggsvelte/svelte";
+  import { createPlotInteraction, Facet, GGPlot } from "@ggsvelte/svelte";
 
   const interaction = createPlotInteraction<number>();
   const scope = { keys: "sales-rows", intervals: "sales-range" } as const;
@@ -125,7 +125,6 @@ must survive filtering, reordering, or data refreshes.
   data={rows}
   aes={{ x: "date", y: "value", color: "series" }}
   layers={[{ geom: "point" }]}
-  facet={{ wrap: "region", ncol: 3 }}
   key="id"
   select={{ type: "interval", mode: "x", preset: "cross-panel" }}
   legendFocus
@@ -133,7 +132,9 @@ must survive filtering, reordering, or data refreshes.
   {interaction}
   interactionScope={scope}
   oninteraction={(event) => console.log(event)}
-/>
+>
+  <Facet wrap="region" ncol={3} />
+</GGPlot>
 ```
 
 - `inspect` adds tooltip, crosshair, keyboard traversal, and pinning; `select`

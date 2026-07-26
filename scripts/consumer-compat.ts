@@ -261,7 +261,7 @@ export function writeConsumerFixture(
   writeFileSync(
     join(directory, "src", "routes", "contract", "+page.svelte"),
     `<script lang="ts">
-  import { coord_transform, coordTransform, dmy, GGPlot, GeomLine, GeomPoint, guideColorsteps, guideLegend, guide_legend, scaleColorBinned, scaleColourBinned, scaleShapeDiscrete, scaleSizeContinuous, scaleXBinned, scaleXDate, scaleXLog10, scale_color_binned, scale_colour_binned, scale_shape_discrete, scale_x_date, scale_x_log10, type GuidePlan, type PortableSpec } from "@ggsvelte/svelte";
+  import { Coord, coord_transform, coordTransform, dmy, GGPlot, GeomLine, GeomPoint, guideColorsteps, guideLegend, guide_legend, Guides, Scale, scaleColorBinned, scaleColourBinned, scaleShapeDiscrete, scaleSizeContinuous, scaleXBinned, scaleXDate, scaleXLog10, scale_color_binned, scale_colour_binned, scale_shape_discrete, scale_x_date, scale_x_log10, type GuidePlan, type PortableSpec } from "@ggsvelte/svelte";
   const spec: PortableSpec = ${JSON.stringify(plotSpec)};
   const temporalRows = [
     { year: "1835", value: 12 },
@@ -312,42 +312,42 @@ export function writeConsumerFixture(
 <GGPlot
   data={[{ x: 1, y: 1 }, { x: 10, y: 2 }, { x: 100, y: 3 }]}
   aes={{ x: "x", y: "y" }}
-  scales={scaleXLog10()}
   width={480}
   height={320}
   ariaLabel="Packed log transform contract chart"
 >
+  <Scale value={scaleXLog10()} />
   <GeomPoint />
 </GGPlot>
 <GGPlot
   data={[{ x: 1, y: 1 }, { x: 10, y: 2 }, { x: 100, y: 3 }]}
   aes={{ x: "x", y: "y", color: "x" }}
-  scales={scaleColorBinned({ breaks: [1, 10, 100] })}
-  guides={{ color: guideColorsteps({ position: "bottom", direction: "horizontal" }) }}
   width={480}
   height={320}
   ariaLabel="Packed binned color contract chart"
 >
+  <Scale value={scaleColorBinned({ breaks: [1, 10, 100] })} />
+  <Guides value={{ color: guideColorsteps({ position: "bottom", direction: "horizontal" }) }} />
   <GeomPoint />
 </GGPlot>
 <GGPlot
   data={[{ x: 1, y: 1, amount: 2, group: "a" }, { x: 2, y: 2, amount: 8, group: "b" }]}
   aes={{ x: "x", y: "y", size: "amount", shape: "group" }}
-  scales={{ ...scaleSizeContinuous(), ...scaleShapeDiscrete() }}
   width={480}
   height={320}
   ariaLabel="Packed mapped style contract chart"
 >
+  <Scale value={{ ...scaleSizeContinuous(), ...scaleShapeDiscrete() }} />
   <GeomPoint />
 </GGPlot>
 <GGPlot
   data={[{ x: 1, y: 1 }, { x: 10, y: 2 }, { x: 100, y: 3 }]}
   aes={{ x: "x", y: "y" }}
-  coord={coordTransform({ x: "log10" })}
   width={480}
   height={320}
   ariaLabel="Packed post-stat coordinate contract chart"
 >
+  <Coord value={coordTransform({ x: "log10" })} />
   <GeomPoint />
 </GGPlot>
 `,

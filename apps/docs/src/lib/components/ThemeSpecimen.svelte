@@ -8,7 +8,10 @@
     GeomSmooth,
     GeomText,
     GGPlot,
+    Labs,
+    Scale,
     scaleXLog10,
+    Theme,
   } from "@ggsvelte/svelte";
   import type { ThemeName } from "@ggsvelte/spec";
 
@@ -60,23 +63,25 @@
       <GGPlot
         data={temperaturesKeyed}
         aes={{ x: "month", y: "temp", color: "city" }}
-        theme={name}
-        scales={{
-          x: { breaks: [...MONTH_BREAKS] },
-          color: colorScale,
-        }}
-        labs={{
-          title: "Monthly mean temperature",
-          x: "Month",
-          y: "Temperature (°C)",
-          color: "City",
-        }}
         key="id"
         inspect={{ mode: "x" }}
         {legendFocus}
         height={plotHeight}
         ariaLabel={`${label} theme multi-series temperatures`}
       >
+        <Theme {name} />
+        <Scale
+          value={{
+            x: { breaks: [...MONTH_BREAKS] },
+            color: colorScale,
+          }}
+        />
+        <Labs
+          title="Monthly mean temperature"
+          x="Month"
+          y="Temperature (°C)"
+          color="City"
+        />
         <GeomLine linewidth={2} />
         <GeomPoint size={2.5} />
       </GGPlot>
@@ -84,20 +89,20 @@
       <GGPlot
         data={ridership}
         aes={{ x: "month", y: "riders", color: "mode" }}
-        theme={name}
-        scales={{ color: colorScale }}
-        labs={{
-          title: "Daily transit ridership",
-          x: "Month",
-          y: "Daily riders (thousands)",
-          color: "Mode",
-        }}
         key="id"
         inspect={{ mode: "x" }}
         {legendFocus}
         height={plotHeight}
         ariaLabel={`${label} theme ridership series`}
       >
+        <Theme {name} />
+        <Scale value={{ color: colorScale }} />
+        <Labs
+          title="Daily transit ridership"
+          x="Month"
+          y="Daily riders (thousands)"
+          color="Mode"
+        />
         <GeomLine linewidth={2} />
         <GeomPoint size={2.8} />
       </GGPlot>
@@ -105,102 +110,102 @@
       <GGPlot
         data={attendees}
         aes={{ x: "track", fill: "level" }}
-        theme={name}
-        scales={{ fill: colorScale }}
-        labs={{
-          title: "Conference attendees by track and experience",
-          x: "Track",
-          y: "Attendees",
-          fill: "Experience",
-        }}
         key="id"
         inspect={{ mode: "xy" }}
         {legendFocus}
         height={plotHeight}
         ariaLabel={`${label} theme dodged bars`}
       >
+        <Theme {name} />
+        <Scale value={{ fill: colorScale }} />
+        <Labs
+          title="Conference attendees by track and experience"
+          x="Track"
+          y="Attendees"
+          fill="Experience"
+        />
         <GeomBar position="dodge" />
       </GGPlot>
     {:else if kind === "generation-area"}
       <GGPlot
         data={generation}
         aes={{ x: "year", y: "twh", fill: "source" }}
-        theme={name}
-        scales={{
-          x: { labels: "d", nice: false },
-          fill: colorScale,
-        }}
-        labs={{
-          title: "Electricity generation mix",
-          x: "Year",
-          y: "Generation (TWh)",
-          fill: "Source",
-        }}
         key="id"
         inspect={{ mode: "x" }}
         {legendFocus}
         height={plotHeight}
         ariaLabel={`${label} theme stacked generation`}
       >
+        <Theme {name} />
+        <Scale
+          value={{
+            x: { labels: "d", nice: false },
+            fill: colorScale,
+          }}
+        />
+        <Labs
+          title="Electricity generation mix"
+          x="Year"
+          y="Generation (TWh)"
+          fill="Source"
+        />
         <GeomArea alpha={0.9} />
       </GGPlot>
     {:else if kind === "long-run-line"}
       <GGPlot
         data={longRunSeries}
         aes={{ x: "year", y: "value" }}
-        theme={name}
-        labs={{
-          title: "Long-run index, 1835–2025",
-          x: "Year",
-          y: "Index",
-        }}
         inspect={{ mode: "x" }}
         height={plotHeight}
         ariaLabel={`${label} theme long-run series`}
       >
+        <Theme {name} />
+        <Labs title="Long-run index, 1835–2025" x="Year" y="Index" />
         <GeomLine linewidth={1.5} />
       </GGPlot>
     {:else if kind === "penguins-scatter"}
       <GGPlot
         data={penguins}
         aes={{ x: "flipper", y: "mass", color: "species" }}
-        theme={name}
-        scales={{ color: colorScale }}
-        labs={{
-          title: "Penguin flipper length and body mass",
-          x: "Flipper length (mm)",
-          y: "Body mass (g)",
-          color: "Species",
-        }}
         key="id"
         inspect={{ mode: "xy" }}
         {legendFocus}
         height={plotHeight}
         ariaLabel={`${label} theme penguin scatter`}
       >
+        <Theme {name} />
+        <Scale value={{ color: colorScale }} />
+        <Labs
+          title="Penguin flipper length and body mass"
+          x="Flipper length (mm)"
+          y="Body mass (g)"
+          color="Species"
+        />
         <GeomPoint size={3.5} alpha={0.9} />
       </GGPlot>
     {:else if kind === "countries-scatter"}
       <GGPlot
         data={countries}
         aes={{ x: "gdp", y: "lifeExp", color: "region" }}
-        theme={name}
-        scales={{
-          ...scaleXLog10({ labels: "~s" }),
-          color: colorScale,
-        }}
-        labs={{
-          title: "Income and life expectancy",
-          x: "GDP per capita (USD, log scale)",
-          y: "Life expectancy (years)",
-          color: "Region",
-        }}
         key="country"
         inspect={{ mode: "xy" }}
         {legendFocus}
         height={plotHeight}
         ariaLabel={`${label} theme income scatter`}
       >
+        <Theme {name} />
+        <Scale
+          value={{
+            ...scaleXLog10({ labels: "~s" }),
+            color: colorScale,
+          }}
+        />
+        <Labs
+          title="Income and life expectancy"
+          x="GDP per capita (USD, log scale)"
+          y="Life expectancy (years)"
+          color="Region"
+        />
         <GeomPoint size={3.5} />
         <GeomSmooth method="lm" se={false} />
       </GGPlot>
@@ -208,16 +213,12 @@
       <GGPlot
         data={revenue}
         aes={{ x: "quarter", y: "amount" }}
-        theme={name}
-        labs={{
-          title: "Quarterly revenue",
-          x: "Quarter",
-          y: "Revenue (€ thousands)",
-        }}
         inspect={{ mode: "xy" }}
         height={plotHeight}
         ariaLabel={`${label} theme revenue columns`}
       >
+        <Theme {name} />
+        <Labs title="Quarterly revenue" x="Quarter" y="Revenue (€ thousands)" />
         <GeomCol width={0.7} />
         <GeomText aes={{ label: "label" }} dy={-8} size={11} />
       </GGPlot>
@@ -225,17 +226,17 @@
       <GGPlot
         data={cities}
         aes={{ x: "rent", y: "livability" }}
-        theme={name}
-        scales={{ x: { labels: ",d" } }}
-        labs={{
-          title: "Livability vs median rent",
-          x: "Median monthly rent (USD)",
-          y: "Livability index",
-        }}
         inspect={{ mode: "xy" }}
         height={plotHeight}
         ariaLabel={`${label} theme labeled cities`}
       >
+        <Theme {name} />
+        <Scale value={{ x: { labels: ",d" } }} />
+        <Labs
+          title="Livability vs median rent"
+          x="Median monthly rent (USD)"
+          y="Livability index"
+        />
         <GeomPoint size={3} />
         <GeomText aes={{ label: "city" }} dy={-9} size={10} />
       </GGPlot>

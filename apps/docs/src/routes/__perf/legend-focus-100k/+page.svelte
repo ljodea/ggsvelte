@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createPlotInteraction, GGPlot } from "@ggsvelte/svelte";
+  import { createPlotInteraction, GGPlot, Labs } from "@ggsvelte/svelte";
 
   const navigationData = Array.from({ length: 100_000 }, (_, id) => ({
     id,
@@ -39,9 +39,10 @@
       interactionScope={navigationScope}
       width={620}
       height={360}
-      labs={{ title: "100k navigation view", color: "Group" }}
       onrender={() => (commitsNavigation += 1)}
-    />
+    >
+      <Labs title="100k navigation view" color="Group" />
+    </GGPlot>
   </div>
   {#each ["A", "B", "C"] as name (name)}
     <div data-perf-plot={name}>
@@ -55,13 +56,14 @@
         interactionScope={scope}
         width={620}
         height={360}
-        labs={{ title: `Linked view ${name}`, color: "Group" }}
         onrender={() => {
           if (name === "A") commitsA += 1;
           else if (name === "B") commitsB += 1;
           else commitsC += 1;
         }}
-      />
+      >
+        <Labs title={`Linked view ${name}`} color="Group" />
+      </GGPlot>
     </div>
   {/each}
 </main>

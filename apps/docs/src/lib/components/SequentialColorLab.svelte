@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomRaster, GGPlot } from "@ggsvelte/svelte";
+  import { GeomRaster, GGPlot, Labs, Scale, Theme } from "@ggsvelte/svelte";
   import type { ColorScaleSpec } from "@ggsvelte/spec";
 
   import { VIRIDIS_COLORS } from "$lib/catalog/themes";
@@ -72,18 +72,18 @@
             <GGPlot
               data={grid}
               aes={{ x: "x", y: "y", fill: "z" }}
-              scales={{ fill: example.scale }}
-              theme="light"
-              labs={{
-                title: `${example.label} density surface`,
-                x: "x",
-                y: "y",
-                fill: "z",
-              }}
               inspect={{ mode: "xy" }}
               height={360}
               ariaLabel={`${example.label} sequential color example`}
             >
+              <Scale value={{ fill: example.scale }} />
+              <Theme name="light" />
+              <Labs
+                title={`${example.label} density surface`}
+                x="x"
+                y="y"
+                fill="z"
+              />
               <GeomRaster />
             </GGPlot>
           </div>

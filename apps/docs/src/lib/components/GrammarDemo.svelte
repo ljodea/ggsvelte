@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
+  import { GeomPoint, GeomSmooth, GGPlot, Theme } from "@ggsvelte/svelte";
 
   // Docs-owned specimen corpus, not the gallery example: point/scatter-color
   // now carries Guerry's 1833 moral statistics, and the hero wants a scatter
@@ -57,9 +57,9 @@
       inspect={active >= 3
         ? { mode: "exact", pin: true, maxDistance: 24 }
         : false}
-      theme={chartTheme}
       ariaLabel="Penguin mass increases with flipper length, grouped by species"
     >
+      <Theme name={chartTheme} />
       <GeomPoint alpha={0.72} />
       {#if active >= 2}
         <GeomSmooth method="loess" span={0.9} degree={1} se={false} />

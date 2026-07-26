@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { createPlotInteraction, GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import {
+    createPlotInteraction,
+    GeomPoint,
+    GGPlot,
+    Labs,
+    Scale,
+  } from "@ggsvelte/svelte";
 
   import CopyCode from "$lib/components/CopyCode.svelte";
 
@@ -79,7 +85,6 @@ ${closeScript}
       data={rows}
       aes={{ x: "period", y: "value", color: "series" }}
       layers={[{ geom: "point", params: { size: 4 } }]}
-      scales={{ color: { type: "ordinal", scheme: "observable10" } }}
       key="id"
       inspect
       select={{ type: "interval", mode: "xy" }}
@@ -88,10 +93,11 @@ ${closeScript}
       {interaction}
       interactionScope={scope}
       height={420}
-      labs={{ x: "Period", y: "Value", color: "Series" }}
       ariaLabel="Interactive series with inspect, select, zoom, and legend focus"
       onlegendfocus={describeLegend}
     >
+      <Scale value={{ color: { type: "ordinal", scheme: "observable10" } }} />
+      <Labs x="Period" y="Value" color="Series" />
       <GeomPoint size={4} />
     </GGPlot>
   </div>

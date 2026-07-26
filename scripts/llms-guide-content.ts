@@ -271,14 +271,13 @@ const root = scaleYSqrt({ reverse: true });
 The Svelte surface accepts the same JSON and re-exports the same helpers:
 
 \`\`\`svelte fragment
-<GGPlot
-  data={rows}
-  aes={{ x: "latency", y: "requests" }}
-  scales={{
-    x: { type: "linear", transform: "log10" },
-    y: { type: "linear", transform: "sqrt" },
-  }}
->
+<GGPlot data={rows} aes={{ x: "latency", y: "requests" }}>
+  <Scale
+    value={{
+      x: { type: "linear", transform: "log10" },
+      y: { type: "linear", transform: "sqrt" },
+    }}
+  />
   <GeomPoint />
   <GeomSmooth method="lm" />
 </GGPlot>
@@ -309,13 +308,15 @@ A binned scale assigns quantitative values to bounded transformed-space bins
 while preserving source values for tooltips and events:
 
 \`\`\`svelte fragment
-scales={{
-  x: {
-    type: "binned",
-    transform: "log10",
-    breaks: [1, 10, 100, 1000],
-  },
-}}
+<Scale
+  value={{
+    x: {
+      type: "binned",
+      transform: "log10",
+      breaks: [1, 10, 100, 1000],
+    },
+  }}
+/>
 \`\`\`
 
 The runtime keeps integer bin identities private for count/stack/fill/dodge.
@@ -340,8 +341,10 @@ apply the forward transform exactly once.
 Use a named categorical scheme when color identifies groups:
 
 \`\`\`svelte fragment
-aes={{ x: "weight", y: "economy", color: "vehicleClass" }}
-scales={{ color: { type: "ordinal", scheme: "observable10" } }}
+<GGPlot data={cars} aes={{ x: "weight", y: "economy", color: "vehicleClass" }}>
+  <Scale value={{ color: { type: "ordinal", scheme: "observable10" } }} />
+  <GeomPoint />
+</GGPlot>
 \`\`\`
 
 Stable assignments preserve category identity as rows filter or reorder. See
@@ -373,14 +376,13 @@ upper edge included. At most 65 boundaries (64 steps) are portable. A
 colorsteps guide exposes every boundary, label, swatch, and inclusivity rule:
 
 \`\`\`svelte fragment
-<GGPlot
-  data={rows}
-  aes={{ x: "hour", y: "pm25", color: "pm25" }}
-  scales={scaleColorBinned({
-    breaks: [0, 12, 35, 55, 100],
-    range: ["#2a9d8f", "#e9c46a", "#f4a261", "#e76f51"],
-  })}
->
+<GGPlot data={rows} aes={{ x: "hour", y: "pm25", color: "pm25" }}>
+  <Scale
+    value={scaleColorBinned({
+      breaks: [0, 12, 35, 55, 100],
+      range: ["#2a9d8f", "#e9c46a", "#f4a261", "#e76f51"],
+    })}
+  />
   <GeomPoint />
 </GGPlot>
 \`\`\`
@@ -470,6 +472,15 @@ const guides = {
 };
 \`\`\`
 
+In Svelte that object is a \`<Guides>\` child:
+
+\`\`\`svelte fragment
+<GGPlot data={rows} aes={{ x: "hour", y: "pm25", color: "pm25" }}>
+  <Guides value={guides} />
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
 Automatic legends stay right only when the viewport is wider than 480px and at
 least 320px of readable panel remains; otherwise they move below. Bottom keys
 wrap without shrinking type and bottom ramps are horizontal. Discrete guides
@@ -497,7 +508,10 @@ trained scales (flip, etc.) without rewriting aesthetic mappings.
 One grammar, one panel per group:
 
 \`\`\`svelte fragment
-facet={{ wrap: "vehicleClass", ncol: 2 }}
+<GGPlot data={cars} aes={{ x: "weight", y: "economy" }}>
+  <FacetWrap field="vehicleClass" ncol={2} />
+  <GeomPoint />
+</GGPlot>
 \`\`\`
 
 Fixed scales: compare magnitudes across panels. Free scales: within-panel shape
@@ -544,10 +558,13 @@ The portable JSON form is strict and callback-free:
 \`\`\`
 
 Use \`coordTransform\` or its identical ggplot2-style alias
-\`coord_transform\`. In Svelte, pass the result to \`coord\`:
+\`coord_transform\`. In Svelte it is a \`<CoordTransform>\` child, which takes
+the same options (\`<Coord value={coordTransform({ … })} />\` is the escape
+hatch for a coordinate computed elsewhere):
 
 \`\`\`svelte fragment
-<GGPlot coord={coordTransform({ x: "log10", y: "sqrt" })}>
+<GGPlot data={rows} aes={{ x: "exposure", y: "response" }}>
+  <CoordTransform x="log10" y="sqrt" />
   <GeomPoint />
   <GeomSmooth method="lm" />
 </GGPlot>
@@ -600,7 +617,10 @@ appearance is independent unless follow mode is explicit.
 Registered theme name; mappings unchanged:
 
 \`\`\`svelte fragment
-theme="economist"
+<GGPlot data={rows} aes={{ x: "year", y: "value" }}>
+  <ThemeEconomist />
+  <GeomLine />
+</GGPlot>
 \`\`\`
 
 Twelve themes, categorical palettes, sequential ramps:

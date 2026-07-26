@@ -1,5 +1,12 @@
 <script lang="ts">
-  import { GeomCol, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomCol,
+    GGPlot,
+    Guides,
+    Labs,
+    Scale,
+    Theme,
+  } from "@ggsvelte/svelte";
   import type { ThemeName } from "@ggsvelte/spec";
 
   import { languages } from "$lib/theme-specimens/data";
@@ -47,18 +54,18 @@
     <GGPlot
       data={languages}
       aes={{ x: "language", y: "respondents", fill: "language" }}
-      scales={{ fill: { type: "ordinal", scheme: name, reverse } }}
-      guides={{ fill: { type: "none" } }}
-      theme={paperTheme}
-      labs={{
-        title: "Survey respondents by language",
-        x: "Language",
-        y: "Respondents",
-      }}
       inspect={{ mode: "xy" }}
       height={340}
       ariaLabel={`${label} palette on ${paperTheme} paper`}
     >
+      <Theme name={paperTheme} />
+      <Scale value={{ fill: { type: "ordinal", scheme: name, reverse } }} />
+      <Guides value={{ fill: { type: "none" } }} />
+      <Labs
+        title="Survey respondents by language"
+        x="Language"
+        y="Respondents"
+      />
       <GeomCol width={0.75} />
     </GGPlot>
   </div>
