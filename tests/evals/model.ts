@@ -310,16 +310,21 @@ export class MockResponder implements Responder {
       new RegExp(`\\bmap\\s+\\S+\\s+to\\s+${aesChannel}\\b`).test(prompt) ||
       new RegExp(`\\bmap\\s+${aesChannel}\\s+to\\s+\\S+\\b`).test(prompt) ||
       STYLE_CHANNELS.some((channel) => mappedStyleField(prompt, profile, channel) !== undefined);
-    // Supported geom_map (#808) uses "geom map" / fortified choropleth phrasing —
-    // do not refuse those. Still refuse bare geographic "map" without a geom.
+    // Supported geom_map (#808) / geom_sf (#809) — do not refuse those.
+    // Still refuse bare geographic "map" / choropleth without a geom.
     const supportedMapGeom = /\bgeom map\b|\bfortified\b/.test(prompt);
+    const supportedSfGeom =
+      /\bgeom[_\s]?sf\b|\bgeojson\b|\bsimple features?\b|\bsf (?:point|polygon|layer|choropleth)\b/.test(
+        prompt,
+      ) || profile.fields.some((field) => field.name === "geometry");
     if (
       /(?:\b3-?d\b|surface plot|network diagram)/.test(prompt) ||
-      (prompt.includes("choropleth") && !supportedMapGeom) ||
+      (prompt.includes("choropleth") && !supportedMapGeom && !supportedSfGeom) ||
       (/\bmap\b/.test(prompt) &&
         !aestheticMapping &&
         !/\bribbon\b/.test(prompt) &&
-        !supportedMapGeom)
+        !supportedMapGeom &&
+        !supportedSfGeom)
     ) {
       return Promise.resolve(
         JSON.stringify({
