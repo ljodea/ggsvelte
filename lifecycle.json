@@ -5653,6 +5653,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleXTime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleYBinned": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5682,6 +5686,10 @@
           "lifecycle": "experimental"
         },
         "scaleYSqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYTime": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5965,6 +5973,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_x_time": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_y_binned": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5994,6 +6006,10 @@
           "lifecycle": "experimental"
         },
         "scale_y_sqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_time": {
           "kind": "value",
           "lifecycle": "experimental"
         },
