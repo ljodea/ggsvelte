@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+import {
+  GALLERY_FILTER_JOURNEY_CATEGORY,
+  GALLERY_FILTER_JOURNEY_QUERY,
+} from "../../apps/docs/src/lib/gallery-filter-journey";
+
 async function expectNoOverflow(page: import("@playwright/test").Page): Promise<void> {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
@@ -227,15 +232,16 @@ test("gallery filtering is URL-addressable, preserves theme, and restores histor
 }) => {
   await page.goto("/examples?theme=dark");
   const search = page.getByRole("searchbox", { name: "Filter" });
-  // Query must hit gallery haystack (id/title/tags/section) — chart Labs copy
-  // and deleted meta descriptions are not indexed.
-  await search.fill("scatter");
-  await expect(page).toHaveURL(/theme=dark.*q=scatter|q=scatter.*theme=dark/);
+  // Shared with scripts/gallery.test.ts — must hit haystack (id/title/tags/section).
+  // Chart Labs copy and deleted meta descriptions are not indexed (#765/#773).
+  await search.fill(GALLERY_FILTER_JOURNEY_QUERY);
+  const q = GALLERY_FILTER_JOURNEY_QUERY;
+  await expect(page).toHaveURL(new RegExp(`theme=dark.*q=${q}|q=${q}.*theme=dark`));
   await expect(page.locator(".example-grid li").first()).toBeVisible();
   const linkedCount = await page.locator(".example-grid li").count();
   expect(linkedCount).toBeGreaterThan(0);
-  await page.getByLabel("Category").selectOption("bar");
-  await expect(page).toHaveURL(/category=bar/);
+  await page.getByLabel("Category").selectOption(GALLERY_FILTER_JOURNEY_CATEGORY);
+  await expect(page).toHaveURL(new RegExp(`category=${GALLERY_FILTER_JOURNEY_CATEGORY}`));
   await page.goBack();
   await expect(page.getByLabel("Category")).toHaveValue("");
   await expect(page.locator(".example-grid li").first()).toBeVisible();

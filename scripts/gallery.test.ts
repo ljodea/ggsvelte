@@ -8,6 +8,10 @@ import {
   type GalleryEntry,
 } from "../apps/docs/src/lib/catalog/gallery.js";
 import {
+  GALLERY_FILTER_JOURNEY_CATEGORY,
+  GALLERY_FILTER_JOURNEY_QUERY,
+} from "../apps/docs/src/lib/gallery-filter-journey.js";
+import {
   filterGallery,
   parseGalleryFilter,
   rankRelatedExamples,
@@ -51,7 +55,9 @@ describe("gallery filter URL contract", () => {
     expect(filterGallery(entries, { query: "", categories: [], tags: [] })).toEqual(entries);
   });
 
-  test("searches manifest titles, descriptions, and tags", () => {
+  test("searches manifest id, title, tags, and docsSection (not Labs copy)", () => {
+    // Descriptions were emptied corpus-wide (#765); filter still accepts the
+    // field but journey terms must match non-description haystack.
     const curated = filterGallery(entries, {
       query: "multi-series line",
       categories: [],
@@ -70,6 +76,31 @@ describe("gallery filter URL contract", () => {
     expect(result.every((entry) => entry.category === "bar" && entry.tags.includes("fill"))).toBe(
       true,
     );
+  });
+
+  test("URL-filter journey query and category stay findable on the public gallery", () => {
+    // Shared with docs-home-gallery.spec.ts so a #765-style content deletion
+    // fails here instead of only on the required component-journeys job (#773).
+    const catalog = galleryCatalog(EXAMPLES);
+    const byQuery = filterGallery(catalog, {
+      query: GALLERY_FILTER_JOURNEY_QUERY,
+      categories: [],
+      tags: [],
+    });
+    expect(byQuery.length).toBeGreaterThan(0);
+    expect(catalog.some((entry) => entry.category === GALLERY_FILTER_JOURNEY_CATEGORY)).toBe(true);
+  });
+
+  test("every gallery entry is reachable via its own name fragment", () => {
+    const catalog = galleryCatalog(EXAMPLES);
+    for (const entry of catalog) {
+      const hits = filterGallery(catalog, {
+        query: entry.name,
+        categories: [],
+        tags: [],
+      });
+      expect(hits.some((hit) => hit.id === entry.id)).toBe(true);
+    }
   });
 
   test("round-trips deterministic gallery keys while preserving unrelated query params", () => {
