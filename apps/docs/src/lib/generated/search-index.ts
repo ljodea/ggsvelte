@@ -3532,14 +3532,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["experimental (460)"],
   },
   {
-    id: "heading:guide-lifecycle:stable-intent-134",
+    id: "heading:guide-lifecycle:stable-intent-135",
     kind: "heading",
-    title: "stable-intent (134)",
+    title: "stable-intent (135)",
     summary:
-      "stable-intent (134) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#stable-intent-134",
+      "stable-intent (135) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#stable-intent-135",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["stable-intent (134)"],
+    exact: ["stable-intent (135)"],
   },
   {
     id: "page:guide-upgrading",
@@ -4075,6 +4075,22 @@ export const DOCS_SEARCH_INDEX = [
       "vr",
     ],
     exact: ["Columns with one multi-word category outlier"],
+  },
+  {
+    id: "example:col:theme-linedraw",
+    kind: "example",
+    title: "Column chart (theme_linedraw)",
+    summary: "Column chart (theme_linedraw) (Bars & columns)",
+    href: "/examples/col/theme-linedraw",
+    keywords: [
+      "Column chart (theme_linedraw)",
+      "Bars & columns",
+      "col",
+      "bars",
+      "theme",
+      "linedraw",
+    ],
+    exact: ["Column chart (theme_linedraw)"],
   },
   {
     id: "example:col:value-labels",
@@ -15720,6 +15736,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-svelte",
     keywords: ["@ggsvelte/svelte", ".", "value", "stable-intent"],
     exact: ["ThemeLight"],
+  },
+  {
+    id: "api:ggsvelte-svelte:ThemeLinedraw",
+    kind: "api",
+    title: "ThemeLinedraw",
+    summary: "@ggsvelte/svelte · value · stable-intent.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "stable-intent"],
+    exact: ["ThemeLinedraw"],
   },
   {
     id: "api:ggsvelte-svelte:ThemeMinimal",
