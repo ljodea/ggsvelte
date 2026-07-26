@@ -156,6 +156,7 @@ export const FacetSpecSchema = SpecModule.Import("FacetSpec");
 export const CoordTransformAxisSpecSchema = SpecModule.Import("CoordTransformAxisSpec");
 export const CoordTransformSpecSchema = SpecModule.Import("CoordTransformSpec");
 export const CoordFixedSpecSchema = SpecModule.Import("CoordFixedSpec");
+export const CoordSfSpecSchema = SpecModule.Import("CoordSfSpec");
 export const CoordSpecSchema = SpecModule.Import("CoordSpec");
 
 // ---------------------------------------------------------------------------
@@ -415,7 +416,9 @@ export type CoordTransformAxisSpec = SpecType<"CoordTransformAxisSpec">;
 export type CoordTransformSpec = SpecType<"CoordTransformSpec">;
 /** Fixed-aspect Cartesian coordinate configuration. */
 export type CoordFixedSpec = SpecType<"CoordFixedSpec">;
-/** Cartesian, flipped, post-stat transformed, or fixed-aspect coordinate system. */
+/** Simple-features fixed-aspect coordinates (already-projected maps; #809). */
+export type CoordSfSpec = SpecType<"CoordSfSpec">;
+/** Cartesian, flipped, post-stat transformed, fixed-aspect, or SF fixed-aspect. */
 export type CoordSpec = SpecType<"CoordSpec">;
 /** Per-layer rendering backend hint. */
 export type RenderBackend = SpecType<"RenderBackend">;

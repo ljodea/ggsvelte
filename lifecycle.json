@@ -240,6 +240,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CoordSfOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordSfSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordSfSpecSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "CoordSpec": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1640,6 +1652,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "coordSf": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "coordTransform": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1649,6 +1665,10 @@
           "lifecycle": "experimental"
         },
         "coord_fixed": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coord_sf": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4028,6 +4048,18 @@
         "CoordFlip": {
           "kind": "value",
           "lifecycle": "stable-intent"
+        },
+        "CoordSf": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "CoordSfOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CoordSfSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
         },
         "CoordSpec": {
           "kind": "type",

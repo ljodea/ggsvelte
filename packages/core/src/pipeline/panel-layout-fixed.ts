@@ -1,4 +1,4 @@
-import type { CoordFixedSpec, Scales } from "@ggsvelte/spec";
+import type { CoordFixedSpec, CoordSfSpec, Scales } from "@ggsvelte/spec";
 
 import type { Tick } from "../layout/layout-types.js";
 import type { AxisGuidePlan } from "../layout/temporal-guide.js";
@@ -65,10 +65,13 @@ export interface FixedAspectLayoutResult {
  * Fit equal fixed-aspect data rectangles inside already-reserved panel allocations.
  * Chart chrome is therefore authoritative; this pass can only add paper gutters.
  */
+/** Fixed-aspect coord forms that share the same layout pass (`fixed` + `sf`). */
+export type FixedAspectCoordSpec = CoordFixedSpec | CoordSfSpec;
+
 export function applyFixedAspectLayout(input: {
   placements: readonly PanelPlacement[];
   panelScales: readonly { x: PositionScale; y: PositionScale }[];
-  coord: CoordFixedSpec;
+  coord: FixedAspectCoordSpec;
   faceted: boolean;
   freeX: boolean;
   freeY: boolean;
@@ -76,17 +79,18 @@ export function applyFixedAspectLayout(input: {
   warnings: PipelineWarning[];
 }): FixedAspectLayoutResult {
   if (input.freeX || input.freeY) {
+    const name = input.coord.type === "sf" ? "coord_sf" : "coord_fixed";
     const cause =
       "Fixed-aspect coordinates cannot assign one truthful physical data-unit ratio across free positional facet scales.";
     throw new PipelineError("coord-fixed-free-scales", "/facet/scales", cause, {
       code: "coord-fixed-free-scales",
       severity: "error",
       path: "/facet/scales",
-      problem: "coord_fixed is incompatible with free positional facet scales.",
+      problem: `${name} is incompatible with free positional facet scales.`,
       cause,
       fixes: [
         { description: 'Use facet.scales = "fixed".' },
-        { description: "Remove the fixed-aspect coordinate." },
+        { description: `Remove the ${name} coordinate.` },
       ],
       documentationUrl: "/guide/coordinate-systems#fixed-aspect",
     });
