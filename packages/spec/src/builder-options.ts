@@ -28,6 +28,7 @@ import type {
   CurveParams,
   ContourParams,
   MapParams,
+  SfParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -220,6 +221,12 @@ export interface GeomCurveOptions extends CurveParams, GeomDataOption {
 
 /** Map-layer sugar options (fortified join; #808). map is required. */
 export interface GeomMapOptions extends MapParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Options for .geomSf() — portable GeoJSON geometries (#809). */
+export interface GeomSfOptions extends SfParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

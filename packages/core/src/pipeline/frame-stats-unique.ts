@@ -159,5 +159,6 @@ export function buildUniqueFrame(
     dodge: null,
     box: null,
     smooth: null,
+    sf: null,
   };
 }

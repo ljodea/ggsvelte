@@ -29,6 +29,7 @@ export function candidateAutoMode(
     case "raster":
     case "density_2d_filled":
     case "map":
+    case "sf":
       return "exact";
     case "line":
     case "path":

@@ -60,9 +60,10 @@ export type { ChannelName, GeomName, PositionName, StatName } from "./schema-cat
  * matching the TypeBox 0.x Module.Import JSON shape used by the artifact
  * emitter and by Value.Check / Value.Errors.
  *
- * Type inference uses `SpecStatic` (Type.Module) instead: Cyclic's Static<>
- * collapses large graphs to `never` under TypeScript 6, while Module inlines
- * refs into concrete object types.
+ * Type inference uses `Static<>` on `SpecDeclarations` (not Cyclic Import):
+ * Cyclic's Static<> collapses large graphs to `never` under TypeScript 6.
+ * We avoid `Type.Module(SpecDeclarations)` for Static extraction — the Module
+ * surface hits TS7056 on composite .d.ts emit once geom unions grow large.
  *
  * Build the `$defs` graph once (rooted at PlotSpec) and re-root by swapping
  * `$ref` — Type.Cyclic(decls, key) per import would rebuild the full graph
@@ -121,6 +122,7 @@ export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
 export const CurveLayerSchema = SpecModule.Import("CurveLayer");
 export const MapLayerSchema = SpecModule.Import("MapLayer");
+export const SfLayerSchema = SpecModule.Import("SfLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
@@ -212,6 +214,8 @@ export type RuleParams = SpecType<"RuleParams">;
 export type SegmentParams = SpecType<"SegmentParams">;
 /** Curve layer params (curvature/angle/ncp + stroke). */
 export type CurveParams = SpecType<"CurveParams">;
+/** Simple-features layer params (geometry column + styling; #809 phase 1). */
+export type SfParams = SpecType<"SfParams">;
 /** Map layer params (fortified map DataRef + styling; #808). */
 export type MapParams = SpecType<"MapParams">;
 /** Text layer params. */
@@ -299,6 +303,7 @@ export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
 export type CurveLayer = LayerWithDataRef<SpecType<"CurveLayer">>;
 /** A choropleth/map layer (#808). */
 export type MapLayer = LayerWithDataRef<SpecType<"MapLayer">>;
+export type SfLayer = LayerWithDataRef<SpecType<"SfLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -313,6 +318,7 @@ export type LayerSpec =
   | SegmentLayer
   | CurveLayer
   | MapLayer
+  | SfLayer
   | RuleLayer
   | TextLayer
   | SmoothLayer

@@ -42,6 +42,7 @@ import type {
   GeomCurveOptions,
   GeomContourOptions,
   GeomMapOptions,
+  GeomSfOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -288,6 +289,11 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'map', ... }) — fortified map join (#808). */
   geomMap(options: GeomMapOptions): GGBuilder {
     return this.layer(layerFrom("map", options));
+  }
+
+  /** Sugar for .layer({ geom: 'sf', ... }) — portable GeoJSON geometries (#809). */
+  geomSf(options: GeomSfOptions = {}): GGBuilder {
+    return this.layer(layerFrom("sf", options));
   }
 
   /**

@@ -568,6 +568,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomSfOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomSmoothOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1112,6 +1116,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeSfLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeSmoothLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1189,6 +1197,18 @@
           "lifecycle": "experimental"
         },
         "SequentialStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SfLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SfLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SfParams": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4102,6 +4122,10 @@
           "lifecycle": "experimental"
         },
         "GeomSegment": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomSf": {
           "kind": "value",
           "lifecycle": "experimental"
         },

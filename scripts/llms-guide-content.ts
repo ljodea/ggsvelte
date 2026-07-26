@@ -369,6 +369,28 @@ weights. Mapping aes.y fails loud (\`computed-y-mapped\`).
 
 [Dotplot histodot](/examples/dotplot/histodot): stacked points in fixed bins.
 
+## Simple features (\`geom_sf\`)
+
+\`geom_sf\` draws already-projected GeoJSON **Geometry** values stored as JSON
+**strings** in a data column (default \`geometry\`; override with
+\`params.geometry\`). Point/MultiPoint → points; LineString/MultiLineString →
+open paths; Polygon/MultiPolygon → closed fills. Multipart geometries expand
+to multiple marks. Interior rings are ignored with a warning; GeometryCollection
+and mixed families in one layer error (split layers).
+
+No CRS / \`coord_sf\` yet — coordinates are treated as already projected.
+
+\`\`\`svelte fragment
+<GeomSf alpha={0.9} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(regions, aes({ fill: "rate" })).geomSf().spec();
+// geometry column holds JSON.stringify({ type: "Polygon", coordinates: [...] })
+\`\`\`
+
+[SF polygons](/examples/sf/basic): three triangles filled by a rate field.
+
 ## Ellipse confidence rings
 
 Bivariate normal confidence ellipses (ggplot2 \`stat_ellipse\`, type \`norm\`

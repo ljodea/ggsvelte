@@ -93,6 +93,15 @@ export function dispatchGeometryBatch(
     case "map":
       // Fortified regions → closed filled paths (ggplot2 geom_map; #808).
       return single(polygonBatch(frame, fx, color, fill, styles, warnings));
+    case "sf": {
+      // Portable GeoJSON expand (#809 phase 1): kind selected during frame build.
+      const kind = frame.sf?.kind ?? "polygon";
+      if (kind === "point") return single(pointsBatch(frame, fx, color, styles, warnings));
+      if (kind === "line") {
+        return single(lineBatch(frame, fx, color, styles, warnings, { sortByX: false }));
+      }
+      return single(polygonBatch(frame, fx, color, fill, styles, warnings));
+    }
     default:
       return [];
   }

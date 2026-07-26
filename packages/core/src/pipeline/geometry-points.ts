@@ -57,9 +57,11 @@ export function pointsBatch(
   if (collected.kept === 0) return null;
 
   const { positions, rowIndex } = packPointPixels(collected, frame, fx);
+  // point / dotplot / geom_sf point family share this builder.
+  // SfParams has size/alpha (not shape); DotplotParams adds binwidth/dotsize.
   const geom = binding.layer.geom;
   const params =
-    geom === "point" || geom === "dotplot"
+    geom === "point" || geom === "dotplot" || geom === "sf"
       ? ((binding.layer.params ?? {}) as {
           size?: number;
           alpha?: number;
@@ -68,6 +70,7 @@ export function pointsBatch(
           dotsize?: number;
         })
       : {};
+  const paramShape = geom === "point" || geom === "dotplot" ? params.shape : undefined;
   const literalSize = binding.size.constant;
   const literalAlpha = binding.alpha.constant;
   const literalShape = binding.shape.constant;
@@ -96,7 +99,7 @@ export function pointsBatch(
     size: markSize,
     alpha: typeof literalAlpha === "number" ? literalAlpha : (params.alpha ?? 1),
     shape:
-      typeof literalShape === "string" ? (literalShape as PointShape) : (params.shape ?? "circle"),
+      typeof literalShape === "string" ? (literalShape as PointShape) : (paramShape ?? "circle"),
     fill: paintChannel.constant,
   };
   const sizes = numericStyleVector(frame, "size", collected.keptRows, styles);

@@ -295,6 +295,22 @@ export const PIPELINE_ERROR_CATALOG = {
     summary: "renderToSVGString refused to render more marks than its maxMarks safety limit.",
     fix: "Raise options.maxMarks deliberately, reduce the data, or render interactively (canvas).",
   },
+  "sf-geometry-missing": {
+    summary: "geom_sf data is missing the geometry column.",
+    fix: 'Provide a column of GeoJSON Geometry JSON strings (default field "geometry", or params.geometry).',
+  },
+  "sf-geometry-invalid": {
+    summary: "A geom_sf geometry cell could not be parsed as drawable GeoJSON Geometry.",
+    fix: "Use valid GeoJSON Geometry JSON strings with finite coordinates.",
+  },
+  "sf-geometry-unsupported": {
+    summary: "geom_sf received a GeoJSON type outside the v1 point/line/polygon families.",
+    fix: "Use Point, MultiPoint, LineString, MultiLineString, Polygon, or MultiPolygon (no GeometryCollection/CRS).",
+  },
+  "sf-geometry-mixed": {
+    summary: "One geom_sf layer mixes geometry families (point vs line vs polygon).",
+    fix: "Split mixed types into separate geom_sf layers (v1 is single-family per layer).",
+  },
   "map-data-required": {
     summary: "geom_map was used without params.map.",
     fix: "Pass params.map as { values }, { columns }, or { name } against spec.datasets.",

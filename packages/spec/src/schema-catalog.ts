@@ -30,6 +30,7 @@ export const KNOWN_GEOMS = [
   "density_2d_filled",
   "dotplot",
   "map",
+  "sf",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -133,4 +134,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   density_2d_filled: { stat: "density_2d_filled", position: "identity" },
   dotplot: { stat: "bindot", position: "identity" },
   map: { stat: "identity", position: "identity" },
+  sf: { stat: "identity", position: "identity" },
 };

@@ -268,7 +268,7 @@ export type ScaleCapability = (typeof SCALE_CAPABILITIES)[number];
 
 /** One checked geom-consumption table for mapped style channels. */
 export const STYLE_AESTHETIC_GEOMS = {
-  size: ["point", "text", "dotplot"],
+  size: ["point", "text", "dotplot", "sf"],
   linewidth: [
     "line",
     "path",
@@ -287,6 +287,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "density_2d",
     "density_2d_filled",
     "map",
+    "sf",
   ],
   alpha: [
     "point",
@@ -315,8 +316,9 @@ export const STYLE_AESTHETIC_GEOMS = {
     "segment",
     "curve",
     "map",
+    "sf",
   ],
-  shape: ["point", "dotplot"],
+  shape: ["point", "dotplot", "sf"],
   linetype: [
     "line",
     "path",
@@ -335,6 +337,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "density_2d",
     "density_2d_filled",
     "map",
+    "sf",
   ],
 } as const;
 
