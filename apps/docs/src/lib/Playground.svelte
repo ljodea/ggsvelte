@@ -3,7 +3,6 @@
   import { onMount, tick } from "svelte";
 
   import type { RenderModel } from "@ggsvelte/core";
-  import type { SpecError } from "@ggsvelte/spec";
 
   import { copyText } from "$lib/clipboard";
   import PlaygroundBrowseLinks from "$lib/components/PlaygroundBrowseLinks.svelte";
@@ -70,21 +69,18 @@
   import { agentHandoffPrompt } from "$lib/playground-agent-handoff";
   import {
     agentIsBusy,
-    beginAgentRequest,
     completeAgentSuccess,
     createPlaygroundAgentState,
     failAgent,
     messageForAgentError,
     resolvePhaseLine,
     setAgentDrawing,
-    setAgentRepairing,
-    setAgentValidating,
     type PlaygroundAgentState,
   } from "$lib/playground-agent-state";
   import {
-    agentFailureIsRepairable,
-    validateAgentEnvelope,
-  } from "$lib/playground-agent-validate";
+    rateLimitLabelFor,
+    runPlaygroundAgentRun,
+  } from "$lib/playground-agent-run";
   import type { PlaygroundDatasetId } from "$lib/playground-dataset-schemas";
   import {
     PLAYGROUND_DEFAULT_DATASET,
@@ -149,10 +145,6 @@
       currentSpec: workbench.committed,
       userGoal: prompt,
     });
-  }
-
-  function rateLimitLabelFor(seconds: number): string {
-    return `Try again in ${seconds}s`;
   }
 
   function cancelActiveRun(): void {
@@ -310,135 +302,48 @@
     const token = ++runSeq;
     // A superseded or cancelled run must stop touching state entirely —
     // its continuations would otherwise interleave with the newer run.
-    const stale = (): boolean =>
+    const isStale = (): boolean =>
       token !== runSeq || options.signal?.aborted === true;
 
-    agent = beginAgentRequest(agent, {
-      exampleMode: options.example !== undefined,
-    });
+    // Clear before the run so a cancelled live generate cannot inherit
+    // mock notice copy from a prior canned example.
     mockNotice = false;
 
-    try {
-      let rawEnvelope: unknown;
-      let envelope: PlaygroundAgentEnvelope;
+    const outcome = await runPlaygroundAgentRun(
+      {
+        userPrompt,
+        dataset,
+        // Re-read at first generate and repair (send named data, never rows).
+        getCurrentSpec: () =>
+          elidePlaygroundDatasetRows(workbench.committed, dataset),
+        ...(options.example === undefined ? {} : { example: options.example }),
+        ...(options.signal === undefined ? {} : { signal: options.signal }),
+        isStale,
+        initialAgent: agent,
+      },
+      {
+        onAgent: (next) => {
+          agent = next;
+        },
+        generateChart,
+      },
+    );
 
-      const example = options.example;
-      if (example === undefined) {
-        const first = await generateChart(
-          {
-            prompt: userPrompt,
-            datasetId: dataset,
-            // Send named data, never inlined rows (performance review S2).
-            currentSpec: elidePlaygroundDatasetRows(
-              workbench.committed,
-              dataset,
-            ),
-          },
-          { signal: options.signal },
-        );
-        if (stale()) return;
-        if (!first.ok) {
-          if (
-            first.code === "rate_limited" ||
-            first.code === "upstream_rate_limited"
-          ) {
-            const seconds = first.retryAfterSeconds ?? 60;
-            rateLimitUntil = Date.now() + seconds * 1000;
-            rateLimitLabel = rateLimitLabelFor(seconds);
-          }
-          agent = failAgent(agent, {
-            code: first.code,
-            message: first.message,
-            ...(first.retryAfterSeconds === undefined
-              ? {}
-              : { retryAfterSeconds: first.retryAfterSeconds }),
-          });
-          return;
-        }
-        if (first.model === "mock") mockNotice = true;
-        envelope = first.envelope;
-        rawEnvelope = first.rawEnvelope;
-      } else {
-        // Instant canned path (OV2-A) — brief phase line, then validate/stage.
-        await new Promise((resolve) => {
-          setTimeout(resolve, 120);
-        });
-        if (stale()) return;
-        envelope = example.envelope;
-        rawEnvelope = {
-          spec: envelope.spec,
-          interactions: envelope.interactions,
-          title: envelope.title,
-        };
+    if (outcome.kind === "stale") return;
+
+    if (outcome.kind === "failed") {
+      mockNotice = outcome.mockNotice;
+      if (outcome.rateLimit !== undefined) {
+        rateLimitUntil = outcome.rateLimit.until;
+        rateLimitLabel = outcome.rateLimit.label;
       }
-
-      agent = setAgentValidating(agent);
-      let validated = validateAgentEnvelope(envelope, dataset);
-
-      // One repair round, and only with raw SpecError[] to repair from: a
-      // seed-bound failure carries none, so repairing would spend a second
-      // model call and double the wait for nothing (#697).
-      if (
-        options.example === undefined &&
-        agentFailureIsRepairable(validated)
-      ) {
-        agent = setAgentRepairing(agent);
-        const repair = await generateChart(
-          {
-            prompt: userPrompt,
-            datasetId: dataset,
-            currentSpec: elidePlaygroundDatasetRows(
-              workbench.committed,
-              dataset,
-            ),
-            priorSpec: rawEnvelope,
-            priorErrors: validated.errors as SpecError[],
-          },
-          { signal: options.signal },
-        );
-        if (stale()) return;
-        if (!repair.ok) {
-          agent = failAgent(agent, {
-            code: repair.code,
-            message: repair.message,
-            details: validated.errors,
-          });
-          return;
-        }
-        envelope = repair.envelope;
-        rawEnvelope = repair.rawEnvelope;
-        validated = validateAgentEnvelope(envelope, dataset);
-      }
-
-      if (!validated.ok) {
-        agent = failAgent(agent, {
-          code: "validation",
-          message: validated.message,
-          details: validated.errors,
-        });
-        return;
-      }
-
-      if (stale()) return;
-      // Success completes on candidate promotion (the "Drawing…" phase is
-      // real; Generate stays disabled until the chart actually paints).
-      pendingSuccess = {
-        spec: validated.spec,
-        interactions: validated.interactions,
-        title: validated.title,
-      };
-      stageAgentSeed(validated.seed, validated.interactions);
-    } catch (error) {
-      // A throw must never strand the machine in a busy phase.
-      if (stale()) return;
-      agent = failAgent(agent, {
-        code: "pipeline",
-        message: messageForAgentError(
-          "pipeline",
-          error instanceof Error ? error.message : undefined,
-        ),
-      });
+      return;
     }
+
+    // ready_to_stage — drawing is owned by stageAgentSeed, not the run module.
+    mockNotice = outcome.mockNotice;
+    pendingSuccess = outcome.pendingSuccess;
+    stageAgentSeed(outcome.seed, outcome.interactions);
   }
 
   function onGenerate(): void {
