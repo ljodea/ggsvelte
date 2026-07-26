@@ -395,9 +395,10 @@ bun run gallery:previews:gen
 
 `gallery:previews:check` (docs build/check, and CI when `examples/**`
 changes) fails when sources move without a recapture — not only when a
-PNG is missing. Gen never rewrites provenance. Non-pixel docs
-structure/a11y runs in `component-journeys` (docs_journeys routing).
-Determinism + fonts: docs/decisions/0009.
+PNG is missing. Gen never restamps source/png digests (capture does);
+it only prunes provenance entries for deleted examples, same as orphan
+PNGs. Non-pixel docs structure/a11y runs in `component-journeys`
+(docs_journeys routing). Determinism + fonts: docs/decisions/0009.
 
 - **Smoke baselines** land in `tests/visual/__screenshots__/` from the pinned
   container. Prefer **same-PR** updates: change render-relevant code + smoke

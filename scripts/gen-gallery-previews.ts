@@ -17,6 +17,8 @@ import {
   assertPreviewProvenance,
   loadProvenance,
   provenancePath,
+  pruneProvenanceToIds,
+  writeProvenance,
 } from "./gallery-preview-provenance.js";
 
 const ROOT = resolve(import.meta.dir, "..");
@@ -119,7 +121,7 @@ export async function generateGalleryPreviews(
         )
       : [];
     if (extras.length > 0) throw new Error(`Unexpected generated gallery preview: ${extras[0]}`);
-    // Source↔PNG binding (#746). Provenance is capture-owned; gen never writes it.
+    // Source↔PNG binding (#746). Digests are capture-owned; gen only prunes orphans.
     const previewsDir = output;
     assertPreviewProvenance({
       examplesRoot,
@@ -143,6 +145,15 @@ export async function generateGalleryPreviews(
     if (from !== to) copyFileSync(from, to);
   }
   writeFileSync(projection, generated);
+  // Closed-set hygiene only: drop provenance for deleted examples (mirrors PNG
+  // cleanup above). Never restamps source/png digests — that remains capture-only.
+  const provFile = provenancePath(output);
+  if (existsSync(provFile)) {
+    writeProvenance(
+      provFile,
+      pruneProvenanceToIds(loadProvenance(provFile), new Set(entries.map((entry) => entry.id))),
+    );
+  }
 }
 
 if (import.meta.main) {

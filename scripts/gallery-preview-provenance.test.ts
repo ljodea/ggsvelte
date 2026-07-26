@@ -12,6 +12,7 @@ import {
   loadProvenance,
   provenanceEntryFor,
   provenancePath,
+  pruneProvenanceToIds,
   serializeProvenance,
   sharedExampleSourcePaths,
   upsertProvenanceEntry,
@@ -260,6 +261,26 @@ describe("assertPreviewProvenance", () => {
     } finally {
       rmSync(dirnameSafe(path), { recursive: true, force: true });
     }
+  });
+});
+
+describe("pruneProvenanceToIds", () => {
+  test("drops deleted example ids without rewriting remaining digests", () => {
+    let p = emptyProvenance();
+    p = upsertProvenanceEntry(p, "keep/me", {
+      filename: "keep-me-light.png",
+      sourceSha256: "a".repeat(64),
+      pngSha256: "b".repeat(64),
+    });
+    p = upsertProvenanceEntry(p, "gone/example", {
+      filename: "gone-example-light.png",
+      sourceSha256: "c".repeat(64),
+      pngSha256: "d".repeat(64),
+    });
+    const pruned = pruneProvenanceToIds(p, new Set(["keep/me"]));
+    expect(pruned.entries["gone/example"]).toBeUndefined();
+    expect(pruned.entries["keep/me"]?.sourceSha256).toBe("a".repeat(64));
+    expect(pruned.entries["keep/me"]?.pngSha256).toBe("b".repeat(64));
   });
 });
 

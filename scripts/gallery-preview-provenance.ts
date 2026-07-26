@@ -208,6 +208,21 @@ export function upsertProvenanceEntry(
   };
 }
 
+/**
+ * Drop provenance entries whose ids are not in `keepIds` (deleted examples).
+ * Does not rewrite digests for remaining entries — closed-set hygiene only.
+ */
+export function pruneProvenanceToIds(
+  provenance: GalleryPreviewProvenance,
+  keepIds: ReadonlySet<string>,
+): GalleryPreviewProvenance {
+  const entries: Record<string, ProvenanceEntry> = {};
+  for (const [id, entry] of Object.entries(provenance.entries)) {
+    if (keepIds.has(id)) entries[id] = entry;
+  }
+  return { version: PROVENANCE_VERSION, entries };
+}
+
 export interface ProvenanceCheckContext {
   readonly examplesRoot: string;
   readonly previewsDir: string;

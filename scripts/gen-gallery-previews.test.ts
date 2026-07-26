@@ -153,6 +153,58 @@ describe("generated gallery previews", () => {
     }
   });
 
+  test("gen write prunes orphan provenance for deleted examples without restamping digests", async () => {
+    const root = mkdtempSync(join(tmpdir(), "ggsvelte-gallery-prune-"));
+    const examplesRoot = join(root, "examples");
+    const previews = join(root, "previews");
+    const projection = join(root, "gallery-previews.ts");
+    mkdirSync(previews, { recursive: true });
+    const keep = EXAMPLES[0]!;
+    const gone = EXAMPLES[1]!;
+    try {
+      for (const entry of [keep, gone]) {
+        const dir = join(examplesRoot, ...entry.id.split("/"));
+        mkdirSync(dir, { recursive: true });
+        writeFileSync(join(dir, "Example.svelte"), entry.id);
+        writeFileSync(join(dir, "spec.ts"), entry.id);
+        writeFileSync(join(dir, "meta.json"), "{}");
+        writeFileSync(join(previews, canonicalPreviewFilename(entry.id)), `png:${entry.id}`);
+      }
+      let provenance = emptyProvenance();
+      for (const entry of [keep, gone]) {
+        provenance = upsertProvenanceEntry(
+          provenance,
+          entry.id,
+          provenanceEntryFor(examplesRoot, previews, entry.id),
+        );
+      }
+      writeProvenance(join(previews, "provenance.json"), provenance);
+      const keepDigest = provenance.entries[keep.id]!.sourceSha256;
+      await generateGalleryPreviews({
+        entries: [keep],
+        source: previews,
+        output: previews,
+        projection,
+        examplesRoot,
+      });
+      const after = JSON.parse(readFileSync(join(previews, "provenance.json"), "utf8")) as {
+        entries: Record<string, { sourceSha256: string }>;
+      };
+      expect(after.entries[gone.id]).toBeUndefined();
+      expect(after.entries[keep.id]?.sourceSha256).toBe(keepDigest);
+      await generateGalleryPreviews({
+        entries: [keep],
+        source: previews,
+        output: previews,
+        projection,
+        examplesRoot,
+        check: true,
+      });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   test("checked repository projection, assets, and provenance are current", async () => {
     await generateGalleryPreviews({ check: true });
   });

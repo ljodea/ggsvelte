@@ -24,6 +24,7 @@ import {
   loadProvenance,
   provenanceEntryFor,
   provenancePath,
+  pruneProvenanceToIds,
   upsertProvenanceEntry,
   writeProvenance,
 } from "./gallery-preview-provenance.js";
@@ -119,6 +120,9 @@ async function main(): Promise<void> {
   } finally {
     await browser.close();
   }
+  // Drop ids no longer in the manifest (deleted examples). Subset captures
+  // still preserve digests for uncaptured live examples.
+  provenance = pruneProvenanceToIds(provenance, new Set(EXAMPLES.map((entry) => entry.id)));
   writeProvenance(provenanceFile, provenance);
   console.log(`updated ${PROVENANCE_FILENAME}`);
 }
