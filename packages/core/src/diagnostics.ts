@@ -424,9 +424,6 @@ export const PIPELINE_WARNING_CATALOG = {
   "density-group-dropped": {
     summary: "A density group had too few finite values and was dropped.",
   },
-  "sf-holes-ignored": {
-    summary: "geom_sf ignored interior polygon rings; v1 draws exterior rings only.",
-  },
   "sf-coordinates-dropped": {
     summary: "stat_sf_coordinates dropped features with no finite representative point.",
   },
