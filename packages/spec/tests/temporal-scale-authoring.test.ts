@@ -10,16 +10,20 @@ import {
   normalize,
   scaleXDate,
   scaleXDatetime,
+  scaleXTime,
   scaleXDiscrete,
   scaleYDate,
   scaleYDatetime,
+  scaleYTime,
   scaleYDiscrete,
   scale_x_date,
   scale_x_datetime,
+  scale_x_time,
   scale_x_discrete,
   SCALE_CAPABILITIES,
   scale_y_date,
   scale_y_datetime,
+  scale_y_time,
   scale_y_discrete,
   validate,
 } from "../src/index.ts";
@@ -33,6 +37,10 @@ describe("temporal scale authoring surfaces", () => {
     expect(temporal?.helpers).toContain("scaleXDate");
     expect(temporal?.helpers).toContain("scale_x_date");
     expect(temporal?.helpers).toContain("scaleYDatetime");
+    expect(temporal?.helpers).toContain("scaleXTime");
+    expect(temporal?.helpers).toContain("scale_x_time");
+    expect(temporal?.helpers).toContain("scaleYTime");
+    expect(temporal?.helpers).toContain("scale_y_time");
     expect(
       SCALE_CAPABILITIES.find((capability) => capability.family === "numeric-style")?.runtime,
     ).toBe("implemented");
@@ -41,8 +49,10 @@ describe("temporal scale authoring surfaces", () => {
   it("exports binding-identical camel and ggplot2 aliases", () => {
     expect(scale_x_date).toBe(scaleXDate);
     expect(scale_x_datetime).toBe(scaleXDatetime);
+    expect(scale_x_time).toBe(scaleXTime);
     expect(scale_y_date).toBe(scaleYDate);
     expect(scale_y_datetime).toBe(scaleYDatetime);
+    expect(scale_y_time).toBe(scaleYTime);
     expect(scale_x_discrete).toBe(scaleXDiscrete);
     expect(scale_y_discrete).toBe(scaleYDiscrete);
   });
@@ -89,6 +99,8 @@ describe("temporal scale authoring surfaces", () => {
     expect(scaleYDate()).toEqual({ y: { type: "time", temporalKind: "date" } });
     expect(scaleXDatetime()).toEqual({ x: { type: "time", temporalKind: "datetime" } });
     expect(scaleYDatetime()).toEqual({ y: { type: "time", temporalKind: "datetime" } });
+    expect(scaleXTime()).toEqual({ x: { type: "time", temporalKind: "time" } });
+    expect(scaleYTime()).toEqual({ y: { type: "time", temporalKind: "time" } });
     expect(scaleXDiscrete()).toEqual({ x: { type: "band" } });
     expect(scaleYDiscrete()).toEqual({ y: { type: "band" } });
     expect(

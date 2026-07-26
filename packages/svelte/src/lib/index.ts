@@ -181,9 +181,13 @@ export { default as ScaleXDate } from "./scale/ScaleXDate.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleXDatetime } from "./scale/ScaleXDatetime.svelte";
 /** @lifecycle stable-intent */
+export { default as ScaleXTime } from "./scale/ScaleXTime.svelte";
+/** @lifecycle stable-intent */
 export { default as ScaleYDate } from "./scale/ScaleYDate.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleYDatetime } from "./scale/ScaleYDatetime.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleYTime } from "./scale/ScaleYTime.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleXDiscrete } from "./scale/ScaleXDiscrete.svelte";
 /** @lifecycle stable-intent */

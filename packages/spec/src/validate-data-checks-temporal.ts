@@ -88,8 +88,8 @@ export function appendTemporalKindMismatch(
     axis: "x" | "y";
     path: string;
     field: string;
-    expected: "date" | "datetime" | undefined;
-    actual: "date" | "datetime" | null;
+    expected: "date" | "datetime" | "time" | undefined;
+    actual: "date" | "datetime" | "time" | null;
   },
 ): void {
   const { axis, path, field, expected, actual } = input;

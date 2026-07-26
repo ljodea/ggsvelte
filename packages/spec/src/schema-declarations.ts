@@ -2788,9 +2788,9 @@ export const SpecDeclarations = {
           }),
         ),
         temporalKind: Type.Optional(
-          Type.Union([Type.Literal("date"), Type.Literal("datetime")], {
+          Type.Union([Type.Literal("date"), Type.Literal("datetime"), Type.Literal("time")], {
             description:
-              'Temporal precision intent. "date" uses calendar dates; "datetime" uses instants. Supplying this option requests a time scale.',
+              'Temporal precision intent. "date" uses calendar dates; "datetime" uses instants; "time" is time-of-day (portable numbers are seconds since midnight). Supplying this option requests a time scale.',
           }),
         ),
         parse: Type.Optional(

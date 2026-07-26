@@ -157,7 +157,8 @@ export function resolveBinnedColorScale(input: {
     colors: Object.freeze(colors),
     naValue,
     unknownValue,
-    ...(view.temporalKind !== null && { temporalKind: view.temporalKind }),
+    ...(view.temporalKind !== null &&
+      view.temporalKind !== "time" && { temporalKind: view.temporalKind }),
     colorOf(value: unknown): string | undefined {
       if (value === null || value === undefined) return naValue;
       const semantic = view.semanticOf(value);

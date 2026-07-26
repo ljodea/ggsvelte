@@ -64,7 +64,7 @@ describe("SHELL_MANIFEST completeness", () => {
     }
     expect(byFamily.get("position-continuous")).toBe(8);
     expect(byFamily.get("position-binned")).toBe(2);
-    expect(byFamily.get("position-temporal")).toBe(4);
+    expect(byFamily.get("position-temporal")).toBe(6);
     expect(byFamily.get("position-discrete")).toBe(2);
     expect(byFamily.get("color-fill")).toBe(30);
     expect(byFamily.get("numeric-style")).toBe(21);

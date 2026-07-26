@@ -73,7 +73,9 @@ function partValue(parts: readonly Intl.DateTimeFormatPart[], type: Intl.DateTim
 
 function displayParts(ms: number, options: TemporalLabelFormatOptions): TemporalDisplayParts {
   const locale = options.locale ?? "en-US";
-  const configuredTimezone = options.kind === "date" ? "UTC" : (options.timezone ?? "UTC");
+  // date and time-of-day are wall-clock-less / fixed UTC; datetime may carry a zone.
+  const configuredTimezone =
+    options.kind === "date" || options.kind === "time" ? "UTC" : (options.timezone ?? "UTC");
   const timezone =
     configuredTimezone === "Z" || configuredTimezone === "Etc/UTC" ? "UTC" : configuredTimezone;
   const d = new Date(ms);
@@ -252,9 +254,13 @@ export function formatTemporalTickSequence(
   const full = compileTemporalLabelFormat(
     options.kind === "date"
       ? "%Y-%m-%d"
-      : needsMilliseconds
-        ? "%Y-%m-%d %H:%M:%S.%L %Z"
-        : "%Y-%m-%d %H:%M:%S %Z",
+      : options.kind === "time"
+        ? needsMilliseconds
+          ? "%H:%M:%S.%L"
+          : "%H:%M:%S"
+        : needsMilliseconds
+          ? "%Y-%m-%d %H:%M:%S.%L %Z"
+          : "%Y-%m-%d %H:%M:%S %Z",
     options,
   );
   if (options.pattern !== undefined) {
