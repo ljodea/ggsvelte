@@ -47,7 +47,7 @@ function parseGeometry(raw: CellValue, path: string): { type: string; coordinate
     parsed === null ||
     typeof parsed !== "object" ||
     !("type" in parsed) ||
-    typeof (parsed as { type: unknown }).type !== "string"
+    typeof parsed.type !== "string"
   ) {
     throw new PipelineError(
       "sf-geometry-invalid",
@@ -55,8 +55,8 @@ function parseGeometry(raw: CellValue, path: string): { type: string; coordinate
       'geom_sf geometry must be a GeoJSON Geometry object with a string "type".',
     );
   }
-  const geom = parsed as { type: string; coordinates?: unknown };
-  return { type: geom.type, coordinates: geom.coordinates };
+  const coordinates = "coordinates" in parsed ? parsed.coordinates : undefined;
+  return { type: parsed.type, coordinates };
 }
 
 function kindOf(type: string): SfKind {
