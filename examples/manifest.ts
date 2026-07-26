@@ -717,6 +717,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "sf/labels",
+    category: "sf",
+    name: "labels",
+    title: "SF region labels",
+    description: "",
+    tags: ["sf", "sf_text", "label", "geojson", "centroid", "map"],
+    docsSection: "Maps & spatial",
+    hasData: true,
+  },
+  {
     id: "smooth/loess-scatter",
     category: "smooth",
     name: "loess-scatter",

@@ -95,6 +95,7 @@ exports[`validate — agent errors (snapshot-tested messages) unknown geom with 
       "dotplot",
       "map",
       "sf",
+      "sf_text",
     ],
     "code": "unknown-geom",
     "fix": {
@@ -103,7 +104,7 @@ exports[`validate — agent errors (snapshot-tested messages) unknown geom with 
         "geom": "point",
       },
     },
-    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf". Did you mean "point"?",
+    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text". Did you mean "point"?",
     "path": "/layers/0/geom",
   },
 ]
@@ -140,6 +141,7 @@ exports[`validate — agent errors (snapshot-tested messages) geom missing entir
       "dotplot",
       "map",
       "sf",
+      "sf_text",
     ],
     "code": "missing-geom",
     "fix": {
@@ -148,7 +150,7 @@ exports[`validate — agent errors (snapshot-tested messages) geom missing entir
         "geom": "point",
       },
     },
-    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf".",
+    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text".",
     "path": "/layers/0/geom",
   },
 ]
@@ -340,6 +342,7 @@ exports[`validate — agent errors (snapshot-tested messages) multiple errors ar
       "dotplot",
       "map",
       "sf",
+      "sf_text",
     ],
     "code": "unknown-geom",
     "fix": {
@@ -348,7 +351,7 @@ exports[`validate — agent errors (snapshot-tested messages) multiple errors ar
         "geom": "point",
       },
     },
-    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf". Did you mean "point"?",
+    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text". Did you mean "point"?",
     "path": "/layers/0/geom",
   },
   {

@@ -391,6 +391,28 @@ gg(regions, aes({ fill: "rate" })).geomSf().spec();
 
 [SF polygons](/examples/sf/basic): three triangles filled by a rate field.
 
+### SF text labels (\`geom_sf_text\`)
+
+\`geom_sf_text\` (ggplot2 \`geom_sf_text\`) defaults to \`stat_sf_coordinates\`:
+one representative point per feature, then draws \`aes.label\` there. Point
+coordinates pass through; MultiPoint/LineString use the vertex mean; Polygon
+uses the exterior-ring shoelace centroid. Multi* geometries use the **first**
+component only in v1. Requires \`aes.label\` (no \`aes.x\`/\`aes.y\`).
+
+\`\`\`svelte fragment
+<GeomSf alpha={0.55} />
+<GeomSfText size={14} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(regions, aes({ fill: "rate", label: "region" }))
+  .geomSf({ alpha: 0.55 })
+  .geomSfText({ size: 14 })
+  .spec();
+\`\`\`
+
+[SF region labels](/examples/sf/labels): filled polygons with names at centroids.
+
 ## Ellipse confidence rings
 
 Bivariate normal confidence ellipses (ggplot2 \`stat_ellipse\`, type \`norm\`

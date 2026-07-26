@@ -377,6 +377,27 @@ export class MockResponder implements Responder {
 
     // --- geom selection (keyword templates, most specific first) -----------
     if (
+      (/\bgeom[_\s]?sf[_\s]?text\b|\bsf_text\b|\bsf text\b/.test(prompt) ||
+        (fieldNamed("geometry") !== undefined &&
+          /\blabel\b/.test(prompt) &&
+          !/\bfill\b|\bchoropleth\b/.test(prompt))) &&
+      (fieldNamed("geometry") !== undefined || /\bgeojson\b|\bsimple features?\b/.test(prompt))
+    ) {
+      // geom_sf_text: labels at representative SF points (#809 phase 2).
+      const aes: MockAes = {};
+      const label =
+        fieldNamed("name") ??
+        fieldNamed("region") ??
+        fieldNamed("label") ??
+        pick.mentionedCat() ??
+        profile.fields.find((fld) => fld.type === "nominal" && fld.name !== "geometry")?.name;
+      if (label !== undefined) aes.label = f(label);
+      const fill =
+        fieldNamed("rate") ??
+        profile.fields.find((fld) => fld.type === "quantitative" && fld.name !== "geometry")?.name;
+      if (fill !== undefined && /\bfill\b/.test(prompt)) aes.fill = f(fill);
+      spec.layers.push({ geom: "sf_text", aes });
+    } else if (
       /\bgeom[_\s]?sf\b|\bgeojson\b|\bsimple features?\b|\bsf (?:point|polygon|layer|choropleth)\b/.test(
         prompt,
       ) ||

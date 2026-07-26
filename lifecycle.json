@@ -1124,6 +1124,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeSfTextLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeSmoothLayer": {
           "kind": "type",
           "lifecycle": "experimental"
