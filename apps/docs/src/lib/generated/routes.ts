@@ -1633,6 +1633,26 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "sf-geometry-missing",
+        title: "sf-geometry-missing",
+        level: 3,
+      },
+      {
+        id: "sf-geometry-invalid",
+        title: "sf-geometry-invalid",
+        level: 3,
+      },
+      {
+        id: "sf-geometry-unsupported",
+        title: "sf-geometry-unsupported",
+        level: 3,
+      },
+      {
+        id: "sf-geometry-mixed",
+        title: "sf-geometry-mixed",
+        level: 3,
+      },
+      {
         id: "render-warnings",
         title: "Render warnings",
         level: 2,
@@ -1775,6 +1795,11 @@ export const DOCS_ROUTES = [
       {
         id: "density-group-dropped",
         title: "density-group-dropped",
+        level: 3,
+      },
+      {
+        id: "sf-coordinates-dropped",
+        title: "sf-coordinates-dropped",
         level: 3,
       },
       {
@@ -2137,8 +2162,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-599",
-        title: "experimental (599)",
+        id: "experimental-613",
+        title: "experimental (613)",
         level: 3,
       },
       {
@@ -2177,8 +2202,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-462",
-        title: "experimental (462)",
+        id: "experimental-468",
+        title: "experimental (468)",
         level: 3,
       },
       {
@@ -2857,6 +2882,16 @@ export const DOCS_ROUTES = [
     title: "Segment annotations — ggsvelte gallery",
     description: "Segment annotations",
     canonicalPath: "/examples/segment/annotations",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/sf/choropleth",
+    title: "SF choropleth — ggsvelte gallery",
+    description: "SF choropleth",
+    canonicalPath: "/examples/sf/choropleth",
     kind: "page",
     index: true,
     sitemap: true,

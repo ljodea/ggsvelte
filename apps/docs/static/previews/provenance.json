@@ -261,6 +261,11 @@
       "sourceSha256": "91e2b96ef160795d290e47b6d2d228687c30dd10823e7bb4afe8457d3b333a2f",
       "pngSha256": "db94c25dd934a387e9d35657c2789dc098a17e7a886583ca07f3137ad6f8fc11"
     },
+    "sf/choropleth": {
+      "filename": "sf-choropleth-light.png",
+      "sourceSha256": "100b73a5b7aba0c06d36158d7da3684470940747c25f20353c465c50364eeebb",
+      "pngSha256": "835aea65ce660064dfb8e28b8e5d48a10c671874ea2d99e7fb6a5224e3c8e4a6"
+    },
     "smooth/loess-scatter": {
       "filename": "smooth-loess-scatter-light.png",
       "sourceSha256": "726fe00865d7ca6a98b104eb4e0ea9c7e9a8cb321aba2cf8d2584d385761f3c0",

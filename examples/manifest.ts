@@ -637,6 +637,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "sf/choropleth",
+    category: "sf",
+    name: "choropleth",
+    title: "SF choropleth",
+    description: "",
+    tags: ["sf", "geojson", "choropleth", "label", "coord", "map", "theme"],
+    docsSection: "Maps & polygons",
+    hasData: true,
+  },
+  {
     id: "smooth/loess-scatter",
     category: "smooth",
     name: "loess-scatter",

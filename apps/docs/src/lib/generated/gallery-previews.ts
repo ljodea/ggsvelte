@@ -321,6 +321,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "db94c25dd934a387e9d35657c2789dc098a17e7a886583ca07f3137ad6f8fc11",
   },
   {
+    id: "sf/choropleth",
+    filename: "sf-choropleth-light.png",
+    path: "/previews/sf-choropleth-light.png",
+    sha256: "835aea65ce660064dfb8e28b8e5d48a10c671874ea2d99e7fb6a5224e3c8e4a6",
+  },
+  {
     id: "smooth/loess-scatter",
     filename: "smooth-loess-scatter-light.png",
     path: "/previews/smooth-loess-scatter-light.png",
