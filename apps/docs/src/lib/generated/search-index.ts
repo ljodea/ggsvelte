@@ -3412,14 +3412,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-519",
+    id: "heading:guide-lifecycle:experimental-520",
     kind: "heading",
-    title: "experimental (519)",
+    title: "experimental (520)",
     summary:
-      "experimental (519) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-519",
+      "experimental (520) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-520",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (519)"],
+    exact: ["experimental (520)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -6502,6 +6502,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
     exact: ["RuntimeErrorbarLayer"],
+  },
+  {
+    id: "api:ggsvelte-spec:RuntimeFreqpolyLayer",
+    kind: "api",
+    title: "RuntimeFreqpolyLayer",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["RuntimeFreqpolyLayer"],
   },
   {
     id: "api:ggsvelte-spec:RuntimeHistogramLayer",
