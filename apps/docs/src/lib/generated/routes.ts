@@ -367,6 +367,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "ellipse-confidence-rings",
+        title: "Ellipse confidence rings",
+        level: 2,
+      },
+      {
         id: "frequency-polygon",
         title: "Frequency polygon",
         level: 2,
@@ -2797,6 +2802,16 @@ export const DOCS_ROUTES = [
     title: "Connect hv path joins — ggsvelte gallery",
     description: "Connect hv path joins",
     canonicalPath: "/examples/path/connect-hv",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/path/ellipse-rings",
+    title: "Ellipse confidence rings — ggsvelte gallery",
+    description: "Ellipse confidence rings",
+    canonicalPath: "/examples/path/ellipse-rings",
     kind: "page",
     index: true,
     sitemap: true,

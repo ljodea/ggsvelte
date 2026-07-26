@@ -129,8 +129,8 @@ export interface LineLayerInput extends LayerInputBase {
 
 export interface PathLayerInput extends LayerInputBase {
   geom: "path";
-  /** identity | unique | connect | manual (#814) */
-  stat?: "identity" | "unique" | "connect" | "manual";
+  /** identity | unique | connect | manual (#814) | ellipse (#812) */
+  stat?: "identity" | "unique" | "connect" | "manual" | "ellipse";
   position?: "identity";
   params?: PathParams;
 }

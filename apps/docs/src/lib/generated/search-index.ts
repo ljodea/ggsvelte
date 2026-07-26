@@ -424,6 +424,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Simple features (geom_sf)"],
   },
   {
+    id: "heading:guide-statistics-positions:ellipse-confidence-rings",
+    kind: "heading",
+    title: "Ellipse confidence rings",
+    summary:
+      "Ellipse confidence rings in Statistics and positions. Compute summaries and control how derived marks occupy the same coordinate space.",
+    href: "/guide/statistics-positions#ellipse-confidence-rings",
+    keywords: ["Statistics and positions", "Core grammar"],
+    exact: ["Ellipse confidence rings"],
+  },
+  {
     id: "heading:guide-statistics-positions:frequency-polygon",
     kind: "heading",
     title: "Frequency polygon",
@@ -4758,6 +4768,25 @@ export const DOCS_SEARCH_INDEX = [
       "trajectory",
     ],
     exact: ["Connect hv path joins"],
+  },
+  {
+    id: "example:path:ellipse-rings",
+    kind: "example",
+    title: "Ellipse confidence rings",
+    summary: "Ellipse confidence rings (Points & scatter)",
+    href: "/examples/path/ellipse-rings",
+    keywords: [
+      "Ellipse confidence rings",
+      "Points & scatter",
+      "path",
+      "ellipse",
+      "stat",
+      "confidence",
+      "group",
+      "point",
+      "theme",
+    ],
+    exact: ["Ellipse confidence rings"],
   },
   {
     id: "example:path:trajectory",

@@ -91,6 +91,7 @@ export const KNOWN_STATS = [
   "density_2d",
   "density_2d_filled",
   "bindot",
+  "ellipse",
 ] as const;
 export type StatName = (typeof KNOWN_STATS)[number];
 

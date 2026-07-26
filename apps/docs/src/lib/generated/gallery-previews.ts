@@ -231,6 +231,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "957ba761ba22e2ecfbd69194872b6471f8a52b97887ea152b633b78da9a3f0a0",
   },
   {
+    id: "path/ellipse-rings",
+    filename: "path-ellipse-rings-light.png",
+    path: "/previews/path-ellipse-rings-light.png",
+    sha256: "d6b2b537e1c4669d03da7ebe18a48fdabd94e06d8e408aa012e9e00cdba81e9c",
+  },
+  {
     id: "path/trajectory",
     filename: "path-trajectory-light.png",
     path: "/previews/path-trajectory-light.png",
