@@ -460,6 +460,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomQuantileOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomRasterOptions": {
           "kind": "type",
           "lifecycle": "experimental"
