@@ -4,8 +4,10 @@
  */
 import {
   coordFixed,
+  coordSf,
   coordTransform,
   type CoordFixedOptions,
+  type CoordSfOptions,
   type CoordTransformOptions,
 } from "./coord-helpers.js";
 import { SpecValidationError } from "./errors.js";
@@ -312,6 +314,14 @@ export class GGBuilderCore {
   /** Equal-unit spelling of coordFixed(). */
   coordEqual(options: CoordFixedOptions = {}): GGBuilder {
     return this.coord(coordFixed(options));
+  }
+
+  /**
+   * Fixed-aspect coordinates for already-projected geom_sf maps (ggplot2
+   * coord_sf subset; #809). No CRS reproject in v1.
+   */
+  coordSf(options: CoordSfOptions = {}): GGBuilder {
+    return this.coord(coordSf(options));
   }
 
   /** Set the accessibility mode ("force-svg" keeps every layer in SVG). */

@@ -351,6 +351,7 @@ export { default as CoordCartesian } from "./coord/CoordCartesian.svelte";
 export { default as CoordTransform } from "./coord/CoordTransform.svelte";
 /** @lifecycle stable-intent */
 export { default as CoordFixed } from "./coord/CoordFixed.svelte";
+export { default as CoordSf } from "./coord/CoordSf.svelte";
 /** @lifecycle stable-intent */
 export { default as CoordEqual } from "./coord/CoordFixed.svelte";
 
@@ -605,7 +606,9 @@ export type {
   ColorScaleSpec,
   CoordSpec,
   CoordFixedOptions,
+  CoordSfOptions,
   CoordFixedSpec,
+  CoordSfSpec,
   CoordTransformAxisOptions,
   CoordTransformAxisSpec,
   CoordTransformName,

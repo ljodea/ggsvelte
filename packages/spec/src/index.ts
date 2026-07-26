@@ -23,6 +23,7 @@ export {
   ColLayerSchema,
   CoordSpecSchema,
   CoordFixedSpecSchema,
+  CoordSfSpecSchema,
   CoordTransformAxisSpecSchema,
   CoordTransformSpecSchema,
   CURRENT_EDITION,
@@ -88,6 +89,7 @@ export type {
   ColParams,
   CoordSpec,
   CoordFixedSpec,
+  CoordSfSpec,
   CoordTransformAxisSpec,
   CoordTransformSpec,
   DataColumns,
@@ -275,13 +277,16 @@ export type {
 export {
   coord_equal,
   coord_fixed,
+  coord_sf,
   coord_transform,
   coordEqual,
   coordFixed,
+  coordSf,
   coordTransform,
 } from "./coord-helpers.js";
 export type {
   CoordFixedOptions,
+  CoordSfOptions,
   CoordTransformAxisOptions,
   CoordTransformName,
   CoordTransformOptions,
