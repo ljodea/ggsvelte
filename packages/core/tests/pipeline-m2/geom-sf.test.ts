@@ -271,4 +271,75 @@ describe("geom_sf", () => {
     expect(batch.closed).toBe(true);
     expect(batch.pathOffsets.length - 1).toBe(1);
   });
+
+  it("returns an empty scene for zero-row data instead of throwing", () => {
+    const model = runPipeline(
+      gg({ geometry: [] as string[], rate: [] as number[] }, aes({ fill: "rate" }))
+        .geomSf()
+        .spec(),
+      size,
+    );
+    expect(model.scene.batches).toEqual([]);
+    expect(model.warnings.some((w) => w.code === "empty-layer" || w.code === "empty-data")).toBe(
+      true,
+    );
+  });
+
+  it("keeps the closing vertex on a closed LineString (open path draw)", () => {
+    const closedLine = geo({
+      type: "LineString",
+      coordinates: [
+        [0, 0],
+        [1, 0],
+        [1, 1],
+        [0, 0],
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [closedLine] }, aes({}))
+        .geomSf()
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PathsBatch;
+    expect(batch.closed).toBeFalsy();
+    // 4 vertices → 8 position floats (closing edge retained for open paths).
+    expect(batch.positions.length).toBe(8);
+  });
+
+  it("honors params.size/alpha for Point sf layers", () => {
+    const model = runPipeline(
+      gg(
+        {
+          geometry: [geo({ type: "Point", coordinates: [1, 2] })],
+        },
+        aes({}),
+      )
+        .geomSf({ size: 12, alpha: 0.4 })
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PointsBatch;
+    expect(batch.size).toBe(12);
+    expect(batch.alpha).toBe(0.4);
+  });
+
+  it("honors params.linewidth/alpha for LineString sf layers", () => {
+    const line = geo({
+      type: "LineString",
+      coordinates: [
+        [0, 0],
+        [1, 1],
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [line] }, aes({}))
+        .geomSf({ linewidth: 3.5, alpha: 0.25 })
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PathsBatch;
+    expect(batch.linewidth).toBe(3.5);
+    expect(batch.alpha).toBe(0.25);
+  });
 });

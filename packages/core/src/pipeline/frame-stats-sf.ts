@@ -116,14 +116,17 @@ function pushRing(
   sourceRow: number,
   ring: unknown,
   minVerts: number,
+  /** Polygon rings close via `closed: true`; open lines must keep a genuine loop vertex. */
+  dropClosingDuplicate: boolean,
 ): boolean {
   if (!Array.isArray(ring)) return false;
   const pts: Position[] = [];
   for (const c of ring) {
     if (isFinitePair(c)) pts.push([c[0], c[1]]);
   }
-  // Drop closing duplicate if present (polygonBatch closes via closed: true).
-  if (pts.length >= 2) {
+  // Drop GeoJSON ring-closing duplicate so polygonBatch can re-close via closed: true.
+  // LineString/MultiLineString are open paths — keep the vertex so a closed loop draws fully.
+  if (dropClosingDuplicate && pts.length >= 2) {
     const first = pts.at(0)!;
     const last = pts.at(-1)!;
     if (first[0] === last[0] && first[1] === last[1]) pts.pop();
@@ -151,6 +154,34 @@ export function buildSfFrame(
       `/layers/${index}/params/geometry`,
       `geom_sf requires a geometry column "${field}" of GeoJSON Geometry JSON strings.`,
     );
+  }
+
+  // Empty panel / zero-row data: match other geoms (warnEmptyLayers later).
+  if (table.rowCount === 0) {
+    void groups;
+    return {
+      binding,
+      table,
+      n: 0,
+      xValues: null,
+      xNumeric: new Float64Array(0),
+      yValues: null,
+      yNumeric: new Float64Array(0),
+      groups: [],
+      inputGroups: groups,
+      inputSourceRows: null,
+      rowIndex: new Uint32Array(0),
+      colorValues: null,
+      fillValues: null,
+      sizeValues: null,
+      linewidthValues: null,
+      alphaValues: null,
+      shapeValues: null,
+      linetypeValues: null,
+      labelValues: null,
+      ...emptyFrameExtras(),
+      sf: { kind: "polygon" },
+    };
   }
 
   const geomCol = table.column(field);
@@ -204,7 +235,7 @@ export function buildSfFrame(
     }
     if (parsed.type === "LineString") {
       const g = ringId++;
-      if (!pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, coords, 2)) {
+      if (!pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, coords, 2, false)) {
         // drop empty
       }
       continue;
@@ -219,7 +250,7 @@ export function buildSfFrame(
       }
       for (const line of coords) {
         const g = ringId++;
-        pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, line, 2);
+        pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, line, 2, false);
       }
       continue;
     }
@@ -233,7 +264,7 @@ export function buildSfFrame(
       }
       if (coords.length > 1) holesIgnored += coords.length - 1;
       const g = ringId++;
-      pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, coords[0], 3);
+      pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, coords[0], 3, true);
       continue;
     }
     // MultiPolygon
@@ -248,7 +279,7 @@ export function buildSfFrame(
       if (!Array.isArray(poly) || poly.length === 0) continue;
       if (poly.length > 1) holesIgnored += poly.length - 1;
       const g = ringId++;
-      pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, poly[0], 3);
+      pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, poly[0], 3, true);
     }
   }
 

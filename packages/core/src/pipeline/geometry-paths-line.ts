@@ -62,7 +62,8 @@ export function lineBatch(
     binding.layer.geom === "path" ||
     binding.layer.geom === "quantile" ||
     binding.layer.geom === "contour" ||
-    binding.layer.geom === "density_2d"
+    binding.layer.geom === "density_2d" ||
+    binding.layer.geom === "sf"
       ? (binding.layer.params ?? {})
       : {};
   // Quantile/contour/density_2d have no curve param; line/path may set step/linear.
