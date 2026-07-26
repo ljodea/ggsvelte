@@ -144,6 +144,7 @@ export function buildManualFrame(
       dodge: null,
       box: null,
       smooth: null,
+      sf: null,
     };
   }
 

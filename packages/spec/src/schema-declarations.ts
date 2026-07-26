@@ -1695,6 +1695,57 @@ export const SpecDeclarations = {
     },
   ),
 
+  SfParams: Type.Object(
+    {
+      geometry: Type.Optional(
+        Type.String({
+          minLength: 1,
+          description:
+            'Name of the data column holding GeoJSON Geometry JSON strings. Default "geometry". Already-projected coordinates only (#809 phase 1).',
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Mark opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px for lines/polygon outlines. Must be greater than 0.",
+        }),
+      ),
+      size: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Point radius in px when geometries are Point/MultiPoint.",
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description: "Within-mark gradient fill paint (polygon family; not a data scale).",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description: "Within-mark gradient stroke paint (not a data scale).",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom_sf (#809 phase 1): portable GeoJSON Geometry column plus styling. No CRS/coord_sf in v1.",
+    },
+  ),
+
   TextParams: Type.Object(
     {
       alpha: Type.Optional(
@@ -2506,6 +2557,35 @@ export const SpecDeclarations = {
     },
   ),
 
+  SfLayer: Type.Object(
+    {
+      geom: Type.Literal("sf", {
+        description:
+          "Simple-features geometry (ggplot2 geom_sf; #809 phase 1): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families; no CRS, coord_sf, sf_text, or sf_label yet.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "SF layers expand geometry then draw as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "SF layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data.",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("SfParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        'An sf geometry layer. Requires a geometry column of GeoJSON Geometry JSON strings (params.geometry, default "geometry"). Coordinates must already be projected.',
+    },
+  ),
+
   LayerSpec: Type.Union(
     [
       Type.Ref("PointLayer"),
@@ -2529,6 +2609,7 @@ export const SpecDeclarations = {
       Type.Ref("RasterLayer"),
       Type.Ref("SegmentLayer"),
       Type.Ref("CurveLayer"),
+      Type.Ref("SfLayer"),
     ],
     {
       description:

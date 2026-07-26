@@ -48,6 +48,11 @@ interface SmoothPayload {
   band: boolean;
 }
 
+/** geom_sf render family after geometry expand (#809 phase 1). */
+interface SfPayload {
+  kind: "point" | "line" | "polygon";
+}
+
 /**
  * Shared fields every stage may read: binding, table, positions, styles,
  * groups, and pre-finalize lineage placeholders.
@@ -123,6 +128,8 @@ export interface LayerFrame extends LayerFrameCore {
   box: BoxPayload | null;
   /** Smooth SE band flag — only smooth ribbon geometry. */
   smooth: SmoothPayload | null;
+  /** geom_sf geometry family after expand — only sf dispatch. */
+  sf: SfPayload | null;
 }
 
 /**
