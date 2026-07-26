@@ -92,7 +92,12 @@ export function assembleCandidateStore(
       let best = -1,
         bestDistance = Infinity,
         bestOrth = Infinity;
-      const mode: ResolvedCandidateInspectMode = search.mode === "auto" ? "exact" : search.mode;
+      // Under auto, exact-mode geometric hits (tier 1) beat pure axis-snap
+      // candidates (tier 2). Prevents path/smooth x-crosshair from stealing
+      // co-layered point hits (#770). Explicit mode is un-tiered.
+      let bestGeometric = false;
+      const isAuto = search.mode === "auto";
+      const mode: ResolvedCandidateInspectMode = isAuto ? "exact" : search.mode;
       let resultMode: ResolvedCandidateInspectMode = mode;
       const pathContainment = new Map<string, boolean>();
       const ids =
@@ -102,7 +107,7 @@ export function assembleCandidateStore(
       for (const id of ids) {
         if (search.panelId !== undefined && scene.panels[panelIds[id]!]!.id !== search.panelId)
           continue;
-        const candidateMode = search.mode === "auto" ? AUTO_MODES[autoModes[id]!]! : mode;
+        const candidateMode = isAuto ? AUTO_MODES[autoModes[id]!]! : mode;
         if (
           (candidateMode === "x" && xTokenIds[id] === -1) ||
           (candidateMode === "y" && yTokenIds[id] === -1)
@@ -124,11 +129,27 @@ export function assembleCandidateStore(
             : candidateMode === "y"
               ? Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px))
               : 0;
+        // Tier 1 = exact-mode candidates with a finite exactDistance only.
+        // Do not promote x/y candidates via stroke geometry (filled areas
+        // return unbounded containment hypot; Claude plan review #770).
+        const geometric = isAuto && candidateMode === "exact";
+        if (isAuto) {
+          if (geometric && !bestGeometric) {
+            best = id;
+            bestDistance = distance;
+            bestOrth = orth;
+            resultMode = candidateMode;
+            bestGeometric = true;
+            continue;
+          }
+          if (!geometric && bestGeometric) continue;
+        }
         if (distance < bestDistance || (distance === bestDistance && orth < bestOrth)) {
           best = id;
           bestDistance = distance;
           bestOrth = orth;
           resultMode = candidateMode;
+          if (isAuto) bestGeometric = geometric;
         }
       }
       const found = indexes.fact(best);
