@@ -270,6 +270,30 @@ gg(data, aes({ x: "x", y: "y" }))
 
 [Quantile lines](/examples/point/quantile-lines): scatter with three RQ lines.
 
+## Contour isolines
+
+Contour isolines (ggplot2 \`geom_contour\` / \`stat_contour\`) draw open path
+polylines of constant \`z\` over a **regular** continuous \`x\` × \`y\` grid.
+Levels come from \`params.breaks\`, else \`binwidth\`, else \`bins\` evenly
+spaced from min(z)..max(z) inclusive (default 10). v1 is open polylines only
+— no \`contour_filled\`, no irregular triangulation, no default color-by-level.
+
+\`\`\`svelte fragment
+<GeomContour bins={8} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(grid, aes({ x: "x", y: "y", z: "z" }))
+  .geomContour({ breaks: [0.25, 0.5, 0.75] })
+  .spec();
+\`\`\`
+
+Incomplete grid cells (missing/NaN corners) are skipped; groups without a
+usable grid or levels are dropped with a warning. after_stat \`level\` is
+carried for tooltips.
+
+[Contour isolines](/examples/contour/basic): nested levels of a radial peak.
+
 ## Frequency polygon
 
 Frequency polygon (ggplot2 \`geom_freqpoly\`) bins continuous \`x\` and draws a

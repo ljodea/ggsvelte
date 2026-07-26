@@ -33,6 +33,7 @@ import type {
   CurveParams,
   Scales,
   QuantileParams,
+  ContourParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -66,6 +67,7 @@ export interface AesInput {
   yend?: ChannelInput;
   width?: ChannelInput;
   height?: ChannelInput;
+  z?: ChannelInput;
 }
 
 interface LayerInputBase {
@@ -191,6 +193,13 @@ export interface QuantileLayerInput extends LayerInputBase {
   params?: QuantileParams;
 }
 
+export interface ContourLayerInput extends LayerInputBase {
+  geom: "contour";
+  stat?: "contour";
+  position?: "identity";
+  params?: ContourParams;
+}
+
 export interface BoxplotLayerInput extends LayerInputBase {
   geom: "boxplot";
   stat?: "boxplot";
@@ -269,6 +278,7 @@ export type LayerInput =
   | TextLayerInput
   | SmoothLayerInput
   | QuantileLayerInput
+  | ContourLayerInput
   | BoxplotLayerInput
   | DensityLayerInput
   | ErrorbarLayerInput

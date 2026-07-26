@@ -342,6 +342,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "contour-isolines",
+        title: "Contour isolines",
+        level: 2,
+      },
+      {
         id: "frequency-polygon",
         title: "Frequency polygon",
         level: 2,
@@ -1778,6 +1783,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "contour-group-dropped",
+        title: "contour-group-dropped",
+        level: 3,
+      },
+      {
         id: "smooth-group-dropped",
         title: "smooth-group-dropped",
         level: 3,
@@ -2137,8 +2147,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-599",
-        title: "experimental (599)",
+        id: "experimental-604",
+        title: "experimental (604)",
         level: 3,
       },
       {
@@ -2177,8 +2187,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-462",
-        title: "experimental (462)",
+        id: "experimental-463",
+        title: "experimental (463)",
         level: 3,
       },
       {
@@ -2507,6 +2517,16 @@ export const DOCS_ROUTES = [
     title: "Continuous color (ramp legend) — ggsvelte gallery",
     description: "Continuous color (ramp legend)",
     canonicalPath: "/examples/color/continuous",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/contour/basic",
+    title: "Contour isolines — ggsvelte gallery",
+    description: "Contour isolines",
+    canonicalPath: "/examples/contour/basic",
     kind: "page",
     index: true,
     sitemap: true,

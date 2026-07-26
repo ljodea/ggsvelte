@@ -93,6 +93,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "ad530227b719c0c8b12f928d996f53e213b08121d36b31e82809bac5462807e5",
   },
   {
+    id: "contour/basic",
+    filename: "contour-basic-light.png",
+    path: "/previews/contour-basic-light.png",
+    sha256: "0ede793a6fadca7aeb2e1fc705a6853fff041ecf4685aa538d1dd1c261adc183",
+  },
+  {
     id: "curve/connectors",
     filename: "curve-connectors-light.png",
     path: "/previews/curve-connectors-light.png",

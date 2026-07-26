@@ -60,10 +60,11 @@ export function lineBatch(
   const params =
     binding.layer.geom === "line" ||
     binding.layer.geom === "path" ||
-    binding.layer.geom === "quantile"
+    binding.layer.geom === "quantile" ||
+    binding.layer.geom === "contour"
       ? (binding.layer.params ?? {})
       : {};
-  // QuantileParams has no curve (linear RQ only); line/path may set step/linear.
+  // Quantile/contour have no curve param; line/path may set step/linear.
   const curve =
     binding.layer.geom === "line" || binding.layer.geom === "path"
       ? ((binding.layer.params ?? {}).curve ?? "linear")

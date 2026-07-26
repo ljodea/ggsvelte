@@ -369,6 +369,29 @@ export class MockResponder implements Responder {
       );
       scales["x"] = { type: "linear", transform: "log10" };
       xField = x;
+    } else if (/\bcontour\b|isolines?\b/.test(prompt)) {
+      // geom_contour + stat_contour over a regular x/y/z grid (#801).
+      const x = fieldNamed("x") ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? pick.quant() ?? "y";
+      const z =
+        fieldNamed("z") ??
+        fieldNamed("temp") ??
+        fieldNamed("elev") ??
+        fieldNamed("elevation") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "z";
+      const aes: MockAes = { x: f(x), y: f(y), z: f(z) };
+      const layer: MockLayer = { geom: "contour", aes };
+      const levels = [...prompt.matchAll(/\b(\d+(?:\.\d+)?)\b/g)]
+        .map((m) => Number(m[1]))
+        .filter((n) => Number.isFinite(n));
+      // "levels at 0.5 and 1.5" → params.breaks when two+ numbers appear.
+      if (/\bbreaks?\b|\blevels?\b/.test(prompt) && levels.length >= 2) {
+        layer.params = { breaks: levels.slice(0, 8) };
+      }
+      spec.layers.push(layer);
+      xField = x;
     } else if (/\braster\b/.test(prompt)) {
       const x = fieldNamed("x") ?? fieldNamed("lon") ?? pick.quant() ?? "x";
       const y = fieldNamed("y") ?? fieldNamed("lat") ?? pick.quant() ?? "y";

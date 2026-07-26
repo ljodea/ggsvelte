@@ -49,6 +49,9 @@ export function dispatchGeometryBatch(
     case "path":
       // Data-order polylines (ggplot2 geom_path); no x-sort (#788).
       return single(lineBatch(frame, fx, color, styles, warnings, { sortByX: false }));
+    case "contour":
+      // Isolines are authored in stitch order; never x-sort.
+      return single(lineBatch(frame, fx, color, styles, warnings, { sortByX: false }));
     case "col":
     case "bar":
       return single(rectsBatch(frame, fx, fill, styles, warnings));

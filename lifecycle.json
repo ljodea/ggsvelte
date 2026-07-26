@@ -204,6 +204,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ContourLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ContourLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ContourParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "CoordFixedOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -441,6 +453,10 @@
           "lifecycle": "experimental"
         },
         "GeomColOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomContourOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -949,6 +965,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeColLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeContourLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3906,6 +3926,10 @@
           "lifecycle": "experimental"
         },
         "GeomCol": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomContour": {
           "kind": "value",
           "lifecycle": "experimental"
         },

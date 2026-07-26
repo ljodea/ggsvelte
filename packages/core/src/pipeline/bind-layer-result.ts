@@ -36,6 +36,7 @@ export function makeLayerBinding(input: {
   labelField: string | null;
   labelConstant: string | null;
   weightField: string | null;
+  zField: string | null;
   ruleForm: LayerBinding["ruleForm"];
 }): LayerBinding {
   return {
@@ -56,6 +57,7 @@ export function makeLayerBinding(input: {
     heightField: input.heightField,
     xendField: input.xendField,
     yendField: input.yendField,
+    zField: input.zField,
     ...(input.ribbonOrientation !== undefined && { ribbonOrientation: input.ribbonOrientation }),
     color: input.color,
     fill: input.fill,

@@ -39,6 +39,8 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   tile: ["x", "y"],
   raster: ["x", "y"],
   ribbon: [], // orientation-dependent; checked separately
+  contour: ["x", "y", "z"],
+  quantile: ["x", "y"],
 };
 
 function hasIntercepts(layer: Record<string, unknown>): boolean {

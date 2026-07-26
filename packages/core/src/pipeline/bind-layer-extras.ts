@@ -22,6 +22,7 @@ export function resolveLabelWeightColorFill(input: {
   labelField: string | null;
   labelConstant: string | null;
   weightField: string | null;
+  zField: string | null;
   color: ColorBinding;
   fill: ColorBinding;
   size: StyleBinding;
@@ -47,6 +48,14 @@ export function resolveLabelWeightColorFill(input: {
     );
   }
   const weightField = checkField(aes.weight, "weight", index, table, warnings);
+  const zField = checkField(aes.z, "z", index, table, warnings);
+  if (geom === "contour" && zField === null) {
+    throw new PipelineError(
+      "missing-channel",
+      `/layers/${index}/aes/z`,
+      'The contour geom requires a continuous "z" channel (map it with aes).',
+    );
+  }
 
   const color = colorBinding(aes.color, "color", index, table, warnings);
   const fill = colorBinding(aes.fill, "fill", index, table, warnings);
@@ -70,6 +79,7 @@ export function resolveLabelWeightColorFill(input: {
     labelField,
     labelConstant,
     weightField,
+    zField,
     color,
     fill,
     size,

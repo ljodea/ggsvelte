@@ -183,6 +183,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "contour/basic",
+    category: "contour",
+    name: "basic",
+    title: "Contour isolines",
+    description: "",
+    tags: ["contour", "stat", "path", "grid", "surface", "theme"],
+    docsSection: "Surfaces & grids",
+    hasData: true,
+  },
+  {
     id: "curve/connectors",
     category: "curve",
     name: "connectors",

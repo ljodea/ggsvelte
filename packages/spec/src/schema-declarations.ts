@@ -437,6 +437,12 @@ export const SpecDeclarations = {
             "Cell height for geom tile (data units after position transform; not a trained position scale). Prefer params.height for a constant.",
         }),
       ),
+      z: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Surface height for geom contour / stat contour (quantitative grid values over continuous x×y; #801).",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -1072,6 +1078,50 @@ export const SpecDeclarations = {
       additionalProperties: false,
       description:
         "Parameters for the quantile geom (linear y~x quantile regression lines; #805). method rqss is intentionally omitted in v1.",
+    },
+  ),
+
+  ContourParams: Type.Object(
+    {
+      bins: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          description:
+            "Number of evenly spaced contour levels from min(z) to max(z) inclusive (integer ≥ 1). Default 10. Overridden by breaks or binwidth.",
+        }),
+      ),
+      binwidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Contour level step in z units (must be greater than 0). Takes precedence over bins; overridden by breaks.",
+        }),
+      ),
+      breaks: Type.Optional(
+        Type.Array(Type.Number(), {
+          minItems: 1,
+          description:
+            "Explicit contour levels (finite numbers). Overrides bins and binwidth when non-empty.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width of contour lines in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Line opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom_contour isolines (#801). v1: regular grid only; contour_filled deferred.",
     },
   ),
 
@@ -2121,6 +2171,38 @@ export const SpecDeclarations = {
     },
   ),
 
+  ContourLayer: Type.Object(
+    {
+      geom: Type.Literal("contour", {
+        description:
+          "Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("contour", {
+          description:
+            "Contour layers run clean-room marching-squares isolines per group over a complete rectangular grid.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Contour layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("ContourParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A contour isoline layer. Requires continuous x, y, and z on a regular complete grid. Levels from params.breaks, binwidth, or bins (default 10).",
+    },
+  ),
+
   BoxplotLayer: Type.Object(
     {
       geom: Type.Literal("boxplot", {
@@ -2521,6 +2603,7 @@ export const SpecDeclarations = {
       Type.Ref("TextLayer"),
       Type.Ref("SmoothLayer"),
       Type.Ref("QuantileLayer"),
+      Type.Ref("ContourLayer"),
       Type.Ref("BoxplotLayer"),
       Type.Ref("DensityLayer"),
       Type.Ref("ErrorbarLayer"),
