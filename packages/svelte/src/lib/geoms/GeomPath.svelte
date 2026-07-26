@@ -19,5 +19,10 @@
   }
 
   const props: Props = $props();
-  createGeomLayer("path", () => props, ["alpha", "linewidth", "curve", "connection"]);
+  createGeomLayer("path", () => props, [
+    "alpha",
+    "linewidth",
+    "curve",
+    "connection",
+  ]);
 </script>
