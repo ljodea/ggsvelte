@@ -376,8 +376,9 @@ weights. Mapping aes.y fails loud (\`computed-y-mapped\`).
 \`params.geometry\`). Point/MultiPoint → points; LineString/MultiLineString →
 open paths; Polygon/MultiPolygon → closed fills. Multipart geometries expand
 to multiple marks. **Interior rings** are even-odd **holes** (SVG
-\`fill-rule="evenodd"\`, canvas, and hit-testing). GeometryCollection and mixed
-families in one layer error (split layers).
+\`fill-rule="evenodd"\`, canvas, and hit-testing). \`GeometryCollection\` is
+flattened to leaf Point/Line/Polygon families (recursive, nesting depth
+capped). Mixed families in one layer still error (split layers).
 
 No CRS / \`coord_sf\` yet — coordinates are treated as already projected.
 
@@ -391,6 +392,8 @@ gg(regions, aes({ fill: "rate" })).geomSf().spec();
 \`\`\`
 
 [SF polygons](/examples/sf/basic): three triangles filled by a rate field.
+[GeometryCollection expand](/examples/sf/geometry-collection): one GC cell
+renders as two polygon parts.
 
 ### SF text labels (\`geom_sf_text\`)
 
@@ -399,7 +402,9 @@ one representative point per geometry part, then draws \`aes.label\` there.
 Point coordinates pass through; LineString uses the vertex mean;
 Polygon uses the exterior-ring shoelace centroid. **MultiPoint /
 MultiLineString / MultiPolygon emit one label per part** (feature aesthetics
-duplicated onto each part). Requires \`aes.label\` (no \`aes.x\`/\`aes.y\`).
+duplicated onto each part). **GeometryCollection** expands to leaves first,
+then the same per-part rule applies (one label per leaf part). Requires
+\`aes.label\` (no \`aes.x\`/\`aes.y\`).
 
 **Migration (multi-part labels):** earlier releases labeled only the first
 Multi* component. Callers that relied on a single first-component label will

@@ -326,6 +326,11 @@
       "sourceSha256": "a11d3c47348338c7a3e82658090fd52dafc84743aa92660abec975494f08fc3a",
       "pngSha256": "ee33e8fcd2e284c607ec8c4661fb9312ecb90af0cb052abba0a8a5e5ce4baa56"
     },
+    "sf/geometry-collection": {
+      "filename": "sf-geometry-collection-light.png",
+      "sourceSha256": "6e7845a503ba5198bc34e401f8286d7acb23123abdc69fb2b2579deccb3d3216",
+      "pngSha256": "82adc75dc8d359ca9b2c49af45f26abc3af229090c587bc86109a130df10b701"
+    },
     "sf/holes": {
       "filename": "sf-holes-light.png",
       "sourceSha256": "06aa48f93ebb7a38426d12c17cf2ca699c2d78766eb9f327ccdce1c61c9bd981",

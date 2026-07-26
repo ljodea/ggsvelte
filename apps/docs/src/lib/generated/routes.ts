@@ -3118,6 +3118,16 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/sf/geometry-collection",
+    title: "GeometryCollection expand — ggsvelte gallery",
+    description: "GeometryCollection expand",
+    canonicalPath: "/examples/sf/geometry-collection",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/sf/holes",
     title: "Simple features polygon holes — ggsvelte gallery",
     description: "Simple features polygon holes",
