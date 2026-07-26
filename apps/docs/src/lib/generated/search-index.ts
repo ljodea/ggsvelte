@@ -384,6 +384,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Align (shared continuous-x grid for stack)"],
   },
   {
+    id: "heading:guide-statistics-positions:connect-named-path-joins",
+    kind: "heading",
+    title: "Connect (named path joins)",
+    summary:
+      "Connect (named path joins) in Statistics and positions. Compute summaries and control how derived marks occupy the same coordinate space.",
+    href: "/guide/statistics-positions#connect-named-path-joins",
+    keywords: ["Statistics and positions", "Core grammar"],
+    exact: ["Connect (named path joins)"],
+  },
+  {
     id: "heading:guide-statistics-positions:positions",
     kind: "heading",
     title: "Positions",
@@ -4324,6 +4334,24 @@ export const DOCS_SEARCH_INDEX = [
       "theme",
     ],
     exact: ["Raw-year time-axis line chart"],
+  },
+  {
+    id: "example:path:connect-hv",
+    kind: "example",
+    title: "Connect hv path joins",
+    summary: "Connect hv path joins (Lines & time)",
+    href: "/examples/path/connect-hv",
+    keywords: [
+      "Connect hv path joins",
+      "Lines & time",
+      "path",
+      "connect",
+      "stat",
+      "step",
+      "hv",
+      "trajectory",
+    ],
+    exact: ["Connect hv path joins"],
   },
   {
     id: "example:path:trajectory",

@@ -34,8 +34,14 @@ export function dispatchGeometryBatch(
   switch (frame.binding.layer.geom) {
     case "point":
       return single(pointsBatch(frame, fx, color, styles, warnings));
-    case "line":
-      return single(lineBatch(frame, fx, color, styles, warnings));
+    case "line": {
+      // stat_connect emits tied-x step corners; a post-stat x-sort would
+      // scramble elbows (#816). Identity line still sorts by x.
+      const connectNoSort = frame.binding.layer.stat === "connect";
+      return single(
+        lineBatch(frame, fx, color, styles, warnings, connectNoSort ? { sortByX: false } : {}),
+      );
+    }
     case "path":
       // Data-order polylines (ggplot2 geom_path); no x-sort (#788).
       return single(lineBatch(frame, fx, color, styles, warnings, { sortByX: false }));

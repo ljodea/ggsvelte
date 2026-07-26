@@ -16,7 +16,7 @@
      * identity | unique (#813) | bin (freqpoly; #796) |
      * align (shared continuous-x grid for stack/fill; #815).
      */
-    stat?: "identity" | "unique" | "bin" | "align";
+    stat?: "identity" | "unique" | "bin" | "align" | "connect";
   }
 
   const props: Props = $props();
@@ -29,5 +29,6 @@
     "boundary",
     "center",
     "closed",
+    "connection",
   ]);
 </script>

@@ -522,6 +522,31 @@
           ],
           "description": "Interpolation between points: \"linear\" (straight segments, default) or \"step\" (horizontal-then-vertical steps, changing at the midpoint between x positions)."
         },
+        "connection": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "hv",
+              "description": "STAT CONNECT: horizontal then vertical (default)."
+            },
+            {
+              "type": "string",
+              "const": "vh",
+              "description": "STAT CONNECT: vertical then horizontal."
+            },
+            {
+              "type": "string",
+              "const": "mid",
+              "description": "STAT CONNECT: step at the midpoint between adjacent x values."
+            },
+            {
+              "type": "string",
+              "const": "linear",
+              "description": "STAT CONNECT: straight segment (identity vertices)."
+            }
+          ],
+          "description": "STAT CONNECT ONLY (#816): how successive points join — \"hv\" (default), \"vh\", \"mid\", or \"linear\". Ignored for other stats."
+        },
         "bins": {
           "type": "integer",
           "minimum": 1,
@@ -591,6 +616,31 @@
             }
           ],
           "description": "Interpolation between points: \"linear\" (straight segments, default) or \"step\" (horizontal-then-vertical steps)."
+        },
+        "connection": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "hv",
+              "description": "STAT CONNECT: horizontal then vertical (default)."
+            },
+            {
+              "type": "string",
+              "const": "vh",
+              "description": "STAT CONNECT: vertical then horizontal."
+            },
+            {
+              "type": "string",
+              "const": "mid",
+              "description": "STAT CONNECT: step at the midpoint between adjacent x values."
+            },
+            {
+              "type": "string",
+              "const": "linear",
+              "description": "STAT CONNECT: straight segment (identity vertices)."
+            }
+          ],
+          "description": "STAT CONNECT ONLY (#816): how successive points join — \"hv\" (default), \"vh\", \"mid\", or \"linear\". Ignored for other stats."
         },
         "strokePaint": {
           "$ref": "#/$defs/GradientPaint",
@@ -1420,7 +1470,7 @@
         "geom": {
           "type": "string",
           "const": "line",
-          "description": "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts. With stat bin (freqpoly alias), y is computed from counts/density."
+          "description": "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts. With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816)."
         },
         "stat": {
           "anyOf": [
@@ -1443,9 +1493,14 @@
               "type": "string",
               "const": "align",
               "description": "Interpolate each group onto the union of finite x values so continuous-x stack/fill aligns (#815). Outside a group's x range y is 0."
+            },
+            {
+              "type": "string",
+              "const": "connect",
+              "description": "Expand successive points into connection vertices (params.connection: hv|vh|mid|linear; #816). Expands in x order; geometry does not re-sort after connect."
             }
           ],
-          "description": "Line stat: \"identity\" (default), \"unique\", \"bin\" (freqpoly), or \"align\" (shared x grid)."
+          "description": "Line stat: \"identity\" (default), \"unique\", \"bin\" (freqpoly), \"align\" (shared x grid), or \"connect\" (step/path joins)."
         },
         "position": {
           "type": "string",
@@ -1478,10 +1533,27 @@
         "geom": {
           "type": "string",
           "const": "path",
-          "description": "Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, and connected scatterplots (ggplot2 geom_path)."
+          "description": "Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, and connected scatterplots (ggplot2 geom_path). With stat connect, successive points expand into named connection vertices (#816)."
         },
         "stat": {
-          "$ref": "#/$defs/IdentityOrUniqueStat"
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "identity",
+              "description": "Draw each data row as-is (default)."
+            },
+            {
+              "type": "string",
+              "const": "unique",
+              "description": "Drop duplicate rows on mapped aesthetics before drawing (first wins; #813)."
+            },
+            {
+              "type": "string",
+              "const": "connect",
+              "description": "Expand successive points into connection vertices (params.connection: hv|vh|mid|linear; default hv; #816). ggplot2 stat_connect default geom is path."
+            }
+          ],
+          "description": "Path stat: \"identity\" (default), \"unique\" (first-wins dedupe), or \"connect\" (named joins)."
         },
         "position": {
           "type": "string",
@@ -1503,7 +1575,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "A path layer. Requires x and y channels; rows stay in data order within each group (no x-sort)."
+      "description": "A path layer. Requires x and y channels; rows stay in data order within each group (no x-sort). Use stat connect for stepped/custom joins without geom curve flags."
     },
     "ColLayer": {
       "type": "object",

@@ -273,6 +273,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "path/connect-hv",
+    title: "Connect hv path joins",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6InBhdGgvY29ubmVjdC1odiJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJ4IjowLCJ5IjowfSx7IngiOjIsInkiOjJ9LHsieCI6NCwieSI6MH1dfSwibGF5ZXJzIjpbeyJnZW9tIjoicGF0aCIsInN0YXQiOiJjb25uZWN0IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoieCJ9LCJ5Ijp7ImZpZWxkIjoieSJ9fSwicGFyYW1zIjp7ImNvbm5lY3Rpb24iOiJodiIsImxpbmV3aWR0aCI6Mi41LCJhbHBoYSI6MC45NX19LHsiZ2VvbSI6InBvaW50Iiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoieCJ9LCJ5Ijp7ImZpZWxkIjoieSJ9fSwicGFyYW1zIjp7InNpemUiOjMuNSwiYWxwaGEiOjAuODV9fV0sImxhYnMiOnsidGl0bGUiOiJzdGF0IGNvbm5lY3Q6IGh2IHBhdGggam9pbnMiLCJzdWJ0aXRsZSI6IlRocmVlIGRhdGEgcG9pbnRzIGV4cGFuZCB0byBob3Jpem9udGFsLXRoZW4tdmVydGljYWwgZWxib3dzIiwieCI6IngiLCJ5IjoieSJ9LCJ0aGVtZSI6ImNsYXNzaWMifX0",
+    },
+  },
+  {
     id: "path/trajectory",
     title: "Path trajectory (data order)",
     compatibility: {
