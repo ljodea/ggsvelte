@@ -3104,6 +3104,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["manual-group-dropped"],
   },
   {
+    id: "heading:guide-errors:ellipse-group-dropped",
+    kind: "heading",
+    title: "ellipse-group-dropped",
+    summary:
+      "ellipse-group-dropped in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#ellipse-group-dropped",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["ellipse-group-dropped"],
+  },
+  {
     id: "heading:guide-errors:palette-exhausted-warning",
     kind: "heading",
     title: "palette-exhausted — warning",
@@ -20957,6 +20967,20 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["manual-group-dropped", "warning:manual-group-dropped"],
+  },
+  {
+    id: "diagnostic:warning:ellipse-group-dropped",
+    kind: "diagnostic",
+    title: "ellipse-group-dropped · warning",
+    summary:
+      "An ellipse group had fewer than two finite (x,y) points or zero variance and was dropped.",
+    href: "/guide/errors#ellipse-group-dropped",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["ellipse-group-dropped", "warning:ellipse-group-dropped"],
   },
   {
     id: "diagnostic:warning:palette-exhausted",

@@ -1893,6 +1893,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "ellipse-group-dropped",
+        title: "ellipse-group-dropped",
+        level: 3,
+      },
+      {
         id: "palette-exhausted-warning",
         title: "palette-exhausted — warning",
         level: 3,
