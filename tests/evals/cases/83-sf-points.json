@@ -4,8 +4,14 @@
   "prompt": "Plot sf point geometries from a GeoJSON geometry column on a map-like layer.",
   "dataProfile": {
     "fields": [
-      { "name": "geometry", "type": "nominal" },
-      { "name": "name", "type": "nominal" }
+      {
+        "name": "geometry",
+        "type": "nominal"
+      },
+      {
+        "name": "name",
+        "type": "nominal"
+      }
     ],
     "rowCount": 2
   },
@@ -23,11 +29,13 @@
   },
   "gold": {
     "edition": 1,
-    "data": { "name": "main" },
+    "data": {
+      "name": "main"
+    },
     "layers": [
       {
         "geom": "sf",
-        "stat": "identity",
+        "stat": "sf",
         "position": "identity"
       }
     ]

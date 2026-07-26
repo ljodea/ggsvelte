@@ -380,7 +380,10 @@ to multiple marks. **Interior rings** are even-odd **holes** (SVG
 flattened to leaf Point/Line/Polygon families (recursive, nesting depth
 capped). Mixed families in one layer still error (split layers).
 
-No CRS / \`coord_sf\` yet — coordinates are treated as already projected.
+Default stat is public **\`stat_sf\`** (ggplot2 \`stat_sf\`): geometry expand
+runs on the normal non-identity frame path. Layer JSON stamps
+\`stat: "sf"\` (not \`identity\`). No CRS / \`coord_sf\` yet — coordinates are
+treated as already projected.
 
 \`\`\`svelte fragment
 <GeomSf alpha={0.9} />
@@ -388,7 +391,7 @@ No CRS / \`coord_sf\` yet — coordinates are treated as already projected.
 
 \`\`\`ts fragment
 gg(regions, aes({ fill: "rate" })).geomSf().spec();
-// geometry column holds JSON.stringify({ type: "Polygon", coordinates: [...] })
+// layer.stat === "sf"; geometry column holds JSON.stringify({ type: "Polygon", ... })
 \`\`\`
 
 [SF polygons](/examples/sf/basic): three triangles filled by a rate field.
