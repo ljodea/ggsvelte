@@ -687,6 +687,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "sf/basic",
+    category: "sf",
+    name: "basic",
+    title: "Simple features polygons",
+    description: "",
+    tags: ["sf", "geojson", "polygon", "fill", "map", "geom"],
+    docsSection: "Maps & spatial",
+    hasData: true,
+  },
+  {
     id: "smooth/loess-scatter",
     category: "smooth",
     name: "loess-scatter",

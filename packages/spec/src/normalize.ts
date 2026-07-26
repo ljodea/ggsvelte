@@ -73,6 +73,7 @@ export type {
   Density2dLayerInput,
   Density2dFilledLayerInput,
   DotplotLayerInput,
+  SfLayerInput,
   CurveLayerInput,
   LayerInput,
   LineLayerInput,

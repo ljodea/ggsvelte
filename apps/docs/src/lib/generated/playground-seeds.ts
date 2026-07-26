@@ -533,6 +533,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "sf/basic",
+    title: "Simple features polygons",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6InNmL2Jhc2ljIn0sInNwZWMiOnsiZWRpdGlvbiI6MiwiZGF0YSI6eyJ2YWx1ZXMiOlt7InJlZ2lvbiI6IkEiLCJyYXRlIjoxMiwiZ2VvbWV0cnkiOiJ7XCJ0eXBlXCI6XCJQb2x5Z29uXCIsXCJjb29yZGluYXRlc1wiOltbWzAsMF0sWzIsMF0sWzEsMl0sWzAsMF1dXX0ifSx7InJlZ2lvbiI6IkIiLCJyYXRlIjoyOCwiZ2VvbWV0cnkiOiJ7XCJ0eXBlXCI6XCJQb2x5Z29uXCIsXCJjb29yZGluYXRlc1wiOltbWzIuMiwwXSxbNC4yLDBdLFszLjIsMl0sWzIuMiwwXV1dfSJ9LHsicmVnaW9uIjoiQyIsInJhdGUiOjE4LCJnZW9tZXRyeSI6IntcInR5cGVcIjpcIlBvbHlnb25cIixcImNvb3JkaW5hdGVzXCI6W1tbMSwyLjJdLFszLjIsMi4yXSxbMi4xLDRdLFsxLDIuMl1dXX0ifV19LCJsYXllcnMiOlt7Imdlb20iOiJzZiIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoiaWRlbnRpdHkiLCJhZXMiOnsiZmlsbCI6eyJmaWVsZCI6InJhdGUifX0sInBhcmFtcyI6eyJhbHBoYSI6MC45LCJsaW5ld2lkdGgiOjAuOH19XSwibGFicyI6eyJ0aXRsZSI6Imdlb21fc2YgcG9seWdvbnMiLCJzdWJ0aXRsZSI6IlBvcnRhYmxlIEdlb0pTT04gR2VvbWV0cnkgc3RyaW5ncyAoYWxyZWFkeSBwcm9qZWN0ZWQ7ICM4MDkpIiwiZmlsbCI6InJhdGUifSwidGhlbWUiOiJjbGFzc2ljIn19",
+    },
+  },
+  {
     id: "smooth/loess-scatter",
     title: "Loess smooth with confidence ribbon",
     compatibility: {

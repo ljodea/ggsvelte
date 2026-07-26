@@ -310,9 +310,18 @@ export class MockResponder implements Responder {
       new RegExp(`\\bmap\\s+\\S+\\s+to\\s+${aesChannel}\\b`).test(prompt) ||
       new RegExp(`\\bmap\\s+${aesChannel}\\s+to\\s+\\S+\\b`).test(prompt) ||
       STYLE_CHANNELS.some((channel) => mappedStyleField(prompt, profile, channel) !== undefined);
+    // geom_sf is supported when the profile has a geometry column (or prompt names sf/geojson).
+    const wantsSf =
+      /\bgeom[_\s]?sf\b|\bgeojson\b|\bsimple features?\b|\bsf (?:point|polygon|layer)\b/.test(
+        prompt,
+      ) || profile.fields.some((field) => field.name === "geometry");
     if (
-      /choropleth|\b3-?d\b|surface plot|network diagram/.test(prompt) ||
-      (/\bmap\b/.test(prompt) && !aestheticMapping && !/\bribbon\b/.test(prompt))
+      (!wantsSf && /choropleth|\b3-?d\b|surface plot|network diagram/.test(prompt)) ||
+      (!wantsSf &&
+        /\bmap\b/.test(prompt) &&
+        !aestheticMapping &&
+        !/\bribbon\b/.test(prompt) &&
+        !/\bsf\b/.test(prompt))
     ) {
       return Promise.resolve(
         JSON.stringify({
@@ -365,6 +374,20 @@ export class MockResponder implements Responder {
 
     // --- geom selection (keyword templates, most specific first) -----------
     if (
+      /\bgeom[_\s]?sf\b|\bgeojson\b|\bsimple features?\b|\bsf (?:point|polygon|layer|choropleth)\b/.test(
+        prompt,
+      ) ||
+      fieldNamed("geometry") !== undefined
+    ) {
+      // geom_sf: GeoJSON Geometry JSON strings in a column (#809).
+      const aes: MockAes = {};
+      const fill =
+        fieldNamed("rate") ??
+        pick.mentionedQuant() ??
+        profile.fields.find((fld) => fld.type === "quantitative" && fld.name !== "geometry")?.name;
+      if (fill !== undefined) aes.fill = f(fill);
+      spec.layers.push({ geom: "sf", aes });
+    } else if (
       prompt.includes("three layers") &&
       prompt.includes("smooth") &&
       prompt.includes("histogram") &&

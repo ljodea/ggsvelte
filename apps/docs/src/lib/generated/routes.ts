@@ -362,6 +362,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "simple-features-geom-sf",
+        title: "Simple features (geom_sf)",
+        level: 2,
+      },
+      {
         id: "frequency-polygon",
         title: "Frequency polygon",
         level: 2,
@@ -1653,6 +1658,26 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "sf-geometry-missing",
+        title: "sf-geometry-missing",
+        level: 3,
+      },
+      {
+        id: "sf-geometry-invalid",
+        title: "sf-geometry-invalid",
+        level: 3,
+      },
+      {
+        id: "sf-geometry-unsupported",
+        title: "sf-geometry-unsupported",
+        level: 3,
+      },
+      {
+        id: "sf-geometry-mixed",
+        title: "sf-geometry-mixed",
+        level: 3,
+      },
+      {
         id: "render-warnings",
         title: "Render warnings",
         level: 2,
@@ -1810,6 +1835,11 @@ export const DOCS_ROUTES = [
       {
         id: "density-2d-filled-open-dropped",
         title: "density-2d-filled-open-dropped",
+        level: 3,
+      },
+      {
+        id: "sf-holes-ignored",
+        title: "sf-holes-ignored",
         level: 3,
       },
       {
@@ -2172,8 +2202,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-623",
-        title: "experimental (623)",
+        id: "experimental-628",
+        title: "experimental (628)",
         level: 3,
       },
       {
@@ -2212,8 +2242,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-470",
-        title: "experimental (470)",
+        id: "experimental-471",
+        title: "experimental (471)",
         level: 3,
       },
       {
@@ -2942,6 +2972,16 @@ export const DOCS_ROUTES = [
     title: "Segment annotations — ggsvelte gallery",
     description: "Segment annotations",
     canonicalPath: "/examples/segment/annotations",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/sf/basic",
+    title: "Simple features polygons — ggsvelte gallery",
+    description: "Simple features polygons",
+    canonicalPath: "/examples/sf/basic",
     kind: "page",
     index: true,
     sitemap: true,

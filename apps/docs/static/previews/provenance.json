@@ -286,6 +286,11 @@
       "sourceSha256": "91e2b96ef160795d290e47b6d2d228687c30dd10823e7bb4afe8457d3b333a2f",
       "pngSha256": "db94c25dd934a387e9d35657c2789dc098a17e7a886583ca07f3137ad6f8fc11"
     },
+    "sf/basic": {
+      "filename": "sf-basic-light.png",
+      "sourceSha256": "3715642aaae172ff1844d1c25e6df3642e46c0ab21c1d7a8a3da65a0867b8c29",
+      "pngSha256": "ab18e17562cdb41056215212f2637717b1a2fd84c187fc5566139ffa9d88c3cf"
+    },
     "smooth/loess-scatter": {
       "filename": "smooth-loess-scatter-light.png",
       "sourceSha256": "726fe00865d7ca6a98b104eb4e0ea9c7e9a8cb321aba2cf8d2584d385761f3c0",

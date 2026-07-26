@@ -39,6 +39,7 @@ import type {
   Density2dLayer,
   Density2dFilledLayer,
   DotplotLayer,
+  SfLayer,
   RuleLayer,
   QuantileLayer,
   SmoothLayer,
@@ -89,6 +90,7 @@ export interface RuntimeContourLayer extends WithRuntimeAes<ContourLayer> {}
 export interface RuntimeDensity2dLayer extends WithRuntimeAes<Density2dLayer> {}
 export interface RuntimeDensity2dFilledLayer extends WithRuntimeAes<Density2dFilledLayer> {}
 export interface RuntimeDotplotLayer extends WithRuntimeAes<DotplotLayer> {}
+export interface RuntimeSfLayer extends WithRuntimeAes<SfLayer> {}
 
 export type RuntimeLayerSpec =
   | RuntimePointLayer
@@ -115,7 +117,8 @@ export type RuntimeLayerSpec =
   | RuntimeContourLayer
   | RuntimeDensity2dLayer
   | RuntimeDensity2dFilledLayer
-  | RuntimeDotplotLayer;
+  | RuntimeDotplotLayer
+  | RuntimeSfLayer;
 
 /** The in-memory spec superset ({ fn } channel accessors allowed). */
 type RuntimeSpecPortableFields = Omit<PortableSpec, "aes" | "layers">;

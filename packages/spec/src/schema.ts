@@ -26,7 +26,7 @@
  * `$defs` key **insertion order** in the declarations bag is load-bearing for
  * the byte-stable `schema/v0.json` artifact.
  */
-import Type, { type Static, type TSchema } from "typebox";
+import Type, { type Static, type TModule, type TSchema } from "typebox";
 
 import { SpecDeclarations } from "./schema-declarations.js";
 
@@ -60,9 +60,10 @@ export type { ChannelName, GeomName, PositionName, StatName } from "./schema-cat
  * matching the TypeBox 0.x Module.Import JSON shape used by the artifact
  * emitter and by Value.Check / Value.Errors.
  *
- * Type inference uses `SpecStatic` (Type.Module) instead: Cyclic's Static<>
- * collapses large graphs to `never` under TypeScript 6, while Module inlines
- * refs into concrete object types.
+ * Type inference uses `Static<>` on `SpecDeclarations` (not Cyclic Import):
+ * Cyclic's Static<> collapses large graphs to `never` under TypeScript 6.
+ * We avoid `Type.Module(SpecDeclarations)` for Static extraction — the Module
+ * surface hits TS7056 on composite .d.ts emit once geom unions grow large.
  *
  * Build the `$defs` graph once (rooted at PlotSpec) and re-root by swapping
  * `$ref` — Type.Cyclic(decls, key) per import would rebuild the full graph
@@ -92,10 +93,15 @@ export const SpecModule = {
   },
 };
 
-/** Inlined declaration bag for Static<> extraction (not for JSON emission). */
-const SpecStatic = Type.Module(SpecDeclarations);
+/**
+ * Inlined declaration bag for Static<> extraction (not for JSON emission).
+ * Annotated as TModule<> so composite .d.ts keeps a short type alias instead of
+ * expanding the full instantiate surface (TS7056 once LayerSpec includes many geoms).
+ */
+type SpecModule = TModule<typeof SpecDeclarations>;
+const SpecStatic: SpecModule = Type.Module(SpecDeclarations);
 
-type SpecType<K extends keyof typeof SpecStatic> = Static<(typeof SpecStatic)[K]>;
+type SpecType<K extends keyof SpecModule> = Static<SpecModule[K]>;
 
 // ---------------------------------------------------------------------------
 // Imported (validatable) schemas — Cyclic `$defs`+`$ref` for runtime/artifact

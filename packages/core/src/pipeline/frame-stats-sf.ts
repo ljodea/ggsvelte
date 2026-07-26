@@ -10,7 +10,7 @@ import { emptyFrameExtras } from "./frame-helpers.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { PipelineError } from "./types.js";
 
-export type SfKind = "point" | "line" | "polygon";
+type SfKind = "point" | "line" | "polygon";
 
 type Position = readonly [number, number];
 
