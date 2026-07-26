@@ -3204,6 +3204,46 @@ export const SpecDeclarations = {
     },
   ),
 
+  BlankParams: Type.Object(
+    {},
+    {
+      additionalProperties: false,
+      description:
+        "Blank layers have no paint/stat params; the object exists only so LayerSpec has a uniform optional params field.",
+    },
+  ),
+
+  BlankLayer: Type.Object(
+    {
+      geom: Type.Literal("blank", {
+        description:
+          "Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", {
+          description: "Blank layers pass data through for scale training only.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Blank layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("BlankParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "An empty layer that trains scales from mapped aesthetics without emitting geometry (ggplot2's geom_blank).",
+    },
+  ),
+
   LayerSpec: Type.Union(
     [
       Type.Ref("PointLayer"),
@@ -3235,6 +3275,7 @@ export const SpecDeclarations = {
       Type.Ref("SfLayer"),
       Type.Ref("SfTextLayer"),
       Type.Ref("SfLabelLayer"),
+      Type.Ref("BlankLayer"),
     ],
     {
       description:

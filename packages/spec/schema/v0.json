@@ -3355,6 +3355,50 @@
       "additionalProperties": false,
       "description": "An sf label layer with a background box. Requires aes.label and a geometry column. Does not require aes.x/y."
     },
+    "BlankParams": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false,
+      "description": "Blank layers have no paint/stat params; the object exists only so LayerSpec has a uniform optional params field."
+    },
+    "BlankLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "blank",
+          "description": "Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Blank layers pass data through for scale training only."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Blank layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/BlankParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "An empty layer that trains scales from mapped aesthetics without emitting geometry (ggplot2's geom_blank)."
+    },
     "LayerSpec": {
       "anyOf": [
         {
@@ -3443,6 +3487,9 @@
         },
         {
           "$ref": "#/$defs/SfLabelLayer"
+        },
+        {
+          "$ref": "#/$defs/BlankLayer"
         }
       ],
       "description": "One plot layer. The `geom` field selects the geometry and determines which stat, position, and params are allowed."

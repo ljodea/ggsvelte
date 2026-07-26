@@ -77,6 +77,7 @@ export type {
   SfLayerInput,
   SfTextLayerInput,
   SfLabelLayerInput,
+  BlankLayerInput,
   CurveLayerInput,
   LayerInput,
   LineLayerInput,

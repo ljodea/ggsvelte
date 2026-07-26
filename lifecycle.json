@@ -96,6 +96,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "BlankLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "BlankLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "BlankParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "BoxplotLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -481,6 +493,10 @@
           "lifecycle": "experimental"
         },
         "GeomBarOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomBlankOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1029,6 +1045,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeBarLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeBlankLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4074,6 +4094,10 @@
           "lifecycle": "experimental"
         },
         "GeomBar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomBlank": {
           "kind": "value",
           "lifecycle": "experimental"
         },
