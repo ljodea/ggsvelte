@@ -22,6 +22,7 @@ import GeomRaster from "../../src/lib/geoms/GeomRaster.svelte";
 import GeomRect from "../../src/lib/geoms/GeomRect.svelte";
 import GeomRule from "../../src/lib/geoms/GeomRule.svelte";
 import GeomSegment from "../../src/lib/geoms/GeomSegment.svelte";
+import GeomFunction from "../../src/lib/geoms/GeomFunction.svelte";
 import GeomSmooth from "../../src/lib/geoms/GeomSmooth.svelte";
 import GeomText from "../../src/lib/geoms/GeomText.svelte";
 import GeomTile from "../../src/lib/geoms/GeomTile.svelte";
@@ -264,6 +265,17 @@ const cases: readonly GeomCase[] = [
     paramKey: "linewidth",
     paramValue: 2,
     markSelector: ".gg-segments line",
+  },
+  {
+    name: "GeomFunction",
+    Component: GeomFunction,
+    geom: "function",
+    data: [{ dummy: 0 }],
+    aes: {},
+    geomProps: { fun: "dnorm", n: 21, xlim: [-2, 2], linewidth: 2 },
+    paramKey: "fun",
+    paramValue: "dnorm",
+    markSelector: ".gg-paths path",
   },
 ];
 

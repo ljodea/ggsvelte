@@ -33,6 +33,7 @@ import type {
   GeomRectOptions,
   GeomRuleOptions,
   GeomSegmentOptions,
+  GeomFunctionOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -228,6 +229,14 @@ export class GGBuilderCore {
    */
   geomSegment(options: GeomSegmentOptions = {}): GGBuilder {
     return this.layer(layerFrom("segment", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'function', ... }). Evaluate a named portable
+   * function (dnorm/pnorm/identity/linear) on a grid and draw a path.
+   */
+  geomFunction(options: GeomFunctionOptions): GGBuilder {
+    return this.layer(layerFrom("function", options));
   }
 
   /**

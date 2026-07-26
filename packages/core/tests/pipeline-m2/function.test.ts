@@ -1,0 +1,72 @@
+/**
+ * M2 pipeline — geom_function / stat_function analytic curves.
+ */
+import { describe, expect, it } from "bun:test";
+import { aes, gg } from "@ggsvelte/spec";
+import { runPipeline } from "../../src/pipeline.ts";
+import type { PathsBatch } from "../../src/scene.ts";
+import { dnorm } from "../../src/stats/function.ts";
+
+const size = { width: 640, height: 400 };
+
+describe("geom_function", () => {
+  it("emits a path over xlim with y = dnorm(x)", () => {
+    const model = runPipeline(
+      gg({ x: [0] })
+        .geomFunction({ fun: "dnorm", n: 21, xlim: [-3, 3], args: { mean: 0, sd: 1 } })
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PathsBatch;
+    expect(batch.kind).toBe("paths");
+    expect(batch.closed).toBeFalsy();
+    // 21 vertices
+    expect(batch.pathOffsets[1]).toBe(21);
+    // Peak near center of panel (x=0 maps mid-domain)
+    if (model.scales.y.type !== "band") {
+      expect(model.scales.y.domain[1]).toBeGreaterThan(dnorm(0, 0, 1) * 0.9);
+    }
+  });
+
+  it("trains x domain from xlim when data x is absent", () => {
+    const model = runPipeline(
+      // Placeholder column so plot data validates; domain still comes from xlim.
+      gg({ dummy: [0] })
+        .geomFunction({ fun: "identity", n: 5, xlim: [2, 8] })
+        .spec(),
+      size,
+    );
+    if (model.scales.x.type !== "band") {
+      expect(model.scales.x.domain[0]).toBeLessThanOrEqual(2);
+      expect(model.scales.x.domain[1]).toBeGreaterThanOrEqual(8);
+    }
+  });
+
+  it("uses peer layer x extent when xlim omitted", () => {
+    const model = runPipeline(
+      gg({ x: [-1, 0, 1], y: [0, 1, 0] }, aes({ x: "x" }))
+        .geomPoint({ aes: aes({ y: "y" }) })
+        .geomFunction({ fun: "identity", n: 5 })
+        .spec(),
+      size,
+    );
+    // Function path present; domain spans point x
+    const paths = model.scene.batches.filter((b) => b.kind === "paths") as PathsBatch[];
+    expect(paths.length).toBe(1);
+    expect(paths[0]!.pathOffsets[1]).toBe(5);
+    if (model.scales.x.type !== "band") {
+      expect(model.scales.x.domain[0]).toBeLessThanOrEqual(-1);
+      expect(model.scales.x.domain[1]).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  it("uses exact-ish line auto hit mode (x)", () => {
+    const model = runPipeline(
+      gg({ x: [0] })
+        .geomFunction({ fun: "identity", n: 11, xlim: [0, 1] })
+        .spec(),
+      size,
+    );
+    expect(model.candidates.candidate(0)?.autoMode).toBe("x");
+  });
+});

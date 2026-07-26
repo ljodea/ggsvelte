@@ -35,6 +35,7 @@ export function dispatchGeometryBatch(
     case "point":
       return single(pointsBatch(frame, fx, color, styles, warnings));
     case "line":
+    case "function":
       return single(lineBatch(frame, fx, color, styles, warnings));
     case "col":
     case "bar":

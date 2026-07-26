@@ -21,6 +21,7 @@ import type {
   RenderBackend,
   RuleParams,
   SegmentParams,
+  FunctionParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -133,6 +134,12 @@ export interface GeomRuleOptions extends RuleParams, GeomDataOption {
 
 /** Segment-layer sugar options: params plus optional layer-level aes. */
 export interface GeomSegmentOptions extends SegmentParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Function-layer sugar: named fun required (+ grid / domain / paint). */
+export interface GeomFunctionOptions extends FunctionParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

@@ -46,6 +46,7 @@ export const STAT_COLUMNS: Record<string, readonly string[]> = {
   smooth: ["y", "ymin", "ymax", "se"],
   boxplot: ["ymin", "lower", "middle", "upper", "ymax"],
   summary: ["y", "ymin", "ymax"],
+  function: ["y"],
 };
 
 function isRecord(v: unknown): v is Record<string, unknown> {

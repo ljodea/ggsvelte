@@ -226,10 +226,22 @@ export type ScaleCapability = (typeof SCALE_CAPABILITIES)[number];
 /** One checked geom-consumption table for mapped style channels. */
 export const STYLE_AESTHETIC_GEOMS = {
   size: ["point", "text"],
-  linewidth: ["line", "rule", "smooth", "boxplot", "errorbar", "rect", "tile", "ribbon", "segment"],
+  linewidth: [
+    "line",
+    "function",
+    "rule",
+    "smooth",
+    "boxplot",
+    "errorbar",
+    "rect",
+    "tile",
+    "ribbon",
+    "segment",
+  ],
   alpha: [
     "point",
     "line",
+    "function",
     "col",
     "bar",
     "histogram",
@@ -247,7 +259,18 @@ export const STYLE_AESTHETIC_GEOMS = {
     "segment",
   ],
   shape: ["point"],
-  linetype: ["line", "rule", "smooth", "boxplot", "errorbar", "rect", "tile", "ribbon", "segment"],
+  linetype: [
+    "line",
+    "function",
+    "rule",
+    "smooth",
+    "boxplot",
+    "errorbar",
+    "rect",
+    "tile",
+    "ribbon",
+    "segment",
+  ],
 } as const;
 
 export type StyleAesthetic = keyof typeof STYLE_AESTHETIC_GEOMS;

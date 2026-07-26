@@ -28,6 +28,7 @@ export function candidateAutoMode(
     case "raster":
       return "exact";
     case "line":
+    case "function":
     case "area":
     case "density":
     case "smooth":

@@ -52,7 +52,11 @@ export function lineBatch(
     }
   }
 
-  const params = binding.layer.geom === "line" ? (binding.layer.params ?? {}) : {};
+  const params = (binding.layer.params ?? {}) as {
+    alpha?: number;
+    linewidth?: number;
+    curve?: "linear" | "step";
+  };
   const styleRows = subpaths.map((rows) => rows[0]!);
   const linewidths = numericStyleVector(frame, "linewidth", styleRows, styles);
   const alphas = numericStyleVector(frame, "alpha", styleRows, styles);
@@ -85,7 +89,7 @@ export function lineBatch(
     ...(alphas !== undefined && { alphas }),
     ...(typeof literalLinetype === "string" && { linetype: literalLinetype as Linetype }),
     ...(linetypeIndexes !== undefined && { linetypeIndexes }),
-    curve: params.curve ?? "linear",
+    curve: binding.layer.geom === "line" ? (params.curve ?? "linear") : "linear",
     ...(strokePaintResolved !== undefined && { strokePaint: strokePaintResolved }),
     ...(glowResolved !== undefined && { glow: glowResolved }),
   };

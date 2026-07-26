@@ -6,6 +6,7 @@ import type { ColumnTable } from "../table.js";
 
 import { buildBinFrame, buildCountFrame, buildDensityFrame } from "./frame-stats-binning.js";
 import { buildBoxplotFrame, buildSmoothFrame, buildSummaryFrame } from "./frame-stats-fit.js";
+import { buildFunctionFrame } from "./frame-stats-function.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 
 export function buildNonIdentityFrame(
@@ -15,6 +16,7 @@ export function buildNonIdentityFrame(
   warnings: PipelineWarning[],
   advisories: Advisory[],
   binRange?: [number, number],
+  functionDomain?: [number, number],
 ): LayerFrame | null {
   const stat = binding.layer.stat ?? "identity";
   if (stat === "identity") return null;
@@ -25,6 +27,7 @@ export function buildNonIdentityFrame(
   if (stat === "smooth") return buildSmoothFrame(binding, table, groups, warnings, advisories);
   if (stat === "boxplot") return buildBoxplotFrame(binding, table, groups, warnings);
   if (stat === "summary") return buildSummaryFrame(binding, table, groups, warnings);
+  if (stat === "function") return buildFunctionFrame(binding, table, warnings, functionDomain);
 
   return null;
 }

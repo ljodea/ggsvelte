@@ -19,6 +19,7 @@ export function buildFrame(
   warnings: PipelineWarning[],
   advisories: Advisory[],
   binRange?: [number, number],
+  functionDomain?: [number, number],
 ): LayerFrame {
   // Annotation frames are rowless (n=0, empty inputGroups). Do not derive or
   // overwrite pre-stat groups — identity index would otherwise retain O(n)
@@ -37,6 +38,7 @@ export function buildFrame(
     warnings,
     advisories,
     binRange,
+    functionDomain,
   );
   if (nonIdentity !== null) return { ...nonIdentity, inputGroups };
 
