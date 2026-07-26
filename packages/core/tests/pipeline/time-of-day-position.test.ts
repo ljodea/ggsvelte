@@ -74,10 +74,10 @@ describe("time-of-day full pipeline (#831)", () => {
     expect(model.scales.x.type).toBe("time");
     if (model.scales.x.type === "band") throw new Error("expected continuous x scale");
     // Domain evidence is in ms-of-day (not raw seconds).
-    const domain = model.scales.x.domain;
-    expect(domain[0]).toBeLessThanOrEqual(0);
+    const [lo, hi] = model.scales.x.domain;
+    expect(lo).toBeLessThanOrEqual(0);
     // 12h in ms = 43_200_000; domain max should be near that scale, not ~12.
-    expect(domain[1]!).toBeGreaterThan(1_000_000);
+    expect(hi).toBeGreaterThan(1_000_000);
   });
 
   it("aligns point x with axis domain under scaleXTime (seconds input)", () => {
@@ -100,13 +100,13 @@ describe("time-of-day full pipeline (#831)", () => {
     if (model.scales.x.type === "band") throw new Error("expected continuous x scale");
     // Normalize ms-of-day values through the trained scale; seconds/ms mismatch
     // would pile everything near 0 (seconds << domain in ms).
-    const xs = [0, 6 * 3600, 12 * 3600].map((s) => model.scales.x.normalize(s * 1000));
-    expect(xs.every((x) => typeof x === "number" && Number.isFinite(x))).toBe(true);
-    expect(xs[0]!).toBeLessThan(xs[1]!);
-    expect(xs[1]!).toBeLessThan(xs[2]!);
+    const [x0, xMid, x1] = [0, 6 * 3600, 12 * 3600].map((s) => model.scales.x.normalize(s * 1000));
+    expect([x0, xMid, x1].every((x) => typeof x === "number" && Number.isFinite(x))).toBe(true);
+    expect(x0).toBeLessThan(xMid);
+    expect(xMid).toBeLessThan(x1);
     // Midpoint (6h) should be near the center of [0, 12h].
-    expect(xs[1]!).toBeGreaterThan(0.4);
-    expect(xs[1]!).toBeLessThan(0.6);
+    expect(xMid).toBeGreaterThan(0.4);
+    expect(xMid).toBeLessThan(0.6);
   });
 
   it("accepts Date cells on scaleXTime and extracts clock portion for domain", () => {
@@ -125,10 +125,10 @@ describe("time-of-day full pipeline (#831)", () => {
     );
     expect(model.scales.x.type).toBe("time");
     if (model.scales.x.type === "band") throw new Error("expected continuous x scale");
-    const domain = model.scales.x.domain;
+    const [lo, hi] = model.scales.x.domain;
     // 8:00 → 28_800_000 ms; 16:00 → 57_600_000 ms (not full calendar epochs).
-    expect(domain[0]!).toBeLessThan(100_000_000);
-    expect(domain[1]!).toBeLessThan(100_000_000);
-    expect(domain[1]!).toBeGreaterThan(domain[0]!);
+    expect(lo).toBeLessThan(100_000_000);
+    expect(hi).toBeLessThan(100_000_000);
+    expect(hi).toBeGreaterThan(lo);
   });
 });
