@@ -102,10 +102,11 @@ export function filterRepresentedSourceRows(input: {
     aggregateXField !== null &&
     outputX !== null &&
     (stat === "count" || stat === "summary" || stat === "boxplot");
+  // summary_bin: bin-edge membership like bin (finite-x only). Non-finite y is
+  // dropped at stat time for the summary value, not from lineage membership.
   const needsBin = (stat === "bin" || stat === "summary_bin") && aggregateXField !== null;
   const needsY =
-    (stat === "smooth" || stat === "summary" || stat === "summary_bin" || stat === "boxplot") &&
-    aggregateYField !== null;
+    (stat === "smooth" || stat === "summary" || stat === "boxplot") && aggregateYField !== null;
 
   // Full-group finite-y path (smooth; summary/boxplot without x/bin): return the
   // shared cached array before cloning baseRows — keeps resolve O(1) per mark.
