@@ -247,7 +247,7 @@ describe("theme prop deprecation advisories", () => {
 });
 
 describe("Theme* export parity with THEME_NAMES", () => {
-  it("12: exported Theme* set === THEME_NAMES ∪ {Theme}, both directions", () => {
+  it("13: exported Theme* set === THEME_NAMES ∪ {Theme}, both directions", () => {
     const nameToExport: Record<string, string> = {
       default: "ThemeDefault",
       light: "ThemeLight",
@@ -263,6 +263,7 @@ describe("Theme* export parity with THEME_NAMES", () => {
       tufte: "ThemeTufte",
       grey: "ThemeGrey",
       gray: "ThemeGray",
+      test: "ThemeTest",
     };
 
     const expectedExports = new Set(["Theme", ...Object.values(nameToExport)]);

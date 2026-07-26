@@ -25,6 +25,7 @@ describe("themes catalog", () => {
       { name: "tufte", scheme: "colorblind" },
       { name: "grey", scheme: "observable10" },
       { name: "gray", scheme: "observable10" },
+      { name: "test", scheme: "colorblind" },
     ]);
 
     expect(CATEGORICAL_PALETTES).toEqual([

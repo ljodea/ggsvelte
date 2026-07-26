@@ -4705,6 +4705,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ThemeTest": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ThemeTokens": {
           "kind": "type",
           "lifecycle": "experimental"

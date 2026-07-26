@@ -89,6 +89,9 @@ export const THEME_NAMES = [
   "tufte",
   "grey",
   "gray",
+  // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters
+  // append after product themes (and after name aliases).
+  "test",
 ] as const;
 
 type ThemeNameValue = (typeof THEME_NAMES)[number];

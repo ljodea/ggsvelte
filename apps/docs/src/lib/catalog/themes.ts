@@ -17,6 +17,7 @@ const THEME_LABELS = {
   // Aliases of the ggplot2 grey-panel look (theme_grey / theme_gray, #824).
   grey: "Grey",
   gray: "Gray",
+  test: "Test",
 } as const satisfies Record<ThemeName, string>;
 
 const PALETTE_LABELS = {
@@ -43,6 +44,7 @@ const THEME_DEMO_SCHEMES = {
   tufte: "colorblind",
   grey: "observable10",
   gray: "observable10",
+  test: "colorblind",
 } as const satisfies Record<ThemeName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
 
 export const THEME_OPTIONS = THEME_NAMES.map((name) => ({

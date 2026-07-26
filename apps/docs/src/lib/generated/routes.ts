@@ -2122,8 +2122,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "stable-intent-123",
-        title: "stable-intent (123)",
+        id: "stable-intent-124",
+        title: "stable-intent (124)",
         level: 3,
       },
     ],
