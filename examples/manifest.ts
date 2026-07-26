@@ -767,6 +767,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "sf/holes",
+    category: "sf",
+    name: "holes",
+    title: "Simple features polygon holes",
+    description: "",
+    tags: ["sf", "geojson", "polygon", "hole", "evenodd", "fill", "map", "geom"],
+    docsSection: "Maps & spatial",
+    hasData: true,
+  },
+  {
     id: "sf/labels",
     category: "sf",
     name: "labels",

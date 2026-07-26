@@ -48,9 +48,14 @@ interface SmoothPayload {
   band: boolean;
 }
 
-/** geom_sf render family after geometry expand (#809 phase 1). */
+/** geom_sf render family after geometry expand (#809 phase 1 / holes phase 4). */
 interface SfPayload {
   kind: "point" | "line" | "polygon";
+  /**
+   * Per-vertex ring index within a polygon part (0 = exterior, 1+ = holes).
+   * Vertices of one part share `groups[i]`; ring breaks drive even-odd holes.
+   */
+  ringIndex?: readonly number[];
 }
 
 /**

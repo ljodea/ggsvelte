@@ -110,9 +110,6 @@ export const PIPELINE_WARNING_CATALOG = {
   "density-2d-filled-open-dropped": {
     summary: "density_2d_filled dropped open isoline rings; v1 fills closed rings only.",
   },
-  "sf-holes-ignored": {
-    summary: "geom_sf ignored interior polygon rings; v1 draws exterior rings only.",
-  },
   "sf-coordinates-dropped": {
     summary: "stat_sf_coordinates dropped features with no finite representative point.",
   },

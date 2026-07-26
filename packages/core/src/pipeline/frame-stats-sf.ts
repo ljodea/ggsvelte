@@ -1,8 +1,9 @@
 /**
- * geom_sf frame expansion (#809 phase 1): portable GeoJSON Geometry strings.
- *
- * Already-projected coordinates only (no CRS / coord_sf). Geometry lives as a
- * JSON string in a data column (CellValue cannot hold nested objects).
+ * geom_sf frame expansion (#809 phase 1 + holes phase 4): portable GeoJSON
+ * Geometry strings. Polygon interior rings share the exterior's group and use
+ * ringIndex for even-odd holes. Already-projected coordinates only (no CRS /
+ * coord_sf). Geometry lives as a JSON string in a data column (CellValue
+ * cannot hold nested objects).
  */
 import { ColumnTable, type CellValue } from "../table.js";
 
@@ -32,15 +33,18 @@ function pushPoint(
   outX: number[],
   outY: number[],
   outGroups: number[],
+  outRingIndex: number[],
   outRowIndex: number[],
   valueRows: number[],
   group: number,
+  ringIndex: number,
   sourceRow: number,
   xy: SfPosition,
 ): void {
   outX.push(xy[0]);
   outY.push(xy[1]);
   outGroups.push(group);
+  outRingIndex.push(ringIndex);
   outRowIndex.push(sourceRow);
   valueRows.push(sourceRow);
 }
@@ -49,9 +53,11 @@ function pushRing(
   outX: number[],
   outY: number[],
   outGroups: number[],
+  outRingIndex: number[],
   outRowIndex: number[],
   valueRows: number[],
   group: number,
+  ringIndex: number,
   sourceRow: number,
   ring: unknown,
   minVerts: number,
@@ -72,16 +78,58 @@ function pushRing(
   }
   if (pts.length < minVerts) return false;
   for (const p of pts) {
-    pushPoint(outX, outY, outGroups, outRowIndex, valueRows, group, sourceRow, p);
+    pushPoint(
+      outX,
+      outY,
+      outGroups,
+      outRingIndex,
+      outRowIndex,
+      valueRows,
+      group,
+      ringIndex,
+      sourceRow,
+      p,
+    );
   }
   return true;
+}
+
+/** Push every GeoJSON polygon ring; rings of one part share `group` (#809 phase 4). */
+function pushPolygonRings(
+  outX: number[],
+  outY: number[],
+  outGroups: number[],
+  outRingIndex: number[],
+  outRowIndex: number[],
+  valueRows: number[],
+  group: number,
+  sourceRow: number,
+  rings: unknown,
+): void {
+  if (!Array.isArray(rings)) return;
+  for (let r = 0; r < rings.length; r++) {
+    pushRing(
+      outX,
+      outY,
+      outGroups,
+      outRingIndex,
+      outRowIndex,
+      valueRows,
+      group,
+      r,
+      sourceRow,
+      rings[r],
+      3,
+      true,
+    );
+  }
 }
 
 export function buildSfFrame(
   binding: LayerBinding,
   table: ColumnTable,
   groups: readonly number[],
-  warnings: PipelineWarning[],
+  _warnings: PipelineWarning[],
 ): LayerFrame {
   const { layer, index } = binding;
   const params = (layer.params ?? {}) as { geometry?: string };
@@ -94,9 +142,10 @@ export function buildSfFrame(
     );
   }
 
-  // Empty panel / zero-row data: match other geoms (warnEmptyLayers later).
+  // Empty facet panel / zero-row layer data: match other geoms (empty frame,
+  // warnEmptyLayers downstream). Do not throw — prepare-panels only skips when
+  // every layer is empty, so per-panel empties still reach buildSfFrame.
   if (table.rowCount === 0) {
-    void groups;
     return {
       binding,
       table,
@@ -126,12 +175,12 @@ export function buildSfFrame(
   const outX: number[] = [];
   const outY: number[] = [];
   const outGroups: number[] = [];
+  const outRingIndex: number[] = [];
   const outRowIndex: number[] = [];
   const valueRows: number[] = [];
 
   let ringId = 0;
   let layerKind: SfKind | null = null;
-  let holesIgnored = 0;
 
   for (let row = 0; row < table.rowCount; row++) {
     const cellPath = `/layers/${index}/data/${field}`;
@@ -155,7 +204,18 @@ export function buildSfFrame(
           "Point geometry requires a finite [x, y] coordinate pair.",
         );
       }
-      pushPoint(outX, outY, outGroups, outRowIndex, valueRows, ringId++, row, coords);
+      pushPoint(
+        outX,
+        outY,
+        outGroups,
+        outRingIndex,
+        outRowIndex,
+        valueRows,
+        ringId++,
+        0,
+        row,
+        coords,
+      );
       continue;
     }
     if (parsed.type === "MultiPoint") {
@@ -168,15 +228,26 @@ export function buildSfFrame(
       }
       for (const c of coords) {
         if (!isFinitePair(c)) continue;
-        pushPoint(outX, outY, outGroups, outRowIndex, valueRows, ringId++, row, c);
+        pushPoint(outX, outY, outGroups, outRingIndex, outRowIndex, valueRows, ringId++, 0, row, c);
       }
       continue;
     }
     if (parsed.type === "LineString") {
       const g = ringId++;
-      if (!pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, coords, 2, false)) {
-        // drop empty
-      }
+      pushRing(
+        outX,
+        outY,
+        outGroups,
+        outRingIndex,
+        outRowIndex,
+        valueRows,
+        g,
+        0,
+        row,
+        coords,
+        2,
+        false,
+      );
       continue;
     }
     if (parsed.type === "MultiLineString") {
@@ -189,7 +260,20 @@ export function buildSfFrame(
       }
       for (const line of coords) {
         const g = ringId++;
-        pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, line, 2, false);
+        pushRing(
+          outX,
+          outY,
+          outGroups,
+          outRingIndex,
+          outRowIndex,
+          valueRows,
+          g,
+          0,
+          row,
+          line,
+          2,
+          false,
+        );
       }
       continue;
     }
@@ -201,9 +285,8 @@ export function buildSfFrame(
           "Polygon coordinates must be a non-empty array of rings.",
         );
       }
-      if (coords.length > 1) holesIgnored += coords.length - 1;
       const g = ringId++;
-      pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, coords[0], 3, true);
+      pushPolygonRings(outX, outY, outGroups, outRingIndex, outRowIndex, valueRows, g, row, coords);
       continue;
     }
     // MultiPolygon
@@ -216,17 +299,9 @@ export function buildSfFrame(
     }
     for (const poly of coords) {
       if (!Array.isArray(poly) || poly.length === 0) continue;
-      if (poly.length > 1) holesIgnored += poly.length - 1;
       const g = ringId++;
-      pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, poly[0], 3, true);
+      pushPolygonRings(outX, outY, outGroups, outRingIndex, outRowIndex, valueRows, g, row, poly);
     }
-  }
-
-  if (holesIgnored > 0) {
-    warnings.push({
-      code: "sf-holes-ignored",
-      message: `Layer ${index} (sf): ignored ${holesIgnored} interior ring(s); v1 draws exterior rings only.`,
-    });
   }
 
   if (layerKind === null || outX.length === 0) {
@@ -260,6 +335,9 @@ export function buildSfFrame(
     linetypeValues: styleColumn(table, binding.linetype.field, valueRows),
     labelValues: styleColumn(table, binding.labelField, valueRows),
     ...emptyFrameExtras(),
-    sf: { kind: layerKind },
+    sf: {
+      kind: layerKind,
+      ...(layerKind === "polygon" ? { ringIndex: outRingIndex } : {}),
+    },
   };
 }

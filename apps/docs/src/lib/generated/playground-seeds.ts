@@ -605,6 +605,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "sf/holes",
+    title: "Simple features polygon holes",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6InNmL2hvbGVzIn0sInNwZWMiOnsiZWRpdGlvbiI6MiwiZGF0YSI6eyJ2YWx1ZXMiOlt7InJlZ2lvbiI6IkEiLCJyYXRlIjoyMiwiZ2VvbWV0cnkiOiJ7XCJ0eXBlXCI6XCJQb2x5Z29uXCIsXCJjb29yZGluYXRlc1wiOltbWzAsMF0sWzYsMF0sWzYsNl0sWzAsNl0sWzAsMF1dLFtbMiwyXSxbNCwyXSxbNCw0XSxbMiw0XSxbMiwyXV1dfSJ9LHsicmVnaW9uIjoiQiIsInJhdGUiOjM4LCJnZW9tZXRyeSI6IntcInR5cGVcIjpcIlBvbHlnb25cIixcImNvb3JkaW5hdGVzXCI6W1tbNywwXSxbMTIsMF0sWzEyLDVdLFs3LDVdLFs3LDBdXSxbWzguNSwxLjVdLFsxMC41LDEuNV0sWzEwLjUsMy41XSxbOC41LDMuNV0sWzguNSwxLjVdXV19In1dfSwibGF5ZXJzIjpbeyJnZW9tIjoic2YiLCJzdGF0IjoiaWRlbnRpdHkiLCJwb3NpdGlvbiI6ImlkZW50aXR5IiwiYWVzIjp7ImZpbGwiOnsiZmllbGQiOiJyYXRlIn19LCJwYXJhbXMiOnsiYWxwaGEiOjAuOSwibGluZXdpZHRoIjowLjl9fV0sImxhYnMiOnsidGl0bGUiOiJnZW9tX3NmIHBvbHlnb24gaG9sZXMiLCJzdWJ0aXRsZSI6IkV2ZW4tb2RkIGludGVyaW9yIHJpbmdzIHB1bmNoIGhvbGVzICgjODA5IHBoYXNlIDQpIiwiZmlsbCI6InJhdGUifSwidGhlbWUiOiJjbGFzc2ljIn19",
+    },
+  },
+  {
     id: "sf/labels",
     title: "SF region labels",
     compatibility: {

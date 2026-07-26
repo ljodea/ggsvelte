@@ -1888,11 +1888,6 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "sf-holes-ignored",
-        title: "sf-holes-ignored",
-        level: 3,
-      },
-      {
         id: "sf-coordinates-dropped",
         title: "sf-coordinates-dropped",
         level: 3,
@@ -3117,6 +3112,16 @@ export const DOCS_ROUTES = [
     title: "SF boxed labels — ggsvelte gallery",
     description: "SF boxed labels",
     canonicalPath: "/examples/sf/boxed-labels",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/sf/holes",
+    title: "Simple features polygon holes — ggsvelte gallery",
+    description: "Simple features polygon holes",
+    canonicalPath: "/examples/sf/holes",
     kind: "page",
     index: true,
     sitemap: true,

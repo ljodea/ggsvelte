@@ -222,6 +222,11 @@ export function projectPathBatch(
   if (linetypeIndexes !== undefined) batch.linetypeIndexes = Uint8Array.from(linetypeIndexes);
   batch.semanticAnchors = Uint8Array.from(semanticAnchors);
   batch.semanticIndex = Uint32Array.from(semanticIndices);
+  // Multi-ring hole topology is not remapped under active coord transforms yet
+  // (#809 phase 4 / coord_sf deferred). Drop even-odd ring metadata so hits
+  // do not use stale vertex indices after tessellation.
+  if (batch.ringStarts !== undefined) delete batch.ringStarts;
+  if (batch.fillRule !== undefined) delete batch.fillRule;
   if (invalidVertices > 0) {
     warnings.push({
       code: "coord-invalid-geometry",
