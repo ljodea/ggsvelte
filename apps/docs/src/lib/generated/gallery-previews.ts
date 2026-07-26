@@ -117,6 +117,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "5b90c498aad252a867417319e5fac04e39e2b6ce6bb326ec97c22c112b16da64",
   },
   {
+    id: "freqpoly/basic",
+    filename: "freqpoly-basic-light.png",
+    path: "/previews/freqpoly-basic-light.png",
+    sha256: "29209d4a65b24bba0dad9bb91a70aaa3d547bf4d24689297f8ea391ebf0ec86c",
+  },
+  {
     id: "histogram/basic",
     filename: "histogram-basic-light.png",
     path: "/previews/histogram-basic-light.png",

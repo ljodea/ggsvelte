@@ -223,6 +223,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "freqpoly/basic",
+    category: "freqpoly",
+    name: "basic",
+    title: "Frequency polygon",
+    description: "",
+    tags: ["freqpoly", "bin", "line", "stat", "rule", "annotation", "theme"],
+    docsSection: "Distributions",
+    hasData: true,
+  },
+  {
     id: "histogram/basic",
     category: "histogram",
     name: "basic",

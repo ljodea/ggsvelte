@@ -354,6 +354,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Statistical summaries"],
   },
   {
+    id: "heading:guide-statistics-positions:frequency-polygon",
+    kind: "heading",
+    title: "Frequency polygon",
+    summary:
+      "Frequency polygon in Statistics and positions. Compute summaries and control how derived marks occupy the same coordinate space.",
+    href: "/guide/statistics-positions#frequency-polygon",
+    keywords: ["Statistics and positions", "Core grammar"],
+    exact: ["Frequency polygon"],
+  },
+  {
     id: "heading:guide-statistics-positions:unique-first-wins-aesthetic-dedupe",
     kind: "heading",
     title: "Unique (first-wins aesthetic dedupe)",
@@ -4175,6 +4185,25 @@ export const DOCS_SEARCH_INDEX = [
     href: "/examples/facet/wrap-free-y",
     keywords: ["Free y scales per panel", "Facets", "facet", "free-scales", "line", "wrap"],
     exact: ["Free y scales per panel"],
+  },
+  {
+    id: "example:freqpoly:basic",
+    kind: "example",
+    title: "Frequency polygon",
+    summary: "Frequency polygon (Distributions)",
+    href: "/examples/freqpoly/basic",
+    keywords: [
+      "Frequency polygon",
+      "Distributions",
+      "freqpoly",
+      "bin",
+      "line",
+      "stat",
+      "rule",
+      "annotation",
+      "theme",
+    ],
+    exact: ["Frequency polygon"],
   },
   {
     id: "example:histogram:basic",
