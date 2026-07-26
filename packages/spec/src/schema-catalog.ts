@@ -37,6 +37,7 @@ export const KNOWN_GEOMS = [
   "sf_label",
   "blank",
   "jitter",
+  "spoke",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -75,6 +76,8 @@ export const CHANNELS = [
   "height",
   "z",
   "map_id",
+  "angle",
+  "radius",
 ] as const;
 export type ChannelName = (typeof CHANNELS)[number];
 
@@ -149,4 +152,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   sf_label: { stat: "sf_coordinates", position: "identity" },
   blank: { stat: "identity", position: "identity" },
   jitter: { stat: "identity", position: "jitter" },
+  spoke: { stat: "identity", position: "identity" },
 };

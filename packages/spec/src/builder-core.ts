@@ -49,6 +49,7 @@ import type {
   GeomSfTextOptions,
   GeomSfLabelOptions,
   GeomBlankOptions,
+  GeomSpokeOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -348,6 +349,11 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'sf_label', ... }) — boxed labels at SF centroids (#809). */
   geomSfLabel(options: GeomSfLabelOptions = {}): GGBuilder {
     return this.layer(layerFrom("sf_label", options));
+  }
+
+  /** Sugar for .layer({ geom: 'spoke', ... }) — origin + angle + radius (#810). */
+  geomSpoke(options: GeomSpokeOptions = {}): GGBuilder {
+    return this.layer(layerFrom("spoke", options));
   }
 
   /**

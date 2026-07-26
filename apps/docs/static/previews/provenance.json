@@ -336,6 +336,11 @@
       "sourceSha256": "726fe00865d7ca6a98b104eb4e0ea9c7e9a8cb321aba2cf8d2584d385761f3c0",
       "pngSha256": "e5e8f44de5ea850ec5a6fea1b4a6eede2fbf777f21c15b11823c5c77abd0c724"
     },
+    "spoke/vector-field": {
+      "filename": "spoke-vector-field-light.png",
+      "sourceSha256": "2cde5ad657046436e1190f587c99fbfafcff9dec118e16704bdc9574c5406f71",
+      "pngSha256": "928a63297721edd0993552dd0ff362d981b62f5fb3f842ffb98decd0143ce344"
+    },
     "text/labels": {
       "filename": "text-labels-light.png",
       "sourceSha256": "d480516e2797afd08a48a131a7a47a06356dd00f159360046a302ce2dd896335",

@@ -77,6 +77,7 @@ export type {
   DotplotLayerInput,
   BlankLayerInput,
   MapLayerInput,
+  SpokeLayerInput,
   SfLayerInput,
   SfTextLayerInput,
   SfLabelLayerInput,

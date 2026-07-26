@@ -377,6 +377,56 @@ export class MockResponder implements Responder {
 
     // --- geom selection (keyword templates, most specific first) -----------
     if (
+      /\bgeom[_\s]?spoke\b|\bspoke\b|\bvector field\b/.test(prompt) &&
+      (fieldNamed("angle") !== undefined ||
+        fieldNamed("radius") !== undefined ||
+        /\bangle\b/.test(prompt) ||
+        /\bradius\b/.test(prompt) ||
+        /\bparams\b/.test(prompt) ||
+        /\bconstant\b/.test(prompt))
+    ) {
+      // geom_spoke: origin + angle (radians) + radius → segment (#810).
+      const x = fieldNamed("x") ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? pick.quant() ?? "y";
+      const aes: MockAes = { x: f(x), y: f(y) };
+      const layer: MockLayer = { geom: "spoke", aes };
+      if (fieldNamed("angle") !== undefined) aes.angle = f("angle");
+      if (fieldNamed("radius") !== undefined) aes.radius = f("radius");
+      // Constant angle/radius when the prompt asks for params (no mapped cols).
+      if (aes.angle === undefined || aes.radius === undefined) {
+        const params: Record<string, unknown> = {};
+        if (aes.angle === undefined) params["angle"] = 0;
+        if (aes.radius === undefined) params["radius"] = 1;
+        layer.params = params;
+      }
+      spec.layers.push(layer);
+      xField = x;
+    } else if (
+      /\bgeom[_\s]?blank\b|\bblank layer\b|\bblank geom\b|\btrain(?:s|ing)? (?:the )?scales?\b.*\bblank\b|\bblank\b.*\bno marks\b/.test(
+        prompt,
+      ) ||
+      (/\bblank\b/.test(prompt) &&
+        (/\bdomain\b/.test(prompt) || /\bexpand\b/.test(prompt) || /\bno marks\b/.test(prompt)))
+    ) {
+      // geom_blank: scale training without marks (#791).
+      const aes: MockAes = {};
+      if (fieldNamed("x_plan") === undefined) {
+        const x = fieldNamed("x") ?? pick.quant() ?? "x";
+        const y = fieldNamed("y") ?? pick.quant() ?? "y";
+        aes.x = f(x);
+        aes.y = f(y);
+      } else {
+        aes.x = f("x_plan");
+        if (fieldNamed("y_plan") !== undefined) aes.y = f("y_plan");
+        if (fieldNamed("x") !== undefined && fieldNamed("y") !== undefined) {
+          spec.layers.push({
+            geom: "point",
+            aes: { x: f("x"), y: f("y") },
+          });
+        }
+      }
+      spec.layers.push({ geom: "blank", aes });
+    } else if (
       (/\bgeom[_\s]?sf[_\s]?label\b|\bsf_label\b|\bsf label\b|\bboxed labels?\b/.test(prompt) ||
         (fieldNamed("geometry") !== undefined &&
           /\blabel\b/.test(prompt) &&

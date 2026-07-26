@@ -411,6 +411,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "e5e8f44de5ea850ec5a6fea1b4a6eede2fbf777f21c15b11823c5c77abd0c724",
   },
   {
+    id: "spoke/vector-field",
+    filename: "spoke-vector-field-light.png",
+    path: "/previews/spoke-vector-field-light.png",
+    sha256: "928a63297721edd0993552dd0ff362d981b62f5fb3f842ffb98decd0143ce344",
+  },
+  {
     id: "text/labels",
     filename: "text-labels-light.png",
     path: "/previews/text-labels-light.png",

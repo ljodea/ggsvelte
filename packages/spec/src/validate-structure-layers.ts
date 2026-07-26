@@ -41,6 +41,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   errorbar: ["x"], // ymin/ymax vs y are stat-dependent, checked separately
   rect: ["xmin", "xmax", "ymin", "ymax"],
   segment: ["x", "y", "xend", "yend"],
+  spoke: ["x", "y"], // angle/radius: aes or params — checked below
   curve: ["x", "y", "xend", "yend"],
   tile: ["x", "y"],
   raster: ["x", "y"],
@@ -363,6 +364,45 @@ export function layerStructuralErrors(
     }
   }
 
+  if (geom === "spoke") {
+    const params = isRecord(layer["params"]) ? layer["params"] : {};
+    for (const channel of ["angle", "radius"] as const) {
+      const fromAes = mapped(channel);
+      const fromParams = params[channel];
+      if (fromAes === undefined && fromParams === undefined) {
+        errors.push({
+          code: "missing-required-channel",
+          path: `${layerPath}/aes/${channel}`,
+          message: `The spoke geom requires "${channel}" via aes.${channel} or params.${channel}.`,
+          fix: {
+            description: `Map aes.${channel} to a field, or set params.${channel} to a constant.`,
+            example:
+              channel === "angle"
+                ? { geom: "spoke", params: { angle: 0, radius: 1 } }
+                : { geom: "spoke", params: { radius: 1, angle: 0 } },
+          },
+        });
+      }
+      // Runtime only materializes field angle/radius (checkField); aes constants
+      // would pass validation then throw in requireField — reject early. Prefer
+      // params.angle / params.radius for constants (ggplot2-compatible).
+      if (fromAes !== undefined && !("field" in fromAes) && fromParams === undefined) {
+        errors.push({
+          code: "missing-required-channel",
+          path: `${layerPath}/aes/${channel}`,
+          message: `The spoke geom requires aes.${channel} to map a data field (not a constant or stat). Use params.${channel} for a fixed value.`,
+          fix: {
+            description: `Map aes.${channel} to a field, or set params.${channel} to a constant.`,
+            example:
+              channel === "angle"
+                ? { geom: "spoke", params: { angle: 0, radius: 1 } }
+                : { geom: "spoke", params: { radius: 1, angle: 0 } },
+          },
+        });
+      }
+    }
+  }
+
   errors.push(...paintStructuralErrors(layer, layerPath, plotAes));
 
   for (const channel of REQUIRED_CHANNELS[geom] ?? []) {
@@ -390,8 +430,8 @@ export function layerStructuralErrors(
       });
       continue;
     }
-    // Segment runtime only materializes field endpoints (checkField); constants/stat
-    // mappings would pass validation then throw in requireField — reject early.
+    // Segment/curve runtime only materializes field endpoints (checkField);
+    // constants/stat mappings would pass validation then throw in requireField.
     if (
       (geom === "segment" || geom === "curve") &&
       (channel === "x" || channel === "y" || channel === "xend" || channel === "yend") &&
@@ -401,6 +441,18 @@ export function layerStructuralErrors(
         code: "missing-required-channel",
         path: `${layerPath}/aes/${channel}`,
         message: `The ${geom} geom requires aes.${channel} to map a data field (not a constant or stat).`,
+        fix: {
+          description: `Map "${channel}" to a data field.`,
+          example: { [channel]: CHANNEL_FIX_EXAMPLE },
+        },
+      });
+    }
+    // Spoke origin x/y are field-only in the pipeline (same requireField path).
+    if (geom === "spoke" && (channel === "x" || channel === "y") && !("field" in value)) {
+      errors.push({
+        code: "missing-required-channel",
+        path: `${layerPath}/aes/${channel}`,
+        message: `The spoke geom requires aes.${channel} to map a data field (not a constant or stat).`,
         fix: {
           description: `Map "${channel}" to a data field.`,
           example: { [channel]: CHANNEL_FIX_EXAMPLE },

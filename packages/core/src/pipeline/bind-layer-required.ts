@@ -18,6 +18,9 @@ export function assertRequiredChannels(input: {
   xmaxField?: string | null;
   xendField?: string | null;
   yendField?: string | null;
+  angleField?: string | null;
+  radiusField?: string | null;
+  layerParams?: unknown;
   ribbonOrientation?: "x" | "y";
 }): void {
   const {
@@ -34,6 +37,9 @@ export function assertRequiredChannels(input: {
     xmaxField = null,
     xendField = null,
     yendField = null,
+    angleField = null,
+    radiusField = null,
+    layerParams,
     ribbonOrientation,
   } = input;
 
@@ -94,5 +100,19 @@ export function assertRequiredChannels(input: {
     requireField(yField, "y", index, geom);
     requireField(xendField, "xend", index, geom);
     requireField(yendField, "yend", index, geom);
+  }
+  if (geom === "spoke") {
+    requireField(xField, "x", index, geom);
+    requireField(yField, "y", index, geom);
+    const params =
+      typeof layerParams === "object" && layerParams !== null
+        ? (layerParams as Record<string, unknown>)
+        : {};
+    if (angleField === null && params["angle"] === undefined) {
+      requireField(angleField, "angle", index, geom);
+    }
+    if (radiusField === null && params["radius"] === undefined) {
+      requireField(radiusField, "radius", index, geom);
+    }
   }
 }

@@ -641,6 +641,30 @@ gg(data, aes({ x: "x", y: "y", xend: "xend", yend: "yend" }))
 Intentional subset: quadratic approximation, not full grid xspline.
 [Curve connectors](/examples/curve/connectors): Darwin maize pairs as arcs.
 
+## Spoke (origin + angle + radius)
+
+\`geom: "spoke"\` (ggplot2 \`geom_spoke\`) draws one finite segment per row from
+\`(x, y)\` in direction \`angle\` (radians; 0 = +x, π/2 = +y) with length
+\`radius\` in **data units**. Endpoints are
+\`xend = x + radius·cos(angle)\`, \`yend = y + radius·sin(angle)\`, then the same
+position transform as x/y. Tips train domains; paint reuses segment strokes.
+\`angle\` and \`radius\` come from aes and/or constant \`params\`. Continuous x
+and y required.
+
+\`\`\`svelte fragment
+<GeomSpoke />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y", angle: "theta", radius: "r" }))
+  .geomSpoke({ linewidth: 1.5, lineend: "round" })
+  .spec();
+// constants: .geomSpoke({ angle: 0, radius: 1 })
+\`\`\`
+
+[Spoke vector field](/examples/spoke/vector-field): synthetic 5×5 field with
+mapped angle and radius.
+
 ## Map (fortified choropleth)
 
 \`geom: "map"\` (ggplot2 \`geom_map\`) joins a **fortified map table** to value
