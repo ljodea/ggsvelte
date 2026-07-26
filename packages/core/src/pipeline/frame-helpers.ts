@@ -16,6 +16,7 @@ export function emptyFrameExtras(): Pick<
   | "dodge"
   | "box"
   | "smooth"
+  | "sf"
   | "ymin"
   | "ymax"
   | "xmin"
@@ -34,6 +35,7 @@ export function emptyFrameExtras(): Pick<
     dodge: null,
     box: null,
     smooth: null,
+    sf: null,
     ymin: null,
     ymax: null,
     xmin: null,

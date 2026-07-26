@@ -41,6 +41,7 @@ import type {
   GeomQuantileOptions,
   GeomCurveOptions,
   GeomContourOptions,
+  GeomSfOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -282,6 +283,11 @@ export class GGBuilderCore {
    */
   geomCurve(options: GeomCurveOptions = {}): GGBuilder {
     return this.layer(layerFrom("curve", options));
+  }
+
+  /** Sugar for .layer({ geom: 'sf', ... }) — portable GeoJSON geometries (#809). */
+  geomSf(options: GeomSfOptions = {}): GGBuilder {
+    return this.layer(layerFrom("sf", options));
   }
 
   /**

@@ -27,6 +27,7 @@ import type {
   QuantileParams,
   CurveParams,
   ContourParams,
+  SfParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -212,6 +213,12 @@ export interface GeomSegmentOptions extends SegmentParams, GeomDataOption {
 
 /** Curve-layer sugar: curvature/angle/ncp + stroke styling. */
 export interface GeomCurveOptions extends CurveParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** SF-layer sugar: portable GeoJSON Geometry column (#809 phase 1). */
+export interface GeomSfOptions extends SfParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

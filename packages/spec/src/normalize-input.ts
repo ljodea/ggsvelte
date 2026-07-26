@@ -33,6 +33,7 @@ import type {
   RuleParams,
   SegmentParams,
   CurveParams,
+  SfParams,
   Scales,
   QuantileParams,
   ContourParams,
@@ -286,6 +287,13 @@ export interface CurveLayerInput extends LayerInputBase {
   params?: CurveParams;
 }
 
+export interface SfLayerInput extends LayerInputBase {
+  geom: "sf";
+  stat?: "identity";
+  position?: "identity";
+  params?: SfParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -312,7 +320,8 @@ export type LayerInput =
   | TileLayerInput
   | RasterLayerInput
   | SegmentLayerInput
-  | CurveLayerInput;
+  | CurveLayerInput
+  | SfLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

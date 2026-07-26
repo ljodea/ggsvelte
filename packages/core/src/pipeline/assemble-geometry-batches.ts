@@ -57,7 +57,8 @@ export function buildGeometryBatches(input: {
         geom === "density" ||
         geom === "smooth" ||
         geom === "quantile" ||
-        geom === "ribbon";
+        geom === "ribbon" ||
+        geom === "sf";
       const built = buildBatch(
         frame,
         // Path topology must retain coordinate-invalid authored/stat vertices

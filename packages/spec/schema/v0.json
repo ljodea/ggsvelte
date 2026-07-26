@@ -1805,6 +1805,46 @@
       "additionalProperties": false,
       "description": "Parameters for geom curve: curvature/angle/ncp plus segment-like stroke styling."
     },
+    "SfParams": {
+      "type": "object",
+      "properties": {
+        "geometry": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the data column holding GeoJSON Geometry JSON strings. Default \"geometry\". Already-projected coordinates only (#809 phase 1)."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Mark opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px for lines/polygon outlines. Must be greater than 0."
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Point radius in px when geometries are Point/MultiPoint."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (polygon family; not a data scale)."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale)."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom_sf (#809 phase 1): portable GeoJSON Geometry column plus styling. No CRS/coord_sf in v1."
+    },
     "TextParams": {
       "type": "object",
       "properties": {
@@ -2983,6 +3023,44 @@
       "additionalProperties": false,
       "description": "A curved-segment layer. Requires x, y, xend, and yend field channels (like geom segment)."
     },
+    "SfLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "sf",
+          "description": "Simple-features geometry (ggplot2 geom_sf; #809 phase 1): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families; no CRS, coord_sf, sf_text, or sf_label yet."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "SF layers expand geometry then draw as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "SF layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data."
+        },
+        "params": {
+          "$ref": "#/$defs/SfParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "An sf geometry layer. Requires a geometry column of GeoJSON Geometry JSON strings (params.geometry, default \"geometry\"). Coordinates must already be projected."
+    },
     "LayerSpec": {
       "anyOf": [
         {
@@ -3059,6 +3137,9 @@
         },
         {
           "$ref": "#/$defs/CurveLayer"
+        },
+        {
+          "$ref": "#/$defs/SfLayer"
         }
       ],
       "description": "One plot layer. The `geom` field selects the geometry and determines which stat, position, and params are allowed."

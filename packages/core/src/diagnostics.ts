@@ -306,6 +306,22 @@ export const PIPELINE_ERROR_CATALOG = {
     summary: "renderToSVGString refused to render more marks than its maxMarks safety limit.",
     fix: "Raise options.maxMarks deliberately, reduce the data, or render interactively (canvas).",
   },
+  "sf-geometry-missing": {
+    summary: "geom_sf data is missing the geometry column.",
+    fix: 'Provide a column of GeoJSON Geometry JSON strings (default field "geometry", or params.geometry).',
+  },
+  "sf-geometry-invalid": {
+    summary: "A geom_sf geometry cell could not be parsed as drawable GeoJSON Geometry.",
+    fix: "Use valid GeoJSON Geometry JSON strings with finite coordinates.",
+  },
+  "sf-geometry-unsupported": {
+    summary: "geom_sf received a GeoJSON type outside the v1 point/line/polygon families.",
+    fix: "Use Point, MultiPoint, LineString, MultiLineString, Polygon, or MultiPolygon (no GeometryCollection/CRS).",
+  },
+  "sf-geometry-mixed": {
+    summary: "One geom_sf layer mixes geometry families (point vs line vs polygon).",
+    fix: "Split mixed types into separate geom_sf layers (v1 is single-family per layer).",
+  },
 } as const satisfies Record<string, PipelineErrorCatalogEntry>;
 
 export type PipelineErrorCode = keyof typeof PIPELINE_ERROR_CATALOG;
@@ -416,6 +432,8 @@ export const PIPELINE_WARNING_CATALOG = {
   },
   "density-2d-filled-open-dropped": {
     summary: "density_2d_filled dropped open isoline rings; v1 fills closed rings only.",
+  "sf-holes-ignored": {
+    summary: "geom_sf ignored interior polygon rings; v1 draws exterior rings only.",
   },
   "smooth-group-dropped": {
     summary: "A smooth group had too few points for the fit and was dropped.",
