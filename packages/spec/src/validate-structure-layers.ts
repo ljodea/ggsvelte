@@ -21,6 +21,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   point: ["x", "y"],
   line: ["x", "y"],
+  path: ["x", "y"], // data-order polylines (#788); same channels as line
   col: ["x", "y"],
   bar: ["x"],
   histogram: ["x"],

@@ -2543,6 +2543,16 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/path/trajectory",
+    title: "Path trajectory (data order) — ggsvelte gallery",
+    description: "Path trajectory (data order)",
+    canonicalPath: "/examples/path/trajectory",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/point/canvas-scatter",
     title: "Canvas scatter (10,000 points) — ggsvelte gallery",
     description: "Canvas scatter (10,000 points)",

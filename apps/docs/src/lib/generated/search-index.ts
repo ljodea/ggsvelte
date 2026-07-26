@@ -4277,6 +4277,23 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Raw-year time-axis line chart"],
   },
   {
+    id: "example:path:trajectory",
+    kind: "example",
+    title: "Path trajectory (data order)",
+    summary: "Path trajectory (data order) (Lines & time)",
+    href: "/examples/path/trajectory",
+    keywords: [
+      "Path trajectory (data order)",
+      "Lines & time",
+      "path",
+      "line",
+      "trajectory",
+      "lissajous",
+      "data-order",
+    ],
+    exact: ["Path trajectory (data order)"],
+  },
+  {
     id: "example:point:canvas-scatter",
     kind: "example",
     title: "Canvas scatter (10,000 points)",
