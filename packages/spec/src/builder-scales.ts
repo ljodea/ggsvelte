@@ -73,13 +73,17 @@ import {
   scaleShapeDiscrete,
   scaleShapeIdentity,
   scaleShapeManual,
+  scaleSizeArea,
   scaleSizeBinned,
+  scaleSizeBinnedArea,
   scaleSizeContinuous,
   scaleSizeDate,
   scaleSizeDatetime,
   scaleSizeDiscrete,
   scaleSizeIdentity,
   scaleSizeManual,
+  scaleSizeOrdinal,
+  scaleRadius,
   type BinnedFiniteStyleScaleOptions,
   type DiscreteFiniteStyleScaleOptions,
   type DiscreteNumericStyleScaleOptions,
@@ -88,6 +92,7 @@ import {
   type ManualFiniteStyleScaleOptions,
   type ManualNumericStyleScaleOptions,
   type SequentialStyleScaleOptions,
+  type SizeAreaScaleOptions,
   type TemporalNumericStyleScaleOptions,
 } from "./scale-style-helpers.js";
 import type { LinetypeName, PointShapeName } from "./schema-names.js";
@@ -299,6 +304,22 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
     }
     scaleSizeIdentity(options: IdentityNumericStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleSizeIdentity(options));
+    }
+    /** ggplot2 scale_size_area — zero→zero area mapping (#830). */
+    scaleSizeArea(options: SizeAreaScaleOptions = {}): GGBuilder {
+      return this.scales(scaleSizeArea(options));
+    }
+    /** ggplot2 scale_size_binned_area (#830). */
+    scaleSizeBinnedArea(options: SizeAreaScaleOptions = {}): GGBuilder {
+      return this.scales(scaleSizeBinnedArea(options));
+    }
+    /** ggplot2 scale_radius — linear radius mapping (#830). */
+    scaleRadius(options: SequentialStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleRadius(options));
+    }
+    /** ggplot2 scale_size_ordinal (#830). */
+    scaleSizeOrdinal(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleSizeOrdinal(options));
     }
 
     scaleLinewidthContinuous(options: SequentialStyleScaleOptions = {}): GGBuilder {

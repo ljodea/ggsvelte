@@ -17,7 +17,10 @@ export type NumericStyleScaleOptions = Omit<NumericStyleScaleSpec, "type">;
 export type SequentialStyleScaleOptions = Omit<
   NumericStyleScaleOptions,
   "domainMode" | "onExhaust"
->;
+> & {
+  /** Size aesthetic only (#830). */
+  sizeUnit?: "area" | "radius" | "area_zero";
+};
 export type DiscreteNumericStyleScaleOptions = Pick<
   NumericStyleScaleSpec,
   "domain" | "domainMode" | "range" | "reverse" | "naValue" | "unknownValue" | "onExhaust" | "guide"
@@ -109,6 +112,11 @@ function manualFiniteStyleScale(
   return { [aesthetic]: { type: "manual", ...rest, range: [...values] } };
 }
 
+export type SizeAreaScaleOptions = SequentialStyleScaleOptions & {
+  /** Max radius when range is omitted (ggplot2 `max_size`; default 6). */
+  maxSize?: number;
+};
+
 export function scaleSizeContinuous(options: SequentialStyleScaleOptions = {}): Scales {
   return numericStyleScale("size", "sequential", options);
 }
@@ -130,6 +138,42 @@ export function scaleSizeManual(options: ManualNumericStyleScaleOptions): Scales
 export function scaleSizeIdentity(options: IdentityNumericStyleScaleOptions = {}): Scales {
   return numericStyleScale("size", "identity", options);
 }
+
+/**
+ * ggplot2 `scale_size_area` — area ∝ value with zero→zero area.
+ * Prefer `maxSize` (or `range: [0, max]`) for the maximum radius.
+ */
+export function scaleSizeArea(options: SizeAreaScaleOptions = {}): Scales {
+  const { maxSize, range, ...rest } = options;
+  const resolvedRange = range !== undefined ? [...range] : [0, maxSize ?? 6];
+  return numericStyleScale("size", "sequential", {
+    ...rest,
+    range: resolvedRange,
+    sizeUnit: "area_zero",
+  });
+}
+
+/** ggplot2 `scale_size_binned_area` — binned values mapped with zero→zero area. */
+export function scaleSizeBinnedArea(options: SizeAreaScaleOptions = {}): Scales {
+  const { maxSize, range, ...rest } = options;
+  const resolvedRange = range !== undefined ? [...range] : [0, maxSize ?? 6];
+  return numericStyleScale("size", "binned", {
+    ...rest,
+    range: resolvedRange,
+    sizeUnit: "area_zero",
+  });
+}
+
+/** ggplot2 `scale_radius` — map value linearly to radius (not area). */
+export function scaleRadius(options: SequentialStyleScaleOptions = {}): Scales {
+  return numericStyleScale("size", "sequential", {
+    ...options,
+    sizeUnit: "radius",
+  });
+}
+
+/** ggplot2 `scale_size_ordinal` — ordered discrete sizes. */
+export const scaleSizeOrdinal = scaleSizeDiscrete;
 
 export function scaleLinewidthContinuous(options: SequentialStyleScaleOptions = {}): Scales {
   return numericStyleScale("linewidth", "sequential", options);
@@ -217,6 +261,11 @@ export const scale_size_date = scaleSizeDate;
 export const scale_size_datetime = scaleSizeDatetime;
 export const scale_size_manual = scaleSizeManual;
 export const scale_size_identity = scaleSizeIdentity;
+export const scale_size = scaleSizeContinuous;
+export const scale_size_area = scaleSizeArea;
+export const scale_size_binned_area = scaleSizeBinnedArea;
+export const scale_size_ordinal = scaleSizeOrdinal;
+export const scale_radius = scaleRadius;
 export const scale_linewidth_continuous = scaleLinewidthContinuous;
 export const scale_linewidth_discrete = scaleLinewidthDiscrete;
 export const scale_linewidth_binned = scaleLinewidthBinned;

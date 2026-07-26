@@ -77,6 +77,17 @@ function numericStyleScaleSpec(rangeValue: ReturnType<typeof Type.Number>, descr
         onExhaust: Type.Optional(Type.Union([Type.Literal("cycle"), Type.Literal("error")])),
         labels: Type.Optional(Type.String()),
         guide: Type.Optional(Type.Ref("GuideSpec")),
+        /**
+         * Size-only rescaling mode (ignored for linewidth). Default `area` matches
+         * the existing continuous size map (area between range endpoints).
+         * `radius` is linear; `area_zero` forces zero→zero area (ggplot2 scale_size_area).
+         */
+        sizeUnit: Type.Optional(
+          Type.Union([Type.Literal("area"), Type.Literal("radius"), Type.Literal("area_zero")], {
+            description:
+              'Size encoding unit (size aesthetic only). "area" (default) interpolates by area between range endpoints; "radius" maps linearly to radius; "area_zero" maps value proportionally to area with zero→zero (ggplot2 scale_size_area / scale_size_binned_area).',
+          }),
+        ),
       },
       { additionalProperties: false, description },
     ),
@@ -2333,8 +2344,9 @@ export const SpecDeclarations = {
   ]),
 
   PositiveStyleScaleSpec: numericStyleScaleSpec(
-    Type.Number({ exclusiveMinimum: 0 }),
-    "Configuration for a positive numeric size or linewidth scale.",
+    // minimum 0 allows scale_size_area zero-area radii; linewidth 0 is also valid.
+    Type.Number({ minimum: 0 }),
+    "Configuration for a non-negative numeric size or linewidth scale.",
   ),
 
   AlphaScaleSpec: numericStyleScaleSpec(

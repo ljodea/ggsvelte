@@ -66,10 +66,10 @@ function colourAliases(stem: string): string[] {
  *   position-temporal    4
  *   position-discrete    2
  *   color-fill          18
- *   numeric-style       21
+ *   numeric-style       24
  *   finite-style         8
  *   ----------------------
- *   63 component files + 9 Colour aliases
+ *   66 component files + 9 Colour aliases
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
@@ -214,16 +214,21 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "IdentityColorScaleOptions",
   ]),
 
-  // --- numeric-style (21) --------------------------------------------------
+  // --- numeric-style (24) --------------------------------------------------
   ...(["Size", "Linewidth", "Alpha"] as const).flatMap((aes) => {
     const base = `scale${aes}`;
     return [
       shell(`${base}Continuous`, "numeric-style", "SequentialStyleScaleOptions", [
         "SequentialStyleScaleOptions",
       ]),
-      shell(`${base}Discrete`, "numeric-style", "DiscreteNumericStyleScaleOptions", [
+      shell(
+        `${base}Discrete`,
+        "numeric-style",
         "DiscreteNumericStyleScaleOptions",
-      ]),
+        ["DiscreteNumericStyleScaleOptions"],
+        // ggplot2 scale_size_ordinal re-exports Discrete shell (#830).
+        aes === "Size" ? ["ScaleSizeOrdinal"] : undefined,
+      ),
       shell(`${base}Binned`, "numeric-style", "SequentialStyleScaleOptions", [
         "SequentialStyleScaleOptions",
       ]),
@@ -241,6 +246,12 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
       ]),
     ];
   }),
+  // size area / radius family (#830)
+  shell("scaleSizeArea", "numeric-style", "SizeAreaScaleOptions", ["SizeAreaScaleOptions"]),
+  shell("scaleSizeBinnedArea", "numeric-style", "SizeAreaScaleOptions", ["SizeAreaScaleOptions"]),
+  shell("scaleRadius", "numeric-style", "SequentialStyleScaleOptions", [
+    "SequentialStyleScaleOptions",
+  ]),
 
   // --- finite-style (8) — generics MUST be pinned to the aesthetic ----------
   shell("scaleShapeDiscrete", "finite-style", "DiscreteFiniteStyleScaleOptions<PointShapeName>", [

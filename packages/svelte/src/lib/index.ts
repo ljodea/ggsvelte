@@ -251,6 +251,12 @@ export { default as ScaleAlphaManual } from "./scale/ScaleAlphaManual.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleAlphaIdentity } from "./scale/ScaleAlphaIdentity.svelte";
 /** @lifecycle stable-intent */
+export { default as ScaleSizeArea } from "./scale/ScaleSizeArea.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleSizeBinnedArea } from "./scale/ScaleSizeBinnedArea.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleRadius } from "./scale/ScaleRadius.svelte";
+/** @lifecycle stable-intent */
 export { default as ScaleShapeDiscrete } from "./scale/ScaleShapeDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleShapeBinned } from "./scale/ScaleShapeBinned.svelte";
@@ -284,6 +290,8 @@ export { default as ScaleColourDatetime } from "./scale/ScaleColorDatetime.svelt
 export { default as ScaleColourManual } from "./scale/ScaleColorManual.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourIdentity } from "./scale/ScaleColorIdentity.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleSizeOrdinal } from "./scale/ScaleSizeDiscrete.svelte";
 // </generated:scale-children>
 
 // Coord children (#659 slice 5) — stable-intent: named shells + <Coord>
