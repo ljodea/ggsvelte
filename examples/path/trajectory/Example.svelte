@@ -8,18 +8,18 @@
     ThemeClassic,
   } from "@ggsvelte/svelte";
 
-  import { lissajousEight } from "./data.js";
+  import { figureEight } from "./data.js";
 </script>
 
-<GGPlot data={lissajousEight} aes={{ x: "x", y: "y" }} width={640} height={400}>
+<GGPlot data={figureEight} aes={{ x: "x", y: "y" }} width={640} height={400}>
   <ThemeClassic />
   <CoordFixed />
   <Labs
-    title="Lissajous eight in data order"
-    subtitle="geom_path keeps parametric order; geom_line would sort by x"
-    x="x = sin(t)"
-    y="y = sin(2t)"
+    title="Figure-eight path in data order"
+    subtitle="geom_path keeps row order; geom_line would sort by x"
+    x="x"
+    y="y"
   />
   <GeomPath linewidth={2} alpha={0.95} />
-  <GeomPoint size={1.8} alpha={0.55} />
+  <GeomPoint size={2.2} alpha={0.55} />
 </GGPlot>

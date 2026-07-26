@@ -392,7 +392,7 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     name: "trajectory",
     title: "Path trajectory (data order)",
     description: "",
-    tags: ["path", "line", "trajectory", "lissajous", "data-order"],
+    tags: ["path", "line", "trajectory", "figure-eight", "data-order"],
     docsSection: "Lines & time",
     hasData: true,
   },

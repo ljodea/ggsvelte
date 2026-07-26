@@ -138,8 +138,8 @@
     },
     "path/trajectory": {
       "filename": "path-trajectory-light.png",
-      "sourceSha256": "c2605e7179fe3801111604fa0bb93c55ddf30e5ca5e4ff2305d0f341edac29eb",
-      "pngSha256": "89fb2a3df512ea68c682320384b8198d1b01ae9648e2eb097d9fb34c56282c54"
+      "sourceSha256": "9112fcb6dc55781a3a297378349bcb0120eb5de7595c60f803de6044d493fa41",
+      "pngSha256": "2ec864cf245cbb1b253a89680e6002a2879c70954c3e4903aee4d2218648a4b8"
     },
     "point/canvas-scatter": {
       "filename": "point-canvas-scatter-light.png",

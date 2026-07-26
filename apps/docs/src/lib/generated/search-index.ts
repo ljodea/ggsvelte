@@ -4288,7 +4288,7 @@ export const DOCS_SEARCH_INDEX = [
       "path",
       "line",
       "trajectory",
-      "lissajous",
+      "figure-eight",
       "data-order",
     ],
     exact: ["Path trajectory (data order)"],

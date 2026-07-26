@@ -1,18 +1,24 @@
 /**
- * Lissajous figure-eight (a=1, b=2) sampled in parametric order.
+ * Closed figure-eight polyline in data order.
  *
- * x = sin(t), y = sin(2t) for t ∈ [0, 2π). x is non-monotonic, so
- * geom_line would re-order the vertices and destroy the loop;
- * geom_path keeps the parametric data order and draws the eight.
+ * Vertices intentionally revisit x (and cross themselves). geom_line would
+ * sort by x and scramble the loops; geom_path keeps row order (#788).
  *
- * Deterministic 64 samples — no RNG.
+ * Integer coordinates only — no Math.sin / transcendental literals (oxlint
+ * approx-constant) and byte-stable playground seeds across hosts.
  */
-export const lissajousEight: { t: number; x: number; y: number }[] = (() => {
-  const n = 64;
-  const rows: { t: number; x: number; y: number }[] = [];
-  for (let i = 0; i < n; i++) {
-    const t = (i / n) * Math.PI * 2;
-    rows.push({ t, x: Math.sin(t), y: Math.sin(2 * t) });
-  }
-  return rows;
-})();
+export const figureEight: { x: number; y: number }[] = [
+  { x: 0, y: 0 },
+  { x: 1, y: 1 },
+  { x: 2, y: 1 },
+  { x: 3, y: 0 },
+  { x: 2, y: -1 },
+  { x: 1, y: -1 },
+  { x: 0, y: 0 },
+  { x: -1, y: 1 },
+  { x: -2, y: 1 },
+  { x: -3, y: 0 },
+  { x: -2, y: -1 },
+  { x: -1, y: -1 },
+  { x: 0, y: 0 },
+];
