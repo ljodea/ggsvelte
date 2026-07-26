@@ -37,7 +37,7 @@ weight, ymin, ymax, xmin, xmax.
 
 ## Geoms / stats / positions
 Geoms: point, line, col, bar, histogram, freqpoly, area, rule, text, smooth, quantile, boxplot, density,
-errorbar, rect, tile, ribbon.
+errorbar, rect, tile, ribbon, blank.
 Defaults: bar→count+stack; histogram→bin+stack; col/area→identity+stack;
 boxplot→boxplot+dodge; else identity.
 Positions are scoped per geom — one used outside its geom is rejected:

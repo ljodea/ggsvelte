@@ -34,6 +34,7 @@ import type {
   SegmentParams,
   CurveParams,
   MapParams,
+  BlankParams,
   SfParams,
   SfTextParams,
   SfLabelParams,
@@ -319,6 +320,13 @@ export interface SfLabelLayerInput extends LayerInputBase {
   params?: SfLabelParams;
 }
 
+export interface BlankLayerInput extends LayerInputBase {
+  geom: "blank";
+  stat?: "identity";
+  position?: "identity";
+  params?: BlankParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -349,7 +357,8 @@ export type LayerInput =
   | MapLayerInput
   | SfLayerInput
   | SfTextLayerInput
-  | SfLabelLayerInput;
+  | SfLabelLayerInput
+  | BlankLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

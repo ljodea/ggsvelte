@@ -45,6 +45,18 @@ export const GALLERY_PREVIEWS = [
     sha256: "657e28882889051d30f128a66483bb0229a624edd6c2eb8d1ab4d49ebc02db58",
   },
   {
+    id: "blank/axes-only",
+    filename: "blank-axes-only-light.png",
+    path: "/previews/blank-axes-only-light.png",
+    sha256: "2939452e748b0d9b660dbfdb98ca2fbb0cb23e87eee08042e976ae8967c516cd",
+  },
+  {
+    id: "blank/domain-expand",
+    filename: "blank-domain-expand-light.png",
+    path: "/previews/blank-domain-expand-light.png",
+    sha256: "44155b76550fca59d37e31acd3ab437d7d68868f505bd362386d62b195385d7d",
+  },
+  {
     id: "boxplot/by-category",
     filename: "boxplot-by-category-light.png",
     path: "/previews/boxplot-by-category-light.png",

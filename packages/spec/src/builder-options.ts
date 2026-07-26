@@ -245,6 +245,12 @@ export interface GeomSfLabelOptions extends SfLabelParams, GeomDataOption {
   render?: RenderBackend;
 }
 
+/** Blank-layer sugar options: scale-training only; no paint params. */
+export interface GeomBlankOptions extends GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
 /** Text-layer sugar options: params plus an optional layer-level aes. */
 export interface GeomTextOptions extends TextParams, GeomDataOption {
   aes?: AesInput;
