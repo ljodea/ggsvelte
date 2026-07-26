@@ -31,6 +31,7 @@ export const KNOWN_GEOMS = [
   "dotplot",
   "map",
   "sf",
+  "spoke",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -69,6 +70,8 @@ export const CHANNELS = [
   "height",
   "z",
   "map_id",
+  "angle",
+  "radius",
 ] as const;
 export type ChannelName = (typeof CHANNELS)[number];
 
@@ -135,4 +138,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   dotplot: { stat: "bindot", position: "identity" },
   map: { stat: "identity", position: "identity" },
   sf: { stat: "identity", position: "identity" },
+  spoke: { stat: "identity", position: "identity" },
 };

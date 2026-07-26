@@ -123,6 +123,7 @@ export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
 export const CurveLayerSchema = SpecModule.Import("CurveLayer");
 export const MapLayerSchema = SpecModule.Import("MapLayer");
 export const SfLayerSchema = SpecModule.Import("SfLayer");
+export const SpokeLayerSchema = SpecModule.Import("SpokeLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
@@ -304,6 +305,8 @@ export type CurveLayer = LayerWithDataRef<SpecType<"CurveLayer">>;
 /** A choropleth/map layer (#808). */
 export type MapLayer = LayerWithDataRef<SpecType<"MapLayer">>;
 export type SfLayer = LayerWithDataRef<SpecType<"SfLayer">>;
+export type SpokeParams = SpecType<"SpokeParams">;
+export type SpokeLayer = LayerWithDataRef<SpecType<"SpokeLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -319,6 +322,7 @@ export type LayerSpec =
   | CurveLayer
   | MapLayer
   | SfLayer
+  | SpokeLayer
   | RuleLayer
   | TextLayer
   | SmoothLayer

@@ -43,6 +43,7 @@ import type {
   GeomContourOptions,
   GeomMapOptions,
   GeomSfOptions,
+  GeomSpokeOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -294,6 +295,11 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'sf', ... }) — portable GeoJSON geometries (#809). */
   geomSf(options: GeomSfOptions = {}): GGBuilder {
     return this.layer(layerFrom("sf", options));
+  }
+
+  /** Sugar for .layer({ geom: 'spoke', ... }) — origin + angle + radius (#810). */
+  geomSpoke(options: GeomSpokeOptions = {}): GGBuilder {
+    return this.layer(layerFrom("spoke", options));
   }
 
   /**

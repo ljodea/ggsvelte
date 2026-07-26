@@ -35,6 +35,7 @@ import type {
   CurveParams,
   MapParams,
   SfParams,
+  SpokeParams,
   Scales,
   QuantileParams,
   ContourParams,
@@ -73,6 +74,8 @@ export interface AesInput {
   height?: ChannelInput;
   z?: ChannelInput;
   map_id?: ChannelInput;
+  angle?: ChannelInput;
+  radius?: ChannelInput;
 }
 
 interface LayerInputBase {
@@ -303,6 +306,13 @@ export interface SfLayerInput extends LayerInputBase {
   params?: SfParams;
 }
 
+export interface SpokeLayerInput extends LayerInputBase {
+  geom: "spoke";
+  stat?: "identity";
+  position?: "identity";
+  params?: SpokeParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -331,7 +341,8 @@ export type LayerInput =
   | SegmentLayerInput
   | CurveLayerInput
   | MapLayerInput
-  | SfLayerInput;
+  | SfLayerInput
+  | SpokeLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

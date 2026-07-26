@@ -29,6 +29,7 @@ import type {
   ContourParams,
   MapParams,
   SfParams,
+  SpokeParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -227,6 +228,12 @@ export interface GeomMapOptions extends MapParams, GeomDataOption {
 
 /** Options for .geomSf() — portable GeoJSON geometries (#809). */
 export interface GeomSfOptions extends SfParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Spoke-layer sugar: origin + angle + radius (#810). */
+export interface GeomSpokeOptions extends SpokeParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

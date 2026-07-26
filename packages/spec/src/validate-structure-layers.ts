@@ -35,6 +35,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   errorbar: ["x"], // ymin/ymax vs y are stat-dependent, checked separately
   rect: ["xmin", "xmax", "ymin", "ymax"],
   segment: ["x", "y", "xend", "yend"],
+  spoke: ["x", "y"], // angle/radius: aes or params — checked below
   curve: ["x", "y", "xend", "yend"],
   tile: ["x", "y"],
   raster: ["x", "y"],
@@ -329,6 +330,28 @@ export function layerStructuralErrors(
           example: { params: { fun: "mean" } },
         },
       });
+    }
+  }
+
+  if (geom === "spoke") {
+    const params = isRecord(layer["params"]) ? layer["params"] : {};
+    for (const channel of ["angle", "radius"] as const) {
+      const fromAes = mapped(channel);
+      const fromParams = params[channel];
+      if (fromAes === undefined && fromParams === undefined) {
+        errors.push({
+          code: "missing-required-channel",
+          path: `${layerPath}/aes/${channel}`,
+          message: `The spoke geom requires "${channel}" via aes.${channel} or params.${channel}.`,
+          fix: {
+            description: `Map aes.${channel} to a field, or set params.${channel} to a constant.`,
+            example:
+              channel === "angle"
+                ? { geom: "spoke", params: { angle: 0, radius: 1 } }
+                : { geom: "spoke", params: { radius: 1, angle: 0 } },
+          },
+        });
+      }
     }
   }
 

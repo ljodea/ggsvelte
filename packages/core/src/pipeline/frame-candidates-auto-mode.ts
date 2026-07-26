@@ -44,6 +44,7 @@ export function candidateAutoMode(
       return "x";
     case "ribbon":
       return binding.ribbonOrientation === "y" ? "y" : "x";
+    case "spoke":
     case "segment":
       // Geometry-based mode in defaultAutoMode (long horizontal → "y", vertical → "x").
       return undefined;

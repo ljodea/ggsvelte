@@ -55,6 +55,7 @@ export type {
   GeomCurveOptions,
   GeomMapOptions,
   GeomSfOptions,
+  GeomSpokeOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
