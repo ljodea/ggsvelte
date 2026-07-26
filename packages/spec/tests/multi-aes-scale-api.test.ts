@@ -66,6 +66,22 @@ describe("multi-aes scale helpers (#833)", () => {
     });
   });
 
+  it("does not share range/domain array identity across channels", () => {
+    const scales = scaleDiscreteManual({
+      aesthetics: ["size", "alpha"],
+      values: [1, 2, 3],
+      domain: ["a", "b", "c"],
+    });
+    const size = scales.size as { range: number[]; domain: string[] };
+    const alpha = scales.alpha as { range: number[]; domain: string[] };
+    expect(size.range).toEqual(alpha.range);
+    expect(size.domain).toEqual(alpha.domain);
+    expect(size.range).not.toBe(alpha.range);
+    expect(size.domain).not.toBe(alpha.domain);
+    size.range[0] = 99;
+    expect(alpha.range[0]).toBe(1);
+  });
+
   it("dedupes colour + color to a single channel", () => {
     expect(scaleContinuousIdentity({ aesthetics: ["color", "colour"] })).toEqual({
       color: { type: "identity" },

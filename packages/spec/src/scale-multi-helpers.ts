@@ -103,17 +103,28 @@ export type MultiManualScaleOptions = {
 };
 
 /**
- * Build a Scales bag by assigning the same JSON config object to each channel.
+ * Build a Scales bag by assigning the same JSON config to each channel.
+ * Deep-clone so nested range/domain arrays are not shared across channels
+ * (shallow `{ ...entry }` would alias them — mutating one channel mutates all).
  * Channel-specific Output types differ (colors vs numbers vs symbols); callers
  * and tier-1 validation own value/channel compatibility.
  */
+function cloneScaleEntry(entry: Record<string, unknown>): Record<string, unknown> {
+  const copy: Record<string, unknown> = { ...entry };
+  const range = copy["range"];
+  if (Array.isArray(range)) copy["range"] = [...range];
+  const domain = copy["domain"];
+  if (Array.isArray(domain)) copy["domain"] = [...domain];
+  return copy;
+}
+
 function assignChannels(
   channels: readonly MultiScaleChannel[],
   entry: Record<string, unknown>,
 ): Scales {
   const scales: Record<string, unknown> = {};
   for (const channel of channels) {
-    scales[channel] = { ...entry };
+    scales[channel] = cloneScaleEntry(entry);
   }
   return scales as Scales;
 }
