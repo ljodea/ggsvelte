@@ -1,0 +1,38 @@
+{
+  "id": "97-step-vh-direction",
+  "kind": "chart",
+  "prompt": "Step chart of a thermostat setpoint over time where the change happens at the start of each interval, not the end.",
+  "dataProfile": {
+    "fields": [
+      { "name": "hour", "type": "quantitative" },
+      { "name": "setpoint", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "hour": 0, "setpoint": 18 },
+      { "hour": 6, "setpoint": 21 },
+      { "hour": 12, "setpoint": 19 },
+      { "hour": 18, "setpoint": 16 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "step",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "hour" },
+          "y": { "field": "setpoint" }
+        },
+        "params": { "direction": "vh" }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "direction \"vh\" moves vertically first, so the new value takes effect at the earlier x (#789)."
+}

@@ -24,6 +24,7 @@ import type {
 import type { PointShape } from "./scales/style.js";
 import type { ThemeTokens } from "./theme.js";
 import { themeVar } from "./theme.js";
+import { stepCorners } from "./path-step.js";
 import { escapeXML, px } from "./render-svg-format.js";
 
 /** When true, use solid paint fallbacks and skip glow filters. */
@@ -109,7 +110,7 @@ function renderPoints(batch: PointsBatch, theme: ThemeTokens): string {
   return parts.join("");
 }
 
-/** Path data for one closed/open ring span ('step' bends at midpoints). */
+/** Path data for one closed/open ring span (step-hv / step-vh / step-mid bends). */
 function pathRingData(
   positions: Float32Array,
   start: number,
@@ -122,11 +123,12 @@ function pathRingData(
   for (let j = start + 1; j < end; j++) {
     const x = positions[j * 2]!;
     const y = positions[j * 2 + 1]!;
-    if (curve === "step") {
+    if (curve === "step" || curve === "step-hv" || curve === "step-vh") {
       const prevX = positions[(j - 1) * 2]!;
       const prevY = positions[(j - 1) * 2 + 1]!;
-      const mid = (prevX + x) / 2;
-      parts.push(`L${px(mid)} ${px(prevY)}`, `L${px(mid)} ${px(y)}`);
+      for (const c of stepCorners(prevX, prevY, x, y, curve)) {
+        parts.push(`L${px(c.x)} ${px(c.y)}`);
+      }
     }
     parts.push(`L${px(x)} ${px(y)}`);
   }
