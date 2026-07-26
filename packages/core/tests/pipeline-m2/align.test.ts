@@ -31,7 +31,7 @@ describe("stat align (#815)", () => {
     expect(batch.pathOffsets.length).toBe(3);
     // Domain y should cover stacked total at x=2: 3+4=7
     if (model.scales.y.type !== "band") {
-      expect(model.scales.y.domain[1] as number).toBeGreaterThanOrEqual(7 - 1e-9);
+      expect(model.scales.y.domain[1]).toBeGreaterThanOrEqual(7 - 1e-9);
     }
   });
 

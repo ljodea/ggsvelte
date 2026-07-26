@@ -11,4 +11,6 @@ Add `stat: "align"` on area and line layers. Union all finite x across groups,
 linearly interpolate each series onto that grid, and set y=0 outside a group's
 range so continuous-x stack/fill aligns.
 
-Area/Line use own stat unions (not shared IdentityOrUniqueStat). Migration: none.
+Area/Line use own stat unions (not shared IdentityOrUniqueStat).
+
+Migration: none — additive
