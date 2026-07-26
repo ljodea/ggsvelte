@@ -3672,14 +3672,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["experimental (468)"],
   },
   {
-    id: "heading:guide-lifecycle:stable-intent-137",
+    id: "heading:guide-lifecycle:stable-intent-138",
     kind: "heading",
-    title: "stable-intent (137)",
+    title: "stable-intent (138)",
     summary:
-      "stable-intent (137) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#stable-intent-137",
+      "stable-intent (138) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#stable-intent-138",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["stable-intent (137)"],
+    exact: ["stable-intent (138)"],
   },
   {
     id: "page:guide-upgrading",
@@ -4799,6 +4799,22 @@ export const DOCS_SEARCH_INDEX = [
       "scales",
     ],
     exact: ["Complete style scales"],
+  },
+  {
+    id: "example:point:void-chrome",
+    kind: "example",
+    title: "Void theme — marks without cartesian chrome",
+    summary: "Void theme — marks without cartesian chrome (Points & scatter)",
+    href: "/examples/point/void-chrome",
+    keywords: [
+      "Void theme — marks without cartesian chrome",
+      "Points & scatter",
+      "point",
+      "theme",
+      "void",
+      "chrome-free",
+    ],
+    exact: ["Void theme — marks without cartesian chrome"],
   },
   {
     id: "example:raster:grid",
@@ -16318,6 +16334,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-svelte",
     keywords: ["@ggsvelte/svelte", ".", "value", "stable-intent"],
     exact: ["ThemeTufte"],
+  },
+  {
+    id: "api:ggsvelte-svelte:ThemeVoid",
+    kind: "api",
+    title: "ThemeVoid",
+    summary: "@ggsvelte/svelte · value · stable-intent.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "stable-intent"],
+    exact: ["ThemeVoid"],
   },
   {
     id: "api:ggsvelte-svelte:Tooltip",

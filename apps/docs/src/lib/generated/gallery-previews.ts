@@ -291,6 +291,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "3f52ea658edff9c430cede998f7fb33f900de36c3e17dfbbc22f0328cab6a0e7",
   },
   {
+    id: "point/void-chrome",
+    filename: "point-void-chrome-light.png",
+    path: "/previews/point-void-chrome-light.png",
+    sha256: "6ea9c8f342288fc5f2069fd6fdd5da6445713d4c3bb6f5bbe29b38ed26d9b9f2",
+  },
+  {
     id: "raster/grid",
     filename: "raster-grid-light.png",
     path: "/previews/raster-grid-light.png",
