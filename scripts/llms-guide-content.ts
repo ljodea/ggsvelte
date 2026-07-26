@@ -622,8 +622,11 @@ Registered theme name; mappings unchanged:
 </GGPlot>
 \`\`\`
 
-Twelve themes, categorical palettes, sequential ramps:
-[Themes and color](/themes). Exhaustion:
+Fourteen registered theme names (twelve distinct looks), categorical palettes,
+and sequential ramps: [Themes and color](/themes). UK \`theme: "grey"\` /
+\`<ThemeGrey />\` and US \`theme: "gray"\` / \`<ThemeGray />\` are first-class
+aliases of the ggplot2 grey-panel look (\`ThemeGgplot2\` / \`theme: "ggplot2"\`),
+matching ggplot2 \`theme_grey\` / \`theme_gray\`. Exhaustion:
 [palette-exhausted](/guide/errors#palette-exhausted).
 
 ## Preserve color meaning

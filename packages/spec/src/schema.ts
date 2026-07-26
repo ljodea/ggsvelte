@@ -40,6 +40,7 @@ export {
   POINT_SHAPE_NAMES,
   SEQUENTIAL_SCHEME_NAMES,
   THEME_NAMES,
+  THEME_NAME_ALIASES,
 } from "./schema-names.js";
 export type { LinetypeName, PointShapeName } from "./schema-names.js";
 

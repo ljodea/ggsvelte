@@ -83,11 +83,23 @@ describe("theme registry", () => {
     expect(resolveTheme("light").gridWidth).toBe(0.25);
   });
 
+  it("resolves theme_grey / theme_gray as aliases of the ggplot2 grey-panel look (#824)", () => {
+    const ggplot2 = resolveTheme("ggplot2");
+    // Prefer shared token maps (not a re-skin): same object identity as ggplot2.
+    expect(resolveTheme("grey")).toBe(ggplot2);
+    expect(resolveTheme("gray")).toBe(ggplot2);
+    expect(BUILTIN_THEMES.grey).toBe(BUILTIN_THEMES.ggplot2);
+    expect(BUILTIN_THEMES.gray).toBe(BUILTIN_THEMES.ggplot2);
+    // Grey-panel signature (not the hrbr/default white panel).
+    expect(ggplot2.panel).toBe("#ebebeb");
+    expect(ggplot2.grid.toLowerCase()).toBe("#ffffff");
+  });
+
   it("keeps axis tick labels readable on light/minimal family themes (#753)", () => {
     // 8.8px was unreadable next to 15px titles and ~12–16px tooltips on the
     // docs homepage hero. Floor is intentionally above 11 so axis chrome is
     // not fine print at 640×400.
-    for (const name of ["light", "minimal", "ggplot2", "classic", "few"] as const) {
+    for (const name of ["light", "minimal", "ggplot2", "classic", "few", "grey", "gray"] as const) {
       expect(resolveTheme(name).axisTextSize, name).toBeGreaterThanOrEqual(12);
     }
     expect(resolveTheme("default").axisTitleSize).toBeGreaterThanOrEqual(11);

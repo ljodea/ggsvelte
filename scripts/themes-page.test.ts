@@ -23,6 +23,8 @@ describe("themes catalog", () => {
       { name: "fivethirtyeight", scheme: "tableau10" },
       { name: "economist", scheme: "flexoki" },
       { name: "tufte", scheme: "colorblind" },
+      { name: "grey", scheme: "observable10" },
+      { name: "gray", scheme: "observable10" },
     ]);
 
     expect(CATEGORICAL_PALETTES).toEqual([
@@ -122,9 +124,14 @@ describe("themes catalog", () => {
     ]);
   });
 
-  it("lists every public theme as a full-width specimen with a real chart kind", () => {
+  it("lists every non-alias theme as a full-width specimen with a real chart kind", () => {
+    // grey/gray are name aliases of ggplot2 (#824) — they stay in THEME_OPTIONS
+    // (picker/lab) but do not duplicate the ggplot2 portrait on /themes.
+    const specimenThemes = THEME_OPTIONS.filter(
+      (theme) => theme.name !== "grey" && theme.name !== "gray",
+    );
     expect(THEME_SPECIMENS.map((specimen) => specimen.name)).toEqual(
-      THEME_OPTIONS.map((theme) => theme.name),
+      specimenThemes.map((theme) => theme.name),
     );
     for (const specimen of THEME_SPECIMENS) {
       expect(specimen.caption.length).toBeGreaterThan(12);
