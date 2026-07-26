@@ -393,11 +393,11 @@ export class MockResponder implements Responder {
         pick.mentionedQuant();
       if (angle !== undefined) aes.angle = f(angle);
       const radius = fieldNamed("r") ?? fieldNamed("radius");
-      if (radius !== undefined) {
+      if (radius === undefined) {
+        spec.layers.push({ geom: "spoke", aes, params: { radius: 1 } });
+      } else {
         aes.radius = f(radius);
         spec.layers.push({ geom: "spoke", aes });
-      } else {
-        spec.layers.push({ geom: "spoke", aes, params: { radius: 1 } });
       }
     } else if (
       (/\bgeom[_\s]?sf[_\s]?label\b|\bsf_label\b|\bsf label\b|\bboxed labels?\b/.test(prompt) ||

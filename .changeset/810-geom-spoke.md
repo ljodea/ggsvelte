@@ -14,4 +14,4 @@ Add ggplot2-style `spoke` geom: endpoints derived as
 rendering. CHANNELS gain `angle` and `radius`; constants via `params.angle` /
 `params.radius` when not mapped. Continuous x/y required.
 
-Migration: none — additive.
+Migration: none — additive
