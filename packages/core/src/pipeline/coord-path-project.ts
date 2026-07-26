@@ -116,6 +116,80 @@ export function projectPathBatch(
     capped = validMandatory > MAX_COORD_VERTICES_PER_PANEL_LAYER;
   }
 
+  /**
+   * Project a half-open source vertex range [runStart, runEnd) into `projected`.
+   * Returns false when the range is empty.
+   */
+  const projectRun = (runStart: number, runEnd: number): boolean => {
+    if (runEnd <= runStart) return false;
+    const authoredCount = runEnd - runStart;
+    const desiredStepCorners = batch.curve === "step" ? Math.max(0, 2 * (authoredCount - 1)) : 0;
+    const stepCornerAllowance = Math.min(
+      panelExtraRemaining,
+      Math.max(0, MAX_COORD_VERTICES_PER_SUBPATH - authoredCount),
+    );
+    const source =
+      batch.curve === "step"
+        ? expandedStepVertices(unprojected, batch.rowIndex, runStart, runEnd, stepCornerAllowance)
+        : {
+            positions: Array.from(unprojected.slice(runStart * 2, runEnd * 2)),
+            rows: Array.from(batch.rowIndex.slice(runStart, runEnd)),
+            anchors: Array.from({ length: authoredCount }, () => 1),
+            indices: indexRange(runStart, runEnd),
+          };
+    const count = source.rows.length;
+    if (count === 0) return false;
+    const emittedStepCorners = Math.max(0, count - authoredCount);
+    if (emittedStepCorners < desiredStepCorners) capped = true;
+    panelExtraRemaining -= emittedStepCorners;
+    const [firstX, firstY] = projectPoint(
+      projector,
+      width,
+      height,
+      source.positions[0]!,
+      source.positions[1]!,
+    );
+    projected.push(firstX, firstY);
+    rows.push(source.rows[0]!);
+    semanticAnchors.push(source.anchors[0]!);
+    semanticIndices.push(source.indices[0]!);
+    let subpathExtraRemaining = Math.max(0, MAX_COORD_VERTICES_PER_SUBPATH - count);
+    if (count > MAX_COORD_VERTICES_PER_SUBPATH) capped = true;
+    for (let i = 1; i < count; i++) {
+      const allowance = Math.min(subpathExtraRemaining, panelExtraRemaining);
+      const segmentBudget = { remaining: 1 + allowance, capped: false };
+      const before = projected.length / 2;
+      tessellateSegment(
+        projector,
+        width,
+        height,
+        source.positions[(i - 1) * 2]!,
+        source.positions[(i - 1) * 2 + 1]!,
+        source.positions[i * 2]!,
+        source.positions[i * 2 + 1]!,
+        source.rows[i]!,
+        source.indices[i]!,
+        projected,
+        rows,
+        semanticAnchors,
+        semanticIndices,
+        segmentBudget,
+      );
+      const added = projected.length / 2 - before;
+      const extraUsed = Math.max(0, added - 1);
+      subpathExtraRemaining -= extraUsed;
+      panelExtraRemaining -= extraUsed;
+      capped ||= segmentBudget.capped;
+      // The recursion marks its endpoint synthetic; the authored/stat vertex
+      // remains a semantic anchor even when midpoint vertices precede it.
+      if (added > 0) semanticAnchors[semanticAnchors.length - 1] = source.anchors[i]!;
+    }
+    return true;
+  };
+
+  const sourceRingStarts = batch.ringStarts;
+  const remappedRingStarts: number[] = [];
+
   for (let s = 0; s + 1 < batch.pathOffsets.length; s++) {
     const start = batch.pathOffsets[s]!;
     const end = batch.pathOffsets[s + 1]!;
@@ -129,77 +203,53 @@ export function projectPathBatch(
     // A partial closed polygon has no valid boundary: SVG and canvas filling
     // implicitly join its finite endpoints with a false chord. Drop that
     // source subpath instead of painting geometry across an invalid gap.
+    // Multi-ring compounds drop as a whole (no partial hole remapping).
     if (batch.closed === true && batch.fills !== undefined && sourceHasInvalidVertex) {
       droppedFilledSubpaths++;
       continue;
     }
+
+    // Hole rings (#809 phase 9): project each ring separately so tessellation
+    // never invents an exterior→hole chord, then remap ringStarts.
+    const holeCompound =
+      batch.closed === true &&
+      batch.fills !== undefined &&
+      sourceRingStarts !== undefined &&
+      sourceRingStarts.length > 0;
+    if (holeCompound) {
+      const cuts: number[] = [start];
+      for (let i = 0; i < sourceRingStarts.length; i++) {
+        const b = sourceRingStarts[i]!;
+        if (b > start && b < end) cuts.push(b);
+      }
+      cuts.push(end);
+      let emittedAny = false;
+      for (let c = 0; c + 1 < cuts.length; c++) {
+        const rs = cuts[c]!;
+        const re = cuts[c + 1]!;
+        if (re <= rs) continue;
+        if (emittedAny) remappedRingStarts.push(projected.length / 2);
+        if (projectRun(rs, re)) emittedAny = true;
+      }
+      if (!emittedAny) continue;
+      offsets.push(projected.length / 2);
+      strokes.push(batch.strokes[s] ?? null);
+      fills?.push(batch.fills?.[s] ?? null);
+      linewidths?.push(batch.linewidths?.[s] ?? batch.linewidth);
+      alphas?.push(batch.alphas?.[s] ?? batch.alpha);
+      linetypeIndexes?.push(batch.linetypeIndexes?.[s] ?? 0);
+      continue;
+    }
+
     let runStart = start;
     while (runStart < end) {
       while (runStart < end && projectable[runStart] === 0) runStart++;
       if (runStart >= end) break;
       let runEnd = runStart + 1;
       while (runEnd < end && projectable[runEnd] === 1) runEnd++;
-
-      const authoredCount = runEnd - runStart;
-      const desiredStepCorners = batch.curve === "step" ? Math.max(0, 2 * (authoredCount - 1)) : 0;
-      const stepCornerAllowance = Math.min(
-        panelExtraRemaining,
-        Math.max(0, MAX_COORD_VERTICES_PER_SUBPATH - authoredCount),
-      );
-      const source =
-        batch.curve === "step"
-          ? expandedStepVertices(unprojected, batch.rowIndex, runStart, runEnd, stepCornerAllowance)
-          : {
-              positions: Array.from(unprojected.slice(runStart * 2, runEnd * 2)),
-              rows: Array.from(batch.rowIndex.slice(runStart, runEnd)),
-              anchors: Array.from({ length: authoredCount }, () => 1),
-              indices: indexRange(runStart, runEnd),
-            };
-      const count = source.rows.length;
-      const emittedStepCorners = Math.max(0, count - authoredCount);
-      if (emittedStepCorners < desiredStepCorners) capped = true;
-      panelExtraRemaining -= emittedStepCorners;
-      const [firstX, firstY] = projectPoint(
-        projector,
-        width,
-        height,
-        source.positions[0]!,
-        source.positions[1]!,
-      );
-      projected.push(firstX, firstY);
-      rows.push(source.rows[0]!);
-      semanticAnchors.push(source.anchors[0]!);
-      semanticIndices.push(source.indices[0]!);
-      let subpathExtraRemaining = Math.max(0, MAX_COORD_VERTICES_PER_SUBPATH - count);
-      if (count > MAX_COORD_VERTICES_PER_SUBPATH) capped = true;
-      for (let i = 1; i < count; i++) {
-        const allowance = Math.min(subpathExtraRemaining, panelExtraRemaining);
-        const segmentBudget = { remaining: 1 + allowance, capped: false };
-        const before = projected.length / 2;
-        tessellateSegment(
-          projector,
-          width,
-          height,
-          source.positions[(i - 1) * 2]!,
-          source.positions[(i - 1) * 2 + 1]!,
-          source.positions[i * 2]!,
-          source.positions[i * 2 + 1]!,
-          source.rows[i]!,
-          source.indices[i]!,
-          projected,
-          rows,
-          semanticAnchors,
-          semanticIndices,
-          segmentBudget,
-        );
-        const added = projected.length / 2 - before;
-        const extraUsed = Math.max(0, added - 1);
-        subpathExtraRemaining -= extraUsed;
-        panelExtraRemaining -= extraUsed;
-        capped ||= segmentBudget.capped;
-        // The recursion marks its endpoint synthetic; the authored/stat vertex
-        // remains a semantic anchor even when midpoint vertices precede it.
-        if (added > 0) semanticAnchors[semanticAnchors.length - 1] = source.anchors[i]!;
+      if (!projectRun(runStart, runEnd)) {
+        runStart = runEnd + 1;
+        continue;
       }
       offsets.push(projected.length / 2);
       strokes.push(batch.strokes[s] ?? null);
@@ -222,11 +272,15 @@ export function projectPathBatch(
   if (linetypeIndexes !== undefined) batch.linetypeIndexes = Uint8Array.from(linetypeIndexes);
   batch.semanticAnchors = Uint8Array.from(semanticAnchors);
   batch.semanticIndex = Uint32Array.from(semanticIndices);
-  // Multi-ring hole topology is not remapped under active coord transforms yet
-  // (#809 phase 4 / coord_sf deferred). Drop even-odd ring metadata so hits
-  // do not use stale vertex indices after tessellation.
-  if (batch.ringStarts !== undefined) delete batch.ringStarts;
-  if (batch.fillRule !== undefined) delete batch.fillRule;
+  // Remap even-odd hole topology (#809 phase 9). Dropped compounds omit their
+  // ringStarts (no stale indices). Closing edges remain untessellated (paint closePath).
+  if (remappedRingStarts.length > 0) {
+    batch.ringStarts = Uint32Array.from(remappedRingStarts);
+    batch.fillRule = "evenodd";
+  } else {
+    if (batch.ringStarts !== undefined) delete batch.ringStarts;
+    if (batch.fillRule !== undefined) delete batch.fillRule;
+  }
   if (invalidVertices > 0) {
     warnings.push({
       code: "coord-invalid-geometry",

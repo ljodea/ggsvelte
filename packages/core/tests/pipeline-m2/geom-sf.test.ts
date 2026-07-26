@@ -422,4 +422,55 @@ describe("geom_sf", () => {
       .spec();
     expect(spec.layers[0]?.stat).toBe("sf");
   });
+
+  it("preserves even-odd holes under active coord_transform (#809 phase 9)", () => {
+    // Exterior [0,10]×[0,10] with hole [3,7]×[3,7]; reverse-x activates the projector.
+    const withHole = geo({
+      type: "Polygon",
+      coordinates: [
+        [
+          [0, 0],
+          [10, 0],
+          [10, 10],
+          [0, 10],
+          [0, 0],
+        ],
+        [
+          [3, 3],
+          [7, 3],
+          [7, 7],
+          [3, 7],
+          [3, 3],
+        ],
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [withHole] }, aes({}))
+        .geomSf()
+        .coordTransform({ x: { reverse: true } })
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PathsBatch;
+    expect(batch.fillRule).toBe("evenodd");
+    expect(batch.ringStarts).toBeDefined();
+    expect(batch.ringStarts!.length).toBeGreaterThan(0);
+    const panel = model.scene.panels[0]!;
+    const toPlot = (dx: number, dy: number) => {
+      const sx = model.scales.x;
+      const sy = model.scales.y;
+      if (sx.type === "band" || sy.type === "band") throw new Error("expected continuous");
+      const nx = sx.normalizeTransformed(dx);
+      const ny = sy.normalizeTransformed(dy);
+      if (nx === undefined || ny === undefined) throw new Error("normalize failed");
+      // Active reverse on x: projector maps fraction → 1 - fraction.
+      const px = panel.x + (1 - nx) * panel.width;
+      const py = panel.y + (1 - ny) * panel.height;
+      return { px, py };
+    };
+    const exterior = toPlot(1, 1);
+    const hole = toPlot(5, 5);
+    expect(model.candidates.hitTest(exterior.px, exterior.py)).not.toBeNull();
+    expect(model.candidates.hitTest(hole.px, hole.py)).toBeNull();
+  });
 });
