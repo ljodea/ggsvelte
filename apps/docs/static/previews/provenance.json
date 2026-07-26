@@ -138,7 +138,7 @@
     },
     "path/trajectory": {
       "filename": "path-trajectory-light.png",
-      "sourceSha256": "523b28942a9b1484c7366cd39e4fad1163e24a44b61f15eda7d0e9e8a18a9fa5",
+      "sourceSha256": "c2605e7179fe3801111604fa0bb93c55ddf30e5ca5e4ff2305d0f341edac29eb",
       "pngSha256": "89fb2a3df512ea68c682320384b8198d1b01ae9648e2eb097d9fb34c56282c54"
     },
     "point/canvas-scatter": {
