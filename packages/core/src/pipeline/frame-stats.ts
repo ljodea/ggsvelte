@@ -7,6 +7,7 @@ import type { ColumnTable } from "../table.js";
 import { buildAlignFrame } from "./frame-stats-align.js";
 import { buildBinFrame, buildCountFrame, buildDensityFrame } from "./frame-stats-binning.js";
 import { buildConnectFrame } from "./frame-stats-connect.js";
+import { buildDensity2dFrame } from "./frame-stats-density-2d.js";
 import { buildBoxplotFrame, buildSmoothFrame, buildSummaryFrame } from "./frame-stats-fit.js";
 import { buildManualFrame } from "./frame-stats-manual.js";
 import { buildContourFrame } from "./frame-stats-contour.js";
@@ -35,6 +36,7 @@ export function buildNonIdentityFrame(
   if (stat === "summary_bin")
     return buildSummaryBinFrame(binding, table, groups, warnings, advisories, binRange);
   if (stat === "density") return buildDensityFrame(binding, table, groups, warnings);
+  if (stat === "density_2d") return buildDensity2dFrame(binding, table, groups, warnings);
   if (stat === "smooth") return buildSmoothFrame(binding, table, groups, warnings, advisories);
   if (stat === "quantile") return buildQuantileFrame(binding, table, groups, warnings);
   if (stat === "contour") return buildContourFrame(binding, table, groups, warnings);

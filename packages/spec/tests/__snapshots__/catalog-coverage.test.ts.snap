@@ -131,6 +131,7 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
       "segment",
       "curve",
       "contour",
+      "density_2d",
     ],
     "code": "missing-geom",
     "fix": {
@@ -139,7 +140,7 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
         "geom": "point",
       },
     },
-    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour".",
+    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d".",
     "path": "/layers/0/geom",
   },
 }
@@ -176,6 +177,7 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
       "segment",
       "curve",
       "contour",
+      "density_2d",
     ],
     "code": "unknown-geom",
     "fix": {
@@ -184,7 +186,7 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
         "geom": "point",
       },
     },
-    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour". Did you mean "point"?",
+    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d". Did you mean "point"?",
     "path": "/layers/0/geom",
   },
 }

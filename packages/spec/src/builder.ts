@@ -37,6 +37,7 @@ export type {
   GeomBoxplotOptions,
   GeomColOptions,
   GeomDensityOptions,
+  GeomDensity2dOptions,
   GeomErrorbarOptions,
   GeomHistogramOptions,
   GeomFreqpolyOptions,

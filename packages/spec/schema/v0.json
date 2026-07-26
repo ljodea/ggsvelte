@@ -1118,6 +1118,71 @@
       "additionalProperties": false,
       "description": "Parameters for the density geom (gaussian kernel density estimate)."
     },
+    "Density2dParams": {
+      "type": "object",
+      "properties": {
+        "h": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          ],
+          "description": "Kernel bandwidth: one positive number for both axes, or [hx, hy]. Omit for MASS bandwidth.nrd per axis (then kde2d h/4 scaling)."
+        },
+        "adjust": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Bandwidth multiplier (must be greater than 0). Default 1."
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 200,
+          "description": "Grid resolution per axis for the KDE surface (integer 10–200). Default 100."
+        },
+        "bins": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of contour levels of the density surface (integer ≥ 1). Default 10. Overridden by breaks."
+        },
+        "binwidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Contour level step in density units. Overridden by breaks."
+        },
+        "breaks": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1,
+          "description": "Explicit density contour levels. Overrides bins and binwidth."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width of density contours in px. Must be greater than 0. Default 1."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Line opacity. Must be between 0 and 1 (inclusive). Default 1."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom_density_2d (bivariate KDE isolines; #802). v1: contour_var density only; filled deferred."
+    },
     "SummaryFun": {
       "anyOf": [
         {
@@ -2281,6 +2346,44 @@
       "additionalProperties": false,
       "description": "A kernel-density layer. Requires a continuous x channel; y is computed by the density stat. Map fill (with alpha) for overlaid group comparisons."
     },
+    "Density2dLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "density_2d",
+          "description": "2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). v1 draws open path contours only (not filled bands)."
+        },
+        "stat": {
+          "type": "string",
+          "const": "density_2d",
+          "description": "density_2d layers estimate a product-Gaussian KDE per group on an n×n grid and extract isolines."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "density_2d layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/Density2dParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A 2D density contour layer. Requires continuous x and y. Contours of estimated density (not a precomputed z grid)."
+    },
     "ErrorbarLayer": {
       "type": "object",
       "required": [
@@ -2744,6 +2847,9 @@
         },
         {
           "$ref": "#/$defs/DensityLayer"
+        },
+        {
+          "$ref": "#/$defs/Density2dLayer"
         },
         {
           "$ref": "#/$defs/ErrorbarLayer"

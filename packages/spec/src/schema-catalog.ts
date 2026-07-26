@@ -26,6 +26,7 @@ export const KNOWN_GEOMS = [
   "segment",
   "curve",
   "contour",
+  "density_2d",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -82,6 +83,7 @@ export const KNOWN_STATS = [
   "summary_bin",
   "contour",
   "align",
+  "density_2d",
 ] as const;
 export type StatName = (typeof KNOWN_STATS)[number];
 
@@ -120,4 +122,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   segment: { stat: "identity", position: "identity" },
   curve: { stat: "identity", position: "identity" },
   contour: { stat: "contour", position: "identity" },
+  density_2d: { stat: "density_2d", position: "identity" },
 };

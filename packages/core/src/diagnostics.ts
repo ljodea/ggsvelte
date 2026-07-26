@@ -411,6 +411,9 @@ export const PIPELINE_WARNING_CATALOG = {
   "contour-group-dropped": {
     summary: "A contour group lacked a usable 2D grid or levels and was dropped.",
   },
+  "density-2d-group-dropped": {
+    summary: "A density_2d group had too few points or produced no contours and was dropped.",
+  },
   "smooth-group-dropped": {
     summary: "A smooth group had too few points for the fit and was dropped.",
   },

@@ -121,6 +121,7 @@ export const QuantileLayerSchema = SpecModule.Import("QuantileLayer");
 export const ContourLayerSchema = SpecModule.Import("ContourLayer");
 export const BoxplotLayerSchema = SpecModule.Import("BoxplotLayer");
 export const DensityLayerSchema = SpecModule.Import("DensityLayer");
+export const Density2dLayerSchema = SpecModule.Import("Density2dLayer");
 export const ErrorbarLayerSchema = SpecModule.Import("ErrorbarLayer");
 export const RectLayerSchema = SpecModule.Import("RectLayer");
 export const TileLayerSchema = SpecModule.Import("TileLayer");
@@ -214,6 +215,8 @@ export type ContourParams = SpecType<"ContourParams">;
 export type BoxplotParams = SpecType<"BoxplotParams">;
 /** Density layer params (bw/adjust/n/cut + styling). */
 export type DensityParams = SpecType<"DensityParams">;
+/** 2D density isoline params (#802). */
+export type Density2dParams = SpecType<"Density2dParams">;
 /** A summary function name (stat summary). */
 export type SummaryFun = SpecType<"SummaryFun">;
 /** Errorbar layer params (styling + summary-stat functions). */
@@ -261,6 +264,8 @@ export type ContourLayer = LayerWithDataRef<SpecType<"ContourLayer">>;
 export type BoxplotLayer = LayerWithDataRef<SpecType<"BoxplotLayer">>;
 /** A density (KDE) layer. */
 export type DensityLayer = LayerWithDataRef<SpecType<"DensityLayer">>;
+/** A 2D density isoline layer (#802). */
+export type Density2dLayer = LayerWithDataRef<SpecType<"Density2dLayer">>;
 /** An errorbar layer. */
 export type ErrorbarLayer = LayerWithDataRef<SpecType<"ErrorbarLayer">>;
 /** A rect layer (arbitrary xmin/xmax/ymin/ymax regions). */
@@ -295,6 +300,7 @@ export type LayerSpec =
   | ContourLayer
   | BoxplotLayer
   | DensityLayer
+  | Density2dLayer
   | ErrorbarLayer
   | RectLayer
   | TileLayer

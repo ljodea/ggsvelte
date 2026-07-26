@@ -50,11 +50,12 @@ export function resolveLayerFields(
         stat === "connect" ||
         stat === "quantile" ||
         stat === "manual" ||
-        stat === "contour"
+        stat === "contour" ||
+        stat === "density_2d"
       ) {
         push("y", "y", "stat");
       }
-      if (stat === "contour") push("level", "level", "stat");
+      if (stat === "contour" || stat === "density_2d") push("level", "level", "stat");
     }
     push("ymin", binding.yminField);
     push("ymax", binding.ymaxField);

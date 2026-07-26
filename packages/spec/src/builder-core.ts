@@ -24,6 +24,7 @@ import type {
   GeomBoxplotOptions,
   GeomColOptions,
   GeomDensityOptions,
+  GeomDensity2dOptions,
   GeomErrorbarOptions,
   GeomRibbonOptions,
   GeomHistogramOptions,
@@ -217,6 +218,11 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'density', ... }) — gaussian KDE area. */
   geomDensity(options: GeomDensityOptions = {}): GGBuilder {
     return this.layer(layerFrom("density", options));
+  }
+
+  /** Sugar for .layer({ geom: 'density_2d', ... }) — bivariate KDE isolines (#802). */
+  geomDensity2d(options: GeomDensity2dOptions = {}): GGBuilder {
+    return this.layer(layerFrom("density_2d", options));
   }
 
   /**
