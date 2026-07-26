@@ -73,7 +73,7 @@
     },
     "contour/basic": {
       "filename": "contour-basic-light.png",
-      "sourceSha256": "70834551d23bd29a9da5d9adf16cf1f50f348b266360c3a9b5fb6d89080c2d1c",
+      "sourceSha256": "c3ad5344a9b480570985135bbfcb63960c90cceda57682b2d33ab4e3da78fac7",
       "pngSha256": "0ede793a6fadca7aeb2e1fc705a6853fff041ecf4685aa538d1dd1c261adc183"
     },
     "curve/connectors": {

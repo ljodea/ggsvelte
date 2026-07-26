@@ -377,6 +377,29 @@ export class MockResponder implements Responder {
       const aes: MockAes = { x: f(x), y: f(y), fill: f(fill) };
       spec.layers.push({ geom: "raster", aes });
       xField = x;
+    } else if (/\bcontour\b|isolines?\b/.test(prompt)) {
+      // geom_contour + stat_contour over a regular x/y/z grid (#801).
+      const x = fieldNamed("x") ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? pick.quant() ?? "y";
+      const z =
+        fieldNamed("z") ??
+        fieldNamed("temp") ??
+        fieldNamed("elev") ??
+        fieldNamed("elevation") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "z";
+      const aes: MockAes = { x: f(x), y: f(y), z: f(z) };
+      const layer: MockLayer = { geom: "contour", aes };
+      const levels = [...prompt.matchAll(/\b(\d+(?:\.\d+)?)\b/g)]
+        .map((m) => Number(m[1]))
+        .filter((n) => Number.isFinite(n));
+      // "levels at 0.5 and 1.5" → params.breaks when two+ numbers appear.
+      if (/\bbreaks?\b|\blevels?\b/.test(prompt) && levels.length >= 2) {
+        layer.params = { breaks: levels.slice(0, 8) };
+      }
+      spec.layers.push(layer);
+      xField = x;
     } else if (/\b(?:geom )?tiles?\b|heatmap/.test(prompt)) {
       const cats = profile.fields.filter(
         (field) => field.type === "nominal" || field.type === "ordinal",
