@@ -464,6 +464,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomViolinOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GlowOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -888,6 +892,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeViolinLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "SCALE_CAPABILITIES": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1187,6 +1195,22 @@
         "ValidateResult": {
           "kind": "type",
           "lifecycle": "stable-intent"
+        },
+        "ViolinLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ViolinLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ViolinLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ViolinParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
         },
         "aes": {
           "kind": "value",
@@ -3598,6 +3622,10 @@
           "lifecycle": "experimental"
         },
         "GeomTile": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomViolin": {
           "kind": "value",
           "lifecycle": "experimental"
         },

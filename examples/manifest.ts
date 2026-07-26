@@ -111,6 +111,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "boxplot/violin",
+    category: "boxplot",
+    name: "violin",
+    title: "Violin plots of Michelson's runs",
+    description: "",
+    tags: ["violin", "density", "distribution", "boxplot"],
+    docsSection: "Boxes & distributions",
+    hasData: false,
+  },
+  {
     id: "col/basic",
     category: "col",
     name: "basic",

@@ -29,6 +29,7 @@ import type {
   RenderBackend,
   RuleParams,
   SegmentParams,
+  ViolinParams,
   Scales,
   SmoothParams,
   StackablePosition,
@@ -222,6 +223,13 @@ export interface SegmentLayerInput extends LayerInputBase {
   params?: SegmentParams;
 }
 
+export interface ViolinLayerInput extends LayerInputBase {
+  geom: "violin";
+  stat?: "ydensity";
+  position?: "dodge" | "identity";
+  params?: ViolinParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -240,7 +248,8 @@ export type LayerInput =
   | RectLayerInput
   | TileLayerInput
   | RasterLayerInput
-  | SegmentLayerInput;
+  | SegmentLayerInput
+  | ViolinLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

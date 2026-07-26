@@ -21,6 +21,7 @@ import type {
   RenderBackend,
   RuleParams,
   SegmentParams,
+  ViolinParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -135,6 +136,13 @@ export interface GeomRuleOptions extends RuleParams, GeomDataOption {
 export interface GeomSegmentOptions extends SegmentParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+}
+
+/** Violin-layer sugar options. */
+export interface GeomViolinOptions extends ViolinParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+  position?: "dodge" | "identity";
 }
 
 /** Text-layer sugar options: params plus an optional layer-level aes. */

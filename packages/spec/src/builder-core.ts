@@ -33,6 +33,7 @@ import type {
   GeomRectOptions,
   GeomRuleOptions,
   GeomSegmentOptions,
+  GeomViolinOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -228,6 +229,11 @@ export class GGBuilderCore {
    */
   geomSegment(options: GeomSegmentOptions = {}): GGBuilder {
     return this.layer(layerFrom("segment", options));
+  }
+
+  /** Sugar for .layer({ geom: 'violin', ... }) — mirrored y-density polygons. */
+  geomViolin(options: GeomViolinOptions = {}): GGBuilder {
+    return this.layer(layerFrom("violin", options));
   }
 
   /**

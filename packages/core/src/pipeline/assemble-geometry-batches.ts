@@ -51,6 +51,7 @@ export function buildGeometryBatches(input: {
         geom === "line" ||
         geom === "area" ||
         geom === "density" ||
+        geom === "violin" ||
         geom === "smooth" ||
         geom === "ribbon";
       const built = buildBatch(

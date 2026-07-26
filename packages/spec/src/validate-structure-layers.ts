@@ -33,6 +33,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   errorbar: ["x"], // ymin/ymax vs y are stat-dependent, checked separately
   rect: ["xmin", "xmax", "ymin", "ymax"],
   segment: ["x", "y", "xend", "yend"],
+  violin: ["x", "y"],
   tile: ["x", "y"],
   raster: ["x", "y"],
   ribbon: [], // orientation-dependent; checked separately

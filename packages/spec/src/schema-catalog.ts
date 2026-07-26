@@ -21,6 +21,7 @@ export const KNOWN_GEOMS = [
   "raster",
   "ribbon",
   "segment",
+  "violin",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -69,6 +70,7 @@ export const KNOWN_STATS = [
   "boxplot",
   "density",
   "summary",
+  "ydensity",
 ] as const;
 export type StatName = (typeof KNOWN_STATS)[number];
 
@@ -101,4 +103,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   raster: { stat: "identity", position: "identity" },
   ribbon: { stat: "identity", position: "identity" },
   segment: { stat: "identity", position: "identity" },
+  violin: { stat: "ydensity", position: "dodge" },
 };

@@ -6,6 +6,7 @@ export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
   count: ["count"],
   bin: ["count", "density", "ncount", "ndensity"],
   density: ["density", "count", "scaled", "ndensity"],
+  ydensity: ["density", "count", "scaled", "violinwidth"],
   smooth: [],
   boxplot: [],
   summary: [],

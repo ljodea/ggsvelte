@@ -22,6 +22,7 @@ import GeomRaster from "../../src/lib/geoms/GeomRaster.svelte";
 import GeomRect from "../../src/lib/geoms/GeomRect.svelte";
 import GeomRule from "../../src/lib/geoms/GeomRule.svelte";
 import GeomSegment from "../../src/lib/geoms/GeomSegment.svelte";
+import GeomViolin from "../../src/lib/geoms/GeomViolin.svelte";
 import GeomSmooth from "../../src/lib/geoms/GeomSmooth.svelte";
 import GeomText from "../../src/lib/geoms/GeomText.svelte";
 import GeomTile from "../../src/lib/geoms/GeomTile.svelte";
@@ -264,6 +265,24 @@ const cases: readonly GeomCase[] = [
     paramKey: "linewidth",
     paramValue: 2,
     markSelector: ".gg-segments line",
+  },
+  {
+    name: "GeomViolin",
+    Component: GeomViolin,
+    geom: "violin",
+    data: [
+      { cat: "a", v: 1 },
+      { cat: "a", v: 2 },
+      { cat: "a", v: 3 },
+      { cat: "b", v: 4 },
+      { cat: "b", v: 5 },
+      { cat: "b", v: 6 },
+    ],
+    aes: { x: "cat", y: "v" },
+    geomProps: { alpha: 0.7, scale: "width", n: 32 },
+    paramKey: "alpha",
+    paramValue: 0.7,
+    markSelector: ".gg-areas path",
   },
 ];
 

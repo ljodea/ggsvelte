@@ -68,6 +68,7 @@ export type {
   HistogramLayerInput,
   RibbonLayerInput,
   SegmentLayerInput,
+  ViolinLayerInput,
   LayerInput,
   LineLayerInput,
   PointLayerInput,

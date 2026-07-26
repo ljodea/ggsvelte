@@ -33,6 +33,7 @@ export function candidateAutoMode(
     case "smooth":
     case "errorbar":
     case "boxplot":
+    case "violin":
       return "x";
     case "ribbon":
       return binding.ribbonOrientation === "y" ? "y" : "x";
