@@ -30,6 +30,7 @@ import type {
   MapLayer,
   SfLayer,
   SfTextLayer,
+  SfLabelLayer,
   PathLayer,
   PointLayer,
   PortableSpec,
@@ -95,6 +96,7 @@ export interface RuntimeDotplotLayer extends WithRuntimeAes<DotplotLayer> {}
 export interface RuntimeMapLayer extends WithRuntimeAes<MapLayer> {}
 export interface RuntimeSfLayer extends WithRuntimeAes<SfLayer> {}
 export interface RuntimeSfTextLayer extends WithRuntimeAes<SfTextLayer> {}
+export interface RuntimeSfLabelLayer extends WithRuntimeAes<SfLabelLayer> {}
 
 export type RuntimeLayerSpec =
   | RuntimePointLayer
@@ -124,7 +126,8 @@ export type RuntimeLayerSpec =
   | RuntimeDotplotLayer
   | RuntimeMapLayer
   | RuntimeSfLayer
-  | RuntimeSfTextLayer;
+  | RuntimeSfTextLayer
+  | RuntimeSfLabelLayer;
 
 /** The in-memory spec superset ({ fn } channel accessors allowed). */
 type RuntimeSpecPortableFields = Omit<PortableSpec, "aes" | "layers">;

@@ -369,6 +369,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "ab18e17562cdb41056215212f2637717b1a2fd84c187fc5566139ffa9d88c3cf",
   },
   {
+    id: "sf/boxed-labels",
+    filename: "sf-boxed-labels-light.png",
+    path: "/previews/sf-boxed-labels-light.png",
+    sha256: "ee33e8fcd2e284c607ec8c4661fb9312ecb90af0cb052abba0a8a5e5ce4baa56",
+  },
+  {
     id: "sf/labels",
     filename: "sf-labels-light.png",
     path: "/previews/sf-labels-light.png",

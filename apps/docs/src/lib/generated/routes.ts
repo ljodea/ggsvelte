@@ -372,6 +372,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "sf-boxed-labels-geom-sf-label",
+        title: "SF boxed labels (geom_sf_label)",
+        level: 3,
+      },
+      {
         id: "ellipse-confidence-rings",
         title: "Ellipse confidence rings",
         level: 2,
@@ -2247,8 +2252,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-638",
-        title: "experimental (638)",
+        id: "experimental-643",
+        title: "experimental (643)",
         level: 3,
       },
       {
@@ -2287,8 +2292,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-473",
-        title: "experimental (473)",
+        id: "experimental-474",
+        title: "experimental (474)",
         level: 3,
       },
       {
@@ -3047,6 +3052,16 @@ export const DOCS_ROUTES = [
     title: "Simple features polygons — ggsvelte gallery",
     description: "Simple features polygons",
     canonicalPath: "/examples/sf/basic",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/sf/boxed-labels",
+    title: "SF boxed labels — ggsvelte gallery",
+    description: "SF boxed labels",
+    canonicalPath: "/examples/sf/boxed-labels",
     kind: "page",
     index: true,
     sitemap: true,

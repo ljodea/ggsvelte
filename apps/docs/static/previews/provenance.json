@@ -301,6 +301,11 @@
       "sourceSha256": "3715642aaae172ff1844d1c25e6df3642e46c0ab21c1d7a8a3da65a0867b8c29",
       "pngSha256": "ab18e17562cdb41056215212f2637717b1a2fd84c187fc5566139ffa9d88c3cf"
     },
+    "sf/boxed-labels": {
+      "filename": "sf-boxed-labels-light.png",
+      "sourceSha256": "09a2ea999da2ebc26386c3283a704a6c35c4c11b13d8b4fb50661e4f7b7adc6b",
+      "pngSha256": "ee33e8fcd2e284c607ec8c4661fb9312ecb90af0cb052abba0a8a5e5ce4baa56"
+    },
     "sf/labels": {
       "filename": "sf-labels-light.png",
       "sourceSha256": "438a7ef29ae53ccbae7e0af30db661095a63f5357d82866bd46b2bc1d0b82379",

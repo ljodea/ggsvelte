@@ -717,6 +717,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "sf/boxed-labels",
+    category: "sf",
+    name: "boxed-labels",
+    title: "SF boxed labels",
+    description: "",
+    tags: ["sf", "sf_label", "label", "box", "geojson", "centroid", "map"],
+    docsSection: "Maps & spatial",
+    hasData: true,
+  },
+  {
     id: "sf/labels",
     category: "sf",
     name: "labels",
