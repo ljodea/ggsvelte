@@ -399,6 +399,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "ee33e8fcd2e284c607ec8c4661fb9312ecb90af0cb052abba0a8a5e5ce4baa56",
   },
   {
+    id: "sf/geometry-collection",
+    filename: "sf-geometry-collection-light.png",
+    path: "/previews/sf-geometry-collection-light.png",
+    sha256: "82adc75dc8d359ca9b2c49af45f26abc3af229090c587bc86109a130df10b701",
+  },
+  {
     id: "sf/holes",
     filename: "sf-holes-light.png",
     path: "/previews/sf-holes-light.png",
