@@ -138,6 +138,8 @@ export { default as ThemeTufte } from "./theme/ThemeTufte.svelte";
 export { default as ThemeGrey } from "./theme/ThemeGrey.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeGray } from "./theme/ThemeGray.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeTest } from "./theme/ThemeTest.svelte";
 
 // Scale children (#659) — stable-intent shells for every SCALE_CAPABILITIES
 // family + <Scale> escape hatch; destination for the deprecated `scales` prop

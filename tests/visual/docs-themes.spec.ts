@@ -43,7 +43,7 @@ test("themes compares all built-in chart themes as full-width interactive portra
 
   const list = page.getByRole("list", { name: "Built-in chart themes" });
   const specimens = list.getByRole("listitem");
-  await expect(specimens).toHaveCount(12);
+  await expect(specimens).toHaveCount(13);
   await expect(specimens.getByRole("heading", { level: 3 })).toHaveText([
     "Default",
     "Light",
@@ -57,6 +57,7 @@ test("themes compares all built-in chart themes as full-width interactive portra
     "FiveThirtyEight",
     "Economist",
     "Tufte",
+    "Test",
   ]);
 
   for (const specimen of await specimens.all()) {

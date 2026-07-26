@@ -5149,9 +5149,13 @@
         {
           "type": "string",
           "const": "gray"
+        },
+        {
+          "type": "string",
+          "const": "test"
         }
       ],
-      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"grey\", \"gray\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"grey\", \"gray\", \"test\"."
     },
     "ThemeSpec": {
       "type": "object",

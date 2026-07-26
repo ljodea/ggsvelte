@@ -135,6 +135,14 @@ export const THEME_SPECIMENS: readonly ThemeSpecimenConfig[] = [
     scheme: BY_NAME.tufte.scheme,
     legendFocus: false,
   },
+  {
+    name: "test",
+    label: BY_NAME.test.label,
+    caption: "Pinned high-contrast chrome for package tests and VR.",
+    kind: "long-run-line",
+    scheme: BY_NAME.test.scheme,
+    legendFocus: false,
+  },
 ];
 
 /** Month breaks shared by climate multi-series charts. */

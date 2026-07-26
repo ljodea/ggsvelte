@@ -45,6 +45,7 @@ const THEME_SHELL: Readonly<Record<string, string>> = {
   tufte: "ThemeTufte",
   grey: "ThemeGrey",
   gray: "ThemeGray",
+  test: "ThemeTest",
 };
 
 const ANY_THEME_SHELL = new RegExp(`<(?:${Object.values(THEME_SHELL).join("|")})\\b`, "g");

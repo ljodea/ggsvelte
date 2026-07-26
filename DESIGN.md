@@ -136,6 +136,7 @@ Built-in themes are structural presets, not color aliases:
 - `classic`: no grid, visible black axes and ticks.
 - `few`, `clean`, `fivethirtyeight`, `economist`, and `tufte`: retain the defining
   structural relationships of their references.
+- `test`: pinned high-contrast chrome for package tests and visual snapshots.
 
 Axes and grids should look drawn, not stamped: hairline widths, short ticks only where
 the theme calls for them, and no default rectangle of thick 1970s-style axes around the

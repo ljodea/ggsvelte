@@ -95,11 +95,60 @@ describe("theme registry", () => {
     expect(ggplot2.grid.toLowerCase()).toBe("#ffffff");
   });
 
+  it("registers theme_test as a pinned high-contrast snapshot theme (#823)", () => {
+    // Stability contract: fixed literals so product-theme sweeps (#753-style)
+    // cannot silently retarget the test chrome. Not an alias of light/classic.
+    expect(THEME_NAMES).toContain("test");
+    expect(THEME_NAMES.at(-1)).toBe("test");
+    const tokens = resolveTheme("test");
+    expect(tokens.paper).toBe("#ffffff");
+    expect(tokens.panel).toBe("#ffffff");
+    expect(tokens.ink).toBe("#000000");
+    expect(tokens.accent).toBe("#000000");
+    expect(tokens.grid).toBe("#cccccc");
+    expect(tokens.axisText).toBe("#000000");
+    expect(tokens.axisLine).toBe("#000000");
+    expect(tokens.tickColor).toBe("#000000");
+    expect(tokens.panelBorder).toBe("#000000");
+    expect(tokens.fontFamily).toBe("Helvetica, Arial, sans-serif");
+    expect(tokens.fontSize).toBe(11);
+    expect(tokens.axisTextSize).toBe(12);
+    expect(tokens.titleSize).toBe(14);
+    expect(tokens.subtitleSize).toBe(12);
+    expect(tokens.axisTitleSize).toBe(11);
+    expect(tokens.captionSize).toBe(9);
+    expect(tokens.stripSize).toBe(11);
+    expect(tokens.axisLineWidth).toBe(0.5);
+    expect(tokens.tickWidth).toBe(0.5);
+    expect(tokens.tickLength).toBe(4);
+    expect(tokens.gridWidth).toBe(0.5);
+    expect(tokens.panelBorderWidth).toBe(0.5);
+    expect(tokens.ticksX).toBe(true);
+    expect(tokens.ticksY).toBe(true);
+    expect(tokens.gridX).toBe(true);
+    expect(tokens.gridY).toBe(true);
+    expect(tokens.axisLineX).toBe(true);
+    expect(tokens.axisLineY).toBe(true);
+    expect(tokens.showPanelBorder).toBe(true);
+    // Not a silent alias of product themes that still evolve.
+    expect(tokens.fontFamily).not.toBe(resolveTheme("default").fontFamily);
+    expect(tokens.grid).not.toBe(resolveTheme("classic").grid);
+  });
+
   it("keeps axis tick labels readable on light/minimal family themes (#753)", () => {
     // 8.8px was unreadable next to 15px titles and ~12–16px tooltips on the
     // docs homepage hero. Floor is intentionally above 11 so axis chrome is
     // not fine print at 640×400.
-    for (const name of ["light", "minimal", "ggplot2", "classic", "few", "grey", "gray"] as const) {
+    for (const name of [
+      "light",
+      "minimal",
+      "ggplot2",
+      "classic",
+      "few",
+      "grey",
+      "gray",
+      "test",
+    ] as const) {
       expect(resolveTheme(name).axisTextSize, name).toBeGreaterThanOrEqual(12);
     }
     expect(resolveTheme("default").axisTitleSize).toBeGreaterThanOrEqual(11);
