@@ -432,6 +432,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomPathOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomPointOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -672,6 +676,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "PathLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PathLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PathLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "PlotSpecSchema": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -845,6 +861,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeLineLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimePathLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3558,6 +3578,10 @@
           "lifecycle": "experimental"
         },
         "GeomLine": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomPath": {
           "kind": "value",
           "lifecycle": "experimental"
         },

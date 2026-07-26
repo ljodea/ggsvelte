@@ -79,6 +79,7 @@ export type {
 } from "./interaction/interaction.js";
 export { default as GeomPoint } from "./geoms/GeomPoint.svelte";
 export { default as GeomLine } from "./geoms/GeomLine.svelte";
+export { default as GeomPath } from "./geoms/GeomPath.svelte";
 export { default as GeomCol } from "./geoms/GeomCol.svelte";
 export { default as GeomBar } from "./geoms/GeomBar.svelte";
 export { default as GeomArea } from "./geoms/GeomArea.svelte";

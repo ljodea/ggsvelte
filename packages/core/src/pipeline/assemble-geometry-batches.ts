@@ -49,6 +49,7 @@ export function buildGeometryBatches(input: {
       const geom = frame.binding.layer.geom;
       const pathLike =
         geom === "line" ||
+        geom === "path" ||
         geom === "area" ||
         geom === "density" ||
         geom === "smooth" ||

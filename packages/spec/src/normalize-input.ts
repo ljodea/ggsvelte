@@ -116,6 +116,13 @@ export interface LineLayerInput extends LayerInputBase {
   params?: LineParams;
 }
 
+export interface PathLayerInput extends LayerInputBase {
+  geom: "path";
+  stat?: "identity";
+  position?: "identity";
+  params?: LineParams;
+}
+
 export interface ColLayerInput extends LayerInputBase {
   geom: "col";
   stat?: "identity";
@@ -226,6 +233,7 @@ export interface SegmentLayerInput extends LayerInputBase {
 export type LayerInput =
   | PointLayerInput
   | LineLayerInput
+  | PathLayerInput
   | ColLayerInput
   | BarLayerInput
   | HistogramLayerInput

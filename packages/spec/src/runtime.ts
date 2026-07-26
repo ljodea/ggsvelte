@@ -26,6 +26,7 @@ import type {
   HistogramLayer,
   LayerSpec,
   LineLayer,
+  PathLayer,
   PointLayer,
   PortableSpec,
   RasterLayer,
@@ -58,6 +59,7 @@ type WithRuntimeAes<Layer extends LayerSpec> = Omit<Layer, "aes"> & {
 
 export interface RuntimePointLayer extends WithRuntimeAes<PointLayer> {}
 export interface RuntimeLineLayer extends WithRuntimeAes<LineLayer> {}
+export interface RuntimePathLayer extends WithRuntimeAes<PathLayer> {}
 export interface RuntimeColLayer extends WithRuntimeAes<ColLayer> {}
 export interface RuntimeBarLayer extends WithRuntimeAes<BarLayer> {}
 export interface RuntimeHistogramLayer extends WithRuntimeAes<HistogramLayer> {}
@@ -77,6 +79,7 @@ export interface RuntimeRasterLayer extends WithRuntimeAes<RasterLayer> {}
 export type RuntimeLayerSpec =
   | RuntimePointLayer
   | RuntimeLineLayer
+  | RuntimePathLayer
   | RuntimeColLayer
   | RuntimeBarLayer
   | RuntimeHistogramLayer

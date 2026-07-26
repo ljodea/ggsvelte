@@ -104,6 +104,7 @@ export const PlotSpecSchema = SpecModule.Import("PlotSpec");
 export const LayerSpecSchema = SpecModule.Import("LayerSpec");
 export const PointLayerSchema = SpecModule.Import("PointLayer");
 export const LineLayerSchema = SpecModule.Import("LineLayer");
+export const PathLayerSchema = SpecModule.Import("PathLayer");
 export const ColLayerSchema = SpecModule.Import("ColLayer");
 export const BarLayerSchema = SpecModule.Import("BarLayer");
 export const HistogramLayerSchema = SpecModule.Import("HistogramLayer");
@@ -221,6 +222,8 @@ type LayerWithDataRef<T> = Omit<T, "data"> & { data?: DataRef };
 export type PointLayer = LayerWithDataRef<SpecType<"PointLayer">>;
 /** A line layer. */
 export type LineLayer = LayerWithDataRef<SpecType<"LineLayer">>;
+/** A path layer (data-order polylines; ggplot2 geom_path). */
+export type PathLayer = LayerWithDataRef<SpecType<"PathLayer">>;
 /** A col layer (pre-computed bars). */
 export type ColLayer = LayerWithDataRef<SpecType<"ColLayer">>;
 /** A bar layer (count or bin stat). */
@@ -255,6 +258,7 @@ export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
 export type LayerSpec =
   | PointLayer
   | LineLayer
+  | PathLayer
   | ColLayer
   | BarLayer
   | HistogramLayer

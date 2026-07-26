@@ -6,6 +6,7 @@
 export const KNOWN_GEOMS = [
   "point",
   "line",
+  "path",
   "col",
   "bar",
   "histogram",
@@ -86,6 +87,7 @@ export type PositionName = (typeof KNOWN_POSITIONS)[number];
 export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: PositionName }> = {
   point: { stat: "identity", position: "identity" },
   line: { stat: "identity", position: "identity" },
+  path: { stat: "identity", position: "identity" },
   col: { stat: "identity", position: "stack" },
   bar: { stat: "count", position: "stack" },
   histogram: { stat: "bin", position: "stack" },

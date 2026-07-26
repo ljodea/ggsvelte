@@ -47,6 +47,12 @@ export interface GeomLineOptions extends LineParams, GeomDataOption {
   render?: RenderBackend;
 }
 
+/** Path-layer sugar options (data-order polylines; same params as line). */
+export interface GeomPathOptions extends LineParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
 /** Col-layer sugar options: params plus aes and a position override. */
 export interface GeomColOptions extends ColParams, GeomDataOption {
   aes?: AesInput;

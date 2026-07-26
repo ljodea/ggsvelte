@@ -40,6 +40,7 @@ export type {
   GeomErrorbarOptions,
   GeomHistogramOptions,
   GeomLineOptions,
+  GeomPathOptions,
   GeomPointOptions,
   GeomRasterOptions,
   GeomRectOptions,
