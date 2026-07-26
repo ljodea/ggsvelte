@@ -3472,14 +3472,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-592",
+    id: "heading:guide-lifecycle:experimental-593",
     kind: "heading",
-    title: "experimental (592)",
+    title: "experimental (593)",
     summary:
-      "experimental (592) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-592",
+      "experimental (593) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-593",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (592)"],
+    exact: ["experimental (593)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -5740,6 +5740,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
     exact: ["GeomPointOptions"],
+  },
+  {
+    id: "api:ggsvelte-spec:GeomQuantileOptions",
+    kind: "api",
+    title: "GeomQuantileOptions",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["GeomQuantileOptions"],
   },
   {
     id: "api:ggsvelte-spec:GeomRasterOptions",
