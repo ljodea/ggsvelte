@@ -2077,8 +2077,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-556",
-        title: "experimental (556)",
+        id: "experimental-588",
+        title: "experimental (588)",
         level: 3,
       },
       {
@@ -2122,8 +2122,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "stable-intent-124",
-        title: "stable-intent (124)",
+        id: "stable-intent-133",
+        title: "stable-intent (133)",
         level: 3,
       },
     ],
@@ -2597,6 +2597,16 @@ export const DOCS_ROUTES = [
     title: "Two-stop gradient colour scale — ggsvelte gallery",
     description: "Two-stop gradient colour scale",
     canonicalPath: "/examples/point/gradient-continuous",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/point/hue-discrete",
+    title: "Hue discrete colour scale — ggsvelte gallery",
+    description: "Hue discrete colour scale",
+    canonicalPath: "/examples/point/hue-discrete",
     kind: "page",
     index: true,
     sitemap: true,
