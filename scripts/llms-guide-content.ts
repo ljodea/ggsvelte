@@ -294,6 +294,34 @@ carried for tooltips.
 
 [Contour isolines](/examples/contour/basic): nested levels of a radial peak.
 
+## 2D density isolines
+
+Bivariate KDE isolines (ggplot2 \`geom_density_2d\` / \`stat_density_2d\`) estimate
+a product Gaussian density over continuous \`x\` and \`y\`, then draw open path
+polylines of constant density. Bandwidth follows MASS \`bandwidth.nrd\` then
+kde2d's h/4 scaling (or \`params.h\` as one number or \`[hx, hy]\`). Grid
+\`params.n\`×\`n\` (default 100) spans a 5%-expanded data range. Levels use the
+same breaks / binwidth / bins rules as contour. v1 is open polylines only —
+no \`density_2d_filled\`, no weights.
+
+\`\`\`svelte fragment
+<GeomPoint alpha={0.5} />
+<GeomDensity2d bins={5} n={40} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(scatter, aes({ x: "x", y: "y" }))
+  .geomPoint({ alpha: 0.5 })
+  .geomDensity2d({ bins: 5, n: 40 })
+  .spec();
+\`\`\`
+
+Groups with fewer than two finite points are dropped with a warning.
+after_stat \`level\` and \`density\` are carried for tooltips.
+
+[2D density isolines](/examples/density/kde-2d): scatter under nested KDE
+contours.
+
 ## Frequency polygon
 
 Frequency polygon (ggplot2 \`geom_freqpoly\`) bins continuous \`x\` and draws a

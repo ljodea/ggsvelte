@@ -203,6 +203,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "density/kde-2d",
+    category: "density",
+    name: "kde-2d",
+    title: "2D density isolines",
+    description: "",
+    tags: ["density", "density_2d", "stat", "kde", "contour", "point", "theme"],
+    docsSection: "Distributions",
+    hasData: true,
+  },
+  {
     id: "density/overlay",
     category: "density",
     name: "overlay",

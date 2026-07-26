@@ -73,7 +73,10 @@ export function buildDensity2dFrame(
     rowIndex: Uint32Array.from({ length: outN }, () => NO_ROW),
     colorValues: col(binding.color.field),
     fillValues: col(binding.fill.field),
-    ...styleColumns(binding, col, { level: result.level, density: result.density }),
+    ...styleColumns(binding, col, {
+      level: result.level,
+      density: result.density,
+    }),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),
   };

@@ -320,6 +320,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "Density2dLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "Density2dParams": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -985,6 +989,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeCurveLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeDensity2dLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },

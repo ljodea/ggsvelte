@@ -15,7 +15,7 @@ import type { CellValue } from "../table.js";
 import { cellSegments, contourLevels, stitchSegments } from "./contour.js";
 import { quantile7, sampleSD } from "./numeric.js";
 
-export interface Density2dParamsInput {
+interface Density2dParamsInput {
   /** Bandwidth: one number for both axes, or [hx, hy]. */
   h?: number | readonly number[] | undefined;
   adjust?: number | undefined;
@@ -107,10 +107,15 @@ function resolveH(
     if (!(h > 0)) throw new Error("density_2d: params.h must be > 0");
     hx = h;
     hy = h;
-  } else if (Array.isArray(h) && h.length >= 2) {
-    hx = h[0]!;
-    hy = h[1]!;
-    if (!(hx > 0) || !(hy > 0)) throw new Error("density_2d: params.h entries must be > 0");
+  } else if (h.length >= 2) {
+    // readonly number[] branch of params.h (not a bare number).
+    const hx0 = h[0]!;
+    const hy0 = h[1]!;
+    if (!(hx0 > 0) || !(hy0 > 0)) {
+      throw new Error("density_2d: params.h entries must be > 0");
+    }
+    hx = hx0;
+    hy = hy0;
   } else {
     throw new Error("density_2d: params.h must be a number or [hx, hy]");
   }

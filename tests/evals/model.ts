@@ -126,8 +126,18 @@ interface MockSpec {
   facet?: Record<string, unknown>;
   coord?: {
     type: string;
-    x?: { transform: string; limits?: number[]; reverse?: boolean; expand?: boolean };
-    y?: { transform: string; limits?: number[]; reverse?: boolean; expand?: boolean };
+    x?: {
+      transform: string;
+      limits?: number[];
+      reverse?: boolean;
+      expand?: boolean;
+    };
+    y?: {
+      transform: string;
+      limits?: number[];
+      reverse?: boolean;
+      expand?: boolean;
+    };
     clip?: boolean;
     ratio?: number;
   };
@@ -363,11 +373,40 @@ export class MockResponder implements Responder {
       const x = pick.quant() ?? "x";
       const y = pick.quant() ?? "y";
       spec.layers.push(
-        { geom: "smooth", aes: { x: f(x), y: f(y) }, params: { method: "lm", se: false } },
-        { geom: "histogram", aes: { x: f(x) }, params: { binwidth: 0.5, boundary: 0 } },
+        {
+          geom: "smooth",
+          aes: { x: f(x), y: f(y) },
+          params: { method: "lm", se: false },
+        },
+        {
+          geom: "histogram",
+          aes: { x: f(x) },
+          params: { binwidth: 0.5, boundary: 0 },
+        },
         { geom: "density", aes: { x: f(x) } },
       );
       scales["x"] = { type: "linear", transform: "log10" };
+      xField = x;
+    } else if (/\bdensity[_ ]?2d\b|\bbivariate kde\b|\bkde isolines?\b/.test(prompt)) {
+      // geom_density_2d / stat_density_2d product Gaussian isolines (#802).
+      const x =
+        fieldNamed("x") ?? fieldNamed("temp") ?? pick.mentionedQuant() ?? pick.quant() ?? "x";
+      const y =
+        fieldNamed("y") ?? fieldNamed("pressure") ?? pick.mentionedQuant() ?? pick.quant() ?? "y";
+      const layer: MockLayer = {
+        geom: "density_2d",
+        stat: "density_2d",
+        aes: { x: f(x), y: f(y) },
+      };
+      const binsMatch = prompt.match(/\b(\d+)\s*bins?\b/);
+      if (binsMatch !== null) {
+        layer.params = { bins: Number(binsMatch[1]) };
+      }
+      // Scatter + isolines when the prompt asks for both.
+      if (/\bscatter\b|\bpoint\b|overlay/.test(prompt)) {
+        spec.layers.push({ geom: "point", aes: { x: f(x), y: f(y) } });
+      }
+      spec.layers.push(layer);
       xField = x;
     } else if (/\bcontour\b|isolines?\b/.test(prompt)) {
       // geom_contour + stat_contour over a regular x/y/z grid (#801).
@@ -483,7 +522,11 @@ export class MockResponder implements Responder {
       const y = pick.quant() ?? "y";
       spec.layers.push(
         repair
-          ? { geom: "line", aes: { x: f(x), y: f(y) }, params: { curve: "step" } }
+          ? {
+              geom: "line",
+              aes: { x: f(x), y: f(y) },
+              params: { curve: "step" },
+            }
           : { geom: "steps", aes: { x: f(x), y: f(y) } },
       );
       if (pick.typeOf(x) === "temporal") scales["x"] = { type: "time" };
@@ -510,7 +553,11 @@ export class MockResponder implements Responder {
       const y = pick.quant() ?? "y";
       const explicitBounds = /\bfrom\b.+\bto\b/.test(prompt);
       if (/jitter|individual/.test(prompt)) {
-        spec.layers.push({ geom: "point", position: "jitter", aes: { x: f(x), y: f(y) } });
+        spec.layers.push({
+          geom: "point",
+          position: "jitter",
+          aes: { x: f(x), y: f(y) },
+        });
       } else if (explicitBounds) {
         spec.layers.push({ geom: "point", aes: { x: f(x), y: f(y) } });
       }
@@ -522,7 +569,11 @@ export class MockResponder implements Responder {
           aes: { x: f(x), y: f(y), ymin: f(ymin), ymax: f(ymax) },
         });
       } else {
-        spec.layers.push({ geom: "errorbar", stat: "summary", aes: { x: f(x), y: f(y) } });
+        spec.layers.push({
+          geom: "errorbar",
+          stat: "summary",
+          aes: { x: f(x), y: f(y) },
+        });
       }
       xField = x;
     } else if (/smooth|trend line|regression|best[- ]fit|loess/.test(prompt)) {
@@ -569,7 +620,10 @@ export class MockResponder implements Responder {
       if (prompt.includes("label")) {
         const label = pick.mentionedCat();
         if (label !== undefined) {
-          spec.layers.push({ geom: "text", aes: { x: f(x), y: f(y), label: f(label) } });
+          spec.layers.push({
+            geom: "text",
+            aes: { x: f(x), y: f(y), label: f(label) },
+          });
         }
       }
       xField = x;
@@ -599,7 +653,11 @@ export class MockResponder implements Responder {
     } else if (/\bjitter/.test(prompt)) {
       const x = pick.cat() ?? "x";
       const y = pick.quant() ?? "y";
-      spec.layers.push({ geom: "point", position: "jitter", aes: { x: f(x), y: f(y) } });
+      spec.layers.push({
+        geom: "point",
+        position: "jitter",
+        aes: { x: f(x), y: f(y) },
+      });
       xField = x;
     } else if (/bar|column/.test(prompt)) {
       const x = pick.cat() ?? "x";
