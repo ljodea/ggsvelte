@@ -177,6 +177,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "3b444fe28067e31a133c512c117405bbd0f238c60a44d07b8d7d00215dabb780",
   },
   {
+    id: "path/connect-hv",
+    filename: "path-connect-hv-light.png",
+    path: "/previews/path-connect-hv-light.png",
+    sha256: "957ba761ba22e2ecfbd69194872b6471f8a52b97887ea152b633b78da9a3f0a0",
+  },
+  {
     id: "path/trajectory",
     filename: "path-trajectory-light.png",
     path: "/previews/path-trajectory-light.png",

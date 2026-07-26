@@ -112,15 +112,16 @@ export interface PointLayerInput extends LayerInputBase {
 
 export interface LineLayerInput extends LayerInputBase {
   geom: "line";
-  /** identity | unique (#813) | bin (freqpoly / #796) | align (#815) */
-  stat?: "identity" | "unique" | "bin" | "align";
+  /** identity | unique (#813) | bin (freqpoly / #796) | align (#815) | connect (#816) */
+  stat?: "identity" | "unique" | "bin" | "align" | "connect";
   position?: "identity";
   params?: LineParams;
 }
 
 export interface PathLayerInput extends LayerInputBase {
   geom: "path";
-  stat?: "identity" | "unique";
+  /** identity | unique (#813) | connect (#816) */
+  stat?: "identity" | "unique" | "connect";
   position?: "identity";
   params?: PathParams;
 }

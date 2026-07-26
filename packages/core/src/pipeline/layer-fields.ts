@@ -35,7 +35,7 @@ export function resolveLayerFields(
         push("y", binding.yStatColumn ?? (stat === "density" ? "density" : "count"), "stat");
       } else if (stat === "boxplot") {
         push("y", "middle", "stat");
-      } else if (stat === "smooth" || stat === "summary") {
+      } else if (stat === "smooth" || stat === "summary" || stat === "connect") {
         push("y", "y", "stat");
       }
     }

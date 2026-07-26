@@ -273,6 +273,27 @@ gg(data, aes({ x: "t", y: "v", fill: "series" }))
 Available on **area** and **line** only (not point or shared identity-only
 geoms). Outside a group's x span y is 0 (stack-friendly).
 
+## Connect (named path joins)
+
+\`stat: "connect"\` (ggplot2 \`stat_connect\`) expands successive finite points
+into intermediate vertices so stepped joins are real path geometry — not only
+a stroke curve flag. \`params.connection\`: \`hv\` (default), \`vh\`, \`mid\`,
+\`linear\`. On **path** expansion is in data order; on **line** points are sorted
+by x first, and geometry skips a second x-sort so tied-x elbows stay intact.
+
+\`\`\`svelte fragment
+<GeomPath stat="connect" connection="hv" />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y" }))
+  .geomPath({ stat: "connect", connection: "hv" })
+  .spec();
+\`\`\`
+
+[Connect hv path](/examples/path/connect-hv): three data points expand to a
+horizontal-then-vertical polyline.
+
 ## Positions
 
 Stack sums, dodge side-by-side groups, fill normalizes each stack to one, jitter

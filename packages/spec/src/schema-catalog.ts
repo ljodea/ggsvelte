@@ -66,6 +66,7 @@ export type ChannelName = (typeof CHANNELS)[number];
 export const KNOWN_STATS = [
   "identity",
   "unique",
+  "connect",
   "count",
   "bin",
   "smooth",

@@ -605,6 +605,28 @@ export const SpecDeclarations = {
             'Interpolation between points: "linear" (straight segments, default) or "step" (horizontal-then-vertical steps, changing at the midpoint between x positions).',
         }),
       ),
+      connection: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("hv", {
+              description: "STAT CONNECT: horizontal then vertical (default).",
+            }),
+            Type.Literal("vh", {
+              description: "STAT CONNECT: vertical then horizontal.",
+            }),
+            Type.Literal("mid", {
+              description: "STAT CONNECT: step at the midpoint between adjacent x values.",
+            }),
+            Type.Literal("linear", {
+              description: "STAT CONNECT: straight segment (identity vertices).",
+            }),
+          ],
+          {
+            description:
+              'STAT CONNECT ONLY (#816): how successive points join — "hv" (default), "vh", "mid", or "linear". Ignored for other stats.',
+          },
+        ),
+      ),
       bins: Type.Optional(
         Type.Integer({
           minimum: 1,
@@ -677,6 +699,28 @@ export const SpecDeclarations = {
           description:
             'Interpolation between points: "linear" (straight segments, default) or "step" (horizontal-then-vertical steps).',
         }),
+      ),
+      connection: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("hv", {
+              description: "STAT CONNECT: horizontal then vertical (default).",
+            }),
+            Type.Literal("vh", {
+              description: "STAT CONNECT: vertical then horizontal.",
+            }),
+            Type.Literal("mid", {
+              description: "STAT CONNECT: step at the midpoint between adjacent x values.",
+            }),
+            Type.Literal("linear", {
+              description: "STAT CONNECT: straight segment (identity vertices).",
+            }),
+          ],
+          {
+            description:
+              'STAT CONNECT ONLY (#816): how successive points join — "hv" (default), "vh", "mid", or "linear". Ignored for other stats.',
+          },
+        ),
       ),
       strokePaint: Type.Optional(
         Type.Ref("GradientPaint", {
@@ -1511,7 +1555,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("line", {
         description:
-          "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts. With stat bin (freqpoly alias), y is computed from counts/density.",
+          "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts. With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
       }),
       stat: Type.Optional(
         Type.Union(
@@ -1531,10 +1575,14 @@ export const SpecDeclarations = {
               description:
                 "Interpolate each group onto the union of finite x values so continuous-x stack/fill aligns (#815). Outside a group's x range y is 0.",
             }),
+            Type.Literal("connect", {
+              description:
+                "Expand successive points into connection vertices (params.connection: hv|vh|mid|linear; #816). Expands in x order; geometry does not re-sort after connect.",
+            }),
           ],
           {
             description:
-              'Line stat: "identity" (default), "unique", "bin" (freqpoly), or "align" (shared x grid).',
+              'Line stat: "identity" (default), "unique", "bin" (freqpoly), "align" (shared x grid), or "connect" (step/path joins).',
           },
         ),
       ),
@@ -1562,9 +1610,29 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("path", {
         description:
-          "Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, and connected scatterplots (ggplot2 geom_path).",
+          "Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, and connected scatterplots (ggplot2 geom_path). With stat connect, successive points expand into named connection vertices (#816).",
       }),
-      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
+      stat: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("identity", {
+              description: "Draw each data row as-is (default).",
+            }),
+            Type.Literal("unique", {
+              description:
+                "Drop duplicate rows on mapped aesthetics before drawing (first wins; #813).",
+            }),
+            Type.Literal("connect", {
+              description:
+                "Expand successive points into connection vertices (params.connection: hv|vh|mid|linear; default hv; #816). ggplot2 stat_connect default geom is path.",
+            }),
+          ],
+          {
+            description:
+              'Path stat: "identity" (default), "unique" (first-wins dedupe), or "connect" (named joins).',
+          },
+        ),
+      ),
       position: Type.Optional(
         Type.Literal("identity", { description: "Path layers use identity positioning." }),
       ),
@@ -1581,7 +1649,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "A path layer. Requires x and y channels; rows stay in data order within each group (no x-sort).",
+        "A path layer. Requires x and y channels; rows stay in data order within each group (no x-sort). Use stat connect for stepped/custom joins without geom curve flags.",
     },
   ),
 

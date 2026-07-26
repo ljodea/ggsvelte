@@ -347,6 +347,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "connect-named-path-joins",
+        title: "Connect (named path joins)",
+        level: 2,
+      },
+      {
         id: "positions",
         title: "Positions",
         level: 2,
@@ -2562,6 +2567,16 @@ export const DOCS_ROUTES = [
     title: "Raw-year time-axis line chart — ggsvelte gallery",
     description: "Raw-year time-axis line chart",
     canonicalPath: "/examples/line/time-axis",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/path/connect-hv",
+    title: "Connect hv path joins — ggsvelte gallery",
+    description: "Connect hv path joins",
+    canonicalPath: "/examples/path/connect-hv",
     kind: "page",
     index: true,
     sitemap: true,

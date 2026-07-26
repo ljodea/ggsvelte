@@ -397,6 +397,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "path/connect-hv",
+    category: "path",
+    name: "connect-hv",
+    title: "Connect hv path joins",
+    description: "",
+    tags: ["path", "connect", "stat", "step", "hv", "trajectory"],
+    docsSection: "Lines & time",
+    hasData: true,
+  },
+  {
     id: "path/trajectory",
     category: "path",
     name: "trajectory",

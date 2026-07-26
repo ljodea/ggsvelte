@@ -44,23 +44,26 @@ export interface GeomPointOptions extends PointParams, GeomDataOption {
   positionParams?: PositionParams;
 }
 
-/** Line-layer sugar options: LineParams (style + optional stat-bin knobs). */
+/** Line-layer sugar options: LineParams (style + optional stat-bin / connect knobs). */
 export interface GeomLineOptions extends LineParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
   /**
    * identity (default) | unique (#813) | bin (freqpoly / #796) |
-   * align (shared continuous-x grid for stack/fill; #815).
+   * align (shared continuous-x grid for stack/fill; #815) |
+   * connect (expand successive points; #816).
    */
-  stat?: "identity" | "unique" | "bin" | "align";
+  stat?: "identity" | "unique" | "bin" | "align" | "connect";
 }
 
-/** Path-layer sugar options (data-order polylines; style-only — no bin knobs). */
+/** Path-layer sugar options (data-order polylines; style + optional connect). */
 export interface GeomPathOptions extends PathParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
-  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
-  stat?: "identity" | "unique";
+  /**
+   * "identity" (default), "unique" (dedupe), or "connect" (named joins; #816).
+   */
+  stat?: "identity" | "unique" | "connect";
 }
 
 /** Col-layer sugar options: params plus aes and a position override. */
