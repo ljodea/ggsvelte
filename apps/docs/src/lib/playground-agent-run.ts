@@ -10,8 +10,6 @@
  * component owns `setAgentDrawing` so lifecycle emits see a consistent phase.
  */
 
-import type { SpecError } from "@ggsvelte/spec";
-
 import type {
   GenerateChartOptions,
   GenerateChartRequest,
@@ -171,7 +169,7 @@ export async function runPlaygroundAgentRun(
           datasetId: input.dataset,
           currentSpec: input.getCurrentSpec(),
           priorSpec: rawEnvelope,
-          priorErrors: validated.errors as SpecError[],
+          priorErrors: validated.errors,
         },
         signal === undefined ? undefined : { signal },
       );
