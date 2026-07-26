@@ -99,6 +99,7 @@ export type {
   SpecInput,
   TextLayerInput,
   TileLayerInput,
+  Bin2dLayerInput,
   VlineLayerInput,
 } from "./normalize-input.js";
 
@@ -214,6 +215,10 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   }
   if (stat === "bindot" && aes?.y === undefined) {
     aes = { ...aes, y: { stat: "stackpos" } };
+  }
+  // bin_2d maps fill to after_stat count (ggplot2 geom_bin2d default aes).
+  if (stat === "bin_2d" && aes?.fill === undefined) {
+    aes = { ...aes, fill: { stat: "count" } };
   }
   const geom = canonicalGeom(layer.geom);
   const positionParams =

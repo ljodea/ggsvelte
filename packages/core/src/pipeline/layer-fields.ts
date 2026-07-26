@@ -60,6 +60,8 @@ export function resolveLayerFields(
                   : "count"),
           "stat",
         );
+      } else if (stat === "bin_2d") {
+        push("y", "y", "stat");
       } else if (stat === "boxplot") {
         push("y", "middle", "stat");
       } else if (
@@ -93,6 +95,8 @@ export function resolveLayerFields(
     push("height", binding.heightField);
     push("color", binding.color.field);
     push("fill", binding.fill.field);
+    if (binding.fill.statColumn != null) push("fill", binding.fill.statColumn, "stat");
+    if (binding.color.statColumn != null) push("color", binding.color.statColumn, "stat");
     for (const channel of ["size", "linewidth", "alpha", "shape", "linetype"] as const) {
       const style = binding[channel];
       push(channel, style.field);

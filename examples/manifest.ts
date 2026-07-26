@@ -121,6 +121,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "bin2d/basic",
+    category: "bin2d",
+    name: "basic",
+    title: "2D bin heatmap",
+    description: "",
+    tags: ["bin2d", "heatmap", "density"],
+    docsSection: "Distributions",
+    hasData: true,
+  },
+  {
     id: "boxplot/by-category",
     category: "boxplot",
     name: "by-category",

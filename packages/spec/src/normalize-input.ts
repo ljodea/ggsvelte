@@ -55,6 +55,7 @@ import type {
   ThemeName,
   ThemeSpec,
   TileParams,
+  Bin2dParams,
 } from "./schema.js";
 
 /** Channel form accepted at the TS/builder level: bare string = { field }. */
@@ -297,6 +298,13 @@ export interface TileLayerInput extends LayerInputBase {
   params?: TileParams;
 }
 
+export interface Bin2dLayerInput extends LayerInputBase {
+  geom: "bin_2d";
+  stat?: "bin_2d";
+  position?: "identity";
+  params?: Bin2dParams;
+}
+
 export interface RasterLayerInput extends LayerInputBase {
   geom: "raster";
   stat?: "identity";
@@ -431,6 +439,7 @@ export type LayerInput =
   | AblineLayerInput
   | RectLayerInput
   | TileLayerInput
+  | Bin2dLayerInput
   | RasterLayerInput
   | SegmentLayerInput
   | CurveLayerInput
