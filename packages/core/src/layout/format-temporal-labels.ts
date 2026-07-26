@@ -276,23 +276,34 @@ export function formatTemporalTickSequence(
     let label: string;
     switch (options.interval.unit) {
       case "year":
-        label = String(part.year);
+        // time-of-day (#831) lives on 1970-01-01Z — never emit a calendar year.
+        label =
+          options.kind === "time" ? `${pad2(part.hour)}:${pad2(part.minute)}` : String(part.year);
         break;
       case "quarter":
-        label = `Q${String(Math.floor((part.month - 1) / 3) + 1)}${first || changedYear ? ` ${String(part.year)}` : ""}`;
+        label =
+          options.kind === "time"
+            ? `${pad2(part.hour)}:${pad2(part.minute)}`
+            : `Q${String(Math.floor((part.month - 1) / 3) + 1)}${first || changedYear ? ` ${String(part.year)}` : ""}`;
         break;
       case "month":
-        label = `${part.monthShort}${first || changedYear ? ` ${String(part.year)}` : ""}`;
+        label =
+          options.kind === "time"
+            ? `${pad2(part.hour)}:${pad2(part.minute)}`
+            : `${part.monthShort}${first || changedYear ? ` ${String(part.year)}` : ""}`;
         break;
       case "week":
       case "day":
-        label = changedMonth
-          ? `${part.monthShort} ${String(part.day)}, ${String(part.year)}`
-          : String(part.day);
+        label =
+          options.kind === "time"
+            ? `${pad2(part.hour)}:${pad2(part.minute)}`
+            : changedMonth
+              ? `${part.monthShort} ${String(part.day)}, ${String(part.year)}`
+              : String(part.day);
         break;
       case "hour":
       case "minute":
-        // time-of-day (#831): never prefix a calendar date — values live on 1970-01-01Z.
+        // time-of-day: never prefix a calendar date — values live on 1970-01-01Z.
         label =
           options.kind === "time"
             ? `${pad2(part.hour)}:${pad2(part.minute)}`
