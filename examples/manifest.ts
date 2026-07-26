@@ -183,6 +183,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "curve/connectors",
+    category: "curve",
+    name: "connectors",
+    title: "Curve connectors",
+    description: "",
+    tags: ["curve", "annotation", "connector", "bezier"],
+    docsSection: "Lines & rules",
+    hasData: true,
+  },
+  {
     id: "density/overlay",
     category: "density",
     name: "overlay",

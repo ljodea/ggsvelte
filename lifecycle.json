@@ -252,6 +252,22 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CurveLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CurveLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CurveLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "CurveParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "DEFAULT_VALIDATE_LIMITS": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -425,6 +441,10 @@
           "lifecycle": "experimental"
         },
         "GeomColOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomCurveOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -929,6 +949,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeColLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeCurveLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3882,6 +3906,10 @@
           "lifecycle": "experimental"
         },
         "GeomCol": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomCurve": {
           "kind": "value",
           "lifecycle": "experimental"
         },

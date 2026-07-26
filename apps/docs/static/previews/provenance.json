@@ -71,6 +71,11 @@
       "sourceSha256": "aa4d07819e808851a677376484bc63da9391d7a9485b30d034e528968e317714",
       "pngSha256": "ad530227b719c0c8b12f928d996f53e213b08121d36b31e82809bac5462807e5"
     },
+    "curve/connectors": {
+      "filename": "curve-connectors-light.png",
+      "sourceSha256": "6c8fac7d0562bcb8a2ff8cd72f0cf92e9fddb8ef91821afdebdf84647bacf2eb",
+      "pngSha256": "5787dfdf4af35aa22721d1d7b0053dc73a73a5914b831d33d10a499d80817f0f"
+    },
     "density/overlay": {
       "filename": "density-overlay-light.png",
       "sourceSha256": "6f9dd6edb1662b969a7ff67916cb419aeb90096aeec8e738e70227aa2878a342",

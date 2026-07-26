@@ -83,7 +83,7 @@ export function assertRequiredChannels(input: {
   }
   if (geom === "rule" && ruleForm === "vertical") requireField(xField, "x", index, geom);
   if (geom === "rule" && ruleForm === "horizontal") requireField(yField, "y", index, geom);
-  if (geom === "segment") {
+  if (geom === "segment" || geom === "curve") {
     requireField(xField, "x", index, geom);
     requireField(yField, "y", index, geom);
     requireField(xendField, "xend", index, geom);

@@ -357,6 +357,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "curve-connectors",
+        title: "Curve connectors",
+        level: 2,
+      },
+      {
         id: "positions",
         title: "Positions",
         level: 2,
@@ -2102,8 +2107,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-593",
-        title: "experimental (593)",
+        id: "experimental-599",
+        title: "experimental (599)",
         level: 3,
       },
       {
@@ -2142,8 +2147,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-461",
-        title: "experimental (461)",
+        id: "experimental-462",
+        title: "experimental (462)",
         level: 3,
       },
       {
@@ -2472,6 +2477,16 @@ export const DOCS_ROUTES = [
     title: "Continuous color (ramp legend) — ggsvelte gallery",
     description: "Continuous color (ramp legend)",
     canonicalPath: "/examples/color/continuous",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/curve/connectors",
+    title: "Curve connectors — ggsvelte gallery",
+    description: "Curve connectors",
+    canonicalPath: "/examples/curve/connectors",
     kind: "page",
     index: true,
     sitemap: true,

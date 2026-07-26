@@ -93,6 +93,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "ad530227b719c0c8b12f928d996f53e213b08121d36b31e82809bac5462807e5",
   },
   {
+    id: "curve/connectors",
+    filename: "curve-connectors-light.png",
+    path: "/previews/curve-connectors-light.png",
+    sha256: "5787dfdf4af35aa22721d1d7b0053dc73a73a5914b831d33d10a499d80817f0f",
+  },
+  {
     id: "density/overlay",
     filename: "density-overlay-light.png",
     path: "/previews/density-overlay-light.png",
