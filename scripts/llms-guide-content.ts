@@ -397,6 +397,25 @@ registered schemes and capacities on
 [palette-exhausted](/guide/errors#palette-exhausted) and
 [palette-exhausted — warning](/guide/errors#palette-exhausted-warning).
 
+ggplot2-shaped discrete helpers (portable named schemes, not bake-only):
+
+\`\`\`svelte fragment
+<ScaleColorHue />
+<!-- or: <ScaleColorGrey />, <ScaleColorOrdinal scheme="tableau10" /> -->
+\`\`\`
+
+\`\`\`ts fragment
+import { scaleColorHue, scaleColorGrey, scaleColorOrdinal } from "@ggsvelte/spec";
+
+scaleColorHue(); // { color: { type: "ordinal", scheme: "hue" } }
+scaleColorGrey(); // scheme "grey" (US gray is a binding-identical alias)
+scaleColorOrdinal({ scheme: "tableau10" }); // alias of scaleColorDiscrete
+// Custom h/c/l (hue) or start/end (grey) bake a fixed 10-stop range instead.
+\`\`\`
+
+[Hue discrete colour](/examples/point/hue-discrete): even-hue groups via
+\`scale_color_hue\`. Registered schemes also include \`"grey"\` / \`"gray"\`.
+
 ## Continuous, binned, manual, and identity color
 
 Quantitative color/fill defaults to a continuous viridis colorbar. The
