@@ -11,6 +11,8 @@ export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
   // density_2d writes isoline x/y; level/density are after_stat, not y columns.
   density_2d: [],
   density_2d_filled: [],
+  // stackpos only — count is not a valid y (would collapse the stack; #803)
+  bindot: ["stackpos"],
   smooth: [],
   boxplot: [],
   summary: [],

@@ -22,7 +22,9 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
   const geom = binding.layer.geom;
   const yConversion = yConversionOf(binding);
 
-  if (isBarLike(geom) || geom === "density") acc.barMeasure = true;
+  // Dotplot stackdir "up"/"down" benefit from a zero baseline so the first
+  // stack row sits on the axis (ggplot2 count-unit stacks).
+  if (isBarLike(geom) || geom === "density" || geom === "dotplot") acc.barMeasure = true;
   if (frame.ymin !== null && frame.ymax !== null) {
     acc.numeric.push(frame.ymin, frame.ymax);
     // Bands need not cover the center line (se: false smooths have

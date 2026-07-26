@@ -19,6 +19,7 @@ export function candidateAutoMode(
     // is opt-in — auto→xy drew a full crosshair and multi-member tooltips on
     // dense scatters without adding much (#754).
     case "point":
+    case "dotplot":
     case "text":
       return "exact";
     case "col":

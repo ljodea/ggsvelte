@@ -72,6 +72,7 @@ export type {
   ContourLayerInput,
   Density2dLayerInput,
   Density2dFilledLayerInput,
+  DotplotLayerInput,
   CurveLayerInput,
   LayerInput,
   LineLayerInput,
@@ -160,6 +161,9 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
     aes?.fill === undefined
   ) {
     aes = { ...aes, fill: { stat: "level" } };
+  }
+  if (stat === "bindot" && aes?.y === undefined) {
+    aes = { ...aes, y: { stat: "stackpos" } };
   }
   // Aliases (one canonical form per concept):
   // histogram → bar + bin; freqpoly → line + bin.

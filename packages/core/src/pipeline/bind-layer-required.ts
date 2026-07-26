@@ -55,7 +55,7 @@ export function assertRequiredChannels(input: {
     requireField(xField, "x", index, geom);
     if (yStatColumn === null) requireField(yField, "y", index, geom);
   }
-  if (geom === "bar" || geom === "density" || geom === "contour")
+  if (geom === "bar" || geom === "density" || geom === "contour" || geom === "dotplot")
     requireField(xField, "x", index, geom);
   if (geom === "contour") {
     requireField(yField, "y", index, geom);

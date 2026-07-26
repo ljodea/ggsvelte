@@ -1169,6 +1169,93 @@ export const SpecDeclarations = {
     },
   ),
 
+  DotplotParams: Type.Object(
+    {
+      bins: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          description:
+            "Number of bins (integer ≥ 1). Default 30 — advisory when neither bins nor binwidth is set. Overridden by binwidth.",
+        }),
+      ),
+      binwidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Histodot bin width in data units (must be greater than 0). Takes precedence over bins. Also drives default point diameter via the x scale.",
+        }),
+      ),
+      boundary: Type.Optional(
+        Type.Number({
+          description: "Align a bin edge to this value (mutually exclusive with center).",
+        }),
+      ),
+      center: Type.Optional(
+        Type.Number({
+          description: "Align a bin center to this value (mutually exclusive with boundary).",
+        }),
+      ),
+      closed: Type.Optional(
+        Type.Union([Type.Literal("right"), Type.Literal("left")], {
+          description:
+            'Which side of each bin is closed: "right" (default, (lo, hi]) or "left" ([lo, hi)).',
+        }),
+      ),
+      stackdir: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("up"),
+            Type.Literal("down"),
+            Type.Literal("center"),
+            Type.Literal("centerwhole"),
+          ],
+          {
+            description:
+              'Stack direction: "up" (default), "down", "center", or "centerwhole" (integer-aligned center).',
+          },
+        ),
+      ),
+      stackratio: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Relative spacing between stacked dots (must be greater than 0). Default 1.",
+        }),
+      ),
+      dotsize: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Multiplier on diameter derived from binwidth × x-scale (must be greater than 0). Default 1. Ignored when params.size is set.",
+        }),
+      ),
+      size: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Point radius in px (must be greater than 0). When set, overrides binwidth-derived sizing.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Point opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      shape: Type.Optional(
+        Type.Union(POINT_SHAPE_NAME_SCHEMAS, {
+          description:
+            'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom_dotplot (histodot binning + stacked dots; #803). method=dotdensity and binaxis=y are not in v1.",
+    },
+  ),
+
   DensityParams: Type.Object(
     {
       bw: Type.Optional(
@@ -2305,6 +2392,38 @@ export const SpecDeclarations = {
     },
   ),
 
+  DotplotLayer: Type.Object(
+    {
+      geom: Type.Literal("dotplot", {
+        description:
+          "Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("bindot", {
+          description:
+            'Histodot bindot: fixed bins, one mark per observation stacked within (group × bin). y defaults to {"stat": "stackpos"}.',
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Dotplot layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("DotplotParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A stacked-dot layer. Requires continuous x; y is stackpos from bindot. Map fill/color for groups. v1: method histodot only.",
+    },
+  ),
+
   DensityLayer: Type.Object(
     {
       geom: Type.Literal("density", {
@@ -2742,6 +2861,7 @@ export const SpecDeclarations = {
       Type.Ref("DensityLayer"),
       Type.Ref("Density2dLayer"),
       Type.Ref("Density2dFilledLayer"),
+      Type.Ref("DotplotLayer"),
       Type.Ref("ErrorbarLayer"),
       Type.Ref("RectLayer"),
       Type.Ref("TileLayer"),

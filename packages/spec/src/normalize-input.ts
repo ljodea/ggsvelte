@@ -14,6 +14,7 @@ import type {
   DataRef,
   DensityParams,
   Density2dParams,
+  DotplotParams,
   ErrorbarParams,
   RibbonParams,
   FacetScales,
@@ -229,6 +230,13 @@ export interface Density2dFilledLayerInput extends LayerInputBase {
   params?: Density2dParams;
 }
 
+export interface DotplotLayerInput extends LayerInputBase {
+  geom: "dotplot";
+  stat?: "bindot";
+  position?: "identity";
+  params?: DotplotParams;
+}
+
 export interface ErrorbarLayerInput extends LayerInputBase {
   geom: "errorbar";
   stat?: "identity" | "unique" | "summary" | "summary_bin";
@@ -298,6 +306,7 @@ export type LayerInput =
   | DensityLayerInput
   | Density2dLayerInput
   | Density2dFilledLayerInput
+  | DotplotLayerInput
   | ErrorbarLayerInput
   | RectLayerInput
   | TileLayerInput

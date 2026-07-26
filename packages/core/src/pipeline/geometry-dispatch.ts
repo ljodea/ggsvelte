@@ -35,6 +35,7 @@ export function dispatchGeometryBatch(
 ): GeometryBatch[] {
   switch (frame.binding.layer.geom) {
     case "point":
+    case "dotplot":
       return single(pointsBatch(frame, fx, color, styles, warnings));
     case "line": {
       // stat_connect emits tied-x step corners; a post-stat x-sort would

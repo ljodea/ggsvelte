@@ -123,6 +123,7 @@ export const BoxplotLayerSchema = SpecModule.Import("BoxplotLayer");
 export const DensityLayerSchema = SpecModule.Import("DensityLayer");
 export const Density2dLayerSchema = SpecModule.Import("Density2dLayer");
 export const Density2dFilledLayerSchema = SpecModule.Import("Density2dFilledLayer");
+export const DotplotLayerSchema = SpecModule.Import("DotplotLayer");
 export const ErrorbarLayerSchema = SpecModule.Import("ErrorbarLayer");
 export const RectLayerSchema = SpecModule.Import("RectLayer");
 export const TileLayerSchema = SpecModule.Import("TileLayer");
@@ -218,6 +219,8 @@ export type BoxplotParams = SpecType<"BoxplotParams">;
 export type DensityParams = SpecType<"DensityParams">;
 /** 2D density isoline params (#802). */
 export type Density2dParams = SpecType<"Density2dParams">;
+/** Dotplot layer params (histodot binning + stack + point style; #803). */
+export type DotplotParams = SpecType<"DotplotParams">;
 /** A summary function name (stat summary). */
 export type SummaryFun = SpecType<"SummaryFun">;
 /** Errorbar layer params (styling + summary-stat functions). */
@@ -269,6 +272,8 @@ export type DensityLayer = LayerWithDataRef<SpecType<"DensityLayer">>;
 export type Density2dLayer = LayerWithDataRef<SpecType<"Density2dLayer">>;
 /** A filled 2D density layer. */
 export type Density2dFilledLayer = LayerWithDataRef<SpecType<"Density2dFilledLayer">>;
+/** A stacked-dot (geom_dotplot) layer. */
+export type DotplotLayer = LayerWithDataRef<SpecType<"DotplotLayer">>;
 /** An errorbar layer. */
 export type ErrorbarLayer = LayerWithDataRef<SpecType<"ErrorbarLayer">>;
 /** A rect layer (arbitrary xmin/xmax/ymin/ymax regions). */
@@ -305,6 +310,7 @@ export type LayerSpec =
   | DensityLayer
   | Density2dLayer
   | Density2dFilledLayer
+  | DotplotLayer
   | ErrorbarLayer
   | RectLayer
   | TileLayer
