@@ -1,5 +1,5 @@
 {
-  "id": "75-map-choropleth-xy",
+  "id": "77-map-choropleth-xy",
   "kind": "chart",
   "prompt": "Show region fills with geom map using x/y map coordinates and mapId id.",
   "dataProfile": {

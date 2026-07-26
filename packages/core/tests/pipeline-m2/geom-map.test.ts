@@ -113,6 +113,28 @@ describe("geom_map", () => {
     expect(model.candidates.candidate(0)?.autoMode).toBe("exact");
   });
 
+  it("attaches closedFrameRows so coord-projected hits map to the correct region (#808)", () => {
+    const model = runPipeline(
+      gg(values, aes({ map_id: "state", fill: "rate" }))
+        .geomMap({ map: { columns: fortified } })
+        // Flip so the projector remaps path vertices; lineage must stay
+        // per-vertex (not ribbon 2×N topology).
+        .coordFlip()
+        .spec(),
+      size,
+    );
+    const batch = pathBatch(model);
+    expect(batch.closedFrameRows).toBeDefined();
+    expect(batch.closedFrameRows!.length).toBe(batch.positions.length / 2);
+    // Region A then B: three vertices each, frame rows index the expanded frame.
+    const aRow = batch.closedFrameRows![0]!;
+    const bRow = batch.closedFrameRows![3]!;
+    expect(aRow).not.toBe(bRow);
+    // Source value rows: A→0, B→1
+    expect(batch.rowIndex[0]).toBe(0);
+    expect(batch.rowIndex[3]).toBe(1);
+  });
+
   it("throws map-data-required when params.map is absent (frame expand)", () => {
     // Schema already requires params.map; this guards buildMapFrame when a
     // PortableSpec reaches the pipeline without that property.
