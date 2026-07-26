@@ -226,7 +226,10 @@ export interface GeomMapOptions extends MapParams, GeomDataOption {
 }
 
 /** Options for .geomSf() — portable GeoJSON geometries (#809). */
-export interface GeomSfOptions extends SfParams, GeomDataOption {}
+export interface GeomSfOptions extends SfParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
 
 /** Text-layer sugar options: params plus an optional layer-level aes. */
 export interface GeomTextOptions extends TextParams, GeomDataOption {

@@ -368,6 +368,7 @@ v1 is histodot only — no Wilkinson \`dotdensity\`, no \`binaxis = "y"\`, no
 weights. Mapping aes.y fails loud (\`computed-y-mapped\`).
 
 [Dotplot histodot](/examples/dotplot/histodot): stacked points in fixed bins.
+
 ## Simple features (\`geom_sf\`)
 
 \`geom_sf\` draws already-projected GeoJSON **Geometry** values stored as JSON
