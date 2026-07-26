@@ -56,7 +56,7 @@ export function assertRequiredChannels(input: {
   if (geom === "bar" || geom === "density") requireField(xField, "x", index, geom);
   if (geom === "errorbar") {
     requireField(xField, "x", index, geom);
-    if (stat === "summary") {
+    if (stat === "summary" || stat === "summary_bin") {
       requireField(yField, "y", index, geom);
     } else {
       requireField(yminField, "ymin", index, geom);

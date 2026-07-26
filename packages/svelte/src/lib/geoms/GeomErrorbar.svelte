@@ -17,9 +17,10 @@
     aes?: AesInput;
     /**
      * Layer stat: "identity" (default, ymin/ymax mapped), "unique" (first-wins
-     * aesthetic dedupe; #813), or "summary" (mean_se per x group).
+     * aesthetic dedupe; #813), "summary" (mean_se per x group), or
+     * "summary_bin" (mean_se per continuous bin; #817).
      */
-    stat?: "identity" | "unique" | "summary";
+    stat?: "identity" | "unique" | "summary" | "summary_bin";
   }
 
   const props: Props = $props();
@@ -30,5 +31,10 @@
     "fun",
     "funMin",
     "funMax",
+    "bins",
+    "binwidth",
+    "boundary",
+    "center",
+    "closed",
   ]);
 </script>

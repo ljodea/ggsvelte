@@ -242,16 +242,19 @@ export function layerStructuralErrors(
     geom === "bar" ||
     geom === "histogram" ||
     geom === "freqpoly" ||
-    (geom === "line" && stat === "bin")
+    (geom === "line" && (stat === "bin" || stat === "summary_bin")) ||
+    (geom === "point" && stat === "summary_bin") ||
+    (geom === "errorbar" && stat === "summary_bin") ||
+    stat === "summary_bin"
   ) {
     const params = isRecord(layer["params"]) ? layer["params"] : {};
-    const binStat = geom === "histogram" || geom === "freqpoly" || stat === "bin";
+    const binStat =
+      geom === "histogram" || geom === "freqpoly" || stat === "bin" || stat === "summary_bin";
     if (binStat && params["center"] !== undefined && params["boundary"] !== undefined) {
       errors.push({
         code: "bin-center-and-boundary",
         path: `${layerPath}/params`,
-        message:
-          "The bin stat accepts params.center OR params.boundary (both align the bin grid), never both.",
+        message: `The ${stat === "summary_bin" ? "summary_bin" : "bin"} stat accepts params.center OR params.boundary (both align the bin grid), never both.`,
         fix: {
           description: "Keep one alignment parameter and remove the other.",
           example: { params: { binwidth: 1, boundary: 0 } },
@@ -261,7 +264,8 @@ export function layerStructuralErrors(
   }
 
   if (geom === "errorbar") {
-    const needed: ChannelName[] = stat === "summary" ? ["y"] : ["ymin", "ymax"];
+    const needed: ChannelName[] =
+      stat === "summary" || stat === "summary_bin" ? ["y"] : ["ymin", "ymax"];
     for (const channel of needed) {
       if (mapped(channel) === undefined) {
         errors.push({

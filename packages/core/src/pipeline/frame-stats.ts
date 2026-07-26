@@ -9,6 +9,7 @@ import { buildBinFrame, buildCountFrame, buildDensityFrame } from "./frame-stats
 import { buildConnectFrame } from "./frame-stats-connect.js";
 import { buildBoxplotFrame, buildSmoothFrame, buildSummaryFrame } from "./frame-stats-fit.js";
 import { buildQuantileFrame } from "./frame-stats-quantile.js";
+import { buildSummaryBinFrame } from "./frame-stats-summary-bin.js";
 import { buildUniqueFrame } from "./frame-stats-unique.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 
@@ -28,6 +29,8 @@ export function buildNonIdentityFrame(
   if (stat === "connect") return buildConnectFrame(binding, table, groups, warnings);
   if (stat === "count") return buildCountFrame(binding, table, groups, warnings);
   if (stat === "bin") return buildBinFrame(binding, table, groups, warnings, advisories, binRange);
+  if (stat === "summary_bin")
+    return buildSummaryBinFrame(binding, table, groups, warnings, advisories, binRange);
   if (stat === "density") return buildDensityFrame(binding, table, groups, warnings);
   if (stat === "smooth") return buildSmoothFrame(binding, table, groups, warnings, advisories);
   if (stat === "quantile") return buildQuantileFrame(binding, table, groups, warnings);

@@ -36,20 +36,22 @@ export function validateComputedYAndBinContracts(input: {
       "The density geom computes y with the density stat, so aes.y must not map data. Map only x.",
     );
   }
-  if (stat === "bin") {
+  if (stat === "bin" || stat === "summary_bin") {
     const p = params as BarParams;
     if (p.center !== undefined && p.boundary !== undefined) {
       throw new PipelineError(
         "bin-center-and-boundary",
         `/layers/${index}/params`,
-        "The bin stat accepts params.center OR params.boundary (both align the bin grid), never both.",
+        `The ${stat} stat accepts params.center OR params.boundary (both align the bin grid), never both.`,
       );
     }
     if (xField !== null && positionFieldType(table, xField, xConversion) === "nominal") {
       throw new PipelineError(
         "channel-type-mismatch",
         `/layers/${index}/aes/x`,
-        `The bin stat needs a continuous x, but field "${xField}" is nominal. Use geom "bar" (the count stat) to count categories instead.`,
+        stat === "summary_bin"
+          ? `The summary_bin stat needs a continuous x, but field "${xField}" is nominal.`
+          : `The bin stat needs a continuous x, but field "${xField}" is nominal. Use geom "bar" (the count stat) to count categories instead.`,
       );
     }
   }

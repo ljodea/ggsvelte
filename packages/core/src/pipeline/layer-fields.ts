@@ -38,6 +38,7 @@ export function resolveLayerFields(
       } else if (
         stat === "smooth" ||
         stat === "summary" ||
+        stat === "summary_bin" ||
         stat === "connect" ||
         stat === "quantile"
       ) {

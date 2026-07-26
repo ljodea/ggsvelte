@@ -76,6 +76,7 @@ export const KNOWN_STATS = [
   "boxplot",
   "density",
   "summary",
+  "summary_bin",
   "align",
 ] as const;
 export type StatName = (typeof KNOWN_STATS)[number];

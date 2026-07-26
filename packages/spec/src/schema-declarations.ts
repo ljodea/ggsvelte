@@ -577,10 +577,59 @@ export const SpecDeclarations = {
             'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
         }),
       ),
+      bins: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          description:
+            "STAT SUMMARY_BIN ONLY (#817): number of bins (integer ≥ 1). Default 30 — advisory. Overridden by binwidth.",
+        }),
+      ),
+      binwidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "STAT SUMMARY_BIN ONLY: bin width in data units (must be greater than 0). Takes precedence over bins.",
+        }),
+      ),
+      boundary: Type.Optional(
+        Type.Number({
+          description:
+            "STAT SUMMARY_BIN ONLY: align a bin EDGE with this x value. Mutually exclusive with center.",
+        }),
+      ),
+      center: Type.Optional(
+        Type.Number({
+          description:
+            "STAT SUMMARY_BIN ONLY: align a bin CENTER with this x value. Mutually exclusive with boundary.",
+        }),
+      ),
+      closed: Type.Optional(
+        Type.Union([Type.Literal("right"), Type.Literal("left")], {
+          description:
+            'STAT SUMMARY_BIN ONLY: which edge of each bin is inclusive: "right" (default) or "left".',
+        }),
+      ),
+      fun: Type.Optional(
+        Type.Union([Type.Literal("mean"), Type.Literal("median"), Type.Literal("sum")], {
+          description:
+            'STAT SUMMARY_BIN ONLY: center summary of y per bin — "mean" (default), "median", or "sum".',
+        }),
+      ),
+      funMin: Type.Optional(
+        Type.Ref("SummaryFun", {
+          description: "STAT SUMMARY_BIN ONLY: lower bound summary (ymin).",
+        }),
+      ),
+      funMax: Type.Optional(
+        Type.Ref("SummaryFun", {
+          description: "STAT SUMMARY_BIN ONLY: upper bound summary (ymax).",
+        }),
+      ),
     },
     {
       additionalProperties: false,
-      description: "Styling parameters for the point geom.",
+      description:
+        "Styling parameters for the point geom, plus optional summary_bin controls when stat is summary_bin (#817).",
     },
   ),
 
@@ -631,32 +680,48 @@ export const SpecDeclarations = {
         Type.Integer({
           minimum: 1,
           description:
-            "STAT BIN ONLY (freqpoly / line+bin): number of bins (integer ≥ 1). Default 30 — an advisory reminds you to pick a real value. Overridden by binwidth.",
+            "STAT BIN / SUMMARY_BIN: number of bins (integer ≥ 1). Default 30 — an advisory reminds you to pick a real value. Overridden by binwidth.",
         }),
       ),
       binwidth: Type.Optional(
         Type.Number({
           exclusiveMinimum: 0,
           description:
-            "STAT BIN ONLY (freqpoly / line+bin): bin width in data units (must be greater than 0). Takes precedence over bins.",
+            "STAT BIN / SUMMARY_BIN: bin width in data units (must be greater than 0). Takes precedence over bins.",
         }),
       ),
       boundary: Type.Optional(
         Type.Number({
           description:
-            "STAT BIN ONLY: align a bin EDGE with this x value. Mutually exclusive with center.",
+            "STAT BIN / SUMMARY_BIN: align a bin EDGE with this x value. Mutually exclusive with center.",
         }),
       ),
       center: Type.Optional(
         Type.Number({
           description:
-            "STAT BIN ONLY: align a bin CENTER with this x value. Mutually exclusive with boundary.",
+            "STAT BIN / SUMMARY_BIN: align a bin CENTER with this x value. Mutually exclusive with boundary.",
         }),
       ),
       closed: Type.Optional(
         Type.Union([Type.Literal("right"), Type.Literal("left")], {
           description:
-            'STAT BIN ONLY: which edge of each bin is inclusive: "right" (default) or "left".',
+            'STAT BIN / SUMMARY_BIN: which edge of each bin is inclusive: "right" (default) or "left".',
+        }),
+      ),
+      fun: Type.Optional(
+        Type.Union([Type.Literal("mean"), Type.Literal("median"), Type.Literal("sum")], {
+          description:
+            'STAT SUMMARY_BIN ONLY (#817): center summary of y per bin — "mean" (default), "median", or "sum".',
+        }),
+      ),
+      funMin: Type.Optional(
+        Type.Ref("SummaryFun", {
+          description: "STAT SUMMARY_BIN ONLY: lower bound summary (ymin).",
+        }),
+      ),
+      funMax: Type.Optional(
+        Type.Ref("SummaryFun", {
+          description: "STAT SUMMARY_BIN ONLY: upper bound summary (ymax).",
         }),
       ),
       strokePaint: Type.Optional(
@@ -674,7 +739,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Styling parameters for the line geom, plus optional stat-bin controls when stat is bin (freqpoly alias).",
+        "Styling parameters for the line geom, plus optional stat-bin (freqpoly) or summary_bin (#817) controls.",
     },
   ),
 
@@ -1121,14 +1186,46 @@ export const SpecDeclarations = {
       funMax: Type.Optional(
         Type.Ref("SummaryFun", {
           description:
-            "STAT SUMMARY ONLY: summary function for the upper bound (ymax). Overrides the mean_se default.",
+            "STAT SUMMARY / SUMMARY_BIN: summary function for the upper bound (ymax). Overrides the mean_se default.",
+        }),
+      ),
+      bins: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          description:
+            "STAT SUMMARY_BIN ONLY (#817): number of bins (integer ≥ 1). Default 30 — advisory. Overridden by binwidth.",
+        }),
+      ),
+      binwidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "STAT SUMMARY_BIN ONLY: bin width in data units (must be greater than 0). Takes precedence over bins.",
+        }),
+      ),
+      boundary: Type.Optional(
+        Type.Number({
+          description:
+            "STAT SUMMARY_BIN ONLY: align a bin EDGE with this x value. Mutually exclusive with center.",
+        }),
+      ),
+      center: Type.Optional(
+        Type.Number({
+          description:
+            "STAT SUMMARY_BIN ONLY: align a bin CENTER with this x value. Mutually exclusive with boundary.",
+        }),
+      ),
+      closed: Type.Optional(
+        Type.Union([Type.Literal("right"), Type.Literal("left")], {
+          description:
+            'STAT SUMMARY_BIN ONLY: which edge of each bin is inclusive: "right" (default) or "left".',
         }),
       ),
     },
     {
       additionalProperties: false,
       description:
-        'Parameters for the errorbar geom: styling plus the summary-stat functions (fun, funMin, funMax) used when stat is "summary".',
+        "Parameters for the errorbar geom: styling plus summary / summary_bin functions and summary_bin binning controls (#817).",
     },
   ),
 
@@ -1638,9 +1735,29 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("point", {
         description:
-          "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views.",
+          "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With stat summary_bin, one point per non-empty (group × bin) summary of y (#817).",
       }),
-      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
+      stat: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("identity", {
+              description: "Draw each data row as-is (default).",
+            }),
+            Type.Literal("unique", {
+              description:
+                "Drop duplicate rows on mapped aesthetics before drawing; first wins (#813).",
+            }),
+            Type.Literal("summary_bin", {
+              description:
+                "Bin continuous x and summarize y per (group × bin); default mean ± se (#817).",
+            }),
+          ],
+          {
+            description:
+              'Point stat: "identity" (default), "unique", or "summary_bin" (binned y summary).',
+          },
+        ),
+      ),
       position: Type.Optional(
         Type.Union([Type.Literal("identity"), Type.Literal("jitter"), Type.Literal("nudge")], {
           description:
@@ -1693,10 +1810,14 @@ export const SpecDeclarations = {
               description:
                 "Expand successive points into connection vertices (params.connection: hv|vh|mid|linear; #816). Expands in x order; geometry does not re-sort after connect.",
             }),
+            Type.Literal("summary_bin", {
+              description:
+                "Bin continuous x and summarize y per (group × bin); default mean ± se; connect centers in x order (#817).",
+            }),
           ],
           {
             description:
-              'Line stat: "identity" (default), "unique", "bin" (freqpoly), "align" (shared x grid), or "connect" (step/path joins).',
+              'Line stat: "identity" (default), "unique", "bin" (freqpoly), "align" (shared x grid), "connect" (step/path joins), or "summary_bin" (binned y summary).',
           },
         ),
       ),
@@ -2033,10 +2154,14 @@ export const SpecDeclarations = {
               description:
                 "Compute y/ymin/ymax per x group from aes.y; default mean ± standard error (ggplot2 mean_se).",
             }),
+            Type.Literal("summary_bin", {
+              description:
+                "Bin continuous x and summarize y per (group × bin); default mean ± se (#817).",
+            }),
           ],
           {
             description:
-              'The errorbar\'s stat: "identity" (default), "unique" (dedupe aesthetics), or "summary" (mean_se per x group).',
+              'The errorbar\'s stat: "identity" (default), "unique", "summary" (per x group), or "summary_bin" (per bin; #817).',
           },
         ),
       ),
@@ -2056,7 +2181,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "An errorbar layer. Identity stat: requires x, ymin, and ymax channels. Summary stat: requires x and y channels (bounds computed by params.fun/funMin/funMax, default mean_se).",
+        "An errorbar layer. Identity: requires x, ymin, ymax. Summary / summary_bin: requires x and y (bounds from params.fun/funMin/funMax, default mean_se).",
     },
   ),
 
