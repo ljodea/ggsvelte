@@ -190,7 +190,19 @@ function gridCellSegments(
       const z10 = grid[j]![i + 1];
       const z01 = grid[j + 1]![i];
       const z11 = grid[j + 1]![i + 1];
-      if (z00 === null || z10 === null || z01 === null || z11 === null) continue;
+      // Inner index can be undefined when a row is short; skip incomplete cells.
+      if (
+        z00 === null ||
+        z00 === undefined ||
+        z10 === null ||
+        z10 === undefined ||
+        z01 === null ||
+        z01 === undefined ||
+        z11 === null ||
+        z11 === undefined
+      ) {
+        continue;
+      }
       segs.push(...cellSegments(xs[i]!, xs[i + 1]!, ys[j]!, ys[j + 1]!, z00, z10, z01, z11, level));
     }
   }
