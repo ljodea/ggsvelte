@@ -12,8 +12,16 @@
     data?: DataInput | readonly Record<string, unknown>[];
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
     aes?: AesInput;
+    /** "identity" (default) or "ecdf" (empirical CDF of x; do not map y). */
+    stat?: "identity" | "ecdf";
   }
 
   const props: Props = $props();
-  createGeomLayer("line", () => props, ["alpha", "linewidth", "curve"]);
+  createGeomLayer("line", () => props, [
+    "alpha",
+    "linewidth",
+    "curve",
+    "pad",
+    "n",
+  ]);
 </script>

@@ -600,9 +600,30 @@ export const SpecDeclarations = {
         }),
       ),
       curve: Type.Optional(
-        Type.Union([Type.Literal("linear"), Type.Literal("step")], {
+        Type.Union(
+          [
+            Type.Literal("linear"),
+            Type.Literal("step"),
+            Type.Literal("step-hv"),
+            Type.Literal("step-vh"),
+          ],
+          {
+            description:
+              'Interpolation: "linear" (default), "step" (mid-x corners), "step-hv" (horizontal then vertical — correct for ECDF), or "step-vh".',
+          },
+        ),
+      ),
+      pad: Type.Optional(
+        Type.Boolean({
           description:
-            'Interpolation between points: "linear" (straight segments, default) or "step" (horizontal-then-vertical steps, changing at the midpoint between x positions).',
+            "With stat ecdf: when true (default), prepend (xmin, 0) so step stairs start at zero. Finite-clamped (ggplot2 uses ±Inf).",
+        }),
+      ),
+      n: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          description:
+            "With stat ecdf: evaluate on n equally spaced x in [min, max] per group; omit for one point per unique x.",
         }),
       ),
       strokePaint: Type.Optional(
@@ -619,7 +640,7 @@ export const SpecDeclarations = {
     },
     {
       additionalProperties: false,
-      description: "Styling parameters for the line geom.",
+      description: "Styling parameters for the line geom (plus ecdf pad/n when stat is ecdf).",
     },
   ),
 
@@ -1423,10 +1444,13 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("line", {
         description:
-          "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts.",
+          "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv).",
       }),
       stat: Type.Optional(
-        Type.Literal("identity", { description: "Line layers draw the data as-is." }),
+        Type.Union([Type.Literal("identity"), Type.Literal("ecdf")], {
+          description:
+            'Line stat: "identity" (default — draw mapped x/y) or "ecdf" (empirical CDF of x; y defaults to {stat:"ecdf"}; do not map field y). Prefer params.curve "step-hv" for ECDF stairs.',
+        }),
       ),
       position: Type.Optional(
         Type.Literal("identity", { description: "Line layers use identity positioning." }),
@@ -1444,7 +1468,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "A line layer. Requires x and y channels; rows are sorted by x within each group before connecting.",
+        "A line layer. Identity: requires x and y. Ecdf: requires x only (y is computed). Rows sorted by x within each group before connecting.",
     },
   ),
 

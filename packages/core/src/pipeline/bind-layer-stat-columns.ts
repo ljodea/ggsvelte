@@ -9,4 +9,5 @@ export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
   smooth: [],
   boxplot: [],
   summary: [],
+  ecdf: ["ecdf"],
 };

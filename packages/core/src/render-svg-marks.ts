@@ -23,6 +23,7 @@ import type {
 } from "./scene.js";
 import type { PointShape } from "./scales/style.js";
 import type { ThemeTokens } from "./theme.js";
+import { isStepCurve, stepCorners } from "./path-step.js";
 import { themeVar } from "./theme.js";
 import { escapeXML, px } from "./render-svg-format.js";
 
@@ -109,7 +110,7 @@ function renderPoints(batch: PointsBatch, theme: ThemeTokens): string {
   return parts.join("");
 }
 
-/** Path data for one subpath ('step' bends at the midpoint between x values). */
+/** Path data for one subpath (linear, mid-step, step-hv, step-vh). */
 export function pathData(
   positions: Float32Array,
   start: number,
@@ -122,11 +123,12 @@ export function pathData(
   for (let j = start + 1; j < end; j++) {
     const x = positions[j * 2]!;
     const y = positions[j * 2 + 1]!;
-    if (curve === "step") {
+    if (isStepCurve(curve)) {
       const prevX = positions[(j - 1) * 2]!;
       const prevY = positions[(j - 1) * 2 + 1]!;
-      const mid = (prevX + x) / 2;
-      parts.push(`L${px(mid)} ${px(prevY)}`, `L${px(mid)} ${px(y)}`);
+      for (const c of stepCorners(prevX, prevY, x, y, curve)) {
+        parts.push(`L${px(c.x)} ${px(c.y)}`);
+      }
     }
     parts.push(`L${px(x)} ${px(y)}`);
   }

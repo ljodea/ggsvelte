@@ -45,6 +45,8 @@ export interface GeomPointOptions extends PointParams, GeomDataOption {
 export interface GeomLineOptions extends LineParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  /** "identity" (default) or "ecdf" (empirical CDF of x; do not map y). */
+  stat?: "identity" | "ecdf";
 }
 
 /** Col-layer sugar options: params plus aes and a position override. */

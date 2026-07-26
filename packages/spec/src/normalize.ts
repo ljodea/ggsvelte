@@ -147,6 +147,9 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   if (stat === "density" && aes?.y === undefined) {
     aes = { ...aes, y: { stat: "density" } };
   }
+  if (stat === "ecdf" && aes?.y === undefined) {
+    aes = { ...aes, y: { stat: "ecdf" } };
+  }
   // The histogram geom is an ALIAS (one canonical form per concept): its
   // post-normalize representation is a bar layer with the bin stat.
   const geom = layer.geom === "histogram" ? "bar" : layer.geom;

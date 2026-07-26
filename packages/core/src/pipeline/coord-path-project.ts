@@ -1,5 +1,6 @@
 import type { PanelCoordProjector } from "../coord-projector.js";
 import type { PathsBatch } from "../scene.js";
+import { isStepCurve, stepCorners, stepCornersPerSegment } from "../path-step.js";
 
 import type { PipelineWarning } from "./types.js";
 import {
@@ -22,6 +23,7 @@ function expandedStepVertices(
   start: number,
   end: number,
   maxSyntheticVertices: number,
+  curve: "step" | "step-hv" | "step-vh",
 ): { positions: number[]; rows: number[]; anchors: number[]; indices: number[] } {
   if (end <= start) return { positions: [], rows: [], anchors: [], indices: [] };
   const p = [positions[start * 2]!, positions[start * 2 + 1]!];
@@ -34,19 +36,15 @@ function expandedStepVertices(
     const priorY = positions[(i - 1) * 2 + 1]!;
     const x = positions[i * 2]!;
     const y = positions[i * 2 + 1]!;
-    const mid = (priorX + x) / 2;
-    if (syntheticVertices < maxSyntheticVertices) {
-      p.push(mid, priorY);
-      r.push(rows[i - 1] ?? 0xffffffff);
+    const corners = stepCorners(priorX, priorY, x, y, curve);
+    for (let c = 0; c < corners.length; c++) {
+      if (syntheticVertices >= maxSyntheticVertices) break;
+      const corner = corners[c]!;
+      p.push(corner.x, corner.y);
+      const usePrior = curve === "step" && c === 0;
+      r.push(rows[usePrior ? i - 1 : i] ?? 0xffffffff);
       a.push(0);
-      indices.push(i - 1);
-      syntheticVertices++;
-    }
-    if (syntheticVertices < maxSyntheticVertices) {
-      p.push(mid, y);
-      r.push(rows[i] ?? 0xffffffff);
-      a.push(0);
-      indices.push(i);
+      indices.push(usePrior ? i - 1 : i);
       syntheticVertices++;
     }
     p.push(x, y);
@@ -141,20 +139,29 @@ export function projectPathBatch(
       while (runEnd < end && projectable[runEnd] === 1) runEnd++;
 
       const authoredCount = runEnd - runStart;
-      const desiredStepCorners = batch.curve === "step" ? Math.max(0, 2 * (authoredCount - 1)) : 0;
+      const stepMode = isStepCurve(batch.curve) ? batch.curve : null;
+      const perSeg = stepMode === null ? 0 : stepCornersPerSegment(stepMode);
+      const desiredStepCorners = stepMode === null ? 0 : Math.max(0, perSeg * (authoredCount - 1));
       const stepCornerAllowance = Math.min(
         panelExtraRemaining,
         Math.max(0, MAX_COORD_VERTICES_PER_SUBPATH - authoredCount),
       );
       const source =
-        batch.curve === "step"
-          ? expandedStepVertices(unprojected, batch.rowIndex, runStart, runEnd, stepCornerAllowance)
-          : {
+        stepMode === null
+          ? {
               positions: Array.from(unprojected.slice(runStart * 2, runEnd * 2)),
               rows: Array.from(batch.rowIndex.slice(runStart, runEnd)),
               anchors: Array.from({ length: authoredCount }, () => 1),
               indices: indexRange(runStart, runEnd),
-            };
+            }
+          : expandedStepVertices(
+              unprojected,
+              batch.rowIndex,
+              runStart,
+              runEnd,
+              stepCornerAllowance,
+              stepMode,
+            );
       const count = source.rows.length;
       const emittedStepCorners = Math.max(0, count - authoredCount);
       if (emittedStepCorners < desiredStepCorners) capped = true;

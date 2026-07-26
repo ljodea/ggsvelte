@@ -46,6 +46,8 @@ export const STAT_COLUMNS: Record<string, readonly string[]> = {
   smooth: ["y", "ymin", "ymax", "se"],
   boxplot: ["ymin", "lower", "middle", "upper", "ymax"],
   summary: ["y", "ymin", "ymax"],
+  /** ggplot2 after_stat(ecdf); y channel defaults to this column. */
+  ecdf: ["ecdf"],
 };
 
 function isRecord(v: unknown): v is Record<string, unknown> {

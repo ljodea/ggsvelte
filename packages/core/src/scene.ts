@@ -101,7 +101,7 @@ export interface PathsBatch {
    * outline edges of a composite mark). Default true / omitted = candidates.
    */
   candidates?: boolean;
-  curve: "linear" | "step";
+  curve: "linear" | "step" | "step-hv" | "step-vh";
   /** Within-mark gradient fill (fallback solid remains in `fills`). */
   fillPaint?: ResolvedGradientPaint;
   /** Within-mark gradient stroke (fallback solid remains in `strokes`). */

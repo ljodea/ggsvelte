@@ -5,6 +5,7 @@
 import type { ColumnTable } from "../table.js";
 
 import { buildBinFrame, buildCountFrame, buildDensityFrame } from "./frame-stats-binning.js";
+import { buildEcdfFrame } from "./frame-stats-ecdf.js";
 import { buildBoxplotFrame, buildSmoothFrame, buildSummaryFrame } from "./frame-stats-fit.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 
@@ -22,6 +23,7 @@ export function buildNonIdentityFrame(
   if (stat === "count") return buildCountFrame(binding, table, groups, warnings);
   if (stat === "bin") return buildBinFrame(binding, table, groups, warnings, advisories, binRange);
   if (stat === "density") return buildDensityFrame(binding, table, groups, warnings);
+  if (stat === "ecdf") return buildEcdfFrame(binding, table, groups, warnings);
   if (stat === "smooth") return buildSmoothFrame(binding, table, groups, warnings, advisories);
   if (stat === "boxplot") return buildBoxplotFrame(binding, table, groups, warnings);
   if (stat === "summary") return buildSummaryFrame(binding, table, groups, warnings);

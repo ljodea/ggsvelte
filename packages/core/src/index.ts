@@ -49,6 +49,8 @@ export type { AesMapping, DeclaredDiscreteness, GroupDerivation } from "./groupi
 // Stats + positions
 export { statCount } from "./stats/count.js";
 export type { CountStatInput, CountStatResult } from "./stats/count.js";
+export { statEcdf } from "./stats/ecdf.js";
+export type { EcdfStatInput, EcdfStatResult } from "./stats/ecdf.js";
 export { positionDodge, positionStack } from "./positions/positions.js";
 export type { DodgeInput, DodgeResult, StackInput, StackResult } from "./positions/positions.js";
 

@@ -69,6 +69,7 @@ export const KNOWN_STATS = [
   "boxplot",
   "density",
   "summary",
+  "ecdf",
 ] as const;
 export type StatName = (typeof KNOWN_STATS)[number];
 

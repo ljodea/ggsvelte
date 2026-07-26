@@ -111,7 +111,7 @@ export interface PointLayerInput extends LayerInputBase {
 
 export interface LineLayerInput extends LayerInputBase {
   geom: "line";
-  stat?: "identity";
+  stat?: "identity" | "ecdf";
   position?: "identity";
   params?: LineParams;
 }
