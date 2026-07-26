@@ -74,7 +74,7 @@ export const THEME_SPECIMENS: readonly ThemeSpecimenConfig[] = [
   {
     name: "ggplot2",
     label: BY_NAME.ggplot2.label,
-    caption: "Gray panel and white grid — the classic R silhouette.",
+    caption: "Gray panel and white grid — the classic R silhouette (also theme grey/gray).",
     kind: "penguins-scatter",
     scheme: BY_NAME.ggplot2.scheme,
     legendFocus: true,
