@@ -3562,14 +3562,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-602",
+    id: "heading:guide-lifecycle:experimental-604",
     kind: "heading",
-    title: "experimental (602)",
+    title: "experimental (604)",
     summary:
-      "experimental (602) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-602",
+      "experimental (604) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-604",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (602)"],
+    exact: ["experimental (604)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -5328,6 +5328,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["ContourLayer"],
   },
   {
+    id: "api:ggsvelte-spec:ContourLayerInput",
+    kind: "api",
+    title: "ContourLayerInput",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["ContourLayerInput"],
+  },
+  {
     id: "api:ggsvelte-spec:ContourParams",
     kind: "api",
     title: "ContourParams",
@@ -7027,6 +7036,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
     exact: ["RuntimeColLayer"],
+  },
+  {
+    id: "api:ggsvelte-spec:RuntimeContourLayer",
+    kind: "api",
+    title: "RuntimeContourLayer",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["RuntimeContourLayer"],
   },
   {
     id: "api:ggsvelte-spec:RuntimeCurveLayer",
