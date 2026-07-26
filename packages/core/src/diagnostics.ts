@@ -414,6 +414,9 @@ export const PIPELINE_WARNING_CATALOG = {
   "density-2d-group-dropped": {
     summary: "A density_2d group had too few points or produced no contours and was dropped.",
   },
+  "density-2d-filled-open-dropped": {
+    summary: "density_2d_filled dropped open isoline rings; v1 fills closed rings only.",
+  },
   "smooth-group-dropped": {
     summary: "A smooth group had too few points for the fit and was dropped.",
   },

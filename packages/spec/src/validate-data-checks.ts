@@ -50,6 +50,7 @@ export const STAT_COLUMNS: Record<string, readonly string[]> = {
   contour: ["level"],
   quantile: ["y"],
   density_2d: ["level", "density"],
+  density_2d_filled: ["level", "density"],
 };
 
 function isRecord(v: unknown): v is Record<string, unknown> {

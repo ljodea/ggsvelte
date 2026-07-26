@@ -19,6 +19,7 @@ import { edgeRectsBatch, rasterRectsBatch, tileRectsBatch } from "./geometry-edg
 import { ribbonBatches } from "./geometry-ribbon.js";
 import { finiteSegmentBatch } from "./geometry-segment-finite.js";
 import { curveBatch } from "./geometry-curve.js";
+import { polygonBatch } from "./geometry-paths-polygon.js";
 
 function single(batch: GeometryBatch | null): GeometryBatch[] {
   return batch === null ? [] : [batch];
@@ -55,6 +56,9 @@ export function dispatchGeometryBatch(
     case "density_2d":
       // KDE isolines are authored in stitch order; never x-sort.
       return single(lineBatch(frame, fx, color, styles, warnings, { sortByX: false }));
+    case "density_2d_filled":
+      // Closed isoline rings as filled paths (#802 phase 2).
+      return single(polygonBatch(frame, fx, color, fill, styles, warnings));
     case "col":
     case "bar":
       return single(rectsBatch(frame, fx, fill, styles, warnings));

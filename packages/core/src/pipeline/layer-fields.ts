@@ -51,11 +51,14 @@ export function resolveLayerFields(
         stat === "quantile" ||
         stat === "manual" ||
         stat === "contour" ||
-        stat === "density_2d"
+        stat === "density_2d" ||
+        stat === "density_2d_filled"
       ) {
         push("y", "y", "stat");
       }
-      if (stat === "contour" || stat === "density_2d") push("level", "level", "stat");
+      if (stat === "contour" || stat === "density_2d" || stat === "density_2d_filled") {
+        push("level", "level", "stat");
+      }
     }
     push("ymin", binding.yminField);
     push("ymax", binding.ymaxField);

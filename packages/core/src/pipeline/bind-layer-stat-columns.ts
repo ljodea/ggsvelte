@@ -10,6 +10,7 @@ export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
   density: ["density", "count", "scaled", "ndensity"],
   // density_2d writes isoline x/y; level/density are after_stat, not y columns.
   density_2d: [],
+  density_2d_filled: [],
   smooth: [],
   boxplot: [],
   summary: [],

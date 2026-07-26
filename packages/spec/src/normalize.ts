@@ -71,6 +71,7 @@ export type {
   SegmentLayerInput,
   ContourLayerInput,
   Density2dLayerInput,
+  Density2dFilledLayerInput,
   CurveLayerInput,
   LayerInput,
   LineLayerInput,
@@ -152,6 +153,13 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   }
   if (stat === "density" && aes?.y === undefined) {
     aes = { ...aes, y: { stat: "density" } };
+  }
+  // density_2d_filled defaults fill to after_stat(level) like ggplot2.
+  if (
+    (stat === "density_2d_filled" || layer.geom === "density_2d_filled") &&
+    aes?.fill === undefined
+  ) {
+    aes = { ...aes, fill: { stat: "level" } };
   }
   // Aliases (one canonical form per concept):
   // histogram → bar + bin; freqpoly → line + bin.

@@ -1289,7 +1289,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Parameters for geom_density_2d (bivariate KDE isolines; #802). v1: contour_var density only; filled deferred.",
+        "Parameters for geom_density_2d / geom_density_2d_filled (bivariate KDE; #802). contour_var density only.",
     },
   ),
 
@@ -2341,7 +2341,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("density_2d", {
         description:
-          "2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). v1 draws open path contours only (not filled bands).",
+          "2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
       }),
       stat: Type.Optional(
         Type.Literal("density_2d", {
@@ -2366,6 +2366,40 @@ export const SpecDeclarations = {
       additionalProperties: false,
       description:
         "A 2D density contour layer. Requires continuous x and y. Contours of estimated density (not a precomputed z grid).",
+    },
+  ),
+
+  Density2dFilledLayer: Type.Object(
+    {
+      geom: Type.Literal("density_2d_filled", {
+        description:
+          "2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("density_2d_filled", {
+          description:
+            "Same KDE + isolines as density_2d, keeping closed rings only for filled paths.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", {
+          description: "density_2d_filled layers use identity positioning.",
+        }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data.",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("Density2dParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A filled 2D density layer. Requires continuous x and y. Fill defaults to after_stat(level).",
     },
   ),
 
@@ -2707,6 +2741,7 @@ export const SpecDeclarations = {
       Type.Ref("BoxplotLayer"),
       Type.Ref("DensityLayer"),
       Type.Ref("Density2dLayer"),
+      Type.Ref("Density2dFilledLayer"),
       Type.Ref("ErrorbarLayer"),
       Type.Ref("RectLayer"),
       Type.Ref("TileLayer"),

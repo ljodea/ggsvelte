@@ -1181,7 +1181,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Parameters for geom_density_2d (bivariate KDE isolines; #802). v1: contour_var density only; filled deferred."
+      "description": "Parameters for geom_density_2d / geom_density_2d_filled (bivariate KDE; #802). contour_var density only."
     },
     "SummaryFun": {
       "anyOf": [
@@ -2355,7 +2355,7 @@
         "geom": {
           "type": "string",
           "const": "density_2d",
-          "description": "2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). v1 draws open path contours only (not filled bands)."
+          "description": "2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours."
         },
         "stat": {
           "type": "string",
@@ -2383,6 +2383,44 @@
       },
       "additionalProperties": false,
       "description": "A 2D density contour layer. Requires continuous x and y. Contours of estimated density (not a precomputed z grid)."
+    },
+    "Density2dFilledLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "density_2d_filled",
+          "description": "2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level)."
+        },
+        "stat": {
+          "type": "string",
+          "const": "density_2d_filled",
+          "description": "Same KDE + isolines as density_2d, keeping closed rings only for filled paths."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "density_2d_filled layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data."
+        },
+        "params": {
+          "$ref": "#/$defs/Density2dParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A filled 2D density layer. Requires continuous x and y. Fill defaults to after_stat(level)."
     },
     "ErrorbarLayer": {
       "type": "object",
@@ -2850,6 +2888,9 @@
         },
         {
           "$ref": "#/$defs/Density2dLayer"
+        },
+        {
+          "$ref": "#/$defs/Density2dFilledLayer"
         },
         {
           "$ref": "#/$defs/ErrorbarLayer"

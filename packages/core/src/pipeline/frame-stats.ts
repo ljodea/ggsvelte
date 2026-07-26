@@ -36,7 +36,9 @@ export function buildNonIdentityFrame(
   if (stat === "summary_bin")
     return buildSummaryBinFrame(binding, table, groups, warnings, advisories, binRange);
   if (stat === "density") return buildDensityFrame(binding, table, groups, warnings);
-  if (stat === "density_2d") return buildDensity2dFrame(binding, table, groups, warnings);
+  if (stat === "density_2d" || stat === "density_2d_filled") {
+    return buildDensity2dFrame(binding, table, groups, warnings);
+  }
   if (stat === "smooth") return buildSmoothFrame(binding, table, groups, warnings, advisories);
   if (stat === "quantile") return buildQuantileFrame(binding, table, groups, warnings);
   if (stat === "contour") return buildContourFrame(binding, table, groups, warnings);
