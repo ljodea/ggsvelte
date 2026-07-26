@@ -76,6 +76,24 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "blank/axes-only",
+    title: "geom_blank axes only",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6ImJsYW5rL2F4ZXMtb25seSJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJ4IjowLCJ5IjowfSx7IngiOjEwMCwieSI6NTB9XX0sImxheWVycyI6W3siZ2VvbSI6ImJsYW5rIiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoieCJ9LCJ5Ijp7ImZpZWxkIjoieSJ9fX1dLCJsYWJzIjp7InRpdGxlIjoiQXhlcyB0cmFpbmVkIHdpdGggbm8gbWFya3MiLCJzdWJ0aXRsZSI6Imdlb21fYmxhbmsgYWxvbmUg4oCUIHVzZWZ1bCB3aGVuIGNvLWxheWVyaW5nIGxhdGVyIG9yIHBpbm5pbmcgZG9tYWlucyIsIngiOiJ4IiwieSI6InkifSwidGhlbWUiOiJjbGFzc2ljIn19",
+    },
+  },
+  {
+    id: "blank/domain-expand",
+    title: "geom_blank domain expansion",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6ImJsYW5rL2RvbWFpbi1leHBhbmQifSwic3BlYyI6eyJlZGl0aW9uIjoyLCJkYXRhIjp7InZhbHVlcyI6W3sieCI6Mi4xLCJ5IjozLjQsInhfcGxhbiI6MCwieV9wbGFuIjowfSx7IngiOjMuOCwieSI6NS4xLCJ4X3BsYW4iOjEwLCJ5X3BsYW4iOjEwfSx7IngiOjUuMiwieSI6Mi43LCJ4X3BsYW4iOjAsInlfcGxhbiI6MTB9LHsieCI6Ni40LCJ5Ijo2LjgsInhfcGxhbiI6MTAsInlfcGxhbiI6MH0seyJ4Ijo0LCJ5Ijo0LjIsInhfcGxhbiI6NSwieV9wbGFuIjo1fV19LCJsYXllcnMiOlt7Imdlb20iOiJwb2ludCIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoiaWRlbnRpdHkiLCJhZXMiOnsieCI6eyJmaWVsZCI6IngifSwieSI6eyJmaWVsZCI6InkifX0sInBhcmFtcyI6eyJzaXplIjozLjUsImFscGhhIjowLjl9fSx7Imdlb20iOiJibGFuayIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoiaWRlbnRpdHkiLCJhZXMiOnsieCI6eyJmaWVsZCI6InhfcGxhbiJ9LCJ5Ijp7ImZpZWxkIjoieV9wbGFuIn19fV0sImxhYnMiOnsidGl0bGUiOiJFeHBhbmQgc2NhbGVzIHdpdGhvdXQgZXh0cmEgbWFya3MiLCJzdWJ0aXRsZSI6Imdlb21fYmxhbmsgbWFwcyB4X3BsYW4gLyB5X3BsYW4gZm9yIGRvbWFpbiB0cmFpbmluZyBvbmx5IiwieCI6InggKG9ic2VydmVkKSIsInkiOiJ5IChvYnNlcnZlZCkifSwidGhlbWUiOiJjbGFzc2ljIn19",
+    },
+  },
+  {
     id: "boxplot/by-category",
     title: "Boxplot by category",
     compatibility: {
