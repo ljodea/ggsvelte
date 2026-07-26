@@ -83,6 +83,7 @@ export const SMOKE_SCENARIOS: readonly SmokeScenario[] = [
   example("facet/wrap", "light"),
   example("point/canvas-scatter", "light"),
   example("smooth/loess-scatter", "light"),
+  // Child-API conversion thinned integer x-ticks vs the pre-#765 prop form.
   example("col/basic", "light"),
   example("boxplot/by-category", "light"),
   interaction("tooltip-pinned", "interaction-tooltip-pinned-light.png", "light"),

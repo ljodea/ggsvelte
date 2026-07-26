@@ -2584,8 +2584,8 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/log-scale",
-    title: "Log-scale scatter with a fitted line — ggsvelte gallery",
-    description: "Log-scale scatter with a fitted line",
+    title: "Log-scale scatter with inspection — ggsvelte gallery",
+    description: "Log-scale scatter with inspection",
     canonicalPath: "/examples/point/log-scale",
     kind: "page",
     index: true,

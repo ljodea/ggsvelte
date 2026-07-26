@@ -300,7 +300,7 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
   },
   {
     id: "point/log-scale",
-    title: "Log-scale scatter with a fitted line",
+    title: "Log-scale scatter with inspection",
     compatibility: {
       supported: true,
       fragment:
