@@ -24,6 +24,7 @@ import type {
   SegmentParams,
   QuantileParams,
   CurveParams,
+  ContourParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -106,6 +107,12 @@ export interface GeomSmoothOptions extends SmoothParams, GeomDataOption {
 
 /** Quantile-layer sugar options: linear RQ lines (#805). */
 export interface GeomQuantileOptions extends QuantileParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Contour isoline sugar options (#801). */
+export interface GeomContourOptions extends ContourParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

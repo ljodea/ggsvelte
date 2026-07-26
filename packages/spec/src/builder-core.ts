@@ -37,6 +37,7 @@ import type {
   GeomSegmentOptions,
   GeomQuantileOptions,
   GeomCurveOptions,
+  GeomContourOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -150,6 +151,11 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'quantile', ... }) — linear QR lines (#805). */
   geomQuantile(options: GeomQuantileOptions = {}): GGBuilder {
     return this.layer(layerFrom("quantile", options));
+  }
+
+  /** Sugar for .layer({ geom: 'contour', ... }) — isolines over a z grid (#801). */
+  geomContour(options: GeomContourOptions = {}): GGBuilder {
+    return this.layer(layerFrom("contour", options));
   }
 
   /** Sugar for .layer({ geom: 'path', ... }) — connect in data order (#788). */

@@ -25,6 +25,7 @@ export const KNOWN_GEOMS = [
   "ribbon",
   "segment",
   "curve",
+  "contour",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -61,6 +62,7 @@ export const CHANNELS = [
   "yend",
   "width",
   "height",
+  "z",
 ] as const;
 export type ChannelName = (typeof CHANNELS)[number];
 
@@ -78,6 +80,7 @@ export const KNOWN_STATS = [
   "density",
   "summary",
   "summary_bin",
+  "contour",
   "align",
 ] as const;
 export type StatName = (typeof KNOWN_STATS)[number];
@@ -116,4 +119,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   ribbon: { stat: "identity", position: "identity" },
   segment: { stat: "identity", position: "identity" },
   curve: { stat: "identity", position: "identity" },
+  contour: { stat: "contour", position: "identity" },
 };

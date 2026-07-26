@@ -90,6 +90,8 @@ export interface LayerBinding {
   xendField: string | null;
   /** Segment end y field; null when unused. */
   yendField: string | null;
+  /** Contour surface height field; null when unused (#801). */
+  zField: string | null;
   /** Ribbon only: resolved running-coordinate orientation. */
   ribbonOrientation?: "x" | "y";
   color: ColorBinding;

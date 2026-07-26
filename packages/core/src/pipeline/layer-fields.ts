@@ -49,10 +49,12 @@ export function resolveLayerFields(
         stat === "summary_bin" ||
         stat === "connect" ||
         stat === "quantile" ||
-        stat === "manual"
+        stat === "manual" ||
+        stat === "contour"
       ) {
         push("y", "y", "stat");
       }
+      if (stat === "contour") push("level", "level", "stat");
     }
     push("ymin", binding.yminField);
     push("ymax", binding.ymaxField);

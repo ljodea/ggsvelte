@@ -9,6 +9,7 @@ import { buildBinFrame, buildCountFrame, buildDensityFrame } from "./frame-stats
 import { buildConnectFrame } from "./frame-stats-connect.js";
 import { buildBoxplotFrame, buildSmoothFrame, buildSummaryFrame } from "./frame-stats-fit.js";
 import { buildManualFrame } from "./frame-stats-manual.js";
+import { buildContourFrame } from "./frame-stats-contour.js";
 import { buildQuantileFrame } from "./frame-stats-quantile.js";
 import { buildSummaryBinFrame } from "./frame-stats-summary-bin.js";
 import { buildUniqueFrame } from "./frame-stats-unique.js";
@@ -36,6 +37,7 @@ export function buildNonIdentityFrame(
   if (stat === "density") return buildDensityFrame(binding, table, groups, warnings);
   if (stat === "smooth") return buildSmoothFrame(binding, table, groups, warnings, advisories);
   if (stat === "quantile") return buildQuantileFrame(binding, table, groups, warnings);
+  if (stat === "contour") return buildContourFrame(binding, table, groups, warnings);
   if (stat === "boxplot") return buildBoxplotFrame(binding, table, groups, warnings);
   if (stat === "summary") return buildSummaryFrame(binding, table, groups, warnings);
 
