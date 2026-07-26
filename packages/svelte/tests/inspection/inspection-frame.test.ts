@@ -151,6 +151,19 @@ describe("buildQueuedPointerInspection", () => {
       candidate: match,
     });
   });
+
+  it("propagates exact mode from nearest so pointer path draws no x-crosshair (#770)", () => {
+    // CandidateStore.nearest under auto returns mode "exact" for co-layered
+    // point hits; concreteMode is what InteractionOverlay / apply use for guides.
+    const exactMatch = { ...match, mode: "exact" as const, autoMode: "exact" as const };
+    expect(
+      buildQueuedPointerInspection({
+        hit,
+        source: "pointer",
+        match: exactMatch,
+      }).concreteMode,
+    ).toBe("exact");
+  });
 });
 
 describe("buildQueuedInspectFrame", () => {
