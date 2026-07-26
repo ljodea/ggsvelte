@@ -11,20 +11,13 @@ import type { GrammarLayerKind } from "./types.js";
 const GUIDE = "https://ggsvelte.sh/guide/upgrading";
 
 /** How sibling children of the same kind compose when folding into the builder. */
-export type GrammarComposition = "merge-by-channel" | "merge-by-key" | "replace";
+type GrammarComposition = "merge-by-channel" | "merge-by-key" | "replace";
 
 /** How a deprecated prop's value is handed to its replacement component. */
 export type GrammarCodemodForm = "value" | "spread" | "theme";
 
 /** Fluent-builder method that receives this family's value. */
-export type GrammarBuilderMethod =
-  | "scales"
-  | "theme"
-  | "coord"
-  | "facet"
-  | "labs"
-  | "guides"
-  | "legend";
+type GrammarBuilderMethod = "scales" | "theme" | "coord" | "facet" | "labs" | "guides" | "legend";
 
 export type GrammarFamilyMeta = {
   readonly kind: GrammarLayerKind;
@@ -211,10 +204,6 @@ export const REPLACE_EMIT_ORDER = [
 
 export type MergeByKeyKind = (typeof MERGE_KEY_EMIT_ORDER)[number];
 export type ReplaceKind = (typeof REPLACE_EMIT_ORDER)[number];
-
-export function grammarFamily(kind: GrammarLayerKind): GrammarFamilyMeta {
-  return GRAMMAR_FAMILIES[kind];
-}
 
 export function grammarFamilyByProp(propName: string): GrammarFamilyMeta | undefined {
   for (const kind of DEPRECATION_EMIT_ORDER) {
