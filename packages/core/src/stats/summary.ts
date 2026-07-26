@@ -54,7 +54,11 @@ export interface SummaryStatResult {
  * - median requires ascending sort (caller must pass sorted).
  * - min/max/mean/sum scan unsorted in O(n).
  */
-function applySummaryFun(fun: SummaryFunName, values: readonly number[], sorted: boolean): number {
+export function applySummaryFun(
+  fun: SummaryFunName,
+  values: readonly number[],
+  sorted: boolean,
+): number {
   switch (fun) {
     case "mean":
       return mean(values);

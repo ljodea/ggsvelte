@@ -285,6 +285,24 @@ export function layerStructuralErrors(
     errors.push(...ribbonStructuralErrors(layer, layerPath, mapped));
   }
 
+  if (stat === "manual") {
+    const params = isRecord(layer["params"]) ? layer["params"] : {};
+    const fun = params["fun"];
+    // Unknown names are rejected by the schema enum as invalid-enum-value.
+    if (fun === undefined || fun === null || fun === "") {
+      errors.push({
+        code: "manual-fun-required",
+        path: `${layerPath}/params/fun`,
+        message:
+          "The manual stat requires params.fun (one of first|last|mean|median|min|max|sum). There is no silent identity default (ggplot2 divergence; #814).",
+        fix: {
+          description: "Set params.fun to a registered portable transform name.",
+          example: { params: { fun: "mean" } },
+        },
+      });
+    }
+  }
+
   errors.push(...paintStructuralErrors(layer, layerPath, plotAes));
 
   for (const channel of REQUIRED_CHANNELS[geom] ?? []) {

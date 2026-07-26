@@ -610,10 +610,21 @@ export const SpecDeclarations = {
         }),
       ),
       fun: Type.Optional(
-        Type.Union([Type.Literal("mean"), Type.Literal("median"), Type.Literal("sum")], {
-          description:
-            'STAT SUMMARY_BIN ONLY: center summary of y per bin — "mean" (default), "median", or "sum".',
-        }),
+        Type.Union(
+          [
+            Type.Literal("first"),
+            Type.Literal("last"),
+            Type.Literal("mean"),
+            Type.Literal("median"),
+            Type.Literal("min"),
+            Type.Literal("max"),
+            Type.Literal("sum"),
+          ],
+          {
+            description:
+              'SUMMARY_BIN center fun (mean/median/sum; #817) or MANUAL named transform (first|last|mean|median|min|max|sum; #814). Required when stat is "manual".',
+          },
+        ),
       ),
       funMin: Type.Optional(
         Type.Ref("SummaryFun", {
@@ -625,11 +636,12 @@ export const SpecDeclarations = {
           description: "STAT SUMMARY_BIN ONLY: upper bound summary (ymax).",
         }),
       ),
+      ),
     },
     {
       additionalProperties: false,
       description:
-        "Styling parameters for the point geom, plus optional summary_bin controls when stat is summary_bin (#817).",
+        "Styling parameters for the point geom, plus summary_bin (#817) and/or manual (#814) controls.",
     },
   ),
 
@@ -709,10 +721,21 @@ export const SpecDeclarations = {
         }),
       ),
       fun: Type.Optional(
-        Type.Union([Type.Literal("mean"), Type.Literal("median"), Type.Literal("sum")], {
-          description:
-            'STAT SUMMARY_BIN ONLY (#817): center summary of y per bin — "mean" (default), "median", or "sum".',
-        }),
+        Type.Union(
+          [
+            Type.Literal("first"),
+            Type.Literal("last"),
+            Type.Literal("mean"),
+            Type.Literal("median"),
+            Type.Literal("min"),
+            Type.Literal("max"),
+            Type.Literal("sum"),
+          ],
+          {
+            description:
+              'SUMMARY_BIN center fun (mean/median/sum; #817) or MANUAL named transform (first|last|mean|median|min|max|sum; #814). Required when stat is "manual".',
+          },
+        ),
       ),
       funMin: Type.Optional(
         Type.Ref("SummaryFun", {
@@ -739,7 +762,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Styling parameters for the line geom, plus optional stat-bin (freqpoly) or summary_bin (#817) controls.",
+        "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin (#817), or manual (#814) controls.",
     },
   ),
 
@@ -787,6 +810,23 @@ export const SpecDeclarations = {
           },
         ),
       ),
+      fun: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("first"),
+            Type.Literal("last"),
+            Type.Literal("mean"),
+            Type.Literal("median"),
+            Type.Literal("min"),
+            Type.Literal("max"),
+            Type.Literal("sum"),
+          ],
+          {
+            description:
+              'STAT MANUAL ONLY (#814): portable named transform (first|last|mean|median|min|max|sum). Required when stat is "manual".',
+          },
+        ),
+      ),
       strokePaint: Type.Optional(
         Type.Ref("GradientPaint", {
           description:
@@ -801,7 +841,8 @@ export const SpecDeclarations = {
     },
     {
       additionalProperties: false,
-      description: "Styling parameters for the path geom (data-order polylines).",
+      description:
+        "Styling parameters for the path geom (data-order polylines), plus optional stat-manual fun (#814).",
     },
   ),
 
@@ -1735,7 +1776,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("point", {
         description:
-          "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With stat summary_bin, one point per non-empty (group × bin) summary of y (#817).",
+          "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
       }),
       stat: Type.Optional(
         Type.Union(
@@ -1751,10 +1792,14 @@ export const SpecDeclarations = {
               description:
                 "Bin continuous x and summarize y per (group × bin); default mean ± se (#817).",
             }),
+            Type.Literal("manual", {
+              description:
+                "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814).",
+            }),
           ],
           {
             description:
-              'Point stat: "identity" (default), "unique", or "summary_bin" (binned y summary).',
+              'Point stat: "identity" (default), "unique", "summary_bin" (#817), or "manual" (#814).',
           },
         ),
       ),
@@ -1814,10 +1859,14 @@ export const SpecDeclarations = {
               description:
                 "Bin continuous x and summarize y per (group × bin); default mean ± se; connect centers in x order (#817).",
             }),
+            Type.Literal("manual", {
+              description:
+                "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814).",
+            }),
           ],
           {
             description:
-              'Line stat: "identity" (default), "unique", "bin" (freqpoly), "align" (shared x grid), "connect" (step/path joins), or "summary_bin" (binned y summary).',
+              'Line stat: "identity" (default), "unique", "bin", "align", "connect", "summary_bin" (#817), or "manual" (#814).',
           },
         ),
       ),
@@ -1861,10 +1910,14 @@ export const SpecDeclarations = {
               description:
                 "Expand successive points into connection vertices (params.connection: hv|vh|mid|linear; default hv; #816). ggplot2 stat_connect default geom is path.",
             }),
+            Type.Literal("manual", {
+              description:
+                "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814).",
+            }),
           ],
           {
             description:
-              'Path stat: "identity" (default), "unique" (first-wins dedupe), or "connect" (named joins).',
+              'Path stat: "identity" (default), "unique", "connect", or "manual" (#814).',
           },
         ),
       ),

@@ -285,6 +285,15 @@ export const PIPELINE_ERROR_CATALOG = {
     summary: "A { stat } style mapping names an output the selected stat does not publish.",
     fix: "Use a generated output listed for that stat or map the original field instead.",
   },
+  "manual-fun-required": {
+    summary: "A layer uses stat manual without params.fun.",
+    fix: "Set params.fun to one of first|last|mean|median|min|max|sum (portable named registry; #814).",
+  },
+  "manual-fun-unknown": {
+    summary:
+      "A layer uses stat manual with an unregistered params.fun (defense for unvalidated specs).",
+    fix: "Use a registered name: first, last, mean, median, min, max, sum.",
+  },
   "unknown-theme": {
     summary: "spec.theme names a theme that is not registered.",
     fix: "Use a registered name (default, light, dark, minimal) or a theme object.",
@@ -407,6 +416,9 @@ export const PIPELINE_WARNING_CATALOG = {
   },
   "quantile-group-dropped": {
     summary: "A quantile group was too small or had constant x and was dropped.",
+  },
+  "manual-group-dropped": {
+    summary: "A manual-stat group had no finite x or y under an aggregate fun and was dropped.",
   },
   "palette-exhausted": {
     summary:

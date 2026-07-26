@@ -40,8 +40,8 @@ interface GeomDataOption {
 export interface GeomPointOptions extends PointParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
-  /** "identity" (default), "unique", or "summary_bin" (binned y summary; #817). */
-  stat?: "identity" | "unique" | "summary_bin";
+  /** identity | unique | summary_bin (#817) | manual (#814). */
+  stat?: "identity" | "unique" | "summary_bin" | "manual";
   position?: PointPosition;
   positionParams?: PositionParams;
 }
@@ -54,9 +54,9 @@ export interface GeomLineOptions extends LineParams, GeomDataOption {
    * identity (default) | unique (#813) | bin (freqpoly / #796) |
    * align (shared continuous-x grid for stack/fill; #815) |
    * connect (expand successive points; #816) |
-   * summary_bin (binned y summary; #817).
+   * summary_bin (#817) | manual (#814).
    */
-  stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin";
+  stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin" | "manual";
 }
 
 /** Path-layer sugar options (data-order polylines; style + optional connect). */
@@ -64,9 +64,9 @@ export interface GeomPathOptions extends PathParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
   /**
-   * "identity" (default), "unique" (dedupe), or "connect" (named joins; #816).
+   * "identity" (default), "unique", "connect" (#816), or "manual" (#814).
    */
-  stat?: "identity" | "unique" | "connect";
+  stat?: "identity" | "unique" | "connect" | "manual";
 }
 
 /** Col-layer sugar options: params plus aes and a position override. */

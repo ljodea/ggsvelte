@@ -939,3 +939,26 @@ exports[`ERROR_CATALOG coverage [validation-limit] is reproducible; message + fi
   },
 }
 `;
+
+exports[`ERROR_CATALOG coverage [manual-fun-required] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Set params.fun to one of first|last|mean|median|min|max|sum (portable named registry; #814).",
+    "summary": "A layer uses stat manual without params.fun.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "manual-fun-required",
+    "fix": {
+      "description": "Set params.fun to a registered portable transform name.",
+      "example": {
+        "params": {
+          "fun": "mean",
+        },
+      },
+    },
+    "message": "The manual stat requires params.fun (one of first|last|mean|median|min|max|sum). There is no silent identity default (ggplot2 divergence; #814).",
+    "path": "/layers/0/params/fun",
+  },
+}
+`;

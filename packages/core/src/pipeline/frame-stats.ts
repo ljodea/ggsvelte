@@ -8,6 +8,7 @@ import { buildAlignFrame } from "./frame-stats-align.js";
 import { buildBinFrame, buildCountFrame, buildDensityFrame } from "./frame-stats-binning.js";
 import { buildConnectFrame } from "./frame-stats-connect.js";
 import { buildBoxplotFrame, buildSmoothFrame, buildSummaryFrame } from "./frame-stats-fit.js";
+import { buildManualFrame } from "./frame-stats-manual.js";
 import { buildQuantileFrame } from "./frame-stats-quantile.js";
 import { buildSummaryBinFrame } from "./frame-stats-summary-bin.js";
 import { buildUniqueFrame } from "./frame-stats-unique.js";
@@ -25,6 +26,7 @@ export function buildNonIdentityFrame(
   if (stat === "identity") return null;
 
   if (stat === "unique") return buildUniqueFrame(binding, table, groups);
+  if (stat === "manual") return buildManualFrame(binding, table, groups, warnings);
   if (stat === "align") return buildAlignFrame(binding, table, groups, warnings);
   if (stat === "connect") return buildConnectFrame(binding, table, groups, warnings);
   if (stat === "count") return buildCountFrame(binding, table, groups, warnings);
