@@ -421,6 +421,31 @@ export class MockResponder implements Responder {
       }
       spec.layers.push(layer);
       xField = x;
+    } else if (/\bellipse\b|\bconfidence (?:ellipse|ring)/.test(prompt)) {
+      // stat_ellipse bivariate normal rings on path (#812).
+      const x = fieldNamed("x") ?? pick.mentionedQuant() ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? pick.mentionedQuant() ?? pick.quant() ?? "y";
+      const color = pick.cat() ?? pick.mentionedCat();
+      const pointAes: MockAes = { x: f(x), y: f(y) };
+      if (color !== undefined) pointAes.color = f(color);
+      if (/\bscatter\b|\bpoint\b|overlay/.test(prompt)) {
+        spec.layers.push({ geom: "point", aes: { ...pointAes } });
+      }
+      const pathAes: MockAes = { x: f(x), y: f(y) };
+      if (color !== undefined) pathAes.color = f(color);
+      const layer: MockLayer = {
+        geom: "path",
+        stat: "ellipse",
+        aes: pathAes,
+      };
+      const levelMatch = prompt.match(/\b0\.\d+\b|\b95%\b|\b99%\b/);
+      if (levelMatch !== null) {
+        const raw = levelMatch[0];
+        const level = raw.endsWith("%") ? Number(raw.slice(0, -1)) / 100 : Number(raw);
+        if (Number.isFinite(level) && level > 0 && level < 1) layer.params = { level };
+      }
+      spec.layers.push(layer);
+      xField = x;
     } else if (/\bdotplot\b|\bhistodot\b|\bbindot\b/.test(prompt)) {
       // geom_dotplot / stat_bindot histodot stacks (#803).
       const x =

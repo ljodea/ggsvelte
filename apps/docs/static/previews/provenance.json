@@ -186,6 +186,11 @@
       "sourceSha256": "b47d7f917ab4fbf323becad011a83c730f7c7dc18fc20fb8e8c9d7a5bec0b51e",
       "pngSha256": "957ba761ba22e2ecfbd69194872b6471f8a52b97887ea152b633b78da9a3f0a0"
     },
+    "path/ellipse-rings": {
+      "filename": "path-ellipse-rings-light.png",
+      "sourceSha256": "b1b6be3393431f0e02c84a0bcee40869216e22eda995d2d29d1cedbe0f6a8ac2",
+      "pngSha256": "d6b2b537e1c4669d03da7ebe18a48fdabd94e06d8e408aa012e9e00cdba81e9c"
+    },
     "path/trajectory": {
       "filename": "path-trajectory-light.png",
       "sourceSha256": "9112fcb6dc55781a3a297378349bcb0120eb5de7595c60f803de6044d493fa41",

@@ -487,6 +487,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "path/ellipse-rings",
+    category: "path",
+    name: "ellipse-rings",
+    title: "Ellipse confidence rings",
+    description: "",
+    tags: ["path", "ellipse", "stat", "confidence", "group", "point", "theme"],
+    docsSection: "Points & scatter",
+    hasData: true,
+  },
+  {
     id: "path/trajectory",
     category: "path",
     name: "trajectory",

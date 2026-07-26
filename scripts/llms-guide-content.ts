@@ -368,6 +368,32 @@ v1 is histodot only — no Wilkinson \`dotdensity\`, no \`binaxis = "y"\`, no
 weights. Mapping aes.y fails loud (\`computed-y-mapped\`).
 
 [Dotplot histodot](/examples/dotplot/histodot): stacked points in fixed bins.
+
+## Ellipse confidence rings
+
+Bivariate normal confidence ellipses (ggplot2 \`stat_ellipse\`, type \`norm\`
+only) on **path** layers: per group, estimate mean and sample covariance,
+scale by √χ²₂(level), and sample the perimeter (\`segments\`, default 51)
+plus a closing duplicate for a closed ring.
+
+\`\`\`svelte fragment
+<GeomPoint />
+<GeomPath stat="ellipse" level={0.95} segments={51} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y", color: "g" }))
+  .geomPoint()
+  .geomPath({ stat: "ellipse", level: 0.95 })
+  .spec();
+\`\`\`
+
+Path-only in v1 (not polygon). Groups with fewer than two finite points or
+zero variance are dropped with a warning. Rejected on other geoms.
+
+[Ellipse confidence rings](/examples/path/ellipse-rings): scatter under 95%
+rings per series.
+
 ## Frequency polygon
 
 Frequency polygon (ggplot2 \`geom_freqpoly\`) bins continuous \`x\` and draws a

@@ -414,6 +414,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Dotplot (histodot)"],
   },
   {
+    id: "heading:guide-statistics-positions:ellipse-confidence-rings",
+    kind: "heading",
+    title: "Ellipse confidence rings",
+    summary:
+      "Ellipse confidence rings in Statistics and positions. Compute summaries and control how derived marks occupy the same coordinate space.",
+    href: "/guide/statistics-positions#ellipse-confidence-rings",
+    keywords: ["Statistics and positions", "Core grammar"],
+    exact: ["Ellipse confidence rings"],
+  },
+  {
     id: "heading:guide-statistics-positions:frequency-polygon",
     kind: "heading",
     title: "Frequency polygon",
@@ -3034,6 +3044,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["manual-group-dropped"],
   },
   {
+    id: "heading:guide-errors:ellipse-group-dropped",
+    kind: "heading",
+    title: "ellipse-group-dropped",
+    summary:
+      "ellipse-group-dropped in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#ellipse-group-dropped",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["ellipse-group-dropped"],
+  },
+  {
     id: "heading:guide-errors:palette-exhausted-warning",
     kind: "heading",
     title: "palette-exhausted — warning",
@@ -4698,6 +4718,25 @@ export const DOCS_SEARCH_INDEX = [
       "trajectory",
     ],
     exact: ["Connect hv path joins"],
+  },
+  {
+    id: "example:path:ellipse-rings",
+    kind: "example",
+    title: "Ellipse confidence rings",
+    summary: "Ellipse confidence rings (Points & scatter)",
+    href: "/examples/path/ellipse-rings",
+    keywords: [
+      "Ellipse confidence rings",
+      "Points & scatter",
+      "path",
+      "ellipse",
+      "stat",
+      "confidence",
+      "group",
+      "point",
+      "theme",
+    ],
+    exact: ["Ellipse confidence rings"],
   },
   {
     id: "example:path:trajectory",
@@ -20731,6 +20770,20 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["manual-group-dropped", "warning:manual-group-dropped"],
+  },
+  {
+    id: "diagnostic:warning:ellipse-group-dropped",
+    kind: "diagnostic",
+    title: "ellipse-group-dropped · warning",
+    summary:
+      "An ellipse group had fewer than two finite (x,y) points or zero variance and was dropped.",
+    href: "/guide/errors#ellipse-group-dropped",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["ellipse-group-dropped", "warning:ellipse-group-dropped"],
   },
   {
     id: "diagnostic:warning:palette-exhausted",
