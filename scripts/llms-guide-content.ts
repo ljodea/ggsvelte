@@ -394,10 +394,16 @@ gg(regions, aes({ fill: "rate" })).geomSf().spec();
 ### SF text labels (\`geom_sf_text\`)
 
 \`geom_sf_text\` (ggplot2 \`geom_sf_text\`) defaults to \`stat_sf_coordinates\`:
-one representative point per feature, then draws \`aes.label\` there. Point
-coordinates pass through; MultiPoint/LineString use the vertex mean; Polygon
-uses the exterior-ring shoelace centroid. Multi* geometries use the **first**
-component only in v1. Requires \`aes.label\` (no \`aes.x\`/\`aes.y\`).
+one representative point per geometry part, then draws \`aes.label\` there.
+Point coordinates pass through; MultiPoint/LineString use the vertex mean;
+Polygon uses the exterior-ring shoelace centroid. **MultiPoint /
+MultiLineString / MultiPolygon emit one label per part** (feature aesthetics
+duplicated onto each part). Requires \`aes.label\` (no \`aes.x\`/\`aes.y\`).
+
+**Migration (multi-part labels):** earlier releases labeled only the first
+Multi* component. Callers that relied on a single first-component label will
+now see one label per part — filter geometries or aggregate labels if you need
+the old single-label behavior.
 
 \`\`\`svelte fragment
 <GeomSf alpha={0.55} />

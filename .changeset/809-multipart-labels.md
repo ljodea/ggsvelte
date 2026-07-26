@@ -11,5 +11,4 @@ MultiPoint / MultiLineString / MultiPolygon expand to one label per geometry
 part (exterior centroid / vertex mean). Duplicates feature aesthetics onto each
 part.
 
-Migration: Multi* features that previously got a single first-component label
-now get one label per part.
+Migration: <https://ggsvelte.sh/guide/statistics-positions#sf-text-labels-geom-sf-text>
