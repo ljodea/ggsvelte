@@ -19,7 +19,7 @@ export function applyPointTextPosition(
   const { binding } = frame;
   const layer = binding.layer;
   const geom = layer.geom;
-  if (geom !== "point" && geom !== "text") return false;
+  if (geom !== "point" && geom !== "count" && geom !== "text") return false;
 
   const position = layer.position ?? "identity";
   if (position === "identity") return true;

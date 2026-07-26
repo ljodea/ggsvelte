@@ -126,6 +126,7 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
       "raster",
       "ribbon",
       "segment",
+      "count",
     ],
     "code": "missing-geom",
     "fix": {
@@ -134,7 +135,7 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
         "geom": "point",
       },
     },
-    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment".",
+    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "count".",
     "path": "/layers/0/geom",
   },
 }
@@ -166,6 +167,7 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
       "raster",
       "ribbon",
       "segment",
+      "count",
     ],
     "code": "unknown-geom",
     "fix": {
@@ -174,7 +176,7 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
         "geom": "point",
       },
     },
-    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment". Did you mean "point"?",
+    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "count". Did you mean "point"?",
     "path": "/layers/0/geom",
   },
 }
@@ -408,6 +410,51 @@ exports[`ERROR_CATALOG coverage [scale-manual-domain-range] is reproducible; mes
     },
     "message": "The manual color scale has 2 domain values but 1 range colors.",
     "path": "/scales/color",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [scale-binned-breaks] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Provide 2+ strictly increasing boundaries (numeric, or temporal strings that parse under the scale's parser).",
+    "summary": "A binned style scale's authored breaks are missing, non-finite after parsing, duplicated, or not strictly increasing.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "scale-binned-breaks",
+    "fix": {
+      "description": "Provide 2+ strictly increasing boundaries that parse under the scale's parser.",
+      "example": [
+        0,
+        10,
+        20,
+      ],
+    },
+    "message": "The size boundaries must be finite and strictly increasing.",
+    "path": "/scales/size/breaks",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [scale-binned-domain] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Set domain to the first and last break values, or omit domain and let breaks define it.",
+    "summary": "A binned style scale's explicit domain does not match the first and last authored breaks.",
+    "tier": 1,
+  },
+  "instance": {
+    "code": "scale-binned-domain",
+    "fix": {
+      "description": "Set domain to the first and last break values, or omit domain.",
+      "example": [
+        0,
+        10,
+      ],
+    },
+    "message": "The size binned domain must match its first and last boundaries.",
+    "path": "/scales/size/domain",
   },
 }
 `;
@@ -670,7 +717,7 @@ exports[`ERROR_CATALOG coverage [unsupported-geom-aesthetic] is reproducible; me
     "fix": {
       "description": "Remove aes.size or move it to a compatible point layer.",
     },
-    "message": "The line geom does not consume aes.size; supported geoms: point, text.",
+    "message": "The line geom does not consume aes.size; supported geoms: point, count, text.",
     "path": "/layers/0/aes/size",
   },
 }
@@ -695,6 +742,61 @@ exports[`ERROR_CATALOG coverage [ribbon-orientation-ambiguous] is reproducible; 
     },
     "message": "This ribbon layer maps both x-orientation (x+ymin+ymax) and y-orientation (y+xmin+xmax) contracts. Set params.orientation to "x" or "y".",
     "path": "/layers/0/params/orientation",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [paint-stops-unordered] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Sort stops by offset ascending (each offset between 0 and 1 inclusive).",
+    "summary": "A gradient paint's color stops are not in non-decreasing offset order.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "paint-stops-unordered",
+    "fix": {
+      "description": "Sort stops by offset ascending (each between 0 and 1).",
+      "example": {
+        "stops": [
+          {
+            "color": "#000000",
+            "offset": 0,
+          },
+          {
+            "color": "#ffffff",
+            "offset": 1,
+          },
+        ],
+      },
+    },
+    "message": "Gradient stop offsets must be non-decreasing; stop 1 has offset 0.1 after 0.9.",
+    "path": "/layers/0/params/fillPaint/stops/1/offset",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [paint-scale-conflict] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Remove the data-mapped fill/color aesthetic, or remove the paint and keep the scale.",
+    "summary": "Within-mark fillPaint/strokePaint cannot combine with a data-mapped fill/color scale channel.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "paint-scale-conflict",
+    "fix": {
+      "description": "Remove aes.fill field mapping, or remove fillPaint and keep the scale.",
+      "example": {
+        "params": {
+          "fillPaint": {
+            "type": "linear",
+          },
+        },
+      },
+    },
+    "message": "params.fillPaint cannot combine with a data-mapped fill channel (field or scaled constant).",
+    "path": "/layers/0/params/fillPaint",
   },
 }
 `;
@@ -828,106 +930,6 @@ exports[`ERROR_CATALOG coverage [validation-limit] is reproducible; message + fi
     "code": "validation-limit",
     "message": "Inline data has 2 rows across plot/layers, more than the documented maxRows limit (1); data-aware checks skipped. Validate with a DataProfile instead.",
     "path": "/data",
-  },
-}
-`;
-
-exports[`ERROR_CATALOG coverage [paint-stops-unordered] is reproducible; message + fix snapshot 1`] = `
-{
-  "catalog": {
-    "fix": "Sort stops by offset ascending (each offset between 0 and 1 inclusive).",
-    "summary": "A gradient paint's color stops are not in non-decreasing offset order.",
-    "tier": 2,
-  },
-  "instance": {
-    "code": "paint-stops-unordered",
-    "fix": {
-      "description": "Sort stops by offset ascending (each between 0 and 1).",
-      "example": {
-        "stops": [
-          {
-            "color": "#000000",
-            "offset": 0,
-          },
-          {
-            "color": "#ffffff",
-            "offset": 1,
-          },
-        ],
-      },
-    },
-    "message": "Gradient stop offsets must be non-decreasing; stop 1 has offset 0.1 after 0.9.",
-    "path": "/layers/0/params/fillPaint/stops/1/offset",
-  },
-}
-`;
-
-exports[`ERROR_CATALOG coverage [paint-scale-conflict] is reproducible; message + fix snapshot 1`] = `
-{
-  "catalog": {
-    "fix": "Remove the data-mapped fill/color aesthetic, or remove the paint and keep the scale.",
-    "summary": "Within-mark fillPaint/strokePaint cannot combine with a data-mapped fill/color scale channel.",
-    "tier": 2,
-  },
-  "instance": {
-    "code": "paint-scale-conflict",
-    "fix": {
-      "description": "Remove aes.fill field mapping, or remove fillPaint and keep the scale.",
-      "example": {
-        "params": {
-          "fillPaint": {
-            "type": "linear",
-          },
-        },
-      },
-    },
-    "message": "params.fillPaint cannot combine with a data-mapped fill channel (field or scaled constant).",
-    "path": "/layers/0/params/fillPaint",
-  },
-}
-`;
-
-exports[`ERROR_CATALOG coverage [scale-binned-breaks] is reproducible; message + fix snapshot 1`] = `
-{
-  "catalog": {
-    "fix": "Provide 2+ strictly increasing boundaries (numeric, or temporal strings that parse under the scale's parser).",
-    "summary": "A binned style scale's authored breaks are missing, non-finite after parsing, duplicated, or not strictly increasing.",
-    "tier": 1,
-  },
-  "instance": {
-    "code": "scale-binned-breaks",
-    "fix": {
-      "description": "Provide 2+ strictly increasing boundaries that parse under the scale's parser.",
-      "example": [
-        0,
-        10,
-        20,
-      ],
-    },
-    "message": "The size boundaries must be finite and strictly increasing.",
-    "path": "/scales/size/breaks",
-  },
-}
-`;
-
-exports[`ERROR_CATALOG coverage [scale-binned-domain] is reproducible; message + fix snapshot 1`] = `
-{
-  "catalog": {
-    "fix": "Set domain to the first and last break values, or omit domain and let breaks define it.",
-    "summary": "A binned style scale's explicit domain does not match the first and last authored breaks.",
-    "tier": 1,
-  },
-  "instance": {
-    "code": "scale-binned-domain",
-    "fix": {
-      "description": "Set domain to the first and last break values, or omit domain.",
-      "example": [
-        0,
-        10,
-      ],
-    },
-    "message": "The size binned domain must match its first and last boundaries.",
-    "path": "/scales/size/domain",
   },
 }
 `;

@@ -41,6 +41,7 @@ export type {
   GeomHistogramOptions,
   GeomLineOptions,
   GeomPointOptions,
+  GeomCountOptions,
   GeomRasterOptions,
   GeomRectOptions,
   GeomRuleOptions,

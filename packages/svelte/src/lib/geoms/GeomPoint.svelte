@@ -34,6 +34,8 @@
     positionParams?: PositionParams;
     /** Rendering backend hint ("svg" | "canvas" | "auto"). */
     render?: RenderBackend;
+    /** "identity" (default) or "sum" (overplotting counts; size → after_stat n). */
+    stat?: "identity" | "sum";
   }
 
   const props: Props = $props();

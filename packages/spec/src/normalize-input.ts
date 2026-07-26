@@ -103,7 +103,15 @@ export interface FacetInput {
 
 export interface PointLayerInput extends LayerInputBase {
   geom: "point";
-  stat?: "identity";
+  stat?: "identity" | "sum";
+  position?: PointPosition;
+  positionParams?: PositionParams;
+  params?: PointParams;
+}
+
+export interface CountLayerInput extends LayerInputBase {
+  geom: "count";
+  stat?: "sum";
   position?: PointPosition;
   positionParams?: PositionParams;
   params?: PointParams;
@@ -240,7 +248,8 @@ export type LayerInput =
   | RectLayerInput
   | TileLayerInput
   | RasterLayerInput
-  | SegmentLayerInput;
+  | SegmentLayerInput
+  | CountLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

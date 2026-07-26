@@ -68,6 +68,7 @@ export type {
   HistogramLayerInput,
   RibbonLayerInput,
   SegmentLayerInput,
+  CountLayerInput,
   LayerInput,
   LineLayerInput,
   PointLayerInput,
@@ -146,6 +147,10 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   }
   if (stat === "density" && aes?.y === undefined) {
     aes = { ...aes, y: { stat: "density" } };
+  }
+  // geom_count / stat_sum: size defaults to after_stat(n) when unset.
+  if (stat === "sum" && aes?.size === undefined) {
+    aes = { ...aes, size: { stat: "n" } };
   }
   // The histogram geom is an ALIAS (one canonical form per concept): its
   // post-normalize representation is a bar layer with the bin stat.

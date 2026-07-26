@@ -20,6 +20,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 /** Channels every geom needs mapped (after plot-aes inheritance). */
 const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   point: ["x", "y"],
+  count: ["x", "y"],
   line: ["x", "y"],
   col: ["x", "y"],
   bar: ["x"],

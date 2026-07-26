@@ -1390,10 +1390,13 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("point", {
         description:
-          "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views.",
+          "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With stat sum, aggregates coincident (x,y) and maps size to after_stat n (geom_count).",
       }),
       stat: Type.Optional(
-        Type.Literal("identity", { description: "Point layers draw the data as-is." }),
+        Type.Union([Type.Literal("identity"), Type.Literal("sum")], {
+          description:
+            'Point stat: "identity" (default) or "sum" (aggregate coincident x/y; size defaults to {stat:"n"}).',
+        }),
       ),
       position: Type.Optional(
         Type.Union([Type.Literal("identity"), Type.Literal("jitter"), Type.Literal("nudge")], {
@@ -1898,6 +1901,40 @@ export const SpecDeclarations = {
     },
   ),
 
+  CountLayer: Type.Object(
+    {
+      geom: Type.Literal("count", {
+        description:
+          "Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("sum", {
+          description:
+            'Count layers run stat sum: n and prop per (group, x, y). size defaults to {"stat": "n"}.',
+        }),
+      ),
+      position: Type.Optional(
+        Type.Union([Type.Literal("identity"), Type.Literal("jitter"), Type.Literal("nudge")], {
+          description: 'Position: "identity" (default), "jitter", or "nudge".',
+        }),
+      ),
+      positionParams: Type.Optional(Type.Ref("PositionParams")),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data.",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("PointParams")),
+    },
+    {
+      additionalProperties: false,
+      description: "A count (overplotting) layer. Requires x and y. Default size is after_stat n.",
+    },
+  ),
+
   LayerSpec: Type.Union(
     [
       Type.Ref("PointLayer"),
@@ -1917,6 +1954,7 @@ export const SpecDeclarations = {
       Type.Ref("TileLayer"),
       Type.Ref("RasterLayer"),
       Type.Ref("SegmentLayer"),
+      Type.Ref("CountLayer"),
     ],
     {
       description:

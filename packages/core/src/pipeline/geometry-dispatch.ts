@@ -33,6 +33,7 @@ export function dispatchGeometryBatch(
 ): GeometryBatch[] {
   switch (frame.binding.layer.geom) {
     case "point":
+    case "count":
       return single(pointsBatch(frame, fx, color, styles, warnings));
     case "line":
       return single(lineBatch(frame, fx, color, styles, warnings));

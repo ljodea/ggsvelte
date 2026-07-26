@@ -110,6 +110,7 @@ export const HistogramLayerSchema = SpecModule.Import("HistogramLayer");
 export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
+export const CountLayerSchema = SpecModule.Import("CountLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
@@ -251,6 +252,8 @@ export type RasterLayer = LayerWithDataRef<SpecType<"RasterLayer">>;
 export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 /** A finite segment layer ((x,y)→(xend,yend)). */
 export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
+/** Count (geom_count / stat_sum) layer. */
+export type CountLayer = LayerWithDataRef<SpecType<"CountLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -261,6 +264,7 @@ export type LayerSpec =
   | AreaLayer
   | RibbonLayer
   | SegmentLayer
+  | CountLayer
   | RuleLayer
   | TextLayer
   | SmoothLayer

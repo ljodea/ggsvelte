@@ -29,6 +29,7 @@ import type {
   GeomHistogramOptions,
   GeomLineOptions,
   GeomPointOptions,
+  GeomCountOptions,
   GeomRasterOptions,
   GeomRectOptions,
   GeomRuleOptions,
@@ -136,6 +137,14 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'point', ... }). */
   geomPoint(options: GeomPointOptions = {}): GGBuilder {
     return this.layer(layerFrom("point", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'count', ... }) — overplotting counts at unique
+   * (x, y); size maps to after_stat n (ggplot2 geom_count).
+   */
+  geomCount(options: GeomCountOptions = {}): GGBuilder {
+    return this.layer(layerFrom("count", options));
   }
 
   /** Sugar for .layer({ geom: 'line', ... }). */

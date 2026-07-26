@@ -62,6 +62,7 @@ export function styleBinding(
       smooth: ["y", "ymin", "ymax", "se"],
       summary: ["y", "ymin", "ymax"],
       boxplot: ["ymin", "lower", "middle", "upper", "ymax"],
+      sum: ["n", "prop"],
     };
     if (!(outputs[stat] ?? []).includes(channel.stat)) {
       throw new PipelineError(

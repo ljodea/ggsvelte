@@ -9,4 +9,6 @@ export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
   smooth: [],
   boxplot: [],
   summary: [],
+  // y is a required *input* to stat_sum — do not publish n/prop on y.
+  sum: [],
 };
