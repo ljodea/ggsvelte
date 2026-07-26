@@ -27,6 +27,7 @@ import {
   RuleLayerSchema,
   SmoothLayerSchema,
   TextLayerSchema,
+  LabelLayerSchema,
   TileLayerSchema,
 } from "./schema.js";
 import { mapValueErrors, unknownGeomError } from "./validate-map-errors.js";
@@ -43,6 +44,7 @@ export const GEOM_BRANCHES = {
   segment: SegmentLayerSchema,
   rule: RuleLayerSchema,
   text: TextLayerSchema,
+  label: LabelLayerSchema,
   smooth: SmoothLayerSchema,
   boxplot: BoxplotLayerSchema,
   density: DensityLayerSchema,

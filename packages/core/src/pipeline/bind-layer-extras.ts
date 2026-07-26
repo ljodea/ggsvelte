@@ -39,11 +39,11 @@ export function resolveLabelWeightColorFill(input: {
     if ("field" in label) labelField = checkField(label, "label", index, table, warnings);
     else if ("value" in label) labelConstant = String(label.value);
   }
-  if (geom === "text" && labelField === null && labelConstant === null) {
+  if ((geom === "text" || geom === "label") && labelField === null && labelConstant === null) {
     throw new PipelineError(
       "missing-channel",
       `/layers/${index}/aes/label`,
-      'The text geom requires a "label" channel (map it with aes).',
+      `The ${geom} geom requires a "label" channel (map it with aes).`,
     );
   }
   const weightField = checkField(aes.weight, "weight", index, table, warnings);

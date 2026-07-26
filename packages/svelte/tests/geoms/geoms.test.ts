@@ -24,6 +24,7 @@ import GeomRule from "../../src/lib/geoms/GeomRule.svelte";
 import GeomSegment from "../../src/lib/geoms/GeomSegment.svelte";
 import GeomSmooth from "../../src/lib/geoms/GeomSmooth.svelte";
 import GeomText from "../../src/lib/geoms/GeomText.svelte";
+import GeomLabel from "../../src/lib/geoms/GeomLabel.svelte";
 import GeomTile from "../../src/lib/geoms/GeomTile.svelte";
 import SingleGeomPlot from "../fixtures/SingleGeomPlot.svelte";
 import { render } from "../helpers/render.js";
@@ -147,6 +148,17 @@ const cases: readonly GeomCase[] = [
     geomProps: { size: 12, alpha: 0.95 },
     paramKey: "size",
     paramValue: 12,
+    markSelector: ".gg-glyphs text",
+  },
+  {
+    name: "GeomLabel",
+    Component: GeomLabel,
+    geom: "label",
+    data: xy,
+    aes: { x: "x", y: "y", label: "label" },
+    geomProps: { size: 12, padding: 4, radius: 2 },
+    paramKey: "padding",
+    paramValue: 4,
     markSelector: ".gg-glyphs text",
   },
   {

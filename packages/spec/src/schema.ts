@@ -112,6 +112,7 @@ export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
+export const LabelLayerSchema = SpecModule.Import("LabelLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
 export const BoxplotLayerSchema = SpecModule.Import("BoxplotLayer");
 export const DensityLayerSchema = SpecModule.Import("DensityLayer");
@@ -194,6 +195,8 @@ export type RuleParams = SpecType<"RuleParams">;
 export type SegmentParams = SpecType<"SegmentParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
+/** Label layer params (text + background box). */
+export type LabelParams = SpecType<"LabelParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
 export type SmoothParams = SpecType<"SmoothParams">;
 /** Boxplot layer params. */
@@ -233,6 +236,8 @@ export type AreaLayer = LayerWithDataRef<SpecType<"AreaLayer">>;
 export type RuleLayer = LayerWithDataRef<SpecType<"RuleLayer">>;
 /** A text-label layer. */
 export type TextLayer = LayerWithDataRef<SpecType<"TextLayer">>;
+/** A label layer (text with background box). */
+export type LabelLayer = LayerWithDataRef<SpecType<"LabelLayer">>;
 /** A smooth (fitted trend) layer. */
 export type SmoothLayer = LayerWithDataRef<SpecType<"SmoothLayer">>;
 /** A boxplot layer. */
@@ -263,6 +268,7 @@ export type LayerSpec =
   | SegmentLayer
   | RuleLayer
   | TextLayer
+  | LabelLayer
   | SmoothLayer
   | BoxplotLayer
   | DensityLayer

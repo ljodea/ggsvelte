@@ -33,6 +33,7 @@ import type {
   SmoothParams,
   StackablePosition,
   TextParams,
+  LabelParams,
   ThemeName,
   ThemeSpec,
   TileParams,
@@ -159,6 +160,14 @@ export interface TextLayerInput extends LayerInputBase {
   params?: TextParams;
 }
 
+export interface LabelLayerInput extends LayerInputBase {
+  geom: "label";
+  stat?: "identity";
+  position?: "identity" | "nudge";
+  positionParams?: PositionParams;
+  params?: LabelParams;
+}
+
 export interface SmoothLayerInput extends LayerInputBase {
   geom: "smooth";
   stat?: "smooth";
@@ -233,6 +242,7 @@ export type LayerInput =
   | RibbonLayerInput
   | RuleLayerInput
   | TextLayerInput
+  | LabelLayerInput
   | SmoothLayerInput
   | BoxplotLayerInput
   | DensityLayerInput

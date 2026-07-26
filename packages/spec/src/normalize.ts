@@ -77,6 +77,7 @@ export type {
   SmoothLayerInput,
   SpecInput,
   TextLayerInput,
+  LabelLayerInput,
   TileLayerInput,
 } from "./normalize-input.js";
 

@@ -47,6 +47,7 @@ export type {
   GeomSegmentOptions,
   GeomSmoothOptions,
   GeomTextOptions,
+  GeomLabelOptions,
   GeomTileOptions,
 } from "./builder-options.js";
 

@@ -55,7 +55,8 @@ export function dispatchGeometryBatch(
     case "segment":
       return single(finiteSegmentBatch(frame, fx, color, styles, warnings));
     case "text":
-      return single(glyphsBatch(frame, fx, color, styles, warnings));
+    case "label":
+      return single(glyphsBatch(frame, fx, color, fill, styles, warnings));
     case "smooth":
       return smoothBatches(frame, fx, color, fill, styles, warnings);
     case "boxplot":

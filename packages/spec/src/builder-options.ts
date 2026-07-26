@@ -24,6 +24,7 @@ import type {
   SmoothParams,
   StackablePosition,
   TextParams,
+  LabelParams,
   TileParams,
 } from "./schema.js";
 
@@ -141,4 +142,14 @@ export interface GeomSegmentOptions extends SegmentParams, GeomDataOption {
 export interface GeomTextOptions extends TextParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  position?: "identity" | "nudge";
+  positionParams?: PositionParams;
+}
+
+/** Label-layer sugar options: text with background box. */
+export interface GeomLabelOptions extends LabelParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+  position?: "identity" | "nudge";
+  positionParams?: PositionParams;
 }

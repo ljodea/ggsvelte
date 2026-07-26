@@ -35,6 +35,7 @@ import type {
   RuleLayer,
   SmoothLayer,
   TextLayer,
+  LabelLayer,
   TileLayer,
 } from "./schema.js";
 
@@ -66,6 +67,7 @@ export interface RuntimeRibbonLayer extends WithRuntimeAes<RibbonLayer> {}
 export interface RuntimeSegmentLayer extends WithRuntimeAes<SegmentLayer> {}
 export interface RuntimeRuleLayer extends WithRuntimeAes<RuleLayer> {}
 export interface RuntimeTextLayer extends WithRuntimeAes<TextLayer> {}
+export interface RuntimeLabelLayer extends WithRuntimeAes<LabelLayer> {}
 export interface RuntimeSmoothLayer extends WithRuntimeAes<SmoothLayer> {}
 export interface RuntimeBoxplotLayer extends WithRuntimeAes<BoxplotLayer> {}
 export interface RuntimeDensityLayer extends WithRuntimeAes<DensityLayer> {}
@@ -85,6 +87,7 @@ export type RuntimeLayerSpec =
   | RuntimeSegmentLayer
   | RuntimeRuleLayer
   | RuntimeTextLayer
+  | RuntimeLabelLayer
   | RuntimeSmoothLayer
   | RuntimeBoxplotLayer
   | RuntimeDensityLayer

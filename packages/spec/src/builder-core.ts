@@ -35,6 +35,7 @@ import type {
   GeomSegmentOptions,
   GeomSmoothOptions,
   GeomTextOptions,
+  GeomLabelOptions,
   GeomTileOptions,
 } from "./builder-options.js";
 import type {
@@ -169,6 +170,11 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'text', ... }). */
   geomText(options: GeomTextOptions = {}): GGBuilder {
     return this.layer(layerFrom("text", options));
+  }
+
+  /** Sugar for .layer({ geom: 'label', ... }) — text with background box. */
+  geomLabel(options: GeomLabelOptions = {}): GGBuilder {
+    return this.layer(layerFrom("label", options));
   }
 
   /** Sugar for .layer({ geom: 'histogram', ... }) — binned bars over continuous x. */

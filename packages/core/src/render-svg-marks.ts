@@ -249,18 +249,50 @@ function renderSegments(batch: SegmentsBatch, theme: ThemeTokens): string {
   return parts.join("");
 }
 
+/** Panel-local box origin for a glyph anchor + box size (geom_label). */
+export function labelBoxOrigin(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  anchor: "start" | "middle" | "end",
+  padding: number,
+): { x: number; y: number } {
+  let left = x - width / 2;
+  if (anchor === "start") left = x - padding;
+  else if (anchor === "end") left = x - width + padding;
+  return { x: left, y: y - height / 2 };
+}
+
 function renderGlyphs(batch: GlyphsBatch, theme: ThemeTokens): string {
   const parts: string[] = [
     `<g class="gg-batch gg-glyphs" data-layer="${batch.layerIndex}" font-size="${px(batch.size)}" text-anchor="${batch.anchor}"${alphaAttr(batch.alpha)}>`,
   ];
   const n = batch.texts.length;
   const themeInk = themeVar("ink", theme);
+  const themePaper = themeVar("paper", theme);
+  const hasBox = batch.boxWidths !== undefined && batch.boxHeights !== undefined;
   for (let j = 0; j < n; j++) {
     const fill = batch.colors?.[j] ?? batch.color ?? themeInk;
     const size = batch.sizes?.[j];
     const alpha = batch.alphas?.[j];
+    const tx = batch.positions[j * 2]!;
+    const ty = batch.positions[j * 2 + 1]!;
+    if (hasBox) {
+      const bw = batch.boxWidths![j]!;
+      const bh = batch.boxHeights![j]!;
+      const pad = batch.boxPadding ?? 0;
+      const origin = labelBoxOrigin(tx, ty, bw, bh, batch.anchor, pad);
+      const boxFill = batch.boxFills?.[j] ?? batch.boxFill ?? themePaper;
+      const boxStroke = batch.boxStrokes?.[j] ?? batch.boxStroke ?? themeInk;
+      const sw = batch.boxStrokeWidth ?? 0.5;
+      const rx = batch.boxRadius ?? 0;
+      parts.push(
+        `<rect x="${px(origin.x)}" y="${px(origin.y)}" width="${px(bw)}" height="${px(bh)}" rx="${px(rx)}" ry="${px(rx)}" fill="${boxFill}" stroke="${boxStroke}" stroke-width="${px(sw)}"${alpha === undefined ? "" : alphaAttr(alpha)}/>`,
+      );
+    }
     parts.push(
-      `<text x="${px(batch.positions[j * 2]!)}" y="${px(batch.positions[j * 2 + 1]!)}" dy="0.32em" fill="${fill}"${size === undefined ? "" : ` font-size="${px(size)}"`}${alpha === undefined ? "" : alphaAttr(alpha)}>${escapeXML(batch.texts[j]!)}</text>`,
+      `<text x="${px(tx)}" y="${px(ty)}" dy="0.32em" fill="${fill}"${size === undefined ? "" : ` font-size="${px(size)}"`}${alpha === undefined ? "" : alphaAttr(alpha)}>${escapeXML(batch.texts[j]!)}</text>`,
     );
   }
   parts.push("</g>");

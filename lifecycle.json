@@ -424,6 +424,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomLabelOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomLineOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -538,6 +542,22 @@
         },
         "LINT_CATALOG": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "LabelLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LabelLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LabelLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "LabelParams": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "Labs": {
@@ -837,6 +857,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeHistogramLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeLabelLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3554,6 +3578,10 @@
           "lifecycle": "experimental"
         },
         "GeomHistogram": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomLabel": {
           "kind": "value",
           "lifecycle": "experimental"
         },

@@ -208,6 +208,20 @@ export interface GlyphsBatch {
   anchor: "start" | "middle" | "end";
   alpha: number;
   alphas?: Float32Array;
+  /**
+   * Optional background box (geom_label). When set, render/hit use these
+   * extents instead of font-size padding alone. Constants only for padding/
+   * radius/strokeWidth in v1; per-glyph widths/heights/fills.
+   */
+  boxFill?: string | null;
+  boxFills?: string[];
+  boxStroke?: string | null;
+  boxStrokes?: string[];
+  boxStrokeWidth?: number;
+  boxPadding?: number;
+  boxRadius?: number;
+  boxWidths?: Float32Array;
+  boxHeights?: Float32Array;
 }
 
 export type GeometryBatch = PointsBatch | PathsBatch | RectsBatch | SegmentsBatch | GlyphsBatch;

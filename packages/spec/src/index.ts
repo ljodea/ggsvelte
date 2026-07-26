@@ -58,6 +58,7 @@ export {
   SmoothLayerSchema,
   SpecModule,
   TextLayerSchema,
+  LabelLayerSchema,
   THEME_NAMES,
 } from "./schema.js";
 export type {
@@ -147,8 +148,10 @@ export type {
   StatName,
   SummaryFun,
   TextLayer,
+  LabelLayer,
   TemporalParserSpec,
   TextParams,
+  LabelParams,
   ThemeName,
   ThemeSpec,
 } from "./schema.js";
@@ -477,6 +480,7 @@ export type {
   RuntimeSmoothLayer,
   RuntimeSpec,
   RuntimeTextLayer,
+  RuntimeLabelLayer,
   RuntimeTileLayer,
 } from "./runtime.js";
 
@@ -508,6 +512,7 @@ export type {
   TileLayerInput,
   SpecInput,
   TextLayerInput,
+  LabelLayerInput,
 } from "./normalize.js";
 
 // Validation + agent error contract
@@ -559,6 +564,7 @@ export type {
   GeomSegmentOptions,
   GeomSmoothOptions,
   GeomTextOptions,
+  GeomLabelOptions,
   GeomTileOptions,
 } from "./builder.js";
 
