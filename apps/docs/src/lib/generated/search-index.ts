@@ -3762,14 +3762,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-637",
+    id: "heading:guide-lifecycle:experimental-638",
     kind: "heading",
-    title: "experimental (637)",
+    title: "experimental (638)",
     summary:
-      "experimental (637) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-637",
+      "experimental (638) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-638",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (637)"],
+    exact: ["experimental (638)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -7948,6 +7948,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
     exact: ["SfTextLayer"],
+  },
+  {
+    id: "api:ggsvelte-spec:SfTextLayerInput",
+    kind: "api",
+    title: "SfTextLayerInput",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["SfTextLayerInput"],
   },
   {
     id: "api:ggsvelte-spec:SfTextParams",
