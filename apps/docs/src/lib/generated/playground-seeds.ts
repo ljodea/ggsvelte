@@ -336,6 +336,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "map/choropleth",
+    title: "Map choropleth",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6Im1hcC9jaG9yb3BsZXRoIn0sInNwZWMiOnsiZWRpdGlvbiI6MiwiZGF0YSI6eyJ2YWx1ZXMiOlt7InJlZ2lvbiI6Ildlc3QiLCJyYXRlIjoxMn0seyJyZWdpb24iOiJFYXN0IiwicmF0ZSI6Mjh9LHsicmVnaW9uIjoiTm9ydGgiLCJyYXRlIjoxOX1dfSwibGF5ZXJzIjpbeyJnZW9tIjoibWFwIiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJmaWxsIjp7ImZpZWxkIjoicmF0ZSJ9LCJtYXBfaWQiOnsiZmllbGQiOiJyZWdpb24ifX0sInBhcmFtcyI6eyJtYXAiOnsidmFsdWVzIjpbeyJsb25nIjowLCJsYXQiOjAsInJlZ2lvbiI6Ildlc3QifSx7ImxvbmciOjEsImxhdCI6MCwicmVnaW9uIjoiV2VzdCJ9LHsibG9uZyI6MC41LCJsYXQiOjEuMiwicmVnaW9uIjoiV2VzdCJ9LHsibG9uZyI6MS4yLCJsYXQiOjAsInJlZ2lvbiI6IkVhc3QifSx7ImxvbmciOjIuMiwibGF0IjowLCJyZWdpb24iOiJFYXN0In0seyJsb25nIjoxLjcsImxhdCI6MS4xLCJyZWdpb24iOiJFYXN0In0seyJsb25nIjowLjQsImxhdCI6MS4zLCJyZWdpb24iOiJOb3J0aCJ9LHsibG9uZyI6MS44LCJsYXQiOjEuMywicmVnaW9uIjoiTm9ydGgifSx7ImxvbmciOjEuMSwibGF0IjoyLjIsInJlZ2lvbiI6Ik5vcnRoIn1dfSwibGluZXdpZHRoIjoxLjIsImFscGhhIjowLjk1fX1dLCJsYWJzIjp7InRpdGxlIjoiUmVnaW9uYWwgcmF0ZXMgKHRveSBtYXApIiwic3VidGl0bGUiOiJGb3J0aWZpZWQgbG9uZy9sYXQgcG9seWdvbnMgam9pbmVkIG9uIHJlZ2lvbiAoZ2VvbV9tYXApIiwiZmlsbCI6IlJhdGUifSwidGhlbWUiOiJjbGFzc2ljIn19",
+    },
+  },
+  {
     id: "path/connect-hv",
     title: "Connect hv path joins",
     compatibility: {

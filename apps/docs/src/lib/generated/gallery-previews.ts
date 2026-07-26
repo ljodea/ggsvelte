@@ -219,6 +219,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "3b444fe28067e31a133c512c117405bbd0f238c60a44d07b8d7d00215dabb780",
   },
   {
+    id: "map/choropleth",
+    filename: "map-choropleth-light.png",
+    path: "/previews/map-choropleth-light.png",
+    sha256: "e30da20b2d785e37d11a646975a11efdb979415cd6ffd5d8ee16d97860a812d8",
+  },
+  {
     id: "path/connect-hv",
     filename: "path-connect-hv-light.png",
     path: "/previews/path-connect-hv-light.png",

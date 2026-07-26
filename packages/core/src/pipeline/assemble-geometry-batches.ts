@@ -58,6 +58,7 @@ export function buildGeometryBatches(input: {
         geom === "smooth" ||
         geom === "quantile" ||
         geom === "ribbon" ||
+        geom === "map" ||
         geom === "sf";
       const built = buildBatch(
         frame,

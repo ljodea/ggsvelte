@@ -33,7 +33,8 @@ GRAMMAR CHEAT-SHEET
     null                  unset an inherited channel
 - Channel names: x, y, color, fill, size, linewidth, alpha, group, label, weight, ymin, ymax, xmin, xmax, xend, yend, width, height.
 - Layers: { "geom": ..., "stat"?, "position"?, "aes": {...}, "params"?, "positionParams"? }.
-- Geoms: point, line, col, bar, histogram, area, rule, text, smooth, boxplot, density, errorbar, rect, tile, raster, ribbon, segment.
+- Geoms: point, line, path, col, bar, histogram, area, rule, text, smooth, boxplot, density, errorbar, rect, tile, raster, ribbon, segment, curve, map.
+- map (choropleth): aes.map_id + params.map ({values} or {columns} with long+lat or x+y and a region id column; params.mapId optional). Not a live geo API.
 - Stat defaults per geom (omit to accept): bar→count, histogram→bin, smooth→smooth, boxplot→boxplot, density→density, everything else→identity.
 - Position defaults: bar/histogram/col/area→stack, boxplot→dodge, else identity. Alternatives: fill (proportions), dodge (side by side), jitter (points; positionParams {width,height,seed}), nudge (text; positionParams {x,y}).
 - bar COUNTS rows (never map aes.y); col draws pre-computed heights (map aes.y). histogram bins a continuous x (params: bins | binwidth).
@@ -49,7 +50,7 @@ GRAMMAR CHEAT-SHEET
 - Only map fields that exist in the DataProfile, with their exact names.
 
 REFUSAL CONTRACT
-If the request needs a chart type outside the geoms above (maps, 3D, networks, ...), or is unanswerable from the profile, reply instead with exactly:
+If the request needs a chart type outside the geoms above (live geographic APIs, 3D, networks, ...), or is unanswerable from the profile, reply instead with exactly:
   {"unsupported": "<one-sentence reason>", "closestAlternative": <a supported PortableSpec or null>}
 
 REPAIR

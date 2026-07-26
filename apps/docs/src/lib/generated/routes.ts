@@ -397,6 +397,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "map-fortified-choropleth",
+        title: "Map (fortified choropleth)",
+        level: 2,
+      },
+      {
         id: "positions",
         title: "Positions",
         level: 2,
@@ -1678,6 +1683,21 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "map-data-required",
+        title: "map-data-required",
+        level: 3,
+      },
+      {
+        id: "map-coords-missing",
+        title: "map-coords-missing",
+        level: 3,
+      },
+      {
+        id: "map-id-column-missing",
+        title: "map-id-column-missing",
+        level: 3,
+      },
+      {
         id: "render-warnings",
         title: "Render warnings",
         level: 2,
@@ -1840,6 +1860,11 @@ export const DOCS_ROUTES = [
       {
         id: "sf-holes-ignored",
         title: "sf-holes-ignored",
+        level: 3,
+      },
+      {
+        id: "map-region-missing",
+        title: "map-region-missing",
         level: 3,
       },
       {
@@ -2202,8 +2227,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-628",
-        title: "experimental (628)",
+        id: "experimental-633",
+        title: "experimental (633)",
         level: 3,
       },
       {
@@ -2242,8 +2267,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-471",
-        title: "experimental (471)",
+        id: "experimental-472",
+        title: "experimental (472)",
         level: 3,
       },
       {
@@ -2752,6 +2777,16 @@ export const DOCS_ROUTES = [
     title: "Raw-year time-axis line chart — ggsvelte gallery",
     description: "Raw-year time-axis line chart",
     canonicalPath: "/examples/line/time-axis",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/map/choropleth",
+    title: "Map choropleth — ggsvelte gallery",
+    description: "Map choropleth",
+    canonicalPath: "/examples/map/choropleth",
     kind: "page",
     index: true,
     sitemap: true,

@@ -29,6 +29,7 @@ export const KNOWN_GEOMS = [
   "density_2d",
   "density_2d_filled",
   "dotplot",
+  "map",
   "sf",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
@@ -67,6 +68,7 @@ export const CHANNELS = [
   "width",
   "height",
   "z",
+  "map_id",
 ] as const;
 export type ChannelName = (typeof CHANNELS)[number];
 
@@ -130,5 +132,6 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   density_2d: { stat: "density_2d", position: "identity" },
   density_2d_filled: { stat: "density_2d_filled", position: "identity" },
   dotplot: { stat: "bindot", position: "identity" },
+  map: { stat: "identity", position: "identity" },
   sf: { stat: "identity", position: "identity" },
 };

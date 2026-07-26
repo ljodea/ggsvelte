@@ -44,6 +44,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   density_2d: ["x", "y"],
   density_2d_filled: ["x", "y"],
   dotplot: ["x"],
+  map: ["map_id"],
 };
 
 function hasIntercepts(layer: Record<string, unknown>): boolean {

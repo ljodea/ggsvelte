@@ -26,7 +26,7 @@
  * `$defs` key **insertion order** in the declarations bag is load-bearing for
  * the byte-stable `schema/v0.json` artifact.
  */
-import Type, { type Static, type TModule, type TSchema } from "typebox";
+import Type, { type Static, type TSchema } from "typebox";
 
 import { SpecDeclarations } from "./schema-declarations.js";
 
@@ -94,13 +94,15 @@ export const SpecModule = {
 };
 
 /**
- * Static<> extraction surface (not for JSON emission).
- * `TModule<>` is a short type alias TypeBox expands during check — avoids
- * `const SpecStatic = Type.Module(...)` which hits TS7056 on composite .d.ts
- * once LayerSpec includes many geoms (dotplot + sf).
+ * Spec type bag for Static<> extraction (not for JSON emission).
+ *
+ * Prefer `ReturnType<typeof Type.Module<...>>` over a `const SpecStatic =
+ * Type.Module(...)` value: once LayerSpec includes density_2d_filled + map the
+ * Module instance exceeds TS7056 declaration-serialize limits under composite
+ * emit. The type-level Module is enough for SpecType / Static<>.
  */
-type SpecModule = TModule<typeof SpecDeclarations>;
-type SpecType<K extends keyof SpecModule> = Static<SpecModule[K]>;
+type SpecModuleStatic = ReturnType<typeof Type.Module<typeof SpecDeclarations>>;
+type SpecType<K extends keyof SpecModuleStatic> = Static<SpecModuleStatic[K]>;
 
 // ---------------------------------------------------------------------------
 // Imported (validatable) schemas — Cyclic `$defs`+`$ref` for runtime/artifact
@@ -119,6 +121,7 @@ export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
 export const CurveLayerSchema = SpecModule.Import("CurveLayer");
+export const MapLayerSchema = SpecModule.Import("MapLayer");
 export const SfLayerSchema = SpecModule.Import("SfLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
@@ -211,8 +214,9 @@ export type RuleParams = SpecType<"RuleParams">;
 export type SegmentParams = SpecType<"SegmentParams">;
 /** Curve layer params (curvature/angle/ncp + stroke). */
 export type CurveParams = SpecType<"CurveParams">;
-/** SF layer params (geometry column + styling; #809 phase 1). */
+/** Map layer params (fortified map DataRef + styling; #808). */
 export type SfParams = SpecType<"SfParams">;
+export type MapParams = SpecType<"MapParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
@@ -296,7 +300,8 @@ export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
 /** A curve layer (curved connectors). */
 export type CurveLayer = LayerWithDataRef<SpecType<"CurveLayer">>;
-/** An sf layer (portable GeoJSON geometries; #809 phase 1). */
+/** A choropleth/map layer (#808). */
+export type MapLayer = LayerWithDataRef<SpecType<"MapLayer">>;
 export type SfLayer = LayerWithDataRef<SpecType<"SfLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
@@ -311,6 +316,7 @@ export type LayerSpec =
   | RibbonLayer
   | SegmentLayer
   | CurveLayer
+  | MapLayer
   | SfLayer
   | RuleLayer
   | TextLayer

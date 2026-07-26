@@ -14,12 +14,12 @@ import {
   rectsBatch,
   segmentsBatch,
 } from "./geometry-marks.js";
+import { polygonBatch } from "./geometry-paths-polygon.js";
 import { boxplotBatches, errorbarBatch, smoothBatches } from "./geometry-composites.js";
 import { edgeRectsBatch, rasterRectsBatch, tileRectsBatch } from "./geometry-edge-rects.js";
 import { ribbonBatches } from "./geometry-ribbon.js";
 import { finiteSegmentBatch } from "./geometry-segment-finite.js";
 import { curveBatch } from "./geometry-curve.js";
-import { polygonBatch } from "./geometry-paths-polygon.js";
 
 function single(batch: GeometryBatch | null): GeometryBatch[] {
   return batch === null ? [] : [batch];
@@ -88,6 +88,9 @@ export function dispatchGeometryBatch(
       return boxplotBatches(frame, fx, fill, styles, warnings);
     case "errorbar":
       return single(errorbarBatch(frame, fx, color, styles, warnings));
+    case "map":
+      // Fortified regions → closed filled paths (ggplot2 geom_map; #808).
+      return single(polygonBatch(frame, fx, color, fill, styles, warnings));
     case "sf": {
       // Portable GeoJSON expand (#809 phase 1): kind selected during frame build.
       const kind = frame.sf?.kind ?? "polygon";

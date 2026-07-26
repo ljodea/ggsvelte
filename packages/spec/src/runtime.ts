@@ -27,6 +27,8 @@ import type {
   FreqpolyLayer,
   LayerSpec,
   LineLayer,
+  MapLayer,
+  SfLayer,
   PathLayer,
   PointLayer,
   PortableSpec,
@@ -39,7 +41,6 @@ import type {
   Density2dLayer,
   Density2dFilledLayer,
   DotplotLayer,
-  SfLayer,
   RuleLayer,
   QuantileLayer,
   SmoothLayer,
@@ -90,6 +91,7 @@ export interface RuntimeContourLayer extends WithRuntimeAes<ContourLayer> {}
 export interface RuntimeDensity2dLayer extends WithRuntimeAes<Density2dLayer> {}
 export interface RuntimeDensity2dFilledLayer extends WithRuntimeAes<Density2dFilledLayer> {}
 export interface RuntimeDotplotLayer extends WithRuntimeAes<DotplotLayer> {}
+export interface RuntimeMapLayer extends WithRuntimeAes<MapLayer> {}
 export interface RuntimeSfLayer extends WithRuntimeAes<SfLayer> {}
 
 export type RuntimeLayerSpec =
@@ -118,6 +120,7 @@ export type RuntimeLayerSpec =
   | RuntimeDensity2dLayer
   | RuntimeDensity2dFilledLayer
   | RuntimeDotplotLayer
+  | RuntimeMapLayer
   | RuntimeSfLayer;
 
 /** The in-memory spec superset ({ fn } channel accessors allowed). */

@@ -28,6 +28,7 @@ export function candidateAutoMode(
     case "tile":
     case "raster":
     case "density_2d_filled":
+    case "map":
     case "sf":
       return "exact";
     case "line":

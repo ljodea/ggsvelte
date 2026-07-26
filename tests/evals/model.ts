@@ -310,18 +310,16 @@ export class MockResponder implements Responder {
       new RegExp(`\\bmap\\s+\\S+\\s+to\\s+${aesChannel}\\b`).test(prompt) ||
       new RegExp(`\\bmap\\s+${aesChannel}\\s+to\\s+\\S+\\b`).test(prompt) ||
       STYLE_CHANNELS.some((channel) => mappedStyleField(prompt, profile, channel) !== undefined);
-    // geom_sf is supported when the profile has a geometry column (or prompt names sf/geojson).
-    const wantsSf =
-      /\bgeom[_\s]?sf\b|\bgeojson\b|\bsimple features?\b|\bsf (?:point|polygon|layer)\b/.test(
-        prompt,
-      ) || profile.fields.some((field) => field.name === "geometry");
+    // Supported geom_map (#808) uses "geom map" / fortified choropleth phrasing —
+    // do not refuse those. Still refuse bare geographic "map" without a geom.
+    const supportedMapGeom = /\bgeom map\b|\bfortified\b/.test(prompt);
     if (
-      (!wantsSf && /choropleth|\b3-?d\b|surface plot|network diagram/.test(prompt)) ||
-      (!wantsSf &&
-        /\bmap\b/.test(prompt) &&
+      /(?:\b3-?d\b|surface plot|network diagram)/.test(prompt) ||
+      (prompt.includes("choropleth") && !supportedMapGeom) ||
+      (/\bmap\b/.test(prompt) &&
         !aestheticMapping &&
         !/\bribbon\b/.test(prompt) &&
-        !/\bsf\b/.test(prompt))
+        !supportedMapGeom)
     ) {
       return Promise.resolve(
         JSON.stringify({
@@ -562,6 +560,29 @@ export class MockResponder implements Responder {
       colorFor("color", aes);
       spec.layers.push({ geom: "segment", aes });
       xField = x;
+    } else if (/\bgeom map\b|\bfortified\b/.test(prompt)) {
+      // geom_map (#808): join value map_id to an inline fortified triangle set.
+      const idField =
+        fieldNamed("region") ?? fieldNamed("zone") ?? pick.cat() ?? pick.mentionedCat() ?? "region";
+      const fillField = fieldNamed("rate") ?? fieldNamed("score") ?? pick.quant() ?? "rate";
+      const aes: MockAes = { map_id: f(idField), fill: f(fillField) };
+      const idKey =
+        /\bmapid\b|\bid\b/.test(prompt) && fieldNamed("zone") !== undefined ? "id" : idField;
+      const regions = ["A", "B", "C"];
+      const mapValues: Array<Record<string, unknown>> = [];
+      for (let i = 0; i < regions.length; i++) {
+        const id = regions[i]!;
+        const ox = i * 1.2;
+        mapValues.push(
+          { long: ox, lat: 0, [idKey]: id },
+          { long: ox + 1, lat: 0, [idKey]: id },
+          { long: ox + 0.5, lat: 1, [idKey]: id },
+        );
+      }
+      const params: Record<string, unknown> = { map: { values: mapValues } };
+      if (idKey !== "region" && idKey !== "id") params["mapId"] = idKey;
+      if (idKey === "id") params["mapId"] = "id";
+      spec.layers.push({ geom: "map", aes, params });
     } else if (/\bribbon\b/.test(prompt) && !/without .*(?:band|ribbon)/.test(prompt)) {
       // Horizontal (y + xmin/xmax) vs vertical (x + ymin/ymax) ribbons.
       if (

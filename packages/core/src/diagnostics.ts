@@ -322,6 +322,18 @@ export const PIPELINE_ERROR_CATALOG = {
     summary: "One geom_sf layer mixes geometry families (point vs line vs polygon).",
     fix: "Split mixed types into separate geom_sf layers (v1 is single-family per layer).",
   },
+  "map-data-required": {
+    summary: "geom_map was used without params.map.",
+    fix: "Pass params.map as { values }, { columns }, or { name } against spec.datasets.",
+  },
+  "map-coords-missing": {
+    summary: "Map data is missing long/lat or x/y coordinate columns.",
+    fix: 'Provide "long"+"lat" or "x"+"y" columns in the fortified map table.',
+  },
+  "map-id-column-missing": {
+    summary: "Map data is missing a region join column.",
+    fix: 'Set params.mapId or include a "region" / "id" column in the map table.',
+  },
 } as const satisfies Record<string, PipelineErrorCatalogEntry>;
 
 export type PipelineErrorCode = keyof typeof PIPELINE_ERROR_CATALOG;
@@ -435,6 +447,9 @@ export const PIPELINE_WARNING_CATALOG = {
   },
   "sf-holes-ignored": {
     summary: "geom_sf ignored interior polygon rings; v1 draws exterior rings only.",
+  },
+  "map-region-missing": {
+    summary: "One or more value rows had no matching map region and were dropped.",
   },
   "smooth-group-dropped": {
     summary: "A smooth group had too few points for the fit and was dropped.",

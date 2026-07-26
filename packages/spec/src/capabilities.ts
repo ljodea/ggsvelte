@@ -286,6 +286,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "curve",
     "density_2d",
     "density_2d_filled",
+    "map",
     "sf",
   ],
   alpha: [
@@ -314,7 +315,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "ribbon",
     "segment",
     "curve",
-    "sf",
+    "map",
   ],
   shape: ["point", "dotplot", "sf"],
   linetype: [
@@ -334,6 +335,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "curve",
     "density_2d",
     "density_2d_filled",
+    "map",
     "sf",
   ],
 } as const;

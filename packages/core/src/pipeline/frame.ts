@@ -9,6 +9,7 @@ import { buildAnnotationFrame } from "./frame-annotation.js";
 import { expandEdgeFrame } from "./frame-edge-expand.js";
 import { deriveLayerGroups } from "./frame-helpers.js";
 import { buildIdentityFrame } from "./frame-identity.js";
+import { buildMapFrame } from "./frame-stats-map.js";
 import { buildSfFrame } from "./frame-stats-sf.js";
 import { buildNonIdentityFrame } from "./frame-stats.js";
 
@@ -20,6 +21,7 @@ export function buildFrame(
   warnings: PipelineWarning[],
   advisories: Advisory[],
   binRange?: [number, number],
+  datasets?: import("@ggsvelte/spec").PortableSpec["datasets"],
 ): LayerFrame {
   // Annotation frames are rowless (n=0, empty inputGroups). Do not derive or
   // overwrite pre-stat groups — identity index would otherwise retain O(n)
@@ -31,6 +33,9 @@ export function buildFrame(
   // Derive once per frame; identity index + bin lineage consume frame.inputGroups.
   const inputGroups = deriveLayerGroups(binding, table);
 
+  if (binding.layer.geom === "map") {
+    return { ...buildMapFrame(binding, table, inputGroups, warnings, datasets), inputGroups };
+  }
   if (binding.layer.geom === "sf") {
     return { ...buildSfFrame(binding, table, inputGroups, warnings), inputGroups };
   }

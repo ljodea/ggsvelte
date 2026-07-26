@@ -33,6 +33,7 @@ import type {
   RuleParams,
   SegmentParams,
   CurveParams,
+  MapParams,
   SfParams,
   Scales,
   QuantileParams,
@@ -71,6 +72,7 @@ export interface AesInput {
   width?: ChannelInput;
   height?: ChannelInput;
   z?: ChannelInput;
+  map_id?: ChannelInput;
 }
 
 interface LayerInputBase {
@@ -287,6 +289,13 @@ export interface CurveLayerInput extends LayerInputBase {
   params?: CurveParams;
 }
 
+export interface MapLayerInput extends LayerInputBase {
+  geom: "map";
+  stat?: "identity";
+  position?: "identity";
+  params: MapParams;
+}
+
 export interface SfLayerInput extends LayerInputBase {
   geom: "sf";
   stat?: "identity";
@@ -321,6 +330,7 @@ export type LayerInput =
   | RasterLayerInput
   | SegmentLayerInput
   | CurveLayerInput
+  | MapLayerInput
   | SfLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
