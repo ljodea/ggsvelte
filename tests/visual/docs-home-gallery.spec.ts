@@ -153,6 +153,27 @@ test("homepage grammar steps change real chart structure in place", async ({ pag
   await expect(output.locator(".gg-paths")).toHaveCount(1);
 });
 
+test("homepage grammar inspect is exact: point tooltip, no path x-crosshair", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/?theme=dark");
+  const output = page.locator(".grammar-output");
+  await expect(output.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
+  // Step 4 (Interaction) is the default open step.
+  await expect(output.locator(".gg-capture")).toBeVisible();
+
+  const capture = output.locator(".gg-capture");
+  await capture.focus();
+  await capture.press("ArrowRight");
+  const tooltip = output.locator(".gg-tooltip");
+  await expect(tooltip).toBeVisible();
+  // Species is carried on identity points; blank "-" means we hit the smooth
+  // path under auto mode "x" instead of a point.
+  await expect(tooltip.getByText("species")).toBeVisible();
+  await expect(tooltip.getByText("-")).toHaveCount(0);
+  // Exact mode: no full-panel vertical guide from path auto-mode "x".
+  await expect(output.locator(".gg-crosshair")).toHaveCount(0);
+});
+
 test("homepage mobile order is claim, specimen, then install", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/?theme=light");

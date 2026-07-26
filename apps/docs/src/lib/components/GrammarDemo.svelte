@@ -41,6 +41,12 @@
     </ol>
   </div>
   <div class="grammar-output">
+    <!--
+      Exact inspect (not auto/x): smooth layers auto-mode to "x" and draw a
+      vertical guide that steals hits from points. Homepage needs point
+      tooltips only. degree 1 + wider span: specimen has ~10 rows/species;
+      default degree-2 loess at span 0.75 overfits and looks jagged.
+    -->
     <GGPlot
       data={penguins}
       aes={{
@@ -48,12 +54,16 @@
         y: "mass",
         ...(active >= 1 && { color: "species" }),
       }}
-      inspect={active >= 3}
+      inspect={active >= 3
+        ? { mode: "exact", pin: true, maxDistance: 24 }
+        : false}
       theme={chartTheme}
       ariaLabel="Penguin mass increases with flipper length, grouped by species"
     >
       <GeomPoint alpha={0.72} />
-      {#if active >= 2}<GeomSmooth method="loess" span={0.75} se={false} />{/if}
+      {#if active >= 2}
+        <GeomSmooth method="loess" span={0.9} degree={1} se={false} />
+      {/if}
     </GGPlot>
   </div>
 </section>
