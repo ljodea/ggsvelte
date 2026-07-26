@@ -49,7 +49,7 @@ export interface GeomLineOptions extends LineParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
   /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
-  stat?: "identity" | "unique";
+  stat?: "identity" | "unique" | "align";
 }
 
 /** Path-layer sugar options (data-order polylines; style-only — no bin knobs). */
@@ -148,7 +148,7 @@ export interface GeomAreaOptions extends AreaParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
   /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
-  stat?: "identity" | "unique";
+  stat?: "identity" | "unique" | "align";
   position?: StackablePosition;
 }
 

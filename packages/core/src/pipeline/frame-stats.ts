@@ -4,6 +4,7 @@
  */
 import type { ColumnTable } from "../table.js";
 
+import { buildAlignFrame } from "./frame-stats-align.js";
 import { buildBinFrame, buildCountFrame, buildDensityFrame } from "./frame-stats-binning.js";
 import { buildBoxplotFrame, buildSmoothFrame, buildSummaryFrame } from "./frame-stats-fit.js";
 import { buildUniqueFrame } from "./frame-stats-unique.js";
@@ -21,6 +22,7 @@ export function buildNonIdentityFrame(
   if (stat === "identity") return null;
 
   if (stat === "unique") return buildUniqueFrame(binding, table, groups);
+  if (stat === "align") return buildAlignFrame(binding, table, groups, warnings);
   if (stat === "count") return buildCountFrame(binding, table, groups, warnings);
   if (stat === "bin") return buildBinFrame(binding, table, groups, warnings, advisories, binRange);
   if (stat === "density") return buildDensityFrame(binding, table, groups, warnings);
