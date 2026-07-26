@@ -443,6 +443,12 @@ export const SpecDeclarations = {
             "Surface height for geom contour / stat contour (quantitative grid values over continuous x×y; #801).",
         }),
       ),
+      map_id: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Region join key for geom_map (value-table column matched to the map data id column; #808).",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -1900,6 +1906,55 @@ export const SpecDeclarations = {
     },
   ),
 
+  MapParams: Type.Object(
+    {
+      map: Type.Ref("DataRef", {
+        description:
+          "Fortified map coordinates ({ values }, { columns }, or { name } against spec.datasets). Must include long+lat or x+y, plus a region id column.",
+      }),
+      mapId: Type.Optional(
+        Type.String({
+          minLength: 1,
+          description:
+            'Join column name in the map data (matched to aes.map_id). Default: "region", then "id".',
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Region fill opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Region outline stroke width in px. Must be greater than 0. Default 1.5.",
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description: "Within-mark gradient fill paint (not a data scale).",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description: "Within-mark gradient stroke paint (not a data scale).",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom_map (#808): fortified map DataRef plus optional join column and polygon styling.",
+    },
+  ),
+
   TextParams: Type.Object(
     {
       alpha: Type.Optional(
@@ -2841,6 +2896,35 @@ export const SpecDeclarations = {
     },
   ),
 
+  MapLayer: Type.Object(
+    {
+      geom: Type.Literal("map", {
+        description:
+          "Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Map layers expand joins then draw as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Map layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local value data (region ids + fill aesthetics). When omitted, inherits plot data.",
+        }),
+      ),
+      params: Type.Ref("MapParams"),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A choropleth/map layer. Requires aes.map_id and params.map. Coordinates come from the map data (long/lat or x/y).",
+    },
+  ),
+
   LayerSpec: Type.Union(
     [
       Type.Ref("PointLayer"),
@@ -2863,6 +2947,7 @@ export const SpecDeclarations = {
       Type.Ref("Density2dFilledLayer"),
       Type.Ref("DotplotLayer"),
       Type.Ref("ErrorbarLayer"),
+      Type.Ref("MapLayer"),
       Type.Ref("RectLayer"),
       Type.Ref("TileLayer"),
       Type.Ref("RasterLayer"),

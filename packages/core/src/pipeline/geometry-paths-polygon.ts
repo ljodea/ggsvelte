@@ -86,6 +86,7 @@ export function polygonBatch(
   }
   pathOffsets[groupRows.length] = cursor;
 
+  // polygon and map (geom_map is polygon-with-join; #808) share this batch.
   const params = (binding.layer.params ?? {}) as {
     alpha?: number;
     linewidth?: number;

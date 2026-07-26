@@ -14,6 +14,7 @@ import {
   rectsBatch,
   segmentsBatch,
 } from "./geometry-marks.js";
+import { polygonBatch } from "./geometry-paths-polygon.js";
 import { boxplotBatches, errorbarBatch, smoothBatches } from "./geometry-composites.js";
 import { edgeRectsBatch, rasterRectsBatch, tileRectsBatch } from "./geometry-edge-rects.js";
 import { ribbonBatches } from "./geometry-ribbon.js";
@@ -88,6 +89,9 @@ export function dispatchGeometryBatch(
       return boxplotBatches(frame, fx, fill, styles, warnings);
     case "errorbar":
       return single(errorbarBatch(frame, fx, color, styles, warnings));
+    case "map":
+      // Fortified regions → closed filled paths (ggplot2 geom_map; #808).
+      return single(polygonBatch(frame, fx, color, fill, styles, warnings));
     default:
       return [];
   }

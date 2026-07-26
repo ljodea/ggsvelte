@@ -41,6 +41,7 @@ import type {
   GeomQuantileOptions,
   GeomCurveOptions,
   GeomContourOptions,
+  GeomMapOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -282,6 +283,11 @@ export class GGBuilderCore {
    */
   geomCurve(options: GeomCurveOptions = {}): GGBuilder {
     return this.layer(layerFrom("curve", options));
+  }
+
+  /** Sugar for .layer({ geom: 'map', ... }) — fortified map join (#808). */
+  geomMap(options: GeomMapOptions): GGBuilder {
+    return this.layer(layerFrom("map", options));
   }
 
   /**

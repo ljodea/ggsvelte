@@ -97,6 +97,8 @@ export interface LayerBinding {
   yendField: string | null;
   /** Contour surface height field; null when unused (#801). */
   zField: string | null;
+  /** geom_map join key in value data (#808); null when unused. */
+  mapIdField: string | null;
   /** Ribbon only: resolved running-coordinate orientation. */
   ribbonOrientation?: "x" | "y";
   color: ColorBinding;

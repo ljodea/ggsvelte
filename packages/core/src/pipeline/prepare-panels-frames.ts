@@ -332,6 +332,7 @@ export function buildPanelFrames(input: {
         warnings,
         advisories,
         binRanges[index],
+        normalized.datasets,
       );
       applyPosition(frame, advisories, slice.table);
       // Annotation frames are rowless — do not retain the full panel source-row

@@ -306,6 +306,18 @@ export const PIPELINE_ERROR_CATALOG = {
     summary: "renderToSVGString refused to render more marks than its maxMarks safety limit.",
     fix: "Raise options.maxMarks deliberately, reduce the data, or render interactively (canvas).",
   },
+  "map-data-required": {
+    summary: "geom_map was used without params.map.",
+    fix: "Pass params.map as { values }, { columns }, or { name } against spec.datasets.",
+  },
+  "map-coords-missing": {
+    summary: "Map data is missing long/lat or x/y coordinate columns.",
+    fix: 'Provide "long"+"lat" or "x"+"y" columns in the fortified map table.',
+  },
+  "map-id-column-missing": {
+    summary: "Map data is missing a region join column.",
+    fix: 'Set params.mapId or include a "region" / "id" column in the map table.',
+  },
 } as const satisfies Record<string, PipelineErrorCatalogEntry>;
 
 export type PipelineErrorCode = keyof typeof PIPELINE_ERROR_CATALOG;
@@ -416,6 +428,9 @@ export const PIPELINE_WARNING_CATALOG = {
   },
   "density-2d-filled-open-dropped": {
     summary: "density_2d_filled dropped open isoline rings; v1 fills closed rings only.",
+  },
+  "map-region-missing": {
+    summary: "One or more value rows had no matching map region and were dropped.",
   },
   "smooth-group-dropped": {
     summary: "A smooth group had too few points for the fit and was dropped.",
