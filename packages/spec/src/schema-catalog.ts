@@ -82,6 +82,7 @@ export const KNOWN_STATS = [
   "summary",
   "summary_bin",
   "align",
+  "sf",
   "sf_coordinates",
 ] as const;
 export type StatName = (typeof KNOWN_STATS)[number];
@@ -120,7 +121,7 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   ribbon: { stat: "identity", position: "identity" },
   segment: { stat: "identity", position: "identity" },
   curve: { stat: "identity", position: "identity" },
-  sf: { stat: "identity", position: "identity" },
+  sf: { stat: "sf", position: "identity" },
   sf_text: { stat: "sf_coordinates", position: "identity" },
   sf_label: { stat: "sf_coordinates", position: "identity" },
 };

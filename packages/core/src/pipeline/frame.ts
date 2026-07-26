@@ -9,7 +9,6 @@ import { buildAnnotationFrame } from "./frame-annotation.js";
 import { expandEdgeFrame } from "./frame-edge-expand.js";
 import { deriveLayerGroups } from "./frame-helpers.js";
 import { buildIdentityFrame } from "./frame-identity.js";
-import { buildSfFrame } from "./frame-stats-sf.js";
 import { buildNonIdentityFrame } from "./frame-stats.js";
 
 export { deriveLayerGroups } from "./frame-helpers.js";
@@ -31,10 +30,7 @@ export function buildFrame(
   // Derive once per frame; identity index + bin lineage consume frame.inputGroups.
   const inputGroups = deriveLayerGroups(binding, table);
 
-  if (binding.layer.geom === "sf") {
-    return { ...buildSfFrame(binding, table, inputGroups, warnings), inputGroups };
-  }
-
+  // geom_sf default stat is "sf" (geometry expand via buildNonIdentityFrame).
   const nonIdentity = buildNonIdentityFrame(
     binding,
     table,

@@ -37,6 +37,9 @@ import type {
   CurveLayer,
   RuleLayer,
   QuantileLayer,
+  SfLabelLayer,
+  SfLayer,
+  SfTextLayer,
   SmoothLayer,
   TextLayer,
   TileLayer,
@@ -81,6 +84,9 @@ export interface RuntimeErrorbarLayer extends WithRuntimeAes<ErrorbarLayer> {}
 export interface RuntimeRectLayer extends WithRuntimeAes<RectLayer> {}
 export interface RuntimeTileLayer extends WithRuntimeAes<TileLayer> {}
 export interface RuntimeRasterLayer extends WithRuntimeAes<RasterLayer> {}
+export interface RuntimeSfLayer extends WithRuntimeAes<SfLayer> {}
+export interface RuntimeSfTextLayer extends WithRuntimeAes<SfTextLayer> {}
+export interface RuntimeSfLabelLayer extends WithRuntimeAes<SfLabelLayer> {}
 
 export type RuntimeLayerSpec =
   | RuntimePointLayer
@@ -103,7 +109,10 @@ export type RuntimeLayerSpec =
   | RuntimeErrorbarLayer
   | RuntimeRectLayer
   | RuntimeTileLayer
-  | RuntimeRasterLayer;
+  | RuntimeRasterLayer
+  | RuntimeSfLayer
+  | RuntimeSfTextLayer
+  | RuntimeSfLabelLayer;
 
 /** The in-memory spec superset ({ fn } channel accessors allowed). */
 type RuntimeSpecPortableFields = Omit<PortableSpec, "aes" | "layers">;

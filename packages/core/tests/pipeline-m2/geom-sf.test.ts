@@ -415,4 +415,11 @@ describe("geom_sf", () => {
     expect(batch.closed).toBe(true);
     expect(batch.pathOffsets.length - 1).toBe(1);
   });
+
+  it("defaults stat to sf (ggplot2 stat_sf)", () => {
+    const spec = gg({ geometry: [polyA] }, aes({}))
+      .geomSf()
+      .spec();
+    expect(spec.layers[0]?.stat).toBe("sf");
+  });
 });

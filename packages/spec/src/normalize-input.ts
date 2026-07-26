@@ -259,7 +259,8 @@ export interface CurveLayerInput extends LayerInputBase {
 
 export interface SfLayerInput extends LayerInputBase {
   geom: "sf";
-  stat?: "identity";
+  /** Geometry expand (ggplot2 `stat_sf`); default from GEOM_DEFAULTS. */
+  stat?: "sf";
   position?: "identity";
   params?: SfParams;
 }
