@@ -484,6 +484,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Blank (scale training without marks)"],
   },
   {
+    id: "heading:guide-statistics-positions:convenience-geoms-jitter-hline-vline",
+    kind: "heading",
+    title: "Convenience geoms (jitter, hline, vline)",
+    summary:
+      "Convenience geoms (jitter, hline, vline) in Statistics and positions. Compute summaries and control how derived marks occupy the same coordinate space.",
+    href: "/guide/statistics-positions#convenience-geoms-jitter-hline-vline",
+    keywords: ["Statistics and positions", "Core grammar"],
+    exact: ["Convenience geoms (jitter, hline, vline)"],
+  },
+  {
     id: "heading:guide-statistics-positions:manual-portable-named-per-group-transforms",
     kind: "heading",
     title: "Manual (portable named per-group transforms)",

@@ -516,6 +516,41 @@ scales without drawing marks. Surfaces: \`.geomBlank()\`, \`<GeomBlank />\`.
 axes past the plotted points. [Blank axes only](/examples/blank/axes-only): axes
 and scales with no marks.
 
+## Convenience geoms (jitter, hline, vline)
+
+Name aliases that normalize to existing marks — no new paint paths:
+
+| Sugar | Normalizes to |
+|-------|----------------|
+| \`jitter\` | \`point\` + \`position: "jitter"\` |
+| \`hline\` | \`rule\` (horizontal) |
+| \`vline\` | \`rule\` (vertical) |
+
+\`geomJitter\` / \`<GeomJitter>\` accept flat \`width\` / \`height\` / \`seed\` and
+assemble them into \`positionParams\` at the builder/component boundary.
+
+\`hline\` / \`vline\` annotation intercepts (\`yintercept\` / \`xintercept\`)
+suppress plot-aes inheritance (ggplot2 \`inherit.aes = FALSE\`). Data-driven
+forms drop the orthogonal axis so the one-axis rule contract holds.
+
+\`\`\`svelte fragment
+<GeomJitter width={0.2} height={0.2} />
+<GeomHline yintercept={0} />
+<GeomVline xintercept={10} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y" }))
+  .geomJitter({ width: 0.2, height: 0.2 })
+  .geomHline({ yintercept: 0 })
+  .geomVline({ xintercept: 10 })
+  .spec();
+\`\`\`
+
+[Jitter sugar](/examples/jitter/basic): overplotted points with position jitter.
+[Hline threshold](/examples/hline/threshold) and
+[Vline cutoff](/examples/vline/cutoff): annotation intercepts as rule aliases.
+
 ## Manual (portable named per-group transforms)
 
 \`stat: "manual"\` (ggplot2 \`stat_manual\`, portable v1) applies a **named**

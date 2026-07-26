@@ -397,6 +397,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "convenience-geoms-jitter-hline-vline",
+        title: "Convenience geoms (jitter, hline, vline)",
+        level: 2,
+      },
+      {
         id: "manual-portable-named-per-group-transforms",
         title: "Manual (portable named per-group transforms)",
         level: 2,
