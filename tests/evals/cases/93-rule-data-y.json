@@ -1,24 +1,43 @@
 {
   "id": "93-rule-data-y",
   "kind": "chart",
-  "prompt": "Draw one horizontal rule per threshold value using data-driven geom_rule mapped to aes.y.",
+  "prompt": "Draw one horizontal rule per threshold using data-driven geom_rule mapped to aes.y.",
   "dataProfile": {
-    "fields": [{ "name": "threshold", "type": "quantitative" }],
+    "fields": [
+      {
+        "name": "threshold",
+        "type": "quantitative"
+      }
+    ],
     "rowCount": 3
   },
   "data": {
-    "main": [{ "threshold": 10 }, { "threshold": 20 }, { "threshold": 30 }]
+    "main": [
+      {
+        "threshold": 10
+      },
+      {
+        "threshold": 20
+      },
+      {
+        "threshold": 30
+      }
+    ]
   },
   "gold": {
     "edition": 1,
-    "data": { "name": "main" },
+    "data": {
+      "name": "main"
+    },
     "layers": [
       {
         "geom": "rule",
         "stat": "identity",
         "position": "identity",
         "aes": {
-          "y": { "field": "threshold" }
+          "y": {
+            "field": "threshold"
+          }
         }
       }
     ]
