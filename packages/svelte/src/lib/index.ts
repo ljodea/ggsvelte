@@ -181,9 +181,13 @@ export { default as ScaleXDate } from "./scale/ScaleXDate.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleXDatetime } from "./scale/ScaleXDatetime.svelte";
 /** @lifecycle stable-intent */
+export { default as ScaleXTime } from "./scale/ScaleXTime.svelte";
+/** @lifecycle stable-intent */
 export { default as ScaleYDate } from "./scale/ScaleYDate.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleYDatetime } from "./scale/ScaleYDatetime.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleYTime } from "./scale/ScaleYTime.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleXDiscrete } from "./scale/ScaleXDiscrete.svelte";
 /** @lifecycle stable-intent */
@@ -537,6 +541,7 @@ export {
   scaleXContinuous,
   scaleXDate,
   scaleXDatetime,
+  scaleXTime,
   scaleXDiscrete,
   scaleXLog10,
   scaleXReverse,
@@ -545,6 +550,7 @@ export {
   scaleYContinuous,
   scaleYDate,
   scaleYDatetime,
+  scaleYTime,
   scaleYDiscrete,
   scaleYLog10,
   scaleYReverse,
@@ -553,6 +559,7 @@ export {
   scale_x_continuous,
   scale_x_date,
   scale_x_datetime,
+  scale_x_time,
   scale_x_discrete,
   scale_x_log10,
   scale_x_reverse,
@@ -561,6 +568,7 @@ export {
   scale_y_continuous,
   scale_y_date,
   scale_y_datetime,
+  scale_y_time,
   scale_y_discrete,
   scale_y_log10,
   scale_y_reverse,

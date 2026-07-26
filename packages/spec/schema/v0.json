@@ -3125,9 +3125,13 @@
                 {
                   "type": "string",
                   "const": "datetime"
+                },
+                {
+                  "type": "string",
+                  "const": "time"
                 }
               ],
-              "description": "Temporal precision intent. \"date\" uses calendar dates; \"datetime\" uses instants. Supplying this option requests a time scale."
+              "description": "Temporal precision intent. \"date\" uses calendar dates; \"datetime\" uses instants; \"time\" is time-of-day (portable numbers are seconds since midnight). Supplying this option requests a time scale."
             },
             "parse": {
               "$ref": "#/$defs/TemporalParserSpec",

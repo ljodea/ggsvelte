@@ -114,7 +114,8 @@ export function planTemporalAxis(input: TemporalAxisPlanInput): AxisGuidePlan {
     source,
     interval: source === "explicit" ? null : selected.interval.key,
     locale: input.config.locale ?? "en-US",
-    timezone: input.kind === "date" ? "UTC" : (input.config.timezone ?? "UTC"),
+    timezone:
+      input.kind === "date" || input.kind === "time" ? "UTC" : (input.config.timezone ?? "UTC"),
     ticks: Object.freeze([...selected.ticks, ...minorTicks].map((tick) => Object.freeze(tick))),
     ...(input.sourceBreaks !== undefined && {
       sourceBreaks: Object.freeze([...input.sourceBreaks]),

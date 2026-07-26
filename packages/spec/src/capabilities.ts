@@ -58,12 +58,16 @@ export const SCALE_CAPABILITIES = [
     helpers: [
       "scaleXDate",
       "scaleXDatetime",
+      "scaleXTime",
       "scaleYDate",
       "scaleYDatetime",
+      "scaleYTime",
       "scale_x_date",
       "scale_x_datetime",
+      "scale_x_time",
       "scale_y_date",
       "scale_y_datetime",
+      "scale_y_time",
     ],
   },
   {
