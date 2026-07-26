@@ -84,4 +84,17 @@ describe("curve geom (#794)", () => {
     );
     expect((def.scene.batches[0] as PathsBatch).linecap).toBe("butt");
   });
+
+  it("defaults linewidth to 1 (segment/rule default, schema Default 1)", () => {
+    const model = runPipeline(
+      gg(
+        { x: [0], y: [0], xend: [1], yend: [1] },
+        aes({ x: "x", y: "y", xend: "xend", yend: "yend" }),
+      )
+        .geomCurve({ ncp: 2 })
+        .spec(),
+      size,
+    );
+    expect((model.scene.batches[0] as PathsBatch).linewidth).toBe(1);
+  });
 });

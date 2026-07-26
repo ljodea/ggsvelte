@@ -317,7 +317,7 @@ export function layerStructuralErrors(
       errors.push({
         code: "missing-required-channel",
         path: `${layerPath}/aes/${channel}`,
-        message: `The segment geom requires aes.${channel} to map a data field (not a constant or stat).`,
+        message: `The ${geom} geom requires aes.${channel} to map a data field (not a constant or stat).`,
         fix: {
           description: `Map "${channel}" to a data field.`,
           example: { [channel]: CHANNEL_FIX_EXAMPLE },
