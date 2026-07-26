@@ -74,7 +74,7 @@ function assertAesthetics(
   for (const raw of aesthetics) {
     if (!MULTI_AES.has(raw)) {
       throw new Error(
-        `${kind}: unsupported aesthetic "${String(raw)}". Expected one of: color, colour, fill, size, linewidth, alpha, shape, linetype.`,
+        `${kind}: unsupported aesthetic "${raw}". Expected one of: color, colour, fill, size, linewidth, alpha, shape, linetype.`,
       );
     }
     const channel = canonicalMultiScaleChannel(raw);
@@ -112,9 +112,9 @@ export type MultiManualScaleOptions = {
 function cloneScaleEntry(entry: Record<string, unknown>): Record<string, unknown> {
   const copy: Record<string, unknown> = { ...entry };
   const range = copy["range"];
-  if (Array.isArray(range)) copy["range"] = [...range];
+  if (Array.isArray(range)) copy["range"] = range.slice();
   const domain = copy["domain"];
-  if (Array.isArray(domain)) copy["domain"] = [...domain];
+  if (Array.isArray(domain)) copy["domain"] = domain.slice();
   return copy;
 }
 
@@ -122,11 +122,11 @@ function assignChannels(
   channels: readonly MultiScaleChannel[],
   entry: Record<string, unknown>,
 ): Scales {
-  const scales: Record<string, unknown> = {};
+  const scales: Partial<Record<MultiScaleChannel, unknown>> = {};
   for (const channel of channels) {
     scales[channel] = cloneScaleEntry(entry);
   }
-  return scales as Scales;
+  return scales;
 }
 
 /**
