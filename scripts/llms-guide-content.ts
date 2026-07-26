@@ -490,6 +490,28 @@ gg(data, aes({ x: "x", y: "y", xend: "xend", yend: "yend" }))
 Intentional subset: quadratic approximation, not full grid xspline.
 [Curve connectors](/examples/curve/connectors): Darwin maize pairs as arcs.
 
+## Map (fortified choropleth)
+
+\`geom: "map"\` (ggplot2 \`geom_map\`) joins a **fortified map table** to value
+rows. Map coordinates come from \`long\`+\`lat\` or \`x\`+\`y\`; the join key is
+\`aes.map_id\` on the value table matched to \`params.mapId\` on the map
+(default \`"region"\`, then \`"id"\`). Optional map \`group\` splits multipoly
+rings. Missing regions drop with a \`map-region-missing\` warning.
+
+\`\`\`svelte fragment
+<GeomMap map={{ values: fortified }} linewidth={1.2} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(rates, aes({ map_id: "region", fill: "rate" }))
+  .geomMap({ map: { values: fortified }, mapId: "region" })
+  .spec();
+\`\`\`
+
+Intentional subset: no network map fetches, no sf/CRS, no public
+\`geom_polygon\` (map ships the closed-path renderer only).
+[Map choropleth](/examples/map/choropleth): three toy regions filled by rate.
+
 ## Positions
 
 Stack sums, dodge side-by-side groups, fill normalizes each stack to one, jitter

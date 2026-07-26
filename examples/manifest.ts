@@ -467,6 +467,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "map/choropleth",
+    category: "map",
+    name: "choropleth",
+    title: "Map choropleth",
+    description: "",
+    tags: ["map", "choropleth", "region", "join", "fill"],
+    docsSection: "Maps & polygons",
+    hasData: true,
+  },
+  {
     id: "path/connect-hv",
     category: "path",
     name: "connect-hv",
