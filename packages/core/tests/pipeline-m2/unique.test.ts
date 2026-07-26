@@ -4,7 +4,6 @@
 import { describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
 import { runPipeline } from "../../src/pipeline.ts";
-import type { PointsBatch } from "../../src/scene.ts";
 import { size } from "./fixtures.ts";
 
 describe("stat unique (#813)", () => {
@@ -22,10 +21,11 @@ describe("stat unique (#813)", () => {
         .spec(),
       size,
     );
-    const batch = model.scene.batches.find((b) => b.kind === "points") as PointsBatch | undefined;
+    const batch = model.scene.batches.find((b) => b.kind === "points");
     expect(batch).toBeDefined();
+    if (batch?.kind !== "points") throw new Error("expected points batch");
     // Keys: (0,0,a), (1,1,b) — two unique combinations.
-    expect(batch!.positions.length / 2).toBe(2);
+    expect(batch.positions.length / 2).toBe(2);
     expect(model.candidates.size).toBe(2);
   });
 
@@ -65,7 +65,8 @@ describe("stat unique (#813)", () => {
         .spec(),
       size,
     );
-    const batch = model.scene.batches.find((b) => b.kind === "points") as PointsBatch | undefined;
-    expect(batch!.positions.length / 2).toBe(3);
+    const batch = model.scene.batches.find((b) => b.kind === "points");
+    if (batch?.kind !== "points") throw new Error("expected points batch");
+    expect(batch.positions.length / 2).toBe(3);
   });
 });

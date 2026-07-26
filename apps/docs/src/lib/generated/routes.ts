@@ -2613,6 +2613,16 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/point/stat-unique",
+    title: "stat unique overplotting — ggsvelte gallery",
+    description: "stat unique overplotting",
+    canonicalPath: "/examples/point/stat-unique",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/point/style-scales",
     title: "Complete style scales — ggsvelte gallery",
     description: "Complete style scales",

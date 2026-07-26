@@ -26,13 +26,14 @@ function keyToken(value: unknown): string {
   }
   if (typeof value === "boolean") return value ? "t" : "f";
   if (typeof value === "string") return `s:${value}`;
-  // Cells are JSON scalars in ColumnTable; anything else stringifies stably enough for equality.
-  return `o:${String(value)}`;
+  // ColumnTable cells are JSON scalars; non-scalars should not appear. Use
+  // JSON.stringify so objects never collapse to the useless "[object Object]".
+  return `o:${JSON.stringify(value)}`;
 }
 
 function rowKey(parts: readonly unknown[]): string {
   // Unit separator avoids accidental collisions between multi-field joins.
-  return parts.map(keyToken).join("\u001f");
+  return parts.map((part) => keyToken(part)).join("\u001F");
 }
 
 /**
