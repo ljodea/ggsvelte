@@ -402,6 +402,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "spoke-origin-angle-radius",
+        title: "Spoke (origin + angle + radius)",
+        level: 2,
+      },
+      {
         id: "manual-portable-named-per-group-transforms",
         title: "Manual (portable named per-group transforms)",
         level: 2,
@@ -2262,8 +2267,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-665",
-        title: "experimental (665)",
+        id: "experimental-670",
+        title: "experimental (670)",
         level: 3,
       },
       {
@@ -2302,8 +2307,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-478",
-        title: "experimental (478)",
+        id: "experimental-479",
+        title: "experimental (479)",
         level: 3,
       },
       {
@@ -3132,6 +3137,16 @@ export const DOCS_ROUTES = [
     title: "Loess smooth with confidence ribbon — ggsvelte gallery",
     description: "Loess smooth with confidence ribbon",
     canonicalPath: "/examples/smooth/loess-scatter",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/spoke/basic",
+    title: "Wind spokes — ggsvelte gallery",
+    description: "Wind spokes",
+    canonicalPath: "/examples/spoke/basic",
     kind: "page",
     index: true,
     sitemap: true,

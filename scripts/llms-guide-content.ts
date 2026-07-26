@@ -551,6 +551,30 @@ gg(data, aes({ x: "x", y: "y" }))
 [Hline threshold](/examples/hline/threshold) and
 [Vline cutoff](/examples/vline/cutoff): annotation intercepts as rule aliases.
 
+## Spoke (origin + angle + radius)
+
+\`geom: "spoke"\` (ggplot2 \`geom_spoke\`) draws one segment per row from
+\`(x, y)\` in direction \`angle\` (radians; 0 = +x, π/2 = +y) with length
+\`radius\` in **data units**. Endpoints:
+
+\`xend = x + radius·cos(angle)\`, \`yend = y + radius·sin(angle)\`
+
+then the same position transform as \`x\`/\`y\`. Reuses segment rendering.
+Requires continuous \`x\`/\`y\`. Map \`aes.angle\` / \`aes.radius\` or set
+constants via \`params.angle\` / \`params.radius\`.
+
+\`\`\`svelte fragment
+<GeomSpoke angle={0} radius={1} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y", angle: "theta", radius: "r" }))
+  .geomSpoke()
+  .spec();
+\`\`\`
+
+[Wind spokes](/examples/spoke/basic): origin points with direction and length.
+
 ## Manual (portable named per-group transforms)
 
 \`stat: "manual"\` (ggplot2 \`stat_manual\`, portable v1) applies a **named**

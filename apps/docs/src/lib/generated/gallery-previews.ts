@@ -411,6 +411,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "e5e8f44de5ea850ec5a6fea1b4a6eede2fbf777f21c15b11823c5c77abd0c724",
   },
   {
+    id: "spoke/basic",
+    filename: "spoke-basic-light.png",
+    path: "/previews/spoke-basic-light.png",
+    sha256: "3b7deb0794eae6049186ffae86f62949a273de8f557f00034b588f6a4007ed35",
+  },
+  {
     id: "text/labels",
     filename: "text-labels-light.png",
     path: "/previews/text-labels-light.png",

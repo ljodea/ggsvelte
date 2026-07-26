@@ -377,6 +377,29 @@ export class MockResponder implements Responder {
 
     // --- geom selection (keyword templates, most specific first) -----------
     if (
+      /\bgeom[_\s]?spoke\b|\bspokes?\b/.test(prompt) ||
+      (fieldNamed("angle") !== undefined && fieldNamed("radius") !== undefined) ||
+      (/\bangle\b/.test(prompt) && /\bradius\b/.test(prompt) && /\bspoke\b/.test(prompt))
+    ) {
+      // geom_spoke: origin + angle (radians) + radius → segment (#810).
+      const aes: MockAes = {
+        x: f(fieldNamed("x") ?? pick.quant() ?? "x"),
+        y: f(fieldNamed("y") ?? pick.quant() ?? "y"),
+      };
+      const angle =
+        fieldNamed("theta") ??
+        fieldNamed("direction") ??
+        fieldNamed("angle") ??
+        pick.mentionedQuant();
+      if (angle !== undefined) aes.angle = f(angle);
+      const radius = fieldNamed("r") ?? fieldNamed("radius");
+      if (radius !== undefined) {
+        aes.radius = f(radius);
+        spec.layers.push({ geom: "spoke", aes });
+      } else {
+        spec.layers.push({ geom: "spoke", aes, params: { radius: 1 } });
+      }
+    } else if (
       (/\bgeom[_\s]?sf[_\s]?label\b|\bsf_label\b|\bsf label\b|\bboxed labels?\b/.test(prompt) ||
         (fieldNamed("geometry") !== undefined &&
           /\blabel\b/.test(prompt) &&

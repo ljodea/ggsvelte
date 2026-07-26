@@ -1,0 +1,38 @@
+{
+  "id": "95-spoke-constant-radius",
+  "kind": "chart",
+  "prompt": "Use geom_spoke with constant radius 1 and mapped angle from direction.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "direction", "type": "quantitative" }
+    ],
+    "rowCount": 2
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 0, "direction": 0 },
+      { "x": 1, "y": 1, "direction": 1.57 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "spoke",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "angle": { "field": "direction" }
+        },
+        "params": { "radius": 1 }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_spoke constant radius via params (#810)."
+}

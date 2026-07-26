@@ -787,6 +787,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "spoke/basic",
+    category: "spoke",
+    name: "basic",
+    title: "Wind spokes",
+    description: "",
+    tags: ["spoke", "segment", "angle", "radius", "vector", "direction"],
+    docsSection: "Lines & rules",
+    hasData: true,
+  },
+  {
     id: "text/labels",
     category: "text",
     name: "labels",
