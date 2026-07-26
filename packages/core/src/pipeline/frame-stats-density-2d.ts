@@ -11,11 +11,11 @@ import type { CellValue, ColumnTable } from "../table.js";
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
 import { makeColumnOf, styleColumns } from "./frame-stats-shared.js";
 import { positionColumn } from "./temporal-position.js";
-import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
+import type { ColorBinding, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { NO_ROW } from "./types.js";
 
 function colorOrFillValues(
-  binding: LayerBinding["color"] | LayerBinding["fill"],
+  binding: ColorBinding,
   columnOf: (field: string | null) => readonly CellValue[] | null,
   computed: Readonly<Record<string, Float64Array>>,
 ): readonly CellValue[] | null {
