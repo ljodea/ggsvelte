@@ -5,6 +5,7 @@
  *  - scale-position-helpers.ts — temporal, discrete, continuous, binned, reverse
  *  - scale-color-helpers.ts — color/fill families + configuredColorScaleType
  *  - scale-style-helpers.ts — numeric and finite-symbol style families
+ *  - scale-multi-helpers.ts — multi-aes identity/manual + scaleType (#833)
  *
  * Public package imports continue through this module for stable paths.
  */
@@ -136,3 +137,21 @@ export {
 } from "./scale-color-helpers.js";
 
 export * from "./scale-style-helpers.js";
+
+export {
+  scaleContinuousIdentity,
+  scaleDiscreteIdentity,
+  scaleDiscreteManual,
+  scaleType,
+  scale_continuous_identity,
+  scale_discrete_identity,
+  scale_discrete_manual,
+  scale_type,
+  canonicalMultiScaleChannel,
+  type MultiScaleAesthetic,
+  type MultiScaleChannel,
+  type MultiIdentityScaleOptions,
+  type MultiManualScaleOptions,
+  type ScaleTypeAesthetic,
+  type RecommendedScaleType,
+} from "./scale-multi-helpers.js";

@@ -433,7 +433,25 @@ colorsteps guide exposes every boundary, label, swatch, and inclusivity rule:
 Manual scales pair each domain value with exactly one color and never recycle
 unknown values. Identity scales validate source \`#rgb\`/\`#rrggbb\` values and
 show no guide by default. \`naValue\` handles missing values; \`unknownValue\`
-handles invalid, unmapped, or censored values.
+handles invalid, unmapped, or censored values. Multi-aesthetic helpers expand
+the same identity or manual config across channels (British \`colour\` aliases
+\`color\`):
+
+\`\`\`ts fragment
+import {
+  scaleContinuousIdentity,
+  scaleDiscreteManual,
+  scaleType,
+} from "@ggsvelte/spec";
+
+const linked = scaleDiscreteManual({
+  aesthetics: ["colour", "fill"],
+  values: ["#4477aa", "#ee6677"],
+  domain: ["control", "treated"],
+});
+const rawSize = scaleContinuousIdentity({ aesthetics: ["size", "alpha"] });
+// Agent default: scaleType({ aesthetic: "color", dataKind: "nominal" }) → "ordinal"
+\`\`\`
 
 \`\`\`ts fragment
 const manual = scaleColorManual({
