@@ -15,6 +15,7 @@ const THEME_LABELS = {
   fivethirtyeight: "FiveThirtyEight",
   economist: "Economist",
   tufte: "Tufte",
+  linedraw: "Linedraw",
   // Aliases of the ggplot2 grey-panel look (theme_grey / theme_gray, #824).
   grey: "Grey",
   gray: "Gray",
@@ -47,6 +48,7 @@ const THEME_DEMO_SCHEMES = {
   fivethirtyeight: "tableau10",
   economist: "flexoki",
   tufte: "colorblind",
+  linedraw: "colorblind",
   grey: "observable10",
   gray: "observable10",
   test: "colorblind",

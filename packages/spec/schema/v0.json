@@ -5254,6 +5254,10 @@
         },
         {
           "type": "string",
+          "const": "linedraw"
+        },
+        {
+          "type": "string",
           "const": "grey"
         },
         {
@@ -5265,7 +5269,7 @@
           "const": "test"
         }
       ],
-      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"grey\", \"gray\", \"test\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"grey\", \"gray\", \"test\"."
     },
     "ThemeSpec": {
       "type": "object",

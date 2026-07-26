@@ -262,6 +262,7 @@ describe("Theme* export parity with THEME_NAMES", () => {
       fivethirtyeight: "ThemeFivethirtyeight",
       economist: "ThemeEconomist",
       tufte: "ThemeTufte",
+      linedraw: "ThemeLinedraw",
       grey: "ThemeGrey",
       gray: "ThemeGray",
       test: "ThemeTest",

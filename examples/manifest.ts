@@ -143,6 +143,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "col/theme-linedraw",
+    category: "col",
+    name: "theme-linedraw",
+    title: "Column chart (theme_linedraw)",
+    description: "",
+    tags: ["col", "bars", "theme", "linedraw"],
+    docsSection: "Bars & columns",
+    hasData: true,
+  },
+  {
     id: "col/value-labels",
     category: "col",
     name: "value-labels",

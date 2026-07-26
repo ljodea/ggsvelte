@@ -137,6 +137,8 @@ export { default as ThemeEconomist } from "./theme/ThemeEconomist.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeTufte } from "./theme/ThemeTufte.svelte";
 /** @lifecycle stable-intent */
+export { default as ThemeLinedraw } from "./theme/ThemeLinedraw.svelte";
+/** @lifecycle stable-intent */
 export { default as ThemeGrey } from "./theme/ThemeGrey.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeGray } from "./theme/ThemeGray.svelte";

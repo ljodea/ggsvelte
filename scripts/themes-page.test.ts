@@ -24,6 +24,7 @@ describe("themes catalog", () => {
       { name: "fivethirtyeight", scheme: "tableau10" },
       { name: "economist", scheme: "flexoki" },
       { name: "tufte", scheme: "colorblind" },
+      { name: "linedraw", scheme: "colorblind" },
       { name: "grey", scheme: "observable10" },
       { name: "gray", scheme: "observable10" },
       { name: "test", scheme: "colorblind" },

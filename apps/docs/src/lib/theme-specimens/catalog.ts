@@ -144,6 +144,14 @@ export const THEME_SPECIMENS: readonly ThemeSpecimenConfig[] = [
     legendFocus: false,
   },
   {
+    name: "linedraw",
+    label: BY_NAME.linedraw.label,
+    caption: "Black grid and border on white paper — line-art monochrome chrome.",
+    kind: "countries-scatter",
+    scheme: BY_NAME.linedraw.scheme,
+    legendFocus: true,
+  },
+  {
     name: "test",
     label: BY_NAME.test.label,
     caption: "Pinned high-contrast chrome for package tests and VR.",
