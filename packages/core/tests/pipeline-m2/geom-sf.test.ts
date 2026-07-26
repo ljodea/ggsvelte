@@ -235,7 +235,45 @@ describe("geom_sf", () => {
     }
   });
 
-  it("errors on GeometryCollection", () => {
+  it("renders GeometryCollection of polygons as multiple closed parts", () => {
+    const gc = geo({
+      type: "GeometryCollection",
+      geometries: [
+        {
+          type: "Polygon",
+          coordinates: [
+            [
+              [0, 0],
+              [1, 0],
+              [0.5, 1],
+              [0, 0],
+            ],
+          ],
+        },
+        {
+          type: "Polygon",
+          coordinates: [
+            [
+              [3, 0],
+              [4, 0],
+              [3.5, 1],
+              [3, 0],
+            ],
+          ],
+        },
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [gc], id: ["parts"] }, aes({ fill: "id" }))
+        .geomSf()
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PathsBatch;
+    expect(batch.pathOffsets.length - 1).toBe(2);
+  });
+
+  it("errors when GeometryCollection mixes geometry families", () => {
     try {
       runPipeline(
         gg(
@@ -243,7 +281,20 @@ describe("geom_sf", () => {
             geometry: [
               geo({
                 type: "GeometryCollection",
-                geometries: [{ type: "Point", coordinates: [0, 0] }],
+                geometries: [
+                  { type: "Point", coordinates: [0, 0] },
+                  {
+                    type: "Polygon",
+                    coordinates: [
+                      [
+                        [0, 0],
+                        [1, 0],
+                        [0.5, 1],
+                        [0, 0],
+                      ],
+                    ],
+                  },
+                ],
               }),
             ],
           },
@@ -256,9 +307,7 @@ describe("geom_sf", () => {
       expect.unreachable();
     } catch (error) {
       expect(error).toBeInstanceOf(PipelineError);
-      expect((error as PipelineError).code).toBe("sf-geometry-unsupported");
-      // Layer-qualified path (not a bare "/geometry" that hides the layer).
-      expect((error as PipelineError).path).toMatch(/^\/layers\/0\//);
+      expect((error as PipelineError).code).toBe("sf-geometry-mixed");
     }
   });
 

@@ -2104,7 +2104,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Parameters for geom_sf (#809 phase 1): portable GeoJSON Geometry column plus styling. No CRS/coord_sf in v1.",
+        "Parameters for geom_sf (#809): portable GeoJSON Geometry column plus styling. GeometryCollection expands to leaf families. No CRS/coord_sf in v1.",
     },
   ),
 
@@ -3176,7 +3176,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("sf", {
         description:
-          "Simple-features geometry (ggplot2 geom_sf; #809 phase 1): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families; no CRS or coord_sf yet.",
+          "Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families and GeometryCollection of those; no CRS or coord_sf yet.",
       }),
       stat: Type.Optional(
         Type.Literal("identity", { description: "SF layers expand geometry then draw as-is." }),

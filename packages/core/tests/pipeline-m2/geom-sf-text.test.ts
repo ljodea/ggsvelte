@@ -134,6 +134,24 @@ describe("geom_sf_text / stat_sf_coordinates", () => {
     }
   });
 
+  it("places labels for each GeometryCollection leaf", () => {
+    const gc = geo({
+      type: "GeometryCollection",
+      geometries: [
+        { type: "Point", coordinates: [0, 0] },
+        { type: "Point", coordinates: [2, 2] },
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [gc], name: ["gc"] }, aes({ label: "name" }))
+        .geomSfText()
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as GlyphsBatch;
+    expect(batch.texts).toEqual(["gc", "gc"]);
+  });
+
   it("defaults stat to sf_coordinates", () => {
     const spec = gg(
       {

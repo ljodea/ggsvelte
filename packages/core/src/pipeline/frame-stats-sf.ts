@@ -8,11 +8,13 @@ import { ColumnTable, type CellValue } from "../table.js";
 
 import { emptyFrameExtras } from "./frame-helpers.js";
 import {
+  expandSfLeaves,
   geometryFieldName,
   isFinitePair,
   parseSfGeometry,
   sfKindOf,
   type SfKind,
+  type SfLeaf,
   type SfPosition,
 } from "./sf-geometry.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
@@ -132,37 +134,36 @@ export function buildSfFrame(
   let ringId = 0;
   let layerKind: SfKind | null = null;
   let holesIgnored = 0;
+  const layerPath = `/layers/${index}`;
 
-  for (let row = 0; row < table.rowCount; row++) {
-    const cellPath = `/layers/${index}/data/${field}`;
-    const parsed = parseSfGeometry(geomCol[row]!, cellPath);
-    const kind = sfKindOf(parsed.type, cellPath);
+  const emitLeaf = (leaf: SfLeaf, row: number): void => {
+    const kind = sfKindOf(leaf.type, layerPath);
     if (layerKind === null) layerKind = kind;
     else if (layerKind !== kind) {
       throw new PipelineError(
         "sf-geometry-mixed",
-        `/layers/${index}`,
+        layerPath,
         `geom_sf v1 requires a single geometry family per layer (found "${layerKind}" then "${kind}"). Split mixed types into separate layers.`,
       );
     }
 
-    const coords = parsed.coordinates;
-    if (parsed.type === "Point") {
+    const coords = leaf.coordinates;
+    if (leaf.type === "Point") {
       if (!isFinitePair(coords)) {
         throw new PipelineError(
           "sf-geometry-invalid",
-          `/layers/${index}`,
+          layerPath,
           "Point geometry requires a finite [x, y] coordinate pair.",
         );
       }
       pushPoint(outX, outY, outGroups, outRowIndex, valueRows, ringId++, row, coords);
-      continue;
+      return;
     }
-    if (parsed.type === "MultiPoint") {
+    if (leaf.type === "MultiPoint") {
       if (!Array.isArray(coords)) {
         throw new PipelineError(
           "sf-geometry-invalid",
-          `/layers/${index}`,
+          layerPath,
           "MultiPoint coordinates must be an array of positions.",
         );
       }
@@ -170,20 +171,20 @@ export function buildSfFrame(
         if (!isFinitePair(c)) continue;
         pushPoint(outX, outY, outGroups, outRowIndex, valueRows, ringId++, row, c);
       }
-      continue;
+      return;
     }
-    if (parsed.type === "LineString") {
+    if (leaf.type === "LineString") {
       const g = ringId++;
       if (!pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, coords, 2, false)) {
         // drop empty
       }
-      continue;
+      return;
     }
-    if (parsed.type === "MultiLineString") {
+    if (leaf.type === "MultiLineString") {
       if (!Array.isArray(coords)) {
         throw new PipelineError(
           "sf-geometry-invalid",
-          `/layers/${index}`,
+          layerPath,
           "MultiLineString coordinates must be an array of line strings.",
         );
       }
@@ -191,26 +192,26 @@ export function buildSfFrame(
         const g = ringId++;
         pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, line, 2, false);
       }
-      continue;
+      return;
     }
-    if (parsed.type === "Polygon") {
+    if (leaf.type === "Polygon") {
       if (!Array.isArray(coords) || coords.length === 0) {
         throw new PipelineError(
           "sf-geometry-invalid",
-          `/layers/${index}`,
+          layerPath,
           "Polygon coordinates must be a non-empty array of rings.",
         );
       }
       if (coords.length > 1) holesIgnored += coords.length - 1;
       const g = ringId++;
       pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, coords[0], 3, true);
-      continue;
+      return;
     }
     // MultiPolygon
     if (!Array.isArray(coords)) {
       throw new PipelineError(
         "sf-geometry-invalid",
-        `/layers/${index}`,
+        layerPath,
         "MultiPolygon coordinates must be an array of polygons.",
       );
     }
@@ -220,6 +221,14 @@ export function buildSfFrame(
       const g = ringId++;
       pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, poly[0], 3, true);
     }
+  };
+
+  for (let row = 0; row < table.rowCount; row++) {
+    const cellPath = `/layers/${index}/data/${field}`;
+    const parsed = parseSfGeometry(geomCol[row]!, cellPath);
+    // GeometryCollection expands to leaves; groups continue across parts (ringId++).
+    const leaves = expandSfLeaves(parsed, cellPath);
+    for (const leaf of leaves) emitLeaf(leaf, row);
   }
 
   if (holesIgnored > 0) {
