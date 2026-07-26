@@ -51,6 +51,7 @@ test("themes compares all built-in chart themes as full-width interactive portra
     "Minimal",
     "ggplot2",
     "Classic",
+    "B&W",
     "HRBR",
     "Few",
     "Clean",

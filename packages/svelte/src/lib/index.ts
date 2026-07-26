@@ -123,6 +123,8 @@ export { default as ThemeGgplot2 } from "./theme/ThemeGgplot2.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeClassic } from "./theme/ThemeClassic.svelte";
 /** @lifecycle stable-intent */
+export { default as ThemeBw } from "./theme/ThemeBw.svelte";
+/** @lifecycle stable-intent */
 export { default as ThemeHrbr } from "./theme/ThemeHrbr.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeFew } from "./theme/ThemeFew.svelte";

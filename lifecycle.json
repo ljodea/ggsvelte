@@ -4893,6 +4893,10 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ThemeBw": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ThemeClassic": {
           "kind": "value",
           "lifecycle": "stable-intent"

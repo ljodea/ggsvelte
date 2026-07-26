@@ -17,6 +17,7 @@ describe("themes catalog", () => {
       { name: "minimal", scheme: "colorblind" },
       { name: "ggplot2", scheme: "observable10" },
       { name: "classic", scheme: "tableau10" },
+      { name: "bw", scheme: "tableau10" },
       { name: "hrbr", scheme: "ipsum" },
       { name: "few", scheme: "tableau10" },
       { name: "clean", scheme: "flexoki" },

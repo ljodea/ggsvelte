@@ -86,6 +86,7 @@ export const THEME_NAMES = [
   "minimal",
   "ggplot2",
   "classic",
+  "bw",
   "hrbr",
   "few",
   "clean",

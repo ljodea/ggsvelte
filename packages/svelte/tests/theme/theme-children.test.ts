@@ -247,7 +247,7 @@ describe("theme prop deprecation advisories", () => {
 });
 
 describe("Theme* export parity with THEME_NAMES", () => {
-  it("12: exported Theme* set === THEME_NAMES ∪ {Theme}, both directions", () => {
+  it("13: exported Theme* set === THEME_NAMES ∪ {Theme}, both directions", () => {
     const nameToExport: Record<string, string> = {
       default: "ThemeDefault",
       light: "ThemeLight",
@@ -255,6 +255,7 @@ describe("Theme* export parity with THEME_NAMES", () => {
       minimal: "ThemeMinimal",
       ggplot2: "ThemeGgplot2",
       classic: "ThemeClassic",
+      bw: "ThemeBw",
       hrbr: "ThemeHrbr",
       few: "ThemeFew",
       clean: "ThemeClean",
