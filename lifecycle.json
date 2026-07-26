@@ -1052,6 +1052,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "THEME_NAME_ALIASES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "TemporalColorScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4522,6 +4526,14 @@
           "lifecycle": "stable-intent"
         },
         "ThemeGgplot2": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeGray": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeGrey": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },

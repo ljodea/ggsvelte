@@ -87,9 +87,23 @@ export const THEME_NAMES = [
   "fivethirtyeight",
   "economist",
   "tufte",
+  "grey",
+  "gray",
 ] as const;
 
 type ThemeNameValue = (typeof THEME_NAMES)[number];
+
+/**
+ * Registered theme names that share another theme's token map / evidence.
+ * Keys are first-class ThemeName values (PortableSpec accepts them); values
+ * are the canonical theme that owns the built-in tokens and visual evidence.
+ * UK `grey` and US `gray` both alias the grey-panel `ggplot2` look (#824).
+ */
+export const THEME_NAME_ALIASES = {
+  grey: "ggplot2",
+  gray: "ggplot2",
+} as const satisfies Partial<Record<ThemeNameValue, ThemeNameValue>>;
+
 /** TypeBox literals for theme names (used by ThemeName def). */
 export const THEME_NAME_SCHEMAS = THEME_NAMES.map((name) => Type.Literal(name)) as unknown as [
   TLiteral<ThemeNameValue>,

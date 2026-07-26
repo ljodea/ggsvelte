@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { readFile } from "node:fs/promises";
 
-import { THEME_NAMES } from "../packages/spec/src/schema.ts";
+import { THEME_NAME_ALIASES, THEME_NAMES } from "../packages/spec/src/schema.ts";
 
 const APP_CSS = new URL("../apps/docs/src/app.css", import.meta.url);
 const THEME_EVIDENCE = new URL("../artifacts/theme-equivalence/", import.meta.url);
@@ -16,9 +16,17 @@ describe("documentation chart theme isolation", () => {
   });
 
   it("keeps rendered evidence for every registered theme", async () => {
+    // Aliases (grey/gray → ggplot2) reuse the canonical theme's evidence files
+    // rather than committing duplicate 1440×960 PNGs (#824).
     for (const theme of THEME_NAMES) {
-      expect(await Bun.file(new URL(`svg/${theme}.svg`, THEME_EVIDENCE)).exists()).toBe(true);
-      expect(await Bun.file(new URL(`ggsvelte-${theme}.png`, THEME_EVIDENCE)).exists()).toBe(true);
+      const evidence =
+        theme in THEME_NAME_ALIASES
+          ? THEME_NAME_ALIASES[theme as keyof typeof THEME_NAME_ALIASES]
+          : theme;
+      expect(await Bun.file(new URL(`svg/${evidence}.svg`, THEME_EVIDENCE)).exists()).toBe(true);
+      expect(await Bun.file(new URL(`ggsvelte-${evidence}.png`, THEME_EVIDENCE)).exists()).toBe(
+        true,
+      );
     }
   });
 });

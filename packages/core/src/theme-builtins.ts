@@ -195,6 +195,32 @@ export function themed(
 }
 
 /**
+ * Grey-panel ggplot2 complete-theme tokens. Shared by registered names
+ * `ggplot2`, `grey`, and `gray` (UK/US theme_grey / theme_gray aliases, #824).
+ * LEGACY_BUILTIN_THEMES spreads BUILTIN_THEMES so the aliases inherit there too.
+ */
+const GGPLOT2_GREY = themed({
+  ink: "#333333",
+  panel: "#ebebeb",
+  grid: "#ffffff",
+  axisText: "#4d4d4d",
+  tickColor: "#333333",
+  fontSize: 11,
+  axisTextSize: 12,
+  fontWeight: 400,
+  titleSize: 13.2,
+  subtitleSize: 11,
+  axisTitleSize: 11,
+  captionSize: 8.8,
+  stripSize: 8.8,
+  tickWidth: 0.5,
+  tickLength: 3.67,
+  gridWidth: 0.5,
+  ticksX: true,
+  ticksY: true,
+});
+
+/**
  * Built-in themes for edition 2. The default deliberately follows
  * hrbrthemes' quiet hierarchy: real typography, hairline grids, and no heavy
  * axis frame. Named presets retain the structural contracts of their R
@@ -244,26 +270,10 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     axisLine: "#6b717b",
     tickColor: "#6b717b",
   }),
-  ggplot2: themed({
-    ink: "#333333",
-    panel: "#ebebeb",
-    grid: "#ffffff",
-    axisText: "#4d4d4d",
-    tickColor: "#333333",
-    fontSize: 11,
-    axisTextSize: 12,
-    fontWeight: 400,
-    titleSize: 13.2,
-    subtitleSize: 11,
-    axisTitleSize: 11,
-    captionSize: 8.8,
-    stripSize: 8.8,
-    tickWidth: 0.5,
-    tickLength: 3.67,
-    gridWidth: 0.5,
-    ticksX: true,
-    ticksY: true,
-  }),
+  ggplot2: GGPLOT2_GREY,
+  // theme_grey / theme_gray name parity — same token map as ggplot2 (#824).
+  grey: GGPLOT2_GREY,
+  gray: GGPLOT2_GREY,
   classic: themed({
     ink: "#000000",
     grid: "none",

@@ -60,6 +60,7 @@ export {
   SpecModule,
   TextLayerSchema,
   THEME_NAMES,
+  THEME_NAME_ALIASES,
 } from "./schema.js";
 export type {
   A11yMode,

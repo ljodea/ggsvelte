@@ -5011,9 +5011,17 @@
         {
           "type": "string",
           "const": "tufte"
+        },
+        {
+          "type": "string",
+          "const": "grey"
+        },
+        {
+          "type": "string",
+          "const": "gray"
         }
       ],
-      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"grey\", \"gray\"."
     },
     "ThemeSpec": {
       "type": "object",

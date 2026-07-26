@@ -52,6 +52,7 @@ const VALUE_EXPORTS = [
   "SpecModule",
   "TextLayerSchema",
   "THEME_NAMES",
+  "THEME_NAME_ALIASES",
 ] as const;
 
 describe("schema facade surface", () => {
