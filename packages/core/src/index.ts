@@ -100,6 +100,19 @@ export type {
   PositionScale,
 } from "./scales/train.js";
 export { rampColor, trainSequential, VIRIDIS_RAMP_10 } from "./scales/color.js";
+export {
+  GREY_DEFAULT_END,
+  GREY_DEFAULT_START,
+  GREY_PALETTE_10,
+  HUE_DEFAULT_C,
+  HUE_DEFAULT_H,
+  HUE_DEFAULT_L,
+  HUE_GREY_PALETTE_SIZE,
+  HUE_PALETTE_10,
+  greyPalette,
+  hclToHex,
+  huePalette,
+} from "./scales/hue-grey-palettes.js";
 export type { SequentialColorScale, SequentialConfig } from "./scales/color.js";
 
 // Pre-stat position scale transform registry (PR 3)

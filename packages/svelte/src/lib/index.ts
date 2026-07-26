@@ -209,6 +209,18 @@ export { default as ScaleFillManual } from "./scale/ScaleFillManual.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleFillIdentity } from "./scale/ScaleFillIdentity.svelte";
 /** @lifecycle stable-intent */
+export { default as ScaleColorHue } from "./scale/ScaleColorHue.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorGrey } from "./scale/ScaleColorGrey.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorOrdinal } from "./scale/ScaleColorOrdinal.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillHue } from "./scale/ScaleFillHue.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillGrey } from "./scale/ScaleFillGrey.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillOrdinal } from "./scale/ScaleFillOrdinal.svelte";
+/** @lifecycle stable-intent */
 export { default as ScaleSizeContinuous } from "./scale/ScaleSizeContinuous.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleSizeDiscrete } from "./scale/ScaleSizeDiscrete.svelte";
@@ -284,6 +296,18 @@ export { default as ScaleColourDatetime } from "./scale/ScaleColorDatetime.svelt
 export { default as ScaleColourManual } from "./scale/ScaleColorManual.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourIdentity } from "./scale/ScaleColorIdentity.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourHue } from "./scale/ScaleColorHue.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourGrey } from "./scale/ScaleColorGrey.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorGray } from "./scale/ScaleColorGrey.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourGray } from "./scale/ScaleColorGrey.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourOrdinal } from "./scale/ScaleColorOrdinal.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillGray } from "./scale/ScaleFillGrey.svelte";
 // </generated:scale-children>
 
 // Coord children (#659 slice 5) — stable-intent: named shells + <Coord>
@@ -424,54 +448,78 @@ export {
   scaleColorDate,
   scaleColorDatetime,
   scaleColorDiscrete,
+  scaleColorGray,
+  scaleColorGrey,
+  scaleColorHue,
   scaleColorIdentity,
   scaleColorLog10,
   scaleColorManual,
+  scaleColorOrdinal,
   scaleColorSqrt,
   scaleColourBinned,
   scaleColourContinuous,
   scaleColourDate,
   scaleColourDatetime,
   scaleColourDiscrete,
+  scaleColourGray,
+  scaleColourGrey,
+  scaleColourHue,
   scaleColourIdentity,
   scaleColourLog10,
   scaleColourManual,
+  scaleColourOrdinal,
   scaleColourSqrt,
   scaleFillBinned,
   scaleFillContinuous,
   scaleFillDate,
   scaleFillDatetime,
   scaleFillDiscrete,
+  scaleFillGray,
+  scaleFillGrey,
+  scaleFillHue,
   scaleFillIdentity,
   scaleFillLog10,
   scaleFillManual,
+  scaleFillOrdinal,
   scaleFillSqrt,
   scale_color_binned,
   scale_color_continuous,
   scale_color_date,
   scale_color_datetime,
   scale_color_discrete,
+  scale_color_gray,
+  scale_color_grey,
+  scale_color_hue,
   scale_color_identity,
   scale_color_log10,
   scale_color_manual,
+  scale_color_ordinal,
   scale_color_sqrt,
   scale_colour_binned,
   scale_colour_continuous,
   scale_colour_date,
   scale_colour_datetime,
   scale_colour_discrete,
+  scale_colour_gray,
+  scale_colour_grey,
+  scale_colour_hue,
   scale_colour_identity,
   scale_colour_log10,
   scale_colour_manual,
+  scale_colour_ordinal,
   scale_colour_sqrt,
   scale_fill_binned,
   scale_fill_continuous,
   scale_fill_date,
   scale_fill_datetime,
   scale_fill_discrete,
+  scale_fill_gray,
+  scale_fill_grey,
+  scale_fill_hue,
   scale_fill_identity,
   scale_fill_log10,
   scale_fill_manual,
+  scale_fill_ordinal,
   scale_fill_sqrt,
   scaleXBinned,
   scaleXContinuous,
@@ -587,6 +635,8 @@ export type {
   TemporalColorScaleOptions,
   TransformedColorScaleOptions,
   TransformedPositionScaleOptions,
+  GreyScaleOptions,
+  HueScaleOptions,
   TemporalDecision,
   TemporalDisambiguation,
   TemporalInterval,

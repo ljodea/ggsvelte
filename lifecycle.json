@@ -476,6 +476,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GreyScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GuideSpec": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -498,6 +502,10 @@
         },
         "HistogramLayerSchema": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "HueScaleOptions": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "IdentityColorScaleOptions": {
@@ -1452,6 +1460,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleColorGray": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorGrey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorHue": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleColorIdentity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1461,6 +1481,10 @@
           "lifecycle": "experimental"
         },
         "scaleColorManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorOrdinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1488,6 +1512,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleColourGray": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourGrey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourHue": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleColourIdentity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1497,6 +1533,10 @@
           "lifecycle": "experimental"
         },
         "scaleColourManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourOrdinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1524,6 +1564,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleFillGray": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillGrey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillHue": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleFillIdentity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1533,6 +1585,10 @@
           "lifecycle": "experimental"
         },
         "scaleFillManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillOrdinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1756,6 +1812,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_color_gray": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_grey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_hue": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_color_identity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1765,6 +1833,10 @@
           "lifecycle": "experimental"
         },
         "scale_color_manual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_ordinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1792,6 +1864,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_colour_gray": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_grey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_hue": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_colour_identity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1801,6 +1885,10 @@
           "lifecycle": "experimental"
         },
         "scale_colour_manual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_ordinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1828,6 +1916,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_fill_gray": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_grey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_hue": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_fill_identity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1837,6 +1937,10 @@
           "lifecycle": "experimental"
         },
         "scale_fill_manual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_ordinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2359,6 +2463,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GREY_DEFAULT_END": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GREY_DEFAULT_START": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GREY_PALETTE_10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeometryBatch": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2373,6 +2489,26 @@
         },
         "GuidePlan": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "HUE_DEFAULT_C": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "HUE_DEFAULT_H": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "HUE_DEFAULT_L": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "HUE_GREY_PALETTE_SIZE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "HUE_PALETTE_10": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "IPSUM_PALETTE": {
@@ -2960,6 +3096,18 @@
           "lifecycle": "experimental"
         },
         "getScaleTransform": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "greyPalette": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "hclToHex": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "huePalette": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3601,6 +3749,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GreyScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GuideAxis": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -3642,6 +3794,10 @@
           "lifecycle": "stable-intent"
         },
         "GuidesSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "HueScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4061,6 +4217,18 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleColorGray": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorGrey": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorHue": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleColorIdentity": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -4070,6 +4238,10 @@
           "lifecycle": "stable-intent"
         },
         "ScaleColorManual": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorOrdinal": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -4097,6 +4269,18 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleColourGray": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourGrey": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourHue": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleColourIdentity": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -4106,6 +4290,10 @@
           "lifecycle": "stable-intent"
         },
         "ScaleColourManual": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourOrdinal": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -4149,6 +4337,18 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleFillGray": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillGrey": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillHue": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleFillIdentity": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -4158,6 +4358,10 @@
           "lifecycle": "stable-intent"
         },
         "ScaleFillManual": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillOrdinal": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -4845,6 +5049,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleColorGray": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorGrey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorHue": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleColorIdentity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4854,6 +5070,10 @@
           "lifecycle": "experimental"
         },
         "scaleColorManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorOrdinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4881,6 +5101,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleColourGray": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourGrey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourHue": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleColourIdentity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4890,6 +5122,10 @@
           "lifecycle": "experimental"
         },
         "scaleColourManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourOrdinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4917,6 +5153,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleFillGray": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillGrey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillHue": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleFillIdentity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4926,6 +5174,10 @@
           "lifecycle": "experimental"
         },
         "scaleFillManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillOrdinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5149,6 +5401,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_color_gray": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_grey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_hue": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_color_identity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5158,6 +5422,10 @@
           "lifecycle": "experimental"
         },
         "scale_color_manual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_ordinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5185,6 +5453,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_colour_gray": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_grey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_hue": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_colour_identity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5194,6 +5474,10 @@
           "lifecycle": "experimental"
         },
         "scale_colour_manual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_ordinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5221,6 +5505,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_fill_gray": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_grey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_hue": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_fill_identity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5230,6 +5526,10 @@
           "lifecycle": "experimental"
         },
         "scale_fill_manual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_ordinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },

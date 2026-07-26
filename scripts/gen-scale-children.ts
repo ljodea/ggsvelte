@@ -65,11 +65,11 @@ function colourAliases(stem: string): string[] {
  *   position-binned      2
  *   position-temporal    4
  *   position-discrete    2
- *   color-fill          18
+ *   color-fill          24
  *   numeric-style       21
  *   finite-style         8
  *   ----------------------
- *   63 component files + 9 Colour aliases
+ *   69 component files + 15 Colour/Gray aliases
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
@@ -127,7 +127,7 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscretePositionScaleOptions",
   ]),
 
-  // --- color-fill (18 components + 9 Colour aliases) -----------------------
+  // --- color-fill (24 components + Colour/Gray aliases) --------------------
   // optionsTypes match the slice-3 hand-written shells exactly.
   shell(
     "scaleColorContinuous",
@@ -212,6 +212,32 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
   shell("scaleFillManual", "color-fill", "ManualColorScaleOptions", ["ManualColorScaleOptions"]),
   shell("scaleFillIdentity", "color-fill", "IdentityColorScaleOptions", [
     "IdentityColorScaleOptions",
+  ]),
+  shell(
+    "scaleColorHue",
+    "color-fill",
+    "HueScaleOptions",
+    ["HueScaleOptions"],
+    colourAliases("Hue"),
+  ),
+  shell(
+    "scaleColorGrey",
+    "color-fill",
+    "GreyScaleOptions",
+    ["GreyScaleOptions"],
+    [...colourAliases("Grey"), "ScaleColorGray", "ScaleColourGray"],
+  ),
+  shell(
+    "scaleColorOrdinal",
+    "color-fill",
+    "DiscreteColorScaleOptions",
+    ["DiscreteColorScaleOptions"],
+    colourAliases("Ordinal"),
+  ),
+  shell("scaleFillHue", "color-fill", "HueScaleOptions", ["HueScaleOptions"]),
+  shell("scaleFillGrey", "color-fill", "GreyScaleOptions", ["GreyScaleOptions"], ["ScaleFillGray"]),
+  shell("scaleFillOrdinal", "color-fill", "DiscreteColorScaleOptions", [
+    "DiscreteColorScaleOptions",
   ]),
 
   // --- numeric-style (21) --------------------------------------------------
@@ -424,7 +450,7 @@ export function expectedCamelHelpers(): Set<string> {
   return out;
 }
 
-/** Colour-spelled camelCase helpers → component alias names. */
+/** Colour-spelled camelCase helpers → component alias names (+ gray index aliases). */
 export function expectedColourAliases(): Set<string> {
   const out = new Set<string>();
   for (const cap of SCALE_CAPABILITIES) {
@@ -434,6 +460,10 @@ export function expectedColourAliases(): Set<string> {
       out.add("S" + h.slice(1));
     }
   }
+  // #829: American gray spelling is index-only (no Scale*Gray.svelte file).
+  out.add("ScaleColorGray");
+  out.add("ScaleColourGray");
+  out.add("ScaleFillGray");
   return out;
 }
 

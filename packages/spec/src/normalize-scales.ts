@@ -35,13 +35,18 @@ function normalizeColorScale(scale: ColorScaleSpec): ColorScaleSpec {
     }),
   };
   if (scale.type === "identity") return { ...withGuide(scale), ...fallbacks };
-  return {
+  const base: ColorScaleSpec = {
     ...withGuide(scale),
     ...(Array.isArray(scale.range) && {
       range: scale.range.map((color) => normalizeHexColor(color)),
     }),
     ...fallbacks,
   };
+  // Authoring alias: scheme "gray" → "grey" so fingerprints stay stable (#829).
+  if (base.scheme === "gray") {
+    return { ...base, scheme: "grey" };
+  }
+  return base;
 }
 
 function normalizePositionScale(scale: PositionScaleSpec): PositionScaleSpec {

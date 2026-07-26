@@ -27,6 +27,11 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "flexoki",
   "tableau10",
   "colorblind",
+  // #829: ggplot2-like discrete constructors (fixed 10-stop tables).
+  // "gray" is accepted on input and normalized to "grey" for fingerprints.
+  "hue",
+  "grey",
+  "gray",
 ] as const;
 
 /** Named sequential color schemes known to this schema version. */

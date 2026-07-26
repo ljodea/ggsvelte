@@ -355,19 +355,26 @@ registered schemes and capacities on
 
 ## Continuous, binned, manual, and identity color
 
-Quantitative color/fill defaults to a continuous viridis colorbar. The
-\`identity\`, \`log10\`, and \`sqrt\` transforms run before color-domain training;
-they do not change position statistics. Explicit reference \`breaks\` stay in
-semantic source units.
+Quantitative color/fill defaults to a continuous viridis colorbar. Discrete
+ggplot2-style constructors \`scale_color_hue\`, \`scale_color_grey\`/\`gray\`, and
+\`scale_color_ordinal\` (plus fill/colour aliases) opt into HCL-hue or greyscale
+palettes or plain ordinal assignment. Fixed 10-stop tables keep grow-mode
+color assignment value-stable; non-default hue/grey parameters require an
+explicit domain so the palette materialises into \`range\`. The \`identity\`,
+\`log10\`, and \`sqrt\` transforms run before color-domain training; they do not
+change position statistics. Explicit reference \`breaks\` stay in semantic
+source units.
 
 \`\`\`ts fragment
 import {
+  scaleColorHue,
   scaleColorLog10,
-  scaleFillContinuous,
+  scaleFillGrey,
 } from "@ggsvelte/spec";
 
 const color = scaleColorLog10({ domain: [1, 1000] });
-const fill = scaleFillContinuous({ scheme: "viridis" });
+const groups = scaleColorHue();
+const fill = scaleFillGrey({ start: 0.3, end: 0.9, domain: ["a", "b", "c"] });
 \`\`\`
 
 Binned color/fill uses deterministic \`[lower, upper)\` intervals with the final
