@@ -367,6 +367,56 @@ describe("geom_sf", () => {
     expect(batch.pathOffsets.length - 1).toBe(2);
   });
 
+  it("preserves even-odd holes on GeometryCollection polygon leaves", () => {
+    const gc = geo({
+      type: "GeometryCollection",
+      geometries: [
+        {
+          type: "Polygon",
+          coordinates: [
+            [
+              [0, 0],
+              [4, 0],
+              [2, 4],
+              [0, 0],
+            ],
+            [
+              [1, 1],
+              [2, 1],
+              [1.5, 2],
+              [1, 1],
+            ],
+          ],
+        },
+        {
+          type: "Polygon",
+          coordinates: [
+            [
+              [5, 0],
+              [6, 0],
+              [5.5, 1],
+              [5, 0],
+            ],
+          ],
+        },
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [gc] }, aes({}))
+        .geomSf()
+        .spec(),
+      size,
+    );
+    expect(model.warnings.some((w) => w.code === "sf-holes-ignored")).toBe(false);
+    const batch = model.scene.batches[0] as PathsBatch;
+    expect(batch.pathOffsets.length - 1).toBe(2);
+    expect(batch.fillRule).toBe("evenodd");
+    // First leaf: exterior 3 + hole 3; second leaf: exterior 3.
+    expect(batch.positions.length / 2).toBe(9);
+    expect(batch.ringStarts).toBeDefined();
+    expect([...batch.ringStarts!]).toEqual([3]);
+  });
+
   it("errors when GeometryCollection mixes geometry families", () => {
     try {
       runPipeline(

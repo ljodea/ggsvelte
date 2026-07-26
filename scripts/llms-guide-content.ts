@@ -402,7 +402,9 @@ one representative point per geometry part, then draws \`aes.label\` there.
 Point coordinates pass through; MultiPoint/LineString use the vertex mean;
 Polygon uses the exterior-ring shoelace centroid. **MultiPoint /
 MultiLineString / MultiPolygon emit one label per part** (feature aesthetics
-duplicated onto each part). Requires \`aes.label\` (no \`aes.x\`/\`aes.y\`).
+duplicated onto each part). **GeometryCollection** expands to leaves first,
+then the same per-part rule applies (one label per leaf part). Requires
+\`aes.label\` (no \`aes.x\`/\`aes.y\`).
 
 **Migration (multi-part labels):** earlier releases labeled only the first
 Multi* component. Callers that relied on a single first-component label will
