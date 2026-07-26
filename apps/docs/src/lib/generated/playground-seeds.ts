@@ -299,6 +299,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "point/gradient-continuous",
+    title: "Two-stop gradient colour scale",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6InBvaW50L2dyYWRpZW50LWNvbnRpbnVvdXMifSwic3BlYyI6eyJlZGl0aW9uIjoyLCJkYXRhIjp7InZhbHVlcyI6W3sieCI6MSwieSI6MS4yLCJ6IjowfSx7IngiOjIsInkiOjIsInoiOjAuMjV9LHsieCI6MywieSI6Mi44LCJ6IjowLjV9LHsieCI6NCwieSI6My4xLCJ6IjowLjc1fSx7IngiOjUsInkiOjMuOSwieiI6MX0seyJ4IjoxLjUsInkiOjIuNCwieiI6MC4xNX0seyJ4IjoyLjUsInkiOjEuNiwieiI6MC40fSx7IngiOjMuNSwieSI6My41LCJ6IjowLjY1fSx7IngiOjQuNSwieSI6Mi4yLCJ6IjowLjl9XX0sImxheWVycyI6W3siZ2VvbSI6InBvaW50Iiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoieCJ9LCJ5Ijp7ImZpZWxkIjoieSJ9LCJjb2xvciI6eyJmaWVsZCI6InoifX0sInBhcmFtcyI6eyJzaXplIjo0fX1dLCJzY2FsZXMiOnsiY29sb3IiOnsidHlwZSI6InNlcXVlbnRpYWwiLCJyYW5nZSI6WyIjMTMyYjQzIiwiIzU2YjFmNyJdfX0sImxhYnMiOnsidGl0bGUiOiJzY2FsZV9jb2xvcl9ncmFkaWVudCIsInN1YnRpdGxlIjoiVHdvLXN0b3AgY29udGludW91cyBjb2xvdXIgKGxvdyDihpIgaGlnaCkiLCJ4IjoieCIsInkiOiJ5IiwiY29sb3IiOiJ6In0sInRoZW1lIjoibWluaW1hbCJ9fQ",
+    },
+  },
+  {
     id: "point/jitter",
     title: "Jittered scatter",
     compatibility: {

@@ -77,7 +77,7 @@ describe("gradient scale helpers (#826)", () => {
         aes: {
           x: { field: "x" },
           y: { field: "y" },
-          ...(scales.color !== undefined ? { color: { field: "v" } } : { fill: { field: "v" } }),
+          ...(scales.color === undefined ? { fill: { field: "v" } } : { color: { field: "v" } }),
         },
         layers: [point],
         scales,
