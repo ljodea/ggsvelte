@@ -1,5 +1,205 @@
 # @ggsvelte/svelte
 
+## 0.11.0
+
+### Minor Changes
+
+- d458ddb: <!-- markdownlint-disable MD041 -->
+
+  feat: theme children + deprecate GGPlot `theme` prop
+
+  Ship declaration-only `<Theme>` / `<ThemeDark>` / … children (stable-intent),
+  fold non-mark plot layers after props so children win, and deliver a
+  once-per-instance `DEPRECATED_PLOT_PROP` advisory through `ondiagnostic`
+  (`PlotDiagnostic` union). Rename `LayerDescriptor` → `MarkLayerDescriptor`
+  (deprecated type alias kept until 0.13.0).
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#compose-the-theme-as-a-child-layer>
+
+- 0f457f1: <!-- markdownlint-disable MD041 -->
+
+  feat: scale children (color/fill) + deprecate GGPlot `scales` prop
+
+  Ship declaration-only `<Scale>` / `<ScaleColor*>` / `<ScaleFill*>` / Colour
+  aliases (stable-intent), fold scale children after props so children win per
+  channel, deliver a once-per-instance `DEPRECATED_PLOT_PROP` advisory for the
+  `scales` prop, and emit `DUPLICATE_SCALE_CHANNEL` when two scale children
+  collide on one aesthetic. `PlotDiagnostic` widens to
+  `InteractionDiagnostic | DeprecationDiagnostic | CompositionDiagnostic`
+  (exhaustive `switch` on `.code` needs a new arm; annotated handlers keep
+  working).
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#compose-scales-as-child-layers>
+
+- 0e96701: <!-- markdownlint-disable MD041 -->
+
+  feat: generate all scale child shells via codegen (#659 slice 4)
+
+  Add position and style `<Scale*>` shells (45 new) and regenerate the 18
+  color/fill shells from a single manifest-driven generator
+  (`bun run scale:children:gen`). Every `SCALE_CAPABILITIES` family now has a
+  declaration-only child; `<Scale value={…}/>` remains the escape hatch for
+  raw/computed fragments. The `scales` prop deprecation already shipped in
+  slice 3.
+
+  Migration: none — additive
+
+- b512a74: <!-- markdownlint-disable MD041 -->
+
+  feat: coord + facet children + deprecate GGPlot `coord` / `facet` props
+
+  Ship declaration-only `<Coord>` / `<CoordFlip>` / `<CoordFixed>` /
+  `<CoordEqual>` / `<CoordTransform>` / `<CoordCartesian>` and `<Facet>` /
+  `<FacetWrap>` / `<FacetGrid>` children (stable-intent). Both families are
+  REPLACE (last child wins over props and earlier children). Deliver
+  `DEPRECATED_PLOT_PROP` for the `coord` and `facet` props (since 0.11.0,
+  remove in 0.13.0) and `DUPLICATE_PLOT_LAYER` when two coord, facet, or theme
+  children are registered (composition diagnostics become a discriminated
+  union with the existing `DUPLICATE_SCALE_CHANNEL` scale variant).
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#compose-coord-as-a-child-layer>
+  Migration: <https://ggsvelte.sh/guide/upgrading#compose-facet-as-a-child-layer>
+
+- 9e2a271: <!-- markdownlint-disable MD041 -->
+
+  feat(#659): labs + guides + legend children, deprecate the props (slice 6)
+
+  Ship declaration-only `<Labs>`, `<Guide*>` and `<Legend>` layers — the last
+  three grammar props to move off `<GGPlot>`.
+
+  - `<Labs title x color …/>` — the whole flat Labs surface as named props. No
+    `value` escape hatch: `<Labs {...computed} />` already covers it.
+  - `<GuideAxis/>`, `<GuideLegend/>`, `<GuideColorbar/>`, `<GuideColorsteps/>`,
+    `<GuideNone/>` — one shell per guide TYPE, each keyed by a `channel` prop
+    (the aesthetic is a key, not part of the component name), plus
+    `<Guides value={…}/>` for raw or computed guide bags.
+  - `<Legend order="sorted"/>` — the plot-wide entry-SORT enum. Deliberately
+    separate from `<GuideLegend order={2}/>`, which is a per-aesthetic integer
+    placement rank; same word, unrelated concepts.
+
+  Deprecates the `labs`, `guides` and `legend` props (since 0.11.0, removable in
+  0.13.0) with upgrading-guide anchors. Children still win over props (D2).
+
+  All three are keyed-MERGE families, so a new `DUPLICATE_MERGE_KEY` composition
+  advisory fires when two children write the same key — the later one wins, and
+  siblings touching different keys all survive. `DUPLICATE_SCALE_CHANNEL` keeps
+  its own code: it shipped in 0.11.0 and its `channel` field and spelling-alias
+  suggestion are scale-specific. `CompositionDiagnostic` widens accordingly, so
+  exhaustive `switch`es on `.code` need one new arm.
+
+  **Type rename on `@ggsvelte/svelte` only:** the `Labs` spec type is re-exported
+  there as `LabsSpec`, because the new `<Labs>` component claims the bare name
+  (every grammar child is named for the PortableSpec field it fills, and `Labs`
+  is the only spec type without a `Spec`/`Input` suffix). `import type { Labs }
+from "@ggsvelte/spec"` is unchanged and remains canonical; only the
+  `@ggsvelte/svelte` re-export moved. Using the old name against a `Labs` object
+  is a compile error, not a silent mistype.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#compose-labs-as-a-child-layer>
+  Migration: <https://ggsvelte.sh/guide/upgrading#compose-guides-as-child-layers>
+  Migration: <https://ggsvelte.sh/guide/upgrading#compose-legend-as-a-child-layer>
+
+- f58fa66: <!-- markdownlint-disable MD041 -->
+
+  feat(#659): ship the plot-props codemod (slice 7, closes #290)
+
+  Add `ggsvelte-codemod`, the first codemod under ADR 0013's policy: it migrates
+  the seven grammar props deprecated in 0.11.0 — `facet`, `coord`, `scales`,
+  `guides`, `legend`, `theme`, `labs` — into the child layers that replace them.
+
+  ```bash
+  npx ggsvelte-codemod src          # diff only, writes nothing
+  npx ggsvelte-codemod --write src  # apply
+  ```
+
+  Dry-run by default, writes only behind `--write`, per ADR 0013's rule that
+  checks and codemods never rewrite code implicitly. Migrated children are
+  inserted before any child the file already had, so a hand-written
+  `<ScaleColorDiscrete/>` keeps winning over a migrated `scales` prop (D2:
+  props apply first, then children in registration order).
+
+  Scoped to meaning-preserving rewrites, never style. It targets the generic
+  escape hatches (`<Coord value={…}/>`, `<Scale value={…}/>`, `<Guides
+value={…}/>`) rather than named shells, because for scales the named form is
+  not byte-identity-preserving (D8 — `normalize()` does not infer scale `type`).
+  Flat bags expand to named props (`labs={{ title: "Sales" }}` →
+  `<Labs title="Sales"/>`), falling back to `<Labs {...expr}/>` when an object
+  literal cannot be expanded losslessly. `theme={expr}` with a non-literal value
+  is deliberately NOT rewritten — `theme` is `ThemeName | ThemeSpec` and
+  `<Theme>` has no `value` hatch — and is reported as `manual change required`
+  with the guide anchor instead of being half-migrated.
+
+  Only files importing `GGPlot` from `@ggsvelte/svelte` are touched, so a
+  consumer's own `GGPlot` is never rewritten.
+
+  Fixtures live at `packages/svelte/tests/codemod/fixtures/<from>-<to>/<case>/`
+  per ADR 0013 and assert the acceptance criteria directly: idempotence, edits
+  confined to the rewritten ranges, and unrecognized shapes left untouched with
+  a printed pointer.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#migrate-the-grammar-props-with-the-codemod>
+
+- fc5a8fc: <!-- markdownlint-disable MD041 -->
+
+  Add `@ggsvelte/svelte/data` with the bundled `kyotoSakura` teaching dataset —
+  838 peak cherry-blossom dates for Kyoto, 812–2026 CE, typed rows plus a
+  `KYOTO_SAKURA_CITATION` string. It backs the getting-started lesson, so the
+  quickstart file you copy builds in a bare app with no extra downloads. Data
+  copyright Yasuyuki Aono; see NOTICE for the full attribution.
+
+  Migration: none — additive
+
+### Patch Changes
+
+- cdb06ee: <!-- markdownlint-disable MD041 -->
+
+  feat: widen LayerRegistry for non-mark plot layers
+
+  Add a `Layer` union (mark + scale/theme/coord/facet/labs/guides/legend),
+  `markLayers` / `registerPlotLayer`, and fold non-mark `plotLayers` into
+  assembly after the existing gates. No public behaviour change: no non-mark
+  components ship yet, and mark consumers read `markLayers`.
+
+  Migration: none — additive
+
+- 87411a3: <!-- markdownlint-disable MD041 -->
+
+  fix: quieter point inspection and readable axis/tooltip chrome
+
+  - Points and text auto-inspect as `exact` (hover ring only), not full `xy`
+    crosshair grouping — axis modes remain opt-in (`mode: "x"|"y"|"xy"`).
+  - Default tooltips omit the shared axis field under `x`/`y` mode and humanize
+    camelCase column names for `<dt>` labels.
+  - Raise light/minimal-family `axisTextSize` (8.8 → 12), base `axisTitleSize`
+    (9 → 11.5), and reduce default tooltip font size (16 → 12.5) so tick labels
+    are readable next to titles and tooltips.
+
+  Migration: none for most plots. If you relied on `inspect: true` / auto mode
+  drawing a full crosshair on scatter points, set `inspect={{ mode: "xy" }}`
+  (or `"x"` / `"y"`) explicitly. Visual baselines for light-theme smoke shots
+  refresh with the larger axis type.
+
+- 902e331: <!-- markdownlint-disable MD041 -->
+
+  fix: default tooltips use labs titles and theme font size
+
+  - Default tooltip field labels prefer explicit `labs` titles for x/y/color/fill
+    (and other aesthetic lab keys), then lightly humanized column names.
+  - Tooltip type size tracks `theme.fontSize` instead of a hard-coded 12.5px
+    (residual of #753 hierarchy work).
+
+  Migration: none. Charts with `labs` get more readable default tooltips; custom
+  `inspect.content` snippets remain fully author-controlled. Smoke interaction
+  VR baselines refresh for the smaller theme-driven tooltip type size.
+
+- Updated dependencies [846ee50]
+- Updated dependencies [56b1b09]
+- Updated dependencies [0f39d55]
+- Updated dependencies [87411a3]
+- Updated dependencies [be64829]
+  - @ggsvelte/core@0.11.0
+  - @ggsvelte/spec@0.11.0
+
 ## 0.10.2
 
 ### Patch Changes

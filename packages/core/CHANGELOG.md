@@ -1,5 +1,75 @@
 # @ggsvelte/core
 
+## 0.11.0
+
+### Patch Changes
+
+- 846ee50: <!-- markdownlint-disable MD041 -->
+
+  fix: boxplot default width matches ggplot2 and caps few-category slabs
+
+  Use ggplot2's 0.75 band-step fraction (not bar's 0.9) and, when `width` is
+  omitted, cap boxes at 15% of panel width so 2–3 category charts stay
+  distribution-shaped (#653). Explicit `params.width` still uses the uncapped
+  fraction.
+
+  Migration: none for callers who set `width`. Default-only plots with few
+  categories render narrower boxes.
+
+- 56b1b09: <!-- markdownlint-disable MD041 -->
+
+  Fix interaction on plots where a layer carries its own `data`. Candidate value
+  resolution looked every mapped field up in the plot's source table, so hovering
+  a chart whose band or annotation layer had its own columns threw
+  `ColumnTable: unknown field "..."`. Row ids are global across sources, so the
+  owning table is now resolved from the row.
+
+  Migration: none — additive
+
+- 0f39d55: <!-- markdownlint-disable MD041 -->
+
+  fix: overlaid density fills composite independently through alpha
+
+  Expand constant area/density alpha onto per-subpath alphas when a closed
+  batch has multiple groups. SVG group opacity was compositing opaque sibling
+  fills into an offscreen buffer first, so translucent overlaid densities
+  still occluded each other in the overlap region.
+
+  Migration: none — same author-facing alpha; only the render packing changes.
+
+- 87411a3: <!-- markdownlint-disable MD041 -->
+
+  fix: quieter point inspection and readable axis/tooltip chrome
+
+  - Points and text auto-inspect as `exact` (hover ring only), not full `xy`
+    crosshair grouping — axis modes remain opt-in (`mode: "x"|"y"|"xy"`).
+  - Default tooltips omit the shared axis field under `x`/`y` mode and humanize
+    camelCase column names for `<dt>` labels.
+  - Raise light/minimal-family `axisTextSize` (8.8 → 12), base `axisTitleSize`
+    (9 → 11.5), and reduce default tooltip font size (16 → 12.5) so tick labels
+    are readable next to titles and tooltips.
+
+  Migration: none for most plots. If you relied on `inspect: true` / auto mode
+  drawing a full crosshair on scatter points, set `inspect={{ mode: "xy" }}`
+  (or `"x"` / `"y"`) explicitly. Visual baselines for light-theme smoke shots
+  refresh with the larger axis type.
+
+- be64829: <!-- markdownlint-disable MD041 -->
+
+  Fix candidate grouping on all-identity plots where layers carry their own
+  `data`. The source-backed strategy derived grouping from the plot's table, so a
+  layer with its own columns threw `deriveGroups: unknown field "..."` as soon as
+  candidates were resolved — and where it happened not to throw, it indexed a
+  plot-length array with a global row id and silently collapsed those rows into
+  one group. Grouping is now derived per owning table and indexed locally, the
+  same way value reads already were.
+
+  Migration: none — a plot that previously threw now renders, and per-layer series
+  grouping is correct where it was collapsed.
+
+- Updated dependencies [846ee50]
+  - @ggsvelte/spec@0.11.0
+
 ## 0.10.2
 
 ### Patch Changes
