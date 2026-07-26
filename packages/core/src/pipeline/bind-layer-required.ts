@@ -22,6 +22,8 @@ export function assertRequiredChannels(input: {
   radiusField?: string | null;
   layerParams?: unknown;
   ribbonOrientation?: "x" | "y";
+  /** Effective rug sides string (default bl) when geom is rug. */
+  rugSides?: string;
 }): void {
   const {
     geom,
@@ -41,6 +43,7 @@ export function assertRequiredChannels(input: {
     radiusField = null,
     layerParams,
     ribbonOrientation,
+    rugSides,
   } = input;
 
   if (
@@ -114,5 +117,10 @@ export function assertRequiredChannels(input: {
     if (radiusField === null && params["radius"] === undefined) {
       requireField(radiusField, "radius", index, geom);
     }
+  }
+  if (geom === "rug") {
+    const sides = rugSides && rugSides.length > 0 ? rugSides : "bl";
+    if (/[bt]/.test(sides)) requireField(xField, "x", index, geom);
+    if (/[lr]/.test(sides)) requireField(yField, "y", index, geom);
   }
 }

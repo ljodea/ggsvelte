@@ -596,6 +596,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomRugOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomRuleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1073,6 +1077,18 @@
           "lifecycle": "experimental"
         },
         "RibbonParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RugLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RugLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "RugParams": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4306,6 +4322,10 @@
           "lifecycle": "experimental"
         },
         "GeomRibbon": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomRug": {
           "kind": "value",
           "lifecycle": "experimental"
         },

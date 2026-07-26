@@ -128,6 +128,7 @@ export const SfTextLayerSchema = SpecModule.Import("SfTextLayer");
 export const SfLabelLayerSchema = SpecModule.Import("SfLabelLayer");
 
 export const SpokeLayerSchema = SpecModule.Import("SpokeLayer");
+export const RugLayerSchema = SpecModule.Import("RugLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const HlineLayerSchema = SpecModule.Import("HlineLayer");
 export const VlineLayerSchema = SpecModule.Import("VlineLayer");
@@ -235,6 +236,8 @@ export type MapParams = SpecType<"MapParams">;
 export type SfTextParams = SpecType<"SfTextParams">;
 /** SF label layer params (geometry + text + box chrome; #809 phase 3). */
 export type SfLabelParams = SpecType<"SfLabelParams">;
+/** Rug layer params (sides, length, stroke styling). */
+export type RugParams = SpecType<"RugParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
@@ -347,6 +350,8 @@ export type BlankLayer = LayerWithDataRef<
 
 export type SpokeParams = SpecType<"SpokeParams">;
 export type SpokeLayer = LayerWithDataRef<SpecType<"SpokeLayer">>;
+/** A marginal rug layer (edge ticks). */
+export type RugLayer = LayerWithDataRef<SpecType<"RugLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -366,6 +371,7 @@ export type LayerSpec =
   | SfLabelLayer
   | BlankLayer
   | SpokeLayer
+  | RugLayer
   | RuleLayer
   | HlineLayer
   | VlineLayer

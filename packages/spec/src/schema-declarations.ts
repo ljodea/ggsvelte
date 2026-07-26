@@ -1961,6 +1961,45 @@ export const SpecDeclarations = {
     },
   ),
 
+  RugParams: Type.Object(
+    {
+      sides: Type.Optional(
+        Type.String({
+          pattern: "^[bltr]+$",
+          minLength: 1,
+          description:
+            'Which panel edges get ticks: any non-empty combination of "b" (bottom), "l" (left), "t" (top), "r" (right). Default "bl". Duplicates are treated as a set. Sides b/t require aes.x; sides l/r require aes.y.',
+        }),
+      ),
+      length: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          maximum: 1,
+          description:
+            'Tick length as a fraction of the panel size along the tick axis (panel-fraction npc analogue of ggplot2 unit(0.03, "npc")). Default 0.03.',
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Tick opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom_rug: panel-edge sides, panel-fraction length, and stroke styling.",
+    },
+  ),
+
   SpokeParams: Type.Object(
     {
       angle: Type.Optional(
@@ -3483,6 +3522,35 @@ export const SpecDeclarations = {
     },
   ),
 
+  RugLayer: Type.Object(
+    {
+      geom: Type.Literal("rug", {
+        description:
+          "Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Rug layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Rug layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("RugParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        'A marginal rug layer. Default sides "bl" require both x and y; restrict sides when only one channel is mapped.',
+    },
+  ),
+
   SpokeLayer: Type.Object(
     {
       geom: Type.Literal("spoke", {
@@ -3548,6 +3616,7 @@ export const SpecDeclarations = {
       Type.Ref("SfLabelLayer"),
       Type.Ref("BlankLayer"),
       Type.Ref("SpokeLayer"),
+      Type.Ref("RugLayer"),
     ],
     {
       description:

@@ -114,6 +114,14 @@ export function resolveLayerPositionChannels(input: {
         })
       : undefined;
 
+  const rugSides =
+    geom === "rug"
+      ? (() => {
+          const params = layer.params as { sides?: unknown } | undefined;
+          return typeof params?.sides === "string" ? params.sides : "bl";
+        })()
+      : undefined;
+
   assertRequiredChannels({
     geom,
     stat,
@@ -132,6 +140,7 @@ export function resolveLayerPositionChannels(input: {
     radiusField,
     layerParams: layer.params,
     ...(ribbonOrientation !== undefined && { ribbonOrientation }),
+    ...(rugSides !== undefined && { rugSides }),
   });
 
   if (geom === "rect") {

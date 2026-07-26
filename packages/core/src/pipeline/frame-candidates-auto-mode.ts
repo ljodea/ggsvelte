@@ -50,6 +50,9 @@ export function candidateAutoMode(
     case "segment":
       // Geometry-based mode in defaultAutoMode (long horizontal → "y", vertical → "x").
       return undefined;
+    case "rug":
+      // Edge chrome: short ticks stay exact-only (not axis-group hover).
+      return "exact";
     case "rule": {
       if (binding.ruleForm === "vertical") return "x";
       if (binding.ruleForm === "horizontal") return "y";

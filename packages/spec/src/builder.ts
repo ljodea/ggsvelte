@@ -53,6 +53,7 @@ export type {
   GeomRasterOptions,
   GeomRectOptions,
   GeomRuleOptions,
+  GeomRugOptions,
   GeomSegmentOptions,
   GeomCurveOptions,
   GeomMapOptions,
