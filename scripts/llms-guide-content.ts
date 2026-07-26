@@ -252,6 +252,27 @@ col, area, rect, ribbon, rule, segment, errorbar).
 [stat unique overplotting](/examples/point/stat-unique): stacked identical
 \`(x, y, series)\` triples collapse to one mark.
 
+## Align (shared continuous-x grid for stack)
+
+\`stat: "align"\` (ggplot2 \`stat_align\`) is for continuous-x \`area\` / \`line\`
+when series sample different x values. It unions finite x across groups,
+linearly interpolates each series onto that shared grid, and sets y to 0
+outside a group's observed x range so \`position: "stack"\` / \`"fill"\` can
+compose without jagged seams.
+
+\`\`\`ts fragment
+gg(data, aes({ x: "t", y: "v", fill: "series" }))
+  .geomArea({ stat: "align", position: "stack" })
+  .spec();
+\`\`\`
+
+\`\`\`svelte fragment
+<GeomArea stat="align" position="stack" />
+\`\`\`
+
+Available on **area** and **line** only (not point or shared identity-only
+geoms). Outside a group's x span y is 0 (stack-friendly).
+
 ## Positions
 
 Stack sums, dodge side-by-side groups, fill normalizes each stack to one, jitter

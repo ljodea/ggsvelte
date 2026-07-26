@@ -18,8 +18,11 @@
     data?: DataInput | readonly Record<string, unknown>[];
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
     aes?: AesInput;
-    /** "identity" (default) or "unique" (first-wins aesthetic dedupe; #813). */
-    stat?: "identity" | "unique";
+    /**
+     * identity (default) | unique (#813) |
+     * align (shared continuous-x grid for stack/fill; #815).
+     */
+    stat?: "identity" | "unique" | "align";
     /** Position adjustment: "stack" (default) | "fill" | "identity". */
     position?: StackablePosition;
   }

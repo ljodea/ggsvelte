@@ -48,8 +48,11 @@ export interface GeomPointOptions extends PointParams, GeomDataOption {
 export interface GeomLineOptions extends LineParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
-  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
-  stat?: "identity" | "unique";
+  /**
+   * identity (default) | unique (#813) | bin (freqpoly / #796) |
+   * align (shared continuous-x grid for stack/fill; #815).
+   */
+  stat?: "identity" | "unique" | "bin" | "align";
 }
 
 /** Path-layer sugar options (data-order polylines; style-only — no bin knobs). */
@@ -148,7 +151,7 @@ export interface GeomAreaOptions extends AreaParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
   /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
-  stat?: "identity" | "unique";
+  stat?: "identity" | "unique" | "align";
   position?: StackablePosition;
 }
 

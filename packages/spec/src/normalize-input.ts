@@ -112,8 +112,8 @@ export interface PointLayerInput extends LayerInputBase {
 
 export interface LineLayerInput extends LayerInputBase {
   geom: "line";
-  /** identity | unique (#813) | bin (freqpoly / #796) */
-  stat?: "identity" | "unique" | "bin";
+  /** identity | unique (#813) | bin (freqpoly / #796) | align (#815) */
+  stat?: "identity" | "unique" | "bin" | "align";
   position?: "identity";
   params?: LineParams;
 }
@@ -154,7 +154,7 @@ export interface FreqpolyLayerInput extends LayerInputBase {
 
 export interface AreaLayerInput extends LayerInputBase {
   geom: "area";
-  stat?: "identity" | "unique";
+  stat?: "identity" | "unique" | "align";
   position?: StackablePosition;
   params?: AreaParams;
 }

@@ -342,6 +342,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "align-shared-continuous-x-grid-for-stack",
+        title: "Align (shared continuous-x grid for stack)",
+        level: 2,
+      },
+      {
         id: "positions",
         title: "Positions",
         level: 2,

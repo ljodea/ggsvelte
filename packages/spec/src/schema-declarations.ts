@@ -1527,10 +1527,14 @@ export const SpecDeclarations = {
               description:
                 'Continuous x binned; the canonical form of geom freqpoly. Do NOT map aes.y to a field; y defaults to {"stat": "count"}.',
             }),
+            Type.Literal("align", {
+              description:
+                "Interpolate each group onto the union of finite x values so continuous-x stack/fill aligns (#815). Outside a group's x range y is 0.",
+            }),
           ],
           {
             description:
-              'Line stat: "identity" (default), "unique" (first-wins dedupe), or "bin" (freqpoly).',
+              'Line stat: "identity" (default), "unique", "bin" (freqpoly), or "align" (shared x grid).',
           },
         ),
       ),
@@ -1931,9 +1935,28 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("area", {
         description:
-          "Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts.",
+          "Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts. With stat align, series with different x samples share a common grid for stack/fill.",
       }),
-      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
+      stat: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("identity", {
+              description: "Draw each data row as-is (default).",
+            }),
+            Type.Literal("unique", {
+              description: "Drop duplicate rows on mapped aesthetics before drawing (first wins).",
+            }),
+            Type.Literal("align", {
+              description:
+                "Interpolate each group onto the union of finite x values so continuous-x stack/fill aligns (#815). Outside a group's x range y is 0.",
+            }),
+          ],
+          {
+            description:
+              'Area stat: "identity" (default), "unique" (first-wins dedupe), or "align" (shared x grid for stacking).',
+          },
+        ),
+      ),
       position: Type.Optional(Type.Ref("StackablePosition")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
@@ -1948,7 +1971,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        'An area layer. Requires x and y channels; rows are sorted by x within each group. Default position "stack".',
+        'An area layer. Requires x and y channels; rows are sorted by x within each group. Default position "stack". Use stat "align" when groups have different continuous x samples.',
     },
   ),
 

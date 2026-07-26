@@ -374,6 +374,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Unique (first-wins aesthetic dedupe)"],
   },
   {
+    id: "heading:guide-statistics-positions:align-shared-continuous-x-grid-for-stack",
+    kind: "heading",
+    title: "Align (shared continuous-x grid for stack)",
+    summary:
+      "Align (shared continuous-x grid for stack) in Statistics and positions. Compute summaries and control how derived marks occupy the same coordinate space.",
+    href: "/guide/statistics-positions#align-shared-continuous-x-grid-for-stack",
+    keywords: ["Statistics and positions", "Core grammar"],
+    exact: ["Align (shared continuous-x grid for stack)"],
+  },
+  {
     id: "heading:guide-statistics-positions:positions",
     kind: "heading",
     title: "Positions",

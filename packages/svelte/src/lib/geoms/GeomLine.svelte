@@ -12,8 +12,11 @@
     data?: DataInput | readonly Record<string, unknown>[];
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
     aes?: AesInput;
-    /** identity | unique (#813) | bin (freqpoly form; #796). */
-    stat?: "identity" | "unique" | "bin";
+    /**
+     * identity | unique (#813) | bin (freqpoly; #796) |
+     * align (shared continuous-x grid for stack/fill; #815).
+     */
+    stat?: "identity" | "unique" | "bin" | "align";
   }
 
   const props: Props = $props();
