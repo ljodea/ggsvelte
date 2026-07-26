@@ -21,44 +21,10 @@
  */
 import { getContext, onDestroy, setContext } from "svelte";
 
-import type {
-  AesInput,
-  CoordSpec,
-  DataInput,
-  FacetInput,
-  GeomName,
-  GuidesSpec,
-  Labs,
-  LegendSpec,
-  PositionName,
-  PositionParams,
-  RenderBackend,
-  Scales,
-  StatName,
-  ThemeName,
-  ThemeSpec,
-} from "@ggsvelte/spec";
-
-/**
- * A live mark-layer descriptor: properties are getters over the child's
- * $props, so prop updates flow into the plot's derived spec without
- * re-registration. (`| undefined` is explicit so getter-backed objects
- * satisfy the type under exactOptionalPropertyTypes.)
- *
- * `params` is a plain record: each geom component narrows its own props
- * (typed per-geom), and normalize()/validate() enforce the per-geom schema.
- */
-export interface MarkLayerDescriptor {
-  readonly geom: GeomName;
-  readonly stat?: StatName | undefined;
-  readonly aes?: AesInput | undefined;
-  /** Optional layer-local data (#589). */
-  readonly data?: DataInput | readonly Record<string, unknown>[] | undefined;
-  readonly position?: PositionName | undefined;
-  readonly positionParams?: PositionParams | undefined;
-  readonly render?: RenderBackend | undefined;
-  readonly params?: Record<string, unknown> | undefined;
-}
+// #785: Layer / MarkLayerDescriptor live in runes-free layers/types.ts so
+// assemble.ts can share the same union without importing this .svelte.ts file.
+export type { Layer, MarkLayerDescriptor } from "../layers/types.js";
+import type { Layer, MarkLayerDescriptor } from "../layers/types.js";
 
 /**
  * @deprecated since 0.11.0 — use MarkLayerDescriptor.
@@ -66,25 +32,6 @@ export interface MarkLayerDescriptor {
  * https://ggsvelte.sh/guide/upgrading#0-10-to-0-11
  */
 export type LayerDescriptor = MarkLayerDescriptor;
-
-/**
- * Everything a declaration-only child may contribute to a plot.
- * Mark/geom layers map onto `spec.layers`; other kinds fold into top-level
- * portable-spec fields (theme/scale/coord/facet/labs/guides/legend).
- *
- * Live getters are load-bearing for non-mark variants exactly as for marks:
- * `value` reads the child's `$props` proxy so prop changes flow through the
- * plot's `$derived` with zero re-registration.
- */
-export type Layer =
-  | { readonly kind: "mark"; readonly descriptor: MarkLayerDescriptor }
-  | { readonly kind: "scale"; get value(): Scales }
-  | { readonly kind: "theme"; get value(): ThemeName | ThemeSpec }
-  | { readonly kind: "coord"; get value(): CoordSpec | "flip" }
-  | { readonly kind: "facet"; get value(): FacetInput }
-  | { readonly kind: "labs"; get value(): Labs }
-  | { readonly kind: "guides"; get value(): GuidesSpec }
-  | { readonly kind: "legend"; get value(): LegendSpec };
 
 let nextId = 0;
 let globalVersion = 0;

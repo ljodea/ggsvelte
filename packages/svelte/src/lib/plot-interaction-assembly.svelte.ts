@@ -27,6 +27,11 @@ import {
   type DeprecationDiagnostic,
   type PlotDiagnostic,
 } from "./diagnostics/deprecation.js";
+import {
+  MERGE_KEY_EMIT_ORDER,
+  REPLACE_EMIT_ORDER,
+  grammarDeprecationInputs,
+} from "./layers/grammar-families.js";
 import type {
   InteractionDiagnostic,
   PlotInteractionScope,
@@ -52,6 +57,14 @@ import { createSurfaceState } from "./surface/surface-state.svelte.js";
 import { createSelectionState, type SelectionState } from "./selection/selection-state.svelte.js";
 import { presentationChromeForKind } from "./selection/selection.js";
 import { createPlotChromeState } from "./chrome/chrome-state.svelte.js";
+
+function isMergeKeyKind(kind: string): kind is DuplicateMergeKeyKind {
+  return (MERGE_KEY_EMIT_ORDER as readonly string[]).includes(kind);
+}
+
+function isReplaceKind(kind: string): kind is DuplicatePlotLayerKind {
+  return (REPLACE_EMIT_ORDER as readonly string[]).includes(kind);
+}
 
 export type PlotInteractionAssemblyDeps<
   Row extends Record<string, CellValue> = Record<string, CellValue>,
@@ -127,113 +140,21 @@ export function createPlotInteractionAssembly<
     }
   });
 
-  // Grammar-prop deprecations (#659): one advisory per deprecated prop that is
-  // !== undefined. Decidable from raw props — assembly does not participate.
-  // Reuses deliverDiagnostic and the same code:prop dedup Set as wiring.
-  const deprecationDiagnostics = $derived.by((): DeprecationDiagnostic[] => {
-    const list: DeprecationDiagnostic[] = [];
-    if (inputs.theme() !== undefined) {
-      list.push(
-        deprecatedPropDiagnostic({
-          prop: "theme",
-          since: "0.11.0",
-          removeIn: "0.13.0",
-          suggestions: [
-            'Replace theme="dark" with <ThemeDark /> (or <Theme name="dark" />)',
-            'Role overrides stay as props on the child: <ThemeDark ink="#eee" />',
-          ],
-          anchor: "compose-the-theme-as-a-child-layer",
-        }),
-      );
-    }
-    if (inputs.scales() !== undefined) {
-      list.push(
-        deprecatedPropDiagnostic({
-          prop: "scales",
-          since: "0.11.0",
-          removeIn: "0.13.0",
-          suggestions: [
-            'Replace scales={scaleColorDiscrete({scheme:"colorblind"})} with <ScaleColorDiscrete scheme="colorblind" />',
-            "Prefer named shells (<ScaleXContinuous/>, <ScaleSizeContinuous/>, <ScaleShapeDiscrete/>, …) for every family",
-            "Use <Scale value={…} /> as the escape hatch for raw/computed scale fragments",
-          ],
-          anchor: "compose-scales-as-child-layers",
-        }),
-      );
-    }
-    if (inputs.coord() !== undefined) {
-      list.push(
-        deprecatedPropDiagnostic({
-          prop: "coord",
-          since: "0.11.0",
-          removeIn: "0.13.0",
-          suggestions: [
-            'Replace coord="flip" with <CoordFlip />',
-            "Use <CoordFixed ratio={…} />, <CoordTransform />, or <Coord value={…} /> for other systems",
-          ],
-          anchor: "compose-coord-as-a-child-layer",
-        }),
-      );
-    }
-    if (inputs.facet() !== undefined) {
-      list.push(
-        deprecatedPropDiagnostic({
-          prop: "facet",
-          since: "0.11.0",
-          removeIn: "0.13.0",
-          suggestions: [
-            'Replace facet={{wrap:"g"}} with <FacetWrap field="g" />',
-            'Use <FacetGrid rows="a" cols="b" /> for a grid, or <Facet wrap={…} /> for the full FacetInput surface',
-          ],
-          anchor: "compose-facet-as-a-child-layer",
-        }),
-      );
-    }
-    if (inputs.guides() !== undefined) {
-      list.push(
-        deprecatedPropDiagnostic({
-          prop: "guides",
-          since: "0.11.0",
-          removeIn: "0.13.0",
-          suggestions: [
-            'Replace guides={{color:guideLegend({position:"bottom"})}} with <GuideLegend channel="color" position="bottom" />',
-            'The aesthetic is the channel prop: <GuideAxis channel="x"/>, <GuideNone channel="size"/>, …',
-            "Use <Guides value={…} /> as the escape hatch for raw/computed guide bags",
-          ],
-          anchor: "compose-guides-as-child-layers",
-        }),
-      );
-    }
-    if (inputs.legend() !== undefined) {
-      list.push(
-        deprecatedPropDiagnostic({
-          prop: "legend",
-          since: "0.11.0",
-          removeIn: "0.13.0",
-          suggestions: [
-            'Replace legend={{order:"sorted"}} with <Legend order="sorted" />',
-            "<Legend order> is the plot-wide entry-sort enum; <GuideLegend order={2}/> is a per-aesthetic placement rank",
-          ],
-          anchor: "compose-legend-as-a-child-layer",
-        }),
-      );
-    }
-    if (inputs.labs() !== undefined) {
-      list.push(
-        deprecatedPropDiagnostic({
-          prop: "labs",
-          since: "0.11.0",
-          removeIn: "0.13.0",
-          suggestions: [
-            'Replace labs={{title:"Sales"}} with <Labs title="Sales" />',
-            'Per-aesthetic titles stay named props on the child: <Labs x="Quarter" color="Region" />',
-          ],
-          anchor: "compose-labs-as-a-child-layer",
-        }),
-      );
-    }
-    return list;
-  });
+  // Grammar-prop deprecations (#659 / #785): table-driven via GRAMMAR_FAMILIES.
+  // One advisory per deprecated prop that is !== undefined. Decidable from
+  // raw props — assembly does not participate. Reuses deliverDiagnostic and
+  // the same code:prop dedup Set as wiring. Emission order is DEPRECATION_EMIT_ORDER.
+  const deprecationDiagnostics = $derived.by((): DeprecationDiagnostic[] =>
+    grammarDeprecationInputs({
+      theme: inputs.theme,
+      scales: inputs.scales,
+      coord: inputs.coord,
+      facet: inputs.facet,
+      guides: inputs.guides,
+      legend: inputs.legend,
+      labs: inputs.labs,
+    }).map((input) => deprecatedPropDiagnostic(input)),
+  );
   $effect(() => {
     for (const diagnostic of deprecationDiagnostics) {
       const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
@@ -254,23 +175,19 @@ export function createPlotInteractionAssembly<
     const list: CompositionDiagnostic[] = [];
     const seenChannels = new Set<string>();
     const duplicateChannels = new Set<string>();
-    // One scan over every keyed-MERGE family. Scales keep their own advisory
-    // code (0.11.0 surface); labs/guides/legend share DUPLICATE_MERGE_KEY.
-    const mergeSeen: Record<DuplicateMergeKeyKind, Set<string>> = {
-      labs: new Set(),
-      guides: new Set(),
-      legend: new Set(),
-    };
-    const mergeDuplicates: Record<DuplicateMergeKeyKind, Set<string>> = {
-      labs: new Set(),
-      guides: new Set(),
-      legend: new Set(),
-    };
-    const replaceCounts: Record<DuplicatePlotLayerKind, number> = {
-      coord: 0,
-      facet: 0,
-      theme: 0,
-    };
+    // Kind membership and emit order come from GRAMMAR_FAMILIES (#785).
+    // Scales keep their own advisory code (0.11.0 surface); labs/guides/legend
+    // share DUPLICATE_MERGE_KEY.
+    const mergeSeen = Object.fromEntries(
+      MERGE_KEY_EMIT_ORDER.map((k) => [k, new Set<string>()]),
+    ) as Record<DuplicateMergeKeyKind, Set<string>>;
+    const mergeDuplicates = Object.fromEntries(
+      MERGE_KEY_EMIT_ORDER.map((k) => [k, new Set<string>()]),
+    ) as Record<DuplicateMergeKeyKind, Set<string>>;
+    const replaceCounts = Object.fromEntries(REPLACE_EMIT_ORDER.map((k) => [k, 0])) as Record<
+      DuplicatePlotLayerKind,
+      number
+    >;
     for (const layer of inputs.registry.layers) {
       if (layer.kind === "scale") {
         for (const channel of Object.keys(layer.value)) {
@@ -282,29 +199,33 @@ export function createPlotInteractionAssembly<
         }
         continue;
       }
-      if (layer.kind === "labs" || layer.kind === "guides" || layer.kind === "legend") {
-        for (const key of Object.keys(layer.value)) {
-          if (mergeSeen[layer.kind].has(key)) {
-            mergeDuplicates[layer.kind].add(key);
+      if (isMergeKeyKind(layer.kind)) {
+        // Narrow via kind predicate + assertion: Layer's value getter is only
+        // on non-mark arms; kind membership is table-driven (#785).
+        const kind = layer.kind;
+        const value = (layer as { readonly value: object }).value;
+        for (const key of Object.keys(value)) {
+          if (mergeSeen[kind].has(key)) {
+            mergeDuplicates[kind].add(key);
           } else {
-            mergeSeen[layer.kind].add(key);
+            mergeSeen[kind].add(key);
           }
         }
         continue;
       }
-      if (layer.kind === "coord" || layer.kind === "facet" || layer.kind === "theme") {
+      if (isReplaceKind(layer.kind)) {
         replaceCounts[layer.kind] += 1;
       }
     }
     for (const channel of duplicateChannels) {
       list.push(duplicateScaleChannelDiagnostic(channel));
     }
-    for (const kind of ["labs", "guides", "legend"] as const) {
+    for (const kind of MERGE_KEY_EMIT_ORDER) {
       for (const key of mergeDuplicates[kind]) {
         list.push(duplicateMergeKeyDiagnostic(kind, key));
       }
     }
-    for (const kind of ["coord", "facet", "theme"] as const) {
+    for (const kind of REPLACE_EMIT_ORDER) {
       if (replaceCounts[kind] > 1) {
         list.push(duplicatePlotLayerDiagnostic(kind));
       }

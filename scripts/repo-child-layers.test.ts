@@ -23,6 +23,7 @@ import { join, relative } from "node:path";
 
 import lifecycle from "../lifecycle.json";
 import { migratePlotProps } from "../packages/svelte/src/lib/codemod/migrate-plot-props.ts";
+import { deprecatedGrammarPropPattern } from "../packages/svelte/src/lib/layers/grammar-families.ts";
 import { guidePages, type LifecycleDoc } from "./gen-llms.ts";
 import { codeBlocks } from "./guide-code-contract.ts";
 import { foldSakura, QUICKSTART_PAGE_FILENAME, SAKURA_STEPS } from "./quickstart.ts";
@@ -99,8 +100,9 @@ describe("the repo's own charts use child layers, not deprecated grammar props",
  * The seven props deprecated in 0.11.0, as they appear in an authored fence.
  * Matched at the start of a line or straight after `<GGPlot` so `<Facet …>`,
  * `<Theme name=…>` and a `theme` key inside a JSON spec never trip it.
+ * Derived from GRAMMAR_FAMILIES (#785) so the list cannot drift from the table.
  */
-const DEPRECATED_PROP = /(?:^\s*|<GGPlot\s+)(facet|coord|scales|guides|legend|theme|labs)=/gm;
+const DEPRECATED_PROP = deprecatedGrammarPropPattern();
 
 /**
  * The upgrading guide is the one page that must show the deprecated form: its
