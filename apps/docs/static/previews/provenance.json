@@ -86,6 +86,11 @@
       "sourceSha256": "533b58881bdadce8d3d0b46c2d18ff430b157efa8f9cf0c3958ada94f411e6bf",
       "pngSha256": "602aaec5f3f02bd322004d4f3800d414139948cad4d04d35d190ccd0f7542e64"
     },
+    "errorbar/summary-bin": {
+      "filename": "errorbar-summary-bin-light.png",
+      "sourceSha256": "ef4a65fb0ae765067b180c99fa1bbf2acaed237443cdea63b2b927304a684d9a",
+      "pngSha256": "06e4a1e517a4630def95e947a30a5e118d2f0d86c3de74323833c04c0af5aec2"
+    },
     "facet/ordered-side-strips": {
       "filename": "facet-ordered-side-strips-light.png",
       "sourceSha256": "1335a363c51dc376292696483f68b703256fe1a63ed970b2b3f853c638e24908",

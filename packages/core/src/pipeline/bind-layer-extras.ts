@@ -56,7 +56,10 @@ export function resolveLabelWeightColorFill(input: {
   const alpha = styleBinding(aes.alpha, "alpha", geom, stat, index, table, warnings);
   const shape = styleBinding(aes.shape, "shape", geom, stat, index, table, warnings);
   const linetype = styleBinding(aes.linetype, "linetype", geom, stat, index, table, warnings);
-  if (weightField !== null && (stat === "boxplot" || stat === "smooth" || stat === "summary")) {
+  if (
+    weightField !== null &&
+    (stat === "boxplot" || stat === "smooth" || stat === "summary" || stat === "summary_bin")
+  ) {
     warnings.push({
       code: "weight-unsupported",
       message: `Layer ${index}: the ${stat} stat does not support aes.weight; the weight mapping is ignored.`,

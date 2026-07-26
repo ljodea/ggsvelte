@@ -111,6 +111,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "602aaec5f3f02bd322004d4f3800d414139948cad4d04d35d190ccd0f7542e64",
   },
   {
+    id: "errorbar/summary-bin",
+    filename: "errorbar-summary-bin-light.png",
+    path: "/previews/errorbar-summary-bin-light.png",
+    sha256: "06e4a1e517a4630def95e947a30a5e118d2f0d86c3de74323833c04c0af5aec2",
+  },
+  {
     id: "facet/ordered-side-strips",
     filename: "facet-ordered-side-strips-light.png",
     path: "/previews/facet-ordered-side-strips-light.png",

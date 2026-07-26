@@ -220,6 +220,36 @@ Fitted trend over points:
 on source points. Histogram, density, boxplot, and errorbar use the same
 derive-then-render path.
 
+For discrete x, \`stat: "summary"\` collapses each group to one summary (default
+mean ± se). For continuous x, use \`stat: "summary_bin"\` instead.
+
+## Binned y summaries (\`summary_bin\`)
+
+\`stat: "summary_bin"\` (ggplot2 \`stat_summary_bin\`) bins continuous \`x\` with
+the same break rules as \`stat_bin\`, then summarizes \`y\` in each non-empty
+(group × bin). Default fun is mean ± se. Available on **point**, **line**, and
+**errorbar**. Empty bins are omitted (unlike count bins).
+
+\`\`\`svelte fragment
+<GeomPoint alpha={0.35} />
+<GeomErrorbar stat="summary_bin" binwidth={1} boundary={0} width={0.4} />
+<GeomLine stat="summary_bin" binwidth={1} boundary={0} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y" }))
+  .geomPoint({ alpha: 0.35 })
+  .geomErrorbar({ stat: "summary_bin", binwidth: 1, boundary: 0 })
+  .geomLine({ stat: "summary_bin", binwidth: 1, boundary: 0 })
+  .spec();
+\`\`\`
+
+Bin knobs match histogram / freqpoly: \`bins\`, \`binwidth\`, \`boundary\`,
+\`center\`, \`closed\`. Summary knobs: \`fun\`, \`funMin\`, \`funMax\`.
+
+[Binned mean ± se](/examples/errorbar/summary-bin): raw points with per-bin
+errorbars and a summary line.
+
 ## Quantile regression lines
 
 Linear quantile regression (ggplot2 \`geom_quantile\` / \`stat_quantile\`): fit

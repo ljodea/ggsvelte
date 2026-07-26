@@ -102,7 +102,9 @@ export function filterRepresentedSourceRows(input: {
     aggregateXField !== null &&
     outputX !== null &&
     (stat === "count" || stat === "summary" || stat === "boxplot");
-  const needsBin = stat === "bin" && aggregateXField !== null;
+  // summary_bin: bin-edge membership like bin (finite-x only). Non-finite y is
+  // dropped at stat time for the summary value, not from lineage membership.
+  const needsBin = (stat === "bin" || stat === "summary_bin") && aggregateXField !== null;
   const needsY =
     (stat === "smooth" || stat === "summary" || stat === "boxplot") && aggregateYField !== null;
 

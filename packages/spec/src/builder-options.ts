@@ -40,8 +40,8 @@ interface GeomDataOption {
 export interface GeomPointOptions extends PointParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
-  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
-  stat?: "identity" | "unique";
+  /** "identity" (default), "unique", or "summary_bin" (binned y summary; #817). */
+  stat?: "identity" | "unique" | "summary_bin";
   position?: PointPosition;
   positionParams?: PositionParams;
 }
@@ -53,9 +53,10 @@ export interface GeomLineOptions extends LineParams, GeomDataOption {
   /**
    * identity (default) | unique (#813) | bin (freqpoly / #796) |
    * align (shared continuous-x grid for stack/fill; #815) |
-   * connect (expand successive points; #816).
+   * connect (expand successive points; #816) |
+   * summary_bin (binned y summary; #817).
    */
-  stat?: "identity" | "unique" | "bin" | "align" | "connect";
+  stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin";
 }
 
 /** Path-layer sugar options (data-order polylines; style + optional connect). */
@@ -126,7 +127,7 @@ export interface GeomDensityOptions extends DensityParams, GeomDataOption {
 export interface GeomErrorbarOptions extends ErrorbarParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
-  stat?: "identity" | "unique" | "summary";
+  stat?: "identity" | "unique" | "summary" | "summary_bin";
 }
 
 /** Rect-layer sugar options: params plus optional layer-level aes. */

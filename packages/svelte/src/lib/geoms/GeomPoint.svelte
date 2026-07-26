@@ -28,8 +28,11 @@
     data?: DataInput | readonly Record<string, unknown>[];
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
     aes?: AesInput;
-    /** "identity" (default) or "unique" (first-wins aesthetic dedupe; #813). */
-    stat?: "identity" | "unique";
+    /**
+     * "identity" (default), "unique" (first-wins aesthetic dedupe; #813), or
+     * "summary_bin" (binned y summary; #817).
+     */
+    stat?: "identity" | "unique" | "summary_bin";
     /** Position adjustment: "identity" (default) | "jitter" (seeded) | "nudge". */
     position?: PointPosition;
     /** Jitter (width/height/seed) or nudge (x/y) parameters. */
@@ -39,5 +42,17 @@
   }
 
   const props: Props = $props();
-  createGeomLayer("point", () => props, ["alpha", "size", "shape"]);
+  createGeomLayer("point", () => props, [
+    "alpha",
+    "size",
+    "shape",
+    "bins",
+    "binwidth",
+    "boundary",
+    "center",
+    "closed",
+    "fun",
+    "funMin",
+    "funMax",
+  ]);
 </script>

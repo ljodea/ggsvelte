@@ -14,9 +14,10 @@
     aes?: AesInput;
     /**
      * identity | unique (#813) | bin (freqpoly; #796) |
-     * align (shared continuous-x grid for stack/fill; #815).
+     * align (shared continuous-x grid for stack/fill; #815) |
+     * connect (#816) | summary_bin (binned y summary; #817).
      */
-    stat?: "identity" | "unique" | "bin" | "align" | "connect";
+    stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin";
   }
 
   const props: Props = $props();
@@ -30,5 +31,8 @@
     "center",
     "closed",
     "connection",
+    "fun",
+    "funMin",
+    "funMax",
   ]);
 </script>

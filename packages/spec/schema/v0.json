@@ -490,10 +490,66 @@
             }
           ],
           "description": "Point shape. One of \"circle\", \"triangle\", \"square\", \"diamond\", \"plus\", \"cross\". Default \"circle\"."
+        },
+        "bins": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "STAT SUMMARY_BIN ONLY (#817): number of bins (integer ≥ 1). Default 30 — advisory. Overridden by binwidth."
+        },
+        "binwidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "STAT SUMMARY_BIN ONLY: bin width in data units (must be greater than 0). Takes precedence over bins."
+        },
+        "boundary": {
+          "type": "number",
+          "description": "STAT SUMMARY_BIN ONLY: align a bin EDGE with this x value. Mutually exclusive with center."
+        },
+        "center": {
+          "type": "number",
+          "description": "STAT SUMMARY_BIN ONLY: align a bin CENTER with this x value. Mutually exclusive with boundary."
+        },
+        "closed": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "right"
+            },
+            {
+              "type": "string",
+              "const": "left"
+            }
+          ],
+          "description": "STAT SUMMARY_BIN ONLY: which edge of each bin is inclusive: \"right\" (default) or \"left\"."
+        },
+        "fun": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "mean"
+            },
+            {
+              "type": "string",
+              "const": "median"
+            },
+            {
+              "type": "string",
+              "const": "sum"
+            }
+          ],
+          "description": "STAT SUMMARY_BIN ONLY: center summary of y per bin — \"mean\" (default), \"median\", or \"sum\"."
+        },
+        "funMin": {
+          "$ref": "#/$defs/SummaryFun",
+          "description": "STAT SUMMARY_BIN ONLY: lower bound summary (ymin)."
+        },
+        "funMax": {
+          "$ref": "#/$defs/SummaryFun",
+          "description": "STAT SUMMARY_BIN ONLY: upper bound summary (ymax)."
         }
       },
       "additionalProperties": false,
-      "description": "Styling parameters for the point geom."
+      "description": "Styling parameters for the point geom, plus optional summary_bin controls when stat is summary_bin (#817)."
     },
     "LineParams": {
       "type": "object",
@@ -550,20 +606,20 @@
         "bins": {
           "type": "integer",
           "minimum": 1,
-          "description": "STAT BIN ONLY (freqpoly / line+bin): number of bins (integer ≥ 1). Default 30 — an advisory reminds you to pick a real value. Overridden by binwidth."
+          "description": "STAT BIN / SUMMARY_BIN: number of bins (integer ≥ 1). Default 30 — an advisory reminds you to pick a real value. Overridden by binwidth."
         },
         "binwidth": {
           "type": "number",
           "exclusiveMinimum": 0,
-          "description": "STAT BIN ONLY (freqpoly / line+bin): bin width in data units (must be greater than 0). Takes precedence over bins."
+          "description": "STAT BIN / SUMMARY_BIN: bin width in data units (must be greater than 0). Takes precedence over bins."
         },
         "boundary": {
           "type": "number",
-          "description": "STAT BIN ONLY: align a bin EDGE with this x value. Mutually exclusive with center."
+          "description": "STAT BIN / SUMMARY_BIN: align a bin EDGE with this x value. Mutually exclusive with center."
         },
         "center": {
           "type": "number",
-          "description": "STAT BIN ONLY: align a bin CENTER with this x value. Mutually exclusive with boundary."
+          "description": "STAT BIN / SUMMARY_BIN: align a bin CENTER with this x value. Mutually exclusive with boundary."
         },
         "closed": {
           "anyOf": [
@@ -576,7 +632,32 @@
               "const": "left"
             }
           ],
-          "description": "STAT BIN ONLY: which edge of each bin is inclusive: \"right\" (default) or \"left\"."
+          "description": "STAT BIN / SUMMARY_BIN: which edge of each bin is inclusive: \"right\" (default) or \"left\"."
+        },
+        "fun": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "mean"
+            },
+            {
+              "type": "string",
+              "const": "median"
+            },
+            {
+              "type": "string",
+              "const": "sum"
+            }
+          ],
+          "description": "STAT SUMMARY_BIN ONLY (#817): center summary of y per bin — \"mean\" (default), \"median\", or \"sum\"."
+        },
+        "funMin": {
+          "$ref": "#/$defs/SummaryFun",
+          "description": "STAT SUMMARY_BIN ONLY: lower bound summary (ymin)."
+        },
+        "funMax": {
+          "$ref": "#/$defs/SummaryFun",
+          "description": "STAT SUMMARY_BIN ONLY: upper bound summary (ymax)."
         },
         "strokePaint": {
           "$ref": "#/$defs/GradientPaint",
@@ -588,7 +669,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Styling parameters for the line geom, plus optional stat-bin controls when stat is bin (freqpoly alias)."
+      "description": "Styling parameters for the line geom, plus optional stat-bin (freqpoly) or summary_bin (#817) controls."
     },
     "PathParams": {
       "type": "object",
@@ -1000,11 +1081,42 @@
         },
         "funMax": {
           "$ref": "#/$defs/SummaryFun",
-          "description": "STAT SUMMARY ONLY: summary function for the upper bound (ymax). Overrides the mean_se default."
+          "description": "STAT SUMMARY / SUMMARY_BIN: summary function for the upper bound (ymax). Overrides the mean_se default."
+        },
+        "bins": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "STAT SUMMARY_BIN ONLY (#817): number of bins (integer ≥ 1). Default 30 — advisory. Overridden by binwidth."
+        },
+        "binwidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "STAT SUMMARY_BIN ONLY: bin width in data units (must be greater than 0). Takes precedence over bins."
+        },
+        "boundary": {
+          "type": "number",
+          "description": "STAT SUMMARY_BIN ONLY: align a bin EDGE with this x value. Mutually exclusive with center."
+        },
+        "center": {
+          "type": "number",
+          "description": "STAT SUMMARY_BIN ONLY: align a bin CENTER with this x value. Mutually exclusive with boundary."
+        },
+        "closed": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "right"
+            },
+            {
+              "type": "string",
+              "const": "left"
+            }
+          ],
+          "description": "STAT SUMMARY_BIN ONLY: which edge of each bin is inclusive: \"right\" (default) or \"left\"."
         }
       },
       "additionalProperties": false,
-      "description": "Parameters for the errorbar geom: styling plus the summary-stat functions (fun, funMin, funMax) used when stat is \"summary\"."
+      "description": "Parameters for the errorbar geom: styling plus summary / summary_bin functions and summary_bin binning controls (#817)."
     },
     "RectParams": {
       "type": "object",
@@ -1519,10 +1631,27 @@
         "geom": {
           "type": "string",
           "const": "point",
-          "description": "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views."
+          "description": "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With stat summary_bin, one point per non-empty (group × bin) summary of y (#817)."
         },
         "stat": {
-          "$ref": "#/$defs/IdentityOrUniqueStat"
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "identity",
+              "description": "Draw each data row as-is (default)."
+            },
+            {
+              "type": "string",
+              "const": "unique",
+              "description": "Drop duplicate rows on mapped aesthetics before drawing; first wins (#813)."
+            },
+            {
+              "type": "string",
+              "const": "summary_bin",
+              "description": "Bin continuous x and summarize y per (group × bin); default mean ± se (#817)."
+            }
+          ],
+          "description": "Point stat: \"identity\" (default), \"unique\", or \"summary_bin\" (binned y summary)."
         },
         "position": {
           "anyOf": [
@@ -1598,9 +1727,14 @@
               "type": "string",
               "const": "connect",
               "description": "Expand successive points into connection vertices (params.connection: hv|vh|mid|linear; #816). Expands in x order; geometry does not re-sort after connect."
+            },
+            {
+              "type": "string",
+              "const": "summary_bin",
+              "description": "Bin continuous x and summarize y per (group × bin); default mean ± se; connect centers in x order (#817)."
             }
           ],
-          "description": "Line stat: \"identity\" (default), \"unique\", \"bin\" (freqpoly), \"align\" (shared x grid), or \"connect\" (step/path joins)."
+          "description": "Line stat: \"identity\" (default), \"unique\", \"bin\" (freqpoly), \"align\" (shared x grid), \"connect\" (step/path joins), or \"summary_bin\" (binned y summary)."
         },
         "position": {
           "type": "string",
@@ -2016,9 +2150,14 @@
               "type": "string",
               "const": "summary",
               "description": "Compute y/ymin/ymax per x group from aes.y; default mean ± standard error (ggplot2 mean_se)."
+            },
+            {
+              "type": "string",
+              "const": "summary_bin",
+              "description": "Bin continuous x and summarize y per (group × bin); default mean ± se (#817)."
             }
           ],
-          "description": "The errorbar's stat: \"identity\" (default), \"unique\" (dedupe aesthetics), or \"summary\" (mean_se per x group)."
+          "description": "The errorbar's stat: \"identity\" (default), \"unique\", \"summary\" (per x group), or \"summary_bin\" (per bin; #817)."
         },
         "position": {
           "type": "string",
@@ -2040,7 +2179,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "An errorbar layer. Identity stat: requires x, ymin, and ymax channels. Summary stat: requires x and y channels (bounds computed by params.fun/funMin/funMax, default mean_se)."
+      "description": "An errorbar layer. Identity: requires x, ymin, ymax. Summary / summary_bin: requires x and y (bounds from params.fun/funMin/funMax, default mean_se)."
     },
     "RectLayer": {
       "type": "object",

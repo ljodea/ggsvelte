@@ -106,7 +106,7 @@ export interface FacetInput {
 
 export interface PointLayerInput extends LayerInputBase {
   geom: "point";
-  stat?: "identity" | "unique";
+  stat?: "identity" | "unique" | "summary_bin";
   position?: PointPosition;
   positionParams?: PositionParams;
   params?: PointParams;
@@ -114,8 +114,8 @@ export interface PointLayerInput extends LayerInputBase {
 
 export interface LineLayerInput extends LayerInputBase {
   geom: "line";
-  /** identity | unique (#813) | bin (freqpoly / #796) | align (#815) | connect (#816) */
-  stat?: "identity" | "unique" | "bin" | "align" | "connect";
+  /** identity | unique | bin | align | connect | summary_bin (#817) */
+  stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin";
   position?: "identity";
   params?: LineParams;
 }
@@ -207,7 +207,7 @@ export interface DensityLayerInput extends LayerInputBase {
 
 export interface ErrorbarLayerInput extends LayerInputBase {
   geom: "errorbar";
-  stat?: "identity" | "unique" | "summary";
+  stat?: "identity" | "unique" | "summary" | "summary_bin";
   position?: "identity";
   params?: ErrorbarParams;
 }

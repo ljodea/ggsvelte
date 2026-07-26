@@ -332,6 +332,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "binned-y-summaries-summary-bin",
+        title: "Binned y summaries (summary_bin)",
+        level: 2,
+      },
+      {
         id: "quantile-regression-lines",
         title: "Quantile regression lines",
         level: 2,
@@ -2507,6 +2512,16 @@ export const DOCS_ROUTES = [
     title: "Errorbars (mean ± se) over raw data — ggsvelte gallery",
     description: "Errorbars (mean ± se) over raw data",
     canonicalPath: "/examples/errorbar/mean-se",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/errorbar/summary-bin",
+    title: "Binned mean ± se (summary_bin) — ggsvelte gallery",
+    description: "Binned mean ± se (summary_bin)",
+    canonicalPath: "/examples/errorbar/summary-bin",
     kind: "page",
     index: true,
     sitemap: true,

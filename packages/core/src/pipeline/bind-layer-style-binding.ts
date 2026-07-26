@@ -61,6 +61,7 @@ export function styleBinding(
       density: ["density", "count", "scaled", "ndensity"],
       smooth: ["y", "ymin", "ymax", "se"],
       summary: ["y", "ymin", "ymax"],
+      summary_bin: ["y", "ymin", "ymax"],
       boxplot: ["ymin", "lower", "middle", "upper", "ymax"],
     };
     if (!(outputs[stat] ?? []).includes(channel.stat)) {
