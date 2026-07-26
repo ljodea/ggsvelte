@@ -36,19 +36,10 @@ describe("geom_sf_text / stat_sf_coordinates", () => {
     const batch = model.scene.batches[0] as GlyphsBatch;
     expect(batch.kind).toBe("glyphs");
     expect(batch.texts).toEqual(["A"]);
-    // Panel maps data [0,2]→width; centroid x=1 → half width (modulo expansion).
-    if (model.scales.x.type !== "band" && model.scales.y.type !== "band") {
-      const [x0, x1] = model.scales.x.domain as [number, number];
-      const [y0, y1] = model.scales.y.domain as [number, number];
-      // Domains trained from centroid only (single point) or from expand —
-      // assert label is drawable and non-empty.
-      expect(Number.isFinite(batch.positions[0]!)).toBe(true);
-      expect(Number.isFinite(batch.positions[1]!)).toBe(true);
-      void x0;
-      void x1;
-      void y0;
-      void y1;
-    }
+    // Domains trained from centroid only (single point) or from expand —
+    // assert label is drawable and non-empty.
+    expect(Number.isFinite(batch.positions[0]!)).toBe(true);
+    expect(Number.isFinite(batch.positions[1]!)).toBe(true);
   });
 
   it("passes Point coordinates through unchanged", () => {

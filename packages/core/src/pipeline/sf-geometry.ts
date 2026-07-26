@@ -41,20 +41,23 @@ export function parseSfGeometry(
       "geom_sf geometry cell is not valid JSON.",
     );
   }
-  if (
-    parsed === null ||
-    typeof parsed !== "object" ||
-    !("type" in parsed) ||
-    typeof (parsed as { type: unknown }).type !== "string"
-  ) {
+  if (parsed === null || typeof parsed !== "object" || !("type" in parsed)) {
     throw new PipelineError(
       "sf-geometry-invalid",
       path,
       'geom_sf geometry must be a GeoJSON Geometry object with a string "type".',
     );
   }
-  const geom = parsed as { type: string; coordinates?: unknown };
-  return { type: geom.type, coordinates: geom.coordinates };
+  const type = parsed.type;
+  if (typeof type !== "string") {
+    throw new PipelineError(
+      "sf-geometry-invalid",
+      path,
+      'geom_sf geometry must be a GeoJSON Geometry object with a string "type".',
+    );
+  }
+  const coordinates = "coordinates" in parsed ? parsed.coordinates : undefined;
+  return { type, coordinates };
 }
 
 export function sfKindOf(type: string, path = "/geometry"): SfKind {
@@ -150,7 +153,7 @@ export function representativePoint(type: string, coordinates: unknown): SfPosit
   }
   if (type === "MultiPolygon") {
     if (!Array.isArray(coordinates) || coordinates.length === 0) return null;
-    const poly = coordinates[0];
+    const poly: unknown = coordinates[0];
     if (!Array.isArray(poly) || poly.length === 0) return null;
     return polygonCentroid(poly[0]);
   }
