@@ -39,8 +39,8 @@ test("getting started presents the complete file, then the agent surface", async
   // The reader gets a complete, runnable file before anything is decomposed,
   // and the agent surface comes after the chart is finished — not before it.
   const order = [
-    "Draw your first chart",
-    "Build the chart",
+    "Start with a basic plot",
+    "Add geometry layers",
     "The finished file",
     "Built for agents",
   ];
@@ -52,7 +52,9 @@ test("getting started presents the complete file, then the agent surface", async
   }
 
   const firstFile = article.locator(".lesson-source--file code").first();
-  await expect(firstFile).toContainText("import { GeomPoint, GGPlot }");
+  await expect(firstFile).toContainText("GeomPoint");
+  await expect(firstFile).toContainText("GGPlot");
+  await expect(firstFile).toContainText("ScaleXContinuous");
   await expect(firstFile).toContainText('from "@ggsvelte/svelte/data"');
   await expect(firstFile).toContainText("ariaLabel=");
   // Width follows the container and height defaults; neither belongs in the

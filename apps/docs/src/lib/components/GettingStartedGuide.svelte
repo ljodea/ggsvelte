@@ -1,10 +1,9 @@
 <script lang="ts">
   /**
-   * The getting-started walkthrough: one editorial chart, built one grammar
-   * element at a time.
+   * Getting started: install, a basic plot, then geometry layers on real data.
    *
    * Every chart on this page renders from `foldSakura(n)` in scripts/quickstart
-   * — the same fold that produces the fragments beside them and the finished
+   * — the same fold that produces the fragments above them and the finished
    * file at the end. Nothing here re-derives a spec, so nothing here can drift
    * from what the reader copies.
    */
@@ -19,12 +18,10 @@
     QUICKSTART_HEADLESS_FRAGMENT,
     QUICKSTART_PAGE_SVELTE,
     QUICKSTART_PORTABLE_SPEC_FRAGMENT,
-    SAKURA_EPOCHS,
     SAKURA_FINISHED_SVELTE,
     SAKURA_RECORDS,
     SAKURA_STEPS,
   } from "$scripts/quickstart";
-  import { nextRovingTabIndex } from "$lib/tab-roving";
   import {
     LESSON_CHART_HEIGHT,
     LESSON_CHART_WIDTH,
@@ -36,27 +33,24 @@
 
   /**
    * Below this chart width, hand-placed callouts collide with the data, so the
-   * records move to the caption under the chart (the bands, trend and points
-   * never move). Measured on the chart container, never on the viewport.
+   * records move into the aria-label only (bands, trend and points never move).
+   * Measured on the chart container, never on the viewport.
    */
   const NARROW_CHART = 560;
 
-  const lessonSurfaces = ["output", "svelte"] as const;
-  let lessonEnhanced = $state(false);
   let narrowChart = $state(false);
-  let lessonSurface = $state<"output" | "svelte">("output");
-  let outputTab = $state<HTMLButtonElement>();
-  let svelteTab = $state<HTMLButtonElement>();
   let finishedChart = $state<HTMLElement>();
 
   /**
    * The finished chart is the page's only live plot, so it is the one the
    * annotation ladder applies to: below NARROW_CHART the record callouts
-   * would collide with the data, and the records move to the caption instead.
+   * would collide with the data.
    */
   const finished = $derived(
     foldSakura(SAKURA_STEPS.length, rows, { annotations: !narrowChart }),
   );
+
+  const recordNames = SAKURA_RECORDS.map((record) => record.label).join("; ");
 
   /**
    * Every step chart ships as SVG the library rendered at build time
@@ -68,13 +62,7 @@
   const chartSrc = (step: number): string =>
     `${base}/lesson/${step < 0 ? "first-render.svg" : `step-${String(step + 1)}.svg`}`;
 
-  const epochNames = SAKURA_EPOCHS.map((band) => band.epoch).join(", ");
-  const recordNames = SAKURA_RECORDS.map((record) => record.label).join("; ");
-
   onMount(() => {
-    lessonEnhanced = true;
-    // Measure the chart itself, not the page: the ladder is about how much
-    // room the plot has.
     const target = finishedChart;
     if (target === undefined) return;
     if (typeof ResizeObserver === "undefined") return;
@@ -87,115 +75,30 @@
       observer.disconnect();
     };
   });
-
-  function selectLessonSurface(
-    surface: "output" | "svelte",
-    focus = false,
-  ): void {
-    lessonSurface = surface;
-    if (focus) (surface === "output" ? outputTab : svelteTab)?.focus();
-  }
-
-  function handleLessonTabs(event: KeyboardEvent): void {
-    const index = lessonSurface === "output" ? 0 : 1;
-    const next = nextRovingTabIndex(event.key, index, lessonSurfaces.length);
-    if (next === null) return;
-    event.preventDefault();
-    selectLessonSurface(lessonSurfaces[next]!, true);
-  }
 </script>
 
 <article class="guide getting-started-guide">
   <h1>Getting started</h1>
-  <p class="lede">
-    Twelve centuries of Kyoto cherry-blossom dates, from a scatter you can
-    barely read to a chart that states what happened — one grammar element per
-    step, on real data that ships with the package.
-  </p>
 
   <h2 id="install">Install</h2>
-  <p>Node.js 22 or newer, in an empty directory.</p>
+  <p>Node.js 22 or newer. In an existing SvelteKit (or Svelte) app:</p>
   <CopyCode
     class="lesson-source"
     language="bash"
-    accessibleLabel="Copy create command"
-    code={`bunx sv create my-chart --template minimal --types ts --no-add-ons --install bun\ncd my-chart\nbun install @ggsvelte/svelte`}
+    accessibleLabel="Copy install command"
+    code="bun install @ggsvelte/svelte"
   />
 
-  <h2 id="draw-your-first-chart">Draw your first chart</h2>
+  <h2 id="start-with-a-basic-plot">Start with a basic plot</h2>
   <p>
-    <code>{`src/routes/+page.svelte`}</code>, in full. The 838 observations come
-    from
-    <code>@ggsvelte/svelte/data</code>, so there is nothing to download.
-    <code>bloomRefDate</code> is each bloom day projected onto one shared calendar
-    year — comparing across twelve centuries needs a common one.
+    Data ships with the package as
+    <code>@ggsvelte/svelte/data</code>
+    (<code>kyotoSakura</code>: 838 peak-bloom observations). Drop this into a
+    route or component:
   </p>
-  {#if lessonEnhanced}
-    <div
-      class="lesson-surface-tabs"
-      role="tablist"
-      aria-label="First chart surfaces"
-    >
-      <button
-        id="first-output-tab"
-        bind:this={outputTab}
-        type="button"
-        role="tab"
-        aria-selected={lessonSurface === "output"}
-        aria-controls="first-output-panel"
-        tabindex={lessonSurface === "output" ? 0 : -1}
-        onclick={() => selectLessonSurface("output")}
-        onkeydown={handleLessonTabs}>Output</button
-      >
-      <button
-        id="first-svelte-tab"
-        bind:this={svelteTab}
-        type="button"
-        role="tab"
-        aria-selected={lessonSurface === "svelte"}
-        aria-controls="first-svelte-panel"
-        tabindex={lessonSurface === "svelte" ? 0 : -1}
-        onclick={() => selectLessonSurface("svelte")}
-        onkeydown={handleLessonTabs}>Svelte</button
-      >
-    </div>
-  {/if}
-  <div
-    class="first-result"
-    data-enhanced={lessonEnhanced ? "true" : undefined}
-    data-surface={lessonSurface}
-  >
-    <section
-      id="first-output-panel"
-      class="lesson-output"
-      role={lessonEnhanced ? "tabpanel" : undefined}
-      aria-labelledby={lessonEnhanced
-        ? "first-output-tab"
-        : "first-output-heading"}
-    >
-      <div class="lesson-label" id="first-output-heading">Output</div>
-      <img
-        class="lesson-chart"
-        src={chartSrc(-1)}
-        width={LESSON_CHART_WIDTH}
-        height={LESSON_CHART_HEIGHT}
-        alt="Peak cherry-blossom dates in Kyoto, 812 to 2026, as an unstyled scatter"
-      />
-      <p>
-        Twelve hundred years of spring, and the scatter says almost nothing —
-        down to the axis, which is a date the library inferred and formatted on
-        its own. Every step below removes one reason for that.
-      </p>
-    </section>
-    <section
-      id="first-svelte-panel"
-      class="lesson-code"
-      role={lessonEnhanced ? "tabpanel" : undefined}
-      aria-labelledby={lessonEnhanced
-        ? "first-svelte-tab"
-        : "first-code-heading"}
-    >
-      <div class="lesson-label" id="first-code-heading">Svelte</div>
+  <div class="lesson-block">
+    <section class="lesson-code">
+      <div class="lesson-label">Svelte</div>
       <CopyCode
         class="lesson-source lesson-source--file"
         language="svelte"
@@ -203,28 +106,37 @@
         code={QUICKSTART_PAGE_SVELTE}
       />
     </section>
+    <section class="lesson-output">
+      <div class="lesson-label">Output</div>
+      <img
+        class="lesson-chart"
+        src={chartSrc(-1)}
+        width={LESSON_CHART_WIDTH}
+        height={LESSON_CHART_HEIGHT}
+        alt="Peak cherry-blossom dates in Kyoto, 812 to 2026, as a scatter"
+      />
+    </section>
   </div>
 
-  <h2 id="build-the-chart">Build the chart</h2>
-  <p>
-    Each step adds one element and re-renders the accumulated chart. Paste the
-    fragment where it belongs in the file above; the finished file is at the
-    end.
-  </p>
+  <h2 id="add-geometry-layers">Add geometry layers</h2>
 
   <div class="lesson-steps">
     {#each SAKURA_STEPS as step, index (step.id)}
       <section class="progressive-step" aria-labelledby={step.id}>
         <div class="step-copy">
           <h3 id={step.id}>{step.title}</h3>
-          <p>{step.outcome}</p>
+          {#if step.outcome !== ""}
+            <p>{step.outcome}</p>
+          {/if}
           <CopyCode
             class="lesson-source"
             language="svelte"
             accessibleLabel={`Copy ${step.title} fragment`}
             code={step.fragment}
           />
-          <p>{step.explanation}</p>
+          {#if step.explanation !== ""}
+            <p>{step.explanation}</p>
+          {/if}
           <a href={`${base}${step.href}`}>Read {step.chapterTitle}</a>
         </div>
         <div class="lesson-output">
@@ -233,21 +145,14 @@
             src={chartSrc(index)}
             width={LESSON_CHART_WIDTH}
             height={LESSON_CHART_HEIGHT}
-            alt={`Kyoto cherry blossom after step ${index + 1}: ${step.outcome}`}
+            alt={`Kyoto cherry blossom after step ${index + 1}: ${step.title}`}
           />
-          {#if index >= 2}
-            <p class="chart-note">Bands, left to right: {epochNames}.</p>
-          {/if}
         </div>
       </section>
     {/each}
   </div>
 
   <h2 id="the-chart">The chart</h2>
-  <p>
-    The same accumulated spec, with room to breathe. Hover it, or tab into it:
-    every one of the 838 observations answers.
-  </p>
   <div class="finished-chart lesson-output" bind:this={finishedChart}>
     <GGPlot
       spec={finished.spec}
@@ -255,17 +160,9 @@
       inspect={finished.inspect}
       ariaLabel={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
     />
-    <p class="chart-note">
-      Bands, left to right: {epochNames}.{#if narrowChart}
-        Called out: {recordNames}.{/if}
-    </p>
   </div>
 
   <h2 id="the-finished-file">The finished file</h2>
-  <p>
-    Every fragment above, in place. This is the whole chart — no build step, no
-    wrapper component, no escape hatch.
-  </p>
   <CopyCode
     class="lesson-source lesson-source--file"
     language="svelte"
@@ -349,43 +246,24 @@
 </article>
 
 <style>
-  .lede {
-    color: var(--muted);
-    font-size: 1.08rem;
-  }
-
-  .lesson-surface-tabs {
-    display: none;
-  }
-
-  .first-result {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    margin: 1.5rem 0 3rem;
-    border-block: 1px solid var(--line);
-  }
-
   /*
-   * Steps stack: the delta is only readable if the chart gets the whole
-   * column, and a chart squeezed beside the prose renders its axis text at
-   * half size.
+   * Code on top, chart below — never side-by-side. Side-by-side crushes the
+   * plot on every viewport and is banned on this docs site.
    */
+  .lesson-block,
   .progressive-step {
     display: grid;
     margin: 1.5rem 0 3rem;
     border-block: 1px solid var(--line);
   }
 
-  .first-result > section,
+  .lesson-block > section,
   .progressive-step > div {
     min-width: 0;
     padding: 1rem;
   }
 
-  .first-result > section + section {
-    border-left: 1px solid var(--line);
-  }
-
+  .lesson-block > section + section,
   .progressive-step > div + div {
     border-top: 1px solid var(--line);
   }
@@ -409,12 +287,6 @@
    */
   .finished-chart {
     min-height: 32rem;
-  }
-
-  .lesson-output p {
-    margin: 0.75rem 0 0;
-    color: #5e6878;
-    font-size: 0.82rem;
   }
 
   .lesson-label {
@@ -442,60 +314,13 @@
   }
 
   /*
-   * Translucent band fills do not survive forced-colors mode. The epoch
-   * boundaries are drawn as hairline rules and the names live in the note
-   * under each chart, so nothing is carried by fill alone.
+   * Translucent band fills do not survive forced-colors mode. Epoch names
+   * remain available via the bottom legend (and the aria-label on the live
+   * chart).
    */
   @media (forced-colors: active) {
     .lesson-output :global(.gg-marks rect) {
       fill: none;
-    }
-  }
-
-  @media (max-width: 63.99rem) {
-    .lesson-surface-tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      margin-top: 1.5rem;
-      border: 1px solid var(--line);
-      border-bottom: 0;
-    }
-
-    .lesson-surface-tabs button {
-      min-height: 44px;
-      border: 0;
-      background: var(--paper);
-      color: var(--muted);
-      font: 600 0.82rem/1 var(--body-font);
-      cursor: pointer;
-    }
-
-    .lesson-surface-tabs button + button {
-      border-left: 1px solid var(--line);
-    }
-
-    .lesson-surface-tabs button[aria-selected="true"] {
-      background: var(--wash);
-      color: var(--ink);
-      box-shadow: inset 0 -2px 0 var(--accent);
-    }
-
-    .first-result[data-enhanced="true"] {
-      margin-top: 0;
-    }
-
-    .first-result[data-enhanced="true"][data-surface="output"] .lesson-code,
-    .first-result[data-enhanced="true"][data-surface="svelte"] .lesson-output {
-      display: none;
-    }
-
-    .first-result {
-      grid-template-columns: 1fr;
-    }
-
-    .first-result > section + section {
-      border-top: 1px solid var(--line);
-      border-left: 0;
     }
   }
 </style>

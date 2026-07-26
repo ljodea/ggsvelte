@@ -13,7 +13,7 @@
  * consumer-compat fixture app.
  */
 
-import type { Labs, LayerSpec, PortableSpec, Scales, ThemeName } from "@ggsvelte/spec";
+import type { GuidesSpec, Labs, LayerSpec, PortableSpec, Scales, ThemeName } from "@ggsvelte/spec";
 
 export const QUICKSTART_PAGE_FILENAME = "src/routes/+page.svelte";
 
@@ -81,6 +81,7 @@ export interface SakuraSpecDelta {
   /** Full bottom-to-top z-order after this step. */
   readonly order?: readonly string[];
   readonly scales?: Scales;
+  readonly guides?: GuidesSpec;
   readonly labs?: Labs;
   readonly theme?: ThemeName;
 }
@@ -93,8 +94,9 @@ export interface SakuraSourceDelta {
   /** `<GGPlot>` attributes, keyed by attribute name; a repeat replaces it. */
   readonly attrs?: Readonly<Record<string, string>>;
   /**
-   * Declaration-only grammar children (`<Scale>`, `<Labs>`, `<ThemeTufte>`),
-   * keyed by the grammar piece they carry; a repeat replaces it.
+   * Declaration-only grammar children (`<ScaleYDate>`, `<Labs>`,
+   * `<GuideLegend>`, `<ThemeTufte>`, …), keyed by the grammar piece they
+   * carry; a repeat replaces it.
    *
    * Held apart from {@link children} because they are not layers: they never
    * appear in `childOrder`, and they are emitted ahead of every geom so that a
@@ -112,11 +114,16 @@ export interface SakuraStep {
   readonly id: string;
   /** Step heading. States the reader's goal, not the mechanism. */
   readonly title: string;
-  /** What changes on the chart. One line. */
+  /**
+   * Optional one-line note under the heading. Empty string = no note
+   * (prefer no marketing prose on this page).
+   */
   readonly outcome: string;
-  /** The grammar concept the step teaches. */
+  /**
+   * Optional grammar note under the fragment. Empty string = no note.
+   */
   readonly explanation: string;
-  /** The delta the reader types, as it appears beside the chart. */
+  /** The delta the reader types, as it appears above the chart. */
   readonly fragment: string;
   readonly chapterTitle: string;
   readonly href: string;
@@ -141,13 +148,15 @@ ${SAKURA_RECORDS.map(
 
 const EPOCH_EDGES_CONST = `  const epochEdges = [${SAKURA_EPOCH_EDGES.map((e) => `{ year: ${e.year} }`).join(", ")}];`;
 
+const EPOCH_DOMAIN = SAKURA_EPOCHS.map((e) => `"${e.epoch}"`).join(", ");
+const EPOCH_VALUES = '"#f5edc4", "#dce8f2", "#f3dcda"';
+
 export const SAKURA_STEPS: readonly SakuraStep[] = [
   {
     id: "separate-signal-from-noise",
     title: "Separate the signal from the noise",
-    outcome: "A fitted trend rises out of eight centuries of scatter.",
-    explanation:
-      "GeomSmooth is a stat layer: the library fits the loess locally and draws the result. Nothing is precomputed, and the points stay exactly as they were — only their alpha changes, so the fit has something to sit on.",
+    outcome: "",
+    explanation: "",
     fragment: `<GeomPoint alpha={0.5} size={1.6}
   aes={{ color: { value: "#777777" } }} />
 <GeomSmooth method="loess" span={0.4} se={false} linewidth={1.8}
@@ -191,21 +200,15 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   {
     id: "put-earlier-bloom-on-top",
     title: "Put earlier bloom on top",
-    outcome: "Real dates on the axis, reversed: earlier spring now reads as up.",
-    explanation:
-      "The bloom day is a date, so the y scale is temporal — dateBreaks and dateLabels format it. Reversing the scale changes direction only; no value is touched, and the trend line above is refit from the same rows.",
-    fragment: `<Scale
-  value={{
-    y: {
-      type: "time",
-      temporalKind: "date",
-      reverse: true,
-      dateBreaks: "10 days",
-      dateLabels: "%b %d",
-      domain: ["${Y_BOTTOM}", "${Y_TOP}"],
-    },
-  }}
-/>`,
+    outcome: "",
+    explanation: "",
+    fragment: `<ScaleYDate
+  reverse
+  dateBreaks="10 days"
+  dateLabels="%b %d"
+  domain={["${Y_BOTTOM}", "${Y_TOP}"]}
+/>
+<ScaleXContinuous labels="d" domain={[800, 2030]} />`,
     chapterTitle: "Scales and guides",
     href: "/guide/scales-guides#date-and-time-axes",
     spec: {
@@ -225,36 +228,24 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       labs: { x: "Year", y: "Peak bloom" },
     },
     source: {
-      components: ["Labs", "Scale"],
+      components: ["ScaleYDate", "ScaleXContinuous"],
       grammar: {
-        scales: `  <Scale
-    value={{
-      y: {
-        type: "time",
-        temporalKind: "date",
-        reverse: true,
-        dateBreaks: "10 days",
-        dateLabels: "%b %d",
-        domain: ["${Y_BOTTOM}", "${Y_TOP}"],
-      },
-      x: { type: "linear", domain: [800, 2030], labels: "d" },
-      fill: {
-        type: "manual",
-        domain: [${SAKURA_EPOCHS.map((e) => `"${e.epoch}"`).join(", ")}],
-        range: ["#f5edc4", "#dce8f2", "#f3dcda"],
-      },
-    }}
+        scaleY: `  <ScaleYDate
+    reverse
+    dateBreaks="10 days"
+    dateLabels="%b %d"
+    domain={["${Y_BOTTOM}", "${Y_TOP}"]}
   />`,
+        scaleX: `  <ScaleXContinuous labels="d" domain={[800, 2030]} />`,
         labs: `  <Labs x="Year" y="Peak bloom" />`,
       },
     },
   },
   {
-    id: "put-the-climate-behind-the-data",
-    title: "Put the climate behind the data",
-    outcome: "Three epoch bands sit under the observations.",
-    explanation:
-      "A layer may bring its own data. This one draws three rows the plot's 838 know nothing about, so it unsets the inherited x and y and maps corners instead. A manual fill scale names the bands in the legend.",
+    id: "add-epoch-bands",
+    title: "Add epoch bands",
+    outcome: "",
+    explanation: "",
     fragment: `<GeomRect
   data={epochs}
   aes={{
@@ -265,7 +256,12 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   alpha={0.55}
 />
 <GeomRule data={epochEdges} aes={{ y: null, color: { value: "#c8ccd0" } }}
-  linewidth={0.5} />`,
+  linewidth={0.5} />
+<ScaleFillManual
+  domain={[${EPOCH_DOMAIN}]}
+  values={[${EPOCH_VALUES}]}
+/>
+<GuideLegend channel="fill" position="bottom" direction="horizontal" />`,
     chapterTitle: "Layers and marks",
     href: "/guide/layers-marks#compose-layers",
     spec: {
@@ -299,10 +295,20 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           range: ["#f5edc4", "#dce8f2", "#f3dcda"],
         },
       },
+      guides: {
+        fill: { type: "legend", position: "bottom", direction: "horizontal" },
+      },
     },
     source: {
-      components: ["GeomRect", "GeomRule"],
+      components: ["GeomRect", "GeomRule", "ScaleFillManual", "GuideLegend"],
       consts: [EPOCHS_CONST, EPOCH_EDGES_CONST],
+      grammar: {
+        scaleFill: `  <ScaleFillManual
+    domain={[${EPOCH_DOMAIN}]}
+    values={[${EPOCH_VALUES}]}
+  />`,
+        guides: `  <GuideLegend channel="fill" position="bottom" direction="horizontal" />`,
+      },
       children: {
         epochEdges: `  <GeomRule
     data={epochEdges}
@@ -327,11 +333,10 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     },
   },
   {
-    id: "name-the-records",
-    title: "Name the records",
-    outcome: "A baseline, and three observations called out by name.",
-    explanation:
-      "Annotations are layers like any other: a rule at a constant, then leader lines and text driven by a three-row table. Nothing here is a chart-library escape hatch.",
+    id: "annotate-record-years",
+    title: "Annotate record years",
+    outcome: "",
+    explanation: "",
     fragment: `<GeomRule yintercept="${SAKURA_BASELINE}" linewidth={0.75} alpha={0.7}
   aes={{ color: { value: "#9aa0a6" }, linetype: { value: "dashed" } }} />
 <GeomSegment data={records}
@@ -414,9 +419,8 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   {
     id: "finish-it",
     title: "Finish it",
-    outcome: "Tufte theme, a title that states the finding, a caption that cites the source.",
-    explanation:
-      "Theme is appearance; labs is editorial. Neither touches a mapping, so swapping themes cannot change what the chart claims.",
+    outcome: "",
+    explanation: "",
     fragment: `<ThemeTufte />
 <Labs
   title="Kyoto cherry blossom, 812–2026"
@@ -455,12 +459,10 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     },
   },
   {
-    id: "and-it-is-data",
-    title: "Make it answer questions — and notice it is data",
-    outcome:
-      "Inspect and pin any of the 838 observations, by pointer or keyboard — try it on the finished chart below.",
-    explanation:
-      "Inspection needs a stable identity per row; year is unique here. Everything above is also a JSON PortableSpec — the same chart an agent can emit, validate, and correct without opening this file.",
+    id: "inspect-and-pin",
+    title: "Inspect and pin",
+    outcome: "",
+    explanation: "",
     fragment: `key="year"
 inspect={{ mode: "exact", pin: true }}`,
     chapterTitle: "Inspect and pin",
@@ -493,13 +495,21 @@ export interface SakuraFold {
 const BASE_LAYERS: Record<string, LayerSpec> = { points: { geom: "point" } };
 const BASE_ORDER = ["points"];
 const BASE_CHILDREN: Record<string, string> = { points: "  <GeomPoint />" };
+/** Readable defaults so the first chart does not ship camelCase axis titles or grouped year ticks. */
+const BASE_SCALES: Scales = { x: { type: "linear", labels: "d" } };
+const BASE_LABS: Labs = { x: "Year", y: "Peak bloom" };
+const BASE_GRAMMAR: Record<string, string> = {
+  scaleX: `  <ScaleXContinuous labels="d" />`,
+  labs: `  <Labs x="Year" y="Peak bloom" />`,
+};
+const BASE_COMPONENTS = ["GeomPoint", "GGPlot", "Labs", "ScaleXContinuous"] as const;
 
 /**
  * Emission order for the grammar children, outermost concern first: how the
  * chart looks, then how values map to the page, then what it is called. None
- * of the three can override another, so this is readability only.
+ * of these can override another, so this is readability only.
  */
-const GRAMMAR_ORDER = ["theme", "scales", "labs"] as const;
+const GRAMMAR_ORDER = ["theme", "scaleY", "scaleX", "scaleFill", "guides", "labs"] as const;
 
 /** Layers that only make sense when the chart is wide enough to place text. */
 export const SAKURA_ANNOTATION_LAYERS = ["leaders", "callouts"] as const;
@@ -527,24 +537,26 @@ export function foldSakura(
 
   const layers: Record<string, LayerSpec> = { ...BASE_LAYERS };
   let order: readonly string[] = BASE_ORDER;
-  let scales: Scales = {};
-  let labs: Labs | undefined;
+  let scales: Scales = { ...BASE_SCALES };
+  let guides: GuidesSpec | undefined;
+  let labs: Labs | undefined = { ...BASE_LABS };
   let theme: ThemeName | undefined;
 
-  const components = new Set(["GeomPoint", "GGPlot"]);
+  const components = new Set<string>(BASE_COMPONENTS);
   const consts: string[] = [];
   const attrs = new Map<string, string>([
     ["data", "  data={kyotoSakura}"],
     ["aes", `  aes={{ x: "year", y: "bloomRefDate" }}`],
   ]);
   const children: Record<string, string> = { ...BASE_CHILDREN };
-  const grammar: Record<string, string> = {};
+  const grammar: Record<string, string> = { ...BASE_GRAMMAR };
   let childOrder: readonly string[] = BASE_ORDER;
 
   for (const step of steps) {
     Object.assign(layers, step.spec.layers ?? {});
     if (step.spec.order !== undefined) order = step.spec.order;
     scales = { ...scales, ...step.spec.scales };
+    if (step.spec.guides !== undefined) guides = { ...guides, ...step.spec.guides };
     if (step.spec.labs !== undefined) labs = { ...labs, ...step.spec.labs };
     if (step.spec.theme !== undefined) theme = step.spec.theme;
 
@@ -566,6 +578,7 @@ export function foldSakura(
     aes: { x: { field: "year" }, y: { field: "bloomRefDate" } },
     layers: drawn.map((name) => layers[name]!),
     ...(Object.keys(scales).length > 0 && { scales }),
+    ...(guides !== undefined && { guides }),
     ...(labs !== undefined && { labs }),
     ...(theme !== undefined && { theme }),
   };
@@ -621,8 +634,8 @@ export const SAKURA_FINISHED_SVELTE = foldSakura(SAKURA_STEPS.length).source;
  */
 export const GETTING_STARTED_PAGE_HEADINGS = [
   { id: "install", title: "Install", level: 2 },
-  { id: "draw-your-first-chart", title: "Draw your first chart", level: 2 },
-  { id: "build-the-chart", title: "Build the chart", level: 2 },
+  { id: "start-with-a-basic-plot", title: "Start with a basic plot", level: 2 },
+  { id: "add-geometry-layers", title: "Add geometry layers", level: 2 },
   ...SAKURA_STEPS.map((step) => ({ id: step.id, title: step.title, level: 3 as const })),
   { id: "the-chart", title: "The chart", level: 2 },
   { id: "the-finished-file", title: "The finished file", level: 2 },
@@ -646,10 +659,14 @@ export function quickstartAriaLabel(): string {
 }
 
 export function sakuraLessonMarkdown(): string {
-  return SAKURA_STEPS.map(
-    (step) =>
-      `### ${step.title}\n\n${step.outcome}\n\n\`\`\`svelte\n${step.fragment}\n\`\`\`\n\n${step.explanation}\n\n[Read ${step.chapterTitle}](${step.href}).`,
-  ).join("\n\n");
+  return SAKURA_STEPS.map((step) => {
+    const parts = [`### ${step.title}`];
+    if (step.outcome !== "") parts.push("", step.outcome);
+    parts.push("", "```svelte", step.fragment, "```");
+    if (step.explanation !== "") parts.push("", step.explanation);
+    parts.push("", `[Read ${step.chapterTitle}](${step.href}).`);
+    return parts.join("\n");
+  }).join("\n\n");
 }
 
 // --- the agent surface -----------------------------------------------------
