@@ -66,7 +66,7 @@ describe("SHELL_MANIFEST completeness", () => {
     expect(byFamily.get("position-binned")).toBe(2);
     expect(byFamily.get("position-temporal")).toBe(4);
     expect(byFamily.get("position-discrete")).toBe(2);
-    expect(byFamily.get("color-fill")).toBe(24);
+    expect(byFamily.get("color-fill")).toBe(30);
     expect(byFamily.get("numeric-style")).toBe(21);
     expect(byFamily.get("finite-style")).toBe(8);
     // Families in the ledger match. Set<string>, not the inferred literal union:
