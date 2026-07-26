@@ -65,11 +65,11 @@ function colourAliases(stem: string): string[] {
  *   position-binned      2
  *   position-temporal    4
  *   position-discrete    2
- *   color-fill          18
+ *   color-fill          24
  *   numeric-style       21
  *   finite-style         8
  *   ----------------------
- *   63 component files + 9 Colour aliases
+ *   69 component files + 12 Colour aliases
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
@@ -127,7 +127,7 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscretePositionScaleOptions",
   ]),
 
-  // --- color-fill (18 components + 9 Colour aliases) -----------------------
+  // --- color-fill (24 components + 12 Colour aliases) ----------------------
   // optionsTypes match the slice-3 hand-written shells exactly.
   shell(
     "scaleColorContinuous",
@@ -149,6 +149,27 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "BinnedColorScaleOptions",
     ["BinnedColorScaleOptions"],
     colourAliases("Binned"),
+  ),
+  shell(
+    "scaleColorBrewer",
+    "color-fill",
+    "ColorBrewerScaleOptions",
+    ["ColorBrewerScaleOptions"],
+    colourAliases("Brewer"),
+  ),
+  shell(
+    "scaleColorDistiller",
+    "color-fill",
+    "ColorDistillerScaleOptions",
+    ["ColorDistillerScaleOptions"],
+    colourAliases("Distiller"),
+  ),
+  shell(
+    "scaleColorFermenter",
+    "color-fill",
+    "ColorFermenterScaleOptions",
+    ["ColorFermenterScaleOptions"],
+    colourAliases("Fermenter"),
   ),
   shell(
     "scaleColorLog10",
@@ -212,6 +233,13 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
   shell("scaleFillManual", "color-fill", "ManualColorScaleOptions", ["ManualColorScaleOptions"]),
   shell("scaleFillIdentity", "color-fill", "IdentityColorScaleOptions", [
     "IdentityColorScaleOptions",
+  ]),
+  shell("scaleFillBrewer", "color-fill", "ColorBrewerScaleOptions", ["ColorBrewerScaleOptions"]),
+  shell("scaleFillDistiller", "color-fill", "ColorDistillerScaleOptions", [
+    "ColorDistillerScaleOptions",
+  ]),
+  shell("scaleFillFermenter", "color-fill", "ColorFermenterScaleOptions", [
+    "ColorFermenterScaleOptions",
   ]),
 
   // --- numeric-style (21) --------------------------------------------------

@@ -22,6 +22,12 @@ const PALETTE_LABELS = {
   flexoki: "Flexoki",
   tableau10: "Tableau 10",
   colorblind: "Colorblind",
+  Set1: "Set1",
+  Set2: "Set2",
+  Set3: "Set3",
+  Dark2: "Dark2",
+  Paired: "Paired",
+  Accent: "Accent",
 } as const satisfies Record<(typeof CATEGORICAL_SCHEME_NAMES)[number], string>;
 
 /** Categorical scheme paired with each theme demo so paper + marks read as a set. */

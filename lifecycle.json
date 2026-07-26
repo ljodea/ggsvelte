@@ -168,6 +168,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ColorBrewerScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ColorDistillerScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ColorFermenterScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ColorScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1436,6 +1448,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleColorBrewer": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleColorContinuous": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1449,6 +1465,14 @@
           "lifecycle": "experimental"
         },
         "scaleColorDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorDistiller": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorFermenter": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1472,6 +1496,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleColourBrewer": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleColourContinuous": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1485,6 +1513,14 @@
           "lifecycle": "experimental"
         },
         "scaleColourDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourDistiller": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourFermenter": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1508,6 +1544,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleFillBrewer": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleFillContinuous": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1521,6 +1561,14 @@
           "lifecycle": "experimental"
         },
         "scaleFillDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillDistiller": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillFermenter": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1740,6 +1788,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_color_brewer": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_color_continuous": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1753,6 +1805,14 @@
           "lifecycle": "experimental"
         },
         "scale_color_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_distiller": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_fermenter": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1776,6 +1836,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_colour_brewer": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_colour_continuous": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1789,6 +1853,14 @@
           "lifecycle": "experimental"
         },
         "scale_colour_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_distiller": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_fermenter": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1812,6 +1884,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_fill_brewer": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_fill_continuous": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1825,6 +1901,14 @@
           "lifecycle": "experimental"
         },
         "scale_fill_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_distiller": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_fermenter": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4045,6 +4129,10 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleColorBrewer": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleColorContinuous": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -4058,6 +4146,14 @@
           "lifecycle": "stable-intent"
         },
         "ScaleColorDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorDistiller": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorFermenter": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -4081,6 +4177,10 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleColourBrewer": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleColourContinuous": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -4094,6 +4194,14 @@
           "lifecycle": "stable-intent"
         },
         "ScaleColourDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourDistiller": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourFermenter": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -4133,6 +4241,10 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleFillBrewer": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleFillContinuous": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -4146,6 +4258,14 @@
           "lifecycle": "stable-intent"
         },
         "ScaleFillDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillDistiller": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillFermenter": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },

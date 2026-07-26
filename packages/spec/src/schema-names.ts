@@ -27,10 +27,34 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "flexoki",
   "tableau10",
   "colorblind",
+  // ColorBrewer qualitative (#825)
+  "Set1",
+  "Set2",
+  "Set3",
+  "Dark2",
+  "Paired",
+  "Accent",
 ] as const;
 
-/** Named sequential color schemes known to this schema version. */
-export const SEQUENTIAL_SCHEME_NAMES = ["viridis"] as const;
+/** Named sequential/diverging color schemes known to this schema version. */
+export const SEQUENTIAL_SCHEME_NAMES = [
+  "viridis",
+  // ColorBrewer sequential + diverging ramps (#825)
+  "Blues",
+  "Greens",
+  "Reds",
+  "Oranges",
+  "Purples",
+  "Greys",
+  "YlOrRd",
+  "YlGnBu",
+  "BuPu",
+  "RdYlBu",
+  "RdBu",
+  "BrBG",
+  "Spectral",
+  "PuOr",
+] as const;
 
 export const COLOR_SCHEME_NAMES = [
   ...CATEGORICAL_SCHEME_NAMES,

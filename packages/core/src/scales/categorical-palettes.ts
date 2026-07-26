@@ -2,6 +2,8 @@
  * Named categorical color palettes and scheme registry for ordinal color
  * scales. Pure data — training lives in train.ts.
  */
+import { COLORBREWER_QUALITATIVE } from "./colorbrewer-palettes.js";
+
 /**
  * Default categorical palette: 10 colors in the Observable 10 family.
  * The palette is a plain value — its fingerprint (not its identity) keys
@@ -78,4 +80,5 @@ export const CATEGORICAL_SCHEMES = {
   flexoki: FLEXOKI_PALETTE,
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
+  ...COLORBREWER_QUALITATIVE,
 } as const satisfies Readonly<Record<string, readonly string[]>>;

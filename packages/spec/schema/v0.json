@@ -2698,10 +2698,90 @@
                 },
                 {
                   "type": "string",
+                  "const": "Set1"
+                },
+                {
+                  "type": "string",
+                  "const": "Set2"
+                },
+                {
+                  "type": "string",
+                  "const": "Set3"
+                },
+                {
+                  "type": "string",
+                  "const": "Dark2"
+                },
+                {
+                  "type": "string",
+                  "const": "Paired"
+                },
+                {
+                  "type": "string",
+                  "const": "Accent"
+                },
+                {
+                  "type": "string",
                   "const": "viridis"
+                },
+                {
+                  "type": "string",
+                  "const": "Blues"
+                },
+                {
+                  "type": "string",
+                  "const": "Greens"
+                },
+                {
+                  "type": "string",
+                  "const": "Reds"
+                },
+                {
+                  "type": "string",
+                  "const": "Oranges"
+                },
+                {
+                  "type": "string",
+                  "const": "Purples"
+                },
+                {
+                  "type": "string",
+                  "const": "Greys"
+                },
+                {
+                  "type": "string",
+                  "const": "YlOrRd"
+                },
+                {
+                  "type": "string",
+                  "const": "YlGnBu"
+                },
+                {
+                  "type": "string",
+                  "const": "BuPu"
+                },
+                {
+                  "type": "string",
+                  "const": "RdYlBu"
+                },
+                {
+                  "type": "string",
+                  "const": "RdBu"
+                },
+                {
+                  "type": "string",
+                  "const": "BrBG"
+                },
+                {
+                  "type": "string",
+                  "const": "Spectral"
+                },
+                {
+                  "type": "string",
+                  "const": "PuOr"
                 }
               ],
-              "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\", \"flexoki\", \"tableau10\", and \"colorblind\"; or sequential \"viridis\" (default). When type is omitted, the named scheme selects its ordinal or sequential scale family."
+              "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\", \"flexoki\", \"tableau10\", \"colorblind\", ColorBrewer qualitative (Set1/Set2/…); sequential \"viridis\" (default) plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). When type is omitted, the named scheme selects its ordinal or sequential scale family."
             },
             "reverse": {
               "type": "boolean",
