@@ -10,7 +10,7 @@
   ],
   "type": "module",
   "scripts": {
-    "check": "tsc -b packages/spec packages/core && bun run check:type-contracts && bun run check:workers && bun run check:scripts-ci-routing && bun run check:scripts",
+    "check": "tsc -b packages/spec packages/core && bun run check:type-contracts && bun run check:workers && bun run check:scripts-ci-routing && bun run check:scripts && bun run lifecycle:check",
     "check:workers": "bun node_modules/.bin/tsc -p workers/playground-api --noEmit",
     "check:scripts-ci-routing": "bun node_modules/.bin/tsc -p scripts/ci-routing --noEmit",
     "check:scripts": "bun node_modules/.bin/tsc -p scripts --noEmit",

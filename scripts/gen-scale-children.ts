@@ -15,6 +15,8 @@ import { dirname, join } from "node:path";
 
 import { SCALE_CAPABILITIES } from "@ggsvelte/spec";
 
+import { defineArtifact, defineArtifactGroup } from "./artifact.ts";
+
 // ---------------------------------------------------------------------------
 // Manifest
 // ---------------------------------------------------------------------------
@@ -437,7 +439,7 @@ export function manifestAliases(): Set<string> {
 }
 
 // ---------------------------------------------------------------------------
-// CLI
+// CLI (#783 shared protocol)
 // ---------------------------------------------------------------------------
 
 export interface GenerateResult {
@@ -446,13 +448,40 @@ export interface GenerateResult {
   indexChanged: boolean;
 }
 
+function scaleChildrenGroup(repoRoot: string) {
+  const shellMembers = SHELL_MANIFEST.map((spec) => {
+    const rel = shellRelPath(spec.component);
+    return defineArtifact({
+      path: join(repoRoot, rel),
+      label: rel,
+      regenerateWith: "scale:children:gen",
+      build: () => renderShell(spec),
+    });
+  });
+  const indexMember = defineArtifact({
+    path: join(repoRoot, INDEX_PATH),
+    label: INDEX_PATH,
+    regenerateWith: "scale:children:gen",
+    build: () => {
+      const indexAbs = join(repoRoot, INDEX_PATH);
+      // Index always exists; rewrite the generated region in place.
+      return rewriteIndexRegion(readFileSync(indexAbs, "utf8"));
+    },
+  });
+  return defineArtifactGroup({
+    regenerateWith: "scale:children:gen",
+    members: [...shellMembers, indexMember],
+    // Intentionally no orphan Scale*.svelte scan — current --check is first-stale only.
+  });
+}
+
 export function generateScaleChildren(opts: { repoRoot: string; check?: boolean }): GenerateResult {
   const { repoRoot, check = false } = opts;
   const wrote: string[] = [];
   const unchanged: string[] = [];
   let indexChanged = false;
 
-  // Shells
+  // Keep the programmatic API for tests; CLI routes through defineArtifactGroup.
   for (const spec of SHELL_MANIFEST) {
     const rel = shellRelPath(spec.component);
     const abs = join(repoRoot, rel);
@@ -474,7 +503,6 @@ export function generateScaleChildren(opts: { repoRoot: string; check?: boolean 
     wrote.push(rel);
   }
 
-  // Index region
   const indexAbs = join(repoRoot, INDEX_PATH);
   const indexSrc = readFileSync(indexAbs, "utf8");
   const freshIndex = rewriteIndexRegion(indexSrc);
@@ -486,41 +514,28 @@ export function generateScaleChildren(opts: { repoRoot: string; check?: boolean 
     writeFileSync(indexAbs, freshIndex);
   }
 
-  if (check) {
-    // Also verify no orphan Scale*.svelte (other than Scale.svelte + factory)
-    // that the manifest does not claim — not required by the task, but the
-    // staleness of every declared shell is enough for --check.
-  }
-
   return { wrote, unchanged, indexChanged };
 }
 
-function main(): void {
+if (import.meta.main) {
   const repoRoot = join(import.meta.dir, "..");
-  const check = process.argv.includes("--check");
+  const group = scaleChildrenGroup(repoRoot);
   try {
-    const result = generateScaleChildren({ repoRoot, check });
-    if (check) {
+    if (process.argv.includes("--check")) {
+      await group.check();
       console.log(
         `scale children are current (${String(SHELL_MANIFEST.length)} shells, ` +
           `${String(manifestAliases().size)} aliases).`,
       );
-      return;
+    } else {
+      await group.write();
+      console.log(
+        `scale children generated (${String(SHELL_MANIFEST.length)} shells, ` +
+          `${String(manifestAliases().size)} aliases).`,
+      );
     }
-    const n = result.wrote.length + (result.indexChanged ? 1 : 0);
-    if (n === 0) {
-      console.log(`scale children already current (${String(SHELL_MANIFEST.length)} shells).`);
-      return;
-    }
-    console.log(
-      `Wrote ${String(result.wrote.length)} shell(s)` +
-        (result.indexChanged ? ` + rewrote ${INDEX_PATH} region` : "") +
-        `.`,
-    );
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
 }
-
-if (import.meta.main) main();
