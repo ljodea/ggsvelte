@@ -127,7 +127,8 @@ function assignChannels(
     scales[channel] = cloneScaleEntry(entry);
   }
   // Expanded subset of Scales keys; entries are identity/manual JSON objects.
-  return scales as Scales;
+  // Double cast: tsc rejects Record→Scales; type-aware lint rejects a single cast.
+  return scales as unknown as Scales;
 }
 
 /**
