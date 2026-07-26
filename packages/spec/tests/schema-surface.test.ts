@@ -34,6 +34,7 @@ const VALUE_EXPORTS = [
   "FacetSpecSchema",
   "GEOM_DEFAULTS",
   "HistogramLayerSchema",
+  "FreqpolyLayerSchema",
   "KNOWN_GEOMS",
   "KNOWN_POSITIONS",
   "KNOWN_STATS",

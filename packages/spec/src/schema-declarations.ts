@@ -605,6 +605,38 @@ export const SpecDeclarations = {
             'Interpolation between points: "linear" (straight segments, default) or "step" (horizontal-then-vertical steps, changing at the midpoint between x positions).',
         }),
       ),
+      bins: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          description:
+            "STAT BIN ONLY (freqpoly / line+bin): number of bins (integer ≥ 1). Default 30 — an advisory reminds you to pick a real value. Overridden by binwidth.",
+        }),
+      ),
+      binwidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "STAT BIN ONLY (freqpoly / line+bin): bin width in data units (must be greater than 0). Takes precedence over bins.",
+        }),
+      ),
+      boundary: Type.Optional(
+        Type.Number({
+          description:
+            "STAT BIN ONLY: align a bin EDGE with this x value. Mutually exclusive with center.",
+        }),
+      ),
+      center: Type.Optional(
+        Type.Number({
+          description:
+            "STAT BIN ONLY: align a bin CENTER with this x value. Mutually exclusive with boundary.",
+        }),
+      ),
+      closed: Type.Optional(
+        Type.Union([Type.Literal("right"), Type.Literal("left")], {
+          description:
+            'STAT BIN ONLY: which edge of each bin is inclusive: "right" (default) or "left".',
+        }),
+      ),
       strokePaint: Type.Optional(
         Type.Ref("GradientPaint", {
           description:
@@ -619,7 +651,48 @@ export const SpecDeclarations = {
     },
     {
       additionalProperties: false,
-      description: "Styling parameters for the line geom.",
+      description:
+        "Styling parameters for the line geom, plus optional stat-bin controls when stat is bin (freqpoly alias).",
+    },
+  ),
+
+  /** Path stroke params (no bin knobs — path never uses stat bin). */
+  PathParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Path opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.5.",
+        }),
+      ),
+      curve: Type.Optional(
+        Type.Union([Type.Literal("linear"), Type.Literal("step")], {
+          description:
+            'Interpolation between points: "linear" (straight segments, default) or "step" (horizontal-then-vertical steps).',
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description: "Styling parameters for the path geom (data-order polylines).",
     },
   ),
 
@@ -1438,9 +1511,29 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("line", {
         description:
-          "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts.",
+          "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts. With stat bin (freqpoly alias), y is computed from counts/density.",
       }),
-      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
+      stat: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("identity", {
+              description: "Draw each data row as-is (default — map aes.y).",
+            }),
+            Type.Literal("unique", {
+              description:
+                "Drop duplicate rows on mapped aesthetics before drawing (first wins; #813).",
+            }),
+            Type.Literal("bin", {
+              description:
+                'Continuous x binned; the canonical form of geom freqpoly. Do NOT map aes.y to a field; y defaults to {"stat": "count"}.',
+            }),
+          ],
+          {
+            description:
+              'Line stat: "identity" (default), "unique" (first-wins dedupe), or "bin" (freqpoly).',
+          },
+        ),
+      ),
       position: Type.Optional(
         Type.Literal("identity", { description: "Line layers use identity positioning." }),
       ),
@@ -1457,7 +1550,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "A line layer. Requires x and y channels; rows are sorted by x within each group before connecting.",
+        "A line layer. Identity: requires x and y. Bin (freqpoly): requires continuous x; y is computed by the bin stat. Rows are sorted by x within each group before connecting.",
     },
   ),
 
@@ -1479,7 +1572,7 @@ export const SpecDeclarations = {
             "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
         }),
       ),
-      params: Type.Optional(Type.Ref("LineParams")),
+      params: Type.Optional(Type.Ref("PathParams")),
     },
     {
       additionalProperties: false,
@@ -1570,6 +1663,38 @@ export const SpecDeclarations = {
       additionalProperties: false,
       description:
         'A histogram layer (alias for bar + stat bin). Requires a continuous x channel; y is computed by the bin stat. Default position "stack". Set params.binwidth or params.bins (default 30, with an advisory).',
+    },
+  ),
+
+  FreqpolyLayer: Type.Object(
+    {
+      geom: Type.Literal("freqpoly", {
+        description:
+          "Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("bin", {
+          description:
+            'Freqpoly layers bin continuous x values. y defaults to {"stat": "count"}; set y to {"stat": "density"} for a density polygon.',
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Freqpoly layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("LineParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        'A frequency-polygon layer (alias for line + stat bin). Requires continuous x; y is computed by the bin stat. Default position "identity". Set params.binwidth or params.bins (default 30, with an advisory).',
     },
   ),
 
@@ -1946,6 +2071,7 @@ export const SpecDeclarations = {
       Type.Ref("ColLayer"),
       Type.Ref("BarLayer"),
       Type.Ref("HistogramLayer"),
+      Type.Ref("FreqpolyLayer"),
       Type.Ref("AreaLayer"),
       Type.Ref("RibbonLayer"),
       Type.Ref("RuleLayer"),

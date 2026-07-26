@@ -229,6 +229,7 @@ export const STYLE_AESTHETIC_GEOMS = {
   linewidth: [
     "line",
     "path",
+    "freqpoly",
     "rule",
     "smooth",
     "boxplot",
@@ -242,6 +243,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "point",
     "line",
     "path",
+    "freqpoly",
     "col",
     "bar",
     "histogram",
@@ -262,6 +264,7 @@ export const STYLE_AESTHETIC_GEOMS = {
   linetype: [
     "line",
     "path",
+    "freqpoly",
     "rule",
     "smooth",
     "boxplot",

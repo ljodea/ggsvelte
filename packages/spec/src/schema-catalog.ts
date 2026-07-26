@@ -10,6 +10,7 @@ export const KNOWN_GEOMS = [
   "col",
   "bar",
   "histogram",
+  "freqpoly",
   "area",
   "rule",
   "text",
@@ -81,8 +82,9 @@ export type PositionName = (typeof KNOWN_POSITIONS)[number];
 /**
  * Per-geom pipeline defaults, mirrored from ggplot2 (normalize() fills these):
  * geom bar counts (stat "count") and stacks; histogram bins and stacks;
- * col/area stack pre-computed values; boxplot dodges (ggplot2 defaults to
- * dodge2 — ggsvelte uses plain dodge, decision 0010); everything else is
+ * freqpoly bins and draws as line (identity position); col/area stack
+ * pre-computed values; boxplot dodges (ggplot2 defaults to dodge2 —
+ * ggsvelte uses plain dodge, decision 0010); everything else is
  * identity/identity.
  */
 export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: PositionName }> = {
@@ -92,6 +94,7 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   col: { stat: "identity", position: "stack" },
   bar: { stat: "count", position: "stack" },
   histogram: { stat: "bin", position: "stack" },
+  freqpoly: { stat: "bin", position: "identity" },
   area: { stat: "identity", position: "stack" },
   rule: { stat: "identity", position: "identity" },
   text: { stat: "identity", position: "identity" },

@@ -21,6 +21,7 @@ import type {
   Labs,
   LegendSpec,
   LineParams,
+  PathParams,
   PointParams,
   PointPosition,
   PositionParams,
@@ -111,7 +112,8 @@ export interface PointLayerInput extends LayerInputBase {
 
 export interface LineLayerInput extends LayerInputBase {
   geom: "line";
-  stat?: "identity" | "unique";
+  /** identity | unique (#813) | bin (freqpoly / #796) */
+  stat?: "identity" | "unique" | "bin";
   position?: "identity";
   params?: LineParams;
 }
@@ -120,7 +122,7 @@ export interface PathLayerInput extends LayerInputBase {
   geom: "path";
   stat?: "identity" | "unique";
   position?: "identity";
-  params?: LineParams;
+  params?: PathParams;
 }
 
 export interface ColLayerInput extends LayerInputBase {
@@ -142,6 +144,12 @@ export interface HistogramLayerInput extends LayerInputBase {
   stat?: "bin";
   position?: StackablePosition;
   params?: BarParams;
+}
+export interface FreqpolyLayerInput extends LayerInputBase {
+  geom: "freqpoly";
+  stat?: "bin";
+  position?: "identity";
+  params?: LineParams;
 }
 
 export interface AreaLayerInput extends LayerInputBase {
@@ -237,6 +245,7 @@ export type LayerInput =
   | ColLayerInput
   | BarLayerInput
   | HistogramLayerInput
+  | FreqpolyLayerInput
   | AreaLayerInput
   | RibbonLayerInput
   | RuleLayerInput

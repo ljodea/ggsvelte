@@ -109,6 +109,7 @@ export const PathLayerSchema = SpecModule.Import("PathLayer");
 export const ColLayerSchema = SpecModule.Import("ColLayer");
 export const BarLayerSchema = SpecModule.Import("BarLayer");
 export const HistogramLayerSchema = SpecModule.Import("HistogramLayer");
+export const FreqpolyLayerSchema = SpecModule.Import("FreqpolyLayer");
 export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
@@ -184,6 +185,8 @@ export type GlowSpec = SpecType<"GlowSpec">;
 export type PointParams = SpecType<"PointParams">;
 /** Line layer params. */
 export type LineParams = SpecType<"LineParams">;
+/** Path layer params (no bin knobs). */
+export type PathParams = SpecType<"PathParams">;
 /** Col layer params. */
 export type ColParams = SpecType<"ColParams">;
 /** Bar/histogram layer params (styling + stat-bin controls). */
@@ -231,6 +234,8 @@ export type ColLayer = LayerWithDataRef<SpecType<"ColLayer">>;
 export type BarLayer = LayerWithDataRef<SpecType<"BarLayer">>;
 /** A histogram layer (alias; normalize() canonicalizes to bar + stat bin). */
 export type HistogramLayer = LayerWithDataRef<SpecType<"HistogramLayer">>;
+/** A freqpoly layer (alias; normalize() → line + stat bin). */
+export type FreqpolyLayer = LayerWithDataRef<SpecType<"FreqpolyLayer">>;
 /** An area layer. */
 export type AreaLayer = LayerWithDataRef<SpecType<"AreaLayer">>;
 /** A rule (reference line) layer. */
@@ -263,6 +268,7 @@ export type LayerSpec =
   | ColLayer
   | BarLayer
   | HistogramLayer
+  | FreqpolyLayer
   | AreaLayer
   | RibbonLayer
   | SegmentLayer

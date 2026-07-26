@@ -25,6 +25,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   col: ["x", "y"],
   bar: ["x"],
   histogram: ["x"],
+  freqpoly: ["x"],
   area: ["x", "y"],
   rule: [], // form-checked separately
   text: ["x", "y", "label"],
@@ -200,7 +201,12 @@ export function layerStructuralErrors(
       ? layer["stat"]
       : (GEOM_DEFAULTS[geom as keyof typeof GEOM_DEFAULTS]?.stat ?? "identity");
 
-  if (geom === "bar" || geom === "histogram") {
+  if (
+    geom === "bar" ||
+    geom === "histogram" ||
+    geom === "freqpoly" ||
+    (geom === "line" && stat === "bin")
+  ) {
     const y = mapped("y");
     if (y !== undefined && !("stat" in y)) {
       errors.push({
@@ -231,9 +237,14 @@ export function layerStructuralErrors(
     }
   }
 
-  if (geom === "bar" || geom === "histogram") {
+  if (
+    geom === "bar" ||
+    geom === "histogram" ||
+    geom === "freqpoly" ||
+    (geom === "line" && stat === "bin")
+  ) {
     const params = isRecord(layer["params"]) ? layer["params"] : {};
-    const binStat = geom === "histogram" || stat === "bin";
+    const binStat = geom === "histogram" || geom === "freqpoly" || stat === "bin";
     if (binStat && params["center"] !== undefined && params["boundary"] !== undefined) {
       errors.push({
         code: "bin-center-and-boundary",
@@ -272,7 +283,14 @@ export function layerStructuralErrors(
   errors.push(...paintStructuralErrors(layer, layerPath, plotAes));
 
   for (const channel of REQUIRED_CHANNELS[geom] ?? []) {
-    if ((geom === "bar" || geom === "histogram" || geom === "density") && channel !== "x") {
+    if (
+      (geom === "bar" ||
+        geom === "histogram" ||
+        geom === "freqpoly" ||
+        geom === "density" ||
+        (geom === "line" && stat === "bin")) &&
+      channel !== "x"
+    ) {
       continue;
     }
     const value = mapped(channel);

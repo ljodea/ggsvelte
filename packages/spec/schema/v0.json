@@ -522,6 +522,37 @@
           ],
           "description": "Interpolation between points: \"linear\" (straight segments, default) or \"step\" (horizontal-then-vertical steps, changing at the midpoint between x positions)."
         },
+        "bins": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "STAT BIN ONLY (freqpoly / line+bin): number of bins (integer ≥ 1). Default 30 — an advisory reminds you to pick a real value. Overridden by binwidth."
+        },
+        "binwidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "STAT BIN ONLY (freqpoly / line+bin): bin width in data units (must be greater than 0). Takes precedence over bins."
+        },
+        "boundary": {
+          "type": "number",
+          "description": "STAT BIN ONLY: align a bin EDGE with this x value. Mutually exclusive with center."
+        },
+        "center": {
+          "type": "number",
+          "description": "STAT BIN ONLY: align a bin CENTER with this x value. Mutually exclusive with boundary."
+        },
+        "closed": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "right"
+            },
+            {
+              "type": "string",
+              "const": "left"
+            }
+          ],
+          "description": "STAT BIN ONLY: which edge of each bin is inclusive: \"right\" (default) or \"left\"."
+        },
         "strokePaint": {
           "$ref": "#/$defs/GradientPaint",
           "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
@@ -532,7 +563,46 @@
         }
       },
       "additionalProperties": false,
-      "description": "Styling parameters for the line geom."
+      "description": "Styling parameters for the line geom, plus optional stat-bin controls when stat is bin (freqpoly alias)."
+    },
+    "PathParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Path opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px. Must be greater than 0. Default 1.5."
+        },
+        "curve": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "linear"
+            },
+            {
+              "type": "string",
+              "const": "step"
+            }
+          ],
+          "description": "Interpolation between points: \"linear\" (straight segments, default) or \"step\" (horizontal-then-vertical steps)."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the path geom (data-order polylines)."
     },
     "ColParams": {
       "type": "object",
@@ -1350,10 +1420,27 @@
         "geom": {
           "type": "string",
           "const": "line",
-          "description": "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts."
+          "description": "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts. With stat bin (freqpoly alias), y is computed from counts/density."
         },
         "stat": {
-          "$ref": "#/$defs/IdentityOrUniqueStat"
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "identity",
+              "description": "Draw each data row as-is (default — map aes.y)."
+            },
+            {
+              "type": "string",
+              "const": "unique",
+              "description": "Drop duplicate rows on mapped aesthetics before drawing (first wins; #813)."
+            },
+            {
+              "type": "string",
+              "const": "bin",
+              "description": "Continuous x binned; the canonical form of geom freqpoly. Do NOT map aes.y to a field; y defaults to {\"stat\": \"count\"}."
+            }
+          ],
+          "description": "Line stat: \"identity\" (default), \"unique\" (first-wins dedupe), or \"bin\" (freqpoly)."
         },
         "position": {
           "type": "string",
@@ -1375,7 +1462,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "A line layer. Requires x and y channels; rows are sorted by x within each group before connecting."
+      "description": "A line layer. Identity: requires x and y. Bin (freqpoly): requires continuous x; y is computed by the bin stat. Rows are sorted by x within each group before connecting."
     },
     "PathLayer": {
       "type": "object",
@@ -1407,7 +1494,7 @@
           "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
-          "$ref": "#/$defs/LineParams"
+          "$ref": "#/$defs/PathParams"
         }
       },
       "additionalProperties": false,
@@ -1526,6 +1613,44 @@
       },
       "additionalProperties": false,
       "description": "A histogram layer (alias for bar + stat bin). Requires a continuous x channel; y is computed by the bin stat. Default position \"stack\". Set params.binwidth or params.bins (default 30, with an advisory)."
+    },
+    "FreqpolyLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "freqpoly",
+          "description": "Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin."
+        },
+        "stat": {
+          "type": "string",
+          "const": "bin",
+          "description": "Freqpoly layers bin continuous x values. y defaults to {\"stat\": \"count\"}; set y to {\"stat\": \"density\"} for a density polygon."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Freqpoly layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/LineParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A frequency-polygon layer (alias for line + stat bin). Requires continuous x; y is computed by the bin stat. Default position \"identity\". Set params.binwidth or params.bins (default 30, with an advisory)."
     },
     "SmoothLayer": {
       "type": "object",
@@ -2022,6 +2147,9 @@
         },
         {
           "$ref": "#/$defs/HistogramLayer"
+        },
+        {
+          "$ref": "#/$defs/FreqpolyLayer"
         },
         {
           "$ref": "#/$defs/AreaLayer"

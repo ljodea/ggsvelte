@@ -24,6 +24,7 @@ import type {
   DensityLayer,
   ErrorbarLayer,
   HistogramLayer,
+  FreqpolyLayer,
   LayerSpec,
   LineLayer,
   PathLayer,
@@ -63,6 +64,7 @@ export interface RuntimePathLayer extends WithRuntimeAes<PathLayer> {}
 export interface RuntimeColLayer extends WithRuntimeAes<ColLayer> {}
 export interface RuntimeBarLayer extends WithRuntimeAes<BarLayer> {}
 export interface RuntimeHistogramLayer extends WithRuntimeAes<HistogramLayer> {}
+export interface RuntimeFreqpolyLayer extends WithRuntimeAes<FreqpolyLayer> {}
 export interface RuntimeAreaLayer extends WithRuntimeAes<AreaLayer> {}
 export interface RuntimeRibbonLayer extends WithRuntimeAes<RibbonLayer> {}
 export interface RuntimeSegmentLayer extends WithRuntimeAes<SegmentLayer> {}
@@ -83,6 +85,7 @@ export type RuntimeLayerSpec =
   | RuntimeColLayer
   | RuntimeBarLayer
   | RuntimeHistogramLayer
+  | RuntimeFreqpolyLayer
   | RuntimeAreaLayer
   | RuntimeRibbonLayer
   | RuntimeSegmentLayer

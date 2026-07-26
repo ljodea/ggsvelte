@@ -27,6 +27,7 @@ import type {
   GeomErrorbarOptions,
   GeomRibbonOptions,
   GeomHistogramOptions,
+  GeomFreqpolyOptions,
   GeomLineOptions,
   GeomPathOptions,
   GeomPointOptions,
@@ -180,6 +181,14 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'histogram', ... }) — binned bars over continuous x. */
   geomHistogram(options: GeomHistogramOptions = {}): GGBuilder {
     return this.layer(layerFrom("histogram", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'freqpoly', ... }) — binned frequency polygon
+   * (normalize → line + stat bin; ggplot2 geom_freqpoly).
+   */
+  geomFreqpoly(options: GeomFreqpolyOptions = {}): GGBuilder {
+    return this.layer(layerFrom("freqpoly", options));
   }
 
   /** Sugar for .layer({ geom: 'smooth', ... }) — fitted trend + se ribbon. */
