@@ -492,7 +492,19 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "Gradient2ScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GradientPaint": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GradientScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GradientnScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1500,6 +1512,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleColorGradient": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorGradient2": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorGradientn": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleColorIdentity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1536,6 +1560,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleColourGradient": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourGradient2": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourGradientn": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleColourIdentity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1569,6 +1605,18 @@
           "lifecycle": "experimental"
         },
         "scaleFillDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillGradient": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillGradient2": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillGradientn": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -1804,6 +1852,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_color_gradient": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_gradient2": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_gradientn": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_color_identity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1840,6 +1900,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_colour_gradient": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_gradient2": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_gradientn": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_colour_identity": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1873,6 +1945,18 @@
           "lifecycle": "experimental"
         },
         "scale_fill_discrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_gradient": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_gradient2": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_gradientn": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4117,6 +4201,18 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleColorGradient": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorGradient2": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorGradientn": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleColorIdentity": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -4150,6 +4246,18 @@
           "lifecycle": "stable-intent"
         },
         "ScaleColourDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourGradient": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourGradient2": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourGradientn": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -4202,6 +4310,18 @@
           "lifecycle": "stable-intent"
         },
         "ScaleFillDiscrete": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillGradient": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillGradient2": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillGradientn": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
