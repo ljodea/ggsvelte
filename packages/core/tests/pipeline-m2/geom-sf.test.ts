@@ -326,6 +326,36 @@ describe("geom_sf", () => {
     expect(batch.alpha).toBe(0.4);
   });
 
+  it("applies coordTransform to Point sf layers", () => {
+    // Points must take the early panel-frame projector (pathLike false for
+    // sf.kind === "point"); otherwise dots sit on linear pixels under log10.
+    const model = runPipeline(
+      gg(
+        {
+          geometry: [
+            geo({ type: "Point", coordinates: [10, 1] }),
+            geo({ type: "Point", coordinates: [100, 1] }),
+          ],
+        },
+        aes({}),
+      )
+        .geomSf()
+        .scales({
+          x: { type: "linear", domain: [1, 1000], expand: { mult: 0, add: 0 } },
+          y: { type: "linear", domain: [0, 2], expand: { mult: 0, add: 0 } },
+        })
+        .coordTransform({ x: { transform: "log10", expand: false } })
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PointsBatch;
+    expect(batch.kind).toBe("points");
+    const panelW = model.scene.panels[0]!.width;
+    // log10 domain [0, 3]: 10 → 1/3, 100 → 2/3 of panel width.
+    expect(batch.positions[0]).toBeCloseTo(panelW / 3, 1);
+    expect(batch.positions[2]).toBeCloseTo((2 * panelW) / 3, 1);
+  });
+
   it("honors params.linewidth/alpha for LineString sf layers", () => {
     const line = geo({
       type: "LineString",
