@@ -2636,7 +2636,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("sf_text", {
         description:
-          "Simple-features text labels (ggplot2 geom_sf_text; #809 phase 2): places aes.label at a representative point from each GeoJSON Geometry (stat_sf_coordinates).",
+          "Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative points from each GeoJSON Geometry (stat_sf_coordinates; Multi* expands one label per part).",
       }),
       stat: Type.Optional(
         Type.Literal("sf_coordinates", {

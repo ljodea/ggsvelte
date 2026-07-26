@@ -126,35 +126,57 @@ function polygonCentroid(ring: unknown): SfPosition | null {
 }
 
 /**
- * One representative point per feature (ggplot2 stat_sf_coordinates-style).
- * Multi* geometries use the first component only in v1.
+ * One or more representative points for label placement (#809 phase 5).
+ * Multi* geometries expand to **one point per part** (not only the first).
+ * Degenerate / empty parts are skipped.
  */
-export function representativePoint(type: string, coordinates: unknown): SfPosition | null {
-  if (type === "Point") return isFinitePair(coordinates) ? coordinates : null;
+export function representativePoints(type: string, coordinates: unknown): readonly SfPosition[] {
+  if (type === "Point") return isFinitePair(coordinates) ? [coordinates] : [];
   if (type === "MultiPoint") {
-    if (!Array.isArray(coordinates)) return null;
+    if (!Array.isArray(coordinates)) return [];
     const pts: SfPosition[] = [];
     for (const c of coordinates) {
       if (isFinitePair(c)) pts.push(c);
     }
-    return meanPosition(pts);
+    return pts;
   }
-  if (type === "LineString") return meanPosition(ringPositions(coordinates));
+  if (type === "LineString") {
+    const m = meanPosition(ringPositions(coordinates));
+    return m === null ? [] : [m];
+  }
   if (type === "MultiLineString") {
-    if (!Array.isArray(coordinates) || coordinates.length === 0) return null;
-    return meanPosition(ringPositions(coordinates[0]));
+    if (!Array.isArray(coordinates)) return [];
+    const out: SfPosition[] = [];
+    for (const line of coordinates) {
+      const m = meanPosition(ringPositions(line));
+      if (m !== null) out.push(m);
+    }
+    return out;
   }
   if (type === "Polygon") {
-    if (!Array.isArray(coordinates) || coordinates.length === 0) return null;
-    return polygonCentroid(coordinates[0]);
+    if (!Array.isArray(coordinates) || coordinates.length === 0) return [];
+    const c = polygonCentroid(coordinates[0]);
+    return c === null ? [] : [c];
   }
   if (type === "MultiPolygon") {
-    if (!Array.isArray(coordinates) || coordinates.length === 0) return null;
-    const poly = coordinates[0];
-    if (!Array.isArray(poly) || poly.length === 0) return null;
-    return polygonCentroid(poly[0]);
+    if (!Array.isArray(coordinates)) return [];
+    const out: SfPosition[] = [];
+    for (const poly of coordinates) {
+      if (!Array.isArray(poly) || poly.length === 0) continue;
+      const c = polygonCentroid(poly[0]);
+      if (c !== null) out.push(c);
+    }
+    return out;
   }
-  return null;
+  return [];
+}
+
+/**
+ * First representative point (compat for single-point consumers).
+ * Prefer {@link representativePoints} for Multi* label expansion.
+ */
+export function representativePoint(type: string, coordinates: unknown): SfPosition | null {
+  return representativePoints(type, coordinates)[0] ?? null;
 }
 
 export function geometryFieldName(params: { geometry?: string } | undefined): string {

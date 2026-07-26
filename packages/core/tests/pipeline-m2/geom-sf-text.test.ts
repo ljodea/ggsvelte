@@ -97,6 +97,68 @@ describe("geom_sf_text / stat_sf_coordinates", () => {
     expect(batch.texts).toEqual(["a", "b"]);
   });
 
+  it("places one label per MultiPolygon part (same feature attrs)", () => {
+    const multi = geo({
+      type: "MultiPolygon",
+      coordinates: [
+        [
+          [
+            [0, 0],
+            [2, 0],
+            [2, 2],
+            [0, 2],
+            [0, 0],
+          ],
+        ],
+        [
+          [
+            [10, 10],
+            [12, 10],
+            [12, 12],
+            [10, 12],
+            [10, 10],
+          ],
+        ],
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [multi], name: ["islands"] }, aes({ label: "name" }))
+        .geomSfText()
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as GlyphsBatch;
+    expect(batch.texts).toEqual(["islands", "islands"]);
+    // Two distinct panel positions (centroids (1,1) vs (11,11)).
+    expect(batch.positions.length / 2).toBe(2);
+    expect(batch.positions[0]!).not.toBe(batch.positions[2]!);
+  });
+
+  it("places one label per MultiPoint vertex", () => {
+    const model = runPipeline(
+      gg(
+        {
+          geometry: [
+            geo({
+              type: "MultiPoint",
+              coordinates: [
+                [0, 0],
+                [5, 5],
+              ],
+            }),
+          ],
+          name: ["pts"],
+        },
+        aes({ label: "name" }),
+      )
+        .geomSfText()
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as GlyphsBatch;
+    expect(batch.texts).toEqual(["pts", "pts"]);
+  });
+
   it("uses exact auto hit mode", () => {
     const model = runPipeline(
       gg(

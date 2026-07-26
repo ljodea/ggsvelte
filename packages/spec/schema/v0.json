@@ -2752,7 +2752,7 @@
         "geom": {
           "type": "string",
           "const": "sf_text",
-          "description": "Simple-features text labels (ggplot2 geom_sf_text; #809 phase 2): places aes.label at a representative point from each GeoJSON Geometry (stat_sf_coordinates)."
+          "description": "Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative points from each GeoJSON Geometry (stat_sf_coordinates; Multi* expands one label per part)."
         },
         "stat": {
           "type": "string",
