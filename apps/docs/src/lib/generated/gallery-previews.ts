@@ -201,6 +201,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "52029b5a4a501f00b305ac5f26b69eeb75ded068a91dc1d35a7c7a45481e102a",
   },
   {
+    id: "point/hue-discrete",
+    filename: "point-hue-discrete-light.png",
+    path: "/previews/point-hue-discrete-light.png",
+    sha256: "0a438791fffccced034955c736fba5ae0a4bdcc7987880cf3e1042b39e536f32",
+  },
+  {
     id: "point/jitter",
     filename: "point-jitter-light.png",
     path: "/previews/point-jitter-light.png",

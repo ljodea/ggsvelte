@@ -308,6 +308,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "point/hue-discrete",
+    title: "Hue discrete colour scale",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6InBvaW50L2h1ZS1kaXNjcmV0ZSJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJ4IjoxLCJ5IjoyLCJncm91cCI6IkEifSx7IngiOjIsInkiOjMsImdyb3VwIjoiQiJ9LHsieCI6MywieSI6Mi41LCJncm91cCI6IkMifSx7IngiOjQsInkiOjQsImdyb3VwIjoiQSJ9LHsieCI6NSwieSI6My4yLCJncm91cCI6IkIifSx7IngiOjIuNSwieSI6MS41LCJncm91cCI6IkMifSx7IngiOjMuNSwieSI6My44LCJncm91cCI6IkQifSx7IngiOjQuNSwieSI6Mi4yLCJncm91cCI6IkQifV19LCJsYXllcnMiOlt7Imdlb20iOiJwb2ludCIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoiaWRlbnRpdHkiLCJhZXMiOnsieCI6eyJmaWVsZCI6IngifSwieSI6eyJmaWVsZCI6InkifSwiY29sb3IiOnsiZmllbGQiOiJncm91cCJ9fSwicGFyYW1zIjp7InNpemUiOjR9fV0sInNjYWxlcyI6eyJjb2xvciI6eyJ0eXBlIjoib3JkaW5hbCIsInNjaGVtZSI6Imh1ZSJ9fSwibGFicyI6eyJ0aXRsZSI6InNjYWxlX2NvbG9yX2h1ZSIsInN1YnRpdGxlIjoiRXZlbi1odWUgZGlzY3JldGUgY29sb3VyIChnZ3Bsb3QyLXNoYXBlZCBkZWZhdWx0IGRpc2NyZXRlIHBhdGgpIiwiY29sb3IiOiJncm91cCJ9LCJ0aGVtZSI6Im1pbmltYWwifX0",
+    },
+  },
+  {
     id: "point/jitter",
     title: "Jittered scatter",
     compatibility: {

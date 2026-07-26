@@ -27,6 +27,11 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "flexoki",
   "tableau10",
   "colorblind",
+  /** Even HSL hues — ggplot2-shaped scale_*_hue default discrete path (#829). */
+  "hue",
+  /** Greyscale discrete — scale_*_grey / scale_*_gray (#829). */
+  "grey",
+  "gray",
 ] as const;
 
 /** Named sequential color schemes known to this schema version. */

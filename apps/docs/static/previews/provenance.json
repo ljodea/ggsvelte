@@ -161,6 +161,11 @@
       "sourceSha256": "f08cdd07126938cc4ed8e789c090c279bdbd134cdb5cb332bacaec80ae9d99c5",
       "pngSha256": "52029b5a4a501f00b305ac5f26b69eeb75ded068a91dc1d35a7c7a45481e102a"
     },
+    "point/hue-discrete": {
+      "filename": "point-hue-discrete-light.png",
+      "sourceSha256": "987b07974a48ecaadb907aec5ecc4aea3a50af95800a36adabeb5e030b4cb55d",
+      "pngSha256": "0a438791fffccced034955c736fba5ae0a4bdcc7987880cf3e1042b39e536f32"
+    },
     "point/jitter": {
       "filename": "point-jitter-light.png",
       "sourceSha256": "82025f8bb360e3af53308d12066ff06fc69095f5221dd6dbf1883ec801f52664",
