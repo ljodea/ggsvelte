@@ -555,6 +555,7 @@ export type {
   RuntimeSegmentLayer,
   RuntimeRuleLayer,
   RuntimeSmoothLayer,
+  RuntimeQuantileLayer,
   RuntimeSpec,
   RuntimeTextLayer,
   RuntimeTileLayer,

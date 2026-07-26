@@ -220,6 +220,26 @@ Fitted trend over points:
 on source points. Histogram, density, boxplot, and errorbar use the same
 derive-then-render path.
 
+## Quantile regression lines
+
+Linear quantile regression (ggplot2 \`geom_quantile\` / \`stat_quantile\`): fit
+\`y ~ x\` at each conditional quantile τ and draw one line per τ (default
+0.25 / 0.5 / 0.75). v1 is linear only — no rqss, no weights.
+
+\`\`\`svelte fragment
+<GeomPoint />
+<GeomQuantile quantiles={[0.25, 0.5, 0.75]} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y" }))
+  .geomPoint()
+  .geomQuantile({ quantiles: [0.1, 0.5, 0.9] })
+  .spec();
+\`\`\`
+
+[Quantile lines](/examples/point/quantile-lines): scatter with three RQ lines.
+
 ## Frequency polygon
 
 Frequency polygon (ggplot2 \`geom_freqpoly\`) bins continuous \`x\` and draws a

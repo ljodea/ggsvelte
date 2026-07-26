@@ -34,7 +34,7 @@ export function buildQuantileFrame(
     y: positionColumn(table, binding.yField!, binding.yConversion, binding.yTransform),
     groups,
     quantiles,
-    n: params.n,
+    ...(params.n !== undefined && { n: params.n }),
     carried,
   });
   removedStatWarning(result.dropped, index, "missing or non-finite x/y before quantile", warnings);

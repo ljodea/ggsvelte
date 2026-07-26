@@ -191,6 +191,11 @@
       "sourceSha256": "dd7db76e6b48dfeec6452aa001eb98257d4f449258ad3d068df2bd0f74f8e7b6",
       "pngSha256": "d4dff22d6dc70f24c0d452ee4f488909f72dc2fedff68fb59e48f02d14acc15a"
     },
+    "point/quantile-lines": {
+      "filename": "point-quantile-lines-light.png",
+      "sourceSha256": "aae51e263c4ba6659c8acf7d80abe9bad3dfedf92a0ff7577268d1da4735fdad",
+      "pngSha256": "e8519371864a4aca3061afced4664d9692a9981413a19ce3161c57d387d73484"
+    },
     "point/scatter-color": {
       "filename": "point-scatter-color-light.png",
       "sourceSha256": "6a367183a0e74109adfde59d8b9b5694b2c760e64207d7b15032648b6b551c3f",

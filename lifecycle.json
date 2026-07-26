@@ -812,6 +812,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "QuantileLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "QuantileLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "QuantileParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RadialGradientPaint": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -945,6 +957,10 @@
           "lifecycle": "experimental"
         },
         "RuntimePointLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeQuantileLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3895,6 +3911,10 @@
         },
         "GeomProps": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomQuantile": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "GeomRaster": {

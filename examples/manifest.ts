@@ -497,6 +497,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "point/quantile-lines",
+    category: "point",
+    name: "quantile-lines",
+    title: "Quantile regression lines",
+    description: "",
+    tags: ["point", "quantile", "stat", "line", "regression", "theme"],
+    docsSection: "Points & scatter",
+    hasData: true,
+  },
+  {
     id: "point/scatter-color",
     category: "point",
     name: "scatter-color",

@@ -332,6 +332,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "quantile-regression-lines",
+        title: "Quantile regression lines",
+        level: 2,
+      },
+      {
         id: "frequency-polygon",
         title: "Frequency polygon",
         level: 2,
@@ -2087,8 +2092,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-588",
-        title: "experimental (588)",
+        id: "experimental-591",
+        title: "experimental (591)",
         level: 3,
       },
       {
@@ -2127,8 +2132,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-460",
-        title: "experimental (460)",
+        id: "experimental-461",
+        title: "experimental (461)",
         level: 3,
       },
       {
@@ -2667,6 +2672,16 @@ export const DOCS_ROUTES = [
     title: "Log-scale scatter with inspection — ggsvelte gallery",
     description: "Log-scale scatter with inspection",
     canonicalPath: "/examples/point/log-scale",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/point/quantile-lines",
+    title: "Quantile regression lines — ggsvelte gallery",
+    description: "Quantile regression lines",
+    canonicalPath: "/examples/point/quantile-lines",
     kind: "page",
     index: true,
     sitemap: true,
