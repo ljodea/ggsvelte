@@ -114,7 +114,7 @@ export function pointsBatch(
     const colors = Array.from<string>({ length: collected.kept });
     for (let j = 0; j < collected.kept; j++) {
       const row = collected.keptRows[j]!;
-      const value = paintValues !== null ? paintValues[row]! : paintChannel.scaledConstant!;
+      const value = paintValues === null ? paintChannel.scaledConstant! : paintValues[row]!;
       colors[j] = colorOf(paintScale, value);
     }
     batch.colors = colors;
