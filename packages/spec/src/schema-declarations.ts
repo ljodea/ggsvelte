@@ -838,6 +838,28 @@ export const SpecDeclarations = {
           },
         ),
       ),
+      level: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          exclusiveMaximum: 1,
+          description:
+            "STAT ELLIPSE ONLY: confidence level of the bivariate normal ellipse, strictly between 0 and 1. Default 0.95.",
+        }),
+      ),
+      type: Type.Optional(
+        Type.Literal("norm", {
+          description:
+            'STAT ELLIPSE ONLY: construction type. Only "norm" (bivariate normal) is supported in v1.',
+        }),
+      ),
+      segments: Type.Optional(
+        Type.Integer({
+          minimum: 3,
+          maximum: 500,
+          description:
+            "STAT ELLIPSE ONLY: number of perimeter samples before the closing duplicate (output length = segments + 1). Default 51.",
+        }),
+      ),
       strokePaint: Type.Optional(
         Type.Ref("GradientPaint", {
           description:
@@ -853,7 +875,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Styling parameters for the path geom (data-order polylines), plus optional stat-manual fun (#814).",
+        "Styling parameters for the path geom (data-order polylines), plus optional connect/manual/ellipse controls.",
     },
   ),
 
@@ -2153,7 +2175,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("path", {
         description:
-          "Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, and connected scatterplots (ggplot2 geom_path). With stat connect, successive points expand into named connection vertices (#816).",
+          "Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
       }),
       stat: Type.Optional(
         Type.Union(
@@ -2173,10 +2195,14 @@ export const SpecDeclarations = {
               description:
                 "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814).",
             }),
+            Type.Literal("ellipse", {
+              description:
+                "Bivariate normal confidence ellipse per group (ggplot2 stat_ellipse, type norm). Emits perimeter samples suitable for path; requires quantitative x and y (#812).",
+            }),
           ],
           {
             description:
-              'Path stat: "identity" (default), "unique", "connect", or "manual" (#814).',
+              'Path stat: "identity" (default), "unique", "connect", "manual" (#814), or "ellipse" (#812).',
           },
         ),
       ),
@@ -2196,7 +2222,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "A path layer. Requires x and y channels; rows stay in data order within each group (no x-sort). Use stat connect for stepped/custom joins without geom curve flags.",
+        "A path layer. Identity/connect/manual: requires x and y; rows stay in data order. Ellipse: quantitative x and y; one closed ring per group.",
     },
   ),
 

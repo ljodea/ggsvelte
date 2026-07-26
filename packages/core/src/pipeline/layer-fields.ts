@@ -27,10 +27,12 @@ export function resolveLayerFields(
       stat === "manual"
         ? ((binding.layer.params as { fun?: string } | undefined)?.fun ?? null)
         : null;
-    // unique / manual first|last are row filters on identity aesthetics.
+    // unique / manual first|last / ellipse use identity-like field maps.
+    // ellipse emits path vertices still keyed to source groups (no after_stat y).
     const identityLike =
       stat === "identity" ||
       stat === "unique" ||
+      stat === "ellipse" ||
       (stat === "manual" && (manualFun === "first" || manualFun === "last"));
     if (identityLike) {
       push("x", binding.xField);

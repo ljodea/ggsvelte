@@ -444,6 +444,10 @@ export const PIPELINE_WARNING_CATALOG = {
   "manual-group-dropped": {
     summary: "A manual-stat group had no finite x or y under an aggregate fun and was dropped.",
   },
+  "ellipse-group-dropped": {
+    summary:
+      "An ellipse group had fewer than two finite (x,y) points or zero variance and was dropped.",
+  },
   "palette-exhausted": {
     summary:
       "A discrete color scale ran out of palette entries and cycled (the default onExhaust).",

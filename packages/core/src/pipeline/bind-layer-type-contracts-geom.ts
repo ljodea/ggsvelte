@@ -46,6 +46,21 @@ export function validateGeomChannelTypeContracts(input: {
       }
     }
   }
+  if (layer.stat === "ellipse") {
+    for (const [channel, field] of [
+      ["x", xField],
+      ["y", yField],
+    ] as const) {
+      const conversion = channel === "x" ? xConversion : yConversion;
+      if (field !== null && positionFieldType(table, field, conversion) === "nominal") {
+        throw new PipelineError(
+          "channel-type-mismatch",
+          `/layers/${index}/aes/${channel}`,
+          `The ellipse stat needs quantitative x and y, but field "${field}" (${channel}) is nominal.`,
+        );
+      }
+    }
+  }
   if (geom === "boxplot") {
     if (xField !== null && positionFieldType(table, xField, xConversion) !== "nominal") {
       throw new PipelineError(

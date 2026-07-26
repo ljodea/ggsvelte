@@ -68,9 +68,10 @@ export interface GeomPathOptions extends PathParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
   /**
-   * "identity" (default), "unique", "connect" (#816), or "manual" (#814).
+   * "identity" (default), "unique", "connect" (#816), "manual" (#814),
+   * or "ellipse" (bivariate normal rings; #812).
    */
-  stat?: "identity" | "unique" | "connect" | "manual";
+  stat?: "identity" | "unique" | "connect" | "manual" | "ellipse";
 }
 
 /** Col-layer sugar options: params plus aes and a position override. */
