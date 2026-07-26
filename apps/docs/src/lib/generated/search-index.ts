@@ -354,6 +354,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Statistical summaries"],
   },
   {
+    id: "heading:guide-statistics-positions:unique-first-wins-aesthetic-dedupe",
+    kind: "heading",
+    title: "Unique (first-wins aesthetic dedupe)",
+    summary:
+      "Unique (first-wins aesthetic dedupe) in Statistics and positions. Compute summaries and control how derived marks occupy the same coordinate space.",
+    href: "/guide/statistics-positions#unique-first-wins-aesthetic-dedupe",
+    keywords: ["Statistics and positions", "Core grammar"],
+    exact: ["Unique (first-wins aesthetic dedupe)"],
+  },
+  {
     id: "heading:guide-statistics-positions:positions",
     kind: "heading",
     title: "Positions",

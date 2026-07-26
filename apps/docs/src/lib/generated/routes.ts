@@ -332,6 +332,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "unique-first-wins-aesthetic-dedupe",
+        title: "Unique (first-wins aesthetic dedupe)",
+        level: 2,
+      },
+      {
         id: "positions",
         title: "Positions",
         level: 2,
