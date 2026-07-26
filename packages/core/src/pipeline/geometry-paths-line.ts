@@ -56,10 +56,18 @@ export function lineBatch(
     }
   }
 
+  // Keep geom checks inline so TS narrows layer.params (line/path vs quantile).
   const params =
-    binding.layer.geom === "line" || binding.layer.geom === "path"
+    binding.layer.geom === "line" ||
+    binding.layer.geom === "path" ||
+    binding.layer.geom === "quantile"
       ? (binding.layer.params ?? {})
       : {};
+  // QuantileParams has no curve (linear RQ only); line/path may set step/linear.
+  const curve =
+    binding.layer.geom === "line" || binding.layer.geom === "path"
+      ? ((binding.layer.params ?? {}).curve ?? "linear")
+      : "linear";
   const styleRows = subpaths.map((rows) => rows[0]!);
   const linewidths = numericStyleVector(frame, "linewidth", styleRows, styles);
   const alphas = numericStyleVector(frame, "alpha", styleRows, styles);
@@ -69,6 +77,8 @@ export function lineBatch(
   const literalLinewidth = binding.linewidth.constant;
   const literalAlpha = binding.alpha.constant;
   const literalLinetype = binding.linetype.constant;
+  const paramLinewidth = "linewidth" in params ? params.linewidth : undefined;
+  const paramAlpha = "alpha" in params ? params.alpha : undefined;
   return {
     kind: "paths",
     layerIndex: binding.index,
@@ -81,18 +91,18 @@ export function lineBatch(
     linewidth:
       typeof literalLinewidth === "number"
         ? literalLinewidth
-        : (params.linewidth ?? DEFAULT_LINEWIDTH),
+        : (paramLinewidth ?? DEFAULT_LINEWIDTH),
     ...(linewidths !== undefined && { linewidths }),
     alpha:
       alphas === undefined
         ? typeof literalAlpha === "number"
           ? literalAlpha
-          : (params.alpha ?? 1)
+          : (paramAlpha ?? 1)
         : 1,
     ...(alphas !== undefined && { alphas }),
     ...(typeof literalLinetype === "string" && { linetype: literalLinetype as Linetype }),
     ...(linetypeIndexes !== undefined && { linetypeIndexes }),
-    curve: params.curve ?? "linear",
+    curve,
     ...(strokePaintResolved !== undefined && { strokePaint: strokePaintResolved }),
     ...(glowResolved !== undefined && { glow: glowResolved }),
   };

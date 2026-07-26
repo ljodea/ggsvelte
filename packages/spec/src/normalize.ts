@@ -76,6 +76,7 @@ export type {
   RasterLayerInput,
   RectLayerInput,
   RuleLayerInput,
+  QuantileLayerInput,
   SmoothLayerInput,
   SpecInput,
   TextLayerInput,

@@ -35,6 +35,7 @@ import type {
   GeomRectOptions,
   GeomRuleOptions,
   GeomSegmentOptions,
+  GeomQuantileOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -143,6 +144,11 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'line', ... }). */
   geomLine(options: GeomLineOptions = {}): GGBuilder {
     return this.layer(layerFrom("line", options));
+  }
+
+  /** Sugar for .layer({ geom: 'quantile', ... }) — linear QR lines (#805). */
+  geomQuantile(options: GeomQuantileOptions = {}): GGBuilder {
+    return this.layer(layerFrom("quantile", options));
   }
 
   /** Sugar for .layer({ geom: 'path', ... }) — connect in data order (#788). */

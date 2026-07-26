@@ -42,6 +42,9 @@ export function dispatchGeometryBatch(
         lineBatch(frame, fx, color, styles, warnings, connectNoSort ? { sortByX: false } : {}),
       );
     }
+    case "quantile":
+      // Fitted QR grids are already sorted by x; treat like line.
+      return single(lineBatch(frame, fx, color, styles, warnings));
     case "path":
       // Data-order polylines (ggplot2 geom_path); no x-sort (#788).
       return single(lineBatch(frame, fx, color, styles, warnings, { sortByX: false }));
