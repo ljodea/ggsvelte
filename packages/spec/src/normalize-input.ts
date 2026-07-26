@@ -33,6 +33,7 @@ import type {
   CurveParams,
   SfParams,
   SfTextParams,
+  SfLabelParams,
   Scales,
   QuantileParams,
   SmoothParams,
@@ -270,6 +271,13 @@ export interface SfTextLayerInput extends LayerInputBase {
   params?: SfTextParams;
 }
 
+export interface SfLabelLayerInput extends LayerInputBase {
+  geom: "sf_label";
+  stat?: "sf_coordinates";
+  position?: "identity";
+  params?: SfLabelParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -294,7 +302,8 @@ export type LayerInput =
   | SegmentLayerInput
   | CurveLayerInput
   | SfLayerInput
-  | SfTextLayerInput;
+  | SfTextLayerInput
+  | SfLabelLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

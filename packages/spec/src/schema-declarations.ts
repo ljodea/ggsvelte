@@ -2663,6 +2663,102 @@ export const SpecDeclarations = {
     },
   ),
 
+  SfLabelParams: Type.Object(
+    {
+      geometry: Type.Optional(
+        Type.String({
+          minLength: 1,
+          description:
+            'Name of the data column holding GeoJSON Geometry JSON strings. Default "geometry".',
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Label opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      size: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Font size in px. Must be greater than 0. Default 11.",
+        }),
+      ),
+      anchor: Type.Optional(
+        Type.Union([Type.Literal("start"), Type.Literal("middle"), Type.Literal("end")], {
+          description:
+            'Horizontal text anchor relative to the representative point: "start", "middle" (default), or "end".',
+        }),
+      ),
+      dx: Type.Optional(
+        Type.Number({
+          description: "Horizontal offset in px applied after positioning. Default 0.",
+        }),
+      ),
+      dy: Type.Optional(
+        Type.Number({
+          description:
+            "Vertical offset in px applied after positioning (positive = down). Default 0.",
+        }),
+      ),
+      padding: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          description: "Box padding around the text in px. Default 3.",
+        }),
+      ),
+      radius: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          description: "Box corner radius in px. Default 3.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Box stroke width in px. Default 0.5.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom_sf_label (#809 phase 3): geometry column, text styling, and label box chrome.",
+    },
+  ),
+
+  SfLabelLayer: Type.Object(
+    {
+      geom: Type.Literal("sf_label", {
+        description:
+          "Simple-features labels with background boxes (ggplot2 geom_sf_label; #809 phase 3): places aes.label at a representative geometry point with a measured rounded rect. color=ink+box stroke; fill=box background.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("sf_coordinates", {
+          description: "Extract one (x,y) representative point per feature from geometry.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "SF label layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data.",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("SfLabelParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "An sf label layer with a background box. Requires aes.label and a geometry column. Does not require aes.x/y.",
+    },
+  ),
+
   LayerSpec: Type.Union(
     [
       Type.Ref("PointLayer"),
@@ -2688,6 +2784,7 @@ export const SpecDeclarations = {
       Type.Ref("CurveLayer"),
       Type.Ref("SfLayer"),
       Type.Ref("SfTextLayer"),
+      Type.Ref("SfLabelLayer"),
     ],
     {
       description:

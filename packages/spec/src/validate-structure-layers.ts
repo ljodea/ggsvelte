@@ -30,6 +30,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   rule: [], // form-checked separately
   text: ["x", "y", "label"],
   sf_text: ["label"], // x/y come from stat_sf_coordinates (#809 phase 2)
+  sf_label: ["label"],
   sf: [], // geometry column, not aes
   smooth: ["x", "y"],
   boxplot: ["x", "y"],

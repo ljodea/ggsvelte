@@ -26,6 +26,7 @@ import type {
   CurveParams,
   SfParams,
   SfTextParams,
+  SfLabelParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -199,6 +200,12 @@ export interface GeomSfOptions extends SfParams, GeomDataOption {
 
 /** SF text-layer sugar: labels at representative geometry points (#809 phase 2). */
 export interface GeomSfTextOptions extends SfTextParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** SF label-layer sugar: boxed labels at representative geometry points (#809 phase 3). */
+export interface GeomSfLabelOptions extends SfLabelParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

@@ -2781,6 +2781,107 @@
       "additionalProperties": false,
       "description": "An sf text layer. Requires aes.label and a geometry column (params.geometry, default \"geometry\"). Does not require aes.x/y."
     },
+    "SfLabelParams": {
+      "type": "object",
+      "properties": {
+        "geometry": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the data column holding GeoJSON Geometry JSON strings. Default \"geometry\"."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Label opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Font size in px. Must be greater than 0. Default 11."
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "start"
+            },
+            {
+              "type": "string",
+              "const": "middle"
+            },
+            {
+              "type": "string",
+              "const": "end"
+            }
+          ],
+          "description": "Horizontal text anchor relative to the representative point: \"start\", \"middle\" (default), or \"end\"."
+        },
+        "dx": {
+          "type": "number",
+          "description": "Horizontal offset in px applied after positioning. Default 0."
+        },
+        "dy": {
+          "type": "number",
+          "description": "Vertical offset in px applied after positioning (positive = down). Default 0."
+        },
+        "padding": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Box padding around the text in px. Default 3."
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Box corner radius in px. Default 3."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Box stroke width in px. Default 0.5."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom_sf_label (#809 phase 3): geometry column, text styling, and label box chrome."
+    },
+    "SfLabelLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "sf_label",
+          "description": "Simple-features labels with background boxes (ggplot2 geom_sf_label; #809 phase 3): places aes.label at a representative geometry point with a measured rounded rect. color=ink+box stroke; fill=box background."
+        },
+        "stat": {
+          "type": "string",
+          "const": "sf_coordinates",
+          "description": "Extract one (x,y) representative point per feature from geometry."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "SF label layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data."
+        },
+        "params": {
+          "$ref": "#/$defs/SfLabelParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "An sf label layer with a background box. Requires aes.label and a geometry column. Does not require aes.x/y."
+    },
     "LayerSpec": {
       "anyOf": [
         {
@@ -2851,6 +2952,9 @@
         },
         {
           "$ref": "#/$defs/SfTextLayer"
+        },
+        {
+          "$ref": "#/$defs/SfLabelLayer"
         }
       ],
       "description": "One plot layer. The `geom` field selects the geometry and determines which stat, position, and params are allowed."

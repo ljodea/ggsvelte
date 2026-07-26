@@ -500,6 +500,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomSfLabelOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomSfOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1097,6 +1101,14 @@
           "lifecycle": "experimental"
         },
         "SequentialStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SfLabelLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SfLabelParams": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3994,6 +4006,10 @@
           "lifecycle": "experimental"
         },
         "GeomSf": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomSfLabel": {
           "kind": "value",
           "lifecycle": "experimental"
         },

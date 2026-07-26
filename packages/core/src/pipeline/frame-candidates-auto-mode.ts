@@ -21,6 +21,7 @@ export function candidateAutoMode(
     case "point":
     case "text":
     case "sf_text":
+    case "sf_label":
       return "exact";
     case "col":
     case "bar":

@@ -264,7 +264,7 @@ export type ScaleCapability = (typeof SCALE_CAPABILITIES)[number];
 
 /** One checked geom-consumption table for mapped style channels. */
 export const STYLE_AESTHETIC_GEOMS = {
-  size: ["point", "text", "sf", "sf_text"],
+  size: ["point", "text", "sf", "sf_text", "sf_label"],
   linewidth: [
     "line",
     "path",
@@ -293,6 +293,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "rule",
     "text",
     "sf_text",
+    "sf_label",
     "smooth",
     "quantile",
     "boxplot",
