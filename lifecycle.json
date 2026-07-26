@@ -1224,6 +1224,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "SfTextLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "SfTextParams": {
           "kind": "type",
           "lifecycle": "experimental"
