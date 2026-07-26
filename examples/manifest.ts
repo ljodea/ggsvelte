@@ -457,6 +457,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "point/stat-unique",
+    category: "point",
+    name: "stat-unique",
+    title: "stat unique overplotting",
+    description: "",
+    tags: ["point", "unique", "stat", "overplotting", "dedupe", "theme"],
+    docsSection: "Points & scatter",
+    hasData: true,
+  },
+  {
     id: "point/style-scales",
     category: "point",
     name: "style-scales",

@@ -332,6 +332,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "unique-first-wins-aesthetic-dedupe",
+        title: "Unique (first-wins aesthetic dedupe)",
+        level: 2,
+      },
+      {
         id: "positions",
         title: "Positions",
         level: 2,
@@ -2607,6 +2612,16 @@ export const DOCS_ROUTES = [
     title: "Scatter plot with color mapping — ggsvelte gallery",
     description: "Scatter plot with color mapping",
     canonicalPath: "/examples/point/scatter-color",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/point/stat-unique",
+    title: "stat unique overplotting — ggsvelte gallery",
+    description: "stat unique overplotting",
+    canonicalPath: "/examples/point/stat-unique",
     kind: "page",
     index: true,
     sitemap: true,

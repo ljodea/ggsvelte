@@ -220,6 +220,20 @@ Fitted trend over points:
 on source points. Histogram, density, boxplot, and errorbar use the same
 derive-then-render path.
 
+## Unique (first-wins aesthetic dedupe)
+
+\`stat: "unique"\` drops duplicate rows on the combination of mapped aesthetic
+fields before drawing — first occurrence wins, panel-local (ggplot2
+\`stat_unique\`). Available on identity-capable geoms (point, line, path, text,
+col, area, rect, ribbon, rule, segment, errorbar).
+
+\`\`\`svelte fragment
+<GeomPoint stat="unique" />
+\`\`\`
+
+[stat unique overplotting](/examples/point/stat-unique): stacked identical
+\`(x, y, series)\` triples collapse to one mark.
+
 ## Positions
 
 Stack sums, dodge side-by-side groups, fill normalizes each stack to one, jitter

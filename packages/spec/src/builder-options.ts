@@ -37,6 +37,8 @@ interface GeomDataOption {
 export interface GeomPointOptions extends PointParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
+  stat?: "identity" | "unique";
   position?: PointPosition;
   positionParams?: PositionParams;
 }
@@ -45,18 +47,24 @@ export interface GeomPointOptions extends PointParams, GeomDataOption {
 export interface GeomLineOptions extends LineParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
+  stat?: "identity" | "unique";
 }
 
 /** Path-layer sugar options (data-order polylines; same params as line). */
 export interface GeomPathOptions extends LineParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
+  stat?: "identity" | "unique";
 }
 
 /** Col-layer sugar options: params plus aes and a position override. */
 export interface GeomColOptions extends ColParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
+  stat?: "identity" | "unique";
   position?: StackablePosition;
 }
 
@@ -97,13 +105,15 @@ export interface GeomDensityOptions extends DensityParams, GeomDataOption {
 export interface GeomErrorbarOptions extends ErrorbarParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
-  stat?: "identity" | "summary";
+  stat?: "identity" | "unique" | "summary";
 }
 
 /** Rect-layer sugar options: params plus optional layer-level aes. */
 export interface GeomRectOptions extends RectParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
+  stat?: "identity" | "unique";
 }
 
 /** Tile-layer sugar options: params plus optional layer-level aes. */
@@ -122,12 +132,16 @@ export interface GeomRasterOptions extends RasterParams, GeomDataOption {
 export interface GeomRibbonOptions extends RibbonParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
+  stat?: "identity" | "unique";
 }
 
 /** Area-layer sugar options: params plus aes and a position override. */
 export interface GeomAreaOptions extends AreaParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
+  stat?: "identity" | "unique";
   position?: StackablePosition;
 }
 
@@ -135,16 +149,22 @@ export interface GeomAreaOptions extends AreaParams, GeomDataOption {
 export interface GeomRuleOptions extends RuleParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
+  stat?: "identity" | "unique";
 }
 
 /** Segment-layer sugar options: params plus optional layer-level aes. */
 export interface GeomSegmentOptions extends SegmentParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
+  stat?: "identity" | "unique";
 }
 
 /** Text-layer sugar options: params plus an optional layer-level aes. */
 export interface GeomTextOptions extends TextParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
+  stat?: "identity" | "unique";
 }

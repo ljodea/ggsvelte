@@ -213,6 +213,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "db5bc0297f0c6d3f194271b375cdac7627b151e43755945be5180b19bdaedd7d",
   },
   {
+    id: "point/stat-unique",
+    filename: "point-stat-unique-light.png",
+    path: "/previews/point-stat-unique-light.png",
+    sha256: "0f22d2ac20a70d65c59e33fe5486c1a5856cb55e8fc105c24952ce7784091102",
+  },
+  {
     id: "point/style-scales",
     filename: "point-style-scales-light.png",
     path: "/previews/point-style-scales-light.png",
