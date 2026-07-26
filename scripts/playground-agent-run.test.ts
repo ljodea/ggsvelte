@@ -287,6 +287,7 @@ describe("runPlaygroundAgentRun", () => {
       delay: (ms) => {
         delays.push(ms);
         gate = true;
+        return Promise.resolve();
       },
     });
     expect(outcome.kind).toBe("stale");
@@ -343,6 +344,7 @@ describe("runPlaygroundAgentRun", () => {
       },
       delay: (ms) => {
         delays.push(ms);
+        return Promise.resolve();
       },
       now: () => 42,
     });
@@ -369,7 +371,7 @@ describe("runPlaygroundAgentRun", () => {
         generates += 1;
         return Promise.resolve(okGenerate(envelope(validSpec)));
       },
-      delay: () => {},
+      delay: () => Promise.resolve(),
     });
     expect(outcome.kind).toBe("failed");
     expect(generates).toBe(0);
