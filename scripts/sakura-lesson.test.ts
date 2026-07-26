@@ -56,7 +56,7 @@ describe("the sakura lesson folds to renderable specs", () => {
     const model = runPipeline(start.spec, { width: 900, height: 480 });
     expect(model.scene.batches[0]!.kind).toBe("points");
     const yearLabels = model.scene.axes.x?.ticks
-      .filter((tick) => tick.showLabel)
+      .filter((tick) => tick.showLabel === true)
       .map((tick) => tick.label);
     expect(yearLabels).toContain("1000");
     expect(yearLabels).not.toContain("1,000");
