@@ -192,6 +192,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "dotplot/histodot",
+    title: "Dotplot histodot",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6ImRvdHBsb3QvaGlzdG9kb3QifSwic3BlYyI6eyJlZGl0aW9uIjoyLCJkYXRhIjp7InZhbHVlcyI6W3sidmFsdWUiOjEuMX0seyJ2YWx1ZSI6MS4yfSx7InZhbHVlIjoxLjE1fSx7InZhbHVlIjoxLjN9LHsidmFsdWUiOjJ9LHsidmFsdWUiOjIuMX0seyJ2YWx1ZSI6Mi4wNX0seyJ2YWx1ZSI6M30seyJ2YWx1ZSI6My4xfSx7InZhbHVlIjozLjA1fSx7InZhbHVlIjozLjJ9LHsidmFsdWUiOjMuMTV9LHsidmFsdWUiOjR9LHsidmFsdWUiOjQuMX0seyJ2YWx1ZSI6NX0seyJ2YWx1ZSI6NS4wNX0seyJ2YWx1ZSI6NS4xfSx7InZhbHVlIjo1LjJ9LHsidmFsdWUiOjUuMTV9LHsidmFsdWUiOjUuMjV9XX0sImxheWVycyI6W3siZ2VvbSI6ImRvdHBsb3QiLCJzdGF0IjoiYmluZG90IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoidmFsdWUifSwieSI6eyJzdGF0Ijoic3RhY2twb3MifX0sInBhcmFtcyI6eyJiaW53aWR0aCI6MC41LCJib3VuZGFyeSI6MCwic3RhY2tkaXIiOiJ1cCJ9fV0sImxhYnMiOnsidGl0bGUiOiJEb3RwbG90IGhpc3RvZG90Iiwic3VidGl0bGUiOiJPbmUgcG9pbnQgcGVyIG9ic2VydmF0aW9uLCBzdGFja2VkIGluIGZpeGVkIGJpbnMgKGdncGxvdDIgZ2VvbV9kb3RwbG90KSIsIngiOiJ2YWx1ZSIsInkiOiJzdGFjayJ9LCJ0aGVtZSI6ImNsYXNzaWMifX0",
+    },
+  },
+  {
     id: "errorbar/mean-se",
     title: "Errorbars (mean ± se) over raw data",
     compatibility: {

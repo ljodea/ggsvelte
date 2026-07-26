@@ -19,9 +19,9 @@ import type { CellValue } from "../table.js";
 
 import { binBreaksBins, binBreaksWidth, binIndexOf } from "./bin-breaks.js";
 
-export type BindotStackdir = "up" | "down" | "center" | "centerwhole";
+type BindotStackdir = "up" | "down" | "center" | "centerwhole";
 
-export interface BindotParamsInput {
+interface BindotParamsInput {
   bins?: number | undefined;
   binwidth?: number | undefined;
   boundary?: number | undefined;

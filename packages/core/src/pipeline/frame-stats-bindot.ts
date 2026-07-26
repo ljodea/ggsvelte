@@ -3,7 +3,7 @@
  */
 import type { ColumnTable } from "../table.js";
 
-import { statBindot, type BindotParamsInput } from "../stats/bindot.js";
+import { statBindot } from "../stats/bindot.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
 import { makeColumnOf, styleColumns } from "./frame-stats-shared.js";
@@ -26,7 +26,7 @@ export function buildBindotFrame(
     x: positionColumn(table, binding.xField!, binding.xConversion, binding.xTransform),
     groups,
     carried,
-    params: (layer.params ?? {}) as BindotParamsInput,
+    params: layer.params ?? {},
     ...(binRange !== undefined && { range: binRange }),
   });
   removedStatWarning(result.dropped, index, "missing, non-finite, or out-of-range x", warnings);

@@ -345,6 +345,29 @@ True isobands between consecutive levels and weights are deferred.
 [2D density filled bands](/examples/density/kde-2d-filled): scatter under
 closed KDE rings colored by level.
 
+## Dotplot (histodot)
+
+Histodot stacked dots (ggplot2 \`geom_dotplot\` / \`stat_bindot\`): continuous
+\`x\` is binned with the same break rules as \`stat_bin\`, then **one point per
+observation** is stacked in each bin. y is after_stat \`stackpos\` only (not
+count). Diameter tracks binwidth in x pixels (\`dotsize\` multiplier; \`size\`
+for an absolute px override). \`stackdir\`: \`up\` | \`down\` | \`center\` |
+\`centerwhole\`; \`stackratio\` scales vertical spacing (default 1).
+
+\`\`\`svelte fragment
+<GeomDotplot binwidth={0.5} boundary={0} stackdir="up" />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "v" }))
+  .geomDotplot({ binwidth: 0.5, boundary: 0 })
+  .spec();
+\`\`\`
+
+v1 is histodot only — no Wilkinson \`dotdensity\`, no \`binaxis = "y"\`, no
+weights. Mapping aes.y fails loud (\`computed-y-mapped\`).
+
+[Dotplot histodot](/examples/dotplot/histodot): stacked points in fixed bins.
 ## Frequency polygon
 
 Frequency polygon (ggplot2 \`geom_freqpoly\`) bins continuous \`x\` and draws a

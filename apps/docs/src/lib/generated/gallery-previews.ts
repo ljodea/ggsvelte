@@ -123,6 +123,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "a13b8429c32efa4815fcf3c617fd8197e518e7173a5fd893a191dbe9d45e93e3",
   },
   {
+    id: "dotplot/histodot",
+    filename: "dotplot-histodot-light.png",
+    path: "/previews/dotplot-histodot-light.png",
+    sha256: "6d45f51f3e3f4aac7a30d7924075751119c086186187993a071dbbb7fcaea198",
+  },
+  {
     id: "errorbar/mean-se",
     filename: "errorbar-mean-se-light.png",
     path: "/previews/errorbar-mean-se-light.png",

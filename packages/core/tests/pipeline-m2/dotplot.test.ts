@@ -84,7 +84,8 @@ describe("dotplot geom (histodot bindot)", () => {
     );
     const batch = model.scene.batches[0] as PointsBatch;
     expect(batch.kind).toBe("points");
-    expect(batch.colors).toBeDefined();
-    expect(new Set(batch.colors!).size).toBe(2);
+    const colors = batch.colors;
+    expect(colors).toBeDefined();
+    expect(new Set(colors).size).toBe(2);
   });
 });

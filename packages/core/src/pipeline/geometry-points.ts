@@ -35,7 +35,7 @@ function dotplotRadiusPx(
     return DEFAULT_POINT_SIZE;
   }
   const domain = fx.xScale.transformedDomain;
-  const span = domain[1]! - domain[0]!;
+  const span = domain[1] - domain[0];
   if (!(span > 0) || !(fx.innerWidth > 0)) return DEFAULT_POINT_SIZE;
   const dotsize = params.dotsize ?? 1;
   const diameterPx = (binwidth / span) * fx.innerWidth * dotsize;

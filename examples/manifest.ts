@@ -233,6 +233,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "dotplot/histodot",
+    category: "dotplot",
+    name: "histodot",
+    title: "Dotplot histodot",
+    description: "",
+    tags: ["dotplot", "bindot", "stat", "bin", "point", "stack", "theme"],
+    docsSection: "Distributions",
+    hasData: true,
+  },
+  {
     id: "errorbar/mean-se",
     category: "errorbar",
     name: "mean-se",

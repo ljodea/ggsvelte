@@ -357,6 +357,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "dotplot-histodot",
+        title: "Dotplot (histodot)",
+        level: 2,
+      },
+      {
         id: "frequency-polygon",
         title: "Frequency polygon",
         level: 2,
@@ -2167,8 +2172,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-617",
-        title: "experimental (617)",
+        id: "experimental-623",
+        title: "experimental (623)",
         level: 3,
       },
       {
@@ -2207,8 +2212,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-469",
-        title: "experimental (469)",
+        id: "experimental-470",
+        title: "experimental (470)",
         level: 3,
       },
       {
@@ -2587,6 +2592,16 @@ export const DOCS_ROUTES = [
     title: "Overlaid density estimates — ggsvelte gallery",
     description: "Overlaid density estimates",
     canonicalPath: "/examples/density/overlay",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/dotplot/histodot",
+    title: "Dotplot histodot — ggsvelte gallery",
+    description: "Dotplot histodot",
+    canonicalPath: "/examples/dotplot/histodot",
     kind: "page",
     index: true,
     sitemap: true,
