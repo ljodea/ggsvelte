@@ -370,35 +370,6 @@ export class MockResponder implements Responder {
       scales["x"] = { type: "linear", transform: "log10" };
       xField = x;
     } else if (/\bcontour\b|isolines?\b/.test(prompt)) {
-      // geom_contour / stat_contour over a regular x×y×z grid (#801).
-      const x = fieldNamed("x") ?? pick.quant() ?? "x";
-      const y = fieldNamed("y") ?? pick.quant() ?? "y";
-      const z =
-        fieldNamed("z") ??
-        fieldNamed("temp") ??
-        fieldNamed("elevation") ??
-        pick.mentionedQuant() ??
-        pick.quant() ??
-        "z";
-      const layer: MockLayer = {
-        geom: "contour",
-        stat: "contour",
-        aes: { x: f(x), y: f(y), z: f(z) },
-      };
-      if (/\bbreaks?\b|explicit levels?/.test(prompt)) {
-        layer.params = { breaks: [0.5, 1.5] };
-      }
-      spec.layers.push(layer);
-      xField = x;
-    } else if (/\braster\b/.test(prompt)) {
-      const x = fieldNamed("x") ?? fieldNamed("lon") ?? pick.quant() ?? "x";
-      const y = fieldNamed("y") ?? fieldNamed("lat") ?? pick.quant() ?? "y";
-      const fill =
-        fieldNamed("z") ?? fieldNamed("elev") ?? pick.mentionedQuant() ?? pick.quant() ?? "z";
-      const aes: MockAes = { x: f(x), y: f(y), fill: f(fill) };
-      spec.layers.push({ geom: "raster", aes });
-      xField = x;
-    } else if (/\bcontour\b|isolines?\b/.test(prompt)) {
       // geom_contour + stat_contour over a regular x/y/z grid (#801).
       const x = fieldNamed("x") ?? pick.quant() ?? "x";
       const y = fieldNamed("y") ?? pick.quant() ?? "y";
@@ -420,6 +391,14 @@ export class MockResponder implements Responder {
         layer.params = { breaks: levels.slice(0, 8) };
       }
       spec.layers.push(layer);
+      xField = x;
+    } else if (/\braster\b/.test(prompt)) {
+      const x = fieldNamed("x") ?? fieldNamed("lon") ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? fieldNamed("lat") ?? pick.quant() ?? "y";
+      const fill =
+        fieldNamed("z") ?? fieldNamed("elev") ?? pick.mentionedQuant() ?? pick.quant() ?? "z";
+      const aes: MockAes = { x: f(x), y: f(y), fill: f(fill) };
+      spec.layers.push({ geom: "raster", aes });
       xField = x;
     } else if (/\b(?:geom )?tiles?\b|heatmap/.test(prompt)) {
       const cats = profile.fields.filter(
