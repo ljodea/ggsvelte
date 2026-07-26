@@ -34,7 +34,9 @@
     </p>
     <p class="eyebrow">{data.entry.category}</p>
     <h1>{data.entry.title}</h1>
-    <p class="proof">{data.entry.description}</p>
+    {#if data.entry.description.trim() !== ""}
+      <p class="proof">{data.entry.description}</p>
+    {/if}
   </header>
 
   {#if data.entry.journey}

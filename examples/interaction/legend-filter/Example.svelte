@@ -1,5 +1,12 @@
 <script lang="ts">
-  import { GeomLine, GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomLine,
+    GeomPoint,
+    GGPlot,
+    Labs,
+    ScaleXContinuous,
+    ThemeFivethirtyeight,
+  } from "@ggsvelte/svelte";
 
   import { britishFinances } from "./data.js";
 
@@ -13,19 +20,10 @@
   <GGPlot
     data={britishFinances}
     aes={{ x: "year", y: "value", color: "series" }}
-    theme="fivethirtyeight"
-    scales={{ x: { labels: "d" } }}
     key="id"
     legendFilter
     width="container"
     height={430}
-    labs={{
-      title: "Playfair's fiscal three, 1770–1824",
-      subtitle: "Filter any series; restored groups keep their original color",
-      x: "Year",
-      y: "Playfair's index units",
-      color: "Series",
-    }}
     onlegendfilter={(event) => {
       status =
         event.phase === "clear" || event.clause === null
@@ -33,6 +31,15 @@
           : `${String(event.clause.values.length)} ${event.clause.values.length === 1 ? "series is" : "series are"} hidden; the legend keeps every series available.`;
     }}
   >
+    <ThemeFivethirtyeight />
+    <ScaleXContinuous labels="d" />
+    <Labs
+      title="Playfair's fiscal three, 1770–1824"
+      subtitle="Filter any series; restored groups keep their original color"
+      x="Year"
+      y="Playfair's index units"
+      color="Series"
+    />
     <GeomLine linewidth={2.2} />
     <GeomPoint size={3.2} />
   </GGPlot>

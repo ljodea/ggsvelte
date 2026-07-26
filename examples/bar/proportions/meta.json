@@ -1,6 +1,5 @@
 {
   "title": "Proportional bar chart",
-  "description": "position fill normalises each band to 1, turning counts into shares. The Armada's 1588 muster splits each squadron's complement into soldiers and sailors, weighted by men, with a manual two-key fill.",
   "tags": ["bar", "fill", "proportion", "legend", "weight", "theme"],
   "docsSection": "Bars & columns"
 }

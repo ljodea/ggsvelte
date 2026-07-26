@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import { GeomPoint, GGPlot, Labs, ThemeLight } from "@ggsvelte/svelte";
 
   import { field } from "./data.js";
 
@@ -14,7 +14,6 @@
 <GGPlot
   data={field}
   aes={{ x: "bill", y: "mass", color: "species" }}
-  theme="light"
   key="id"
   inspect={true}
   select={{ type: "interval", mode: "xy", persistent: true }}
@@ -33,15 +32,11 @@
         ? "Zoom reset."
         : `Zoomed to x ${event.domains?.x?.map((value) => value.toFixed(2)).join("–") ?? "all"}, y ${event.domains?.y?.map((value) => value.toFixed(2)).join("–") ?? "all"}.`;
   }}
-  labs={{
-    title: "Select an interval or brush to zoom",
-    x: "x",
-    y: "y",
-    color: "Group",
-  }}
   width="container"
   height={400}
 >
+  <ThemeLight />
+  <Labs title="Select an interval or brush to zoom" x="x" y="y" color="Group" />
   <GeomPoint size={2.5} alpha={0.8} />
 </GGPlot>
 

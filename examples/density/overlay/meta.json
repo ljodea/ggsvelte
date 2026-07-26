@@ -1,6 +1,5 @@
 {
   "title": "Overlaid density estimates",
-  "description": "Kernel density estimates for two groups, drawn semi-transparent so the overlap stays readable. Galton's 934 adult children from 1886 give two distributions that overlap heavily but separate cleanly at the means.",
   "tags": ["density", "kde", "fill", "alpha", "theme", "palette"],
   "docsSection": "Distributions"
 }

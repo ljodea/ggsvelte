@@ -1,6 +1,5 @@
 {
   "title": "Free y scales per panel",
-  "description": "scales: \"free_y\" trains the y domain per panel — Arbuthnot's four measures span five orders of magnitude, from a ratio near 1.1 to the 68,596 plague deaths of 1665, and each fills its panel at its own magnitude. Every panel gets its own left axis; x stays shared.",
   "tags": ["facet", "free-scales", "line", "wrap"],
   "docsSection": "Facets"
 }

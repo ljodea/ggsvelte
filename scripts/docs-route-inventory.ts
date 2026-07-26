@@ -186,6 +186,14 @@ const PERFORMANCE_ROUTES: readonly DocsRouteRecord[] = [
   shell: "site",
 }));
 
+/** SEO meta needs a non-empty string; page lede may be empty (description deleted). */
+function exampleSeoDescription(entry: {
+  readonly title: string;
+  readonly description: string;
+}): string {
+  return entry.description.trim() === "" ? entry.title : entry.description;
+}
+
 export function createDocsRouteInventory(): DocsRouteRecord[] {
   const guideCatalog: readonly GuideCatalogEntry[] = GUIDE_CATALOG;
   const guides: DocsRouteRecord[] = guideCatalog.map((entry) => ({
@@ -210,12 +218,13 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
           },
         }),
   }));
+
   const examples: DocsRouteRecord[] = EXAMPLES.filter(
     (entry) => !isInteractionExposition(entry.id),
   ).map((entry) => ({
     path: `/examples/${entry.id}`,
     title: `${entry.title} — ggsvelte gallery`,
-    description: entry.description,
+    description: exampleSeoDescription(entry),
     canonicalPath: `/examples/${entry.id}`,
     kind: "page",
     index: true,
@@ -231,7 +240,7 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
     return {
       path: `/interactions/${slug}`,
       title: `${entry.title} — ggsvelte interactions`,
-      description: entry.description,
+      description: exampleSeoDescription(entry),
       canonicalPath: `/interactions/${slug}`,
       kind: "page" as const,
       index: true,
@@ -247,9 +256,9 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
     return {
       path: `/examples/${id}`,
       title: `${entry?.title ?? "Interaction demo"} — ggsvelte interactions`,
-      description:
-        entry?.description ??
-        "A chart-local interaction demo relocated from the gallery to /interactions.",
+      description: entry
+        ? exampleSeoDescription(entry)
+        : "A chart-local interaction demo relocated from the gallery to /interactions.",
       canonicalPath: `/interactions/${slug}`,
       kind: "alias" as const,
       index: false,
@@ -267,8 +276,9 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
     return {
       path: `/examples/${alias}`,
       title: `${target?.title ?? "Example"} — ggsvelte ${isExposition ? "interactions" : "gallery"}`,
-      description:
-        target?.description ?? "A legacy ggsvelte example route preserved for compatibility.",
+      description: target
+        ? exampleSeoDescription(target)
+        : "A legacy ggsvelte example route preserved for compatibility.",
       canonicalPath,
       kind: "alias" as const,
       index: false,

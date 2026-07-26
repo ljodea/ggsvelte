@@ -1,6 +1,5 @@
 {
   "title": "Ordered small multiples with side strips",
-  "description": "facet.wrap.levels locks Gosset's authored A→D sample order independent of row order; labels supply human strip text; strip.position: \"left\" reserves a measured band beside each panel instead of above it. Fill comes from an ordinal palette scale with its legend suppressed, because the strips already name every panel.",
   "tags": ["facet", "order", "labels", "strip", "wrap", "col"],
   "docsSection": "Facets"
 }

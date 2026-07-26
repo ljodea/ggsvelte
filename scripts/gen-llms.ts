@@ -415,7 +415,11 @@ export function buildLlmsIndex(
     const expositionSlug = interactionExpositionSlug(ex.id);
     const href =
       typeof expositionSlug === "string" ? `/interactions/${expositionSlug}` : `/examples/${ex.id}`;
-    lines.push(`- [${ex.title}](${href}): ${ex.description}`);
+    lines.push(
+      ex.description.trim() === ""
+        ? `- [${ex.title}](${href})`
+        : `- [${ex.title}](${href}): ${ex.description}`,
+    );
   }
   lines.push("");
   return absoluteMarkdownLinks(lines.join("\n"), facts.canonicalBase);
@@ -492,11 +496,11 @@ export function buildLlmsFull(
   }
   parts.push("# Examples", "");
   for (const ex of examples) {
+    parts.push(`## ${ex.title} (${ex.id})`, "");
+    if (ex.description.trim() !== "") {
+      parts.push(ex.description, "");
+    }
     parts.push(
-      `## ${ex.title} (${ex.id})`,
-      "",
-      ex.description,
-      "",
       `Tags: ${ex.tags.join(", ")}`,
       "",
       "Spec (canonical PortableSpec JSON):",

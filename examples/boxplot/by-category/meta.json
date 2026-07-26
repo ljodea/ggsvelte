@@ -1,6 +1,5 @@
 {
   "title": "Boxplot by category",
-  "description": "Five-number summaries per category, with outliers past 1.5 IQR drawn individually. Michelson's five experimental runs of twenty disagree with each other more than the readings within any one of them — the reason the dataset is used to teach measurement error.",
   "tags": ["boxplot", "stat", "summary", "outliers", "theme"],
   "docsSection": "Distributions"
 }

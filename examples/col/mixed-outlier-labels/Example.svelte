@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomCol, GGPlot } from "@ggsvelte/svelte";
+  import { GeomCol, GGPlot, Labs } from "@ggsvelte/svelte";
 
   import { filings } from "./data.js";
 </script>
@@ -11,13 +11,9 @@
 <GGPlot
   data={filings}
   aes={{ x: "category", y: "count" }}
-  labs={{
-    title: "Filing types (mixed label lengths)",
-    x: "Category",
-    y: "Count",
-  }}
   width={640}
   height={320}
 >
+  <Labs title="Filing types (mixed label lengths)" x="Category" y="Count" />
   <GeomCol />
 </GGPlot>

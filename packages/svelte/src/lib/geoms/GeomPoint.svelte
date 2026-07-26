@@ -18,6 +18,7 @@
     PointParams,
     PointPosition,
     PositionParams,
+    RenderBackend,
   } from "@ggsvelte/spec";
 
   import { createGeomLayer } from "./factory.svelte.js";
@@ -31,6 +32,8 @@
     position?: PointPosition;
     /** Jitter (width/height/seed) or nudge (x/y) parameters. */
     positionParams?: PositionParams;
+    /** Rendering backend hint ("svg" | "canvas" | "auto"). */
+    render?: RenderBackend;
   }
 
   const props: Props = $props();

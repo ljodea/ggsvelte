@@ -23,7 +23,8 @@ import { join } from "node:path";
 
 export interface ExampleMeta {
   title: string;
-  description: string;
+  /** Page subtitle; omit or empty to show no lede (AI-slop deleted, not rewritten). */
+  description?: string;
   tags: readonly string[];
   docsSection: string;
   vrHeight?: number;
@@ -143,11 +144,15 @@ export function validateMeta(meta: unknown, id: string): string[] {
   for (const key of Object.keys(m)) {
     if (!META_KEYS.has(key)) problems.push(`${id}: meta.json has unknown key "${key}"`);
   }
-  for (const key of ["title", "description", "docsSection"] as const) {
+  for (const key of ["title", "docsSection"] as const) {
     const v = m[key];
     if (typeof v !== "string" || v.trim() === "") {
       problems.push(`${id}: meta.json "${key}" must be a non-empty string`);
     }
+  }
+  // description is optional: omit or "" means no page subtitle (delete-not-rewrite).
+  if (m["description"] !== undefined && typeof m["description"] !== "string") {
+    problems.push(`${id}: meta.json "description" must be a string when present`);
   }
   const tags = m["tags"];
   if (
@@ -344,7 +349,7 @@ export function discoverExamples(examplesDir: string): DiscoveredExample[] {
         category,
         name,
         title: m.title,
-        description: m.description,
+        description: typeof m.description === "string" ? m.description : "",
         tags: m.tags,
         docsSection: m.docsSection,
         ...(m.vrHeight === undefined ? {} : { vrHeight: m.vrHeight }),

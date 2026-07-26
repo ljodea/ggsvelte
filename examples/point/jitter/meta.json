@@ -1,6 +1,5 @@
 {
   "title": "Jittered scatter",
-  "description": "position jitter offsets overlapping marks so ties stay countable. Pearson's 1910 survey of 70 trades has many sharing a wage class, and the clean theme's dashed horizontal grid keeps the eye on the vertical spread.",
   "tags": ["point", "jitter", "position", "overplotting", "theme"],
   "docsSection": "Points & scatter"
 }

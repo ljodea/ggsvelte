@@ -1,6 +1,5 @@
 {
   "title": "Log-scale scatter with a fitted line",
-  "description": "scaleXLog10 compresses a multiplicative axis. Farr's 1849 London cholera districts span two orders of magnitude in population density, and colouring by water company separates them the way the epidemic did — the economist theme's tinted paper forces a manual three-key scale.",
   "tags": ["point", "scales", "log", "inspect", "theme", "palette"],
   "docsSection": "Points & scatter"
 }

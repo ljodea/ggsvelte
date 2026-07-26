@@ -1,6 +1,5 @@
 {
   "title": "Continuous color (ramp legend)",
-  "description": "A quantitative color mapping through the viridis sequential ramp, with a gradient ramp legend instead of discrete swatches, under coord_fixed so the map keeps its shape. A second layer draws the true positions the ramp is read against.",
   "tags": ["point", "color", "sequential", "viridis", "legend", "coord-fixed"],
   "docsSection": "Color & legends"
 }

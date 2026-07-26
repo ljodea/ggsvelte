@@ -1,5 +1,12 @@
 <script lang="ts">
-  import { GeomLine, GeomPoint, GeomRule, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomLine,
+    GeomPoint,
+    GeomRule,
+    GGPlot,
+    Labs,
+    ThemeTufte,
+  } from "@ggsvelte/svelte";
 
   import { earthDensity } from "./data.js";
 </script>
@@ -7,17 +14,16 @@
 <GGPlot
   data={earthDensity}
   aes={{ x: "trial", y: "density" }}
-  theme="tufte"
-  labs={{
-    title: "Cavendish weighs the world, 1798",
-    subtitle:
-      "Vertical rule: he refits the balance with a stiffer wire. Horizontal: the modern value.",
-    x: "Determination",
-    y: "Density of the earth (water = 1)",
-  }}
   width={640}
   height={400}
 >
+  <ThemeTufte />
+  <Labs
+    title="Cavendish weighs the world, 1798"
+    subtitle="Vertical rule: he refits the balance with a stiffer wire. Horizontal: the modern value."
+    x="Determination"
+    y="Density of the earth (water = 1)"
+  />
   <GeomRule xintercept={6.5} aes={{ color: { value: "#d4615c" } }} />
   <GeomRule
     yintercept={5.517}

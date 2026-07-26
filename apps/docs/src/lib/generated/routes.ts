@@ -2300,8 +2300,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/area/basic",
     title: "Area chart — ggsvelte gallery",
-    description:
-      "A single filled area from the zero baseline (the theme's accent role) with a line layer tracing its upper edge — layer order is paint order. Halley's 1693 Breslau life table gives the monotone survivorship curve, and the classic theme drops the grid for black axis lines and ticks.",
+    description: "Area chart",
     canonicalPath: "/examples/area/basic",
     kind: "page",
     index: true,
@@ -2311,8 +2310,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/area/stacked",
     title: "Stacked area chart — ggsvelte gallery",
-    description:
-      "Areas stack by default: the fill groups pile from the zero baseline, showing total and composition over time. First-seen group order stays on top. Nightingale's 1858 Crimean mortality data supplies the composition, and the economist theme's tinted paper forces an explicit manual fill scale chosen for contrast against it.",
+    description: "Stacked area chart",
     canonicalPath: "/examples/area/stacked",
     kind: "page",
     index: true,
@@ -2322,8 +2320,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/bar/dodged",
     title: "Dodged bar chart — ggsvelte gallery",
-    description:
-      "position dodge places the fill groups side by side within each band: groups present at an x split the band evenly (ggplot2's preserve = \"total\"). Edgeworth's 1885 county mortality table supplies six counties over seven years, weighted by deaths, on the few theme with tableau10.",
+    description: "Dodged bar chart",
     canonicalPath: "/examples/bar/dodged",
     kind: "page",
     index: true,
@@ -2333,8 +2330,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/bar/horizontal",
     title: "Horizontal bar chart (coord flip) — ggsvelte gallery",
-    description:
-      'coord: {"type": "flip"} is THE horizontal-composition mechanism: map x to the category and y to the value as usual, then flip — the band axis moves to the left (first category at the bottom, like ggplot2), the measure runs rightward, and stacking/dodging would follow. Armada squadron tonnage, pre-sorted so the flip reads smallest-up.',
+    description: "Horizontal bar chart (coord flip)",
     canonicalPath: "/examples/bar/horizontal",
     kind: "page",
     index: true,
@@ -2344,8 +2340,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/bar/proportions",
     title: "Proportional bar chart — ggsvelte gallery",
-    description:
-      "position fill normalises each band to 1, turning counts into shares. The Armada's 1588 muster splits each squadron's complement into soldiers and sailors, weighted by men, with a manual two-key fill.",
+    description: "Proportional bar chart",
     canonicalPath: "/examples/bar/proportions",
     kind: "page",
     index: true,
@@ -2355,8 +2350,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/bar/stacked",
     title: "Stacked bar chart — ggsvelte gallery",
-    description:
-      "position stack piles the fill groups within each band. The Trial of the Pyx supplies a real frequency table, so the weight channel makes the count stat sum counts instead of counting rows — 72 rows standing in for 10,000 sovereigns — and flexoki's eight keys map one-to-one onto the eight ordered deviation bins.",
+    description: "Stacked bar chart",
     canonicalPath: "/examples/bar/stacked",
     kind: "page",
     index: true,
@@ -2366,8 +2360,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/boxplot/by-category",
     title: "Boxplot by category — ggsvelte gallery",
-    description:
-      "Five-number summaries per category, with outliers past 1.5 IQR drawn individually. Michelson's five experimental runs of twenty disagree with each other more than the readings within any one of them — the reason the dataset is used to teach measurement error.",
+    description: "Boxplot by category",
     canonicalPath: "/examples/boxplot/by-category",
     kind: "page",
     index: true,
@@ -2377,8 +2370,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/col/basic",
     title: "Column chart — ggsvelte gallery",
-    description:
-      "geom col draws one bar per row at the height you supply — no statistic. Quetelet's 5,738 Scottish militiamen give the shape that made the normal curve a claim about people, under the classic theme's black axis lines and bare panel.",
+    description: "Column chart",
     canonicalPath: "/examples/col/basic",
     kind: "page",
     index: true,
@@ -2388,8 +2380,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/col/long-labels",
     title: "Columns with long i18n category labels — ggsvelte gallery",
-    description:
-      "Narrow (480px) column chart with long Spanish multi-word and German single-token category labels — exercises measured band-axis wrap/rotate/truncate layout.",
+    description: "Columns with long i18n category labels",
     canonicalPath: "/examples/col/long-labels",
     kind: "page",
     index: true,
@@ -2399,8 +2390,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/col/mixed-outlier-labels",
     title: "Columns with one multi-word category outlier — ggsvelte gallery",
-    description:
-      "Desktop-width (640px) column chart: mostly short labels plus one four-token Spanish outlier — band planner should wrap, not fall to −90° + truncate (#634).",
+    description: "Columns with one multi-word category outlier",
     canonicalPath: "/examples/col/mixed-outlier-labels",
     kind: "page",
     index: true,
@@ -2410,8 +2400,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/col/value-labels",
     title: "Column chart with value labels — ggsvelte gallery",
-    description:
-      "A text layer above each column turns the bars into a table you can read directly. The 1954 Salk vaccine trial supplies the numbers the trial existed to produce: the vaccinated rate is about a third of the placebo rate.",
+    description: "Column chart with value labels",
     canonicalPath: "/examples/col/value-labels",
     kind: "page",
     index: true,
@@ -2421,8 +2410,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/color/binned",
     title: "Binned color (colorsteps) — ggsvelte gallery",
-    description:
-      "A quantitative color mapping split into deterministic intervals with a colorsteps guide. Color carries a third variable — how often each (actual, estimated) pairing came up across Jevons' 1,027 throws — rather than restating x or y.",
+    description: "Binned color (colorsteps)",
     canonicalPath: "/examples/color/binned",
     kind: "page",
     index: true,
@@ -2432,8 +2420,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/color/continuous",
     title: "Continuous color (ramp legend) — ggsvelte gallery",
-    description:
-      "A quantitative color mapping through the viridis sequential ramp, with a gradient ramp legend instead of discrete swatches, under coord_fixed so the map keeps its shape. A second layer draws the true positions the ramp is read against.",
+    description: "Continuous color (ramp legend)",
     canonicalPath: "/examples/color/continuous",
     kind: "page",
     index: true,
@@ -2443,8 +2430,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/density/overlay",
     title: "Overlaid density estimates — ggsvelte gallery",
-    description:
-      "Kernel density estimates for two groups, drawn semi-transparent so the overlap stays readable. Galton's 934 adult children from 1886 give two distributions that overlap heavily but separate cleanly at the means.",
+    description: "Overlaid density estimates",
     canonicalPath: "/examples/density/overlay",
     kind: "page",
     index: true,
@@ -2454,8 +2440,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/errorbar/mean-se",
     title: "Errorbars (mean ± se) over raw data — ggsvelte gallery",
-    description:
-      'The summary stat computes mean ± standard error per group (ggplot2\'s mean_se default), drawn as errorbars over the seeded-jitter raw observations — here the 1905 soporific trial that "Student" used to introduce the t-distribution.',
+    description: "Errorbars (mean ± se) over raw data",
     canonicalPath: "/examples/errorbar/mean-se",
     kind: "page",
     index: true,
@@ -2465,8 +2450,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/facet/ordered-side-strips",
     title: "Ordered small multiples with side strips — ggsvelte gallery",
-    description:
-      'facet.wrap.levels locks Gosset\'s authored A→D sample order independent of row order; labels supply human strip text; strip.position: "left" reserves a measured band beside each panel instead of above it. Fill comes from an ordinal palette scale with its legend suppressed, because the strips already name every panel.',
+    description: "Ordered small multiples with side strips",
     canonicalPath: "/examples/facet/ordered-side-strips",
     kind: "page",
     index: true,
@@ -2476,8 +2460,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/facet/wrap",
     title: "Faceted histograms (facet wrap) — ggsvelte gallery",
-    description:
-      "facet.wrap partitions the data BEFORE the bin stat: each panel bins its own parent-child table over one shared break grid, and fixed scales share both axes (edge axes only). The weight channel lets Pearson and Lee's published frequency table stand in for 4,892 measured children.",
+    description: "Faceted histograms (facet wrap)",
     canonicalPath: "/examples/facet/wrap",
     kind: "page",
     index: true,
@@ -2487,8 +2470,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/facet/wrap-free-y",
     title: "Free y scales per panel — ggsvelte gallery",
-    description:
-      'scales: "free_y" trains the y domain per panel — Arbuthnot\'s four measures span five orders of magnitude, from a ratio near 1.1 to the 68,596 plague deaths of 1665, and each fills its panel at its own magnitude. Every panel gets its own left axis; x stays shared.',
+    description: "Free y scales per panel",
     canonicalPath: "/examples/facet/wrap-free-y",
     kind: "page",
     index: true,
@@ -2498,8 +2480,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/histogram/basic",
     title: "Histogram — ggsvelte gallery",
-    description:
-      "The bin stat buckets a continuous variable and counts what lands in each bucket. Michelson's 100 speed-of-light runs from 1879 supply the distribution, and a rule at the modern accepted value shows the whole thing sitting above it: precise and biased at once.",
+    description: "Histogram",
     canonicalPath: "/examples/histogram/basic",
     kind: "page",
     index: true,
@@ -2509,8 +2490,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/interaction/legend-filter",
     title: "Filter with a stable-color legend — ggsvelte gallery",
-    description:
-      "Accessible legend checkboxes explicitly include or exclude data before statistics and scales are trained. Hidden groups remain available in the legend, and each group keeps its original color when it returns. The three series are Playfair's national debt, revenue and expenditure, 1770–1824 — the same source faceted over disjoint commodity series in facet/wrap-free-y.",
+    description: "Filter with a stable-color legend",
     canonicalPath: "/examples/interaction/legend-filter",
     kind: "page",
     index: true,
@@ -2520,8 +2500,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/interaction/legend-focus",
     title: "Focus and link discrete legend groups — ggsvelte gallery",
-    description:
-      "Opt-in legend controls preview locally, commit stable row keys to a shared controller, and de-emphasize unrelated marks without changing scales, statistics, layout, or color identity. The same semantic mask drives SVG and canvas views. The three series are Playfair's stock, bread and export indices, 1770–1824, which read as both a scatter and a connected line.",
+    description: "Focus and link discrete legend groups",
     canonicalPath: "/examples/interaction/legend-focus",
     kind: "page",
     index: true,
@@ -2531,8 +2510,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/interaction/tooltip",
     title: "Inspect and pin data — ggsvelte gallery",
-    description:
-      "Chart-local, private inspection state adds a semantic crosshair, a complete HTML tooltip, keyboard traversal, and click-or-Enter pinning. The concise live announcement reports the shared x value and group count once, while every member remains navigable in ordinary DOM. Measurements are the 333 complete Palmer Archipelago penguin records; flipper length is recorded to the millimetre, so many birds genuinely share an x value.",
+    description: "Inspect and pin data",
     canonicalPath: "/examples/interaction/tooltip",
     kind: "page",
     index: true,
@@ -2542,8 +2520,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/line/multi-series",
     title: "Multi-series line chart — ggsvelte gallery",
-    description:
-      "One line per group, derived from the discrete color mapping — plus a point layer on top showing how layers compose. Playfair's 1821 wheat-and-wages plate supplies the two series, and a manual color scale picks the economist theme's own red and ink so both clear contrast on its tinted paper — the shorter wage series ends early because the original records no 1821 wage.",
+    description: "Multi-series line chart",
     canonicalPath: "/examples/line/multi-series",
     kind: "page",
     index: true,
@@ -2553,8 +2530,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/line/time-axis",
     title: "Raw-year time-axis line chart — ggsvelte gallery",
-    description:
-      "A long-run series over untouched four-digit year strings. Value-driven inference selects a UTC calendar scale automatically; no preprocessing or explicit time scale is required. Bowley's 1855–99 British export series supplies the trend, drawn on the fivethirtyeight theme's newsprint paper with white gridlines.",
+    description: "Raw-year time-axis line chart",
     canonicalPath: "/examples/line/time-axis",
     kind: "page",
     index: true,
@@ -2564,8 +2540,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/point/canvas-scatter",
     title: "Canvas scatter (10,000 points) — ggsvelte gallery",
-    description:
-      "Above the canvas threshold the marks render to a canvas stratum while axes, grid, and legend stay SVG. This is the one example that keeps generated data deliberately — its subject is the rendering path under load, not a dataset — and the dark theme is where overplotting at low alpha actually reads.",
+    description: "Canvas scatter (10,000 points)",
     canonicalPath: "/examples/point/canvas-scatter",
     kind: "page",
     index: true,
@@ -2575,8 +2550,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/point/fixed-aspect",
     title: "Fixed aspect ratio — ggsvelte gallery",
-    description:
-      "A unit circle remains circular through responsive width changes because coord_fixed fits a centered equal-unit data rectangle.",
+    description: "Fixed aspect ratio",
     canonicalPath: "/examples/point/fixed-aspect",
     kind: "page",
     index: true,
@@ -2586,8 +2560,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/point/jitter",
     title: "Jittered scatter — ggsvelte gallery",
-    description:
-      "position jitter offsets overlapping marks so ties stay countable. Pearson's 1910 survey of 70 trades has many sharing a wage class, and the clean theme's dashed horizontal grid keeps the eye on the vertical spread.",
+    description: "Jittered scatter",
     canonicalPath: "/examples/point/jitter",
     kind: "page",
     index: true,
@@ -2597,8 +2570,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/point/layer-data-bands",
     title: "Per-layer data (bands + callout) — ggsvelte gallery",
-    description:
-      "A large observation table layered with a small background-band table and a one-row annotation table. Each geom supplies its own data; the plot has no shared table.",
+    description: "Per-layer data (bands + callout)",
     canonicalPath: "/examples/point/layer-data-bands",
     kind: "page",
     index: true,
@@ -2608,8 +2580,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/point/log-scale",
     title: "Log-scale scatter with a fitted line — ggsvelte gallery",
-    description:
-      "scaleXLog10 compresses a multiplicative axis. Farr's 1849 London cholera districts span two orders of magnitude in population density, and colouring by water company separates them the way the epidemic did — the economist theme's tinted paper forces a manual three-key scale.",
+    description: "Log-scale scatter with a fitted line",
     canonicalPath: "/examples/point/log-scale",
     kind: "page",
     index: true,
@@ -2619,8 +2590,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/point/scatter-color",
     title: "Scatter plot with color mapping — ggsvelte gallery",
-    description:
-      "A discrete color mapping splits the points into groups and produces the legend. Guerry's 1833 moral statistics of France put 85 departments on the axes, coloured by region on the few theme with tableau10 — Corsica is dropped because the source gives it no region.",
+    description: "Scatter plot with color mapping",
     canonicalPath: "/examples/point/scatter-color",
     kind: "page",
     index: true,
@@ -2630,8 +2600,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/point/style-scales",
     title: "Complete style scales — ggsvelte gallery",
-    description:
-      "Map size, alpha, linewidth, shape, and linetype with stable legends across SVG and Canvas.",
+    description: "Complete style scales",
     canonicalPath: "/examples/point/style-scales",
     kind: "page",
     index: true,
@@ -2641,8 +2610,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/raster/grid",
     title: "Regular density grid (geom raster) — ggsvelte gallery",
-    description:
-      "Equal-cell raster from a regular (x, y) grid with fill — dense heatmaps without per-cell strokes. The grid must be complete, so the source's 22 × 42 table is cropped to its largest complete 15 × 33 sub-rectangle.",
+    description: "Regular density grid (geom raster)",
     canonicalPath: "/examples/raster/grid",
     kind: "page",
     index: true,
@@ -2652,8 +2620,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/rect/regions",
     title: "Shaded time bands (geom rect) — ggsvelte gallery",
-    description:
-      "Arbitrary rectangles from xmin/xmax/ymin/ymax — background time bands or regions without image injection. Two layers over two unrelated datasets, so neither inherits a plot-level mapping: the rects are Playfair's twelve reigns, the line is his wheat-price series.",
+    description: "Shaded time bands (geom rect)",
     canonicalPath: "/examples/rect/regions",
     kind: "page",
     index: true,
@@ -2663,8 +2630,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/ribbon/bounds",
     title: "Ribbon interval — ggsvelte gallery",
-    description:
-      "A filled band between precomputed lower and upper bounds along x — the canonical geom_ribbon contract (not a zero-baseline area). The bounds are observed rather than modelled: the smallest and largest of Halley's five annual counts at each age.",
+    description: "Ribbon interval",
     canonicalPath: "/examples/ribbon/bounds",
     kind: "page",
     index: true,
@@ -2674,8 +2640,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/ribbon/paint",
     title: "Ribbon paint — ggsvelte gallery",
-    description:
-      "Portable within-mark linear gradients for fill and stroke plus a bounded glow, with required solid fallbacks — not theme decoration and not a data color scale.",
+    description: "Ribbon paint",
     canonicalPath: "/examples/ribbon/paint",
     kind: "page",
     index: true,
@@ -2685,8 +2650,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/rule/annotation",
     title: "Reference-line annotations — ggsvelte gallery",
-    description:
-      "The rule geom's annotation form: fixed x/y intercepts drawn under a line layer. Annotation rules inherit no plot aes and still train the scales, exactly like ggplot2's vline/hline. Both intercepts here come from the source's own documentation — the apparatus change after Cavendish's sixth determination, and the modern value of the earth's density.",
+    description: "Reference-line annotations",
     canonicalPath: "/examples/rule/annotation",
     kind: "page",
     index: true,
@@ -2696,8 +2660,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/rule/data-driven",
     title: "Data-driven rules (rug) — ggsvelte gallery",
-    description:
-      "The rule geom's data-driven form: mapping aes.x (and only x) draws one vertical panel-spanning rule per row — a rug plot of the distribution. Semi-transparent strokes reveal density. Van Langren's 1644 chart, believed to be the first graph of statistical data, was exactly this.",
+    description: "Data-driven rules (rug)",
     canonicalPath: "/examples/rule/data-driven",
     kind: "page",
     index: true,
@@ -2707,8 +2670,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/segment/annotations",
     title: "Segment annotations — ggsvelte gallery",
-    description:
-      "Finite data-driven segments from (x,y) to (xend,yend) — leader lines and range ticks that do not span the panel (unlike rule). Here each segment runs from a pair's self-fertilised height to its cross-fertilised one, so the direction of the segment carries Darwin's result.",
+    description: "Segment annotations",
     canonicalPath: "/examples/segment/annotations",
     kind: "page",
     index: true,
@@ -2718,8 +2680,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/smooth/loess-scatter",
     title: "Loess smooth with confidence ribbon — ggsvelte gallery",
-    description:
-      "A loess trend (R-parity local regression, degree 2) fitted over a scatter, with its 95% confidence ribbon drawn under the line — ggplot2's geom_smooth, applied to the first scatterplot ever published. A continuous size scale carries Herschel's own weighting of each observation.",
+    description: "Loess smooth with confidence ribbon",
     canonicalPath: "/examples/smooth/loess-scatter",
     kind: "page",
     index: true,
@@ -2729,8 +2690,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/text/labels",
     title: "Text labels on a scatter — ggsvelte gallery",
-    description:
-      "A text layer labels each point from a data field, start-anchored and offset with dx. Labels draw exactly where they are placed — there is no collision detection — so the twelve names are staggered down the panel by rank.",
+    description: "Text labels on a scatter",
     canonicalPath: "/examples/text/labels",
     kind: "page",
     index: true,
@@ -2740,8 +2700,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/tile/heatmap",
     title: "Categorical heatmap (geom tile) — ggsvelte gallery",
-    description:
-      "Center-sized tiles on discrete x/y with fill — the ordinary heatmap contract without raster grid constraints. Fifty-three week columns against seven weekday rows lay a whole year out as a calendar.",
+    description: "Categorical heatmap (geom tile)",
     canonicalPath: "/examples/tile/heatmap",
     kind: "page",
     index: true,
@@ -2751,8 +2710,7 @@ export const DOCS_ROUTES = [
   {
     path: "/interactions/brush-zoom",
     title: "Interval selection and zoom — ggsvelte interactions",
-    description:
-      "The tool rail separates rectangular selection from brush zoom. Selection reports start, change, end, and clear phases with semantic keys and domain bounds; zoom reports explicit domains and a clear event on reset, while inspection remains available alongside both. The field is the 333 complete Palmer Archipelago penguin records.",
+    description: "Interval selection and zoom",
     canonicalPath: "/interactions/brush-zoom",
     kind: "page",
     index: true,
@@ -2762,8 +2720,7 @@ export const DOCS_ROUTES = [
   {
     path: "/interactions/facet-intervals",
     title: "Coordinate intervals across facets — ggsvelte interactions",
-    description:
-      "Choose independent, union, or cross-panel interval semantics, then draw inside a facet. Stable panel identities keep selections attached to their facet even when rows reorder or a panel temporarily disappears. Panels are the three Palmer Archipelago islands; Biscoe holds every Gentoo, so the panels have genuinely different shapes.",
+    description: "Coordinate intervals across facets",
     canonicalPath: "/interactions/facet-intervals",
     kind: "page",
     index: true,
@@ -2773,8 +2730,7 @@ export const DOCS_ROUTES = [
   {
     path: "/interactions/linked-views",
     title: "Link plots, controls, and a table — ggsvelte interactions",
-    description:
-      "A shared Svelte 5 interaction controller coordinates semantic selection, lightweight emphasis, and zoom domains without callback loops. Stable row keys link two plots to ordinary accessible DOM, while explicit reconciliation makes data replacement predictable. Five Palmer penguins per species, evenly sampled, so every linked row fits in the table alongside the plots.",
+    description: "Link plots, controls, and a table",
     canonicalPath: "/interactions/linked-views",
     kind: "page",
     index: true,
@@ -2784,8 +2740,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/interaction/brush-zoom",
     title: "Interval selection and zoom — ggsvelte interactions",
-    description:
-      "The tool rail separates rectangular selection from brush zoom. Selection reports start, change, end, and clear phases with semantic keys and domain bounds; zoom reports explicit domains and a clear event on reset, while inspection remains available alongside both. The field is the 333 complete Palmer Archipelago penguin records.",
+    description: "Interval selection and zoom",
     canonicalPath: "/interactions/brush-zoom",
     kind: "alias",
     index: false,
@@ -2795,8 +2750,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/interaction/facet-intervals",
     title: "Coordinate intervals across facets — ggsvelte interactions",
-    description:
-      "Choose independent, union, or cross-panel interval semantics, then draw inside a facet. Stable panel identities keep selections attached to their facet even when rows reorder or a panel temporarily disappears. Panels are the three Palmer Archipelago islands; Biscoe holds every Gentoo, so the panels have genuinely different shapes.",
+    description: "Coordinate intervals across facets",
     canonicalPath: "/interactions/facet-intervals",
     kind: "alias",
     index: false,
@@ -2806,8 +2760,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/interaction/linked-views",
     title: "Link plots, controls, and a table — ggsvelte interactions",
-    description:
-      "A shared Svelte 5 interaction controller coordinates semantic selection, lightweight emphasis, and zoom domains without callback loops. Stable row keys link two plots to ordinary accessible DOM, while explicit reconciliation makes data replacement predictable. Five Palmer penguins per species, evenly sampled, so every linked row fits in the table alongside the plots.",
+    description: "Link plots, controls, and a table",
     canonicalPath: "/interactions/linked-views",
     kind: "alias",
     index: false,
@@ -2817,8 +2770,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/interactions/inspection",
     title: "Inspect and pin data — ggsvelte gallery",
-    description:
-      "Chart-local, private inspection state adds a semantic crosshair, a complete HTML tooltip, keyboard traversal, and click-or-Enter pinning. The concise live announcement reports the shared x value and group count once, while every member remains navigable in ordinary DOM. Measurements are the 333 complete Palmer Archipelago penguin records; flipper length is recorded to the millimetre, so many birds genuinely share an x value.",
+    description: "Inspect and pin data",
     canonicalPath: "/examples/interaction/tooltip",
     kind: "alias",
     index: false,
@@ -2828,8 +2780,7 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/interactions/interval-selection",
     title: "Interval selection and zoom — ggsvelte interactions",
-    description:
-      "The tool rail separates rectangular selection from brush zoom. Selection reports start, change, end, and clear phases with semantic keys and domain bounds; zoom reports explicit domains and a clear event on reset, while inspection remains available alongside both. The field is the 333 complete Palmer Archipelago penguin records.",
+    description: "Interval selection and zoom",
     canonicalPath: "/interactions/brush-zoom",
     kind: "alias",
     index: false,

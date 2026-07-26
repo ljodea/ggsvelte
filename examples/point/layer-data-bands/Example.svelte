@@ -1,20 +1,23 @@
 <script lang="ts">
-  import { GeomPoint, GeomRect, GeomText, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomPoint,
+    GeomRect,
+    GeomText,
+    GGPlot,
+    Labs,
+  } from "@ggsvelte/svelte";
 
   import { bands, callouts, observations } from "./data.js";
 </script>
 
-<GGPlot
-  labs={{
-    title: "Per-layer data: observations, bands, and a callout",
-    x: "x",
-    y: "y",
-    color: "Group",
-    fill: "Region",
-  }}
-  width={640}
-  height={400}
->
+<GGPlot width={640} height={400}>
+  <Labs
+    title="Per-layer data: observations, bands, and a callout"
+    x="x"
+    y="y"
+    color="Group"
+    fill="Region"
+  />
   <GeomRect
     data={bands}
     aes={{

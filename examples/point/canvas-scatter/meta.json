@@ -1,6 +1,5 @@
 {
   "title": "Canvas scatter (10,000 points)",
-  "description": "Above the canvas threshold the marks render to a canvas stratum while axes, grid, and legend stay SVG. This is the one example that keeps generated data deliberately — its subject is the rendering path under load, not a dataset — and the dark theme is where overplotting at low alpha actually reads.",
   "tags": ["point", "canvas", "performance", "theme"],
   "docsSection": "Points & scatter"
 }

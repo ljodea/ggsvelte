@@ -1,5 +1,13 @@
 <script lang="ts">
-  import { createPlotInteraction, GGPlot } from "@ggsvelte/svelte";
+  import {
+    createPlotInteraction,
+    GeomLine,
+    GeomPoint,
+    GGPlot,
+    Labs,
+    ScaleXContinuous,
+    ThemeFew,
+  } from "@ggsvelte/svelte";
 
   import { rows } from "./data.js";
 
@@ -31,63 +39,52 @@
     <GGPlot
       data={rows}
       aes={mapping}
-      theme="few"
-      scales={{ x: { labels: "d" } }}
-      layers={[{ geom: "point", params: { size: 4 } }]}
       key="id"
       legendFocus
       {interaction}
       interactionScope={scope}
       width="container"
       height={310}
-      labs={{
-        title: "SVG points",
-        x: "Year",
-        y: "Index units",
-        color: "Series",
-      }}
       onlegendfocus={describe}
-    />
+    >
+      <ThemeFew />
+      <ScaleXContinuous labels="d" />
+      <Labs title="SVG points" x="Year" y="Index units" color="Series" />
+      <GeomPoint size={4} />
+    </GGPlot>
     <GGPlot
       data={rows}
       aes={mapping}
-      theme="few"
-      scales={{ x: { labels: "d" } }}
-      layers={[{ geom: "point", render: "canvas", params: { size: 4 } }]}
       key="id"
       legendFocus
       {interaction}
       interactionScope={scope}
       width="container"
       height={310}
-      labs={{
-        title: "Canvas points",
-        x: "Year",
-        y: "Index units",
-        color: "Series",
-      }}
       onlegendfocus={describe}
-    />
+    >
+      <ThemeFew />
+      <ScaleXContinuous labels="d" />
+      <Labs title="Canvas points" x="Year" y="Index units" color="Series" />
+      <GeomPoint size={4} render="canvas" />
+    </GGPlot>
     <GGPlot
       data={rows}
       aes={mapping}
-      theme="few"
-      scales={{ x: { labels: "d" } }}
-      layers={[{ geom: "line", params: { linewidth: 2 } }, { geom: "point" }]}
       key="id"
       legendFocus
       {interaction}
       interactionScope={scope}
       width="container"
       height={310}
-      labs={{
-        title: "SVG lines",
-        x: "Year",
-        y: "Index units",
-        color: "Series",
-      }}
       onlegendfocus={describe}
-    />
+    >
+      <ThemeFew />
+      <ScaleXContinuous labels="d" />
+      <Labs title="SVG lines" x="Year" y="Index units" color="Series" />
+      <GeomLine linewidth={2} />
+      <GeomPoint />
+    </GGPlot>
   </div>
   <div class="summary gg-demo-chrome">
     <strong>{emphasized.length} rows focused</strong>

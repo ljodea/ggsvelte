@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { createPlotInteraction, GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import {
+    createPlotInteraction,
+    GeomPoint,
+    GGPlot,
+    Labs,
+    ThemeMinimal,
+  } from "@ggsvelte/svelte";
 
   import { penguins, type PenguinRow } from "./data.js";
 
@@ -68,43 +74,43 @@
     <GGPlot
       data={rows}
       aes={{ x: "flipper", y: "mass", color: "species" }}
-      theme="minimal"
       key="id"
       select={{ type: "point", multiple: true }}
       zoom={{ mode: "x" }}
       {interaction}
       interactionScope={scope}
-      labs={{
-        title: "Select in either view",
-        x: "Flipper length (mm)",
-        y: "Body mass (g)",
-        color: "Species",
-      }}
       width="container"
       height={360}
       ariaLabel="Penguins by flipper length and body mass, colored by species"
     >
+      <ThemeMinimal />
+      <Labs
+        title="Select in either view"
+        x="Flipper length (mm)"
+        y="Body mass (g)"
+        color="Species"
+      />
       <GeomPoint size={4} alpha={0.86} />
     </GGPlot>
 
     <GGPlot
       data={rows}
       aes={{ x: "flipper", y: "mass" }}
-      theme="minimal"
       key="id"
       select={{ type: "point", multiple: true }}
       zoom={{ mode: "x" }}
       {interaction}
       interactionScope={scope}
-      labs={{
-        title: "The same keys, quieter styling",
-        x: "Flipper length (mm)",
-        y: "Body mass (g)",
-      }}
       width="container"
       height={360}
       ariaLabel="Penguins by flipper length and body mass in a quieter style"
     >
+      <ThemeMinimal />
+      <Labs
+        title="The same keys, quieter styling"
+        x="Flipper length (mm)"
+        y="Body mass (g)"
+      />
       <GeomPoint size={3.2} color="#287271" alpha={0.68} />
     </GGPlot>
   </div>

@@ -1,6 +1,5 @@
 {
   "title": "Column chart with value labels",
-  "description": "A text layer above each column turns the bars into a table you can read directly. The 1954 Salk vaccine trial supplies the numbers the trial existed to produce: the vaccinated rate is about a third of the placebo rate.",
   "tags": ["col", "text", "labels", "annotation", "theme"],
   "docsSection": "Bars & columns"
 }

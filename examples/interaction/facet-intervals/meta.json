@@ -1,6 +1,5 @@
 {
   "title": "Coordinate intervals across facets",
-  "description": "Choose independent, union, or cross-panel interval semantics, then draw inside a facet. Stable panel identities keep selections attached to their facet even when rows reorder or a panel temporarily disappears. Panels are the three Palmer Archipelago islands; Biscoe holds every Gentoo, so the panels have genuinely different shapes.",
   "tags": ["interaction", "facet", "select", "interval", "brush", "keyboard"],
   "docsSection": "Interaction",
   "vrHeight": 760,

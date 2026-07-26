@@ -1,6 +1,5 @@
 {
   "title": "Filter with a stable-color legend",
-  "description": "Accessible legend checkboxes explicitly include or exclude data before statistics and scales are trained. Hidden groups remain available in the legend, and each group keeps its original color when it returns. The three series are Playfair's national debt, revenue and expenditure, 1770–1824 — the same source faceted over disjoint commodity series in facet/wrap-free-y.",
   "tags": ["interaction", "legend", "filter", "stable-color", "keyboard", "touch"],
   "docsSection": "Interaction",
   "vrHeight": 720,

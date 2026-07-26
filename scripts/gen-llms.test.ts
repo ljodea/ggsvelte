@@ -423,7 +423,8 @@ describe("llms surfaces", () => {
     const linked = EXAMPLES.find((example) => example.id === "interaction/linked-views");
     expect(inspection?.title).toBe("Inspect and pin data");
     expect(inspection?.tags).toContain("inspect");
-    expect(inspection?.description).toContain("Chart-local");
+    // Page subtitles are deleted (empty), not rewritten.
+    expect(inspection?.description).toBe("");
     expect(selection?.title).toBe("Interval selection and zoom");
     expect(selection?.tags).toContain("select");
     expect(linked?.title).toBe("Link plots, controls, and a table");
