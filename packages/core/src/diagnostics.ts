@@ -402,6 +402,12 @@ export const PIPELINE_WARNING_CATALOG = {
   "smooth-group-dropped": {
     summary: "A smooth group had too few points for the fit and was dropped.",
   },
+  "quantile-empty": {
+    summary: "No valid quantiles in (0,1) after filtering; nothing drawn.",
+  },
+  "quantile-group-dropped": {
+    summary: "A quantile group was too small or had constant x and was dropped.",
+  },
   "palette-exhausted": {
     summary:
       "A discrete color scale ran out of palette entries and cycled (the default onExhaust).",
