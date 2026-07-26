@@ -13,8 +13,10 @@
   const frameWidth = $derived(data.entry.vrWidth ?? 640);
   const frameHeight = $derived(data.entry.vrHeight ?? 400);
   const galleryEntries = galleryCatalog(EXAMPLES);
+  // Seed from the page entry so exposition aliases (outside galleryCatalog)
+  // still get gallery neighbours instead of an empty "More examples" section.
   const related = $derived(
-    rankRelatedExamples(data.entry.id, galleryEntries, 3),
+    rankRelatedExamples(data.entry.id, galleryEntries, 3, data.entry),
   );
   const tabs = $derived([
     { label: "Svelte", code: data.svelteSource, language: "svelte" },
@@ -121,32 +123,34 @@
     {/if}
   </section>
 
-  <section class="example-prose related" aria-labelledby="related-heading">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">Related</p>
-        <h2 id="related-heading">More examples</h2>
+  {#if related.length > 0}
+    <section class="example-prose related" aria-labelledby="related-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Related</p>
+          <h2 id="related-heading">More examples</h2>
+        </div>
+        <a href={`${base}/examples`}>All {galleryEntries.length}</a>
       </div>
-      <a href={`${base}/examples`}>All {galleryEntries.length}</a>
-    </div>
-    <ul>
-      {#each related as entry (entry.id)}
-        <li>
-          <a href={`${base}/examples/${entry.id}`} aria-label={entry.title}>
-            <div class="preview-paper">
-              <img
-                src={`${base}${entry.previewPath}`}
-                alt=""
-                width="640"
-                height={entry.vrHeight ?? 400}
-                loading="lazy"
-              />
-            </div>
-          </a>
-        </li>
-      {/each}
-    </ul>
-  </section>
+      <ul>
+        {#each related as entry (entry.id)}
+          <li>
+            <a href={`${base}/examples/${entry.id}`} aria-label={entry.title}>
+              <div class="preview-paper">
+                <img
+                  src={`${base}${entry.previewPath}`}
+                  alt=""
+                  width="640"
+                  height={entry.vrHeight ?? 400}
+                  loading="lazy"
+                />
+              </div>
+            </a>
+          </li>
+        {/each}
+      </ul>
+    </section>
+  {/if}
 </article>
 
 <style>
