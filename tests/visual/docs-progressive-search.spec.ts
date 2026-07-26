@@ -14,7 +14,7 @@ test("Getting Started renders the packed file and the built-up chart", async ({ 
 
   // The first render is the honest starting chart: every observation, no
   // styling. It is a build-time render, so it is an image, not a live plot.
-  const firstChart = guide.locator(".first-result img.lesson-chart");
+  const firstChart = guide.locator(".lesson-block img.lesson-chart");
   await expect(firstChart).toBeVisible();
   await expect(firstChart).toHaveJSProperty("naturalWidth", 660);
 
@@ -31,10 +31,10 @@ test("each step shows its own delta and the finished chart is live", async ({ pa
   await expect(steps.getByRole("heading", { level: 3 })).toHaveText([
     "Separate the signal from the noise",
     "Put earlier bloom on top",
-    "Put the climate behind the data",
-    "Name the records",
+    "Add epoch bands",
+    "Annotate record years",
     "Finish it",
-    "Make it answer questions — and notice it is data",
+    "Inspect and pin",
   ]);
 
   // Every step chart is a build-time render; the page carries exactly one
@@ -79,7 +79,10 @@ test("the finished chart drops its band fills and names the epochs in forced col
     .evaluateAll((rects) => rects.map((rect) => getComputedStyle(rect).fill));
   expect(fills.length).toBeGreaterThan(0);
   expect(new Set(fills)).toEqual(new Set(["none"]));
-  await expect(finished.locator(".chart-note")).toContainText("Bands, left to right:");
+  // Epoch names live on the bottom legend (and the plot aria-label), not a caption.
+  await expect(finished.locator(".gg-legend")).toContainText("Medieval warm period");
+  await expect(finished.locator(".gg-legend")).toContainText("Little Ice Age");
+  await expect(finished.locator(".gg-legend")).toContainText("Industrial era");
 });
 
 test("Docs landing and sidebar expose the full path without duplicate Reference", async ({
@@ -149,7 +152,7 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
   );
   // Every step chart is a build-time render, so the whole lesson is readable
   // with no JavaScript at all — only the inspect step loses its interaction.
-  await expect(page.locator(".first-result .lesson-output")).toBeVisible();
+  await expect(page.locator(".lesson-block .lesson-output")).toBeVisible();
   await expect(page.locator("img.lesson-chart")).toHaveCount(7);
   await expect(
     page.getByRole("heading", { level: 3, name: "Separate the signal from the noise" }),
@@ -298,26 +301,18 @@ test("global search is reachable from compact chrome and survives 200 percent zo
   await expectNoDocumentOverflow(page);
 });
 
-test("mobile lesson keeps result before source and remains contained", async ({ page }) => {
+test("mobile lesson stacks code above chart and remains contained", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/guide/getting-started?theme=light");
 
+  // Side-by-side is banned: code always above the chart, on every viewport.
   const order = await page
-    .locator(".first-result > section")
+    .locator(".lesson-block > section")
     .evaluateAll((sections) => sections.map((section) => section.getAttribute("class")));
-  expect(order[0]).toContain("lesson-output");
-  expect(order[1]).toContain("lesson-code");
-
-  const tabs = page.getByRole("tablist", { name: "First chart surfaces" });
-  const output = tabs.getByRole("tab", { name: "Output" });
-  const svelte = tabs.getByRole("tab", { name: "Svelte" });
-  await expect(output).toHaveAttribute("aria-selected", "true");
-  await expect(page.locator("#first-output-panel")).toBeVisible();
-  await expect(page.locator("#first-svelte-panel")).toBeHidden();
-  await svelte.click();
-  await expect(page.locator("#first-svelte-panel")).toBeVisible();
-  await svelte.press("Home");
-  await expect(output).toBeFocused();
-  await expect(page.locator("#first-output-panel")).toBeVisible();
+  expect(order[0]).toContain("lesson-code");
+  expect(order[1]).toContain("lesson-output");
+  await expect(page.getByRole("tablist", { name: "First chart surfaces" })).toHaveCount(0);
+  await expect(page.locator(".lesson-block .lesson-code")).toBeVisible();
+  await expect(page.locator(".lesson-block .lesson-output")).toBeVisible();
   await expectNoDocumentOverflow(page);
 });

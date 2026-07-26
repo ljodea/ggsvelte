@@ -45,12 +45,21 @@ describe("the sakura lesson folds to renderable specs", () => {
   it("starts from a plain scatter of every observation", () => {
     const start = foldSakura(0, rows);
     expect(start.spec.layers).toEqual([{ geom: "point" }]);
-    expect(start.spec.scales).toBeUndefined();
+    // Year ticks use labels: "d" from the first render so 1000 CE is not "1,000".
+    expect(start.spec.scales).toEqual({ x: { type: "linear", labels: "d" } });
+    expect(start.spec.labs).toEqual({ x: "Year", y: "Peak bloom" });
     expect(start.spec.theme).toBeUndefined();
     expect(start.key).toBeUndefined();
     expect(start.source).toBe(QUICKSTART_PAGE_SVELTE);
+    expect(start.source).toContain('<ScaleXContinuous labels="d" />');
+    expect(start.source).toContain('<Labs x="Year" y="Peak bloom" />');
     const model = runPipeline(start.spec, { width: 900, height: 480 });
     expect(model.scene.batches[0]!.kind).toBe("points");
+    const yearLabels = model.scene.axes.x?.ticks
+      .filter((tick) => tick.showLabel === true)
+      .map((tick) => tick.label);
+    expect(yearLabels).toContain("1000");
+    expect(yearLabels).not.toContain("1,000");
   });
 
   it("validates and renders at every step", () => {
@@ -107,10 +116,13 @@ describe("the sakura lesson folds to renderable specs", () => {
       [0, "loess", '"method":"loess"'],
       [0, `span={${SAKURA_LOESS_SPAN}}`, `"span":${SAKURA_LOESS_SPAN}`],
       [0, "alpha={0.5}", '"alpha":0.5'],
-      [1, "reverse: true", '"reverse":true'],
-      [1, '"%b %d"', '"dateLabels":"%b %d"'],
+      [1, "reverse", '"reverse":true'],
+      [1, "ScaleYDate", '"dateLabels":"%b %d"'],
+      [1, "ScaleXContinuous", '"labels":"d"'],
       [2, "x: null", '"x":null'],
       [2, 'fill: "epoch"', '"fill":{"field":"epoch"}'],
+      [2, "GuideLegend", '"position":"bottom"'],
+      [2, "ScaleFillManual", '"type":"manual"'],
       [3, SAKURA_BASELINE, `"yintercept":"${SAKURA_BASELINE}"`],
       [3, '"#b3452f"', '"value":"#b3452f"'],
       [4, "<ThemeTufte />", '"theme":"tufte"'],

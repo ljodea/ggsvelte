@@ -164,7 +164,10 @@ describe("guide sections cover their catalogs", () => {
   it("carries the exact complete SvelteKit page", () => {
     expect(GETTING_STARTED_MD).toContain(QUICKSTART_PAGE_SVELTE);
     expect(GETTING_STARTED_MD.match(/```svelte complete/g)).toHaveLength(1);
-    expect(QUICKSTART_PAGE_SVELTE).toContain("import { GeomPoint, GGPlot }");
+    expect(QUICKSTART_PAGE_SVELTE).toContain("GeomPoint");
+    expect(QUICKSTART_PAGE_SVELTE).toContain("GGPlot");
+    expect(QUICKSTART_PAGE_SVELTE).toContain("ScaleXContinuous");
+    expect(QUICKSTART_PAGE_SVELTE).toContain("Labs");
     expect(QUICKSTART_PAGE_SVELTE).toContain('import { kyotoSakura } from "@ggsvelte/svelte/data"');
     expect(QUICKSTART_PAGE_SVELTE).toContain('aes={{ x: "year", y: "bloomRefDate" }}');
     expect(QUICKSTART_PAGE_SVELTE).toMatch(/ariaLabel="[^"]{20,}"/);

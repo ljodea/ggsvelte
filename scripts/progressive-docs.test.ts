@@ -100,7 +100,10 @@ describe("progressive Docs journey", () => {
     // from one catalog — asserted above — but the narrative does not.
     for (const step of SAKURA_STEPS) {
       expect(GETTING_STARTED_MD).not.toContain(`### ${step.title}`);
-      expect(GETTING_STARTED_MD).not.toContain(step.outcome);
+      // Empty outcomes are intentional (no marketing prose on the human page).
+      if (step.outcome !== "") {
+        expect(GETTING_STARTED_MD).not.toContain(step.outcome);
+      }
     }
     expect(GETTING_STARTED_MD).toContain("/guide/getting-started");
   });

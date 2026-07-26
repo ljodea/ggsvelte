@@ -190,13 +190,13 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "draw-your-first-chart",
-        title: "Draw your first chart",
+        id: "start-with-a-basic-plot",
+        title: "Start with a basic plot",
         level: 2,
       },
       {
-        id: "build-the-chart",
-        title: "Build the chart",
+        id: "add-geometry-layers",
+        title: "Add geometry layers",
         level: 2,
       },
       {
@@ -210,13 +210,13 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "put-the-climate-behind-the-data",
-        title: "Put the climate behind the data",
+        id: "add-epoch-bands",
+        title: "Add epoch bands",
         level: 3,
       },
       {
-        id: "name-the-records",
-        title: "Name the records",
+        id: "annotate-record-years",
+        title: "Annotate record years",
         level: 3,
       },
       {
@@ -225,8 +225,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "and-it-is-data",
-        title: "Make it answer questions — and notice it is data",
+        id: "inspect-and-pin",
+        title: "Inspect and pin",
         level: 3,
       },
       {
