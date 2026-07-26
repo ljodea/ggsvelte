@@ -7,7 +7,7 @@
 
 import type { GuidesSpec, Labs, LayerSpec, PortableSpec, Scales, ThemeName } from "@ggsvelte/spec";
 
-import { SAKURA_STEPS } from "./steps.ts";
+import { SAKURA_STEPS } from "./steps";
 
 const ARIA_LABEL = "Kyoto peak bloom, 812 to 2026: about a week earlier since 1850";
 

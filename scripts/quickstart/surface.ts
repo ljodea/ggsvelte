@@ -5,8 +5,8 @@
  * Not part of the human walkthrough fold — see GettingStartedGuide and llms.
  */
 
-import { QUICKSTART_PAGE_SVELTE } from "./fold.ts";
-import { SAKURA_LOESS_SPAN, SAKURA_STEPS } from "./steps.ts";
+import { QUICKSTART_PAGE_SVELTE } from "./fold";
+import { SAKURA_LOESS_SPAN, SAKURA_STEPS } from "./steps";
 
 /**
  * Section headings of the HUMAN getting-started page, in page order.

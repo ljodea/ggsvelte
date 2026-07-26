@@ -31,16 +31,16 @@ export {
   SAKURA_EPOCH_EDGES,
   SAKURA_RECORDS,
   SAKURA_STEPS,
-} from "./quickstart/steps.ts";
-export type { SakuraSpecDelta, SakuraSourceDelta, SakuraStep } from "./quickstart/steps.ts";
+} from "./quickstart/steps";
+export type { SakuraSpecDelta, SakuraSourceDelta, SakuraStep } from "./quickstart/steps";
 
 export {
   SAKURA_ANNOTATION_LAYERS,
   foldSakura,
   QUICKSTART_PAGE_SVELTE,
   SAKURA_FINISHED_SVELTE,
-} from "./quickstart/fold.ts";
-export type { SakuraRow, SakuraFold, FoldSakuraOptions } from "./quickstart/fold.ts";
+} from "./quickstart/fold";
+export type { SakuraRow, SakuraFold, FoldSakuraOptions } from "./quickstart/fold";
 
 export {
   GETTING_STARTED_PAGE_HEADINGS,
@@ -50,4 +50,4 @@ export {
   QUICKSTART_PORTABLE_SPEC_FRAGMENT,
   QUICKSTART_HEADLESS_FRAGMENT,
   QUICKSTART_CLI_FRAGMENT,
-} from "./quickstart/surface.ts";
+} from "./quickstart/surface";
