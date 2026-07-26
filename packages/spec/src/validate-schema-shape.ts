@@ -18,6 +18,7 @@ import {
   ErrorbarLayerSchema,
   HistogramLayerSchema,
   LineLayerSchema,
+  PathLayerSchema,
   PlotSpecSchema,
   PointLayerSchema,
   RasterLayerSchema,
@@ -35,6 +36,7 @@ import { mapValueErrors, unknownGeomError } from "./validate-map-errors.js";
 export const GEOM_BRANCHES = {
   point: PointLayerSchema,
   line: LineLayerSchema,
+  path: PathLayerSchema,
   col: ColLayerSchema,
   bar: BarLayerSchema,
   histogram: HistogramLayerSchema,

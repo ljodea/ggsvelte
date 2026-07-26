@@ -40,6 +40,7 @@ export function assertRequiredChannels(input: {
   if (
     geom === "point" ||
     geom === "line" ||
+    geom === "path" ||
     geom === "col" ||
     geom === "area" ||
     geom === "text" ||

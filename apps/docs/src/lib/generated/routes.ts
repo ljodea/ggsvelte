@@ -2067,8 +2067,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-508",
-        title: "experimental (508)",
+        id: "experimental-513",
+        title: "experimental (513)",
         level: 3,
       },
       {
@@ -2107,8 +2107,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-444",
-        title: "experimental (444)",
+        id: "experimental-445",
+        title: "experimental (445)",
         level: 3,
       },
       {
@@ -2537,6 +2537,16 @@ export const DOCS_ROUTES = [
     title: "Raw-year time-axis line chart — ggsvelte gallery",
     description: "Raw-year time-axis line chart",
     canonicalPath: "/examples/line/time-axis",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/path/trajectory",
+    title: "Path trajectory (data order) — ggsvelte gallery",
+    description: "Path trajectory (data order)",
+    canonicalPath: "/examples/path/trajectory",
     kind: "page",
     index: true,
     sitemap: true,

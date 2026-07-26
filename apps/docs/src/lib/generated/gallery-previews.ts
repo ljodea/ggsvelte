@@ -171,6 +171,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "3b444fe28067e31a133c512c117405bbd0f238c60a44d07b8d7d00215dabb780",
   },
   {
+    id: "path/trajectory",
+    filename: "path-trajectory-light.png",
+    path: "/previews/path-trajectory-light.png",
+    sha256: "2ec864cf245cbb1b253a89680e6002a2879c70954c3e4903aee4d2218648a4b8",
+  },
+  {
     id: "point/canvas-scatter",
     filename: "point-canvas-scatter-light.png",
     path: "/previews/point-canvas-scatter-light.png",

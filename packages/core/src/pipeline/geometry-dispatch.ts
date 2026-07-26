@@ -36,6 +36,9 @@ export function dispatchGeometryBatch(
       return single(pointsBatch(frame, fx, color, styles, warnings));
     case "line":
       return single(lineBatch(frame, fx, color, styles, warnings));
+    case "path":
+      // Data-order polylines (ggplot2 geom_path); no x-sort (#788).
+      return single(lineBatch(frame, fx, color, styles, warnings, { sortByX: false }));
     case "col":
     case "bar":
       return single(rectsBatch(frame, fx, fill, styles, warnings));

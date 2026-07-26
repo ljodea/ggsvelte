@@ -264,6 +264,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "path/trajectory",
+    title: "Path trajectory (data order)",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6InBhdGgvdHJhamVjdG9yeSJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJ4IjowLCJ5IjowfSx7IngiOjEsInkiOjF9LHsieCI6MiwieSI6MX0seyJ4IjozLCJ5IjowfSx7IngiOjIsInkiOi0xfSx7IngiOjEsInkiOi0xfSx7IngiOjAsInkiOjB9LHsieCI6LTEsInkiOjF9LHsieCI6LTIsInkiOjF9LHsieCI6LTMsInkiOjB9LHsieCI6LTIsInkiOi0xfSx7IngiOi0xLCJ5IjotMX0seyJ4IjowLCJ5IjowfV19LCJsYXllcnMiOlt7Imdlb20iOiJwYXRoIiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoieCJ9LCJ5Ijp7ImZpZWxkIjoieSJ9fSwicGFyYW1zIjp7ImxpbmV3aWR0aCI6MiwiYWxwaGEiOjAuOTV9fSx7Imdlb20iOiJwb2ludCIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoiaWRlbnRpdHkiLCJhZXMiOnsieCI6eyJmaWVsZCI6IngifSwieSI6eyJmaWVsZCI6InkifX0sInBhcmFtcyI6eyJzaXplIjoyLjIsImFscGhhIjowLjU1fX1dLCJjb29yZCI6eyJ0eXBlIjoiZml4ZWQifSwibGFicyI6eyJ0aXRsZSI6IkZpZ3VyZS1laWdodCBwYXRoIGluIGRhdGEgb3JkZXIiLCJzdWJ0aXRsZSI6Imdlb21fcGF0aCBrZWVwcyByb3cgb3JkZXI7IGdlb21fbGluZSB3b3VsZCBzb3J0IGJ5IHgiLCJ4IjoieCIsInkiOiJ5In0sInRoZW1lIjoiY2xhc3NpYyJ9fQ",
+    },
+  },
+  {
     id: "point/canvas-scatter",
     title: "Canvas scatter (10,000 points)",
     compatibility: {

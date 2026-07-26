@@ -70,6 +70,7 @@ export type {
   SegmentLayerInput,
   LayerInput,
   LineLayerInput,
+  PathLayerInput,
   PointLayerInput,
   RasterLayerInput,
   RectLayerInput,

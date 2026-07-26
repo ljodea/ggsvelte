@@ -1448,6 +1448,35 @@ export const SpecDeclarations = {
     },
   ),
 
+  PathLayer: Type.Object(
+    {
+      geom: Type.Literal("path", {
+        description:
+          "Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, and connected scatterplots (ggplot2 geom_path).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Path layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Path layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("LineParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A path layer. Requires x and y channels; rows stay in data order within each group (no x-sort).",
+    },
+  ),
+
   ColLayer: Type.Object(
     {
       geom: Type.Literal("col", {
@@ -1902,6 +1931,7 @@ export const SpecDeclarations = {
     [
       Type.Ref("PointLayer"),
       Type.Ref("LineLayer"),
+      Type.Ref("PathLayer"),
       Type.Ref("ColLayer"),
       Type.Ref("BarLayer"),
       Type.Ref("HistogramLayer"),

@@ -28,6 +28,7 @@ import type {
   GeomRibbonOptions,
   GeomHistogramOptions,
   GeomLineOptions,
+  GeomPathOptions,
   GeomPointOptions,
   GeomRasterOptions,
   GeomRectOptions,
@@ -141,6 +142,11 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'line', ... }). */
   geomLine(options: GeomLineOptions = {}): GGBuilder {
     return this.layer(layerFrom("line", options));
+  }
+
+  /** Sugar for .layer({ geom: 'path', ... }) — connect in data order (#788). */
+  geomPath(options: GeomPathOptions = {}): GGBuilder {
+    return this.layer(layerFrom("path", options));
   }
 
   /** Sugar for .layer({ geom: 'col', ... }) — bars from pre-computed heights. */

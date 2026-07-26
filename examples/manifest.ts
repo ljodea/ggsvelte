@@ -387,6 +387,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "path/trajectory",
+    category: "path",
+    name: "trajectory",
+    title: "Path trajectory (data order)",
+    description: "",
+    tags: ["path", "line", "trajectory", "figure-eight", "data-order"],
+    docsSection: "Lines & time",
+    hasData: true,
+  },
+  {
     id: "point/canvas-scatter",
     category: "point",
     name: "canvas-scatter",

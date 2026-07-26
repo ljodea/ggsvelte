@@ -22,11 +22,15 @@ export function lineBatch(
   color: ResolvedColorScale | null,
   styles: ResolvedStyleScales,
   warnings: PipelineWarning[],
+  options: { sortByX?: boolean } = {},
 ): PathsBatch | null {
   const { binding } = frame;
   const groupedRows = bucketByGroup(frame, fx, null, warnings);
   if (groupedRows.length === 0) return null;
-  sortGroupRowsByX(groupedRows, frame, fx);
+  // geom_line sorts by x; geom_path keeps data/row order (#788).
+  if (options.sortByX !== false && binding.layer.geom !== "path") {
+    sortGroupRowsByX(groupedRows, frame, fx);
+  }
   const subpaths = splitStyleSubpaths(frame, groupedRows, styles);
   const styleSplit = subpaths.length > groupedRows.length;
 
@@ -52,7 +56,10 @@ export function lineBatch(
     }
   }
 
-  const params = binding.layer.geom === "line" ? (binding.layer.params ?? {}) : {};
+  const params =
+    binding.layer.geom === "line" || binding.layer.geom === "path"
+      ? (binding.layer.params ?? {})
+      : {};
   const styleRows = subpaths.map((rows) => rows[0]!);
   const linewidths = numericStyleVector(frame, "linewidth", styleRows, styles);
   const alphas = numericStyleVector(frame, "alpha", styleRows, styles);
