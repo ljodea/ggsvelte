@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { GeomPath, GeomPoint, GGPlot, Labs, ThemeClassic } from "@ggsvelte/svelte";
+  import {
+    GeomPath,
+    GeomPoint,
+    GGPlot,
+    Labs,
+    ThemeClassic,
+  } from "@ggsvelte/svelte";
 
   import { stepCorners } from "./data.js";
 </script>
