@@ -1,14 +1,18 @@
 /**
- * Diagnostics-catalog completeness (M3 error-catalog audit): the catalogs in
- * src/diagnostics.ts must cover every code the core sources can emit, and
- * carry no dead entries. Enforced by scanning the sources — adding a new
- * `new PipelineError("x", ...)` or `warnings.push({ code: "x", ... })`
- * without a catalog entry fails this test, and so does cataloging a code
- * nothing emits.
+ * Diagnostics-catalog completeness (M3 error-catalog audit): the catalogs under
+ * src/diagnostics.ts (+ diagnostics-*-catalog.ts modules) must cover every code
+ * the core sources can emit, and carry no dead entries. Enforced by scanning
+ * emission sites — adding a new `new PipelineError("x", ...)` or
+ * `warnings.push({ code: "x", ... })` without a catalog entry fails this test,
+ * and so does cataloging a code nothing emits.
+ *
+ * Catalog modules themselves are excluded from the dead-entry corpus (their
+ * keys would otherwise always "appear"). Dynamic style emissions rewrite
+ * ScaleWarningCode as `style-${code}` in scale-style-discrete.ts.
  */
 import { describe, expect, it } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 
 import {
   ADVISORY_CATALOG,
@@ -29,13 +33,24 @@ function sourceFiles(dir: string): string[] {
   return out;
 }
 
+/** Pure catalog tables — not emission sites. */
+function isCatalogSource(path: string): boolean {
+  const name = basename(path);
+  return (
+    name === "diagnostics.ts" ||
+    name === "diagnostics-error-catalog.ts" ||
+    name === "diagnostics-warning-catalog.ts"
+  );
+}
+
 const files = sourceFiles(SRC).map((path) => ({ path, text: readFileSync(path, "utf8") }));
-const allText = files.map((f) => f.text).join("\n");
+const emissionFiles = files.filter((f) => !isCatalogSource(f.path));
+const emissionText = emissionFiles.map((f) => f.text).join("\n");
 
 /** Codes thrown as PipelineError / ScaleConfigError (constructor literals). */
 function emittedErrorCodes(): Set<string> {
   const codes = new Set<string>();
-  for (const { text } of files) {
+  for (const { text } of emissionFiles) {
     for (const m of text.matchAll(
       /new (?:PipelineError|ScaleConfigError)\(\s*\n?\s*"([a-z0-9-]+)"/g,
     )) {
@@ -48,7 +63,7 @@ function emittedErrorCodes(): Set<string> {
 /** `code: "..."` literals in warnings.push / advisories.push / errLine sites. */
 function emittedCodeLiterals(): Set<string> {
   const codes = new Set<string>();
-  for (const { text } of files) {
+  for (const { text } of emissionFiles) {
     for (const m of text.matchAll(/code: "([a-z0-9-]+)"/g)) codes.add(m[1]!);
   }
   return codes;
@@ -59,6 +74,23 @@ function scaleWarningCodes(): Set<string> {
   const state = readFileSync(join(SRC, "scales", "state.ts"), "utf8");
   const union = /export type ScaleWarningCode =([^;]+);/.exec(state)?.[1] ?? "";
   return new Set([...union.matchAll(/"([a-z0-9-]+)"/g)].map((m) => m[1]!));
+}
+
+/**
+ * Discrete style training rewrites ScaleWarningCode as `style-${code}`
+ * (see pipeline/scale-style-discrete.ts). Those full codes never appear as
+ * quoted literals at the emit site.
+ */
+function stylePrefixedScaleWarningCodes(): Set<string> {
+  const hasStyleTemplate = emissionFiles.some((f) => /code:\s*`style-\$\{/.test(f.text));
+  if (!hasStyleTemplate) return new Set();
+  return new Set([...scaleWarningCodes()].map((c) => `style-${c}`));
+}
+
+function isEmittedOutsideCatalog(code: string): boolean {
+  if (emissionText.includes(`"${code}"`)) return true;
+  if (stylePrefixedScaleWarningCodes().has(code)) return true;
+  return false;
 }
 
 const errorCatalog = new Set(Object.keys(PIPELINE_ERROR_CATALOG));
@@ -83,10 +115,15 @@ describe("diagnostics catalog completeness", () => {
     expect(missing).toEqual([]);
   });
 
-  it("no dead catalog entries: every cataloged code appears in the sources", () => {
+  it("style-prefixed ScaleWarningCode emissions are cataloged as warnings", () => {
+    const missing = [...stylePrefixedScaleWarningCodes()].filter((c) => !warningCatalog.has(c));
+    expect(missing).toEqual([]);
+  });
+
+  it("no dead catalog entries: every cataloged code is emitted outside catalogs", () => {
     const dead: string[] = [];
     for (const code of [...errorCatalog, ...warningCatalog, ...advisoryCatalog, ...cliCatalog]) {
-      if (!allText.includes(`"${code}"`)) dead.push(code);
+      if (!isEmittedOutsideCatalog(code)) dead.push(code);
     }
     expect(dead).toEqual([]);
   });
