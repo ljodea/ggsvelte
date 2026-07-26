@@ -3376,12 +3376,12 @@
         "geom": {
           "type": "string",
           "const": "sf",
-          "description": "Simple-features geometry (ggplot2 geom_sf; #809 phase 1): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families; no CRS or coord_sf yet."
+          "description": "Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families; no CRS or coord_sf yet."
         },
         "stat": {
           "type": "string",
-          "const": "identity",
-          "description": "SF layers expand geometry then draw as-is."
+          "const": "sf",
+          "description": "Geometry expand (ggplot2 stat_sf; #809): portable GeoJSON → drawable point/line/polygon parts."
         },
         "position": {
           "type": "string",
@@ -3403,7 +3403,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "An sf geometry layer. Requires a geometry column of GeoJSON Geometry JSON strings (params.geometry, default \"geometry\"). Coordinates must already be projected."
+      "description": "An sf geometry layer. Requires a geometry column of GeoJSON Geometry JSON strings (params.geometry, default \"geometry\"). Coordinates must already be projected. Default stat is \"sf\"."
     },
     "SfTextParams": {
       "type": "object",
