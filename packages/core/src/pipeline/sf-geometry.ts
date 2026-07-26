@@ -51,24 +51,28 @@ export function parseSfGeometry(raw: CellValue, path: string): SfParsed {
       "geom_sf geometry cell is not valid JSON.",
     );
   }
-  if (
-    parsed === null ||
-    typeof parsed !== "object" ||
-    Array.isArray(parsed) ||
-    !("type" in parsed) ||
-    typeof (parsed as { type: unknown }).type !== "string"
-  ) {
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
     throw new PipelineError(
       "sf-geometry-invalid",
       path,
       'geom_sf geometry must be a GeoJSON Geometry object with a string "type".',
     );
   }
-  const geom = parsed as { type: string; coordinates?: unknown; geometries?: unknown };
+  const record = parsed as Record<string, unknown>;
+  const type = record["type"];
+  if (typeof type !== "string") {
+    throw new PipelineError(
+      "sf-geometry-invalid",
+      path,
+      'geom_sf geometry must be a GeoJSON Geometry object with a string "type".',
+    );
+  }
+  const coordinates = record["coordinates"];
+  const geometries = record["geometries"];
   return {
-    type: geom.type,
-    ...(geom.coordinates !== undefined && { coordinates: geom.coordinates }),
-    ...(geom.geometries !== undefined && { geometries: geom.geometries }),
+    type,
+    ...(coordinates !== undefined && { coordinates }),
+    ...(geometries !== undefined && { geometries }),
   };
 }
 
