@@ -224,8 +224,8 @@ test("install copy and code tabs share the manual-copy fallback", async ({ page 
 test("gallery exposes every generated preview exactly once", async ({ page }) => {
   await page.goto("/examples");
   // One meta.json per example under examples/ (grows when new specimens land).
-  // 71 corpus − 3 interaction expositions; + convenience (#818) + spoke (#810).
-  const exampleCount = 68;
+  // 72 corpus − 3 interaction expositions; + sf/holes even-odd (#809 phase 4).
+  const exampleCount = 69;
   await expect(page.locator(".example-grid li")).toHaveCount(exampleCount);
   await expect(page.locator('img[src*="/previews/"]')).toHaveCount(exampleCount);
 });

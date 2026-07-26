@@ -3094,16 +3094,6 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["density-2d-filled-open-dropped"],
   },
   {
-    id: "heading:guide-errors:sf-holes-ignored",
-    kind: "heading",
-    title: "sf-holes-ignored",
-    summary:
-      "sf-holes-ignored in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
-    href: "/guide/errors#sf-holes-ignored",
-    keywords: ["Errors reference", "Reference"],
-    exact: ["sf-holes-ignored"],
-  },
-  {
     id: "heading:guide-errors:sf-coordinates-dropped",
     kind: "heading",
     title: "sf-coordinates-dropped",
@@ -5280,6 +5270,26 @@ export const DOCS_SEARCH_INDEX = [
       "map",
     ],
     exact: ["SF boxed labels"],
+  },
+  {
+    id: "example:sf:holes",
+    kind: "example",
+    title: "Simple features polygon holes",
+    summary: "Simple features polygon holes (Maps & spatial)",
+    href: "/examples/sf/holes",
+    keywords: [
+      "Simple features polygon holes",
+      "Maps & spatial",
+      "sf",
+      "geojson",
+      "polygon",
+      "hole",
+      "evenodd",
+      "fill",
+      "map",
+      "geom",
+    ],
+    exact: ["Simple features polygon holes"],
   },
   {
     id: "example:sf:labels",
@@ -21477,19 +21487,6 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["density-2d-filled-open-dropped", "warning:density-2d-filled-open-dropped"],
-  },
-  {
-    id: "diagnostic:warning:sf-holes-ignored",
-    kind: "diagnostic",
-    title: "sf-holes-ignored · warning",
-    summary: "geom_sf ignored interior polygon rings; v1 draws exterior rings only.",
-    href: "/guide/errors#sf-holes-ignored",
-    keywords: [
-      "warning",
-      "warning",
-      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
-    ],
-    exact: ["sf-holes-ignored", "warning:sf-holes-ignored"],
   },
   {
     id: "diagnostic:warning:sf-coordinates-dropped",
