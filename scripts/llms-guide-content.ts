@@ -32,8 +32,7 @@ same grammar, built up one element at a time on a real dataset — is at
 ## Install
 
 \`\`\`sh complete
-bun install @ggsvelte/svelte
-# or: bun add @ggsvelte/svelte
+bun add @ggsvelte/svelte
 # or: npm install @ggsvelte/svelte
 # or: pnpm add @ggsvelte/svelte
 \`\`\`

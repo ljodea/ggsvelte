@@ -86,7 +86,7 @@
     class="lesson-source"
     language="bash"
     accessibleLabel="Copy install command"
-    code="bun install @ggsvelte/svelte"
+    code="bun add @ggsvelte/svelte"
   />
 
   <h2 id="start-with-a-basic-plot">Start with a basic plot</h2>

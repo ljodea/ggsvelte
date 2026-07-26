@@ -15,7 +15,7 @@
 
   type GuerryRow = (typeof guerry)[number];
 
-  const install = "bun install @ggsvelte/svelte";
+  const install = "bun add @ggsvelte/svelte";
   const entries = galleryCatalog(EXAMPLES);
   const featured = FEATURED_EXAMPLES.map((item) =>
     entries.find((entry) => entry.id === item.id)!,
