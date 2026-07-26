@@ -265,7 +265,7 @@ export function collectCompositionDiagnostics(
     }
     if (isMergeKeyLayer(layer)) {
       const kind = layer.kind;
-      for (const key of Object.keys(layer.value as object)) {
+      for (const key of Object.keys(layer.value)) {
         if (mergeSeen[kind].has(key)) {
           mergeDuplicates[kind].add(key);
         } else {

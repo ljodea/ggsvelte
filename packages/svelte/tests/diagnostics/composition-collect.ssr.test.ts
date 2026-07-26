@@ -12,19 +12,19 @@ import {
 import type { PlotLayerLike } from "../../src/lib/layers/types.js";
 
 function scale(channel: string): PlotLayerLike {
-  return { kind: "scale", value: { [channel]: { type: "discrete" } } as never };
+  return { kind: "scale", value: { [channel]: { type: "discrete" } } };
 }
 
 function labs(keys: Record<string, string>): PlotLayerLike {
-  return { kind: "labs", value: keys as never };
+  return { kind: "labs", value: keys };
 }
 
 function guides(keys: Record<string, unknown>): PlotLayerLike {
-  return { kind: "guides", value: keys as never };
+  return { kind: "guides", value: keys };
 }
 
 function legend(keys: Record<string, unknown>): PlotLayerLike {
-  return { kind: "legend", value: keys as never };
+  return { kind: "legend", value: keys };
 }
 
 function coord(): PlotLayerLike {
@@ -32,17 +32,17 @@ function coord(): PlotLayerLike {
 }
 
 function facet(): PlotLayerLike {
-  return { kind: "facet", value: { rows: "g" } as never };
+  return { kind: "facet", value: { rows: "g" } };
 }
 
 function theme(): PlotLayerLike {
-  return { kind: "theme", value: "dark" as never };
+  return { kind: "theme", value: "dark" };
 }
 
 function mark(): PlotLayerLike {
   return {
     kind: "mark",
-    descriptor: { geom: "point", data: undefined, mapping: undefined } as never,
+    descriptor: { geom: "point" },
   };
 }
 
