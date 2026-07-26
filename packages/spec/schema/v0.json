@@ -249,6 +249,14 @@
           "$ref": "#/$defs/ChannelValue",
           "description": "Segment end y (geom segment). Trains the y scale together with aes.y; may be discrete or continuous."
         },
+        "angle": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Spoke direction in radians (geom spoke; 0 = +x, π/2 = +y). Quantitative only. May also be set as params.angle."
+        },
+        "radius": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Spoke length in data units (geom spoke). Quantitative only. May also be set as params.radius."
+        },
         "width": {
           "$ref": "#/$defs/ChannelValue",
           "description": "Cell width for geom tile (data units after position transform; not a trained position scale). Prefer params.width for a constant."
@@ -1194,6 +1202,58 @@
       "additionalProperties": false,
       "description": "Styling parameters for the segment geom (finite line from (x,y) to (xend,yend))."
     },
+    "SpokeParams": {
+      "type": "object",
+      "properties": {
+        "angle": {
+          "type": "number",
+          "description": "Constant spoke direction in radians when aes.angle is not mapped. 0 = +x, π/2 = +y."
+        },
+        "radius": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Constant spoke length in data units when aes.radius is not mapped. Must be greater than 0."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Spoke opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px. Must be greater than 0. Default 1."
+        },
+        "lineend": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "butt"
+            },
+            {
+              "type": "string",
+              "const": "round"
+            },
+            {
+              "type": "string",
+              "const": "square"
+            }
+          ],
+          "description": "SVG stroke-linecap for spoke ends. Default \"butt\"."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom spoke: optional constant angle/radius plus segment-like stroke styling."
+    },
     "TextParams": {
       "type": "object",
       "properties": {
@@ -2001,6 +2061,44 @@
       "additionalProperties": false,
       "description": "A finite segment layer (ggplot2's geom_segment). Requires x, y, xend, and yend channels."
     },
+    "SpokeLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "spoke",
+          "description": "Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Spoke layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Spoke layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/SpokeParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A spoke layer. Requires x and y; angle and radius from aes and/or params (constants). Angle is radians."
+    },
     "LayerSpec": {
       "anyOf": [
         {
@@ -2056,6 +2154,9 @@
         },
         {
           "$ref": "#/$defs/SegmentLayer"
+        },
+        {
+          "$ref": "#/$defs/SpokeLayer"
         }
       ],
       "description": "One plot layer. The `geom` field selects the geometry and determines which stat, position, and params are allowed."

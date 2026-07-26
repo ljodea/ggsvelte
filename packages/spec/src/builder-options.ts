@@ -21,6 +21,7 @@ import type {
   RenderBackend,
   RuleParams,
   SegmentParams,
+  SpokeParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -139,6 +140,12 @@ export interface GeomRuleOptions extends RuleParams, GeomDataOption {
 
 /** Segment-layer sugar options: params plus optional layer-level aes. */
 export interface GeomSegmentOptions extends SegmentParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Spoke-layer sugar: angle/radius constants + stroke; map aes.angle/radius for per-row. */
+export interface GeomSpokeOptions extends SpokeParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

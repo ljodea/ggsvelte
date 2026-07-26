@@ -34,6 +34,7 @@ import type {
   GeomRectOptions,
   GeomRuleOptions,
   GeomSegmentOptions,
+  GeomSpokeOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -234,6 +235,14 @@ export class GGBuilderCore {
    */
   geomSegment(options: GeomSegmentOptions = {}): GGBuilder {
     return this.layer(layerFrom("segment", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'spoke', ... }) — origin + angle (radians) +
+   * radius → segment (ggplot2 geom_spoke).
+   */
+  geomSpoke(options: GeomSpokeOptions = {}): GGBuilder {
+    return this.layer(layerFrom("spoke", options));
   }
 
   /**

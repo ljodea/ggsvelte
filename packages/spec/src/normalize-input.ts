@@ -29,6 +29,7 @@ import type {
   RenderBackend,
   RuleParams,
   SegmentParams,
+  SpokeParams,
   Scales,
   SmoothParams,
   StackablePosition,
@@ -61,6 +62,8 @@ export interface AesInput {
   xmax?: ChannelInput;
   xend?: ChannelInput;
   yend?: ChannelInput;
+  angle?: ChannelInput;
+  radius?: ChannelInput;
   width?: ChannelInput;
   height?: ChannelInput;
 }
@@ -229,6 +232,13 @@ export interface SegmentLayerInput extends LayerInputBase {
   params?: SegmentParams;
 }
 
+export interface SpokeLayerInput extends LayerInputBase {
+  geom: "spoke";
+  stat?: "identity";
+  position?: "identity";
+  params?: SpokeParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -248,7 +258,8 @@ export type LayerInput =
   | RectLayerInput
   | TileLayerInput
   | RasterLayerInput
-  | SegmentLayerInput;
+  | SegmentLayerInput
+  | SpokeLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

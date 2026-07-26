@@ -56,6 +56,7 @@ export function dispatchGeometryBatch(
     case "rule":
       return single(segmentsBatch(frame, fx, color, styles, warnings));
     case "segment":
+    case "spoke":
       return single(finiteSegmentBatch(frame, fx, color, styles, warnings));
     case "text":
       return single(glyphsBatch(frame, fx, color, styles, warnings));

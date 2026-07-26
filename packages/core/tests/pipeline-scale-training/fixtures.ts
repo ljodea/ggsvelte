@@ -69,6 +69,8 @@ export function pointFrame(table: ColumnTable): LayerFrame {
     heightField: null,
     xendField: null,
     yendField: null,
+    angleField: null,
+    radiusField: null,
     color: { field: null, constant: null, scaledConstant: null },
     fill: { field: null, constant: null, scaledConstant: null },
     size: style,

@@ -1,8 +1,11 @@
 /**
  * Identity-stat LayerFrame (source columns, optional ymin/ymax).
  */
+import type { SpokeParams } from "@ggsvelte/spec";
+
 import type { ColumnTable } from "../table.js";
 
+import { spokeEndpoints } from "../stats/spoke.js";
 import { binIdColumn, snapColumnToBins, type BinnedBoundaries } from "./binned-scale.js";
 import { emptyFrameExtras } from "./frame-helpers.js";
 import { positionColumn } from "./temporal-position.js";
@@ -35,6 +38,45 @@ function binIdOf(
 ): Int32Array | null {
   if (binning === undefined) return null;
   return binIdColumn(positionColumn(table, field, conversion, transform), binning);
+}
+
+/** Apply the same pre-stat transform used for x/y to semantic endpoint arrays. */
+function applyPositionTransform(
+  semantic: Float64Array,
+  transform: ColumnTransformConfig | undefined,
+): Float64Array {
+  if (transform === undefined) return semantic;
+  const out = new Float64Array(semantic.length);
+  for (let i = 0; i < semantic.length; i++) {
+    const value = semantic[i]!;
+    out[i] = transform.transform.valid(value) ? transform.transform.forward(value) : Number.NaN;
+  }
+  return out;
+}
+
+function spokeAngleRadius(
+  binding: LayerBinding,
+  table: ColumnTable,
+  n: number,
+): { angle: Float64Array; radius: Float64Array } {
+  const params = (binding.layer.params ?? {}) as SpokeParams;
+  const angle = new Float64Array(n);
+  const radius = new Float64Array(n);
+  if (binding.angleField !== null) {
+    const col = table.numeric(binding.angleField);
+    angle.set(col);
+  } else {
+    const constant = params.angle ?? 0;
+    angle.fill(constant);
+  }
+  if (binding.radiusField !== null) {
+    const col = table.numeric(binding.radiusField);
+    radius.set(col);
+  } else {
+    const constant = params.radius ?? 1;
+    radius.fill(constant);
+  }
+  return { angle, radius };
 }
 
 export function buildIdentityFrame(
@@ -151,34 +193,50 @@ export function buildIdentityFrame(
             binding.xBinning,
           )
         : null,
-    // Segment only — keep xend/yend off other geoms so scale training stays clean.
-    xend:
-      binding.layer.geom === "segment" && binding.xendField !== null
-        ? positionNumeric(
-            table,
-            binding.xendField,
-            binding.xConversion,
-            binding.xTransform,
-            binding.xBinning,
-          )
-        : null,
-    yend:
-      binding.layer.geom === "segment" && binding.yendField !== null
-        ? positionNumeric(
-            table,
-            binding.yendField,
-            binding.yConversion,
-            binding.yTransform,
-            binding.yBinning,
-          )
-        : null,
-    xendValues:
-      binding.layer.geom === "segment" && binding.xendField !== null
-        ? table.column(binding.xendField)
-        : null,
-    yendValues:
-      binding.layer.geom === "segment" && binding.yendField !== null
-        ? table.column(binding.yendField)
-        : null,
+    // Segment: mapped xend/yend fields. Spoke: derive ends in data space then
+    // transform like x/y (Claude plan review #810). Keep off other geoms.
+    ...(() => {
+      if (binding.layer.geom === "segment") {
+        return {
+          xend:
+            binding.xendField === null
+              ? null
+              : positionNumeric(
+                  table,
+                  binding.xendField,
+                  binding.xConversion,
+                  binding.xTransform,
+                  binding.xBinning,
+                ),
+          yend:
+            binding.yendField === null
+              ? null
+              : positionNumeric(
+                  table,
+                  binding.yendField,
+                  binding.yConversion,
+                  binding.yTransform,
+                  binding.yBinning,
+                ),
+          xendValues: binding.xendField === null ? null : table.column(binding.xendField),
+          yendValues: binding.yendField === null ? null : table.column(binding.yendField),
+        };
+      }
+      if (binding.layer.geom === "spoke" && binding.xField !== null && binding.yField !== null) {
+        // Semantic (pre-transform) space for polar offset math.
+        const xSem = positionColumn(table, binding.xField, binding.xConversion, undefined);
+        const ySem = positionColumn(table, binding.yField, binding.yConversion, undefined);
+        const { angle, radius } = spokeAngleRadius(binding, table, n);
+        const tips = spokeEndpoints(xSem, ySem, angle, radius);
+        return {
+          xend: applyPositionTransform(tips.xend, binding.xTransform),
+          yend: applyPositionTransform(tips.yend, binding.yTransform),
+          // No raw table column for ends — scale typing falls back to quantitative.
+          xendValues: null,
+          yendValues: null,
+        };
+      }
+      return { xend: null, yend: null, xendValues: null, yendValues: null };
+    })(),
   };
 }

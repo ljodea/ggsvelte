@@ -90,6 +90,10 @@ export interface LayerBinding {
   xendField: string | null;
   /** Segment end y field; null when unused. */
   yendField: string | null;
+  /** Spoke angle field (radians); null when using params.angle constant. */
+  angleField: string | null;
+  /** Spoke radius field (data units); null when using params.radius constant. */
+  radiusField: string | null;
   /** Ribbon only: resolved running-coordinate orientation. */
   ribbonOrientation?: "x" | "y";
   color: ColorBinding;

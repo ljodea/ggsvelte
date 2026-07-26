@@ -25,6 +25,8 @@ export function makeLayerBinding(input: {
   heightField: string | null;
   xendField: string | null;
   yendField: string | null;
+  angleField: string | null;
+  radiusField: string | null;
   ribbonOrientation?: "x" | "y";
   color: LayerBinding["color"];
   fill: LayerBinding["fill"];
@@ -56,6 +58,8 @@ export function makeLayerBinding(input: {
     heightField: input.heightField,
     xendField: input.xendField,
     yendField: input.yendField,
+    angleField: input.angleField,
+    radiusField: input.radiusField,
     ...(input.ribbonOrientation !== undefined && { ribbonOrientation: input.ribbonOrientation }),
     color: input.color,
     fill: input.fill,
