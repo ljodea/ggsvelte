@@ -113,6 +113,9 @@ export const PIPELINE_WARNING_CATALOG = {
   "sf-holes-ignored": {
     summary: "geom_sf ignored interior polygon rings; v1 draws exterior rings only.",
   },
+  "sf-coordinates-dropped": {
+    summary: "stat_sf_coordinates dropped features with no finite representative point.",
+  },
   "map-region-missing": {
     summary: "One or more value rows had no matching map region and were dropped.",
   },

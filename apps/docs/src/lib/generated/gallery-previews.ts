@@ -369,6 +369,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "ab18e17562cdb41056215212f2637717b1a2fd84c187fc5566139ffa9d88c3cf",
   },
   {
+    id: "sf/labels",
+    filename: "sf-labels-light.png",
+    path: "/previews/sf-labels-light.png",
+    sha256: "de80a275be7b22349b7776bb03c41f2f4dc7eb19f4e666d92604329d86232b0f",
+  },
+  {
     id: "smooth/loess-scatter",
     filename: "smooth-loess-scatter-light.png",
     path: "/previews/smooth-loess-scatter-light.png",

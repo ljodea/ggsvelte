@@ -83,6 +83,7 @@ export function dispatchGeometryBatch(
     case "curve":
       return single(curveBatch(frame, fx, color, styles, warnings));
     case "text":
+    case "sf_text":
       return single(glyphsBatch(frame, fx, color, styles, warnings));
     case "smooth":
       return smoothBatches(frame, fx, color, fill, styles, warnings);

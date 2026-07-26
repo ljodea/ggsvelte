@@ -123,6 +123,7 @@ export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
 export const CurveLayerSchema = SpecModule.Import("CurveLayer");
 export const MapLayerSchema = SpecModule.Import("MapLayer");
 export const SfLayerSchema = SpecModule.Import("SfLayer");
+export const SfTextLayerSchema = SpecModule.Import("SfTextLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
@@ -218,6 +219,8 @@ export type CurveParams = SpecType<"CurveParams">;
 export type SfParams = SpecType<"SfParams">;
 /** Map layer params (fortified map DataRef + styling; #808). */
 export type MapParams = SpecType<"MapParams">;
+/** SF text layer params (geometry column + text styling; #809 phase 2). */
+export type SfTextParams = SpecType<"SfTextParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
@@ -304,6 +307,8 @@ export type CurveLayer = LayerWithDataRef<SpecType<"CurveLayer">>;
 /** A choropleth/map layer (#808). */
 export type MapLayer = LayerWithDataRef<SpecType<"MapLayer">>;
 export type SfLayer = LayerWithDataRef<SpecType<"SfLayer">>;
+/** An sf_text layer (labels at representative points; #809 phase 2). */
+export type SfTextLayer = LayerWithDataRef<SpecType<"SfTextLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -319,6 +324,7 @@ export type LayerSpec =
   | CurveLayer
   | MapLayer
   | SfLayer
+  | SfTextLayer
   | RuleLayer
   | TextLayer
   | SmoothLayer

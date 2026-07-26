@@ -572,6 +572,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomSfTextOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomSmoothOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1120,6 +1124,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeSfTextLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeSmoothLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1209,6 +1217,18 @@
           "lifecycle": "experimental"
         },
         "SfParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SfTextLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SfTextLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SfTextParams": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4126,6 +4146,10 @@
           "lifecycle": "experimental"
         },
         "GeomSf": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomSfText": {
           "kind": "value",
           "lifecycle": "experimental"
         },

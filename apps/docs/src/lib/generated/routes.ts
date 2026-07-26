@@ -367,6 +367,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "sf-text-labels-geom-sf-text",
+        title: "SF text labels (geom_sf_text)",
+        level: 3,
+      },
+      {
         id: "ellipse-confidence-rings",
         title: "Ellipse confidence rings",
         level: 2,
@@ -1868,6 +1873,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "sf-coordinates-dropped",
+        title: "sf-coordinates-dropped",
+        level: 3,
+      },
+      {
         id: "map-region-missing",
         title: "map-region-missing",
         level: 3,
@@ -2237,8 +2247,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-633",
-        title: "experimental (633)",
+        id: "experimental-638",
+        title: "experimental (638)",
         level: 3,
       },
       {
@@ -2277,8 +2287,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-472",
-        title: "experimental (472)",
+        id: "experimental-473",
+        title: "experimental (473)",
         level: 3,
       },
       {
@@ -3037,6 +3047,16 @@ export const DOCS_ROUTES = [
     title: "Simple features polygons — ggsvelte gallery",
     description: "Simple features polygons",
     canonicalPath: "/examples/sf/basic",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/sf/labels",
+    title: "SF region labels — ggsvelte gallery",
+    description: "SF region labels",
+    canonicalPath: "/examples/sf/labels",
     kind: "page",
     index: true,
     sitemap: true,
