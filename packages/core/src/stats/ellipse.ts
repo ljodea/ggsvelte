@@ -11,13 +11,11 @@
 
 import { mean } from "./numeric.js";
 
-export type EllipseType = "norm";
-
 export interface StatEllipseParams {
   /** Confidence level in (0, 1). Default 0.95. */
   level?: number;
   /** Ellipse construction type. Only "norm" in v1. */
-  type?: EllipseType;
+  type?: string;
   /** Perimeter samples before closing duplicate. Default 51. */
   segments?: number;
 }
@@ -53,7 +51,14 @@ export function sampleCov2(
   x: Float64Array,
   y: Float64Array,
   rows: readonly number[],
-): { sxx: number; syy: number; sxy: number; mx: number; my: number; n: number } | null {
+): {
+  sxx: number;
+  syy: number;
+  sxy: number;
+  mx: number;
+  my: number;
+  n: number;
+} | null {
   const xs: number[] = [];
   const ys: number[] = [];
   for (const row of rows) {

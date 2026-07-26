@@ -1,0 +1,54 @@
+{
+  "id": "78-ellipse-rings",
+  "kind": "chart",
+  "prompt": "Scatter x against y colored by group and overlay bivariate normal confidence ellipses at level 0.95.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "group", "type": "nominal" }
+    ],
+    "rowCount": 8
+  },
+  "data": {
+    "main": [
+      { "x": 1, "y": 1.1, "group": "A" },
+      { "x": 1.2, "y": 0.9, "group": "A" },
+      { "x": 0.8, "y": 1.2, "group": "A" },
+      { "x": 1.1, "y": 1.0, "group": "A" },
+      { "x": 4, "y": 3.9, "group": "B" },
+      { "x": 4.2, "y": 4.1, "group": "B" },
+      { "x": 3.8, "y": 4.0, "group": "B" },
+      { "x": 4.1, "y": 3.8, "group": "B" }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "color": { "field": "group" }
+        }
+      },
+      {
+        "geom": "path",
+        "stat": "ellipse",
+        "position": "identity",
+        "params": { "level": 0.95 },
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "color": { "field": "group" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "stat_ellipse path rings at 0.95 (#812)."
+}

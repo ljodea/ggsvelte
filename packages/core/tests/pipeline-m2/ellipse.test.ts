@@ -65,15 +65,19 @@ describe("stat ellipse (#812)", () => {
     );
     if (model.scales.x.type !== "band") {
       // Ellipse should extend past ±1 for unit-ish cloud at 95%
-      const span = (model.scales.x.domain[1] as number) - (model.scales.x.domain[0] as number);
-      expect(span).toBeGreaterThan(2);
+      const domain = model.scales.x.domain;
+      expect(domain[1] - domain[0]).toBeGreaterThan(2);
     }
   });
 
   it("rejects stat ellipse on point (path-only)", () => {
     expect(() =>
       gg({ x: [0, 1, 2], y: [0, 1, 2] }, aes({ x: "x", y: "y" }))
-        .layer({ geom: "point", stat: "ellipse" as "identity", aes: { x: "x", y: "y" } })
+        .layer({
+          geom: "point",
+          stat: "ellipse" as "identity",
+          aes: { x: "x", y: "y" },
+        })
         .spec(),
     ).toThrow();
   });

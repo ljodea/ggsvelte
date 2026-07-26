@@ -12,4 +12,6 @@ Per-group mean + sample covariance → χ²-scaled ellipse perimeter; segments
 samples + closing duplicate for a closed path ring. Params: level (0.95),
 type ("norm"), segments (51 before close).
 
-Intentional subset: path-only; type norm only (not t/euclid). Migration: none.
+Intentional subset: path-only; type norm only (not t/euclid).
+
+Migration: none — additive
