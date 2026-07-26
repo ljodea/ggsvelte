@@ -62,6 +62,14 @@ describe("expandSfLeaves (#809 GeometryCollection)", () => {
     ]);
   });
 
+  it("rejects GeometryCollection nesting beyond the depth cap", () => {
+    let nest: Record<string, unknown> = { type: "Point", coordinates: [0, 0] };
+    for (let i = 0; i < 40; i++) {
+      nest = { type: "GeometryCollection", geometries: [nest] };
+    }
+    expect(() => expandSfLeaves(nest as never, "/test")).toThrow(/nesting exceeds/);
+  });
+
   it("rejects GeometryCollection without geometries array", () => {
     expect(() => expandSfLeaves({ type: "GeometryCollection" }, "/test")).toThrow(PipelineError);
   });

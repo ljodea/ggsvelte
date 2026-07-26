@@ -92,13 +92,24 @@ export function sfKindOf(type: string, path = "/geometry"): SfKind {
   }
 }
 
+/** Max GeometryCollection nesting depth (prevents unbounded recursion). */
+const MAX_GEOMETRY_COLLECTION_DEPTH = 32;
+
 /**
  * Flatten GeometryCollection (recursively) to leaf Point/Line/Polygon families.
  * Empty collections yield []. Mixed families are not filtered here — callers
- * enforce layer homogeneity via {@link sfKindOf}.
+ * enforce layer homogeneity via {@link sfKindOf}. Nesting is capped at
+ * {@link MAX_GEOMETRY_COLLECTION_DEPTH}.
  */
-export function expandSfLeaves(geom: SfParsed, path: string): SfLeaf[] {
+export function expandSfLeaves(geom: SfParsed, path: string, depth = 0): SfLeaf[] {
   if (geom.type === "GeometryCollection") {
+    if (depth >= MAX_GEOMETRY_COLLECTION_DEPTH) {
+      throw new PipelineError(
+        "sf-geometry-invalid",
+        path,
+        `GeometryCollection nesting exceeds ${MAX_GEOMETRY_COLLECTION_DEPTH} levels.`,
+      );
+    }
     if (!Array.isArray(geom.geometries)) {
       throw new PipelineError(
         "sf-geometry-invalid",
@@ -130,6 +141,7 @@ export function expandSfLeaves(geom: SfParsed, path: string): SfLeaf[] {
             ...(c.geometries !== undefined && { geometries: c.geometries }),
           },
           path,
+          depth + 1,
         ),
       );
     }

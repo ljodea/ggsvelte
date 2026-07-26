@@ -376,8 +376,9 @@ weights. Mapping aes.y fails loud (\`computed-y-mapped\`).
 \`params.geometry\`). Point/MultiPoint → points; LineString/MultiLineString →
 open paths; Polygon/MultiPolygon → closed fills. Multipart geometries expand
 to multiple marks. **Interior rings** are even-odd **holes** (SVG
-\`fill-rule="evenodd"\`, canvas, and hit-testing). GeometryCollection and mixed
-families in one layer error (split layers).
+\`fill-rule="evenodd"\`, canvas, and hit-testing). \`GeometryCollection\` is
+flattened to leaf Point/Line/Polygon families (recursive, nesting depth
+capped). Mixed families in one layer still error (split layers).
 
 No CRS / \`coord_sf\` yet — coordinates are treated as already projected.
 
