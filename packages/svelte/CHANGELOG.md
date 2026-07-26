@@ -1,5 +1,34 @@
 # @ggsvelte/svelte
 
+## 0.11.1
+
+### Patch Changes
+
+- c198432: <!-- markdownlint-disable MD041 -->
+
+  refactor(#659): compose the repo's own charts as child layers (slice 8)
+
+  The docs site, the getting-started tutorial, the package README, the bundled
+  agent skill, and the clean-consumer compatibility harness no longer pass the
+  grammar props deprecated in 0.11.0 — they use `<Scale>`, `<Labs>`, `<Guides>`,
+  `<Coord>`, `<Facet>`, and the theme shells instead. A new guard runs
+  `ggsvelte-codemod`'s own transform over those sources and fails if any of them
+  would still change.
+
+- c198432: <!-- markdownlint-disable MD041 -->
+
+  docs(#659): teach the child-layer API in the guide (slice 9)
+
+  Every Svelte snippet outside the upgrading page now composes scales, guides,
+  coordinates, facets, labels, and themes as children rather than as the props
+  deprecated in 0.11.0, and the copy-ready snippets on the themes page follow.
+  The upgrading guide keeps the old form on purpose — it is the page that
+  migrates away from it — and a guard asserts that exemption stays earned.
+
+- Updated dependencies [92564eb]
+  - @ggsvelte/core@0.11.1
+  - @ggsvelte/spec@0.11.1
+
 ## 0.11.0
 
 ### Minor Changes
