@@ -220,6 +220,19 @@ Fitted trend over points:
 on source points. Histogram, density, boxplot, and errorbar use the same
 derive-then-render path.
 
+Frequency polygon (ggplot2 \`geom_freqpoly\`) bins continuous \`x\` and draws a
+line through bin centers (y defaults to count). Canonical form is \`line\` +
+\`stat: "bin"\` + position identity — not a separate mark type:
+
+\`\`\`svelte fragment
+<GeomFreqpoly bins={30} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "v", color: "g" })).geomFreqpoly({ bins: 30 }).spec();
+// → { geom: "line", stat: "bin", position: "identity", y: { stat: "count" } }
+\`\`\`
+
 ## Unique (first-wins aesthetic dedupe)
 
 \`stat: "unique"\` drops duplicate rows on the combination of mapped aesthetic

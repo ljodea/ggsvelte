@@ -4,8 +4,24 @@
 import { describe, expect, it } from "bun:test";
 
 import { aes, gg } from "../src/builder.ts";
+import { KNOWN_GEOMS } from "../src/schema-catalog.ts";
 import { normalize } from "../src/normalize.ts";
 import type { SpecInput } from "../src/normalize.ts";
+import { GEOM_BRANCHES } from "../src/validate-schema-shape.ts";
+import { validate } from "../src/validate.ts";
+
+describe("GEOM_BRANCHES registry (#796)", () => {
+  it("keys match KNOWN_GEOMS exactly (no stray schema-name entries)", () => {
+    expect(Object.keys(GEOM_BRANCHES).toSorted()).toEqual([...KNOWN_GEOMS].toSorted());
+  });
+
+  it("rejects nonsense geom that is not a registered shorthand", () => {
+    const result = validate({ layers: [{ geom: "FreqpolyLayerSchema" }] });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.errors.some((e) => e.code === "unknown-geom")).toBe(true);
+  });
+});
 
 describe("normalize — geom freqpoly (#796)", () => {
   it("canonicalizes freqpoly → line + bin + identity (+ y count)", () => {

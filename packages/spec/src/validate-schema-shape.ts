@@ -42,7 +42,6 @@ export const GEOM_BRANCHES = {
   bar: BarLayerSchema,
   histogram: HistogramLayerSchema,
   freqpoly: FreqpolyLayerSchema,
-  FreqpolyLayerSchema,
   area: AreaLayerSchema,
   ribbon: RibbonLayerSchema,
   segment: SegmentLayerSchema,
