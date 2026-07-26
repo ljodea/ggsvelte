@@ -8,8 +8,7 @@ import { emptyFrameExtras } from "./frame-helpers.js";
 import {
   geometryFieldName,
   parseSfGeometry,
-  representativePoints,
-  sfKindOf,
+  representativePointsForGeometry,
 } from "./sf-geometry.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { PipelineError } from "./types.js";
@@ -50,12 +49,12 @@ export function buildSfCoordinatesFrame(
   let dropped = 0;
 
   for (let row = 0; row < table.rowCount; row++) {
-    const parsed = parseSfGeometry(geomCol[row]!, `/layers/${index}/data/${field}`);
-    // Validate type is in the supported family (throws on GeometryCollection).
-    sfKindOf(parsed.type);
-    const pts = representativePoints(parsed.type, parsed.coordinates);
+    const path = `/layers/${index}/data/${field}`;
+    const parsed = parseSfGeometry(geomCol[row]!, path);
+    // GeometryCollection + Multi* expand to one point per part (#809 phase 5–6).
+    const pts = representativePointsForGeometry(parsed, path);
     if (pts.length === 0) {
-      // One drop per input feature with no usable part (not per empty part).
+      // One drop per input feature with no usable part (empty GC / degenerate).
       dropped++;
       continue;
     }

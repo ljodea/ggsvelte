@@ -316,7 +316,7 @@ export const PIPELINE_ERROR_CATALOG = {
   },
   "sf-geometry-unsupported": {
     summary: "geom_sf received a GeoJSON type outside the v1 point/line/polygon families.",
-    fix: "Use Point, MultiPoint, LineString, MultiLineString, Polygon, or MultiPolygon (no GeometryCollection/CRS).",
+    fix: "Use Point/MultiPoint, LineString/MultiLineString, Polygon/MultiPolygon, or GeometryCollection of those families (no CRS).",
   },
   "sf-geometry-mixed": {
     summary: "One geom_sf layer mixes geometry families (point vs line vs polygon).",

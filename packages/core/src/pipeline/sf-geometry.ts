@@ -9,6 +9,19 @@ import { PipelineError } from "./types.js";
 export type SfKind = "point" | "line" | "polygon";
 export type SfPosition = readonly [number, number];
 
+/** Parsed GeoJSON Geometry object (coordinates and/or nested geometries). */
+export type SfParsed = {
+  type: string;
+  coordinates?: unknown;
+  geometries?: unknown;
+};
+
+/** Leaf geometry after GeometryCollection flattening (#809 phase 6). */
+export type SfLeaf = {
+  type: string;
+  coordinates: unknown;
+};
+
 export function isFinitePair(c: unknown): c is SfPosition {
   return (
     Array.isArray(c) &&
@@ -20,10 +33,7 @@ export function isFinitePair(c: unknown): c is SfPosition {
   );
 }
 
-export function parseSfGeometry(
-  raw: CellValue,
-  path: string,
-): { type: string; coordinates: unknown } {
+export function parseSfGeometry(raw: CellValue, path: string): SfParsed {
   if (typeof raw !== "string" || raw.length === 0) {
     throw new PipelineError(
       "sf-geometry-invalid",
@@ -44,6 +54,7 @@ export function parseSfGeometry(
   if (
     parsed === null ||
     typeof parsed !== "object" ||
+    Array.isArray(parsed) ||
     !("type" in parsed) ||
     typeof (parsed as { type: unknown }).type !== "string"
   ) {
@@ -53,8 +64,12 @@ export function parseSfGeometry(
       'geom_sf geometry must be a GeoJSON Geometry object with a string "type".',
     );
   }
-  const geom = parsed as { type: string; coordinates?: unknown };
-  return { type: geom.type, coordinates: geom.coordinates };
+  const geom = parsed as { type: string; coordinates?: unknown; geometries?: unknown };
+  return {
+    type: geom.type,
+    ...(geom.coordinates !== undefined && { coordinates: geom.coordinates }),
+    ...(geom.geometries !== undefined && { geometries: geom.geometries }),
+  };
 }
 
 export function sfKindOf(type: string): SfKind {
@@ -72,9 +87,70 @@ export function sfKindOf(type: string): SfKind {
       throw new PipelineError(
         "sf-geometry-unsupported",
         "/geometry",
-        `geom_sf does not support GeoJSON type "${type}" in v1 (point/line/polygon families only; no GeometryCollection or CRS).`,
+        `geom_sf does not support GeoJSON type "${type}" in v1 (point/line/polygon families only; no CRS).`,
       );
   }
+}
+
+/**
+ * Flatten GeometryCollection (recursively) to leaf Point/Line/Polygon families.
+ * Empty collections yield []. Mixed families are not filtered here — callers
+ * enforce layer homogeneity via {@link sfKindOf}.
+ */
+export function expandSfLeaves(geom: SfParsed, path: string): SfLeaf[] {
+  if (geom.type === "GeometryCollection") {
+    if (!Array.isArray(geom.geometries)) {
+      throw new PipelineError(
+        "sf-geometry-invalid",
+        path,
+        "GeometryCollection requires a geometries array.",
+      );
+    }
+    const out: SfLeaf[] = [];
+    for (const child of geom.geometries) {
+      if (
+        child === null ||
+        typeof child !== "object" ||
+        Array.isArray(child) ||
+        !("type" in child) ||
+        typeof (child as { type: unknown }).type !== "string"
+      ) {
+        throw new PipelineError(
+          "sf-geometry-invalid",
+          path,
+          "GeometryCollection members must be GeoJSON Geometry objects with a string type.",
+        );
+      }
+      const c = child as { type: string; coordinates?: unknown; geometries?: unknown };
+      out.push(
+        ...expandSfLeaves(
+          {
+            type: c.type,
+            ...(c.coordinates !== undefined && { coordinates: c.coordinates }),
+            ...(c.geometries !== undefined && { geometries: c.geometries }),
+          },
+          path,
+        ),
+      );
+    }
+    return out;
+  }
+  // Validate leaf family (throws on Feature, CRS objects, etc.).
+  sfKindOf(geom.type);
+  return [{ type: geom.type, coordinates: geom.coordinates }];
+}
+
+/** All label points for a geometry (GeometryCollection + Multi* expand). */
+export function representativePointsForGeometry(
+  geom: SfParsed,
+  path: string,
+): readonly SfPosition[] {
+  const leaves = expandSfLeaves(geom, path);
+  const out: SfPosition[] = [];
+  for (const leaf of leaves) {
+    out.push(...representativePoints(leaf.type, leaf.coordinates));
+  }
+  return out;
 }
 
 function ringPositions(ring: unknown): SfPosition[] {

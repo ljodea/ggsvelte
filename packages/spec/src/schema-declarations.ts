@@ -1742,7 +1742,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Parameters for geom_sf (#809): portable GeoJSON Geometry column plus styling. Interior rings are even-odd holes. No CRS/coord_sf yet.",
+        "Parameters for geom_sf (#809): portable GeoJSON Geometry column plus styling. Interior rings are even-odd holes; GeometryCollection expands. No CRS/coord_sf yet.",
     },
   ),
 
@@ -2561,7 +2561,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("sf", {
         description:
-          "Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families with even-odd holes; no CRS or coord_sf yet.",
+          "Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; no CRS or coord_sf yet.",
       }),
       stat: Type.Optional(
         Type.Literal("identity", { description: "SF layers expand geometry then draw as-is." }),
