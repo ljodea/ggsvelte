@@ -3462,12 +3462,12 @@
         "geom": {
           "type": "string",
           "const": "sf_text",
-          "description": "Simple-features text labels (ggplot2 geom_sf_text; #809 phase 2): places aes.label at a representative point from each GeoJSON Geometry (stat_sf_coordinates)."
+          "description": "Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates)."
         },
         "stat": {
           "type": "string",
           "const": "sf_coordinates",
-          "description": "Extract one (x,y) representative point per feature from geometry."
+          "description": "Extract (x,y) representative points from geometry (Multi* → one point per part)."
         },
         "position": {
           "type": "string",
@@ -3563,12 +3563,12 @@
         "geom": {
           "type": "string",
           "const": "sf_label",
-          "description": "Simple-features labels with background boxes (ggplot2 geom_sf_label; #809 phase 3): places aes.label at a representative geometry point with a measured rounded rect. color=ink+box stroke; fill=box background."
+          "description": "Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background."
         },
         "stat": {
           "type": "string",
           "const": "sf_coordinates",
-          "description": "Extract one (x,y) representative point per feature from geometry."
+          "description": "Extract (x,y) representative points from geometry (Multi* → one point per part)."
         },
         "position": {
           "type": "string",
