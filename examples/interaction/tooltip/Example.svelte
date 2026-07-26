@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import { GeomPoint, GGPlot, Labs, ThemeLight } from "@ggsvelte/svelte";
 
   import { penguins } from "./data.js";
 
@@ -11,7 +11,6 @@
 <GGPlot
   data={penguins}
   aes={{ x: "flipper", y: "mass", color: "species" }}
-  theme="light"
   key="id"
   inspect={{ mode: "x", pin: true, maxDistance: 24 }}
   oninspect={(event) => {
@@ -20,17 +19,17 @@
         ? `Inspection cleared by ${event.source}.`
         : `${event.state === "pinned" ? "Pinned" : "Inspecting"} ${String(event.focus.row?.species ?? "datum")} · ${String(event.members.length)} member${event.members.length === 1 ? "" : "s"} · ${event.source}`;
   }}
-  labs={{
-    title: "Inspect a shared x value, then pin",
-    subtitle:
-      "333 Palmer Archipelago penguins; flipper length is measured to the millimetre, so many birds share one",
-    x: "Flipper length (mm)",
-    y: "Body mass (g)",
-    color: "Species",
-  }}
   width="container"
   height={400}
 >
+  <ThemeLight />
+  <Labs
+    title="Inspect a shared x value, then pin"
+    subtitle="333 Palmer Archipelago penguins; flipper length is measured to the millimetre, so many birds share one"
+    x="Flipper length (mm)"
+    y="Body mass (g)"
+    color="Species"
+  />
   <GeomPoint size={4} alpha={0.85} />
 </GGPlot>
 

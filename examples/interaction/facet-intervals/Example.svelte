@@ -1,6 +1,12 @@
 <script lang="ts">
   import type { FacetIntervalPreset } from "@ggsvelte/svelte";
-  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import {
+    FacetWrap,
+    GeomPoint,
+    GGPlot,
+    Labs,
+    ThemeClean,
+  } from "@ggsvelte/svelte";
 
   import { observations } from "./data.js";
 
@@ -40,18 +46,10 @@
   <GGPlot
     data={observations}
     aes={{ x: "bill", y: "mass" }}
-    theme="clean"
-    facet={{ wrap: "island", ncol: 3 }}
     key="id"
     select={{ type: "interval", mode: "xy", persistent: true, preset }}
     width="container"
     height={430}
-    labs={{
-      title: "Palmer penguins by island",
-      subtitle: `${preset} interval semantics`,
-      x: "Bill length (mm)",
-      y: "Body mass (g)",
-    }}
     onselect={(event) => {
       if (event.mode === "point") return;
       status =
@@ -60,6 +58,14 @@
           : `${event.phase}: ${String(event.keys.length)} rows selected from ${event.panelId}.`;
     }}
   >
+    <ThemeClean />
+    <FacetWrap field="island" ncol={3} />
+    <Labs
+      title="Palmer penguins by island"
+      subtitle={`${preset} interval semantics`}
+      x="Bill length (mm)"
+      y="Body mass (g)"
+    />
     <GeomPoint size={3.8} />
   </GGPlot>
 </div>
