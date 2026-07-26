@@ -200,6 +200,69 @@ describe("createInspectionState scene-reconcile effect", () => {
 
     destroy();
   });
+
+  it("scene invalidate drops stashed pending so unpin does not restore a pre-swap stash", () => {
+    const modelA = modelFor(continuousSpec());
+    Object.defineProperty(modelA, "runId", { value: 1, configurable: true });
+    const modelBox = reactiveBox<RenderModel | null>(modelA);
+    const { state, flushFrame, destroy } = mountInspectionController({
+      model: () => modelBox.value,
+      deferredFrames: true,
+    });
+
+    const first = candidateHit(modelA);
+    applyInspect(state, first.candidate);
+    flushSync();
+    state.toggleInspectionPin("pointer");
+    flushSync();
+    expect(state.inspection?.state).toBe("pinned");
+
+    let second: CandidateFacts | null = null;
+    for (let id = 0; id < modelA.candidates.size; id++) {
+      const candidate = modelA.candidates.candidate(id);
+      if (candidate !== null && candidate.id !== first.candidate.id) {
+        second = candidate;
+        break;
+      }
+    }
+    if (second === null) throw new Error("expected a second candidate");
+
+    // While pinned, a flushed inspect stashes rather than applying.
+    state.schedulePointerInspect({
+      point: { x: second.x, y: second.y },
+      source: "pointer",
+      mode: "xy",
+      maxDistance: 1e6,
+    });
+    flushFrame();
+    flushSync();
+    expect(state.inspection?.state).toBe("pinned");
+
+    // Responsive relayout (same data, advanced runId) reconciles the pin and
+    // must clear the queue stash so a later unpin flips the original seed.
+    const relayout = Object.create(
+      Object.getPrototypeOf(modelA) as object,
+      Object.getOwnPropertyDescriptors(modelA),
+    ) as RenderModel;
+    Object.defineProperty(relayout, "runId", { value: 2, configurable: true });
+    modelBox.set(relayout);
+    flushSync();
+    expect(state.inspection?.state).toBe("pinned");
+
+    state.toggleInspectionPin("pointer");
+    flushSync();
+    expect(state.inspection?.state).toBe("transient");
+    expect(state.inspection?.focus.anchor).toEqual({
+      x: first.candidate.x,
+      y: first.candidate.y,
+    });
+    expect(state.inspection?.focus.anchor).not.toEqual({
+      x: second.x,
+      y: second.y,
+    });
+
+    destroy();
+  });
 });
 
 describe("createInspectionState callback replacement", () => {

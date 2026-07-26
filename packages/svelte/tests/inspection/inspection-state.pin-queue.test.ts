@@ -375,6 +375,52 @@ describe("createInspectionState schedulePointerInspect / onInspectPointerFrame",
 
     destroy();
   });
+
+  it("clear-disabled discards inspect queue with inspect-only cancel (move-area survives)", () => {
+    let frame: (() => void) | null = null;
+    const frames: string[] = [];
+    let controller: ReturnType<typeof createInspectionState> | null = null;
+    const model = modelFor(continuousSpec());
+    const enabledBox = reactiveBox(true);
+    const reducer = createInteractionReducer({
+      scheduleFrame: (callback) => {
+        frame = callback;
+        return 1;
+      },
+      cancelFrame: () => {
+        frame = null;
+      },
+      onPointerFrame: (action) => {
+        frames.push(action.type);
+        if (action.type === "inspect") return controller!.onInspectPointerFrame(action);
+        return true;
+      },
+    });
+    const { state, destroy } = mountInspectionController({
+      model: () => model,
+      reducer: () => reducer,
+      inspectEnabled: () => enabledBox.value,
+    });
+    controller = state;
+
+    const { candidate, hit } = candidateHit(model);
+    state.setInspection(hit, "pointer", "transient", "xy", candidate);
+    flushSync();
+    expect(state.inspection?.state).toBe("transient");
+
+    // Queue move-area, then disable inspect (clear-disabled path).
+    reducer.queuePointer({ type: "move-area", point: { x: 3, y: 4 } });
+    expect(frame).not.toBeNull();
+    enabledBox.set(false);
+    flushSync();
+    expect(state.inspection).toBeNull();
+    // Inspect-only cancel must not kill the move-area schedule.
+    expect(frame).not.toBeNull();
+    frame?.();
+    expect(frames).toEqual(["move-area"]);
+
+    destroy();
+  });
 });
 describe("createInspectionState setInspection(null) clear ordering", () => {
   it("emits clear while inspection is still non-null, then clears state", () => {
