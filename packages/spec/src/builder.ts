@@ -43,6 +43,7 @@ export type {
   GeomLineOptions,
   GeomPathOptions,
   GeomPointOptions,
+  GeomQuantileOptions,
   GeomRasterOptions,
   GeomRectOptions,
   GeomRuleOptions,

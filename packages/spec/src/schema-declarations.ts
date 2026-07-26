@@ -915,6 +915,61 @@ export const SpecDeclarations = {
     },
   ),
 
+  QuantileParams: Type.Object(
+    {
+      quantiles: Type.Optional(
+        Type.Array(
+          Type.Number({
+            exclusiveMinimum: 0,
+            exclusiveMaximum: 1,
+            description: "One conditional quantile τ strictly between 0 and 1.",
+          }),
+          {
+            minItems: 1,
+            description:
+              "Conditional quantiles of y to fit and draw. Each entry must be in (0, 1). Default [0.25, 0.5, 0.75].",
+          },
+        ),
+      ),
+      n: Type.Optional(
+        Type.Integer({
+          minimum: 2,
+          maximum: 5000,
+          description:
+            "Number of evaluation points along x (integer 2–5000). Default 80. Linear fits need only endpoints; denser grids help nonlinear coords.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width of quantile lines in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Line opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description: "Within-mark gradient stroke paint for quantile lines (not a data scale).",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for the quantile geom (linear y~x quantile regression lines; #805). method rqss is intentionally omitted in v1.",
+    },
+  ),
+
   BoxplotParams: Type.Object(
     {
       width: Type.Optional(
@@ -1802,6 +1857,38 @@ export const SpecDeclarations = {
     },
   ),
 
+  QuantileLayer: Type.Object(
+    {
+      geom: Type.Literal("quantile", {
+        description:
+          "Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("quantile", {
+          description:
+            "Quantile layers fit linear RQ per group × τ and evaluate on a grid of params.n points.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Quantile layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("QuantileParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A quantile-regression layer. Requires quantitative x and y. Default quantiles [0.25, 0.5, 0.75]. v1 is linear y~x only (no rqss).",
+    },
+  ),
+
   BoxplotLayer: Type.Object(
     {
       geom: Type.Literal("boxplot", {
@@ -2168,6 +2255,7 @@ export const SpecDeclarations = {
       Type.Ref("RuleLayer"),
       Type.Ref("TextLayer"),
       Type.Ref("SmoothLayer"),
+      Type.Ref("QuantileLayer"),
       Type.Ref("BoxplotLayer"),
       Type.Ref("DensityLayer"),
       Type.Ref("ErrorbarLayer"),

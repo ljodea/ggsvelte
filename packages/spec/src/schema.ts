@@ -116,6 +116,7 @@ export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
+export const QuantileLayerSchema = SpecModule.Import("QuantileLayer");
 export const BoxplotLayerSchema = SpecModule.Import("BoxplotLayer");
 export const DensityLayerSchema = SpecModule.Import("DensityLayer");
 export const ErrorbarLayerSchema = SpecModule.Import("ErrorbarLayer");
@@ -201,6 +202,8 @@ export type SegmentParams = SpecType<"SegmentParams">;
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
 export type SmoothParams = SpecType<"SmoothParams">;
+/** Quantile layer params (quantiles/n + styling). */
+export type QuantileParams = SpecType<"QuantileParams">;
 /** Boxplot layer params. */
 export type BoxplotParams = SpecType<"BoxplotParams">;
 /** Density layer params (bw/adjust/n/cut + styling). */
@@ -244,6 +247,8 @@ export type RuleLayer = LayerWithDataRef<SpecType<"RuleLayer">>;
 export type TextLayer = LayerWithDataRef<SpecType<"TextLayer">>;
 /** A smooth (fitted trend) layer. */
 export type SmoothLayer = LayerWithDataRef<SpecType<"SmoothLayer">>;
+/** A quantile regression layer. */
+export type QuantileLayer = LayerWithDataRef<SpecType<"QuantileLayer">>;
 /** A boxplot layer. */
 export type BoxplotLayer = LayerWithDataRef<SpecType<"BoxplotLayer">>;
 /** A density (KDE) layer. */
@@ -275,6 +280,7 @@ export type LayerSpec =
   | RuleLayer
   | TextLayer
   | SmoothLayer
+  | QuantileLayer
   | BoxplotLayer
   | DensityLayer
   | ErrorbarLayer

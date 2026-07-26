@@ -31,6 +31,7 @@ import type {
   RuleParams,
   SegmentParams,
   Scales,
+  QuantileParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -182,6 +183,13 @@ export interface SmoothLayerInput extends LayerInputBase {
   params?: SmoothParams;
 }
 
+export interface QuantileLayerInput extends LayerInputBase {
+  geom: "quantile";
+  stat?: "quantile";
+  position?: "identity";
+  params?: QuantileParams;
+}
+
 export interface BoxplotLayerInput extends LayerInputBase {
   geom: "boxplot";
   stat?: "boxplot";
@@ -252,6 +260,7 @@ export type LayerInput =
   | RuleLayerInput
   | TextLayerInput
   | SmoothLayerInput
+  | QuantileLayerInput
   | BoxplotLayerInput
   | DensityLayerInput
   | ErrorbarLayerInput

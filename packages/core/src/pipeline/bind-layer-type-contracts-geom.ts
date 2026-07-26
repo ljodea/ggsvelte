@@ -31,7 +31,7 @@ export function validateGeomChannelTypeContracts(input: {
       `The density stat needs a continuous x, but field "${xField}" is nominal. Use geom "bar" (the count stat) to count categories instead.`,
     );
   }
-  if (geom === "smooth") {
+  if (geom === "smooth" || geom === "quantile") {
     for (const [channel, field] of [
       ["x", xField],
       ["y", yField],
@@ -41,7 +41,7 @@ export function validateGeomChannelTypeContracts(input: {
         throw new PipelineError(
           "channel-type-mismatch",
           `/layers/${index}/aes/${channel}`,
-          `The smooth stat needs quantitative x and y, but field "${field}" (${channel}) is nominal.`,
+          `The ${geom} stat needs quantitative x and y, but field "${field}" (${channel}) is nominal.`,
         );
       }
     }

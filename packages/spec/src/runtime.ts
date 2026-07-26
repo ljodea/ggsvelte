@@ -35,6 +35,7 @@ import type {
   RibbonLayer,
   SegmentLayer,
   RuleLayer,
+  QuantileLayer,
   SmoothLayer,
   TextLayer,
   TileLayer,
@@ -71,6 +72,7 @@ export interface RuntimeSegmentLayer extends WithRuntimeAes<SegmentLayer> {}
 export interface RuntimeRuleLayer extends WithRuntimeAes<RuleLayer> {}
 export interface RuntimeTextLayer extends WithRuntimeAes<TextLayer> {}
 export interface RuntimeSmoothLayer extends WithRuntimeAes<SmoothLayer> {}
+export interface RuntimeQuantileLayer extends WithRuntimeAes<QuantileLayer> {}
 export interface RuntimeBoxplotLayer extends WithRuntimeAes<BoxplotLayer> {}
 export interface RuntimeDensityLayer extends WithRuntimeAes<DensityLayer> {}
 export interface RuntimeErrorbarLayer extends WithRuntimeAes<ErrorbarLayer> {}
@@ -92,6 +94,7 @@ export type RuntimeLayerSpec =
   | RuntimeRuleLayer
   | RuntimeTextLayer
   | RuntimeSmoothLayer
+  | RuntimeQuantileLayer
   | RuntimeBoxplotLayer
   | RuntimeDensityLayer
   | RuntimeErrorbarLayer

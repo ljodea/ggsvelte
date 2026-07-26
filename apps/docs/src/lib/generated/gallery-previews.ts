@@ -237,6 +237,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "d4dff22d6dc70f24c0d452ee4f488909f72dc2fedff68fb59e48f02d14acc15a",
   },
   {
+    id: "point/quantile-lines",
+    filename: "point-quantile-lines-light.png",
+    path: "/previews/point-quantile-lines-light.png",
+    sha256: "3e231b64b2cccd11a5a2c4c7748e1461074f0e01f1173bcd968d8d21a6f5e305",
+  },
+  {
     id: "point/scatter-color",
     filename: "point-scatter-color-light.png",
     path: "/previews/point-scatter-color-light.png",

@@ -22,6 +22,7 @@ import type {
   RenderBackend,
   RuleParams,
   SegmentParams,
+  QuantileParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -97,6 +98,12 @@ export interface GeomHistogramOptions extends BarParams, GeomDataOption {
 
 /** Smooth-layer sugar options: params plus an optional layer-level aes. */
 export interface GeomSmoothOptions extends SmoothParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Quantile-layer sugar options: linear RQ lines (#805). */
+export interface GeomQuantileOptions extends QuantileParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }
