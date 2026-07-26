@@ -6,7 +6,8 @@
  *  - checkPositionScaleDataCompatibility — post-layer scale/type vs field evidence
  *
  * Shared temporal memoization: validate-data-checks-temporal.ts.
- * Color: validate-data-checks-color.ts. Orchestrator: validate-data-checks.ts.
+ * Color: validate-data-checks-color.ts. Style: validate-data-checks-style.ts.
+ * Orchestrator: validate-data-checks.ts.
  */
 import type { SpecError } from "./errors.js";
 import type { PositionScaleSpec } from "./schema.js";

@@ -1,7 +1,8 @@
 /**
  * Color/fill data-aware scale checks (manual domain/range, sequential, temporal).
  * Shared temporal memoization: validate-data-checks-temporal.ts.
- * Position: validate-data-checks-position.ts. Orchestrator: validate-data-checks.ts.
+ * Position: validate-data-checks-position.ts. Style: validate-data-checks-style.ts.
+ * Orchestrator: validate-data-checks.ts.
  */
 import type { SpecError } from "./errors.js";
 import { configuredColorScaleType } from "./scale-helpers.js";
