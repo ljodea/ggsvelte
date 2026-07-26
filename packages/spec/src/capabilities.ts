@@ -285,6 +285,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "segment",
     "curve",
     "density_2d",
+    "density_2d_filled",
   ],
   alpha: [
     "point",
@@ -303,6 +304,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "boxplot",
     "density",
     "density_2d",
+    "density_2d_filled",
     "errorbar",
     "rect",
     "tile",
@@ -328,6 +330,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "segment",
     "curve",
     "density_2d",
+    "density_2d_filled",
   ],
 } as const;
 

@@ -352,6 +352,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "2d-density-filled-bands",
+        title: "2D density filled bands",
+        level: 2,
+      },
+      {
         id: "frequency-polygon",
         title: "Frequency polygon",
         level: 2,
@@ -1798,6 +1803,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "density-2d-filled-open-dropped",
+        title: "density-2d-filled-open-dropped",
+        level: 3,
+      },
+      {
         id: "smooth-group-dropped",
         title: "smooth-group-dropped",
         level: 3,
@@ -2157,8 +2167,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-613",
-        title: "experimental (613)",
+        id: "experimental-617",
+        title: "experimental (617)",
         level: 3,
       },
       {
@@ -2197,8 +2207,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-468",
-        title: "experimental (468)",
+        id: "experimental-469",
+        title: "experimental (469)",
         level: 3,
       },
       {
@@ -2557,6 +2567,16 @@ export const DOCS_ROUTES = [
     title: "2D density isolines — ggsvelte gallery",
     description: "2D density isolines",
     canonicalPath: "/examples/density/kde-2d",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/density/kde-2d-filled",
+    title: "2D density filled bands — ggsvelte gallery",
+    description: "2D density filled bands",
+    canonicalPath: "/examples/density/kde-2d-filled",
     kind: "page",
     index: true,
     sitemap: true,

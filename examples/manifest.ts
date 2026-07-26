@@ -213,6 +213,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "density/kde-2d-filled",
+    category: "density",
+    name: "kde-2d-filled",
+    title: "2D density filled bands",
+    description: "",
+    tags: ["density", "density_2d_filled", "kde", "fill", "stat", "contour"],
+    docsSection: "Statistical summaries",
+    hasData: true,
+  },
+  {
     id: "density/overlay",
     category: "density",
     name: "overlay",

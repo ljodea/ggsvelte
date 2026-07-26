@@ -49,7 +49,8 @@ export function assertRequiredChannels(input: {
     geom === "boxplot" ||
     geom === "tile" ||
     geom === "raster" ||
-    geom === "density_2d"
+    geom === "density_2d" ||
+    geom === "density_2d_filled"
   ) {
     requireField(xField, "x", index, geom);
     if (yStatColumn === null) requireField(yField, "y", index, geom);

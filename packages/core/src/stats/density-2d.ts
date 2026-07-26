@@ -8,7 +8,9 @@
  * Grid: n×n over data range expanded by 5% each side (approx ggplot expand).
  * Contour levels: contourLevels(breaks | bins | binwidth) of the density surface.
  *
- * Deferred: density_2d_filled, contour_var other than density, weights.
+ * Filled v1 (#802 phase 2): closed isoline rings only (open rings dropped).
+ * True isobands between consecutive levels deferred.
+ * Deferred: contour_var other than density, weights.
  */
 import type { CellValue } from "../table.js";
 
@@ -24,6 +26,11 @@ interface Density2dParamsInput {
   bins?: number | undefined;
   breaks?: readonly number[] | undefined;
   binwidth?: number | undefined;
+  /**
+   * When true, keep only closed isoline rings for filled bands (density_2d_filled).
+   * Open (boundary-touching) rings are dropped.
+   */
+  filled?: boolean | undefined;
 }
 
 export interface Density2dStatInput {
@@ -44,6 +51,16 @@ export interface Density2dStatResult {
   carried: Record<string, CellValue[]>;
   dropped: number;
   droppedGroups: number;
+  /** Open rings dropped when params.filled (for warnings). */
+  openRingsDropped: number;
+}
+
+/** Whether a stitched polyline closes on itself (filled-ring eligibility). */
+export function isClosedRing(line: readonly { x: number; y: number }[], eps = 1e-9): boolean {
+  if (line.length < 3) return false;
+  const a = line.at(0)!;
+  const b = line.at(-1)!;
+  return Math.abs(a.x - b.x) <= eps && Math.abs(a.y - b.y) <= eps;
 }
 
 /**
@@ -155,6 +172,8 @@ export function statDensity2d(input: Density2dStatInput): Density2dStatResult {
   const outPiece: number[] = [];
   const sampleRows: number[] = [];
   let droppedGroups = 0;
+  let openRingsDropped = 0;
+  const filled = params.filled === true;
 
   for (const g of groupOrder) {
     const rows = groupRows.get(g)!;
@@ -267,6 +286,10 @@ export function statDensity2d(input: Density2dStatInput): Density2dStatResult {
       }
       const lines = stitchSegments(segs);
       for (const line of lines) {
+        if (filled && !isClosedRing(line)) {
+          openRingsDropped++;
+          continue;
+        }
         const piece = pieceCounter++;
         // Encode group as composite later in frame; store source group id here.
         for (const p of line) {
@@ -298,5 +321,6 @@ export function statDensity2d(input: Density2dStatInput): Density2dStatResult {
     carried,
     dropped,
     droppedGroups,
+    openRingsDropped,
   };
 }

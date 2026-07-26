@@ -42,6 +42,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   contour: ["x", "y", "z"],
   quantile: ["x", "y"],
   density_2d: ["x", "y"],
+  density_2d_filled: ["x", "y"],
 };
 
 function hasIntercepts(layer: Record<string, unknown>): boolean {

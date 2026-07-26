@@ -137,6 +137,12 @@ export interface GeomDensity2dOptions extends Density2dParams, GeomDataOption {
   render?: RenderBackend;
 }
 
+/** Filled 2D density-layer sugar (#802 phase 2). */
+export interface GeomDensity2dFilledOptions extends Density2dParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
 /** Errorbar-layer sugar options: params plus aes and a stat override. */
 export interface GeomErrorbarOptions extends ErrorbarParams, GeomDataOption {
   aes?: AesInput;

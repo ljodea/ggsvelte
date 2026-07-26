@@ -25,6 +25,7 @@ import type {
   GeomColOptions,
   GeomDensityOptions,
   GeomDensity2dOptions,
+  GeomDensity2dFilledOptions,
   GeomErrorbarOptions,
   GeomRibbonOptions,
   GeomHistogramOptions,
@@ -223,6 +224,11 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'density_2d', ... }) — bivariate KDE isolines (#802). */
   geomDensity2d(options: GeomDensity2dOptions = {}): GGBuilder {
     return this.layer(layerFrom("density_2d", options));
+  }
+
+  /** Sugar for filled 2D KDE rings (#802 phase 2). */
+  geomDensity2dFilled(options: GeomDensity2dFilledOptions = {}): GGBuilder {
+    return this.layer(layerFrom("density_2d_filled", options));
   }
 
   /**

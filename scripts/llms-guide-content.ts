@@ -301,8 +301,7 @@ a product Gaussian density over continuous \`x\` and \`y\`, then draw open path
 polylines of constant density. Bandwidth follows MASS \`bandwidth.nrd\` then
 kde2d's h/4 scaling (or \`params.h\` as one number or \`[hx, hy]\`). Grid
 \`params.n\`×\`n\` (default 100) spans a 5%-expanded data range. Levels use the
-same breaks / binwidth / bins rules as contour. v1 is open polylines only —
-no \`density_2d_filled\`, no weights.
+same breaks / binwidth / bins rules as contour. Weights deferred.
 
 \`\`\`svelte fragment
 <GeomPoint alpha={0.5} />
@@ -321,6 +320,30 @@ after_stat \`level\` and \`density\` are carried for tooltips.
 
 [2D density isolines](/examples/density/kde-2d): scatter under nested KDE
 contours.
+
+## 2D density filled bands
+
+\`geom_density_2d_filled\` / \`stat_density_2d_filled\` reuses the same KDE grid
+and draws **closed** isoline rings as filled polygons (ggplot2
+\`geom_density_2d_filled\`). Open rings are dropped with
+\`density-2d-filled-open-dropped\`. Fill defaults to after_stat \`level\`.
+
+\`\`\`svelte fragment
+<GeomPoint alpha={0.45} />
+<GeomDensity2dFilled bins={5} n={40} alpha={0.55} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(scatter, aes({ x: "x", y: "y" }))
+  .geomPoint({ alpha: 0.45 })
+  .geomDensity2dFilled({ bins: 5, n: 40 })
+  .spec();
+\`\`\`
+
+True isobands between consecutive levels and weights are deferred.
+
+[2D density filled bands](/examples/density/kde-2d-filled): scatter under
+closed KDE rings colored by level.
 
 ## Frequency polygon
 

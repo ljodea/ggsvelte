@@ -222,6 +222,13 @@ export interface Density2dLayerInput extends LayerInputBase {
   params?: Density2dParams;
 }
 
+export interface Density2dFilledLayerInput extends LayerInputBase {
+  geom: "density_2d_filled";
+  stat?: "density_2d_filled";
+  position?: "identity";
+  params?: Density2dParams;
+}
+
 export interface ErrorbarLayerInput extends LayerInputBase {
   geom: "errorbar";
   stat?: "identity" | "unique" | "summary" | "summary_bin";
@@ -290,6 +297,7 @@ export type LayerInput =
   | BoxplotLayerInput
   | DensityLayerInput
   | Density2dLayerInput
+  | Density2dFilledLayerInput
   | ErrorbarLayerInput
   | RectLayerInput
   | TileLayerInput

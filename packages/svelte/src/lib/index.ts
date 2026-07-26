@@ -93,6 +93,7 @@ export { default as GeomQuantile } from "./geoms/GeomQuantile.svelte";
 export { default as GeomBoxplot } from "./geoms/GeomBoxplot.svelte";
 export { default as GeomDensity } from "./geoms/GeomDensity.svelte";
 export { default as GeomDensity2d } from "./geoms/GeomDensity2d.svelte";
+export { default as GeomDensity2dFilled } from "./geoms/GeomDensity2dFilled.svelte";
 export { default as GeomErrorbar } from "./geoms/GeomErrorbar.svelte";
 export { default as GeomRect } from "./geoms/GeomRect.svelte";
 export { default as GeomTile } from "./geoms/GeomTile.svelte";

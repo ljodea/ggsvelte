@@ -86,6 +86,11 @@
       "sourceSha256": "9781dad38fcc155b18877a941ba51ef2b2a12d74cea27c0303bde9ad44845178",
       "pngSha256": "2484e5beaf043405416d669d1d9b601df11b62ec7c78cfdcd7eb98b5da404800"
     },
+    "density/kde-2d-filled": {
+      "filename": "density-kde-2d-filled-light.png",
+      "sourceSha256": "848c22ada82c99367cc24988508d42a1304f4121a5dc2c349be57a55bf239bc0",
+      "pngSha256": "bc55ffc8fb6dcf9992bfeb3a01efa3565bba78ab8c3ca89881e36b2d754dc3ae"
+    },
     "density/overlay": {
       "filename": "density-overlay-light.png",
       "sourceSha256": "6f9dd6edb1662b969a7ff67916cb419aeb90096aeec8e738e70227aa2878a342",

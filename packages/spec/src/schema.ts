@@ -122,6 +122,7 @@ export const ContourLayerSchema = SpecModule.Import("ContourLayer");
 export const BoxplotLayerSchema = SpecModule.Import("BoxplotLayer");
 export const DensityLayerSchema = SpecModule.Import("DensityLayer");
 export const Density2dLayerSchema = SpecModule.Import("Density2dLayer");
+export const Density2dFilledLayerSchema = SpecModule.Import("Density2dFilledLayer");
 export const ErrorbarLayerSchema = SpecModule.Import("ErrorbarLayer");
 export const RectLayerSchema = SpecModule.Import("RectLayer");
 export const TileLayerSchema = SpecModule.Import("TileLayer");
@@ -266,6 +267,8 @@ export type BoxplotLayer = LayerWithDataRef<SpecType<"BoxplotLayer">>;
 export type DensityLayer = LayerWithDataRef<SpecType<"DensityLayer">>;
 /** A 2D density isoline layer (#802). */
 export type Density2dLayer = LayerWithDataRef<SpecType<"Density2dLayer">>;
+/** A filled 2D density layer. */
+export type Density2dFilledLayer = LayerWithDataRef<SpecType<"Density2dFilledLayer">>;
 /** An errorbar layer. */
 export type ErrorbarLayer = LayerWithDataRef<SpecType<"ErrorbarLayer">>;
 /** A rect layer (arbitrary xmin/xmax/ymin/ymax regions). */
@@ -301,6 +304,7 @@ export type LayerSpec =
   | BoxplotLayer
   | DensityLayer
   | Density2dLayer
+  | Density2dFilledLayer
   | ErrorbarLayer
   | RectLayer
   | TileLayer

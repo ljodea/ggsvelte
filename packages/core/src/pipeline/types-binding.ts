@@ -11,6 +11,11 @@ import type { PositionConversionContext } from "./temporal-position.js";
 
 export interface ColorBinding {
   field: string | null;
+  /**
+   * Stat-generated column mapped with { stat } (e.g. after_stat level for
+   * density_2d_filled fill; #802 phase 2). Optional for fixture ergonomics.
+   */
+  statColumn?: string | null;
   /** Literal (non-scaled) constant, if any. */
   constant: string | null;
   /** Scaled constant ({value, scale: true}), if any. */
