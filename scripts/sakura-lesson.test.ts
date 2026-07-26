@@ -16,6 +16,8 @@ import { kyotoSakura } from "../packages/svelte/src/lib/data/index.ts";
 import {
   foldSakura,
   QUICKSTART_PAGE_SVELTE,
+  quickstartAriaLabel,
+  quickstartTitle,
   SAKURA_BASELINE,
   SAKURA_FINISHED_SVELTE,
   SAKURA_LOESS_SPAN,
@@ -81,6 +83,31 @@ describe("the sakura lesson folds to renderable specs", () => {
     for (let i = 1; i < layerCounts.length; i += 1) {
       expect(layerCounts[i]!).toBeGreaterThanOrEqual(layerCounts[i - 1]!);
     }
+  });
+
+  it("exposes title and aria-label from the folded starting page", () => {
+    // consumer-compat also asserts these against a packed app; keep a direct
+    // unit guard so the extractors stay covered without that harness.
+    expect(quickstartTitle()).toBe("<title>Kyoto cherry blossom</title>");
+    expect(quickstartAriaLabel()).toBe(
+      "Kyoto peak bloom, 812 to 2026: about a week earlier since 1850",
+    );
+  });
+
+  it("drops record callouts when annotations are disabled", () => {
+    // GettingStartedGuide uses this below ~560px so hand-placed text does not
+    // collide with the data. Bands, trend, baseline, and points stay.
+    const full = foldSakura(SAKURA_STEPS.length, rows);
+    const narrow = foldSakura(SAKURA_STEPS.length, rows, { annotations: false });
+    expect((full.spec.layers as unknown[]).length).toBe(7);
+    expect((narrow.spec.layers as unknown[]).length).toBe(5);
+    const kinds = (narrow.spec.layers as { geom: string }[]).map((layer) => layer.geom);
+    expect(kinds).not.toContain("segment");
+    expect(kinds).not.toContain("text");
+    expect(kinds).toContain("point");
+    expect(kinds).toContain("smooth");
+    expect(kinds).toContain("rect");
+    expect(kinds).toContain("rule");
   });
 
   it("keeps the finished chart identical to the finished source", () => {

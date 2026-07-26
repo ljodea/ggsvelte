@@ -128,6 +128,7 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "scripts/docs-seo.ts",
     "scripts/diagnostic-docs.ts",
     "scripts/quickstart.ts",
+    "scripts/quickstart/**",
     "scripts/cli-docs.ts",
     "scripts/guide-code-contract.ts",
     "scripts/gen-docs-search.ts",
@@ -217,6 +218,7 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     // Packed fixture snippets live here; consumer-compat imports them.
     "scripts/guide-code-contract.ts",
     "scripts/quickstart.ts",
+    "scripts/quickstart/**",
     "scripts/quickstart-timing.ts",
     "scripts/quickstart-timing.test.ts",
     "scripts/support-matrix.ts",

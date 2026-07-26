@@ -437,6 +437,22 @@ describe("planJobs", () => {
     }
   });
 
+  test("quickstart implementation modules schedule docs + consumer (not scripts-only)", () => {
+    // After the lesson was split under scripts/quickstart/, edits must not land
+    // on the scripts lane alone — same false-green class as missing ci-routing/**.
+    const nested = "scripts/quickstart/steps.ts";
+    const flags = classifyChangedPaths([nested]);
+    expect(flags.docs).toBe(true);
+    expect(flags.scripts).toBe(true);
+    const plan = planJobs(flags);
+    expect(plan.consumer).toBe(true);
+    expect(plan.docs_site).toBe(true);
+    expect(plan.svelte_check).toBe(true);
+    expect(plan.docs_journeys).toBe(true);
+    // Sibling timing harness stays outside the module tree.
+    expect(matchPathPattern("scripts/quickstart/**", "scripts/quickstart-timing.ts")).toBe(false);
+  });
+
   test("guide-code-contract changes invalidate the consumer content-hash surface", () => {
     expect(JOB_CONTENT_INPUTS.consumer).toContain("scripts/guide-code-contract.ts");
   });
@@ -600,6 +616,18 @@ describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
     const file = "scripts/gen-lesson-charts.ts";
     expect(JOB_CONTENT_INPUTS.component_journeys).toContain(file);
     expect(listJobContentPaths("component_journeys", [file])).toContain(file);
+  });
+
+  test("quickstart modules invalidate docs, journeys, and consumer content hashes", () => {
+    const nested = "scripts/quickstart/steps.ts";
+    for (const execution of [
+      "svelte_check",
+      "docs_site",
+      "component_journeys",
+      "consumer",
+    ] as const) {
+      expect(listJobContentPaths(execution, [nested]), execution).toContain(nested);
+    }
   });
 });
 
