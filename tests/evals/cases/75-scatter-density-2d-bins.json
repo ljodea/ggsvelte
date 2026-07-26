@@ -26,6 +26,15 @@
     "data": { "name": "main" },
     "layers": [
       {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "temp" },
+          "y": { "field": "pressure" }
+        }
+      },
+      {
         "geom": "density_2d",
         "stat": "density_2d",
         "position": "identity",

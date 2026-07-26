@@ -387,6 +387,33 @@ export class MockResponder implements Responder {
       );
       scales["x"] = { type: "linear", transform: "log10" };
       xField = x;
+    } else if (
+      /\bdensity[_ ]?2d[_ ]?filled\b|\bfilled\b.*\bdensity\b|\bdensity\b.*\bfilled\b|\bfilled bands?\b/.test(
+        prompt,
+      )
+    ) {
+      // geom_density_2d_filled closed KDE rings (#802 phase 2).
+      const x = fieldNamed("x") ?? pick.mentionedQuant() ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? pick.mentionedQuant() ?? pick.quant() ?? "y";
+      const layer: MockLayer = {
+        geom: "density_2d_filled",
+        stat: "density_2d_filled",
+        aes: { x: f(x), y: f(y) },
+      };
+      const params: Record<string, unknown> = {};
+      const binsMatch = prompt.match(/\b(\d+)\s*bins?\b/);
+      if (binsMatch !== null) params["bins"] = Number(binsMatch[1]);
+      const nMatch = prompt.match(/\b(\d+)\s*(?:by|×|x)\s*(\d+)\s*grid\b|\b(\d+)\s*by\s*(\d+)\b/i);
+      if (nMatch !== null) {
+        const n = Number(nMatch[1] ?? nMatch[3]);
+        if (Number.isFinite(n)) params["n"] = n;
+      }
+      if (Object.keys(params).length > 0) layer.params = params;
+      if (/\bscatter\b|\bpoint\b|overlay/.test(prompt)) {
+        spec.layers.push({ geom: "point", aes: { x: f(x), y: f(y) } });
+      }
+      spec.layers.push(layer);
+      xField = x;
     } else if (/\bdensity[_ ]?2d\b|\bbivariate kde\b|\bkde isolines?\b/.test(prompt)) {
       // geom_density_2d / stat_density_2d product Gaussian isolines (#802).
       const x =
