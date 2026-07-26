@@ -16,6 +16,7 @@ import { buildContourFrame } from "./frame-stats-contour.js";
 import { buildQuantileFrame } from "./frame-stats-quantile.js";
 import { buildSummaryBinFrame } from "./frame-stats-summary-bin.js";
 import { buildSfCoordinatesFrame } from "./frame-stats-sf-coordinates.js";
+import { buildSfFrame } from "./frame-stats-sf.js";
 import { buildUniqueFrame } from "./frame-stats-unique.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 
@@ -30,6 +31,8 @@ export function buildNonIdentityFrame(
   const stat = binding.layer.stat ?? "identity";
   if (stat === "identity") return null;
 
+  // ggplot2 stat_sf: expand portable GeoJSON to drawable parts (#809 phase 7).
+  if (stat === "sf") return buildSfFrame(binding, table, groups, warnings);
   if (stat === "sf_coordinates") return buildSfCoordinatesFrame(binding, table, groups, warnings);
   if (stat === "unique") return buildUniqueFrame(binding, table, groups);
   if (stat === "manual") return buildManualFrame(binding, table, groups, warnings);

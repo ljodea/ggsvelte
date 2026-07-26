@@ -512,4 +512,10 @@ describe("geom_sf", () => {
     expect(batch.linewidth).toBe(3.5);
     expect(batch.alpha).toBe(0.25);
   });
+  it("defaults stat to sf (ggplot2 stat_sf)", () => {
+    const spec = gg({ geometry: [polyA] }, aes({}))
+      .geomSf()
+      .spec();
+    expect(spec.layers[0]?.stat).toBe("sf");
+  });
 });
