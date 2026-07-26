@@ -29,6 +29,7 @@ import type {
   ContourParams,
   MapParams,
   SfParams,
+  SfTextParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -227,6 +228,12 @@ export interface GeomMapOptions extends MapParams, GeomDataOption {
 
 /** Options for .geomSf() — portable GeoJSON geometries (#809). */
 export interface GeomSfOptions extends SfParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** SF text-layer sugar: labels at representative geometry points (#809 phase 2). */
+export interface GeomSfTextOptions extends SfTextParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

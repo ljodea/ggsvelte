@@ -136,6 +136,7 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
       "dotplot",
       "map",
       "sf",
+      "sf_text",
     ],
     "code": "missing-geom",
     "fix": {
@@ -186,6 +187,7 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
       "dotplot",
       "map",
       "sf",
+      "sf_text",
     ],
     "code": "unknown-geom",
     "fix": {
