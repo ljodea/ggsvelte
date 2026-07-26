@@ -33,6 +33,7 @@ export const KNOWN_GEOMS = [
   "sf",
   "sf_text",
   "sf_label",
+  "blank",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -140,4 +141,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   sf: { stat: "identity", position: "identity" },
   sf_text: { stat: "sf_coordinates", position: "identity" },
   sf_label: { stat: "sf_coordinates", position: "identity" },
+  blank: { stat: "identity", position: "identity" },
 };

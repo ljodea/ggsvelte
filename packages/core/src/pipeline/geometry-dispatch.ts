@@ -104,6 +104,9 @@ export function dispatchGeometryBatch(
       }
       return single(polygonBatch(frame, fx, color, fill, styles, warnings));
     }
+    case "blank":
+      // ggplot2 geom_blank: train scales, emit no marks / hit targets.
+      return [];
     default:
       return [];
   }

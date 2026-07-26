@@ -28,6 +28,7 @@ import type {
   LayerSpec,
   LineLayer,
   MapLayer,
+  BlankLayer,
   SfLayer,
   SfTextLayer,
   SfLabelLayer,
@@ -94,6 +95,7 @@ export interface RuntimeDensity2dLayer extends WithRuntimeAes<Density2dLayer> {}
 export interface RuntimeDensity2dFilledLayer extends WithRuntimeAes<Density2dFilledLayer> {}
 export interface RuntimeDotplotLayer extends WithRuntimeAes<DotplotLayer> {}
 export interface RuntimeMapLayer extends WithRuntimeAes<MapLayer> {}
+export interface RuntimeBlankLayer extends WithRuntimeAes<BlankLayer> {}
 export interface RuntimeSfLayer extends WithRuntimeAes<SfLayer> {}
 export interface RuntimeSfTextLayer extends WithRuntimeAes<SfTextLayer> {}
 export interface RuntimeSfLabelLayer extends WithRuntimeAes<SfLabelLayer> {}
@@ -127,7 +129,9 @@ export type RuntimeLayerSpec =
   | RuntimeMapLayer
   | RuntimeSfLayer
   | RuntimeSfTextLayer
-  | RuntimeSfLabelLayer;
+  | RuntimeSfLabelLayer
+  | RuntimeBlankLayer
+  | RuntimeSfLayer;
 
 /** The in-memory spec superset ({ fn } channel accessors allowed). */
 type RuntimeSpecPortableFields = Omit<PortableSpec, "aes" | "layers">;
