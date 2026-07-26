@@ -113,7 +113,9 @@ test("homepage hero tooltip names a single department without axis crosshair noi
     hero.locator(".gg-axis-title", { hasText: "Literate conscripts (%)" }),
   ).toBeVisible();
   await expect(
-    hero.locator(".gg-axis-title", { hasText: "Population per crime against persons" }),
+    hero.locator(".gg-axis-title", {
+      hasText: "Population per crime against persons",
+    }),
   ).toBeVisible();
 
   // Readable tick size floor (light/dark themes were 8.8px on several presets).
@@ -222,8 +224,8 @@ test("install copy and code tabs share the manual-copy fallback", async ({ page 
 test("gallery exposes every generated preview exactly once", async ({ page }) => {
   await page.goto("/examples");
   // One meta.json per example under examples/ (grows when new specimens land).
-  // 70 corpus − 3 interaction expositions; + jitter/hline/vline sugar (#818).
-  const exampleCount = 67;
+  // 71 corpus − 3 interaction expositions; + convenience (#818) + spoke (#810).
+  const exampleCount = 68;
   await expect(page.locator(".example-grid li")).toHaveCount(exampleCount);
   await expect(page.locator('img[src*="/previews/"]')).toHaveCount(exampleCount);
 });

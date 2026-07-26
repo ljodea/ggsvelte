@@ -37,7 +37,7 @@ weight, ymin, ymax, xmin, xmax.
 
 ## Geoms / stats / positions
 Geoms: point, line, col, bar, histogram, freqpoly, area, rule, hline, vline, text, smooth, quantile, boxplot, density,
-errorbar, rect, tile, ribbon, jitter, blank.
+errorbar, rect, tile, ribbon, jitter, blank, spoke, segment, curve.
 Defaults: bar→count+stack; histogram→bin+stack; col/area→identity+stack;
 boxplot→boxplot+dodge; jitter→point+position jitter; hline/vline→rule; else identity.
 Positions are scoped per geom — one used outside its geom is rejected:
@@ -135,7 +135,10 @@ export function buildChatMessages(input: {
   // `unknown[] | undefined` local rather than omitting the key, and the body
   // below already branches on `!== undefined`.
   readonly priorErrors?: unknown[] | undefined;
-}): { readonly messages: readonly ChatMessage[]; readonly systemBytes: number } {
+}): {
+  readonly messages: readonly ChatMessage[];
+  readonly systemBytes: number;
+} {
   const system = assembleSystemPrompt(input.datasetId);
   let userContent = input.prompt.trim();
   if (input.currentSpec !== undefined) {

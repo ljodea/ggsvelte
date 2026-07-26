@@ -787,6 +787,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "spoke/vector-field",
+    category: "spoke",
+    name: "vector-field",
+    title: "Spoke vector field",
+    description: "",
+    tags: ["spoke", "vector", "angle", "radius", "segment", "theme"],
+    docsSection: "Lines & rules",
+    hasData: true,
+  },
+  {
     id: "text/labels",
     category: "text",
     name: "labels",

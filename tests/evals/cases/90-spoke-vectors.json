@@ -1,0 +1,41 @@
+{
+  "id": "90-spoke-vectors",
+  "kind": "chart",
+  "prompt": "Draw a vector field with geom_spoke: each row is an origin (x,y) with direction angle (radians) and length radius.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "angle", "type": "quantitative" },
+      { "name": "radius", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 0, "angle": 0, "radius": 1 },
+      { "x": 1, "y": 0, "angle": 1.5708, "radius": 0.8 },
+      { "x": 0, "y": 1, "angle": 3.1416, "radius": 0.6 },
+      { "x": 1, "y": 1, "angle": 0.7854, "radius": 1.2 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "spoke",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "angle": { "field": "angle" },
+          "radius": { "field": "radius" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_spoke maps origin + angle + radius; tips train domains (#810)."
+}

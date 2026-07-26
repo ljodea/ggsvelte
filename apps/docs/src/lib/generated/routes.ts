@@ -397,11 +397,6 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "convenience-geoms-jitter-hline-vline",
-        title: "Convenience geoms (jitter, hline, vline)",
-        level: 2,
-      },
-      {
         id: "manual-portable-named-per-group-transforms",
         title: "Manual (portable named per-group transforms)",
         level: 2,
@@ -419,6 +414,11 @@ export const DOCS_ROUTES = [
       {
         id: "curve-connectors",
         title: "Curve connectors",
+        level: 2,
+      },
+      {
+        id: "spoke-origin-angle-radius",
+        title: "Spoke (origin + angle + radius)",
         level: 2,
       },
       {
@@ -2262,8 +2262,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-665",
-        title: "experimental (665)",
+        id: "experimental-653",
+        title: "experimental (653)",
         level: 3,
       },
       {
@@ -2302,8 +2302,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-478",
-        title: "experimental (478)",
+        id: "experimental-476",
+        title: "experimental (476)",
         level: 3,
       },
       {
@@ -2788,16 +2788,6 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
-    path: "/examples/hline/threshold",
-    title: "geom_hline threshold — ggsvelte gallery",
-    description: "geom_hline threshold",
-    canonicalPath: "/examples/hline/threshold",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "site",
-  },
-  {
     path: "/examples/interaction/legend-filter",
     title: "Filter with a stable-color legend — ggsvelte gallery",
     description: "Filter with a stable-color legend",
@@ -2822,16 +2812,6 @@ export const DOCS_ROUTES = [
     title: "Inspect and pin data — ggsvelte gallery",
     description: "Inspect and pin data",
     canonicalPath: "/examples/interaction/tooltip",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "site",
-  },
-  {
-    path: "/examples/jitter/basic",
-    title: "geom_jitter sugar — ggsvelte gallery",
-    description: "geom_jitter sugar",
-    canonicalPath: "/examples/jitter/basic",
     kind: "page",
     index: true,
     sitemap: true,
@@ -3138,6 +3118,16 @@ export const DOCS_ROUTES = [
     shell: "site",
   },
   {
+    path: "/examples/spoke/vector-field",
+    title: "Spoke vector field — ggsvelte gallery",
+    description: "Spoke vector field",
+    canonicalPath: "/examples/spoke/vector-field",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
     path: "/examples/text/labels",
     title: "Text labels on a scatter — ggsvelte gallery",
     description: "Text labels on a scatter",
@@ -3152,16 +3142,6 @@ export const DOCS_ROUTES = [
     title: "Categorical heatmap (geom tile) — ggsvelte gallery",
     description: "Categorical heatmap (geom tile)",
     canonicalPath: "/examples/tile/heatmap",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "site",
-  },
-  {
-    path: "/examples/vline/cutoff",
-    title: "geom_vline cutoff — ggsvelte gallery",
-    description: "geom_vline cutoff",
-    canonicalPath: "/examples/vline/cutoff",
     kind: "page",
     index: true,
     sitemap: true,
