@@ -3315,11 +3315,12 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("sf_text", {
         description:
-          "Simple-features text labels (ggplot2 geom_sf_text; #809 phase 2): places aes.label at a representative point from each GeoJSON Geometry (stat_sf_coordinates).",
+          "Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
       }),
       stat: Type.Optional(
         Type.Literal("sf_coordinates", {
-          description: "Extract one (x,y) representative point per feature from geometry.",
+          description:
+            "Extract (x,y) representative points from geometry (Multi* → one point per part).",
         }),
       ),
       position: Type.Optional(
@@ -3411,11 +3412,12 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("sf_label", {
         description:
-          "Simple-features labels with background boxes (ggplot2 geom_sf_label; #809 phase 3): places aes.label at a representative geometry point with a measured rounded rect. color=ink+box stroke; fill=box background.",
+          "Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
       }),
       stat: Type.Optional(
         Type.Literal("sf_coordinates", {
-          description: "Extract one (x,y) representative point per feature from geometry.",
+          description:
+            "Extract (x,y) representative points from geometry (Multi* → one point per part).",
         }),
       ),
       position: Type.Optional(

@@ -1,5 +1,6 @@
 /**
- * stat_sf_coordinates (#809 phase 2): one (x,y) per feature from portable GeoJSON.
+ * stat_sf_coordinates (#809 phase 2 + multi-part labels phase 5):
+ * one (x,y) per geometry part from portable GeoJSON (Multi* expands).
  */
 import { ColumnTable, type CellValue } from "../table.js";
 
@@ -7,7 +8,7 @@ import { emptyFrameExtras } from "./frame-helpers.js";
 import {
   geometryFieldName,
   parseSfGeometry,
-  representativePoint,
+  representativePoints,
   sfKindOf,
 } from "./sf-geometry.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
@@ -83,19 +84,23 @@ export function buildSfCoordinatesFrame(
   let dropped = 0;
 
   for (let row = 0; row < table.rowCount; row++) {
-    const parsed = parseSfGeometry(geomCol[row]!, `/layers/${index}/data/${field}`);
+    const path = `/layers/${index}/data/${field}`;
+    const parsed = parseSfGeometry(geomCol[row]!, path);
     // Validate type is in the supported family (throws on GeometryCollection).
-    sfKindOf(parsed.type, `/layers/${index}`);
-    const pt = representativePoint(parsed.type, parsed.coordinates);
-    if (pt === null) {
+    sfKindOf(parsed.type, path);
+    const pts = representativePoints(parsed.type, parsed.coordinates);
+    if (pts.length === 0) {
+      // One drop per input feature with no usable part (not per empty part).
       dropped++;
       continue;
     }
-    outX.push(pt[0]);
-    outY.push(pt[1]);
-    outGroups.push(groups[row] ?? 0);
-    outRowIndex.push(row);
-    valueRows.push(row);
+    for (const pt of pts) {
+      outX.push(pt[0]);
+      outY.push(pt[1]);
+      outGroups.push(groups[row] ?? 0);
+      outRowIndex.push(row);
+      valueRows.push(row);
+    }
   }
 
   if (dropped > 0) {
