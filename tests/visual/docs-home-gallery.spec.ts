@@ -206,8 +206,10 @@ test("gallery filtering is URL-addressable, preserves theme, and restores histor
 }) => {
   await page.goto("/examples?theme=dark");
   const search = page.getByRole("searchbox", { name: "Filter" });
-  await search.fill("wheat");
-  await expect(page).toHaveURL(/theme=dark.*q=wheat|q=wheat.*theme=dark/);
+  // Query must hit gallery haystack (id/title/tags/section) — chart Labs copy
+  // and deleted meta descriptions are not indexed.
+  await search.fill("scatter");
+  await expect(page).toHaveURL(/theme=dark.*q=scatter|q=scatter.*theme=dark/);
   await expect(page.locator(".example-grid li").first()).toBeVisible();
   const linkedCount = await page.locator(".example-grid li").count();
   expect(linkedCount).toBeGreaterThan(0);
