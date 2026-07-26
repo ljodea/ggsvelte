@@ -24,11 +24,13 @@ describe("cellSegments", () => {
     // SW high, others low → segment bottom-left
     const segs = cellSegments(0, 1, 0, 1, 1, 0, 0, 0, 0.5);
     expect(segs.length).toBe(1);
-    const [[a, b]] = segs;
-    expect(a!.y).toBeCloseTo(0, 9);
-    expect(a!.x).toBeCloseTo(0.5, 9);
-    expect(b!.x).toBeCloseTo(0, 9);
-    expect(b!.y).toBeCloseTo(0.5, 9);
+    const pair = segs[0]!;
+    const a = pair[0];
+    const b = pair[1];
+    expect(a.y).toBeCloseTo(0, 9);
+    expect(a.x).toBeCloseTo(0.5, 9);
+    expect(b.x).toBeCloseTo(0, 9);
+    expect(b.y).toBeCloseTo(0.5, 9);
   });
 
   it("returns empty when all corners same side", () => {

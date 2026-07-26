@@ -46,7 +46,7 @@ type Pt = { x: number; y: number };
 function uniqueSorted(values: Float64Array, finiteMask: boolean[]): number[] {
   const set = new Set<number>();
   for (let i = 0; i < values.length; i++) {
-    if (!finiteMask[i]) continue;
+    if (finiteMask[i] !== true) continue;
     const v = values[i]!;
     if (Number.isFinite(v)) set.add(v);
   }
@@ -174,6 +174,27 @@ export function cellSegments(
 function keyPt(p: Pt): string {
   // Round to avoid float join failures.
   return `${p.x.toFixed(9)},${p.y.toFixed(9)}`;
+}
+
+/** Marching-squares segments for every complete cell on a regular grid. */
+function gridCellSegments(
+  xs: readonly number[],
+  ys: readonly number[],
+  grid: readonly (readonly (number | null)[])[],
+  level: number,
+): Array<[Pt, Pt]> {
+  const segs: Array<[Pt, Pt]> = [];
+  for (let j = 0; j < ys.length - 1; j++) {
+    for (let i = 0; i < xs.length - 1; i++) {
+      const z00 = grid[j]![i];
+      const z10 = grid[j]![i + 1];
+      const z01 = grid[j + 1]![i];
+      const z11 = grid[j + 1]![i + 1];
+      if (z00 === null || z10 === null || z01 === null || z11 === null) continue;
+      segs.push(...cellSegments(xs[i]!, xs[i + 1]!, ys[j]!, ys[j + 1]!, z00, z10, z01, z11, level));
+    }
+  }
+  return segs;
 }
 
 /** Stitch undirected segments into polylines (open or closed). */
@@ -332,17 +353,7 @@ export function statContour(input: ContourStatInput): ContourStatResult {
     const sample = rows[0]!;
     let pieceCounter = 0;
     for (const level of levels) {
-      const segs: Array<[Pt, Pt]> = [];
-      for (let j = 0; j < ys.length - 1; j++) {
-        for (let i = 0; i < xs.length - 1; i++) {
-          const corners = [grid[j]![i], grid[j]![i + 1], grid[j + 1]![i], grid[j + 1]![i + 1]];
-          if (corners.some((v) => v === null || v === undefined)) continue;
-          const [z00, z10, z01, z11] = corners as [number, number, number, number];
-          segs.push(
-            ...cellSegments(xs[i]!, xs[i + 1]!, ys[j]!, ys[j + 1]!, z00, z10, z01, z11, level),
-          );
-        }
-      }
+      const segs = gridCellSegments(xs, ys, grid, level);
       const lines = stitchSegments(segs);
       for (const line of lines) {
         const piece = pieceCounter++;
