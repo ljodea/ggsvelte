@@ -13,31 +13,22 @@ import type { PortableSpec } from "@ggsvelte/spec";
 
 import type { OrchestratorInputs } from "./plot-orchestrator.svelte.js";
 import {
-  duplicateMergeKeyDiagnostic,
-  duplicatePlotLayerDiagnostic,
-  duplicateScaleChannelDiagnostic,
-  isDuplicateMergeKeyDiagnostic,
-  isDuplicateScaleChannelDiagnostic,
+  collectCompositionDiagnostics,
+  compositionAdvisoryDedupKey,
   type CompositionDiagnostic,
-  type DuplicateMergeKeyKind,
-  type DuplicatePlotLayerKind,
 } from "./diagnostics/composition.js";
 import {
   deprecatedPropDiagnostic,
   type DeprecationDiagnostic,
   type PlotDiagnostic,
 } from "./diagnostics/deprecation.js";
-import {
-  MERGE_KEY_EMIT_ORDER,
-  REPLACE_EMIT_ORDER,
-  grammarDeprecationInputs,
-} from "./layers/grammar-families.js";
+import { grammarDeprecationInputs } from "./layers/grammar-families.js";
 import type {
   InteractionDiagnostic,
   PlotInteractionScope,
   ResolvedInteractionConfig,
 } from "./interaction/interaction.js";
-import { INTERACTION_DIAGNOSTIC_CATALOG } from "./interaction/interaction.js";
+import { collectWiringDiagnostics } from "./interaction/wiring-advisories.js";
 import { createPlotAnnouncer } from "./runtime/announcer.svelte.js";
 import { createSourceIdentityTracker, dataIdentityEpochToken } from "./runtime/semantic-keys.js";
 import {
@@ -57,14 +48,6 @@ import { createSurfaceState } from "./surface/surface-state.svelte.js";
 import { createSelectionState, type SelectionState } from "./selection/selection-state.svelte.js";
 import { presentationChromeForKind } from "./selection/selection.js";
 import { createPlotChromeState } from "./chrome/chrome-state.svelte.js";
-
-function isMergeKeyKind(kind: string): kind is DuplicateMergeKeyKind {
-  return (MERGE_KEY_EMIT_ORDER as readonly string[]).includes(kind);
-}
-
-function isReplaceKind(kind: string): kind is DuplicatePlotLayerKind {
-  return (REPLACE_EMIT_ORDER as readonly string[]).includes(kind);
-}
 
 export type PlotInteractionAssemblyDeps<
   Row extends Record<string, CellValue> = Record<string, CellValue>,
@@ -102,34 +85,31 @@ export function createPlotInteractionAssembly<
   // Wiring advisories (ADR 0013 audit): prop combinations that silently do
   // nothing. Unlike config diagnostics (re-delivered per recompute), these
   // fire once per prop per plot instance — a later capability toggle must
-  // not re-advise.
-  const wiringDiagnostics = $derived.by((): InteractionDiagnostic[] => {
-    const list: InteractionDiagnostic[] = [];
-    if (inputs.interactionScope() !== undefined && inputs.interaction() === undefined)
-      list.push({ ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_SCOPE_WITHOUT_CONTROLLER });
-    const handlerCapabilityPairs = [
-      ["oninspect", "inspect", inputs.oninspect(), inputs.inspect()],
-      ["onselect", "select", inputs.onselect(), inputs.select()],
-      ["onzoom", "zoom", inputs.onzoom(), inputs.zoom()],
-      ["onlegendfocus", "legendFocus", inputs.onlegendfocus(), inputs.legendFocus()],
-      ["onlegendfilter", "legendFilter", inputs.onlegendfilter(), inputs.legendFilter()],
-    ] as const;
-    for (const [handler, capability, handlerValue, capabilityValue] of handlerCapabilityPairs) {
-      if (handlerValue === undefined) continue;
-      // Capability "requested" (any value but undefined/false) is enough:
-      // requested-but-degraded configs already get their own diagnostics
-      // (requires-key, faceted zoom, ...) — never advise twice for one
-      // mistake.
-      if (capabilityValue !== undefined && capabilityValue !== false) continue;
-      list.push({
-        ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_HANDLER_WITHOUT_CAPABILITY,
-        prop: handler,
-        actual: capability,
-      });
-    }
-    return list;
-  });
-  // Shared once-per-code-per-prop Set for wiring + deprecation advisories.
+  // not re-advise. Pure collect lives in wiring-advisories.ts; snapshot is
+  // taken inside this derived so late-bound handlers still recompute.
+  const wiringDiagnostics = $derived.by((): InteractionDiagnostic[] =>
+    collectWiringDiagnostics({
+      interactionScope: inputs.interactionScope(),
+      interaction: inputs.interaction(),
+      handlers: {
+        oninspect: inputs.oninspect(),
+        onselect: inputs.onselect(),
+        onzoom: inputs.onzoom(),
+        onlegendfocus: inputs.onlegendfocus(),
+        onlegendfilter: inputs.onlegendfilter(),
+      },
+      capabilities: {
+        inspect: inputs.inspect(),
+        select: inputs.select(),
+        zoom: inputs.zoom(),
+        legendFocus: inputs.legendFocus(),
+        legendFilter: inputs.legendFilter(),
+      },
+    }),
+  );
+  // Shared once-per-code-per-prop Set for wiring + deprecation + composition.
+  // Delivery order is fixed: config effect (above) → wiring → deprecation →
+  // composition. Do not reorder these $effect registrations.
   const deliveredAdvisories = new Set<string>();
   $effect(() => {
     for (const diagnostic of wiringDiagnostics) {
@@ -164,81 +144,15 @@ export function createPlotInteractionAssembly<
     }
   });
 
-  // Composition advisories (#659 slices 3+5+6):
-  // - scale MERGE: duplicate aesthetic channels (dedup `${code}:${channel}`)
-  // - labs/guides/legend MERGE: duplicate keys in the same shallow merge
-  //   (dedup `${code}:${kind}:${key}`)
-  // - coord/facet/theme REPLACE: more than one child of that kind
-  //   (dedup `${code}:${kind}` so coord + facet dups deliver two advisories)
-  // Last child still wins (shallow merge / last write).
-  const compositionDiagnostics = $derived.by((): CompositionDiagnostic[] => {
-    const list: CompositionDiagnostic[] = [];
-    const seenChannels = new Set<string>();
-    const duplicateChannels = new Set<string>();
-    // Kind membership and emit order come from GRAMMAR_FAMILIES (#785).
-    // Scales keep their own advisory code (0.11.0 surface); labs/guides/legend
-    // share DUPLICATE_MERGE_KEY.
-    const mergeSeen = Object.fromEntries(
-      MERGE_KEY_EMIT_ORDER.map((k) => [k, new Set<string>()]),
-    ) as Record<DuplicateMergeKeyKind, Set<string>>;
-    const mergeDuplicates = Object.fromEntries(
-      MERGE_KEY_EMIT_ORDER.map((k) => [k, new Set<string>()]),
-    ) as Record<DuplicateMergeKeyKind, Set<string>>;
-    const replaceCounts = Object.fromEntries(REPLACE_EMIT_ORDER.map((k) => [k, 0])) as Record<
-      DuplicatePlotLayerKind,
-      number
-    >;
-    for (const layer of inputs.registry.layers) {
-      if (layer.kind === "scale") {
-        for (const channel of Object.keys(layer.value)) {
-          if (seenChannels.has(channel)) {
-            duplicateChannels.add(channel);
-          } else {
-            seenChannels.add(channel);
-          }
-        }
-        continue;
-      }
-      if (isMergeKeyKind(layer.kind)) {
-        // Narrow via kind predicate + assertion: Layer's value getter is only
-        // on non-mark arms; kind membership is table-driven (#785).
-        const kind = layer.kind;
-        const value = (layer as { readonly value: object }).value;
-        for (const key of Object.keys(value)) {
-          if (mergeSeen[kind].has(key)) {
-            mergeDuplicates[kind].add(key);
-          } else {
-            mergeSeen[kind].add(key);
-          }
-        }
-        continue;
-      }
-      if (isReplaceKind(layer.kind)) {
-        replaceCounts[layer.kind] += 1;
-      }
-    }
-    for (const channel of duplicateChannels) {
-      list.push(duplicateScaleChannelDiagnostic(channel));
-    }
-    for (const kind of MERGE_KEY_EMIT_ORDER) {
-      for (const key of mergeDuplicates[kind]) {
-        list.push(duplicateMergeKeyDiagnostic(kind, key));
-      }
-    }
-    for (const kind of REPLACE_EMIT_ORDER) {
-      if (replaceCounts[kind] > 1) {
-        list.push(duplicatePlotLayerDiagnostic(kind));
-      }
-    }
-    return list;
-  });
+  // Composition advisories (#659 slices 3+5+6): pure collect over
+  // registry.layers. Last child still wins (shallow merge / last write);
+  // delivery is once-per-dedup-key via compositionAdvisoryDedupKey.
+  const compositionDiagnostics = $derived.by((): CompositionDiagnostic[] =>
+    collectCompositionDiagnostics(inputs.registry.layers),
+  );
   $effect(() => {
     for (const diagnostic of compositionDiagnostics) {
-      const dedupKey = isDuplicateScaleChannelDiagnostic(diagnostic)
-        ? `${diagnostic.code}:${diagnostic.channel}`
-        : isDuplicateMergeKeyDiagnostic(diagnostic)
-          ? `${diagnostic.code}:${diagnostic.kind}:${diagnostic.key}`
-          : `${diagnostic.code}:${diagnostic.kind}`;
+      const dedupKey = compositionAdvisoryDedupKey(diagnostic);
       if (deliveredAdvisories.has(dedupKey)) continue;
       deliveredAdvisories.add(dedupKey);
       deliverDiagnostic(diagnostic);
