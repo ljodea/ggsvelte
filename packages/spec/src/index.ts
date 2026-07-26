@@ -611,6 +611,7 @@ export type {
   DotplotLayerInput,
   MapLayerInput,
   SfLayerInput,
+  SfTextLayerInput,
   CurveLayerInput,
   FacetFieldInput,
   FacetInput,
