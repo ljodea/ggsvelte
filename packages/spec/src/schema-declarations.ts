@@ -449,6 +449,18 @@ export const SpecDeclarations = {
             "Region join key for geom_map (value-table column matched to the map data id column; #808).",
         }),
       ),
+      angle: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Spoke direction in radians (geom spoke; 0 = +x, π/2 = +y). Quantitative only. May also be set as params.angle.",
+        }),
+      ),
+      radius: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Spoke length in data units (geom spoke). Quantitative only. May also be set as params.radius.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -1949,6 +1961,58 @@ export const SpecDeclarations = {
     },
   ),
 
+  SpokeParams: Type.Object(
+    {
+      angle: Type.Optional(
+        Type.Number({
+          description:
+            "Constant spoke direction in radians when aes.angle is not mapped. 0 = +x, π/2 = +y.",
+        }),
+      ),
+      radius: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Constant spoke length in data units when aes.radius is not mapped. Must be greater than 0.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Spoke opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      lineend: Type.Optional(
+        Type.Union([Type.Literal("butt"), Type.Literal("round"), Type.Literal("square")], {
+          description: 'SVG stroke-linecap for spoke ends. Default "butt".',
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom spoke: optional constant angle/radius plus segment-like stroke styling.",
+    },
+  ),
+
   CurveParams: Type.Object(
     {
       curvature: Type.Optional(
@@ -3414,6 +3478,35 @@ export const SpecDeclarations = {
     },
   ),
 
+  SpokeLayer: Type.Object(
+    {
+      geom: Type.Literal("spoke", {
+        description:
+          "Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Spoke layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Spoke layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("SpokeParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A spoke layer. Requires x and y; angle and radius from aes and/or params (constants). Angle is radians.",
+    },
+  ),
+
   LayerSpec: Type.Union(
     [
       Type.Ref("PointLayer"),
@@ -3449,6 +3542,7 @@ export const SpecDeclarations = {
       Type.Ref("SfTextLayer"),
       Type.Ref("SfLabelLayer"),
       Type.Ref("BlankLayer"),
+      Type.Ref("SpokeLayer"),
     ],
     {
       description:

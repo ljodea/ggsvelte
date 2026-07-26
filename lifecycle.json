@@ -608,6 +608,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomSpokeOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomTextOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1212,6 +1216,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeSpokeLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeTextLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1371,6 +1379,18 @@
         "SpecValidationError": {
           "kind": "value",
           "lifecycle": "stable-intent"
+        },
+        "SpokeLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SpokeLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SpokeParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
         },
         "StackablePosition": {
           "kind": "type",
@@ -4278,6 +4298,10 @@
           "lifecycle": "experimental"
         },
         "GeomSmooth": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomSpoke": {
           "kind": "value",
           "lifecycle": "experimental"
         },

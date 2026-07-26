@@ -37,6 +37,8 @@ export function resolveLayerPositionChannels(input: {
   heightField: string | null;
   xendField: string | null;
   yendField: string | null;
+  angleField: string | null;
+  radiusField: string | null;
   ribbonOrientation?: "x" | "y";
 } {
   const { layer, aes, index, table, warnings, xConversion, yConversion } = input;
@@ -64,6 +66,8 @@ export function resolveLayerPositionChannels(input: {
   const heightField = checkField(aes.height, "height", index, table, warnings);
   const xendField = checkField(aes.xend, "xend", index, table, warnings);
   const yendField = checkField(aes.yend, "yend", index, table, warnings);
+  const angleField = checkField(aes.angle, "angle", index, table, warnings);
+  const radiusField = checkField(aes.radius, "radius", index, table, warnings);
 
   if (geom === "tile") {
     const params = { ...layer.params } as Record<string, unknown>;
@@ -124,6 +128,9 @@ export function resolveLayerPositionChannels(input: {
     xmaxField,
     xendField,
     yendField,
+    angleField,
+    radiusField,
+    layerParams: layer.params,
     ...(ribbonOrientation !== undefined && { ribbonOrientation }),
   });
 
@@ -173,6 +180,8 @@ export function resolveLayerPositionChannels(input: {
     heightField,
     xendField,
     yendField,
+    angleField,
+    radiusField,
     ...(ribbonOrientation !== undefined && { ribbonOrientation }),
   };
 }
