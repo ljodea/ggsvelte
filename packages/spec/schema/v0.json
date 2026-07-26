@@ -526,6 +526,14 @@
           "anyOf": [
             {
               "type": "string",
+              "const": "first"
+            },
+            {
+              "type": "string",
+              "const": "last"
+            },
+            {
+              "type": "string",
               "const": "mean"
             },
             {
@@ -534,10 +542,18 @@
             },
             {
               "type": "string",
+              "const": "min"
+            },
+            {
+              "type": "string",
+              "const": "max"
+            },
+            {
+              "type": "string",
               "const": "sum"
             }
           ],
-          "description": "STAT SUMMARY_BIN ONLY: center summary of y per bin — \"mean\" (default), \"median\", or \"sum\"."
+          "description": "SUMMARY_BIN center fun (mean/median/sum; #817) or MANUAL named transform (first|last|mean|median|min|max|sum; #814). Required when stat is \"manual\"."
         },
         "funMin": {
           "$ref": "#/$defs/SummaryFun",
@@ -549,7 +565,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Styling parameters for the point geom, plus optional summary_bin controls when stat is summary_bin (#817)."
+      "description": "Styling parameters for the point geom, plus summary_bin (#817) and/or manual (#814) controls."
     },
     "LineParams": {
       "type": "object",
@@ -638,6 +654,14 @@
           "anyOf": [
             {
               "type": "string",
+              "const": "first"
+            },
+            {
+              "type": "string",
+              "const": "last"
+            },
+            {
+              "type": "string",
               "const": "mean"
             },
             {
@@ -646,10 +670,18 @@
             },
             {
               "type": "string",
+              "const": "min"
+            },
+            {
+              "type": "string",
+              "const": "max"
+            },
+            {
+              "type": "string",
               "const": "sum"
             }
           ],
-          "description": "STAT SUMMARY_BIN ONLY (#817): center summary of y per bin — \"mean\" (default), \"median\", or \"sum\"."
+          "description": "SUMMARY_BIN center fun (mean/median/sum; #817) or MANUAL named transform (first|last|mean|median|min|max|sum; #814). Required when stat is \"manual\"."
         },
         "funMin": {
           "$ref": "#/$defs/SummaryFun",
@@ -669,7 +701,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Styling parameters for the line geom, plus optional stat-bin (freqpoly) or summary_bin (#817) controls."
+      "description": "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin (#817), or manual (#814) controls."
     },
     "PathParams": {
       "type": "object",
@@ -723,6 +755,39 @@
           ],
           "description": "STAT CONNECT ONLY (#816): how successive points join — \"hv\" (default), \"vh\", \"mid\", or \"linear\". Ignored for other stats."
         },
+        "fun": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "first"
+            },
+            {
+              "type": "string",
+              "const": "last"
+            },
+            {
+              "type": "string",
+              "const": "mean"
+            },
+            {
+              "type": "string",
+              "const": "median"
+            },
+            {
+              "type": "string",
+              "const": "min"
+            },
+            {
+              "type": "string",
+              "const": "max"
+            },
+            {
+              "type": "string",
+              "const": "sum"
+            }
+          ],
+          "description": "STAT MANUAL ONLY (#814): portable named transform (first|last|mean|median|min|max|sum). Required when stat is \"manual\"."
+        },
         "strokePaint": {
           "$ref": "#/$defs/GradientPaint",
           "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
@@ -733,7 +798,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Styling parameters for the path geom (data-order polylines)."
+      "description": "Styling parameters for the path geom (data-order polylines), plus optional stat-manual fun (#814)."
     },
     "ColParams": {
       "type": "object",
@@ -1631,7 +1696,7 @@
         "geom": {
           "type": "string",
           "const": "point",
-          "description": "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With stat summary_bin, one point per non-empty (group × bin) summary of y (#817)."
+          "description": "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814)."
         },
         "stat": {
           "anyOf": [
@@ -1649,9 +1714,14 @@
               "type": "string",
               "const": "summary_bin",
               "description": "Bin continuous x and summarize y per (group × bin); default mean ± se (#817)."
+            },
+            {
+              "type": "string",
+              "const": "manual",
+              "description": "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814)."
             }
           ],
-          "description": "Point stat: \"identity\" (default), \"unique\", or \"summary_bin\" (binned y summary)."
+          "description": "Point stat: \"identity\" (default), \"unique\", \"summary_bin\" (#817), or \"manual\" (#814)."
         },
         "position": {
           "anyOf": [
@@ -1732,9 +1802,14 @@
               "type": "string",
               "const": "summary_bin",
               "description": "Bin continuous x and summarize y per (group × bin); default mean ± se; connect centers in x order (#817)."
+            },
+            {
+              "type": "string",
+              "const": "manual",
+              "description": "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814)."
             }
           ],
-          "description": "Line stat: \"identity\" (default), \"unique\", \"bin\" (freqpoly), \"align\" (shared x grid), \"connect\" (step/path joins), or \"summary_bin\" (binned y summary)."
+          "description": "Line stat: \"identity\" (default), \"unique\", \"bin\", \"align\", \"connect\", \"summary_bin\" (#817), or \"manual\" (#814)."
         },
         "position": {
           "type": "string",
@@ -1785,9 +1860,14 @@
               "type": "string",
               "const": "connect",
               "description": "Expand successive points into connection vertices (params.connection: hv|vh|mid|linear; default hv; #816). ggplot2 stat_connect default geom is path."
+            },
+            {
+              "type": "string",
+              "const": "manual",
+              "description": "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814)."
             }
           ],
-          "description": "Path stat: \"identity\" (default), \"unique\" (first-wins dedupe), or \"connect\" (named joins)."
+          "description": "Path stat: \"identity\" (default), \"unique\", \"connect\", or \"manual\" (#814)."
         },
         "position": {
           "type": "string",

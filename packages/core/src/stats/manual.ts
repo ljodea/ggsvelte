@@ -13,12 +13,12 @@
  */
 import { applySummaryFun } from "./summary.js";
 
-export const MANUAL_KEEP_FUNS = ["first", "last"] as const;
-export const MANUAL_AGG_FUNS = ["mean", "median", "min", "max", "sum"] as const;
-export const MANUAL_FUNS = [...MANUAL_KEEP_FUNS, ...MANUAL_AGG_FUNS] as const;
+const MANUAL_KEEP_FUNS = ["first", "last"] as const;
+const MANUAL_AGG_FUNS = ["mean", "median", "min", "max", "sum"] as const;
+const MANUAL_FUNS = [...MANUAL_KEEP_FUNS, ...MANUAL_AGG_FUNS] as const;
 
-export type ManualKeepFun = (typeof MANUAL_KEEP_FUNS)[number];
-export type ManualAggFun = (typeof MANUAL_AGG_FUNS)[number];
+type ManualKeepFun = (typeof MANUAL_KEEP_FUNS)[number];
+type ManualAggFun = (typeof MANUAL_AGG_FUNS)[number];
 export type ManualFunName = (typeof MANUAL_FUNS)[number];
 
 export function isManualFun(value: unknown): value is ManualFunName {

@@ -7,7 +7,7 @@
  */
 import type { CellValue, ColumnTable } from "../table.js";
 
-import { isManualFun, isManualKeepFun, statManual, type ManualFunName } from "../stats/manual.js";
+import { isManualFun, statManual, type ManualFunName } from "../stats/manual.js";
 import { PipelineError } from "./types.js";
 import { NO_ROW, type LayerBinding, type LayerFrame, type PipelineWarning } from "./types.js";
 import { buildIdentityFrame } from "./frame-identity.js";
@@ -179,5 +179,3 @@ export function buildManualFrame(
     ...emptyFrameExtras(),
   };
 }
-
-export { isManualKeepFun };

@@ -636,7 +636,6 @@ export const SpecDeclarations = {
           description: "STAT SUMMARY_BIN ONLY: upper bound summary (ymax).",
         }),
       ),
-      ),
     },
     {
       additionalProperties: false,
