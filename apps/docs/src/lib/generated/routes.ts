@@ -2252,8 +2252,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-643",
-        title: "experimental (643)",
+        id: "experimental-648",
+        title: "experimental (648)",
         level: 3,
       },
       {
@@ -2292,8 +2292,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-474",
-        title: "experimental (474)",
+        id: "experimental-475",
+        title: "experimental (475)",
         level: 3,
       },
       {
@@ -2542,6 +2542,26 @@ export const DOCS_ROUTES = [
     title: "Stacked bar chart — ggsvelte gallery",
     description: "Stacked bar chart",
     canonicalPath: "/examples/bar/stacked",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/blank/axes-only",
+    title: "geom_blank axes only — ggsvelte gallery",
+    description: "geom_blank axes only",
+    canonicalPath: "/examples/blank/axes-only",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/blank/domain-expand",
+    title: "geom_blank domain expansion — ggsvelte gallery",
+    description: "geom_blank domain expansion",
+    canonicalPath: "/examples/blank/domain-expand",
     kind: "page",
     index: true,
     sitemap: true,
