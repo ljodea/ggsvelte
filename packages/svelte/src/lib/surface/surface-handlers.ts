@@ -122,13 +122,7 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
   }
 
   function panelAtPoint(point: Readonly<{ x: number; y: number }>) {
-    const model = deps.model();
-    if (model === null) return null;
-    const viewportPanel = model.viewport.panelAt(point);
-    return (
-      model.scene.panels.find((panel) => panel.id === viewportPanel?.id) ??
-      (model.scene.panels.length === 1 ? model.scene.panels[0]! : null)
-    );
+    return deps.model()?.viewport.panelAtOrOnly(point) ?? null;
   }
 
   function onPointerMove(event: PointerEvent): void {
@@ -267,9 +261,9 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
         const extending = live.getAreaAwaitingSecond() && live.getBrushRect() !== null;
         const model = deps.model();
         const originPanel = extending
-          ? area.kind === "idle"
+          ? area.kind === "idle" || area.panelId === null
             ? null
-            : (model?.scene.panels.find((panel) => panel.id === area.panelId) ?? null)
+            : (model?.viewport.panel(area.panelId) ?? null)
           : panelAtPoint(p);
         if (originPanel === null) break;
         // Pure table owns fresh vs extend corner policy.
@@ -339,7 +333,8 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
         touchInspectStart = null;
         touchInspectMoved = false;
         // mode/maxDistance/state from pure inspect snapshot — no re-gate.
-        const match = deps.model()?.candidates.nearest(endPoint.x, endPoint.y, {
+        // Panel-scoped nearest so faceted taps cannot seed another facet (#787).
+        const match = deps.model()?.viewport.panelAtOrOnly(endPoint)?.nearest(endPoint, {
           mode: action.mode,
           maxDistance: action.maxDistance,
         });
@@ -466,7 +461,8 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
         break;
       case "toggle-point": {
         const point = plotPoint(event);
-        const match = deps.model()?.candidates.nearest(point.x, point.y, {
+        // Panel-scoped nearest so faceted point-select cannot toggle another facet (#787).
+        const match = deps.model()?.viewport.panelAtOrOnly(point)?.nearest(point, {
           mode: "xy",
           maxDistance: POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
         });

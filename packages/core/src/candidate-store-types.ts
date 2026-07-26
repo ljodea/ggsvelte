@@ -96,8 +96,18 @@ export interface CandidateStore {
   readonly x: Float32Array;
   readonly y: Float32Array;
   candidate(id: number): CandidateFacts | null;
-  /** Topmost painted candidate at a plot-pixel position, or null. */
+  /**
+   * Topmost painted candidate at a plot-pixel position, or null.
+   * Enforces panel clip (skips panels with clip !== false when the point is
+   * outside the panel rectangle). Soft hover targeting should use
+   * `SemanticViewportPanel.nearest` instead (#787).
+   */
   hitTest(x: number, y: number): CandidateFacts | null;
+  /**
+   * Soft nearest-candidate targeting. Does **not** enforce panel clip; pass
+   * `panelId` (or use `SemanticViewportPanel.nearest`) so faceted probes cannot
+   * seed another panel. `hitTest` is the clip-gated hard-hit counterpart.
+   */
   nearest(
     x: number,
     y: number,

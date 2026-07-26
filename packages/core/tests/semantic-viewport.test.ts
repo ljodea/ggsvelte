@@ -367,4 +367,89 @@ describe("RenderModel semantic viewport", () => {
       expect(x.slice(["b", "missing"])).toBeUndefined();
     }
   });
+
+  it("panel.nearest never surfaces a candidate from another facet (#787)", () => {
+    // Stacked facets + mode "x": unscoped nearest uses a full-height strip and
+    // |Δx| distance, so a hover in A at B's screen-x seeds B. Panel-scoped
+    // nearest must refuse that leak.
+    const model = runPipeline(
+      gg(
+        [
+          { g: "A", x: 1, y: 5 },
+          { g: "B", x: 5, y: 5 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .facet({ wrap: "g", ncol: 1 })
+        .scales({
+          x: { domain: [0, 10], nice: false, expand: { mult: 0, add: 0 } },
+          y: { domain: [0, 10], nice: false, expand: { mult: 0, add: 0 } },
+        })
+        .spec(),
+      { width: 200, height: 400 },
+    );
+    const panelA = model.scene.panels[0]!;
+    const candB = model.candidates.candidate(1)!;
+    expect(candB.panelId).toBe(model.scene.panels[1]!.id);
+
+    const probe = { x: candB.x, y: panelA.y + panelA.height / 2 };
+    // Documents the leak the viewport API closes.
+    expect(
+      model.candidates.nearest(probe.x, probe.y, { mode: "x", maxDistance: 24 })?.panelId,
+    ).toBe(candB.panelId);
+
+    const viewportPanel = model.viewport.panelAt(probe)!;
+    expect(viewportPanel.id).toBe(panelA.id);
+    expect(viewportPanel.nearest(probe, { mode: "x", maxDistance: 24 })).toBeNull();
+  });
+
+  it("panelAtOrOnly falls back only when the plot has a single panel", () => {
+    const single = runPipeline(
+      gg(
+        [
+          { x: 0, y: 0 },
+          { x: 10, y: 10 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .scales({
+          x: { domain: [0, 10], nice: false, expand: { mult: 0, add: 0 } },
+          y: { domain: [0, 10], nice: false, expand: { mult: 0, add: 0 } },
+        })
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const only = single.viewport.panels[0]!;
+    const outside = { x: only.bounds.x0 - 10, y: only.bounds.y0 - 10 };
+    expect(single.viewport.panelAt(outside)).toBeNull();
+    expect(single.viewport.panelAtOrOnly(outside)?.id).toBe(only.id);
+    expect(
+      single.viewport.panelAtOrOnly({ x: only.bounds.x0 + 1, y: only.bounds.y0 + 1 })?.id,
+    ).toBe(only.id);
+
+    const multi = runPipeline(
+      gg(
+        [
+          { g: "A", x: 1, y: 1 },
+          { g: "B", x: 2, y: 2 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .facet({ wrap: "g" })
+        .spec(),
+      { width: 400, height: 200 },
+    );
+    expect(multi.viewport.panels.length).toBe(2);
+    expect(multi.viewport.panelAtOrOnly({ x: -50, y: -50 })).toBeNull();
+    const first = multi.viewport.panels[0]!;
+    expect(
+      multi.viewport.panelAtOrOnly({
+        x: (first.bounds.x0 + first.bounds.x1) / 2,
+        y: (first.bounds.y0 + first.bounds.y1) / 2,
+      })?.id,
+    ).toBe(first.id);
+  });
 });

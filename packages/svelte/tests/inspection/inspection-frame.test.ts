@@ -173,6 +173,7 @@ describe("buildQueuedInspectFrame", () => {
     autoMode: "xy" as const,
     layerIndex: 1,
     panelIndex: 2,
+    panelId: "panel-2",
     rowIndex: 1,
     lineage: 0,
     x: 12,
@@ -205,7 +206,6 @@ describe("buildQueuedInspectFrame", () => {
 
   it("uses fallback candidate identity when semantic nearest misses", () => {
     let fallbackCalls = 0;
-    let panelCalls = 0;
     const built = buildQueuedInspectFrame({
       match: null,
       source: "pointer",
@@ -214,13 +214,8 @@ describe("buildQueuedInspectFrame", () => {
         fallbackCalls += 1;
         return fallback;
       },
-      panelIdForIndex: () => {
-        panelCalls += 1;
-        return "p0";
-      },
     });
     expect(fallbackCalls).toBe(1);
-    expect(panelCalls).toBe(1);
     expect(built).toEqual({
       queued: {
         hit: {
@@ -246,7 +241,6 @@ describe("buildQueuedInspectFrame", () => {
 
   it("builds hit + queued mode + candidate from match without calling fallback", () => {
     let fallbackCalls = 0;
-    let panelCalls = 0;
     const built = buildQueuedInspectFrame({
       match,
       source: "touch",
@@ -255,14 +249,8 @@ describe("buildQueuedInspectFrame", () => {
         fallbackCalls += 1;
         return fallback;
       },
-      panelIdForIndex: (panelIndex) => {
-        panelCalls += 1;
-        expect(panelIndex).toBe(2);
-        return "panel-2";
-      },
     });
     expect(fallbackCalls).toBe(0);
-    expect(panelCalls).toBe(1);
     expect(built.queued).toEqual({
       hit: {
         layerIndex: 1,

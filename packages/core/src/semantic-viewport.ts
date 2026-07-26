@@ -6,7 +6,12 @@ import type { PositionTransformName } from "./scales/transform.js";
 import type { ScenePanel } from "./scene.js";
 import type { PanelCoordProjector } from "./coord-projector.js";
 import type { CellValue } from "./table.js";
-import type { CandidateFacts, CandidateStore } from "./candidate-store.js";
+import type {
+  CandidateFacts,
+  CandidateInspectMode,
+  CandidateMatch,
+  CandidateStore,
+} from "./candidate-store.js";
 import { encodeKey } from "./scales/state.js";
 
 export interface PlotRect {
@@ -61,12 +66,28 @@ export interface SemanticViewportPanel {
   project(selection: SemanticViewportSelection): PlotRect;
   resolve(selection: SemanticViewportSelection): SemanticViewportDomains;
   query(rect: PlotRect, mode: "x" | "y" | "xy"): readonly CandidateFacts[];
+  /**
+   * Nearest candidate in this panel only. Soft targeting (does not enforce
+   * panel clip); contrast `CandidateStore.hitTest`, which is clip-gated.
+   * Prefer this over store.nearest without panelId so faceted hover/select
+   * cannot seed another panel's mark (#787).
+   */
+  nearest(
+    point: Readonly<{ x: number; y: number }>,
+    options: { mode: CandidateInspectMode; maxDistance: number },
+  ): CandidateMatch | null;
 }
 
 export interface SemanticViewport {
   readonly panels: readonly SemanticViewportPanel[];
   panel(id: string): SemanticViewportPanel | null;
   panelAt(point: Readonly<{ x: number; y: number }>): SemanticViewportPanel | null;
+  /**
+   * Panel under `point`, or the sole panel when the plot has exactly one.
+   * Owns the single-panel outside-panel brush/inspect fallback so interaction
+   * callers do not reimplement it divergently (#787).
+   */
+  panelAtOrOnly(point: Readonly<{ x: number; y: number }>): SemanticViewportPanel | null;
 }
 
 type ViewportScales = {
@@ -292,6 +313,13 @@ function createPanel(
       }
       return matches;
     },
+    nearest(point, options) {
+      return candidates.nearest(point.x, point.y, {
+        mode: options.mode,
+        maxDistance: options.maxDistance,
+        panelId: panel.id,
+      });
+    },
   };
 }
 
@@ -311,21 +339,25 @@ export function createSemanticViewport(
       candidates,
     ),
   );
+  function panelAt(point: Readonly<{ x: number; y: number }>): SemanticViewportPanel | null {
+    return (
+      viewportPanels.find(
+        (panel) =>
+          point.x >= panel.bounds.x0 &&
+          point.x <= panel.bounds.x1 &&
+          point.y >= panel.bounds.y0 &&
+          point.y <= panel.bounds.y1,
+      ) ?? null
+    );
+  }
   return {
     panels: viewportPanels,
     panel(id) {
       return viewportPanels.find((panel) => panel.id === id) ?? null;
     },
-    panelAt(point) {
-      return (
-        viewportPanels.find(
-          (panel) =>
-            point.x >= panel.bounds.x0 &&
-            point.x <= panel.bounds.x1 &&
-            point.y >= panel.bounds.y0 &&
-            point.y <= panel.bounds.y1,
-        ) ?? null
-      );
+    panelAt,
+    panelAtOrOnly(point) {
+      return panelAt(point) ?? (viewportPanels.length === 1 ? (viewportPanels[0] ?? null) : null);
     },
   };
 }

@@ -54,6 +54,9 @@ export function scene(partial: {
       panelAt() {
         return null;
       },
+      panelAtOrOnly() {
+        return panels.length === 1 ? (panels[0] ?? null) : null;
+      },
     },
     lineageKeys(id) {
       return lineage[id] ?? [];

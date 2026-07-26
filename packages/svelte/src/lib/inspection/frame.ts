@@ -49,8 +49,8 @@ export function buildQueuedPointerInspection(input: {
  *
  * Owns the single `match === null` branch for hit resolution + reducer
  * candidate ref (avoids three separate null checks / eager hitTest).
- * `fallbackCandidate` and `panelIdForIndex` are thunks evaluated only on the
- * path that needs them.
+ * `fallbackCandidate` is evaluated only on the path that needs it.
+ * Candidate `panelId` comes from the facts object (no scene index round-trip).
  */
 export type QueuedInspectFrameBuild = {
   readonly queued: QueuedPointerInspection;
@@ -63,8 +63,6 @@ export function buildQueuedInspectFrame(input: {
   readonly epoch: number;
   /** Evaluated only when match is null. */
   readonly fallbackCandidate: () => CandidateFacts | null;
-  /** Evaluated only when a candidate is found. */
-  readonly panelIdForIndex: (panelIndex: number) => string | null;
 }): QueuedInspectFrameBuild {
   if (input.match === null) {
     const fallback = input.fallbackCandidate();
@@ -79,7 +77,7 @@ export function buildQueuedInspectFrame(input: {
       candidate: {
         epoch: input.epoch,
         id: fallback.id,
-        panelId: input.panelIdForIndex(fallback.panelIndex),
+        panelId: fallback.panelId,
         x: fallback.x,
         y: fallback.y,
       },
@@ -96,7 +94,7 @@ export function buildQueuedInspectFrame(input: {
     candidate: {
       epoch: input.epoch,
       id: match.id,
-      panelId: input.panelIdForIndex(match.panelIndex),
+      panelId: match.panelId,
       x: match.x,
       y: match.y,
     },
