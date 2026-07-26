@@ -1,0 +1,172 @@
+{
+  "id": "65-vibration-freqpoly-by-machine",
+  "kind": "chart",
+  "prompt": "Frequency polygon of vibration readings by machine, density scaled, 20 bins.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "vibration_rms",
+        "type": "quantitative"
+      },
+      {
+        "name": "machine",
+        "type": "nominal",
+        "examples": ["press-a", "press-b"]
+      }
+    ],
+    "rowCount": 30
+  },
+  "data": {
+    "main": [
+      {
+        "vibration_rms": 1.1,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 1.4,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 1.8,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 2,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 2.1,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 2.2,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 2.3,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 2.3,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 2.4,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 2.5,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 2.5,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 2.6,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 2.7,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 2.7,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 2.8,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 2.9,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 3,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 3,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 3.1,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 3.2,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 3.3,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 3.5,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 3.6,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 3.8,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 4,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 4.2,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 4.5,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 4.9,
+        "machine": "press-b"
+      },
+      {
+        "vibration_rms": 5.3,
+        "machine": "press-a"
+      },
+      {
+        "vibration_rms": 5.8,
+        "machine": "press-b"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "line",
+        "stat": "bin",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "vibration_rms"
+          },
+          "y": {
+            "stat": "density"
+          },
+          "color": {
+            "field": "machine"
+          }
+        },
+        "params": {
+          "bins": 20
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Colored frequency polygon: one line series per group; y can be density. Still line + bin + identity."
+}

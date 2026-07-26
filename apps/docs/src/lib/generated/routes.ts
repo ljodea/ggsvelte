@@ -332,6 +332,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "frequency-polygon",
+        title: "Frequency polygon",
+        level: 2,
+      },
+      {
         id: "unique-first-wins-aesthetic-dedupe",
         title: "Unique (first-wins aesthetic dedupe)",
         level: 2,
@@ -2072,8 +2077,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-514",
-        title: "experimental (514)",
+        id: "experimental-520",
+        title: "experimental (520)",
         level: 3,
       },
       {
@@ -2112,8 +2117,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-445",
-        title: "experimental (445)",
+        id: "experimental-446",
+        title: "experimental (446)",
         level: 3,
       },
       {
@@ -2482,6 +2487,16 @@ export const DOCS_ROUTES = [
     title: "Free y scales per panel — ggsvelte gallery",
     description: "Free y scales per panel",
     canonicalPath: "/examples/facet/wrap-free-y",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/freqpoly/basic",
+    title: "Frequency polygon — ggsvelte gallery",
+    description: "Frequency polygon",
+    canonicalPath: "/examples/freqpoly/basic",
     kind: "page",
     index: true,
     sitemap: true,

@@ -91,6 +91,11 @@
       "sourceSha256": "0a0605f1917b24071736e28aee55f940112037857efe926604ef5acf34445c37",
       "pngSha256": "5b90c498aad252a867417319e5fac04e39e2b6ce6bb326ec97c22c112b16da64"
     },
+    "freqpoly/basic": {
+      "filename": "freqpoly-basic-light.png",
+      "sourceSha256": "debd3a7f3545a99ee4f83a4a89b9456a559339c725b7b1727596104e69d76569",
+      "pngSha256": "29209d4a65b24bba0dad9bb91a70aaa3d547bf4d24689297f8ea391ebf0ec86c"
+    },
     "histogram/basic": {
       "filename": "histogram-basic-light.png",
       "sourceSha256": "49122556a7f21ec9a57652a005ab87da2025a1328520b3d07e70656bd02d1869",

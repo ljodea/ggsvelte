@@ -388,6 +388,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "FreqpolyLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FreqpolyLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FreqpolyLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GEOM_DEFAULTS": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -417,6 +429,10 @@
           "lifecycle": "experimental"
         },
         "GeomErrorbarOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomFreqpolyOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -688,6 +704,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "PathParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "PlotSpecSchema": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -849,6 +869,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeErrorbarLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeFreqpolyLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3574,6 +3598,10 @@
           "lifecycle": "experimental"
         },
         "GeomErrorbar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomFreqpoly": {
           "kind": "value",
           "lifecycle": "experimental"
         },

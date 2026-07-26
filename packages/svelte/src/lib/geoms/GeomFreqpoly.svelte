@@ -1,9 +1,11 @@
 <script lang="ts">
   /**
-   * <GeomLine> — declaration-only line-layer sugar for <GGPlot>.
-   * Same contract and z-order constraint as <GeomPoint> (decision 0001).
+   * <GeomFreqpoly> — declaration-only frequency-polygon sugar for <GGPlot>
+   * (ggplot2 geom_freqpoly; canonicalized to line + stat bin). Map continuous
+   * aes.x only; y is computed by the bin stat. Same z-order contract as
+   * <GeomPoint> (decision 0001).
    */
-  import type { DataInput, AesInput, LineParams } from "@ggsvelte/spec";
+  import type { AesInput, DataInput, LineParams } from "@ggsvelte/spec";
 
   import { createGeomLayer } from "./factory.svelte.js";
 
@@ -12,12 +14,10 @@
     data?: DataInput | readonly Record<string, unknown>[];
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
     aes?: AesInput;
-    /** identity | unique (#813) | bin (freqpoly form; #796). */
-    stat?: "identity" | "unique" | "bin";
   }
 
   const props: Props = $props();
-  createGeomLayer("line", () => props, [
+  createGeomLayer("freqpoly", () => props, [
     "alpha",
     "linewidth",
     "curve",

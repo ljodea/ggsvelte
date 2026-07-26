@@ -175,7 +175,13 @@ export function dataChecks(
         );
       }
     }
-    if (geom === "histogram" || geom === "density" || (geom === "bar" && stat === "bin")) {
+    if (
+      geom === "histogram" ||
+      geom === "freqpoly" ||
+      geom === "density" ||
+      (geom === "bar" && stat === "bin") ||
+      (geom === "line" && stat === "bin")
+    ) {
       const x = fieldTypeOf("x");
       if (x !== null && (x[1] === "nominal" || x[1] === "ordinal")) {
         typeError(

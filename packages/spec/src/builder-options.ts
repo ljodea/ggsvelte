@@ -13,6 +13,7 @@ import type {
   ErrorbarParams,
   RibbonParams,
   LineParams,
+  PathParams,
   PointParams,
   PointPosition,
   PositionParams,
@@ -43,7 +44,7 @@ export interface GeomPointOptions extends PointParams, GeomDataOption {
   positionParams?: PositionParams;
 }
 
-/** Line-layer sugar options: params plus an optional layer-level aes. */
+/** Line-layer sugar options: LineParams (style + optional stat-bin knobs). */
 export interface GeomLineOptions extends LineParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
@@ -51,8 +52,8 @@ export interface GeomLineOptions extends LineParams, GeomDataOption {
   stat?: "identity" | "unique";
 }
 
-/** Path-layer sugar options (data-order polylines; same params as line). */
-export interface GeomPathOptions extends LineParams, GeomDataOption {
+/** Path-layer sugar options (data-order polylines; style-only — no bin knobs). */
+export interface GeomPathOptions extends PathParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
   /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
@@ -73,6 +74,12 @@ export interface GeomBarOptions extends BarParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
   position?: StackablePosition;
+}
+
+/** Freqpoly sugar: bin params + line styling (normalize → line + bin). */
+export interface GeomFreqpolyOptions extends LineParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
 }
 
 /** Histogram-layer sugar options: bin params plus aes and a position override. */

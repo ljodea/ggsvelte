@@ -36,7 +36,7 @@ Bare strings are invalid in JSON specs. Channels: x, y, color, fill, group, labe
 weight, ymin, ymax, xmin, xmax.
 
 ## Geoms / stats / positions
-Geoms: point, line, col, bar, histogram, area, rule, text, smooth, boxplot, density,
+Geoms: point, line, col, bar, histogram, freqpoly, area, rule, text, smooth, boxplot, density,
 errorbar, rect, tile, ribbon.
 Defaults: bar→count+stack; histogram→bin+stack; col/area→identity+stack;
 boxplot→boxplot+dodge; else identity.

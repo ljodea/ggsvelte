@@ -86,6 +86,7 @@ export { default as GeomArea } from "./geoms/GeomArea.svelte";
 export { default as GeomRule } from "./geoms/GeomRule.svelte";
 export { default as GeomText } from "./geoms/GeomText.svelte";
 export { default as GeomHistogram } from "./geoms/GeomHistogram.svelte";
+export { default as GeomFreqpoly } from "./geoms/GeomFreqpoly.svelte";
 export { default as GeomSmooth } from "./geoms/GeomSmooth.svelte";
 export { default as GeomBoxplot } from "./geoms/GeomBoxplot.svelte";
 export { default as GeomDensity } from "./geoms/GeomDensity.svelte";

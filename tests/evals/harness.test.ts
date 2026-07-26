@@ -69,12 +69,18 @@ describe("case corpus", () => {
   });
 
   test("every geom is covered at least twice across the corpus", () => {
-    // Canonical golds store histogram as bar+bin — count it as histogram.
+    // Canonical golds store sugar geoms expanded: bar+bin → histogram,
+    // line+bin → freqpoly (#796).
     const counts = new Map<string, number>();
     for (const c of cases) {
       if (c.gold === null) continue;
       for (const layer of c.gold.layers as Array<{ geom: string; stat?: string }>) {
-        const name = layer.geom === "bar" && layer.stat === "bin" ? "histogram" : layer.geom;
+        const name =
+          layer.geom === "bar" && layer.stat === "bin"
+            ? "histogram"
+            : layer.geom === "line" && layer.stat === "bin"
+              ? "freqpoly"
+              : layer.geom;
         counts.set(name, (counts.get(name) ?? 0) + 1);
       }
     }

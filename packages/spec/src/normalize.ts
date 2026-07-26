@@ -66,6 +66,7 @@ export type {
   FacetFieldInput,
   FacetInput,
   HistogramLayerInput,
+  FreqpolyLayerInput,
   RibbonLayerInput,
   SegmentLayerInput,
   LayerInput,
@@ -148,9 +149,9 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   if (stat === "density" && aes?.y === undefined) {
     aes = { ...aes, y: { stat: "density" } };
   }
-  // The histogram geom is an ALIAS (one canonical form per concept): its
-  // post-normalize representation is a bar layer with the bin stat.
-  const geom = layer.geom === "histogram" ? "bar" : layer.geom;
+  // Aliases (one canonical form per concept):
+  // histogram → bar + bin; freqpoly → line + bin.
+  const geom = layer.geom === "histogram" ? "bar" : layer.geom === "freqpoly" ? "line" : layer.geom;
   const positionParams =
     "positionParams" in layer && layer.positionParams !== undefined
       ? { ...layer.positionParams }
