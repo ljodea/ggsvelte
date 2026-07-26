@@ -21,10 +21,13 @@
  */
 import {
   GRAMMAR_FAMILIES,
+  MERGE_KEY_EMIT_ORDER,
+  REPLACE_EMIT_ORDER,
   grammarDocUrl,
   type MergeByKeyKind,
   type ReplaceKind,
 } from "../layers/grammar-families.js";
+import type { PlotLayerLike } from "../layers/types.js";
 
 export type CompositionDiagnosticCode =
   | "DUPLICATE_SCALE_CHANNEL"
@@ -209,4 +212,105 @@ export function duplicatePlotLayerDiagnostic(
     ],
     docUrl: grammarDocUrl(kind),
   };
+}
+
+type MergeKeyLayer = Extract<PlotLayerLike, { kind: DuplicateMergeKeyKind }>;
+type ReplaceLayer = Extract<PlotLayerLike, { kind: DuplicatePlotLayerKind }>;
+
+function isMergeKeyLayer(layer: PlotLayerLike): layer is MergeKeyLayer {
+  return (MERGE_KEY_EMIT_ORDER as readonly string[]).includes(layer.kind);
+}
+
+function isReplaceLayer(layer: PlotLayerLike): layer is ReplaceLayer {
+  return (REPLACE_EMIT_ORDER as readonly string[]).includes(layer.kind);
+}
+
+/**
+ * Scan plot layers for composition collisions (duplicate scale channels,
+ * keyed-MERGE key collisions, REPLACE multi-children). Pure — safe to call
+ * from a `$derived` that only re-reads `registry.layers`.
+ *
+ * Emission order: scale channels, then MERGE_KEY_EMIT_ORDER, then
+ * REPLACE_EMIT_ORDER. Mark layers are ignored.
+ */
+export function collectCompositionDiagnostics(
+  layers: readonly PlotLayerLike[],
+): CompositionDiagnostic[] {
+  const list: CompositionDiagnostic[] = [];
+  const seenChannels = new Set<string>();
+  const duplicateChannels = new Set<string>();
+  // Kind membership and emit order come from GRAMMAR_FAMILIES (#785).
+  // Scales keep their own advisory code (0.11.0 surface); labs/guides/legend
+  // share DUPLICATE_MERGE_KEY.
+  const mergeSeen = Object.fromEntries(
+    MERGE_KEY_EMIT_ORDER.map((k) => [k, new Set<string>()]),
+  ) as Record<DuplicateMergeKeyKind, Set<string>>;
+  const mergeDuplicates = Object.fromEntries(
+    MERGE_KEY_EMIT_ORDER.map((k) => [k, new Set<string>()]),
+  ) as Record<DuplicateMergeKeyKind, Set<string>>;
+  const replaceCounts = Object.fromEntries(REPLACE_EMIT_ORDER.map((k) => [k, 0])) as Record<
+    DuplicatePlotLayerKind,
+    number
+  >;
+  for (const layer of layers) {
+    if (layer.kind === "scale") {
+      for (const channel of Object.keys(layer.value)) {
+        if (seenChannels.has(channel)) {
+          duplicateChannels.add(channel);
+        } else {
+          seenChannels.add(channel);
+        }
+      }
+      continue;
+    }
+    if (isMergeKeyLayer(layer)) {
+      const kind = layer.kind;
+      for (const key of Object.keys(layer.value)) {
+        if (mergeSeen[kind].has(key)) {
+          mergeDuplicates[kind].add(key);
+        } else {
+          mergeSeen[kind].add(key);
+        }
+      }
+      continue;
+    }
+    if (isReplaceLayer(layer)) {
+      replaceCounts[layer.kind] += 1;
+    }
+  }
+  for (const channel of duplicateChannels) {
+    list.push(duplicateScaleChannelDiagnostic(channel));
+  }
+  for (const kind of MERGE_KEY_EMIT_ORDER) {
+    for (const key of mergeDuplicates[kind]) {
+      list.push(duplicateMergeKeyDiagnostic(kind, key));
+    }
+  }
+  for (const kind of REPLACE_EMIT_ORDER) {
+    if (replaceCounts[kind] > 1) {
+      list.push(duplicatePlotLayerDiagnostic(kind));
+    }
+  }
+  return list;
+}
+
+/**
+ * Once-per-instance advisory dedup key for composition diagnostics.
+ * Shape matches the assembly deliveredAdvisories Set:
+ * - scale: `${code}:${channel}`
+ * - merge-key: `${code}:${kind}:${key}`
+ * - replace: `${code}:${kind}`
+ */
+export function compositionAdvisoryDedupKey(diagnostic: CompositionDiagnostic): string {
+  if (isDuplicateScaleChannelDiagnostic(diagnostic)) {
+    return `${diagnostic.code}:${diagnostic.channel}`;
+  }
+  if (isDuplicateMergeKeyDiagnostic(diagnostic)) {
+    return `${diagnostic.code}:${diagnostic.kind}:${diagnostic.key}`;
+  }
+  if (isDuplicatePlotLayerDiagnostic(diagnostic)) {
+    return `${diagnostic.code}:${diagnostic.kind}`;
+  }
+  // Exhaustiveness: CompositionDiagnostic has only the three variants above.
+  return ((x: never) => x)(diagnostic);
 }
