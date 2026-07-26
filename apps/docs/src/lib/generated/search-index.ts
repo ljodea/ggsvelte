@@ -2974,6 +2974,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["density-2d-group-dropped"],
   },
   {
+    id: "heading:guide-errors:density-2d-filled-open-dropped",
+    kind: "heading",
+    title: "density-2d-filled-open-dropped",
+    summary:
+      "density-2d-filled-open-dropped in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#density-2d-filled-open-dropped",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["density-2d-filled-open-dropped"],
+  },
+  {
     id: "heading:guide-errors:map-region-missing",
     kind: "heading",
     title: "map-region-missing",
@@ -20643,6 +20653,19 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["density-2d-group-dropped", "warning:density-2d-group-dropped"],
+  },
+  {
+    id: "diagnostic:warning:density-2d-filled-open-dropped",
+    kind: "diagnostic",
+    title: "density-2d-filled-open-dropped · warning",
+    summary: "density_2d_filled dropped open isoline rings; v1 fills closed rings only.",
+    href: "/guide/errors#density-2d-filled-open-dropped",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["density-2d-filled-open-dropped", "warning:density-2d-filled-open-dropped"],
   },
   {
     id: "diagnostic:warning:map-region-missing",

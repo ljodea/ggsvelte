@@ -1828,6 +1828,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "density-2d-filled-open-dropped",
+        title: "density-2d-filled-open-dropped",
+        level: 3,
+      },
+      {
         id: "map-region-missing",
         title: "map-region-missing",
         level: 3,
