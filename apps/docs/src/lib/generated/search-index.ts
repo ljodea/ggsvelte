@@ -3522,14 +3522,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["experimental (460)"],
   },
   {
-    id: "heading:guide-lifecycle:stable-intent-133",
+    id: "heading:guide-lifecycle:stable-intent-134",
     kind: "heading",
-    title: "stable-intent (133)",
+    title: "stable-intent (134)",
     summary:
-      "stable-intent (133) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#stable-intent-133",
+      "stable-intent (134) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#stable-intent-134",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["stable-intent (133)"],
+    exact: ["stable-intent (134)"],
   },
   {
     id: "page:guide-upgrading",
@@ -15575,6 +15575,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-svelte",
     keywords: ["@ggsvelte/svelte", ".", "value", "stable-intent"],
     exact: ["Theme"],
+  },
+  {
+    id: "api:ggsvelte-svelte:ThemeBw",
+    kind: "api",
+    title: "ThemeBw",
+    summary: "@ggsvelte/svelte · value · stable-intent.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "stable-intent"],
+    exact: ["ThemeBw"],
   },
   {
     id: "api:ggsvelte-svelte:ThemeClassic",
