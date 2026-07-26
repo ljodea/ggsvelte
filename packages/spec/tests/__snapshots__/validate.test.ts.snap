@@ -101,7 +101,8 @@ exports[`validate — agent errors (snapshot-tested messages) unknown geom with 
       "sf_label",
       "blank",
       "jitter",
-      "spoke",    ],
+      "spoke",
+    ],
     "code": "unknown-geom",
     "fix": {
       "description": "Set geom to "point".",
@@ -109,8 +110,8 @@ exports[`validate — agent errors (snapshot-tested messages) unknown geom with 
         "geom": "point",
       },
     },
-      "jitter",
-      "spoke",    "path": "/layers/0/geom",
+    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "sf_label", "blank", "jitter", "spoke". Did you mean "point"?",
+    "path": "/layers/0/geom",
   },
 ]
 `;
@@ -152,7 +153,8 @@ exports[`validate — agent errors (snapshot-tested messages) geom missing entir
       "sf_label",
       "blank",
       "jitter",
-      "spoke",    ],
+      "spoke",
+    ],
     "code": "missing-geom",
     "fix": {
       "description": "Add a geom to the layer.",
@@ -160,8 +162,8 @@ exports[`validate — agent errors (snapshot-tested messages) geom missing entir
         "geom": "point",
       },
     },
-      "jitter",
-      "spoke",    "path": "/layers/0/geom",
+    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "sf_label", "blank", "jitter", "spoke".",
+    "path": "/layers/0/geom",
   },
 ]
 `;
@@ -358,7 +360,8 @@ exports[`validate — agent errors (snapshot-tested messages) multiple errors ar
       "sf_label",
       "blank",
       "jitter",
-      "spoke",    ],
+      "spoke",
+    ],
     "code": "unknown-geom",
     "fix": {
       "description": "Set geom to "point".",
@@ -366,8 +369,8 @@ exports[`validate — agent errors (snapshot-tested messages) multiple errors ar
         "geom": "point",
       },
     },
-      "jitter",
-      "spoke",    "path": "/layers/0/geom",
+    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "sf_label", "blank", "jitter", "spoke". Did you mean "point"?",
+    "path": "/layers/0/geom",
   },
   {
     "code": "value-out-of-range",
