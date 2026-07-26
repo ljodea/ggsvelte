@@ -88,4 +88,35 @@ describe("dotplot geom (histodot bindot)", () => {
     expect(colors).toBeDefined();
     expect(new Set(colors).size).toBe(2);
   });
+
+  // ggplot2 geom_dotplot groups by fill by default; schema advertises "Map fill/color".
+  it("fill aesthetic paints per-observation dots", () => {
+    const model = runPipeline(
+      gg(data, aes({ x: "x", fill: "g" }))
+        .geomDotplot({ binwidth: 1, boundary: 0.5 })
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PointsBatch;
+    expect(batch.kind).toBe("points");
+    const colors = batch.colors;
+    expect(colors).toBeDefined();
+    expect(new Set(colors).size).toBe(2);
+  });
+
+  it("fill paint wins over color when both are mapped", () => {
+    const model = runPipeline(
+      gg(
+        { x: [1, 1, 2, 2], fillG: ["a", "a", "b", "b"], colorG: ["x", "x", "x", "x"] },
+        aes({ x: "x", fill: "fillG", color: "colorG" }),
+      )
+        .geomDotplot({ binwidth: 1, boundary: 0.5 })
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PointsBatch;
+    expect(batch.colors).toBeDefined();
+    // fill has 2 levels; color is constant — paint must follow fill.
+    expect(new Set(batch.colors).size).toBe(2);
+  });
 });
