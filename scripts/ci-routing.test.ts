@@ -1,12 +1,16 @@
 import { describe, expect, test } from "bun:test";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import {
   CACHEABLE_EXECUTIONS,
   CONTENT_HASH_SCHEMA,
   JOB_CONTENT_INPUTS,
+  LANE_PATTERNS,
   classifyChangedPaths,
   contentHashCacheKey,
+  docsPackageInvokedScripts,
+  docsSourceScriptImports,
   evaluateGate,
   formatGithubOutputs,
   formatTreeEntryDigest,
@@ -139,11 +143,26 @@ describe("classifyChangedPaths", () => {
       "apps/docs/src/lib/guide.ts",
       "apps/docs/src/lib/components/GettingStartedGuide.svelte",
       "apps/docs/src/lib/catalog/docs-tasks.ts",
+      // Sibling generated inventory modules are content-only (#784 lesson-charts).
+      "apps/docs/src/lib/generated/lesson-charts.ts",
+      "apps/docs/src/lib/generated/routes.ts",
+      "apps/docs/src/lib/generated/search-index.ts",
+      "apps/docs/src/lib/generated/playground-seeds.ts",
+      "apps/docs/src/lib/generated/gallery-previews.ts",
     ]) {
       const flags = classifyChangedPaths([file]);
       expect(flags.docs, file).toBe(true);
       expect(flags.docs_render, file).toBe(false);
     }
+  });
+
+  test("lesson-charts projection schedules docs site without VR", () => {
+    const path = "apps/docs/src/lib/generated/lesson-charts.ts";
+    const plan = planJobs(classifyChangedPaths([path]));
+    expect(plan.docs_site).toBe(true);
+    expect(plan.svelte_check).toBe(true);
+    expect(plan.docs_journeys).toBe(true);
+    expect(plan.vr).toBe(false);
   });
 
   test("unknown apps/docs shell paths fail closed to docs_render", () => {
@@ -523,6 +542,11 @@ describe("planJobs", () => {
       "scripts/gen-playground-seeds.ts",
       "scripts/check-docs-metadata.ts",
       "scripts/check-pages-links.ts",
+      // #784: package.json build/check invoke gen-lesson-charts; build invokes docs-csp.
+      "scripts/gen-lesson-charts.ts",
+      "scripts/gen-lesson-charts.test.ts",
+      "scripts/docs-csp.ts",
+      "scripts/docs-csp.test.ts",
     ]) {
       const flags = classifyChangedPaths([path]);
       expect(flags.docs, path).toBe(true);
@@ -530,6 +554,7 @@ describe("planJobs", () => {
       expect(plan.svelte_check, path).toBe(true);
       expect(plan.docs_site, path).toBe(true);
       expect(plan.pages, path).toBe(true);
+      expect(plan.docs_journeys, path).toBe(true);
       expect(plan.unit, path).toBe(true);
       expect(plan.build, path).toBe(true);
       expect(plan.vr, path).toBe(false);
@@ -558,11 +583,102 @@ describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
       expect(inputs, execution).toContain("scripts/gen-playground-seeds.ts");
       expect(inputs, execution).toContain("scripts/check-docs-metadata.ts");
       expect(inputs, execution).toContain("scripts/check-pages-links.ts");
+      expect(inputs, execution).toContain("scripts/gen-lesson-charts.ts");
+      expect(inputs, execution).toContain("scripts/docs-csp.ts");
       expect(inputs, execution).toContain("scripts/gen-llms.ts");
       expect(inputs, execution).toContain("scripts/docs-seo.ts");
       expect(inputs, execution).toContain("scripts/quickstart.ts");
       expect(inputs, execution).toContain("scripts/guide-code-contract.ts");
       expect(inputs, execution).toContain("scripts/highlight-code.ts");
+      for (const file of ["scripts/gen-lesson-charts.ts", "scripts/docs-csp.ts"]) {
+        expect(listJobContentPaths(execution, [file]), `${execution}:${file}`).toContain(file);
+      }
+    }
+  });
+
+  test("component_journeys hashes gen-lesson-charts (lesson img counts on getting-started)", () => {
+    const file = "scripts/gen-lesson-charts.ts";
+    expect(JOB_CONTENT_INPUTS.component_journeys).toContain(file);
+    expect(listJobContentPaths("component_journeys", [file])).toContain(file);
+  });
+});
+
+describe("docs surface membership gates (#784)", () => {
+  test("docsPackageInvokedScripts parses bun script paths with and without flags", () => {
+    expect(
+      docsPackageInvokedScripts({
+        build: "bun ../../scripts/gen-a.ts --check && bun ../../scripts/docs-csp.ts",
+        check: "bun ../../scripts/gen-a.ts --check",
+        dev: "vite dev",
+      }),
+    ).toEqual(["scripts/docs-csp.ts", "scripts/gen-a.ts"]);
+  });
+
+  test("docsSourceScriptImports resolves $scripts module ids to scripts/*.ts", () => {
+    expect(
+      docsSourceScriptImports(`
+        import { x } from "$scripts/gen-llms";
+        import type { Y } from "$scripts/cli-docs";
+        import { z } from "$scripts/quickstart.ts";
+      `),
+    ).toEqual(["scripts/cli-docs.ts", "scripts/gen-llms.ts", "scripts/quickstart.ts"]);
+  });
+
+  test("every apps/docs package.json-invoked script is on the docs lane and docs surface hash", () => {
+    const pkgPath = join(import.meta.dir, "..", "apps", "docs", "package.json");
+    const pkg = JSON.parse(readFileSync(pkgPath, "utf8")) as {
+      scripts: Record<string, string>;
+    };
+    const invoked = docsPackageInvokedScripts(pkg.scripts);
+    // Sanity: build/check must surface at least the known generators.
+    expect(invoked).toContain("scripts/gen-lesson-charts.ts");
+    expect(invoked).toContain("scripts/docs-csp.ts");
+    expect(invoked.length).toBeGreaterThan(4);
+
+    for (const path of invoked) {
+      // Membership via patterns (exact path or covered by a docs-lane pattern).
+      const onDocsLane = LANE_PATTERNS.docs.some((pattern) => matchPathPattern(pattern, path));
+      expect(onDocsLane, `LANE_PATTERNS.docs missing ${path}`).toBe(true);
+      expect(classifyChangedPaths([path]).docs, path).toBe(true);
+      // Invoked files (not their .test.ts siblings) must bust docs surface hashes.
+      expect(listJobContentPaths("docs_site", [path]), `docs_site:${path}`).toContain(path);
+      expect(listJobContentPaths("svelte_check", [path]), `svelte_check:${path}`).toContain(path);
+    }
+  });
+
+  test("every $scripts import under apps/docs/src is on the docs lane and docs surface hash", () => {
+    const root = join(import.meta.dir, "..", "apps", "docs", "src");
+    const sources: string[] = [];
+    const walk = (dir: string) => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const full = join(dir, entry.name);
+        if (entry.isDirectory()) {
+          walk(full);
+          continue;
+        }
+        if (/\.(ts|js|svelte)$/.test(entry.name)) sources.push(full);
+      }
+    };
+    walk(root);
+
+    const imported = new Set<string>();
+    for (const file of sources) {
+      for (const path of docsSourceScriptImports(readFileSync(file, "utf8"))) {
+        imported.add(path);
+      }
+    }
+    expect(imported.size).toBeGreaterThan(0);
+    // Known $scripts consumers today.
+    expect(imported).toContain("scripts/gen-llms.ts");
+    expect(imported).toContain("scripts/docs-seo.ts");
+    expect(imported).toContain("scripts/cli-docs.ts");
+    expect(imported).toContain("scripts/quickstart.ts");
+
+    for (const path of [...imported].toSorted()) {
+      const onDocsLane = LANE_PATTERNS.docs.some((pattern) => matchPathPattern(pattern, path));
+      expect(onDocsLane, `LANE_PATTERNS.docs missing $scripts import ${path}`).toBe(true);
+      expect(listJobContentPaths("docs_site", [path]), `docs_site:${path}`).toContain(path);
+      expect(listJobContentPaths("svelte_check", [path]), `svelte_check:${path}`).toContain(path);
     }
   });
 });
@@ -1017,6 +1133,8 @@ describe("ci-routing module tree (split-safe)", () => {
       "classifyChangedPaths",
       "collectGitHeadInputDigests",
       "contentHashCacheKey",
+      "docsPackageInvokedScripts",
+      "docsSourceScriptImports",
       "emptyChangeFlags",
       "evaluateGate",
       "formatGithubOutputs",

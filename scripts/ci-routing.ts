@@ -30,6 +30,8 @@ export {
   classifyChangedPaths,
   isDocsContentOnlyPath,
   isDocsRenderPath,
+  docsPackageInvokedScripts,
+  docsSourceScriptImports,
   planJobs,
   evaluateGate,
   formatGithubOutputs,
