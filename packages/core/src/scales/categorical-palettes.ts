@@ -2,9 +2,10 @@
  * Named categorical color palettes and scheme registry for ordinal color
  * scales. Pure data — training lives in train.ts.
  */
+// Palettes live in @ggsvelte/spec (authoring + portable schemes). Core only
+// consumes the frozen 10-stop tables for CATEGORICAL_SCHEMES — do not re-export
+// builders here (knip: unused package exports).
 import { GREY_PALETTE_10, HUE_PALETTE_10 } from "@ggsvelte/spec";
-
-export { buildGreyPalette, buildHuePalette, GREY_PALETTE_10, HUE_PALETTE_10 } from "@ggsvelte/spec";
 
 /**
  * Default categorical palette: 10 colors in the Observable 10 family.
