@@ -126,7 +126,8 @@ describe("geom_sf", () => {
     expect(batch.positions.length / 2).toBe(2);
   });
 
-  it("warns when interior rings (holes) are present", () => {
+  it("draws interior rings as even-odd holes (no ignore warning)", () => {
+    // Exterior triangle (0,0)-(4,0)-(2,4); hole triangle (1,1)-(2,1)-(1.5,2).
     const withHole = geo({
       type: "Polygon",
       coordinates: [
@@ -150,9 +151,101 @@ describe("geom_sf", () => {
         .spec(),
       size,
     );
-    expect(model.warnings.some((w) => w.code === "sf-holes-ignored")).toBe(true);
+    expect(model.warnings.some((w) => w.code === "sf-holes-ignored")).toBe(false);
     const batch = model.scene.batches[0] as PathsBatch;
     expect(batch.pathOffsets.length - 1).toBe(1);
+    // Exterior 3 verts + hole 3 verts (closing duplicates dropped).
+    expect(batch.positions.length / 2).toBe(6);
+    expect(batch.fillRule).toBe("evenodd");
+    expect(batch.ringStarts).toBeDefined();
+    expect([...batch.ringStarts!]).toEqual([3]);
+  });
+
+  it("hit-tests exterior minus holes (even-odd)", () => {
+    const withHole = geo({
+      type: "Polygon",
+      coordinates: [
+        [
+          [0, 0],
+          [10, 0],
+          [10, 10],
+          [0, 10],
+          [0, 0],
+        ],
+        [
+          [3, 3],
+          [7, 3],
+          [7, 7],
+          [3, 7],
+          [3, 3],
+        ],
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [withHole] }, aes({}))
+        .geomSf()
+        .spec(),
+      size,
+    );
+    // Map data → panel px via scales (linear trained on [0,10] × [0,10]).
+    const panel = model.scene.panels[0]!;
+    const toPlot = (dx: number, dy: number) => {
+      const sx = model.scales.x;
+      const sy = model.scales.y;
+      if (sx.type === "band" || sy.type === "band") throw new Error("expected continuous");
+      const nx = sx.normalizeTransformed(dx);
+      const ny = sy.normalizeTransformed(dy);
+      if (nx === undefined || ny === undefined) throw new Error("normalize failed");
+      const px = panel.x + nx * panel.width;
+      const py = panel.y + (1 - ny) * panel.height;
+      return { px, py };
+    };
+    const exterior = toPlot(1, 1);
+    const hole = toPlot(5, 5);
+    expect(model.candidates.hitTest(exterior.px, exterior.py)).not.toBeNull();
+    expect(model.candidates.hitTest(hole.px, hole.py)).toBeNull();
+  });
+
+  it("keeps MultiPolygon parts as separate compounds when one has a hole", () => {
+    const multi = geo({
+      type: "MultiPolygon",
+      coordinates: [
+        [
+          [
+            [0, 0],
+            [2, 0],
+            [1, 2],
+            [0, 0],
+          ],
+          [
+            [0.5, 0.4],
+            [1.5, 0.4],
+            [1, 1.2],
+            [0.5, 0.4],
+          ],
+        ],
+        [
+          [
+            [4, 0],
+            [6, 0],
+            [5, 2],
+            [4, 0],
+          ],
+        ],
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [multi] }, aes({}))
+        .geomSf()
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PathsBatch;
+    // Two polygon parts → two path subpaths.
+    expect(batch.pathOffsets.length - 1).toBe(2);
+    expect(batch.fillRule).toBe("evenodd");
+    // First part: 3 exterior + 3 hole; second part: 3 exterior.
+    expect(batch.positions.length / 2).toBe(9);
   });
 
   it("uses exact auto hit mode", () => {

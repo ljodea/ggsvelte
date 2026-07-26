@@ -79,6 +79,17 @@ export interface PathsBatch {
   closedFrameRows?: Uint32Array;
   /** Start offset (in points) of each subpath; length = subpathCount + 1. */
   pathOffsets: Uint32Array;
+  /**
+   * Additional ring-start vertex indices within a closed filled subpath
+   * (exterior already starts at pathOffsets[s]). Used for polygon holes:
+   * one compound path with multiple M…Z rings (#809 phase 4).
+   */
+  ringStarts?: Uint32Array;
+  /**
+   * Canvas/SVG fill rule for closed filled subpaths. Default / omitted is
+   * nonzero. Set to evenodd when a subpath carries hole rings.
+   */
+  fillRule?: "nonzero" | "evenodd";
   /** Stroke color per subpath (null = theme ink). */
   strokes: (string | null)[];
   /** Fill color per subpath (area polygons; null entries = theme accent).

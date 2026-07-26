@@ -229,7 +229,35 @@ export {
   panelRangeInOrder,
 } from "./candidate-geometry-nearest.js";
 
-export function insidePath(
+/**
+ * Half-open ring spans within a path subpath [start, end), split on
+ * {@link PathsBatch.ringStarts} (hole rings). Always includes [start, end) when
+ * no interior breaks fall in range.
+ */
+export function pathRingRanges(
+  batch: Extract<GeometryBatch, { kind: "paths" }>,
+  start: number,
+  end: number,
+): readonly (readonly [number, number])[] {
+  if (end <= start) return [];
+  const breaks = batch.ringStarts;
+  if (breaks === undefined || breaks.length === 0) return [[start, end]];
+  const cuts: number[] = [start];
+  for (let i = 0; i < breaks.length; i++) {
+    const b = breaks[i]!;
+    if (b > start && b < end) cuts.push(b);
+  }
+  cuts.push(end);
+  const ranges: (readonly [number, number])[] = [];
+  for (let i = 0; i + 1 < cuts.length; i++) {
+    const a = cuts[i]!;
+    const b = cuts[i + 1]!;
+    if (b > a) ranges.push([a, b]);
+  }
+  return ranges;
+}
+
+function insideRing(
   batch: Extract<GeometryBatch, { kind: "paths" }>,
   start: number,
   end: number,
@@ -243,6 +271,30 @@ export function insidePath(
     const xj = batch.positions[j * 2]!;
     const yj = batch.positions[j * 2 + 1]!;
     if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+/**
+ * Point-in-filled-path. Multi-ring subpaths (polygon holes) use even-odd across
+ * rings; single-ring subpaths keep the classic even-odd edge toggle (equivalent
+ * to nonzero for simple non-self-intersecting polygons).
+ */
+export function insidePath(
+  batch: Extract<GeometryBatch, { kind: "paths" }>,
+  start: number,
+  end: number,
+  x: number,
+  y: number,
+): boolean {
+  const rings = pathRingRanges(batch, start, end);
+  if (rings.length <= 1) {
+    return insideRing(batch, start, end, x, y);
+  }
+  // Even-odd compound: each ring toggles membership (GeoJSON holes).
+  let inside = false;
+  for (const [rs, re] of rings) {
+    if (insideRing(batch, rs, re, x, y)) inside = !inside;
   }
   return inside;
 }
