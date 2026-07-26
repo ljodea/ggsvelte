@@ -44,6 +44,7 @@ const THEME_SHELL: Readonly<Record<string, string>> = {
   fivethirtyeight: "ThemeFivethirtyeight",
   economist: "ThemeEconomist",
   tufte: "ThemeTufte",
+  linedraw: "ThemeLinedraw",
   grey: "ThemeGrey",
   gray: "ThemeGray",
   test: "ThemeTest",

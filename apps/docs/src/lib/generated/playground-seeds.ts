@@ -112,6 +112,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "col/theme-linedraw",
+    title: "Column chart (theme_linedraw)",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6ImNvbC90aGVtZS1saW5lZHJhdyJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJjaGVzdCI6MzMsInNvbGRpZXJzIjozfSx7ImNoZXN0IjozNCwic29sZGllcnMiOjE4fSx7ImNoZXN0IjozNSwic29sZGllcnMiOjgxfSx7ImNoZXN0IjozNiwic29sZGllcnMiOjE4NX0seyJjaGVzdCI6MzcsInNvbGRpZXJzIjo0MjB9LHsiY2hlc3QiOjM4LCJzb2xkaWVycyI6NzQ5fSx7ImNoZXN0IjozOSwic29sZGllcnMiOjEwNzN9LHsiY2hlc3QiOjQwLCJzb2xkaWVycyI6MTA3OX0seyJjaGVzdCI6NDEsInNvbGRpZXJzIjo5MzR9LHsiY2hlc3QiOjQyLCJzb2xkaWVycyI6NjU4fSx7ImNoZXN0Ijo0Mywic29sZGllcnMiOjM3MH0seyJjaGVzdCI6NDQsInNvbGRpZXJzIjo5Mn0seyJjaGVzdCI6NDUsInNvbGRpZXJzIjo1MH0seyJjaGVzdCI6NDYsInNvbGRpZXJzIjoyMX0seyJjaGVzdCI6NDcsInNvbGRpZXJzIjo0fSx7ImNoZXN0Ijo0OCwic29sZGllcnMiOjF9XX0sImxheWVycyI6W3siZ2VvbSI6ImNvbCIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoic3RhY2siLCJhZXMiOnsieCI6eyJmaWVsZCI6ImNoZXN0In0sInkiOnsiZmllbGQiOiJzb2xkaWVycyJ9fX1dLCJzY2FsZXMiOnsieCI6eyJuaWNlIjpmYWxzZX19LCJsYWJzIjp7InRpdGxlIjoiQ2hlc3RzIG9mIDUsNzM4IFNjb3R0aXNoIHNvbGRpZXJzIiwic3VidGl0bGUiOiJ0aGVtZV9saW5lZHJhdyDigJQgYmxhY2sgZ3JpZCBhbmQgYm9yZGVyIG9uIHdoaXRlIHBhbmVsIiwieCI6IkNoZXN0IGNpcmN1bWZlcmVuY2UgKGluY2hlcykiLCJ5IjoiU29sZGllcnMifSwidGhlbWUiOiJsaW5lZHJhdyJ9fQ",
+    },
+  },
+  {
     id: "col/value-labels",
     title: "Column chart with value labels",
     compatibility: {

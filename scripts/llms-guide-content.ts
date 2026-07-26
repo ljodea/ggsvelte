@@ -745,15 +745,16 @@ Registered theme name; mappings unchanged:
 </GGPlot>
 \`\`\`
 
-Sixteen registered theme names (fourteen distinct looks), categorical palettes,
+Seventeen registered theme names (fifteen distinct looks), categorical palettes,
 and sequential ramps: [Themes and color](/themes). \`theme: "bw"\` /
 \`<ThemeBw />\` is a white-panel print theme (grey grid + rectangular border).
-UK \`theme: "grey"\` / \`<ThemeGrey />\` and US \`theme: "gray"\` / \`<ThemeGray />\`
-are first-class aliases of the ggplot2 grey-panel look (\`ThemeGgplot2\` /
-\`theme: "ggplot2"\`), matching ggplot2 \`theme_grey\` / \`theme_gray\`.
-\`theme: "test"\` / \`<ThemeTest />\` is a pinned high-contrast snapshot theme
-for package tests and VR (ggplot2 \`theme_test\` role; not an alias of product
-themes). Exhaustion:
+\`theme: "linedraw"\` / \`<ThemeLinedraw />\` is monochrome line-art chrome
+(black hairline grid and panel border). UK \`theme: "grey"\` / \`<ThemeGrey />\`
+and US \`theme: "gray"\` / \`<ThemeGray />\` are first-class aliases of the
+ggplot2 grey-panel look (\`ThemeGgplot2\` / \`theme: "ggplot2"\`), matching
+ggplot2 \`theme_grey\` / \`theme_gray\`. \`theme: "test"\` / \`<ThemeTest />\`
+is a pinned high-contrast snapshot theme for package tests and VR (ggplot2
+\`theme_test\` role; not an alias of product themes). Exhaustion:
 [palette-exhausted](/guide/errors#palette-exhausted).
 
 ## Preserve color meaning

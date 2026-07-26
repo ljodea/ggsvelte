@@ -398,6 +398,36 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     gridX: false,
     gridY: false,
   }),
+  // theme_linedraw: white panel + black grid/border/ticks (line-art / B&W print).
+  // Hairline black grid (0.3) avoids solid graph paper; panel border carries the
+  // frame (axisLineX/Y stay false from HRBR_BASE). Accent stays monochrome so
+  // unmapped marks and focus chrome do not introduce a brand hue.
+  linedraw: themed({
+    ink: "#000000",
+    paper: "#ffffff",
+    panel: "#ffffff",
+    accent: "#000000",
+    grid: "#000000",
+    axisText: "#000000",
+    axisLine: "#000000",
+    tickColor: "#000000",
+    panelBorder: "#000000",
+    fontSize: 11,
+    axisTextSize: 12,
+    fontWeight: 400,
+    titleSize: 13.2,
+    subtitleSize: 11,
+    axisTitleSize: 11,
+    captionSize: 8.8,
+    stripSize: 8.8,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.3,
+    panelBorderWidth: 0.5,
+    ticksX: true,
+    ticksY: true,
+    showPanelBorder: true,
+  }),
   // theme_test (#823): pinned high-contrast chrome for package tests / VR.
   // Explicit literals — not an alias of light/classic — so product sweeps
   // cannot retarget snapshot chrome. Stability over brand aesthetics.

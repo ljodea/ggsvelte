@@ -164,6 +164,32 @@ describe("theme registry", () => {
     expect(bw.gridWidth).not.toBe(light.gridWidth);
   });
 
+  it("resolves theme_linedraw as high-contrast black-line chrome (#821)", () => {
+    const t = resolveTheme("linedraw");
+    const classic = resolveTheme("classic");
+    const ggplot2 = resolveTheme("ggplot2");
+
+    // White panel (not ggplot2 grey); black monochrome chrome.
+    expect(t.panel).toBe("#ffffff");
+    expect(t.paper).toBe("#ffffff");
+    expect(t.panel).not.toBe(ggplot2.panel);
+    expect(t.ink.toLowerCase()).toBe("#000000");
+    expect(t.grid.toLowerCase()).toBe("#000000");
+    expect(t.panelBorder.toLowerCase()).toBe("#000000");
+    expect(t.tickColor.toLowerCase()).toBe("#000000");
+    expect(t.axisText.toLowerCase()).toBe("#000000");
+    // Grid present (classic suppresses grid entirely).
+    expect(t.gridX).toBe(true);
+    expect(t.gridY).toBe(true);
+    expect(classic.gridX).toBe(false);
+    expect(t.showPanelBorder).toBe(true);
+    expect(t.ticksX).toBe(true);
+    expect(t.ticksY).toBe(true);
+    expect(t.axisTextSize).toBeGreaterThanOrEqual(12);
+    // Hairline black grid — not solid graph paper.
+    expect(t.gridWidth).toBeLessThanOrEqual(0.35);
+  });
+
   it("keeps axis tick labels readable on light/minimal family themes (#753)", () => {
     // 8.8px was unreadable next to 15px titles and ~12–16px tooltips on the
     // docs homepage hero. Floor is intentionally above 11 so axis chrome is
@@ -175,6 +201,7 @@ describe("theme registry", () => {
       "classic",
       "few",
       "bw",
+      "linedraw",
       "grey",
       "gray",
       "test",

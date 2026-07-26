@@ -51,6 +51,11 @@
       "sourceSha256": "17fa193a99500759faf6346a9620e9631c6a4cfee2a622c49b5e09c0a17f0385",
       "pngSha256": "ee0273feac87f1d3ba711a51828ed04d5fe42f6f49f656e0cada1dcbaca5b47f"
     },
+    "col/theme-linedraw": {
+      "filename": "col-theme-linedraw-light.png",
+      "sourceSha256": "0902c7cde2e829c0f2495deff38eabb35567cc4178865fb49d393d11e85f4b89",
+      "pngSha256": "f2945fd0fff31178c8bdfe36d1785a51901ada1fc76106efd2d6be20beea10e5"
+    },
     "col/value-labels": {
       "filename": "col-value-labels-light.png",
       "sourceSha256": "494ea556f30afd05ec8f25b50e5d080a9158ce75c1f6c7dca69784cb84ac452a",

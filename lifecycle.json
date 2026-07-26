@@ -4945,6 +4945,10 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ThemeLinedraw": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ThemeMinimal": {
           "kind": "value",
           "lifecycle": "stable-intent"

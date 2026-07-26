@@ -69,6 +69,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "ee0273feac87f1d3ba711a51828ed04d5fe42f6f49f656e0cada1dcbaca5b47f",
   },
   {
+    id: "col/theme-linedraw",
+    filename: "col-theme-linedraw-light.png",
+    path: "/previews/col-theme-linedraw-light.png",
+    sha256: "f2945fd0fff31178c8bdfe36d1785a51901ada1fc76106efd2d6be20beea10e5",
+  },
+  {
     id: "col/value-labels",
     filename: "col-value-labels-light.png",
     path: "/previews/col-value-labels-light.png",
