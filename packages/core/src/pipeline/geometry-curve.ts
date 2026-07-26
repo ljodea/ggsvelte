@@ -15,7 +15,7 @@ import { tessellateCurve } from "../stats/curve.js";
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
-import { DEFAULT_LINEWIDTH, positionOf, removedWarning } from "./geometry-shared.js";
+import { DEFAULT_RULE_LINEWIDTH, positionOf, removedWarning } from "./geometry-shared.js";
 import {
   indexedStyleVector,
   numericStyleVector,
@@ -136,7 +136,7 @@ export function curveBatch(
     linewidth:
       typeof literalLinewidth === "number"
         ? literalLinewidth
-        : (params.linewidth ?? DEFAULT_LINEWIDTH),
+        : (params.linewidth ?? DEFAULT_RULE_LINEWIDTH),
     ...(linewidths !== undefined && { linewidths }),
     alpha:
       alphas === undefined
