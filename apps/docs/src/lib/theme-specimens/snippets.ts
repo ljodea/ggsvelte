@@ -5,7 +5,7 @@
 
 export function heroThemePaletteSnippet(theme: string, scheme: string): string {
   return `<script lang="ts">
-  import { GeomLine, GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import { GeomLine, GeomPoint, GGPlot, Labs, Scale, Theme } from "@ggsvelte/svelte";
 
   const temperatures = [
     { city: "Reykjavik", month: 1, temp: -0.5 },
@@ -21,28 +21,30 @@ export function heroThemePaletteSnippet(theme: string, scheme: string): string {
 <GGPlot
   data={temperatures}
   aes={{ x: "month", y: "temp", color: "city" }}
-  theme="${theme}"
-  scales={{
-    x: { breaks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
-    color: { type: "ordinal", scheme: "${scheme}" },
-  }}
-  labs={{
-    title: "Monthly mean temperature",
-    x: "Month",
-    y: "Temperature (°C)",
-    color: "City",
-  }}
   inspect={{ mode: "x" }}
   legendFocus
   height={400}
 >
+  <Theme name="${theme}" />
+  <Scale
+    value={{
+      x: { breaks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
+      color: { type: "ordinal", scheme: "${scheme}" },
+    }}
+  />
+  <Labs
+    title="Monthly mean temperature"
+    x="Month"
+    y="Temperature (°C)"
+    color="City"
+  />
   <GeomLine linewidth={2} />
   <GeomPoint size={2.5} />
 </GGPlot>`;
 }
 
 export const SEQUENTIAL_RASTER_SNIPPET = `<script lang="ts">
-  import { GeomRaster, GGPlot } from "@ggsvelte/svelte";
+  import { GeomRaster, GGPlot, Labs, Scale } from "@ggsvelte/svelte";
 
   // Regular x/y/z surface (48 cells in the live demos).
   const grid = [
@@ -56,14 +58,16 @@ export const SEQUENTIAL_RASTER_SNIPPET = `<script lang="ts">
 <GGPlot
   data={grid}
   aes={{ x: "x", y: "y", fill: "z" }}
-  scales={{
-    fill: { type: "sequential", scheme: "viridis" },
-    // reverse: true
-    // domain: [0.3, 0.7]  // pin inside actual z
-    // range: ["#2d1e2f", "#3d5a80", "#e76f51"]
-  }}
-  labs={{ title: "Density surface", x: "x", y: "y" }}
   height={400}
 >
+  <Scale
+    value={{
+      fill: { type: "sequential", scheme: "viridis" },
+      // reverse: true
+      // domain: [0.3, 0.7]  // pin inside actual z
+      // range: ["#2d1e2f", "#3d5a80", "#e76f51"]
+    }}
+  />
+  <Labs title="Density surface" x="x" y="y" />
   <GeomRaster />
 </GGPlot>`;
