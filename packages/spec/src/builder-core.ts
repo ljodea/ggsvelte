@@ -34,6 +34,7 @@ import type {
   GeomRectOptions,
   GeomRuleOptions,
   GeomSegmentOptions,
+  GeomCurveOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -234,6 +235,14 @@ export class GGBuilderCore {
    */
   geomSegment(options: GeomSegmentOptions = {}): GGBuilder {
     return this.layer(layerFrom("segment", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'curve', ... }) — curved connectors from
+   * (x,y) to (xend,yend) (ggplot2 geom_curve).
+   */
+  geomCurve(options: GeomCurveOptions = {}): GGBuilder {
+    return this.layer(layerFrom("curve", options));
   }
 
   /**

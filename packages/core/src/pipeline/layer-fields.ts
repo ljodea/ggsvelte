@@ -43,7 +43,7 @@ export function resolveLayerFields(
     push("ymax", binding.ymaxField);
     push("xmin", binding.xminField);
     push("xmax", binding.xmaxField);
-    if (binding.layer.geom === "segment") {
+    if (binding.layer.geom === "segment" || binding.layer.geom === "curve") {
       push("xend", binding.xendField);
       push("yend", binding.yendField);
     }

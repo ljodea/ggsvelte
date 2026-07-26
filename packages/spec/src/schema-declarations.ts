@@ -1327,6 +1327,65 @@ export const SpecDeclarations = {
     },
   ),
 
+  CurveParams: Type.Object(
+    {
+      curvature: Type.Optional(
+        Type.Number({
+          description:
+            "Amount of bend away from the straight chord. 0 is a straight line; ggplot2 default 0.5. Positive bows to the right of the start→end direction when angle is 90.",
+        }),
+      ),
+      angle: Type.Optional(
+        Type.Number({
+          description:
+            "Control-point direction relative to the chord, in degrees. ggplot2 default 90 (perpendicular).",
+        }),
+      ),
+      ncp: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          maximum: 50,
+          description:
+            "Smoothness density knob (ggplot2 ncp). Maps to tessellation sample count = max(8, ncp×8); not multi-control xspline. Default 5.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Curve opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      lineend: Type.Optional(
+        Type.Union([Type.Literal("butt"), Type.Literal("round"), Type.Literal("square")], {
+          description: 'SVG stroke-linecap for curve ends. Default "butt".',
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom curve: curvature/angle/ncp plus segment-like stroke styling.",
+    },
+  ),
+
   TextParams: Type.Object(
     {
       alpha: Type.Optional(
@@ -1938,6 +1997,35 @@ export const SpecDeclarations = {
     },
   ),
 
+  CurveLayer: Type.Object(
+    {
+      geom: Type.Literal("curve", {
+        description:
+          "Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Curve layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Curve layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("CurveParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A curved-segment layer. Requires x, y, xend, and yend field channels (like geom segment).",
+    },
+  ),
+
   LayerSpec: Type.Union(
     [
       Type.Ref("PointLayer"),
@@ -1958,6 +2046,7 @@ export const SpecDeclarations = {
       Type.Ref("TileLayer"),
       Type.Ref("RasterLayer"),
       Type.Ref("SegmentLayer"),
+      Type.Ref("CurveLayer"),
     ],
     {
       description:

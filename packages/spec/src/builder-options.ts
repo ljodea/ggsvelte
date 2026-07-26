@@ -21,6 +21,7 @@ import type {
   RenderBackend,
   RuleParams,
   SegmentParams,
+  CurveParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -159,6 +160,12 @@ export interface GeomSegmentOptions extends SegmentParams, GeomDataOption {
   render?: RenderBackend;
   /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
   stat?: "identity" | "unique";
+}
+
+/** Curve-layer sugar: curvature/angle/ncp + stroke styling. */
+export interface GeomCurveOptions extends CurveParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
 }
 
 /** Text-layer sugar options: params plus an optional layer-level aes. */

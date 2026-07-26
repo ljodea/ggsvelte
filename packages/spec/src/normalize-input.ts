@@ -29,6 +29,7 @@ import type {
   RenderBackend,
   RuleParams,
   SegmentParams,
+  CurveParams,
   Scales,
   SmoothParams,
   StackablePosition,
@@ -229,6 +230,13 @@ export interface SegmentLayerInput extends LayerInputBase {
   params?: SegmentParams;
 }
 
+export interface CurveLayerInput extends LayerInputBase {
+  geom: "curve";
+  stat?: "identity";
+  position?: "identity";
+  params?: CurveParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -248,7 +256,8 @@ export type LayerInput =
   | RectLayerInput
   | TileLayerInput
   | RasterLayerInput
-  | SegmentLayerInput;
+  | SegmentLayerInput
+  | CurveLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

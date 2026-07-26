@@ -22,6 +22,7 @@ export const KNOWN_GEOMS = [
   "raster",
   "ribbon",
   "segment",
+  "curve",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -104,4 +105,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   raster: { stat: "identity", position: "identity" },
   ribbon: { stat: "identity", position: "identity" },
   segment: { stat: "identity", position: "identity" },
+  curve: { stat: "identity", position: "identity" },
 };

@@ -34,6 +34,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   errorbar: ["x"], // ymin/ymax vs y are stat-dependent, checked separately
   rect: ["xmin", "xmax", "ymin", "ymax"],
   segment: ["x", "y", "xend", "yend"],
+  curve: ["x", "y", "xend", "yend"],
   tile: ["x", "y"],
   raster: ["x", "y"],
   ribbon: [], // orientation-dependent; checked separately
@@ -291,7 +292,7 @@ export function layerStructuralErrors(
     // Segment runtime only materializes field endpoints (checkField); constants/stat
     // mappings would pass validation then throw in requireField — reject early.
     if (
-      geom === "segment" &&
+      (geom === "segment" || geom === "curve") &&
       (channel === "x" || channel === "y" || channel === "xend" || channel === "yend") &&
       !("field" in value)
     ) {
