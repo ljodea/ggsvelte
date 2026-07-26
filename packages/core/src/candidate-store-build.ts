@@ -97,7 +97,8 @@ export function assembleCandidateStore(
       // co-layered point hits (#770). Explicit mode is un-tiered.
       let bestGeometric = false;
       const isAuto = search.mode === "auto";
-      const mode: ResolvedCandidateInspectMode = isAuto ? "exact" : search.mode;
+      // Ternary must compare search.mode directly so TS narrows away "auto".
+      const mode: ResolvedCandidateInspectMode = search.mode === "auto" ? "exact" : search.mode;
       let resultMode: ResolvedCandidateInspectMode = mode;
       const pathContainment = new Map<string, boolean>();
       const ids =
