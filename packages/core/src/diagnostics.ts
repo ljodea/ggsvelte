@@ -427,6 +427,9 @@ export const PIPELINE_WARNING_CATALOG = {
   "sf-holes-ignored": {
     summary: "geom_sf ignored interior polygon rings; v1 draws exterior rings only.",
   },
+  "sf-coordinates-dropped": {
+    summary: "stat_sf_coordinates dropped features with no finite representative point.",
+  },
   "smooth-group-dropped": {
     summary: "A smooth group had too few points for the fit and was dropped.",
   },

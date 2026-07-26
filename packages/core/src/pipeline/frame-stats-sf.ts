@@ -7,77 +7,16 @@
 import { ColumnTable, type CellValue } from "../table.js";
 
 import { emptyFrameExtras } from "./frame-helpers.js";
+import {
+  geometryFieldName,
+  isFinitePair,
+  parseSfGeometry,
+  sfKindOf,
+  type SfKind,
+  type SfPosition,
+} from "./sf-geometry.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { PipelineError } from "./types.js";
-
-export type SfKind = "point" | "line" | "polygon";
-
-type Position = readonly [number, number];
-
-function isFinitePair(c: unknown): c is Position {
-  return (
-    Array.isArray(c) &&
-    c.length >= 2 &&
-    typeof c[0] === "number" &&
-    typeof c[1] === "number" &&
-    Number.isFinite(c[0]) &&
-    Number.isFinite(c[1])
-  );
-}
-
-function parseGeometry(raw: CellValue, path: string): { type: string; coordinates: unknown } {
-  if (typeof raw !== "string" || raw.length === 0) {
-    throw new PipelineError(
-      "sf-geometry-invalid",
-      path,
-      "geom_sf geometry cells must be non-empty GeoJSON Geometry JSON strings.",
-    );
-  }
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    throw new PipelineError(
-      "sf-geometry-invalid",
-      path,
-      "geom_sf geometry cell is not valid JSON.",
-    );
-  }
-  if (
-    parsed === null ||
-    typeof parsed !== "object" ||
-    !("type" in parsed) ||
-    typeof (parsed as { type: unknown }).type !== "string"
-  ) {
-    throw new PipelineError(
-      "sf-geometry-invalid",
-      path,
-      'geom_sf geometry must be a GeoJSON Geometry object with a string "type".',
-    );
-  }
-  const geom = parsed as { type: string; coordinates?: unknown };
-  return { type: geom.type, coordinates: geom.coordinates };
-}
-
-function kindOf(type: string): SfKind {
-  switch (type) {
-    case "Point":
-    case "MultiPoint":
-      return "point";
-    case "LineString":
-    case "MultiLineString":
-      return "line";
-    case "Polygon":
-    case "MultiPolygon":
-      return "polygon";
-    default:
-      throw new PipelineError(
-        "sf-geometry-unsupported",
-        "/geometry",
-        `geom_sf does not support GeoJSON type "${type}" in v1 (point/line/polygon families only; no GeometryCollection or CRS).`,
-      );
-  }
-}
 
 function styleColumn(
   table: ColumnTable,
@@ -97,7 +36,7 @@ function pushPoint(
   valueRows: number[],
   group: number,
   sourceRow: number,
-  xy: Position,
+  xy: SfPosition,
 ): void {
   outX.push(xy[0]);
   outY.push(xy[1]);
@@ -118,7 +57,7 @@ function pushRing(
   minVerts: number,
 ): boolean {
   if (!Array.isArray(ring)) return false;
-  const pts: Position[] = [];
+  const pts: SfPosition[] = [];
   for (const c of ring) {
     if (isFinitePair(c)) pts.push([c[0], c[1]]);
   }
@@ -143,8 +82,7 @@ export function buildSfFrame(
 ): LayerFrame {
   const { layer, index } = binding;
   const params = (layer.params ?? {}) as { geometry?: string };
-  const field =
-    params.geometry !== undefined && params.geometry !== "" ? params.geometry : "geometry";
+  const field = geometryFieldName(params);
   if (!table.has(field)) {
     throw new PipelineError(
       "sf-geometry-missing",
@@ -165,8 +103,8 @@ export function buildSfFrame(
   let holesIgnored = 0;
 
   for (let row = 0; row < table.rowCount; row++) {
-    const parsed = parseGeometry(geomCol[row]!, `/layers/${index}/data/${field}`);
-    const kind = kindOf(parsed.type);
+    const parsed = parseSfGeometry(geomCol[row]!, `/layers/${index}/data/${field}`);
+    const kind = sfKindOf(parsed.type);
     if (layerKind === null) layerKind = kind;
     else if (layerKind !== kind) {
       throw new PipelineError(
@@ -204,9 +142,7 @@ export function buildSfFrame(
     }
     if (parsed.type === "LineString") {
       const g = ringId++;
-      if (!pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, coords, 2)) {
-        // drop empty
-      }
+      pushRing(outX, outY, outGroups, outRowIndex, valueRows, g, row, coords, 2);
       continue;
     }
     if (parsed.type === "MultiLineString") {

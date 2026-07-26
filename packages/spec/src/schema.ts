@@ -115,6 +115,7 @@ export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
 export const CurveLayerSchema = SpecModule.Import("CurveLayer");
 export const SfLayerSchema = SpecModule.Import("SfLayer");
+export const SfTextLayerSchema = SpecModule.Import("SfTextLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
@@ -204,6 +205,8 @@ export type SegmentParams = SpecType<"SegmentParams">;
 export type CurveParams = SpecType<"CurveParams">;
 /** SF layer params (geometry column + styling; #809 phase 1). */
 export type SfParams = SpecType<"SfParams">;
+/** SF text layer params (geometry column + text styling; #809 phase 2). */
+export type SfTextParams = SpecType<"SfTextParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
@@ -275,6 +278,8 @@ export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
 export type CurveLayer = LayerWithDataRef<SpecType<"CurveLayer">>;
 /** An sf layer (portable GeoJSON geometries; #809 phase 1). */
 export type SfLayer = LayerWithDataRef<SpecType<"SfLayer">>;
+/** An sf_text layer (labels at representative points; #809 phase 2). */
+export type SfTextLayer = LayerWithDataRef<SpecType<"SfTextLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -289,6 +294,7 @@ export type LayerSpec =
   | SegmentLayer
   | CurveLayer
   | SfLayer
+  | SfTextLayer
   | RuleLayer
   | TextLayer
   | SmoothLayer

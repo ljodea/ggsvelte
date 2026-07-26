@@ -131,6 +131,7 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
       "segment",
       "curve",
       "sf",
+      "sf_text",
     ],
     "code": "missing-geom",
     "fix": {
@@ -139,7 +140,7 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
         "geom": "point",
       },
     },
-    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "sf".",
+    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "sf", "sf_text".",
     "path": "/layers/0/geom",
   },
 }
@@ -176,6 +177,7 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
       "segment",
       "curve",
       "sf",
+      "sf_text",
     ],
     "code": "unknown-geom",
     "fix": {
@@ -184,7 +186,7 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
         "geom": "point",
       },
     },
-    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "sf". Did you mean "point"?",
+    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "sf", "sf_text". Did you mean "point"?",
     "path": "/layers/0/geom",
   },
 }
@@ -725,7 +727,7 @@ exports[`ERROR_CATALOG coverage [unsupported-geom-aesthetic] is reproducible; me
     "fix": {
       "description": "Remove aes.size or move it to a compatible point layer.",
     },
-    "message": "The line geom does not consume aes.size; supported geoms: point, text, sf.",
+    "message": "The line geom does not consume aes.size; supported geoms: point, text, sf, sf_text.",
     "path": "/layers/0/aes/size",
   },
 }

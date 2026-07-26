@@ -26,6 +26,7 @@ export const KNOWN_GEOMS = [
   "segment",
   "curve",
   "sf",
+  "sf_text",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -80,6 +81,7 @@ export const KNOWN_STATS = [
   "summary",
   "summary_bin",
   "align",
+  "sf_coordinates",
 ] as const;
 export type StatName = (typeof KNOWN_STATS)[number];
 
@@ -118,4 +120,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   segment: { stat: "identity", position: "identity" },
   curve: { stat: "identity", position: "identity" },
   sf: { stat: "identity", position: "identity" },
+  sf_text: { stat: "sf_coordinates", position: "identity" },
 };

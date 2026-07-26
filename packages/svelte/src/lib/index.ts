@@ -99,6 +99,7 @@ export { default as GeomRibbon } from "./geoms/GeomRibbon.svelte";
 export { default as GeomSegment } from "./geoms/GeomSegment.svelte";
 export { default as GeomCurve } from "./geoms/GeomCurve.svelte";
 export { default as GeomSf } from "./geoms/GeomSf.svelte";
+export { default as GeomSfText } from "./geoms/GeomSfText.svelte";
 export { registerLayer, registerPlotLayer } from "./geoms/registry.svelte.js";
 export type {
   Layer,

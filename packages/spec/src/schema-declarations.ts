@@ -2561,7 +2561,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("sf", {
         description:
-          "Simple-features geometry (ggplot2 geom_sf; #809 phase 1): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families; no CRS, coord_sf, sf_text, or sf_label yet.",
+          "Simple-features geometry (ggplot2 geom_sf; #809 phase 1): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families; no CRS or coord_sf yet.",
       }),
       stat: Type.Optional(
         Type.Literal("identity", { description: "SF layers expand geometry then draw as-is." }),
@@ -2583,6 +2583,83 @@ export const SpecDeclarations = {
       additionalProperties: false,
       description:
         'An sf geometry layer. Requires a geometry column of GeoJSON Geometry JSON strings (params.geometry, default "geometry"). Coordinates must already be projected.',
+    },
+  ),
+
+  SfTextParams: Type.Object(
+    {
+      geometry: Type.Optional(
+        Type.String({
+          minLength: 1,
+          description:
+            'Name of the data column holding GeoJSON Geometry JSON strings. Default "geometry".',
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Text opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      size: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Font size in px. Must be greater than 0. Default 11.",
+        }),
+      ),
+      anchor: Type.Optional(
+        Type.Union([Type.Literal("start"), Type.Literal("middle"), Type.Literal("end")], {
+          description:
+            'Horizontal text anchor relative to the representative point: "start", "middle" (default), or "end".',
+        }),
+      ),
+      dx: Type.Optional(
+        Type.Number({
+          description: "Horizontal offset in px applied after positioning. Default 0.",
+        }),
+      ),
+      dy: Type.Optional(
+        Type.Number({
+          description:
+            "Vertical offset in px applied after positioning (positive = down). Default 0.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description: "Parameters for geom_sf_text (#809 phase 2): geometry column plus text styling.",
+    },
+  ),
+
+  SfTextLayer: Type.Object(
+    {
+      geom: Type.Literal("sf_text", {
+        description:
+          "Simple-features text labels (ggplot2 geom_sf_text; #809 phase 2): places aes.label at a representative point from each GeoJSON Geometry (stat_sf_coordinates).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("sf_coordinates", {
+          description: "Extract one (x,y) representative point per feature from geometry.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "SF text layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data.",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("SfTextParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        'An sf text layer. Requires aes.label and a geometry column (params.geometry, default "geometry"). Does not require aes.x/y.',
     },
   ),
 
@@ -2610,6 +2687,7 @@ export const SpecDeclarations = {
       Type.Ref("SegmentLayer"),
       Type.Ref("CurveLayer"),
       Type.Ref("SfLayer"),
+      Type.Ref("SfTextLayer"),
     ],
     {
       description:
