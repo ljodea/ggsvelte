@@ -14,8 +14,10 @@
  *   bun scripts/gen-manifest.ts --check   # exit 1 if the file is stale
  *     (the manifest-current pre-commit hook + CI parity run --check)
  */
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+
+import { defineArtifact } from "./artifact.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -364,34 +366,18 @@ export function discoverExamples(examplesDir: string): DiscoveredExample[] {
 }
 
 // ---------------------------------------------------------------------------
-// CLI
+// CLI (#783 shared protocol)
 // ---------------------------------------------------------------------------
 
-function main(): void {
-  const repoRoot = join(import.meta.dir, "..");
-  const examplesDir = join(repoRoot, "examples");
-  const manifestPath = join(examplesDir, "manifest.ts");
-  const fresh = buildManifestSource(discoverExamples(examplesDir));
-  const check = process.argv.includes("--check");
-  const current = existsSync(manifestPath) ? readFileSync(manifestPath, "utf8") : null;
-  if (check) {
-    if (current === fresh) {
-      console.log("examples/manifest.ts is current.");
-      return;
-    }
-    console.error(
-      current === null
-        ? "examples/manifest.ts is MISSING. Run: bun run manifest:gen"
-        : "examples/manifest.ts is STALE (corpus changed). Run: bun run manifest:gen",
-    );
-    process.exit(1);
-  }
-  if (current === fresh) {
-    console.log("examples/manifest.ts already current.");
-    return;
-  }
-  writeFileSync(manifestPath, fresh);
-  console.log(`Wrote examples/manifest.ts (${String(fresh.length)} bytes).`);
-}
+const repoRoot = join(import.meta.dir, "..");
+const examplesDir = join(repoRoot, "examples");
 
-if (import.meta.main) main();
+/** Shared protocol handle for examples/manifest.ts. */
+export const manifestArtifact = defineArtifact({
+  path: join(examplesDir, "manifest.ts"),
+  label: "examples/manifest.ts",
+  regenerateWith: "manifest:gen",
+  build: () => buildManifestSource(discoverExamples(examplesDir)),
+});
+
+if (import.meta.main) await manifestArtifact.cli();

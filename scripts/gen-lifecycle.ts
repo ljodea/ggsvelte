@@ -21,8 +21,10 @@
  *   bun scripts/gen-lifecycle.ts --check   # exit 1 if the file is stale
  *     (gen-lifecycle.test.ts also asserts staleness in CI)
  */
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
+
+import { defineArtifact } from "./artifact.ts";
 
 export const LIFECYCLE_TAGS = ["experimental", "stable-intent", "stable", "superseded"] as const;
 export type LifecycleTag = (typeof LIFECYCLE_TAGS)[number];
@@ -180,29 +182,14 @@ export function lifecycleJSON(read: (file: string) => string): string {
   return JSON.stringify(buildLifecycleDocument(read), null, 2) + "\n";
 }
 
-function main(): void {
-  const repoRoot = join(import.meta.dir, "..");
-  const outPath = join(repoRoot, "lifecycle.json");
-  const fresh = lifecycleJSON((file) => readFileSync(join(repoRoot, file), "utf8"));
-  const current = existsSync(outPath) ? readFileSync(outPath, "utf8") : null;
-  if (process.argv.includes("--check")) {
-    if (current === fresh) {
-      console.log("lifecycle.json is current.");
-      return;
-    }
-    console.error(
-      current === null
-        ? "lifecycle.json is MISSING. Run: bun run lifecycle:gen"
-        : "lifecycle.json is STALE (public surface changed). Run: bun run lifecycle:gen",
-    );
-    process.exit(1);
-  }
-  if (current === fresh) {
-    console.log("lifecycle.json already current.");
-    return;
-  }
-  writeFileSync(outPath, fresh);
-  console.log(`Wrote lifecycle.json (${String(fresh.length)} bytes).`);
-}
+const repoRoot = join(import.meta.dir, "..");
 
-if (import.meta.main) main();
+/** Shared protocol handle for lifecycle.json (#783). */
+export const lifecycleArtifact = defineArtifact({
+  path: join(repoRoot, "lifecycle.json"),
+  label: "lifecycle.json",
+  regenerateWith: "lifecycle:gen",
+  build: () => lifecycleJSON((file) => readFileSync(join(repoRoot, file), "utf8")),
+});
+
+if (import.meta.main) await lifecycleArtifact.cli();
