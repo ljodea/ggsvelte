@@ -268,6 +268,21 @@ describe("migratePlotProps — element surgery", () => {
   });
 });
 
+describe("migratePlotProps — ignores non-rule attribute names", () => {
+  it("does not treat Object.prototype members as migratable props", () => {
+    // RULES is a plain object; RULES[name] without hasOwn walks the prototype
+    // and would treat constructor/toString/valueOf as "rules" with undefined
+    // form/component, corrupting the rewrite and import list.
+    const before = plot("<GGPlot data={rows} constructor={oops} toString={nope}>");
+    const result = migratePlotProps(before);
+
+    expect(result.code).toBe(before);
+    expect(result.changes).toEqual([]);
+    expect(result.code).not.toContain("<undefined");
+    expect(result.code).not.toMatch(/import \{[^}]*undefined/);
+  });
+});
+
 describe("migratePlotProps — ADR 0013 acceptance criteria", () => {
   const messy = [
     '<script lang="ts">',

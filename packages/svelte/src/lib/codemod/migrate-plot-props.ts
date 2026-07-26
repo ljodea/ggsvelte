@@ -441,7 +441,10 @@ export function migratePlotProps(source: string, options: MigrateOptions = {}): 
         previousEnd = attributeEnd;
         continue;
       }
-      const rule = RULES[name];
+      // Own keys only — plain RULES[name] walks Object.prototype and would
+      // treat constructor/toString/… as migratable (truthy functions), then
+      // emit <undefined …/> and an import of undefined under --write.
+      const rule = Object.hasOwn(RULES, name) ? RULES[name] : undefined;
       if (rule === undefined) {
         previousEnd = attributeEnd;
         continue;
