@@ -172,6 +172,27 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     colourAliases("Gradientn"),
   ),
   shell(
+    "scaleColorHue",
+    "color-fill",
+    "HueScaleOptions",
+    ["HueScaleOptions"],
+    colourAliases("Hue"),
+  ),
+  shell(
+    "scaleColorGrey",
+    "color-fill",
+    "GreyScaleOptions",
+    ["GreyScaleOptions"],
+    colourAliases("Grey"),
+  ),
+  shell(
+    "scaleColorOrdinal",
+    "color-fill",
+    "OrdinalColorScaleOptions",
+    ["OrdinalColorScaleOptions"],
+    colourAliases("Ordinal"),
+  ),
+  shell(
     "scaleColorLog10",
     "color-fill",
     "TransformedColorScaleOptions",
@@ -223,6 +244,9 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
   shell("scaleFillGradient", "color-fill", "GradientScaleOptions", ["GradientScaleOptions"]),
   shell("scaleFillGradient2", "color-fill", "Gradient2ScaleOptions", ["Gradient2ScaleOptions"]),
   shell("scaleFillGradientn", "color-fill", "GradientnScaleOptions", ["GradientnScaleOptions"]),
+  shell("scaleFillHue", "color-fill", "HueScaleOptions", ["HueScaleOptions"]),
+  shell("scaleFillGrey", "color-fill", "GreyScaleOptions", ["GreyScaleOptions"]),
+  shell("scaleFillOrdinal", "color-fill", "OrdinalColorScaleOptions", ["OrdinalColorScaleOptions"]),
   shell("scaleFillLog10", "color-fill", "TransformedColorScaleOptions", [
     "TransformedColorScaleOptions",
   ]),

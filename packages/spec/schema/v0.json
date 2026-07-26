@@ -2869,6 +2869,18 @@
                 },
                 {
                   "type": "string",
+                  "const": "hue"
+                },
+                {
+                  "type": "string",
+                  "const": "grey"
+                },
+                {
+                  "type": "string",
+                  "const": "gray"
+                },
+                {
+                  "type": "string",
                   "const": "viridis"
                 }
               ],

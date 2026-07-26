@@ -54,9 +54,9 @@ describe("SHELL_MANIFEST completeness", () => {
     expect(actual).toEqual(expected);
   });
 
-  it("cardinality: 69 component files + 12 aliases", () => {
-    expect(SHELL_MANIFEST).toHaveLength(69);
-    expect(manifestAliases().size).toBe(12);
+  it("cardinality: 75 component files + 15 aliases", () => {
+    expect(SHELL_MANIFEST).toHaveLength(75);
+    expect(manifestAliases().size).toBe(15);
     // Cross-check family buckets against the verified ledger.
     const byFamily = new Map<string, number>();
     for (const s of SHELL_MANIFEST) {
@@ -159,7 +159,7 @@ describe("index region rewrite", () => {
     expect(region.startsWith(REGION_START)).toBe(true);
     expect(region.endsWith(REGION_END)).toBe(true);
     const exportCount = (region.match(/^export \{ default as /gm) ?? []).length;
-    expect(exportCount).toBe(69 + 12);
+    expect(exportCount).toBe(75 + 15);
     expect(region).toContain(
       'export { default as ScaleColourContinuous } from "./scale/ScaleColorContinuous.svelte";',
     );

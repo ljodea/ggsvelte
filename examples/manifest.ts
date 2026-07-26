@@ -437,6 +437,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "point/hue-discrete",
+    category: "point",
+    name: "hue-discrete",
+    title: "Hue discrete colour scale",
+    description: "",
+    tags: ["point", "color", "hue", "discrete", "scale"],
+    docsSection: "Points & scatter",
+    hasData: true,
+  },
+  {
     id: "point/jitter",
     category: "point",
     name: "jitter",

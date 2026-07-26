@@ -2,6 +2,10 @@
  * Named categorical color palettes and scheme registry for ordinal color
  * scales. Pure data — training lives in train.ts.
  */
+import { GREY_PALETTE_10, HUE_PALETTE_10 } from "@ggsvelte/spec";
+
+export { buildGreyPalette, buildHuePalette, GREY_PALETTE_10, HUE_PALETTE_10 } from "@ggsvelte/spec";
+
 /**
  * Default categorical palette: 10 colors in the Observable 10 family.
  * The palette is a plain value — its fingerprint (not its identity) keys
@@ -78,4 +82,7 @@ export const CATEGORICAL_SCHEMES = {
   flexoki: FLEXOKI_PALETTE,
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
+  hue: HUE_PALETTE_10,
+  grey: GREY_PALETTE_10,
+  gray: GREY_PALETTE_10,
 } as const satisfies Readonly<Record<string, readonly string[]>>;
