@@ -11,9 +11,11 @@ import {
   glyphsBatch,
   lineBatch,
   pointsBatch,
+  polygonBatch,
   rectsBatch,
   segmentsBatch,
 } from "./geometry-marks.js";
+
 import { boxplotBatches, errorbarBatch, smoothBatches } from "./geometry-composites.js";
 import { edgeRectsBatch, rasterRectsBatch, tileRectsBatch } from "./geometry-edge-rects.js";
 import { ribbonBatches } from "./geometry-ribbon.js";
@@ -54,8 +56,11 @@ export function dispatchGeometryBatch(
       return single(segmentsBatch(frame, fx, color, styles, warnings));
     case "segment":
       return single(finiteSegmentBatch(frame, fx, color, styles, warnings));
+    case "polygon":
+      return single(polygonBatch(frame, fx, color, fill, styles, warnings));
     case "text":
       return single(glyphsBatch(frame, fx, color, styles, warnings));
+
     case "smooth":
       return smoothBatches(frame, fx, color, fill, styles, warnings);
     case "boxplot":

@@ -110,6 +110,7 @@ export const HistogramLayerSchema = SpecModule.Import("HistogramLayer");
 export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
+export const PolygonLayerSchema = SpecModule.Import("PolygonLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
@@ -192,6 +193,8 @@ export type AreaParams = SpecType<"AreaParams">;
 export type RuleParams = SpecType<"RuleParams">;
 /** Segment layer params (styling + lineend). */
 export type SegmentParams = SpecType<"SegmentParams">;
+/** Polygon layer params (fill/stroke styling). */
+export type PolygonParams = SpecType<"PolygonParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
@@ -251,6 +254,8 @@ export type RasterLayer = LayerWithDataRef<SpecType<"RasterLayer">>;
 export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 /** A finite segment layer ((x,y)→(xend,yend)). */
 export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
+/** A closed polygon layer ((x,y) vertices in data order). */
+export type PolygonLayer = LayerWithDataRef<SpecType<"PolygonLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -261,6 +266,7 @@ export type LayerSpec =
   | AreaLayer
   | RibbonLayer
   | SegmentLayer
+  | PolygonLayer
   | RuleLayer
   | TextLayer
   | SmoothLayer

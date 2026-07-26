@@ -1327,6 +1327,48 @@ export const SpecDeclarations = {
     },
   ),
 
+  PolygonParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description:
+            "Polygon fill/stroke opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Outline stroke width in px. Must be greater than 0. Default matches line (1.5).",
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Styling parameters for the polygon geom (closed filled path from (x,y) vertices).",
+    },
+  ),
+
   TextParams: Type.Object(
     {
       alpha: Type.Optional(
@@ -1898,6 +1940,35 @@ export const SpecDeclarations = {
     },
   ),
 
+  PolygonLayer: Type.Object(
+    {
+      geom: Type.Literal("polygon", {
+        description:
+          "Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Polygon layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Polygon layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("PolygonParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A closed polygon layer (ggplot2's geom_polygon). Requires x and y channels; vertices connect in data order per group and close implicitly.",
+    },
+  ),
+
   LayerSpec: Type.Union(
     [
       Type.Ref("PointLayer"),
@@ -1917,6 +1988,7 @@ export const SpecDeclarations = {
       Type.Ref("TileLayer"),
       Type.Ref("RasterLayer"),
       Type.Ref("SegmentLayer"),
+      Type.Ref("PolygonLayer"),
     ],
     {
       description:

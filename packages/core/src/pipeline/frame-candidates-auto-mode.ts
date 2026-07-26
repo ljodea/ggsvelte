@@ -26,7 +26,9 @@ export function candidateAutoMode(
     case "rect":
     case "tile":
     case "raster":
+    case "polygon":
       return "exact";
+
     case "line":
     case "area":
     case "density":

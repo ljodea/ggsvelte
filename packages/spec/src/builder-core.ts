@@ -33,6 +33,7 @@ import type {
   GeomRectOptions,
   GeomRuleOptions,
   GeomSegmentOptions,
+  GeomPolygonOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -228,6 +229,14 @@ export class GGBuilderCore {
    */
   geomSegment(options: GeomSegmentOptions = {}): GGBuilder {
     return this.layer(layerFrom("segment", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'polygon', ... }). Map x, y (+ group/fill) for
+   * closed filled polygons in data order (ggplot2 geom_polygon).
+   */
+  geomPolygon(options: GeomPolygonOptions = {}): GGBuilder {
+    return this.layer(layerFrom("polygon", options));
   }
 
   /**

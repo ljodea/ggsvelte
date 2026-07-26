@@ -22,6 +22,7 @@ import GeomRaster from "../../src/lib/geoms/GeomRaster.svelte";
 import GeomRect from "../../src/lib/geoms/GeomRect.svelte";
 import GeomRule from "../../src/lib/geoms/GeomRule.svelte";
 import GeomSegment from "../../src/lib/geoms/GeomSegment.svelte";
+import GeomPolygon from "../../src/lib/geoms/GeomPolygon.svelte";
 import GeomSmooth from "../../src/lib/geoms/GeomSmooth.svelte";
 import GeomText from "../../src/lib/geoms/GeomText.svelte";
 import GeomTile from "../../src/lib/geoms/GeomTile.svelte";
@@ -264,6 +265,21 @@ const cases: readonly GeomCase[] = [
     paramKey: "linewidth",
     paramValue: 2,
     markSelector: ".gg-segments line",
+  },
+  {
+    name: "GeomPolygon",
+    Component: GeomPolygon,
+    geom: "polygon",
+    data: [
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 0.5, y: 1 },
+    ],
+    aes: { x: "x", y: "y" },
+    geomProps: { alpha: 0.7, linewidth: 1.5 },
+    paramKey: "alpha",
+    paramValue: 0.7,
+    markSelector: ".gg-areas path",
   },
 ];
 

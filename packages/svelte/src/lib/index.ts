@@ -94,6 +94,7 @@ export { default as GeomTile } from "./geoms/GeomTile.svelte";
 export { default as GeomRaster } from "./geoms/GeomRaster.svelte";
 export { default as GeomRibbon } from "./geoms/GeomRibbon.svelte";
 export { default as GeomSegment } from "./geoms/GeomSegment.svelte";
+export { default as GeomPolygon } from "./geoms/GeomPolygon.svelte";
 export { registerLayer, registerPlotLayer } from "./geoms/registry.svelte.js";
 export type {
   Layer,

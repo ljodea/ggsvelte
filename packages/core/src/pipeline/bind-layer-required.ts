@@ -42,6 +42,7 @@ export function assertRequiredChannels(input: {
     geom === "line" ||
     geom === "col" ||
     geom === "area" ||
+    geom === "polygon" ||
     geom === "text" ||
     geom === "smooth" ||
     geom === "boxplot" ||

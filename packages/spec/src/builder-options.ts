@@ -21,6 +21,7 @@ import type {
   RenderBackend,
   RuleParams,
   SegmentParams,
+  PolygonParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -133,6 +134,12 @@ export interface GeomRuleOptions extends RuleParams, GeomDataOption {
 
 /** Segment-layer sugar options: params plus optional layer-level aes. */
 export interface GeomSegmentOptions extends SegmentParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Polygon-layer sugar options: params plus optional layer-level aes. */
+export interface GeomPolygonOptions extends PolygonParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

@@ -29,6 +29,7 @@ import type {
   RenderBackend,
   RuleParams,
   SegmentParams,
+  PolygonParams,
   Scales,
   SmoothParams,
   StackablePosition,
@@ -222,6 +223,13 @@ export interface SegmentLayerInput extends LayerInputBase {
   params?: SegmentParams;
 }
 
+export interface PolygonLayerInput extends LayerInputBase {
+  geom: "polygon";
+  stat?: "identity";
+  position?: "identity";
+  params?: PolygonParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -240,7 +248,8 @@ export type LayerInput =
   | RectLayerInput
   | TileLayerInput
   | RasterLayerInput
-  | SegmentLayerInput;
+  | SegmentLayerInput
+  | PolygonLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

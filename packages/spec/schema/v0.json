@@ -1194,6 +1194,36 @@
       "additionalProperties": false,
       "description": "Styling parameters for the segment geom (finite line from (x,y) to (xend,yend))."
     },
+    "PolygonParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Polygon fill/stroke opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Outline stroke width in px. Must be greater than 0. Default matches line (1.5)."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the polygon geom (closed filled path from (x,y) vertices)."
+    },
     "TextParams": {
       "type": "object",
       "properties": {
@@ -1963,6 +1993,44 @@
       "additionalProperties": false,
       "description": "A finite segment layer (ggplot2's geom_segment). Requires x, y, xend, and yend channels."
     },
+    "PolygonLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "polygon",
+          "description": "Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Polygon layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Polygon layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/PolygonParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A closed polygon layer (ggplot2's geom_polygon). Requires x and y channels; vertices connect in data order per group and close implicitly."
+    },
     "LayerSpec": {
       "anyOf": [
         {
@@ -2015,6 +2083,9 @@
         },
         {
           "$ref": "#/$defs/SegmentLayer"
+        },
+        {
+          "$ref": "#/$defs/PolygonLayer"
         }
       ],
       "description": "One plot layer. The `geom` field selects the geometry and determines which stat, position, and params are allowed."
