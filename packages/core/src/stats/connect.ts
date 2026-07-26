@@ -71,6 +71,10 @@ export function expandSegment(
         { x: bx, y: by },
       ];
     }
+    default: {
+      // Exhaustiveness for ConnectConnection.
+      throw new Error(`unknown connection mode: ${String(connection satisfies never)}`);
+    }
   }
 }
 
@@ -109,7 +113,7 @@ export function statConnect(input: StatConnectInput): StatConnectResult {
     if (sortByX) {
       rows.sort((a, b) => {
         const dx = x[a]! - x[b]!;
-        return dx !== 0 ? dx : a - b;
+        return dx === 0 ? a - b : dx;
       });
     }
     if (rows.length === 0) continue;
