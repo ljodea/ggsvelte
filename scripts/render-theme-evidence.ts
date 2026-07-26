@@ -7,13 +7,20 @@ import { pathToFileURL } from "node:url";
 import { chromium } from "@playwright/test";
 
 import { renderToSVGString } from "../packages/core/src/index.js";
-import { THEME_NAMES, type SpecInput, type ThemeName } from "../packages/spec/src/index.js";
+import {
+  THEME_NAME_ALIASES,
+  THEME_NAMES,
+  type SpecInput,
+  type ThemeName,
+} from "../packages/spec/src/index.js";
 
 const ROOT = dirname(import.meta.dirname);
 const OUT = join(ROOT, "artifacts/theme-equivalence");
 const SVG_OUT = join(OUT, "svg");
 const FONT_DIR = "../../../packages/svelte/src/lib/fonts";
-const themes = THEME_NAMES;
+// Alias names (grey/gray → ggplot2) share the canonical evidence files; do not
+// emit duplicate 1440×960 PNG/SVG (theme-contract resolves via THEME_NAME_ALIASES).
+const themes = THEME_NAMES.filter((theme) => !(theme in THEME_NAME_ALIASES));
 const matchedReferenceThemes = new Set<ThemeName>(["ggplot2", "hrbr", "few"]);
 
 const values = [

@@ -5,6 +5,7 @@ import { THEME_NAME_ALIASES, THEME_NAMES } from "../packages/spec/src/schema.ts"
 
 const APP_CSS = new URL("../apps/docs/src/app.css", import.meta.url);
 const THEME_EVIDENCE = new URL("../artifacts/theme-equivalence/", import.meta.url);
+const THEME_EVIDENCE_GENERATOR = new URL("./render-theme-evidence.ts", import.meta.url);
 
 describe("documentation chart theme isolation", () => {
   it("does not set chart fallback variables from the site appearance", async () => {
@@ -28,5 +29,11 @@ describe("documentation chart theme isolation", () => {
         true,
       );
     }
+  });
+
+  it("evidence generator skips THEME_NAME_ALIASES so refresh does not re-create duplicates", async () => {
+    const src = await readFile(THEME_EVIDENCE_GENERATOR, "utf8");
+    expect(src).toContain("THEME_NAME_ALIASES");
+    expect(src).toMatch(/THEME_NAMES\.filter\(\(theme\) => !\(theme in THEME_NAME_ALIASES\)\)/);
   });
 });
