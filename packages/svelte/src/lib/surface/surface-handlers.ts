@@ -261,7 +261,7 @@ export function createSurfaceHandlers(live: SurfaceHandlerLive): SurfaceHandlers
         const extending = live.getAreaAwaitingSecond() && live.getBrushRect() !== null;
         const model = deps.model();
         const originPanel = extending
-          ? area.kind === "idle"
+          ? area.kind === "idle" || area.panelId === null
             ? null
             : (model?.viewport.panel(area.panelId) ?? null)
           : panelAtPoint(p);

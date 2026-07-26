@@ -114,7 +114,7 @@ type CancelPointerInspectPolicy = {
 };
 
 /** Panel geometry for crosshairs / keyboard clamp; id for scene lookups. */
-export type InspectionPanelBounds = PanelBounds & { readonly id: string };
+type InspectionPanelBounds = PanelBounds & { readonly id: string };
 
 export type InspectionState = {
   readonly inspection: PlotInspectionChange<Record<string, CellValue>, PropertyKey> | null;
