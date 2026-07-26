@@ -315,10 +315,19 @@ export type SfLayer = LayerWithDataRef<SpecType<"SfLayer">>;
 export type SfTextLayer = LayerWithDataRef<SpecType<"SfTextLayer">>;
 /** An sf_label layer (boxed labels at representative points; #809 phase 3). */
 export type SfLabelLayer = LayerWithDataRef<SpecType<"SfLabelLayer">>;
-/** Empty params bag for blank layers. */
-export type BlankParams = SpecType<"BlankParams">;
+/**
+ * Empty params bag for blank layers.
+ *
+ * TypeBox `Type.Object({})` Static-infers as `{}`, which is *not* assignable
+ * to `Record<string, unknown>` and also poisons `LayerSpec["params"]` unions
+ * (oxlint no-unnecessary-type-assertion on every `(layer.params ?? {}) as X`).
+ * Override so blank matches every other geom params bag.
+ */
+export type BlankParams = Record<string, never>;
 /** A blank layer (no marks; trains scales from mapped aesthetics). */
-export type BlankLayer = LayerWithDataRef<SpecType<"BlankLayer">>;
+export type BlankLayer = LayerWithDataRef<
+  Omit<SpecType<"BlankLayer">, "params"> & { readonly params?: BlankParams }
+>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer

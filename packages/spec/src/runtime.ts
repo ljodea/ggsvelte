@@ -130,8 +130,7 @@ export type RuntimeLayerSpec =
   | RuntimeSfLayer
   | RuntimeSfTextLayer
   | RuntimeSfLabelLayer
-  | RuntimeBlankLayer
-  | RuntimeSfLayer;
+  | RuntimeBlankLayer;
 
 /** The in-memory spec superset ({ fn } channel accessors allowed). */
 type RuntimeSpecPortableFields = Omit<PortableSpec, "aes" | "layers">;

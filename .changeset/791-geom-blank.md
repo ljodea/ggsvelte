@@ -12,4 +12,4 @@ Add ggplot2-style `blank` geom that trains scales from mapped aesthetics and
 emits no geometry batches or interaction candidates. Surfaces: PortableSpec,
 `geomBlank()`, and `<GeomBlank>`.
 
-Migration: none — additive.
+Migration: none — additive
