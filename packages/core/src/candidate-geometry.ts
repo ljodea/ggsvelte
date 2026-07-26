@@ -234,7 +234,7 @@ export {
  * {@link PathsBatch.ringStarts} (hole rings). Always includes [start, end) when
  * no interior breaks fall in range.
  */
-export function pathRingRanges(
+function pathRingRanges(
   batch: Extract<GeometryBatch, { kind: "paths" }>,
   start: number,
   end: number,
