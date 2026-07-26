@@ -7,7 +7,7 @@
  * expanded object is what normalize/validate already understand.
  *
  * `scaleType` is a small registry for agent/tooling default selection — not
- * an R S3 generic.
+ * an R S3 generic (agent tooling).
  */
 
 import type { CellValue, Scales } from "./schema.js";
