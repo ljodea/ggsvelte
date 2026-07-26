@@ -92,6 +92,16 @@ export interface SakuraSourceDelta {
   readonly consts?: readonly string[];
   /** `<GGPlot>` attributes, keyed by attribute name; a repeat replaces it. */
   readonly attrs?: Readonly<Record<string, string>>;
+  /**
+   * Declaration-only grammar children (`<Scale>`, `<Labs>`, `<ThemeTufte>`),
+   * keyed by the grammar piece they carry; a repeat replaces it.
+   *
+   * Held apart from {@link children} because they are not layers: they never
+   * appear in `childOrder`, and they are emitted ahead of every geom so that a
+   * later step adding a geom cannot silently reorder them (#659 D2 — child
+   * layers apply in registration order).
+   */
+  readonly grammar?: Readonly<Record<string, string>>;
   /** Child elements keyed by the layer they draw; a repeat replaces it. */
   readonly children?: Readonly<Record<string, string>>;
   /** Full bottom-to-top child order after this step. */
@@ -184,16 +194,18 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     outcome: "Real dates on the axis, reversed: earlier spring now reads as up.",
     explanation:
       "The bloom day is a date, so the y scale is temporal — dateBreaks and dateLabels format it. Reversing the scale changes direction only; no value is touched, and the trend line above is refit from the same rows.",
-    fragment: `scales={{
-  y: {
-    type: "time",
-    temporalKind: "date",
-    reverse: true,
-    dateBreaks: "10 days",
-    dateLabels: "%b %d",
-    domain: ["${Y_BOTTOM}", "${Y_TOP}"],
-  },
-}}`,
+    fragment: `<Scale
+  value={{
+    y: {
+      type: "time",
+      temporalKind: "date",
+      reverse: true,
+      dateBreaks: "10 days",
+      dateLabels: "%b %d",
+      domain: ["${Y_BOTTOM}", "${Y_TOP}"],
+    },
+  }}
+/>`,
     chapterTitle: "Scales and guides",
     href: "/guide/scales-guides#date-and-time-axes",
     spec: {
@@ -213,24 +225,27 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       labs: { x: "Year", y: "Peak bloom" },
     },
     source: {
-      attrs: {
-        scales: `  scales={{
-    y: {
-      type: "time",
-      temporalKind: "date",
-      reverse: true,
-      dateBreaks: "10 days",
-      dateLabels: "%b %d",
-      domain: ["${Y_BOTTOM}", "${Y_TOP}"],
-    },
-    x: { type: "linear", domain: [800, 2030], labels: "d" },
-    fill: {
-      type: "manual",
-      domain: [${SAKURA_EPOCHS.map((e) => `"${e.epoch}"`).join(", ")}],
-      range: ["#f5edc4", "#dce8f2", "#f3dcda"],
-    },
-  }}`,
-        labs: `  labs={{ x: "Year", y: "Peak bloom" }}`,
+      components: ["Labs", "Scale"],
+      grammar: {
+        scales: `  <Scale
+    value={{
+      y: {
+        type: "time",
+        temporalKind: "date",
+        reverse: true,
+        dateBreaks: "10 days",
+        dateLabels: "%b %d",
+        domain: ["${Y_BOTTOM}", "${Y_TOP}"],
+      },
+      x: { type: "linear", domain: [800, 2030], labels: "d" },
+      fill: {
+        type: "manual",
+        domain: [${SAKURA_EPOCHS.map((e) => `"${e.epoch}"`).join(", ")}],
+        range: ["#f5edc4", "#dce8f2", "#f3dcda"],
+      },
+    }}
+  />`,
+        labs: `  <Labs x="Year" y="Peak bloom" />`,
       },
     },
   },
@@ -402,15 +417,15 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     outcome: "Tufte theme, a title that states the finding, a caption that cites the source.",
     explanation:
       "Theme is appearance; labs is editorial. Neither touches a mapping, so swapping themes cannot change what the chart claims.",
-    fragment: `theme="tufte"
-labs={{
-  title: "Kyoto cherry blossom, 812–2026",
-  subtitle: "Bloom now arrives about a week earlier than it did for a millennium",
-  caption: "838 observations. Data: Yasuyuki Aono (2008, 2010).",
-  x: "Year",
-  y: "Peak bloom",
-  fill: "Climate epoch",
-}}`,
+    fragment: `<ThemeTufte />
+<Labs
+  title="Kyoto cherry blossom, 812–2026"
+  subtitle="Bloom now arrives about a week earlier than it did for a millennium"
+  caption="838 observations. Data: Yasuyuki Aono (2008, 2010)."
+  x="Year"
+  y="Peak bloom"
+  fill="Climate epoch"
+/>`,
     chapterTitle: "Themes and color",
     href: "/guide/themes-color#choose-a-chart-theme",
     spec: {
@@ -425,18 +440,17 @@ labs={{
       },
     },
     source: {
-      attrs: {
-        theme: `  theme="tufte"`,
-        labs: `  labs={{
-    x: "Year",
-    y: "Peak bloom",
-    title: "Kyoto cherry blossom, 812–2026",
-    subtitle:
-      "Bloom now arrives about a week earlier than it did for a millennium",
-    caption:
-      "838 observations. Data: Yasuyuki Aono (2008, 2010).",
-    fill: "Climate epoch",
-  }}`,
+      components: ["ThemeTufte"],
+      grammar: {
+        theme: `  <ThemeTufte />`,
+        labs: `  <Labs
+    x="Year"
+    y="Peak bloom"
+    title="Kyoto cherry blossom, 812–2026"
+    subtitle="Bloom now arrives about a week earlier than it did for a millennium"
+    caption="838 observations. Data: Yasuyuki Aono (2008, 2010)."
+    fill="Climate epoch"
+  />`,
       },
     },
   },
@@ -480,6 +494,13 @@ const BASE_LAYERS: Record<string, LayerSpec> = { points: { geom: "point" } };
 const BASE_ORDER = ["points"];
 const BASE_CHILDREN: Record<string, string> = { points: "  <GeomPoint />" };
 
+/**
+ * Emission order for the grammar children, outermost concern first: how the
+ * chart looks, then how values map to the page, then what it is called. None
+ * of the three can override another, so this is readability only.
+ */
+const GRAMMAR_ORDER = ["theme", "scales", "labs"] as const;
+
 /** Layers that only make sense when the chart is wide enough to place text. */
 export const SAKURA_ANNOTATION_LAYERS = ["leaders", "callouts"] as const;
 
@@ -517,6 +538,7 @@ export function foldSakura(
     ["aes", `  aes={{ x: "year", y: "bloomRefDate" }}`],
   ]);
   const children: Record<string, string> = { ...BASE_CHILDREN };
+  const grammar: Record<string, string> = {};
   let childOrder: readonly string[] = BASE_ORDER;
 
   for (const step of steps) {
@@ -529,6 +551,7 @@ export function foldSakura(
     for (const component of step.source.components ?? []) components.add(component);
     consts.push(...(step.source.consts ?? []));
     for (const [name, text] of Object.entries(step.source.attrs ?? {})) attrs.set(name, text);
+    Object.assign(grammar, step.source.grammar ?? {});
     Object.assign(children, step.source.children ?? {});
     if (step.source.childOrder !== undefined) childOrder = step.source.childOrder;
   }
@@ -569,7 +592,7 @@ ${script}
 <GGPlot
 ${[...attrs.values()].join("\n")}
 >
-${childOrder.map((name) => children[name]).join("\n")}
+${[...GRAMMAR_ORDER.filter((name) => grammar[name] !== undefined).map((name) => grammar[name]!), ...childOrder.map((name) => children[name]!)].join("\n")}
 </GGPlot>`;
 
   return {

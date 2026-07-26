@@ -1,7 +1,7 @@
 <script lang="ts">
   import { base } from "$app/paths";
   import type { PlotInspectionChange } from "@ggsvelte/svelte";
-  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import { GeomPoint, GGPlot, Labs, Scale, Theme } from "@ggsvelte/svelte";
 
   import { guerry } from "$examples/point/scatter-color/data";
   import CodeTabs from "$lib/CodeTabs.svelte";
@@ -69,20 +69,19 @@
         maxDistance: 24,
         content: heroTooltip,
       }}
-      theme={heroTheme}
-      scales={{ color: { type: "ordinal", scheme: "tableau10" } }}
-      labs={{
-        title: "Literacy and crime in France, 1833",
-        subtitle:
-          "85 French departments — higher y means fewer crimes per head",
-        x: "Literate conscripts (%)",
-        y: "Population per crime against persons",
-        color: "Region",
-      }}
       width="container"
       height={400}
       ariaLabel="Literacy percentage against population per crime against persons for 85 French departments, coloured by region"
     >
+      <Theme name={heroTheme} />
+      <Scale value={{ color: { type: "ordinal", scheme: "tableau10" } }} />
+      <Labs
+        title="Literacy and crime in France, 1833"
+        subtitle="85 French departments — higher y means fewer crimes per head"
+        x="Literate conscripts (%)"
+        y="Population per crime against persons"
+        color="Region"
+      />
       <GeomPoint size={4} alpha={0.85} />
     </GGPlot>
   </div>

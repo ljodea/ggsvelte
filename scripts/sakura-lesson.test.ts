@@ -85,6 +85,9 @@ describe("the sakura lesson folds to renderable specs", () => {
     const lastChild = new Map<string, string>();
     for (const step of SAKURA_STEPS) {
       for (const [key, text] of Object.entries(step.source.attrs ?? {})) lastAttr.set(key, text);
+      // Grammar children ride with the attrs they replaced (#659 slice 8):
+      // they are not layers, so they must stay out of the layer count below.
+      for (const [key, text] of Object.entries(step.source.grammar ?? {})) lastAttr.set(key, text);
       for (const [key, text] of Object.entries(step.source.children ?? {}))
         lastChild.set(key, text);
     }
@@ -110,7 +113,7 @@ describe("the sakura lesson folds to renderable specs", () => {
       [2, 'fill: "epoch"', '"fill":{"field":"epoch"}'],
       [3, SAKURA_BASELINE, `"yintercept":"${SAKURA_BASELINE}"`],
       [3, '"#b3452f"', '"value":"#b3452f"'],
-      [4, 'theme="tufte"', '"theme":"tufte"'],
+      [4, "<ThemeTufte />", '"theme":"tufte"'],
       [5, 'key="year"', ""],
     ];
     for (const [index, inFragment, inSpec] of pairs) {

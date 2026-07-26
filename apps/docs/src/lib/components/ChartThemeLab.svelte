@@ -1,5 +1,12 @@
 <script lang="ts">
-  import { GeomLine, GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomLine,
+    GeomPoint,
+    GGPlot,
+    Labs,
+    Scale,
+    Theme,
+  } from "@ggsvelte/svelte";
   import type { ThemeName } from "@ggsvelte/spec";
   import { onMount } from "svelte";
 
@@ -63,23 +70,25 @@
     <GGPlot
       data={temperaturesKeyed}
       aes={{ x: "month", y: "temp", color: "city" }}
-      theme={resolvedTheme}
-      scales={{
-        x: { breaks: [...MONTH_BREAKS] },
-        color: { type: "ordinal", scheme },
-      }}
-      labs={{
-        title: "Monthly mean temperature",
-        x: "Month",
-        y: "Temperature (°C)",
-        color: "City",
-      }}
       key="id"
       inspect={{ mode: "x" }}
       legendFocus
       height={400}
       ariaLabel={`${resolvedTheme} theme with ${scheme} palette`}
     >
+      <Theme name={resolvedTheme} />
+      <Scale
+        value={{
+          x: { breaks: [...MONTH_BREAKS] },
+          color: { type: "ordinal", scheme },
+        }}
+      />
+      <Labs
+        title="Monthly mean temperature"
+        x="Month"
+        y="Temperature (°C)"
+        color="City"
+      />
       <GeomLine linewidth={2} />
       <GeomPoint size={2.5} />
     </GGPlot>

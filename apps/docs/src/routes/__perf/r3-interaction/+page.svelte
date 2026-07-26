@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createPlotInteraction, GGPlot } from "@ggsvelte/svelte";
+  import { createPlotInteraction, Facet, GGPlot, Labs } from "@ggsvelte/svelte";
 
   const FILTER_ROWS = 20_000;
   const FACET_ROWS = 12_000;
@@ -78,9 +78,10 @@
       legendFilter
       width={900}
       height={420}
-      labs={{ title: "R3 legend filter pipeline", color: "Group" }}
       onrender={() => (filterPipelineCommits += 1)}
-    />
+    >
+      <Labs title="R3 legend filter pipeline" color="Group" />
+    </GGPlot>
   </section>
 
   <section data-perf-plot="facet">
@@ -88,16 +89,17 @@
       data={facetData}
       aes={mapping}
       layers={[{ geom: "point", render: "canvas", params: { size: 1 } }]}
-      facet={{ wrap: "facet", ncol: 3 }}
       key="id"
       select={crossPanelSelect}
       interaction={facetInteraction}
       interactionScope={facetScope}
       width={900}
       height={420}
-      labs={{ title: "R3 cross-panel interval and precise bounds" }}
       onrender={() => (facetPipelineCommits += 1)}
-    />
+    >
+      <Facet wrap="facet" ncol={3} />
+      <Labs title="R3 cross-panel interval and precise bounds" />
+    </GGPlot>
   </section>
 
   <section data-perf-plot="zoom">
@@ -111,9 +113,10 @@
       interactionScope={zoomScope}
       width={900}
       height={420}
-      labs={{ title: "R3 precise zoom bounds" }}
       onrender={() => (zoomPipelineCommits += 1)}
-    />
+    >
+      <Labs title="R3 precise zoom bounds" />
+    </GGPlot>
   </section>
 </main>
 
