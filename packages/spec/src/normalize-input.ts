@@ -29,6 +29,8 @@ import type {
   RenderBackend,
   RuleParams,
   SegmentParams,
+  QqParams,
+  QqLineParams,
   Scales,
   SmoothParams,
   StackablePosition,
@@ -55,6 +57,7 @@ export interface AesInput {
   group?: ChannelInput;
   label?: ChannelInput;
   weight?: ChannelInput;
+  sample?: ChannelInput;
   ymin?: ChannelInput;
   ymax?: ChannelInput;
   xmin?: ChannelInput;
@@ -222,6 +225,20 @@ export interface SegmentLayerInput extends LayerInputBase {
   params?: SegmentParams;
 }
 
+export interface QqLayerInput extends LayerInputBase {
+  geom: "qq";
+  stat?: "qq";
+  position?: "identity";
+  params?: QqParams;
+}
+
+export interface QqLineLayerInput extends LayerInputBase {
+  geom: "qq_line";
+  stat?: "qq_line";
+  position?: "identity";
+  params?: QqLineParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -240,7 +257,9 @@ export type LayerInput =
   | RectLayerInput
   | TileLayerInput
   | RasterLayerInput
-  | SegmentLayerInput;
+  | SegmentLayerInput
+  | QqLayerInput
+  | QqLineLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

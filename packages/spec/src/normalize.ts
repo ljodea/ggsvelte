@@ -68,6 +68,8 @@ export type {
   HistogramLayerInput,
   RibbonLayerInput,
   SegmentLayerInput,
+  QqLayerInput,
+  QqLineLayerInput,
   LayerInput,
   LineLayerInput,
   PointLayerInput,

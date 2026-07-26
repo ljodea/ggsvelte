@@ -110,6 +110,8 @@ export const HistogramLayerSchema = SpecModule.Import("HistogramLayer");
 export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
+export const QqLayerSchema = SpecModule.Import("QqLayer");
+export const QqLineLayerSchema = SpecModule.Import("QqLineLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
@@ -192,6 +194,10 @@ export type AreaParams = SpecType<"AreaParams">;
 export type RuleParams = SpecType<"RuleParams">;
 /** Segment layer params (styling + lineend). */
 export type SegmentParams = SpecType<"SegmentParams">;
+/** Q–Q point layer params. */
+export type QqParams = SpecType<"QqParams">;
+/** Q–Q reference line params. */
+export type QqLineParams = SpecType<"QqLineParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
@@ -251,6 +257,10 @@ export type RasterLayer = LayerWithDataRef<SpecType<"RasterLayer">>;
 export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 /** A finite segment layer ((x,y)→(xend,yend)). */
 export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
+/** A Q–Q scatter layer. */
+export type QqLayer = LayerWithDataRef<SpecType<"QqLayer">>;
+/** A Q–Q reference line layer. */
+export type QqLineLayer = LayerWithDataRef<SpecType<"QqLineLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -269,7 +279,9 @@ export type LayerSpec =
   | ErrorbarLayer
   | RectLayer
   | TileLayer
-  | RasterLayer;
+  | RasterLayer
+  | QqLayer
+  | QqLineLayer;
 /** Stackable position adjustment names. */
 export type StackablePosition = SpecType<"StackablePosition">;
 /** Position adjustments accepted by point layers. */

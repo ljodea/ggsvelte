@@ -34,7 +34,7 @@ export function resolveLayerFields(
         push("y", binding.yStatColumn ?? (stat === "density" ? "density" : "count"), "stat");
       } else if (stat === "boxplot") {
         push("y", "middle", "stat");
-      } else if (stat === "smooth" || stat === "summary") {
+      } else if (stat === "smooth" || stat === "summary" || stat === "qq" || stat === "qq_line") {
         push("y", "y", "stat");
       }
     }
@@ -57,6 +57,7 @@ export function resolveLayerFields(
     }
     push("label", binding.labelField);
     push("weight", binding.weightField);
+    push("sample", binding.sampleField);
     return fields;
   });
 }

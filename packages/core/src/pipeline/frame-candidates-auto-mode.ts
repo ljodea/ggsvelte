@@ -20,6 +20,7 @@ export function candidateAutoMode(
     // dense scatters without adding much (#754).
     case "point":
     case "text":
+    case "qq":
       return "exact";
     case "col":
     case "bar":
@@ -28,6 +29,7 @@ export function candidateAutoMode(
     case "raster":
       return "exact";
     case "line":
+    case "qq_line":
     case "area":
     case "density":
     case "smooth":

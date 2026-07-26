@@ -6,6 +6,7 @@ import type { ColumnTable } from "../table.js";
 
 import { buildBinFrame, buildCountFrame, buildDensityFrame } from "./frame-stats-binning.js";
 import { buildBoxplotFrame, buildSmoothFrame, buildSummaryFrame } from "./frame-stats-fit.js";
+import { buildQqFrame, buildQqLineFrame } from "./frame-stats-qq.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 
 export function buildNonIdentityFrame(
@@ -25,6 +26,8 @@ export function buildNonIdentityFrame(
   if (stat === "smooth") return buildSmoothFrame(binding, table, groups, warnings, advisories);
   if (stat === "boxplot") return buildBoxplotFrame(binding, table, groups, warnings);
   if (stat === "summary") return buildSummaryFrame(binding, table, groups, warnings);
+  if (stat === "qq") return buildQqFrame(binding, table, groups, warnings);
+  if (stat === "qq_line") return buildQqLineFrame(binding, table, groups, warnings);
 
   return null;
 }

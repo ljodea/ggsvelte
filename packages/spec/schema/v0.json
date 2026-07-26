@@ -225,6 +225,10 @@
           "$ref": "#/$defs/ChannelValue",
           "description": "Statistical weight channel. The count, bin, and density stats sum weights instead of counting rows. Never participates in grouping."
         },
+        "sample": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Sample distribution channel for Q–Q plots (ggplot2 aes.sample). The qq / qq_line stats read this column; x/y become theoretical and sample quantiles after the stat. Never participates in grouping."
+        },
         "ymin": {
           "$ref": "#/$defs/ChannelValue",
           "description": "Lower y bound (errorbar identity, rect edges, ribbon x-orientation). Quantitative values only."
@@ -1194,6 +1198,71 @@
       "additionalProperties": false,
       "description": "Styling parameters for the segment geom (finite line from (x,y) to (xend,yend))."
     },
+    "QqParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Point opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Point size in px. Must be greater than 0."
+        },
+        "shape": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "circle"
+            },
+            {
+              "type": "string",
+              "const": "triangle"
+            },
+            {
+              "type": "string",
+              "const": "square"
+            },
+            {
+              "type": "string",
+              "const": "diamond"
+            },
+            {
+              "type": "string",
+              "const": "plus"
+            },
+            {
+              "type": "string",
+              "const": "cross"
+            }
+          ],
+          "description": "Point shape. One of \"circle\", \"triangle\", \"square\", \"diamond\", \"plus\", \"cross\". Default \"circle\"."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling for geom_qq (Q–Q scatter). Requires aes.sample; x/y become theoretical and sample quantiles."
+    },
+    "QqLineParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Line opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px. Must be greater than 0. Default 1."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling for geom_qq_line (reference line through sample/theoretical quartile match)."
+    },
     "TextParams": {
       "type": "object",
       "properties": {
@@ -1963,6 +2032,82 @@
       "additionalProperties": false,
       "description": "A finite segment layer (ggplot2's geom_segment). Requires x, y, xend, and yend channels."
     },
+    "QqLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "qq",
+          "description": "Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample."
+        },
+        "stat": {
+          "type": "string",
+          "const": "qq",
+          "description": "Q–Q quantile pairing (default for this geom)."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "qq layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/QqParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A Q–Q point layer. Requires the sample channel."
+    },
+    "QqLineLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "qq_line",
+          "description": "Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample."
+        },
+        "stat": {
+          "type": "string",
+          "const": "qq_line",
+          "description": "Q–Q line slope/intercept from quartile match (default for this geom)."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "qq_line layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/QqLineParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A Q–Q reference line layer. Requires the sample channel."
+    },
     "LayerSpec": {
       "anyOf": [
         {
@@ -2015,6 +2160,12 @@
         },
         {
           "$ref": "#/$defs/SegmentLayer"
+        },
+        {
+          "$ref": "#/$defs/QqLayer"
+        },
+        {
+          "$ref": "#/$defs/QqLineLayer"
         }
       ],
       "description": "One plot layer. The `geom` field selects the geometry and determines which stat, position, and params are allowed."

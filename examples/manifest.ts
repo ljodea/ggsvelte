@@ -457,6 +457,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "qq/normal",
+    category: "qq",
+    name: "normal",
+    title: "Normal Q–Q plot",
+    description: "",
+    tags: ["qq", "diagnostics", "distribution"],
+    docsSection: "Distributions",
+    hasData: true,
+  },
+  {
     id: "raster/grid",
     category: "raster",
     name: "grid",

@@ -105,6 +105,7 @@ export function bindLayer(
     labelField: extras.labelField,
     labelConstant: extras.labelConstant,
     weightField: extras.weightField,
+    sampleField: extras.sampleField,
     ruleForm: position.ruleForm,
   });
 }

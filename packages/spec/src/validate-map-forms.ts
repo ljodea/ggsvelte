@@ -22,6 +22,7 @@ const AES_CHANNEL_KEYS = new Set([
   "group",
   "label",
   "weight",
+  "sample",
   "ymin",
   "ymax",
   "xmin",

@@ -28,7 +28,10 @@ export function pointsBatch(
   if (collected.kept === 0) return null;
 
   const { positions, rowIndex } = packPointPixels(collected, frame, fx);
-  const params = binding.layer.geom === "point" ? (binding.layer.params ?? {}) : {};
+  const params =
+    binding.layer.geom === "point" || binding.layer.geom === "qq"
+      ? (binding.layer.params ?? {})
+      : {};
   const literalSize = binding.size.constant;
   const literalAlpha = binding.alpha.constant;
   const literalShape = binding.shape.constant;

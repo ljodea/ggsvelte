@@ -33,8 +33,10 @@ export function dispatchGeometryBatch(
 ): GeometryBatch[] {
   switch (frame.binding.layer.geom) {
     case "point":
+    case "qq":
       return single(pointsBatch(frame, fx, color, styles, warnings));
     case "line":
+    case "qq_line":
       return single(lineBatch(frame, fx, color, styles, warnings));
     case "col":
     case "bar":

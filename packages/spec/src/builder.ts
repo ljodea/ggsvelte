@@ -45,6 +45,8 @@ export type {
   GeomRectOptions,
   GeomRuleOptions,
   GeomSegmentOptions,
+  GeomQqOptions,
+  GeomQqLineOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,

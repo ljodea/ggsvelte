@@ -21,6 +21,8 @@ export const KNOWN_GEOMS = [
   "raster",
   "ribbon",
   "segment",
+  "qq",
+  "qq_line",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -57,6 +59,7 @@ export const CHANNELS = [
   "yend",
   "width",
   "height",
+  "sample",
 ] as const;
 export type ChannelName = (typeof CHANNELS)[number];
 
@@ -69,6 +72,8 @@ export const KNOWN_STATS = [
   "boxplot",
   "density",
   "summary",
+  "qq",
+  "qq_line",
 ] as const;
 export type StatName = (typeof KNOWN_STATS)[number];
 
@@ -101,4 +106,6 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   raster: { stat: "identity", position: "identity" },
   ribbon: { stat: "identity", position: "identity" },
   segment: { stat: "identity", position: "identity" },
+  qq: { stat: "qq", position: "identity" },
+  qq_line: { stat: "qq_line", position: "identity" },
 };

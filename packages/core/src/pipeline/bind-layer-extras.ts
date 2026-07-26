@@ -22,6 +22,7 @@ export function resolveLabelWeightColorFill(input: {
   labelField: string | null;
   labelConstant: string | null;
   weightField: string | null;
+  sampleField: string | null;
   color: ColorBinding;
   fill: ColorBinding;
   size: StyleBinding;
@@ -47,6 +48,14 @@ export function resolveLabelWeightColorFill(input: {
     );
   }
   const weightField = checkField(aes.weight, "weight", index, table, warnings);
+  const sampleField = checkField(aes.sample, "sample", index, table, warnings);
+  if ((geom === "qq" || geom === "qq_line") && sampleField === null) {
+    throw new PipelineError(
+      "missing-channel",
+      `/layers/${index}/aes/sample`,
+      `The ${geom} geom requires a "sample" channel (map the distribution column with aes.sample).`,
+    );
+  }
 
   const color = colorBinding(aes.color, "color", index, table, warnings);
   const fill = colorBinding(aes.fill, "fill", index, table, warnings);
@@ -67,6 +76,7 @@ export function resolveLabelWeightColorFill(input: {
     labelField,
     labelConstant,
     weightField,
+    sampleField,
     color,
     fill,
     size,

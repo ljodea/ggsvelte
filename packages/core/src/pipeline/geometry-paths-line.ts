@@ -52,7 +52,11 @@ export function lineBatch(
     }
   }
 
-  const params = binding.layer.geom === "line" ? (binding.layer.params ?? {}) : {};
+  const params = (
+    binding.layer.geom === "line" || binding.layer.geom === "qq_line"
+      ? (binding.layer.params ?? {})
+      : {}
+  ) as { linewidth?: number; alpha?: number; curve?: "linear" | "step" };
   const styleRows = subpaths.map((rows) => rows[0]!);
   const linewidths = numericStyleVector(frame, "linewidth", styleRows, styles);
   const alphas = numericStyleVector(frame, "alpha", styleRows, styles);

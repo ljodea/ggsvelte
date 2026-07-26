@@ -21,6 +21,8 @@ import type {
   RenderBackend,
   RuleParams,
   SegmentParams,
+  QqParams,
+  QqLineParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -133,6 +135,18 @@ export interface GeomRuleOptions extends RuleParams, GeomDataOption {
 
 /** Segment-layer sugar options: params plus optional layer-level aes. */
 export interface GeomSegmentOptions extends SegmentParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Q–Q scatter sugar options (requires aes.sample). */
+export interface GeomQqOptions extends QqParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Q–Q reference line sugar options (requires aes.sample). */
+export interface GeomQqLineOptions extends QqLineParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }
