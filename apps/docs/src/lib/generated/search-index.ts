@@ -4335,11 +4335,11 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:point:log-scale",
     kind: "example",
-    title: "Log-scale scatter with a fitted line",
-    summary: "Log-scale scatter with a fitted line (Points & scatter)",
+    title: "Log-scale scatter with inspection",
+    summary: "Log-scale scatter with inspection (Points & scatter)",
     href: "/examples/point/log-scale",
     keywords: [
-      "Log-scale scatter with a fitted line",
+      "Log-scale scatter with inspection",
       "Points & scatter",
       "point",
       "scales",
@@ -4348,7 +4348,7 @@ export const DOCS_SEARCH_INDEX = [
       "theme",
       "palette",
     ],
-    exact: ["Log-scale scatter with a fitted line"],
+    exact: ["Log-scale scatter with inspection"],
   },
   {
     id: "example:point:scatter-color",

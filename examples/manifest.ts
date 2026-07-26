@@ -430,7 +430,7 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     id: "point/log-scale",
     category: "point",
     name: "log-scale",
-    title: "Log-scale scatter with a fitted line",
+    title: "Log-scale scatter with inspection",
     description: "",
     tags: ["point", "scales", "log", "inspect", "theme", "palette"],
     docsSection: "Points & scatter",

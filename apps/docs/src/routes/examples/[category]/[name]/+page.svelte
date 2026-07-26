@@ -245,6 +245,16 @@
     border-bottom: 1px solid var(--line);
   }
 
+  /* CodeTabs already draws a top rule — keep one separator, not a double line. */
+  .code-section .section-heading {
+    padding-bottom: 0.35rem;
+    border-bottom: none;
+  }
+
+  .code-section :global(.code-tabs) {
+    margin-top: 0.75rem;
+  }
+
   .section-heading h2,
   .implementation h2 {
     margin: 0.25rem 0 0;

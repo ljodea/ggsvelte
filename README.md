@@ -150,7 +150,7 @@ live output and complete source.
 
 [![Heights of Galton's adult children as overlaid density estimates](apps/docs/static/previews/density-overlay-light.png)](https://ggsvelte.sh/examples/density/overlay)
 
-### [Log scale, fit, and inspection](https://ggsvelte.sh/examples/point/log-scale)
+### [Log scale and inspection](https://ggsvelte.sh/examples/point/log-scale)
 
 <!-- example-source: point/log-scale -->
 
