@@ -139,7 +139,16 @@ describe("theme registry", () => {
     // 8.8px was unreadable next to 15px titles and ~12–16px tooltips on the
     // docs homepage hero. Floor is intentionally above 11 so axis chrome is
     // not fine print at 640×400.
-    for (const name of ["light", "minimal", "ggplot2", "classic", "few", "grey", "gray", "test"] as const) {
+    for (const name of [
+      "light",
+      "minimal",
+      "ggplot2",
+      "classic",
+      "few",
+      "grey",
+      "gray",
+      "test",
+    ] as const) {
       expect(resolveTheme(name).axisTextSize, name).toBeGreaterThanOrEqual(12);
     }
     expect(resolveTheme("default").axisTitleSize).toBeGreaterThanOrEqual(11);
