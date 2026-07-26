@@ -1,7 +1,7 @@
 /**
- * Tier-2 data-aware checks: inline data, DataProfile, input limits.
+ * Tier-2 data-aware checks: inline data, DataProfile, input limits (incl. style scales).
  * Temporal decision reuse: validate-tier2-temporal-reuse.test.ts (reuse) + validate-tier2-temporal-position.test.ts (scales).
- * Production: validate-data*.ts.
+ * Production: validate-data*.ts (style: validate-data-checks-style.ts).
  */
 import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";

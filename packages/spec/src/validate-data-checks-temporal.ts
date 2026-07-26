@@ -1,6 +1,6 @@
 /**
  * Shared temporal decision memoization for data-aware scale checks.
- * Used by position (x/y) and color/fill scale compatibility.
+ * Used by position (x/y), color/fill, and numeric style scale compatibility.
  * Orchestrator: validate-data-checks.ts.
  */
 import type { SpecError } from "./errors.js";
@@ -38,7 +38,7 @@ export function temporalParserUsable(parse: unknown): boolean {
   );
 }
 
-/** One Map per dataChecks() call — shared by position and color checkers. */
+/** One Map per dataChecks() call — shared by position, color, and style checkers. */
 export type TemporalDecisionCache = Map<string, TemporalDecision | null | undefined>;
 
 /**

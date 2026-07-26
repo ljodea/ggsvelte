@@ -10,6 +10,7 @@
  *  - validate-data-checks-temporal.ts — shared temporalDecisionForField memoization
  *  - validate-data-checks-position.ts — pre-evidence temporal config + x/y scale types
  *  - validate-data-checks-color.ts — color/fill scale types + manual domain/range
+ *  - validate-data-checks-style.ts — shape/linetype + size/linewidth/alpha scale types
  *
  * Checks:
  *  - field existence: every { field } channel must name an available field
