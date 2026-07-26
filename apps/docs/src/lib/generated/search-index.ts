@@ -21036,7 +21036,7 @@ export const DOCS_SEARCH_INDEX = [
     keywords: [
       "pipeline",
       "error",
-      "Use Point, MultiPoint, LineString, MultiLineString, Polygon, or MultiPolygon (no GeometryCollection/CRS).",
+      "Use Point/MultiPoint, LineString/MultiLineString, Polygon/MultiPolygon, or GeometryCollection of those families (no CRS).",
     ],
     exact: ["sf-geometry-unsupported", "pipeline:sf-geometry-unsupported"],
   },
