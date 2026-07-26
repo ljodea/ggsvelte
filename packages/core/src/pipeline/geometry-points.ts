@@ -78,11 +78,11 @@ export function pointsBatch(
 
   // geom_dotplot paints with fill when present (schema: "Map fill/color for groups").
   // Solid point marks only have one paint channel; fill wins over color when both map.
-  const paintWithFill =
-    geom === "dotplot" &&
-    (fill !== null
-      ? frame.fillValues !== null || binding.fill.scaledConstant !== null
-      : binding.fill.constant !== null);
+  const fillMapped =
+    frame.fillValues !== null ||
+    binding.fill.scaledConstant !== null ||
+    binding.fill.constant !== null;
+  const paintWithFill = geom === "dotplot" && fillMapped;
   const paintScale = paintWithFill ? fill : color;
   const paintValues = paintWithFill ? frame.fillValues : frame.colorValues;
   const paintChannel = paintWithFill ? binding.fill : binding.color;
@@ -114,7 +114,7 @@ export function pointsBatch(
     const colors = Array.from<string>({ length: collected.kept });
     for (let j = 0; j < collected.kept; j++) {
       const row = collected.keptRows[j]!;
-      const value = paintValues === null ? paintChannel.scaledConstant! : paintValues[row]!;
+      const value = paintValues !== null ? paintValues[row]! : paintChannel.scaledConstant!;
       colors[j] = colorOf(paintScale, value);
     }
     batch.colors = colors;
