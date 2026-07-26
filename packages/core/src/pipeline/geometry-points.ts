@@ -48,6 +48,8 @@ export function pointsBatch(
   color: ResolvedColorScale | null,
   styles: ResolvedStyleScales,
   warnings: PipelineWarning[],
+  /** Fill scale — used as paint for geom_dotplot (ggplot2 fill grouping; #900). */
+  fill: ResolvedColorScale | null = null,
 ): PointsBatch | null {
   const { binding, n } = frame;
   const collected = collectPointPositions(frame, fx);
@@ -74,6 +76,17 @@ export function pointsBatch(
   else if (typeof params.size === "number") markSize = params.size;
   else if (geom === "dotplot") markSize = dotplotRadiusPx(frame, fx, params);
 
+  // geom_dotplot paints with fill when present (schema: "Map fill/color for groups").
+  // Solid point marks only have one paint channel; fill wins over color when both map.
+  const paintWithFill =
+    geom === "dotplot" &&
+    (fill !== null
+      ? frame.fillValues !== null || binding.fill.scaledConstant !== null
+      : binding.fill.constant !== null);
+  const paintScale = paintWithFill ? fill : color;
+  const paintValues = paintWithFill ? frame.fillValues : frame.colorValues;
+  const paintChannel = paintWithFill ? binding.fill : binding.color;
+
   const batch: PointsBatch = {
     kind: "points",
     layerIndex: binding.index,
@@ -84,7 +97,7 @@ export function pointsBatch(
     alpha: typeof literalAlpha === "number" ? literalAlpha : (params.alpha ?? 1),
     shape:
       typeof literalShape === "string" ? (literalShape as PointShape) : (params.shape ?? "circle"),
-    fill: binding.color.constant,
+    fill: paintChannel.constant,
   };
   const sizes = numericStyleVector(frame, "size", collected.keptRows, styles);
   const alphas = numericStyleVector(frame, "alpha", collected.keptRows, styles);
@@ -97,13 +110,12 @@ export function pointsBatch(
     batch.alphas = alphas;
   }
   if (shapeIndexes !== undefined) batch.shapeIndexes = shapeIndexes;
-  if (color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null)) {
+  if (paintScale !== null && (paintValues !== null || paintChannel.scaledConstant !== null)) {
     const colors = Array.from<string>({ length: collected.kept });
     for (let j = 0; j < collected.kept; j++) {
       const row = collected.keptRows[j]!;
-      const value =
-        frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
-      colors[j] = colorOf(color, value);
+      const value = paintValues === null ? paintChannel.scaledConstant! : paintValues[row]!;
+      colors[j] = colorOf(paintScale, value);
     }
     batch.colors = colors;
   }
