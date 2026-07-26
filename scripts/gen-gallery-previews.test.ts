@@ -5,6 +5,12 @@ import { join } from "node:path";
 
 import { EXAMPLES } from "../examples/manifest.js";
 import {
+  emptyProvenance,
+  provenanceEntryFor,
+  upsertProvenanceEntry,
+  writeProvenance,
+} from "./gallery-preview-provenance.js";
+import {
   canonicalPreviewFilename,
   generateGalleryPreviews,
   previewSourceInventory,
@@ -57,7 +63,97 @@ describe("generated gallery previews", () => {
     }
   });
 
-  test("checked repository projection and assets are current", async () => {
+  test("check fails when example sources drift even if PNG + projection stay consistent (#746)", async () => {
+    const root = mkdtempSync(join(tmpdir(), "ggsvelte-gallery-stale-src-"));
+    const examplesRoot = join(root, "examples");
+    const previews = join(root, "previews");
+    const projection = join(root, "gallery-previews.ts");
+    mkdirSync(previews, { recursive: true });
+    const sample = [EXAMPLES[0]!, EXAMPLES[1]!];
+    try {
+      let provenance = emptyProvenance();
+      for (const entry of sample) {
+        const dir = join(examplesRoot, ...entry.id.split("/"));
+        mkdirSync(dir, { recursive: true });
+        writeFileSync(join(dir, "Example.svelte"), `example:${entry.id}`);
+        writeFileSync(join(dir, "spec.ts"), `spec:${entry.id}`);
+        writeFileSync(join(dir, "meta.json"), "{}");
+        writeFileSync(join(previews, canonicalPreviewFilename(entry.id)), `png:${entry.id}`);
+        provenance = upsertProvenanceEntry(
+          provenance,
+          entry.id,
+          provenanceEntryFor(examplesRoot, previews, entry.id),
+        );
+      }
+      writeProvenance(join(previews, "provenance.json"), provenance);
+      await generateGalleryPreviews({
+        entries: sample,
+        source: previews,
+        output: previews,
+        projection,
+        examplesRoot,
+      });
+      // Fresh provenance + projection: green
+      await generateGalleryPreviews({
+        entries: sample,
+        source: previews,
+        output: previews,
+        projection,
+        examplesRoot,
+        check: true,
+      });
+      // Mutate source without recapture — PNG bytes unchanged, projection still matches
+      writeFileSync(
+        join(examplesRoot, ...sample[0]!.id.split("/"), "Example.svelte"),
+        "mutated without recapture",
+      );
+      let staleError: unknown;
+      try {
+        await generateGalleryPreviews({
+          entries: sample,
+          source: previews,
+          output: previews,
+          projection,
+          examplesRoot,
+          check: true,
+        });
+      } catch (error) {
+        staleError = error;
+      }
+      expect(staleError).toBeInstanceOf(Error);
+      if (!(staleError instanceof Error)) throw new Error("expected check to fail");
+      expect(staleError.message).toContain(sample[0]!.id);
+      expect(staleError.message).toContain("source files changed");
+      // gen alone must not rewrite provenance and silence the gate
+      await generateGalleryPreviews({
+        entries: sample,
+        source: previews,
+        output: previews,
+        projection,
+        examplesRoot,
+      });
+      let stillStale: unknown;
+      try {
+        await generateGalleryPreviews({
+          entries: sample,
+          source: previews,
+          output: previews,
+          projection,
+          examplesRoot,
+          check: true,
+        });
+      } catch (error) {
+        stillStale = error;
+      }
+      expect(stillStale).toBeInstanceOf(Error);
+      if (!(stillStale instanceof Error)) throw new Error("expected check still fail");
+      expect(stillStale.message).toContain(sample[0]!.id);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test("checked repository projection, assets, and provenance are current", async () => {
     await generateGalleryPreviews({ check: true });
   });
 });

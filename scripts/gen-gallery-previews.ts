@@ -13,6 +13,11 @@ import { dirname, join, resolve } from "node:path";
 import { format } from "oxfmt";
 
 import { EXAMPLES, type ExampleManifestEntry } from "../examples/manifest.js";
+import {
+  assertPreviewProvenance,
+  loadProvenance,
+  provenancePath,
+} from "./gallery-preview-provenance.js";
 
 const ROOT = resolve(import.meta.dir, "..");
 // Gallery lights are owned by the published previews tree, not the VR smoke
@@ -28,6 +33,7 @@ const DEFAULT_PROJECTION = join(
   "generated",
   "gallery-previews.ts",
 );
+const DEFAULT_EXAMPLES_ROOT = join(ROOT, "examples");
 
 export interface PreviewInventoryEntry {
   id: string;
@@ -39,6 +45,8 @@ export interface GenerateGalleryPreviewOptions {
   source?: string;
   output?: string;
   projection?: string;
+  /** Root of the examples/ tree — used only for provenance source digests. */
+  examplesRoot?: string;
   check?: boolean;
 }
 
@@ -87,6 +95,7 @@ export async function generateGalleryPreviews(
   const source = options.source ?? DEFAULT_SOURCE;
   const output = options.output ?? DEFAULT_OUTPUT;
   const projection = options.projection ?? DEFAULT_PROJECTION;
+  const examplesRoot = options.examplesRoot ?? DEFAULT_EXAMPLES_ROOT;
   const inventory = previewSourceInventory(entries);
   const expected = new Set(inventory.map((entry) => entry.filename));
   const generated = await projectionSource(inventory, source);
@@ -110,6 +119,14 @@ export async function generateGalleryPreviews(
         )
       : [];
     if (extras.length > 0) throw new Error(`Unexpected generated gallery preview: ${extras[0]}`);
+    // Source↔PNG binding (#746). Provenance is capture-owned; gen never writes it.
+    const previewsDir = output;
+    assertPreviewProvenance({
+      examplesRoot,
+      previewsDir,
+      entries,
+      provenance: loadProvenance(provenancePath(previewsDir)),
+    });
     return;
   }
 

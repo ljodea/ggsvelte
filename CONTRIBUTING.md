@@ -382,9 +382,22 @@ Enforced VR is a **smoke suite** (`tests/visual/smoke-matrix.ts` +
 site: example pages support `?vr&theme=light|dark`, which strips chrome,
 freezes animations, and pins `.gg-example-frame`. Full dual-theme × every
 example is intentionally gone. Gallery lights live under
-`apps/docs/static/previews/` and may lag. Non-pixel docs structure/a11y runs
-in `component-journeys` (docs_journeys routing). Determinism + fonts:
-docs/decisions/0009.
+`apps/docs/static/previews/` with a capture-owned `provenance.json` that
+binds each PNG to a digest of that example's source tree (#746). After
+editing an example's sources, recapture then regenerate:
+
+```sh
+bun run build && bun run build:docs
+bun scripts/serve-docs.ts &
+bun run gallery:previews:capture          # or pass an id-prefix subset
+bun run gallery:previews:gen
+```
+
+`gallery:previews:check` (docs build/check, and CI when `examples/**`
+changes) fails when sources move without a recapture — not only when a
+PNG is missing. Gen never rewrites provenance. Non-pixel docs
+structure/a11y runs in `component-journeys` (docs_journeys routing).
+Determinism + fonts: docs/decisions/0009.
 
 - **Smoke baselines** land in `tests/visual/__screenshots__/` from the pinned
   container. Prefer **same-PR** updates: change render-relevant code + smoke
