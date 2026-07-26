@@ -44,7 +44,7 @@ export type CancelPointerInspectPolicy = {
 export type InspectPointerFrameAction = Extract<InteractionAction, { type: "inspect" }>;
 
 /** Reducer methods the queue touches (host may pass a getter). */
-export type PointerInspectReducer = {
+type PointerInspectReducer = {
   frameToken(): InteractionFrameToken;
   accepts(token: InteractionFrameToken): boolean;
   queuePointer(action: Extract<InteractionAction, { type: "inspect" | "move-area" }>): void;
