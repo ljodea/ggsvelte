@@ -1898,6 +1898,68 @@ export const SpecDeclarations = {
     },
   ),
 
+  AblineParams: Type.Object(
+    {
+      slope: Type.Optional(
+        Type.Number({
+          description: "Line slope (rise/run). Default 1 (identity line when intercept is 0).",
+        }),
+      ),
+      intercept: Type.Optional(
+        Type.Number({
+          description: "Y-intercept in data units. Default 0.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Line opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Annotation parameters for geom abline: y = intercept + slope · x, clipped to the panel. Annotation-only in v1 (no data-mapped slope/intercept).",
+    },
+  ),
+
+  AblineLayer: Type.Object(
+    {
+      geom: Type.Literal("abline", {
+        description:
+          "Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Abline layers use fixed params as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Abline layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. Abline v1 ignores row data (annotation-only).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("AblineParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A slope/intercept reference-line layer (ggplot2 geom_abline). Annotation-only: set params.slope and params.intercept.",
+    },
+  ),
+
   LayerSpec: Type.Union(
     [
       Type.Ref("PointLayer"),
@@ -1917,6 +1979,7 @@ export const SpecDeclarations = {
       Type.Ref("TileLayer"),
       Type.Ref("RasterLayer"),
       Type.Ref("SegmentLayer"),
+      Type.Ref("AblineLayer"),
     ],
     {
       description:

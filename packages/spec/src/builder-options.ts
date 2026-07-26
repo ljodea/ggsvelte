@@ -21,6 +21,7 @@ import type {
   RenderBackend,
   RuleParams,
   SegmentParams,
+  AblineParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -133,6 +134,12 @@ export interface GeomRuleOptions extends RuleParams, GeomDataOption {
 
 /** Segment-layer sugar options: params plus optional layer-level aes. */
 export interface GeomSegmentOptions extends SegmentParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Abline-layer sugar options: slope/intercept annotation params. */
+export interface GeomAblineOptions extends AblineParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

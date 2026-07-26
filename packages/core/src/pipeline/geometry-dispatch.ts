@@ -18,6 +18,7 @@ import { boxplotBatches, errorbarBatch, smoothBatches } from "./geometry-composi
 import { edgeRectsBatch, rasterRectsBatch, tileRectsBatch } from "./geometry-edge-rects.js";
 import { ribbonBatches } from "./geometry-ribbon.js";
 import { finiteSegmentBatch } from "./geometry-segment-finite.js";
+import { ablineBatch } from "./geometry-abline.js";
 
 function single(batch: GeometryBatch | null): GeometryBatch[] {
   return batch === null ? [] : [batch];
@@ -54,6 +55,8 @@ export function dispatchGeometryBatch(
       return single(segmentsBatch(frame, fx, color, styles, warnings));
     case "segment":
       return single(finiteSegmentBatch(frame, fx, color, styles, warnings));
+    case "abline":
+      return single(ablineBatch(frame, fx, color, styles, warnings));
     case "text":
       return single(glyphsBatch(frame, fx, color, styles, warnings));
     case "smooth":

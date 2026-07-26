@@ -68,6 +68,7 @@ export type {
   HistogramLayerInput,
   RibbonLayerInput,
   SegmentLayerInput,
+  AblineLayerInput,
   LayerInput,
   LineLayerInput,
   PointLayerInput,
@@ -131,8 +132,14 @@ function isAnnotationRule(layer: LayerInput): boolean {
   return params?.xintercept !== undefined || params?.yintercept !== undefined;
 }
 
+/** Abline is always annotation-style (fixed slope/intercept; no plot aes). */
+function isAnnotationAbline(layer: LayerInput): boolean {
+  return layer.geom === "abline";
+}
+
 function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec {
-  const inherited = isAnnotationRule(layer) ? undefined : plotAes;
+  const inherited =
+    isAnnotationRule(layer) || isAnnotationAbline(layer) ? undefined : plotAes;
   let aes = resolveLayerAes(inherited, normalizeAes(layer.aes));
   // Unknown geoms fall back to identity defaults so normalize never throws —
   // validate() rejects them right after with the proper did-you-mean error.

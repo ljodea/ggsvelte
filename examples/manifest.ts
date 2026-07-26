@@ -387,6 +387,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "point/abline-identity",
+    category: "point",
+    name: "abline-identity",
+    title: "Abline identity reference",
+    description: "",
+    tags: ["point", "abline", "annotation", "reference"],
+    docsSection: "Points & scatter",
+    hasData: true,
+  },
+  {
     id: "point/canvas-scatter",
     category: "point",
     name: "canvas-scatter",

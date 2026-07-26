@@ -110,6 +110,7 @@ export const HistogramLayerSchema = SpecModule.Import("HistogramLayer");
 export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
+export const AblineLayerSchema = SpecModule.Import("AblineLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
@@ -192,6 +193,7 @@ export type AreaParams = SpecType<"AreaParams">;
 export type RuleParams = SpecType<"RuleParams">;
 /** Segment layer params (styling + lineend). */
 export type SegmentParams = SpecType<"SegmentParams">;
+export type AblineParams = SpecType<"AblineParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
@@ -251,6 +253,8 @@ export type RasterLayer = LayerWithDataRef<SpecType<"RasterLayer">>;
 export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 /** A finite segment layer ((x,y)→(xend,yend)). */
 export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
+/** A slope/intercept reference line layer (geom_abline). */
+export type AblineLayer = LayerWithDataRef<SpecType<"AblineLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -261,6 +265,7 @@ export type LayerSpec =
   | AreaLayer
   | RibbonLayer
   | SegmentLayer
+  | AblineLayer
   | RuleLayer
   | TextLayer
   | SmoothLayer

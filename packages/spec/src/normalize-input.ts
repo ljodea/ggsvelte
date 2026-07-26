@@ -29,6 +29,7 @@ import type {
   RenderBackend,
   RuleParams,
   SegmentParams,
+  AblineParams,
   Scales,
   SmoothParams,
   StackablePosition,
@@ -222,6 +223,13 @@ export interface SegmentLayerInput extends LayerInputBase {
   params?: SegmentParams;
 }
 
+export interface AblineLayerInput extends LayerInputBase {
+  geom: "abline";
+  stat?: "identity";
+  position?: "identity";
+  params?: AblineParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -237,6 +245,7 @@ export type LayerInput =
   | BoxplotLayerInput
   | DensityLayerInput
   | ErrorbarLayerInput
+  | AblineLayerInput
   | RectLayerInput
   | TileLayerInput
   | RasterLayerInput
