@@ -14,4 +14,4 @@ curvature (default 0.5), angle (degrees, default 90), ncp (density knob).
 One path subpath per row; one semantic candidate per curve.
 
 Intentional subset: quadratic Bezier approximation, not full grid xspline.
-Migration: none — additive.
+Migration: none — additive
