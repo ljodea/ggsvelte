@@ -32,6 +32,8 @@ export function resolveLayerFields(
       if (binding.xField !== null) push("x", "x", "stat");
       if (stat === "count" || stat === "bin" || stat === "density") {
         push("y", binding.yStatColumn ?? (stat === "density" ? "density" : "count"), "stat");
+      } else if (stat === "bin_hex") {
+        push("y", "y", "stat");
       } else if (stat === "boxplot") {
         push("y", "middle", "stat");
       } else if (stat === "smooth" || stat === "summary") {
@@ -50,6 +52,8 @@ export function resolveLayerFields(
     push("height", binding.heightField);
     push("color", binding.color.field);
     push("fill", binding.fill.field);
+    if (binding.fill.statColumn !== null) push("fill", binding.fill.statColumn, "stat");
+    if (binding.color.statColumn !== null) push("color", binding.color.statColumn, "stat");
     for (const channel of ["size", "linewidth", "alpha", "shape", "linetype"] as const) {
       const style = binding[channel];
       push(channel, style.field);

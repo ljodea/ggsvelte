@@ -26,6 +26,7 @@ export function candidateAutoMode(
     case "rect":
     case "tile":
     case "raster":
+    case "hex":
       return "exact";
     case "line":
     case "area":

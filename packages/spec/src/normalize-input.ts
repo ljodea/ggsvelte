@@ -25,6 +25,7 @@ import type {
   PointPosition,
   PositionParams,
   RasterParams,
+  HexParams,
   RectParams,
   RenderBackend,
   RuleParams,
@@ -208,6 +209,13 @@ export interface RasterLayerInput extends LayerInputBase {
   params?: RasterParams;
 }
 
+export interface HexLayerInput extends LayerInputBase {
+  geom: "hex";
+  stat?: "bin_hex";
+  position?: "identity";
+  params?: HexParams;
+}
+
 export interface RibbonLayerInput extends LayerInputBase {
   geom: "ribbon";
   stat?: "identity";
@@ -240,6 +248,7 @@ export type LayerInput =
   | RectLayerInput
   | TileLayerInput
   | RasterLayerInput
+  | HexLayerInput
   | SegmentLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */

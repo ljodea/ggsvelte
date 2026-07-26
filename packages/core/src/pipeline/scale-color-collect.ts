@@ -31,6 +31,11 @@ export function collectColorChannelValues(
       }
       for (const v of frameValues) values.push(v);
     }
+    // after_stat color/fill (e.g. hex fill = count): values live on the frame.
+    if (channel.statColumn !== null && frameValues !== null) {
+      anyField = true;
+      for (const v of frameValues) values.push(v);
+    }
     if (channel.scaledConstant !== null) {
       anyDiscreteField = true;
       anyField = true;

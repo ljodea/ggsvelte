@@ -11,6 +11,8 @@ import type { PositionConversionContext } from "./temporal-position.js";
 
 export interface ColorBinding {
   field: string | null;
+  /** Stat-generated column mapped with { stat } (e.g. after_stat count on fill). */
+  statColumn: string | null;
   /** Literal (non-scaled) constant, if any. */
   constant: string | null;
   /** Scaled constant ({value, scale: true}), if any. */

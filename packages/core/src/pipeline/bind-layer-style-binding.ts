@@ -58,6 +58,7 @@ export function styleBinding(
       identity: [],
       count: ["count"],
       bin: ["count", "density", "ncount", "ndensity"],
+      bin_hex: ["count", "density", "ncount", "ndensity"],
       density: ["density", "count", "scaled", "ndensity"],
       smooth: ["y", "ymin", "ymax", "se"],
       summary: ["y", "ymin", "ymax"],

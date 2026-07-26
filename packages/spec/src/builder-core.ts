@@ -30,6 +30,7 @@ import type {
   GeomLineOptions,
   GeomPointOptions,
   GeomRasterOptions,
+  GeomHexOptions,
   GeomRectOptions,
   GeomRuleOptions,
   GeomSegmentOptions,
@@ -212,6 +213,11 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'raster', ... }) — equal-cell dense grid. */
   geomRaster(options: GeomRasterOptions = {}): GGBuilder {
     return this.layer(layerFrom("raster", options));
+  }
+
+  /** Sugar for .layer({ geom: 'hex', ... }) — hexagonal 2D bin heatmap. */
+  geomHex(options: GeomHexOptions = {}): GGBuilder {
+    return this.layer(layerFrom("hex", options));
   }
 
   /**

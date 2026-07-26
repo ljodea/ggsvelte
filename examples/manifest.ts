@@ -223,6 +223,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "hex/basic",
+    category: "hex",
+    name: "basic",
+    title: "Hexagonal bin heatmap",
+    description: "",
+    tags: ["hex", "heatmap", "density"],
+    docsSection: "Distributions",
+    hasData: true,
+  },
+  {
     id: "histogram/basic",
     category: "histogram",
     name: "basic",

@@ -42,6 +42,7 @@ export type {
   GeomLineOptions,
   GeomPointOptions,
   GeomRasterOptions,
+  GeomHexOptions,
   GeomRectOptions,
   GeomRuleOptions,
   GeomSegmentOptions,

@@ -99,6 +99,10 @@ interface LayerFrameCore {
   /** Annotation-rule intercepts (data units). */
   xIntercepts: CellValue[];
   yIntercepts: CellValue[];
+  /** Hex cell full width in data units (bin_hex); null when unused. */
+  hexWidth: Float64Array | null;
+  /** Hex cell full height in data units (bin_hex); null when unused. */
+  hexHeight: Float64Array | null;
 }
 
 /**

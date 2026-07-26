@@ -48,8 +48,8 @@ export function resolveLabelWeightColorFill(input: {
   }
   const weightField = checkField(aes.weight, "weight", index, table, warnings);
 
-  const color = colorBinding(aes.color, "color", index, table, warnings);
-  const fill = colorBinding(aes.fill, "fill", index, table, warnings);
+  const color = colorBinding(aes.color, "color", index, table, warnings, stat);
+  const fill = colorBinding(aes.fill, "fill", index, table, warnings, stat);
   applyColorOnFillGeomWarning(geom, index, color, warnings);
   const size = styleBinding(aes.size, "size", geom, stat, index, table, warnings);
   const linewidth = styleBinding(aes.linewidth, "linewidth", geom, stat, index, table, warnings);

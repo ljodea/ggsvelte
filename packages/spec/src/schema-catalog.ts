@@ -21,6 +21,7 @@ export const KNOWN_GEOMS = [
   "raster",
   "ribbon",
   "segment",
+  "hex",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -65,6 +66,7 @@ export const KNOWN_STATS = [
   "identity",
   "count",
   "bin",
+  "bin_hex",
   "smooth",
   "boxplot",
   "density",
@@ -101,4 +103,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   raster: { stat: "identity", position: "identity" },
   ribbon: { stat: "identity", position: "identity" },
   segment: { stat: "identity", position: "identity" },
+  hex: { stat: "bin_hex", position: "identity" },
 };

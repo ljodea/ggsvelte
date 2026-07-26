@@ -18,6 +18,7 @@ import { boxplotBatches, errorbarBatch, smoothBatches } from "./geometry-composi
 import { edgeRectsBatch, rasterRectsBatch, tileRectsBatch } from "./geometry-edge-rects.js";
 import { ribbonBatches } from "./geometry-ribbon.js";
 import { finiteSegmentBatch } from "./geometry-segment-finite.js";
+import { hexBatch } from "./geometry-hex.js";
 
 function single(batch: GeometryBatch | null): GeometryBatch[] {
   return batch === null ? [] : [batch];
@@ -62,6 +63,8 @@ export function dispatchGeometryBatch(
       return boxplotBatches(frame, fx, fill, styles, warnings);
     case "errorbar":
       return single(errorbarBatch(frame, fx, color, styles, warnings));
+    case "hex":
+      return single(hexBatch(frame, fx, fill, color, styles, warnings));
     default:
       return [];
   }

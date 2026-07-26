@@ -29,6 +29,7 @@ import type {
   PointLayer,
   PortableSpec,
   RasterLayer,
+  HexLayer,
   RectLayer,
   RibbonLayer,
   SegmentLayer,
@@ -73,6 +74,7 @@ export interface RuntimeErrorbarLayer extends WithRuntimeAes<ErrorbarLayer> {}
 export interface RuntimeRectLayer extends WithRuntimeAes<RectLayer> {}
 export interface RuntimeTileLayer extends WithRuntimeAes<TileLayer> {}
 export interface RuntimeRasterLayer extends WithRuntimeAes<RasterLayer> {}
+export interface RuntimeHexLayer extends WithRuntimeAes<HexLayer> {}
 
 export type RuntimeLayerSpec =
   | RuntimePointLayer
@@ -91,7 +93,8 @@ export type RuntimeLayerSpec =
   | RuntimeErrorbarLayer
   | RuntimeRectLayer
   | RuntimeTileLayer
-  | RuntimeRasterLayer;
+  | RuntimeRasterLayer
+  | RuntimeHexLayer;
 
 /** The in-memory spec superset ({ fn } channel accessors allowed). */
 type RuntimeSpecPortableFields = Omit<PortableSpec, "aes" | "layers">;

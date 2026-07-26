@@ -72,6 +72,7 @@ export type {
   LineLayerInput,
   PointLayerInput,
   RasterLayerInput,
+  HexLayerInput,
   RectLayerInput,
   RuleLayerInput,
   SmoothLayerInput,
@@ -146,6 +147,10 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   }
   if (stat === "density" && aes?.y === undefined) {
     aes = { ...aes, y: { stat: "density" } };
+  }
+  // bin_hex maps fill to after_stat count (ggplot2 geom_hex default aes).
+  if (stat === "bin_hex" && aes?.fill === undefined) {
+    aes = { ...aes, fill: { stat: "count" } };
   }
   // The histogram geom is an ALIAS (one canonical form per concept): its
   // post-normalize representation is a bar layer with the bin stat.
