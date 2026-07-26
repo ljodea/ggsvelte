@@ -77,6 +77,8 @@ exports[`validate — agent errors (snapshot-tested messages) unknown geom with 
       "freqpoly",
       "area",
       "rule",
+      "hline",
+      "vline",
       "text",
       "smooth",
       "quantile",
@@ -96,6 +98,7 @@ exports[`validate — agent errors (snapshot-tested messages) unknown geom with 
       "map",
       "sf",
       "sf_text",
+      "jitter",
     ],
     "code": "unknown-geom",
     "fix": {
@@ -104,7 +107,7 @@ exports[`validate — agent errors (snapshot-tested messages) unknown geom with 
         "geom": "point",
       },
     },
-    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text". Did you mean "point"?",
+    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "jitter". Did you mean "point"?",
     "path": "/layers/0/geom",
   },
 ]
@@ -123,6 +126,8 @@ exports[`validate — agent errors (snapshot-tested messages) geom missing entir
       "freqpoly",
       "area",
       "rule",
+      "hline",
+      "vline",
       "text",
       "smooth",
       "quantile",
@@ -142,6 +147,7 @@ exports[`validate — agent errors (snapshot-tested messages) geom missing entir
       "map",
       "sf",
       "sf_text",
+      "jitter",
     ],
     "code": "missing-geom",
     "fix": {
@@ -150,7 +156,7 @@ exports[`validate — agent errors (snapshot-tested messages) geom missing entir
         "geom": "point",
       },
     },
-    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text".",
+    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "jitter".",
     "path": "/layers/0/geom",
   },
 ]
@@ -324,6 +330,8 @@ exports[`validate — agent errors (snapshot-tested messages) multiple errors ar
       "freqpoly",
       "area",
       "rule",
+      "hline",
+      "vline",
       "text",
       "smooth",
       "quantile",
@@ -343,6 +351,7 @@ exports[`validate — agent errors (snapshot-tested messages) multiple errors ar
       "map",
       "sf",
       "sf_text",
+      "jitter",
     ],
     "code": "unknown-geom",
     "fix": {
@@ -351,7 +360,7 @@ exports[`validate — agent errors (snapshot-tested messages) multiple errors ar
         "geom": "point",
       },
     },
-    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text". Did you mean "point"?",
+    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "jitter". Did you mean "point"?",
     "path": "/layers/0/geom",
   },
   {

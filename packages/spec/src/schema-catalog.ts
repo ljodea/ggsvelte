@@ -13,6 +13,8 @@ export const KNOWN_GEOMS = [
   "freqpoly",
   "area",
   "rule",
+  "hline",
+  "vline",
   "text",
   "smooth",
   "quantile",
@@ -32,6 +34,7 @@ export const KNOWN_GEOMS = [
   "map",
   "sf",
   "sf_text",
+  "jitter",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -106,7 +109,8 @@ export type PositionName = (typeof KNOWN_POSITIONS)[number];
  * geom bar counts (stat "count") and stacks; histogram bins and stacks;
  * freqpoly bins and draws as line (identity position); col/area stack
  * pre-computed values; boxplot dodges (ggplot2 defaults to dodge2 —
- * ggsvelte uses plain dodge, decision 0010); everything else is
+ * ggsvelte uses plain dodge, decision 0010); jitter aliases to
+ * point+position jitter; hline/vline alias to rule; everything else is
  * identity/identity.
  */
 export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: PositionName }> = {
@@ -119,6 +123,8 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   freqpoly: { stat: "bin", position: "identity" },
   area: { stat: "identity", position: "stack" },
   rule: { stat: "identity", position: "identity" },
+  hline: { stat: "identity", position: "identity" },
+  vline: { stat: "identity", position: "identity" },
   text: { stat: "identity", position: "identity" },
   smooth: { stat: "smooth", position: "identity" },
   quantile: { stat: "quantile", position: "identity" },
@@ -138,4 +144,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   map: { stat: "identity", position: "identity" },
   sf: { stat: "identity", position: "identity" },
   sf_text: { stat: "sf_coordinates", position: "identity" },
+  jitter: { stat: "identity", position: "jitter" },
 };

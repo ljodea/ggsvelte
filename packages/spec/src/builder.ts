@@ -43,6 +43,8 @@ export type {
   GeomErrorbarOptions,
   GeomHistogramOptions,
   GeomFreqpolyOptions,
+  GeomHlineOptions,
+  GeomJitterOptions,
   GeomLineOptions,
   GeomPathOptions,
   GeomPointOptions,
@@ -59,6 +61,7 @@ export type {
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
+  GeomVlineOptions,
 } from "./builder-options.js";
 
 /**

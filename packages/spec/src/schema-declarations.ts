@@ -1830,6 +1830,86 @@ export const SpecDeclarations = {
     },
   ),
 
+  HlineParams: Type.Object(
+    {
+      yintercept: Type.Optional(
+        Type.Ref("RuleIntercept", {
+          description:
+            "ANNOTATION FORM ONLY: draw a horizontal rule at each of these fixed y positions. Mutually exclusive with mapping aes.y on this layer.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Rule opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for the hline alias (ggplot2 geom_hline). Annotation form sets yintercept; data-driven form maps aes.y. Canonicalized by normalize() to a rule layer.",
+    },
+  ),
+
+  VlineParams: Type.Object(
+    {
+      xintercept: Type.Optional(
+        Type.Ref("RuleIntercept", {
+          description:
+            "ANNOTATION FORM ONLY: draw a vertical rule at each of these fixed x positions. Mutually exclusive with mapping aes.x on this layer.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Rule opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for the vline alias (ggplot2 geom_vline). Annotation form sets xintercept; data-driven form maps aes.x. Canonicalized by normalize() to a rule layer.",
+    },
+  ),
+
   SegmentParams: Type.Object(
     {
       alpha: Type.Optional(
@@ -2887,6 +2967,96 @@ export const SpecDeclarations = {
     },
   ),
 
+  HlineLayer: Type.Object(
+    {
+      geom: Type.Literal("hline", {
+        description:
+          "Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Hline layers draw the given positions as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Hline layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("HlineParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A horizontal reference-line layer alias (normalize() → rule). Annotation: params.yintercept. Data-driven: map aes.y.",
+    },
+  ),
+
+  VlineLayer: Type.Object(
+    {
+      geom: Type.Literal("vline", {
+        description:
+          "Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Vline layers draw the given positions as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Vline layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("VlineParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A vertical reference-line layer alias (normalize() → rule). Annotation: params.xintercept. Data-driven: map aes.x.",
+    },
+  ),
+
+  JitterLayer: Type.Object(
+    {
+      geom: Type.Literal("jitter", {
+        description:
+          "Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Jitter layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("jitter", {
+          description: 'Jitter layers always use position "jitter" (the alias purpose).',
+        }),
+      ),
+      positionParams: Type.Optional(Type.Ref("PositionParams")),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("PointParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        'A scatter layer with position "jitter" (alias; normalize() → point). Requires x and y channels. Jitter width/height/seed live on positionParams.',
+    },
+  ),
+
   TextLayer: Type.Object(
     {
       geom: Type.Literal("text", {
@@ -3120,6 +3290,9 @@ export const SpecDeclarations = {
       Type.Ref("AreaLayer"),
       Type.Ref("RibbonLayer"),
       Type.Ref("RuleLayer"),
+      Type.Ref("HlineLayer"),
+      Type.Ref("VlineLayer"),
+      Type.Ref("JitterLayer"),
       Type.Ref("TextLayer"),
       Type.Ref("SmoothLayer"),
       Type.Ref("QuantileLayer"),

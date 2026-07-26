@@ -23,6 +23,8 @@ import type {
   RectParams,
   RenderBackend,
   RuleParams,
+  HlineParams,
+  VlineParams,
   SegmentParams,
   QuantileParams,
   CurveParams,
@@ -204,6 +206,34 @@ export interface GeomRuleOptions extends RuleParams, GeomDataOption {
   render?: RenderBackend;
   /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
   stat?: "identity" | "unique";
+}
+
+/** Hline alias sugar: yintercept annotation (or map aes.y). */
+export interface GeomHlineOptions extends HlineParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Vline alias sugar: xintercept annotation (or map aes.x). */
+export interface GeomVlineOptions extends VlineParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/**
+ * Jitter alias sugar: point params + flat width/height/seed (assembled into
+ * positionParams by geomJitter — not a normalize peel).
+ */
+export interface GeomJitterOptions extends PointParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+  /** Maximum horizontal jitter (data units / band-step fraction). */
+  width?: number;
+  /** Maximum vertical jitter (data units / band-step fraction). */
+  height?: number;
+  /** Seeded RNG seed (ggsvelte jitter is always seeded; default 42). */
+  seed?: number;
+  positionParams?: PositionParams;
 }
 
 /** Segment-layer sugar options: params plus optional layer-level aes. */

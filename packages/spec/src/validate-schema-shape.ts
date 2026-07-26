@@ -21,6 +21,8 @@ import {
   ErrorbarLayerSchema,
   HistogramLayerSchema,
   FreqpolyLayerSchema,
+  HlineLayerSchema,
+  JitterLayerSchema,
   LineLayerSchema,
   PathLayerSchema,
   PlotSpecSchema,
@@ -39,6 +41,7 @@ import {
   SmoothLayerSchema,
   TextLayerSchema,
   TileLayerSchema,
+  VlineLayerSchema,
 } from "./schema.js";
 import { mapValueErrors, unknownGeomError } from "./validate-map-errors.js";
 
@@ -59,6 +62,9 @@ export const GEOM_BRANCHES = {
   sf: SfLayerSchema,
   sf_text: SfTextLayerSchema,
   rule: RuleLayerSchema,
+  hline: HlineLayerSchema,
+  vline: VlineLayerSchema,
+  jitter: JitterLayerSchema,
   text: TextLayerSchema,
   smooth: SmoothLayerSchema,
   quantile: QuantileLayerSchema,
