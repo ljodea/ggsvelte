@@ -33,6 +33,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   vline: [], // form-checked like rule (xintercept / aes.x)
   text: ["x", "y", "label"],
   sf_text: ["label"], // x/y come from stat_sf_coordinates (#809 phase 2)
+  sf_label: ["label"],
   sf: [], // geometry column, not aes
   smooth: ["x", "y"],
   boxplot: ["x", "y"],
@@ -50,6 +51,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   density_2d_filled: ["x", "y"],
   dotplot: ["x"],
   map: ["map_id"],
+  blank: [], // trains whatever is mapped; nothing required
 };
 
 /** Asymmetric intercept presence for rule / hline / vline form checks. */

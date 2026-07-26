@@ -96,6 +96,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "BlankLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "BlankLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "BlankParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "BoxplotLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -484,6 +496,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomBlankOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomBoxplotOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -528,6 +544,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomHlineOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomJitterOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomLineOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -568,6 +592,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomSfLabelOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomSfOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -585,6 +613,10 @@
           "lifecycle": "experimental"
         },
         "GeomTileOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomVlineOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -644,6 +676,22 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "HlineLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "HlineLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "HlineLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "HlineParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "HueScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -666,6 +714,18 @@
         },
         "JSONValue": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "JitterLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "JitterLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "JitterLayerSchema": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "KNOWN_GEOMS": {
@@ -1028,6 +1088,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeBlankLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeBoxplotLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1076,6 +1140,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeHlineLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeJitterLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeLayerSpec": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1120,6 +1192,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeSfLabelLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeSfLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1141,6 +1217,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeTileLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeVlineLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1205,6 +1285,18 @@
           "lifecycle": "experimental"
         },
         "SequentialStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SfLabelLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SfLabelLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SfLabelParams": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1475,6 +1567,22 @@
         "ValidateResult": {
           "kind": "type",
           "lifecycle": "stable-intent"
+        },
+        "VlineLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "VlineLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "VlineLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "VlineParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
         },
         "aes": {
           "kind": "value",
@@ -4057,6 +4165,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GeomBlank": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeomBoxplot": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4098,6 +4210,14 @@
           "lifecycle": "experimental"
         },
         "GeomHistogram": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomHline": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomJitter": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4149,6 +4269,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GeomSfLabel": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeomSfText": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4162,6 +4286,10 @@
           "lifecycle": "experimental"
         },
         "GeomTile": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomVline": {
           "kind": "value",
           "lifecycle": "experimental"
         },

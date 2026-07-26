@@ -122,8 +122,10 @@ export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
 export const CurveLayerSchema = SpecModule.Import("CurveLayer");
 export const MapLayerSchema = SpecModule.Import("MapLayer");
+export const BlankLayerSchema = SpecModule.Import("BlankLayer");
 export const SfLayerSchema = SpecModule.Import("SfLayer");
 export const SfTextLayerSchema = SpecModule.Import("SfTextLayer");
+export const SfLabelLayerSchema = SpecModule.Import("SfLabelLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const HlineLayerSchema = SpecModule.Import("HlineLayer");
 export const VlineLayerSchema = SpecModule.Import("VlineLayer");
@@ -228,6 +230,8 @@ export type SfParams = SpecType<"SfParams">;
 export type MapParams = SpecType<"MapParams">;
 /** SF text layer params (geometry column + text styling; #809 phase 2). */
 export type SfTextParams = SpecType<"SfTextParams">;
+/** SF label layer params (geometry + text + box chrome; #809 phase 3). */
+export type SfLabelParams = SpecType<"SfLabelParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
@@ -322,6 +326,21 @@ export type MapLayer = LayerWithDataRef<SpecType<"MapLayer">>;
 export type SfLayer = LayerWithDataRef<SpecType<"SfLayer">>;
 /** An sf_text layer (labels at representative points; #809 phase 2). */
 export type SfTextLayer = LayerWithDataRef<SpecType<"SfTextLayer">>;
+/** An sf_label layer (boxed labels at representative points; #809 phase 3). */
+export type SfLabelLayer = LayerWithDataRef<SpecType<"SfLabelLayer">>;
+/**
+ * Empty params bag for blank layers.
+ *
+ * TypeBox `Type.Object({})` Static-infers as `{}`, which is *not* assignable
+ * to `Record<string, unknown>` and also poisons `LayerSpec["params"]` unions
+ * (oxlint no-unnecessary-type-assertion on every `(layer.params ?? {}) as X`).
+ * Override so blank matches every other geom params bag.
+ */
+export type BlankParams = Record<string, never>;
+/** A blank layer (no marks; trains scales from mapped aesthetics). */
+export type BlankLayer = LayerWithDataRef<
+  Omit<SpecType<"BlankLayer">, "params"> & { readonly params?: BlankParams }
+>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -338,6 +357,8 @@ export type LayerSpec =
   | MapLayer
   | SfLayer
   | SfTextLayer
+  | SfLabelLayer
+  | BlankLayer
   | RuleLayer
   | HlineLayer
   | VlineLayer

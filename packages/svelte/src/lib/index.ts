@@ -108,6 +108,8 @@ export { default as GeomCurve } from "./geoms/GeomCurve.svelte";
 export { default as GeomMap } from "./geoms/GeomMap.svelte";
 export { default as GeomSf } from "./geoms/GeomSf.svelte";
 export { default as GeomSfText } from "./geoms/GeomSfText.svelte";
+export { default as GeomSfLabel } from "./geoms/GeomSfLabel.svelte";
+export { default as GeomBlank } from "./geoms/GeomBlank.svelte";
 export { registerLayer, registerPlotLayer } from "./geoms/registry.svelte.js";
 export type {
   Layer,

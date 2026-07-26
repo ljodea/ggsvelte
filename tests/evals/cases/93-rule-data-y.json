@@ -1,0 +1,28 @@
+{
+  "id": "93-rule-data-y",
+  "kind": "chart",
+  "prompt": "Draw one horizontal rule per threshold value using data-driven geom_rule mapped to aes.y.",
+  "dataProfile": {
+    "fields": [{ "name": "threshold", "type": "quantitative" }],
+    "rowCount": 3
+  },
+  "data": {
+    "main": [{ "threshold": 10 }, { "threshold": 20 }, { "threshold": 30 }]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "rule",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "y": { "field": "threshold" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Data-driven horizontal rules (one-axis aes.y form) for bare rule coverage after hline intercept remapping (#818)."
+}

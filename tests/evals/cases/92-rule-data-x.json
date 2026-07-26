@@ -1,0 +1,33 @@
+{
+  "id": "92-rule-data-x",
+  "kind": "chart",
+  "prompt": "Draw one vertical rule per row at the estimated longitude (data-driven geom_rule on aes.x only).",
+  "dataProfile": {
+    "fields": [{ "name": "longitude", "type": "quantitative" }],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "longitude": 20.1 },
+      { "longitude": 22.4 },
+      { "longitude": 25.0 },
+      { "longitude": 28.7 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "rule",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "longitude" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Data-driven vertical rules (one-axis aes.x form) — not intercept annotation (#818 coverage for bare rule)."
+}

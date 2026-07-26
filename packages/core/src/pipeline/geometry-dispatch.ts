@@ -84,7 +84,8 @@ export function dispatchGeometryBatch(
       return single(curveBatch(frame, fx, color, styles, warnings));
     case "text":
     case "sf_text":
-      return single(glyphsBatch(frame, fx, color, styles, warnings));
+    case "sf_label":
+      return single(glyphsBatch(frame, fx, color, fill, styles, warnings));
     case "smooth":
       return smoothBatches(frame, fx, color, fill, styles, warnings);
     case "boxplot":
@@ -103,6 +104,9 @@ export function dispatchGeometryBatch(
       }
       return single(polygonBatch(frame, fx, color, fill, styles, warnings));
     }
+    case "blank":
+      // ggplot2 geom_blank: train scales, emit no marks / hit targets.
+      return [];
     default:
       return [];
   }

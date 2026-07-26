@@ -413,6 +413,28 @@ gg(regions, aes({ fill: "rate", label: "region" }))
 
 [SF region labels](/examples/sf/labels): filled polygons with names at centroids.
 
+### SF boxed labels (\`geom_sf_label\`)
+
+\`geom_sf_label\` is the boxed sibling of \`geom_sf_text\`: same
+\`stat_sf_coordinates\` placement, plus a measured rounded rect behind the text.
+\`color\` is ink + box stroke; \`fill\` is the box background (theme paper by
+default). Params include \`padding\`, \`radius\`, \`linewidth\`, and text
+\`size\`/\`anchor\`/\`dx\`/\`dy\`.
+
+\`\`\`svelte fragment
+<GeomSf alpha={0.45} />
+<GeomSfLabel padding={3} radius={2} size={13} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(regions, aes({ fill: "rate", label: "region" }))
+  .geomSf({ alpha: 0.45 })
+  .geomSfLabel({ padding: 3, radius: 2, size: 13 })
+  .spec();
+\`\`\`
+
+[SF boxed labels](/examples/sf/boxed-labels): names on paper-backed label boxes.
+
 ## Ellipse confidence rings
 
 Bivariate normal confidence ellipses (ggplot2 \`stat_ellipse\`, type \`norm\`
@@ -469,6 +491,30 @@ col, area, rect, ribbon, rule, segment, errorbar).
 
 [stat unique overplotting](/examples/point/stat-unique): stacked identical
 \`(x, y, series)\` triples collapse to one mark.
+
+## Blank (scale training without marks)
+
+\`geom: "blank"\` (ggplot2 \`geom_blank\`) contributes mapped aesthetics to
+**scale training and layout only** — no paint, no hit targets. Use it to expand
+domains, force axes open for sparse marks, or reserve layout without drawing.
+
+\`\`\`svelte fragment
+<GeomBlank />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y" }))
+  .geomPoint()
+  .geomBlank({ aes: aes({ x: "x2", y: "y2" }) }) // expands domains only
+  .spec();
+\`\`\`
+
+No channels are required. Mapped style channels (color, size, …) train their
+scales without drawing marks. Surfaces: \`.geomBlank()\`, \`<GeomBlank />\`.
+
+[Blank domain expand](/examples/blank/domain-expand): co-layer blank rows stretch
+axes past the plotted points. [Blank axes only](/examples/blank/axes-only): axes
+and scales with no marks.
 
 ## Manual (portable named per-group transforms)
 

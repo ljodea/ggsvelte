@@ -45,6 +45,18 @@ export const GALLERY_PREVIEWS = [
     sha256: "657e28882889051d30f128a66483bb0229a624edd6c2eb8d1ab4d49ebc02db58",
   },
   {
+    id: "blank/axes-only",
+    filename: "blank-axes-only-light.png",
+    path: "/previews/blank-axes-only-light.png",
+    sha256: "2939452e748b0d9b660dbfdb98ca2fbb0cb23e87eee08042e976ae8967c516cd",
+  },
+  {
+    id: "blank/domain-expand",
+    filename: "blank-domain-expand-light.png",
+    path: "/previews/blank-domain-expand-light.png",
+    sha256: "44155b76550fca59d37e31acd3ab437d7d68868f505bd362386d62b195385d7d",
+  },
+  {
     id: "boxplot/by-category",
     filename: "boxplot-by-category-light.png",
     path: "/previews/boxplot-by-category-light.png",
@@ -171,6 +183,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "c69f977b2621aceaa9ffd0135d6ce1127c637e2d615587762611f970d91e5e48",
   },
   {
+    id: "hline/threshold",
+    filename: "hline-threshold-light.png",
+    path: "/previews/hline-threshold-light.png",
+    sha256: "be49fc17cd14fe909bfd878c6b86ef9930b9a57966672c78d09f0897dbd21dfc",
+  },
+  {
     id: "interaction/brush-zoom",
     filename: "interaction-brush-zoom-light.png",
     path: "/previews/interaction-brush-zoom-light.png",
@@ -205,6 +223,12 @@ export const GALLERY_PREVIEWS = [
     filename: "interaction-tooltip-light.png",
     path: "/previews/interaction-tooltip-light.png",
     sha256: "be96a7eebfea75f5a8f6beaee4e8322b5c51ee8726656fe840f2040f67784348",
+  },
+  {
+    id: "jitter/basic",
+    filename: "jitter-basic-light.png",
+    path: "/previews/jitter-basic-light.png",
+    sha256: "5b200ec3afed907940cede09cf159dc882df2279069e906a82324d0a0ee7ddb5",
   },
   {
     id: "line/multi-series",
@@ -369,6 +393,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "ab18e17562cdb41056215212f2637717b1a2fd84c187fc5566139ffa9d88c3cf",
   },
   {
+    id: "sf/boxed-labels",
+    filename: "sf-boxed-labels-light.png",
+    path: "/previews/sf-boxed-labels-light.png",
+    sha256: "ee33e8fcd2e284c607ec8c4661fb9312ecb90af0cb052abba0a8a5e5ce4baa56",
+  },
+  {
     id: "sf/labels",
     filename: "sf-labels-light.png",
     path: "/previews/sf-labels-light.png",
@@ -391,5 +421,11 @@ export const GALLERY_PREVIEWS = [
     filename: "tile-heatmap-light.png",
     path: "/previews/tile-heatmap-light.png",
     sha256: "0d3949e02777b5dae7cbc1a2c92b67aeb26568065e77df7f86ae805ee98533af",
+  },
+  {
+    id: "vline/cutoff",
+    filename: "vline-cutoff-light.png",
+    path: "/previews/vline-cutoff-light.png",
+    sha256: "4a110ef7063488f0cfab75bba9d533ada264636dc5438b71bb1ac73cd0cac759",
   },
 ] as const satisfies readonly GalleryPreview[];

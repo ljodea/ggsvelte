@@ -47,6 +47,8 @@ import type {
   GeomMapOptions,
   GeomSfOptions,
   GeomSfTextOptions,
+  GeomSfLabelOptions,
+  GeomBlankOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -341,6 +343,19 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'sf_text', ... }) — labels at SF centroids (#809). */
   geomSfText(options: GeomSfTextOptions = {}): GGBuilder {
     return this.layer(layerFrom("sf_text", options));
+  }
+
+  /** Sugar for .layer({ geom: 'sf_label', ... }) — boxed labels at SF centroids (#809). */
+  geomSfLabel(options: GeomSfLabelOptions = {}): GGBuilder {
+    return this.layer(layerFrom("sf_label", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'blank', ... }) — trains scales from mapped
+   * aesthetics without drawing marks (ggplot2 geom_blank).
+   */
+  geomBlank(options: GeomBlankOptions = {}): GGBuilder {
+    return this.layer(layerFrom("blank", options));
   }
 
   /**
