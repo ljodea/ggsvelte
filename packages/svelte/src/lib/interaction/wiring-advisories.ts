@@ -23,13 +23,18 @@ const HANDLER_CAPABILITY_PAIRS = [
 export type WiringHandlerName = (typeof HANDLER_CAPABILITY_PAIRS)[number][0];
 export type WiringCapabilityName = (typeof HANDLER_CAPABILITY_PAIRS)[number][1];
 
+/**
+ * Full handler/capability bags (not Partial): missing keys would silently
+ * drop advisories when the pair table grows. Call sites must list every
+ * entry from HANDLER_CAPABILITY_PAIRS.
+ */
 export type WiringDiagnosticInput = {
   readonly interactionScope: unknown;
   readonly interaction: unknown;
   /** Present handlers only need defined vs undefined; values are not inspected. */
-  readonly handlers: Partial<Record<WiringHandlerName, unknown>>;
+  readonly handlers: Record<WiringHandlerName, unknown>;
   /** Capability "requested" means not undefined and not false. */
-  readonly capabilities: Partial<Record<WiringCapabilityName, unknown>>;
+  readonly capabilities: Record<WiringCapabilityName, unknown>;
 };
 
 /**

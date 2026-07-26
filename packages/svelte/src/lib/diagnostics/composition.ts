@@ -214,12 +214,15 @@ export function duplicatePlotLayerDiagnostic(
   };
 }
 
-function isMergeKeyKind(kind: string): kind is DuplicateMergeKeyKind {
-  return (MERGE_KEY_EMIT_ORDER as readonly string[]).includes(kind);
+type MergeKeyLayer = Extract<PlotLayerLike, { kind: DuplicateMergeKeyKind }>;
+type ReplaceLayer = Extract<PlotLayerLike, { kind: DuplicatePlotLayerKind }>;
+
+function isMergeKeyLayer(layer: PlotLayerLike): layer is MergeKeyLayer {
+  return (MERGE_KEY_EMIT_ORDER as readonly string[]).includes(layer.kind);
 }
 
-function isReplaceKind(kind: string): kind is DuplicatePlotLayerKind {
-  return (REPLACE_EMIT_ORDER as readonly string[]).includes(kind);
+function isReplaceLayer(layer: PlotLayerLike): layer is ReplaceLayer {
+  return (REPLACE_EMIT_ORDER as readonly string[]).includes(layer.kind);
 }
 
 /**
@@ -260,12 +263,9 @@ export function collectCompositionDiagnostics(
       }
       continue;
     }
-    if (isMergeKeyKind(layer.kind)) {
-      // After kind predicate, value is present on merge-key arms (not mark).
+    if (isMergeKeyLayer(layer)) {
       const kind = layer.kind;
-      const value = (layer as Extract<PlotLayerLike, { kind: DuplicateMergeKeyKind }>)
-        .value as object;
-      for (const key of Object.keys(value)) {
+      for (const key of Object.keys(layer.value as object)) {
         if (mergeSeen[kind].has(key)) {
           mergeDuplicates[kind].add(key);
         } else {
@@ -274,7 +274,7 @@ export function collectCompositionDiagnostics(
       }
       continue;
     }
-    if (isReplaceKind(layer.kind)) {
+    if (isReplaceLayer(layer)) {
       replaceCounts[layer.kind] += 1;
     }
   }
@@ -308,5 +308,9 @@ export function compositionAdvisoryDedupKey(diagnostic: CompositionDiagnostic): 
   if (isDuplicateMergeKeyDiagnostic(diagnostic)) {
     return `${diagnostic.code}:${diagnostic.kind}:${diagnostic.key}`;
   }
-  return `${diagnostic.code}:${diagnostic.kind}`;
+  if (isDuplicatePlotLayerDiagnostic(diagnostic)) {
+    return `${diagnostic.code}:${diagnostic.kind}`;
+  }
+  // Exhaustiveness: CompositionDiagnostic has only the three variants above.
+  return ((x: never) => x)(diagnostic);
 }
