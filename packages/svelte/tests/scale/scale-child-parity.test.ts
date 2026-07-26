@@ -138,7 +138,7 @@ const helpers = shellHelpers();
 
 describe("scale-child parity (all 63 shells)", () => {
   it(`enumerates exactly 63 helpers (got ${String(helpers.length)})`, () => {
-    expect(helpers).toHaveLength(63);
+    expect(helpers).toHaveLength(69);
   });
 
   for (const helper of helpers) {
