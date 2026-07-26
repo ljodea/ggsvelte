@@ -303,7 +303,7 @@
     },
     "sf/labels": {
       "filename": "sf-labels-light.png",
-      "sourceSha256": "12a499780494e4fbd272a6583c3e8caa14a34f4600f46fcde3f803a787b54ec0",
+      "sourceSha256": "438a7ef29ae53ccbae7e0af30db661095a63f5357d82866bd46b2bc1d0b82379",
       "pngSha256": "de80a275be7b22349b7776bb03c41f2f4dc7eb19f4e666d92604329d86232b0f"
     },
     "smooth/loess-scatter": {
