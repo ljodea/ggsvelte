@@ -413,6 +413,28 @@ gg(regions, aes({ fill: "rate", label: "region" }))
 
 [SF region labels](/examples/sf/labels): filled polygons with names at centroids.
 
+### SF boxed labels (\`geom_sf_label\`)
+
+\`geom_sf_label\` is the boxed sibling of \`geom_sf_text\`: same
+\`stat_sf_coordinates\` placement, plus a measured rounded rect behind the text.
+\`color\` is ink + box stroke; \`fill\` is the box background (theme paper by
+default). Params include \`padding\`, \`radius\`, \`linewidth\`, and text
+\`size\`/\`anchor\`/\`dx\`/\`dy\`.
+
+\`\`\`svelte fragment
+<GeomSf alpha={0.45} />
+<GeomSfLabel padding={3} radius={2} size={13} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(regions, aes({ fill: "rate", label: "region" }))
+  .geomSf({ alpha: 0.45 })
+  .geomSfLabel({ padding: 3, radius: 2, size: 13 })
+  .spec();
+\`\`\`
+
+[SF boxed labels](/examples/sf/boxed-labels): names on paper-backed label boxes.
+
 ## Ellipse confidence rings
 
 Bivariate normal confidence ellipses (ggplot2 \`stat_ellipse\`, type \`norm\`

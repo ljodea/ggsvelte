@@ -22,6 +22,7 @@ export function candidateAutoMode(
     case "dotplot":
     case "text":
     case "sf_text":
+    case "sf_label":
       return "exact";
     case "col":
     case "bar":

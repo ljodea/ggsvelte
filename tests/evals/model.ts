@@ -377,6 +377,23 @@ export class MockResponder implements Responder {
 
     // --- geom selection (keyword templates, most specific first) -----------
     if (
+      (/\bgeom[_\s]?sf[_\s]?label\b|\bsf_label\b|\bsf label\b|\bboxed labels?\b/.test(prompt) ||
+        (fieldNamed("geometry") !== undefined &&
+          /\blabel\b/.test(prompt) &&
+          /\bbox(?:ed|es)?\b/.test(prompt))) &&
+      (fieldNamed("geometry") !== undefined || /\bgeojson\b|\bsimple features?\b/.test(prompt))
+    ) {
+      // geom_sf_label: boxed labels at representative SF points (#809 phase 3).
+      const aes: MockAes = {};
+      const label =
+        fieldNamed("name") ??
+        fieldNamed("region") ??
+        fieldNamed("label") ??
+        pick.mentionedCat() ??
+        profile.fields.find((fld) => fld.type === "nominal" && fld.name !== "geometry")?.name;
+      if (label !== undefined) aes.label = f(label);
+      spec.layers.push({ geom: "sf_label", aes });
+    } else if (
       (/\bgeom[_\s]?sf[_\s]?text\b|\bsf_text\b|\bsf text\b/.test(prompt) ||
         (fieldNamed("geometry") !== undefined &&
           /\blabel\b/.test(prompt) &&

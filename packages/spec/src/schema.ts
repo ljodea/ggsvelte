@@ -124,6 +124,7 @@ export const CurveLayerSchema = SpecModule.Import("CurveLayer");
 export const MapLayerSchema = SpecModule.Import("MapLayer");
 export const SfLayerSchema = SpecModule.Import("SfLayer");
 export const SfTextLayerSchema = SpecModule.Import("SfTextLayer");
+export const SfLabelLayerSchema = SpecModule.Import("SfLabelLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
@@ -221,6 +222,8 @@ export type SfParams = SpecType<"SfParams">;
 export type MapParams = SpecType<"MapParams">;
 /** SF text layer params (geometry column + text styling; #809 phase 2). */
 export type SfTextParams = SpecType<"SfTextParams">;
+/** SF label layer params (geometry + text + box chrome; #809 phase 3). */
+export type SfLabelParams = SpecType<"SfLabelParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
@@ -309,6 +312,8 @@ export type MapLayer = LayerWithDataRef<SpecType<"MapLayer">>;
 export type SfLayer = LayerWithDataRef<SpecType<"SfLayer">>;
 /** An sf_text layer (labels at representative points; #809 phase 2). */
 export type SfTextLayer = LayerWithDataRef<SpecType<"SfTextLayer">>;
+/** An sf_label layer (boxed labels at representative points; #809 phase 3). */
+export type SfLabelLayer = LayerWithDataRef<SpecType<"SfLabelLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -325,6 +330,7 @@ export type LayerSpec =
   | MapLayer
   | SfLayer
   | SfTextLayer
+  | SfLabelLayer
   | RuleLayer
   | TextLayer
   | SmoothLayer

@@ -560,6 +560,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "sf/boxed-labels",
+    title: "SF boxed labels",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6InNmL2JveGVkLWxhYmVscyJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJyZWdpb24iOiJOb3J0aCIsInJhdGUiOjEyLCJnZW9tZXRyeSI6IntcInR5cGVcIjpcIlBvbHlnb25cIixcImNvb3JkaW5hdGVzXCI6W1tbMCwyXSxbMiwyXSxbMSw0XSxbMCwyXV1dfSJ9LHsicmVnaW9uIjoiRWFzdCIsInJhdGUiOjI4LCJnZW9tZXRyeSI6IntcInR5cGVcIjpcIlBvbHlnb25cIixcImNvb3JkaW5hdGVzXCI6W1tbMi4yLDBdLFs0LjIsMF0sWzQuMiwyXSxbMi4yLDJdLFsyLjIsMF1dXX0ifSx7InJlZ2lvbiI6Ildlc3QiLCJyYXRlIjoxOCwiZ2VvbWV0cnkiOiJ7XCJ0eXBlXCI6XCJQb2x5Z29uXCIsXCJjb29yZGluYXRlc1wiOltbWzAsMF0sWzIsMF0sWzIsMS44XSxbMCwxLjhdLFswLDBdXV19In1dfSwibGF5ZXJzIjpbeyJnZW9tIjoic2YiLCJzdGF0IjoiaWRlbnRpdHkiLCJwb3NpdGlvbiI6ImlkZW50aXR5IiwiYWVzIjp7ImZpbGwiOnsiZmllbGQiOiJyYXRlIn0sImxhYmVsIjp7ImZpZWxkIjoicmVnaW9uIn19LCJwYXJhbXMiOnsiYWxwaGEiOjAuNDUsImxpbmV3aWR0aCI6MC44fX0seyJnZW9tIjoic2ZfbGFiZWwiLCJzdGF0Ijoic2ZfY29vcmRpbmF0ZXMiLCJwb3NpdGlvbiI6ImlkZW50aXR5IiwiYWVzIjp7ImZpbGwiOnsiZmllbGQiOiJyYXRlIn0sImxhYmVsIjp7ImZpZWxkIjoicmVnaW9uIn19LCJwYXJhbXMiOnsicGFkZGluZyI6MywicmFkaXVzIjoyLCJzaXplIjoxM319XSwibGFicyI6eyJ0aXRsZSI6Imdlb21fc2ZfbGFiZWwgYm94ZWQgbGFiZWxzIiwic3VidGl0bGUiOiJNZWFzdXJlZCBwYXBlci1iYWNrZWQgYm94ZXMgYXQgcmVwcmVzZW50YXRpdmUgU0YgcG9pbnRzICgjODA5KSIsImZpbGwiOiJyYXRlIn0sInRoZW1lIjoiY2xhc3NpYyJ9fQ",
+    },
+  },
+  {
     id: "sf/labels",
     title: "SF region labels",
     compatibility: {
