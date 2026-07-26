@@ -8,16 +8,31 @@
  *   bun scripts/capture-gallery-lights.ts              # every example
  *   bun scripts/capture-gallery-lights.ts interaction/ # id-prefix subset
  *   bun run gallery:previews:gen
+ *
+ * Capture also updates `previews/provenance.json` (source+png digests) so
+ * `gallery:previews:check` can fail on stale-but-present PNGs (#746).
+ * Gen never writes provenance.
  */
 import { chromium, type Page } from "@playwright/test";
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 import { EXAMPLES } from "../examples/manifest.js";
+import {
+  PROVENANCE_FILENAME,
+  emptyProvenance,
+  loadProvenance,
+  provenanceEntryFor,
+  provenancePath,
+  pruneProvenanceToIds,
+  upsertProvenanceEntry,
+  writeProvenance,
+} from "./gallery-preview-provenance.js";
 import { canonicalPreviewFilename } from "./gen-gallery-previews.js";
 
 const ROOT = resolve(import.meta.dir, "..");
 const OUT = join(ROOT, "apps", "docs", "static", "previews");
+const EXAMPLES_ROOT = join(ROOT, "examples");
 const BASE = process.env["GALLERY_CAPTURE_BASE"] ?? "http://127.0.0.1:4173";
 
 const prefix = process.argv[2];
@@ -58,6 +73,8 @@ async function main(): Promise<void> {
     throw new Error(`no examples match the id prefix "${String(prefix)}"`);
   }
   mkdirSync(OUT, { recursive: true });
+  const provenanceFile = provenancePath(OUT);
+  let provenance = existsSync(provenanceFile) ? loadProvenance(provenanceFile) : emptyProvenance();
   const browser = await chromium.launch();
   try {
     for (const entry of targets) {
@@ -92,12 +109,22 @@ async function main(): Promise<void> {
         animations: "disabled",
         caret: "hide",
       });
+      provenance = upsertProvenanceEntry(
+        provenance,
+        entry.id,
+        provenanceEntryFor(EXAMPLES_ROOT, OUT, entry.id),
+      );
       console.log(`wrote ${filename}`);
       await context.close();
     }
   } finally {
     await browser.close();
   }
+  // Drop ids no longer in the manifest (deleted examples). Subset captures
+  // still preserve digests for uncaptured live examples.
+  provenance = pruneProvenanceToIds(provenance, new Set(EXAMPLES.map((entry) => entry.id)));
+  writeProvenance(provenanceFile, provenance);
+  console.log(`updated ${PROVENANCE_FILENAME}`);
 }
 
 await main();

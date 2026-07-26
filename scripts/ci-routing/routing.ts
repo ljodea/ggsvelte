@@ -92,6 +92,8 @@ export const DOCS_CONTENT_SCRIPT_PATTERNS: readonly string[] = [
   "scripts/gen-docs-search.test.ts",
   "scripts/gen-gallery-previews.ts",
   "scripts/gen-gallery-previews.test.ts",
+  "scripts/gallery-preview-provenance.ts",
+  "scripts/gallery-preview-provenance.test.ts",
   "scripts/cloudflare-pages-config.test.ts",
   "scripts/deployment-artifact.ts",
   "scripts/deployment-artifact.test.ts",
@@ -124,6 +126,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "scripts/gen-docs-search.test.ts",
     "scripts/gen-gallery-previews.ts",
     "scripts/gen-gallery-previews.test.ts",
+    "scripts/gallery-preview-provenance.ts",
+    "scripts/gallery-preview-provenance.test.ts",
     // apps/docs package.json build/check invoke these — must schedule svelte_check + docs_site
     // after the monlith split (Codex P2: pure scripts/** no longer runs vite docs).
     "scripts/gen-docs-routes.ts",
