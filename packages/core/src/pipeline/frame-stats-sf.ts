@@ -142,6 +142,35 @@ export function buildSfFrame(
     );
   }
 
+  // Empty facet panel / zero-row layer data: match other geoms (empty frame,
+  // warnEmptyLayers downstream). Do not throw — prepare-panels only skips when
+  // every layer is empty, so per-panel empties still reach buildSfFrame.
+  if (table.rowCount === 0) {
+    return {
+      binding,
+      table,
+      n: 0,
+      xValues: null,
+      xNumeric: new Float64Array(0),
+      yValues: null,
+      yNumeric: new Float64Array(0),
+      groups: [],
+      inputGroups: groups,
+      inputSourceRows: null,
+      rowIndex: new Uint32Array(0),
+      colorValues: null,
+      fillValues: null,
+      sizeValues: null,
+      linewidthValues: null,
+      alphaValues: null,
+      shapeValues: null,
+      linetypeValues: null,
+      labelValues: null,
+      ...emptyFrameExtras(),
+      sf: { kind: "polygon" },
+    };
+  }
+
   const geomCol = table.column(field);
   const outX: number[] = [];
   const outY: number[] = [];

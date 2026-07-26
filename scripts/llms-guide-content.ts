@@ -375,8 +375,9 @@ weights. Mapping aes.y fails loud (\`computed-y-mapped\`).
 **strings** in a data column (default \`geometry\`; override with
 \`params.geometry\`). Point/MultiPoint → points; LineString/MultiLineString →
 open paths; Polygon/MultiPolygon → closed fills. Multipart geometries expand
-to multiple marks. Interior rings are ignored with a warning; GeometryCollection
-and mixed families in one layer error (split layers).
+to multiple marks. **Interior rings** are even-odd **holes** (SVG
+\`fill-rule="evenodd"\`, canvas, and hit-testing). GeometryCollection and mixed
+families in one layer error (split layers).
 
 No CRS / \`coord_sf\` yet — coordinates are treated as already projected.
 

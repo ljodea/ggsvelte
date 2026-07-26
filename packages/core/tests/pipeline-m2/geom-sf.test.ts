@@ -4,6 +4,7 @@
 import { describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
 import { PipelineError, runPipeline } from "../../src/pipeline.ts";
+import { pathData } from "../../src/render-svg-marks.ts";
 import type { PathsBatch, PointsBatch } from "../../src/scene.ts";
 
 const size = { width: 400, height: 300 };
@@ -378,6 +379,50 @@ describe("geom_sf", () => {
     expect(model.warnings.some((w) => w.code === "empty-layer" || w.code === "empty-data")).toBe(
       true,
     );
+  });
+
+  it("pathData with ringStarts emits separate exterior and hole rings", () => {
+    const withHole = geo({
+      type: "Polygon",
+      coordinates: [
+        [
+          [0, 0],
+          [10, 0],
+          [10, 10],
+          [0, 10],
+          [0, 0],
+        ],
+        [
+          [3, 3],
+          [7, 3],
+          [7, 7],
+          [3, 7],
+          [3, 3],
+        ],
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [withHole], rate: [1] }, aes({ fill: "rate" }))
+        .geomSf()
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PathsBatch;
+    expect(batch.fillRule).toBe("evenodd");
+    expect(batch.ringStarts).toBeDefined();
+    const d = pathData(
+      batch.positions,
+      batch.pathOffsets[0]!,
+      batch.pathOffsets[1]!,
+      batch.curve,
+      true,
+      batch.ringStarts,
+    );
+    // Two closed rings (exterior + hole) — each ends with Z; without ringStarts
+    // the d would be a single M…Z joining exterior into the hole.
+    const zCount = (d.match(/Z/g) ?? []).length;
+    expect(zCount).toBe(2);
+    expect((d.match(/M/g) ?? []).length).toBe(2);
   });
 
   it("keeps the closing vertex on a closed LineString (open path draw)", () => {
