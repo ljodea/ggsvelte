@@ -138,4 +138,15 @@ describe("gg builder — M2 sugar methods", () => {
       params: { alpha: 0.4 },
     });
   });
+
+  it("geomPoint({ stat: 'unique' }) survives normalize + validate (#813)", () => {
+    const spec = gg(xy, aes({ x: "x", y: "y" }))
+      .geomPoint({ stat: "unique" })
+      .spec();
+    expect(spec.layers[0]).toMatchObject({
+      geom: "point",
+      stat: "unique",
+      position: "identity",
+    });
+  });
 });

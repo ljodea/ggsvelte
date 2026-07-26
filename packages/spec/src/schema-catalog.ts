@@ -64,6 +64,7 @@ export type ChannelName = (typeof CHANNELS)[number];
 /** Stat names known to this schema version. */
 export const KNOWN_STATS = [
   "identity",
+  "unique",
   "count",
   "bin",
   "smooth",

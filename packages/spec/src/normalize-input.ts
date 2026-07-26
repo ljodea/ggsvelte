@@ -103,7 +103,7 @@ export interface FacetInput {
 
 export interface PointLayerInput extends LayerInputBase {
   geom: "point";
-  stat?: "identity";
+  stat?: "identity" | "unique";
   position?: PointPosition;
   positionParams?: PositionParams;
   params?: PointParams;
@@ -111,21 +111,21 @@ export interface PointLayerInput extends LayerInputBase {
 
 export interface LineLayerInput extends LayerInputBase {
   geom: "line";
-  stat?: "identity";
+  stat?: "identity" | "unique";
   position?: "identity";
   params?: LineParams;
 }
 
 export interface PathLayerInput extends LayerInputBase {
   geom: "path";
-  stat?: "identity";
+  stat?: "identity" | "unique";
   position?: "identity";
   params?: LineParams;
 }
 
 export interface ColLayerInput extends LayerInputBase {
   geom: "col";
-  stat?: "identity";
+  stat?: "identity" | "unique";
   position?: StackablePosition;
   params?: ColParams;
 }
@@ -146,21 +146,21 @@ export interface HistogramLayerInput extends LayerInputBase {
 
 export interface AreaLayerInput extends LayerInputBase {
   geom: "area";
-  stat?: "identity";
+  stat?: "identity" | "unique";
   position?: StackablePosition;
   params?: AreaParams;
 }
 
 export interface RuleLayerInput extends LayerInputBase {
   geom: "rule";
-  stat?: "identity";
+  stat?: "identity" | "unique";
   position?: "identity";
   params?: RuleParams;
 }
 
 export interface TextLayerInput extends LayerInputBase {
   geom: "text";
-  stat?: "identity";
+  stat?: "identity" | "unique";
   position?: "identity" | "nudge";
   positionParams?: PositionParams;
   params?: TextParams;
@@ -189,14 +189,14 @@ export interface DensityLayerInput extends LayerInputBase {
 
 export interface ErrorbarLayerInput extends LayerInputBase {
   geom: "errorbar";
-  stat?: "identity" | "summary";
+  stat?: "identity" | "unique" | "summary";
   position?: "identity";
   params?: ErrorbarParams;
 }
 
 export interface RectLayerInput extends LayerInputBase {
   geom: "rect";
-  stat?: "identity";
+  stat?: "identity" | "unique";
   position?: "identity";
   params?: RectParams;
 }
@@ -217,14 +217,14 @@ export interface RasterLayerInput extends LayerInputBase {
 
 export interface RibbonLayerInput extends LayerInputBase {
   geom: "ribbon";
-  stat?: "identity";
+  stat?: "identity" | "unique";
   position?: "identity";
   params?: RibbonParams;
 }
 
 export interface SegmentLayerInput extends LayerInputBase {
   geom: "segment";
-  stat?: "identity";
+  stat?: "identity" | "unique";
   position?: "identity";
   params?: SegmentParams;
 }

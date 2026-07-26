@@ -37,6 +37,8 @@ interface GeomDataOption {
 export interface GeomPointOptions extends PointParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
+  stat?: "identity" | "unique";
   position?: PointPosition;
   positionParams?: PositionParams;
 }
@@ -97,7 +99,7 @@ export interface GeomDensityOptions extends DensityParams, GeomDataOption {
 export interface GeomErrorbarOptions extends ErrorbarParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
-  stat?: "identity" | "summary";
+  stat?: "identity" | "unique" | "summary";
 }
 
 /** Rect-layer sugar options: params plus optional layer-level aes. */
@@ -147,4 +149,6 @@ export interface GeomSegmentOptions extends SegmentParams, GeomDataOption {
 export interface GeomTextOptions extends TextParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
+  stat?: "identity" | "unique";
 }

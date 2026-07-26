@@ -1384,6 +1384,23 @@ export const SpecDeclarations = {
     },
   ),
 
+  /** Identity-capable layers may also use unique (first-wins aesthetic dedupe). */
+  IdentityOrUniqueStat: Type.Union(
+    [
+      Type.Literal("identity", {
+        description: "Draw each data row as-is (no aggregation or row filter).",
+      }),
+      Type.Literal("unique", {
+        description:
+          "Drop duplicate rows on the combination of mapped aesthetic fields before drawing; first occurrence wins (ggplot2's stat_unique). Panel-local.",
+      }),
+    ],
+    {
+      description:
+        'Layer stat: "identity" (default) or "unique" (dedupe mapped aesthetics, first wins).',
+    },
+  ),
+
   // --- layers (discriminated by geom) ----------------------------------------
 
   PointLayer: Type.Object(
@@ -1392,9 +1409,7 @@ export const SpecDeclarations = {
         description:
           "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views.",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Point layers draw the data as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
         Type.Union([Type.Literal("identity"), Type.Literal("jitter"), Type.Literal("nudge")], {
           description:
@@ -1425,9 +1440,7 @@ export const SpecDeclarations = {
         description:
           "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts.",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Line layers draw the data as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
         Type.Literal("identity", { description: "Line layers use identity positioning." }),
       ),
@@ -1454,9 +1467,7 @@ export const SpecDeclarations = {
         description:
           "Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, and connected scatterplots (ggplot2 geom_path).",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Path layers draw the data as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
         Type.Literal("identity", { description: "Path layers use identity positioning." }),
       ),
@@ -1483,9 +1494,7 @@ export const SpecDeclarations = {
         description:
           "Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Col layers draw the given y values as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(Type.Ref("StackablePosition")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
@@ -1669,10 +1678,24 @@ export const SpecDeclarations = {
           "Errorbar geometry: a vertical range with caps at ymin and ymax, one per data row (identity stat) or per x group (summary stat).",
       }),
       stat: Type.Optional(
-        Type.Union([Type.Literal("identity"), Type.Literal("summary")], {
-          description:
-            'The errorbar\'s stat: "identity" (default — map aes.ymin and aes.ymax to data fields) or "summary" (compute y/ymin/ymax per x group from aes.y; default mean ± standard error, ggplot2\'s mean_se).',
-        }),
+        Type.Union(
+          [
+            Type.Literal("identity", {
+              description: "Map aes.ymin and aes.ymax to data fields (default).",
+            }),
+            Type.Literal("unique", {
+              description: "Drop duplicate rows on mapped aesthetics before drawing; first wins.",
+            }),
+            Type.Literal("summary", {
+              description:
+                "Compute y/ymin/ymax per x group from aes.y; default mean ± standard error (ggplot2 mean_se).",
+            }),
+          ],
+          {
+            description:
+              'The errorbar\'s stat: "identity" (default), "unique" (dedupe aesthetics), or "summary" (mean_se per x group).',
+          },
+        ),
       ),
       position: Type.Optional(
         Type.Literal("identity", { description: "Errorbar layers use identity positioning." }),
@@ -1700,9 +1723,7 @@ export const SpecDeclarations = {
         description:
           "Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands.",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Rect layers draw the data as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
         Type.Literal("identity", { description: "Rect layers use identity positioning." }),
       ),
@@ -1787,9 +1808,7 @@ export const SpecDeclarations = {
         description:
           "Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts.",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Area layers draw the data as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(Type.Ref("StackablePosition")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
@@ -1814,9 +1833,7 @@ export const SpecDeclarations = {
         description:
           "Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Ribbon layers draw precomputed bounds as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
         Type.Literal("identity", { description: "Ribbon layers use identity positioning." }),
       ),
@@ -1843,9 +1860,7 @@ export const SpecDeclarations = {
         description:
           "Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Rule layers draw the given positions as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
         Type.Literal("identity", { description: "Rule layers use identity positioning." }),
       ),
@@ -1872,9 +1887,7 @@ export const SpecDeclarations = {
         description:
           "Text geometry: one label per data row at (x, y). No collision detection — labels draw exactly where placed. Requires x, y, and label channels.",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Text layers draw the data as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
         Type.Union([Type.Literal("identity"), Type.Literal("nudge")], {
           description:
@@ -1904,9 +1917,7 @@ export const SpecDeclarations = {
         description:
           "Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel.",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Segment layers draw the data as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
         Type.Literal("identity", { description: "Segment layers use identity positioning." }),
       ),

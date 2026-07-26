@@ -23,7 +23,8 @@ export function resolveLayerFields(
         fields.push(source === undefined ? { channel, field } : { channel, field, source });
     };
     const stat = binding.layer.stat ?? "identity";
-    if (stat === "identity") {
+    // unique is a row filter on identity aesthetics (no after_stat columns).
+    if (stat === "identity" || stat === "unique") {
       push("x", binding.xField);
       push("y", binding.yField);
     } else {
