@@ -396,7 +396,7 @@ gg(regions, aes({ fill: "rate" })).geomSf().spec();
 
 \`geom_sf_text\` (ggplot2 \`geom_sf_text\`) defaults to \`stat_sf_coordinates\`:
 one representative point per geometry part, then draws \`aes.label\` there.
-Point coordinates pass through; MultiPoint/LineString use the vertex mean;
+Point coordinates pass through; LineString uses the vertex mean;
 Polygon uses the exterior-ring shoelace centroid. **MultiPoint /
 MultiLineString / MultiPolygon emit one label per part** (feature aesthetics
 duplicated onto each part). Requires \`aes.label\` (no \`aes.x\`/\`aes.y\`).
