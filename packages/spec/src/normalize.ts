@@ -179,7 +179,10 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   // Unknown geoms fall back to identity defaults so normalize never throws —
   // validate() rejects them right after with the proper did-you-mean error.
   const defaults = GEOM_DEFAULTS[layer.geom] ?? { stat: "identity", position: "identity" };
-  const stat = layer.stat ?? defaults.stat;
+  // geom_sf: public stat_sf (#809 phase 7). Rewrite legacy portable
+  // `stat: "identity"` so re-normalize stays additive (draw path unchanged).
+  const rawStat = layer.stat ?? defaults.stat;
+  const stat = layer.geom === "sf" && rawStat === "identity" ? "sf" : rawStat;
   // Stat default mappings (ggplot2's `after_stat()` default aes): the count
   // and bin stats map y to their count column; the density stat maps y to
   // its density column.
