@@ -208,6 +208,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ContourLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ContourParams": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -961,6 +965,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeColLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeContourLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },

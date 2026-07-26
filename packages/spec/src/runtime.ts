@@ -34,6 +34,7 @@ import type {
   RectLayer,
   RibbonLayer,
   SegmentLayer,
+  ContourLayer,
   CurveLayer,
   RuleLayer,
   QuantileLayer,
@@ -81,6 +82,7 @@ export interface RuntimeErrorbarLayer extends WithRuntimeAes<ErrorbarLayer> {}
 export interface RuntimeRectLayer extends WithRuntimeAes<RectLayer> {}
 export interface RuntimeTileLayer extends WithRuntimeAes<TileLayer> {}
 export interface RuntimeRasterLayer extends WithRuntimeAes<RasterLayer> {}
+export interface RuntimeContourLayer extends WithRuntimeAes<ContourLayer> {}
 
 export type RuntimeLayerSpec =
   | RuntimePointLayer
@@ -103,7 +105,8 @@ export type RuntimeLayerSpec =
   | RuntimeErrorbarLayer
   | RuntimeRectLayer
   | RuntimeTileLayer
-  | RuntimeRasterLayer;
+  | RuntimeRasterLayer
+  | RuntimeContourLayer;
 
 /** The in-memory spec superset ({ fn } channel accessors allowed). */
 type RuntimeSpecPortableFields = Omit<PortableSpec, "aes" | "layers">;

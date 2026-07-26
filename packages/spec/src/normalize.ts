@@ -69,6 +69,7 @@ export type {
   FreqpolyLayerInput,
   RibbonLayerInput,
   SegmentLayerInput,
+  ContourLayerInput,
   CurveLayerInput,
   LayerInput,
   LineLayerInput,
