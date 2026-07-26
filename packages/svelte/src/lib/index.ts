@@ -185,6 +185,12 @@ export { default as ScaleColorDiscrete } from "./scale/ScaleColorDiscrete.svelte
 /** @lifecycle stable-intent */
 export { default as ScaleColorBinned } from "./scale/ScaleColorBinned.svelte";
 /** @lifecycle stable-intent */
+export { default as ScaleColorGradient } from "./scale/ScaleColorGradient.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorGradient2 } from "./scale/ScaleColorGradient2.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorGradientn } from "./scale/ScaleColorGradientn.svelte";
+/** @lifecycle stable-intent */
 export { default as ScaleColorLog10 } from "./scale/ScaleColorLog10.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColorSqrt } from "./scale/ScaleColorSqrt.svelte";
@@ -202,6 +208,12 @@ export { default as ScaleFillContinuous } from "./scale/ScaleFillContinuous.svel
 export { default as ScaleFillDiscrete } from "./scale/ScaleFillDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleFillBinned } from "./scale/ScaleFillBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillGradient } from "./scale/ScaleFillGradient.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillGradient2 } from "./scale/ScaleFillGradient2.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillGradientn } from "./scale/ScaleFillGradientn.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleFillLog10 } from "./scale/ScaleFillLog10.svelte";
 /** @lifecycle stable-intent */
@@ -278,6 +290,12 @@ export { default as ScaleColourContinuous } from "./scale/ScaleColorContinuous.s
 export { default as ScaleColourDiscrete } from "./scale/ScaleColorDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourBinned } from "./scale/ScaleColorBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourGradient } from "./scale/ScaleColorGradient.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourGradient2 } from "./scale/ScaleColorGradient2.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourGradientn } from "./scale/ScaleColorGradientn.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourLog10 } from "./scale/ScaleColorLog10.svelte";
 /** @lifecycle stable-intent */

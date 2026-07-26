@@ -195,6 +195,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "a01023c80d53494482d6939976252005279c66fdde9ec71823d19940b181a672",
   },
   {
+    id: "point/gradient-continuous",
+    filename: "point-gradient-continuous-light.png",
+    path: "/previews/point-gradient-continuous-light.png",
+    sha256: "52029b5a4a501f00b305ac5f26b69eeb75ded068a91dc1d35a7c7a45481e102a",
+  },
+  {
     id: "point/jitter",
     filename: "point-jitter-light.png",
     path: "/previews/point-jitter-light.png",

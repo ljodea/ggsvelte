@@ -427,6 +427,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "point/gradient-continuous",
+    category: "point",
+    name: "gradient-continuous",
+    title: "Two-stop gradient colour scale",
+    description: "",
+    tags: ["point", "color", "gradient", "sequential", "scale"],
+    docsSection: "Points & scatter",
+    hasData: true,
+  },
+  {
     id: "point/jitter",
     category: "point",
     name: "jitter",

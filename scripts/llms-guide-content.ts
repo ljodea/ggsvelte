@@ -292,12 +292,24 @@ import {
   scaleXLog10,
   scaleYSqrt,
   scale_x_log10,
+  scaleColorGradient,
+  scale_color_gradient2,
+  scale_fill_gradientn,
 } from "@ggsvelte/spec";
 
 const camel = scaleXLog10({ domain: [1, 10_000] });
 const alias = scale_x_log10({ limits: [1, 10_000] });
 const root = scaleYSqrt({ reverse: true });
+// Continuous colour gradients (#826): map to sequential scales with explicit range.
+const twoStop = scaleColorGradient({ low: "#132B43", high: "#56B1F7" });
+const diverging = scale_color_gradient2({ low: "#B2182B", mid: "#F7F7F7", high: "#2166AC" });
+const nStop = scale_fill_gradientn({ colours: ["#440154", "#21918c", "#fde725"] });
 \`\`\`
+
+Svelte shells: \`<ScaleColorGradient>\`, \`<ScaleColorGradient2>\`,
+\`<ScaleColorGradientn>\` (and fill / colour aliases). gradientn requires ≥2
+hex stops via \`colours\` / \`colors\` / \`values\`. See
+[gradient colour example](/examples/point/gradient-continuous).
 
 The Svelte surface accepts the same JSON and re-exports the same helpers:
 

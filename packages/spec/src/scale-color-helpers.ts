@@ -188,3 +188,96 @@ export const scale_fill_date = scaleFillDate;
 export const scale_fill_datetime = scaleFillDatetime;
 export const scale_fill_manual = scaleFillManual;
 export const scale_fill_identity = scaleFillIdentity;
+
+// --- gradient / gradient2 / gradientn (#826) --------------------------------
+// Map onto sequential color with explicit range stops. Hex-only (ColorScaleSpec).
+
+/** ggplot2-shaped two-stop continuous colour (default navy → sky). */
+export type GradientScaleOptions = Omit<SequentialColorScaleOptions, "scheme" | "range"> & {
+  low?: string;
+  high?: string;
+};
+
+/**
+ * Diverging three-stop continuous colour.
+ * v1: mid is the center stop of `range` only — no asymmetric domain remapping
+ * (ggplot2 `midpoint` deferred; not accepted so it cannot silently no-op).
+ */
+export type Gradient2ScaleOptions = Omit<SequentialColorScaleOptions, "scheme" | "range"> & {
+  low?: string;
+  mid?: string;
+  high?: string;
+};
+
+/** N-stop continuous colour; requires ≥2 hex stops via colours/colors/values. */
+export type GradientnScaleOptions = Omit<SequentialColorScaleOptions, "scheme" | "range"> & {
+  colours?: readonly string[];
+  colors?: readonly string[];
+  values?: readonly string[];
+};
+
+const GRADIENT_DEFAULT_LOW = "#132B43";
+const GRADIENT_DEFAULT_HIGH = "#56B1F7";
+/** ggsvelte diverging defaults (red–light–blue); not claimed as ggplot2 muted(). */
+const GRADIENT2_DEFAULT_LOW = "#B2182B";
+const GRADIENT2_DEFAULT_MID = "#F7F7F7";
+const GRADIENT2_DEFAULT_HIGH = "#2166AC";
+
+function gradientRange(options: GradientScaleOptions): SequentialColorScaleOptions {
+  const { low = GRADIENT_DEFAULT_LOW, high = GRADIENT_DEFAULT_HIGH, ...rest } = options;
+  return { ...rest, range: [low, high] };
+}
+
+function gradient2Range(options: Gradient2ScaleOptions): SequentialColorScaleOptions {
+  const {
+    low = GRADIENT2_DEFAULT_LOW,
+    mid = GRADIENT2_DEFAULT_MID,
+    high = GRADIENT2_DEFAULT_HIGH,
+    ...rest
+  } = options;
+  return { ...rest, range: [low, mid, high] };
+}
+
+function gradientnRange(options: GradientnScaleOptions): SequentialColorScaleOptions {
+  const { colours, colors, values, ...rest } = options;
+  const stops = colours ?? colors ?? values;
+  if (stops === undefined || stops.length < 2) {
+    throw new Error(
+      "scale_*_gradientn requires colours/colors/values with at least 2 #rgb/#rrggbb stops.",
+    );
+  }
+  return { ...rest, range: [...stops] };
+}
+
+export function scaleColorGradient(options: GradientScaleOptions = {}): Scales {
+  return colorScale("color", "sequential", gradientRange(options));
+}
+export function scaleColorGradient2(options: Gradient2ScaleOptions = {}): Scales {
+  return colorScale("color", "sequential", gradient2Range(options));
+}
+export function scaleColorGradientn(options: GradientnScaleOptions = {}): Scales {
+  return colorScale("color", "sequential", gradientnRange(options));
+}
+
+export function scaleFillGradient(options: GradientScaleOptions = {}): Scales {
+  return colorScale("fill", "sequential", gradientRange(options));
+}
+export function scaleFillGradient2(options: Gradient2ScaleOptions = {}): Scales {
+  return colorScale("fill", "sequential", gradient2Range(options));
+}
+export function scaleFillGradientn(options: GradientnScaleOptions = {}): Scales {
+  return colorScale("fill", "sequential", gradientnRange(options));
+}
+
+export const scaleColourGradient = scaleColorGradient;
+export const scaleColourGradient2 = scaleColorGradient2;
+export const scaleColourGradientn = scaleColorGradientn;
+export const scale_color_gradient = scaleColorGradient;
+export const scale_color_gradient2 = scaleColorGradient2;
+export const scale_color_gradientn = scaleColorGradientn;
+export const scale_colour_gradient = scaleColorGradient;
+export const scale_colour_gradient2 = scaleColorGradient2;
+export const scale_colour_gradientn = scaleColorGradientn;
+export const scale_fill_gradient = scaleFillGradient;
+export const scale_fill_gradient2 = scaleFillGradient2;
+export const scale_fill_gradientn = scaleFillGradientn;
