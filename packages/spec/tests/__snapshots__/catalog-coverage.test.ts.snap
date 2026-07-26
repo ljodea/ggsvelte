@@ -137,6 +137,7 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
       "map",
       "sf",
       "sf_text",
+      "sf_label",
     ],
     "code": "missing-geom",
     "fix": {
@@ -188,6 +189,7 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
       "map",
       "sf",
       "sf_text",
+      "sf_label",
     ],
     "code": "unknown-geom",
     "fix": {
