@@ -62,19 +62,15 @@ function spokeAngleRadius(
   const params = (binding.layer.params ?? {}) as SpokeParams;
   const angle = new Float64Array(n);
   const radius = new Float64Array(n);
-  if (binding.angleField !== null) {
-    const col = table.numeric(binding.angleField);
-    angle.set(col);
+  if (binding.angleField === null) {
+    angle.fill(params.angle ?? 0);
   } else {
-    const constant = params.angle ?? 0;
-    angle.fill(constant);
+    angle.set(table.numeric(binding.angleField));
   }
-  if (binding.radiusField !== null) {
-    const col = table.numeric(binding.radiusField);
-    radius.set(col);
+  if (binding.radiusField === null) {
+    radius.fill(params.radius ?? 1);
   } else {
-    const constant = params.radius ?? 1;
-    radius.fill(constant);
+    radius.set(table.numeric(binding.radiusField));
   }
   return { angle, radius };
 }

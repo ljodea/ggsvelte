@@ -410,7 +410,12 @@ export class MockResponder implements Responder {
     ) {
       // geom_blank: scale training without marks (#791).
       const aes: MockAes = {};
-      if (fieldNamed("x_plan") !== undefined) {
+      if (fieldNamed("x_plan") === undefined) {
+        const x = fieldNamed("x") ?? pick.quant() ?? "x";
+        const y = fieldNamed("y") ?? pick.quant() ?? "y";
+        aes.x = f(x);
+        aes.y = f(y);
+      } else {
         aes.x = f("x_plan");
         if (fieldNamed("y_plan") !== undefined) aes.y = f("y_plan");
         if (fieldNamed("x") !== undefined && fieldNamed("y") !== undefined) {
@@ -419,11 +424,6 @@ export class MockResponder implements Responder {
             aes: { x: f("x"), y: f("y") },
           });
         }
-      } else {
-        const x = fieldNamed("x") ?? pick.quant() ?? "x";
-        const y = fieldNamed("y") ?? pick.quant() ?? "y";
-        aes.x = f(x);
-        aes.y = f(y);
       }
       spec.layers.push({ geom: "blank", aes });
     } else if (
