@@ -127,8 +127,9 @@ function assignChannels(
     scales[channel] = cloneScaleEntry(entry);
   }
   // Expanded subset of Scales keys; entries are identity/manual JSON objects.
-  // Double cast: tsc rejects Record→Scales; type-aware lint rejects a single cast.
-  return scales as unknown as Scales;
+  // tsc needs the cast; type-aware lint mis-accepts Record→Scales without it.
+  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion -- tsc TS2322
+  return scales as Scales;
 }
 
 /**
