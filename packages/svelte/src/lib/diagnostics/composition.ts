@@ -16,7 +16,15 @@
  * DUPLICATE_MERGE_KEY: it shipped in 0.11.0, its `channel` field and its
  * spelling-alias suggestion are scale-specific, and renaming a live advisory
  * code would break consumer `switch`es for no behavioural gain.
+ *
+ * Kind sets and doc anchors come from GRAMMAR_FAMILIES (#785).
  */
+import {
+  GRAMMAR_FAMILIES,
+  grammarDocUrl,
+  type MergeByKeyKind,
+  type ReplaceKind,
+} from "../layers/grammar-families.js";
 
 export type CompositionDiagnosticCode =
   | "DUPLICATE_SCALE_CHANNEL"
@@ -40,8 +48,8 @@ export interface DuplicateScaleChannelDiagnostic {
   readonly docUrl: string;
 }
 
-/** Keyed-MERGE families other than scales (#659 slice 6). */
-export type DuplicateMergeKeyKind = "labs" | "guides" | "legend";
+/** Keyed-MERGE families other than scales (#659 slice 6 / #785). */
+export type DuplicateMergeKeyKind = MergeByKeyKind;
 
 /**
  * Two children of one keyed-MERGE family wrote the same key. Unlike the
@@ -59,7 +67,7 @@ export interface DuplicateMergeKeyDiagnostic {
   readonly docUrl: string;
 }
 
-export type DuplicatePlotLayerKind = "coord" | "facet" | "theme";
+export type DuplicatePlotLayerKind = ReplaceKind;
 
 export interface DuplicatePlotLayerDiagnostic {
   readonly severity: "advisory";
@@ -104,41 +112,13 @@ export function isDuplicatePlotLayerDiagnostic(
   return d.code === "DUPLICATE_PLOT_LAYER";
 }
 
-const GUIDE_SCALE_CHILDREN = "https://ggsvelte.sh/guide/upgrading#compose-scales-as-child-layers";
-const GUIDE_COORD_CHILDREN = "https://ggsvelte.sh/guide/upgrading#compose-coord-as-a-child-layer";
-const GUIDE_FACET_CHILDREN = "https://ggsvelte.sh/guide/upgrading#compose-facet-as-a-child-layer";
-const GUIDE_THEME_CHILDREN =
-  "https://ggsvelte.sh/guide/upgrading#compose-the-theme-as-a-child-layer";
+function mergeKeyNoun(kind: DuplicateMergeKeyKind): string {
+  return GRAMMAR_FAMILIES[kind].mergeKeyNoun ?? "key";
+}
 
-const GUIDE_LABS_CHILDREN = "https://ggsvelte.sh/guide/upgrading#compose-labs-as-a-child-layer";
-const GUIDE_GUIDES_CHILDREN = "https://ggsvelte.sh/guide/upgrading#compose-guides-as-child-layers";
-const GUIDE_LEGEND_CHILDREN = "https://ggsvelte.sh/guide/upgrading#compose-legend-as-a-child-layer";
-
-const PLOT_LAYER_DOC_URL: Readonly<Record<DuplicatePlotLayerKind, string>> = {
-  coord: GUIDE_COORD_CHILDREN,
-  facet: GUIDE_FACET_CHILDREN,
-  theme: GUIDE_THEME_CHILDREN,
-};
-
-const MERGE_KEY_DOC_URL: Readonly<Record<DuplicateMergeKeyKind, string>> = {
-  labs: GUIDE_LABS_CHILDREN,
-  guides: GUIDE_GUIDES_CHILDREN,
-  legend: GUIDE_LEGEND_CHILDREN,
-};
-
-/** How each merge-key family names the thing that collided, for the message. */
-const MERGE_KEY_NOUN: Readonly<Record<DuplicateMergeKeyKind, string>> = {
-  labs: "label",
-  guides: "channel",
-  legend: "option",
-};
-
-/** The child element authors should look for when a key collides. */
-const MERGE_KEY_CHILD: Readonly<Record<DuplicateMergeKeyKind, string>> = {
-  labs: "<Labs>",
-  guides: "<Guide*>",
-  legend: "<Legend>",
-};
+function mergeKeyChild(kind: DuplicateMergeKeyKind): string {
+  return GRAMMAR_FAMILIES[kind].mergeKeyChild ?? `<${kind}>`;
+}
 
 /**
  * Frozen catalog entry for composition codes. Per-emission fields are filled
@@ -185,7 +165,7 @@ export function duplicateScaleChannelDiagnostic(channel: string): DuplicateScale
       `Keep one scale child per channel — remove all but the intended "${channel}" scale`,
       `British and American spellings write the same channel: <ScaleColorDiscrete/> and <ScaleColourContinuous/> both configure "color"`,
     ],
-    docUrl: GUIDE_SCALE_CHILDREN,
+    docUrl: grammarDocUrl("scale"),
   };
 }
 
@@ -195,6 +175,8 @@ export function duplicateMergeKeyDiagnostic(
   key: string,
 ): DuplicateMergeKeyDiagnostic {
   const entry = COMPOSITION_DIAGNOSTIC_CATALOG.DUPLICATE_MERGE_KEY;
+  const noun = mergeKeyNoun(kind);
+  const child = mergeKeyChild(kind);
   return {
     severity: entry.severity,
     code: "DUPLICATE_MERGE_KEY",
@@ -202,10 +184,10 @@ export function duplicateMergeKeyDiagnostic(
     kind,
     key,
     suggestions: [
-      `Set the ${MERGE_KEY_NOUN[kind]} "${key}" on exactly one ${MERGE_KEY_CHILD[kind]} child`,
-      `${kind} is a MERGE family: siblings that touch different ${MERGE_KEY_NOUN[kind]}s all survive — only "${key}" is overwritten`,
+      `Set the ${noun} "${key}" on exactly one ${child} child`,
+      `${kind} is a MERGE family: siblings that touch different ${noun}s all survive — only "${key}" is overwritten`,
     ],
-    docUrl: MERGE_KEY_DOC_URL[kind],
+    docUrl: grammarDocUrl(kind),
   };
 }
 
@@ -214,15 +196,17 @@ export function duplicatePlotLayerDiagnostic(
   kind: DuplicatePlotLayerKind,
 ): DuplicatePlotLayerDiagnostic {
   const entry = COMPOSITION_DIAGNOSTIC_CATALOG.DUPLICATE_PLOT_LAYER;
+  const shell =
+    kind === "theme" ? "Theme" : kind === "coord" ? "Coord" : kind === "facet" ? "Facet" : kind;
   return {
     severity: entry.severity,
     code: "DUPLICATE_PLOT_LAYER",
     message: entry.messageTemplate(kind),
     kind,
     suggestions: [
-      `Keep one <${kind === "theme" ? "Theme" : kind === "coord" ? "Coord" : "Facet"}*> child — remove earlier ${kind} children so the intended one is the only registration`,
+      `Keep one <${shell}*> child — remove earlier ${kind} children so the intended one is the only registration`,
       `${kind} is a REPLACE family: the last child fully replaces earlier ones (and any ${kind} prop)`,
     ],
-    docUrl: PLOT_LAYER_DOC_URL[kind],
+    docUrl: grammarDocUrl(kind),
   };
 }

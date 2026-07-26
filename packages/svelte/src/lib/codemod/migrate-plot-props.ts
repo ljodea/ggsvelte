@@ -38,12 +38,11 @@
  */
 import { parse } from "svelte/compiler";
 
+import { grammarCodemodRules, type GrammarCodemodForm } from "../layers/grammar-families.js";
 import { applyEdits, type Edit } from "./edits.js";
 
-const GUIDE = "https://ggsvelte.sh/guide/upgrading";
-
 /** How a deprecated prop's value is handed to its replacement component. */
-type Form = "value" | "spread" | "theme";
+type Form = GrammarCodemodForm;
 
 interface PropRule {
   readonly component: string;
@@ -51,24 +50,12 @@ interface PropRule {
   readonly docUrl: string;
 }
 
-/** The seven props deprecated in 0.11.0, in GGPlotProps declaration order. */
-const RULES: Readonly<Record<string, PropRule>> = {
-  facet: { component: "Facet", form: "spread", docUrl: `${GUIDE}#compose-facet-as-a-child-layer` },
-  coord: { component: "Coord", form: "value", docUrl: `${GUIDE}#compose-coord-as-a-child-layer` },
-  scales: { component: "Scale", form: "value", docUrl: `${GUIDE}#compose-scales-as-child-layers` },
-  guides: { component: "Guides", form: "value", docUrl: `${GUIDE}#compose-guides-as-child-layers` },
-  legend: {
-    component: "Legend",
-    form: "spread",
-    docUrl: `${GUIDE}#compose-legend-as-a-child-layer`,
-  },
-  theme: {
-    component: "Theme",
-    form: "theme",
-    docUrl: `${GUIDE}#compose-the-theme-as-a-child-layer`,
-  },
-  labs: { component: "Labs", form: "spread", docUrl: `${GUIDE}#compose-labs-as-a-child-layer` },
-};
+/**
+ * The seven props deprecated in 0.11.0, in GGPlotProps declaration order.
+ * Built from GRAMMAR_FAMILIES / GGPLOT_PROP_ORDER (#785) so codemod rules
+ * cannot drift from deprecation metadata.
+ */
+const RULES: Readonly<Record<string, PropRule>> = grammarCodemodRules();
 
 /** A prop this run rewrote. */
 export interface PropChange {

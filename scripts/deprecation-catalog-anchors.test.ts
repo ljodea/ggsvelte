@@ -7,6 +7,7 @@ import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { GRAMMAR_DOC_URLS } from "../packages/svelte/src/lib/layers/grammar-families.ts";
 import type { LifecycleDoc } from "./gen-llms.ts";
 import { guidePages, renderMarkdown } from "./gen-llms.ts";
 
@@ -31,16 +32,9 @@ function guideAnchors(): Map<string, Set<string>> {
  * (deprecatedPropDiagnostic) and composition (duplicateScaleChannelDiagnostic,
  * duplicateMergeKeyDiagnostic, duplicatePlotLayerDiagnostic) alike. All ship a
  * docUrl, so all need the anchor to actually resolve.
+ * Derived from GRAMMAR_FAMILIES (#785).
  */
-const RUNTIME_ADVISORY_URLS = [
-  "https://ggsvelte.sh/guide/upgrading#compose-the-theme-as-a-child-layer",
-  "https://ggsvelte.sh/guide/upgrading#compose-scales-as-child-layers",
-  "https://ggsvelte.sh/guide/upgrading#compose-coord-as-a-child-layer",
-  "https://ggsvelte.sh/guide/upgrading#compose-facet-as-a-child-layer",
-  "https://ggsvelte.sh/guide/upgrading#compose-labs-as-a-child-layer",
-  "https://ggsvelte.sh/guide/upgrading#compose-guides-as-child-layers",
-  "https://ggsvelte.sh/guide/upgrading#compose-legend-as-a-child-layer",
-] as const;
+const RUNTIME_ADVISORY_URLS = GRAMMAR_DOC_URLS;
 
 describe("diagnostic catalog runtime docUrl anchors", () => {
   it("every live runtime advisory docUrl anchor resolves in the rendered guide", () => {

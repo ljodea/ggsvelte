@@ -4,55 +4,28 @@ import type {
   CoordSpec,
   DataInput,
   FacetInput,
-  GeomName,
   GuidesSpec,
   Labs,
   LayerInput,
   LegendSpec,
   PortableSpec,
-  PositionName,
-  PositionParams,
-  RenderBackend,
   Scales,
   SpecInput,
-  StatName,
   ThemeName,
   ThemeSpec,
 } from "@ggsvelte/spec";
 import { gg, normalize } from "@ggsvelte/spec";
 
 import type { PlotInteractionScope, ZoomInput } from "../interaction/interaction.js";
+import { foldPlotLayer } from "../layers/fold.js";
+import type { MarkLayerDescriptor, PlotLayerLike } from "../layers/types.js";
 
 /**
- * Structural mark-layer descriptor (live getters allowed). Kept local so this
- * module does not import `registry.svelte.ts`.
+ * Structural mark-layer descriptor (live getters allowed). Alias of the shared
+ * MarkLayerDescriptor so callers that already import from assemble keep working
+ * without pulling in the `.svelte.ts` registry (#785).
  */
-export type MarkLayerDescriptorLike = {
-  readonly geom: GeomName;
-  readonly stat?: StatName | undefined;
-  readonly aes?: AesInput | undefined;
-  readonly data?: DataInput | readonly Record<string, unknown>[] | undefined;
-  readonly position?: PositionName | undefined;
-  readonly positionParams?: PositionParams | undefined;
-  readonly render?: RenderBackend | undefined;
-  readonly params?: Record<string, unknown> | undefined;
-};
-
-/**
- * Structural non-mark (and optional mark) plot layer. Same discipline as
- * MarkLayerDescriptorLike: no import of the `.svelte.ts` registry module.
- * Live getters allowed on `value`. Module-private (structural callers pass
- * compatible objects; not a public export).
- */
-type PlotLayerLike =
-  | { readonly kind: "mark"; readonly descriptor: MarkLayerDescriptorLike }
-  | { readonly kind: "scale"; readonly value: Scales }
-  | { readonly kind: "theme"; readonly value: ThemeName | ThemeSpec }
-  | { readonly kind: "coord"; readonly value: CoordSpec | "flip" }
-  | { readonly kind: "facet"; readonly value: FacetInput }
-  | { readonly kind: "labs"; readonly value: Labs }
-  | { readonly kind: "guides"; readonly value: GuidesSpec }
-  | { readonly kind: "legend"; readonly value: LegendSpec };
+export type MarkLayerDescriptorLike = MarkLayerDescriptor;
 
 /** True when an object is already a single-key DataRef container. */
 function isWrappedDataRef(data: object): data is NonNullable<LayerInput["data"]> {
@@ -145,39 +118,6 @@ export function isFacetedPlotIntent(input: {
   );
 }
 
-/** Apply one non-mark plot layer onto the fluent builder. */
-function applyPlotLayer(
-  builder: ReturnType<typeof gg>,
-  layer: PlotLayerLike,
-): ReturnType<typeof gg> {
-  switch (layer.kind) {
-    case "mark":
-      // Marks travel through `input.layers` (toLayerInput); ignore if present.
-      return builder;
-    case "scale":
-      return builder.scales(layer.value);
-    case "theme":
-      return builder.theme(layer.value);
-    case "coord":
-      return builder.coord(layer.value);
-    case "facet":
-      return builder.facet(layer.value);
-    case "labs":
-      return builder.labs(layer.value);
-    case "guides":
-      return builder.guides(layer.value);
-    case "legend":
-      return builder.legend(layer.value);
-    default: {
-      // Exhaustiveness: a new Layer kind must be handled here, not silently
-      // dropped. `never` makes that a compile error; the throw makes an
-      // unforeseen runtime kind loud instead of a missing spec field.
-      const unhandled: never = layer;
-      throw new TypeError(`Unhandled plot layer kind: ${String(unhandled)}`);
-    }
-  }
-}
-
 /**
  * Build the normalized PortableSpec for GGPlot.
  * Explicit `spec` wins over everything (including non-mark children).
@@ -193,6 +133,7 @@ export function assemblePortableSpec(input: AssemblePortableSpecInput): Portable
   // Props first, then non-mark children (registration order) — children win (D2).
   // REPLACE families (theme/coord/facet): last write wins.
   // MERGE families (scales/guides/labs/legend): {...prev, ...next} puts child last.
+  // Fold dispatch is table-driven via foldPlotLayer (#785).
   if (input.facet !== undefined) builder = builder.facet(input.facet);
   if (input.coord !== undefined) builder = builder.coord(input.coord);
   if (input.a11y !== undefined) builder = builder.a11y(input.a11y);
@@ -202,7 +143,7 @@ export function assemblePortableSpec(input: AssemblePortableSpecInput): Portable
   if (input.theme !== undefined) builder = builder.theme(input.theme);
   if (input.labs !== undefined) builder = builder.labs(input.labs);
   for (const plotLayer of input.plotLayers ?? []) {
-    builder = applyPlotLayer(builder, plotLayer);
+    builder = foldPlotLayer(builder, plotLayer);
   }
   return builder.spec();
 }
