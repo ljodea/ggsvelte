@@ -65,11 +65,11 @@ function colourAliases(stem: string): string[] {
  *   position-binned      2
  *   position-temporal    4
  *   position-discrete    2
- *   color-fill          24
+ *   color-fill          30
  *   numeric-style       21
  *   finite-style         8
  *   ----------------------
- *   69 component files + 12 Colour aliases
+ *   75 component files + 15 Colour aliases
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
@@ -127,7 +127,7 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscretePositionScaleOptions",
   ]),
 
-  // --- color-fill (24 components + 12 Colour aliases) ----------------------
+  // --- color-fill (30 components + 15 Colour aliases) ----------------------
   // optionsTypes match the slice-3 hand-written shells exactly.
   shell(
     "scaleColorContinuous",
