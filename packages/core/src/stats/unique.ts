@@ -2,8 +2,9 @@
  * stat_unique — first-wins row deduplication on aesthetic key columns.
  * Clean-room contract against ggplot2 public behavior (no R source).
  *
- * Keys are pre-materialized cell tuples (one entry per input row). Equality
- * uses Object.is so NaN collapses with NaN and -0 equals +0.
+ * Keys are pre-materialized cell tuples (one entry per input row). Key tokens
+ * collapse NaN with NaN and -0 with +0 (Object.is would keep signed zeros
+ * distinct; template-number tokens intentionally do not).
  */
 
 export interface StatUniqueInput {

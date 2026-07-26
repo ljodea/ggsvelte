@@ -149,4 +149,22 @@ describe("gg builder — M2 sugar methods", () => {
       position: "identity",
     });
   });
+
+  it("identity-capable geom* sugar accepts stat unique (#813)", () => {
+    // Schema already allowed unique on these layers; builder Options must too.
+    const line = gg(xy, aes({ x: "x", y: "y" }))
+      .geomLine({ stat: "unique" })
+      .spec();
+    expect(line.layers[0]).toMatchObject({ geom: "line", stat: "unique" });
+
+    const path = gg(xy, aes({ x: "x", y: "y" }))
+      .geomPath({ stat: "unique" })
+      .spec();
+    expect(path.layers[0]).toMatchObject({ geom: "path", stat: "unique" });
+
+    const text = gg(xy, aes({ x: "x", y: "y", label: "x" }))
+      .geomText({ stat: "unique" })
+      .spec();
+    expect(text.layers[0]).toMatchObject({ geom: "text", stat: "unique" });
+  });
 });
