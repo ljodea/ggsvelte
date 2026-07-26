@@ -78,10 +78,10 @@ export type IntervalStateDeps = {
   consumptionCandidates: () => readonly IntervalConsumptionCandidate<PropertyKey>[];
   /**
    * Handler-only: `openBoundsEditor` select branch reads the host's inspection
-   * panel as its fallback target. Host derived is earlier than the factory and
-   * returns `ScenePanel | null`.
+   * panel id as its fallback target. Host derived is earlier than the factory
+   * and returns bounds + id (or null).
    */
-  inspectionPanel: () => ScenePanel | null;
+  inspectionPanel: () => Readonly<{ id: string }> | null;
   /** Hoisted host fn (shared with point selection until S7/S8). */
   emitSelection: (event: PlotSelection) => void;
   announce: (message: string) => void;
@@ -472,11 +472,18 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   ): void {
     boundsReturnFocus = trigger;
     if (action === "select") {
+      const model = deps.model();
       const panel =
         currentIntervalRecord === null
-          ? (deps.inspectionPanel() ?? deps.model()?.scene.panels[0])
+          ? (() => {
+              const inspectionTarget = deps.inspectionPanel();
+              if (inspectionTarget !== null && model !== null) {
+                return model.scene.panels.find((candidate) => candidate.id === inspectionTarget.id);
+              }
+              return model?.scene.panels[0];
+            })()
           : currentIntervalPanel;
-      if (panel === undefined) return;
+      if (panel === undefined || panel === null) return;
       boundsEditor = {
         action,
         axis,

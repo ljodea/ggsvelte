@@ -2,7 +2,7 @@
  * Shared harness for createIntervalState composite tests.
  * Factories own deriveds + effects — instantiate under `$effect.root` and destroy.
  */
-import type { CandidateFacts, RenderModel, ScenePanel } from "@ggsvelte/core";
+import type { CandidateFacts, RenderModel } from "@ggsvelte/core";
 import { aes, gg, type PortableSpec } from "@ggsvelte/spec";
 
 import type {
@@ -152,7 +152,7 @@ export function mountIntervalController(
     captureSurface?: () => HTMLDivElement | null;
     candidateSemanticKeys?: (candidate: CandidateFacts) => PropertyKey[];
     consumptionCandidates?: IntervalStateDeps["consumptionCandidates"];
-    inspectionPanel?: () => ScenePanel | null;
+    inspectionPanel?: () => Readonly<{ id: string }> | null;
     emitSelection?: (event: PlotSelection) => void;
     announce?: (message: string) => void;
   } = {},

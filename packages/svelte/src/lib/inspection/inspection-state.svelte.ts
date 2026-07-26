@@ -19,7 +19,9 @@
  *
  * Scene-reconcile + coordinator disposal effects register inside this factory.
  */
-import type { CandidateFacts, CellValue, RenderModel, ScenePanel } from "@ggsvelte/core";
+import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
+
+import type { PanelBounds } from "../scene/geometry.js";
 
 import { createInspectionCoordinator } from "./coordinator.js";
 import type { createInteractionReducer, InteractionAction } from "../interaction/reducer.js";
@@ -111,9 +113,12 @@ type CancelPointerInspectPolicy = {
   readonly pendingPinned: "preserve" | "discard";
 };
 
+/** Panel geometry for crosshairs / keyboard clamp; id for scene lookups. */
+export type InspectionPanelBounds = PanelBounds & { readonly id: string };
+
 export type InspectionState = {
   readonly inspection: PlotInspectionChange<Record<string, CellValue>, PropertyKey> | null;
-  readonly inspectionPanel: ScenePanel | null;
+  readonly inspectionPanel: InspectionPanelBounds | null;
   /** Seed candidate for presentation chrome (kind); not emitted on public events. */
   readonly inspectionSeed: CandidateFacts | null;
   setInspection(
@@ -201,11 +206,23 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   }
 
   // Construction-safe: own state + earlier host model.
-  const inspectionPanel = $derived.by(() => {
+  // Key off the inspection snapshot's panelId (authoritative from the seed
+  // candidate), not a re-hit of focus.anchor geometry (#787). Bounds come
+  // from the semantic viewport — no scene.panels.find round-trip.
+  const inspectionPanel = $derived.by((): InspectionPanelBounds | null => {
     if (inspection === null || deps.model() === null) return null;
-    const model = deps.model()!;
-    const viewportPanel = model.viewport.panelAt(inspection.focus.anchor);
-    return model.scene.panels.find((panel) => panel.id === viewportPanel?.id) ?? null;
+    const panelId = inspection.panelId;
+    if (panelId === null) return null;
+    const viewportPanel = deps.model()!.viewport.panel(panelId);
+    if (viewportPanel === null) return null;
+    const { x0, y0, x1, y1 } = viewportPanel.bounds;
+    return {
+      id: viewportPanel.id,
+      x: x0,
+      y: y0,
+      width: x1 - x0,
+      height: y1 - y0,
+    };
   });
 
   // Coordinator closes over keyAt — handler-only invocation (deferred).
@@ -484,16 +501,12 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     activeCandidateId = null;
   }
 
-  function panelIdForIndex(index: number): string | null {
-    const panel = deps.model()?.scene.panels[index];
-    if (panel === undefined) return null;
-    return panel.id;
-  }
-
   function schedulePointerInspect(input: SchedulePointerInspectInput): void {
     const model = deps.model();
+    // Panel-scoped nearest so faceted hover cannot seed another facet (#787).
+    // panelAtOrOnly keeps single-panel axis-margin hover working (Claude plan review).
     const match =
-      model?.candidates.nearest(input.point.x, input.point.y, {
+      model?.viewport.panelAtOrOnly(input.point)?.nearest(input.point, {
         mode: input.mode,
         maxDistance: input.maxDistance,
       }) ?? null;
@@ -502,7 +515,6 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
       source: input.source,
       epoch: model?.runId ?? 0,
       fallbackCandidate: () => model?.candidates.hitTest(input.point.x, input.point.y) ?? null,
-      panelIdForIndex,
     });
     const reducer = reducerOf();
     queuedPointerInspection = frame.queued;
