@@ -94,6 +94,7 @@ export const THEME_NAMES = [
   "economist",
   "tufte",
   "linedraw",
+  "void",
   "grey",
   "gray",
   // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters

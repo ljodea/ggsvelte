@@ -587,6 +587,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "point/void-chrome",
+    category: "point",
+    name: "void-chrome",
+    title: "Void theme — marks without cartesian chrome",
+    description: "",
+    tags: ["point", "theme", "void", "chrome-free"],
+    docsSection: "Points & scatter",
+    hasData: true,
+  },
+  {
     id: "raster/grid",
     category: "raster",
     name: "grid",
