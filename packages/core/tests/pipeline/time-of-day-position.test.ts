@@ -131,4 +131,21 @@ describe("time-of-day full pipeline (#831)", () => {
     expect(hi).toBeLessThan(100_000_000);
     expect(hi).toBeGreaterThan(lo);
   });
+
+  it("count/bar on scaleXTime trains domain in ms-of-day (not raw seconds)", () => {
+    const model = runPipeline(
+      gg([{ t: 3600 }, { t: 3600 }, { t: 7200 }], aes({ x: "t" }))
+        .geomBar()
+        .scales(scaleXTime({ nice: false }))
+        .spec(),
+      size,
+    );
+    expect(model.scales.x.type).toBe("time");
+    if (model.scales.x.type === "band") throw new Error("expected continuous x scale");
+    const [lo, hi] = model.scales.x.domain;
+    // 1h–2h in ms; must not stay in portable seconds (3600…7200).
+    expect(lo).toBeGreaterThanOrEqual(3_000_000);
+    expect(hi).toBeGreaterThanOrEqual(7_000_000);
+    expect(hi).toBeLessThan(100_000_000);
+  });
 });

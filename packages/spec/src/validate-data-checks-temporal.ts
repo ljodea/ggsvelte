@@ -94,6 +94,8 @@ export function appendTemporalKindMismatch(
 ): void {
   const { axis, path, field, expected, actual } = input;
   if (expected === undefined || actual === null || actual === expected) return;
+  // scale_*_time reduces date/datetime to UTC clock portion (#831); not a mismatch.
+  if (expected === "time" && (actual === "date" || actual === "datetime")) return;
   errors.push({
     code: "scale-type-mismatch",
     path,

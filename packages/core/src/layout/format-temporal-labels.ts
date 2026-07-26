@@ -292,7 +292,11 @@ export function formatTemporalTickSequence(
         break;
       case "hour":
       case "minute":
-        label = `${changedMonth || part.day !== previous?.day ? `${part.monthShort} ${String(part.day)} ` : ""}${pad2(part.hour)}:${pad2(part.minute)}`;
+        // time-of-day (#831): never prefix a calendar date — values live on 1970-01-01Z.
+        label =
+          options.kind === "time"
+            ? `${pad2(part.hour)}:${pad2(part.minute)}`
+            : `${changedMonth || part.day !== previous?.day ? `${part.monthShort} ${String(part.day)} ` : ""}${pad2(part.hour)}:${pad2(part.minute)}`;
         break;
       case "second":
         label = `${pad2(part.hour)}:${pad2(part.minute)}:${pad2(part.second)}`;
