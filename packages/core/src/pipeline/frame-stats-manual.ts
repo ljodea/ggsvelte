@@ -55,10 +55,11 @@ function resolveManualFun(binding: LayerBinding): ManualFunName {
     );
   }
   if (!isManualFun(fun)) {
+    const label = typeof fun === "string" ? fun : JSON.stringify(fun);
     throw new PipelineError(
       "manual-fun-unknown",
       `/layers/${binding.index}/params/fun`,
-      `Unknown manual fun "${String(fun)}". Allowed: first, last, mean, median, min, max, sum.`,
+      `Unknown manual fun "${label}". Allowed: first, last, mean, median, min, max, sum.`,
     );
   }
   return fun;

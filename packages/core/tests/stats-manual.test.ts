@@ -85,6 +85,6 @@ describe("statManual", () => {
     expect(isManualFun("mean")).toBe(true);
     expect(isManualFun("first")).toBe(true);
     expect(isManualFun("identity")).toBe(false);
-    expect(isManualFun(undefined)).toBe(false);
+    expect(isManualFun(null)).toBe(false);
   });
 });

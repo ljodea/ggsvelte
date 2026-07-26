@@ -11,7 +11,7 @@
  * Discrete aesthetics: first-wins within the group (handled by frame packing).
  * Missing / unknown fun: callers must reject before calling (fail loud).
  */
-import { applySummaryFun, type SummaryFunName } from "./summary.js";
+import { applySummaryFun } from "./summary.js";
 
 export const MANUAL_KEEP_FUNS = ["first", "last"] as const;
 export const MANUAL_AGG_FUNS = ["mean", "median", "min", "max", "sum"] as const;
@@ -86,7 +86,7 @@ function aggregateChannel(
   if (finite.length === 0) return Number.NaN;
   const sorted = fun === "median";
   if (sorted) finite.sort((a, b) => a - b);
-  return applySummaryFun(fun as SummaryFunName, finite, sorted);
+  return applySummaryFun(fun, finite, sorted);
 }
 
 export function statManual(input: ManualStatInput): ManualStatResult {
@@ -99,7 +99,7 @@ export function statManual(input: ManualStatInput): ManualStatResult {
     for (const g of order) {
       const list = rows.get(g)!;
       if (list.length === 0) continue;
-      keep.push(fun === "first" ? list[0]! : list[list.length - 1]!);
+      keep.push(fun === "first" ? list.at(0)! : list.at(-1)!);
       outGroups.push(g);
     }
     return { kind: "keep", keep, groups: outGroups };

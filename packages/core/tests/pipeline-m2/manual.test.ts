@@ -25,7 +25,7 @@ describe("stat manual (#814)", () => {
     expect(batch.kind).toBe("points");
     expect(batch.positions.length / 2).toBe(2);
     expect(batch.colors).toBeDefined();
-    expect(new Set(batch.colors!).size).toBe(2);
+    expect(new Set(batch.colors).size).toBe(2);
   });
 
   it("first keeps one source row per group", () => {
