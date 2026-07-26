@@ -15,9 +15,16 @@
     /**
      * identity | unique (#813) | bin (freqpoly; #796) |
      * align (shared continuous-x grid for stack/fill; #815) |
-     * connect (#816) | summary_bin (binned y summary; #817).
+     * connect | summary_bin (#817) | manual (#814).
      */
-    stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin";
+    stat?:
+      | "identity"
+      | "unique"
+      | "bin"
+      | "align"
+      | "connect"
+      | "summary_bin"
+      | "manual";
   }
 
   const props: Props = $props();

@@ -352,6 +352,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "manual-portable-named-per-group-transforms",
+        title: "Manual (portable named per-group transforms)",
+        level: 2,
+      },
+      {
         id: "align-shared-continuous-x-grid-for-stack",
         title: "Align (shared continuous-x grid for stack)",
         level: 2,
@@ -1268,6 +1273,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "manual-fun-required",
+        title: "manual-fun-required",
+        level: 3,
+      },
+      {
         id: "invalid-data-profile",
         title: "invalid-data-profile",
         level: 3,
@@ -1598,6 +1608,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "manual-fun-required-pipeline",
+        title: "manual-fun-required — pipeline",
+        level: 3,
+      },
+      {
+        id: "manual-fun-unknown",
+        title: "manual-fun-unknown",
+        level: 3,
+      },
+      {
         id: "unknown-theme",
         title: "unknown-theme",
         level: 3,
@@ -1770,6 +1790,11 @@ export const DOCS_ROUTES = [
       {
         id: "quantile-group-dropped",
         title: "quantile-group-dropped",
+        level: 3,
+      },
+      {
+        id: "manual-group-dropped",
+        title: "manual-group-dropped",
         level: 3,
       },
       {
@@ -2732,6 +2757,16 @@ export const DOCS_ROUTES = [
     title: "Scatter plot with color mapping — ggsvelte gallery",
     description: "Scatter plot with color mapping",
     canonicalPath: "/examples/point/scatter-color",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/point/stat-manual-mean",
+    title: "stat manual mean centroids — ggsvelte gallery",
+    description: "stat manual mean centroids",
+    canonicalPath: "/examples/point/stat-manual-mean",
     kind: "page",
     index: true,
     sitemap: true,

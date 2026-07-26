@@ -227,6 +227,12 @@ export const ERROR_CATALOG = {
     summary: "A { stat } channel names a column the layer's stat does not generate.",
     fix: "Use one of the columns the stat generates (the error lists them), or change the layer's stat.",
   },
+  "manual-fun-required": {
+    // Structural grammar (layerStructuralErrors) — opt-in tier-2 only; not plain validate().
+    tier: 2,
+    summary: "A layer uses stat manual without params.fun.",
+    fix: "Set params.fun to one of first|last|mean|median|min|max|sum (portable named registry; #814).",
+  },
   "invalid-data-profile": {
     tier: 2,
     summary: "The provided DataProfile is malformed.",

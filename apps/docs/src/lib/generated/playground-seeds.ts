@@ -398,6 +398,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "point/stat-manual-mean",
+    title: "stat manual mean centroids",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6InBvaW50L3N0YXQtbWFudWFsLW1lYW4ifSwic3BlYyI6eyJlZGl0aW9uIjoyLCJkYXRhIjp7InZhbHVlcyI6W3sieCI6MSwieSI6Miwic2VyaWVzIjoiQSJ9LHsieCI6MiwieSI6Mywic2VyaWVzIjoiQSJ9LHsieCI6MywieSI6NCwic2VyaWVzIjoiQSJ9LHsieCI6MiwieSI6Mywic2VyaWVzIjoiQSJ9LHsieCI6NCwieSI6MSwic2VyaWVzIjoiQiJ9LHsieCI6NSwieSI6Miwic2VyaWVzIjoiQiJ9LHsieCI6NiwieSI6Mywic2VyaWVzIjoiQiJ9LHsieCI6NSwieSI6Miwic2VyaWVzIjoiQiJ9XX0sImxheWVycyI6W3siZ2VvbSI6InBvaW50Iiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoieCJ9LCJ5Ijp7ImZpZWxkIjoieSJ9LCJjb2xvciI6eyJmaWVsZCI6InNlcmllcyJ9fSwicGFyYW1zIjp7InNpemUiOjIuNSwiYWxwaGEiOjAuMzV9fSx7Imdlb20iOiJwb2ludCIsInN0YXQiOiJtYW51YWwiLCJwb3NpdGlvbiI6ImlkZW50aXR5IiwiYWVzIjp7IngiOnsiZmllbGQiOiJ4In0sInkiOnsiZmllbGQiOiJ5In0sImNvbG9yIjp7ImZpZWxkIjoic2VyaWVzIn19LCJwYXJhbXMiOnsiZnVuIjoibWVhbiIsInNpemUiOjUsImFscGhhIjowLjk1fX1dLCJzY2FsZXMiOnsiY29sb3IiOnsidHlwZSI6Im1hbnVhbCIsImRvbWFpbiI6WyJBIiwiQiJdLCJyYW5nZSI6WyIjMWI5ZTc3IiwiI2Q5NWYwMiJdfX0sImxhYnMiOnsidGl0bGUiOiJzdGF0IG1hbnVhbDogcGVyLWdyb3VwIG1lYW4gY2VudHJvaWRzIiwic3VidGl0bGUiOiJGYWludCBwb2ludHMgYXJlIGlkZW50aXR5OyBsYXJnZSBwb2ludHMgYXJlIGZ1bj1cIm1lYW5cIiBwZXIgc2VyaWVzIiwieCI6IngiLCJ5IjoieSIsImNvbG9yIjoiU2VyaWVzIn0sInRoZW1lIjoiY2xhc3NpYyJ9fQ",
+    },
+  },
+  {
     id: "point/stat-unique",
     title: "stat unique overplotting",
     compatibility: {

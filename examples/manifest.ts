@@ -537,6 +537,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "point/stat-manual-mean",
+    category: "point",
+    name: "stat-manual-mean",
+    title: "stat manual mean centroids",
+    description: "",
+    tags: ["point", "manual", "stat", "mean", "group", "theme"],
+    docsSection: "Points & scatter",
+    hasData: true,
+  },
+  {
     id: "point/stat-unique",
     category: "point",
     name: "stat-unique",

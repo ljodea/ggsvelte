@@ -211,6 +211,11 @@
       "sourceSha256": "6a367183a0e74109adfde59d8b9b5694b2c760e64207d7b15032648b6b551c3f",
       "pngSha256": "db5bc0297f0c6d3f194271b375cdac7627b151e43755945be5180b19bdaedd7d"
     },
+    "point/stat-manual-mean": {
+      "filename": "point-stat-manual-mean-light.png",
+      "sourceSha256": "52b9a9eccedaf85b1ee2468827e716ef9cfc1888314bda453cd1e429970e521f",
+      "pngSha256": "7795cd797aa8457d6ea63b2364ff8e43f0ca871250b0f13d09ecada951b5b142"
+    },
     "point/stat-unique": {
       "filename": "point-stat-unique-light.png",
       "sourceSha256": "b89b32026eb42a40b5f7fac934f9e8088fe615eddbdba19bbe5ee81697f40d51",

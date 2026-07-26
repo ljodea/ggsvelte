@@ -13,9 +13,9 @@
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
     aes?: AesInput;
     /**
-     * identity (default) | unique (#813) | connect (named joins; #816).
+     * identity (default) | unique (#813) | connect (#816) | manual (#814).
      */
-    stat?: "identity" | "unique" | "connect";
+    stat?: "identity" | "unique" | "connect" | "manual";
   }
 
   const props: Props = $props();
@@ -24,5 +24,6 @@
     "linewidth",
     "curve",
     "connection",
+    "fun",
   ]);
 </script>

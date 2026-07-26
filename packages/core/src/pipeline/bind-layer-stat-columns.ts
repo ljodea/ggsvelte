@@ -3,6 +3,8 @@
  */
 export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
   identity: [],
+  unique: [],
+  manual: [],
   count: ["count"],
   bin: ["count", "density", "ncount", "ndensity"],
   density: ["density", "count", "scaled", "ndensity"],

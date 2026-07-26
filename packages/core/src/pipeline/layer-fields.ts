@@ -23,8 +23,16 @@ export function resolveLayerFields(
         fields.push(source === undefined ? { channel, field } : { channel, field, source });
     };
     const stat = binding.layer.stat ?? "identity";
-    // unique is a row filter on identity aesthetics (no after_stat columns).
-    if (stat === "identity" || stat === "unique") {
+    const manualFun =
+      stat === "manual"
+        ? ((binding.layer.params as { fun?: string } | undefined)?.fun ?? null)
+        : null;
+    // unique / manual first|last are row filters on identity aesthetics.
+    const identityLike =
+      stat === "identity" ||
+      stat === "unique" ||
+      (stat === "manual" && (manualFun === "first" || manualFun === "last"));
+    if (identityLike) {
       push("x", binding.xField);
       push("y", binding.yField);
     } else {
@@ -40,7 +48,8 @@ export function resolveLayerFields(
         stat === "summary" ||
         stat === "summary_bin" ||
         stat === "connect" ||
-        stat === "quantile"
+        stat === "quantile" ||
+        stat === "manual"
       ) {
         push("y", "y", "stat");
       }
