@@ -11,6 +11,8 @@ export const KNOWN_GEOMS = [
   "histogram",
   "area",
   "rule",
+  "hline",
+  "vline",
   "text",
   "smooth",
   "boxplot",
@@ -21,6 +23,7 @@ export const KNOWN_GEOMS = [
   "raster",
   "ribbon",
   "segment",
+  "jitter",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -80,7 +83,8 @@ export type PositionName = (typeof KNOWN_POSITIONS)[number];
  * Per-geom pipeline defaults, mirrored from ggplot2 (normalize() fills these):
  * geom bar counts (stat "count") and stacks; histogram bins and stacks;
  * col/area stack pre-computed values; boxplot dodges (ggplot2 defaults to
- * dodge2 — ggsvelte uses plain dodge, decision 0010); everything else is
+ * dodge2 — ggsvelte uses plain dodge, decision 0010); jitter aliases to
+ * point+position jitter; hline/vline alias to rule; everything else is
  * identity/identity.
  */
 export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: PositionName }> = {
@@ -91,6 +95,8 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   histogram: { stat: "bin", position: "stack" },
   area: { stat: "identity", position: "stack" },
   rule: { stat: "identity", position: "identity" },
+  hline: { stat: "identity", position: "identity" },
+  vline: { stat: "identity", position: "identity" },
   text: { stat: "identity", position: "identity" },
   smooth: { stat: "smooth", position: "identity" },
   boxplot: { stat: "boxplot", position: "dodge" },
@@ -101,4 +107,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   raster: { stat: "identity", position: "identity" },
   ribbon: { stat: "identity", position: "identity" },
   segment: { stat: "identity", position: "identity" },
+  jitter: { stat: "identity", position: "jitter" },
 };

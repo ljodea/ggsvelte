@@ -75,6 +75,8 @@ exports[`validate — agent errors (snapshot-tested messages) unknown geom with 
       "histogram",
       "area",
       "rule",
+      "hline",
+      "vline",
       "text",
       "smooth",
       "boxplot",
@@ -85,6 +87,7 @@ exports[`validate — agent errors (snapshot-tested messages) unknown geom with 
       "raster",
       "ribbon",
       "segment",
+      "jitter",
     ],
     "code": "unknown-geom",
     "fix": {
@@ -93,7 +96,7 @@ exports[`validate — agent errors (snapshot-tested messages) unknown geom with 
         "geom": "point",
       },
     },
-    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment". Did you mean "point"?",
+    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "hline", "vline", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "jitter". Did you mean "point"?",
     "path": "/layers/0/geom",
   },
 ]
@@ -110,6 +113,8 @@ exports[`validate — agent errors (snapshot-tested messages) geom missing entir
       "histogram",
       "area",
       "rule",
+      "hline",
+      "vline",
       "text",
       "smooth",
       "boxplot",
@@ -120,6 +125,7 @@ exports[`validate — agent errors (snapshot-tested messages) geom missing entir
       "raster",
       "ribbon",
       "segment",
+      "jitter",
     ],
     "code": "missing-geom",
     "fix": {
@@ -128,7 +134,7 @@ exports[`validate — agent errors (snapshot-tested messages) geom missing entir
         "geom": "point",
       },
     },
-    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment".",
+    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "hline", "vline", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "jitter".",
     "path": "/layers/0/geom",
   },
 ]
@@ -281,6 +287,8 @@ exports[`validate — agent errors (snapshot-tested messages) multiple errors ar
       "histogram",
       "area",
       "rule",
+      "hline",
+      "vline",
       "text",
       "smooth",
       "boxplot",
@@ -291,6 +299,7 @@ exports[`validate — agent errors (snapshot-tested messages) multiple errors ar
       "raster",
       "ribbon",
       "segment",
+      "jitter",
     ],
     "code": "unknown-geom",
     "fix": {
@@ -299,7 +308,7 @@ exports[`validate — agent errors (snapshot-tested messages) multiple errors ar
         "geom": "point",
       },
     },
-    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment". Did you mean "point"?",
+    "message": "Unknown geom "poit". Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "hline", "vline", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "jitter". Did you mean "point"?",
     "path": "/layers/0/geom",
   },
   {

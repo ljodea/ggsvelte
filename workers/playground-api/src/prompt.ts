@@ -36,14 +36,15 @@ Bare strings are invalid in JSON specs. Channels: x, y, color, fill, group, labe
 weight, ymin, ymax, xmin, xmax.
 
 ## Geoms / stats / positions
-Geoms: point, line, col, bar, histogram, area, rule, text, smooth, boxplot, density,
-errorbar, rect, tile, ribbon.
+Geoms: point, jitter, line, col, bar, histogram, area, rule, hline, vline, text,
+smooth, boxplot, density, errorbar, rect, tile, ribbon, segment, raster.
 Defaults: bar→count+stack; histogram→bin+stack; col/area→identity+stack;
-boxplot→boxplot+dodge; else identity.
+boxplot→boxplot+dodge; jitter→point+position jitter; hline/vline→rule; else identity.
 Positions are scoped per geom — one used outside its geom is rejected:
-bar/col/area/histogram → identity, stack, fill, dodge; point → identity, jitter, nudge;
+bar/col/area/histogram → identity, stack, fill, dodge; point/jitter → identity, jitter, nudge;
 boxplot → dodge, identity; every other geom → identity only.
 Bar/histogram/density must NOT map aes.y to a field (stat computes y).
+Aliases: jitter (point+jitter), hline/vline (rule), histogram (bar+bin).
 
 ## Scales / facet / coord
 scales.x/y: linear | binned | time | band. Time: {"type":"time","parse":"ymd"} for ISO dates.

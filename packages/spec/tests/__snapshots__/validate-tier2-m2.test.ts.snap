@@ -1,5 +1,19 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
+exports[`tier 2 — M2 statistical layer (snapshot-tested messages) histogram y mapped to a field -> computed-y-mapped 1`] = `
+{
+  "code": "computed-y-mapped",
+  "fix": {
+    "description": "Switch the layer to geom "col" (identity stat) to draw mapped y values.",
+    "example": {
+      "geom": "col",
+    },
+  },
+  "message": "The histogram geom computes y with the bin stat, so aes.y must not map data. Use geom "col" for pre-computed heights, or unset y with null.",
+  "path": "/layers/0/aes/y",
+}
+`;
+
 exports[`tier 2 — M2 statistical layer (snapshot-tested messages) density y mapped to a field -> computed-y-mapped 1`] = `
 {
   "code": "computed-y-mapped",
@@ -69,19 +83,5 @@ exports[`tier 2 — M2 statistical layer (snapshot-tested messages) boxplot need
   },
   "message": "The boxplot geom needs a DISCRETE x this milestone, but field "v" is quantitative.",
   "path": "/layers/0/aes/x",
-}
-`;
-
-exports[`tier 2 — M2 statistical layer (snapshot-tested messages) histogram y mapped to a field -> computed-y-mapped 1`] = `
-{
-  "code": "computed-y-mapped",
-  "fix": {
-    "description": "Switch the layer to geom "col" (identity stat) to draw mapped y values.",
-    "example": {
-      "geom": "col",
-    },
-  },
-  "message": "The histogram geom computes y with the bin stat, so aes.y must not map data. Use geom "col" for pre-computed heights, or unset y with null.",
-  "path": "/layers/0/aes/y",
 }
 `;

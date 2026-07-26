@@ -39,6 +39,8 @@ export {
   FacetSpecSchema,
   GEOM_DEFAULTS,
   HistogramLayerSchema,
+  HlineLayerSchema,
+  JitterLayerSchema,
   KNOWN_GEOMS,
   KNOWN_POSITIONS,
   KNOWN_STATS,
@@ -52,6 +54,7 @@ export {
   PlotSpecSchema,
   PointLayerSchema,
   RuleLayerSchema,
+  VlineLayerSchema,
   ScalesSchema,
   SEQUENTIAL_SCHEME_NAMES,
   TemporalParserSpecSchemaRef,
@@ -116,7 +119,10 @@ export type {
   ColorstepsGuideSpec,
   NoneGuideSpec,
   HistogramLayer,
+  HlineLayer,
+  HlineParams,
   InlineData,
+  JitterLayer,
   Labs,
   LayerSpec,
   LegendSpec,
@@ -139,6 +145,8 @@ export type {
   RuleParams,
   SegmentLayer,
   SegmentParams,
+  VlineLayer,
+  VlineParams,
   ScaleExpansion,
   Scales,
   SmoothLayer,
@@ -467,6 +475,8 @@ export type {
   RuntimeErrorbarLayer,
   RuntimeRibbonLayer,
   RuntimeHistogramLayer,
+  RuntimeHlineLayer,
+  RuntimeJitterLayer,
   RuntimeLayerSpec,
   RuntimeLineLayer,
   RuntimePointLayer,
@@ -478,6 +488,7 @@ export type {
   RuntimeSpec,
   RuntimeTextLayer,
   RuntimeTileLayer,
+  RuntimeVlineLayer,
 } from "./runtime.js";
 
 // Canonicalizer
@@ -498,6 +509,8 @@ export type {
   FacetFieldInput,
   FacetInput,
   HistogramLayerInput,
+  HlineLayerInput,
+  JitterLayerInput,
   LayerInput,
   LineLayerInput,
   PointLayerInput,
@@ -508,6 +521,7 @@ export type {
   TileLayerInput,
   SpecInput,
   TextLayerInput,
+  VlineLayerInput,
 } from "./normalize.js";
 
 // Validation + agent error contract
@@ -551,6 +565,8 @@ export type {
   GeomDensityOptions,
   GeomErrorbarOptions,
   GeomHistogramOptions,
+  GeomHlineOptions,
+  GeomJitterOptions,
   GeomLineOptions,
   GeomPointOptions,
   GeomRasterOptions,
@@ -560,6 +576,7 @@ export type {
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
+  GeomVlineOptions,
 } from "./builder.js";
 
 // Within-mark paint helpers (#591)

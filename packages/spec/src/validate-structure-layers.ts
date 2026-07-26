@@ -20,12 +20,15 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 /** Channels every geom needs mapped (after plot-aes inheritance). */
 const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   point: ["x", "y"],
+  jitter: ["x", "y"],
   line: ["x", "y"],
   col: ["x", "y"],
   bar: ["x"],
   histogram: ["x"],
   area: ["x", "y"],
   rule: [], // form-checked separately
+  hline: [], // form-checked like rule (yintercept / aes.y)
+  vline: [], // form-checked like rule (xintercept / aes.x)
   text: ["x", "y", "label"],
   smooth: ["x", "y"],
   boxplot: ["x", "y"],
@@ -38,9 +41,12 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   ribbon: [], // orientation-dependent; checked separately
 };
 
-function hasIntercepts(layer: Record<string, unknown>): boolean {
+/** Asymmetric intercept presence for rule / hline / vline form checks. */
+function hasGeomIntercepts(geom: string, layer: Record<string, unknown>): boolean {
   const params = layer["params"];
   if (!isRecord(params)) return false;
+  if (geom === "hline") return params["yintercept"] !== undefined;
+  if (geom === "vline") return params["xintercept"] !== undefined;
   return params["xintercept"] !== undefined || params["yintercept"] !== undefined;
 }
 
@@ -126,11 +132,12 @@ export function layerStructuralErrors(
   const layerAes = isRecord(layer["aes"]) ? (layer["aes"] as Aes) : undefined;
   const layerPath = `/layers/${index}`;
   const mapped = (channel: ChannelName) => effectiveChannel(plotAes, layerAes, channel);
-  // Annotation-form rules (fixed intercepts) inherit NO plot aes — normalize
-  // drops it — so a plot-level style meant for other layers must not trip the
-  // geom-capability check here. Match the rule-form x/y handling below by
-  // consulting only the rule's OWN aes for these layers.
-  const annotationRule = geom === "rule" && hasIntercepts(layer);
+  // Annotation-form rules / hline / vline (fixed intercepts) inherit NO plot
+  // aes — normalize drops it — so a plot-level style meant for other layers
+  // must not trip the geom-capability check here. Match the rule-form x/y
+  // handling below by consulting only the layer's OWN aes for these layers.
+  const isRuleFamily = geom === "rule" || geom === "hline" || geom === "vline";
+  const annotationRule = isRuleFamily && hasGeomIntercepts(geom, layer);
 
   for (const aesthetic of Object.keys(STYLE_AESTHETIC_GEOMS) as StyleAesthetic[]) {
     const value = annotationRule ? (layerAes?.[aesthetic] ?? undefined) : mapped(aesthetic);
@@ -147,44 +154,63 @@ export function layerStructuralErrors(
     });
   }
 
-  if (geom === "rule") {
-    const intercepts = hasIntercepts(layer);
+  if (isRuleFamily) {
+    const intercepts = hasGeomIntercepts(geom, layer);
     // The annotation form inherits NO plot aes (normalize drops it, matching
     // ggplot2's inherit.aes = FALSE) — only the layer's OWN x/y mappings
-    // conflict with intercepts.
+    // conflict with intercepts. Data-driven hline/vline sugar also nulls the
+    // orthogonal axis during normalize; pre-normalize validation still sees
+    // raw layer aes here.
     const own = (channel: "x" | "y") => layerAes?.[channel] ?? undefined;
-    const x = intercepts ? own("x") : mapped("x");
-    const y = intercepts ? own("y") : mapped("y");
+    let x = intercepts ? own("x") : mapped("x");
+    let y = intercepts ? own("y") : mapped("y");
+    // Pre-normalize data-driven aliases: orthogonal axis is not part of the form.
+    if (!intercepts && geom === "hline") x = undefined;
+    if (!intercepts && geom === "vline") y = undefined;
+    const interceptHint =
+      geom === "hline"
+        ? "params.yintercept"
+        : geom === "vline"
+          ? "params.xintercept"
+          : "params.xintercept/yintercept";
+    const dataHint = geom === "hline" ? "aes.y" : geom === "vline" ? "aes.x" : "aes.x/aes.y";
     if (intercepts && (x !== undefined || y !== undefined)) {
       errors.push({
         code: "rule-form-ambiguous",
         path: layerPath,
-        message:
-          "This rule layer mixes the annotation form (params.xintercept/yintercept) with mapped aes.x/aes.y. Use fixed intercepts OR a data mapping, never both.",
+        message: `This ${geom} layer mixes the annotation form (${interceptHint}) with mapped ${dataHint}. Use fixed intercepts OR a data mapping, never both.`,
         fix: {
           description:
-            "Remove the intercept params (data-driven form), or unset aes.x/aes.y with null (annotation form).",
-          example: { geom: "rule", aes: { x: null, y: null }, params: { yintercept: 0 } },
+            "Remove the intercept params (data-driven form), or unset the position aes with null (annotation form).",
+          example:
+            geom === "vline"
+              ? { geom: "vline", params: { xintercept: 0 } }
+              : { geom: geom === "hline" ? "hline" : "rule", params: { yintercept: 0 } },
         },
       });
     } else if (!intercepts && x === undefined && y === undefined) {
       errors.push({
         code: "rule-form-missing",
         path: layerPath,
-        message:
-          "This rule layer has neither fixed intercepts (params.xintercept/yintercept) nor a mapped aes.x/aes.y — nothing to draw.",
+        message: `This ${geom} layer has neither fixed intercepts (${interceptHint}) nor a mapped ${dataHint} — nothing to draw.`,
         fix: {
           description:
-            "Set params.yintercept (or xintercept) for an annotation, or map aes.x/aes.y to a field for data-driven rules.",
-          example: { geom: "rule", params: { yintercept: 0 } },
+            geom === "hline"
+              ? "Set params.yintercept for an annotation, or map aes.y for data-driven horizontal rules."
+              : geom === "vline"
+                ? "Set params.xintercept for an annotation, or map aes.x for data-driven vertical rules."
+                : "Set params.yintercept (or xintercept) for an annotation, or map aes.x/aes.y to a field for data-driven rules.",
+          example:
+            geom === "vline"
+              ? { geom: "vline", params: { xintercept: 0 } }
+              : { geom: geom === "hline" ? "hline" : "rule", params: { yintercept: 0 } },
         },
       });
     } else if (!intercepts && x !== undefined && y !== undefined) {
       errors.push({
         code: "rule-both-axes",
         path: layerPath,
-        message:
-          "This rule layer maps BOTH aes.x and aes.y; a data-driven rule is either vertical (map x) or horizontal (map y). Unset the other channel with null.",
+        message: `This ${geom} layer maps BOTH aes.x and aes.y; a data-driven rule is either vertical (map x) or horizontal (map y). Unset the other channel with null.`,
         fix: {
           description: "Keep one direction and unset the other channel with null.",
           example: { geom: "rule", aes: { y: null } },

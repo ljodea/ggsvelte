@@ -34,6 +34,8 @@ const VALUE_EXPORTS = [
   "FacetSpecSchema",
   "GEOM_DEFAULTS",
   "HistogramLayerSchema",
+  "HlineLayerSchema",
+  "JitterLayerSchema",
   "KNOWN_GEOMS",
   "KNOWN_POSITIONS",
   "KNOWN_STATS",
@@ -52,6 +54,7 @@ const VALUE_EXPORTS = [
   "SpecModule",
   "TextLayerSchema",
   "THEME_NAMES",
+  "VlineLayerSchema",
 ] as const;
 
 describe("schema facade surface", () => {

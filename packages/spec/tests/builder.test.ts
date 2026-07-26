@@ -138,4 +138,37 @@ describe("gg builder — M2 sugar methods", () => {
       params: { alpha: 0.4 },
     });
   });
+
+  it("geomJitter assembles flat width/height/seed into positionParams (#818)", () => {
+    const spec = gg(xy, aes({ x: "x", y: "y" }))
+      .geomJitter({ width: 0.2, height: 0, seed: 9, alpha: 0.75, size: 2 })
+      .spec();
+    expect(spec.layers[0]).toEqual({
+      geom: "point",
+      stat: "identity",
+      position: "jitter",
+      positionParams: { width: 0.2, height: 0, seed: 9 },
+      aes: { x: { field: "x" }, y: { field: "y" } },
+      params: { alpha: 0.75, size: 2 },
+    });
+  });
+
+  it("geomHline / geomVline compile to rule annotations (#818)", () => {
+    const spec = gg(xy, aes({ x: "x", y: "y" }))
+      .geomHline({ yintercept: 0, linewidth: 1.2 })
+      .geomVline({ xintercept: 1, alpha: 0.5 })
+      .spec();
+    expect(spec.layers[0]).toEqual({
+      geom: "rule",
+      stat: "identity",
+      position: "identity",
+      params: { yintercept: 0, linewidth: 1.2 },
+    });
+    expect(spec.layers[1]).toEqual({
+      geom: "rule",
+      stat: "identity",
+      position: "identity",
+      params: { xintercept: 1, alpha: 0.5 },
+    });
+  });
 });

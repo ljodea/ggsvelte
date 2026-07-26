@@ -78,6 +78,9 @@ export type {
   ZoomOptions,
 } from "./interaction/interaction.js";
 export { default as GeomPoint } from "./geoms/GeomPoint.svelte";
+export { default as GeomJitter } from "./geoms/GeomJitter.svelte";
+export { default as GeomHline } from "./geoms/GeomHline.svelte";
+export { default as GeomVline } from "./geoms/GeomVline.svelte";
 export { default as GeomLine } from "./geoms/GeomLine.svelte";
 export { default as GeomCol } from "./geoms/GeomCol.svelte";
 export { default as GeomBar } from "./geoms/GeomBar.svelte";

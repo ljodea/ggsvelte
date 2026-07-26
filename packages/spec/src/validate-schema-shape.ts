@@ -17,6 +17,8 @@ import {
   DensityLayerSchema,
   ErrorbarLayerSchema,
   HistogramLayerSchema,
+  HlineLayerSchema,
+  JitterLayerSchema,
   LineLayerSchema,
   PlotSpecSchema,
   PointLayerSchema,
@@ -28,6 +30,7 @@ import {
   SmoothLayerSchema,
   TextLayerSchema,
   TileLayerSchema,
+  VlineLayerSchema,
 } from "./schema.js";
 import { mapValueErrors, unknownGeomError } from "./validate-map-errors.js";
 
@@ -42,6 +45,9 @@ export const GEOM_BRANCHES = {
   ribbon: RibbonLayerSchema,
   segment: SegmentLayerSchema,
   rule: RuleLayerSchema,
+  hline: HlineLayerSchema,
+  vline: VlineLayerSchema,
+  jitter: JitterLayerSchema,
   text: TextLayerSchema,
   smooth: SmoothLayerSchema,
   boxplot: BoxplotLayerSchema,

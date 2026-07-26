@@ -27,6 +27,8 @@ import type {
   GeomErrorbarOptions,
   GeomRibbonOptions,
   GeomHistogramOptions,
+  GeomHlineOptions,
+  GeomJitterOptions,
   GeomLineOptions,
   GeomPointOptions,
   GeomRasterOptions,
@@ -36,6 +38,7 @@ import type {
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
+  GeomVlineOptions,
 } from "./builder-options.js";
 import type {
   A11yMode,
@@ -164,6 +167,44 @@ export class GGBuilderCore {
    */
   geomRule(options: GeomRuleOptions = {}): GGBuilder {
     return this.layer(layerFrom("rule", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'hline', ... }) — horizontal reference lines
+   * (ggplot2 geom_hline; normalize() → rule). Annotation: yintercept.
+   */
+  geomHline(options: GeomHlineOptions = {}): GGBuilder {
+    return this.layer(layerFrom("hline", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'vline', ... }) — vertical reference lines
+   * (ggplot2 geom_vline; normalize() → rule). Annotation: xintercept.
+   */
+  geomVline(options: GeomVlineOptions = {}): GGBuilder {
+    return this.layer(layerFrom("vline", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'jitter', ... }) — points with position jitter
+   * (ggplot2 geom_jitter; normalize() → point + position jitter). Flat
+   * width/height/seed are assembled into positionParams here (not by normalize).
+   */
+  geomJitter(options: GeomJitterOptions = {}): GGBuilder {
+    const { width, height, seed, positionParams, ...rest } = options;
+    const mergedPositionParams = {
+      ...positionParams,
+      ...(width !== undefined && { width }),
+      ...(height !== undefined && { height }),
+      ...(seed !== undefined && { seed }),
+    };
+    const hasPositionParams = Object.keys(mergedPositionParams).length > 0;
+    return this.layer(
+      layerFrom("jitter", {
+        ...rest,
+        ...(hasPositionParams && { positionParams: mergedPositionParams }),
+      }),
+    );
   }
 
   /** Sugar for .layer({ geom: 'text', ... }). */

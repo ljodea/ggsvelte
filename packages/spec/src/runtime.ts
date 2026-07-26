@@ -24,6 +24,8 @@ import type {
   DensityLayer,
   ErrorbarLayer,
   HistogramLayer,
+  HlineLayer,
+  JitterLayer,
   LayerSpec,
   LineLayer,
   PointLayer,
@@ -36,6 +38,7 @@ import type {
   SmoothLayer,
   TextLayer,
   TileLayer,
+  VlineLayer,
 } from "./schema.js";
 
 /** A function channel accessor: computes the channel value per row. */
@@ -65,6 +68,9 @@ export interface RuntimeAreaLayer extends WithRuntimeAes<AreaLayer> {}
 export interface RuntimeRibbonLayer extends WithRuntimeAes<RibbonLayer> {}
 export interface RuntimeSegmentLayer extends WithRuntimeAes<SegmentLayer> {}
 export interface RuntimeRuleLayer extends WithRuntimeAes<RuleLayer> {}
+export interface RuntimeHlineLayer extends WithRuntimeAes<HlineLayer> {}
+export interface RuntimeVlineLayer extends WithRuntimeAes<VlineLayer> {}
+export interface RuntimeJitterLayer extends WithRuntimeAes<JitterLayer> {}
 export interface RuntimeTextLayer extends WithRuntimeAes<TextLayer> {}
 export interface RuntimeSmoothLayer extends WithRuntimeAes<SmoothLayer> {}
 export interface RuntimeBoxplotLayer extends WithRuntimeAes<BoxplotLayer> {}
@@ -84,6 +90,9 @@ export type RuntimeLayerSpec =
   | RuntimeRibbonLayer
   | RuntimeSegmentLayer
   | RuntimeRuleLayer
+  | RuntimeHlineLayer
+  | RuntimeVlineLayer
+  | RuntimeJitterLayer
   | RuntimeTextLayer
   | RuntimeSmoothLayer
   | RuntimeBoxplotLayer
