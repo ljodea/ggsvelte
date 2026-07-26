@@ -13,4 +13,5 @@ to count (or density). LineParams gains optional STAT BIN ONLY knobs;
 PathParams stays style-only so path never accepts bin params.
 
 Surfaces: PortableSpec, `.geomFreqpoly()`, `<GeomFreqpoly>`.
-Migration: none — additive.
+
+Migration: none — additive

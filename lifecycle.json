@@ -872,6 +872,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeFreqpolyLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeHistogramLayer": {
           "kind": "type",
           "lifecycle": "experimental"

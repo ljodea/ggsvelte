@@ -44,16 +44,16 @@ export interface GeomPointOptions extends PointParams, GeomDataOption {
   positionParams?: PositionParams;
 }
 
-/** Line-layer sugar options: params plus an optional layer-level aes. */
-export interface GeomLineOptions extends LineParams, PathParams, GeomDataOption {
+/** Line-layer sugar options: LineParams (style + optional stat-bin knobs). */
+export interface GeomLineOptions extends LineParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
   /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
   stat?: "identity" | "unique";
 }
 
-/** Path-layer sugar options (data-order polylines; same params as line). */
-export interface GeomPathOptions extends LineParams, PathParams, GeomDataOption {
+/** Path-layer sugar options (data-order polylines; style-only — no bin knobs). */
+export interface GeomPathOptions extends PathParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
   /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */

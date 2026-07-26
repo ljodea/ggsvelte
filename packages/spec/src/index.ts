@@ -473,6 +473,7 @@ export type {
   RuntimeErrorbarLayer,
   RuntimeRibbonLayer,
   RuntimeHistogramLayer,
+  RuntimeFreqpolyLayer,
   RuntimeLayerSpec,
   RuntimeLineLayer,
   RuntimePathLayer,
