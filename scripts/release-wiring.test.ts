@@ -561,13 +561,23 @@ describe("R0 release wiring", () => {
     }
   });
 
-  it("ships the CLI bin without npm manifest normalization", () => {
+  it("ships the CLI bins without npm manifest normalization", () => {
     const manifest = JSON.parse(read("packages/svelte/package.json")) as {
       bin?: Record<string, string>;
     };
     expect(manifest.bin).toEqual({
+      "ggsvelte-codemod": "bin/ggsvelte-codemod.js",
       "ggsvelte-render": "bin/ggsvelte-render.js",
     });
+  });
+
+  it("keeps every bin's entry file present and executable-shaped", () => {
+    // A bin whose target is missing installs a broken command; npm does not
+    // validate the path, so this is the only gate that would catch it.
+    for (const relative of ["bin/ggsvelte-codemod.js", "bin/ggsvelte-render.js"]) {
+      const source = read(`packages/svelte/${relative}`);
+      expect(source.startsWith("#!/usr/bin/env node"), `${relative} needs a shebang`).toBe(true);
+    }
   });
 });
 

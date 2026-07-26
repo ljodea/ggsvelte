@@ -3601,6 +3601,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Compose legend as a child layer"],
   },
   {
+    id: "heading:guide-upgrading:migrate-the-grammar-props-with-the-codemod",
+    kind: "heading",
+    title: "Migrate the grammar props with the codemod",
+    summary:
+      "Migrate the grammar props with the codemod in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#migrate-the-grammar-props-with-the-codemod",
+    keywords: ["Upgrade in five minutes", "Release"],
+    exact: ["Migrate the grammar props with the codemod"],
+  },
+  {
     id: "heading:guide-upgrading:diagnostic-handlers-receive-plotdiagnostic",
     kind: "heading",
     title: "Diagnostic handlers receive PlotDiagnostic",

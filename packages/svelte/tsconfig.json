@@ -4,7 +4,12 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "lib": ["es2023", "dom", "dom.iterable"]
+    "lib": ["es2023", "dom", "dom.iterable"],
+    // node: the codemod fixture harness walks the fixture tree with node:fs.
+    "types": ["node"]
   },
-  "include": ["src/**/*", "svelte.config.js", "tests/migrations/**/*"]
+  // tests/codemod/*.ts only: the fixtures beneath it import "@ggsvelte/svelte",
+  // which the workspace cannot resolve (no self-link), and they are read as
+  // text by the harness rather than compiled.
+  "include": ["src/**/*", "svelte.config.js", "tests/migrations/**/*", "tests/codemod/*.ts"]
 }

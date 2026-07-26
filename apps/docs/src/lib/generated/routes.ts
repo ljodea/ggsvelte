@@ -2179,6 +2179,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "migrate-the-grammar-props-with-the-codemod",
+        title: "Migrate the grammar props with the codemod",
+        level: 3,
+      },
+      {
         id: "diagnostic-handlers-receive-plotdiagnostic",
         title: "Diagnostic handlers receive PlotDiagnostic",
         level: 3,

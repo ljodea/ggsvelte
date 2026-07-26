@@ -1766,6 +1766,47 @@ changes color assignments. It is NOT \`<GuideLegend order={2}/>\`, which is a
 per-aesthetic INTEGER placement rank. Same word, unrelated concepts — the two
 compose independently on one plot.
 
+### Migrate the grammar props with the codemod
+
+All seven grammar props above move mechanically, so \`@ggsvelte/svelte\` ships a
+codemod. It is opt-in and prints a diff by default — it writes nothing until
+you pass \`--write\`:
+
+\`\`\`bash complete
+# see what would change
+npx ggsvelte-codemod src
+
+# apply it
+npx ggsvelte-codemod --write src
+\`\`\`
+
+It rewrites \`facet\`, \`coord\`, \`scales\`, \`guides\`, \`legend\`, \`theme\` and
+\`labs\` into their child layers and adds the components to the
+\`@ggsvelte/svelte\` import that already provided \`GGPlot\`. Migrated children are
+inserted BEFORE any child the file already had, because props apply before
+children — so a hand-written \`<ScaleColorDiscrete/>\` keeps winning over a
+migrated \`scales\` prop exactly as it did before.
+
+The rewrite is meaning-preserving, never a style rewrite. It targets the
+generic escape hatches (\`<Coord value={…}/>\`, \`<Scale value={…}/>\`,
+\`<Guides value={…}/>\`) rather than the named shells this guide recommends by
+hand: for scales the named form is not byte-identical (\`normalize()\` does not
+infer a scale \`type\`), so choosing it is a judgment call the tool does not
+make for you. Flat prop bags become named props —
+\`labs={{ title: "Sales" }}\` → \`<Labs title="Sales"/>\` — falling back to
+\`<Labs {...expr}/>\` for anything it cannot expand losslessly.
+
+One shape is deliberately left alone: \`theme={expr}\` where \`expr\` is not a
+string literal. \`theme\` accepts \`ThemeName | ThemeSpec\` and \`<Theme>\` has no
+\`value\` hatch, so routing a dynamic value needs a human. Those sites are
+printed as \`manual change required\` with a link back to this guide — the tool
+reports them rather than half-migrating them.
+
+Two more things worth knowing: the codemod only touches files that import
+\`GGPlot\` from \`@ggsvelte/svelte\` (a \`GGPlot\` of your own is never rewritten),
+and it edits only the ranges it changes, so run your formatter afterwards if
+you keep multi-line open tags.
+
 ### Diagnostic handlers receive \`PlotDiagnostic\`
 
 \`ondiagnostic\` now receives the \`PlotDiagnostic\` union

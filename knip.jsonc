@@ -42,7 +42,17 @@
       // src/lib/data/data-contract.ts exists only to be type-checked: it
       // asserts every bundled dataset stays assignable to the plot's data
       // prop, which nothing imports at runtime by design.
-      "entry": ["tests/**/*.test.ts", "tests/migrations/**", "src/lib/data/data-contract.ts"],
+      // src/lib/codemod is reached only from bin/ggsvelte-codemod.js, which
+      // imports the BUILT dist path — invisible to knip's source graph.
+      "entry": [
+        "tests/**/*.test.ts",
+        "tests/migrations/**",
+        // Same story as tests/migrations: codemod fixtures are read from the
+        // filesystem by the harness, never imported.
+        "tests/codemod/fixtures/**",
+        "src/lib/data/data-contract.ts",
+        "src/lib/codemod/index.ts",
+      ],
       "project": ["src/**", "tests/**"],
     },
     "benchmarks": {

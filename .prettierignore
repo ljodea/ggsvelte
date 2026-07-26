@@ -4,3 +4,9 @@ spikes/
 dist/
 node_modules/
 .svelte-kit/
+
+# Codemod fixtures are byte-exact expected tool output (ADR 0013). The codemod
+# only edits the ranges it rewrites, so a multi-line <GGPlot> open tag keeps
+# its surviving attributes on their own lines — which prettier would reflow,
+# permanently disagreeing with the tool the fixtures pin.
+packages/svelte/tests/codemod/fixtures/
