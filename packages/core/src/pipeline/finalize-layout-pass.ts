@@ -79,8 +79,8 @@ export function finalizePanelLayoutPass(input: {
     return scale.type === "time" && conversion.requestedTime ? "datetime" : null;
   };
 
-  const xGuide = resolveAxisGuide("x", scalesConfig, normalized.guides);
-  const yGuide = resolveAxisGuide("y", scalesConfig, normalized.guides);
+  const xGuide = resolveAxisGuide("x", scalesConfig, normalized.guides, theme);
+  const yGuide = resolveAxisGuide("y", scalesConfig, normalized.guides, theme);
   const labs = { ...normalized.labs };
   if (xGuide.visible) {
     if (xGuide.title !== undefined) labs.x = xGuide.title;

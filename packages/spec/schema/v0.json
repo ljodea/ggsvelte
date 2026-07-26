@@ -5850,6 +5850,10 @@
         },
         {
           "type": "string",
+          "const": "void"
+        },
+        {
+          "type": "string",
           "const": "grey"
         },
         {
@@ -5861,7 +5865,7 @@
           "const": "test"
         }
       ],
-      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"grey\", \"gray\", \"test\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"grey\", \"gray\", \"test\"."
     },
     "ThemeSpec": {
       "type": "object",
@@ -6080,6 +6084,14 @@
         },
         "ticksY": {
           "type": "boolean"
+        },
+        "labelsX": {
+          "type": "boolean",
+          "description": "When false, suppress x-axis tick labels (theme_void)."
+        },
+        "labelsY": {
+          "type": "boolean",
+          "description": "When false, suppress y-axis tick labels (theme_void)."
         },
         "gridX": {
           "type": "boolean"

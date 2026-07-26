@@ -236,6 +236,11 @@
       "sourceSha256": "81d4be7d9dca5cc1c45558da6a0b3ca303d810443f407648bbf831bedc4cde9f",
       "pngSha256": "3f52ea658edff9c430cede998f7fb33f900de36c3e17dfbbc22f0328cab6a0e7"
     },
+    "point/void-chrome": {
+      "filename": "point-void-chrome-light.png",
+      "sourceSha256": "3629ec64109b22c2f3b03b62668d6cc55c334683e45ff8c9362c2a9db7feb2f8",
+      "pngSha256": "6ea9c8f342288fc5f2069fd6fdd5da6445713d4c3bb6f5bbe29b38ed26d9b9f2"
+    },
     "raster/grid": {
       "filename": "raster-grid-light.png",
       "sourceSha256": "88c5bbdd127acf278d0d2852d0834afdbc7d6febd80c87ee686ad3e1ac9826a9",

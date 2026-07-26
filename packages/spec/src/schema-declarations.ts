@@ -3444,6 +3444,16 @@ export const SpecDeclarations = {
       axisLineY: Type.Optional(Type.Boolean()),
       ticksX: Type.Optional(Type.Boolean()),
       ticksY: Type.Optional(Type.Boolean()),
+      labelsX: Type.Optional(
+        Type.Boolean({
+          description: "When false, suppress x-axis tick labels (theme_void).",
+        }),
+      ),
+      labelsY: Type.Optional(
+        Type.Boolean({
+          description: "When false, suppress y-axis tick labels (theme_void).",
+        }),
+      ),
       gridX: Type.Optional(Type.Boolean()),
       gridY: Type.Optional(Type.Boolean()),
       showPanelBorder: Type.Optional(Type.Boolean()),

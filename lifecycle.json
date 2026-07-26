@@ -5097,6 +5097,10 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ThemeVoid": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "Tooltip": {
           "kind": "value",
           "lifecycle": "experimental"

@@ -65,8 +65,8 @@ export function finalizeGeometryAndScene(input: {
   perfMark("ggsvelte:geometry:end");
   perfMeasure("ggsvelte:geometry", "ggsvelte:geometry:start", "ggsvelte:geometry:end");
 
-  const xGuide = resolveAxisGuide("x", trained.scalesConfig, normalized.guides);
-  const yGuide = resolveAxisGuide("y", trained.scalesConfig, normalized.guides);
+  const xGuide = resolveAxisGuide("x", trained.scalesConfig, normalized.guides, theme);
+  const yGuide = resolveAxisGuide("y", trained.scalesConfig, normalized.guides, theme);
   return assembleScene({
     width: options.width,
     height: options.height,

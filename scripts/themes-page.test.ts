@@ -25,6 +25,7 @@ describe("themes catalog", () => {
       { name: "economist", scheme: "flexoki" },
       { name: "tufte", scheme: "colorblind" },
       { name: "linedraw", scheme: "colorblind" },
+      { name: "void", scheme: "colorblind" },
       { name: "grey", scheme: "observable10" },
       { name: "gray", scheme: "observable10" },
       { name: "test", scheme: "colorblind" },
