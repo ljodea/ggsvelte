@@ -213,6 +213,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "errorbar/summary-bin",
+    category: "errorbar",
+    name: "summary-bin",
+    title: "Binned mean ± se (summary_bin)",
+    description: "",
+    tags: ["errorbar", "summary_bin", "bin", "mean-se", "line", "stat"],
+    docsSection: "Statistical summaries",
+    hasData: true,
+  },
+  {
     id: "facet/ordered-side-strips",
     category: "facet",
     name: "ordered-side-strips",

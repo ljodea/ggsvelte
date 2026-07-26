@@ -354,6 +354,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Statistical summaries"],
   },
   {
+    id: "heading:guide-statistics-positions:binned-y-summaries-summary-bin",
+    kind: "heading",
+    title: "Binned y summaries (summary_bin)",
+    summary:
+      "Binned y summaries (summary_bin) in Statistics and positions. Compute summaries and control how derived marks occupy the same coordinate space.",
+    href: "/guide/statistics-positions#binned-y-summaries-summary-bin",
+    keywords: ["Statistics and positions", "Core grammar"],
+    exact: ["Binned y summaries (summary_bin)"],
+  },
+  {
     id: "heading:guide-statistics-positions:quantile-regression-lines",
     kind: "heading",
     title: "Quantile regression lines",
@@ -4226,6 +4236,24 @@ export const DOCS_SEARCH_INDEX = [
       "jitter",
     ],
     exact: ["Errorbars (mean ± se) over raw data"],
+  },
+  {
+    id: "example:errorbar:summary-bin",
+    kind: "example",
+    title: "Binned mean ± se (summary_bin)",
+    summary: "Binned mean ± se (summary_bin) (Statistical summaries)",
+    href: "/examples/errorbar/summary-bin",
+    keywords: [
+      "Binned mean ± se (summary_bin)",
+      "Statistical summaries",
+      "errorbar",
+      "summary_bin",
+      "bin",
+      "mean-se",
+      "line",
+      "stat",
+    ],
+    exact: ["Binned mean ± se (summary_bin)"],
   },
   {
     id: "example:facet:ordered-side-strips",
