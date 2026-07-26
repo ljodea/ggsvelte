@@ -31,6 +31,8 @@ import type {
   RectParams,
   RenderBackend,
   RuleParams,
+  HlineParams,
+  VlineParams,
   SegmentParams,
   CurveParams,
   MapParams,
@@ -177,6 +179,28 @@ export interface RuleLayerInput extends LayerInputBase {
   stat?: "identity" | "unique";
   position?: "identity";
   params?: RuleParams;
+}
+
+export interface HlineLayerInput extends LayerInputBase {
+  geom: "hline";
+  stat?: "identity";
+  position?: "identity";
+  params?: HlineParams;
+}
+
+export interface VlineLayerInput extends LayerInputBase {
+  geom: "vline";
+  stat?: "identity";
+  position?: "identity";
+  params?: VlineParams;
+}
+
+export interface JitterLayerInput extends LayerInputBase {
+  geom: "jitter";
+  stat?: "identity";
+  position?: "jitter";
+  positionParams?: PositionParams;
+  params?: PointParams;
 }
 
 export interface TextLayerInput extends LayerInputBase {
@@ -339,6 +363,9 @@ export type LayerInput =
   | AreaLayerInput
   | RibbonLayerInput
   | RuleLayerInput
+  | HlineLayerInput
+  | VlineLayerInput
+  | JitterLayerInput
   | TextLayerInput
   | SmoothLayerInput
   | QuantileLayerInput

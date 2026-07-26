@@ -819,6 +819,16 @@ export class MockResponder implements Responder {
         aes: { x: f(x), y: f(y) },
       });
       xField = x;
+    } else if (/data-driven geom_rule|one vertical rule per|one horizontal rule per/.test(prompt)) {
+      // Bare one-axis rule forms (#818 eval coverage for geom rule itself).
+      if (/aes\.y|horizontal rule/.test(prompt)) {
+        const y = pick.quant() ?? "y";
+        spec.layers.push({ geom: "rule", aes: { y: f(y) } });
+      } else {
+        const x = pick.quant() ?? "x";
+        spec.layers.push({ geom: "rule", aes: { x: f(x) } });
+        xField = x;
+      }
     } else if (/bar|column/.test(prompt)) {
       const x = pick.cat() ?? "x";
       const y = pick.mentionedQuant();
@@ -857,11 +867,41 @@ export class MockResponder implements Responder {
       }
     }
 
-    // --- rule annotation add-on ---------------------------------------------
-    const ruleMatch =
-      /(?:threshold|limit|target|reference line|average)[^.]*?\bat (-?\d+(?:\.\d+)?)/.exec(prompt);
-    if (ruleMatch !== null) {
-      const value = Number(ruleMatch[1]);
+    // --- rule annotation add-on (geom_hline / geom_vline sugar #818) ---------
+    // Prefer explicit intercepts: "y = 10", "x = 2.5", or "at N" after
+    // threshold/hline/vline/vertical/horizontal phrasing.
+    const hlineMatch =
+      /\bhline\b/.test(prompt) || /horizontal (?:reference )?line/.test(prompt)
+        ? (/y\s*=\s*(-?\d+(?:\.\d+)?)/.exec(prompt) ??
+          /(?:threshold|limit|target|reference line|average)[^.]*?\bat (-?\d+(?:\.\d+)?)/.exec(
+            prompt,
+          ))
+        : null;
+    const vlineMatch =
+      /\bvline\b/.test(prompt) || /vertical (?:reference |cutoff )?line/.test(prompt)
+        ? (/x\s*=\s*(-?\d+(?:\.\d+)?)/.exec(prompt) ??
+          /(?:cutoff|threshold|limit|target|reference line)[^.]*?\bat (-?\d+(?:\.\d+)?)/.exec(
+            prompt,
+          ))
+        : null;
+    const legacyRuleMatch =
+      hlineMatch === null && vlineMatch === null
+        ? /(?:threshold|limit|target|reference line|average)[^.]*?\bat (-?\d+(?:\.\d+)?)/.exec(
+            prompt,
+          )
+        : null;
+    if (hlineMatch !== null) {
+      spec.layers.push({
+        geom: "rule",
+        params: { yintercept: Number(hlineMatch[1]) },
+      });
+    } else if (vlineMatch !== null) {
+      spec.layers.push({
+        geom: "rule",
+        params: { xintercept: Number(vlineMatch[1]) },
+      });
+    } else if (legacyRuleMatch !== null) {
+      const value = Number(legacyRuleMatch[1]);
       const vertical = prompt.includes("vertical");
       spec.layers.push({
         geom: "rule",

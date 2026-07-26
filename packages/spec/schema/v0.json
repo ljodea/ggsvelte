@@ -1726,6 +1726,66 @@
       "additionalProperties": false,
       "description": "Styling parameters for the rule geom. The annotation form sets xintercept and/or yintercept here; the data-driven form maps aes.x OR aes.y instead (never both forms at once)."
     },
+    "HlineParams": {
+      "type": "object",
+      "properties": {
+        "yintercept": {
+          "$ref": "#/$defs/RuleIntercept",
+          "description": "ANNOTATION FORM ONLY: draw a horizontal rule at each of these fixed y positions. Mutually exclusive with mapping aes.y on this layer."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Rule opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px. Must be greater than 0. Default 1."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for the hline alias (ggplot2 geom_hline). Annotation form sets yintercept; data-driven form maps aes.y. Canonicalized by normalize() to a rule layer."
+    },
+    "VlineParams": {
+      "type": "object",
+      "properties": {
+        "xintercept": {
+          "$ref": "#/$defs/RuleIntercept",
+          "description": "ANNOTATION FORM ONLY: draw a vertical rule at each of these fixed x positions. Mutually exclusive with mapping aes.x on this layer."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Rule opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px. Must be greater than 0. Default 1."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for the vline alias (ggplot2 geom_vline). Annotation form sets xintercept; data-driven form maps aes.x. Canonicalized by normalize() to a rule layer."
+    },
     "SegmentParams": {
       "type": "object",
       "properties": {
@@ -2970,6 +3030,123 @@
       "additionalProperties": false,
       "description": "A reference-line layer (ggplot2's geom_vline/geom_hline, unified). Annotation form: fixed intercepts in params. Data-driven form: map aes.x OR aes.y."
     },
+    "HlineLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "hline",
+          "description": "Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds)."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Hline layers draw the given positions as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Hline layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/HlineParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A horizontal reference-line layer alias (normalize() → rule). Annotation: params.yintercept. Data-driven: map aes.y."
+    },
+    "VlineLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "vline",
+          "description": "Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds)."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Vline layers draw the given positions as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Vline layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/VlineParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A vertical reference-line layer alias (normalize() → rule). Annotation: params.xintercept. Data-driven: map aes.x."
+    },
+    "JitterLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "jitter",
+          "description": "Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Jitter layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "jitter",
+          "description": "Jitter layers always use position \"jitter\" (the alias purpose)."
+        },
+        "positionParams": {
+          "$ref": "#/$defs/PositionParams"
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/PointParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A scatter layer with position \"jitter\" (alias; normalize() → point). Requires x and y channels. Jitter width/height/seed live on positionParams."
+    },
     "TextLayer": {
       "type": "object",
       "required": [
@@ -3430,6 +3607,15 @@
         },
         {
           "$ref": "#/$defs/RuleLayer"
+        },
+        {
+          "$ref": "#/$defs/HlineLayer"
+        },
+        {
+          "$ref": "#/$defs/VlineLayer"
+        },
+        {
+          "$ref": "#/$defs/JitterLayer"
         },
         {
           "$ref": "#/$defs/TextLayer"

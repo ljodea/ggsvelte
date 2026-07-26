@@ -70,17 +70,30 @@ describe("case corpus", () => {
 
   test("every geom is covered at least twice across the corpus", () => {
     // Canonical golds store sugar geoms expanded: bar+bin → histogram,
-    // line+bin → freqpoly (#796).
+    // line+bin → freqpoly (#796); point+position jitter → jitter;
+    // rule annotation intercepts → hline/vline (#818).
     const counts = new Map<string, number>();
     for (const c of cases) {
       if (c.gold === null) continue;
-      for (const layer of c.gold.layers as Array<{ geom: string; stat?: string }>) {
+      for (const layer of c.gold.layers as Array<{
+        geom: string;
+        stat?: string;
+        position?: string;
+        params?: { xintercept?: unknown; yintercept?: unknown };
+      }>) {
+        const params = layer.params ?? {};
         const name =
           layer.geom === "bar" && layer.stat === "bin"
             ? "histogram"
             : layer.geom === "line" && layer.stat === "bin"
               ? "freqpoly"
-              : layer.geom;
+              : layer.geom === "point" && layer.position === "jitter"
+                ? "jitter"
+                : layer.geom === "rule" && params.yintercept !== undefined
+                  ? "hline"
+                  : layer.geom === "rule" && params.xintercept !== undefined
+                    ? "vline"
+                    : layer.geom;
         counts.set(name, (counts.get(name) ?? 0) + 1);
       }
     }

@@ -127,6 +127,9 @@ export const SfLayerSchema = SpecModule.Import("SfLayer");
 export const SfTextLayerSchema = SpecModule.Import("SfTextLayer");
 export const SfLabelLayerSchema = SpecModule.Import("SfLabelLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
+export const HlineLayerSchema = SpecModule.Import("HlineLayer");
+export const VlineLayerSchema = SpecModule.Import("VlineLayer");
+export const JitterLayerSchema = SpecModule.Import("JitterLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
 export const QuantileLayerSchema = SpecModule.Import("QuantileLayer");
@@ -213,6 +216,10 @@ export type BarParams = SpecType<"BarParams">;
 export type AreaParams = SpecType<"AreaParams">;
 /** Rule layer params (annotation intercepts + styling). */
 export type RuleParams = SpecType<"RuleParams">;
+/** Hline alias params (yintercept + styling). */
+export type HlineParams = SpecType<"HlineParams">;
+/** Vline alias params (xintercept + styling). */
+export type VlineParams = SpecType<"VlineParams">;
 /** Segment layer params (styling + lineend). */
 export type SegmentParams = SpecType<"SegmentParams">;
 /** Curve layer params (curvature/angle/ncp + stroke). */
@@ -276,6 +283,12 @@ export type FreqpolyLayer = LayerWithDataRef<SpecType<"FreqpolyLayer">>;
 export type AreaLayer = LayerWithDataRef<SpecType<"AreaLayer">>;
 /** A rule (reference line) layer. */
 export type RuleLayer = LayerWithDataRef<SpecType<"RuleLayer">>;
+/** An hline layer (alias; normalize() → rule). */
+export type HlineLayer = LayerWithDataRef<SpecType<"HlineLayer">>;
+/** A vline layer (alias; normalize() → rule). */
+export type VlineLayer = LayerWithDataRef<SpecType<"VlineLayer">>;
+/** A jitter layer (alias; normalize() → point + position jitter). */
+export type JitterLayer = LayerWithDataRef<SpecType<"JitterLayer">>;
 /** A text-label layer. */
 export type TextLayer = LayerWithDataRef<SpecType<"TextLayer">>;
 /** A smooth (fitted trend) layer. */
@@ -347,6 +360,9 @@ export type LayerSpec =
   | SfLabelLayer
   | BlankLayer
   | RuleLayer
+  | HlineLayer
+  | VlineLayer
+  | JitterLayer
   | TextLayer
   | SmoothLayer
   | QuantileLayer

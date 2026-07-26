@@ -17,6 +17,8 @@ import GeomDensity from "../../src/lib/geoms/GeomDensity.svelte";
 import GeomDotplot from "../../src/lib/geoms/GeomDotplot.svelte";
 import GeomErrorbar from "../../src/lib/geoms/GeomErrorbar.svelte";
 import GeomHistogram from "../../src/lib/geoms/GeomHistogram.svelte";
+import GeomHline from "../../src/lib/geoms/GeomHline.svelte";
+import GeomJitter from "../../src/lib/geoms/GeomJitter.svelte";
 import GeomLine from "../../src/lib/geoms/GeomLine.svelte";
 import GeomPoint from "../../src/lib/geoms/GeomPoint.svelte";
 import GeomRaster from "../../src/lib/geoms/GeomRaster.svelte";
@@ -26,6 +28,7 @@ import GeomSegment from "../../src/lib/geoms/GeomSegment.svelte";
 import GeomSmooth from "../../src/lib/geoms/GeomSmooth.svelte";
 import GeomText from "../../src/lib/geoms/GeomText.svelte";
 import GeomTile from "../../src/lib/geoms/GeomTile.svelte";
+import GeomVline from "../../src/lib/geoms/GeomVline.svelte";
 import SingleGeomPlot from "../fixtures/SingleGeomPlot.svelte";
 import { render } from "../helpers/render.js";
 
@@ -138,6 +141,42 @@ const cases: readonly GeomCase[] = [
     paramKey: "yintercept",
     paramValue: 15,
     markSelector: ".gg-segments line",
+  },
+  {
+    name: "GeomHline",
+    Component: GeomHline,
+    geom: "hline",
+    assembledGeom: "rule",
+    data: xy,
+    aes: { x: "x", y: "y" },
+    geomProps: { yintercept: 12, linewidth: 1.25 },
+    paramKey: "yintercept",
+    paramValue: 12,
+    markSelector: ".gg-segments line",
+  },
+  {
+    name: "GeomVline",
+    Component: GeomVline,
+    geom: "vline",
+    assembledGeom: "rule",
+    data: xy,
+    aes: { x: "x", y: "y" },
+    geomProps: { xintercept: 2, linewidth: 1.1 },
+    paramKey: "xintercept",
+    paramValue: 2,
+    markSelector: ".gg-segments line",
+  },
+  {
+    name: "GeomJitter",
+    Component: GeomJitter,
+    geom: "jitter",
+    assembledGeom: "point",
+    data: xy,
+    aes: { x: "x", y: "y" },
+    geomProps: { size: 4, alpha: 0.7, width: 0.15, seed: 3 },
+    paramKey: "size",
+    paramValue: 4,
+    markSelector: ".gg-points circle",
   },
   {
     name: "GeomText",

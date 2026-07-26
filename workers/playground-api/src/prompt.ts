@@ -36,12 +36,12 @@ Bare strings are invalid in JSON specs. Channels: x, y, color, fill, group, labe
 weight, ymin, ymax, xmin, xmax.
 
 ## Geoms / stats / positions
-Geoms: point, line, col, bar, histogram, freqpoly, area, rule, text, smooth, quantile, boxplot, density,
-errorbar, rect, tile, ribbon, blank.
+Geoms: point, line, col, bar, histogram, freqpoly, area, rule, hline, vline, text, smooth, quantile, boxplot, density,
+errorbar, rect, tile, ribbon, jitter, blank.
 Defaults: bar→count+stack; histogram→bin+stack; col/area→identity+stack;
-boxplot→boxplot+dodge; else identity.
+boxplot→boxplot+dodge; jitter→point+position jitter; hline/vline→rule; else identity.
 Positions are scoped per geom — one used outside its geom is rejected:
-bar/col/area/histogram → identity, stack, fill, dodge; point → identity, jitter, nudge;
+bar/col/area/histogram → identity, stack, fill, dodge; point/jitter → identity, jitter, nudge;
 boxplot → dodge, identity; every other geom → identity only.
 Bar/histogram/density must NOT map aes.y to a field (stat computes y).
 

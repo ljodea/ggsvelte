@@ -146,6 +146,11 @@
       "sourceSha256": "49122556a7f21ec9a57652a005ab87da2025a1328520b3d07e70656bd02d1869",
       "pngSha256": "c69f977b2621aceaa9ffd0135d6ce1127c637e2d615587762611f970d91e5e48"
     },
+    "hline/threshold": {
+      "filename": "hline-threshold-light.png",
+      "sourceSha256": "4079b8fe6d438462f4ea27f3f4ba438d943f4a93ff7767056e47314f79180985",
+      "pngSha256": "be49fc17cd14fe909bfd878c6b86ef9930b9a57966672c78d09f0897dbd21dfc"
+    },
     "interaction/brush-zoom": {
       "filename": "interaction-brush-zoom-light.png",
       "sourceSha256": "4ef8f804e15b3ecf912096b189bd11dcda58769277fce2c01bf78656f4ff1e08",
@@ -175,6 +180,11 @@
       "filename": "interaction-tooltip-light.png",
       "sourceSha256": "5861e092e890a84b4169e79d50e5c74108b642070fcf325449b3e3da6ab07142",
       "pngSha256": "be96a7eebfea75f5a8f6beaee4e8322b5c51ee8726656fe840f2040f67784348"
+    },
+    "jitter/basic": {
+      "filename": "jitter-basic-light.png",
+      "sourceSha256": "7aae9c345fc7b22892ec0f44c044783c3080d4eb58d79fafe446aea4815fbe5c",
+      "pngSha256": "5b200ec3afed907940cede09cf159dc882df2279069e906a82324d0a0ee7ddb5"
     },
     "line/multi-series": {
       "filename": "line-multi-series-light.png",
@@ -335,6 +345,11 @@
       "filename": "tile-heatmap-light.png",
       "sourceSha256": "718bc6c5e9e6e4aa21bb83dd244a098f1ae8046aeb84baef78f3b70214d42c37",
       "pngSha256": "0d3949e02777b5dae7cbc1a2c92b67aeb26568065e77df7f86ae805ee98533af"
+    },
+    "vline/cutoff": {
+      "filename": "vline-cutoff-light.png",
+      "sourceSha256": "56d6ecc5bcc0c6dfc4e0921567d49cf646ca549598b3503108f37eb2843b537f",
+      "pngSha256": "4a110ef7063488f0cfab75bba9d533ada264636dc5438b71bb1ac73cd0cac759"
     }
   }
 }

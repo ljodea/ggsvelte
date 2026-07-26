@@ -544,6 +544,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomHlineOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomJitterOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomLineOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -608,6 +616,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomVlineOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GlowOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -664,6 +676,22 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "HlineLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "HlineLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "HlineLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "HlineParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "HueScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -686,6 +714,18 @@
         },
         "JSONValue": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "JitterLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "JitterLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "JitterLayerSchema": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "KNOWN_GEOMS": {
@@ -1100,6 +1140,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeHlineLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeJitterLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeLayerSpec": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1169,6 +1217,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeTileLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeVlineLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1515,6 +1567,22 @@
         "ValidateResult": {
           "kind": "type",
           "lifecycle": "stable-intent"
+        },
+        "VlineLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "VlineLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "VlineLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "VlineParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
         },
         "aes": {
           "kind": "value",
@@ -4145,6 +4213,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GeomHline": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomJitter": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeomLine": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4210,6 +4286,10 @@
           "lifecycle": "experimental"
         },
         "GeomTile": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomVline": {
           "kind": "value",
           "lifecycle": "experimental"
         },
