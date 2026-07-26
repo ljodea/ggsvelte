@@ -31,7 +31,9 @@ test("theme code uses the shared manual-copy fallback", async ({ page }) => {
   await expect(lab.getByRole("status").filter({ hasText: "Clipboard unavailable" })).toHaveText(
     "Clipboard unavailable. Code selected for manual copy.",
   );
-  expect(await page.evaluate(() => getSelection()?.toString())).toContain('theme="default"');
+  expect(await page.evaluate(() => getSelection()?.toString())).toContain(
+    '<Theme name="default" />',
+  );
 });
 
 test("themes compares all built-in chart themes as full-width interactive portraits", async ({
@@ -78,12 +80,12 @@ test("chart theme stays separate until follow-docs appearance is explicit", asyn
   const chartPaper = () => plot.locator(".gg-paper").getAttribute("fill");
 
   await chartTheme.selectOption("economist");
-  await expect(lab.locator(".copy-code code")).toContainText('theme="economist"');
+  await expect(lab.locator(".copy-code code")).toContainText('<Theme name="economist" />');
   await expect.poll(chartPaper).toBe("var(--gg-paper, #d5e4eb)");
   // Palette is independent of theme.
   await palette.selectOption("tableau10");
   await expect(lab.locator(".copy-code code")).toContainText('scheme: "tableau10"');
-  await expect(lab.locator(".copy-code code")).toContainText('theme="economist"');
+  await expect(lab.locator(".copy-code code")).toContainText('<Theme name="economist" />');
 
   await page.getByRole("button", { name: "Dark appearance" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
@@ -93,7 +95,7 @@ test("chart theme stays separate until follow-docs appearance is explicit", asyn
   await expect(lab.getByRole("status").filter({ hasText: "follows site" })).toContainText(
     'scheme="tableau10"',
   );
-  await expect(lab.locator(".copy-code code")).toContainText('theme="dark"');
+  await expect(lab.locator(".copy-code code")).toContainText('<Theme name="dark" />');
   await expect.poll(chartPaper).toBe("var(--gg-paper, #16181d)");
   await page.getByRole("button", { name: "Light appearance" }).click();
   await expect.poll(chartPaper).toBe("var(--gg-paper, #ffffff)");
