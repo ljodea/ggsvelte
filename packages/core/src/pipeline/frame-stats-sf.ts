@@ -59,7 +59,7 @@ function parseGeometry(raw: CellValue, path: string): { type: string; coordinate
   return { type: parsed.type, coordinates };
 }
 
-function kindOf(type: string): SfKind {
+function kindOf(type: string, path: string): SfKind {
   switch (type) {
     case "Point":
     case "MultiPoint":
@@ -73,7 +73,7 @@ function kindOf(type: string): SfKind {
     default:
       throw new PipelineError(
         "sf-geometry-unsupported",
-        "/geometry",
+        path,
         `geom_sf does not support GeoJSON type "${type}" in v1 (point/line/polygon families only; no GeometryCollection or CRS).`,
       );
   }
@@ -196,8 +196,9 @@ export function buildSfFrame(
   let holesIgnored = 0;
 
   for (let row = 0; row < table.rowCount; row++) {
-    const parsed = parseGeometry(geomCol[row]!, `/layers/${index}/data/${field}`);
-    const kind = kindOf(parsed.type);
+    const cellPath = `/layers/${index}/data/${field}`;
+    const parsed = parseGeometry(geomCol[row]!, cellPath);
+    const kind = kindOf(parsed.type, cellPath);
     if (layerKind === null) layerKind = kind;
     else if (layerKind !== kind) {
       throw new PipelineError(

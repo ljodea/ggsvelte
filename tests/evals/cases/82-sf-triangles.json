@@ -1,5 +1,5 @@
 {
-  "id": "78-sf-triangles",
+  "id": "82-sf-triangles",
   "kind": "chart",
   "prompt": "Draw an sf choropleth of rate filled polygons from a GeoJSON geometry column.",
   "dataProfile": {

@@ -257,6 +257,8 @@ describe("geom_sf", () => {
     } catch (error) {
       expect(error).toBeInstanceOf(PipelineError);
       expect((error as PipelineError).code).toBe("sf-geometry-unsupported");
+      // Layer-qualified path (not a bare "/geometry" that hides the layer).
+      expect((error as PipelineError).path).toMatch(/^\/layers\/0\//);
     }
   });
 

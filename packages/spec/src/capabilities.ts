@@ -316,6 +316,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "segment",
     "curve",
     "map",
+    "sf",
   ],
   shape: ["point", "dotplot", "sf"],
   linetype: [

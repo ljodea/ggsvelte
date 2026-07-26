@@ -1,5 +1,5 @@
 {
-  "id": "79-sf-points",
+  "id": "83-sf-points",
   "kind": "chart",
   "prompt": "Plot sf point geometries from a GeoJSON geometry column on a map-like layer.",
   "dataProfile": {

@@ -214,8 +214,9 @@ export type RuleParams = SpecType<"RuleParams">;
 export type SegmentParams = SpecType<"SegmentParams">;
 /** Curve layer params (curvature/angle/ncp + stroke). */
 export type CurveParams = SpecType<"CurveParams">;
-/** Map layer params (fortified map DataRef + styling; #808). */
+/** Simple-features layer params (geometry column + styling; #809 phase 1). */
 export type SfParams = SpecType<"SfParams">;
+/** Map layer params (fortified map DataRef + styling; #808). */
 export type MapParams = SpecType<"MapParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
