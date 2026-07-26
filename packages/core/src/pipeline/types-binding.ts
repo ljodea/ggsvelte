@@ -95,6 +95,10 @@ export interface LayerBinding {
   xendField: string | null;
   /** Segment end y field; null when unused. */
   yendField: string | null;
+  /** Spoke angle field (radians); null when using params.angle constant. */
+  angleField: string | null;
+  /** Spoke radius field (data units); null when using params.radius constant. */
+  radiusField: string | null;
   /** Contour surface height field; null when unused (#801). */
   zField: string | null;
   /** geom_map join key in value data (#808); null when unused. */

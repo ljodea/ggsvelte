@@ -37,6 +37,7 @@ import {
   SfLayerSchema,
   SfTextLayerSchema,
   SfLabelLayerSchema,
+  SpokeLayerSchema,
   RuleLayerSchema,
   QuantileLayerSchema,
   ContourLayerSchema,
@@ -65,6 +66,8 @@ export const GEOM_BRANCHES = {
   sf: SfLayerSchema,
   sf_text: SfTextLayerSchema,
   sf_label: SfLabelLayerSchema,
+
+  spoke: SpokeLayerSchema,
   rule: RuleLayerSchema,
   hline: HlineLayerSchema,
   vline: VlineLayerSchema,

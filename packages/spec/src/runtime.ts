@@ -34,6 +34,7 @@ import type {
   SfLayer,
   SfTextLayer,
   SfLabelLayer,
+  SpokeLayer,
   PathLayer,
   PointLayer,
   PortableSpec,
@@ -106,6 +107,8 @@ export interface RuntimeSfLayer extends WithRuntimeAes<SfLayer> {}
 export interface RuntimeSfTextLayer extends WithRuntimeAes<SfTextLayer> {}
 export interface RuntimeSfLabelLayer extends WithRuntimeAes<SfLabelLayer> {}
 
+export interface RuntimeSpokeLayer extends WithRuntimeAes<SpokeLayer> {}
+
 export type RuntimeLayerSpec =
   | RuntimePointLayer
   | RuntimeLineLayer
@@ -139,7 +142,8 @@ export type RuntimeLayerSpec =
   | RuntimeSfLayer
   | RuntimeSfTextLayer
   | RuntimeSfLabelLayer
-  | RuntimeBlankLayer;
+  | RuntimeBlankLayer
+  | RuntimeSpokeLayer;
 
 /** The in-memory spec superset ({ fn } channel accessors allowed). */
 type RuntimeSpecPortableFields = Omit<PortableSpec, "aes" | "layers">;

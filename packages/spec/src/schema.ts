@@ -126,6 +126,8 @@ export const BlankLayerSchema = SpecModule.Import("BlankLayer");
 export const SfLayerSchema = SpecModule.Import("SfLayer");
 export const SfTextLayerSchema = SpecModule.Import("SfTextLayer");
 export const SfLabelLayerSchema = SpecModule.Import("SfLabelLayer");
+
+export const SpokeLayerSchema = SpecModule.Import("SpokeLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const HlineLayerSchema = SpecModule.Import("HlineLayer");
 export const VlineLayerSchema = SpecModule.Import("VlineLayer");
@@ -341,6 +343,9 @@ export type BlankParams = Record<string, never>;
 export type BlankLayer = LayerWithDataRef<
   Omit<SpecType<"BlankLayer">, "params"> & { readonly params?: BlankParams }
 >;
+
+export type SpokeParams = SpecType<"SpokeParams">;
+export type SpokeLayer = LayerWithDataRef<SpecType<"SpokeLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -359,6 +364,7 @@ export type LayerSpec =
   | SfTextLayer
   | SfLabelLayer
   | BlankLayer
+  | SpokeLayer
   | RuleLayer
   | HlineLayer
   | VlineLayer

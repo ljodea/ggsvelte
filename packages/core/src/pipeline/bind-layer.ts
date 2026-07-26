@@ -92,6 +92,8 @@ export function bindLayer(
     heightField: position.heightField,
     xendField: position.xendField,
     yendField: position.yendField,
+    angleField: position.angleField,
+    radiusField: position.radiusField,
     ...(position.ribbonOrientation !== undefined && {
       ribbonOrientation: position.ribbonOrientation,
     }),

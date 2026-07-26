@@ -93,4 +93,20 @@ export function validateGeomChannelTypeContracts(input: {
       );
     }
   }
+  if (geom === "spoke") {
+    if (xField !== null && positionFieldType(table, xField, xConversion) === "nominal") {
+      throw new PipelineError(
+        "channel-type-mismatch",
+        `/layers/${index}/aes/x`,
+        `The spoke geom needs continuous x for endpoint math (x + radius·cos(angle)); field "${xField}" is nominal.`,
+      );
+    }
+    if (yField !== null && positionFieldType(table, yField, yConversion) === "nominal") {
+      throw new PipelineError(
+        "channel-type-mismatch",
+        `/layers/${index}/aes/y`,
+        `The spoke geom needs continuous y for endpoint math (y + radius·sin(angle)); field "${yField}" is nominal.`,
+      );
+    }
+  }
 }

@@ -33,6 +33,7 @@ import type {
   SfParams,
   SfTextParams,
   SfLabelParams,
+  SpokeParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -277,6 +278,12 @@ export interface GeomSfLabelOptions extends SfLabelParams, GeomDataOption {
 
 /** Blank-layer sugar options: scale-training only; no paint params. */
 export interface GeomBlankOptions extends GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Spoke-layer sugar: origin + angle + radius (#810). */
+export interface GeomSpokeOptions extends SpokeParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }
