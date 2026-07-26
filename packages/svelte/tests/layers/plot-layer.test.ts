@@ -51,12 +51,13 @@ describe("createPlotLayer", () => {
         },
       });
       expect(registry).toBeDefined();
-      expect(registry!.layers).toHaveLength(1);
-      const layer = registry!.layers[0]!;
+      if (!registry) throw new Error("expected registry");
+      expect(registry.layers).toHaveLength(1);
+      const layer = registry.layers[0];
       expect(layer.kind).toBe(kind);
       if (layer.kind === "mark") throw new Error("expected non-mark layer");
       expect(layer.value).toEqual(initial);
-      expect(registry!.registrationCount).toBe(1);
+      expect(registry.registrationCount).toBe(1);
     },
   );
 
@@ -71,8 +72,9 @@ describe("createPlotLayer", () => {
           registry = r;
         },
       });
-      const layer = registry!.layers[0]!;
-      const countAfterInit = registry!.registrationCount;
+      if (!registry) throw new Error("expected registry");
+      const layer = registry.layers[0];
+      const countAfterInit = registry.registrationCount;
 
       await view.rerender({
         kind,
@@ -82,15 +84,17 @@ describe("createPlotLayer", () => {
         },
       });
       flushSync();
-      expect(registry!.layers).toHaveLength(1);
-      expect(registry!.layers[0]).toBe(layer);
-      if (registry!.layers[0]!.kind === "mark") throw new Error("expected non-mark");
-      expect(registry!.layers[0]!.value).toEqual(updated);
-      expect(registry!.registrationCount).toBe(countAfterInit);
+      // registry was narrowed before rerender; host reuses the same instance.
+      expect(registry.layers).toHaveLength(1);
+      expect(registry.layers[0]).toBe(layer);
+      const next = registry.layers[0];
+      if (next.kind === "mark") throw new Error("expected non-mark");
+      expect(next.value).toEqual(updated);
+      expect(registry.registrationCount).toBe(countAfterInit);
     },
   );
 
-  it("unregisters on destroy; registrationCount does not decrease", async () => {
+  it("unregisters on destroy; registrationCount does not decrease", () => {
     let registry: LayerRegistry | undefined;
     const view = render(PlotLayerFactoryHost, {
       kind: "labs",
@@ -99,19 +103,15 @@ describe("createPlotLayer", () => {
         registry = r;
       },
     });
-    expect(registry!.layers).toHaveLength(1);
-    const countAfterInit = registry!.registrationCount;
+    if (!registry) throw new Error("expected registry");
+    expect(registry.layers).toHaveLength(1);
+    const countAfterInit = registry.registrationCount;
 
-    // Drop the child by remounting host without a layer is not how destroy
-    // works here — unmount the whole host and confirm count is monotonic
-    // while layers empty via a second host that shares no registry.
-    // Use rerender pattern: host always has one child; destroy is covered by
-    // unmounting the view and checking a fresh host is empty until register.
     view.unmount();
     flushSync();
     // After unmount the captured registry still exists but the layer is gone.
-    expect(registry!.layers).toHaveLength(0);
-    expect(registry!.registrationCount).toBe(countAfterInit);
+    expect(registry.layers).toHaveLength(0);
+    expect(registry.registrationCount).toBe(countAfterInit);
   });
 
   it("is inert without a provideRegistry ancestor", () => {
