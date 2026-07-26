@@ -316,7 +316,7 @@ describe("Scale* export parity with all SCALE_CAPABILITIES families", () => {
     }
     expect(new Set(actualScaleExports)).toEqual(expectedExports);
     // Shells + Colour aliases + hand-written Scale (cardinality from gen-scale-children).
-    expect(expectedExports.size).toBe(75 + 15 + 1);
+    expect(expectedExports.size).toBe(77 + 15 + 1);
   });
 });
 

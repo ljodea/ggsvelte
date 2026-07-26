@@ -63,13 +63,13 @@ function colourAliases(stem: string): string[] {
  * Complete shell ledger. Cardinality (asserted in tests):
  *   position-continuous  8
  *   position-binned      2
- *   position-temporal    6
+ *   position-temporal    6  (date/datetime/time × x/y)
  *   position-discrete    2
  *   color-fill          30
  *   numeric-style       21
  *   finite-style         8
  *   ----------------------
- *   75 component files + 15 Colour aliases
+ *   77 component files + 15 Colour aliases
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
