@@ -92,10 +92,16 @@ export const SpecModule = {
   },
 };
 
-/** Inlined declaration bag for Static<> extraction (not for JSON emission). */
-const SpecStatic = Type.Module(SpecDeclarations);
-
-type SpecType<K extends keyof typeof SpecStatic> = Static<(typeof SpecStatic)[K]>;
+/**
+ * Spec type bag for Static<> extraction (not for JSON emission).
+ *
+ * Prefer `ReturnType<typeof Type.Module<...>>` over a `const SpecStatic =
+ * Type.Module(...)` value: once LayerSpec includes density_2d_filled + map the
+ * Module instance exceeds TS7056 declaration-serialize limits under composite
+ * emit. The type-level Module is enough for SpecType / Static<>.
+ */
+type SpecModuleStatic = ReturnType<typeof Type.Module<typeof SpecDeclarations>>;
+type SpecType<K extends keyof SpecModuleStatic> = Static<SpecModuleStatic[K]>;
 
 // ---------------------------------------------------------------------------
 // Imported (validatable) schemas — Cyclic `$defs`+`$ref` for runtime/artifact

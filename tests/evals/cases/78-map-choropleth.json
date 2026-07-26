@@ -1,5 +1,5 @@
 {
-  "id": "76-map-choropleth",
+  "id": "78-map-choropleth",
   "kind": "chart",
   "prompt": "Draw a choropleth with geom map joining region rates to fortified long/lat polygons.",
   "dataProfile": {

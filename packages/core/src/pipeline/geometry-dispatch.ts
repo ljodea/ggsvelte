@@ -20,7 +20,6 @@ import { edgeRectsBatch, rasterRectsBatch, tileRectsBatch } from "./geometry-edg
 import { ribbonBatches } from "./geometry-ribbon.js";
 import { finiteSegmentBatch } from "./geometry-segment-finite.js";
 import { curveBatch } from "./geometry-curve.js";
-import { polygonBatch } from "./geometry-paths-polygon.js";
 
 function single(batch: GeometryBatch | null): GeometryBatch[] {
   return batch === null ? [] : [batch];
