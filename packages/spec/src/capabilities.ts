@@ -280,6 +280,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "ribbon",
     "segment",
     "curve",
+    "density_2d",
   ],
   alpha: [
     "point",
@@ -297,6 +298,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "contour",
     "boxplot",
     "density",
+    "density_2d",
     "errorbar",
     "rect",
     "tile",
@@ -321,6 +323,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "ribbon",
     "segment",
     "curve",
+    "density_2d",
   ],
 } as const;
 

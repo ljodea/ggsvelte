@@ -13,6 +13,7 @@ import type {
   CoordSpec,
   DataRef,
   DensityParams,
+  Density2dParams,
   ErrorbarParams,
   RibbonParams,
   FacetScales,
@@ -214,6 +215,13 @@ export interface DensityLayerInput extends LayerInputBase {
   params?: DensityParams;
 }
 
+export interface Density2dLayerInput extends LayerInputBase {
+  geom: "density_2d";
+  stat?: "density_2d";
+  position?: "identity";
+  params?: Density2dParams;
+}
+
 export interface ErrorbarLayerInput extends LayerInputBase {
   geom: "errorbar";
   stat?: "identity" | "unique" | "summary" | "summary_bin";
@@ -281,6 +289,7 @@ export type LayerInput =
   | ContourLayerInput
   | BoxplotLayerInput
   | DensityLayerInput
+  | Density2dLayerInput
   | ErrorbarLayerInput
   | RectLayerInput
   | TileLayerInput

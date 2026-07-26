@@ -1,0 +1,42 @@
+{
+  "id": "75-scatter-density-2d-bins",
+  "kind": "chart",
+  "prompt": "Draw density_2d isolines with 5 bins over a bivariate scatter of temp vs pressure.",
+  "dataProfile": {
+    "fields": [
+      { "name": "temp", "type": "quantitative" },
+      { "name": "pressure", "type": "quantitative" }
+    ],
+    "rowCount": 8
+  },
+  "data": {
+    "main": [
+      { "temp": 10, "pressure": 100 },
+      { "temp": 12, "pressure": 105 },
+      { "temp": 11, "pressure": 98 },
+      { "temp": 20, "pressure": 120 },
+      { "temp": 22, "pressure": 125 },
+      { "temp": 19, "pressure": 118 },
+      { "temp": 15, "pressure": 110 },
+      { "temp": 16, "pressure": 112 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "density_2d",
+        "stat": "density_2d",
+        "position": "identity",
+        "params": { "bins": 5 },
+        "aes": {
+          "x": { "field": "temp" },
+          "y": { "field": "pressure" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_density_2d with params.bins (#802)."
+}

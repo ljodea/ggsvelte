@@ -347,6 +347,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "2d-density-isolines",
+        title: "2D density isolines",
+        level: 2,
+      },
+      {
         id: "frequency-polygon",
         title: "Frequency polygon",
         level: 2,
@@ -1788,6 +1793,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "density-2d-group-dropped",
+        title: "density-2d-group-dropped",
+        level: 3,
+      },
+      {
         id: "smooth-group-dropped",
         title: "smooth-group-dropped",
         level: 3,
@@ -2147,8 +2157,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-604",
-        title: "experimental (604)",
+        id: "experimental-609",
+        title: "experimental (609)",
         level: 3,
       },
       {
@@ -2187,8 +2197,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-463",
-        title: "experimental (463)",
+        id: "experimental-464",
+        title: "experimental (464)",
         level: 3,
       },
       {
@@ -2537,6 +2547,16 @@ export const DOCS_ROUTES = [
     title: "Curve connectors — ggsvelte gallery",
     description: "Curve connectors",
     canonicalPath: "/examples/curve/connectors",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/density/kde-2d",
+    title: "2D density isolines — ggsvelte gallery",
+    description: "2D density isolines",
+    canonicalPath: "/examples/density/kde-2d",
     kind: "page",
     index: true,
     sitemap: true,

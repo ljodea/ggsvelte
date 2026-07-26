@@ -223,7 +223,7 @@ test("gallery exposes every generated preview exactly once", async ({ page }) =>
   await page.goto("/examples");
   // One meta.json per example under examples/ (grows when new specimens land).
   // corpus 56 minus 3 interaction expositions under /interactions (#801 contour).
-  const exampleCount = 53;
+  const exampleCount = 54;
   await expect(page.locator(".example-grid li")).toHaveCount(exampleCount);
   await expect(page.locator('img[src*="/previews/"]')).toHaveCount(exampleCount);
 });

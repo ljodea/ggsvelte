@@ -34,6 +34,7 @@ export function candidateAutoMode(
     case "density":
     case "smooth":
     case "quantile":
+    case "density_2d":
     case "errorbar":
     case "boxplot":
       return "x";

@@ -1225,6 +1225,74 @@ export const SpecDeclarations = {
     },
   ),
 
+  Density2dParams: Type.Object(
+    {
+      h: Type.Optional(
+        Type.Union(
+          [
+            Type.Number({ exclusiveMinimum: 0 }),
+            Type.Array(Type.Number({ exclusiveMinimum: 0 }), { minItems: 2, maxItems: 2 }),
+          ],
+          {
+            description:
+              "Kernel bandwidth: one positive number for both axes, or [hx, hy]. Omit for MASS bandwidth.nrd per axis (then kde2d h/4 scaling).",
+          },
+        ),
+      ),
+      adjust: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Bandwidth multiplier (must be greater than 0). Default 1.",
+        }),
+      ),
+      n: Type.Optional(
+        Type.Integer({
+          minimum: 10,
+          maximum: 200,
+          description:
+            "Grid resolution per axis for the KDE surface (integer 10–200). Default 100.",
+        }),
+      ),
+      bins: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          description:
+            "Number of contour levels of the density surface (integer ≥ 1). Default 10. Overridden by breaks.",
+        }),
+      ),
+      binwidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Contour level step in density units. Overridden by breaks.",
+        }),
+      ),
+      breaks: Type.Optional(
+        Type.Array(Type.Number(), {
+          minItems: 1,
+          description: "Explicit density contour levels. Overrides bins and binwidth.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width of density contours in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Line opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom_density_2d (bivariate KDE isolines; #802). v1: contour_var density only; filled deferred.",
+    },
+  ),
+
   SummaryFun: Type.Union(
     [
       Type.Literal("mean"),
@@ -2269,6 +2337,38 @@ export const SpecDeclarations = {
     },
   ),
 
+  Density2dLayer: Type.Object(
+    {
+      geom: Type.Literal("density_2d", {
+        description:
+          "2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). v1 draws open path contours only (not filled bands).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("density_2d", {
+          description:
+            "density_2d layers estimate a product-Gaussian KDE per group on an n×n grid and extract isolines.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "density_2d layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("Density2dParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A 2D density contour layer. Requires continuous x and y. Contours of estimated density (not a precomputed z grid).",
+    },
+  ),
+
   ErrorbarLayer: Type.Object(
     {
       geom: Type.Literal("errorbar", {
@@ -2606,6 +2706,7 @@ export const SpecDeclarations = {
       Type.Ref("ContourLayer"),
       Type.Ref("BoxplotLayer"),
       Type.Ref("DensityLayer"),
+      Type.Ref("Density2dLayer"),
       Type.Ref("ErrorbarLayer"),
       Type.Ref("RectLayer"),
       Type.Ref("TileLayer"),

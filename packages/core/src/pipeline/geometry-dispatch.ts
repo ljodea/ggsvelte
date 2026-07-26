@@ -52,6 +52,9 @@ export function dispatchGeometryBatch(
     case "contour":
       // Isolines are authored in stitch order; never x-sort.
       return single(lineBatch(frame, fx, color, styles, warnings, { sortByX: false }));
+    case "density_2d":
+      // KDE isolines are authored in stitch order; never x-sort.
+      return single(lineBatch(frame, fx, color, styles, warnings, { sortByX: false }));
     case "col":
     case "bar":
       return single(rectsBatch(frame, fx, fill, styles, warnings));

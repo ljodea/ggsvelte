@@ -316,6 +316,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "Density2dLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "Density2dLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "Density2dParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "DensityLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -461,6 +473,10 @@
           "lifecycle": "experimental"
         },
         "GeomCurveOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomDensity2dOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -973,6 +989,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeCurveLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeDensity2dLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3938,6 +3958,10 @@
           "lifecycle": "experimental"
         },
         "GeomDensity": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomDensity2d": {
           "kind": "value",
           "lifecycle": "experimental"
         },

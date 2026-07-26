@@ -41,6 +41,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   ribbon: [], // orientation-dependent; checked separately
   contour: ["x", "y", "z"],
   quantile: ["x", "y"],
+  density_2d: ["x", "y"],
 };
 
 function hasIntercepts(layer: Record<string, unknown>): boolean {

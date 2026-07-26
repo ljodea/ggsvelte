@@ -10,6 +10,7 @@ import type {
   BoxplotParams,
   ColParams,
   DensityParams,
+  Density2dParams,
   ErrorbarParams,
   RibbonParams,
   LineParams,
@@ -126,6 +127,12 @@ export interface GeomBoxplotOptions extends BoxplotParams, GeomDataOption {
 
 /** Density-layer sugar options: params plus an optional layer-level aes. */
 export interface GeomDensityOptions extends DensityParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** 2D density isoline sugar options (#802). */
+export interface GeomDensity2dOptions extends Density2dParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }
