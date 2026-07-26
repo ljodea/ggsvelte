@@ -38,7 +38,7 @@ export default defineConfig({
       // which CI runs without --coverage because coverage-v8 cannot collect
       // under bun there. Leaving it in this denominator would tax the browser
       // threshold with ~400 statements the browser lane can never execute.
-      exclude: [...(coverageBase.exclude ?? []), "src/lib/codemod/**"],
+      exclude: ["src/lib/codemod/**"],
       // Browser-only gate: keep thresholds on this config (not coverageBase)
       // so the structurally-low SSR report is not blocked. Values sit ≥5pp
       // under current mature browser totals to ratchet regressions without
