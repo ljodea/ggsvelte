@@ -62,6 +62,9 @@ export function dispatchGeometryBatch(
       return boxplotBatches(frame, fx, fill, styles, warnings);
     case "errorbar":
       return single(errorbarBatch(frame, fx, color, styles, warnings));
+    case "blank":
+      // ggplot2 geom_blank: train scales, emit no marks / hit targets.
+      return [];
     default:
       return [];
   }

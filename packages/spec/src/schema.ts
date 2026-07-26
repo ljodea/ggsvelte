@@ -110,6 +110,7 @@ export const HistogramLayerSchema = SpecModule.Import("HistogramLayer");
 export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
+export const BlankLayerSchema = SpecModule.Import("BlankLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
@@ -251,6 +252,10 @@ export type RasterLayer = LayerWithDataRef<SpecType<"RasterLayer">>;
 export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 /** A finite segment layer ((x,y)→(xend,yend)). */
 export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
+/** Empty params bag for blank layers. */
+export type BlankParams = SpecType<"BlankParams">;
+/** A blank layer (no marks; trains scales from mapped aesthetics). */
+export type BlankLayer = LayerWithDataRef<SpecType<"BlankLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -261,6 +266,7 @@ export type LayerSpec =
   | AreaLayer
   | RibbonLayer
   | SegmentLayer
+  | BlankLayer
   | RuleLayer
   | TextLayer
   | SmoothLayer

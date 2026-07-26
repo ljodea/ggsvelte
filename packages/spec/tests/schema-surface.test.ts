@@ -11,6 +11,7 @@ const VALUE_EXPORTS = [
   "AesSchema",
   "AreaLayerSchema",
   "BarLayerSchema",
+  "BlankLayerSchema",
   "BoxplotLayerSchema",
   "CATEGORICAL_SCHEME_NAMES",
   "CHANNELS",

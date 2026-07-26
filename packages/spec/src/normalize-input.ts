@@ -28,6 +28,7 @@ import type {
   RectParams,
   RenderBackend,
   RuleParams,
+  BlankParams,
   SegmentParams,
   Scales,
   SmoothParams,
@@ -222,6 +223,13 @@ export interface SegmentLayerInput extends LayerInputBase {
   params?: SegmentParams;
 }
 
+export interface BlankLayerInput extends LayerInputBase {
+  geom: "blank";
+  stat?: "identity";
+  position?: "identity";
+  params?: BlankParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -240,7 +248,8 @@ export type LayerInput =
   | RectLayerInput
   | TileLayerInput
   | RasterLayerInput
-  | SegmentLayerInput;
+  | SegmentLayerInput
+  | BlankLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

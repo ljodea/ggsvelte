@@ -12,6 +12,7 @@ import type { SpecError } from "./errors.js";
 import {
   AreaLayerSchema,
   BarLayerSchema,
+  BlankLayerSchema,
   BoxplotLayerSchema,
   ColLayerSchema,
   DensityLayerSchema,
@@ -41,6 +42,7 @@ export const GEOM_BRANCHES = {
   area: AreaLayerSchema,
   ribbon: RibbonLayerSchema,
   segment: SegmentLayerSchema,
+  blank: BlankLayerSchema,
   rule: RuleLayerSchema,
   text: TextLayerSchema,
   smooth: SmoothLayerSchema,

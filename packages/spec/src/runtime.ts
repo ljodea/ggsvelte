@@ -24,6 +24,7 @@ import type {
   DensityLayer,
   ErrorbarLayer,
   HistogramLayer,
+  BlankLayer,
   LayerSpec,
   LineLayer,
   PointLayer,
@@ -64,6 +65,7 @@ export interface RuntimeHistogramLayer extends WithRuntimeAes<HistogramLayer> {}
 export interface RuntimeAreaLayer extends WithRuntimeAes<AreaLayer> {}
 export interface RuntimeRibbonLayer extends WithRuntimeAes<RibbonLayer> {}
 export interface RuntimeSegmentLayer extends WithRuntimeAes<SegmentLayer> {}
+export interface RuntimeBlankLayer extends WithRuntimeAes<BlankLayer> {}
 export interface RuntimeRuleLayer extends WithRuntimeAes<RuleLayer> {}
 export interface RuntimeTextLayer extends WithRuntimeAes<TextLayer> {}
 export interface RuntimeSmoothLayer extends WithRuntimeAes<SmoothLayer> {}
@@ -83,6 +85,7 @@ export type RuntimeLayerSpec =
   | RuntimeAreaLayer
   | RuntimeRibbonLayer
   | RuntimeSegmentLayer
+  | RuntimeBlankLayer
   | RuntimeRuleLayer
   | RuntimeTextLayer
   | RuntimeSmoothLayer

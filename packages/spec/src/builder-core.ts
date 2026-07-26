@@ -21,6 +21,7 @@ import {
 import type {
   GeomAreaOptions,
   GeomBarOptions,
+  GeomBlankOptions,
   GeomBoxplotOptions,
   GeomColOptions,
   GeomDensityOptions,
@@ -228,6 +229,14 @@ export class GGBuilderCore {
    */
   geomSegment(options: GeomSegmentOptions = {}): GGBuilder {
     return this.layer(layerFrom("segment", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'blank', ... }) — trains scales from mapped
+   * aesthetics without drawing marks (ggplot2 geom_blank).
+   */
+  geomBlank(options: GeomBlankOptions = {}): GGBuilder {
+    return this.layer(layerFrom("blank", options));
   }
 
   /**

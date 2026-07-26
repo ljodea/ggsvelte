@@ -34,6 +34,7 @@ export type {
 export type {
   GeomAreaOptions,
   GeomBarOptions,
+  GeomBlankOptions,
   GeomBoxplotOptions,
   GeomColOptions,
   GeomDensityOptions,
