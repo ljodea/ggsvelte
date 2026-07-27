@@ -293,6 +293,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "map",
     "sf",
     "blank",
+    "rug",
   ],
   alpha: [
     "point",
@@ -329,6 +330,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "map",
     "sf",
     "blank",
+    "rug",
   ],
   shape: ["point", "jitter", "dotplot", "sf", "blank"],
   linetype: [
@@ -354,6 +356,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "map",
     "sf",
     "blank",
+    "rug",
   ],
 } as const;
 

@@ -33,6 +33,7 @@ import type {
   RuleParams,
   HlineParams,
   VlineParams,
+  RugParams,
   SegmentParams,
   CurveParams,
   MapParams,
@@ -362,6 +363,13 @@ export interface SpokeLayerInput extends LayerInputBase {
   params?: SpokeParams;
 }
 
+export interface RugLayerInput extends LayerInputBase {
+  geom: "rug";
+  stat?: "identity";
+  position?: "identity";
+  params?: RugParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -397,7 +405,8 @@ export type LayerInput =
   | SfTextLayerInput
   | SfLabelLayerInput
   | BlankLayerInput
-  | SpokeLayerInput;
+  | SpokeLayerInput
+  | RugLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

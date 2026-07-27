@@ -25,6 +25,7 @@ import type {
   RuleParams,
   HlineParams,
   VlineParams,
+  RugParams,
   SegmentParams,
   QuantileParams,
   CurveParams,
@@ -284,6 +285,12 @@ export interface GeomBlankOptions extends GeomDataOption {
 
 /** Spoke-layer sugar: origin + angle + radius (#810). */
 export interface GeomSpokeOptions extends SpokeParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Rug-layer sugar options: sides/length + stroke params. */
+export interface GeomRugOptions extends RugParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

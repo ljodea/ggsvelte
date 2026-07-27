@@ -43,6 +43,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   segment: ["x", "y", "xend", "yend"],
   spoke: ["x", "y"], // angle/radius: aes or params — checked below
   curve: ["x", "y", "xend", "yend"],
+  rug: [], // sides-dependent; checked separately
   tile: ["x", "y"],
   raster: ["x", "y"],
   ribbon: [], // orientation-dependent; checked separately
@@ -400,6 +401,27 @@ export function layerStructuralErrors(
           },
         });
       }
+    }
+  }
+
+  if (geom === "rug") {
+    const params = isRecord(layer["params"]) ? layer["params"] : {};
+    const sides = typeof params["sides"] === "string" ? params["sides"] : "bl";
+    if (/[bt]/.test(sides) && mapped("x") === undefined) {
+      pushMissingChannel(
+        errors,
+        layerPath,
+        "x",
+        `The rug geom with sides "${sides}" requires an "x" channel for bottom/top ticks; map aes.x or narrow params.sides.`,
+      );
+    }
+    if (/[lr]/.test(sides) && mapped("y") === undefined) {
+      pushMissingChannel(
+        errors,
+        layerPath,
+        "y",
+        `The rug geom with sides "${sides}" requires a "y" channel for left/right ticks; map aes.y or narrow params.sides.`,
+      );
     }
   }
 
