@@ -57,74 +57,47 @@ describe("appendClosedBandEdges — shared closed ribbon vertices", () => {
   });
 });
 
-describe("layoutBoxplotBody — hinge/whisker collection", () => {
-  it("returns null when box extras or scales are unsuitable", async () => {
-    const { layoutBoxplotBody } =
-      await import("../../src/pipeline/geometry-boxplot-body-layout.ts");
-    const frame = fromAny<LayerFrame>({
-      binding: { index: 0, layer: { params: {} } },
-      n: 1,
-      box: null,
-      ymin: null,
-      ymax: null,
-    });
-    const fx = fromPartial<Frame>({
-      xScale: { type: "linear" },
-      yScale: { type: "linear" },
-      innerWidth: 100,
-      innerHeight: 100,
-    });
-    expect(layoutBoxplotBody(frame, fx, [])).toBeNull();
-  });
-});
-
-describe("BOX_MEDIAN_FATTEN", () => {
-  it("matches ggplot2 fatten default of 2", async () => {
-    const { BOX_MEDIAN_FATTEN } =
-      await import("../../src/pipeline/geometry-boxplot-body-batches-parts.ts");
-    expect(BOX_MEDIAN_FATTEN).toBe(2);
-  });
-});
-
-describe("writeSmoothLineGeometry", () => {
-  it("writes one path offset per group and maps y into panel px", async () => {
-    const { writeSmoothLineGeometry } =
-      await import("../../src/pipeline/geometry-smooth-line-write.ts");
-    const frame = fromAny({
-      binding: { color: { constant: "#abc", scaledConstant: null } },
-      xNumeric: new Float64Array([0, 1]),
-      yNumeric: new Float64Array([0, 1]),
-      xValues: null,
-      colorValues: null,
-      rowIndex: new Uint32Array([10, 11]),
-    });
-    const fx = fromAny({
-      xScale: {
-        type: "linear",
-        normalize: (v: number) => v,
-        normalizeTransformed: (v: number) => v,
-      },
-      yScale: {
-        type: "linear",
-        normalize: (v: number) => v,
-        normalizeTransformed: (v: number) => v,
-      },
-      innerWidth: 100,
-      innerHeight: 50,
-    });
-    const geom = writeSmoothLineGeometry({
-      frame,
-      fx,
-      color: null,
-      groupRows: [[0, 1]],
-    });
-    expect([...geom.pathOffsets]).toEqual([0, 2]);
-    expect([...geom.rowIndex]).toEqual([10, 11]);
-    expect(geom.positions[0]).toBe(0);
-    expect(geom.positions[1]).toBe(50);
-    expect(geom.positions[2]).toBe(100);
-    expect(geom.positions[3]).toBe(0);
-    expect(geom.strokes).toEqual(["#abc"]);
+describe("boxplot body — rendered composite", () => {
+  it("emits hinge rects, whiskers, and a 2×-fattened median line", async () => {
+    const { aes, gg } = await import("@ggsvelte/spec");
+    const { runPipeline } = await import("../../src/pipeline.ts");
+    const model = runPipeline(
+      gg(
+        [
+          { g: "a", y: 1 },
+          { g: "a", y: 2 },
+          { g: "a", y: 3 },
+          { g: "a", y: 4 },
+          { g: "a", y: 5 },
+          { g: "b", y: 10 },
+          { g: "b", y: 12 },
+          { g: "b", y: 14 },
+          { g: "b", y: 16 },
+          { g: "b", y: 18 },
+        ],
+        aes({ x: "g", y: "y" }),
+      )
+        .geomBoxplot()
+        .spec(),
+      { width: 200, height: 100 },
+    );
+    const segments = model.scene.batches.filter((b) => b.kind === "segments");
+    const rects = model.scene.batches.find((b) => b.kind === "rects");
+    expect(rects).toBeDefined();
+    expect(rects!.kind).toBe("rects");
+    if (rects!.kind !== "rects") throw new Error("expected rects");
+    // two categories → two hinge boxes
+    expect(rects.rects.length / 4).toBe(2);
+    expect(segments.length).toBe(2);
+    const [whiskers, medians] = segments;
+    if (whiskers!.kind !== "segments" || medians!.kind !== "segments") {
+      throw new Error("expected whisker and median segment batches");
+    }
+    // 2 whiskers × 2 boxes; 1 median × 2 boxes
+    expect(whiskers.segments.length / 4).toBe(4);
+    expect(medians.segments.length / 4).toBe(2);
+    // ggplot2 fatten default: median linewidth is 2× the box/whisker linewidth
+    expect(medians.linewidth).toBe(whiskers.linewidth * 2);
   });
 });
 

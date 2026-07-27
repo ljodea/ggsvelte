@@ -48,8 +48,8 @@ const POSITION_READ_INVENTORY = [
   { file: "geometry-errorbar-rows.ts", space: "transformed" },
   { file: "geometry-errorbar-width.ts", space: "transformed" },
   { file: "geometry-paths-closed.ts", space: "transformed" }, // area/density/smooth-ribbon bands
-  { file: "geometry-boxplot-body-layout.ts", space: "transformed" }, // stat_boxplot aggregates
-  { file: "geometry-boxplot-outliers.ts", space: "transformed" },
+  { file: "geometry-boxplot-body.ts", space: "transformed" }, // stat_boxplot aggregates
+  { file: "geometry-boxplot.ts", space: "transformed" }, // outlier y in scale-space
   { file: "geometry-segments-annotation.ts", space: "semantic" }, // xintercept/yintercept are source values
 ] as const;
 
