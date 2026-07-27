@@ -27,11 +27,12 @@ export function colorBinding(
   if ("field" in channel) {
     out.field = checkField(channel, channelName, layerIndex, table, warnings);
   } else if ("stat" in channel) {
-    // after_stat columns (e.g. density_2d_filled fill → level; #802 phase 2).
-    // Only the density_2d frame resolves these into colour values, so warn
-    // rather than drop the mapping in silence (#915). This stays a warning,
-    // not a PipelineError as on style channels, because the layer still
-    // renders and after_stat colour is a mapping we may yet support.
+    // after_stat columns (e.g. density_2d_filled fill → level; #802 phase 2;
+    // bin_hex fill → count; #800). Only frames that resolve after_stat into
+    // colour values honor these; warn rather than drop the mapping in silence
+    // (#915). This stays a warning, not a PipelineError as on style channels,
+    // because the layer still renders and after_stat colour is a mapping we
+    // may yet support for more stats.
     if (!(STAT_COLOR_COLUMNS[stat] ?? []).includes(channel.stat)) {
       warnings.push({
         code: "stat-channel-unsupported",

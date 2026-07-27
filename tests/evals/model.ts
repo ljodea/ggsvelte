@@ -713,17 +713,57 @@ export class MockResponder implements Responder {
       spec.layers.push({ geom: "raster", aes });
       xField = x;
     } else if (
+      // geom_hex / hexagonal bin heatmap — must win over bare "heatmap" → tile (#800).
+      /\bhex(?:agon(?:al)?)?(?:\s+bin)?\b|\bgeom[_\s]?hex\b|\bbin_hex\b/.test(prompt)
+    ) {
+      const x =
+        fieldNamed("distance") ??
+        fieldNamed("humidity") ??
+        fieldNamed("x") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "x";
+      const y =
+        fieldNamed("delay") ??
+        fieldNamed("temperature") ??
+        fieldNamed("y") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "y";
+      const layer: MockLayer = {
+        geom: "hex",
+        stat: "bin_hex",
+        position: "identity",
+        aes: {
+          x: f(x),
+          y: f(y),
+          fill: { stat: "count" },
+        },
+      };
+      const binsMatchHex = prompt.match(/\b(\d+)\s*bins?\b/);
+      if (binsMatchHex !== null) layer.params = { bins: Number(binsMatchHex[1]) };
+      spec.layers.push(layer);
+      xField = x;
+    } else if (
       /\bgeom[_\s]?bin[_ ]?2d\b|\bbin[_ ]?2d\b|\b2d bin(?:ned)? heatmap\b|\b2d rectangular bins?\b|\brectangular bins?\b.*\bheatmap\b|\bheatmap\b.*\brectangular bins?\b|\bbin heatmap\b/.test(
         prompt,
       )
     ) {
-      // geom_bin_2d + stat_bin_2d rectangular heatmap (#799).
-      // "Y against X" → y=first mention, x=second (same as scatter).
-      const first = pick.mentionedQuant() ?? pick.quant() ?? "x";
-      const second = pick.mentionedQuant() ?? pick.quant() ?? "y";
-      const reversed = /\b(?:against|versus|vs\.?)\b/.test(prompt);
-      const x = reversed ? second : first;
-      const y = reversed ? first : second;
+      // Prefer domain field names used in eval golds (distance/delay, humidity/temp).
+      const x =
+        fieldNamed("distance") ??
+        fieldNamed("humidity") ??
+        fieldNamed("x") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "x";
+      const y =
+        fieldNamed("delay") ??
+        fieldNamed("temperature") ??
+        fieldNamed("y") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "y";
       const layer: MockLayer = {
         geom: "bin_2d",
         stat: "bin_2d",

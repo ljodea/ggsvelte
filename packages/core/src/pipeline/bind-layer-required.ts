@@ -59,6 +59,7 @@ export function assertRequiredChannels(input: {
     geom === "boxplot" ||
     geom === "tile" ||
     geom === "raster" ||
+    geom === "hex" ||
     geom === "density_2d" ||
     geom === "density_2d_filled" ||
     geom === "bin_2d"

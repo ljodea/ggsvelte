@@ -282,6 +282,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "hex/basic",
+    title: "Hexagonal bin heatmap",
+    compatibility: {
+      supported: false,
+      reason:
+        "This example is larger than the 12 KiB share limit. Open a smaller example or sample.",
+    },
+  },
+  {
     id: "histogram/basic",
     title: "Histogram",
     compatibility: {

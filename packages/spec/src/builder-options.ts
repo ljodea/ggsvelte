@@ -20,6 +20,7 @@ import type {
   PointPosition,
   PositionParams,
   RasterParams,
+  HexParams,
   RectParams,
   RenderBackend,
   RuleParams,
@@ -195,6 +196,12 @@ export interface GeomBin2dOptions extends Bin2dParams, GeomDataOption {
 
 /** Raster-layer sugar options: params plus optional layer-level aes. */
 export interface GeomRasterOptions extends RasterParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Hex bin heatmap sugar options. */
+export interface GeomHexOptions extends HexParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

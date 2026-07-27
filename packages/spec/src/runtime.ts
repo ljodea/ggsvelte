@@ -39,6 +39,7 @@ import type {
   PointLayer,
   PortableSpec,
   RasterLayer,
+  HexLayer,
   RectLayer,
   RibbonLayer,
   SegmentLayer,
@@ -111,6 +112,7 @@ export interface RuntimeRectLayer extends WithRuntimeAes<RectLayer> {}
 export interface RuntimeTileLayer extends WithRuntimeAes<TileLayer> {}
 export interface RuntimeBin2dLayer extends WithRuntimeAes<Bin2dLayer> {}
 export interface RuntimeRasterLayer extends WithRuntimeAes<RasterLayer> {}
+export interface RuntimeHexLayer extends WithRuntimeAes<HexLayer> {}
 export interface RuntimeContourLayer extends WithRuntimeAes<ContourLayer> {}
 export interface RuntimeDensity2dLayer extends WithRuntimeAes<Density2dLayer> {}
 export interface RuntimeDensity2dFilledLayer extends WithRuntimeAes<Density2dFilledLayer> {}
@@ -155,6 +157,7 @@ export type RuntimeLayerSpec =
   | RuntimeTileLayer
   | RuntimeBin2dLayer
   | RuntimeRasterLayer
+  | RuntimeHexLayer
   | RuntimeContourLayer
   | RuntimeDensity2dLayer
   | RuntimeDensity2dFilledLayer

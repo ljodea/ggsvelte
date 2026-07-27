@@ -196,6 +196,14 @@ export const PIPELINE_WARNING_CATALOG = {
   "function-fun-unknown": {
     summary: "geom/stat function named an unknown params.fun registry function.",
   },
+  "hex-band-scale": {
+    summary:
+      "geom_hex needs continuous x and y scales for hexagonal binning; the layer is skipped on band axes.",
+  },
+  "hex-missing-size": {
+    summary:
+      "geom_hex is missing per-cell width/height from bin_hex (identity or incomplete frame); the layer is skipped.",
+  },
 } as const satisfies Record<string, { summary: string }>;
 
 export type PipelineWarningCode = keyof typeof PIPELINE_WARNING_CATALOG;

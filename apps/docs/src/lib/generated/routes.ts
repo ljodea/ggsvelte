@@ -2282,8 +2282,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-780",
-        title: "experimental (780)",
+        id: "experimental-786",
+        title: "experimental (786)",
         level: 3,
       },
       {
@@ -2322,8 +2322,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-510",
-        title: "experimental (510)",
+        id: "experimental-511",
+        title: "experimental (511)",
         level: 3,
       },
       {
@@ -2802,6 +2802,16 @@ export const DOCS_ROUTES = [
     title: "Frequency polygon — ggsvelte gallery",
     description: "Frequency polygon",
     canonicalPath: "/examples/freqpoly/basic",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/hex/basic",
+    title: "Hexagonal bin heatmap — ggsvelte gallery",
+    description: "Hexagonal bin heatmap",
+    canonicalPath: "/examples/hex/basic",
     kind: "page",
     index: true,
     sitemap: true,

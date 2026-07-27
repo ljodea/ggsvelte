@@ -21,6 +21,7 @@ import { ribbonBatches } from "./geometry-ribbon.js";
 import { finiteSegmentBatch } from "./geometry-segment-finite.js";
 import { ablineBatch } from "./geometry-abline.js";
 import { curveBatch } from "./geometry-curve.js";
+import { hexBatch } from "./geometry-hex.js";
 import { rugBatch } from "./geometry-rug.js";
 
 function single(batch: GeometryBatch | null): GeometryBatch[] {
@@ -104,6 +105,8 @@ export function dispatchGeometryBatch(
       return boxplotBatches(frame, fx, fill, styles, warnings);
     case "errorbar":
       return single(errorbarBatch(frame, fx, color, styles, warnings));
+    case "hex":
+      return single(hexBatch(frame, fx, fill, color, styles, warnings));
     case "map":
       // Fortified regions → closed filled paths (ggplot2 geom_map; #808).
       return single(polygonBatch(frame, fx, color, fill, styles, warnings));

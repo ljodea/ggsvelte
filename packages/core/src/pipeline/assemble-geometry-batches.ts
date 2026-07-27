@@ -64,6 +64,9 @@ export function buildGeometryBatches(input: {
         geom === "quantile" ||
         geom === "ribbon" ||
         geom === "map" ||
+        // Closed hex paths: project once in projectPathBatch (not via projected
+        // panel scales), same as density_2d_filled / map (#800).
+        geom === "hex" ||
         (geom === "sf" && frame.sf?.kind !== "point");
       const built = buildBatch(
         frame,

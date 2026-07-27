@@ -13,7 +13,8 @@ export interface ColorBinding {
   field: string | null;
   /**
    * Stat-generated column mapped with { stat } (e.g. after_stat level for
-   * density_2d_filled fill; #802 phase 2). Optional for fixture ergonomics.
+   * density_2d_filled fill; #802 phase 2; after_stat count for bin_hex; #800).
+   * Optional for fixture ergonomics.
    */
   statColumn?: string | null;
   /** Literal (non-scaled) constant, if any. */
