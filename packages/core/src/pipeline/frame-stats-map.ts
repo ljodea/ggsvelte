@@ -4,6 +4,9 @@
  * Values table (layer data) carries map_id + styles (fill/color/...).
  * Map table (params.map) carries coordinates (long/lat or x/y) + join key
  * (params.mapId default "region", then "id") and optional multipoly `group`.
+ *
+ * Fortified map table + byKey index are memoized per LayerBinding for the run
+ * so faceted panels do not rebuild the map join (#910).
  */
 import type { DataRef, PortableSpec } from "@ggsvelte/spec";
 
@@ -15,6 +18,19 @@ import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { PipelineError } from "./types.js";
 
 type Datasets = PortableSpec["datasets"];
+
+/** Fortified map join index shared across facet panels for one map layer. */
+export type MapJoinIndex = {
+  readonly mapX: readonly CellValue[];
+  readonly mapY: readonly CellValue[];
+  readonly mapGroups: readonly CellValue[] | null;
+  readonly byKey: ReadonlyMap<string, readonly number[]>;
+  /** Emit map-region-missing at most once per layer per run. */
+  missingWarned: boolean;
+};
+
+/** Run-scoped cache: LayerBinding lives for one pipeline run only. */
+const mapJoinByBinding = new WeakMap<LayerBinding, MapJoinIndex>();
 
 function tableFromDataRef(ref: DataRef, datasets: Datasets | undefined, path: string): ColumnTable {
   if ("values" in ref) return ColumnTable.fromRows(ref.values);
@@ -73,13 +89,17 @@ function styleColumn(
   return valueRows.map((row) => col[row]!);
 }
 
-export function buildMapFrame(
+/**
+ * Resolve (or build once) the fortified map table + join index for a layer.
+ * Exported for unit tests that assert once-per-binding memoization (#910).
+ */
+export function resolveMapJoinIndex(
   binding: LayerBinding,
-  table: ColumnTable,
-  groups: readonly number[],
-  warnings: PipelineWarning[],
-  datasets?: Datasets,
-): LayerFrame {
+  datasets: Datasets | undefined,
+): MapJoinIndex {
+  const cached = mapJoinByBinding.get(binding);
+  if (cached !== undefined) return cached;
+
   const { layer, index } = binding;
   const params = (layer.params ?? {}) as {
     map?: DataRef;
@@ -90,14 +110,6 @@ export function buildMapFrame(
       "map-data-required",
       `/layers/${index}/params/map`,
       "geom_map requires params.map (a DataRef: { values }, { columns }, or { name }).",
-    );
-  }
-  const mapIdField = binding.mapIdField;
-  if (mapIdField === null) {
-    throw new PipelineError(
-      "missing-channel",
-      `/layers/${index}/aes/map_id`,
-      'The map geom requires a "map_id" channel joining value rows to the map.',
     );
   }
 
@@ -120,6 +132,37 @@ export function buildMapFrame(
     }
     list.push(i);
   }
+
+  const joinIndex: MapJoinIndex = {
+    mapX,
+    mapY,
+    mapGroups,
+    byKey,
+    missingWarned: false,
+  };
+  mapJoinByBinding.set(binding, joinIndex);
+  return joinIndex;
+}
+
+export function buildMapFrame(
+  binding: LayerBinding,
+  table: ColumnTable,
+  groups: readonly number[],
+  warnings: PipelineWarning[],
+  datasets?: Datasets,
+): LayerFrame {
+  const { index } = binding;
+  const mapIdField = binding.mapIdField;
+  if (mapIdField === null) {
+    throw new PipelineError(
+      "missing-channel",
+      `/layers/${index}/aes/map_id`,
+      'The map geom requires a "map_id" channel joining value rows to the map.',
+    );
+  }
+
+  const join = resolveMapJoinIndex(binding, datasets);
+  const { mapX, mapY, mapGroups, byKey } = join;
 
   const valueIds = table.column(mapIdField);
   const outX: number[] = [];
@@ -171,7 +214,8 @@ export function buildMapFrame(
     }
   }
 
-  if (missing > 0) {
+  if (missing > 0 && !join.missingWarned) {
+    join.missingWarned = true;
     warnings.push({
       code: "map-region-missing",
       message: `Layer ${index} (map): ${missing} value row(s) had no matching map region and were dropped.`,
