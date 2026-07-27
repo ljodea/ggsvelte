@@ -276,6 +276,11 @@
       "sourceSha256": "b89b32026eb42a40b5f7fac934f9e8088fe615eddbdba19bbe5ee81697f40d51",
       "pngSha256": "0f22d2ac20a70d65c59e33fe5486c1a5856cb55e8fc105c24952ce7784091102"
     },
+    "point/steps-binned": {
+      "filename": "point-steps-binned-light.png",
+      "sourceSha256": "bc1c283de8f80a022316b04d4828a9657b20aef863a909295c2e5ced52289e9f",
+      "pngSha256": "3097ea59517b54c748254fe129f95f52dffab95ecfcfc4338435574f5e9315a0"
+    },
     "point/style-scales": {
       "filename": "point-style-scales-light.png",
       "sourceSha256": "81d4be7d9dca5cc1c45558da6a0b3ca303d810443f407648bbf831bedc4cde9f",

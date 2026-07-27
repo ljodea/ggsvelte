@@ -219,6 +219,12 @@ export { default as ScaleColorDiscrete } from "./scale/ScaleColorDiscrete.svelte
 /** @lifecycle stable-intent */
 export { default as ScaleColorBinned } from "./scale/ScaleColorBinned.svelte";
 /** @lifecycle stable-intent */
+export { default as ScaleColorSteps } from "./scale/ScaleColorSteps.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorSteps2 } from "./scale/ScaleColorSteps2.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorStepsn } from "./scale/ScaleColorStepsn.svelte";
+/** @lifecycle stable-intent */
 export { default as ScaleColorGradient } from "./scale/ScaleColorGradient.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColorGradient2 } from "./scale/ScaleColorGradient2.svelte";
@@ -248,6 +254,12 @@ export { default as ScaleFillContinuous } from "./scale/ScaleFillContinuous.svel
 export { default as ScaleFillDiscrete } from "./scale/ScaleFillDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleFillBinned } from "./scale/ScaleFillBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillSteps } from "./scale/ScaleFillSteps.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillSteps2 } from "./scale/ScaleFillSteps2.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillStepsn } from "./scale/ScaleFillStepsn.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleFillGradient } from "./scale/ScaleFillGradient.svelte";
 /** @lifecycle stable-intent */
@@ -327,6 +339,12 @@ export { default as ScaleAlphaManual } from "./scale/ScaleAlphaManual.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleAlphaIdentity } from "./scale/ScaleAlphaIdentity.svelte";
 /** @lifecycle stable-intent */
+export { default as ScaleSizeArea } from "./scale/ScaleSizeArea.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleSizeBinnedArea } from "./scale/ScaleSizeBinnedArea.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleRadius } from "./scale/ScaleRadius.svelte";
+/** @lifecycle stable-intent */
 export { default as ScaleShapeDiscrete } from "./scale/ScaleShapeDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleShapeBinned } from "./scale/ScaleShapeBinned.svelte";
@@ -348,6 +366,12 @@ export { default as ScaleColourContinuous } from "./scale/ScaleColorContinuous.s
 export { default as ScaleColourDiscrete } from "./scale/ScaleColorDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourBinned } from "./scale/ScaleColorBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourSteps } from "./scale/ScaleColorSteps.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourSteps2 } from "./scale/ScaleColorSteps2.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourStepsn } from "./scale/ScaleColorStepsn.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourGradient } from "./scale/ScaleColorGradient.svelte";
 /** @lifecycle stable-intent */
@@ -378,6 +402,8 @@ export { default as ScaleColourViridisC } from "./scale/ScaleColorViridisC.svelt
 export { default as ScaleColourViridisD } from "./scale/ScaleColorViridisD.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourViridisB } from "./scale/ScaleColorViridisB.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleSizeOrdinal } from "./scale/ScaleSizeDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleLinewidthOrdinal } from "./scale/ScaleLinewidthDiscrete.svelte";
 /** @lifecycle stable-intent */
