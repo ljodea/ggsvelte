@@ -2262,8 +2262,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-689",
-        title: "experimental (689)",
+        id: "experimental-695",
+        title: "experimental (695)",
         level: 3,
       },
       {
@@ -2307,8 +2307,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "stable-intent-141",
-        title: "stable-intent (141)",
+        id: "stable-intent-142",
+        title: "stable-intent (142)",
         level: 3,
       },
     ],
@@ -2892,6 +2892,16 @@ export const DOCS_ROUTES = [
     title: "Path trajectory (data order) — ggsvelte gallery",
     description: "Path trajectory (data order)",
     canonicalPath: "/examples/path/trajectory",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/point/abline-identity",
+    title: "Abline identity reference — ggsvelte gallery",
+    description: "Abline identity reference",
+    canonicalPath: "/examples/point/abline-identity",
     kind: "page",
     index: true,
     sitemap: true,

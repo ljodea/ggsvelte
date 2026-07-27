@@ -16,6 +16,22 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "AblineLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AblineLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AblineLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "AblineParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "Aes": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -498,6 +514,10 @@
         },
         "GREY_PALETTE_10": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomAblineOptions": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "GeomAreaOptions": {
@@ -1109,6 +1129,10 @@
           "lifecycle": "experimental"
         },
         "RuleParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeAblineLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4262,6 +4286,10 @@
           "lifecycle": "experimental"
         },
         "GGPlot": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "GeomAbline": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },

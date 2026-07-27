@@ -27,6 +27,7 @@ import type {
   VlineParams,
   RugParams,
   SegmentParams,
+  AblineParams,
   QuantileParams,
   CurveParams,
   ContourParams,
@@ -285,6 +286,12 @@ export interface GeomBlankOptions extends GeomDataOption {
 
 /** Spoke-layer sugar: origin + angle + radius (#810). */
 export interface GeomSpokeOptions extends SpokeParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Abline-layer sugar options: slope/intercept annotation params. */
+export interface GeomAblineOptions extends AblineParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

@@ -35,6 +35,7 @@ import type {
   VlineParams,
   RugParams,
   SegmentParams,
+  AblineParams,
   CurveParams,
   MapParams,
   BlankParams,
@@ -313,6 +314,13 @@ export interface SegmentLayerInput extends LayerInputBase {
   params?: SegmentParams;
 }
 
+export interface AblineLayerInput extends LayerInputBase {
+  geom: "abline";
+  stat?: "identity";
+  position?: "identity";
+  params?: AblineParams;
+}
+
 export interface CurveLayerInput extends LayerInputBase {
   geom: "curve";
   stat?: "identity";
@@ -395,6 +403,7 @@ export type LayerInput =
   | Density2dFilledLayerInput
   | DotplotLayerInput
   | ErrorbarLayerInput
+  | AblineLayerInput
   | RectLayerInput
   | TileLayerInput
   | RasterLayerInput

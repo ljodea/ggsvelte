@@ -19,6 +19,7 @@ import { boxplotBatches, errorbarBatch, smoothBatches } from "./geometry-composi
 import { edgeRectsBatch, rasterRectsBatch, tileRectsBatch } from "./geometry-edge-rects.js";
 import { ribbonBatches } from "./geometry-ribbon.js";
 import { finiteSegmentBatch } from "./geometry-segment-finite.js";
+import { ablineBatch } from "./geometry-abline.js";
 import { curveBatch } from "./geometry-curve.js";
 import { rugBatch } from "./geometry-rug.js";
 
@@ -82,6 +83,8 @@ export function dispatchGeometryBatch(
     case "segment":
     case "spoke":
       return single(finiteSegmentBatch(frame, fx, color, styles, warnings));
+    case "abline":
+      return single(ablineBatch(frame, fx, color, styles, warnings));
     case "curve":
       return single(curveBatch(frame, fx, color, styles, warnings));
     case "rug":

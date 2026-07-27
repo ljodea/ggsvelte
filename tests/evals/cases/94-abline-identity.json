@@ -1,0 +1,42 @@
+{
+  "id": "94-abline-identity",
+  "kind": "chart",
+  "prompt": "Scatter observed against predicted and overlay the y = x identity line using geom_abline.",
+  "dataProfile": {
+    "fields": [
+      { "name": "predicted", "type": "quantitative" },
+      { "name": "observed", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "predicted": 1, "observed": 1.2 },
+      { "predicted": 2, "observed": 1.8 },
+      { "predicted": 3, "observed": 3.3 },
+      { "predicted": 4, "observed": 3.9 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "predicted" },
+          "y": { "field": "observed" }
+        }
+      },
+      {
+        "geom": "abline",
+        "stat": "identity",
+        "position": "identity"
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Canonical gold for geom_abline defaults: slope 1, intercept 0 (#790)."
+}

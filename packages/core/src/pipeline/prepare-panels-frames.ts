@@ -339,7 +339,7 @@ export function buildPanelFrames(input: {
       // array (can be huge under facets) when there is no lineage to resolve.
       // Still mark lineage finalized (empty) so panelFrames is FinalizedLayerFrame[].
       let finalized: FinalizedLayerFrame;
-      if (bindings[index]!.ruleForm === "annotation") {
+      if (bindings[index]!.ruleForm === "annotation" || bindings[index]!.layer.geom === "abline") {
         // Rowless — empty lineage map (do not retain huge panel source-row arrays).
         frame.inputSourceRows = [];
         finalized = frame as FinalizedLayerFrame;
