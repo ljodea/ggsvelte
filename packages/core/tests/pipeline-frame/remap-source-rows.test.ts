@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from "bun:test";
 
-import { bindLayer } from "../../src/pipeline/bind.ts";
+import { bindLayer } from "../../src/pipeline/bind-layer.ts";
 import { buildFrame } from "../../src/pipeline/frame.ts";
 import { finalizeFrameSourceRows } from "../../src/pipeline/source-row-lineage.ts";
 import { NO_ROW } from "../../src/pipeline/types.ts";

@@ -6,7 +6,7 @@ import { describe, expect, it } from "bun:test";
 
 import { aes, gg } from "@ggsvelte/spec";
 
-import { bindLayer } from "../src/pipeline/bind.ts";
+import { bindLayer } from "../src/pipeline/bind-layer.ts";
 import { buildFrame } from "../src/pipeline/frame.ts";
 import { barSlotKeys } from "../src/pipeline/position-bar.ts";
 import { applyPosition } from "../src/pipeline/position.ts";

@@ -6,7 +6,7 @@ import { encodeKey } from "../scales/state.js";
 import { scaleTransform } from "../scales/transform.js";
 
 import { transformedZeroBaseline } from "./position-baseline.js";
-import { isBarLike } from "./scale-training.js";
+import { isBarLike } from "./scale-axis-train.js";
 import type { LayerFrame } from "./types.js";
 
 /** Per-row slot keys: band categories, or bin centers for binned bars.

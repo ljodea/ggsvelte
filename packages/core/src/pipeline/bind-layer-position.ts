@@ -5,7 +5,7 @@ import type { Aes, LayerSpec } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
-import { checkField } from "./bind-layer-helpers.js";
+import { checkField } from "./bind-layer-check-field.js";
 import {
   assertRequiredChannels,
   resolveRuleForm,

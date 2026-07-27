@@ -6,16 +6,16 @@ import type { GeometryBatch } from "../scene.js";
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import type { ResolvedStyleScales } from "./geometry-style.js";
-import {
-  areaBatch,
-  glyphsBatch,
-  lineBatch,
-  pointsBatch,
-  rectsBatch,
-  segmentsBatch,
-} from "./geometry-marks.js";
+import { pointsBatch } from "./geometry-points.js";
+import { lineBatch } from "./geometry-paths-line.js";
+import { areaBatch } from "./geometry-paths-area.js";
+import { rectsBatch } from "./geometry-rects.js";
+import { segmentsBatch } from "./geometry-segments.js";
+import { glyphsBatch } from "./geometry-glyphs.js";
 import { polygonBatch } from "./geometry-paths-polygon.js";
-import { boxplotBatches, errorbarBatch, smoothBatches } from "./geometry-composites.js";
+import { smoothBatches } from "./geometry-smooth.js";
+import { boxplotBatches } from "./geometry-boxplot.js";
+import { errorbarBatch } from "./geometry-errorbar.js";
 import { edgeRectsBatch, rasterRectsBatch, tileRectsBatch } from "./geometry-edge-rects.js";
 import { ribbonBatches } from "./geometry-ribbon.js";
 import { finiteSegmentBatch } from "./geometry-segment-finite.js";

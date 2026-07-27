@@ -1,14 +1,46 @@
 /**
  * Scene assembly from panel placements, axes, and legends.
  */
-import type { Scene, SceneTick } from "../scene.js";
+import type { PanelCoordProjector } from "../coord-projector.js";
+import type { TextMeasurer } from "../layout/measure.js";
+import type { GeometryBatch, Scene, SceneLegend, SceneTick } from "../scene.js";
+import type { ThemeTokens } from "../theme.js";
+import type { PositionScale } from "../scales/train.js";
 
-import type { AssembleSceneInput } from "./assemble-scene-input.js";
+import type { FacetPanelDef } from "./facets.js";
+import type { AxisGuideAppearance } from "./guide-config.js";
+import type { PanelPlacement } from "./panel-layout.js";
 import { placeSceneLegends } from "./assemble-scene-legends.js";
 import { LEGEND_EDGE_PAD } from "./layout-helpers.js";
 import { assembleScenePanels } from "./assemble-scene-panels.js";
 
-export type { AssembleSceneInput } from "./assemble-scene-input.js";
+export interface AssembleSceneInput {
+  width: number;
+  height: number;
+  placements: readonly PanelPlacement[];
+  facetPanels: readonly FacetPanelDef[];
+  strip: import("./facets-types.js").FacetStripConfig;
+  stripBand: number;
+  displayScales: (p: number) => { h: PositionScale; v: PositionScale };
+  hTitle: string;
+  vTitle: string;
+  hGuide: AxisGuideAppearance;
+  vGuide: AxisGuideAppearance;
+  coordProjectors: readonly PanelCoordProjector[];
+  measureText?: TextMeasurer | undefined;
+  axisTextSize: number;
+  hMinorBreaks?: readonly number[] | undefined;
+  vMinorBreaks?: readonly number[] | undefined;
+  batches: GeometryBatch[];
+  legendBlock: { legends: SceneLegend[]; width: number; bottomHeight: number };
+  topBand: number;
+  bottomBand: number;
+  degraded: boolean;
+  theme: ThemeTokens;
+  title: string;
+  subtitle: string;
+  caption: string;
+}
 
 function presentTicks(ticks: SceneTick[], guide: AssembleSceneInput["hGuide"]): SceneTick[] {
   return ticks.map((tick) => {

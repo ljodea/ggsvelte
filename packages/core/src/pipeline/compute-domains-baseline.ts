@@ -3,7 +3,8 @@
  */
 import type { FacetPanelDef } from "./facets.js";
 import { scaleDomainSnapshot } from "./layout-helpers.js";
-import { collectAxisInputs, trainAxis } from "./scale-training.js";
+import { collectAxisInputs } from "./scale-axis-collect.js";
+import { trainAxis } from "./scale-axis-train.js";
 import type { Advisory, LayerFrame, ScaleDomainSnapshot } from "./types.js";
 import type { RunOptions } from "./types.js";
 

@@ -75,7 +75,7 @@ describe("collectPointPositions", () => {
 describe("flipDisplayTitles / flipDisplayFreeFlags", () => {
   it("swaps titles and free flags under coord flip", async () => {
     const { flipDisplayTitles, flipDisplayFreeFlags } =
-      await import("../../src/pipeline/panel-layout-chrome-display-flip.ts");
+      await import("../../src/pipeline/panel-layout-chrome.ts");
     expect(flipDisplayTitles(true, "X", "Y")).toEqual({ hTitle: "Y", vTitle: "X" });
     expect(flipDisplayTitles(false, "X", "Y")).toEqual({ hTitle: "X", vTitle: "Y" });
     expect(flipDisplayFreeFlags(true, true, false)).toEqual({ freeH: false, freeV: true });

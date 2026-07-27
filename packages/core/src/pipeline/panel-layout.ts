@@ -5,6 +5,7 @@
 import type { PortableSpec, TemporalKind } from "@ggsvelte/spec";
 
 import type { FixedAspectCoordSpec } from "./panel-layout-fixed.js";
+import { planBasicAxis } from "../layout/temporal-guide.js";
 
 import {
   assertLegendBlockFitsPlacedArea,
@@ -20,15 +21,74 @@ import { DEFAULT_FACET_STRIP } from "./facets.js";
 import { measureFacetStripBand } from "./facets-strip.js";
 import { LEGEND_EDGE_PAD } from "./layout-helpers.js";
 import type { AxisGuideAppearance } from "./guide-config.js";
-import { resolvePanelLayoutChrome } from "./panel-layout-chrome.js";
+import { resolvePanelLayoutChrome, type PanelLayoutChrome } from "./panel-layout-chrome.js";
 import { containedRightLegendY } from "./assemble-scene-legends.js";
 import { applyFixedAspectLayout } from "./panel-layout-fixed.js";
 import { buildPanelPlacements } from "./panel-layout-placements.js";
-import { panelLayoutResultFromChrome } from "./panel-layout-result.js";
-import type { PanelLayoutResult } from "./panel-layout-types.js";
+import type { PanelLayoutResult, PanelPlacement } from "./panel-layout-types.js";
 import { PipelineError, type LayerFrame, type PipelineWarning, type RunOptions } from "./types.js";
 
 export type { PanelPlacement, PanelLayoutResult } from "./panel-layout-types.js";
+
+function panelLayoutResultFromChrome(
+  chrome: PanelLayoutChrome,
+  placements: PanelPlacement[],
+  strip: import("./facets-types.js").FacetStripConfig,
+  stripBand: number,
+  degraded = false,
+): PanelLayoutResult {
+  const guidePlans = placements.flatMap((placement, panelIndex) => {
+    const { h, v } = chrome.displayScales(panelIndex);
+    const hAesthetic = chrome.flip ? "y" : "x";
+    const vAesthetic = chrome.flip ? "x" : "y";
+    return [
+      ...(placement.showAxisX
+        ? [
+            placement.hGuidePlan ??
+              planBasicAxis({
+                aesthetic: hAesthetic,
+                panelIndex,
+                scale: h,
+                ticks: placement.ticksH,
+                config: chrome.scalesConfig[hAesthetic],
+              }),
+          ]
+        : []),
+      ...(placement.showAxisY
+        ? [
+            placement.vGuidePlan ??
+              planBasicAxis({
+                aesthetic: vAesthetic,
+                panelIndex,
+                scale: v,
+                ticks: placement.ticksV,
+                config: chrome.scalesConfig[vAesthetic],
+              }),
+          ]
+        : []),
+    ];
+  });
+  return {
+    placements,
+    title: chrome.title,
+    subtitle: chrome.subtitle,
+    caption: chrome.caption,
+    hTitle: chrome.hTitle,
+    vTitle: chrome.vTitle,
+    xTitle: chrome.xTitle,
+    yTitle: chrome.yTitle,
+    topBand: chrome.topBand,
+    bottomBand: chrome.bottomBand,
+    formatX: chrome.formatX,
+    formatY: chrome.formatY,
+    displayScales: chrome.displayScales,
+    legendBlock: chrome.legendBlock,
+    guidePlans: Object.freeze(guidePlans),
+    strip,
+    stripBand,
+    degraded,
+  };
+}
 
 export function computePanelLayout(input: {
   flip: boolean;

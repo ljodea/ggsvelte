@@ -4,7 +4,8 @@
 import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 
-import { collectAxisInputs, trainAxis } from "../../src/pipeline/scale-training.ts";
+import { collectAxisInputs } from "../../src/pipeline/scale-axis-collect.ts";
+import { trainAxis } from "../../src/pipeline/scale-axis-train.ts";
 import { continuousDomainOf } from "../../src/pipeline/scale-axis-domain.ts";
 import { PipelineError } from "../../src/pipeline.ts";
 import { ColumnTable } from "../../src/table.ts";

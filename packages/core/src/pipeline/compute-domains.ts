@@ -6,7 +6,7 @@ import type { PositionScale } from "../scales/train.js";
 import { computeTrainedBaselineDomains } from "./compute-domains-baseline.js";
 import type { FacetPanelDef } from "./facets.js";
 import { scaleDomainSnapshot } from "./layout-helpers.js";
-import { collectAxisInputs } from "./scale-training.js";
+import { collectAxisInputs } from "./scale-axis-collect.js";
 import type { LayerFrame, ScaleDomainSnapshot } from "./types.js";
 import type { RunOptions } from "./types.js";
 

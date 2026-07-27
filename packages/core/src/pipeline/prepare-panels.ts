@@ -5,7 +5,7 @@ import type { PortableSpec } from "@ggsvelte/spec";
 
 import { ColumnTable, type CellValue } from "../table.js";
 
-import { bindLayer } from "./bind.js";
+import { bindLayer } from "./bind-layer.js";
 import { bindLayerTable, bindPlotData } from "./bind-data.js";
 import { configureStyleBindings } from "./bind-layer-style-config.js";
 import type { FacetLayout } from "./facets.js";

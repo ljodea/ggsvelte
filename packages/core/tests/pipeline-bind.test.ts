@@ -6,7 +6,8 @@ import { describe, expect, it } from "bun:test";
 
 import { aes, gg } from "@ggsvelte/spec";
 
-import { bindData, bindLayer } from "../src/pipeline/bind.ts";
+import { bindData } from "../src/pipeline/bind-data.ts";
+import { bindLayer } from "../src/pipeline/bind-layer.ts";
 import { PipelineError, runPipeline } from "../src/pipeline.ts";
 import { ColumnTable } from "../src/table.ts";
 

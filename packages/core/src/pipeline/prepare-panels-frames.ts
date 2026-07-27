@@ -5,7 +5,7 @@ import { configuredColorScaleType, type PortableSpec } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
-import { bindLayer } from "./bind.js";
+import { bindLayer } from "./bind-layer.js";
 import { configureStyleBindings } from "./bind-layer-style-config.js";
 import type { FacetPanelDef } from "./facets.js";
 import { styleBinExtent } from "./frame-group-columns.js";

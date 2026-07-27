@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from "bun:test";
 
-import { collectAxisInputs } from "../../src/pipeline/scale-training.ts";
+import { collectAxisInputs } from "../../src/pipeline/scale-axis-collect.ts";
 import { ColumnTable } from "../../src/table.ts";
 import type { Advisory, LayerBinding, LayerFrame } from "../../src/pipeline/types.ts";
 import { emptyExtras } from "./fixtures.ts";

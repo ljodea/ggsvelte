@@ -5,7 +5,8 @@ import type { Aes, LayerSpec } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
-import { checkField, colorBinding } from "./bind-layer-helpers.js";
+import { checkField } from "./bind-layer-check-field.js";
+import { colorBinding } from "./bind-layer-color-binding.js";
 import { styleBinding } from "./bind-layer-style-binding.js";
 import { applyColorOnFillGeomWarning } from "./bind-layer-validate.js";
 import type { ColorBinding, PipelineWarning, StyleBinding } from "./types.js";
