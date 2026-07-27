@@ -40,6 +40,24 @@ describe("geom_abline (#790)", () => {
     expect(ab!.segments.length).toBe(4);
   });
 
+  it("ascends left-to-right in screen space for a positive slope", () => {
+    const model = runPipeline(
+      gg(rows, aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .geomAbline({ slope: 1, intercept: 0 })
+        .spec(),
+      size,
+    );
+    const ab = model.scene.batches
+      .filter((b) => b.kind === "segments")
+      .find((b) => b.layerIndex === 1)!;
+    const [x0, y0, x1, y1] = ab.segments;
+    // Screen y grows downward, so a positive data slope must render with the
+    // right-hand endpoint ABOVE the left-hand one.
+    const [left, right] = x0! <= x1! ? [y0!, y1!] : [y1!, y0!];
+    expect(right).toBeLessThan(left);
+  });
+
   it("renders a stroke line in SVG", () => {
     const svg = renderToSVGString(
       gg(rows, aes({ x: "x", y: "y" }))

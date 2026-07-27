@@ -49,11 +49,13 @@ export function ablineBatch(
   const ny1 = fx.yScale.normalize(dy1);
   if (![nx0, ny0, nx1, ny1].every((v) => Number.isFinite(v))) return null;
 
+  // Screen y grows downward: flip the normalized y like every other geometry
+  // (see geometry-segment-finite.ts), otherwise the line renders mirrored.
   const segments = new Float32Array([
     nx0 * fx.innerWidth,
-    ny0 * fx.innerHeight,
+    fx.innerHeight - ny0 * fx.innerHeight,
     nx1 * fx.innerWidth,
-    ny1 * fx.innerHeight,
+    fx.innerHeight - ny1 * fx.innerHeight,
   ]);
   const rowIndex = new Uint32Array([NO_ROW]);
   const styleRows = new Uint32Array([0]);
