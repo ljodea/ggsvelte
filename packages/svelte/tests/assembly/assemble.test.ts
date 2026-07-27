@@ -286,17 +286,6 @@ describe("mappedChannelField", () => {
 });
 
 describe("isFacetedPlotIntent", () => {
-  it("is true from the raw facet prop before layers assemble (declaration-only children)", () => {
-    // Hosts must treat a raw facet prop as intent even when assembled is still
-    // null — declaration-only children register on a later flush.
-    expect(
-      isFacetedPlotIntent({
-        facet: { rows: "g" },
-        assembled: null,
-      }),
-    ).toBe(true);
-  });
-
   it("is true from assembled.facet when the plot is driven by a portable spec", () => {
     // Spec-based plots put facet on the normalized spec, not a separate prop.
     const assembled = assemblePortableSpec({
@@ -315,7 +304,7 @@ describe("isFacetedPlotIntent", () => {
     ).toBe(true);
   });
 
-  it("is false when neither the prop nor the assembled spec is faceted", () => {
+  it("is false when neither a facet layer nor the assembled spec is faceted", () => {
     const assembled = assemblePortableSpec({
       data: [{ x: 1, y: 2 }],
       layers: [{ geom: "point", aes: { x: "x", y: "y" } }],

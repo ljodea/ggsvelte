@@ -4,11 +4,7 @@
    * Mounts GeomPoint + the keyed-MERGE grammar children under GGPlot and
    * optionally captures the plot registry for registrationCount assertions.
    */
-  import type {
-    GuidesSpec,
-    Labs as LabsSpec,
-    LegendSpec,
-  } from "@ggsvelte/spec";
+  import type { GuidesSpec, LegendSpec } from "@ggsvelte/spec";
 
   import type { PlotDiagnostic } from "../../src/lib/diagnostics/deprecation.js";
   import type { PortableSpec, RenderModel } from "../../src/lib/index.js";
@@ -32,9 +28,6 @@
   import ThemeRegistryCapture from "./ThemeRegistryCapture.svelte";
 
   const {
-    labsProp,
-    guidesProp,
-    legendProp,
     useLabs = false,
     labsTitle,
     labsSubtitle,
@@ -66,9 +59,6 @@
     onrender,
     ondiagnostic,
   }: {
-    labsProp?: LabsSpec;
-    guidesProp?: GuidesSpec;
-    legendProp?: LegendSpec;
     useLabs?: boolean;
     labsTitle?: string;
     labsSubtitle?: string;
@@ -129,9 +119,6 @@
     aes={continuousColor
       ? { x: "x", y: "y", color: "n" }
       : { x: "x", y: "y", color: "c" }}
-    labs={labsProp}
-    guides={guidesProp}
-    legend={legendProp}
     width={480}
     height={320}
     {onrender}

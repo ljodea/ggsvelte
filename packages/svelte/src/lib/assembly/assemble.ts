@@ -100,19 +100,17 @@ export type AssemblePortableSpecInput = {
  * (disable brush zoom / interval select with a diagnostic).
  *
  * True when any of:
- * - the raw `facet` prop is set (covers declaration-only children before layers
- *   register and `assembled` is still null),
  * - a `kind: "facet"` registry plot layer is present (`<FacetWrap/>` / …),
- * - `assembled.facet` is set (covers portable-`spec` plots that embed facet
- *   without a separate prop).
+ * - `assembled.facet` is set (covers portable-`spec` plots that embed facet).
+ *
+ * The raw GGPlot `facet` prop was removed in 0.13.0 (#704); facet intent is
+ * children- or portable-spec-only.
  */
 export function isFacetedPlotIntent(input: {
-  readonly facet?: FacetInput | undefined;
   readonly plotLayers?: readonly { readonly kind: string }[] | undefined;
   readonly assembled: PortableSpec | null;
 }): boolean {
   return (
-    input.facet !== undefined ||
     input.plotLayers?.some((layer) => layer.kind === "facet") === true ||
     input.assembled?.facet !== undefined
   );

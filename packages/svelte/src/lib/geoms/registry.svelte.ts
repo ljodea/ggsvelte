@@ -23,15 +23,9 @@ import { getContext, onDestroy, setContext } from "svelte";
 
 // #785: Layer / MarkLayerDescriptor live in runes-free layers/types.ts so
 // assemble.ts can share the same union without importing this .svelte.ts file.
+// LayerDescriptor alias removed in 0.13.0 (#704) — use MarkLayerDescriptor.
 export type { Layer, MarkLayerDescriptor } from "../layers/types.js";
 import type { Layer, MarkLayerDescriptor } from "../layers/types.js";
-
-/**
- * @deprecated since 0.11.0 — use MarkLayerDescriptor.
- * Kept as a source migration alias only:
- * https://ggsvelte.sh/guide/upgrading#0-10-to-0-11
- */
-export type LayerDescriptor = MarkLayerDescriptor;
 
 let nextId = 0;
 let globalVersion = 0;

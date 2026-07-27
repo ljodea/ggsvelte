@@ -7,18 +7,10 @@ import type { Snippet } from "svelte";
 import type {
   A11yMode,
   AesInput,
-  CoordSpec,
   DataInput,
-  FacetInput,
-  GuidesSpec,
-  Labs,
   LayerInput,
-  LegendSpec,
   PortableSpec,
-  Scales,
   SpecInput,
-  ThemeName,
-  ThemeSpec,
 } from "@ggsvelte/spec";
 import type { CellValue, RenderModel } from "@ggsvelte/core";
 
@@ -48,6 +40,11 @@ type PublicKey<
     ? Extract<Key, PropertyKey>
     : never;
 
+/**
+ * Props for `<GGPlot>`. Grammar pieces (theme, scales, coord, facet, labs,
+ * guides, legend) are declaration-only children — not props (#704 / #659).
+ * Removed from the prop surface in 0.13.0 (deprecated since 0.11.0).
+ */
 export interface GGPlotProps<
   Row extends Record<string, CellValue> = Record<string, CellValue>,
   Identity extends keyof Row | ((row: Row, index: number) => PropertyKey) = keyof Row,
@@ -60,67 +57,6 @@ export interface GGPlotProps<
   aes?: AesInput;
   /** Layers (props-first canonical form). Wins over declaration-only children. */
   layers?: LayerInput[];
-  /**
-   * Facet into small multiples (wrap or rows/cols grid).
-   *
-   * @deprecated since 0.11.0 — compose facets as declaration-only child layers
-   * instead (`<FacetWrap field="g"/>`, `<FacetGrid rows="a" cols="b"/>`,
-   * `<Facet wrap={…}/>`). Removable in 0.13.0.
-   * https://ggsvelte.sh/guide/upgrading#compose-facet-as-a-child-layer
-   */
-  facet?: FacetInput;
-  /**
-   * Coordinate system ("flip" shorthand accepted).
-   *
-   * @deprecated since 0.11.0 — compose the coordinate system as a child layer
-   * instead (`<CoordFlip/>`, `<CoordFixed/>`, `<Coord value={…}/>`, …).
-   * Removable in 0.13.0.
-   * https://ggsvelte.sh/guide/upgrading#compose-coord-as-a-child-layer
-   */
-  coord?: CoordSpec | "flip";
-  /**
-   * Per-scale configuration (types, domains, schemes, breaks, labels).
-   *
-   * @deprecated since 0.11.0 — compose scales as declaration-only child layers
-   * instead (`<ScaleColorDiscrete scheme="colorblind"/>`, `<Scale value={…}/>`,
-   * …). Removable in 0.13.0.
-   * https://ggsvelte.sh/guide/upgrading#compose-scales-as-child-layers
-   */
-  scales?: Scales;
-  /**
-   * Appearance-only guide configuration keyed by aesthetic.
-   *
-   * @deprecated since 0.11.0 — compose guides as declaration-only child layers
-   * instead (`<GuideLegend channel="color" position="bottom"/>`,
-   * `<GuideAxis channel="x"/>`, `<GuideNone channel="size"/>`,
-   * `<Guides value={…}/>`). Removable in 0.13.0.
-   * https://ggsvelte.sh/guide/upgrading#compose-guides-as-child-layers
-   */
-  guides?: GuidesSpec;
-  /**
-   * Legend entry ordering (plot-wide sort enum).
-   *
-   * @deprecated since 0.11.0 — compose legend options as a child layer instead
-   * (`<Legend order="sorted"/>`). Removable in 0.13.0.
-   * https://ggsvelte.sh/guide/upgrading#compose-legend-as-a-child-layer
-   */
-  legend?: LegendSpec;
-  /**
-   * Theme: a registered name or an object with role overrides.
-   *
-   * @deprecated since 0.11.0 — compose the theme as a child layer instead
-   * (`<ThemeDark/>`, `<Theme name="dark"/>`, …). Removable in 0.13.0.
-   * https://ggsvelte.sh/guide/upgrading#compose-the-theme-as-a-child-layer
-   */
-  theme?: ThemeName | ThemeSpec;
-  /**
-   * Titles and axis labels.
-   *
-   * @deprecated since 0.11.0 — compose labels as a declaration-only child layer
-   * instead (`<Labs title="Sales" x="Quarter"/>`). Removable in 0.13.0.
-   * https://ggsvelte.sh/guide/upgrading#compose-labs-as-a-child-layer
-   */
-  labs?: Labs;
   /** Accessibility mode ("force-svg" keeps every layer as SVG marks). */
   a11y?: A11yMode;
   /** Plot width in px. Omitted is container-responsive. */

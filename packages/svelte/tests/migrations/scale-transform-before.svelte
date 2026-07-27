@@ -1,4 +1,5 @@
 <script lang="ts">
+  // @ts-nocheck — historical GGPlot scales prop (removed in 0.13.0)
   import { GeomPoint, GeomSmooth, GGPlot } from "../../src/lib/index.js";
 
   const rows = [

@@ -10,8 +10,8 @@
  * So the duplication is allowed, but it is not allowed to disagree. Guard for
  * #656, which is the first change to make theme load-bearing in examples/**.
  *
- * Theme may be declared either as the deprecated `theme="…"` GGPlot prop or as
- * a declaration-only child (`<ThemeDark />`, `<Theme name="dark" />`, …).
+ * Theme is declared as a declaration-only child (`<ThemeDark />`,
+ * `<Theme name="dark" />`, …). The GGPlot `theme` prop was removed in 0.13.0.
  */
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";

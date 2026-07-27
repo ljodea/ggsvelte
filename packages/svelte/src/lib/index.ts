@@ -179,17 +179,12 @@ export { default as GeomQq } from "./geoms/GeomQq.svelte";
 /** @lifecycle stable-intent */
 export { default as GeomQqLine } from "./geoms/GeomQqLine.svelte";
 export { registerLayer, registerPlotLayer } from "./geoms/registry.svelte.js";
-export type {
-  Layer,
-  LayerDescriptor,
-  LayerRegistry,
-  MarkLayerDescriptor,
-} from "./geoms/registry.svelte.js";
+export type { Layer, LayerRegistry, MarkLayerDescriptor } from "./geoms/registry.svelte.js";
 export { createGeomLayer } from "./geoms/factory.svelte.js";
 export type { GeomProps } from "./geoms/factory.svelte.js";
 
 // Theme children (#659 slice 2) — stable-intent: 1:1 mirror of ThemeSpec /
-// THEME_NAMES; destination for the deprecated `theme` prop (since 0.11.0).
+// THEME_NAMES. The GGPlot `theme` prop was removed in 0.13.0 (#704).
 /** @lifecycle stable-intent */
 export { default as Theme } from "./theme/Theme.svelte";
 /** @lifecycle stable-intent */
