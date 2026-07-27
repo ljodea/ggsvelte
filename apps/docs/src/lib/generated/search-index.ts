@@ -3932,14 +3932,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/svelte"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-470",
+    id: "heading:guide-lifecycle:experimental-469",
     kind: "heading",
-    title: "experimental (470)",
+    title: "experimental (469)",
     summary:
-      "experimental (470) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-470",
+      "experimental (469) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-469",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (470)"],
+    exact: ["experimental (469)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-221",
@@ -3989,6 +3989,26 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/upgrading#manual-color-domain-range-diagnostic-code",
     keywords: ["Upgrade guide", "Release"],
     exact: ["Manual color domain/range diagnostic code"],
+  },
+  {
+    id: "heading:guide-upgrading:0-12-to-0-13",
+    kind: "heading",
+    title: "0.12 to 0.13",
+    summary:
+      "0.12 to 0.13 in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#0-12-to-0-13",
+    keywords: ["Upgrade in five minutes", "Release"],
+    exact: ["0.12 to 0.13"],
+  },
+  {
+    id: "heading:guide-upgrading:grammar-props-removed-from-ggplot",
+    kind: "heading",
+    title: "Grammar props removed from <GGPlot>",
+    summary:
+      "Grammar props removed from <GGPlot> in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#grammar-props-removed-from-ggplot",
+    keywords: ["Upgrade in five minutes", "Release"],
+    exact: ["Grammar props removed from <GGPlot>"],
   },
   {
     id: "heading:guide-upgrading:0-10-to-0-11",
@@ -17432,15 +17452,6 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-svelte",
     keywords: ["@ggsvelte/svelte", ".", "type", "experimental"],
     exact: ["LayerBackend"],
-  },
-  {
-    id: "api:ggsvelte-svelte:LayerDescriptor",
-    kind: "api",
-    title: "LayerDescriptor",
-    summary: "@ggsvelte/svelte · type · experimental.",
-    href: "/guide/lifecycle#ggsvelte-svelte",
-    keywords: ["@ggsvelte/svelte", ".", "type", "experimental"],
-    exact: ["LayerDescriptor"],
   },
   {
     id: "api:ggsvelte-svelte:LayerInput",

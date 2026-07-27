@@ -2332,8 +2332,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-470",
-        title: "experimental (470)",
+        id: "experimental-469",
+        title: "experimental (469)",
         level: 3,
       },
       {
@@ -2371,6 +2371,16 @@ export const DOCS_ROUTES = [
       {
         id: "manual-color-domain-range-diagnostic-code",
         title: "Manual color domain/range diagnostic code",
+        level: 3,
+      },
+      {
+        id: "0-12-to-0-13",
+        title: "0.12 to 0.13",
+        level: 2,
+      },
+      {
+        id: "grammar-props-removed-from-ggplot",
+        title: "Grammar props removed from <GGPlot>",
         level: 3,
       },
       {
