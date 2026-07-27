@@ -1,0 +1,38 @@
+{
+  "id": "66-heights-qq",
+  "kind": "chart",
+  "prompt": "Make a normal Q-Q plot of height.",
+  "dataProfile": {
+    "fields": [{ "name": "height", "type": "quantitative" }],
+    "rowCount": 5
+  },
+  "data": {
+    "main": [
+      { "height": 165 },
+      { "height": 170 },
+      { "height": 172 },
+      { "height": 175 },
+      { "height": 180 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "qq",
+        "stat": "qq",
+        "position": "identity",
+        "aes": { "sample": { "field": "height" } }
+      },
+      {
+        "geom": "qq_line",
+        "stat": "qq_line",
+        "position": "identity",
+        "aes": { "sample": { "field": "height" } }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Q-Q scatter of a quantitative sample column."
+}

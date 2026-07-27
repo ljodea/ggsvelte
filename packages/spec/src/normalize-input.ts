@@ -44,6 +44,8 @@ import type {
   SfLabelParams,
   SpokeParams,
   StepParams,
+  QqParams,
+  QqLineParams,
   Scales,
   QuantileParams,
   ContourParams,
@@ -72,6 +74,7 @@ export interface AesInput {
   group?: ChannelInput;
   label?: ChannelInput;
   weight?: ChannelInput;
+  sample?: ChannelInput;
   ymin?: ChannelInput;
   ymax?: ChannelInput;
   xmin?: ChannelInput;
@@ -315,6 +318,20 @@ export interface SegmentLayerInput extends LayerInputBase {
   params?: SegmentParams;
 }
 
+export interface QqLayerInput extends LayerInputBase {
+  geom: "qq";
+  stat?: "qq";
+  position?: "identity";
+  params?: QqParams;
+}
+
+export interface QqLineLayerInput extends LayerInputBase {
+  geom: "qq_line";
+  stat?: "qq_line";
+  position?: "identity";
+  params?: QqLineParams;
+}
+
 export interface AblineLayerInput extends LayerInputBase {
   geom: "abline";
   stat?: "identity";
@@ -424,7 +441,9 @@ export type LayerInput =
   | BlankLayerInput
   | SpokeLayerInput
   | RugLayerInput
-  | StepLayerInput;
+  | StepLayerInput
+  | QqLayerInput
+  | QqLineLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

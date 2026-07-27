@@ -377,6 +377,44 @@ export class MockResponder implements Responder {
 
     // --- geom selection (keyword templates, most specific first) -----------
     if (
+      /\bq-?q\b/.test(prompt) ||
+      /\bgeom[_\s]?qq(?:_line)?\b/.test(prompt) ||
+      (/\bnormal\b/.test(prompt) && /\breference line\b/.test(prompt))
+    ) {
+      // geom_qq + geom_qq_line: sample channel (ggplot2 aes.sample) (#804).
+      const sample =
+        fieldNamed("height") ??
+        fieldNamed("latency") ??
+        fieldNamed("sample") ??
+        pick.quant() ??
+        "sample";
+      const sampleAes: MockAes = { sample: f(sample) };
+      spec.layers.push({ geom: "qq", aes: sampleAes });
+      if (
+        /\breference line\b|\bqq_line\b|\bqq-line\b/.test(prompt) ||
+        /\bwith a normal\b/.test(prompt)
+      ) {
+        spec.layers.push({ geom: "qq_line", aes: { sample: f(sample) } });
+      }
+    } else if (
+      (/\bgeom[_\s]?step\b|\bstep (?:line|chart)\b/.test(prompt) ||
+        (/\bstep\b/.test(prompt) &&
+          /\bhold(?:s|ing)?\b|\bcumulative\b|\bthermostat\b|\bsetpoint\b|\bdirection\b/.test(
+            prompt,
+          ))) &&
+      !/stepp?ed/.test(prompt)
+    ) {
+      // geom_step: hv/vh staircase polylines (#789). Not the intentional
+      // "stepped" unknown-geom repair fixture below.
+      const x = pick.temporal() ?? pick.quant() ?? "x";
+      const y = pick.quant() ?? "y";
+      const layer: MockLayer = { geom: "step", aes: { x: f(x), y: f(y) } };
+      if (/\bstart of each interval\b|\bdirection\b.*\bvh\b|\bvh\b/.test(prompt)) {
+        layer.params = { direction: "vh" };
+      }
+      spec.layers.push(layer);
+      xField = x;
+    } else if (
       /\bgeom[_\s]?spoke\b|\bspoke\b|\bvector field\b/.test(prompt) &&
       (fieldNamed("angle") !== undefined ||
         fieldNamed("radius") !== undefined ||

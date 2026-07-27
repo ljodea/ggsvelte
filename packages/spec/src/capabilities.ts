@@ -318,9 +318,10 @@ export type ScaleCapability = (typeof SCALE_CAPABILITIES)[number];
 /** One checked geom-consumption table for mapped style channels. */
 export const STYLE_AESTHETIC_GEOMS = {
   // blank trains style scales without marks; jitter is sugar for point.
-  size: ["point", "jitter", "text", "dotplot", "sf", "sf_text", "sf_label", "blank"],
+  size: ["point", "jitter", "text", "dotplot", "sf", "sf_text", "sf_label", "blank", "qq"],
   linewidth: [
     "line",
+    "qq_line",
     "path",
     "step",
     "freqpoly",
@@ -350,6 +351,8 @@ export const STYLE_AESTHETIC_GEOMS = {
     "point",
     "jitter",
     "line",
+    "qq",
+    "qq_line",
     "path",
     "step",
     "freqpoly",
@@ -385,9 +388,10 @@ export const STYLE_AESTHETIC_GEOMS = {
     "blank",
     "rug",
   ],
-  shape: ["point", "jitter", "dotplot", "sf", "blank"],
+  shape: ["point", "jitter", "dotplot", "sf", "blank", "qq"],
   linetype: [
     "line",
+    "qq_line",
     "path",
     "step",
     "freqpoly",
