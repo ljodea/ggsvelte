@@ -325,16 +325,6 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Compose layers"],
   },
   {
-    id: "heading:guide-layers-marks:choose-a-mark-for-the-question",
-    kind: "heading",
-    title: "Choose a mark for the question",
-    summary:
-      "Choose a mark for the question in Layers and marks. Compose marks in paint order while sharing or overriding plot mappings.",
-    href: "/guide/layers-marks#choose-a-mark-for-the-question",
-    keywords: ["Layers and marks", "Core grammar"],
-    exact: ["Choose a mark for the question"],
-  },
-  {
     id: "page:guide-statistics-positions",
     kind: "page",
     title: "Statistics and positions",
