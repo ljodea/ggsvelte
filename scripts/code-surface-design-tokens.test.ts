@@ -84,8 +84,12 @@ describe("four code-block call sites use .code-surface (#696)", () => {
   it("CodeTabs scroll region applies code-surface and inherits type from it", () => {
     expect(tabs).toMatch(/class="[^"]*\bcode-surface\b[^"]*"/);
     const css = styleBlock(tabs);
-    // No private font-size / padding restatement that re-forks the surface.
+    // Surface type/ink come from .code-surface; do not re-fork font-size or paper.
     expect(css).not.toMatch(/font-size\s*:\s*0\.8rem/);
     expect(css).not.toMatch(/\.scroll-region[^{]*\{[^}]*background\s*:\s*var\(--code-paper\)/s);
+    // Padding must live on the scrollable pre (not only the scrollport) so
+    // inline-end gap survives horizontal scroll of wide samples.
+    expect(css).toMatch(/\.scroll-region[^{]*\{[^}]*padding\s*:\s*0\b/s);
+    expect(css).toMatch(/pre[^{]*\{[^}]*padding\s*:\s*1rem/s);
   });
 });

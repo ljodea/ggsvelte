@@ -191,15 +191,21 @@
     background: color-mix(in srgb, var(--accent) 12%, transparent);
   }
 
+  /*
+   * code-surface puts padding on the box; here the box is the scrollport.
+   * Keep padding on the scrollable pre so inline-end gap survives horizontal
+   * scroll (Blink/WebKit drop scrollport padding at the end of overflow).
+   */
   .scroll-region {
     max-width: 100%;
+    padding: 0;
   }
 
   .scroll-region :global(pre.hljs),
   .scroll-region :global(pre) {
     min-width: max-content;
     margin: 0;
-    padding: 0;
+    padding: 1rem;
     background: transparent !important;
     color: inherit;
     font: inherit;
