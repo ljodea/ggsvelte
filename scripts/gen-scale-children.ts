@@ -65,12 +65,12 @@ function colourAliases(stem: string): string[] {
  *   position-binned      2
  *   position-temporal    6  (date/datetime/time × x/y)
  *   position-discrete    2
- *   color-fill          42
+ *   color-fill          48
  *   numeric-style       24  (21 base + size area/radius family #830)
  *   finite-style         8
  *   ----------------------
- *   92 component files + 25 aliases
- *     (21 Colour + 4 Size/Linewidth/Alpha/Shape Ordinal re-exports, #830/#832)
+ *   98 component files + 28 aliases
+ *     (24 Colour + 4 Size/Linewidth/Alpha/Shape Ordinal re-exports, #830/#832)
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
@@ -130,7 +130,7 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscretePositionScaleOptions",
   ]),
 
-  // --- color-fill (42 components + 21 Colour aliases) ----------------------
+  // --- color-fill (48 components + 24 Colour aliases) ----------------------
   // optionsTypes match the slice-3 hand-written shells exactly.
   shell(
     "scaleColorContinuous",
@@ -152,6 +152,27 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "BinnedColorScaleOptions",
     ["BinnedColorScaleOptions"],
     colourAliases("Binned"),
+  ),
+  shell(
+    "scaleColorBrewer",
+    "color-fill",
+    "ColorBrewerScaleOptions",
+    ["ColorBrewerScaleOptions"],
+    colourAliases("Brewer"),
+  ),
+  shell(
+    "scaleColorDistiller",
+    "color-fill",
+    "ColorDistillerScaleOptions",
+    ["ColorDistillerScaleOptions"],
+    colourAliases("Distiller"),
+  ),
+  shell(
+    "scaleColorFermenter",
+    "color-fill",
+    "ColorFermenterScaleOptions",
+    ["ColorFermenterScaleOptions"],
+    colourAliases("Fermenter"),
   ),
   shell(
     "scaleColorSteps",
@@ -287,6 +308,13 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
   shell("scaleFillManual", "color-fill", "ManualColorScaleOptions", ["ManualColorScaleOptions"]),
   shell("scaleFillIdentity", "color-fill", "IdentityColorScaleOptions", [
     "IdentityColorScaleOptions",
+  ]),
+  shell("scaleFillBrewer", "color-fill", "ColorBrewerScaleOptions", ["ColorBrewerScaleOptions"]),
+  shell("scaleFillDistiller", "color-fill", "ColorDistillerScaleOptions", [
+    "ColorDistillerScaleOptions",
+  ]),
+  shell("scaleFillFermenter", "color-fill", "ColorFermenterScaleOptions", [
+    "ColorFermenterScaleOptions",
   ]),
   shell(
     "scaleColorViridisC",

@@ -4961,7 +4961,7 @@ export const SpecDeclarations = {
         scheme: Type.Optional(
           Type.Union(COLOR_SCHEME_NAME_SCHEMAS, {
             description:
-              'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "tableau10", "colorblind", "hue", "grey", and "gray"; or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo". Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
+              'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "tableau10", "colorblind", "hue", "grey", "gray", and ColorBrewer qualitative (Set1/Set2/…); or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
           }),
         ),
         reverse: Type.Optional(

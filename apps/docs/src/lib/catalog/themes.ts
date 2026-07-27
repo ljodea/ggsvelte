@@ -32,6 +32,13 @@ const PALETTE_LABELS = {
   hue: "Hue",
   grey: "Grey",
   gray: "Gray",
+  // ColorBrewer qualitative (#825) — keep the upstream palette names.
+  Set1: "Set1",
+  Set2: "Set2",
+  Set3: "Set3",
+  Dark2: "Dark2",
+  Paired: "Paired",
+  Accent: "Accent",
 } as const satisfies Record<(typeof CATEGORICAL_SCHEME_NAMES)[number], string>;
 
 /** Categorical scheme paired with each theme demo so paper + marks read as a set. */

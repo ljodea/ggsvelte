@@ -5777,6 +5777,30 @@
                 },
                 {
                   "type": "string",
+                  "const": "Set1"
+                },
+                {
+                  "type": "string",
+                  "const": "Set2"
+                },
+                {
+                  "type": "string",
+                  "const": "Set3"
+                },
+                {
+                  "type": "string",
+                  "const": "Dark2"
+                },
+                {
+                  "type": "string",
+                  "const": "Paired"
+                },
+                {
+                  "type": "string",
+                  "const": "Accent"
+                },
+                {
+                  "type": "string",
                   "const": "hue"
                 },
                 {
@@ -5810,9 +5834,65 @@
                 {
                   "type": "string",
                   "const": "turbo"
+                },
+                {
+                  "type": "string",
+                  "const": "Blues"
+                },
+                {
+                  "type": "string",
+                  "const": "Greens"
+                },
+                {
+                  "type": "string",
+                  "const": "Reds"
+                },
+                {
+                  "type": "string",
+                  "const": "Oranges"
+                },
+                {
+                  "type": "string",
+                  "const": "Purples"
+                },
+                {
+                  "type": "string",
+                  "const": "Greys"
+                },
+                {
+                  "type": "string",
+                  "const": "YlOrRd"
+                },
+                {
+                  "type": "string",
+                  "const": "YlGnBu"
+                },
+                {
+                  "type": "string",
+                  "const": "BuPu"
+                },
+                {
+                  "type": "string",
+                  "const": "RdYlBu"
+                },
+                {
+                  "type": "string",
+                  "const": "RdBu"
+                },
+                {
+                  "type": "string",
+                  "const": "BrBG"
+                },
+                {
+                  "type": "string",
+                  "const": "Spectral"
+                },
+                {
+                  "type": "string",
+                  "const": "PuOr"
                 }
               ],
-              "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\", \"flexoki\", \"tableau10\", \"colorblind\", \"hue\", \"grey\", and \"gray\"; or sequential family \"viridis\" (default), \"magma\", \"plasma\", \"inferno\", \"cividis\", \"turbo\". Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family."
+              "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\", \"flexoki\", \"tableau10\", \"colorblind\", \"hue\", \"grey\", \"gray\", and ColorBrewer qualitative (Set1/Set2/…); or sequential family \"viridis\" (default), \"magma\", \"plasma\", \"inferno\", \"cividis\", \"turbo\", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family."
             },
             "reverse": {
               "type": "boolean",

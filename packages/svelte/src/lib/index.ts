@@ -229,6 +229,12 @@ export { default as ScaleColorDiscrete } from "./scale/ScaleColorDiscrete.svelte
 /** @lifecycle stable-intent */
 export { default as ScaleColorBinned } from "./scale/ScaleColorBinned.svelte";
 /** @lifecycle stable-intent */
+export { default as ScaleColorBrewer } from "./scale/ScaleColorBrewer.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorDistiller } from "./scale/ScaleColorDistiller.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorFermenter } from "./scale/ScaleColorFermenter.svelte";
+/** @lifecycle stable-intent */
 export { default as ScaleColorSteps } from "./scale/ScaleColorSteps.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColorSteps2 } from "./scale/ScaleColorSteps2.svelte";
@@ -294,6 +300,12 @@ export { default as ScaleFillDatetime } from "./scale/ScaleFillDatetime.svelte";
 export { default as ScaleFillManual } from "./scale/ScaleFillManual.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleFillIdentity } from "./scale/ScaleFillIdentity.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillBrewer } from "./scale/ScaleFillBrewer.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillDistiller } from "./scale/ScaleFillDistiller.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillFermenter } from "./scale/ScaleFillFermenter.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColorViridisC } from "./scale/ScaleColorViridisC.svelte";
 /** @lifecycle stable-intent */
@@ -376,6 +388,12 @@ export { default as ScaleColourContinuous } from "./scale/ScaleColorContinuous.s
 export { default as ScaleColourDiscrete } from "./scale/ScaleColorDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourBinned } from "./scale/ScaleColorBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourBrewer } from "./scale/ScaleColorBrewer.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourDistiller } from "./scale/ScaleColorDistiller.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourFermenter } from "./scale/ScaleColorFermenter.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourSteps } from "./scale/ScaleColorSteps.svelte";
 /** @lifecycle stable-intent */

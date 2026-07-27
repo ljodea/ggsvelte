@@ -126,6 +126,49 @@ export function scaleColorIdentity(options: IdentityColorScaleOptions = {}): Sca
   return colorScale("color", "identity", options);
 }
 
+/** ggplot2 palette + direction options for ColorBrewer helpers (#825). */
+export type ColorBrewerScaleOptions = DiscreteColorScaleOptions & {
+  /** ColorBrewer palette name (e.g. "Set2", "Blues"). Maps to `scheme`. */
+  palette?: string;
+  /** `1` (default) or `-1` (reverse). */
+  direction?: 1 | -1;
+};
+
+export type ColorDistillerScaleOptions = SequentialColorScaleOptions & {
+  palette?: string;
+  direction?: 1 | -1;
+};
+
+export type ColorFermenterScaleOptions = BinnedColorScaleOptions & {
+  palette?: string;
+  direction?: 1 | -1;
+};
+
+function withBrewerPalette<T extends { scheme?: string; reverse?: boolean }>(
+  options: T & { palette?: string; direction?: 1 | -1 },
+): T {
+  const { palette, direction, scheme, reverse, ...rest } = options;
+  const resolvedScheme = palette ?? scheme;
+  return {
+    ...rest,
+    ...(resolvedScheme === undefined ? {} : { scheme: resolvedScheme }),
+    ...(direction === -1 || reverse === true ? { reverse: true } : {}),
+  } as T;
+}
+
+/** ggplot2 `scale_color_brewer` — discrete ColorBrewer palette. */
+export function scaleColorBrewer(options: ColorBrewerScaleOptions = {}): Scales {
+  return colorScale("color", "ordinal", withBrewerPalette(options));
+}
+/** ggplot2 `scale_color_distiller` — continuous ColorBrewer ramp. */
+export function scaleColorDistiller(options: ColorDistillerScaleOptions = {}): Scales {
+  return colorScale("color", "sequential", withBrewerPalette(options));
+}
+/** ggplot2 `scale_color_fermenter` — binned ColorBrewer ramp. */
+export function scaleColorFermenter(options: ColorFermenterScaleOptions = {}): Scales {
+  return colorScale("color", "binned", withBrewerPalette(options));
+}
+
 export const scaleColourContinuous = scaleColorContinuous;
 export const scaleColourDiscrete = scaleColorDiscrete;
 export const scaleColourBinned = scaleColorBinned;
@@ -135,6 +178,9 @@ export const scaleColourDate = scaleColorDate;
 export const scaleColourDatetime = scaleColorDatetime;
 export const scaleColourManual = scaleColorManual;
 export const scaleColourIdentity = scaleColorIdentity;
+export const scaleColourBrewer = scaleColorBrewer;
+export const scaleColourDistiller = scaleColorDistiller;
+export const scaleColourFermenter = scaleColorFermenter;
 export const scale_color_continuous = scaleColorContinuous;
 export const scale_color_discrete = scaleColorDiscrete;
 export const scale_color_binned = scaleColorBinned;
@@ -144,6 +190,9 @@ export const scale_color_date = scaleColorDate;
 export const scale_color_datetime = scaleColorDatetime;
 export const scale_color_manual = scaleColorManual;
 export const scale_color_identity = scaleColorIdentity;
+export const scale_color_brewer = scaleColorBrewer;
+export const scale_color_distiller = scaleColorDistiller;
+export const scale_color_fermenter = scaleColorFermenter;
 export const scale_colour_continuous = scaleColorContinuous;
 export const scale_colour_discrete = scaleColorDiscrete;
 export const scale_colour_binned = scaleColorBinned;
@@ -153,6 +202,9 @@ export const scale_colour_date = scaleColorDate;
 export const scale_colour_datetime = scaleColorDatetime;
 export const scale_colour_manual = scaleColorManual;
 export const scale_colour_identity = scaleColorIdentity;
+export const scale_colour_brewer = scaleColorBrewer;
+export const scale_colour_distiller = scaleColorDistiller;
+export const scale_colour_fermenter = scaleColorFermenter;
 
 export function scaleFillContinuous(options: SequentialColorScaleOptions = {}): Scales {
   return colorScale("fill", "sequential", options);
@@ -182,6 +234,19 @@ export function scaleFillIdentity(options: IdentityColorScaleOptions = {}): Scal
   return colorScale("fill", "identity", options);
 }
 
+/** ggplot2 `scale_fill_brewer`. */
+export function scaleFillBrewer(options: ColorBrewerScaleOptions = {}): Scales {
+  return colorScale("fill", "ordinal", withBrewerPalette(options));
+}
+/** ggplot2 `scale_fill_distiller`. */
+export function scaleFillDistiller(options: ColorDistillerScaleOptions = {}): Scales {
+  return colorScale("fill", "sequential", withBrewerPalette(options));
+}
+/** ggplot2 `scale_fill_fermenter`. */
+export function scaleFillFermenter(options: ColorFermenterScaleOptions = {}): Scales {
+  return colorScale("fill", "binned", withBrewerPalette(options));
+}
+
 export const scale_fill_continuous = scaleFillContinuous;
 export const scale_fill_discrete = scaleFillDiscrete;
 export const scale_fill_binned = scaleFillBinned;
@@ -191,6 +256,9 @@ export const scale_fill_date = scaleFillDate;
 export const scale_fill_datetime = scaleFillDatetime;
 export const scale_fill_manual = scaleFillManual;
 export const scale_fill_identity = scaleFillIdentity;
+export const scale_fill_brewer = scaleFillBrewer;
+export const scale_fill_distiller = scaleFillDistiller;
+export const scale_fill_fermenter = scaleFillFermenter;
 
 // --- viridis family constructors (#828) -------------------------------------
 // ggplot2 scale_*_viridis_{c,d,b}. Helper-only fields `option` and `direction`
