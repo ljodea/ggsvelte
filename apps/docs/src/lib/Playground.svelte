@@ -16,13 +16,11 @@
   } from "$lib/generated/playground-seeds";
   import {
     acceptCandidatePhase,
-    candidateTransitionAccepted,
     createCandidateLifecycleTracker,
     emitPlaygroundCandidatePhase,
     phaseNotesForCandidateTransition,
     type PlaygroundCandidateIsolation,
     type PlaygroundCandidatePhaseDetail,
-    type PlaygroundCandidateRef,
   } from "$lib/playground-candidate-lifecycle";
   import {
     appendPlaygroundEvent,
@@ -34,55 +32,18 @@
     type PlaygroundSeedV1,
   } from "$lib/playground-codec";
   import {
-    applyPlaygroundHashRestoreState,
-    rejectRestoreCancelPhase,
-    resolvePlaygroundHashRestore,
-  } from "$lib/playground-hash-restore";
-  import {
     PLAYGROUND_ACTIVE_FAILED_STATUS,
-    PLAYGROUND_SAMPLE_DISCARD_CONFIRM,
-    PLAYGROUND_UNDO_DISCARD_CONFIRM,
     shouldClearPlayHashAfterPromotion,
   } from "$lib/playground-link-policy";
   import { playgroundOutputs } from "$lib/playground-output";
   import { playgroundShareCopyStatus } from "$lib/playground-output-status";
-  import {
-    confirmPlaygroundRendered,
-    createPlaygroundState,
-    failPlaygroundCandidate,
-    promotePlaygroundCandidate,
-    reportPlaygroundDiagnostic,
-    setPlaygroundHistoryHash,
-    stagePlaygroundSeed,
-    type PlaygroundDiagnostic,
+  import type {
+    PlaygroundDiagnostic,
+    PlaygroundState,
   } from "$lib/playground-state";
-  import {
-    planSampleLoad,
-    planUndoChart,
-    workbenchCandidateRef,
-  } from "$lib/playground-workbench-actions";
-  import {
-    defaultPlaygroundInteractions,
-    type PlaygroundAgentEnvelope,
-    type PlaygroundInteractions,
-  } from "$lib/playground-agent-envelope";
   import { generateChart } from "$lib/playground-agent-client";
-  import { elidePlaygroundDatasetRows } from "$lib/playground-datasets";
   import { agentHandoffPrompt } from "$lib/playground-agent-handoff";
-  import {
-    agentIsBusy,
-    completeAgentSuccess,
-    createPlaygroundAgentState,
-    failAgent,
-    messageForAgentError,
-    resolvePhaseLine,
-    setAgentDrawing,
-    type PlaygroundAgentState,
-  } from "$lib/playground-agent-state";
-  import {
-    rateLimitLabelFor,
-    runPlaygroundAgentRun,
-  } from "$lib/playground-agent-run";
+  import { createPlaygroundSession } from "$lib/playground-session";
   import type { PlaygroundDatasetId } from "$lib/playground-dataset-schemas";
   import {
     PLAYGROUND_DEFAULT_DATASET,
@@ -97,63 +58,9 @@
     samples: PLAYGROUND_SAMPLES,
   };
 
-  let workbench = $state(createPlaygroundState(initialSeed));
-  let agent = $state<PlaygroundAgentState>(createPlaygroundAgentState());
-  let interactions = $state<PlaygroundInteractions>(
-    defaultPlaygroundInteractions(),
-  );
-  let pendingInteractions = $state<PlaygroundInteractions | null>(null);
-  let prompt = $state(PLAYGROUND_DEFAULT_PROMPT);
-  let datasetId = $state<PlaygroundDatasetId>(PLAYGROUND_DEFAULT_DATASET);
-  let shareUrl = $state("");
-  let shareStatus = $state("");
-  let shareSource = $state<HTMLElement>();
-  let events = $state<readonly PlaygroundEventEntry[]>([]);
+  // Revision bridge: session owns mutable state; Svelte re-reads via $derived.
+  let sessionRev = $state(0);
   let lifecycleTracker = $state(createCandidateLifecycleTracker());
-  let abortController = $state<AbortController | null>(null);
-  let rateLimitUntil = $state<number | null>(null);
-  let rateLimitLabel = $state("");
-  let nowTick = $state(Date.now());
-  // Monotonic run token: continuations from a superseded/cancelled pipeline
-  // must never touch state after a newer run (or a sample load) began.
-  let runSeq = 0;
-  let pendingSuccess = $state<PlaygroundAgentEnvelope | null>(null);
-  let mockNotice = $state(false);
-
-  const outputs = $derived(
-    playgroundOutputs(workbench.committed, interactions, datasetId),
-  );
-  const sampleLinks = $derived(
-    PLAYGROUND_SAMPLES.map((s) => ({ id: s.id, title: s.title })),
-  );
-  const busy = $derived(agentIsBusy(agent));
-  const phaseLine = $derived.by(() => {
-    const resolved = resolvePhaseLine(agent, nowTick);
-    if (resolved !== "") return resolved;
-    return mockNotice
-      ? "Instant sample — live generation isn't enabled yet."
-      : "";
-  });
-  const generateLabel = $derived(
-    rateLimitLabel === "" ? "Generate" : rateLimitLabel,
-  );
-  const generateDisabled = $derived(
-    rateLimitUntil !== null && nowTick < rateLimitUntil,
-  );
-  // Computed lazily at copy time — the ~10KB prompt assembly must not run
-  // on every keystroke (performance review).
-  function currentHandoffText(): string {
-    return agentHandoffPrompt({
-      currentSpec: workbench.committed,
-      userGoal: prompt,
-    });
-  }
-
-  function cancelActiveRun(): void {
-    runSeq += 1;
-    abortController?.abort();
-    abortController = null;
-  }
 
   function noteCandidatePhase(detail: PlaygroundCandidatePhaseDetail): void {
     const accepted = acceptCandidatePhase(lifecycleTracker, detail);
@@ -163,8 +70,11 @@
   }
 
   function noteStagedCandidate(
-    previous: PlaygroundCandidateRef | null,
-    next: typeof workbench,
+    previous: {
+      readonly generation: number;
+      readonly origin: PlaygroundCandidatePhaseDetail["origin"];
+    } | null,
+    next: PlaygroundState,
   ): void {
     for (const detail of phaseNotesForCandidateTransition(previous, {
       candidate: next.candidate,
@@ -174,8 +84,84 @@
     }
   }
 
-  function activeCandidate(): PlaygroundCandidateRef | null {
-    return workbenchCandidateRef(workbench);
+  const session = createPlaygroundSession({
+    initialSeed,
+    samples: PLAYGROUND_SAMPLES,
+    shareCatalogs,
+    generateChart,
+    confirm: (message) => window.confirm(message),
+    onChange: () => {
+      sessionRev += 1;
+    },
+    onWorkbenchStaged: ({ previous, workbench: next }) => {
+      noteStagedCandidate(previous, next);
+    },
+  });
+
+  // UI-only state (not race-sensitive coordination).
+  let prompt = $state(PLAYGROUND_DEFAULT_PROMPT);
+  let datasetId = $state<PlaygroundDatasetId>(PLAYGROUND_DEFAULT_DATASET);
+  let shareSource = $state<HTMLElement>();
+  let events = $state<readonly PlaygroundEventEntry[]>([]);
+  let nowTick = $state(Date.now());
+
+  const workbench = $derived.by(() => {
+    void sessionRev;
+    return session.workbench;
+  });
+  const agent = $derived.by(() => {
+    void sessionRev;
+    return session.agent;
+  });
+  const interactions = $derived.by(() => {
+    void sessionRev;
+    return session.interactions;
+  });
+  const shareUrl = $derived.by(() => {
+    void sessionRev;
+    return session.shareUrl;
+  });
+  const shareStatus = $derived.by(() => {
+    void sessionRev;
+    return session.shareStatus;
+  });
+  const rateLimitUntil = $derived.by(() => {
+    void sessionRev;
+    return session.rateLimitUntil;
+  });
+  const rateLimitLabel = $derived.by(() => {
+    void sessionRev;
+    return session.rateLimitLabel;
+  });
+  const busy = $derived.by(() => {
+    void sessionRev;
+    return session.busy;
+  });
+  const phaseLine = $derived.by(() => {
+    void sessionRev;
+    return session.phaseLine(nowTick);
+  });
+
+  const outputs = $derived(
+    playgroundOutputs(workbench.committed, interactions, datasetId),
+  );
+  const sampleLinks = $derived(
+    PLAYGROUND_SAMPLES.map((s) => ({ id: s.id, title: s.title })),
+  );
+  const generateLabel = $derived(
+    rateLimitLabel === "" ? "Generate" : rateLimitLabel,
+  );
+  const generateDisabled = $derived(
+    rateLimitUntil !== null && nowTick < rateLimitUntil,
+  );
+
+  // Computed lazily at copy time — the ~10KB prompt assembly must not run
+  // on every keystroke (performance review).
+  function currentHandoffText(): string {
+    return agentHandoffPrompt({
+      currentSpec: session.workbench.committed,
+      userGoal: prompt,
+    });
   }
 
   function replaceLocationHash(hash: string | null): void {
@@ -185,35 +171,21 @@
   }
 
   function restoreLocation(origin: "initial-navigation" | "popstate"): void {
-    const decision = resolvePlaygroundHashRestore(
-      origin,
-      window.location.hash,
-      shareCatalogs,
-    );
-    if (decision.kind === "noop") return;
-    // History restore replaces the chart: cancel any in-flight agent run and
-    // drop its pending payload so it can't apply to the restored chart.
-    cancelActiveRun();
-    pendingInteractions = null;
-    pendingSuccess = null;
-    if (agentIsBusy(agent)) agent = createPlaygroundAgentState();
-    if (decision.kind === "reject") {
-      replaceLocationHash(workbench.historyHash);
+    const side = session.restoreFromHash(origin, window.location.hash);
+    if (side.kind === "noop") return;
+    if (side.replaceWithHistoryHash !== null) {
+      replaceLocationHash(side.replaceWithHistoryHash);
     }
-    const previous = activeCandidate();
-    const next = applyPlaygroundHashRestoreState(
-      workbench,
-      decision,
-      origin,
-      initialSeed,
-    );
-    workbench = next;
-    if (decision.kind === "reject") {
-      const cancel = rejectRestoreCancelPhase(previous, workbench.status);
-      if (cancel !== null) noteCandidatePhase(cancel);
+    if (side.rejectCancel !== null) {
+      noteCandidatePhase({
+        generation: side.rejectCancel.generation,
+        origin: side.rejectCancel.origin,
+        phase: "cancelled",
+        status: side.rejectCancel.status,
+      });
       return;
     }
-    noteStagedCandidate(previous, next);
+    noteStagedCandidate(side.previous, side.workbench);
   }
 
   function onPopState(): void {
@@ -230,148 +202,34 @@
     if (!busy && rateLimitUntil === null) return;
     const id = window.setInterval(() => {
       nowTick = Date.now();
-      if (rateLimitUntil !== null) {
-        const remaining = Math.ceil((rateLimitUntil - nowTick) / 1000);
-        if (remaining <= 0) {
-          rateLimitUntil = null;
-          rateLimitLabel = "";
-        } else {
-          rateLimitLabel = rateLimitLabelFor(remaining);
-        }
-      }
+      session.tickNow(nowTick);
     }, 500);
     return () => window.clearInterval(id);
   });
 
   function undoChart(): void {
-    let plan = planUndoChart(workbench, busy, false);
-    if (plan.kind === "noop") return;
-    if (plan.kind === "needs_confirm") {
-      const discard = window.confirm(PLAYGROUND_UNDO_DISCARD_CONFIRM);
-      if (!discard) return;
-      plan = planUndoChart(workbench, busy, true);
-      if (plan.kind !== "stage") return;
-    }
-    workbench = plan.workbench;
-    noteStagedCandidate(plan.previous, plan.workbench);
+    session.undo();
   }
 
   function loadSample(id: string): boolean {
-    let plan = planSampleLoad(workbench, id, PLAYGROUND_SAMPLES, false);
-    if (plan.kind === "noop") return false;
-    if (plan.kind === "needs_confirm") {
-      const discard = window.confirm(PLAYGROUND_SAMPLE_DISCARD_CONFIRM);
-      if (!discard) return false;
-      plan = planSampleLoad(workbench, id, PLAYGROUND_SAMPLES, true);
-      if (plan.kind !== "load") return false;
-    }
-    cancelActiveRun();
-    workbench = plan.workbench;
-    interactions = plan.interactions;
-    pendingInteractions = plan.pendingInteractions;
-    pendingSuccess = plan.pendingSuccess;
-    mockNotice = plan.mockNotice;
-    agent = plan.agent;
-    noteStagedCandidate(plan.previous, plan.workbench);
-    return true;
-  }
-
-  function stageAgentSeed(
-    seed: PlaygroundSeedV1,
-    nextInteractions: PlaygroundInteractions,
-  ): void {
-    const previous = activeCandidate();
-    pendingInteractions = nextInteractions;
-    const next = stagePlaygroundSeed(workbench, seed, "agent");
-    workbench = next;
-    agent = setAgentDrawing(agent);
-    noteStagedCandidate(previous, next);
-  }
-
-  async function runAgentPipeline(
-    userPrompt: string,
-    dataset: PlaygroundDatasetId,
-    options: {
-      readonly example?: PlaygroundExamplePrompt;
-      readonly signal?: AbortSignal;
-    } = {},
-  ): Promise<void> {
-    const token = ++runSeq;
-    // A superseded or cancelled run must stop touching state entirely —
-    // its continuations would otherwise interleave with the newer run.
-    const isStale = (): boolean =>
-      token !== runSeq || options.signal?.aborted === true;
-
-    // Clear before the run so a cancelled live generate cannot inherit
-    // mock notice copy from a prior canned example.
-    mockNotice = false;
-
-    const outcome = await runPlaygroundAgentRun(
-      {
-        userPrompt,
-        dataset,
-        // Re-read at first generate and repair (send named data, never rows).
-        getCurrentSpec: () =>
-          elidePlaygroundDatasetRows(workbench.committed, dataset),
-        ...(options.example === undefined ? {} : { example: options.example }),
-        ...(options.signal === undefined ? {} : { signal: options.signal }),
-        isStale,
-        initialAgent: agent,
-      },
-      {
-        onAgent: (next) => {
-          agent = next;
-        },
-        generateChart,
-      },
-    );
-
-    if (outcome.kind === "stale") return;
-
-    if (outcome.kind === "failed") {
-      mockNotice = outcome.mockNotice;
-      if (outcome.rateLimit !== undefined) {
-        rateLimitUntil = outcome.rateLimit.until;
-        rateLimitLabel = outcome.rateLimit.label;
-      }
-      return;
-    }
-
-    // ready_to_stage — drawing is owned by stageAgentSeed, not the run module.
-    mockNotice = outcome.mockNotice;
-    pendingSuccess = outcome.pendingSuccess;
-    stageAgentSeed(outcome.seed, outcome.interactions);
+    return session.loadSample(id);
   }
 
   function onGenerate(): void {
     if (busy || generateDisabled) return;
     if (prompt.trim() === "") return;
-    cancelActiveRun();
-    const controller = new AbortController();
-    abortController = controller;
-    void runAgentPipeline(prompt, datasetId, { signal: controller.signal });
+    void session.runAgent(prompt, datasetId);
   }
 
   function onExample(example: PlaygroundExamplePrompt): void {
     if (busy) return;
     prompt = example.prompt;
     datasetId = example.datasetId;
-    cancelActiveRun();
-    const controller = new AbortController();
-    abortController = controller;
-    void runAgentPipeline(example.prompt, example.datasetId, {
-      example,
-      signal: controller.signal,
-    });
+    void session.runAgent(example.prompt, example.datasetId, { example });
   }
 
   function onCancel(): void {
-    cancelActiveRun();
-    pendingSuccess = null;
-    agent = failAgent(agent, {
-      code: "aborted",
-      message: messageForAgentError("aborted"),
-    });
+    session.cancel();
   }
 
   async function onCopyHandoff(): Promise<void> {
@@ -390,7 +248,7 @@
     generation: number,
     isolation: PlaygroundCandidateIsolation,
   ): void {
-    const current = workbench;
+    const current = session.workbench;
     const candidate = current.candidate;
     if (candidate?.generation !== generation) return;
     noteCandidatePhase({
@@ -406,63 +264,41 @@
   }
 
   function promoteAcceptedCandidate(generation: number): void {
-    const current = workbench;
-    const origin = current.candidate?.origin;
-    const promoted = promotePlaygroundCandidate(current, generation);
-    if (!candidateTransitionAccepted(current, promoted)) return;
-    workbench = promoted;
-    if (pendingInteractions !== null) {
-      interactions = pendingInteractions;
-      pendingInteractions = null;
-    }
-    if (origin === "agent" && pendingSuccess !== null) {
-      agent = completeAgentSuccess(agent, pendingSuccess);
-      pendingSuccess = null;
-    }
+    const result = session.promoteCandidate(generation);
+    if (!result.accepted) return;
     noteCandidatePhase({
       generation,
-      origin: origin ?? "agent",
+      origin: result.origin ?? "agent",
       phase: "promoted",
-      status: promoted.status,
+      status: result.workbench.status,
     });
     events = [];
-    if (shouldClearPlayHashAfterPromotion(origin, window.location.hash)) {
+    if (
+      shouldClearPlayHashAfterPromotion(result.origin, window.location.hash)
+    ) {
       replaceLocationHash(null);
     }
-    shareUrl = "";
-    shareStatus = "";
   }
 
   function reconcileCandidateFailure(
     generation: number,
     diagnostic: PlaygroundDiagnostic,
   ): void {
-    const current = workbench;
-    const origin = current.candidate?.origin;
-    const failed = failPlaygroundCandidate(current, generation, diagnostic);
-    if (!candidateTransitionAccepted(current, failed)) return;
-    workbench = failed;
-    pendingInteractions = null;
-    pendingSuccess = null;
+    const result = session.failCandidate(generation, diagnostic);
+    if (!result.accepted) return;
     noteCandidatePhase({
       generation,
-      origin: origin ?? "agent",
+      origin: result.origin ?? "agent",
       phase: "failed",
-      status: failed.status,
+      status: result.workbench.status,
     });
-    if (origin === "agent") {
-      agent = failAgent(agent, {
-        code: "pipeline",
-        message: diagnostic.message,
-      });
-    }
-    if (failed.navigationRecovery !== null) {
-      replaceLocationHash(failed.navigationRecovery.replaceHash);
+    if (result.navigationRecovery !== null) {
+      replaceLocationHash(result.navigationRecovery.replaceHash ?? null);
     }
   }
 
   function activeRendered(_model: RenderModel): void {
-    workbench = confirmPlaygroundRendered(workbench);
+    session.confirmRendered();
   }
 
   function recordInteraction(event: PlaygroundInteractionEvent): void {
@@ -470,39 +306,45 @@
   }
 
   function activeFailed(diagnostic: PlaygroundDiagnostic): void {
-    const previous = activeCandidate();
-    workbench = reportPlaygroundDiagnostic(
-      workbench,
+    const previous =
+      session.workbench.candidate === null
+        ? null
+        : {
+            generation: session.workbench.candidate.generation,
+            origin: session.workbench.candidate.origin,
+          };
+    const next = session.reportActiveFailed(
       diagnostic,
       PLAYGROUND_ACTIVE_FAILED_STATUS,
-      false,
     );
     for (const detail of phaseNotesForCandidateTransition(previous, {
       candidate: null,
-      status: workbench.status,
+      status: next.status,
     })) {
       noteCandidatePhase(detail);
     }
   }
 
   async function share(): Promise<void> {
-    if (!workbench.canCopyOrShare) return;
-    const hash = encodePlaygroundSeed(workbench.seed);
+    if (!session.workbench.canCopyOrShare) return;
+    const hash = encodePlaygroundSeed(session.workbench.seed);
     const url = new URL(window.location.href);
     url.hash = hash;
     pushSvelteKitState(url, {});
-    workbench = setPlaygroundHistoryHash(workbench, hash);
-    shareUrl = url.href;
+    session.setHistoryHash(hash);
+    session.setShareResult(url.href, "");
     await tick();
     if (shareSource === undefined) {
       // PlaygroundCode triggers share; status via shareStatus only.
-      shareStatus = playgroundShareCopyStatus(
-        await copyText(shareUrl, document.body),
+      session.setShareStatus(
+        playgroundShareCopyStatus(
+          await copyText(session.shareUrl, document.body),
+        ),
       );
       return;
     }
-    const result = await copyText(shareUrl, shareSource);
-    shareStatus = playgroundShareCopyStatus(result);
+    const result = await copyText(session.shareUrl, shareSource);
+    session.setShareStatus(playgroundShareCopyStatus(result));
   }
 </script>
 
@@ -542,7 +384,7 @@
     status={workbench.status}
     {interactions}
     onInteractionsChange={(next) => {
-      interactions = next;
+      session.setInteractions(next);
     }}
     onCandidateReady={candidateReady}
     onCandidateFailed={reconcileCandidateFailure}
