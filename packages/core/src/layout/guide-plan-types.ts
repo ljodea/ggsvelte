@@ -10,8 +10,6 @@ import type { CellValue } from "../table.js";
 import type { BandLabelMode } from "./band-guide.js";
 import type { GuideDegradedCode } from "./guide-degraded-codes.js";
 
-export type { GuideDegradedCode } from "./guide-degraded-codes.js";
-
 export interface AxisGuideTick {
   value: number | CellValue;
   label: string;

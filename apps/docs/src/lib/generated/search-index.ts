@@ -3144,6 +3144,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["ellipse-group-dropped"],
   },
   {
+    id: "heading:guide-errors:stat-channel-unsupported-warning",
+    kind: "heading",
+    title: "stat-channel-unsupported — warning",
+    summary:
+      "stat-channel-unsupported — warning in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#stat-channel-unsupported-warning",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["stat-channel-unsupported — warning"],
+  },
+  {
     id: "heading:guide-errors:palette-exhausted-warning",
     kind: "heading",
     title: "palette-exhausted — warning",
@@ -3872,14 +3882,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-289",
+    id: "heading:guide-lifecycle:experimental-290",
     kind: "heading",
-    title: "experimental (289)",
+    title: "experimental (290)",
     summary:
-      "experimental (289) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-289",
+      "experimental (290) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-290",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (289)"],
+    exact: ["experimental (290)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -13824,6 +13834,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "type", "experimental"],
     exact: ["DeclaredDiscreteness"],
+  },
+  {
+    id: "api:ggsvelte-core:DiagnosticCode",
+    kind: "api",
+    title: "DiagnosticCode",
+    summary: "@ggsvelte/core · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "type", "experimental"],
+    exact: ["DiagnosticCode"],
   },
   {
     id: "api:ggsvelte-core:DiscreteGuideEntry",
@@ -24275,6 +24294,20 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["ellipse-group-dropped", "warning:ellipse-group-dropped"],
+  },
+  {
+    id: "diagnostic:warning:stat-channel-unsupported",
+    kind: "diagnostic",
+    title: "stat-channel-unsupported · warning",
+    summary:
+      "A color/fill after-stat mapping names an output the selected stat does not publish; the mapping is ignored (style channels throw the same code as an error).",
+    href: "/guide/errors#stat-channel-unsupported-warning",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["stat-channel-unsupported", "warning:stat-channel-unsupported"],
   },
   {
     id: "diagnostic:warning:palette-exhausted",

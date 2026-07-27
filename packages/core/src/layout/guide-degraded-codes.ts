@@ -5,7 +5,7 @@
 import type { PipelineWarningCode } from "../diagnostics-warning-catalog.js";
 
 /** Exhaustive list; `satisfies` proves each member is a catalogued warning. */
-export const GUIDE_DEGRADED_CODES = [
+const GUIDE_DEGRADED_CODES = [
   "band-label-overlap",
   "band-label-margin-overflow",
   "temporal-label-overlap",

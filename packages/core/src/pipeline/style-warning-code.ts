@@ -12,7 +12,7 @@ const STYLE_PREFIXED = {
   "out-of-domain": "style-out-of-domain",
 } as const satisfies Record<ScaleWarningCode, PipelineWarningCode>;
 
-export type StylePrefixedWarningCode = (typeof STYLE_PREFIXED)[ScaleWarningCode];
+type StylePrefixedWarningCode = (typeof STYLE_PREFIXED)[ScaleWarningCode];
 
 export function styleWarningCode(code: ScaleWarningCode): StylePrefixedWarningCode {
   return STYLE_PREFIXED[code];
