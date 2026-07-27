@@ -363,8 +363,8 @@
     },
     "rule/data-driven": {
       "filename": "rule-data-driven-light.png",
-      "sourceSha256": "760570e3c797c8d3f49bcf4d6b812dc35f205d1da0db38888acd242fa8c87f2c",
-      "pngSha256": "d4db8a00a667a8a4c3a78ae0e78001739fdefcf16b8a56fc000aee9265b64614"
+      "sourceSha256": "0aed803d3fba83e8187a7d45c723439c1b1b0403e8b17c609e963e5a353ac7e9",
+      "pngSha256": "238f83b3dc85f85ca10f40eb158f116b7dfb3dd0245bc93a501383f67fef0ed8"
     },
     "segment/annotations": {
       "filename": "segment-annotations-light.png",

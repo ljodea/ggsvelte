@@ -696,3 +696,59 @@ describe("responsive guide planning", () => {
     expect(hidden.scene.legends).toHaveLength(0);
   });
 });
+
+/**
+ * #700 — rug plots (vertical rules with only aes.x) train a synthetic y
+ * domain of [0, 1] so panel-spanning marks have a range. Without an explicit
+ * suppress, that domain renders a full 0.0…1.0 y-axis ladder of meaningless
+ * ink. guideNone() on y is the supported way to hide it.
+ */
+describe("rug plot y-axis suppression (#700)", () => {
+  const rugRows = [{ longitude: 18.1 }, { longitude: 22.4 }, { longitude: 29.7 }];
+
+  it("default rug still draws a synthetic 0–1 y tick ladder", () => {
+    const result = runPipeline(
+      gg(rugRows, aes({ x: "longitude" }))
+        .geomRule()
+        .spec(),
+      { width: 640, height: 400 },
+    );
+    const labels = (result.scene.panels[0]?.axisY ?? []).map((tick) => tick.label);
+    expect(labels).toContain("0.0");
+    expect(labels).toContain("1.0");
+  });
+
+  it("guides.y = none removes the y axis (panel + scene title)", () => {
+    const result = runPipeline(
+      gg(rugRows, aes({ x: "longitude" }))
+        .geomRule()
+        .guides({ y: guideNone() })
+        .spec(),
+      { width: 640, height: 400 },
+    );
+    expect(result.scene.panels[0]?.axisY).toBeNull();
+    expect(result.scene.axes.y.title).toBe("");
+    const svg = renderToSVGString(
+      gg(rugRows, aes({ x: "longitude" }))
+        .geomRule()
+        .guides({ y: guideNone() })
+        .spec(),
+      { width: 640, height: 400 },
+    );
+    expect(svg).not.toContain(">0.0</text>");
+    expect(svg).not.toContain(">1.0</text>");
+    // x axis still present for the distribution
+    expect(svg).toMatch(/>1[89]</);
+  });
+
+  it("scale-local guide: none also hides the y axis", () => {
+    const result = runPipeline(
+      gg(rugRows, aes({ x: "longitude" }))
+        .geomRule()
+        .scales({ y: { guide: guideNone() } })
+        .spec(),
+      { width: 640, height: 400 },
+    );
+    expect(result.scene.panels[0]?.axisY).toBeNull();
+  });
+});

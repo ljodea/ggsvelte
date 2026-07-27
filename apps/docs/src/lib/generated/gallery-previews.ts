@@ -444,7 +444,7 @@ export const GALLERY_PREVIEWS = [
     id: "rule/data-driven",
     filename: "rule-data-driven-light.png",
     path: "/previews/rule-data-driven-light.png",
-    sha256: "d4db8a00a667a8a4c3a78ae0e78001739fdefcf16b8a56fc000aee9265b64614",
+    sha256: "238f83b3dc85f85ca10f40eb158f116b7dfb3dd0245bc93a501383f67fef0ed8",
   },
   {
     id: "segment/annotations",
