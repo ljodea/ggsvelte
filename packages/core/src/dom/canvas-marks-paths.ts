@@ -15,6 +15,7 @@ import type { PathsBatch, RectsBatch, SegmentsBatch } from "../scene.js";
 import type { Linetype } from "../scales/style.js";
 import type { ThemeTokens } from "../theme.js";
 import { themeVar } from "../theme.js";
+import { stepCorners } from "../path-step.js";
 import type { ColorResolver } from "./canvas-dom.js";
 import { maskIncludes, type PrimitiveFocusMask } from "./canvas-marks-mask.js";
 
@@ -61,12 +62,12 @@ function traceRing(
   for (let i = start + 1; i < end; i++) {
     const x = batch.positions[i * 2]!;
     const y = batch.positions[i * 2 + 1]!;
-    if (batch.curve === "step") {
+    if (batch.curve === "step" || batch.curve === "step-hv" || batch.curve === "step-vh") {
       const prevX = batch.positions[(i - 1) * 2]!;
       const prevY = batch.positions[(i - 1) * 2 + 1]!;
-      const mid = (prevX + x) / 2;
-      ctx.lineTo(mid, prevY);
-      ctx.lineTo(mid, y);
+      for (const c of stepCorners(prevX, prevY, x, y, batch.curve)) {
+        ctx.lineTo(c.x, c.y);
+      }
     }
     ctx.lineTo(x, y);
   }

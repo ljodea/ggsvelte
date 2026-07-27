@@ -36,6 +36,7 @@ import type {
   SfTextParams,
   SfLabelParams,
   SpokeParams,
+  StepParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -298,6 +299,12 @@ export interface GeomAblineOptions extends AblineParams, GeomDataOption {
 
 /** Rug-layer sugar options: sides/length + stroke params. */
 export interface GeomRugOptions extends RugParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Step-layer sugar options: params (direction hv/vh/mid) plus optional aes. */
+export interface GeomStepOptions extends StepParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }
