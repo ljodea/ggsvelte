@@ -1,5 +1,5 @@
 /**
  * Same twin-cloud scatter as density/kde-2d so filled rings nest visibly.
- * Fixed decimals — values stable across hosts.
+ * Fixed decimals — playground seed stable across hosts.
  */
 export { twinClouds } from "../kde-2d/data.js";

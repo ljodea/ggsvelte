@@ -5,7 +5,7 @@
  * sort by x and scramble the loops; geom_path keeps row order (#788).
  *
  * Integer coordinates only — no Math.sin / transcendental literals (oxlint
- * approx-constant) and byte-stable seeds across hosts.
+ * approx-constant) and byte-stable playground seeds across hosts.
  */
 export const figureEight: { x: number; y: number }[] = [
   { x: 0, y: 0 },

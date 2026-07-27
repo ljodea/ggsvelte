@@ -1,6 +1,6 @@
 /**
  * Compact regular grid of a radial Gaussian peak so default bins (10) draw
- * nested isolines. Fixed decimals only — values must be host-stable.
+ * nested isolines. Fixed decimals only — playground seeds must be host-stable.
  */
 export const peakGrid: { x: number; y: number; z: number }[] = (() => {
   const rows: { x: number; y: number; z: number }[] = [];
