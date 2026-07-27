@@ -17,9 +17,9 @@ import type { CellValue } from "../table.js";
 
 import { statDensity } from "./density.js";
 
-export type ViolinScale = "area" | "count" | "width";
+type ViolinScale = "area" | "count" | "width";
 
-export interface YDensityParamsInput {
+interface YDensityParamsInput {
   bw?: number;
   adjust?: number;
   n?: number;
