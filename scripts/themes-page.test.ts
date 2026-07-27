@@ -5,7 +5,7 @@ import {
   THEME_OPTIONS,
   VIRIDIS_COLORS,
 } from "../apps/docs/src/lib/catalog/themes.ts";
-import { colorBehaviorEvidence } from "../apps/docs/src/lib/color-evidence.ts";
+import { colorBehaviorEvidence } from "./color-evidence.ts";
 import {
   MONTH_BREAKS,
   RASTER_Z_DOMAIN,

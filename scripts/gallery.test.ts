@@ -10,7 +10,7 @@ import {
 import {
   GALLERY_FILTER_JOURNEY_CATEGORY,
   GALLERY_FILTER_JOURNEY_QUERY,
-} from "../apps/docs/src/lib/gallery-filter-journey.js";
+} from "../tests/fixtures/gallery-filter-journey.js";
 import {
   filterGallery,
   parseGalleryFilter,
