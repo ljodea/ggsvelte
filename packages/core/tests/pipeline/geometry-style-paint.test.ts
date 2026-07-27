@@ -11,6 +11,7 @@ import {
   paintVector,
 } from "../../src/pipeline/geometry-style.ts";
 import { DEFAULT_MISSING_COLOR } from "../../src/scales/engine.ts";
+import type { CellValue } from "../../src/table.ts";
 import type { LayerBinding, LayerFrame, ResolvedColorScale } from "../../src/pipeline/types.ts";
 
 const PALETTE: Record<string, string> = {
@@ -24,7 +25,8 @@ function stubScale(map: Record<string, string> = PALETTE): ResolvedColorScale {
   return fromPartial<ResolvedColorScale>({
     kind: "ordinal",
     scale: {
-      colorOf: (value: unknown) => (value === null ? undefined : map[String(value)]),
+      colorOf: (value: unknown) =>
+        value === null || value === undefined ? undefined : map[`${value as string | number}`],
       naValue: DEFAULT_MISSING_COLOR,
       unknownValue: DEFAULT_MISSING_COLOR,
     },
@@ -151,7 +153,8 @@ describe("constantStyle", () => {
   });
 
   it("ignores non-number binding constants", () => {
-    const binding = makeFrame({ alpha: { constant: "nope" as unknown as number } }).binding;
+    const nonNumber: CellValue = "nope";
+    const binding = makeFrame({ alpha: { constant: nonNumber } }).binding;
     expect(constantStyle(binding, { alpha: 0.2 }, "alpha", 1)).toBe(0.2);
   });
 });
