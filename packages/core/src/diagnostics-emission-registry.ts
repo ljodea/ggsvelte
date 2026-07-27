@@ -10,9 +10,9 @@ import type { PipelineErrorCode } from "./diagnostics-error-catalog.js";
 import type { PipelineWarningCode } from "./diagnostics-warning-catalog.js";
 import type { AdvisoryCode, CLIDiagnosticCode } from "./diagnostics.js";
 
-export type EmissionChannel = "warning" | "advisory" | "error" | "cli";
+type EmissionChannel = "warning" | "advisory" | "error" | "cli";
 
-export interface EmissionRegistryEntry {
+interface EmissionRegistryEntry {
   channel: EmissionChannel;
   /**
    * Module that owns structured dual-channel projection (lean + rich from

@@ -84,17 +84,14 @@ describe("dedupeScaleDiagnostics", () => {
 });
 
 describe("no message-text recovery for scale-training rich evidence", () => {
-  it("pipeline sources do not parse warning.message for break-outside evidence", () => {
+  it("training emitters use structured dual-channel factories (no message parse)", () => {
     const src = join(import.meta.dir, "..", "src", "pipeline");
-    const training = readFileSync(
-      join(src, "assemble-render-model-scale-training-diagnostics.ts"),
-      "utf8",
-    );
-    // File may still exist as a re-export shim, but must not parse messages.
-    expect(training).not.toMatch(/parseBreakOutside|warning\.message|message\.match|\/explicit/);
     const continuous = readFileSync(join(src, "scale-axis-train-continuous.ts"), "utf8");
     expect(continuous).toContain("emitScaleBreakOutsideDomain");
+    expect(continuous).not.toMatch(/parseBreakOutside|warning\.message\.match/);
     const zero = readFileSync(join(src, "scale-axis-train-continuous-zero.ts"), "utf8");
     expect(zero).toContain("emitScaleBaselineTransformedOrigin");
+    const emit = readFileSync(join(src, "diagnostics-emit.ts"), "utf8");
+    expect(emit).not.toMatch(/warning\.message|message\.match|parseBreakOutside/);
   });
 });
