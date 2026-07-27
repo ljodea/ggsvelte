@@ -206,6 +206,11 @@
       "sourceSha256": "d471551633c7bf1f3b844babb7bf362456f0b77c36f5accdfc726db1a36a9b29",
       "pngSha256": "50ddc15712530f71fda35c44b4cb11db0ca2ee47fddce5004960322ee18401c3"
     },
+    "line/function": {
+      "filename": "line-function-light.png",
+      "sourceSha256": "476d3658027ddc820a489a2f183b57ac8bea3f65dd66de5f3ea33d48574c40a7",
+      "pngSha256": "5dd1feed84dc2483b802d010aac11d8e033d4b5390f9167ddacf9e9b81fd6246"
+    },
     "line/multi-series": {
       "filename": "line-multi-series-light.png",
       "sourceSha256": "b96ff1cc3bf02c2d4d65a7a593c43efa135545562a13459e4e0c259a9649bc38",

@@ -16,6 +16,7 @@ export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
   smooth: [],
   boxplot: [],
   summary: [],
+  function: ["y"],
   ecdf: ["ecdf"],
   // y/ymin/ymax are field-mapped measure outputs (not {stat} y columns).
   summary_bin: [],

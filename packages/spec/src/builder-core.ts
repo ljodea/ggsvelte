@@ -47,6 +47,7 @@ import type {
   GeomRuleOptions,
   GeomRugOptions,
   GeomSegmentOptions,
+  GeomFunctionOptions,
   GeomPolygonOptions,
   GeomAblineOptions,
   GeomVlineOptions,
@@ -375,6 +376,14 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'qq_line', ... }) — Q–Q reference line. */
   geomQqLine(options: GeomQqLineOptions = {}): GGBuilder {
     return this.layer(layerFrom("qq_line", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'function', ... }). Evaluate a named portable
+   * function (dnorm/pnorm/identity/linear) on a grid and draw a path.
+   */
+  geomFunction(options: GeomFunctionOptions): GGBuilder {
+    return this.layer(layerFrom("function", options));
   }
 
   /**

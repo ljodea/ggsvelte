@@ -255,6 +255,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "50ddc15712530f71fda35c44b4cb11db0ca2ee47fddce5004960322ee18401c3",
   },
   {
+    id: "line/function",
+    filename: "line-function-light.png",
+    path: "/previews/line-function-light.png",
+    sha256: "5dd1feed84dc2483b802d010aac11d8e033d4b5390f9167ddacf9e9b81fd6246",
+  },
+  {
     id: "line/multi-series",
     filename: "line-multi-series-light.png",
     path: "/previews/line-multi-series-light.png",

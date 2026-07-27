@@ -31,6 +31,7 @@ import type {
   VlineParams,
   RugParams,
   SegmentParams,
+  FunctionParams,
   PolygonParams,
   AblineParams,
   QuantileParams,
@@ -342,6 +343,12 @@ export interface GeomAblineOptions extends AblineParams, GeomDataOption {
 
 /** Rug-layer sugar options: sides/length + stroke params. */
 export interface GeomRugOptions extends RugParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Function-layer sugar: named fun required (+ grid / domain / paint). */
+export interface GeomFunctionOptions extends FunctionParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

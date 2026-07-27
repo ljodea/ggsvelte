@@ -1234,6 +1234,102 @@
       "additionalProperties": false,
       "description": "Styling parameters for the boxplot geom."
     },
+    "FunctionRegistryName": {
+      "anyOf": [
+        {
+          "type": "string",
+          "const": "identity"
+        },
+        {
+          "type": "string",
+          "const": "dnorm"
+        },
+        {
+          "type": "string",
+          "const": "pnorm"
+        },
+        {
+          "type": "string",
+          "const": "linear"
+        }
+      ],
+      "description": "Portable named function for stat/geom function: \"identity\", \"dnorm\" (normal PDF), \"pnorm\" (normal CDF), or \"linear\" (a + b·x)."
+    },
+    "FunctionArgs": {
+      "type": "object",
+      "properties": {
+        "mean": {
+          "type": "number",
+          "description": "Mean for dnorm/pnorm. Default 0."
+        },
+        "sd": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Standard deviation for dnorm/pnorm (must be > 0). Default 1."
+        },
+        "a": {
+          "type": "number",
+          "description": "Intercept for linear (y = a + b·x). Default 0."
+        },
+        "b": {
+          "type": "number",
+          "description": "Slope for linear (y = a + b·x). Default 1."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Named arguments for the registry function."
+    },
+    "FunctionParams": {
+      "type": "object",
+      "required": [
+        "fun"
+      ],
+      "properties": {
+        "fun": {
+          "$ref": "#/$defs/FunctionRegistryName",
+          "description": "Required named function from the portable registry."
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 10000,
+          "description": "Number of evaluation grid points (2–10000). Default 101."
+        },
+        "xlim": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Evaluation domain [min, max] (min < max). When omitted, uses continuous aes.x extent or peer-layer x domain."
+        },
+        "args": {
+          "$ref": "#/$defs/FunctionArgs"
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Path opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px. Must be greater than 0. Default 1.5."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom/stat function: named fun, grid size n, optional xlim and args."
+    },
     "DotplotParams": {
       "type": "object",
       "properties": {
@@ -4169,6 +4265,46 @@
       "additionalProperties": false,
       "description": "A finite segment layer (ggplot2's geom_segment). Requires x, y, xend, and yend channels."
     },
+    "FunctionLayer": {
+      "type": "object",
+      "required": [
+        "geom",
+        "params"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "function",
+          "description": "Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers."
+        },
+        "stat": {
+          "type": "string",
+          "const": "function",
+          "description": "Function layers evaluate a named registry function on a grid."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Function layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/FunctionParams",
+          "description": "Function parameters (fun is required)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "An analytic function layer (ggplot2's geom_function). y is computed as { stat: y }; do not map data y. Portable fun names only (no JS closures)."
+    },
     "CurveLayer": {
       "type": "object",
       "required": [
@@ -4741,6 +4877,9 @@
         },
         {
           "$ref": "#/$defs/SegmentLayer"
+        },
+        {
+          "$ref": "#/$defs/FunctionLayer"
         },
         {
           "$ref": "#/$defs/PolygonLayer"

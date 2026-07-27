@@ -45,6 +45,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   crossbar: ["x"],
   rect: ["xmin", "xmax", "ymin", "ymax"],
   segment: ["x", "y", "xend", "yend"],
+  function: [], // domain from xlim / peer / optional x; y is after_stat
   polygon: ["x", "y"],
   spoke: ["x", "y"], // angle/radius: aes or params — checked below
   curve: ["x", "y", "xend", "yend"],
@@ -277,6 +278,22 @@ export function layerStructuralErrors(
         fix: {
           description: "Remove the y mapping (or unset an inherited one with null).",
           example: { geom: "density", aes: { y: null } },
+        },
+      });
+    }
+  }
+
+  if (geom === "function" || stat === "function") {
+    const y = mapped("y");
+    if (y !== undefined && !("stat" in y)) {
+      errors.push({
+        code: "computed-y-mapped",
+        path: `${layerPath}/aes/y`,
+        message:
+          "The function geom/stat computes y from the named function, so aes.y must not map data. Unset y with null.",
+        fix: {
+          description: "Remove the y mapping (or unset an inherited one with null).",
+          example: { geom: "function", aes: { y: null }, params: { fun: "dnorm", xlim: [-3, 3] } },
         },
       });
     }

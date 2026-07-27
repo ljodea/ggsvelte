@@ -376,7 +376,57 @@ export class MockResponder implements Responder {
       profile.fields.some((field) => field.name === name) ? name : undefined;
 
     // --- geom selection (keyword templates, most specific first) -----------
-    if (/\bgeom[_\s]?linerange\b|\bgeom[_\s]?pointrange\b|\bgeom[_\s]?crossbar\b/.test(prompt)) {
+    if (
+      /\bgeom[_\s]?function\b|\bstat[_\s]?function\b|\bdnorm\b|\bpnorm\b|\banalytical? (?:curve|function)\b|\bnormal density\b/.test(
+        prompt,
+      )
+    ) {
+      // geom_function / stat_function: portable named registry curve (#797).
+      const fun = /\bpnorm\b/.test(prompt)
+        ? "pnorm"
+        : /\bdnorm\b|\bnormal density\b|\bpdf\b/.test(prompt)
+          ? "dnorm"
+          : /\blinear\b/.test(prompt)
+            ? "linear"
+            : "identity";
+      const params: Record<string, unknown> = { fun };
+      const xlimMatch = prompt.match(/\bxlim from (\d+(?:\.\d+)?) to (\d+(?:\.\d+)?)/i);
+      if (xlimMatch) {
+        params["xlim"] = [Number(xlimMatch[1]), Number(xlimMatch[2])];
+      } else if (/\bxlim\b|\[-?3/.test(prompt)) {
+        params["xlim"] = [-3, 3];
+      }
+      const nMatch = prompt.match(/\b(\d+)\s+evaluation points?\b/i);
+      if (nMatch) params["n"] = Number(nMatch[1]);
+      else if (fun === "dnorm") params["n"] = 101;
+      if (fun === "dnorm" || fun === "pnorm") params["args"] = { mean: 0, sd: 1 };
+
+      const x = fieldNamed("x");
+      if (x !== undefined && fieldNamed("y") !== undefined) {
+        spec.layers.push({
+          geom: "point",
+          aes: { x: f(x), y: f("y") },
+        });
+      }
+      const functionAes: MockAes = { y: { stat: "y" } };
+      // When xlim is set, x need not be mapped (domain comes from params.xlim).
+      if (x !== undefined) functionAes.x = f(x);
+      else if (params["xlim"] === undefined) {
+        const fallbackX = pick.quant();
+        if (fallbackX !== undefined) functionAes.x = f(fallbackX);
+      }
+      spec.layers.push({
+        geom: "function",
+        stat: "function",
+        aes: functionAes,
+        params,
+      });
+      if (functionAes.x !== undefined && "field" in functionAes.x) {
+        xField = functionAes.x.field;
+      }
+    } else if (
+      /\bgeom[_\s]?linerange\b|\bgeom[_\s]?pointrange\b|\bgeom[_\s]?crossbar\b/.test(prompt)
+    ) {
       // Interval family beyond errorbar (#793). Multi-geom prompts emit all
       // named forms so corpus golds with three layers stay mock-reachable.
       const x = fieldNamed("group") ?? fieldNamed("treatment") ?? pick.cat() ?? "x";

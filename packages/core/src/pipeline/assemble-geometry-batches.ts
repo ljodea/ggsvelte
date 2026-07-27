@@ -52,6 +52,7 @@ export function buildGeometryBatches(input: {
       // topology survives until projectGeometryBatch (#809).
       const pathLike =
         geom === "line" ||
+        geom === "function" ||
         geom === "path" ||
         geom === "step" ||
         geom === "contour" ||
