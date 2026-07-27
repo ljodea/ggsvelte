@@ -66,10 +66,11 @@ function colourAliases(stem: string): string[] {
  *   position-temporal    6  (date/datetime/time × x/y)
  *   position-discrete    2
  *   color-fill          36
- *   numeric-style       21
+ *   numeric-style       24  (21 base + size area/radius family #830)
  *   finite-style         8
  *   ----------------------
- *   83 component files + 21 aliases (18 Colour + 3 Ordinal re-exports, #832)
+ *   86 component files + 22 aliases
+ *     (18 Colour + Size/Linewidth/Alpha/Shape Ordinal re-exports, #830/#832)
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
@@ -288,16 +289,18 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
   shell("scaleFillViridisD", "color-fill", "ViridisScaleOptions", ["ViridisScaleOptions"]),
   shell("scaleFillViridisB", "color-fill", "ViridisScaleOptions", ["ViridisScaleOptions"]),
 
-  // --- numeric-style (21 components; Linewidth/Alpha Discrete gain Ordinal
-  // re-export aliases for ggplot2 scale_*_ordinal, #832) -------------------
+  // --- numeric-style (24: 21 base + size area/radius #830; Discrete shells
+  // re-export Ordinal component names for ggplot2 scale_*_ordinal, #830/#832)
   ...(["Size", "Linewidth", "Alpha"] as const).flatMap((aes) => {
     const base = `scale${aes}`;
     const discreteAliases =
-      aes === "Linewidth"
-        ? (["ScaleLinewidthOrdinal"] as const)
-        : aes === "Alpha"
-          ? (["ScaleAlphaOrdinal"] as const)
-          : undefined;
+      aes === "Size"
+        ? (["ScaleSizeOrdinal"] as const)
+        : aes === "Linewidth"
+          ? (["ScaleLinewidthOrdinal"] as const)
+          : aes === "Alpha"
+            ? (["ScaleAlphaOrdinal"] as const)
+            : undefined;
     return [
       shell(`${base}Continuous`, "numeric-style", "SequentialStyleScaleOptions", [
         "SequentialStyleScaleOptions",
@@ -326,6 +329,12 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
       ]),
     ];
   }),
+  // size area / radius family (#830)
+  shell("scaleSizeArea", "numeric-style", "SizeAreaScaleOptions", ["SizeAreaScaleOptions"]),
+  shell("scaleSizeBinnedArea", "numeric-style", "SizeAreaScaleOptions", ["SizeAreaScaleOptions"]),
+  shell("scaleRadius", "numeric-style", "SequentialStyleScaleOptions", [
+    "SequentialStyleScaleOptions",
+  ]),
 
   // --- finite-style (8) — generics MUST be pinned to the aesthetic ----------
   // Ordinal shells re-export Discrete (ggplot2 scale_*_ordinal; #832).

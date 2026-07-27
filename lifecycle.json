@@ -1404,6 +1404,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "SizeAreaScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SizeSequentialStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SizeTemporalNumericStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "SmoothLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2264,6 +2276,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleRadius": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleShape": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2292,7 +2308,15 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleSizeArea": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleSizeBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeBinnedArea": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2317,6 +2341,10 @@
           "lifecycle": "experimental"
         },
         "scaleSizeManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeOrdinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2728,6 +2756,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_radius": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_shape": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2752,7 +2784,19 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_size": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_area": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_size_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_binned_area": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2777,6 +2821,10 @@
           "lifecycle": "experimental"
         },
         "scale_size_manual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_ordinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5325,6 +5373,10 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleRadius": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleShapeBinned": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -5345,7 +5397,15 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleSizeArea": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleSizeBinned": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleSizeBinnedArea": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -5370,6 +5430,10 @@
           "lifecycle": "stable-intent"
         },
         "ScaleSizeManual": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleSizeOrdinal": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },

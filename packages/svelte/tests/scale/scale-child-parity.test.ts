@@ -144,9 +144,9 @@ async function waitRegistry(get: () => LayerRegistry | undefined): Promise<Layer
 
 const helpers = shellHelpers();
 
-describe("scale-child parity (all 83 shells)", () => {
-  it(`enumerates exactly 83 helpers (got ${String(helpers.length)})`, () => {
-    expect(helpers).toHaveLength(83);
+describe("scale-child parity (all 86 shells)", () => {
+  it(`enumerates exactly 86 helpers (got ${String(helpers.length)})`, () => {
+    expect(helpers).toHaveLength(86);
   });
 
   for (const helper of helpers) {
@@ -267,7 +267,7 @@ describe("live prop update (one per family, ADR-0001 getter)", () => {
 });
 
 /**
- * The 83-shell sweep above runs on ScaleRegistryHost, which provides the
+ * The 86-shell sweep above runs on ScaleRegistryHost, which provides the
  * registry WITHOUT mounting <GGPlot> — pipeline training rejects many
  * scale+data combinations that are orthogonal to shell→helper parity. That
  * leaves the sweep proving "the shell registers the right fragment" but not
