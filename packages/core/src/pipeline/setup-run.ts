@@ -1,7 +1,7 @@
 /**
  * Pipeline run setup: normalize + validate, edition defaults, theme, coord flip.
  */
-import type { PortableSpec, SpecInput } from "@ggsvelte/spec";
+import type { NormalizedSpec, PortableSpec, SpecInput } from "@ggsvelte/spec";
 
 import type { EditionDefaults } from "../editions.js";
 import type { ThemeTokens } from "../theme.js";
@@ -12,7 +12,7 @@ import { resolvePipelineTheme } from "./setup-run-theme.js";
 import type { PipelineWarning, RunOptions } from "./types.js";
 
 export interface PipelineRunSetup {
-  normalized: PortableSpec;
+  normalized: NormalizedSpec;
   editionDefaults: EditionDefaults;
   theme: ThemeTokens;
   flip: boolean;

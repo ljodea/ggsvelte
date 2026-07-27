@@ -1,7 +1,7 @@
 /**
  * Resolve color/fill ChannelValue into a ColorBinding.
  */
-import type { ChannelValue } from "@ggsvelte/spec";
+import type { ChannelValue, StatName } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
@@ -12,7 +12,7 @@ import type { ColorBinding, PipelineWarning } from "./types.js";
 export function colorBinding(
   channel: ChannelValue | undefined,
   channelName: string,
-  stat: string,
+  stat: StatName,
   layerIndex: number,
   table: ColumnTable,
   warnings: PipelineWarning[],

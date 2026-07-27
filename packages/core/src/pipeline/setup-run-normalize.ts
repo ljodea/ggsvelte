@@ -1,7 +1,7 @@
 /**
  * Normalize + validate a pipeline spec entry.
  */
-import type { PortableSpec, SpecError, SpecInput } from "@ggsvelte/spec";
+import type { NormalizedSpec, PortableSpec, SpecError, SpecInput } from "@ggsvelte/spec";
 import {
   normalize,
   SpecValidationError,
@@ -56,7 +56,7 @@ function preflightTemporalLabels(spec: PortableSpec): void {
   }
 }
 
-export function normalizeAndValidateSpec(spec: SpecInput | PortableSpec): PortableSpec {
+export function normalizeAndValidateSpec(spec: SpecInput | PortableSpec): NormalizedSpec {
   const normalized = normalize(spec);
   // Preserve the stable pipeline diagnostic before the portable schema rejects
   // the same closed-token violation as a generic shape error.

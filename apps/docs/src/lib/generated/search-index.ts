@@ -3144,16 +3144,6 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["ellipse-group-dropped"],
   },
   {
-    id: "heading:guide-errors:stat-channel-unsupported-warning",
-    kind: "heading",
-    title: "stat-channel-unsupported — warning",
-    summary:
-      "stat-channel-unsupported — warning in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
-    href: "/guide/errors#stat-channel-unsupported-warning",
-    keywords: ["Errors reference", "Reference"],
-    exact: ["stat-channel-unsupported — warning"],
-  },
-  {
     id: "heading:guide-errors:palette-exhausted-warning",
     kind: "heading",
     title: "palette-exhausted — warning",
@@ -3852,14 +3842,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-852",
+    id: "heading:guide-lifecycle:experimental-858",
     kind: "heading",
-    title: "experimental (852)",
+    title: "experimental (858)",
     summary:
-      "experimental (852) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-852",
+      "experimental (858) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-858",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (852)"],
+    exact: ["experimental (858)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -4009,6 +3999,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/upgrading#grammar-props-removed-from-ggplot",
     keywords: ["Upgrade guide", "Release"],
     exact: ["Grammar props removed from <GGPlot>"],
+  },
+  {
+    id: "heading:guide-upgrading:normalize-returns-the-post-normalize-geom-union",
+    kind: "heading",
+    title: "normalize() returns the post-normalize geom union",
+    summary:
+      "normalize() returns the post-normalize geom union in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#normalize-returns-the-post-normalize-geom-union",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["normalize() returns the post-normalize geom union"],
   },
   {
     id: "heading:guide-upgrading:0-10-to-0-11",
@@ -5628,6 +5628,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["A11yMode"],
   },
   {
+    id: "api:ggsvelte-spec:ALIAS_GEOMS",
+    kind: "api",
+    title: "ALIAS_GEOMS",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["ALIAS_GEOMS"],
+  },
+  {
     id: "api:ggsvelte-spec:AblineLayer",
     kind: "api",
     title: "AblineLayer",
@@ -5689,6 +5698,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
     exact: ["AesSchema"],
+  },
+  {
+    id: "api:ggsvelte-spec:AliasGeomName",
+    kind: "api",
+    title: "AliasGeomName",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["AliasGeomName"],
   },
   {
     id: "api:ggsvelte-spec:AlphaScaleSpec",
@@ -6906,6 +6924,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["FunctionRegistryName"],
   },
   {
+    id: "api:ggsvelte-spec:GEOM_ALIASES",
+    kind: "api",
+    title: "GEOM_ALIASES",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["GEOM_ALIASES"],
+  },
+  {
     id: "api:ggsvelte-spec:GEOM_DEFAULTS",
     kind: "api",
     title: "GEOM_DEFAULTS",
@@ -8101,6 +8128,33 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
     exact: ["NoneGuideSpec"],
+  },
+  {
+    id: "api:ggsvelte-spec:NormalizedGeomName",
+    kind: "api",
+    title: "NormalizedGeomName",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["NormalizedGeomName"],
+  },
+  {
+    id: "api:ggsvelte-spec:NormalizedLayerSpec",
+    kind: "api",
+    title: "NormalizedLayerSpec",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["NormalizedLayerSpec"],
+  },
+  {
+    id: "api:ggsvelte-spec:NormalizedSpec",
+    kind: "api",
+    title: "NormalizedSpec",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["NormalizedSpec"],
   },
   {
     id: "api:ggsvelte-spec:NumericStyleScaleOptions",
@@ -24303,20 +24357,6 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["ellipse-group-dropped", "warning:ellipse-group-dropped"],
-  },
-  {
-    id: "diagnostic:warning:stat-channel-unsupported",
-    kind: "diagnostic",
-    title: "stat-channel-unsupported · warning",
-    summary:
-      "A color/fill after-stat mapping names an output the selected stat does not publish; the mapping is ignored (style channels throw the same code as an error).",
-    href: "/guide/errors#stat-channel-unsupported-warning",
-    keywords: [
-      "warning",
-      "warning",
-      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
-    ],
-    exact: ["stat-channel-unsupported", "warning:stat-channel-unsupported"],
   },
   {
     id: "diagnostic:warning:palette-exhausted",

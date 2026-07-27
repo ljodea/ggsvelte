@@ -57,6 +57,31 @@ export const KNOWN_GEOMS = [
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
 /**
+ * Convenience geom names normalize() rewrites away. None of these can reach
+ * the render pipeline, so pipeline tables key off {@link NormalizedGeomName}
+ * and the compiler names any geom they forget (#1042).
+ *
+ * Declared before GEOM_ALIASES on purpose: deriving the alias names from that
+ * table's keys and then constraining its values to NormalizedGeomName would be
+ * circular, and the looser constraint would accept an alias pointing at
+ * another alias — which one pass of canonicalGeom() would leave in place.
+ */
+export const ALIAS_GEOMS = ["histogram", "freqpoly", "jitter", "hline", "vline"] as const;
+export type AliasGeomName = (typeof ALIAS_GEOMS)[number];
+
+/** A geom name that can reach the render pipeline (post-normalize). */
+export type NormalizedGeomName = Exclude<GeomName, AliasGeomName>;
+
+/** What each alias rewrites to. Targets are canonical, never another alias. */
+export const GEOM_ALIASES = {
+  histogram: "bar",
+  freqpoly: "line",
+  jitter: "point",
+  hline: "rule",
+  vline: "rule",
+} as const satisfies Record<AliasGeomName, NormalizedGeomName>;
+
+/**
  * The current DEFAULTS EDITION (Hadley lesson 13: fix accumulated bad
  * defaults "without breaking existing code"). normalize() stamps this onto
  * specs that carry no `edition`, freezing which generation of default

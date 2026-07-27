@@ -45,14 +45,24 @@ export {
 export type { LinetypeName, PointShapeName } from "./schema-names.js";
 
 export {
+  ALIAS_GEOMS,
   CHANNELS,
   CURRENT_EDITION,
+  GEOM_ALIASES,
   GEOM_DEFAULTS,
   KNOWN_GEOMS,
   KNOWN_POSITIONS,
   KNOWN_STATS,
 } from "./schema-catalog.js";
-export type { ChannelName, GeomName, PositionName, StatName } from "./schema-catalog.js";
+export type {
+  AliasGeomName,
+  ChannelName,
+  GeomName,
+  NormalizedGeomName,
+  PositionName,
+  StatName,
+} from "./schema-catalog.js";
+import type { NormalizedGeomName } from "./schema-catalog.js";
 
 /**
  * Named-defs module surface (public).
@@ -471,6 +481,13 @@ export type LayerSpec =
   | HexLayer
   | QqLayer
   | QqLineLayer;
+/**
+ * A layer that survived normalize(): the alias geoms (histogram, freqpoly,
+ * jitter, hline, vline) are rewritten by then, so this union is 44 wide, not
+ * 49. Keying pipeline tables off it lets `tsc` name a geom nobody handled
+ * instead of leaving a silent `default:` arm (#1042).
+ */
+export type NormalizedLayerSpec = Extract<LayerSpec, { geom: NormalizedGeomName }>;
 /** Stackable position adjustment names. */
 export type StackablePosition = SpecType<"StackablePosition">;
 /** Position adjustments accepted by point layers. */
@@ -537,4 +554,15 @@ export type PortableSpec = Omit<SpecType<"PlotSpec">, "data" | "datasets" | "lay
   data?: DataRef;
   datasets?: Record<string, InlineData>;
   layers: LayerSpec[];
+};
+
+/**
+ * What normalize() returns: a PortableSpec whose layers carry no alias geom.
+ *
+ * Assignable to PortableSpec, so passing the result on is unchanged. The JSON
+ * Schema keeps describing PortableSpec — histogram and friends stay legal
+ * *input*; they just cannot survive normalize().
+ */
+export type NormalizedSpec = Omit<PortableSpec, "layers"> & {
+  layers: NormalizedLayerSpec[];
 };

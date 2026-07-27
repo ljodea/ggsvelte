@@ -1,7 +1,7 @@
 /**
  * Layer binding contract: aes field resolution result for one layer.
  */
-import type { LayerSpec, TemporalParserSpec } from "@ggsvelte/spec";
+import type { NormalizedLayerSpec, TemporalParserSpec } from "@ggsvelte/spec";
 
 import type { CellValue } from "../table.js";
 import type { ColumnTransformConfig } from "../scales/transform.js";
@@ -57,7 +57,7 @@ export interface StyleBinding {
 export type RuleForm = "annotation" | "vertical" | "horizontal";
 
 export interface LayerBinding {
-  layer: LayerSpec;
+  layer: NormalizedLayerSpec;
   index: number;
   /**
    * Unfiltered source table this layer owns (plot inheritance or layer DataRef).

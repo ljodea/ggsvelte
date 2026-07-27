@@ -1,7 +1,7 @@
 /**
  * Resolve positional channels (x/y/ymin/ymax/xmin/xmax) and validate geom/stat contracts.
  */
-import type { Aes, LayerSpec } from "@ggsvelte/spec";
+import type { Aes, LayerSpec, NormalizedLayerSpec } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
@@ -17,7 +17,7 @@ import { PipelineError } from "./types.js";
 import type { LayerBinding, PipelineWarning } from "./types.js";
 
 export function resolveLayerPositionChannels(input: {
-  layer: LayerSpec;
+  layer: NormalizedLayerSpec;
   aes: Aes;
   index: number;
   table: ColumnTable;

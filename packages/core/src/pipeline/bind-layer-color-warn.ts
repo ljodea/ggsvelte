@@ -1,10 +1,12 @@
 /**
  * Warn and clear color mappings on fill-only geoms.
  */
+import type { NormalizedGeomName } from "@ggsvelte/spec";
+
 import type { ColorBinding, PipelineWarning } from "./types.js";
 
 export function applyColorOnFillGeomWarning(
-  geom: string,
+  geom: NormalizedGeomName,
   index: number,
   color: ColorBinding,
   warnings: PipelineWarning[],

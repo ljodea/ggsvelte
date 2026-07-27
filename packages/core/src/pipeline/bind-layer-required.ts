@@ -1,12 +1,14 @@
 /**
  * Required-channel checks for bindLayer by geom/stat.
  */
+import type { NormalizedGeomName, StatName } from "@ggsvelte/spec";
+
 import { requireField } from "./bind-layer-check-field.js";
 import type { RuleForm } from "./types.js";
 
 export function assertRequiredChannels(input: {
-  geom: string;
-  stat: string;
+  geom: NormalizedGeomName;
+  stat: StatName;
   index: number;
   ruleForm: RuleForm | null;
   xField: string | null;

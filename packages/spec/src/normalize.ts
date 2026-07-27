@@ -31,19 +31,21 @@
  */
 import type {
   Aes,
+  AliasGeomName,
   ChannelValue,
   FacetSpec,
   GuidesSpec,
   GuideSpec,
-  LayerSpec,
-  PortableSpec,
+  NormalizedGeomName,
+  NormalizedLayerSpec,
+  NormalizedSpec,
   ThemeName,
   ThemeSpec,
 } from "./schema.js";
 import { normalizeCoord } from "./normalize-coord.js";
 import { normalizeLayerParamsPaint } from "./normalize-paint.js";
 import { normalizeScales } from "./normalize-scales.js";
-import { CHANNELS, CURRENT_EDITION, GEOM_DEFAULTS } from "./schema.js";
+import { CHANNELS, CURRENT_EDITION, GEOM_ALIASES, GEOM_DEFAULTS } from "./schema.js";
 import type {
   AesInput,
   ChannelInput,
@@ -175,16 +177,15 @@ function isAnnotationAbline(layer: LayerInput): boolean {
 /**
  * Convenience geom aliases (#818 / histogram / freqpoly): rewrite to the
  * canonical geom name. Pure renames only — no cross-field params surgery.
+ *
+ * The rewrite is GEOM_ALIASES, so the alias set is one table core can key its
+ * pipeline records off (#1042) rather than a fact buried in this branch.
  */
-function canonicalGeom(geom: LayerInput["geom"]): LayerSpec["geom"] {
-  if (geom === "histogram") return "bar";
-  if (geom === "freqpoly") return "line";
-  if (geom === "jitter") return "point";
-  if (geom === "hline" || geom === "vline") return "rule";
-  return geom;
+function canonicalGeom(geom: LayerInput["geom"]): NormalizedGeomName {
+  return geom in GEOM_ALIASES ? GEOM_ALIASES[geom as AliasGeomName] : (geom as NormalizedGeomName);
 }
 
-function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec {
+function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): NormalizedLayerSpec {
   // Data-driven hline/vline are one-axis rules: drop the orthogonal position
   // channel from inheritance so plot-level x+y does not trigger rule-both-axes.
   let layerAesInput = layer.aes;
@@ -267,7 +268,7 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
     ...(layer.data !== undefined && { data: layer.data }),
     ...(params !== undefined && { params }),
   };
-  return out as LayerSpec;
+  return out as NormalizedLayerSpec;
 }
 
 /** Canonicalize one facet field: bare string -> { field }; clone levels/labels. */
@@ -343,14 +344,21 @@ function normalizeGuides(guides: GuidesSpec): GuidesSpec {
   );
 }
 
-/** Canonicalize a SpecInput into a normalized PortableSpec (see module docs). */
-export function normalize(input: SpecInput): PortableSpec {
+/**
+ * Canonicalize a SpecInput into a normalized PortableSpec (see module docs).
+ *
+ * The NormalizedSpec return type promises one thing the runtime enforces —
+ * canonicalGeom() has rewritten every alias geom. It promises nothing about an
+ * unknown geom: normalize() deliberately never throws on one (see below), so
+ * the type is only sound once validate() has passed on the result.
+ */
+export function normalize(input: SpecInput): NormalizedSpec {
   const plotAes = normalizeAes(input.aes);
   // Defaults canonicalize away: Cartesian/identity coord and a11y "auto" ARE
   // the absent forms (one canonical form per concept).
   const coord = normalizeCoord(input.coord);
   const a11y = input.a11y === "force-svg" ? input.a11y : undefined;
-  const out: PortableSpec = {
+  const out: NormalizedSpec = {
     ...(input.$schema !== undefined && { $schema: input.$schema }),
     // Defaults-edition stamping (Hadley lesson 13): absent -> current, so the
     // spec's default look is frozen at authoring time (schema description).
