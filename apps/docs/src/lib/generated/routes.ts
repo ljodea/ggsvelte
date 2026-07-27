@@ -2267,8 +2267,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-715",
-        title: "experimental (715)",
+        id: "experimental-720",
+        title: "experimental (720)",
         level: 3,
       },
       {
@@ -2282,8 +2282,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-279",
-        title: "experimental (279)",
+        id: "experimental-282",
+        title: "experimental (282)",
         level: 3,
       },
       {
@@ -2307,8 +2307,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-505",
-        title: "experimental (505)",
+        id: "experimental-506",
+        title: "experimental (506)",
         level: 3,
       },
       {
@@ -2917,6 +2917,16 @@ export const DOCS_ROUTES = [
     title: "Canvas scatter (10,000 points) — ggsvelte gallery",
     description: "Canvas scatter (10,000 points)",
     canonicalPath: "/examples/point/canvas-scatter",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/point/count",
+    title: "Overplotting counts — ggsvelte gallery",
+    description: "Overplotting counts",
+    canonicalPath: "/examples/point/count",
     kind: "page",
     index: true,
     sitemap: true,

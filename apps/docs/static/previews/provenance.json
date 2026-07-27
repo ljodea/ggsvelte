@@ -226,6 +226,11 @@
       "sourceSha256": "dd7eac3cde73be8e80764027c9c930e3518153e41b47b4890124f847eef81219",
       "pngSha256": "297f6c0c6dd84b25b6b4346a9141811a342ffa9d822fe0c94fa0348f274c78ae"
     },
+    "point/count": {
+      "filename": "point-count-light.png",
+      "sourceSha256": "cead36fcb8cc956e617f79756ff36262bf34aec94e79389825598c402e6c0a61",
+      "pngSha256": "87033b2c117c563f4b73373439be9f7953298338a233786955f47e853555f9c0"
+    },
     "point/fixed-aspect": {
       "filename": "point-fixed-aspect-light.png",
       "sourceSha256": "419ae185a1738bfb3e95d7c51647a8460352252794b2e15af6e5c2dd8e49462e",

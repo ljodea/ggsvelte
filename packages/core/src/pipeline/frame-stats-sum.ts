@@ -25,8 +25,7 @@ function positionCells(
     if (!Number.isFinite(v)) return null;
     // Preserve original cell for discrete keys when transform is identity.
     if (transform === undefined || transform.transform.key === "identity") {
-      const cell = raw[i]!;
-      return cell === null ? null : cell;
+      return raw[i]!;
     }
     return v;
   });
