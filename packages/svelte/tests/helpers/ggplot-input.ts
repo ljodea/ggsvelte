@@ -48,7 +48,7 @@ function portableCoord(coord: CoordSpec | "flip"): CoordSpec {
 }
 
 /** True when any #704-removed grammar key is present. */
-export function hasGrammarProps(input: GrammarBag): boolean {
+function hasGrammarProps(input: GrammarBag): boolean {
   return (
     input.theme !== undefined ||
     input.scales !== undefined ||
