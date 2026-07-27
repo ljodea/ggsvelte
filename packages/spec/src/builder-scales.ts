@@ -26,6 +26,7 @@ import {
   scaleXContinuous,
   scaleXDate,
   scaleXDatetime,
+  scaleXTime,
   scaleXDiscrete,
   scaleXLog10,
   scaleXReverse,
@@ -34,6 +35,7 @@ import {
   scaleYContinuous,
   scaleYDate,
   scaleYDatetime,
+  scaleYTime,
   scaleYDiscrete,
   scaleYLog10,
   scaleYReverse,
@@ -115,6 +117,11 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
       return this.scales(scaleXDatetime(options));
     }
 
+    /** Configure the x scale as time-of-day (seconds since midnight, #831). */
+    scaleXTime(options: TemporalScaleOptions = {}): GGBuilder {
+      return this.scales(scaleXTime(options));
+    }
+
     /** Configure the y scale as calendar dates. */
     scaleYDate(options: TemporalScaleOptions = {}): GGBuilder {
       return this.scales(scaleYDate(options));
@@ -123,6 +130,11 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
     /** Configure the y scale as date-time instants. */
     scaleYDatetime(options: TemporalScaleOptions = {}): GGBuilder {
       return this.scales(scaleYDatetime(options));
+    }
+
+    /** Configure the y scale as time-of-day (seconds since midnight, #831). */
+    scaleYTime(options: TemporalScaleOptions = {}): GGBuilder {
+      return this.scales(scaleYTime(options));
     }
 
     /** Force x values to remain discrete categories. */

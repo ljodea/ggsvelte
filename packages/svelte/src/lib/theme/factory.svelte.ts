@@ -67,6 +67,8 @@ const THEME_ROLE_KEYS = [
   "axisLineY",
   "ticksX",
   "ticksY",
+  "labelsX",
+  "labelsY",
   "gridX",
   "gridY",
   "showPanelBorder",

@@ -1,0 +1,45 @@
+{
+  "id": "73-elevation-contour-breaks",
+  "kind": "chart",
+  "prompt": "Contour the temperature surface with explicit levels at 0.5 and 1.5.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "temp", "type": "quantitative" }
+    ],
+    "rowCount": 9
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 0, "temp": 0 },
+      { "x": 1, "y": 0, "temp": 1 },
+      { "x": 2, "y": 0, "temp": 2 },
+      { "x": 0, "y": 1, "temp": 0.5 },
+      { "x": 1, "y": 1, "temp": 1.5 },
+      { "x": 2, "y": 1, "temp": 2.5 },
+      { "x": 0, "y": 2, "temp": 1 },
+      { "x": 1, "y": 2, "temp": 2 },
+      { "x": 2, "y": 2, "temp": 3 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "contour",
+        "stat": "contour",
+        "position": "identity",
+        "params": { "breaks": [0.5, 1.5] },
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "z": { "field": "temp" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_contour with params.breaks for explicit isoline levels (#801)."
+}

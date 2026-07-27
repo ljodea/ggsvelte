@@ -22,7 +22,9 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
   const geom = binding.layer.geom;
   const yConversion = yConversionOf(binding);
 
-  if (isBarLike(geom) || geom === "density") acc.barMeasure = true;
+  // Dotplot stackdir "up"/"down" benefit from a zero baseline so the first
+  // stack row sits on the axis (ggplot2 count-unit stacks).
+  if (isBarLike(geom) || geom === "density" || geom === "dotplot") acc.barMeasure = true;
   if (frame.ymin !== null && frame.ymax !== null) {
     acc.numeric.push(frame.ymin, frame.ymax);
     // Bands need not cover the center line (se: false smooths have
@@ -74,6 +76,12 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
     acc.typeParts.add(fieldType);
     if (fieldType === "nominal") acc.anyDiscrete = true;
     if (fieldType !== "temporal") acc.allTemporal = false;
+    acc.sawContinuousEvidence = true;
+  } else if (frame.yNumeric !== null) {
+    // Synthesized continuous y without aes.y (e.g. geom_map fortified vertices).
+    acc.numeric.push(frame.yNumeric);
+    acc.typeParts.add("quantitative");
+    acc.allTemporal = false;
     acc.sawContinuousEvidence = true;
   }
   // Segment end y: dual evidence (numeric + discrete) even when yField is set.

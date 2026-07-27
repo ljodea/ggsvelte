@@ -57,6 +57,56 @@ function expandedStepVertices(
   return { positions: p, rows: r, anchors: a, indices };
 }
 
+/**
+ * Until coord_sf remaps multi-ring hole topology through tessellation, drop
+ * interior-ring vertices (and even-odd metadata) before projection so exterior
+ * alone is rendered. Deleting ringStarts/fillRule while keeping hole verts
+ * merges exterior+hole into one ring (spurious chord + solid hole).
+ */
+function stripUnremappedHoleRings(batch: PathsBatch): number {
+  const breaks = batch.ringStarts;
+  if (breaks === undefined || breaks.length === 0) {
+    if (batch.fillRule !== undefined) delete batch.fillRule;
+    return 0;
+  }
+  const positions: number[] = [];
+  const rows: number[] = [];
+  const closedFrameRows: number[] | undefined =
+    batch.closedFrameRows === undefined ? undefined : [];
+  const offsets: number[] = [0];
+  let dropped = 0;
+  for (let s = 0; s + 1 < batch.pathOffsets.length; s++) {
+    const start = batch.pathOffsets[s]!;
+    const end = batch.pathOffsets[s + 1]!;
+    let exteriorEnd = end;
+    for (let i = 0; i < breaks.length; i++) {
+      const rs = breaks[i]!;
+      if (rs > start && rs < end) {
+        exteriorEnd = rs;
+        break;
+      }
+    }
+    dropped += end - exteriorEnd;
+    for (let v = start; v < exteriorEnd; v++) {
+      positions.push(batch.positions[v * 2]!, batch.positions[v * 2 + 1]!);
+      rows.push(batch.rowIndex[v]!);
+      if (closedFrameRows !== undefined) {
+        closedFrameRows.push(batch.closedFrameRows![v]!);
+      }
+    }
+    offsets.push(positions.length / 2);
+  }
+  batch.positions = Float32Array.from(positions);
+  batch.rowIndex = Uint32Array.from(rows);
+  batch.pathOffsets = Uint32Array.from(offsets);
+  if (closedFrameRows !== undefined) {
+    batch.closedFrameRows = Uint32Array.from(closedFrameRows);
+  }
+  delete batch.ringStarts;
+  delete batch.fillRule;
+  return dropped;
+}
+
 export function projectPathBatch(
   batch: PathsBatch,
   projector: PanelCoordProjector,
@@ -65,6 +115,18 @@ export function projectPathBatch(
   warnings: PipelineWarning[],
   sharedBudget?: CoordTessellationBudget,
 ): void {
+  const holesDropped = stripUnremappedHoleRings(batch);
+  if (holesDropped > 0 && sharedBudget !== undefined) {
+    sharedBudget.mandatoryVertices = Math.max(0, sharedBudget.mandatoryVertices - holesDropped);
+    const allowedExtra = Math.max(
+      0,
+      MAX_COORD_VERTICES_PER_PANEL_LAYER - sharedBudget.mandatoryVertices,
+    );
+    sharedBudget.extraRemaining = Math.min(
+      sharedBudget.extraRemaining + holesDropped,
+      allowedExtra,
+    );
+  }
   const projected: number[] = [];
   const rows: number[] = [];
   const semanticAnchors: number[] = [];
@@ -222,6 +284,10 @@ export function projectPathBatch(
   if (linetypeIndexes !== undefined) batch.linetypeIndexes = Uint8Array.from(linetypeIndexes);
   batch.semanticAnchors = Uint8Array.from(semanticAnchors);
   batch.semanticIndex = Uint32Array.from(semanticIndices);
+  // Hole verts + ringStarts are stripped at entry (stripUnremappedHoleRings).
+  // Keep a defensive clear if a future path reintroduces them mid-function.
+  if (batch.ringStarts !== undefined) delete batch.ringStarts;
+  if (batch.fillRule !== undefined) delete batch.fillRule;
   if (invalidVertices > 0) {
     warnings.push({
       code: "coord-invalid-geometry",

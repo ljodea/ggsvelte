@@ -36,6 +36,12 @@ describe("lineage represented-row filters", () => {
       groups: new Uint32Array([0, 0]),
       n: 2,
       binding: { layer: { params: { closed: "right" } } },
+      // The stat's own cut over breaks [0, 2, 4] (fuzz = 1e-8 × median gap).
+      binCut: {
+        fuzzy: [0 - 2e-8, 2 + 2e-8, 4 + 2e-8],
+        rightClosed: true,
+        binIndex: new Int32Array([0, 1]),
+      },
     });
     expect(
       filterBinRepresentedRows({
@@ -92,6 +98,11 @@ describe("lineage filter column hoist (issue #220)", () => {
       groups: new Uint32Array([0]),
       n: 1,
       binding: { layer: { params: { closed: "right" } } },
+      binCut: {
+        fuzzy: [0 - 2e-8, 2 + 2e-8],
+        rightClosed: true,
+        binIndex: new Int32Array([0]),
+      },
     });
     const baseRows = Array.from({ length: 40 }, (_, i) => i);
     const reads = countColumnReads("x", () => {

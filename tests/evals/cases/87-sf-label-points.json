@@ -1,0 +1,40 @@
+{
+  "id": "87-sf-label-points",
+  "kind": "chart",
+  "prompt": "Label GeoJSON Point cities with geom_sf_label boxed text by name.",
+  "dataProfile": {
+    "fields": [
+      { "name": "geometry", "type": "nominal" },
+      { "name": "name", "type": "nominal" }
+    ],
+    "rowCount": 2
+  },
+  "data": {
+    "main": [
+      {
+        "geometry": "{\"type\":\"Point\",\"coordinates\":[1,2]}",
+        "name": "Alpha"
+      },
+      {
+        "geometry": "{\"type\":\"Point\",\"coordinates\":[3,4]}",
+        "name": "Beta"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "sf_label",
+        "stat": "sf_coordinates",
+        "position": "identity",
+        "aes": {
+          "label": { "field": "name" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_sf_label Point family with boxes (#809 phase 3)."
+}

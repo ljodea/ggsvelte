@@ -240,6 +240,25 @@ describe("deriveGroups: edge cases", () => {
     expect(r.groupCount).toBe(1);
   });
 
+  test("angle/radius never participate in default grouping (#810)", () => {
+    // Plot-level spoke channels can inherit onto non-spoke layers; they must
+    // not split those layers when inferred discrete.
+    const t: Columns = {
+      x: [1, 2, 3, 4],
+      y: [1, 2, 3, 4],
+      angle: ["a", "b", "a", "b"],
+      radius: ["c", "c", "d", "d"],
+    };
+    const r = deriveGroups(t, {
+      x: { field: "x" },
+      y: { field: "y" },
+      angle: { field: "angle" },
+      radius: { field: "radius" },
+    });
+    expect(r.source).toBe("none");
+    expect(r.groupCount).toBe(1);
+  });
+
   test("zero-row table yields zero groups", () => {
     const r = deriveGroups({ cat1: [] }, { x: { field: "cat1" } });
     expect(r.groupCount).toBe(0);
