@@ -7,7 +7,9 @@ type SearchIndexModule = {
 type SearchIndexImporter = () => Promise<SearchIndexModule>;
 
 const defaultImporter: SearchIndexImporter = () =>
-  import("./generated/search-index.js") as Promise<SearchIndexModule>;
+  import("./generated/search-index.js").then((module) => ({
+    DOCS_SEARCH_INDEX: module.DOCS_SEARCH_INDEX,
+  }));
 
 let pending: Promise<readonly DocsSearchEntry[]> | undefined;
 
@@ -18,14 +20,12 @@ let pending: Promise<readonly DocsSearchEntry[]> | undefined;
 export function loadDocsSearchIndex(
   importer: SearchIndexImporter = defaultImporter,
 ): Promise<readonly DocsSearchEntry[]> {
-  if (pending === undefined) {
-    pending = importer()
-      .then((module) => module.DOCS_SEARCH_INDEX)
-      .catch((error: unknown) => {
-        pending = undefined;
-        throw error;
-      });
-  }
+  pending ??= importer()
+    .then((module) => module.DOCS_SEARCH_INDEX)
+    .catch((error: unknown) => {
+      pending = undefined;
+      throw error;
+    });
   return pending;
 }
 

@@ -37,7 +37,14 @@ describe("docs search index lazy load (#948)", () => {
   it("clears the cache after failure so a later open can retry", async () => {
     resetDocsSearchIndexLoaderForTests();
     const failing = loadDocsSearchIndex(() => Promise.reject(new Error("chunk missing")));
-    await expect(failing).rejects.toThrow("chunk missing");
+    let caught: unknown;
+    try {
+      await failing;
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(Error);
+    expect((caught as Error).message).toBe("chunk missing");
     const recovered = await loadDocsSearchIndex(() =>
       Promise.resolve({
         DOCS_SEARCH_INDEX: [
