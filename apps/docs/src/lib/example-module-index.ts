@@ -15,7 +15,10 @@ export function exampleIdFromGlobKey(path: string, leaf: string): string | null 
   const withoutLeaf = path.slice(0, -suffix.length);
   const parts = withoutLeaf.split("/").filter((segment) => segment.length > 0);
   if (parts.length < 2) return null;
-  return `${parts[parts.length - 2]}/${parts[parts.length - 1]}`;
+  const category = parts.at(-2);
+  const name = parts.at(-1);
+  if (category === undefined || name === undefined) return null;
+  return `${category}/${name}`;
 }
 
 /**
@@ -27,7 +30,9 @@ export function indexExampleModulesById<T>(table: Record<string, T>, leaf: strin
   for (const key of Object.keys(table)) {
     const id = exampleIdFromGlobKey(key, leaf);
     if (id === null || map.has(id)) continue;
-    map.set(id, table[key]!);
+    const value = table[key];
+    if (value === undefined) continue;
+    map.set(id, value);
   }
   return map;
 }
