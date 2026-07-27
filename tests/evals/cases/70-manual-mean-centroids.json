@@ -1,0 +1,41 @@
+{
+  "id": "70-manual-mean-centroids",
+  "kind": "chart",
+  "prompt": "Collapse each color group to its mean (x,y) centroid with stat manual fun mean on a point layer.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "g", "type": "nominal" }
+    ],
+    "rowCount": 6
+  },
+  "data": {
+    "main": [
+      { "x": 1, "y": 2, "g": "A" },
+      { "x": 3, "y": 4, "g": "A" },
+      { "x": 2, "y": 3, "g": "A" },
+      { "x": 5, "y": 1, "g": "B" },
+      { "x": 7, "y": 3, "g": "B" },
+      { "x": 6, "y": 2, "g": "B" }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "manual",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "color": { "field": "g" }
+        },
+        "params": { "fun": "mean" }
+      }
+    ]
+  },
+  "notes": "stat_manual portable mean: one synthetic row per group; x and y aggregated independently (#814)."
+}

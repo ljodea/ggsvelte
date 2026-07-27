@@ -74,7 +74,7 @@ describe("geom_label geometry (#792)", () => {
         .spec(),
       size,
     );
-    const glyphs = model.scene.batches.filter((b) => b.kind === "glyphs") as GlyphsBatch[];
+    const glyphs = model.scene.batches.filter((b) => b.kind === "glyphs");
     expect(glyphs).toHaveLength(1);
     const batch = glyphs[0]!;
     expect(batch.texts).toEqual(["A", "BB"]);

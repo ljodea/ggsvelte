@@ -1,4 +1,4 @@
-import type { CoordFixedSpec, Scales } from "@ggsvelte/spec";
+import type { CoordFixedSpec, CoordSfSpec, Scales } from "@ggsvelte/spec";
 
 import type { Tick } from "../layout/layout-types.js";
 import type { AxisGuidePlan } from "../layout/temporal-guide.js";
@@ -65,16 +65,22 @@ export interface FixedAspectLayoutResult {
  * Fit equal fixed-aspect data rectangles inside already-reserved panel allocations.
  * Chart chrome is therefore authoritative; this pass can only add paper gutters.
  */
+/** Fixed-aspect coord forms that share the same layout pass (`fixed` + `sf`). */
+export type FixedAspectCoordSpec = CoordFixedSpec | CoordSfSpec;
+
 export function applyFixedAspectLayout(input: {
   placements: readonly PanelPlacement[];
   panelScales: readonly { x: PositionScale; y: PositionScale }[];
-  coord: CoordFixedSpec;
+  coord: FixedAspectCoordSpec;
   faceted: boolean;
   freeX: boolean;
   freeY: boolean;
   scalesConfig: Scales;
   warnings: PipelineWarning[];
 }): FixedAspectLayoutResult {
+  // Both coord_fixed and coord_sf route through this pass; diagnostics must name
+  // the coordinate the user actually wrote.
+  const name = input.coord.type === "sf" ? "coord_sf" : "coord_fixed";
   if (input.freeX || input.freeY) {
     const cause =
       "Fixed-aspect coordinates cannot assign one truthful physical data-unit ratio across free positional facet scales.";
@@ -82,11 +88,11 @@ export function applyFixedAspectLayout(input: {
       code: "coord-fixed-free-scales",
       severity: "error",
       path: "/facet/scales",
-      problem: "coord_fixed is incompatible with free positional facet scales.",
+      problem: `${name} is incompatible with free positional facet scales.`,
       cause,
       fixes: [
         { description: 'Use facet.scales = "fixed".' },
-        { description: "Remove the fixed-aspect coordinate." },
+        { description: `Remove the ${name} coordinate.` },
       ],
       documentationUrl: "/guide/coordinate-systems#fixed-aspect",
     });
@@ -104,7 +110,7 @@ export function applyFixedAspectLayout(input: {
       code: "coord-fixed-invalid-aspect",
       severity: "error",
       path: "/coord/ratio",
-      problem: "coord_fixed computed a non-finite or non-positive target aspect.",
+      problem: `${name} computed a non-finite or non-positive target aspect.`,
       cause,
       fixes: [
         { description: "Use a moderate finite ratio (for example between 0.1 and 10)." },
@@ -134,7 +140,7 @@ export function applyFixedAspectLayout(input: {
       code: "coord-fixed-invalid-aspect",
       severity: "error",
       path: "/coord",
-      problem: "coord_fixed has no positive panel allocation to fit a data rectangle into.",
+      problem: `${name} has no positive panel allocation to fit a data rectangle into.`,
       cause,
       fixes: [
         { description: "Increase the plot width/height." },
@@ -160,7 +166,7 @@ export function applyFixedAspectLayout(input: {
       code: "coord-fixed-invalid-aspect",
       severity: "error",
       path: "/coord/ratio",
-      problem: "coord_fixed cannot fit a positive finite data rectangle at the requested ratio.",
+      problem: `${name} cannot fit a positive finite data rectangle at the requested ratio.`,
       cause,
       fixes: [
         { description: "Use a less extreme ratio." },

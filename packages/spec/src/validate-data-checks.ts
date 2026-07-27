@@ -42,10 +42,22 @@ export const STAT_COLUMNS: Record<string, readonly string[]> = {
   identity: [],
   count: ["count"],
   bin: ["count", "density", "ncount", "ndensity"],
+  bin_hex: ["count", "density", "ncount", "ndensity"],
+  bin_2d: ["count", "density", "ncount", "ndensity"],
   density: ["density", "count", "scaled", "ndensity"],
+  bindot: ["stackpos"],
   smooth: ["y", "ymin", "ymax", "se"],
   boxplot: ["ymin", "lower", "middle", "upper", "ymax"],
   summary: ["y", "ymin", "ymax"],
+  /** ggplot2 after_stat(ecdf); y channel defaults to this column. */
+  ecdf: ["ecdf"],
+  summary_bin: ["y", "ymin", "ymax"],
+  contour: ["level"],
+  quantile: ["y"],
+  density_2d: ["level", "density"],
+  density_2d_filled: ["level", "density"],
+  qq: ["sample", "theoretical"],
+  qq_line: ["sample", "theoretical"],
 };
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -175,7 +187,13 @@ export function dataChecks(
         );
       }
     }
-    if (geom === "histogram" || geom === "density" || (geom === "bar" && stat === "bin")) {
+    if (
+      geom === "histogram" ||
+      geom === "freqpoly" ||
+      geom === "density" ||
+      (geom === "bar" && stat === "bin") ||
+      (geom === "line" && stat === "bin")
+    ) {
       const x = fieldTypeOf("x");
       if (x !== null && (x[1] === "nominal" || x[1] === "ordinal")) {
         typeError(

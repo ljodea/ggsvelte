@@ -1,0 +1,87 @@
+{
+  "id": "98-polygon-regions",
+  "kind": "chart",
+  "prompt": "Draw two closed regions from their vertices using geom_polygon, filled by region.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "x",
+        "type": "quantitative"
+      },
+      {
+        "name": "y",
+        "type": "quantitative"
+      },
+      {
+        "name": "region",
+        "type": "nominal"
+      }
+    ],
+    "rowCount": 7
+  },
+  "data": {
+    "main": [
+      {
+        "x": 0,
+        "y": 0,
+        "region": "west"
+      },
+      {
+        "x": 2,
+        "y": 0,
+        "region": "west"
+      },
+      {
+        "x": 1,
+        "y": 2,
+        "region": "west"
+      },
+      {
+        "x": 3,
+        "y": 0,
+        "region": "east"
+      },
+      {
+        "x": 5,
+        "y": 0,
+        "region": "east"
+      },
+      {
+        "x": 5,
+        "y": 1.5,
+        "region": "east"
+      },
+      {
+        "x": 3,
+        "y": 1.2,
+        "region": "east"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "polygon",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": {
+            "field": "x"
+          },
+          "y": {
+            "field": "y"
+          },
+          "fill": {
+            "field": "region"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Canonical gold for geom_polygon: vertices connect in data order per group and close implicitly (#807)."
+}

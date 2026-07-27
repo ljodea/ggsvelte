@@ -95,5 +95,31 @@ describe("segment geom (spec)", () => {
     if (result.ok) return;
     expect(result.errors.some((e) => e.code === "missing-required-channel")).toBe(true);
     expect(result.errors.map((e) => e.path).join(" ")).toMatch(/xend|yend/);
+    expect(result.errors.map((e) => e.message).join(" ")).toMatch(/segment geom/);
+  });
+
+  it("rejects constant curve endpoints and names curve (not segment) in the message", () => {
+    const result = validate(
+      {
+        data: { values: [{ x: 1, y: 2 }] },
+        layers: [
+          {
+            geom: "curve",
+            aes: {
+              x: { field: "x" },
+              y: { field: "y" },
+              xend: { value: 3 },
+              yend: { value: 4 },
+            },
+          },
+        ],
+      },
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const messages = result.errors.map((e) => e.message).join(" ");
+    expect(messages).toMatch(/curve geom/);
+    expect(messages).not.toMatch(/segment geom/);
   });
 });

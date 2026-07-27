@@ -5,6 +5,9 @@
 
 import type { ColorScaleSpec, Scales } from "./schema.js";
 import { SEQUENTIAL_SCHEME_NAMES } from "./schema-names.js";
+import { buildGreyPalette, buildHuePalette } from "./hue-grey-palettes.js";
+
+type SequentialSchemeName = (typeof SEQUENTIAL_SCHEME_NAMES)[number];
 
 const SEQUENTIAL_SCHEMES = new Set<string>(SEQUENTIAL_SCHEME_NAMES);
 
@@ -188,3 +191,359 @@ export const scale_fill_date = scaleFillDate;
 export const scale_fill_datetime = scaleFillDatetime;
 export const scale_fill_manual = scaleFillManual;
 export const scale_fill_identity = scaleFillIdentity;
+
+// --- viridis family constructors (#828) -------------------------------------
+// ggplot2 scale_*_viridis_{c,d,b}. Helper-only fields `option` and `direction`
+// are stripped before PortableSpec; `begin`/`end` deferred.
+
+export type ViridisOptionName = SequentialSchemeName;
+
+/** Shared option surface for scale_*_viridis_* constructors. */
+export type ViridisScaleOptions = {
+  /** Viridis-family map name (default `"viridis"`). Maps to PortableSpec `scheme`. */
+  option?: ViridisOptionName;
+  /**
+   * ggplot2 direction: `1` (default) dark→bright, `-1` reverses the ramp.
+   * Emitted as PortableSpec `reverse: true` when `-1`.
+   */
+  direction?: 1 | -1;
+  reverse?: boolean;
+  domain?: SequentialColorScaleOptions["domain"];
+  range?: SequentialColorScaleOptions["range"];
+  breaks?: SequentialColorScaleOptions["breaks"];
+  labels?: SequentialColorScaleOptions["labels"];
+  oob?: SequentialColorScaleOptions["oob"];
+  naValue?: SequentialColorScaleOptions["naValue"];
+  unknownValue?: SequentialColorScaleOptions["unknownValue"];
+  guide?: SequentialColorScaleOptions["guide"];
+  transform?: SequentialColorScaleOptions["transform"];
+  domainMode?: DiscreteColorScaleOptions["domainMode"];
+  onExhaust?: DiscreteColorScaleOptions["onExhaust"];
+};
+
+const VIRIDIS_OPTIONS = new Set<string>(SEQUENTIAL_SCHEME_NAMES);
+
+function resolveViridisPortable(options: ViridisScaleOptions): ColorScaleOptions {
+  const { option, direction, reverse, ...rest } = options;
+  if (option !== undefined && !VIRIDIS_OPTIONS.has(option)) {
+    throw new Error(
+      `Unknown viridis option "${option}". Expected one of: ${SEQUENTIAL_SCHEME_NAMES.join(", ")}.`,
+    );
+  }
+  const out: ColorScaleOptions = {
+    scheme: option ?? "viridis",
+  };
+  if (rest.domain !== undefined) out.domain = rest.domain;
+  if (rest.range !== undefined) out.range = rest.range;
+  if (rest.breaks !== undefined) out.breaks = rest.breaks;
+  if (rest.labels !== undefined) out.labels = rest.labels;
+  if (rest.oob !== undefined) out.oob = rest.oob;
+  if (rest.naValue !== undefined) out.naValue = rest.naValue;
+  if (rest.unknownValue !== undefined) out.unknownValue = rest.unknownValue;
+  if (rest.guide !== undefined) out.guide = rest.guide;
+  if (rest.transform !== undefined) out.transform = rest.transform;
+  if (rest.domainMode !== undefined) out.domainMode = rest.domainMode;
+  if (rest.onExhaust !== undefined) out.onExhaust = rest.onExhaust;
+  if (reverse === true || direction === -1) out.reverse = true;
+  return out;
+}
+
+export function scaleColorViridisC(options: ViridisScaleOptions = {}): Scales {
+  return colorScale("color", "sequential", resolveViridisPortable(options));
+}
+export function scaleColorViridisD(options: ViridisScaleOptions = {}): Scales {
+  return colorScale("color", "ordinal", resolveViridisPortable(options));
+}
+export function scaleColorViridisB(options: ViridisScaleOptions = {}): Scales {
+  return colorScale("color", "binned", resolveViridisPortable(options));
+}
+export function scaleFillViridisC(options: ViridisScaleOptions = {}): Scales {
+  return colorScale("fill", "sequential", resolveViridisPortable(options));
+}
+export function scaleFillViridisD(options: ViridisScaleOptions = {}): Scales {
+  return colorScale("fill", "ordinal", resolveViridisPortable(options));
+}
+export function scaleFillViridisB(options: ViridisScaleOptions = {}): Scales {
+  return colorScale("fill", "binned", resolveViridisPortable(options));
+}
+
+export const scaleColourViridisC = scaleColorViridisC;
+export const scaleColourViridisD = scaleColorViridisD;
+export const scaleColourViridisB = scaleColorViridisB;
+export const scale_color_viridis_c = scaleColorViridisC;
+export const scale_color_viridis_d = scaleColorViridisD;
+export const scale_color_viridis_b = scaleColorViridisB;
+export const scale_colour_viridis_c = scaleColorViridisC;
+export const scale_colour_viridis_d = scaleColorViridisD;
+export const scale_colour_viridis_b = scaleColorViridisB;
+export const scale_fill_viridis_c = scaleFillViridisC;
+export const scale_fill_viridis_d = scaleFillViridisD;
+export const scale_fill_viridis_b = scaleFillViridisB;
+// --- gradient / gradient2 / gradientn (#826) --------------------------------
+// Map onto sequential color with explicit range stops. Hex-only (ColorScaleSpec).
+
+/** ggplot2-shaped two-stop continuous colour (default navy → sky). */
+export type GradientScaleOptions = Omit<SequentialColorScaleOptions, "scheme" | "range"> & {
+  low?: string;
+  high?: string;
+};
+
+/**
+ * Diverging three-stop continuous colour.
+ * v1: mid is the center stop of `range` only — no asymmetric domain remapping
+ * (ggplot2 `midpoint` deferred; not accepted so it cannot silently no-op).
+ */
+export type Gradient2ScaleOptions = Omit<SequentialColorScaleOptions, "scheme" | "range"> & {
+  low?: string;
+  mid?: string;
+  high?: string;
+};
+
+/** N-stop continuous colour; requires ≥2 hex stops via colours/colors/values. */
+export type GradientnScaleOptions = Omit<SequentialColorScaleOptions, "scheme" | "range"> & {
+  colours?: readonly string[];
+  colors?: readonly string[];
+  values?: readonly string[];
+};
+
+const GRADIENT_DEFAULT_LOW = "#132B43";
+const GRADIENT_DEFAULT_HIGH = "#56B1F7";
+/** ggsvelte diverging defaults (red–light–blue); not claimed as ggplot2 muted(). */
+const GRADIENT2_DEFAULT_LOW = "#B2182B";
+const GRADIENT2_DEFAULT_MID = "#F7F7F7";
+const GRADIENT2_DEFAULT_HIGH = "#2166AC";
+
+function gradientRange(options: GradientScaleOptions): SequentialColorScaleOptions {
+  const { low = GRADIENT_DEFAULT_LOW, high = GRADIENT_DEFAULT_HIGH, ...rest } = options;
+  return { ...rest, range: [low, high] };
+}
+
+function gradient2Range(options: Gradient2ScaleOptions): SequentialColorScaleOptions {
+  const {
+    low = GRADIENT2_DEFAULT_LOW,
+    mid = GRADIENT2_DEFAULT_MID,
+    high = GRADIENT2_DEFAULT_HIGH,
+    ...rest
+  } = options;
+  return { ...rest, range: [low, mid, high] };
+}
+
+function gradientnRange(options: GradientnScaleOptions): SequentialColorScaleOptions {
+  const { colours, colors, values, ...rest } = options;
+  const stops = colours ?? colors ?? values;
+  if (stops === undefined || stops.length < 2) {
+    throw new Error(
+      "scale_*_gradientn requires colours/colors/values with at least 2 #rgb/#rrggbb stops.",
+    );
+  }
+  return { ...rest, range: [...stops] };
+}
+
+export function scaleColorGradient(options: GradientScaleOptions = {}): Scales {
+  return colorScale("color", "sequential", gradientRange(options));
+}
+export function scaleColorGradient2(options: Gradient2ScaleOptions = {}): Scales {
+  return colorScale("color", "sequential", gradient2Range(options));
+}
+export function scaleColorGradientn(options: GradientnScaleOptions = {}): Scales {
+  return colorScale("color", "sequential", gradientnRange(options));
+}
+
+export function scaleFillGradient(options: GradientScaleOptions = {}): Scales {
+  return colorScale("fill", "sequential", gradientRange(options));
+}
+export function scaleFillGradient2(options: Gradient2ScaleOptions = {}): Scales {
+  return colorScale("fill", "sequential", gradient2Range(options));
+}
+export function scaleFillGradientn(options: GradientnScaleOptions = {}): Scales {
+  return colorScale("fill", "sequential", gradientnRange(options));
+}
+
+export const scaleColourGradient = scaleColorGradient;
+export const scaleColourGradient2 = scaleColorGradient2;
+export const scaleColourGradientn = scaleColorGradientn;
+export const scale_color_gradient = scaleColorGradient;
+export const scale_color_gradient2 = scaleColorGradient2;
+export const scale_color_gradientn = scaleColorGradientn;
+export const scale_colour_gradient = scaleColorGradient;
+export const scale_colour_gradient2 = scaleColorGradient2;
+export const scale_colour_gradientn = scaleColorGradientn;
+export const scale_fill_gradient = scaleFillGradient;
+export const scale_fill_gradient2 = scaleFillGradient2;
+export const scale_fill_gradientn = scaleFillGradientn;
+// --- hue / grey / ordinal (#829) --------------------------------------------
+
+const HUE_STOPS = 10;
+const GREY_STOPS = 10;
+
+/** scale_*_hue options: discrete + optional HSL-ish h/c/l (bake range if set). */
+export type HueScaleOptions = Omit<DiscreteColorScaleOptions, "scheme" | "range"> & {
+  /** Hue range in degrees [start, end). Default [15, 375). */
+  h?: readonly [number, number];
+  /** Chroma proxy 0–100 → HSL saturation. Default 100. */
+  c?: number;
+  /** Lightness 0–100. Default 65. */
+  l?: number;
+};
+
+/** scale_*_grey / gray options. */
+export type GreyScaleOptions = Omit<DiscreteColorScaleOptions, "scheme" | "range"> & {
+  /** Lightness start in [0, 1]. Default 0.2. */
+  start?: number;
+  /** Lightness end in [0, 1]. Default 0.8. */
+  end?: number;
+};
+
+export type OrdinalColorScaleOptions = DiscreteColorScaleOptions;
+
+function hueConfig(options: HueScaleOptions): DiscreteColorScaleOptions {
+  const { h, c, l, ...rest } = options;
+  if (h !== undefined || c !== undefined || l !== undefined) {
+    return {
+      ...rest,
+      range: buildHuePalette(HUE_STOPS, h ?? [15, 375], c ?? 100, l ?? 65),
+    };
+  }
+  return { ...rest, scheme: "hue" };
+}
+
+function greyConfig(options: GreyScaleOptions): DiscreteColorScaleOptions {
+  const { start, end, ...rest } = options;
+  if (start !== undefined || end !== undefined) {
+    return {
+      ...rest,
+      range: buildGreyPalette(GREY_STOPS, start ?? 0.2, end ?? 0.8),
+    };
+  }
+  return { ...rest, scheme: "grey" };
+}
+
+export function scaleColorHue(options: HueScaleOptions = {}): Scales {
+  return colorScale("color", "ordinal", hueConfig(options));
+}
+export function scaleColorGrey(options: GreyScaleOptions = {}): Scales {
+  return colorScale("color", "ordinal", greyConfig(options));
+}
+/** Binding-identical American spelling of scaleColorGrey. */
+export const scaleColorGray = scaleColorGrey;
+/** Binding-identical alias of scaleColorDiscrete (ggplot2 scale_*_ordinal). */
+export const scaleColorOrdinal = scaleColorDiscrete;
+
+export function scaleFillHue(options: HueScaleOptions = {}): Scales {
+  return colorScale("fill", "ordinal", hueConfig(options));
+}
+export function scaleFillGrey(options: GreyScaleOptions = {}): Scales {
+  return colorScale("fill", "ordinal", greyConfig(options));
+}
+/** Binding-identical American spelling of scaleFillGrey. */
+export const scaleFillGray = scaleFillGrey;
+/** Binding-identical alias of scaleFillDiscrete. */
+export const scaleFillOrdinal = scaleFillDiscrete;
+
+export const scaleColourHue = scaleColorHue;
+export const scaleColourGrey = scaleColorGrey;
+export const scaleColourGray = scaleColorGray;
+export const scaleColourOrdinal = scaleColorOrdinal;
+export const scale_color_hue = scaleColorHue;
+export const scale_color_grey = scaleColorGrey;
+export const scale_color_gray = scaleColorGray;
+export const scale_color_ordinal = scaleColorOrdinal;
+export const scale_colour_hue = scaleColorHue;
+export const scale_colour_grey = scaleColorGrey;
+export const scale_colour_gray = scaleColorGray;
+export const scale_colour_ordinal = scaleColorOrdinal;
+export const scale_fill_hue = scaleFillHue;
+export const scale_fill_grey = scaleFillGrey;
+export const scale_fill_gray = scaleFillGray;
+export const scale_fill_ordinal = scaleFillOrdinal;
+
+// --- steps / steps2 / stepsn (#827) ----------------------------------------
+// Binned continuous colour with hard steps (ggplot2 scale_*_steps*).
+
+/** Two-stop stepped continuous colour (default navy → sky). */
+export type StepsScaleOptions = Omit<BinnedColorScaleOptions, "scheme" | "range"> & {
+  low?: string;
+  high?: string;
+};
+
+/**
+ * Three-stop stepped diverging colour.
+ * v1: no `midpoint` param (asymmetric domain remapping deferred).
+ */
+export type Steps2ScaleOptions = Omit<BinnedColorScaleOptions, "scheme" | "range"> & {
+  low?: string;
+  mid?: string;
+  high?: string;
+};
+
+/** N-stop stepped colour; requires ≥2 hex stops via colours/colors/values. */
+export type StepsnScaleOptions = Omit<BinnedColorScaleOptions, "scheme" | "range"> & {
+  colours?: readonly string[];
+  colors?: readonly string[];
+  values?: readonly string[];
+};
+
+const STEPS_DEFAULT_LOW = "#132B43";
+const STEPS_DEFAULT_HIGH = "#56B1F7";
+const STEPS2_DEFAULT_LOW = "#B2182B";
+const STEPS2_DEFAULT_MID = "#F7F7F7";
+const STEPS2_DEFAULT_HIGH = "#2166AC";
+
+function stepsRange(options: StepsScaleOptions): BinnedColorScaleOptions {
+  const { low = STEPS_DEFAULT_LOW, high = STEPS_DEFAULT_HIGH, ...rest } = options;
+  return { ...rest, range: [low, high] };
+}
+
+function steps2Range(options: Steps2ScaleOptions): BinnedColorScaleOptions {
+  const {
+    low = STEPS2_DEFAULT_LOW,
+    mid = STEPS2_DEFAULT_MID,
+    high = STEPS2_DEFAULT_HIGH,
+    ...rest
+  } = options;
+  return { ...rest, range: [low, mid, high] };
+}
+
+function stepsnRange(options: StepsnScaleOptions): BinnedColorScaleOptions {
+  const { colours, colors, values, ...rest } = options;
+  const stops = colours ?? colors ?? values;
+  if (stops === undefined || stops.length < 2) {
+    throw new Error(
+      "scale_*_stepsn requires colours/colors/values with at least 2 #rgb/#rrggbb stops.",
+    );
+  }
+  return { ...rest, range: [...stops] };
+}
+
+export function scaleColorSteps(options: StepsScaleOptions = {}): Scales {
+  return colorScale("color", "binned", stepsRange(options));
+}
+export function scaleColorSteps2(options: Steps2ScaleOptions = {}): Scales {
+  return colorScale("color", "binned", steps2Range(options));
+}
+export function scaleColorStepsn(options: StepsnScaleOptions = {}): Scales {
+  return colorScale("color", "binned", stepsnRange(options));
+}
+
+export function scaleFillSteps(options: StepsScaleOptions = {}): Scales {
+  return colorScale("fill", "binned", stepsRange(options));
+}
+export function scaleFillSteps2(options: Steps2ScaleOptions = {}): Scales {
+  return colorScale("fill", "binned", steps2Range(options));
+}
+export function scaleFillStepsn(options: StepsnScaleOptions = {}): Scales {
+  return colorScale("fill", "binned", stepsnRange(options));
+}
+
+export const scaleColourSteps = scaleColorSteps;
+export const scaleColourSteps2 = scaleColorSteps2;
+export const scaleColourStepsn = scaleColorStepsn;
+export const scale_color_steps = scaleColorSteps;
+export const scale_color_steps2 = scaleColorSteps2;
+export const scale_color_stepsn = scaleColorStepsn;
+export const scale_colour_steps = scaleColorSteps;
+export const scale_colour_steps2 = scaleColorSteps2;
+export const scale_colour_stepsn = scaleColorStepsn;
+export const scale_fill_steps = scaleFillSteps;
+export const scale_fill_steps2 = scaleFillSteps2;
+export const scale_fill_stepsn = scaleFillStepsn;

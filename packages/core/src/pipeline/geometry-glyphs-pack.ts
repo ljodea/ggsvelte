@@ -30,7 +30,7 @@ export function packGlyphsBatch(input: {
     radius?: number;
     linewidth?: number;
   };
-  /** When true, attach geom_label background box fields. */
+  /** When true, attach label background box fields (geom_label / geom_sf_label). */
   withBox?: boolean;
   fill?: ResolvedColorScale | null;
 }): GlyphsBatch | null {

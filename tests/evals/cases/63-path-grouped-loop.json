@@ -1,0 +1,42 @@
+{
+  "id": "63-path-grouped-loop",
+  "kind": "chart",
+  "prompt": "Draw two colored paths that follow each series in row order, suitable for loops or non-monotonic x.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "series", "type": "nominal" }
+    ],
+    "rowCount": 8
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 0, "series": "A" },
+      { "x": 1, "y": 1, "series": "A" },
+      { "x": 0.5, "y": 0.2, "series": "A" },
+      { "x": 0, "y": 0, "series": "A" },
+      { "x": 0, "y": 2, "series": "B" },
+      { "x": 1, "y": 3, "series": "B" },
+      { "x": 0.5, "y": 2.2, "series": "B" },
+      { "x": 0, "y": 2, "series": "B" }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "path",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "color": { "field": "series" }
+        }
+      }
+    ]
+  },
+  "notes": "Second path corpus cover: grouped data-order polylines with mapped color."
+}

@@ -47,12 +47,27 @@ export function buildGeometryBatches(input: {
       const placement = placements[p]!;
       const projector = coordProjectors[p];
       const geom = frame.binding.layer.geom;
+      // geom_sf points are ordinary PointsBatch marks — they must take the
+      // early panel-frame projector. path/polygon sf defer like line/map so
+      // topology survives until projectGeometryBatch (#809).
       const pathLike =
         geom === "line" ||
+        geom === "path" ||
+        geom === "step" ||
+        geom === "contour" ||
+        geom === "density_2d" ||
+        geom === "density_2d_filled" ||
         geom === "area" ||
         geom === "density" ||
         geom === "smooth" ||
-        geom === "ribbon";
+        geom === "quantile" ||
+        geom === "ribbon" ||
+        geom === "polygon" ||
+        geom === "map" ||
+        // Closed hex paths: project once in projectPathBatch (not via projected
+        // panel scales), same as density_2d_filled / map (#800).
+        geom === "hex" ||
+        (geom === "sf" && frame.sf?.kind !== "point");
       const built = buildBatch(
         frame,
         // Path topology must retain coordinate-invalid authored/stat vertices
