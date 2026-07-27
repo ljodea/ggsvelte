@@ -351,6 +351,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "6ea9c8f342288fc5f2069fd6fdd5da6445713d4c3bb6f5bbe29b38ed26d9b9f2",
   },
   {
+    id: "qq/normal",
+    filename: "qq-normal-light.png",
+    path: "/previews/qq-normal-light.png",
+    sha256: "3f85fa6cb7a76cb98173e74cb5a39ef2f8de37c00097f0feb8b3ae761cadfcf7",
+  },
+  {
     id: "raster/grid",
     filename: "raster-grid-light.png",
     path: "/previews/raster-grid-light.png",

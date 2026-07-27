@@ -286,6 +286,11 @@
       "sourceSha256": "3629ec64109b22c2f3b03b62668d6cc55c334683e45ff8c9362c2a9db7feb2f8",
       "pngSha256": "6ea9c8f342288fc5f2069fd6fdd5da6445713d4c3bb6f5bbe29b38ed26d9b9f2"
     },
+    "qq/normal": {
+      "filename": "qq-normal-light.png",
+      "sourceSha256": "bdfb803dbdd7310b34c95fb1accad062fba6ba6d2971c12dea56db698e59ad7f",
+      "pngSha256": "3f85fa6cb7a76cb98173e74cb5a39ef2f8de37c00097f0feb8b3ae761cadfcf7"
+    },
     "raster/grid": {
       "filename": "raster-grid-light.png",
       "sourceSha256": "88c5bbdd127acf278d0d2852d0834afdbc7d6febd80c87ee686ad3e1ac9826a9",
