@@ -201,4 +201,29 @@ describe("playground outputs", () => {
     expect(output).toContain("\\u2028");
     expect(output).toContain("\\u2029");
   });
+
+  // A second `"values": "__GG_PLAYGROUND_DATA_VALUES__"` (e.g. in layer params)
+  // makes the data seam non-unique; the generator must fall back to plain
+  // inline data rather than replacing the wrong occurrence.
+  test("falls back to inline data when the sentinel string appears as another values field", () => {
+    const forged: PortableSpec = {
+      ...spec,
+      layers: [
+        {
+          geom: "point",
+          stat: "identity",
+          position: "identity",
+          aes: { x: { field: "label" }, y: { field: "value" } },
+          // Forged second values field — same serial form as the data seam.
+          params: { values: "__GG_PLAYGROUND_DATA_VALUES__" },
+        },
+      ],
+    };
+    const output = playgroundSvelteOutput(forged);
+    expect(output).not.toContain("← replace with your rows");
+    expect(output).not.toMatch(/"values":\s*rows/u);
+    expect(output).toContain("const spec: PortableSpec =");
+    expect(output).toContain('"__GG_PLAYGROUND_DATA_VALUES__"');
+    expect(parseSpecFromSvelteOutput(output)).toEqual(forged);
+  });
 });

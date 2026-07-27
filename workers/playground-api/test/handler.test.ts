@@ -163,6 +163,79 @@ describe("handleGenerate", () => {
     );
   });
 
+  test("rejects whitespace-only, missing, and non-string prompts", async () => {
+    for (const body of [
+      { prompt: "   \n\t  ", datasetId: "penguins" },
+      { datasetId: "penguins" },
+      { prompt: 42, datasetId: "penguins" },
+      { prompt: null, datasetId: "penguins" },
+    ]) {
+      const res = await handleGenerate(request(body), {
+        OPENROUTER_API_KEY: "sk-test",
+        ...okLimiters,
+      });
+      expect(res.status).toBe(400);
+      expect(((await res.json()) as { error: { code: string } }).error.code).toBe("bad_request");
+    }
+  });
+
+  test("rejects non-array priorErrors", async () => {
+    const res = await handleGenerate(
+      request({
+        prompt: "fix",
+        datasetId: "penguins",
+        priorSpec: { edition: 2 },
+        priorErrors: { code: "not-an-array" },
+      }),
+      { OPENROUTER_API_KEY: "sk-test", ...okLimiters },
+    );
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as { error: { code: string } }).error.code).toBe("bad_request");
+  });
+
+  test("slices priorErrors to PRIOR_ERRORS_MAX before assembling messages", async () => {
+    let repairUser = "";
+    const seven = Array.from({ length: 7 }, (_, i) => ({
+      code: `err-${i}`,
+      path: `/${i}`,
+      message: `m${i}`,
+    }));
+    await handleGenerate(
+      request({
+        prompt: "fix",
+        datasetId: "penguins",
+        priorSpec: { edition: 2, data: { name: "penguins" }, layers: [] },
+        priorErrors: seven,
+      }),
+      {
+        OPENROUTER_API_KEY: "sk-test-key",
+        ...okLimiters,
+        fetch: (_url, init) => {
+          const body = JSON.parse(typeof init.body === "string" ? init.body : "{}") as {
+            messages?: Array<{ role: string; content: string }>;
+          };
+          repairUser =
+            body.messages?.find((m) => m.role === "user" && m.content.includes("SpecError"))
+              ?.content ??
+            body.messages?.filter((m) => m.role === "user").at(-1)?.content ??
+            "";
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({ model: "m", choices: [{ message: { content: "{}" } }] }),
+              {
+                status: 200,
+              },
+            ),
+          );
+        },
+      },
+    );
+    expect(repairUser).toContain("err-0");
+    expect(repairUser).toContain("err-4");
+    expect(repairUser).not.toContain("err-5");
+    expect(repairUser).not.toContain("err-6");
+  });
+
   test("disabled kill-switch and missing key", async () => {
     const disabled = await handleGenerate(request({ prompt: "hi", datasetId: "penguins" }), {
       DISABLED: "true",
@@ -237,6 +310,47 @@ describe("handleGenerate", () => {
       expect(line).toHaveProperty("outcome");
       expect(line).toHaveProperty("repair_used");
     }
+  });
+
+  // The 429 path returns a canned SAFE_MESSAGE and cannot exercise the
+  // false branches. A model envelope that itself embeds key-shaped text is
+  // the only path that hits sanitizeForLeak → false → bad_output.
+  test("drops a model envelope that contains a key-shaped string as bad_output", async () => {
+    const leaky = {
+      spec: {
+        edition: 2,
+        data: { name: "penguins" },
+        layers: [{ geom: "point" }],
+        labs: { title: "sk-abcdefghijklmnopqrstuvwxyz" },
+      },
+      interactions: { inspect: true },
+      title: "Leaked",
+    };
+    const res = await handleGenerate(request({ prompt: "scatter", datasetId: "penguins" }), {
+      OPENROUTER_API_KEY: "sk-test-key",
+      ...okLimiters,
+      fetch: () =>
+        Promise.resolve(
+          new Response(
+            JSON.stringify({
+              model: "test/model",
+              choices: [{ message: { content: JSON.stringify(leaky) } }],
+            }),
+            { status: 200 },
+          ),
+        ),
+    });
+    expect(res.status).toBe(statusForError("bad_output"));
+    const text = await res.text();
+    expect(text).not.toContain("sk-abcdefghijklmnopqrstuvwxyz");
+    expect((JSON.parse(text) as { error: { code: string } }).error.code).toBe("bad_output");
+  });
+
+  test("sanitizeForLeak flags key, Authorization Bearer, and OPENROUTER+key patterns", () => {
+    expect(sanitizeForLeak("plain chart title")).toBe(true);
+    expect(sanitizeForLeak("sk-abcdefghijklmnop")).toBe(false);
+    expect(sanitizeForLeak("Authorization: Bearer tok")).toBe(false);
+    expect(sanitizeForLeak("OPENROUTER_API_KEY present")).toBe(false);
   });
 
   test("happy path returns envelope JSON object", async () => {

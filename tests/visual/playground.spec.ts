@@ -427,6 +427,127 @@ test("cancel during generation reaches the aborted state", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Generate" })).toBeEnabled();
 });
 
+test("repair transport failure keeps prior chart and shows SpecError Details", async ({ page }) => {
+  let calls = 0;
+  await page.route("**/v1/generate", async (route) => {
+    calls += 1;
+    if (calls === 1) {
+      // Repairable: unknown field on curated penguins schema.
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          model: "stub/model",
+          envelope: {
+            spec: {
+              edition: 2,
+              data: { name: "penguins" },
+              layers: [
+                {
+                  geom: "point",
+                  aes: { x: { field: "no_such_field" }, y: { field: "mass" } },
+                },
+              ],
+              labs: { title: "Must not promote" },
+              height: 400,
+            },
+            interactions: {
+              inspect: true,
+              select: false,
+              zoom: false,
+              legendFilter: false,
+              legendFocus: false,
+            },
+            title: "Must not promote",
+          },
+        }),
+      });
+      return;
+    }
+    // Second call is the repair round — fail the transport.
+    await route.fulfill({
+      status: 502,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: false,
+        error: { code: "upstream_error", message: "Upstream failed" },
+      }),
+    });
+  });
+
+  const beforeTitle = await (async () => {
+    await page.goto("/playground?gg-api=live");
+    await settleVisualState(page);
+    return page.locator(".active-chart .gg-title").textContent();
+  })();
+
+  await page.getByLabel("Rewrite this chart").fill("Chart that needs repair then fails");
+  await page.getByRole("button", { name: "Generate" }).click();
+
+  const alert = page.getByRole("alert");
+  await expect(alert).toBeVisible();
+  // Degraded UX: Details disclosure with the first-round SpecError payload.
+  await expect(alert.getByText("Details")).toBeVisible();
+  await alert.getByText("Details").click();
+  await expect(alert.locator("pre")).toContainText("no_such_field");
+  // Prior chart stays put — never promote the invalid envelope.
+  await expect(page.locator(".active-chart .gg-title")).toHaveText(beforeTitle ?? "");
+  expect(calls).toBe(2);
+});
+
+test("repair still invalid surfaces validation Details and does not promote", async ({ page }) => {
+  await page.route("**/v1/generate", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        model: "stub/model",
+        envelope: {
+          spec: {
+            edition: 2,
+            data: { name: "penguins" },
+            layers: [
+              {
+                geom: "point",
+                aes: { x: { field: "no_such_field" }, y: { field: "mass" } },
+              },
+            ],
+            labs: { title: "Still broken" },
+            height: 400,
+          },
+          interactions: {
+            inspect: true,
+            select: false,
+            zoom: false,
+            legendFilter: false,
+            legendFocus: false,
+          },
+          title: "Still broken",
+        },
+      }),
+    });
+  });
+
+  await page.goto("/playground?gg-api=live");
+  await settleVisualState(page);
+  const beforeTitle = await page.locator(".active-chart .gg-title").textContent();
+
+  await page.getByLabel("Rewrite this chart").fill("Keep failing validation after repair");
+  await page.getByRole("button", { name: "Generate" }).click();
+
+  const alert = page.getByRole("alert");
+  await expect(alert).toBeVisible();
+  // Failure message is the first SpecError text (not a generic code label).
+  await expect(alert.locator("p").first()).not.toBeEmpty();
+  await expect(alert.getByText("Details")).toBeVisible();
+  await alert.getByText("Details").click();
+  await expect(alert.locator("pre")).toContainText("no_such_field");
+  await expect(page.locator(".active-chart .gg-title")).toHaveText(beforeTitle ?? "");
+  await expect(page.locator(".active-chart .gg-title")).not.toHaveText("Still broken");
+});
+
 test("capability toggles change codegen output", async ({ page }) => {
   await page.goto("/playground");
   await settleVisualState(page);
