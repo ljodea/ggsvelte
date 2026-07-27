@@ -20118,7 +20118,11 @@ export const DOCS_SEARCH_INDEX = [
     title: "coord-fixed-free-scales · validation",
     summary: "Fixed-aspect coordinates cannot represent free positional facet scales truthfully.",
     href: "/guide/errors#coord-fixed-free-scales",
-    keywords: ["validation", "error", 'Use facet.scales = "fixed", or remove coord_fixed.'],
+    keywords: [
+      "validation",
+      "error",
+      'Use facet.scales = "fixed", or remove coord_fixed / coord_sf.',
+    ],
     exact: ["coord-fixed-free-scales", "validation:coord-fixed-free-scales"],
   },
   {
@@ -20815,7 +20819,11 @@ export const DOCS_SEARCH_INDEX = [
     title: "coord-fixed-free-scales · pipeline",
     summary: "Fixed-aspect coordinates were combined with free positional facet scales.",
     href: "/guide/errors#coord-fixed-free-scales-pipeline",
-    keywords: ["pipeline", "error", 'Use facet.scales = "fixed", or remove coord_fixed.'],
+    keywords: [
+      "pipeline",
+      "error",
+      'Use facet.scales = "fixed", or remove coord_fixed / coord_sf.',
+    ],
     exact: ["coord-fixed-free-scales", "pipeline:coord-fixed-free-scales"],
   },
   {
