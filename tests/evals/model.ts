@@ -677,6 +677,28 @@ export class MockResponder implements Responder {
       const aes: MockAes = { x: f(x), y: f(y), fill: f(fill) };
       spec.layers.push({ geom: "raster", aes });
       xField = x;
+    } else if (
+      /\bgeom[_\s]?bin[_ ]?2d\b|\bbin[_ ]?2d\b|\b2d bin(?:ned)? heatmap\b|\b2d rectangular bins?\b|\brectangular bins?\b.*\bheatmap\b|\bheatmap\b.*\brectangular bins?\b|\bbin heatmap\b/.test(
+        prompt,
+      )
+    ) {
+      // geom_bin_2d + stat_bin_2d rectangular heatmap (#799).
+      // "Y against X" → y=first mention, x=second (same as scatter).
+      const first = pick.mentionedQuant() ?? pick.quant() ?? "x";
+      const second = pick.mentionedQuant() ?? pick.quant() ?? "y";
+      const reversed = /\b(?:against|versus|vs\.?)\b/.test(prompt);
+      const x = reversed ? second : first;
+      const y = reversed ? first : second;
+      const layer: MockLayer = {
+        geom: "bin_2d",
+        stat: "bin_2d",
+        position: "identity",
+        aes: { x: f(x), y: f(y), fill: { stat: "count" } },
+      };
+      const binsMatch = prompt.match(/\b(\d+)\s*bins?\b/);
+      if (binsMatch !== null) layer.params = { bins: Number(binsMatch[1]) };
+      spec.layers.push(layer);
+      xField = x;
     } else if (/\b(?:geom )?tiles?\b|heatmap/.test(prompt)) {
       const cats = profile.fields.filter(
         (field) => field.type === "nominal" || field.type === "ordinal",

@@ -31,6 +31,7 @@ export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
  * Stats absent from this map publish nothing for colour.
  */
 export const STAT_COLOR_COLUMNS: Record<string, readonly string[]> = {
+  bin_2d: ["count", "density", "ncount", "ndensity"],
   density_2d: ["level", "density"],
   density_2d_filled: ["level", "density"],
 };

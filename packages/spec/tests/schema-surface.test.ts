@@ -26,6 +26,7 @@ const VALUE_EXPORTS = [
   "ErrorbarLayerSchema",
   "RectLayerSchema",
   "TileLayerSchema",
+  "Bin2dLayerSchema",
   "RasterLayerSchema",
   "RibbonLayerSchema",
   "SegmentLayerSchema",

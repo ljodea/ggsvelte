@@ -1690,6 +1690,49 @@ export const SpecDeclarations = {
     },
   ),
 
+  Bin2dParams: Type.Object(
+    {
+      bins: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Number of bins on each axis (ggplot2 bins). Default 30. Applies equally to x and y in v1.",
+        }),
+      ),
+      binwidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Shared bin width in data units for both axes (overrides bins). Prefer when the scale units are meaningful.",
+        }),
+      ),
+      drop: Type.Optional(
+        Type.Boolean({
+          description:
+            "When true (default), omit zero-count bins from the output (ggplot2 drop=TRUE).",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Cell opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Outline stroke width in px when color is set. Must be greater than 0.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom/stat bin_2d (2D rectangular binning heatmap). fill defaults to after_stat count.",
+    },
+  ),
+
   TileParams: Type.Object(
     {
       width: Type.Optional(
@@ -3272,6 +3315,37 @@ export const SpecDeclarations = {
     },
   ),
 
+  Bin2dLayer: Type.Object(
+    {
+      geom: Type.Literal("bin_2d", {
+        description:
+          "2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("bin_2d", {
+          description: "2D binning stat (default for this geom).",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "bin_2d layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("Bin2dParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A 2D bin heatmap layer. Requires continuous x and y; fill defaults to after_stat count.",
+    },
+  ),
+
   RasterLayer: Type.Object(
     {
       geom: Type.Literal("raster", {
@@ -3969,6 +4043,7 @@ export const SpecDeclarations = {
       Type.Ref("MapLayer"),
       Type.Ref("RectLayer"),
       Type.Ref("TileLayer"),
+      Type.Ref("Bin2dLayer"),
       Type.Ref("RasterLayer"),
       Type.Ref("SegmentLayer"),
       Type.Ref("PolygonLayer"),

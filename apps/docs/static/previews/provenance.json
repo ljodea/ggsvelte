@@ -31,6 +31,11 @@
       "sourceSha256": "47592cf1390ecea94504fe57cad10e0424f588c8fdfef97eaf71274166601b3b",
       "pngSha256": "657e28882889051d30f128a66483bb0229a624edd6c2eb8d1ab4d49ebc02db58"
     },
+    "bin2d/basic": {
+      "filename": "bin2d-basic-light.png",
+      "sourceSha256": "2e096b03ccccec900e41e3bfe1cf3cd1314c55821efc8a5e226044aa9a91b5f4",
+      "pngSha256": "b0a1115a204dce5d5582cde656e2fa4fc8d395c49032c32d262aed476423121c"
+    },
     "blank/axes-only": {
       "filename": "blank-axes-only-light.png",
       "sourceSha256": "078d4dc764ff3b0cffd25d09ba1909eca67bfcb8c263cef7466b5dcf4d81b27e",

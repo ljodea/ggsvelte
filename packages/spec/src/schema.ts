@@ -150,6 +150,7 @@ export const DotplotLayerSchema = SpecModule.Import("DotplotLayer");
 export const ErrorbarLayerSchema = SpecModule.Import("ErrorbarLayer");
 export const RectLayerSchema = SpecModule.Import("RectLayer");
 export const TileLayerSchema = SpecModule.Import("TileLayer");
+export const Bin2dLayerSchema = SpecModule.Import("Bin2dLayer");
 export const RasterLayerSchema = SpecModule.Import("RasterLayer");
 export const AesSchema = SpecModule.Import("Aes");
 export const ChannelValueSchema = SpecModule.Import("ChannelValue");
@@ -274,6 +275,8 @@ export type ErrorbarParams = SpecType<"ErrorbarParams">;
 export type RectParams = SpecType<"RectParams">;
 /** Tile layer params. */
 export type TileParams = SpecType<"TileParams">;
+/** bin_2d layer params. */
+export type Bin2dParams = SpecType<"Bin2dParams">;
 /** Raster layer params. */
 export type RasterParams = SpecType<"RasterParams">;
 /** Ribbon layer params (outline, orientation, stroke ends). */
@@ -331,6 +334,8 @@ export type ErrorbarLayer = LayerWithDataRef<SpecType<"ErrorbarLayer">>;
 export type RectLayer = LayerWithDataRef<SpecType<"RectLayer">>;
 /** A tile layer (center-sized cells). */
 export type TileLayer = LayerWithDataRef<SpecType<"TileLayer">>;
+/** A 2D bin heatmap layer. */
+export type Bin2dLayer = LayerWithDataRef<SpecType<"Bin2dLayer">>;
 /** A raster layer (equal-cell dense grid). */
 export type RasterLayer = LayerWithDataRef<SpecType<"RasterLayer">>;
 /** A ribbon (interval band) layer. */
@@ -411,6 +416,7 @@ export type LayerSpec =
   | ErrorbarLayer
   | RectLayer
   | TileLayer
+  | Bin2dLayer
   | RasterLayer
   | QqLayer
   | QqLineLayer;
