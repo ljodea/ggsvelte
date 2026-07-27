@@ -84,6 +84,7 @@ export type {
   SfLabelLayerInput,
   CurveLayerInput,
   RugLayerInput,
+  StepLayerInput,
   LayerInput,
   LineLayerInput,
   PathLayerInput,

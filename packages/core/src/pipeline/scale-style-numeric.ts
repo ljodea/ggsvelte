@@ -6,7 +6,7 @@ import { encodeKey, type ScaleState } from "../scales/state.js";
 import { finiteExtent } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 
-import { resolveStyleLegendFormat } from "./scale-color-sequential-format.js";
+import { minAdjacentWidth, resolveStyleLegendFormat } from "./scale-color-sequential-format.js";
 import { discreteStyleResolution, styleGuideEntry } from "./scale-style-discrete.js";
 import type { NumericStyleAesthetic, StyleResolution } from "./scale-style-types.js";
 import { resolveNumericStyleValueView, type NumericStyleConfig } from "./scale-style-values.js";
@@ -239,12 +239,14 @@ function numericSequentialResolution(input: {
     kind === "binned"
       ? boundaries.slice(0, -1)
       : ((sequentialBreaks as number[] | undefined) ?? linearTicks(low, high, 5));
+  const formatStep = kind === "binned" ? minAdjacentWidth(boundaries) : undefined;
   const formatter = resolveStyleLegendFormat({
     domain,
     temporalKind: view.temporalKind,
     config,
     name: aesthetic,
     warnings,
+    ...(formatStep !== undefined && { formatStep }),
   });
   const entries = ticks.map((value, index) =>
     styleGuideEntry(

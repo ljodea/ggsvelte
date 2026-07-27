@@ -43,6 +43,7 @@ import type {
   SfTextParams,
   SfLabelParams,
   SpokeParams,
+  StepParams,
   Scales,
   QuantileParams,
   ContourParams,
@@ -378,6 +379,13 @@ export interface RugLayerInput extends LayerInputBase {
   params?: RugParams;
 }
 
+export interface StepLayerInput extends LayerInputBase {
+  geom: "step";
+  stat?: "identity";
+  position?: "identity";
+  params?: StepParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -415,7 +423,8 @@ export type LayerInput =
   | SfLabelLayerInput
   | BlankLayerInput
   | SpokeLayerInput
-  | RugLayerInput;
+  | RugLayerInput
+  | StepLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

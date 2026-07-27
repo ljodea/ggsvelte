@@ -41,6 +41,7 @@ export function dispatchGeometryBatch(
     case "dotplot":
       // Pass fill so histodot dots honor aes.fill (ggplot2 fill grouping; #900).
       return single(pointsBatch(frame, fx, color, styles, warnings, fill));
+    case "step":
     case "line": {
       // stat_connect emits tied-x step corners; a post-stat x-sort would
       // scramble elbows (#816). Identity line still sorts by x.

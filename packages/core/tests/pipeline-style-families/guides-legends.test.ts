@@ -123,6 +123,33 @@ describe("style guides and legend interactivity", () => {
     expect(plan.entries.map((entry) => entry.value)).toEqual([0, 25, 50, 75, 100]);
   });
 
+  it("keeps adjacent default binned size edges distinguishable in legend labels (#955)", () => {
+    const model = runPipeline(
+      fromAny({
+        data: {
+          values: [0, 1, 2, 3, 4].map((amount, index) => ({
+            x: index + 1,
+            y: index + 1,
+            amount,
+          })),
+        },
+        aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "amount" } },
+        layers: [{ geom: "point" }],
+        scales: { size: { type: "binned" } },
+      }),
+      viewport,
+    );
+    const plan = model.guidePlans.find((p) => p.aesthetic === "size");
+    if (plan?.type !== "discrete") throw new Error("expected size discrete guide plan");
+    expect(plan.entries.map((entry) => entry.label)).toEqual([
+      "0.0–0.8",
+      "0.8–1.6",
+      "1.6–2.4",
+      "2.4–3.2",
+      "3.2–4.0",
+    ]);
+  });
+
   it("rejects a field-mapped style on a fixed-intercept annotation rule", () => {
     // An annotation rule emits no data rows, so a field mapping has nothing to
     // map and would produce NaN/invalid style vectors — reject it loudly.
