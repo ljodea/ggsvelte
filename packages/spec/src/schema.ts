@@ -121,6 +121,7 @@ export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
 export const ViolinLayerSchema = SpecModule.Import("ViolinLayer");
+export const FunctionLayerSchema = SpecModule.Import("FunctionLayer");
 export const PolygonLayerSchema = SpecModule.Import("PolygonLayer");
 export const AblineLayerSchema = SpecModule.Import("AblineLayer");
 export const CurveLayerSchema = SpecModule.Import("CurveLayer");
@@ -241,6 +242,12 @@ export type VlineParams = SpecType<"VlineParams">;
 /** Segment layer params (styling + lineend). */
 export type SegmentParams = SpecType<"SegmentParams">;
 export type ViolinParams = SpecType<"ViolinParams">;
+/** Function layer params (named fun + grid). */
+export type FunctionParams = SpecType<"FunctionParams">;
+/** Named portable function registry entry. */
+export type FunctionRegistryName = SpecType<"FunctionRegistryName">;
+/** Args bag for registry functions. */
+export type FunctionArgs = SpecType<"FunctionArgs">;
 /** Polygon layer params (fill/stroke styling). */
 export type PolygonParams = SpecType<"PolygonParams">;
 export type AblineParams = SpecType<"AblineParams">;
@@ -371,6 +378,8 @@ export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
 /** A violin (mirrored y-density) layer. */
 export type ViolinLayer = LayerWithDataRef<SpecType<"ViolinLayer">>;
+/** An analytic function path layer (y = f(x) grid). */
+export type FunctionLayer = LayerWithDataRef<SpecType<"FunctionLayer">>;
 /** A closed polygon layer ((x,y) vertices in data order). */
 export type PolygonLayer = LayerWithDataRef<SpecType<"PolygonLayer">>;
 /** A slope/intercept reference line layer (geom_abline). */
@@ -419,6 +428,7 @@ export type LayerSpec =
   | RibbonLayer
   | SegmentLayer
   | ViolinLayer
+  | FunctionLayer
   | PolygonLayer
   | AblineLayer
   | CurveLayer

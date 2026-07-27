@@ -60,6 +60,7 @@ export type {
   GeomRugOptions,
   GeomSegmentOptions,
   GeomViolinOptions,
+  GeomFunctionOptions,
   GeomPolygonOptions,
   GeomAblineOptions,
   GeomCurveOptions,

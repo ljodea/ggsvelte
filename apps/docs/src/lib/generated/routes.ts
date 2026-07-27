@@ -2003,6 +2003,21 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "function-domain-missing",
+        title: "function-domain-missing",
+        level: 3,
+      },
+      {
+        id: "function-fun-missing",
+        title: "function-fun-missing",
+        level: 3,
+      },
+      {
+        id: "function-fun-unknown",
+        title: "function-fun-unknown",
+        level: 3,
+      },
+      {
         id: "hex-band-scale",
         title: "hex-band-scale",
         level: 3,
@@ -2282,8 +2297,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-814",
-        title: "experimental (814)",
+        id: "experimental-822",
+        title: "experimental (822)",
         level: 3,
       },
       {
@@ -2297,8 +2312,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-282",
-        title: "experimental (282)",
+        id: "experimental-284",
+        title: "experimental (284)",
         level: 3,
       },
       {
@@ -2322,8 +2337,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-516",
-        title: "experimental (516)",
+        id: "experimental-517",
+        title: "experimental (517)",
         level: 3,
       },
       {
@@ -2902,6 +2917,16 @@ export const DOCS_ROUTES = [
     title: "Empirical CDF — ggsvelte gallery",
     description: "Empirical CDF",
     canonicalPath: "/examples/line/ecdf",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/line/function",
+    title: "Normal PDF with geom_function — ggsvelte gallery",
+    description: "Normal PDF with geom_function",
+    canonicalPath: "/examples/line/function",
     kind: "page",
     index: true,
     sitemap: true,

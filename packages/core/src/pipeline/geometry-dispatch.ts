@@ -54,6 +54,7 @@ export function dispatchGeometryBatch(
         lineBatch(frame, fx, color, styles, warnings, connectNoSort ? { sortByX: false } : {}),
       );
     }
+    case "function":
     case "qq_line":
     case "quantile":
       // Fitted QR grids / QQ line endpoints are already ordered; treat like line.

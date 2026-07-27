@@ -333,6 +333,7 @@ export const STYLE_AESTHETIC_GEOMS = {
   ],
   linewidth: [
     "line",
+    "function",
     "qq_line",
     "path",
     "step",
@@ -371,6 +372,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "point",
     "jitter",
     "line",
+    "function",
     "qq",
     "qq_line",
     "path",
@@ -419,6 +421,7 @@ export const STYLE_AESTHETIC_GEOMS = {
   shape: ["point", "jitter", "dotplot", "pointrange", "sf", "blank", "qq"],
   linetype: [
     "line",
+    "function",
     "qq_line",
     "path",
     "step",

@@ -15,6 +15,7 @@ import { buildDensity2dFrame } from "./frame-stats-density-2d.js";
 import { buildEllipseFrame } from "./frame-stats-ellipse.js";
 import { buildBoxplotFrame, buildSmoothFrame, buildSummaryFrame } from "./frame-stats-fit.js";
 import { buildYDensityFrame } from "./frame-stats-ydensity.js";
+import { buildFunctionFrame } from "./frame-stats-function.js";
 import { buildQqFrame, buildQqLineFrame } from "./frame-stats-qq.js";
 import { buildManualFrame } from "./frame-stats-manual.js";
 import { buildContourFrame } from "./frame-stats-contour.js";
@@ -32,6 +33,7 @@ export function buildNonIdentityFrame(
   warnings: PipelineWarning[],
   advisories: Advisory[],
   binRange?: [number, number],
+  functionDomain?: [number, number],
 ): LayerFrame | null {
   const stat = binding.layer.stat ?? "identity";
   if (stat === "identity") return null;
@@ -63,6 +65,7 @@ export function buildNonIdentityFrame(
   if (stat === "contour") return buildContourFrame(binding, table, groups, warnings);
   if (stat === "boxplot") return buildBoxplotFrame(binding, table, groups, warnings);
   if (stat === "summary") return buildSummaryFrame(binding, table, groups, warnings);
+  if (stat === "function") return buildFunctionFrame(binding, table, warnings, functionDomain);
   if (stat === "qq") return buildQqFrame(binding, table, groups, warnings);
   if (stat === "qq_line") return buildQqLineFrame(binding, table, groups, warnings);
 

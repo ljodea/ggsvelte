@@ -26,6 +26,7 @@ import GeomRect from "../../src/lib/geoms/GeomRect.svelte";
 import GeomRule from "../../src/lib/geoms/GeomRule.svelte";
 import GeomSegment from "../../src/lib/geoms/GeomSegment.svelte";
 import GeomViolin from "../../src/lib/geoms/GeomViolin.svelte";
+import GeomFunction from "../../src/lib/geoms/GeomFunction.svelte";
 import GeomPolygon from "../../src/lib/geoms/GeomPolygon.svelte";
 import GeomSmooth from "../../src/lib/geoms/GeomSmooth.svelte";
 import GeomStep from "../../src/lib/geoms/GeomStep.svelte";
@@ -348,6 +349,17 @@ const cases: readonly GeomCase[] = [
     paramKey: "alpha",
     paramValue: 0.7,
     markSelector: ".gg-areas path",
+  },
+  {
+    name: "GeomFunction",
+    Component: GeomFunction,
+    geom: "function",
+    data: [{ dummy: 0 }],
+    aes: {},
+    geomProps: { fun: "dnorm", n: 21, xlim: [-2, 2], linewidth: 2 },
+    paramKey: "fun",
+    paramValue: "dnorm",
+    markSelector: ".gg-paths path",
   },
   {
     name: "GeomPolygon",

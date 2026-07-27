@@ -32,6 +32,7 @@ const VALUE_EXPORTS = [
   "RibbonLayerSchema",
   "SegmentLayerSchema",
   "ViolinLayerSchema",
+  "FunctionLayerSchema",
   "PolygonLayerSchema",
   "CurveLayerSchema",
   "StepLayerSchema",

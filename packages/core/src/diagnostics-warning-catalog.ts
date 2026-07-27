@@ -186,6 +186,16 @@ export const PIPELINE_WARNING_CATALOG = {
     summary:
       "geom_abline needs continuous x and y scales to clip y = intercept + slope · x; the layer is skipped on band axes.",
   },
+  "function-domain-missing": {
+    summary:
+      "geom/stat function could not resolve an x evaluation domain (no xlim, mapped x, or peer layer domain).",
+  },
+  "function-fun-missing": {
+    summary: "geom/stat function is missing the required params.fun registry function name.",
+  },
+  "function-fun-unknown": {
+    summary: "geom/stat function named an unknown params.fun registry function.",
+  },
   "hex-band-scale": {
     summary:
       "geom_hex needs continuous x and y scales for hexagonal binning; the layer is skipped on band axes.",

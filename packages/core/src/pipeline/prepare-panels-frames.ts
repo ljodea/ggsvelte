@@ -16,6 +16,7 @@ import { applyPosition } from "./position.js";
 import { resolveColumnTransform } from "./position-program.js";
 import { assertInferredTemporalTransform } from "./scale-config-preflight.js";
 import { computePanelBinRanges } from "./prepare-panels-bin-ranges.js";
+import { computeFunctionPeerDomains } from "./prepare-panels-function-ranges.js";
 import { resolveBinnedAxis } from "./resolve-binned-axis.js";
 import { warnEmptyLayers } from "./prepare-panels-empty-layers.js";
 import { assertRibbonBounds } from "./ribbon-bounds.js";
@@ -314,6 +315,7 @@ export function buildPanelFrames(input: {
     transformDiagnostics,
   );
   const binRanges = computePanelBinRanges(bindings, filteredLayerTables, faceted, freeX);
+  const functionDomains = computeFunctionPeerDomains(bindings, filteredLayerTables);
   for (let p = 0; p < facetPanels.length; p++) {
     for (let index = 0; index < bindings.length; index++) {
       const ctx = layerContexts[index]!;
@@ -332,6 +334,7 @@ export function buildPanelFrames(input: {
         warnings,
         advisories,
         binRanges[index],
+        functionDomains[index],
         normalized.datasets,
       );
       applyPosition(frame, advisories, slice.table);

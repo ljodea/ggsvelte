@@ -1425,6 +1425,92 @@ export const SpecDeclarations = {
     },
   ),
 
+  FunctionRegistryName: Type.Union(
+    [
+      Type.Literal("identity"),
+      Type.Literal("dnorm"),
+      Type.Literal("pnorm"),
+      Type.Literal("linear"),
+    ],
+    {
+      description:
+        'Portable named function for stat/geom function: "identity", "dnorm" (normal PDF), "pnorm" (normal CDF), or "linear" (a + b·x).',
+    },
+  ),
+
+  FunctionArgs: Type.Object(
+    {
+      mean: Type.Optional(Type.Number({ description: "Mean for dnorm/pnorm. Default 0." })),
+      sd: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Standard deviation for dnorm/pnorm (must be > 0). Default 1.",
+        }),
+      ),
+      a: Type.Optional(
+        Type.Number({ description: "Intercept for linear (y = a + b·x). Default 0." }),
+      ),
+      b: Type.Optional(Type.Number({ description: "Slope for linear (y = a + b·x). Default 1." })),
+    },
+    {
+      additionalProperties: false,
+      description: "Named arguments for the registry function.",
+    },
+  ),
+
+  FunctionParams: Type.Object(
+    {
+      fun: Type.Ref("FunctionRegistryName", {
+        description: "Required named function from the portable registry.",
+      }),
+      n: Type.Optional(
+        Type.Integer({
+          minimum: 2,
+          maximum: 10000,
+          description: "Number of evaluation grid points (2–10000). Default 101.",
+        }),
+      ),
+      xlim: Type.Optional(
+        Type.Array(Type.Number(), {
+          minItems: 2,
+          maxItems: 2,
+          description:
+            "Evaluation domain [min, max] (min < max). When omitted, uses continuous aes.x extent or peer-layer x domain.",
+        }),
+      ),
+      args: Type.Optional(Type.Ref("FunctionArgs")),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Path opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.5.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom/stat function: named fun, grid size n, optional xlim and args.",
+    },
+  ),
+
   DotplotParams: Type.Object(
     {
       bins: Type.Optional(
@@ -4059,6 +4145,39 @@ export const SpecDeclarations = {
     },
   ),
 
+  FunctionLayer: Type.Object(
+    {
+      geom: Type.Literal("function", {
+        description:
+          "Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("function", {
+          description: "Function layers evaluate a named registry function on a grid.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Function layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Ref("FunctionParams", {
+        description: "Function parameters (fun is required).",
+      }),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "An analytic function layer (ggplot2's geom_function). y is computed as { stat: y }; do not map data y. Portable fun names only (no JS closures).",
+    },
+  ),
+
   CurveLayer: Type.Object(
     {
       geom: Type.Literal("curve", {
@@ -4491,6 +4610,7 @@ export const SpecDeclarations = {
       Type.Ref("RasterLayer"),
       Type.Ref("HexLayer"),
       Type.Ref("SegmentLayer"),
+      Type.Ref("FunctionLayer"),
       Type.Ref("PolygonLayer"),
       Type.Ref("AblineLayer"),
       Type.Ref("CurveLayer"),
@@ -5265,31 +5385,58 @@ export const SpecDeclarations = {
       subtitle: Type.Optional(Type.String({ description: "Plot subtitle, under the title." })),
       caption: Type.Optional(Type.String({ description: "Small caption under the plot." })),
       x: Type.Optional(
-        Type.String({ description: "X axis title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "X axis title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       y: Type.Optional(
-        Type.String({ description: "Y axis title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Y axis title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       color: Type.Optional(
-        Type.String({ description: "Color legend title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Color legend title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       fill: Type.Optional(
-        Type.String({ description: "Fill legend title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Fill legend title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       size: Type.Optional(
-        Type.String({ description: "Size legend title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Size legend title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       linewidth: Type.Optional(
-        Type.String({ description: "Linewidth legend title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Linewidth legend title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       alpha: Type.Optional(
-        Type.String({ description: "Alpha legend title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Alpha legend title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       shape: Type.Optional(
-        Type.String({ description: "Shape legend title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Shape legend title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       linetype: Type.Optional(
-        Type.String({ description: "Linetype legend title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Linetype legend title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
     },
     {

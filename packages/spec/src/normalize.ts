@@ -75,6 +75,7 @@ export type {
   RibbonLayerInput,
   SegmentLayerInput,
   ViolinLayerInput,
+  FunctionLayerInput,
   PolygonLayerInput,
   AblineLayerInput,
   ContourLayerInput,
@@ -209,6 +210,9 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   }
   if (stat === "density" && aes?.y === undefined) {
     aes = { ...aes, y: { stat: "density" } };
+  }
+  if (stat === "function" && aes?.y === undefined) {
+    aes = { ...aes, y: { stat: "y" } };
   }
   // bin_hex maps fill to after_stat count (ggplot2 geom_hex default aes).
   if (stat === "bin_hex" && aes?.fill === undefined) {

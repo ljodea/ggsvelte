@@ -143,4 +143,40 @@ describe("panel layout via runPipeline", () => {
     expect(model.scene.axes.y.title).toBe("Miles");
     expect(model.scene.axes.x.title).toBe("Gallons");
   });
+
+  it("humanizes default axis and legend titles from camelCase fields (#961)", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { bloomYear: 1850, bloomRefDate: 100, regionName: "A" },
+          { bloomYear: 1900, bloomRefDate: 110, regionName: "B" },
+        ],
+        aes({ x: "bloomYear", y: "bloomRefDate", color: "regionName" }),
+      )
+        .geomPoint()
+        .spec(),
+      size,
+    );
+    expect(model.scene.axes.x.title).toBe("Bloom year");
+    expect(model.scene.axes.y.title).toBe("Bloom ref date");
+    expect(model.scene.legends[0]?.title).toBe("Region name");
+  });
+
+  it("keeps explicit labs including empty string to hide axis titles (#961)", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { bloomYear: 1850, bloomRefDate: 100 },
+          { bloomYear: 1900, bloomRefDate: 110 },
+        ],
+        aes({ x: "bloomYear", y: "bloomRefDate" }),
+      )
+        .geomPoint()
+        .labs({ x: "", y: "Peak bloom" })
+        .spec(),
+      size,
+    );
+    expect(model.scene.axes.x.title).toBe("");
+    expect(model.scene.axes.y.title).toBe("Peak bloom");
+  });
 });

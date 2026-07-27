@@ -536,6 +536,30 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "FunctionArgs": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FunctionLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FunctionLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FunctionLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "FunctionParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FunctionRegistryName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GEOM_DEFAULTS": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -609,6 +633,10 @@
           "lifecycle": "experimental"
         },
         "GeomFreqpolyOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomFunctionOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1389,6 +1417,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeFreqpolyLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeFunctionLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4219,6 +4251,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "humanizeFieldTitle": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "inferDiscreteness": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4396,6 +4432,10 @@
           "lifecycle": "experimental"
         },
         "serializeScaleState": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "spaceFieldName": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4874,6 +4914,10 @@
           "lifecycle": "experimental"
         },
         "GeomFreqpoly": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomFunction": {
           "kind": "value",
           "lifecycle": "experimental"
         },

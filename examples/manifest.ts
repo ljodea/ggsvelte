@@ -537,6 +537,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "line/function",
+    category: "line",
+    name: "function",
+    title: "Normal PDF with geom_function",
+    description: "",
+    tags: ["function", "dnorm", "overlay", "line"],
+    docsSection: "Lines & rules",
+    hasData: true,
+  },
+  {
     id: "line/multi-series",
     category: "line",
     name: "multi-series",

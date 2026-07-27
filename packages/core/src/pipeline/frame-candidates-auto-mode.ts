@@ -40,6 +40,7 @@ export function candidateAutoMode(
       return "exact";
 
     case "line":
+    case "function":
     case "qq_line":
     case "path":
     case "step":
