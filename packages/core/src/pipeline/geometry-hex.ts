@@ -44,6 +44,9 @@ export function hexBatch(
   const totalVerts = n * 6;
   const positions = new Float32Array(totalVerts * 2);
   const rowIndex = new Uint32Array(totalVerts);
+  // One frame-row id per vertex so hover/tooltip maps each hex to its cell,
+  // not the ribbon/band reconstruction fallback (same as polygonBatch; #916).
+  const closedFrameRows = new Uint32Array(totalVerts);
   const pathOffsets = new Uint32Array(n + 1);
   const keptRows = new Uint32Array(n);
   const fills: (string | null)[] = [];
@@ -82,6 +85,7 @@ export function hexBatch(
       positions[cursor * 2] = tx * fx.innerWidth;
       positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
       rowIndex[cursor] = frame.rowIndex[row]!;
+      closedFrameRows[cursor] = row;
       cursor++;
     }
     if (!ok) {
@@ -127,6 +131,7 @@ export function hexBatch(
     strokes,
     fills,
     closed: true,
+    closedFrameRows: closedFrameRows.subarray(0, cursor).slice(),
     linewidth:
       typeof binding.linewidth?.constant === "number"
         ? binding.linewidth.constant

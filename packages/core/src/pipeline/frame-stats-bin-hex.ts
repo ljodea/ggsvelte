@@ -59,6 +59,17 @@ export function buildBinHexFrame(
     fillValues = Array.from(series, (v) => v as CellValue);
   }
 
+  // Outline colour: resolve after_stat the same way as fill (bin_hex publishes
+  // count/density/… in STAT_COLOR_COLUMNS; field-only would drop color: {stat}).
+  let colorValues: readonly CellValue[] | null = null;
+  const colorStat = binding.color.statColumn ?? null;
+  if (colorStat === null) {
+    colorValues = col(binding.color.field);
+  } else {
+    const series = columns[colorStat] ?? result.count;
+    colorValues = Array.from(series, (v) => v as CellValue);
+  }
+
   return {
     binding,
     table,
@@ -71,7 +82,7 @@ export function buildBinHexFrame(
     inputGroups: groups,
     inputSourceRows: null,
     rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
-    colorValues: col(binding.color.field),
+    colorValues,
     fillValues,
     ...styleColumns(binding, col, columns),
     labelValues: col(binding.labelField),

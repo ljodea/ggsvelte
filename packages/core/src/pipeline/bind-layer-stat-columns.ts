@@ -23,11 +23,11 @@ export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
 };
 
 /**
- * color/fill `{ stat }` columns each stat exposes. Only the density_2d frame
- * builder resolves an after_stat column into colour values
- * (`frame-stats-density-2d.ts`); every other frame builds colour from the
- * mapped field alone, so an `{ stat }` mapping there is dropped (#915).
- * Stats absent from this map publish nothing for colour.
+ * color/fill `{ stat }` columns each stat exposes. Frame builders that resolve
+ * after_stat colour: density_2d / density_2d_filled (`frame-stats-density-2d.ts`)
+ * and bin_hex (`frame-stats-bin-hex.ts` fill + color). Every other frame builds
+ * colour from the mapped field alone, so an `{ stat }` mapping there is dropped
+ * (#915). Stats absent from this map publish nothing for colour.
  */
 export const STAT_COLOR_COLUMNS: Record<string, readonly string[]> = {
   density_2d: ["level", "density"],

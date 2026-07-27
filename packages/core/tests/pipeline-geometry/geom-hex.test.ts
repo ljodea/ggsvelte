@@ -101,6 +101,60 @@ describe("geom_hex geometry (#800)", () => {
     expect(denseN).toBeGreaterThanOrEqual(sparseN);
   });
 
+  it("attaches closedFrameRows so each hex vertex maps to its cell row", () => {
+    const model = runPipeline(
+      gg(
+        {
+          x: [0.1, 0.2, 0.8, 0.9, 0.5],
+          y: [0.1, 0.15, 0.8, 0.9, 0.5],
+        },
+        aes({ x: "x", y: "y" }),
+      )
+        .geomHex({ bins: 6 })
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches.find((b) => b.kind === "paths");
+    expect(batch?.kind).toBe("paths");
+    expect(batch!.closed).toBe(true);
+    expect(batch!.closedFrameRows).toBeDefined();
+    expect(batch!.closedFrameRows!.length).toBe(batch!.positions.length / 2);
+    const nHex = batch!.pathOffsets.length - 1;
+    expect(nHex).toBeGreaterThan(1);
+    // First vertex of subpath 0 and subpath 1 must resolve to different cells.
+    const row0 = batch!.closedFrameRows![batch!.pathOffsets[0]!]!;
+    const row1 = batch!.closedFrameRows![batch!.pathOffsets[1]!]!;
+    expect(row0).not.toBe(row1);
+    // All six vertices of a hex share that cell's frame row.
+    for (let v = 0; v < 6; v++) {
+      expect(batch!.closedFrameRows![batch!.pathOffsets[0]! + v]).toBe(row0);
+    }
+  });
+
+  it("resolves after_stat color (outline) from count like fill", () => {
+    const model = runPipeline(
+      gg(
+        {
+          x: [0.1, 0.15, 0.8, 0.85, 0.5],
+          y: [0.1, 0.2, 0.75, 0.9, 0.5],
+        },
+        aes({ x: "x", y: "y", color: { stat: "count" }, fill: { stat: "count" } }),
+      )
+        .geomHex({ bins: 5, linewidth: 1 })
+        .spec(),
+      size,
+    );
+    expect(model.warnings.filter((w) => w.code === "stat-channel-unsupported")).toEqual([]);
+    const batch = model.scene.batches.find((b) => b.kind === "paths");
+    expect(batch?.kind).toBe("paths");
+    const nHex = batch!.pathOffsets.length - 1;
+    expect(nHex).toBeGreaterThan(0);
+    expect(batch!.strokes).toBeDefined();
+    expect(batch!.strokes!.length).toBe(nHex);
+    // At least one hex should get a non-null stroke from the count scale.
+    expect(batch!.strokes!.some((s) => s !== null && s !== undefined)).toBe(true);
+  });
+
   it("maps alpha/linewidth to kept subpaths when some hexes drop", () => {
     // Three candidate cells; middle center is non-finite so only rows 0 and 2 emit.
     const frame = fromAny<LayerFrame>({

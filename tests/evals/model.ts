@@ -626,6 +626,39 @@ export class MockResponder implements Responder {
       const aes: MockAes = { x: f(x), y: f(y), fill: f(fill) };
       spec.layers.push({ geom: "raster", aes });
       xField = x;
+    } else if (
+      // geom_hex / hexagonal bin heatmap — must win over bare "heatmap" → tile (#800).
+      /\bhex(?:agon(?:al)?)?(?:\s+bin)?\b|\bgeom[_\s]?hex\b|\bbin_hex\b/.test(prompt)
+    ) {
+      const x =
+        fieldNamed("distance") ??
+        fieldNamed("humidity") ??
+        fieldNamed("x") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "x";
+      const y =
+        fieldNamed("delay") ??
+        fieldNamed("temperature") ??
+        fieldNamed("y") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "y";
+      const aes: MockAes = {
+        x: f(x),
+        y: f(y),
+        fill: { stat: "count" },
+      };
+      const layer: MockLayer = {
+        geom: "hex",
+        stat: "bin_hex",
+        position: "identity",
+        aes,
+      };
+      const binsMatch = prompt.match(/\b(\d+)\s*bins?\b/);
+      if (binsMatch !== null) layer.params = { bins: Number(binsMatch[1]) };
+      spec.layers.push(layer);
+      xField = x;
     } else if (/\b(?:geom )?tiles?\b|heatmap/.test(prompt)) {
       const cats = profile.fields.filter(
         (field) => field.type === "nominal" || field.type === "ordinal",

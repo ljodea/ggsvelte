@@ -143,8 +143,8 @@
     },
     "hex/basic": {
       "filename": "hex-basic-light.png",
-      "sourceSha256": "a16c0aa0928fe11c2d3e909acfee2aed74f84402e86e7221558dc38a4f0c0b56",
-      "pngSha256": "bd0fcdc18cc1cde8d754ef90caaadf880d38e1c8dd1585e54ff7ea958eaaa9bf"
+      "sourceSha256": "a9fb882b805da1a661942ee64641ac85e4de9508a4d9459ab48e482d8862a49e",
+      "pngSha256": "e6514f5698e4a33726342f36653b1397e3e0a4d19a1961344dc26e97a01190b0"
     },
     "histogram/basic": {
       "filename": "histogram-basic-light.png",

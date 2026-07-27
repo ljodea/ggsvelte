@@ -1,11 +1,9 @@
+import { mulberry32 } from "../../rng.js";
+
 /** Two overlapping clouds for a hex heatmap demo. */
 export const cloud: { x: number; y: number }[] = (() => {
   const rows: { x: number; y: number }[] = [];
-  let s = 99;
-  const rnd = () => {
-    s = (s * 1664525 + 1013904223) >>> 0;
-    return s / 0xffffffff;
-  };
+  const rnd = mulberry32(99);
   for (let i = 0; i < 500; i++) {
     const u1 = Math.max(1e-9, rnd());
     const u2 = rnd();
