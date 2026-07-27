@@ -78,15 +78,11 @@ jobs:
           container_tag: ${{ inputs.playwright_container_tag }}
       # Docs .svelte component harness (issue #991). Runs before the static
       # build so a failed unit-level race test fails fast without vite build.
-      # svelte-kit sync materializes .svelte-kit/tsconfig.json that the app
-      # tsconfig extends (vite-plugin-svelte reads it during vitest startup).
+      # package.json `test` runs svelte-kit sync first (clean-checkout safe).
       - name: docs component tests (apps/docs, chromium)
         if: steps.content_hash.outputs.hit != 'true'
         working-directory: apps/docs
-        run: |
-          set -euo pipefail
-          bun x svelte-kit sync
-          bun run --bun test
+        run: bun run --bun test
       - name: build packaged interaction test target
         if: steps.content_hash.outputs.hit != 'true'
         run: DOCS_BUILD_MODE=cloudflare-preview bun run build:docs
