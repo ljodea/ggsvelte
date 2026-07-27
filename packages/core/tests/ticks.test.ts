@@ -28,6 +28,21 @@ describe("defaultTickFormat", () => {
     expect(fmt(2e14)).toBe("200,000,000,000,000");
   });
 
+  it("keeps year-like integer ticks ungrouped (#779)", () => {
+    const fmt = defaultTickFormat(tickStep(800, 2030, 5));
+    expect(fmt(800)).toBe("800");
+    expect(fmt(1000)).toBe("1000");
+    expect(fmt(1200)).toBe("1200");
+    expect(fmt(2000)).toBe("2000");
+  });
+
+  it("groups consistently when the tick step itself is >= 1000", () => {
+    const fmt = defaultTickFormat(1000);
+    expect(fmt(8000)).toBe("8,000");
+    expect(fmt(10000)).toBe("10,000");
+    expect(fmt(12000)).toBe("12,000");
+  });
+
   it("derives decimals from the step (nice steps are 1/2/5 x 10^k)", () => {
     expect(defaultTickFormat(0.2)(0.6)).toBe("0.6");
     expect(defaultTickFormat(0.05)(0.25)).toBe("0.25");

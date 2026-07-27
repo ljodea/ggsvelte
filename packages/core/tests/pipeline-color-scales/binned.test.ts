@@ -61,7 +61,7 @@ describe("binned color scales", () => {
         upper: 1000,
         lowerInclusive: true,
         upperInclusive: true,
-        label: "100–1,000",
+        label: "100–1000",
         color: "#eeeeee",
       },
     ]);
