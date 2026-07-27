@@ -149,9 +149,17 @@
       </dd>
     </div>
     <div>
-      <dt>Themes and color</dt>
+      <dt>Themes</dt>
       <dd>
-        <a href={`${base}/themes`}>Built-in themes, palettes, scales</a>
+        <a href={`${base}/themes`}>Built-in chart themes</a>
+      </dd>
+    </div>
+    <div>
+      <dt>Palettes</dt>
+      <dd>
+        <a href={`${base}/palettes`}
+          >Categorical palettes and sequential scales</a
+        >
       </dd>
     </div>
     <div>

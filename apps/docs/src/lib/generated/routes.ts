@@ -40,9 +40,19 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/themes",
-    title: "Chart themes and color scales — ggsvelte",
-    description: "Built-in chart themes, categorical palettes, and sequential scales.",
+    title: "Chart themes — ggsvelte",
+    description: "Built-in chart themes for paper, grids, axes, and type.",
     canonicalPath: "/themes",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/palettes",
+    title: "Color palettes — ggsvelte",
+    description: "Categorical palettes and sequential color scales for data encoding.",
+    canonicalPath: "/palettes",
     kind: "page",
     index: true,
     sitemap: true,
@@ -1904,11 +1914,6 @@ export const DOCS_ROUTES = [
       {
         id: "ellipse-group-dropped",
         title: "ellipse-group-dropped",
-        level: 3,
-      },
-      {
-        id: "stat-channel-unsupported-warning",
-        title: "stat-channel-unsupported — warning",
         level: 3,
       },
       {

@@ -105,6 +105,8 @@
       ·
       <a href={`${base}/themes`}>Themes</a>
       ·
+      <a href={`${base}/palettes`}>Palettes</a>
+      ·
       <a href={`${base}/interactions`}>Interactions</a>
     </p>
   </section>

@@ -35,5 +35,6 @@ describe("runtime docs route projection helpers", () => {
     expect(primaryNavigationOwner(findDocsRoute("/guide/interaction-reference"))).toBe("reference");
     expect(primaryNavigationOwner(findDocsRoute("/reference/interactions"))).toBe("reference");
     expect(primaryNavigationOwner(findDocsRoute("/themes"))).toBeUndefined();
+    expect(primaryNavigationOwner(findDocsRoute("/palettes"))).toBeUndefined();
   });
 });

@@ -33,11 +33,20 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "page:themes",
     kind: "page",
-    title: "Chart themes and color scales",
-    summary: "Built-in chart themes, categorical palettes, and sequential scales.",
+    title: "Chart themes",
+    summary: "Built-in chart themes for paper, grids, axes, and type.",
     href: "/themes",
     keywords: [],
-    exact: ["Chart themes and color scales"],
+    exact: ["Chart themes"],
+  },
+  {
+    id: "page:palettes",
+    kind: "page",
+    title: "Color palettes",
+    summary: "Categorical palettes and sequential color scales for data encoding.",
+    href: "/palettes",
+    keywords: [],
+    exact: ["Color palettes"],
   },
   {
     id: "page:interactions",
@@ -3142,16 +3151,6 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/errors#ellipse-group-dropped",
     keywords: ["Errors reference", "Reference"],
     exact: ["ellipse-group-dropped"],
-  },
-  {
-    id: "heading:guide-errors:stat-channel-unsupported-warning",
-    kind: "heading",
-    title: "stat-channel-unsupported — warning",
-    summary:
-      "stat-channel-unsupported — warning in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
-    href: "/guide/errors#stat-channel-unsupported-warning",
-    keywords: ["Errors reference", "Reference"],
-    exact: ["stat-channel-unsupported — warning"],
   },
   {
     id: "heading:guide-errors:palette-exhausted-warning",
@@ -24303,20 +24302,6 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["ellipse-group-dropped", "warning:ellipse-group-dropped"],
-  },
-  {
-    id: "diagnostic:warning:stat-channel-unsupported",
-    kind: "diagnostic",
-    title: "stat-channel-unsupported · warning",
-    summary:
-      "A color/fill after-stat mapping names an output the selected stat does not publish; the mapping is ignored (style channels throw the same code as an error).",
-    href: "/guide/errors#stat-channel-unsupported-warning",
-    keywords: [
-      "warning",
-      "warning",
-      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
-    ],
-    exact: ["stat-channel-unsupported", "warning:stat-channel-unsupported"],
   },
   {
     id: "diagnostic:warning:palette-exhausted",

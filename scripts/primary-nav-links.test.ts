@@ -9,6 +9,7 @@ describe("primaryNavLinks", () => {
       "Docs",
       "Gallery",
       "Themes",
+      "Palettes",
       "Interactions",
       "Reference",
     ]);
@@ -17,11 +18,14 @@ describe("primaryNavLinks", () => {
     expect(links.find((link) => link.href === "/reference")?.active).toBe(false);
   });
 
-  test("marks gallery children and exact themes/interactions", () => {
+  test("marks gallery children and exact themes/palettes/interactions", () => {
     expect(
       primaryNavLinks("/examples/point/scatter").find((link) => link.href === "/examples")?.active,
     ).toBe(true);
     expect(primaryNavLinks("/themes").find((link) => link.href === "/themes")?.active).toBe(true);
+    expect(primaryNavLinks("/palettes").find((link) => link.href === "/palettes")?.active).toBe(
+      true,
+    );
     expect(
       primaryNavLinks("/interactions").find((link) => link.href === "/interactions")?.active,
     ).toBe(true);
