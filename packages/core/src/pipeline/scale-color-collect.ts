@@ -24,6 +24,8 @@ export function collectColorChannelValues(
   for (const frame of frames) {
     const channel = name === "color" ? frame.binding.color : frame.binding.fill;
     const frameValues = name === "color" ? frame.colorValues : frame.fillValues;
+    // Field-mapped or after_stat color/fill (e.g. bin_2d fill = count): values
+    // live on the frame. One push only — do not dual-loop statColumn rows.
     if (frameValues !== null && (channel.field !== null || (channel.statColumn ?? null) !== null)) {
       anyField = true;
       if (
@@ -33,12 +35,6 @@ export function collectColorChannelValues(
       ) {
         anyDiscreteField = true;
       }
-      for (const v of frameValues) values.push(v);
-    }
-    // after_stat color/fill (e.g. bin_2d fill = count): values live on the frame.
-    if ((channel.statColumn ?? null) !== null && frameValues !== null) {
-      anyField = true;
-      // Numeric after_stat columns train continuous/sequential scales.
       for (const v of frameValues) values.push(v);
     }
     if (channel.scaledConstant !== null) {
