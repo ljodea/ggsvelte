@@ -132,9 +132,8 @@
       Svelte for builders, JSON for embedded agents.
     </h2>
     <p>
-      Svelte components help human-agent teams reason about visualizations
-      together. JSON specs allow agents operating in webapps to make interactive
-      charts on demand for rendering on-the-fly.
+      Human-agent pairs get Svelte components for clarity. Embedded agents can
+      use JSON specs for interactive charts on demand.
     </p>
   </div>
   <CodeTabs {tabs} />
