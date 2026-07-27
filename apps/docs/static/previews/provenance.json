@@ -248,7 +248,7 @@
     },
     "point/canvas-scatter": {
       "filename": "point-canvas-scatter-light.png",
-      "sourceSha256": "b76292ac37ec75df8d37323da73690a982a814170fa25e495b6ac4188087b794",
+      "sourceSha256": "d0b5fcc09f49b04be0cb2e9f74e10f03339af779fc6183bbe655fe84b1119498",
       "pngSha256": "6a83545566705ea7101c0382f5e895bab46cd36b3448e2ad46095c8dbe5eadc7"
     },
     "point/fixed-aspect": {
