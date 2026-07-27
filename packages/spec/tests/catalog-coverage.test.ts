@@ -99,6 +99,18 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
     },
     options: {},
   },
+  "manual-fun-required": {
+    spec: {
+      layers: [
+        {
+          geom: "point",
+          stat: "manual",
+          aes: { x: { field: "x" }, y: { field: "y" } },
+        },
+      ],
+    },
+    options: {},
+  },
   "facet-form-ambiguous": {
     spec: {
       layers: [point],

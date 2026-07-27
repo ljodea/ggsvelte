@@ -24,9 +24,13 @@ export function collectColorChannelValues(
   for (const frame of frames) {
     const channel = name === "color" ? frame.binding.color : frame.binding.fill;
     const frameValues = name === "color" ? frame.colorValues : frame.fillValues;
-    if (channel.field !== null && frameValues !== null) {
+    if (frameValues !== null && (channel.field !== null || (channel.statColumn ?? null) !== null)) {
       anyField = true;
-      if (table.has(channel.field) && table.discreteness(channel.field) === "discrete") {
+      if (
+        channel.field !== null &&
+        table.has(channel.field) &&
+        table.discreteness(channel.field) === "discrete"
+      ) {
         anyDiscreteField = true;
       }
       for (const v of frameValues) values.push(v);

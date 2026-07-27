@@ -220,6 +220,488 @@ Fitted trend over points:
 on source points. Histogram, density, boxplot, and errorbar use the same
 derive-then-render path.
 
+For discrete x, \`stat: "summary"\` collapses each group to one summary (default
+mean ± se). For continuous x, use \`stat: "summary_bin"\` instead.
+
+## Binned y summaries (\`summary_bin\`)
+
+\`stat: "summary_bin"\` (ggplot2 \`stat_summary_bin\`) bins continuous \`x\` with
+the same break rules as \`stat_bin\`, then summarizes \`y\` in each non-empty
+(group × bin). Default fun is mean ± se. Available on **point**, **line**, and
+**errorbar**. Empty bins are omitted (unlike count bins).
+
+\`\`\`svelte fragment
+<GeomPoint alpha={0.35} />
+<GeomErrorbar stat="summary_bin" binwidth={1} boundary={0} width={0.4} />
+<GeomLine stat="summary_bin" binwidth={1} boundary={0} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y" }))
+  .geomPoint({ alpha: 0.35 })
+  .geomErrorbar({ stat: "summary_bin", binwidth: 1, boundary: 0 })
+  .geomLine({ stat: "summary_bin", binwidth: 1, boundary: 0 })
+  .spec();
+\`\`\`
+
+Bin knobs match histogram / freqpoly: \`bins\`, \`binwidth\`, \`boundary\`,
+\`center\`, \`closed\`. Summary knobs: \`fun\`, \`funMin\`, \`funMax\`.
+
+[Binned mean ± se](/examples/errorbar/summary-bin): raw points with per-bin
+errorbars and a summary line.
+
+## Quantile regression lines
+
+Linear quantile regression (ggplot2 \`geom_quantile\` / \`stat_quantile\`): fit
+\`y ~ x\` at each conditional quantile τ and draw one line per τ (default
+0.25 / 0.5 / 0.75). v1 is linear only — no rqss, no weights.
+
+\`\`\`svelte fragment
+<GeomPoint />
+<GeomQuantile quantiles={[0.25, 0.5, 0.75]} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y" }))
+  .geomPoint()
+  .geomQuantile({ quantiles: [0.1, 0.5, 0.9] })
+  .spec();
+\`\`\`
+
+[Quantile lines](/examples/point/quantile-lines): scatter with three RQ lines.
+
+## Contour isolines
+
+Contour isolines (ggplot2 \`geom_contour\` / \`stat_contour\`) draw open path
+polylines of constant \`z\` over a **regular** continuous \`x\` × \`y\` grid.
+Levels come from \`params.breaks\`, else \`binwidth\`, else \`bins\` evenly
+spaced from min(z)..max(z) inclusive (default 10). v1 is open polylines only
+— no \`contour_filled\`, no irregular triangulation, no default color-by-level.
+
+\`\`\`svelte fragment
+<GeomContour bins={8} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(grid, aes({ x: "x", y: "y", z: "z" }))
+  .geomContour({ breaks: [0.25, 0.5, 0.75] })
+  .spec();
+\`\`\`
+
+Incomplete grid cells (missing/NaN corners) are skipped; groups without a
+usable grid or levels are dropped with a warning. after_stat \`level\` is
+carried for tooltips.
+
+[Contour isolines](/examples/contour/basic): nested levels of a radial peak.
+
+## 2D density isolines
+
+Bivariate KDE isolines (ggplot2 \`geom_density_2d\` / \`stat_density_2d\`) estimate
+a product Gaussian density over continuous \`x\` and \`y\`, then draw open path
+polylines of constant density. Bandwidth follows MASS \`bandwidth.nrd\` then
+kde2d's h/4 scaling (or \`params.h\` as one number or \`[hx, hy]\`). Grid
+\`params.n\`×\`n\` (default 100) spans a 5%-expanded data range. Levels use the
+same breaks / binwidth / bins rules as contour. Weights deferred.
+
+\`\`\`svelte fragment
+<GeomPoint alpha={0.5} />
+<GeomDensity2d bins={5} n={40} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(scatter, aes({ x: "x", y: "y" }))
+  .geomPoint({ alpha: 0.5 })
+  .geomDensity2d({ bins: 5, n: 40 })
+  .spec();
+\`\`\`
+
+Groups with fewer than two finite points are dropped with a warning.
+after_stat \`level\` and \`density\` are carried for tooltips.
+
+[2D density isolines](/examples/density/kde-2d): scatter under nested KDE
+contours.
+
+## 2D density filled bands
+
+\`geom_density_2d_filled\` / \`stat_density_2d_filled\` reuses the same KDE grid
+and draws **closed** isoline rings as filled polygons (ggplot2
+\`geom_density_2d_filled\`). Open rings are dropped with
+\`density-2d-filled-open-dropped\`. Fill defaults to after_stat \`level\`.
+
+\`\`\`svelte fragment
+<GeomPoint alpha={0.45} />
+<GeomDensity2dFilled bins={5} n={40} alpha={0.55} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(scatter, aes({ x: "x", y: "y" }))
+  .geomPoint({ alpha: 0.45 })
+  .geomDensity2dFilled({ bins: 5, n: 40 })
+  .spec();
+\`\`\`
+
+True isobands between consecutive levels and weights are deferred.
+
+[2D density filled bands](/examples/density/kde-2d-filled): scatter under
+closed KDE rings colored by level.
+
+## Dotplot (histodot)
+
+Histodot stacked dots (ggplot2 \`geom_dotplot\` / \`stat_bindot\`): continuous
+\`x\` is binned with the same break rules as \`stat_bin\`, then **one point per
+observation** is stacked in each bin. y is after_stat \`stackpos\` only (not
+count). Diameter tracks binwidth in x pixels (\`dotsize\` multiplier; \`size\`
+for an absolute px override). \`stackdir\`: \`up\` | \`down\` | \`center\` |
+\`centerwhole\`; \`stackratio\` scales vertical spacing (default 1).
+
+\`\`\`svelte fragment
+<GeomDotplot binwidth={0.5} boundary={0} stackdir="up" />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "v" }))
+  .geomDotplot({ binwidth: 0.5, boundary: 0 })
+  .spec();
+\`\`\`
+
+v1 is histodot only — no Wilkinson \`dotdensity\`, no \`binaxis = "y"\`, no
+weights. Mapping aes.y fails loud (\`computed-y-mapped\`).
+
+[Dotplot histodot](/examples/dotplot/histodot): stacked points in fixed bins.
+
+## Simple features (\`geom_sf\`)
+
+\`geom_sf\` draws already-projected GeoJSON **Geometry** values stored as JSON
+**strings** in a data column (default \`geometry\`; override with
+\`params.geometry\`). Point/MultiPoint → points; LineString/MultiLineString →
+open paths; Polygon/MultiPolygon → closed fills. Multipart geometries expand
+to multiple marks. **Interior rings** are even-odd **holes** (SVG
+\`fill-rule="evenodd"\`, canvas, and hit-testing). \`GeometryCollection\` is
+flattened to leaf Point/Line/Polygon families (recursive, nesting depth
+capped). Mixed families in one layer still error (split layers).
+
+Default stat is public **\`stat_sf\`** (ggplot2 \`stat_sf\`): geometry expand
+runs on the normal non-identity frame path. Layer JSON stamps
+\`stat: "sf"\` (not \`identity\`). No CRS / \`coord_sf\` yet — coordinates are
+treated as already projected.
+
+\`\`\`svelte fragment
+<GeomSf alpha={0.9} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(regions, aes({ fill: "rate" })).geomSf().spec();
+// layer.stat === "sf"; geometry column holds JSON.stringify({ type: "Polygon", ... })
+\`\`\`
+
+[SF polygons](/examples/sf/basic): three triangles filled by a rate field.
+[GeometryCollection expand](/examples/sf/geometry-collection): one GC cell
+renders as two polygon parts.
+
+### SF text labels (\`geom_sf_text\`)
+
+\`geom_sf_text\` (ggplot2 \`geom_sf_text\`) defaults to \`stat_sf_coordinates\`:
+one representative point per geometry part, then draws \`aes.label\` there.
+Point coordinates pass through; LineString uses the vertex mean;
+Polygon uses the exterior-ring shoelace centroid. **MultiPoint /
+MultiLineString / MultiPolygon emit one label per part** (feature aesthetics
+duplicated onto each part). **GeometryCollection** expands to leaves first,
+then the same per-part rule applies (one label per leaf part). Requires
+\`aes.label\` (no \`aes.x\`/\`aes.y\`).
+
+**Migration (multi-part labels):** earlier releases labeled only the first
+Multi* component. Callers that relied on a single first-component label will
+now see one label per part — filter geometries or aggregate labels if you need
+the old single-label behavior.
+
+\`\`\`svelte fragment
+<GeomSf alpha={0.55} />
+<GeomSfText size={14} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(regions, aes({ fill: "rate", label: "region" }))
+  .geomSf({ alpha: 0.55 })
+  .geomSfText({ size: 14 })
+  .spec();
+\`\`\`
+
+[SF region labels](/examples/sf/labels): filled polygons with names at centroids.
+
+### SF boxed labels (\`geom_sf_label\`)
+
+\`geom_sf_label\` is the boxed sibling of \`geom_sf_text\`: same
+\`stat_sf_coordinates\` placement, plus a measured rounded rect behind the text.
+\`color\` is ink + box stroke; \`fill\` is the box background (theme paper by
+default). Params include \`padding\`, \`radius\`, \`linewidth\`, and text
+\`size\`/\`anchor\`/\`dx\`/\`dy\`.
+
+\`\`\`svelte fragment
+<GeomSf alpha={0.45} />
+<GeomSfLabel padding={3} radius={2} size={13} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(regions, aes({ fill: "rate", label: "region" }))
+  .geomSf({ alpha: 0.45 })
+  .geomSfLabel({ padding: 3, radius: 2, size: 13 })
+  .spec();
+\`\`\`
+
+[SF boxed labels](/examples/sf/boxed-labels): names on paper-backed label boxes.
+
+## Ellipse confidence rings
+
+Bivariate normal confidence ellipses (ggplot2 \`stat_ellipse\`, type \`norm\`
+only) on **path** layers: per group, estimate mean and sample covariance,
+scale by √χ²₂(level), and sample the perimeter (\`segments\`, default 51)
+plus a closing duplicate for a closed ring.
+
+\`\`\`svelte fragment
+<GeomPoint />
+<GeomPath stat="ellipse" level={0.95} segments={51} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y", color: "g" }))
+  .geomPoint()
+  .geomPath({ stat: "ellipse", level: 0.95 })
+  .spec();
+\`\`\`
+
+Path-only in v1 (not polygon). Groups with fewer than two finite points or
+zero variance are dropped with a warning. Rejected on other geoms.
+
+[Ellipse confidence rings](/examples/path/ellipse-rings): scatter under 95%
+rings per series.
+
+## Frequency polygon
+
+Frequency polygon (ggplot2 \`geom_freqpoly\`) bins continuous \`x\` and draws a
+line through bin centers (y defaults to count). Canonical form is \`line\` +
+\`stat: "bin"\` + position identity — not a separate mark type:
+
+\`\`\`svelte fragment
+<GeomFreqpoly bins={30} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "v", color: "g" })).geomFreqpoly({ bins: 30 }).spec();
+// → { geom: "line", stat: "bin", position: "identity", y: { stat: "count" } }
+\`\`\`
+
+[Frequency polygon](/examples/freqpoly/basic): Michelson light-speed runs as a
+line through bin centers (companion to the histogram specimen).
+
+## Unique (first-wins aesthetic dedupe)
+
+\`stat: "unique"\` drops duplicate rows on the combination of mapped aesthetic
+fields before drawing — first occurrence wins, panel-local (ggplot2
+\`stat_unique\`). Available on identity-capable geoms (point, line, path, text,
+col, area, rect, ribbon, rule, segment, errorbar).
+
+\`\`\`svelte fragment
+<GeomPoint stat="unique" />
+\`\`\`
+
+[stat unique overplotting](/examples/point/stat-unique): stacked identical
+\`(x, y, series)\` triples collapse to one mark.
+
+## Blank (scale training without marks)
+
+\`geom: "blank"\` (ggplot2 \`geom_blank\`) contributes mapped aesthetics to
+**scale training and layout only** — no paint, no hit targets. Use it to expand
+domains, force axes open for sparse marks, or reserve layout without drawing.
+
+\`\`\`svelte fragment
+<GeomBlank />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y" }))
+  .geomPoint()
+  .geomBlank({ aes: aes({ x: "x2", y: "y2" }) }) // expands domains only
+  .spec();
+\`\`\`
+
+No channels are required. Mapped style channels (color, size, …) train their
+scales without drawing marks. Surfaces: \`.geomBlank()\`, \`<GeomBlank />\`.
+
+[Blank domain expand](/examples/blank/domain-expand): co-layer blank rows stretch
+axes past the plotted points. [Blank axes only](/examples/blank/axes-only): axes
+and scales with no marks.
+
+## Convenience geoms (jitter, hline, vline)
+
+Name aliases that normalize to existing marks — no new paint paths:
+
+| Sugar | Normalizes to |
+|-------|----------------|
+| \`jitter\` | \`point\` + \`position: "jitter"\` |
+| \`hline\` | \`rule\` (horizontal) |
+| \`vline\` | \`rule\` (vertical) |
+
+\`geomJitter\` / \`<GeomJitter>\` accept flat \`width\` / \`height\` / \`seed\` and
+assemble them into \`positionParams\` at the builder/component boundary.
+
+\`hline\` / \`vline\` annotation intercepts (\`yintercept\` / \`xintercept\`)
+suppress plot-aes inheritance (ggplot2 \`inherit.aes = FALSE\`). Data-driven
+forms drop the orthogonal axis so the one-axis rule contract holds.
+
+\`\`\`svelte fragment
+<GeomJitter width={0.2} height={0.2} />
+<GeomHline yintercept={0} />
+<GeomVline xintercept={10} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y" }))
+  .geomJitter({ width: 0.2, height: 0.2 })
+  .geomHline({ yintercept: 0 })
+  .geomVline({ xintercept: 10 })
+  .spec();
+\`\`\`
+
+[Jitter sugar](/examples/jitter/basic): overplotted points with position jitter.
+[Hline threshold](/examples/hline/threshold) and
+[Vline cutoff](/examples/vline/cutoff): annotation intercepts as rule aliases.
+
+## Manual (portable named per-group transforms)
+
+\`stat: "manual"\` (ggplot2 \`stat_manual\`, portable v1) applies a **named**
+per-group transform — no JS callbacks (PortableSpec only). Required
+\`params.fun\`:
+
+| fun | Behavior |
+|-----|----------|
+| \`first\` / \`last\` | Keep one source row per aesthetic group |
+| \`mean\` / \`median\` / \`min\` / \`max\` / \`sum\` | One synthetic row; x and y aggregated independently |
+
+Surfaces: **point**, **line**, **path**. Missing \`fun\` fails with
+\`manual-fun-required\`; unknown names are schema \`invalid-enum-value\`.
+
+\`\`\`svelte fragment
+<GeomPoint stat="manual" fun="mean" />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y", color: "g" }))
+  .geomPoint({ stat: "manual", fun: "mean" })
+  .spec();
+\`\`\`
+
+[stat manual mean centroids](/examples/point/stat-manual-mean): identity
+scatter under large mean points per series.
+
+## Align (shared continuous-x grid for stack)
+
+\`stat: "align"\` (ggplot2 \`stat_align\`) is for continuous-x \`area\` / \`line\`
+when series sample different x values. It unions finite x across groups,
+linearly interpolates each series onto that shared grid, and sets y to 0
+outside a group's observed x range so \`position: "stack"\` / \`"fill"\` can
+compose without jagged seams.
+
+\`\`\`ts fragment
+gg(data, aes({ x: "t", y: "v", fill: "series" }))
+  .geomArea({ stat: "align", position: "stack" })
+  .spec();
+\`\`\`
+
+\`\`\`svelte fragment
+<GeomArea stat="align" position="stack" />
+\`\`\`
+
+Available on **area** and **line** only (not point or shared identity-only
+geoms). Outside a group's x span y is 0 (stack-friendly).
+
+## Connect (named path joins)
+
+\`stat: "connect"\` (ggplot2 \`stat_connect\`) expands successive finite points
+into intermediate vertices so stepped joins are real path geometry — not only
+a stroke curve flag. \`params.connection\`: \`hv\` (default), \`vh\`, \`mid\`,
+\`linear\`. On **path** expansion is in data order; on **line** points are sorted
+by x first, and geometry skips a second x-sort so tied-x elbows stay intact.
+
+\`\`\`svelte fragment
+<GeomPath stat="connect" connection="hv" />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y" }))
+  .geomPath({ stat: "connect", connection: "hv" })
+  .spec();
+\`\`\`
+
+[Connect hv path](/examples/path/connect-hv): three data points expand to a
+horizontal-then-vertical polyline.
+
+## Curve connectors
+
+Curved connectors (ggplot2 \`geom_curve\`): one quadratic Bezier per row from
+\`(x,y)\` to \`(xend,yend)\`, tessellated in **panel px** so curvature is not
+aspect-skewed. Params: \`curvature\` (default 0.5), \`angle\` (degrees, default
+90), \`ncp\` (control-point density). Same required channels as segment;
+\`lineend\` maps to SVG stroke-linecap (default butt).
+
+\`\`\`svelte fragment
+<GeomCurve curvature={0.4} lineend="round" />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y", xend: "xend", yend: "yend" }))
+  .geomCurve({ curvature: 0.5, angle: 90, ncp: 5 })
+  .spec();
+\`\`\`
+
+Intentional subset: quadratic approximation, not full grid xspline.
+[Curve connectors](/examples/curve/connectors): Darwin maize pairs as arcs.
+
+## Spoke (origin + angle + radius)
+
+\`geom: "spoke"\` (ggplot2 \`geom_spoke\`) draws one finite segment per row from
+\`(x, y)\` in direction \`angle\` (radians; 0 = +x, π/2 = +y) with length
+\`radius\` in **data units**. Endpoints are
+\`xend = x + radius·cos(angle)\`, \`yend = y + radius·sin(angle)\`, then the same
+position transform as x/y. Tips train domains; paint reuses segment strokes.
+\`angle\` and \`radius\` come from aes and/or constant \`params\`. Continuous x
+and y required.
+
+\`\`\`svelte fragment
+<GeomSpoke />
+\`\`\`
+
+\`\`\`ts fragment
+gg(data, aes({ x: "x", y: "y", angle: "theta", radius: "r" }))
+  .geomSpoke({ linewidth: 1.5, lineend: "round" })
+  .spec();
+// constants: .geomSpoke({ angle: 0, radius: 1 })
+\`\`\`
+
+[Spoke vector field](/examples/spoke/vector-field): synthetic 5×5 field with
+mapped angle and radius.
+
+## Map (fortified choropleth)
+
+\`geom: "map"\` (ggplot2 \`geom_map\`) joins a **fortified map table** to value
+rows. Map coordinates come from \`long\`+\`lat\` or \`x\`+\`y\`; the join key is
+\`aes.map_id\` on the value table matched to \`params.mapId\` on the map
+(default \`"region"\`, then \`"id"\`). Optional map \`group\` splits multipoly
+rings. Missing regions drop with a \`map-region-missing\` warning.
+
+\`\`\`svelte fragment
+<GeomMap map={{ values: fortified }} linewidth={1.2} />
+\`\`\`
+
+\`\`\`ts fragment
+gg(rates, aes({ map_id: "region", fill: "rate" }))
+  .geomMap({ map: { values: fortified }, mapId: "region" })
+  .spec();
+\`\`\`
+
+Intentional subset: no network map fetches, no sf/CRS, no public
+\`geom_polygon\` (map ships the closed-path renderer only).
+[Map choropleth](/examples/map/choropleth): three toy regions filled by rate.
+
 ## Positions
 
 Stack sums, dodge side-by-side groups, fill normalizes each stack to one, jitter
@@ -260,12 +742,24 @@ import {
   scaleXLog10,
   scaleYSqrt,
   scale_x_log10,
+  scaleColorGradient,
+  scale_color_gradient2,
+  scale_fill_gradientn,
 } from "@ggsvelte/spec";
 
 const camel = scaleXLog10({ domain: [1, 10_000] });
 const alias = scale_x_log10({ limits: [1, 10_000] });
 const root = scaleYSqrt({ reverse: true });
+// Continuous colour gradients (#826): map to sequential scales with explicit range.
+const twoStop = scaleColorGradient({ low: "#132B43", high: "#56B1F7" });
+const diverging = scale_color_gradient2({ low: "#B2182B", mid: "#F7F7F7", high: "#2166AC" });
+const nStop = scale_fill_gradientn({ colours: ["#440154", "#21918c", "#fde725"] });
 \`\`\`
+
+Svelte shells: \`<ScaleColorGradient>\`, \`<ScaleColorGradient2>\`,
+\`<ScaleColorGradientn>\` (and fill / colour aliases). gradientn requires ≥2
+hex stops via \`colours\` / \`colors\` / \`values\`. See
+[gradient colour example](/examples/point/gradient-continuous).
 
 The Svelte surface accepts the same JSON and re-exports the same helpers:
 
@@ -353,21 +847,45 @@ registered schemes and capacities on
 [palette-exhausted](/guide/errors#palette-exhausted) and
 [palette-exhausted — warning](/guide/errors#palette-exhausted-warning).
 
+ggplot2-shaped discrete helpers (portable named schemes, not bake-only):
+
+\`\`\`svelte fragment
+<ScaleColorHue />
+<!-- or: <ScaleColorGrey />, <ScaleColorOrdinal scheme="tableau10" /> -->
+\`\`\`
+
+\`\`\`ts fragment
+import { scaleColorHue, scaleColorGrey, scaleColorOrdinal } from "@ggsvelte/spec";
+
+scaleColorHue(); // { color: { type: "ordinal", scheme: "hue" } }
+scaleColorGrey(); // scheme "grey" (US gray is a binding-identical alias)
+scaleColorOrdinal({ scheme: "tableau10" }); // alias of scaleColorDiscrete
+// Custom h/c/l (hue) or start/end (grey) bake a fixed 10-stop range instead.
+\`\`\`
+
+[Hue discrete colour](/examples/point/hue-discrete): even-hue groups via
+\`scale_color_hue\`. Registered schemes also include \`"grey"\` / \`"gray"\`.
+
 ## Continuous, binned, manual, and identity color
 
-Quantitative color/fill defaults to a continuous viridis colorbar. The
-\`identity\`, \`log10\`, and \`sqrt\` transforms run before color-domain training;
-they do not change position statistics. Explicit reference \`breaks\` stay in
-semantic source units.
+Quantitative color/fill defaults to a continuous viridis colorbar. Named
+viridis-family constructors match ggplot2 \`scale_*_viridis_{c,d,b}\`
+(\`option\` selects \`viridis\`/\`magma\`/\`plasma\`/\`inferno\`/\`cividis\`/\`turbo\`;
+\`direction: -1\` reverses). Discrete viridis samples evenly across the ramp.
+The \`identity\`, \`log10\`, and \`sqrt\` transforms run before color-domain
+training; they do not change position statistics. Explicit reference
+\`breaks\` stay in semantic source units.
 
 \`\`\`ts fragment
 import {
   scaleColorLog10,
-  scaleFillContinuous,
+  scaleColorViridisD,
+  scaleFillViridisC,
 } from "@ggsvelte/spec";
 
 const color = scaleColorLog10({ domain: [1, 1000] });
-const fill = scaleFillContinuous({ scheme: "viridis" });
+const fill = scaleFillViridisC({ option: "plasma" });
+const groups = scaleColorViridisD({ option: "viridis" });
 \`\`\`
 
 Binned color/fill uses deterministic \`[lower, upper)\` intervals with the final
@@ -389,7 +907,25 @@ colorsteps guide exposes every boundary, label, swatch, and inclusivity rule:
 Manual scales pair each domain value with exactly one color and never recycle
 unknown values. Identity scales validate source \`#rgb\`/\`#rrggbb\` values and
 show no guide by default. \`naValue\` handles missing values; \`unknownValue\`
-handles invalid, unmapped, or censored values.
+handles invalid, unmapped, or censored values. Multi-aesthetic helpers expand
+the same identity or manual config across channels (British \`colour\` aliases
+\`color\`):
+
+\`\`\`ts fragment
+import {
+  scaleContinuousIdentity,
+  scaleDiscreteManual,
+  scaleType,
+} from "@ggsvelte/spec";
+
+const linked = scaleDiscreteManual({
+  aesthetics: ["colour", "fill"],
+  values: ["#4477aa", "#ee6677"],
+  domain: ["control", "treated"],
+});
+const rawSize = scaleContinuousIdentity({ aesthetics: ["size", "alpha"] });
+// Agent default: scaleType({ aesthetic: "color", dataKind: "nominal" }) → "ordinal"
+\`\`\`
 
 \`\`\`ts fragment
 const manual = scaleColorManual({
@@ -622,9 +1158,19 @@ Registered theme name; mappings unchanged:
 </GGPlot>
 \`\`\`
 
-Twelve themes, categorical palettes, sequential ramps:
-[Themes and color](/themes). Exhaustion:
-[palette-exhausted](/guide/errors#palette-exhausted).
+Eighteen registered theme names (sixteen distinct looks), categorical palettes,
+and sequential ramps: [Themes and color](/themes). \`theme: "bw"\` /
+\`<ThemeBw />\` is a white-panel print theme (grey grid + rectangular border).
+\`theme: "linedraw"\` / \`<ThemeLinedraw />\` is monochrome line-art chrome
+(black hairline grid and panel border). \`theme: "void"\` / \`<ThemeVoid />\`
+suppresses axes, grid, and panel chrome (marks and legends remain) for maps,
+logos, and free-form composition (ggplot2 \`theme_void\`). UK
+\`theme: "grey"\` / \`<ThemeGrey />\` and US \`theme: "gray"\` / \`<ThemeGray />\`
+are first-class aliases of the ggplot2 grey-panel look (\`ThemeGgplot2\` /
+\`theme: "ggplot2"\`), matching ggplot2 \`theme_grey\` / \`theme_gray\`.
+\`theme: "test"\` / \`<ThemeTest />\` is a pinned high-contrast snapshot theme
+for package tests and VR (ggplot2 \`theme_test\` role; not an alias of product
+themes). Exhaustion: [palette-exhausted](/guide/errors#palette-exhausted).
 
 ## Preserve color meaning
 

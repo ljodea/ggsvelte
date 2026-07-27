@@ -11,6 +11,11 @@ import type { PositionConversionContext } from "./temporal-position.js";
 
 export interface ColorBinding {
   field: string | null;
+  /**
+   * Stat-generated column mapped with { stat } (e.g. after_stat level for
+   * density_2d_filled fill; #802 phase 2). Optional for fixture ergonomics.
+   */
+  statColumn?: string | null;
   /** Literal (non-scaled) constant, if any. */
   constant: string | null;
   /** Scaled constant ({value, scale: true}), if any. */
@@ -90,6 +95,14 @@ export interface LayerBinding {
   xendField: string | null;
   /** Segment end y field; null when unused. */
   yendField: string | null;
+  /** Spoke angle field (radians); null when using params.angle constant. */
+  angleField: string | null;
+  /** Spoke radius field (data units); null when using params.radius constant. */
+  radiusField: string | null;
+  /** Contour surface height field; null when unused (#801). */
+  zField: string | null;
+  /** geom_map join key in value data (#808); null when unused. */
+  mapIdField: string | null;
   /** Ribbon only: resolved running-coordinate orientation. */
   ribbonOrientation?: "x" | "y";
   color: ColorBinding;

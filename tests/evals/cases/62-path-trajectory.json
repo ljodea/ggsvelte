@@ -1,0 +1,37 @@
+{
+  "id": "62-path-trajectory",
+  "kind": "chart",
+  "prompt": "Connect these trajectory points in data order with geom path (do not sort by x).",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" }
+    ],
+    "rowCount": 5
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 0 },
+      { "x": 1, "y": 1 },
+      { "x": 0.5, "y": 1.5 },
+      { "x": 0, "y": 1 },
+      { "x": 0.2, "y": 0.2 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "path",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" }
+        }
+      }
+    ]
+  },
+  "notes": "geom_path keeps row order (ggplot2 geom_path). Distinct from geom_line which sorts by x."
+}

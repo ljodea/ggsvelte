@@ -29,6 +29,7 @@ const VALUE_EXPORTS = [
   "RasterLayerSchema",
   "RibbonLayerSchema",
   "SegmentLayerSchema",
+  "CurveLayerSchema",
   "QqLayerSchema",
   "QqLineLayerSchema",
   "FacetFieldRefSchema",
@@ -36,6 +37,9 @@ const VALUE_EXPORTS = [
   "FacetSpecSchema",
   "GEOM_DEFAULTS",
   "HistogramLayerSchema",
+  "FreqpolyLayerSchema",
+  "HlineLayerSchema",
+  "JitterLayerSchema",
   "KNOWN_GEOMS",
   "KNOWN_POSITIONS",
   "KNOWN_STATS",
@@ -47,6 +51,7 @@ const VALUE_EXPORTS = [
   "PlotSpecSchema",
   "PointLayerSchema",
   "RuleLayerSchema",
+  "VlineLayerSchema",
   "ScalesSchema",
   "SEQUENTIAL_SCHEME_NAMES",
   "TemporalParserSpecSchemaRef",
@@ -54,6 +59,7 @@ const VALUE_EXPORTS = [
   "SpecModule",
   "TextLayerSchema",
   "THEME_NAMES",
+  "THEME_NAME_ALIASES",
 ] as const;
 
 describe("schema facade surface", () => {

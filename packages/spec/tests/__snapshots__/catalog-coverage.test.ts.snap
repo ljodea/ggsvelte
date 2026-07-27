@@ -111,13 +111,18 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
     "allowed": [
       "point",
       "line",
+      "path",
       "col",
       "bar",
       "histogram",
+      "freqpoly",
       "area",
       "rule",
+      "hline",
+      "vline",
       "text",
       "smooth",
+      "quantile",
       "boxplot",
       "density",
       "errorbar",
@@ -126,6 +131,20 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
       "raster",
       "ribbon",
       "segment",
+      "abline",
+      "curve",
+      "contour",
+      "density_2d",
+      "density_2d_filled",
+      "dotplot",
+      "map",
+      "sf",
+      "sf_text",
+      "sf_label",
+      "blank",
+      "jitter",
+      "spoke",
+      "rug",
       "qq",
       "qq_line",
     ],
@@ -136,7 +155,7 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
         "geom": "point",
       },
     },
-    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "qq", "qq_line".",
+    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "abline", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "sf_label", "blank", "jitter", "spoke", "rug", "qq", "qq_line".",
     "path": "/layers/0/geom",
   },
 }
@@ -153,13 +172,18 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
     "allowed": [
       "point",
       "line",
+      "path",
       "col",
       "bar",
       "histogram",
+      "freqpoly",
       "area",
       "rule",
+      "hline",
+      "vline",
       "text",
       "smooth",
+      "quantile",
       "boxplot",
       "density",
       "errorbar",
@@ -168,6 +192,20 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
       "raster",
       "ribbon",
       "segment",
+      "abline",
+      "curve",
+      "contour",
+      "density_2d",
+      "density_2d_filled",
+      "dotplot",
+      "map",
+      "sf",
+      "sf_text",
+      "sf_label",
+      "blank",
+      "jitter",
+      "spoke",
+      "rug",
       "qq",
       "qq_line",
     ],
@@ -178,7 +216,7 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
         "geom": "point",
       },
     },
-    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "col", "bar", "histogram", "area", "rule", "text", "smooth", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "qq", "qq_line". Did you mean "point"?",
+    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "abline", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "sf_label", "blank", "jitter", "spoke", "rug", "qq", "qq_line". Did you mean "point"?",
     "path": "/layers/0/geom",
   },
 }
@@ -269,9 +307,10 @@ exports[`ERROR_CATALOG coverage [invalid-enum-value] is reproducible; message + 
       "flip",
       "transform",
       "fixed",
+      "sf",
     ],
     "code": "invalid-enum-value",
-    "message": "Invalid value "polar" for "type"; allowed: "cartesian", "flip", "transform", "fixed".",
+    "message": "Invalid value "polar" for "type"; allowed: "cartesian", "flip", "transform", "fixed", "sf".",
     "path": "/coord/type",
   },
 }
@@ -344,7 +383,7 @@ exports[`ERROR_CATALOG coverage [invalid-type] is reproducible; message + fix sn
 exports[`ERROR_CATALOG coverage [scale-scheme-type] is reproducible; message + fix snapshot 1`] = `
 {
   "catalog": {
-    "fix": "Use a categorical scheme with "ordinal", or "viridis"/hex stops with "sequential".",
+    "fix": "Use a categorical scheme with "ordinal" (or a sequential-family scheme like "viridis" for discrete viridis), or "viridis"/hex stops with "sequential".",
     "summary": "A named color scheme is incompatible with the configured color scale type.",
     "tier": 1,
   },
@@ -482,14 +521,14 @@ exports[`ERROR_CATALOG coverage [guide-aesthetic-incompatible] is reproducible; 
 exports[`ERROR_CATALOG coverage [coord-fixed-free-scales] is reproducible; message + fix snapshot 1`] = `
 {
   "catalog": {
-    "fix": "Use facet.scales = "fixed", or remove coord_fixed.",
+    "fix": "Use facet.scales = "fixed", or remove coord_fixed / coord_sf.",
     "summary": "Fixed-aspect coordinates cannot represent free positional facet scales truthfully.",
     "tier": 1,
   },
   "instance": {
     "code": "coord-fixed-free-scales",
     "fix": {
-      "description": "Use facet.scales = "fixed", or remove the fixed-aspect coordinate.",
+      "description": "Use facet.scales = "fixed", or remove the coord_fixed coordinate.",
       "example": "fixed",
     },
     "message": "coord_fixed cannot use facet scales "free_x" because panels would imply unequal physical data-unit lengths.",
@@ -531,12 +570,8 @@ exports[`ERROR_CATALOG coverage [rule-form-ambiguous] is reproducible; message +
   "instance": {
     "code": "rule-form-ambiguous",
     "fix": {
-      "description": "Remove the intercept params (data-driven form), or unset aes.x/aes.y with null (annotation form).",
+      "description": "Remove the intercept params (data-driven form), or unset the position aes with null (annotation form).",
       "example": {
-        "aes": {
-          "x": null,
-          "y": null,
-        },
         "geom": "rule",
         "params": {
           "yintercept": 0,
@@ -719,7 +754,7 @@ exports[`ERROR_CATALOG coverage [unsupported-geom-aesthetic] is reproducible; me
     "fix": {
       "description": "Remove aes.size or move it to a compatible point layer.",
     },
-    "message": "The line geom does not consume aes.size; supported geoms: point, text, qq.",
+    "message": "The line geom does not consume aes.size; supported geoms: point, jitter, text, dotplot, sf, sf_text, sf_label, blank, qq.",
     "path": "/layers/0/aes/size",
   },
 }
@@ -890,6 +925,29 @@ exports[`ERROR_CATALOG coverage [unknown-stat-column] is reproducible; message +
     "code": "unknown-stat-column",
     "message": "Channel "y" maps stat column "count", but this layer's stat ("identity") generates no columns.",
     "path": "/layers/0/aes/y",
+  },
+}
+`;
+
+exports[`ERROR_CATALOG coverage [manual-fun-required] is reproducible; message + fix snapshot 1`] = `
+{
+  "catalog": {
+    "fix": "Set params.fun to one of first|last|mean|median|min|max|sum (portable named registry; #814).",
+    "summary": "A layer uses stat manual without params.fun.",
+    "tier": 2,
+  },
+  "instance": {
+    "code": "manual-fun-required",
+    "fix": {
+      "description": "Set params.fun to a registered portable transform name.",
+      "example": {
+        "params": {
+          "fun": "mean",
+        },
+      },
+    },
+    "message": "The manual stat requires params.fun (one of first|last|mean|median|min|max|sum). There is no silent identity default (ggplot2 divergence; #814).",
+    "path": "/layers/0/params/fun",
   },
 }
 `;

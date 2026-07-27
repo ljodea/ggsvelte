@@ -119,10 +119,24 @@ export function resolveCandidateFrameRow(input: {
 
   if (frame !== undefined && batch.kind === "paths") {
     const explicitFrameRow = batch.frameRowIndex?.[primitiveIndex];
+    // Emitted closed-path frame rows are exact in both primitive-index spaces:
+    // with no coord they index render vertices, and after projection
+    // `semanticIndex` is a post-hole-strip vertex id keyed to this same array
+    // (hole stripping rewrites it alongside positions; projection leaves it).
+    const emittedClosedRow =
+      batch.closed === true ? batch.closedFrameRows?.[primitiveIndex] : undefined;
     if (explicitFrameRow !== undefined && explicitFrameRow < frame.n) {
       // Style-split lines emit exact frame rows so candidate identity survives
       // subpath reindexing after mapped stroke-style breaks.
       frameRow = explicitFrameRow;
+      derivedGroup = frame.groups[frameRow] ?? derivedGroup;
+    } else if (emittedClosedRow !== undefined) {
+      // Prefer emitted rows for every closed path, coord or not. Polygon rings
+      // (geom_polygon / geom_sf / density_2d_filled) keep authored winding and
+      // are not a 2×N reflected band, so the sorted-row reconstruction below
+      // would claim a neighbouring ring's row (#916); filtered ribbons need the
+      // same exactness after non-finite edge drops (#502).
+      frameRow = emittedClosedRow;
       derivedGroup = frame.groups[frameRow] ?? derivedGroup;
     } else if (batch.semanticIndex === undefined) {
       // After coord projection, candidate facts pass semanticIndex (pre-render
@@ -140,24 +154,18 @@ export function resolveCandidateFrameRow(input: {
         frameRow = rowsInGroup[Math.min(reflected, rowsInGroup.length - 1)] ?? frameRow;
       }
     } else if (batch.closed === true) {
-      // Prefer emitted closed-band frame rows (filtered ribbons) when present —
-      // layout from full frame groups mis-reflects after non-finite edge drops (#502).
-      const emitted = batch.closedFrameRows;
-      if (emitted !== undefined && primitiveIndex >= 0 && primitiveIndex < emitted.length) {
-        frameRow = emitted[primitiveIndex]!;
+      // Closed band with no emitted rows (handled above): reconstruct the 2×N
+      // upper/lower reflection from full frame groups.
+      const resolved = resolveClosedBandFrameRow(
+        getClosedBandLayout(frame, orderedGroups),
+        primitiveIndex,
+      );
+      if (resolved === null) {
+        frameRow = Math.min(Math.max(0, primitiveIndex), Math.max(0, frame.n - 1));
         derivedGroup = frame.groups[frameRow] ?? derivedGroup;
       } else {
-        const resolved = resolveClosedBandFrameRow(
-          getClosedBandLayout(frame, orderedGroups),
-          primitiveIndex,
-        );
-        if (resolved === null) {
-          frameRow = Math.min(Math.max(0, primitiveIndex), Math.max(0, frame.n - 1));
-          derivedGroup = frame.groups[frameRow] ?? derivedGroup;
-        } else {
-          frameRow = resolved.frameRow;
-          derivedGroup = resolved.derivedGroup;
-        }
+        frameRow = resolved.frameRow;
+        derivedGroup = resolved.derivedGroup;
       }
     } else {
       // Open paths: semantic index is the pre-split vertex / frame row.

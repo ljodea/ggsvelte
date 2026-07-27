@@ -1,0 +1,40 @@
+{
+  "id": "85-sf-text-point-labels",
+  "kind": "chart",
+  "prompt": "Use geom_sf_text to label GeoJSON Point cities by name.",
+  "dataProfile": {
+    "fields": [
+      { "name": "geometry", "type": "nominal" },
+      { "name": "name", "type": "nominal" }
+    ],
+    "rowCount": 2
+  },
+  "data": {
+    "main": [
+      {
+        "geometry": "{\"type\":\"Point\",\"coordinates\":[1,2]}",
+        "name": "Alpha"
+      },
+      {
+        "geometry": "{\"type\":\"Point\",\"coordinates\":[3,4]}",
+        "name": "Beta"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "sf_text",
+        "stat": "sf_coordinates",
+        "position": "identity",
+        "aes": {
+          "label": { "field": "name" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_sf_text Point family labels (#809 phase 2)."
+}

@@ -206,6 +206,74 @@ describe("resolveCandidateFrameRow paths", () => {
     ).toEqual({ frameRow: 0, derivedGroup: 0 });
   });
 
+  /**
+   * Polygon rings (geom_polygon / geom_sf / density_2d_filled) keep authored
+   * winding, not x-sorted order, and are not a 2×N reflected band. Without a
+   * coord transform there is no semanticIndex, so resolution used to fall into
+   * the x-sorted subpath reconstruction and claim a neighbouring ring's row —
+   * filled density bands resolved the wrong after_stat level (#916).
+   */
+  it("uses closedFrameRows for polygon rings with no coord semanticIndex", async () => {
+    const { resolveCandidateFrameRow } =
+      await import("../../src/pipeline/candidate-construction/frame-row.ts");
+    // xNumeric deliberately unsorted: data order [0,1,2,3], x-sorted [0,2,1,3].
+    const frame = fromAny({
+      n: 4,
+      groups: [0, 0, 0, 0],
+      xNumeric: new Float64Array([0, 2, 1, 3]),
+      binding: { layer: { geom: "density_2d_filled" } },
+    });
+    const batch = fromAny({
+      kind: "paths",
+      closed: true,
+      pathOffsets: new Uint32Array([0, 4]),
+      closedFrameRows: new Uint32Array([0, 1, 2, 3]),
+    });
+    // x-sorted reconstruction would map primitive 1 → frame row 2 (wrong ring).
+    for (const primitiveIndex of [0, 1, 2, 3]) {
+      expect(
+        resolveCandidateFrameRow({
+          frame,
+          batch,
+          primitiveIndex,
+          orderedGroups: [0],
+          outlierLocalRow: null,
+        }),
+      ).toEqual({ frameRow: primitiveIndex, derivedGroup: 0 });
+    }
+  });
+
+  /**
+   * Closed band, no emitted rows, and a primitive past the reconstructed 2×N
+   * layout: fall back to a clamped frame row rather than resolving nothing.
+   */
+  it("clamps out-of-layout closed-band primitives with no emitted rows", async () => {
+    const { resolveCandidateFrameRow } =
+      await import("../../src/pipeline/candidate-construction/frame-row.ts");
+    const frame = fromAny({
+      n: 2,
+      groups: [0, 0],
+      xNumeric: new Float64Array([0, 1]),
+      binding: { layer: { geom: "area" } },
+    });
+    // Band layout spans 2 rows × 2 = 4 vertices; 10 is past the end.
+    const batch = fromAny({
+      kind: "paths",
+      closed: true,
+      pathOffsets: new Uint32Array([0, 4]),
+      semanticIndex: new Uint32Array(4),
+    });
+    expect(
+      resolveCandidateFrameRow({
+        frame,
+        batch,
+        primitiveIndex: 10,
+        orderedGroups: [0],
+        outlierLocalRow: null,
+      }),
+    ).toEqual({ frameRow: 1, derivedGroup: 0 });
+  });
+
   it("resolves many subpaths without linear pathOffsets scans (O(log P))", async () => {
     const { resolveCandidateFrameRow } =
       await import("../../src/pipeline/candidate-construction/frame-row.ts");
