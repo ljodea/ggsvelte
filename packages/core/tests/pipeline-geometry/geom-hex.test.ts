@@ -149,10 +149,10 @@ describe("geom_hex geometry (#800)", () => {
     expect(batch?.kind).toBe("paths");
     const nHex = batch!.pathOffsets.length - 1;
     expect(nHex).toBeGreaterThan(0);
-    expect(batch!.strokes).toBeDefined();
-    expect(batch!.strokes!.length).toBe(nHex);
+    const strokes = batch!.strokes ?? [];
+    expect(strokes.length).toBe(nHex);
     // At least one hex should get a non-null stroke from the count scale.
-    expect(batch!.strokes!.some((s) => s !== null && s !== undefined)).toBe(true);
+    expect(strokes.some((s) => s !== null && s !== undefined)).toBe(true);
   });
 
   it("maps alpha/linewidth to kept subpaths when some hexes drop", () => {
