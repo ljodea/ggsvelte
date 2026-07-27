@@ -524,6 +524,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "point/steps-binned",
+    title: "Stepped binned colour scale",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6InBvaW50L3N0ZXBzLWJpbm5lZCJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJ4IjoxLCJ5IjoxLjEsInoiOjB9LHsieCI6MiwieSI6MS44LCJ6IjoxfSx7IngiOjMsInkiOjIuNCwieiI6Mn0seyJ4Ijo0LCJ5IjozLCJ6IjozfSx7IngiOjUsInkiOjMuNiwieiI6NH0seyJ4IjoxLjUsInkiOjIuMiwieiI6MC41fSx7IngiOjIuNSwieSI6Mi45LCJ6IjoxLjV9LHsieCI6My41LCJ5IjoxLjUsInoiOjIuNX0seyJ4Ijo0LjUsInkiOjMuMywieiI6My41fV19LCJsYXllcnMiOlt7Imdlb20iOiJwb2ludCIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoiaWRlbnRpdHkiLCJhZXMiOnsieCI6eyJmaWVsZCI6IngifSwieSI6eyJmaWVsZCI6InkifSwiY29sb3IiOnsiZmllbGQiOiJ6In19LCJwYXJhbXMiOnsic2l6ZSI6NH19XSwic2NhbGVzIjp7ImNvbG9yIjp7InR5cGUiOiJiaW5uZWQiLCJyYW5nZSI6WyIjMTMyYjQzIiwiIzU2YjFmNyJdfX0sImxhYnMiOnsidGl0bGUiOiJzY2FsZV9jb2xvcl9zdGVwcyIsInN1YnRpdGxlIjoiQmlubmVkIGNvbnRpbnVvdXMgY29sb3VyIHdpdGggaGFyZCBzdGVwcyAobG93IOKGkiBoaWdoKSIsIngiOiJ4IiwieSI6InkiLCJjb2xvciI6InoifSwidGhlbWUiOiJtaW5pbWFsIn19",
+    },
+  },
+  {
     id: "point/style-scales",
     title: "Complete style scales",
     compatibility: {

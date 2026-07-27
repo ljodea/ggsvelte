@@ -2282,8 +2282,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-741",
-        title: "experimental (741)",
+        id: "experimental-762",
+        title: "experimental (762)",
         level: 3,
       },
       {
@@ -2327,8 +2327,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "stable-intent-155",
-        title: "stable-intent (155)",
+        id: "stable-intent-164",
+        title: "stable-intent (164)",
         level: 3,
       },
     ],
@@ -3042,6 +3042,16 @@ export const DOCS_ROUTES = [
     title: "stat unique overplotting — ggsvelte gallery",
     description: "stat unique overplotting",
     canonicalPath: "/examples/point/stat-unique",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/point/steps-binned",
+    title: "Stepped binned colour scale — ggsvelte gallery",
+    description: "Stepped binned colour scale",
+    canonicalPath: "/examples/point/steps-binned",
     kind: "page",
     index: true,
     sitemap: true,
