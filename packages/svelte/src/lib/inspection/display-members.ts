@@ -6,7 +6,7 @@
  * that render the default field rows should collapse identical *display*
  * payloads so users never see the same period/value block twice.
  */
-import type { CellValue } from "@ggsvelte/core";
+import { spaceFieldName, type CellValue } from "@ggsvelte/core";
 
 import type { NonEmptyReadonlyArray, PlotDatum, TooltipField } from "../interaction/interaction.js";
 
@@ -62,10 +62,12 @@ function isTooltipLabChannel(channel: string): channel is TooltipLabChannel {
  *
  * Preference order:
  * 1. Explicit lab for the field's channel (x/y/color/…), when non-empty
- * 2. Light humanization of the column name (camelCase / snake_case → words)
+ * 2. Light humanization of the column name via shared `spaceFieldName`
+ *    (camelCase / snake_case → words; multi-word → lowercase for scanability)
  * 3. Raw field name as last resort (empty input)
  *
  * Does not invent domain semantics ("crimePersons" stays "crime persons").
+ * Axis/legend titles use `humanizeFieldTitle` (sentence case) instead (#961).
  */
 export function tooltipFieldLabel(
   fieldName: string,
@@ -87,10 +89,7 @@ export function tooltipFieldLabel(
   }
 
   if (fieldName.length === 0) return fieldName;
-  const spaced = fieldName
-    .replaceAll("_", " ")
-    .replaceAll(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .replaceAll(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
+  const spaced = spaceFieldName(fieldName);
   // Preserve intentional Title Case single tokens (e.g. "Region"); only fold
   // multi-word camelCase into lowercase words for scanability.
   if (!/\s/.test(spaced)) return spaced;

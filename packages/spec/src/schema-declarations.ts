@@ -4815,31 +4815,58 @@ export const SpecDeclarations = {
       subtitle: Type.Optional(Type.String({ description: "Plot subtitle, under the title." })),
       caption: Type.Optional(Type.String({ description: "Small caption under the plot." })),
       x: Type.Optional(
-        Type.String({ description: "X axis title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "X axis title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       y: Type.Optional(
-        Type.String({ description: "Y axis title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Y axis title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       color: Type.Optional(
-        Type.String({ description: "Color legend title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Color legend title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       fill: Type.Optional(
-        Type.String({ description: "Fill legend title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Fill legend title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       size: Type.Optional(
-        Type.String({ description: "Size legend title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Size legend title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       linewidth: Type.Optional(
-        Type.String({ description: "Linewidth legend title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Linewidth legend title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       alpha: Type.Optional(
-        Type.String({ description: "Alpha legend title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Alpha legend title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       shape: Type.Optional(
-        Type.String({ description: "Shape legend title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Shape legend title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
       linetype: Type.Optional(
-        Type.String({ description: "Linetype legend title. Defaults to the mapped field name." }),
+        Type.String({
+          description:
+            "Linetype legend title. Defaults to a humanized form of the mapped field name (sentence case).",
+        }),
       ),
     },
     {
