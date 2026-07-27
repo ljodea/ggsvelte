@@ -2350,7 +2350,7 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/guide/upgrading",
-    title: "Upgrade in five minutes — ggsvelte",
+    title: "Upgrade guide — ggsvelte",
     description: "Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     canonicalPath: "/guide/upgrading",
     kind: "page",
@@ -2359,7 +2359,7 @@ export const DOCS_ROUTES = [
     shell: "docs",
     navigation: {
       section: "Release",
-      label: "Upgrade in five minutes",
+      label: "Upgrade guide",
       order: 60,
     },
     headings: [
@@ -2507,38 +2507,6 @@ export const DOCS_ROUTES = [
         id: "deprecated-type-aliases",
         title: "Deprecated type aliases",
         level: 3,
-      },
-    ],
-  },
-  {
-    path: "/guide/migrating-pre-0-1",
-    title: "Migrating pre-0.1 interactions — ggsvelte",
-    description: "Move from tooltip and brush props to semantic interaction capabilities.",
-    canonicalPath: "/guide/migrating-pre-0-1",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "docs",
-    navigation: {
-      section: "Release",
-      label: "Migrating pre-0.1 interactions",
-      order: 61,
-    },
-    headings: [
-      {
-        id: "rename-the-props-and-callbacks",
-        title: "Rename the props and callbacks",
-        level: 2,
-      },
-      {
-        id: "migrate-payload-handling",
-        title: "Migrate payload handling",
-        level: 2,
-      },
-      {
-        id: "migrate-custom-tooltip-snippets",
-        title: "Migrate custom tooltip snippets",
-        level: 2,
       },
     ],
   },
@@ -3651,11 +3619,7 @@ export const GUIDE_NAVIGATION = [
     entries: [
       {
         path: "/guide/upgrading",
-        label: "Upgrade in five minutes",
-      },
-      {
-        path: "/guide/migrating-pre-0-1",
-        label: "Migrating pre-0.1 interactions",
+        label: "Upgrade guide",
       },
     ],
   },

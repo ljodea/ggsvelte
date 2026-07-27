@@ -122,17 +122,19 @@ test("Docs landing and sidebar expose the full path without duplicate Reference"
   // Full chapter index on the landing page (not just the four task hubs).
   const index = page.getByRole("navigation", { name: "All documentation guides" });
   await expect(index.getByRole("heading", { level: 3 })).toHaveText([
-    "Start",
     "Core grammar",
     "Interaction",
     "Production",
     "Reference",
     "Release",
   ]);
+  // Getting started lives in Start here only — not repeated under All guides.
+  await expect(index.getByRole("link", { name: /Getting started/ })).toHaveCount(0);
   await expect(index.getByRole("link", { name: /Data and mappings/ })).toBeVisible();
   await expect(index.getByRole("link", { name: /Dates without preprocessing/ })).toBeVisible();
   await expect(index.getByRole("link", { name: /Errors reference/ })).toBeVisible();
-  await expect(index.getByRole("link", { name: /Upgrade in five minutes/ })).toBeVisible();
+  await expect(index.getByRole("link", { name: /Upgrade guide/ })).toBeVisible();
+  await expect(index.getByRole("link", { name: /Migrating pre-0.1/ })).toHaveCount(0);
 
   const sidebar = page.getByRole("navigation", { name: "Guide chapters" });
   await expect(sidebar.getByRole("heading", { level: 2 })).toHaveText([
@@ -143,7 +145,8 @@ test("Docs landing and sidebar expose the full path without duplicate Reference"
     "Reference",
     "Release",
   ]);
-  await expect(sidebar.getByRole("link")).toHaveCount(26);
+  // Overview + guides minus deleted pre-0.1 page.
+  await expect(sidebar.getByRole("link")).toHaveCount(25);
   await expect(sidebar.getByRole("link", { name: "Dates without preprocessing" })).toBeVisible();
   await expectNoDocumentOverflow(page);
 
@@ -216,7 +219,7 @@ for (const chapter of [
   {
     group: "release",
     path: "/guide/upgrading",
-    heading: "Upgrade in five minutes",
+    heading: "Upgrade guide",
     evidence: "/guide/lifecycle#lifecycle-tags",
   },
 ] as const) {

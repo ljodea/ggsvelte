@@ -3964,20 +3964,20 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "page:guide-upgrading",
     kind: "page",
-    title: "Upgrade in five minutes",
+    title: "Upgrade guide",
     summary: "Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading",
     keywords: ["Release"],
-    exact: ["Upgrade in five minutes"],
+    exact: ["Upgrade guide"],
   },
   {
     id: "heading:guide-upgrading:five-minute-path",
     kind: "heading",
     title: "Five-minute path",
     summary:
-      "Five-minute path in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Five-minute path in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#five-minute-path",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Five-minute path"],
   },
   {
@@ -3985,9 +3985,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "0.11 to 0.12",
     summary:
-      "0.11 to 0.12 in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "0.11 to 0.12 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#0-11-to-0-12",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["0.11 to 0.12"],
   },
   {
@@ -3995,9 +3995,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Manual color domain/range diagnostic code",
     summary:
-      "Manual color domain/range diagnostic code in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Manual color domain/range diagnostic code in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#manual-color-domain-range-diagnostic-code",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Manual color domain/range diagnostic code"],
   },
   {
@@ -4005,9 +4005,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "0.10 to 0.11",
     summary:
-      "0.10 to 0.11 in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "0.10 to 0.11 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#0-10-to-0-11",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["0.10 to 0.11"],
   },
   {
@@ -4015,9 +4015,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Compose the theme as a child layer",
     summary:
-      "Compose the theme as a child layer in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Compose the theme as a child layer in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#compose-the-theme-as-a-child-layer",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Compose the theme as a child layer"],
   },
   {
@@ -4025,9 +4025,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Compose scales as child layers",
     summary:
-      "Compose scales as child layers in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Compose scales as child layers in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#compose-scales-as-child-layers",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Compose scales as child layers"],
   },
   {
@@ -4035,9 +4035,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Compose coord as a child layer",
     summary:
-      "Compose coord as a child layer in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Compose coord as a child layer in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#compose-coord-as-a-child-layer",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Compose coord as a child layer"],
   },
   {
@@ -4045,9 +4045,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Compose facet as a child layer",
     summary:
-      "Compose facet as a child layer in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Compose facet as a child layer in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#compose-facet-as-a-child-layer",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Compose facet as a child layer"],
   },
   {
@@ -4055,9 +4055,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Compose labs as a child layer",
     summary:
-      "Compose labs as a child layer in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Compose labs as a child layer in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#compose-labs-as-a-child-layer",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Compose labs as a child layer"],
   },
   {
@@ -4065,9 +4065,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Compose guides as child layers",
     summary:
-      "Compose guides as child layers in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Compose guides as child layers in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#compose-guides-as-child-layers",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Compose guides as child layers"],
   },
   {
@@ -4075,9 +4075,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Compose legend as a child layer",
     summary:
-      "Compose legend as a child layer in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Compose legend as a child layer in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#compose-legend-as-a-child-layer",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Compose legend as a child layer"],
   },
   {
@@ -4085,9 +4085,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Migrate the grammar props with the codemod",
     summary:
-      "Migrate the grammar props with the codemod in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Migrate the grammar props with the codemod in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#migrate-the-grammar-props-with-the-codemod",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Migrate the grammar props with the codemod"],
   },
   {
@@ -4095,9 +4095,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Diagnostic handlers receive PlotDiagnostic",
     summary:
-      "Diagnostic handlers receive PlotDiagnostic in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Diagnostic handlers receive PlotDiagnostic in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#diagnostic-handlers-receive-plotdiagnostic",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Diagnostic handlers receive PlotDiagnostic"],
   },
   {
@@ -4105,9 +4105,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "0.7 to 0.8",
     summary:
-      "0.7 to 0.8 in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "0.7 to 0.8 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#0-7-to-0-8",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["0.7 to 0.8"],
   },
   {
@@ -4115,9 +4115,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Map style semantics instead of precomputing outputs",
     summary:
-      "Map style semantics instead of precomputing outputs in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Map style semantics instead of precomputing outputs in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#map-style-semantics-instead-of-precomputing-outputs",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Map style semantics instead of precomputing outputs"],
   },
   {
@@ -4125,9 +4125,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Move guide layout into the guide API",
     summary:
-      "Move guide layout into the guide API in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Move guide layout into the guide API in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#move-guide-layout-into-the-guide-api",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Move guide layout into the guide API"],
   },
   {
@@ -4135,9 +4135,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "0.8 to 0.9",
     summary:
-      "0.8 to 0.9 in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "0.8 to 0.9 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#0-8-to-0-9",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["0.8 to 0.9"],
   },
   {
@@ -4145,9 +4145,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Constrain the data rectangle instead of the outer box",
     summary:
-      "Constrain the data rectangle instead of the outer box in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Constrain the data rectangle instead of the outer box in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#constrain-the-data-rectangle-instead-of-the-outer-box",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Constrain the data rectangle instead of the outer box"],
   },
   {
@@ -4155,9 +4155,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "0.6 to 0.7",
     summary:
-      "0.6 to 0.7 in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "0.6 to 0.7 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#0-6-to-0-7",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["0.6 to 0.7"],
   },
   {
@@ -4165,9 +4165,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Choose explicit color/fill families",
     summary:
-      "Choose explicit color/fill families in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Choose explicit color/fill families in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#choose-explicit-color-fill-families",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Choose explicit color/fill families"],
   },
   {
@@ -4175,9 +4175,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "0.5 to 0.6",
     summary:
-      "0.5 to 0.6 in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "0.5 to 0.6 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#0-5-to-0-6",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["0.5 to 0.6"],
   },
   {
@@ -4185,9 +4185,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Move position transforms before statistics",
     summary:
-      "Move position transforms before statistics in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Move position transforms before statistics in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#move-position-transforms-before-statistics",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Move position transforms before statistics"],
   },
   {
@@ -4195,9 +4195,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Review limits, zoom, and transformed units",
     summary:
-      "Review limits, zoom, and transformed units in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Review limits, zoom, and transformed units in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#review-limits-zoom-and-transformed-units",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Review limits, zoom, and transformed units"],
   },
   {
@@ -4205,9 +4205,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Update scale and interaction inspection",
     summary:
-      "Update scale and interaction inspection in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Update scale and interaction inspection in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#update-scale-and-interaction-inspection",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Update scale and interaction inspection"],
   },
   {
@@ -4215,9 +4215,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "0.2 to 0.3",
     summary:
-      "0.2 to 0.3 in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "0.2 to 0.3 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#0-2-to-0-3",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["0.2 to 0.3"],
   },
   {
@@ -4225,9 +4225,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Replace custom hit indexes with CandidateStore",
     summary:
-      "Replace custom hit indexes with CandidateStore in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Replace custom hit indexes with CandidateStore in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#replace-custom-hit-indexes-with-candidatestore",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Replace custom hit indexes with CandidateStore"],
   },
   {
@@ -4235,9 +4235,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "0.1 to 0.2",
     summary:
-      "0.1 to 0.2 in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "0.1 to 0.2 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#0-1-to-0-2",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["0.1 to 0.2"],
   },
   {
@@ -4245,9 +4245,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Optional: shared interaction state with a controller",
     summary:
-      "Optional: shared interaction state with a controller in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Optional: shared interaction state with a controller in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#optional-shared-interaction-state-with-a-controller",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Optional: shared interaction state with a controller"],
   },
   {
@@ -4255,49 +4255,10 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Deprecated type aliases",
     summary:
-      "Deprecated type aliases in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Deprecated type aliases in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#deprecated-type-aliases",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Deprecated type aliases"],
-  },
-  {
-    id: "page:guide-migrating-pre-0-1",
-    kind: "page",
-    title: "Migrating pre-0.1 interactions",
-    summary: "Move from tooltip and brush props to semantic interaction capabilities.",
-    href: "/guide/migrating-pre-0-1",
-    keywords: ["Release"],
-    exact: ["Migrating pre-0.1 interactions"],
-  },
-  {
-    id: "heading:guide-migrating-pre-0-1:rename-the-props-and-callbacks",
-    kind: "heading",
-    title: "Rename the props and callbacks",
-    summary:
-      "Rename the props and callbacks in Migrating pre-0.1 interactions. Move from tooltip and brush props to semantic interaction capabilities.",
-    href: "/guide/migrating-pre-0-1#rename-the-props-and-callbacks",
-    keywords: ["Migrating pre-0.1 interactions", "Release"],
-    exact: ["Rename the props and callbacks"],
-  },
-  {
-    id: "heading:guide-migrating-pre-0-1:migrate-payload-handling",
-    kind: "heading",
-    title: "Migrate payload handling",
-    summary:
-      "Migrate payload handling in Migrating pre-0.1 interactions. Move from tooltip and brush props to semantic interaction capabilities.",
-    href: "/guide/migrating-pre-0-1#migrate-payload-handling",
-    keywords: ["Migrating pre-0.1 interactions", "Release"],
-    exact: ["Migrate payload handling"],
-  },
-  {
-    id: "heading:guide-migrating-pre-0-1:migrate-custom-tooltip-snippets",
-    kind: "heading",
-    title: "Migrate custom tooltip snippets",
-    summary:
-      "Migrate custom tooltip snippets in Migrating pre-0.1 interactions. Move from tooltip and brush props to semantic interaction capabilities.",
-    href: "/guide/migrating-pre-0-1#migrate-custom-tooltip-snippets",
-    keywords: ["Migrating pre-0.1 interactions", "Release"],
-    exact: ["Migrate custom tooltip snippets"],
   },
   {
     id: "page:interactions-brush-zoom",

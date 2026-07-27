@@ -20,7 +20,6 @@ describe("packed Pages link checks", () => {
     "reference.html",
     "guide/interactions.html",
     "guide/interaction-reference.html",
-    "guide/migrating-pre-0-1.html",
     "guide/upgrading.html",
     "playground.html",
     "themes.html",
@@ -45,7 +44,7 @@ describe("packed Pages link checks", () => {
         "guide/interactions.html",
         [
           "../examples/interaction/tooltip",
-          "../guide/migrating-pre-0-1#payloads",
+          "../guide/upgrading#deprecated-type-aliases",
           "../llms.txt",
           "../_app/app.js",
           "../",

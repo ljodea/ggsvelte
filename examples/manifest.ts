@@ -499,7 +499,6 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
       references: [
         { label: "Interaction guide and event reference", href: "/guide/interactions" },
         { label: "Linked controlled-state example", href: "/interactions/linked-views" },
-        { label: "Pre-0.1 interaction migration", href: "/guide/migrating-pre-0-1" },
       ],
       svelteFirst: true,
       fullWidth: true,

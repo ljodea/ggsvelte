@@ -34,7 +34,6 @@ import {
   INTERACTION_REFERENCE_MD,
   LAYERS_MARKS_MD,
   LINKED_VIEWS_MD,
-  MIGRATING_PRE_0_1_MD,
   RENDERING_PERFORMANCE_MD,
   RESPONSIVE_CHARTS_MD,
   SCALES_GUIDES_MD,
@@ -60,7 +59,6 @@ export {
   INTERACTION_REFERENCE_MD,
   LAYERS_MARKS_MD,
   LINKED_VIEWS_MD,
-  MIGRATING_PRE_0_1_MD,
   RENDERING_PERFORMANCE_MD,
   RESPONSIVE_CHARTS_MD,
   SCALES_GUIDES_MD,
@@ -319,7 +317,6 @@ export function guidePages(lifecycle: LifecycleDoc): GuidePage[] {
     errors: buildErrorsMd(),
     advisories: buildAdvisoriesMd(),
     lifecycle: buildLifecycleMd(lifecycle),
-    "migrating-pre-0-1": MIGRATING_PRE_0_1_MD,
     upgrading: UPGRADING_MD,
   };
 
