@@ -89,7 +89,7 @@ export const SEQUENTIAL_SCHEME_RAMPS = {
   turbo: TURBO_RAMP_10,
 } as const;
 
-export type SequentialSchemeName = keyof typeof SEQUENTIAL_SCHEME_RAMPS;
+type SequentialSchemeName = keyof typeof SEQUENTIAL_SCHEME_RAMPS;
 
 export function isSequentialSchemeName(name: string): name is SequentialSchemeName {
   return Object.hasOwn(SEQUENTIAL_SCHEME_RAMPS, name);
