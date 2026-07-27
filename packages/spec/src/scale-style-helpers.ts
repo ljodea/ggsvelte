@@ -145,7 +145,7 @@ export function scaleSizeIdentity(options: IdentityNumericStyleScaleOptions = {}
  */
 export function scaleSizeArea(options: SizeAreaScaleOptions = {}): Scales {
   const { maxSize, range, ...rest } = options;
-  const resolvedRange = range !== undefined ? [...range] : [0, maxSize ?? 6];
+  const resolvedRange = range === undefined ? [0, maxSize ?? 6] : [...range];
   return numericStyleScale("size", "sequential", {
     ...rest,
     range: resolvedRange,
@@ -156,7 +156,7 @@ export function scaleSizeArea(options: SizeAreaScaleOptions = {}): Scales {
 /** ggplot2 `scale_size_binned_area` — binned values mapped with zero→zero area. */
 export function scaleSizeBinnedArea(options: SizeAreaScaleOptions = {}): Scales {
   const { maxSize, range, ...rest } = options;
-  const resolvedRange = range !== undefined ? [...range] : [0, maxSize ?? 6];
+  const resolvedRange = range === undefined ? [0, maxSize ?? 6] : [...range];
   return numericStyleScale("size", "binned", {
     ...rest,
     range: resolvedRange,
