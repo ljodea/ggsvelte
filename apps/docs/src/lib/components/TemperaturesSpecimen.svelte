@@ -9,6 +9,7 @@
   } from "@ggsvelte/svelte";
   import type { ThemeName } from "@ggsvelte/spec";
 
+  import type { SchemeName } from "$lib/theme-specimens/catalog";
   import { temperaturesKeyed } from "$lib/theme-specimens/data";
   import { TEMPERATURES_CHART } from "$lib/theme-specimens/temperatures-chart";
 
@@ -20,7 +21,7 @@
     ariaLabel,
   }: {
     theme: ThemeName;
-    scheme: string;
+    scheme: SchemeName;
     height: number;
     legendFocus: boolean;
     ariaLabel: string;

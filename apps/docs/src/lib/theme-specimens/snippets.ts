@@ -6,7 +6,7 @@
  * drift from what TemperaturesSpecimen renders (#990).
  */
 
-import { formatMonthBreaksLiteral, TEMPERATURES_CHART } from "./temperatures-chart.ts";
+import { formatMonthBreaksLiteral, TEMPERATURES_CHART } from "./temperatures-chart.js";
 
 export function heroThemePaletteSnippet(theme: string, scheme: string): string {
   const chart = TEMPERATURES_CHART;

@@ -3,7 +3,7 @@
  * The live `<TemperaturesSpecimen>` and the copyable `heroThemePaletteSnippet`
  * both read from here so the snippet cannot drift from what the page renders.
  */
-import { MONTH_BREAKS } from "./catalog.ts";
+import { MONTH_BREAKS } from "./catalog.js";
 
 export const TEMPERATURES_CHART = {
   key: "id",
