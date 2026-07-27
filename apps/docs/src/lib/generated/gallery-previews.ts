@@ -312,7 +312,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/canvas-scatter",
     filename: "point-canvas-scatter-light.png",
     path: "/previews/point-canvas-scatter-light.png",
-    sha256: "297f6c0c6dd84b25b6b4346a9141811a342ffa9d822fe0c94fa0348f274c78ae",
+    sha256: "6a83545566705ea7101c0382f5e895bab46cd36b3448e2ad46095c8dbe5eadc7",
   },
   {
     id: "point/count",

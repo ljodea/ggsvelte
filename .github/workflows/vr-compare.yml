@@ -127,7 +127,7 @@ jobs:
           # in ci.yml component-journeys under docs_journeys routing.
           if ls tests/visual/__screenshots__/*.png >/dev/null 2>&1; then
             echo "committed smoke baselines present — comparing"
-            # workers=1: point/canvas-scatter (10k marks) monopolizes the main thread
+            # workers=1: point/canvas-scatter monopolizes the main thread
             # during hydrate; parallel workers starve it past the test budget on CI.
             bun run test:visual -- vr.spec.ts --workers=1
           else

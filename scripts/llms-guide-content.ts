@@ -1294,7 +1294,7 @@ a11y chrome stay semantic regardless of SVG vs canvas.
 ## SVG, canvas, and auto
 
 SVG: DOM marks. Canvas: dense strata. Auto: switches above the published
-threshold and emits \`canvas-auto\`. [10k-point scatter](/examples/point/canvas-scatter):
+threshold and emits \`canvas-auto\`. [2.5k-point scatter](/examples/point/canvas-scatter):
 canvas marks, SVG axes/legend.
 
 ## Canvas and interaction
