@@ -15,3 +15,9 @@ authored. Explicit `labs` values (including `""` to hide) are unchanged.
 
 Also exports `spaceFieldName` / `humanizeFieldTitle` from `@ggsvelte/core`;
 tooltip `<dt>` labels share the spacing helper.
+
+Migration: none — additive
+
+Default axis/legend titles for multi-word field names change from raw
+identifiers to sentence case (e.g. `bloomRefDate` → `Bloom ref date`). Set
+`labs` explicitly to keep a previous string.

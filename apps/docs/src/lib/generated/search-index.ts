@@ -3852,14 +3852,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-282",
+    id: "heading:guide-lifecycle:experimental-284",
     kind: "heading",
-    title: "experimental (282)",
+    title: "experimental (284)",
     summary:
-      "experimental (282) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-282",
+      "experimental (284) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-284",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (282)"],
+    exact: ["experimental (284)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -14640,6 +14640,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["getScaleTransform"],
   },
   {
+    id: "api:ggsvelte-core:humanizeFieldTitle",
+    kind: "api",
+    title: "humanizeFieldTitle",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["humanizeFieldTitle"],
+  },
+  {
     id: "api:ggsvelte-core:inferDiscreteness",
     kind: "api",
     title: "inferDiscreteness",
@@ -15043,6 +15052,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["serializeScaleState"],
+  },
+  {
+    id: "api:ggsvelte-core:spaceFieldName",
+    kind: "api",
+    title: "spaceFieldName",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["spaceFieldName"],
   },
   {
     id: "api:ggsvelte-core:statCount",
