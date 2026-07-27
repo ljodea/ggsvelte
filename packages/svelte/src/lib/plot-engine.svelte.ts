@@ -222,13 +222,14 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   const interactionConfig = $derived(
     (() => {
       const tool = host.props.tool;
-      const capabilities = caps();
+      // Four fields only — legendFilter is not part of normalizeInteractionConfig.
+      // Reading it via caps() re-delivered config diagnostics on every filter toggle.
       return normalizeInteractionConfig(
         {
-          inspect: capabilities.inspect,
-          select: capabilities.select,
-          zoom: capabilities.zoom,
-          legendFocus: capabilities.legendFocus,
+          inspect: host.props.inspect ?? false,
+          select: host.props.select ?? false,
+          zoom: host.props.zoom ?? false,
+          legendFocus: host.props.legendFocus ?? false,
           ...(tool !== undefined && { tool }),
         },
         {
