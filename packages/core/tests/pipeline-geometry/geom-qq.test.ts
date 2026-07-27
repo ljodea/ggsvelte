@@ -89,4 +89,29 @@ describe("geom_qq geometry (#804)", () => {
       ),
     ).toThrow(/sample/i);
   });
+
+  it("trains y scale on sample quantiles (not unit [0,1] fallback)", () => {
+    // Regression for Devin review on #884: qq frames set yNumeric to samples
+    // without aes.y; collectAxisInputsY must still train continuous y.
+    const samples = [150, 160, 170, 180, 190];
+    const model = runPipeline(
+      gg({ y: samples }, aes({ sample: "y" }))
+        .geomQq()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const yDomain = model.scales.y.domain as [number, number];
+    expect(yDomain[0]).toBeLessThanOrEqual(Math.min(...samples));
+    expect(yDomain[1]).toBeGreaterThanOrEqual(Math.max(...samples));
+    // Points must land inside the plot height (broken training puts them off-panel).
+    const points = model.scene.batches.filter((b) => b.kind === "points") as PointsBatch[];
+    expect(points).toHaveLength(1);
+    const ys: number[] = [];
+    const pos = points[0]!.positions;
+    for (let i = 1; i < pos.length; i += 2) ys.push(pos[i]!);
+    for (const y of ys) {
+      expect(y).toBeGreaterThanOrEqual(0);
+      expect(y).toBeLessThanOrEqual(300);
+    }
+  });
 });
