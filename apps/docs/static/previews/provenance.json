@@ -288,8 +288,8 @@
     },
     "qq/normal": {
       "filename": "qq-normal-light.png",
-      "sourceSha256": "bdfb803dbdd7310b34c95fb1accad062fba6ba6d2971c12dea56db698e59ad7f",
-      "pngSha256": "3f85fa6cb7a76cb98173e74cb5a39ef2f8de37c00097f0feb8b3ae761cadfcf7"
+      "sourceSha256": "c34d77e7d4c00e633f6d3704410f175841271e8c79b683092c16823e90038a21",
+      "pngSha256": "d839230f6ef08ed5a775e8b88047ecb2734488b40ef8f1187ef4bb1ef3ab6a91"
     },
     "raster/grid": {
       "filename": "raster-grid-light.png",

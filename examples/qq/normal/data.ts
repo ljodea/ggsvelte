@@ -1,11 +1,9 @@
+import { mulberry32 } from "../../rng.js";
+
 /** Sample from a slightly right-skewed distribution for a Q–Q demo. */
 export const heights: { height: number }[] = (() => {
   const rows: { height: number }[] = [];
-  let s = 7;
-  const rnd = () => {
-    s = (s * 1664525 + 1013904223) >>> 0;
-    return s / 0xffffffff;
-  };
+  const rnd = mulberry32(7);
   for (let i = 0; i < 80; i++) {
     // Box–Muller + slight skew
     const u1 = Math.max(1e-9, rnd());
