@@ -49,9 +49,11 @@ function exhaustionSpec(onExhaust: "cycle" | "error"): PortableSpec {
 }
 
 export function colorBehaviorEvidence(): ColorBehaviorEvidence {
+  // Categorical scheme on a sequential scale — still the load-bearing mismatch.
+  // Ordinal + viridis is valid for scale_*_viridis_d (#828).
   const incompatibleResult = validate({
     ...exhaustionSpec("cycle"),
-    scales: { color: { type: "ordinal", scheme: "viridis" } },
+    scales: { color: { type: "sequential", scheme: "ipsum" } },
   });
   if (incompatibleResult.ok) {
     throw new Error("Expected the incompatible color scheme demonstration to fail validation.");

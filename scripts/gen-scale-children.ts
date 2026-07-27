@@ -65,7 +65,7 @@ function colourAliases(stem: string): string[] {
  *   position-binned      2
  *   position-temporal    6  (date/datetime/time × x/y)
  *   position-discrete    2
- *   color-fill          36
+ *   color-fill          42
  *   numeric-style       21
  *   finite-style         8
  *   ----------------------
@@ -129,7 +129,7 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscretePositionScaleOptions",
   ]),
 
-  // --- color-fill (36 components + 18 Colour aliases) ----------------------
+  // --- color-fill (42 components + 24 Colour aliases) ----------------------
   // optionsTypes match the slice-3 hand-written shells exactly.
   shell(
     "scaleColorContinuous",
@@ -287,6 +287,30 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
   shell("scaleFillIdentity", "color-fill", "IdentityColorScaleOptions", [
     "IdentityColorScaleOptions",
   ]),
+  shell(
+    "scaleColorViridisC",
+    "color-fill",
+    "ViridisScaleOptions",
+    ["ViridisScaleOptions"],
+    colourAliases("ViridisC"),
+  ),
+  shell(
+    "scaleColorViridisD",
+    "color-fill",
+    "ViridisScaleOptions",
+    ["ViridisScaleOptions"],
+    colourAliases("ViridisD"),
+  ),
+  shell(
+    "scaleColorViridisB",
+    "color-fill",
+    "ViridisScaleOptions",
+    ["ViridisScaleOptions"],
+    colourAliases("ViridisB"),
+  ),
+  shell("scaleFillViridisC", "color-fill", "ViridisScaleOptions", ["ViridisScaleOptions"]),
+  shell("scaleFillViridisD", "color-fill", "ViridisScaleOptions", ["ViridisScaleOptions"]),
+  shell("scaleFillViridisB", "color-fill", "ViridisScaleOptions", ["ViridisScaleOptions"]),
 
   // --- numeric-style (21 components; Linewidth/Alpha Discrete gain Ordinal
   // re-export aliases for ggplot2 scale_*_ordinal, #832) -------------------
