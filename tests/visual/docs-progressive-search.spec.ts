@@ -39,18 +39,23 @@ test("each step shows its own delta and the finished chart is live", async ({ pa
 
   // Every step chart is a build-time render; the page carries exactly one
   // live plot, the finished chart, where inspection is worth demonstrating.
+  // Live GGPlot hydrates only when near the viewport (#972); fold is slow.
   await expect(steps.locator("img.lesson-chart")).toHaveCount(6);
   await expect(steps.locator(".gg-plot-root")).toHaveCount(0);
-  const finished = page.locator(".finished-chart .gg-plot-root");
-  await expect(finished).toHaveAttribute("data-gg-ready", "true");
+  const finishedChart = page.locator(".finished-chart");
+  await finishedChart.scrollIntoViewIfNeeded();
+  const finished = finishedChart.locator(".gg-plot-root");
+  await expect(finished).toHaveAttribute("data-gg-ready", "true", { timeout: 45_000 });
   await expect(page.locator(".gg-plot-root")).toHaveCount(1);
   await expectNoDocumentOverflow(page);
 });
 
 test("the finished chart answers keyboard inspection", async ({ page }) => {
   await page.goto("/guide/getting-started?theme=light");
-  const capture = page.locator(".finished-chart .gg-capture");
-  await expect(capture).toBeVisible();
+  const finishedChart = page.locator(".finished-chart");
+  await finishedChart.scrollIntoViewIfNeeded();
+  const capture = finishedChart.locator(".gg-capture");
+  await expect(capture).toBeVisible({ timeout: 45_000 });
   await capture.focus();
   await capture.press("ArrowRight");
   await expect(page.locator(".finished-chart .gg-tooltip")).toBeVisible();
@@ -71,7 +76,10 @@ test("the finished chart drops its band fills and names the epochs in forced col
   await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
   await page.goto("/guide/getting-started?theme=light");
   const finished = page.locator(".finished-chart");
-  await expect(finished.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
+  await finished.scrollIntoViewIfNeeded();
+  await expect(finished.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
+    timeout: 45_000,
+  });
   expect(await page.evaluate(() => matchMedia("(forced-colors: active)").matches)).toBe(true);
 
   const fills = await finished
@@ -151,9 +159,10 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
     'import { kyotoSakura } from "@ggsvelte/svelte/data"',
   );
   // Every step chart is a build-time render, so the whole lesson is readable
-  // with no JavaScript at all — only the inspect step loses its interaction.
+  // with no JavaScript at all — the finished chart stays a static SVG until
+  // hydrate near-viewport (#972); only inspect interaction needs JS.
   await expect(page.locator(".lesson-block .lesson-output")).toBeVisible();
-  await expect(page.locator("img.lesson-chart")).toHaveCount(7);
+  await expect(page.locator("img.lesson-chart")).toHaveCount(8);
   await expect(
     page.getByRole("heading", { level: 3, name: "Separate the signal from the noise" }),
   ).toBeVisible();
