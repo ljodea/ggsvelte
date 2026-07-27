@@ -10,9 +10,8 @@
  * tooltips, no vertical axis guide). That is a GGPlot host prop — not a
  * PortableSpec field and not a builder method.
  * - Svelte / builder: set `inspect` on <GGPlot>
- * - JSON: agent envelope `{ interactions, spec }` (playground host maps
- *   interactions onto GGPlot props; bare PortableSpec is also accepted and
- *   defaults inspect on)
+ * - JSON: agent envelope `{ interactions, spec }` (host maps interactions onto
+ *   GGPlot props; bare PortableSpec is also accepted and defaults inspect on)
  *
  * Smooth params: local-linear loess (degree 1, span 0.9). The specimen has
  * ~10 rows per species; default degree-2 / span 0.75 overfits and jaggeds.

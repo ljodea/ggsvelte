@@ -11,7 +11,7 @@ for (const route of [
 ]) {
   test(`${route} has no automated accessibility violations`, async ({ page }) => {
     // Init scripts bypass the page CSP; post-load addScriptTag does not
-    // (docs CSP script-src is hash-locked — see playground.spec axe path).
+    // (docs CSP script-src is hash-locked).
     await page.addInitScript({ content: axe.source });
     await page.goto(route);
     await settleVisualState(page, route.endsWith("linked-views") ? 2 : 1);

@@ -84,9 +84,9 @@ describe("classifyChangedPaths", () => {
 
   test("worker sources sit on the workers lane only (issue #720)", () => {
     const flags = classifyChangedPaths([
-      "workers/playground-api/src/handler.ts",
-      "workers/playground-api/test/handler.test.ts",
-      "workers/playground-api/wrangler.toml",
+      "workers/example-api/src/handler.ts",
+      "workers/example-api/test/handler.test.ts",
+      "workers/example-api/wrangler.toml",
     ]);
     expect(flags.workers).toBe(true);
     expect(flags.spec).toBe(false);
@@ -149,7 +149,6 @@ describe("classifyChangedPaths", () => {
       "apps/docs/src/lib/generated/lesson-charts.ts",
       "apps/docs/src/lib/generated/routes.ts",
       "apps/docs/src/lib/generated/search-index.ts",
-      "apps/docs/src/lib/generated/playground-seeds.ts",
       "apps/docs/src/lib/generated/gallery-previews.ts",
     ]) {
       const flags = classifyChangedPaths([file]);
@@ -523,9 +522,8 @@ describe("planJobs", () => {
   });
 
   test("worker changes schedule unit + build without the browser/docs surface (issue #720)", () => {
-    // workers/playground-api ships its own bun test suite; build carries the only
-    // type coverage the worker has (oxlint --type-aware + knip over the repo).
-    const plan = planJobs(classifyChangedPaths(["workers/playground-api/src/handler.ts"]));
+    // workers/** (when present) own bun tests; build covers type-aware lint + knip.
+    const plan = planJobs(classifyChangedPaths(["workers/example-api/src/handler.ts"]));
     expect(plan.checks).toBe(true);
     expect(plan.unit).toBe(true);
     expect(plan.build).toBe(true);
@@ -567,7 +565,6 @@ describe("planJobs", () => {
     for (const path of [
       "scripts/gen-docs-routes.ts",
       "scripts/docs-route-inventory.ts",
-      "scripts/gen-playground-seeds.ts",
       "scripts/check-docs-metadata.ts",
       "scripts/check-pages-links.ts",
       // #784: package.json build/check invoke gen-lesson-charts; build invokes docs-csp.
@@ -596,7 +593,7 @@ describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
   });
 
   test("unit and build hash the workers tree so worker edits miss the cache (issue #720)", () => {
-    const workerPath = "workers/playground-api/src/handler.ts";
+    const workerPath = "workers/example-api/src/handler.ts";
     for (const execution of ["unit", "build"] as const) {
       expect(listJobContentPaths(execution, [workerPath]), execution).toEqual([workerPath]);
     }
@@ -608,7 +605,7 @@ describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
       expect(inputs, execution).toContain("apps/docs/**");
       expect(inputs, execution).toContain("scripts/gen-docs-routes.ts");
       expect(inputs, execution).toContain("scripts/docs-route-inventory.ts");
-      expect(inputs, execution).toContain("scripts/gen-playground-seeds.ts");
+      expect(inputs, execution).not.toContain("scripts/gen-playground-seeds.ts");
       expect(inputs, execution).toContain("scripts/check-docs-metadata.ts");
       expect(inputs, execution).toContain("scripts/check-pages-links.ts");
       expect(inputs, execution).toContain("scripts/gen-lesson-charts.ts");

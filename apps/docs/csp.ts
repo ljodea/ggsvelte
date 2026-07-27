@@ -1,18 +1,7 @@
 import type { DocsBuildConfig } from "./build-mode";
 
-const PLAYGROUND_API_ORIGIN = "https://playground-api.ggsvelte.sh";
-const PLAYGROUND_API_DEV_ORIGIN = "http://localhost:8787";
-
 export function docsCspDirectives(mode: DocsBuildConfig["mode"]) {
-  const connectSrc =
-    mode === "dev"
-      ? ([
-          "self",
-          "https://cloudflareinsights.com",
-          PLAYGROUND_API_ORIGIN,
-          PLAYGROUND_API_DEV_ORIGIN,
-        ] as const)
-      : (["self", "https://cloudflareinsights.com", PLAYGROUND_API_ORIGIN] as const);
+  const connectSrc = ["self", "https://cloudflareinsights.com"] as const;
 
   return {
     "default-src": ["self"],

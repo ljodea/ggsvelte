@@ -399,7 +399,6 @@ export function buildLlmsIndex(
     lines.push(`- [${page.title}](/guide/${page.slug}): ${page.description}`);
   }
   lines.push(
-    "- [PortableSpec playground](/playground): edit bounded local JSON, inspect semantic events, and take complete Svelte, equivalent Builder or JSON, SVG, or an explicit share URL",
     "- [Search interaction reference](/reference/interactions): filter interaction capabilities, events, diagnostics, and accessibility guidance",
     "- [JSON Schema v0](/schema/v0.json): the PortableSpec schema (unstable in v0.1)",
     "- [llms-full.txt](/llms-full.txt): all docs prose plus every example (spec JSON + Svelte source)",

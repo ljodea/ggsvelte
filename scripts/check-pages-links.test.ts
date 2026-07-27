@@ -3,9 +3,6 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
-import { encodePlaygroundSeed } from "../apps/docs/src/lib/playground-codec.ts";
-import type { PlaygroundSeedV1 } from "../apps/docs/src/lib/playground-codec.ts";
-
 import {
   checkPackedPages,
   findBrokenFragments,
@@ -21,7 +18,6 @@ describe("packed Pages link checks", () => {
     "guide/interactions.html",
     "guide/interaction-reference.html",
     "guide/upgrading.html",
-    "playground.html",
     "themes.html",
     "interactions.html",
     "reference/interactions.html",
@@ -87,37 +83,13 @@ describe("packed Pages link checks", () => {
     ).toEqual(["#missing"]);
   });
 
-  it("validates playground state fragments instead of treating them as heading ids", () => {
-    const seed: PlaygroundSeedV1 = {
-      version: 1,
-      source: { kind: "sample", id: "link-check" },
-      spec: {
-        edition: 2,
-        data: { values: [{ x: 1, y: 2 }] },
-        layers: [
-          {
-            geom: "point",
-            stat: "identity",
-            position: "identity",
-            aes: { x: { field: "x" }, y: { field: "y" } },
-          },
-        ],
-      },
-    };
-    const valid = `../../playground${encodePlaygroundSeed(seed)}`;
-    const invalid = "../../playground#play=v1.bad";
-    expect(
-      findBrokenFragments("examples/point/scatter.html", [valid, invalid], files, new Map()),
-    ).toEqual([invalid]);
-  });
-
-  it("requires the playground, R0 examples, guides, and agent endpoints in the packed site", () => {
+  it("requires the R0 examples, guides, and agent endpoints in the packed site", () => {
     for (const page of requiredPages) expect(files.has(page)).toBe(true);
     expect(requiredPages).toContain("examples/interactions/inspection.html");
     expect(requiredPages).toContain("examples/interactions/interval-selection.html");
     expect(requiredPages).toContain("docs.html");
     expect(requiredPages).toContain("reference.html");
-    expect(requiredPages).toContain("playground.html");
+    expect(requiredPages).not.toContain("playground.html");
     expect(requiredPages).toContain("themes.html");
     expect(requiredPages).toContain("interactions.html");
     expect(requiredPages).toContain("reference/interactions.html");

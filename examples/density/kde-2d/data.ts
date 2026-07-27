@@ -1,6 +1,6 @@
 /**
  * Compact bivariate scatter with two clusters so density_2d isolines nest
- * visibly. Fixed decimals only — playground seeds must be host-stable.
+ * visibly. Fixed decimals only — values must be host-stable.
  */
 export const twinClouds: { x: number; y: number }[] = [
   // cluster A (lower-left)

@@ -176,8 +176,7 @@ on the same positions.
 ## Keep data local
 
 Inline rows, named datasets, and PortableSpec data all validate and normalize
-before render. The docs playground uses bounded local seeds only — no upload.
-On failure it keeps the last render-confirmed chart.
+before render. Prefer local data over remote fetch in published examples.
 `;
 
 export const LAYERS_MARKS_MD = `# Layers and marks
@@ -1126,8 +1125,8 @@ warning. See the runnable [fixed-aspect example](/examples/point/fixed-aspect).
 Non-identity coordinate transforms reject band and temporal axes with
 \`coord-transform-continuous\` or \`coord-transform-temporal\`. Domains that
 cross log10/sqrt boundaries fail with \`coord-transform-domain\` and exact
-recovery guidance. Open the runnable **Post-stat coordinate transform** sample
-in the [Playground](/playground).
+recovery guidance. See the runnable **Post-stat coordinate transform** sample
+in the [gallery](/examples).
 `;
 
 export const THEMES_COLOR_MD = `# Themes and color
@@ -1463,8 +1462,7 @@ Examples: [inspect](/examples/interactions/inspection),
 [linked views](/interactions/linked-views),
 [legend focus](/examples/interaction/legend-focus),
 [legend filter](/examples/interaction/legend-filter),
-[facet intervals](/interactions/facet-intervals),
-[playground](/playground).
+[facet intervals](/interactions/facet-intervals).
 Contracts: [interaction reference](/guide/interaction-reference).
 
 ## Inspection

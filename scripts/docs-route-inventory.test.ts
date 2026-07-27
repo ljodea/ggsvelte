@@ -32,7 +32,7 @@ describe("docs route inventory", () => {
     expect(paths.has("/examples")).toBe(true);
     expect(paths.has("/examples/point/scatter-color")).toBe(true);
     expect(paths.has("/examples/interactions/inspection")).toBe(true);
-    expect(paths.has("/playground")).toBe(true);
+    expect(paths.has("/playground")).toBe(false);
     expect(paths.has("/themes")).toBe(true);
     expect(paths.has("/reference/interactions")).toBe(true);
     expect(paths.has("/reference/cli")).toBe(true);

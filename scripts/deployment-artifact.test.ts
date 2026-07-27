@@ -29,7 +29,7 @@ const PRODUCTION_REDIRECTS = `/ggsvelte https://ggsvelte.sh/ 301
 /ggsvelte/* https://ggsvelte.sh/:splat 301
 `;
 
-const CSP_META = `<meta http-equiv="content-security-policy" content="default-src 'self'; base-uri 'self'; connect-src 'self' https://cloudflareinsights.com https://playground-api.ggsvelte.sh; font-src 'self'; form-action 'self'; frame-src 'none'; img-src 'self' data:; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self'; style-src-attr 'unsafe-inline'; upgrade-insecure-requests">`;
+const CSP_META = `<meta http-equiv="content-security-policy" content="default-src 'self'; base-uri 'self'; connect-src 'self' https://cloudflareinsights.com; font-src 'self'; form-action 'self'; frame-src 'none'; img-src 'self' data:; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self'; style-src-attr 'unsafe-inline'; upgrade-insecure-requests">`;
 const NOT_FOUND_CSP_META = `<meta http-equiv="content-security-policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; frame-src 'none'; img-src 'self' data:; object-src 'none'; script-src 'none'; script-src-attr 'none'; style-src 'self'; style-src-attr 'none'; upgrade-insecure-requests">`;
 
 const PREVIEW_REDIRECTS = `/ggsvelte / 301

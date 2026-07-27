@@ -103,8 +103,6 @@
       ·
       <a href={`${base}/reference`}>Reference</a>
       ·
-      <a href={`${base}/playground`}>Playground</a>
-      ·
       <a href={`${base}/themes`}>Themes</a>
       ·
       <a href={`${base}/interactions`}>Interactions</a>

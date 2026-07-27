@@ -74,7 +74,6 @@ export const DOCS_CONTENT_ONLY_PATHS: readonly string[] = [
   "apps/docs/src/lib/components/GettingStartedGuide.svelte",
   "apps/docs/src/lib/generated/search-index.ts",
   "apps/docs/src/lib/generated/routes.ts",
-  "apps/docs/src/lib/generated/playground-seeds.ts",
   "apps/docs/src/lib/generated/gallery-previews.ts",
   // Inventory projection only; static SVGs under apps/docs/static/lesson stay fail-closed.
   "apps/docs/src/lib/generated/lesson-charts.ts",
@@ -145,8 +144,6 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     // deployment-artifact (Codex P2: inventory-only PRs were scripts-lane only).
     "scripts/docs-route-inventory.ts",
     "scripts/docs-route-inventory.test.ts",
-    "scripts/gen-playground-seeds.ts",
-    "scripts/gen-playground-seeds.test.ts",
     "scripts/check-docs-metadata.ts",
     "scripts/check-docs-metadata.test.ts",
     "scripts/check-pages-links.ts",
@@ -183,10 +180,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "README.md",
     "packages/svelte/README.md",
   ],
-  // Cloudflare workers (issue #720). They own a bun test suite and are
-  // type-covered by check:workers tsc (#725) plus the repo-wide oxlint
-  // --type-aware / knip pass; nothing here renders charts, so no browser/docs
-  // surface.
+  // Cloudflare workers (when present). Own bun tests + type-aware lint/knip.
+  // Nothing under workers/** renders charts, so no browser/docs surface.
   workers: ["workers/**"],
   evals: ["tests/evals/**"],
   workflows: [
@@ -418,7 +413,7 @@ export type PlanOptions = {
  * - docs generators (gen-llms / lifecycle.json) sit on the docs lane → pages
  * - pixel VR follows package surface, examples, visual tests, or docs_render only
  * - docs_journeys covers non-pixel Playwright structure/a11y for docs content PRs
- * - workers run unit (own bun suite + check:workers tsc) + build (type-aware lint / knip)
+ * - workers run unit (own bun suite when present) + build (type-aware lint / knip)
  *
  * Force tiers (do not collapse these):
  * - `forceProduct`: lockfile or ci-routing self-change — full package/browser surface.
@@ -487,7 +482,7 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
       changes.scripts ||
       changes.benchmarks ||
       changes.evals ||
-      // workers/playground-api ships its own bun test suite in the unit job.
+      // workers/** own bun tests (when present) run in the unit job.
       changes.workers ||
       changes.docs ||
       changes.examples ||

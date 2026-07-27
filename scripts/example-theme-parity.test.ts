@@ -1,11 +1,9 @@
 /**
  * Every example describes itself twice: spec.ts (the PortableSpec the docs
- * "Builder"/"Spec" tabs and the playground seed are built from) and
- * Example.svelte (what the gallery actually renders). Data, aes and labs have
- * always been hand-duplicated that way, but `theme` is the one attribute where
- * drift is visible on two surfaces at once: the gallery would render one theme
- * while "Open in Playground" hands over another, because the seed encodes the
- * normalized spec — theme included (scripts/gen-playground-seeds.ts).
+ * "Builder"/"Spec" tabs are built from) and Example.svelte (what the gallery
+ * actually renders). Data, aes and labs have always been hand-duplicated that
+ * way, but `theme` is the one attribute where drift is visible: the gallery
+ * would render one theme while Spec JSON shows another.
  *
  * So the duplication is allowed, but it is not allowed to disagree. Guard for
  * #656, which is the first change to make theme load-bearing in examples/**.

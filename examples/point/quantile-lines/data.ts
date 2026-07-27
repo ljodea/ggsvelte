@@ -1,7 +1,7 @@
 /**
  * Compact hand-authored scatter with increasing residual spread so the three
  * default RQ lines (0.25 / 0.5 / 0.75) separate. Fixed decimals only — no
- * floating RNG (playground seed fragments must be byte-stable across hosts).
+ * floating RNG (values must be byte-stable across hosts).
  */
 export const fanningScatter: { x: number; y: number }[] = [
   { x: 0.5, y: 1.2 },

@@ -93,8 +93,6 @@
         Getting started
       </UiButton>
       <UiButton href={`${base}/examples`}>Examples</UiButton>
-      <UiButton variant="ghost" href={`${base}/playground`}>Playground</UiButton
-      >
     </div>
   </div>
 </section>

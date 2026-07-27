@@ -97,7 +97,6 @@ const DOCS_SURFACE_CONTENT_INPUTS: readonly string[] = [
   "scripts/gen-gallery-previews.test.ts",
   "scripts/gallery-preview-provenance.ts",
   "scripts/gallery-preview-provenance.test.ts",
-  "scripts/gen-playground-seeds.ts",
   "scripts/check-docs-metadata.ts",
   "scripts/check-pages-links.ts",
   // #784: build/check --check gen-lesson-charts; build runs docs-csp after vite.
@@ -141,7 +140,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "benchmarks/**",
     "scripts/**",
     "tests/evals/**",
-    // workers/playground-api runs in the unit suite (issue #720).
+    // workers/** (when present) run in the unit suite.
     "workers/**",
     "docs/accessibility/**",
     ".github/ISSUE_TEMPLATE/**",
@@ -177,8 +176,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     // rest of scripts/** is still type-aware lint + knip only.
     "scripts/**",
     "tests/evals/**",
-    // build re-enters `bun run check`, which now runs check:workers tsc (#725)
-    // on top of the repo-wide type-aware lint + knip.
+    // build re-enters `bun run check` plus repo-wide type-aware lint + knip.
     "workers/**",
     "skills/**",
     "lifecycle.json",

@@ -1,7 +1,7 @@
 /**
  * Hand-authored continuous-x scatter with several observations per unit
  * interval so summary_bin (mean ± se) has non-empty bins. Integers and
- * tenths only — byte-stable for gallery previews and playground seeds.
+ * tenths only — byte-stable for gallery previews.
  */
 export const binnedScatter: { x: number; y: number }[] = [
   { x: 0.2, y: 2.1 },
