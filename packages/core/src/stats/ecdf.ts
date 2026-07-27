@@ -18,7 +18,7 @@
  */
 import type { CellValue } from "../table.js";
 
-export interface EcdfParamsInput {
+interface EcdfParamsInput {
   /** Prepend (xmin, 0). Default true. */
   pad?: boolean | undefined;
   /** Evaluation grid size; omit for unique data x. */
