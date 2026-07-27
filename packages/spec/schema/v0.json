@@ -1837,6 +1837,36 @@
       "additionalProperties": false,
       "description": "Styling parameters for the segment geom (finite line from (x,y) to (xend,yend))."
     },
+    "RugParams": {
+      "type": "object",
+      "properties": {
+        "sides": {
+          "type": "string",
+          "pattern": "^[bltr]+$",
+          "minLength": 1,
+          "description": "Which panel edges get ticks: any non-empty combination of \"b\" (bottom), \"l\" (left), \"t\" (top), \"r\" (right). Default \"bl\". Duplicates are treated as a set. Sides b/t require aes.x; sides l/r require aes.y."
+        },
+        "length": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Tick length as a fraction of the panel size along the tick axis (panel-fraction npc analogue of ggplot2 unit(0.03, \"npc\")). Default 0.03."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Tick opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px. Must be greater than 0. Default 1."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom_rug: panel-edge sides, panel-fraction length, and stroke styling."
+    },
     "SpokeParams": {
       "type": "object",
       "properties": {
@@ -3700,6 +3730,44 @@
       "additionalProperties": false,
       "description": "An empty layer that trains scales from mapped aesthetics without emitting geometry (ggplot2's geom_blank)."
     },
+    "RugLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "rug",
+          "description": "Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Rug layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Rug layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/RugParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A marginal rug layer. Default sides \"bl\" require both x and y; restrict sides when only one channel is mapped."
+    },
     "SpokeLayer": {
       "type": "object",
       "required": [
@@ -3844,6 +3912,9 @@
         },
         {
           "$ref": "#/$defs/SpokeLayer"
+        },
+        {
+          "$ref": "#/$defs/RugLayer"
         }
       ],
       "description": "One plot layer. The `geom` field selects the geometry and determines which stat, position, and params are allowed."

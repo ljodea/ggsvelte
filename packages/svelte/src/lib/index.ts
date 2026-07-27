@@ -114,6 +114,7 @@ export { default as GeomSfLabel } from "./geoms/GeomSfLabel.svelte";
 export { default as GeomBlank } from "./geoms/GeomBlank.svelte";
 
 export { default as GeomSpoke } from "./geoms/GeomSpoke.svelte";
+export { default as GeomRug } from "./geoms/GeomRug.svelte";
 export { registerLayer, registerPlotLayer } from "./geoms/registry.svelte.js";
 export type {
   Layer,

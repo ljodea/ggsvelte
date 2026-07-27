@@ -83,6 +83,7 @@ export type {
   SfTextLayerInput,
   SfLabelLayerInput,
   CurveLayerInput,
+  RugLayerInput,
   LayerInput,
   LineLayerInput,
   PathLayerInput,

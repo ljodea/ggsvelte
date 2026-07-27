@@ -21,6 +21,7 @@ import { ribbonBatches } from "./geometry-ribbon.js";
 import { finiteSegmentBatch } from "./geometry-segment-finite.js";
 import { ablineBatch } from "./geometry-abline.js";
 import { curveBatch } from "./geometry-curve.js";
+import { rugBatch } from "./geometry-rug.js";
 
 function single(batch: GeometryBatch | null): GeometryBatch[] {
   return batch === null ? [] : [batch];
@@ -86,6 +87,8 @@ export function dispatchGeometryBatch(
       return single(ablineBatch(frame, fx, color, styles, warnings));
     case "curve":
       return single(curveBatch(frame, fx, color, styles, warnings));
+    case "rug":
+      return single(rugBatch(frame, fx, color, styles, warnings));
     case "text":
     case "sf_text":
     case "sf_label":

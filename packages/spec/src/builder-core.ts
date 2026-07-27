@@ -41,6 +41,7 @@ import type {
   GeomRasterOptions,
   GeomRectOptions,
   GeomRuleOptions,
+  GeomRugOptions,
   GeomSegmentOptions,
   GeomAblineOptions,
   GeomVlineOptions,
@@ -373,6 +374,14 @@ export class GGBuilderCore {
    */
   geomBlank(options: GeomBlankOptions = {}): GGBuilder {
     return this.layer(layerFrom("blank", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'rug', ... }). Marginal edge ticks; set
+   * params.sides (default "bl") and params.length (panel fraction, default 0.03).
+   */
+  geomRug(options: GeomRugOptions = {}): GGBuilder {
+    return this.layer(layerFrom("rug", options));
   }
 
   /**

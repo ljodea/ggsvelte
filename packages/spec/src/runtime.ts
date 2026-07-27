@@ -48,6 +48,7 @@ import type {
   Density2dLayer,
   Density2dFilledLayer,
   DotplotLayer,
+  RugLayer,
   RuleLayer,
   QuantileLayer,
   SmoothLayer,
@@ -86,6 +87,7 @@ export interface RuntimeRibbonLayer extends WithRuntimeAes<RibbonLayer> {}
 export interface RuntimeSegmentLayer extends WithRuntimeAes<SegmentLayer> {}
 export interface RuntimeAblineLayer extends WithRuntimeAes<AblineLayer> {}
 export interface RuntimeCurveLayer extends WithRuntimeAes<CurveLayer> {}
+export interface RuntimeRugLayer extends WithRuntimeAes<RugLayer> {}
 export interface RuntimeRuleLayer extends WithRuntimeAes<RuleLayer> {}
 export interface RuntimeHlineLayer extends WithRuntimeAes<HlineLayer> {}
 export interface RuntimeVlineLayer extends WithRuntimeAes<VlineLayer> {}
@@ -124,6 +126,7 @@ export type RuntimeLayerSpec =
   | RuntimeSegmentLayer
   | RuntimeAblineLayer
   | RuntimeCurveLayer
+  | RuntimeRugLayer
   | RuntimeRuleLayer
   | RuntimeHlineLayer
   | RuntimeVlineLayer
