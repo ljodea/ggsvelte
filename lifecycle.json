@@ -1084,6 +1084,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RugLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RugLayerSchema": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1213,6 +1217,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeRibbonLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeRugLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
