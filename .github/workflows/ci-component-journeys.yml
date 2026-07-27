@@ -68,6 +68,20 @@ jobs:
           package: "@playwright/test"
           scope: root @playwright/test (VR suite)
           container_tag: ${{ inputs.playwright_container_tag }}
+      - name: assert playwright npm/container version sync (apps/docs)
+        if: steps.content_hash.outputs.hit != 'true'
+        uses: ./.github/actions/ci-assert-playwright-version-sync
+        with:
+          working_directory: apps/docs
+          package: playwright
+          scope: apps/docs
+          container_tag: ${{ inputs.playwright_container_tag }}
+      # Docs .svelte component harness (issue #991). Runs before the static
+      # build so a failed unit-level race test fails fast without vite build.
+      - name: docs component tests (apps/docs, chromium)
+        if: steps.content_hash.outputs.hit != 'true'
+        working-directory: apps/docs
+        run: bun run --bun test
       - name: build packaged interaction test target
         if: steps.content_hash.outputs.hit != 'true'
         run: DOCS_BUILD_MODE=cloudflare-preview bun run build:docs
@@ -93,6 +107,7 @@ jobs:
           path: |
             tests/visual/test-results/
             tests/visual/playwright-report/
+            apps/docs/test-results/
           if-no-files-found: ignore
           retention-days: 7
 

@@ -212,7 +212,7 @@ describe("ci-assert-playwright-version-sync composite", () => {
     expect(action).not.toMatch(/uses:\s+(?!composite)/);
   });
 
-  it("is the sole playwright version-sync path for the four container jobs", () => {
+  it("is the sole playwright version-sync path for the container jobs", () => {
     const ci = readCiSurface();
     for (const jobId of PLAYWRIGHT_VERSION_SYNC_JOBS) {
       const job = jobSlice(ci, jobId);
@@ -222,11 +222,12 @@ describe("ci-assert-playwright-version-sync composite", () => {
         /require\(["'](?:playwright|@playwright\/test)\/package\.json["']\)/,
       );
     }
+    // svelte + svelte-fx + spikes + journeys root + journeys apps/docs (#991).
     const uses = ci.match(/uses: \.\/\.github\/actions\/ci-assert-playwright-version-sync/g) ?? [];
-    expect(uses.length).toBe(4);
+    expect(uses.length).toBe(5);
   });
 
-  it("wires scope/package inputs for svelte, spikes, and VR root", () => {
+  it("wires scope/package inputs for svelte, spikes, VR root, and docs components", () => {
     const ci = readCiSurface();
     const svelte = jobSlice(ci, "component-svelte");
     expect(svelte).toMatch(/working_directory:\s*packages\/svelte/);
@@ -242,6 +243,10 @@ describe("ci-assert-playwright-version-sync composite", () => {
     expect(journeys).toMatch(/working_directory:\s*\./);
     expect(journeys).toMatch(/package:\s*["']@playwright\/test["']/);
     expect(journeys).toMatch(/scope:\s*root @playwright\/test \(VR suite\)/);
+    // Docs .svelte harness (issue #991) pins playwright next to @playwright/test.
+    expect(journeys).toMatch(/working_directory:\s*apps\/docs/);
+    expect(journeys).toMatch(/scope:\s*apps\/docs/);
+    expect(journeys).toMatch(/docs component tests \(apps\/docs, chromium\)/);
   });
 });
 

@@ -6,6 +6,7 @@
   import { searchDocs } from "$lib/search";
   import type { DocsSearchEntry } from "$lib/search-types";
   import { siteSearchKeyAction } from "$lib/site-search-keyboard";
+  import { assignDocsLocation } from "$lib/site-search-navigate";
 
   let dialog = $state<HTMLDialogElement>();
   let input = $state<HTMLInputElement>();
@@ -82,7 +83,7 @@
     const result = results[activeIndex];
     if (result === undefined) return;
     close();
-    window.location.assign(`${base}${result.href}`);
+    assignDocsLocation(`${base}${result.href}`);
   }
 
   async function handleKeydown(event: KeyboardEvent): Promise<void> {

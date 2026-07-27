@@ -8,6 +8,7 @@ tests/visual/test-results/
 tests/visual/playwright-report/
 tests/performance/test-results/
 packages/svelte/test-results/
+apps/docs/test-results/
 spikes/browser/test-results/
 benchmarks/results/
 .vitest-attachments/
