@@ -147,4 +147,29 @@ describe("range geoms geometry (#793)", () => {
     const segs = model.scene.batches[0] as SegmentsBatch;
     expect(segs.segments.length / 4).toBe(1);
   });
+
+  it("pointrange drops the mid point when ymin is null (no floating estimate)", () => {
+    const model = runPipeline(
+      {
+        data: {
+          values: [
+            { g: "a", mid: 2, lo: 1, hi: 3 },
+            { g: "b", mid: 4, lo: null, hi: 5 },
+          ],
+        },
+        aes: {
+          x: { field: "g" },
+          y: { field: "mid" },
+          ymin: { field: "lo" },
+          ymax: { field: "hi" },
+        },
+        layers: [{ geom: "pointrange" }],
+      },
+      size,
+    );
+    const segs = model.scene.batches.filter((b) => b.kind === "segments") as SegmentsBatch[];
+    const pts = model.scene.batches.filter((b) => b.kind === "points") as PointsBatch[];
+    expect(segs[0]!.segments.length / 4).toBe(1);
+    expect(pts[0]!.positions.length / 2).toBe(1);
+  });
 });

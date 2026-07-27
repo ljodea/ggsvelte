@@ -175,7 +175,20 @@ function midPointsBatch(
   for (let row = 0; row < n; row++) {
     const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
     const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
-    if (Number.isNaN(tx) || Number.isNaN(ty)) continue;
+    // Match linerangeBatch: drop when interval bounds are missing so a
+    // pointrange never draws a floating mid point without a stem.
+    const t0 = frame.ymin !== null ? fx.yScale.normalizeTransformed(frame.ymin[row]!) : undefined;
+    const t1 = frame.ymax !== null ? fx.yScale.normalizeTransformed(frame.ymax[row]!) : undefined;
+    if (
+      Number.isNaN(tx) ||
+      Number.isNaN(ty) ||
+      t0 === undefined ||
+      t1 === undefined ||
+      Number.isNaN(t0) ||
+      Number.isNaN(t1)
+    ) {
+      continue;
+    }
     const o = kept * 2;
     positions[o] = tx * fx.innerWidth;
     positions[o + 1] = fx.innerHeight - ty * fx.innerHeight;
