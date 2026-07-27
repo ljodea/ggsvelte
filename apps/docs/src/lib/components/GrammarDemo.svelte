@@ -11,7 +11,7 @@
     { label: "Data", note: "Rows as plain objects." },
     { label: "Mappings", note: "aes for x, y, and color." },
     { label: "Layers", note: "GeomSmooth over GeomPoint." },
-    { label: "Interaction", note: "inspect and pin." },
+    { label: "Interaction", note: "just one more layer" },
   ] as const;
   let active = $state(steps.length - 1);
   const chartTheme = $derived(contrastChartTheme());
@@ -19,8 +19,8 @@
 
 <section class="grammar-demo" aria-labelledby="grammar-heading">
   <div class="grammar-copy">
-    <h2 id="grammar-heading">Inspect and pin are plot props.</h2>
-    <p>No D3 — not a second interaction library.</p>
+    <h2 id="grammar-heading">Interaction is a layer.</h2>
+    <p>Zero D3.js. Inspect and pin are plot props.</p>
     <ol>
       {#each steps as step, index (step.label)}
         <li class:active={active === index}>
@@ -76,7 +76,7 @@
   }
 
   h2 {
-    max-width: 18ch;
+    max-width: 12ch;
     margin: 0.25rem 0 1rem;
     font-size: clamp(2.5rem, 5vw, 4.5rem);
     line-height: 0.95;
