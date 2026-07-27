@@ -120,6 +120,7 @@ export const FreqpolyLayerSchema = SpecModule.Import("FreqpolyLayer");
 export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
+export const CountLayerSchema = SpecModule.Import("CountLayer");
 export const ViolinLayerSchema = SpecModule.Import("ViolinLayer");
 export const FunctionLayerSchema = SpecModule.Import("FunctionLayer");
 export const PolygonLayerSchema = SpecModule.Import("PolygonLayer");
@@ -376,6 +377,10 @@ export type HexLayer = LayerWithDataRef<SpecType<"HexLayer">>;
 export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 /** A finite segment layer ((x,y)→(xend,yend)). */
 export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
+/** Count (geom_count / stat_sum) layer. */
+export type CountLayer = LayerWithDataRef<
+  SpecType<"CountLayer">
+>; /** A slope/intercept reference line layer (geom_abline). */
 /** A violin (mirrored y-density) layer. */
 export type ViolinLayer = LayerWithDataRef<SpecType<"ViolinLayer">>;
 /** An analytic function path layer (y = f(x) grid). */
@@ -427,6 +432,7 @@ export type LayerSpec =
   | AreaLayer
   | RibbonLayer
   | SegmentLayer
+  | CountLayer
   | ViolinLayer
   | FunctionLayer
   | PolygonLayer

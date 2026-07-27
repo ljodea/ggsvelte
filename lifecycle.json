@@ -320,6 +320,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CountLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CountLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CountLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "CrossbarLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -601,6 +613,10 @@
           "lifecycle": "experimental"
         },
         "GeomContourOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomCountOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1385,6 +1401,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeContourLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeCountLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4051,6 +4071,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "SumStatInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SumStatResult": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "TABLEAU10_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4444,6 +4472,10 @@
           "lifecycle": "experimental"
         },
         "statEcdf": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "statSum": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4882,6 +4914,10 @@
           "lifecycle": "experimental"
         },
         "GeomContour": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomCount": {
           "kind": "value",
           "lifecycle": "experimental"
         },

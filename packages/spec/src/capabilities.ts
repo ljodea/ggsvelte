@@ -321,6 +321,7 @@ export const STYLE_AESTHETIC_GEOMS = {
   size: [
     "point",
     "jitter",
+    "count",
     "text",
     "dotplot",
     "pointrange",
@@ -371,6 +372,7 @@ export const STYLE_AESTHETIC_GEOMS = {
   alpha: [
     "point",
     "jitter",
+    "count",
     "line",
     "function",
     "qq",
@@ -418,7 +420,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "blank",
     "rug",
   ],
-  shape: ["point", "jitter", "dotplot", "pointrange", "sf", "blank", "qq"],
+  shape: ["point", "jitter", "count", "dotplot", "pointrange", "sf", "blank", "qq"],
   linetype: [
     "line",
     "function",

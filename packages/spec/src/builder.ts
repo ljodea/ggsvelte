@@ -51,6 +51,7 @@ export type {
   GeomLineOptions,
   GeomPathOptions,
   GeomPointOptions,
+  GeomCountOptions,
   GeomQuantileOptions,
   GeomContourOptions,
   GeomRasterOptions,

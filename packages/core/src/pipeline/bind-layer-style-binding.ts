@@ -66,6 +66,7 @@ export function styleBinding(
       summary: ["y", "ymin", "ymax"],
       summary_bin: ["y", "ymin", "ymax"],
       boxplot: ["ymin", "lower", "middle", "upper", "ymax"],
+      sum: ["n", "prop"],
       ecdf: ["ecdf"],
       qq: ["sample", "theoretical"],
       qq_line: ["sample", "theoretical"],

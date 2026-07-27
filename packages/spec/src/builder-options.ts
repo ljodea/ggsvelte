@@ -64,8 +64,19 @@ interface GeomDataOption {
 export interface GeomPointOptions extends PointParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
-  /** identity | unique | summary_bin (#817) | manual (#814). */
-  stat?: "identity" | "unique" | "summary_bin" | "manual";
+  /**
+   * identity | unique | summary_bin (#817) | manual (#814) |
+   * sum (geom_count overplotting; #795).
+   */
+  stat?: "identity" | "unique" | "summary_bin" | "manual" | "sum";
+  position?: PointPosition;
+  positionParams?: PositionParams;
+}
+
+/** Count-layer sugar (point + stat sum; size defaults to after_stat n). */
+export interface GeomCountOptions extends PointParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
   position?: PointPosition;
   positionParams?: PositionParams;
 }

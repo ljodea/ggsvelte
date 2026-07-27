@@ -2941,10 +2941,14 @@ export const SpecDeclarations = {
               description:
                 "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814).",
             }),
+            Type.Literal("sum", {
+              description:
+                'Aggregate coincident (x, y); size defaults to {stat:"n"} (geom_count / #795).',
+            }),
           ],
           {
             description:
-              'Point stat: "identity" (default), "unique", "summary_bin" (#817), or "manual" (#814).',
+              'Point stat: "identity" (default), "unique", "summary_bin" (#817), "manual" (#814), or "sum" (#795).',
           },
         ),
       ),
@@ -3456,6 +3460,40 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description: "A boxplot layer. Requires a discrete x channel and a quantitative y channel.",
+    },
+  ),
+
+  CountLayer: Type.Object(
+    {
+      geom: Type.Literal("count", {
+        description:
+          "Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("sum", {
+          description:
+            'Count layers run stat sum: n and prop per (group, x, y). size defaults to {"stat": "n"}.',
+        }),
+      ),
+      position: Type.Optional(
+        Type.Union([Type.Literal("identity"), Type.Literal("jitter"), Type.Literal("nudge")], {
+          description: 'Position: "identity" (default), "jitter", or "nudge".',
+        }),
+      ),
+      positionParams: Type.Optional(Type.Ref("PositionParams")),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data.",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("PointParams")),
+    },
+    {
+      additionalProperties: false,
+      description: "A count (overplotting) layer. Requires x and y. Default size is after_stat n.",
     },
   ),
 
@@ -4599,6 +4637,7 @@ export const SpecDeclarations = {
       Type.Ref("Density2dLayer"),
       Type.Ref("Density2dFilledLayer"),
       Type.Ref("DotplotLayer"),
+      Type.Ref("CountLayer"),
       Type.Ref("ErrorbarLayer"),
       Type.Ref("LinerangeLayer"),
       Type.Ref("PointrangeLayer"),

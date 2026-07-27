@@ -74,6 +74,7 @@ export type {
   JitterLayerInput,
   RibbonLayerInput,
   SegmentLayerInput,
+  CountLayerInput,
   ViolinLayerInput,
   FunctionLayerInput,
   PolygonLayerInput,
@@ -210,6 +211,10 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   }
   if (stat === "density" && aes?.y === undefined) {
     aes = { ...aes, y: { stat: "density" } };
+  }
+  // geom_count / stat_sum: size defaults to after_stat(n) when unset.
+  if (stat === "sum" && aes?.size === undefined) {
+    aes = { ...aes, size: { stat: "n" } };
   }
   if (stat === "function" && aes?.y === undefined) {
     aes = { ...aes, y: { stat: "y" } };

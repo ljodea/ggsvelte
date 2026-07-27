@@ -136,7 +136,15 @@ export interface FacetInput {
 
 export interface PointLayerInput extends LayerInputBase {
   geom: "point";
-  stat?: "identity" | "unique" | "summary_bin" | "manual";
+  stat?: "identity" | "unique" | "summary_bin" | "manual" | "sum";
+  position?: PointPosition;
+  positionParams?: PositionParams;
+  params?: PointParams;
+}
+
+export interface CountLayerInput extends LayerInputBase {
+  geom: "count";
+  stat?: "sum";
   position?: PointPosition;
   positionParams?: PositionParams;
   params?: PointParams;
@@ -511,6 +519,7 @@ export type LayerInput =
   | Bin2dLayerInput
   | RasterLayerInput
   | SegmentLayerInput
+  | CountLayerInput
   | ViolinLayerInput
   | HexLayerInput
   | FunctionLayerInput

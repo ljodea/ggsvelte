@@ -46,6 +46,7 @@ import type {
   RectLayer,
   RibbonLayer,
   SegmentLayer,
+  CountLayer,
   ViolinLayer,
   FunctionLayer,
   PolygonLayer,
@@ -97,6 +98,7 @@ export interface RuntimeFreqpolyLayer extends WithRuntimeAes<FreqpolyLayer> {}
 export interface RuntimeAreaLayer extends WithRuntimeAes<AreaLayer> {}
 export interface RuntimeRibbonLayer extends WithRuntimeAes<RibbonLayer> {}
 export interface RuntimeSegmentLayer extends WithRuntimeAes<SegmentLayer> {}
+export interface RuntimeCountLayer extends WithRuntimeAes<CountLayer> {}
 export interface RuntimeViolinLayer extends WithRuntimeAes<ViolinLayer> {}
 export interface RuntimeFunctionLayer extends WithRuntimeAes<FunctionLayer> {}
 export interface RuntimePolygonLayer extends WithRuntimeAes<PolygonLayer> {}
@@ -148,6 +150,7 @@ export type RuntimeLayerSpec =
   | RuntimeAreaLayer
   | RuntimeRibbonLayer
   | RuntimeSegmentLayer
+  | RuntimeCountLayer
   | RuntimeViolinLayer
   | RuntimeFunctionLayer
   | RuntimePolygonLayer

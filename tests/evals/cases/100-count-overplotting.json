@@ -1,0 +1,40 @@
+{
+  "id": "100-count-overplotting",
+  "kind": "chart",
+  "prompt": "Show overplotting of x against y with geom_count so point size encodes how many rows share each position.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" }
+    ],
+    "rowCount": 6
+  },
+  "data": {
+    "main": [
+      { "x": 1, "y": 1 },
+      { "x": 1, "y": 1 },
+      { "x": 1, "y": 2 },
+      { "x": 2, "y": 2 },
+      { "x": 2, "y": 2 },
+      { "x": 3, "y": 1 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "count",
+        "stat": "sum",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "size": { "stat": "n" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Canonical gold for geom_count: stat sum with size defaulting to after_stat n (#795)."
+}

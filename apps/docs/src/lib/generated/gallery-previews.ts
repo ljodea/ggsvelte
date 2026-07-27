@@ -315,6 +315,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "297f6c0c6dd84b25b6b4346a9141811a342ffa9d822fe0c94fa0348f274c78ae",
   },
   {
+    id: "point/count",
+    filename: "point-count-light.png",
+    path: "/previews/point-count-light.png",
+    sha256: "87033b2c117c563f4b73373439be9f7953298338a233786955f47e853555f9c0",
+  },
+  {
     id: "point/fixed-aspect",
     filename: "point-fixed-aspect-light.png",
     path: "/previews/point-fixed-aspect-light.png",

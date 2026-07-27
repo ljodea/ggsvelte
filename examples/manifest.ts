@@ -627,6 +627,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "point/count",
+    category: "point",
+    name: "count",
+    title: "Overplotting counts",
+    description: "",
+    tags: ["point", "count", "size", "overplot", "stat"],
+    docsSection: "Points & scatter",
+    hasData: true,
+  },
+  {
     id: "point/fixed-aspect",
     category: "point",
     name: "fixed-aspect",

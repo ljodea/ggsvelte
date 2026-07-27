@@ -493,6 +493,14 @@ export class MockResponder implements Responder {
       }
       spec.layers.push(layer);
       xField = x;
+    } else if (/\bgeom[_\s]?count\b|\boverplotting\b/.test(prompt)) {
+      // geom_count: stat sum at unique (x, y); size defaults to after_stat n (#795).
+      const x = fieldNamed("x") ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? pick.quant() ?? "y";
+      const aes: MockAes = { x: f(x), y: f(y) };
+      colorFor("color", aes);
+      spec.layers.push({ geom: "count", aes });
+      xField = x;
     } else if (/\bgeom[_\s]?violin\b|\bviolin plots?\b|\bviolin\b/.test(prompt)) {
       // geom_violin: mirrored ydensity polygons per discrete x (#798).
       const x = pick.mentionedCat() ?? pick.cat() ?? "x";
