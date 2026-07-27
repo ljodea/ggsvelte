@@ -408,6 +408,16 @@ describe("planJobs", () => {
     expect(plan.consumer).toBe(true);
   });
 
+  test("skill reference changes route like the skill itself", () => {
+    // The references/ tree ships in the npm package; a glob regression that
+    // narrowed routing to SKILL.md alone must fail here, not in production.
+    const plan = planJobs(classifyChangedPaths(["skills/ggsvelte/references/geoms-and-stats.md"]));
+    expect(plan.unit).toBe(true);
+    expect(plan.component).toBe(true);
+    expect(plan.build).toBe(true);
+    expect(plan.consumer).toBe(true);
+  });
+
   test("svelte-only changes run unit (lifecycle) and bench_smoke (retained-memory)", () => {
     const plan = planJobs(classifyChangedPaths(["packages/svelte/src/lib/index.ts"]));
     expect(plan.unit).toBe(true);

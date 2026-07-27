@@ -1,169 +1,191 @@
 ---
 name: ggsvelte
-description: Build data visualizations with ggsvelte, a grammar-of-graphics charting library (ggplot2 semantics, JSON specs, Svelte 5 components, headless SVG rendering). Use whenever creating, editing, validating, or debugging charts, plots, graphs, scatter plots, bar charts, histograms, line charts, boxplots, density plots, faceted/small-multiple charts, or data visualization in a JavaScript/TypeScript/Svelte project; when code imports from "@ggsvelte/svelte", "@ggsvelte/spec", or "@ggsvelte/core"; when emitting a ggsvelte plot spec JSON; or when rendering charts server-side/headless to SVG.
+description: Build data visualizations with ggsvelte, a grammar-of-graphics charting library (ggplot2 semantics, Svelte 5 child-component composition, JSON specs, headless SVG rendering). Use whenever creating, editing, validating, or debugging charts, plots, graphs, scatter plots, bar charts, histograms, line charts, boxplots, density plots, violins, heatmaps, maps, faceted/small-multiple charts, or data visualization in a JavaScript/TypeScript/Svelte project; when code imports from "@ggsvelte/svelte", "@ggsvelte/spec", or "@ggsvelte/core"; when composing GGPlot with Geom*/Scale*/Theme*/Facet*/Coord*/Guide*/Labs children; when emitting a ggsvelte plot spec JSON; or when rendering charts server-side/headless to SVG.
 ---
 
 # ggsvelte
 
-A layered grammar of graphics with ggplot2 nomenclature. **You emit a JSON
-`PortableSpec`; a deterministic renderer draws it.** Never build SVG or
-canvas output yourself — describe the plot, let the pipeline render it.
+A layered grammar of graphics with ggplot2 nomenclature. Two ways to author the
+same grammar — never build SVG or canvas output yourself:
+
+- **Svelte apps (canonical):** `<GGPlot>` with declaration-only children —
+  `<GeomPoint/>`, `<ThemeMinimal/>`, `<ScaleXLog10/>`, `<FacetWrap/>`, `<Labs/>`.
+- **Agents / headless:** emit a JSON `PortableSpec`, check it with
+  `validate(spec)`, render with `renderToSVGString(spec, {width, height})`
+  (Node-safe), `ggsvelte-render spec.json > out.svg` (CLI), or `<GGPlot spec>`.
+  A third skin, the `gg()` builder, produces the same spec in TypeScript.
 
 ## Mental model
 
-```text
-spec = data + aes (mappings) + layers[]        one layer = { geom, stat, position, aes?, params? }
-       + scales? coord? facet? labs? theme?
+```text fragment
+spec = data + aes (mappings) + layers[]
+       + scales? coord? facet? labs? theme? guides?
+one layer = { geom, stat?, position?, positionParams?, aes?, params?, render?, data? }
 ```
 
 - **data**: `{"values": [rows]}`, `{"columns": {name: [...]}}`, or
   `{"name": "dataset"}` (resolved from `spec.datasets` or runtime data).
-- **aes**: channel → canonical form. `{"field": "col"}` maps a data column;
-  `{"value": "red"}` is a constant; `{"stat": "count"}` reads a stat output;
-  `null` unsets an inherited channel. **Bare strings are invalid in JSON
-  specs** — always `{"field": ...}`. Channels: x, y, color (strokes/points),
-  fill (bars/areas), group, label, weight, ymin, ymax, xmin, xmax, width, height.
-  Mapped size, linewidth, alpha, shape, and linetype are supported on the geoms
-  that consume them (see STYLE_AESTHETIC_GEOMS).
-- **layers**: drawn in order. Geoms: `point, line, col, bar, histogram, area,
-rule, text, smooth, boxplot, density, errorbar, rect, tile, raster, ribbon`. Each geom has a default
-  stat/position (bar → count+stack, histogram → bin+stack, col/area →
-  identity+stack, boxplot → boxplot+dodge, everything else identity).
-- **stats compute columns**: count→`count`; bin→`count, density, ncount,
-ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
-  boxplot→`ymin, lower, middle, upper, ymax`; summary→`y, ymin, ymax`.
-  A stat that computes y means you must NOT map `aes.y` to a field
-  (bar/histogram/density) — the `computed-y-mapped` error.
-- **positions**: `stack, fill` (proportions), `dodge` (side-by-side),
-  `jitter` (seeded, deterministic), `nudge`, `identity`.
-- **coord**: `{"type": "flip"}` = horizontal bars (map the category to x,
-  the value to y, then flip). Post-stat projection uses
-  `{"type":"transform","x":{"transform":"log10"},"y":{"transform":"sqrt"}}`
-  with optional semantic `limits`, `reverse`, `expand`, and plot-level `clip`.
-  Use `coordTransform`/`coord_transform`; unlike scale transforms, coordinate
-  transforms preserve stat inputs, tessellate curved render topology, and
-  invert coordinates before scales for interactions. Non-identity coordinate
-  transforms require continuous non-temporal axes. Fixed aspect uses
-  `{"type":"fixed","ratio":1}`, `coordFixed`/`coord_fixed`, or
-  `coordEqual`/`coord_equal`; ratio is physical y-unit/x-unit length. Fixed
-  coordinates fit a centered data rectangle after chart chrome and reject
-  free positional facet scales.
-- **facet**: wrap form `{"wrap": {"field": "g"}, "ncol": 3}` XOR grid form
-  `{"rows": {...}, "cols": {...}}`; `"scales": "fixed"|"free"|"free_x"|"free_y"`.
-- **scales**: canonical x/y families are `{"type": "linear"|"binned"|"time"|"band"}`.
-  Numeric continuous/binned scales accept `"transform":"identity"|"log10"|"sqrt"`,
-  semantic `domain`/`limits`, `oob:"censor"|"squish"`, `expand`, `nice`,
-  major/minor breaks, and `reverse`. Authored `type:"log"` is accepted but
-  canonicalizes to `type:"linear", transform:"log10"`; trained models never
-  report type `log`. Scale transforms run before stats and positions. Binned
-  integer ids remain private; guides, candidates, and events use semantic values.
-  Helpers include `scaleXLog10`, `scaleYSqrt`, `scaleXBinned` and binding-identical
-  `scale_x_log10`, `scale_y_sqrt`, `scale_x_binned` aliases. Time scales additionally accept `"parse"` (closed names such as `"dmy"`,
-  exact `{ "format": ... }`, or `{ "epoch": "seconds"|"milliseconds" }`),
-  `"temporalKind"`, `"timezone"`, `"disambiguation"`,
-  `"parseFailure":"error"|"censor"`, `"dateBreaks"`,
-  `"dateMinorBreaks"`, `"dateLabels"`, `"locale"`, and `"weekStart"`.
-  Color/fill families are `ordinal`, `sequential`, `binned`, `manual`, and
-  `identity`. Sequential/binned accept identity/log10/sqrt transforms,
-  semantic domains/breaks, OOB policy, temporal parser options, and explicit
-  `naValue`/`unknownValue`; `labels` accepts numeric or temporal formats for
-  colorbars and colorsteps. Manual requires one range color per domain value;
-  identity validates source hex colors and suppresses its guide by default.
-  Bounded warnings count mapped NA and unknown fallback values.
-  Use continuous/discrete/binned/log10/sqrt/date/datetime/manual/identity
-  helpers for color or fill. `color`/`colour` and ggplot2 snake-case exports
-  are binding-identical. GuidePlans are `discrete`, `colorbar`, or
-  `colorsteps`. Defaults are inferred and disclosed as advisories.
-- **guides**: top-level `guides` overrides scale-local `guide`. Use `axis`,
-  `legend`, `colorbar`, `colorsteps`, or `none` through the camelCase helpers
-  (or binding-identical snake-case aliases). Guide options style titles,
-  ticks/labels, numeric order, `auto|right|bottom` placement,
-  `auto|vertical|horizontal` direction, collision handling, force visibility,
-  and bounded theme roles without changing scale math. Auto non-position guides
-  move below when the viewport is at most 480px or a right guide would leave
-  less than 320px of panel. Exact discrete entries remain interactive; numeric
-  ticks/bins do not. Force identity/single-value manual guides explicitly.
-- **temporal defaults**: ISO dates/date-times, four-digit year strings,
-  year-months, month-years, and year-quarters infer time after bounded sampling
-  plus whole-column validation. Ambiguous ordered dates stay discrete: set
-  `"parse":"dmy"` or `"parse":"mdy"`. For year-like identifiers, force
-  `{"type":"band"}`. Never preprocess dates into indexes. Automatic temporal
-  labels use measured panel extent and calendar boundaries; inspect
-  `model.guidePlans` for the selected interval and visible/full labels.
-- **temporal override rules**: `.scaleXDate()`/`.scaleYDate()` serialize mapped
-  authoring `Date` cells as calendar dates; `.scaleXDatetime()`/
-  `.scaleYDatetime()` preserve instants; `.scaleXTime()`/`.scaleYTime()`
-  (ggplot2 `scale_*_time`) are time-of-day only — portable numbers are
-  **seconds since midnight** (mapped to epoch ms on 1970-01-01Z); `Date` cells
-  use the UTC clock portion; default labels `%H:%M:%S`.
-  Explicit `linear`/`binned` (including authored alias `log`) disables temporal inference, so numeric strings stay
-  quantitative. Explicit ordinal color/fill keeps temporal-looking labels as
-  separate groups; sequential temporal color/fill uses parsed domains and
-  calendar legend labels. Censoring is available only with an explicit parser;
-  invalid configuration and ambiguous automatic inference remain errors.
-  Use e.g. `.scaleXDatetime({ dateBreaks: "2 weeks", dateMinorBreaks: "1 day",
-dateLabels: "%e %b", locale: "en-GB", timezone: "Europe/London" })`.
-  Explicit `breaks` outrank `dateBreaks`; `dateLabels` outranks `labels`.
-  Authored labels are preserved with a diagnostic rather than silently
-  rotated, thinned, or truncated.
-- Rendering surfaces: `<GGPlot spec={...}/>` (Svelte),
-  `renderToSVGString(spec, {width, height})` (headless, Node-safe),
-  `ggsvelte-render spec.json > out.svg` (CLI; JSON-line diagnostics on stderr).
+- **layers** draw in order — later layers on top (z-order).
+- Geom defaults: bar → count+stack, histogram → bin+stack, col/area →
+  identity+stack, boxplot → boxplot+dodge, violin → ydensity+dodge,
+  jitter → point+jitter, freqpoly → bin, smooth → smooth, count → sum,
+  density → density, hex → bin_hex, everything else identity+identity.
 
-## Svelte interactions (v0.2+)
+## Aes: JSON specs vs Svelte props
 
-`@ggsvelte/svelte` requires Svelte `^5.33.1`. Interactions are opt-in props on
-`<GGPlot>`; always provide a stable `key` field when selection or linked views
-must survive filtering, reordering, or data refreshes.
+The one rule that differs between the two skins:
 
-```svelte
+| Surface                                 | `x: "displ"` bare string              | canonical                |
+| --------------------------------------- | ------------------------------------- | ------------------------ |
+| JSON `PortableSpec` (incl. `spec` prop) | INVALID                               | `{"field": "displ"}`     |
+| Svelte `aes` prop (plot or `Geom*`)     | valid shorthand, expands to `{field}` | same object form also OK |
+
+Canonical channel forms: `{"field": "col"}` maps a column, `{"value": "red"}`
+is a constant, `{"stat": "count"}` reads a stat output, `null` unsets an
+inherited channel. Layer aes merges over plot aes per channel.
+Channels (25): x, y, color, fill, size, linewidth, alpha, shape, linetype,
+group, label, weight, ymin, ymax, xmin, xmax, xend, yend, width, height, z,
+map_id, angle, radius, sample. Mapped size/linewidth/alpha/shape/linetype work
+only on the geoms in `STYLE_AESTHETIC_GEOMS`.
+
+## Svelte composition — children are canonical
+
+```svelte fragment
 <script lang="ts">
-  import { createPlotInteraction, Facet, GGPlot } from "@ggsvelte/svelte";
+  import {
+    GeomPoint,
+    GeomSmooth,
+    GGPlot,
+    Labs,
+    ScaleColorDiscrete,
+    ThemeMinimal,
+  } from "@ggsvelte/svelte";
 
-  const interaction = createPlotInteraction<number>();
-  const scope = { keys: "sales-rows", intervals: "sales-range" } as const;
+  const cars = [
+    { displ: 1.8, hwy: 29, class: "compact" },
+    { displ: 2.0, hwy: 31, class: "compact" },
+    { displ: 3.5, hwy: 26, class: "midsize" },
+    { displ: 5.3, hwy: 20, class: "suv" },
+    { displ: 5.7, hwy: 17, class: "suv" },
+    { displ: 6.2, hwy: 16, class: "suv" },
+  ];
 </script>
 
-<GGPlot
-  data={rows}
-  aes={{ x: "date", y: "value", color: "series" }}
-  layers={[{ geom: "point" }]}
-  key="id"
-  select={{ type: "interval", mode: "x", preset: "cross-panel" }}
-  legendFocus
-  legendFilter
-  {interaction}
-  interactionScope={scope}
-  oninteraction={(event) => console.log(event)}
->
-  <Facet wrap="region" ncol={3} />
+<GGPlot data={cars} aes={{ x: "displ", y: "hwy", color: "class" }} height={400}>
+  <ThemeMinimal />
+  <ScaleColorDiscrete scheme="tableau10" />
+  <Labs
+    title="Bigger engines, thirstier cars"
+    x="Displacement (l)"
+    y="Highway mpg"
+    color="Class"
+  />
+  <GeomSmooth method="loess" se={false} />
+  <GeomPoint size={3} alpha={0.85} />
 </GGPlot>
 ```
 
-- `inspect` adds tooltip, crosshair, keyboard traversal, and pinning; `select`
-  supports point or interval selection; `zoom` enables brush zoom.
-- Faceted interval presets are `independent`, `union`, and `cross-panel`.
-  After an interval or zoom commit, accessible controls accept exact bounds.
-- `legendFocus` only emphasizes a discrete group. `legendFilter` changes the
-  included rows and reruns the grammar while preserving stable color identity.
-- Share one `createPlotInteraction()` controller between plots to link semantic
-  selection, emphasis, interval, and zoom state. Give plots matching
-  `interactionScope` channels only when they should coordinate.
-- Use controlled controller methods such as `setSelection`, `setInterval`, and
-  `setZoom` for external controls. Observe all interaction kinds through
-  `oninteraction`, or use capability-specific handlers such as `onselect`,
-  `onzoom`, `onlegendfocus`, and `onlegendfilter`.
-- A handler without its matching capability prop, or `interactionScope` without
-  an `interaction` controller, is inert and emits a development advisory.
+Convention: theme → scales → guides → labs → mark layers. Grammar children
+(theme/scale/coord/facet/guides/labs/legend) render no markup and register
+declaratively; mark-layer registration order is z-order (points above smooth
+here). Every geom takes aesthetics through one `aes` object prop (bare-string
+shorthand allowed) and constant style params as direct props (`size={3}`);
+structural props are `data`, `stat`, `position`, `positionParams`, `render`.
+
+`<GGPlot>` props: `spec`, `data`, `aes`, `layers`, `key`, `width`
+(number | "container"), `height`, `a11y`, `ariaLabel`, the interaction props
+(`inspect`, `select`, `zoom`, `legendFocus`, `legendFilter`, `tool`,
+`interaction`, `interactionScope`), the `on*` handlers, and `children`.
+Instance methods: `resetScales()`, `setZoom()`.
+
+Precedence: `spec` wins over everything else. For mark layers, an explicit
+`layers` prop wins over geom children — use it for dynamic layer lists (a keyed
+`{#each}` reorder does not preserve z-order). For grammar families, children
+win over the deprecated props. Coord/facet/theme REPLACE (last wins); scales
+merge per channel; labs/guides/legend merge per key. Duplicates emit
+`DUPLICATE_PLOT_LAYER` / `DUPLICATE_SCALE_CHANNEL` / `DUPLICATE_MERGE_KEY`
+advisories — full semantics in
+[references/composition-surfaces.md](references/composition-surfaces.md).
+
+**Deprecated (since 0.11.0, planned removal in 0.13.0):** the seven `<GGPlot>`
+grammar props `facet`, `coord`, `scales`, `guides`, `legend`, `theme`, `labs`.
+Compose them as children instead; `spec`, `data`, `aes`, and `layers` stay
+first-class. Migrate existing code with `npx ggsvelte-codemod --write src`
+(dry-run without `--write`). Using a deprecated prop fires a
+`DEPRECATED_PLOT_PROP` advisory via `ondiagnostic`.
+
+## Which geom for which data
+
+| x type           | y type                                | extra              | recommend                                                    |
+| ---------------- | ------------------------------------- | ------------------ | ------------------------------------------------------------ |
+| quantitative     | quantitative                          | ≤ ~2k rows         | `point` (+ `smooth` layer for trend)                         |
+| quantitative     | quantitative                          | many rows          | `point` with `"render": "canvas"`, or `hex`/`bin_2d` density |
+| temporal         | quantitative                          | —                  | `line` (multi-series: map `color` to the series field)       |
+| nominal/ordinal  | quantitative (pre-aggregated)         | —                  | `col`; many/long labels → add a `flip` coord                 |
+| nominal/ordinal  | (none — count rows)                   | —                  | `bar` (count stat; do NOT map y)                             |
+| quantitative     | (none — distribution)                 | —                  | `histogram` (or `density` for smooth overlay)                |
+| nominal          | quantitative (distribution per group) | —                  | `boxplot` (or `violin` for shape)                            |
+| nominal          | nominal                               | —                  | `point` + `"position": "jitter"`, or counts via `count`      |
+| quantitative     | quantitative                          | uncertainty bounds | `errorbar` (map ymin/ymax) or `smooth` (se ribbon)           |
+| any of the above | + one more nominal field              | few values         | same geom + facet wrap on that field                         |
+
+Only the everyday geoms appear above. All 50 geoms (violin, hex, contour, qq,
+step, segment, sf/maps, text/label annotation, …), all 28 stats with their
+computed columns, and the position rules live in
+[references/geoms-and-stats.md](references/geoms-and-stats.md) — read it
+whenever the user wants a geom, stat, or annotation not shown here.
+
+Two rules worth keeping in working memory:
+
+- **Positions are scoped per geom** (a disallowed position is a schema error):
+  stack/fill only on bar, col, histogram, area; dodge on those plus boxplot
+  and violin; jitter on point, count, jitter; nudge on point, count, text,
+  label; identity everywhere.
+- **A stat that computes y forbids mapping `aes.y` to a field**
+  (bar/histogram/density/…) — the `computed-y-mapped` error. Read stat outputs
+  with `{"stat": "count"}` aes.
+
+## Scales, palettes, themes
+
+- x/y families: `{"type": "linear"|"binned"|"time"|"band"}` with
+  `"transform": "identity"|"log10"|"sqrt"`, `domain`/`limits`,
+  `oob: "censor"|"squish"`, `expand`, `nice`, breaks, `reverse`. Authored
+  `type:"log"` canonicalizes to linear+log10. Scale transforms run before
+  stats and positions; coord transforms run after stats.
+- color/fill families: `ordinal`, `sequential`, `binned`, `manual`,
+  `identity`. 34 named schemes — 14 categorical (`observable10`, `tableau10`,
+  `colorblind`, `Set1`…) and 20 sequential/diverging (`viridis`, `magma`,
+  `Blues`, `RdBu`…). Size/linewidth/alpha and shape/linetype have their own
+  scale families.
+- Three equivalent skins:
+  JSON `"scales": {"x": {"type": "linear", "transform": "log10"}}` ≡ helper
+  functions `scaleXLog10()` / `scale_x_log10()` (binding-identical camelCase,
+  snake_case, and Colour spellings, from `@ggsvelte/spec`) ≡ components
+  `<ScaleXLog10/>`. The `gg()` builder chains the same names:
+  `gg(rows, aes({ x: "flipper", y: "mass" })).geomPoint({ alpha: 0.7 }).scaleXLog10().spec()`.
+- Temporal: ISO dates/date-times, four-digit-year strings, year-months, and
+  year-quarters infer time automatically. Ambiguous ordered dates need
+  `"parse": "dmy"` or `"mdy"`; force `{"type": "band"}` for year-like
+  identifiers; never preprocess dates into indexes.
+- Themes: 17 names (`default`, `light`, `dark`, `minimal`, `ggplot2`,
+  `classic`, `bw`, `hrbr`, `few`, `clean`, `fivethirtyeight`, `economist`,
+  `tufte`, `linedraw`, `void`, plus `grey`/`gray` aliasing `ggplot2`) as
+  `<ThemeTufte/>`-style children or `"theme": "tufte"` in JSON.
+
+Full option surfaces — every scale option, the `Scale*` component matrix, all
+scheme tables, the whole temporal/parser system:
+[references/scales-and-palettes.md](references/scales-and-palettes.md).
+Themes, coords, facets, guides, legend order, and `Labs` in depth:
+[references/composition-surfaces.md](references/composition-surfaces.md).
 
 ## The validation contract (use it!)
 
-`validate(spec)` = schema shape. `validate(spec, { profile })` adds
-data-aware checks against a `DataProfile` —
+`validate(spec)` = schema shape. `validate(spec, { profile })` adds data-aware
+checks against a `DataProfile` —
 `{"fields": [{"name": "displ", "type": "quantitative"}], "rowCount": 234}`
 (types: quantitative | temporal | ordinal | nominal). Every error is:
 
-```json
+```json fragment
 {
   "code": "unknown-field",
   "path": "/layers/0/aes/x",
@@ -180,63 +202,79 @@ data-aware checks against a `DataProfile` —
 `validate(spec, { lint: true })` additionally returns advisories for
 valid-but-questionable specs (line over unordered categories, >10 discrete
 colors, stacked negative areas, discrete×discrete scatter, transform-domain
-mixed-sign data). Advisories never block; fix them when they match intent.
+mixed-sign data); `lintSpec(spec)` is the standalone equivalent. Advisories
+never block; fix them when they match intent. `normalize(input)` canonicalizes
+authoring sugar into a `PortableSpec`; `isPortable`/`toPortable` check and
+strip runtime-only fields. CLIs: `ggsvelte-render spec.json > out.svg`
+(JSON-line diagnostics on stderr) and `ggsvelte-codemod [--write] src`.
 
-## Which geom for which data (DataProfile → recommendation)
-
-| x type           | y type                                | extra              | recommend                                                            |
-| ---------------- | ------------------------------------- | ------------------ | -------------------------------------------------------------------- |
-| quantitative     | quantitative                          | ≤ ~2k rows         | `point` (+ `smooth` layer for trend)                                 |
-| quantitative     | quantitative                          | many rows          | `point` with `"render": "canvas"`, or `histogram`/`density` per axis |
-| temporal         | quantitative                          | —                  | `line` (multi-series: map `color` to the series field)               |
-| nominal/ordinal  | quantitative (pre-aggregated)         | —                  | `col`; many/long labels → add `"coord": {"type": "flip"}`            |
-| nominal/ordinal  | (none — count rows)                   | —                  | `bar` (count stat; do NOT map y)                                     |
-| quantitative     | (none — distribution)                 | —                  | `histogram` (or `density` for smooth overlay)                        |
-| nominal          | quantitative (distribution per group) | —                  | `boxplot`                                                            |
-| nominal          | nominal                               | —                  | `point` + `"position": "jitter"`, or counts via size                 |
-| quantitative     | quantitative                          | uncertainty bounds | `errorbar` (map ymin/ymax) or `smooth` (se ribbon)                   |
-| any of the above | + one more nominal field              | few values         | same geom + `facet.wrap` on that field                               |
-
-Annotations (reference lines): `rule` with `params.yintercept`/`xintercept`
-(no aes). Data-driven rules: map exactly ONE of aes.x / aes.y.
-
-## Recipes (canonical spec JSON — top 20)
+## Recipes (spec JSON — the everyday twelve)
 
 All specs assume inline `"data": {"values": [...]}` or a named dataset.
-`A` = aes shorthand shown expanded once, then abbreviated for space.
 
-1. **Scatter** — `{"layers":[{"geom":"point","aes":{"x":{"field":"displ"},"y":{"field":"hwy"}}}]}`
-2. **Scatter colored by category** — add `"color":{"field":"class"}` to the aes.
-3. **Scatter + trend** — `{"aes":{"x":{"field":"x"},"y":{"field":"y"}},"layers":[{"geom":"point"},{"geom":"smooth","params":{"method":"loess"}}]}` (plot-level aes inherits into both layers)
-4. **Line (time series)** — `{"layers":[{"geom":"line","aes":{"x":{"field":"date"},"y":{"field":"value"}}}]}` (ISO dates, raw four-digit years, year-months, and year-quarters infer time automatically; add `"scales":{"x":{"type":"time","parse":"dmy"}}` only for an explicit ordered parser)
-5. **Multi-series line** — map `"color":{"field":"series"}` (grouping follows).
-6. **Column chart (pre-computed heights)** — `{"layers":[{"geom":"col","aes":{"x":{"field":"category"},"y":{"field":"amount"}}}]}`
-7. **Bar chart (count rows per category)** — `{"layers":[{"geom":"bar","aes":{"x":{"field":"category"}}}]}` — never map y on bar.
-8. **Horizontal bars** — recipe 6 or 7 + `"coord":{"type":"flip"}`.
-9. **Stacked bars** — recipe 7 + `"fill":{"field":"subgroup"}` in aes (stack is the default position).
-10. **Dodged (grouped) bars** — recipe 9 + `"position":"dodge"` on the layer.
-11. **Proportion bars (100% stacked)** — recipe 9 + `"position":"fill"`.
-12. **Histogram** — `{"layers":[{"geom":"histogram","aes":{"x":{"field":"measure"}},"params":{"bins":30}}]}` (or `"binwidth"`; never both `center` and `boundary`).
-13. **Density overlay** — `{"layers":[{"geom":"density","aes":{"x":{"field":"measure"},"color":{"field":"group"}}}]}`
-14. **Boxplot by category** — `{"layers":[{"geom":"boxplot","aes":{"x":{"field":"group"},"y":{"field":"value"}}}]}` (x must be discrete)
-15. **Stacked area** — `{"layers":[{"geom":"area","aes":{"x":{"field":"date"},"y":{"field":"value"},"fill":{"field":"series"}}}]}`
-16. **Errorbar (mean ± se)** — `{"layers":[{"geom":"errorbar","stat":"summary","aes":{"x":{"field":"group"},"y":{"field":"value"}}}]}`
-17. **Reference line annotation** — add layer `{"geom":"rule","params":{"yintercept":0}}`.
-18. **Value labels on columns** — recipe 6 + layer `{"geom":"text","aes":{"x":{"field":"category"},"y":{"field":"amount"},"label":{"field":"amount"}},"params":{"dy":-8}}` (`dy`/`dx` are px offsets; `position: "nudge"` + `positionParams.x/y` offsets in DATA units)
-19. **Facets (small multiples)** — any recipe + `"facet":{"wrap":{"field":"panel"},"ncol":3}` (add `"scales":"free_y"` for per-panel y).
-20. **Big scatter (canvas)** — recipe 1 + `"render":"canvas"` on the layer (or let >2000 marks auto-switch; `"a11y":"force-svg"` at plot level overrides for assistive tech). Log10 axis: `"scales":{"x":{"type":"linear","transform":"log10"}}` (positive data only; transform runs before stats). Jittered categorical scatter: `"position":"jitter"` on a point layer.
+1. **Scatter** — `{"layers":[{"geom":"point","aes":{"x":{"field":"displ"},"y":{"field":"hwy"}}}]}`; color by category: add `"color":{"field":"class"}`.
+2. **Scatter + trend** — `{"aes":{"x":{"field":"x"},"y":{"field":"y"}},"layers":[{"geom":"point"},{"geom":"smooth","params":{"method":"loess"}}]}` (plot-level aes inherits into both layers).
+3. **Line (time series)** — `{"layers":[{"geom":"line","aes":{"x":{"field":"date"},"y":{"field":"value"}}}]}`; multi-series: map `"color":{"field":"series"}`.
+4. **Column chart (pre-computed heights)** — `{"layers":[{"geom":"col","aes":{"x":{"field":"category"},"y":{"field":"amount"}}}]}`
+5. **Bar chart (count rows)** — `{"layers":[{"geom":"bar","aes":{"x":{"field":"category"}}}]}` — never map y on bar.
+6. **Horizontal bars** — recipe 4 or 5 + `"coord":{"type":"flip"}`.
+7. **Stacked / dodged / proportion bars** — recipe 5 + `"fill":{"field":"subgroup"}` in aes (stack is the default); `"position":"dodge"` for side-by-side, `"position":"fill"` for 100% stacked.
+8. **Histogram** — `{"layers":[{"geom":"histogram","aes":{"x":{"field":"measure"}},"params":{"bins":30}}]}` (or `"binwidth"`; never both `center` and `boundary`).
+9. **Boxplot by category** — `{"layers":[{"geom":"boxplot","aes":{"x":{"field":"group"},"y":{"field":"value"}}}]}` (x must be discrete).
+10. **Facets (small multiples)** — any recipe + `"facet":{"wrap":{"field":"panel"},"ncol":3}` (add `"scales":"free_y"` for per-panel y).
+11. **Reference line annotation** — add layer `{"geom":"rule","params":{"yintercept":0}}`.
+12. **Finishing** — `"labs":{"title":...,"x":...,"y":...}`, `"width"`/`"height"` in px, `"theme":"minimal"`.
 
-Finish with `"labs": {"title": ..., "x": ..., "y": ...}` for human-readable
-labels, `"width"`/`"height"` in px, `"theme": "default"|"light"|"dark"|"minimal"`.
+The same charts as Svelte children, twice over:
 
-## References
+```svelte fragment
+<GGPlot data={sales} aes={{ x: "quarter", y: "amount", fill: "region" }}>
+  <GeomCol position="dodge" />
+</GGPlot>
+```
+
+```svelte fragment
+<GGPlot data={measurements} aes={{ x: "value" }}>
+  <FacetWrap field="site" ncol={2} />
+  <GeomHistogram bins={20} />
+</GGPlot>
+```
+
+Long-tail recipes — errorbar, value labels, canvas big-scatter, log axis,
+violin, tile heatmap, hex density, ECDF step, ribbon, flipped boxplot,
+per-layer aes override, sf/map — each as validated JSON plus a Svelte twin:
+[references/recipes.md](references/recipes.md).
+
+## Interactions (Svelte props, not spec fields)
+
+Opt-in `<GGPlot>` props: `inspect` (tooltip/crosshair/keyboard/pinning),
+`select` (point or interval), `zoom` (brush), `legendFocus` (emphasis only),
+`legendFilter` (refilters and reruns the grammar, colors stay stable). Always
+give a stable `key` when selection or linked views must survive filtering or
+refreshes. Link plots by sharing one `createPlotInteraction()` controller and
+matching `interactionScope` channels; observe everything through
+`oninteraction` or per-capability handlers. Faceted interval presets, the
+controller API, `Tooltip`, handler payloads, and diagnostics:
+[references/interactions.md](references/interactions.md) — read it before
+writing any interactive or linked-view code.
+
+## Pointers
 
 - JSON Schema (constrained decoding): `packages/spec/schema/v0.json` in the
   repo, `/schema/v0.json` on the docs site, or
   `import schema from "@ggsvelte/spec/schema/v0.json"`.
 - Full corpus for models: `/llms-full.txt` on the docs site (all guide prose
-  - every example with spec JSON and Svelte source); index at `/llms.txt`.
+  plus every example with spec JSON and Svelte source); index at `/llms.txt`.
 - Error catalog: `/guide/errors`; advisories: `/guide/advisories`;
   lifecycle/editions: `/guide/lifecycle` (specs are stamped with the current
-  appearance edition, currently 2; editions do not preserve incorrect pre-1.0
-  parser or scale execution).
+  appearance edition, currently 2). Upgrading off deprecated props:
+  `/guide/upgrading`.
+- References in this skill — read the one that matches the task:
+  [geoms-and-stats.md](references/geoms-and-stats.md) (any geom/stat/position
+  beyond the everyday set, annotations),
+  [scales-and-palettes.md](references/scales-and-palettes.md) (scale options,
+  palettes, temporal),
+  [composition-surfaces.md](references/composition-surfaces.md) (themes,
+  coords, facets, guides, merge semantics),
+  [interactions.md](references/interactions.md) (tooltips, selection, linking),
+  [recipes.md](references/recipes.md) (long-tail chart recipes).

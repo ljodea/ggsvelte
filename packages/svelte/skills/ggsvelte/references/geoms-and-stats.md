@@ -1,0 +1,258 @@
+<!-- Source of truth: packages/spec/src/schema-catalog.ts (KNOWN_GEOMS, KNOWN_STATS, KNOWN_POSITIONS, GEOM_DEFAULTS), packages/spec/src/schema-declarations.ts (per-geom position unions, params), packages/svelte/src/lib/geoms/. Inventory tables are asserted complete by scripts/skill-content.test.ts. -->
+
+# Geoms, stats, and positions
+
+A JSON layer is `{ "geom": ..., "stat"?, "position"?, "positionParams"?, "aes"?, "data"?, "params"?, "render"? }`.
+Every geom is also a Svelte component (`<GeomPoint/>` inside `<GGPlot>`); the component takes
+`data`, `aes`, `stat`, `position`, `positionParams`, `render` props, and its constant style
+params (the layer's `params` keys) as DIRECT props — each component whitelists exactly its
+geom's param keys via `createGeomLayer` (`packages/svelte/src/lib/geoms/*.svelte`):
+
+```svelte fragment
+<GeomPoint
+  aes={{ x: "displ", y: "hwy" }}
+  size={3}
+  alpha={0.6}
+  position="jitter"
+  positionParams={{ seed: 7 }}
+/>
+```
+
+Omit `stat`/`position` to get the geom's defaults (normalize fills them in). Each layer
+declaration allows only its own stat and position values — anything else is a schema error.
+
+Component layer z-order equals registration order (decision 0001). Static markup, `{#if}`
+membership, and unkeyed `{#each}` keep declaration order; keyed `{#each}` reorder or
+re-mount appends re-registered layers at the END — use the props-first API
+(`layers={[...]}`) for dynamic layer composition. Components emit no markup and are inert
+outside a `<GGPlot>` ancestor.
+
+## Geom inventory
+
+All 49 geoms. "Default" is stat+position from GEOM_DEFAULTS. "Channels" lists required
+channels (all geoms also consume color/fill/alpha and group where meaningful; strokes take
+linewidth/linetype, points take size/shape). "Positions" is the layer's full allowed set.
+
+| geom                | component           | default (stat + position)    | channels                                             | key params                                                                     | positions                    |
+| ------------------- | ------------------- | ---------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------ | ---------------------------- |
+| `point`             | GeomPoint           | identity + identity          | x, y                                                 | alpha, size, shape; summary_bin/manual add bins, binwidth, fun, funMin, funMax | identity, jitter, nudge      |
+| `line`              | GeomLine            | identity + identity          | x, y (ecdf/bin: x only)                              | linewidth, alpha, curve, connection, bins, binwidth, fun                       | identity                     |
+| `path`              | GeomPath            | identity + identity          | x, y (data order, not x-sorted)                      | linewidth, curve, connection; ellipse: level, type, segments                   | identity                     |
+| `step`              | GeomStep            | identity + identity          | x, y                                                 | direction ("hv" default, "vh", "mid")                                          | identity                     |
+| `col`               | GeomCol             | identity + stack             | x (discrete), y (height)                             | width, alpha                                                                   | stack, fill, dodge, identity |
+| `bar`               | GeomBar             | count + stack                | x only (y computed)                                  | width, alpha; stat bin adds bins, binwidth                                     | stack, fill, dodge, identity |
+| `histogram`         | GeomHistogram       | bin + stack                  | x (continuous; y computed)                           | bins (default 30), binwidth, boundary, center, closed                          | stack, fill, dodge, identity |
+| `freqpoly`          | GeomFreqpoly        | bin + identity               | x (continuous; y computed)                           | bins, binwidth, boundary, center, closed, linewidth                            | identity                     |
+| `area`              | GeomArea            | identity + stack             | x, y                                                 | alpha; stat align for mismatched x samples                                     | stack, fill, dodge, identity |
+| `ribbon`            | GeomRibbon          | identity + identity          | x+ymin+ymax OR y+xmin+xmax                           | alpha, outline, orientation                                                    | identity                     |
+| `rule`              | GeomRule            | identity + identity          | none (annotation) or exactly ONE of x / y            | xintercept, yintercept, linewidth                                              | identity                     |
+| `hline`             | GeomHline           | identity + identity          | none, or aes.y (data-driven)                         | yintercept, linewidth                                                          | identity                     |
+| `vline`             | GeomVline           | identity + identity          | none, or aes.x (data-driven)                         | xintercept, linewidth                                                          | identity                     |
+| `abline`            | GeomAbline          | identity + identity          | none (annotation only)                               | slope, intercept, linewidth                                                    | identity                     |
+| `text`              | GeomText            | identity + identity          | x, y, label                                          | size, anchor, dx, dy (px offsets)                                              | identity, nudge              |
+| `label`             | GeomLabel           | identity + identity          | x, y, label                                          | size, anchor, dx, dy, padding, radius, linewidth                               | identity, nudge              |
+| `smooth`            | GeomSmooth          | smooth + identity            | x, y (quantitative)                                  | method, se, level, span, degree, n                                             | identity                     |
+| `quantile`          | GeomQuantile        | quantile + identity          | x, y (quantitative)                                  | quantiles (default [0.25, 0.5, 0.75]), n                                       | identity                     |
+| `boxplot`           | GeomBoxplot         | boxplot + dodge              | x (discrete), y (quantitative)                       | width, coef, outlierSize, linewidth                                            | dodge, identity              |
+| `violin`            | GeomViolin          | ydensity + dodge             | x (discrete), y (continuous)                         | bw, adjust, trim, scale, width                                                 | dodge, identity              |
+| `density`           | GeomDensity         | density + identity           | x (continuous; y computed)                           | bw, adjust, n, cut                                                             | identity                     |
+| `errorbar`          | GeomErrorbar        | identity + identity          | x, ymin, ymax (identity); x, y (summary/summary_bin) | width, fun, funMin, funMax, bins, binwidth                                     | identity                     |
+| `linerange`         | GeomLinerange       | identity + identity          | x, ymin, ymax (identity); x, y (summary)             | none                                                                           | identity                     |
+| `pointrange`        | GeomPointrange      | identity + identity          | x, y, ymin, ymax (identity); x, y (summary)          | size, shape, linewidth, fun                                                    | identity                     |
+| `crossbar`          | GeomCrossbar        | identity + identity          | x, y, ymin, ymax                                     | width, fatten, fun, funMin, funMax                                             | identity                     |
+| `rect`              | GeomRect            | identity + identity          | xmin, xmax, ymin, ymax                               | linewidth, alpha                                                               | identity                     |
+| `tile`              | GeomTile            | identity + identity          | x, y (cell centers); width/height via aes or params  | width, height, linewidth                                                       | identity                     |
+| `raster`            | GeomRaster          | identity + identity          | x, y (regular grid), fill                            | hjust, vjust, interpolate                                                      | identity                     |
+| `bin_2d`            | GeomBin2d           | bin_2d + identity            | x, y (continuous; fill defaults to after-stat count) | bins, binwidth, drop                                                           | identity                     |
+| `hex`               | GeomHex             | bin_hex + identity           | x, y (continuous; fill defaults to after-stat count) | bins, drop                                                                     | identity                     |
+| `segment`           | GeomSegment         | identity + identity          | x, y, xend, yend                                     | linewidth, lineend                                                             | identity                     |
+| `curve`             | GeomCurve           | identity + identity          | x, y, xend, yend                                     | curvature, angle, ncp, lineend                                                 | identity                     |
+| `spoke`             | GeomSpoke           | identity + identity          | x, y; angle (radians) + radius via aes or params     | angle, radius, linewidth                                                       | identity                     |
+| `count`             | GeomCount           | sum + identity               | x, y (size defaults to after-stat n)                 | alpha, size, shape                                                             | identity, jitter, nudge      |
+| `jitter`            | GeomJitter          | identity + jitter            | x, y (alias; normalize → point + position jitter)    | alpha, size, shape                                                             | jitter                       |
+| `function`          | GeomFunction        | function + identity          | none (y computed from params.fun)                    | fun, n, xlim, args                                                             | identity                     |
+| `polygon`           | GeomPolygon         | identity + identity          | x, y (vertices in data order, auto-closed)           | alpha, linewidth                                                               | identity                     |
+| `contour`           | GeomContour         | contour + identity           | x, y, z (regular complete grid)                      | bins (default 10), binwidth, breaks                                            | identity                     |
+| `density_2d`        | GeomDensity2d       | density_2d + identity        | x, y (continuous)                                    | h, adjust, n, bins, binwidth, breaks                                           | identity                     |
+| `density_2d_filled` | GeomDensity2dFilled | density_2d_filled + identity | x, y (continuous; fill defaults to after-stat level) | h, adjust, n, bins, breaks                                                     | identity                     |
+| `dotplot`           | GeomDotplot         | bindot + identity            | x (continuous; y is computed stackpos)               | bins, binwidth, stackdir, stackratio, dotsize                                  | identity                     |
+| `rug`               | GeomRug             | identity + identity          | x and/or y (match params.sides)                      | sides (default "bl"), length                                                   | identity                     |
+| `map`               | GeomMap             | identity + identity          | map_id (joined to map data)                          | map (required DataRef), mapId                                                  | identity                     |
+| `sf`                | GeomSf              | sf + identity                | none (GeoJSON geometry column)                       | geometry (default "geometry"), size, linewidth                                 | identity                     |
+| `sf_text`           | GeomSfText          | sf_coordinates + identity    | label (+ geometry column; no x/y)                    | geometry, size, anchor, dx, dy                                                 | identity                     |
+| `sf_label`          | GeomSfLabel         | sf_coordinates + identity    | label (+ geometry column; no x/y)                    | geometry, padding, radius, dx, dy                                              | identity                     |
+| `blank`             | GeomBlank           | identity + identity          | any mapped channel (trains scales, draws nothing)    | none                                                                           | identity                     |
+| `qq`                | GeomQq              | qq + identity                | sample                                               | size, shape                                                                    | identity                     |
+| `qq_line`           | GeomQqLine          | qq_line + identity           | sample                                               | linewidth                                                                      | identity                     |
+
+Alias geoms (rewritten by `normalize`): `histogram` → bar + stat bin; `freqpoly` → line +
+stat bin; `jitter` → point + position jitter; `hline`/`vline` → rule. Annotation-form
+rule/hline/vline (fixed intercepts in params) inherit NO plot aes. Any geom absent from
+GEOM_DEFAULTS notes above defaults to identity + identity.
+
+## Stat inventory
+
+There are NO `Stat*` components — `stat` is a prop on geom components and a field on JSON
+layers. Stats either compute new columns (read them with the after-stat aes form
+`{"stat": "count"}`) or transform rows in place.
+
+**Computed-y rule:** when the stat computes y (bar/histogram/freqpoly, line + stat bin or
+ecdf, density, function, dotplot/bindot), `aes.y` must NOT map a field — that is the
+`computed-y-mapped` error. Leave y unmapped (the default after-stat mapping applies), map
+`{"stat": "..."}` explicitly, or unset an inherited y with `null`:
+
+```json fragment
+{
+  "geom": "histogram",
+  "aes": { "x": { "field": "hwy" }, "y": { "stat": "density" } },
+  "params": { "bins": 20 }
+}
+```
+
+**After-stat color/fill:** `{"stat": ...}` on color or fill resolves ONLY for the stats
+that publish color columns — `bin_2d` and `bin_hex` (count, density, ncount, ndensity)
+and `density_2d` / `density_2d_filled` (level, density). On every other stat an
+after-stat color mapping is dropped; those geoms already default fill to the right
+after-stat column, so usually map nothing at all.
+
+| stat                | computed columns                                          | typical geoms                                                             | key params                                               |
+| ------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `identity`          | none (rows drawn as-is)                                   | most geoms (default)                                                      | —                                                        |
+| `unique`            | none (dedupes rows on mapped aesthetics, first wins)      | point, line, path, col, text, rect, rule, segment, ribbon, area, errorbar | —                                                        |
+| `manual`            | none (one row per group via a named aggregate)            | point, line, path                                                         | fun (required: first, last, mean, median, min, max, sum) |
+| `connect`           | none (expands successive points into connection vertices) | path (ggplot2 default), line                                              | connection (hv, vh, mid, linear)                         |
+| `align`             | none (interpolates each group onto the union of x values) | area, line                                                                | —                                                        |
+| `count`             | count                                                     | bar                                                                       | —                                                        |
+| `bin`               | count, density, ncount, ndensity                          | histogram, bar, freqpoly, line                                            | bins (default 30), binwidth, boundary, center, closed    |
+| `bin_hex`           | count, density, ncount, ndensity                          | hex                                                                       | bins, drop                                               |
+| `bin_2d`            | count, density, ncount, ndensity                          | bin_2d                                                                    | bins, binwidth, drop                                     |
+| `smooth`            | y, ymin, ymax, se                                         | smooth                                                                    | method, se, level, span, degree, n                       |
+| `quantile`          | y (one line per quantile)                                 | quantile                                                                  | quantiles, n                                             |
+| `boxplot`           | ymin, lower, middle, upper, ymax                          | boxplot                                                                   | coef                                                     |
+| `density`           | density, count, scaled, ndensity                          | density                                                                   | bw, adjust, n, cut                                       |
+| `summary`           | y, ymin, ymax                                             | errorbar, linerange, pointrange, crossbar                                 | fun, funMin, funMax (default mean ± se)                  |
+| `summary_bin`       | y, ymin, ymax (per x bin)                                 | point, line, errorbar                                                     | fun + bins, binwidth, boundary, center, closed           |
+| `sum`               | n, prop (aggregates coincident x, y)                      | count, point                                                              | —                                                        |
+| `ydensity`          | density, count, scaled, violinwidth, y                    | violin                                                                    | bw, adjust, n, trim, scale                               |
+| `function`          | y (evaluates a portable named fun)                        | function                                                                  | fun, n, xlim, args                                       |
+| `ecdf`              | ecdf (y defaults to it)                                   | line (use params.curve "step-hv")                                         | —                                                        |
+| `contour`           | level                                                     | contour                                                                   | bins, binwidth, breaks                                   |
+| `density_2d`        | level, density (isolines; also after-stat color)          | density_2d                                                                | h, adjust, n, bins, breaks                               |
+| `density_2d_filled` | level, density (filled bands)                             | density_2d_filled                                                         | h, adjust, n, bins, breaks                               |
+| `bindot`            | stackpos (the computed y; count is NOT a valid y here)    | dotplot                                                                   | bins, binwidth, stackdir, stackratio                     |
+| `ellipse`           | none (one closed normal-ellipse ring per group)           | path                                                                      | level, type, segments                                    |
+| `sf`                | none (renders the GeoJSON geometry column)                | sf                                                                        | geometry                                                 |
+| `sf_coordinates`    | none (computes x/y anchors from geometry)                 | sf_text, sf_label                                                         | geometry                                                 |
+| `qq`                | sample, theoretical                                       | qq                                                                        | —                                                        |
+| `qq_line`           | sample, theoretical                                       | qq_line                                                                   | —                                                        |
+
+### Stat usage patterns
+
+Non-default stats go on the layer; their params share the layer's `params` object.
+
+```json fragment
+{
+  "geom": "errorbar",
+  "stat": "summary",
+  "aes": { "x": { "field": "group" }, "y": { "field": "value" } }
+}
+```
+
+```json fragment
+{
+  "geom": "line",
+  "stat": "ecdf",
+  "aes": { "x": { "field": "value" } },
+  "params": { "curve": "step-hv" }
+}
+```
+
+```json fragment
+{
+  "geom": "line",
+  "stat": "manual",
+  "aes": { "x": { "field": "month" }, "y": { "field": "value" } },
+  "params": { "fun": "mean" }
+}
+```
+
+```json fragment
+{ "geom": "function", "params": { "fun": "sin", "n": 200, "xlim": [0, 6.28] } }
+```
+
+```json fragment
+{
+  "geom": "point",
+  "stat": "summary_bin",
+  "aes": { "x": { "field": "carat" }, "y": { "field": "price" } },
+  "params": { "bins": 20, "fun": "median" }
+}
+```
+
+- `summary` / `summary_bin` default to mean ± se; override with `fun`, `funMin`, `funMax`
+  (first, last, mean, median, min, max, sum).
+- `align` fixes continuous-x stack/fill when groups sample different x values (area, line).
+- `connect` (path/line) expands point pairs into hv / vh / mid / linear connectors.
+- `unique` dedupes rows on the mapped aesthetic combination, first occurrence wins.
+- `ellipse` on path draws one closed normal-data ellipse per group (params.level default 0.95).
+
+## Position inventory
+
+All 6 positions. Each layer declaration scopes which it accepts (see the geom table); a
+disallowed position is a schema error, not a silent fallback.
+
+| position   | effect                                           | positionParams                                                                                    | allowed on                                 |
+| ---------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `identity` | leave positions unchanged                        | —                                                                                                 | every geom                                 |
+| `stack`    | pile grouped values (positive up, negative down) | —                                                                                                 | bar, col, histogram, area                  |
+| `fill`     | stack, then rescale to proportions of 1          | —                                                                                                 | bar, col, histogram, area                  |
+| `dodge`    | place groups side by side within each x band     | — (no width param)                                                                                | bar, col, histogram, area, boxplot, violin |
+| `jitter`   | seeded random offsets — ALWAYS deterministic     | width, height (data units on continuous axes, band-step fractions on discrete), seed (default 42) | point, count, jitter                       |
+| `nudge`    | fixed offset in data units / band-step fractions | x, y (default 0)                                                                                  | point, count, text, label                  |
+
+`positionParams` exists only on layers that allow jitter or nudge (point, count, jitter,
+text, label). Jitter defaults width/height to 40% of the data resolution; pass `seed` to
+vary the (reproducible) layout. Stack, fill, and dodge take no parameters.
+
+## Annotations
+
+There is no `Annotate` API — annotate with ordinary geom layers:
+
+- **Reference lines:** `rule` with `params.yintercept` / `params.xintercept` and NO aes
+  (annotation form; inherits nothing). `hline` (params.yintercept) and `vline`
+  (params.xintercept) are aliases that normalize to rule. Data-driven rules map exactly
+  ONE of aes.x / aes.y (both mapped is the `rule-both-axes` error).
+- **Sloped line:** `abline` with `params.slope` and `params.intercept` (annotation only —
+  no data-mapped slope).
+- **Text:** `text` / `label` with layer-local inline data. `params.dx`/`params.dy` are PX
+  offsets; `position: "nudge"` + `positionParams.x`/`y` offset in DATA units.
+- **Arrows and callout paths:** `segment` (straight; x, y, xend, yend) or `curve` (same
+  channels plus curvature/angle/ncp).
+- **Radial marks:** `spoke` (x, y plus angle in radians and radius from aes or params).
+
+```json complete
+{
+  "data": {
+    "values": [
+      { "x": 1, "y": 3 },
+      { "x": 2, "y": 5 },
+      { "x": 3, "y": 4 }
+    ]
+  },
+  "aes": { "x": { "field": "x" }, "y": { "field": "y" } },
+  "layers": [
+    { "geom": "point" },
+    { "geom": "rule", "params": { "yintercept": 4 } },
+    {
+      "geom": "text",
+      "data": { "values": [{ "x": 2, "y": 5, "note": "peak" }] },
+      "aes": {
+        "x": { "field": "x" },
+        "y": { "field": "y" },
+        "label": { "field": "note" }
+      },
+      "params": { "dy": -8 }
+    }
+  ]
+}
+```
