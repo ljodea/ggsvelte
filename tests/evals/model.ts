@@ -463,6 +463,19 @@ export class MockResponder implements Responder {
       spec.layers.push(layer);
       xField = x;
     } else if (
+      /\bgeom[_\s]?polygon\b|\bclosed (?:filled )?(?:region|shape|ring)s?\b|\bfilled regions?\b|\bquadrilateral\b/.test(
+        prompt,
+      )
+    ) {
+      // geom_polygon: closed filled rings in data order, one per group (#807).
+      // Vertex fields are positional, not prompt-ordered — prefer literal x/y.
+      const x = fieldNamed("x") ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? pick.quant() ?? "y";
+      const layer: MockLayer = { geom: "polygon", aes: { x: f(x), y: f(y) } };
+      colorFor("fill", layer.aes);
+      spec.layers.push(layer);
+      xField = x;
+    } else if (
       /\bgeom[_\s]?spoke\b|\bspoke\b|\bvector field\b/.test(prompt) &&
       (fieldNamed("angle") !== undefined ||
         fieldNamed("radius") !== undefined ||

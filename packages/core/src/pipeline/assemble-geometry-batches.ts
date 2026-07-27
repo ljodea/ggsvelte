@@ -63,6 +63,7 @@ export function buildGeometryBatches(input: {
         geom === "smooth" ||
         geom === "quantile" ||
         geom === "ribbon" ||
+        geom === "polygon" ||
         geom === "map" ||
         // Closed hex paths: project once in projectPathBatch (not via projected
         // panel scales), same as density_2d_filled / map (#800).

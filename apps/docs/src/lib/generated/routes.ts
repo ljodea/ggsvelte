@@ -2292,8 +2292,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-786",
-        title: "experimental (786)",
+        id: "experimental-792",
+        title: "experimental (792)",
         level: 3,
       },
       {
@@ -2332,8 +2332,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-511",
-        title: "experimental (511)",
+        id: "experimental-512",
+        title: "experimental (512)",
         level: 3,
       },
       {
@@ -3112,6 +3112,16 @@ export const DOCS_ROUTES = [
     title: "Void theme — marks without cartesian chrome — ggsvelte gallery",
     description: "Void theme — marks without cartesian chrome",
     canonicalPath: "/examples/point/void-chrome",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/polygon/regions",
+    title: "Two regions as polygons — ggsvelte gallery",
+    description: "Two regions as polygons",
+    canonicalPath: "/examples/polygon/regions",
     kind: "page",
     index: true,
     sitemap: true,

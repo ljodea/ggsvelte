@@ -45,6 +45,7 @@ import type {
   GeomRugOptions,
   GeomSegmentOptions,
   GeomFunctionOptions,
+  GeomPolygonOptions,
   GeomAblineOptions,
   GeomVlineOptions,
   GeomQuantileOptions,
@@ -424,6 +425,14 @@ export class GGBuilderCore {
    */
   geomStep(options: GeomStepOptions = {}): GGBuilder {
     return this.layer(layerFrom("step", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'polygon', ... }). Map x, y (+ group/fill) for
+   * closed filled polygons in data order (ggplot2 geom_polygon).
+   */
+  geomPolygon(options: GeomPolygonOptions = {}): GGBuilder {
+    return this.layer(layerFrom("polygon", options));
   }
 
   /**

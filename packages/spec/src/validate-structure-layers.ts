@@ -43,6 +43,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   rect: ["xmin", "xmax", "ymin", "ymax"],
   segment: ["x", "y", "xend", "yend"],
   function: [], // domain from xlim / peer / optional x; y is after_stat
+  polygon: ["x", "y"],
   spoke: ["x", "y"], // angle/radius: aes or params — checked below
   curve: ["x", "y", "xend", "yend"],
   rug: [], // sides-dependent; checked separately

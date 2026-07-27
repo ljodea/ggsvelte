@@ -381,6 +381,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "6ea9c8f342288fc5f2069fd6fdd5da6445713d4c3bb6f5bbe29b38ed26d9b9f2",
   },
   {
+    id: "polygon/regions",
+    filename: "polygon-regions-light.png",
+    path: "/previews/polygon-regions-light.png",
+    sha256: "79216d10146fd23ddac6fa368be3dd4c87c1ffa5681ee6dbb2b5e1157316c156",
+  },
+  {
     id: "qq/normal",
     filename: "qq-normal-light.png",
     path: "/previews/qq-normal-light.png",

@@ -29,6 +29,7 @@ import type {
   RugParams,
   SegmentParams,
   FunctionParams,
+  PolygonParams,
   AblineParams,
   QuantileParams,
   CurveParams,
@@ -341,6 +342,12 @@ export interface GeomQqOptions extends QqParams, GeomDataOption {
 
 /** Q–Q reference line sugar options (requires aes.sample). */
 export interface GeomQqLineOptions extends QqLineParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Polygon-layer sugar options: params plus optional layer-level aes. */
+export interface GeomPolygonOptions extends PolygonParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

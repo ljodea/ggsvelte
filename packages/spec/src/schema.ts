@@ -121,6 +121,7 @@ export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
 export const FunctionLayerSchema = SpecModule.Import("FunctionLayer");
+export const PolygonLayerSchema = SpecModule.Import("PolygonLayer");
 export const AblineLayerSchema = SpecModule.Import("AblineLayer");
 export const CurveLayerSchema = SpecModule.Import("CurveLayer");
 export const MapLayerSchema = SpecModule.Import("MapLayer");
@@ -241,6 +242,8 @@ export type FunctionParams = SpecType<"FunctionParams">;
 export type FunctionRegistryName = SpecType<"FunctionRegistryName">;
 /** Args bag for registry functions. */
 export type FunctionArgs = SpecType<"FunctionArgs">;
+/** Polygon layer params (fill/stroke styling). */
+export type PolygonParams = SpecType<"PolygonParams">;
 export type AblineParams = SpecType<"AblineParams">;
 /** Curve layer params (curvature/angle/ncp + stroke). */
 export type CurveParams = SpecType<"CurveParams">;
@@ -353,6 +356,8 @@ export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
 /** An analytic function path layer (y = f(x) grid). */
 export type FunctionLayer = LayerWithDataRef<SpecType<"FunctionLayer">>;
+/** A closed polygon layer ((x,y) vertices in data order). */
+export type PolygonLayer = LayerWithDataRef<SpecType<"PolygonLayer">>;
 /** A slope/intercept reference line layer (geom_abline). */
 export type AblineLayer = LayerWithDataRef<SpecType<"AblineLayer">>;
 /** A curve layer (curved connectors). */
@@ -399,6 +404,7 @@ export type LayerSpec =
   | RibbonLayer
   | SegmentLayer
   | FunctionLayer
+  | PolygonLayer
   | AblineLayer
   | CurveLayer
   | MapLayer

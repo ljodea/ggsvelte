@@ -72,6 +72,7 @@ export type {
   RibbonLayerInput,
   SegmentLayerInput,
   FunctionLayerInput,
+  PolygonLayerInput,
   AblineLayerInput,
   ContourLayerInput,
   Density2dLayerInput,
