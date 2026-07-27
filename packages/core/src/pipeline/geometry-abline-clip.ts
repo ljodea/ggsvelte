@@ -41,19 +41,17 @@ export function clipAblineToRect(
     for (const y of [loY, hiY]) {
       push((y - intercept) / slope, y);
     }
-  } else {
+  } else if (intercept >= loY - 1e-12 && intercept <= hiY + 1e-12) {
     // Horizontal line y = intercept.
-    if (intercept >= loY - 1e-12 && intercept <= hiY + 1e-12) {
-      push(loX, intercept);
-      push(hiX, intercept);
-    }
+    push(loX, intercept);
+    push(hiX, intercept);
   }
 
   if (pts.length < 2) return null;
   // Order by x (then y) so the segment is stable.
   pts.sort((a, b) => a.x - b.x || a.y - b.y);
   const a = pts[0]!;
-  const b = pts[pts.length - 1]!;
+  const b = pts.at(-1)!;
   if (a.x === b.x && a.y === b.y) return null;
   return [a.x, a.y, b.x, b.y];
 }

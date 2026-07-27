@@ -16,5 +16,10 @@
   }
 
   const props: Props = $props();
-  createGeomLayer("abline", () => props, ["slope", "intercept", "alpha", "linewidth"]);
+  createGeomLayer("abline", () => props, [
+    "slope",
+    "intercept",
+    "alpha",
+    "linewidth",
+  ]);
 </script>

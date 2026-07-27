@@ -10,12 +10,7 @@
   import { ablineScatter } from "./data.js";
 </script>
 
-<GGPlot
-  data={ablineScatter}
-  aes={{ x: "x", y: "y" }}
-  width={640}
-  height={400}
->
+<GGPlot data={ablineScatter} aes={{ x: "x", y: "y" }} width={640} height={400}>
   <ThemeMinimal />
   <Labs
     title="geom_abline"
