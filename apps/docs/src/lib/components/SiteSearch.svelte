@@ -23,7 +23,7 @@
   );
 
   async function ensureIndex(): Promise<void> {
-    if (loadState === "ready" || loadState === "loading") return;
+    if (loadState === "ready") return;
     loadState = "loading";
     try {
       entries = await loadDocsSearchIndex();
@@ -85,9 +85,25 @@
     window.location.assign(`${base}${result.href}`);
   }
 
-  function handleKeydown(event: KeyboardEvent): void {
+  async function handleKeydown(event: KeyboardEvent): Promise<void> {
     const action = siteSearchKeyAction(event.key, activeIndex, results.length);
-    if (action.type === "ignore") return;
+    if (action.type === "ignore") {
+      // Enter with no active option is ignored while the index is still loading;
+      // wait for it and select the first match for the current query (#948).
+      if (
+        event.key === "Enter" &&
+        loadState !== "ready" &&
+        query.trim() !== ""
+      ) {
+        event.preventDefault();
+        await ensureIndex();
+        if (results.length > 0) {
+          activeIndex = 0;
+          followActive();
+        }
+      }
+      return;
+    }
     event.preventDefault();
     if (action.type === "move") {
       activeIndex = action.index;
