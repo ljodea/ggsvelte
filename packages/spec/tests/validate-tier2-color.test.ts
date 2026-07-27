@@ -125,7 +125,7 @@ describe("tier 2 — color scale data-aware validation", () => {
     );
     expect(result.ok).toBe(false);
     if (result.ok) throw new Error("expected failure");
-    expect(result.errors.some((error) => error.code === "scale-manual-domain-range")).toBe(true);
+    expect(result.errors.some((error) => error.code === "color-manual-domain-range")).toBe(true);
   });
 
   it("rejects temporal color options on quantitative fields without epoch parse", () => {
@@ -177,7 +177,7 @@ describe("tier 2 — color scale data-aware validation", () => {
     );
     expect(result.ok).toBe(false);
     if (result.ok) throw new Error("expected failure");
-    expect(result.errors.some((error) => error.code === "scale-manual-domain-range")).toBe(true);
+    expect(result.errors.some((error) => error.code === "color-manual-domain-range")).toBe(true);
   });
 
   it("rejects censored temporal kind mismatches that runtime also rejects", () => {
@@ -857,6 +857,6 @@ describe("tier 2 — color scale data-aware validation", () => {
     );
     expect(result.ok).toBe(false);
     if (result.ok) throw new Error("expected failure");
-    expect(result.errors.some((error) => error.code === "scale-manual-domain-range")).toBe(true);
+    expect(result.errors.some((error) => error.code === "color-manual-domain-range")).toBe(true);
   });
 });

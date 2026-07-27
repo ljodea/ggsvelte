@@ -829,6 +829,8 @@ export { LINT_CATALOG, lintSpec } from "./lint.js";
 export type { LintAdvisoryCode, LintCatalogEntry, SpecAdvisory } from "./lint.js";
 export { ERROR_CATALOG } from "./errors.js";
 export type { ErrorCatalogEntry } from "./errors.js";
+export { PIPELINE_ERROR_CATALOG } from "./pipeline-error-catalog.js";
+export type { PipelineErrorCatalogEntry, PipelineErrorCode } from "./pipeline-error-catalog.js";
 export { DEFAULT_VALIDATE_LIMITS, effectiveChannel, STAT_COLUMNS } from "./validate-data.js";
 export type {
   DataProfile,

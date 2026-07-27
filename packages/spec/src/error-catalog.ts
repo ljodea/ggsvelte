@@ -1,8 +1,11 @@
 /**
  * Validation error catalog — stable codes for agent diagnostics and docs.
- * Pure data: zero runtime imports. SpecError instance types and didYouMean
- * live in errors.ts.
+ * Dual-channel codes (also emitable by the pipeline) pull summary/fix from
+ * error-prose-shared.ts (#987). SpecError instance types and didYouMean live
+ * in errors.ts. Pipeline-only codes live in pipeline-error-catalog.ts.
  */
+
+import { DUAL_ERROR_PROSE } from "./error-prose-shared.js";
 
 /** One entry of the validation error catalog (docs render straight from it). */
 export interface ErrorCatalogEntry {
@@ -16,10 +19,10 @@ export interface ErrorCatalogEntry {
 
 /**
  * The stable catalog of validation error codes — THE single source for the
- * docs error-reference page and llms-full.txt. Audited M3: every code has a
- * prescriptive summary + fix; near-duplicates were merged (`bar-y-mapped`
- * folded into `computed-y-mapped` — same grammar rule, geom-aware message);
- * a coverage test asserts every code is exercised by a snapshot test.
+ * docs error-reference page and llms-full.txt for validation. Dual-channel
+ * prose is shared with PIPELINE_ERROR_CATALOG via DUAL_ERROR_PROSE.
+ * Audited M3: every code has a prescriptive summary + fix; a coverage test
+ * asserts every code is exercised by a snapshot test.
  */
 export const ERROR_CATALOG = {
   // --- tier 1 (schema shape, no data needed) -------------------------------
@@ -101,13 +104,11 @@ export const ERROR_CATALOG = {
   },
   "scale-type-transform-conflict": {
     tier: 1,
-    summary: "A scale family is incompatible with its requested transform.",
-    fix: "Use identity for temporal/discrete/manual/identity scales, or choose a quantitative family.",
+    ...DUAL_ERROR_PROSE["scale-type-transform-conflict"],
   },
-  "scale-manual-domain-range": {
+  "color-manual-domain-range": {
     tier: 1,
-    summary: "A manual color scale has different domain and range lengths.",
-    fix: "Provide exactly one range color for each explicit domain value.",
+    ...DUAL_ERROR_PROSE["color-manual-domain-range"],
   },
   "scale-binned-breaks": {
     tier: 1,
@@ -123,13 +124,11 @@ export const ERROR_CATALOG = {
   },
   "guide-aesthetic-incompatible": {
     tier: 1,
-    summary: "A guide variant is incompatible with its aesthetic or trained scale family.",
-    fix: "Use axis for x/y, legend for discrete/style scales, colorbar for sequential color, or colorsteps for binned color.",
+    ...DUAL_ERROR_PROSE["guide-aesthetic-incompatible"],
   },
   "coord-fixed-free-scales": {
     tier: 1,
-    summary: "Fixed-aspect coordinates cannot represent free positional facet scales truthfully.",
-    fix: 'Use facet.scales = "fixed", or remove coord_fixed / coord_sf.',
+    ...DUAL_ERROR_PROSE["coord-fixed-free-scales"],
   },
   // --- tier 1 structural (grammar rules the schema alone cannot express) ---
   "missing-required-channel": {
@@ -139,39 +138,31 @@ export const ERROR_CATALOG = {
   },
   "rule-form-ambiguous": {
     tier: 2,
-    summary:
-      "A rule layer mixes the annotation form (params.xintercept/yintercept) with mapped aes.x/aes.y.",
-    fix: "Use fixed intercepts OR a data mapping, never both (unset the other with null).",
+    ...DUAL_ERROR_PROSE["rule-form-ambiguous"],
   },
   "rule-form-missing": {
     tier: 2,
-    summary: "A rule layer has neither intercept params nor a mapped aes.x/aes.y.",
-    fix: "Set params.yintercept/xintercept (annotation) or map aes.x/aes.y (data-driven).",
+    ...DUAL_ERROR_PROSE["rule-form-missing"],
   },
   "rule-both-axes": {
     tier: 2,
-    summary: "A data-driven rule layer maps BOTH aes.x and aes.y (pick one direction).",
-    fix: "Keep one direction (vertical: map x; horizontal: map y) and unset the other with null.",
+    ...DUAL_ERROR_PROSE["rule-both-axes"],
   },
   "computed-y-mapped": {
     tier: 2,
-    summary: "A layer whose stat computes y (count, bin, density) maps aes.y to a data field.",
-    fix: 'Unset y with null — or, for pre-computed bar heights, switch the layer to geom "col".',
+    ...DUAL_ERROR_PROSE["computed-y-mapped"],
   },
   "bin-center-and-boundary": {
     tier: 2,
-    summary: "A bin-stat layer sets BOTH params.center and params.boundary.",
-    fix: "Keep one bin-grid alignment parameter and remove the other.",
+    ...DUAL_ERROR_PROSE["bin-center-and-boundary"],
   },
   "facet-form-ambiguous": {
     tier: 2,
-    summary: "A facet sets BOTH the wrap form and the rows/cols grid form.",
-    fix: "Keep facet.wrap (and drop rows/cols), or keep rows/cols (and drop wrap).",
+    ...DUAL_ERROR_PROSE["facet-form-ambiguous"],
   },
   "facet-form-missing": {
     tier: 2,
-    summary: "A facet sets neither wrap nor rows/cols — nothing to partition by.",
-    fix: "Set facet.wrap (wrap form) or facet.rows/facet.cols (grid form).",
+    ...DUAL_ERROR_PROSE["facet-form-missing"],
   },
   "facet-ncol-without-wrap": {
     tier: 2,
@@ -180,14 +171,11 @@ export const ERROR_CATALOG = {
   },
   "unsupported-geom-aesthetic": {
     tier: 2,
-    summary: "A mapped style aesthetic is not consumed by the selected geom.",
-    fix: "Remove the mapping or move it to one of the compatible geoms listed in the error.",
+    ...DUAL_ERROR_PROSE["unsupported-geom-aesthetic"],
   },
   "ribbon-orientation-ambiguous": {
     tier: 2,
-    summary:
-      "A ribbon layer maps both x-orientation (x+ymin+ymax) and y-orientation (y+xmin+xmax) contracts without params.orientation.",
-    fix: 'Set params.orientation to "x" or "y", or map only one complete interval contract.',
+    ...DUAL_ERROR_PROSE["ribbon-orientation-ambiguous"],
   },
   "paint-stops-unordered": {
     tier: 2,
@@ -203,13 +191,11 @@ export const ERROR_CATALOG = {
   // --- tier 2 (data-aware; needs inline data or a DataProfile) -------------
   "unknown-field": {
     tier: 2,
-    summary: "A channel maps a field that does not exist in the data.",
-    fix: "Map the channel to one of the available fields (the error lists them, with a did-you-mean).",
+    ...DUAL_ERROR_PROSE["unknown-field"],
   },
   "all-null-column": {
     tier: 2,
-    summary: "A mapped column contains only null values.",
-    fix: "Map the channel to a column with actual values, or fix the data.",
+    ...DUAL_ERROR_PROSE["all-null-column"],
   },
   "scale-type-mismatch": {
     tier: 2,
@@ -218,20 +204,16 @@ export const ERROR_CATALOG = {
   },
   "channel-type-mismatch": {
     tier: 2,
-    summary:
-      "A mapped field's type is incompatible with the layer's geom/stat (e.g. a nominal x on smooth/bin/density, a continuous x on boxplot).",
-    fix: "Map a field of the type the geom/stat needs, or switch to a geom that fits the field (the message suggests one).",
+    ...DUAL_ERROR_PROSE["channel-type-mismatch"],
   },
   "unknown-stat-column": {
     tier: 2,
-    summary: "A { stat } channel names a column the layer's stat does not generate.",
-    fix: "Use one of the columns the stat generates (the error lists them), or change the layer's stat.",
+    ...DUAL_ERROR_PROSE["unknown-stat-column"],
   },
   "manual-fun-required": {
     // Structural grammar (layerStructuralErrors) — opt-in tier-2 only; not plain validate().
     tier: 2,
-    summary: "A layer uses stat manual without params.fun.",
-    fix: "Set params.fun to one of first|last|mean|median|min|max|sum (portable named registry; #814).",
+    ...DUAL_ERROR_PROSE["manual-fun-required"],
   },
   "invalid-data-profile": {
     tier: 2,

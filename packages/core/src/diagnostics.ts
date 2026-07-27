@@ -1,15 +1,14 @@
 /**
- * The core diagnostics catalog — render-time errors, warnings, and advisories
- * (M3 error-catalog audit). @ggsvelte/spec owns the VALIDATION catalog
- * (ERROR_CATALOG in its errors.ts); this module owns everything the pipeline,
- * renderer, and CLI can emit at run time. The docs error-reference page and
- * llms-full.txt render straight from these tables — one source, no drift —
- * and diagnostics.test.ts scans the core sources to prove the tables are
- * complete in both directions (every emitted code is cataloged; every
- * cataloged code is emitted somewhere).
+ * The core diagnostics surface — render-time errors, warnings, and advisories
+ * (M3 error-catalog audit). Error *prose* for pipeline codes lives in
+ * @ggsvelte/spec (`PIPELINE_ERROR_CATALOG`, #987); this package re-exports it
+ * and owns warnings, advisories, CLI diagnostics, and every emission site.
+ * diagnostics.test.ts scans the core sources to prove catalogs are complete
+ * in both directions (every emitted code is cataloged; every cataloged code
+ * is emitted somewhere).
  *
- * Large catalogs live in sibling modules:
- * - diagnostics-error-catalog.ts — PIPELINE_ERROR_CATALOG
+ * Large tables:
+ * - diagnostics-error-catalog.ts — re-exports PIPELINE_ERROR_CATALOG from spec
  * - diagnostics-warning-catalog.ts — PIPELINE_WARNING_CATALOG
  * This file keeps advisories, CLI diagnostics, and re-exports the public surface.
  *

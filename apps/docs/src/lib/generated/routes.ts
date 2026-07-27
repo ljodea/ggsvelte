@@ -1218,8 +1218,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "scale-manual-domain-range",
-        title: "scale-manual-domain-range",
+        id: "color-manual-domain-range",
+        title: "color-manual-domain-range",
         level: 3,
       },
       {
@@ -1553,8 +1553,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "color-manual-domain-range",
-        title: "color-manual-domain-range",
+        id: "color-manual-domain-range-pipeline",
+        title: "color-manual-domain-range — pipeline",
         level: 3,
       },
       {
@@ -2297,8 +2297,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-848",
-        title: "experimental (848)",
+        id: "experimental-851",
+        title: "experimental (851)",
         level: 3,
       },
       {
@@ -2367,6 +2367,16 @@ export const DOCS_ROUTES = [
         id: "five-minute-path",
         title: "Five-minute path",
         level: 2,
+      },
+      {
+        id: "0-11-to-0-12",
+        title: "0.11 to 0.12",
+        level: 2,
+      },
+      {
+        id: "manual-color-domain-range-diagnostic-code",
+        title: "Manual color domain/range diagnostic code",
+        level: 3,
       },
       {
         id: "0-10-to-0-11",

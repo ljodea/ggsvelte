@@ -134,7 +134,7 @@ export function colorScaleStructuralErrors(scales: Record<string, unknown>): Spe
       domain.length !== range.length
     ) {
       errors.push({
-        code: "scale-manual-domain-range",
+        code: "color-manual-domain-range",
         path: `/scales/${channel}`,
         message: `The manual ${channel} scale has ${String(domain.length)} domain values but ${String(range.length)} range colors.`,
         fix: {

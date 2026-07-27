@@ -47,7 +47,7 @@ const TRIGGERS: Record<SpecErrorCode, Trigger> = {
       scales: { color: { type: "sequential", temporalKind: "date", transform: "sqrt" } },
     },
   },
-  "scale-manual-domain-range": {
+  "color-manual-domain-range": {
     spec: {
       layers: [point],
       scales: { color: { type: "manual", domain: ["a", "b"], range: ["#f00"] } },

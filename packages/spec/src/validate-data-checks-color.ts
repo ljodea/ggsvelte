@@ -319,7 +319,7 @@ export function checkColorScaleDataCompatibility(input: {
         (expected.kind === "exact" ? range.length !== expected.size : range.length < expected.size);
       if (rangeMismatch && expected !== null) {
         errors.push({
-          code: "scale-manual-domain-range",
+          code: "color-manual-domain-range",
           path: `/scales/${channel}`,
           message:
             expected.kind === "exact"
