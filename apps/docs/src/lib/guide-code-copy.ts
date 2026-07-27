@@ -87,17 +87,20 @@ function applyGuideCopyFeedback(targets: GuideCopyDomTargets, feedback: GuideCop
 
 type GuideCodeCopyDeps = {
   readonly copyText: (text: string, fallbackNode: Node) => Promise<"copied" | "manual">;
-  readonly setTimeout: typeof setTimeout;
-  readonly clearTimeout: typeof clearTimeout;
+  /** Subset of setTimeout — only the (fn, ms) form the attachment uses. */
+  readonly setTimeout: (fn: () => void, ms: number) => ReturnType<typeof setTimeout>;
+  readonly clearTimeout: (id: ReturnType<typeof setTimeout>) => void;
 };
 
 /** Live globals so tests can stub clipboard / timers without exporting deps. */
 const defaultDeps: GuideCodeCopyDeps = {
   copyText,
-  setTimeout: ((...args: Parameters<typeof setTimeout>) =>
-    globalThis.setTimeout(...args)) as typeof setTimeout,
-  clearTimeout: ((...args: Parameters<typeof clearTimeout>) =>
-    globalThis.clearTimeout(...args)) as typeof clearTimeout,
+  setTimeout(fn, ms) {
+    return globalThis.setTimeout(fn, ms);
+  },
+  clearTimeout(id) {
+    globalThis.clearTimeout(id);
+  },
 };
 
 /**
