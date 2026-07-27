@@ -267,6 +267,10 @@ export const scaleLinewidth = scaleLinewidthContinuous;
 export const scaleAlpha = scaleAlphaContinuous;
 export const scaleShape = scaleShapeDiscrete;
 export const scaleLinetype = scaleLinetypeDiscrete;
+// ggplot2 scale_*_ordinal spellings — discrete style already emits type:"ordinal" (#832).
+export const scaleAlphaOrdinal = scaleAlphaDiscrete;
+export const scaleLinewidthOrdinal = scaleLinewidthDiscrete;
+export const scaleShapeOrdinal = scaleShapeDiscrete;
 export const scale_size_continuous = scaleSizeContinuous;
 export const scale_size_discrete = scaleSizeDiscrete;
 export const scale_size_binned = scaleSizeBinned;
@@ -286,6 +290,9 @@ export const scale_linewidth_date = scaleLinewidthDate;
 export const scale_linewidth_datetime = scaleLinewidthDatetime;
 export const scale_linewidth_manual = scaleLinewidthManual;
 export const scale_linewidth_identity = scaleLinewidthIdentity;
+/** Bare ggplot2 alias → continuous (#832). */
+export const scale_linewidth = scaleLinewidthContinuous;
+export const scale_linewidth_ordinal = scaleLinewidthOrdinal;
 export const scale_alpha_continuous = scaleAlphaContinuous;
 export const scale_alpha_discrete = scaleAlphaDiscrete;
 export const scale_alpha_binned = scaleAlphaBinned;
@@ -293,8 +300,12 @@ export const scale_alpha_date = scaleAlphaDate;
 export const scale_alpha_datetime = scaleAlphaDatetime;
 export const scale_alpha_manual = scaleAlphaManual;
 export const scale_alpha_identity = scaleAlphaIdentity;
+/** Bare ggplot2 alias → continuous (#832). */
+export const scale_alpha = scaleAlphaContinuous;
+export const scale_alpha_ordinal = scaleAlphaOrdinal;
 export const scale_shape = scaleShapeDiscrete;
 export const scale_shape_discrete = scaleShapeDiscrete;
+export const scale_shape_ordinal = scaleShapeOrdinal;
 export const scale_shape_binned = scaleShapeBinned;
 export const scale_shape_manual = scaleShapeManual;
 export const scale_shape_identity = scaleShapeIdentity;

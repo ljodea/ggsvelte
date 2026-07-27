@@ -56,6 +56,8 @@ describe("mapped style capability contract", () => {
       scale_linewidth_datetime: "scaleLinewidthDatetime",
       scale_linewidth_manual: "scaleLinewidthManual",
       scale_linewidth_identity: "scaleLinewidthIdentity",
+      // Bare ggplot2 aliases → continuous (#832).
+      scale_linewidth: "scaleLinewidthContinuous",
       scale_alpha_continuous: "scaleAlphaContinuous",
       scale_alpha_discrete: "scaleAlphaDiscrete",
       scale_alpha_binned: "scaleAlphaBinned",
@@ -63,8 +65,16 @@ describe("mapped style capability contract", () => {
       scale_alpha_datetime: "scaleAlphaDatetime",
       scale_alpha_manual: "scaleAlphaManual",
       scale_alpha_identity: "scaleAlphaIdentity",
+      scale_alpha: "scaleAlphaContinuous",
+      // Ordinal spellings ≡ discrete (PortableSpec type is already "ordinal", #832).
+      scale_alpha_ordinal: "scaleAlphaDiscrete",
+      scaleAlphaOrdinal: "scaleAlphaDiscrete",
+      scale_linewidth_ordinal: "scaleLinewidthDiscrete",
+      scaleLinewidthOrdinal: "scaleLinewidthDiscrete",
       scale_shape: "scaleShapeDiscrete",
       scale_shape_discrete: "scaleShapeDiscrete",
+      scale_shape_ordinal: "scaleShapeDiscrete",
+      scaleShapeOrdinal: "scaleShapeDiscrete",
       scale_shape_binned: "scaleShapeBinned",
       scale_shape_manual: "scaleShapeManual",
       scale_shape_identity: "scaleShapeIdentity",
@@ -105,6 +115,14 @@ describe("mapped style capability contract", () => {
       },
     );
     expect(call("scaleLinetypeDiscrete")).toEqual({ linetype: { type: "ordinal" } });
+    // Ordered-factor ergonomics: domain order is the PortableSpec contract (#832).
+    expect(call("scale_alpha_ordinal", { domain: ["low", "mid", "high"] })).toEqual({
+      alpha: { type: "ordinal", domain: ["low", "mid", "high"] },
+    });
+    expect(call("scaleShapeOrdinal", { domain: ["a", "b"] })).toEqual({
+      shape: { type: "ordinal", domain: ["a", "b"] },
+    });
+    expect(call("scale_linewidth")).toEqual({ linewidth: { type: "sequential" } });
   });
 
   it("accepts sizeUnit on size scales and rejects it on alpha (#830)", () => {

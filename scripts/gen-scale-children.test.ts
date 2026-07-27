@@ -42,8 +42,16 @@ describe("SHELL_MANIFEST completeness", () => {
     expect(actual).toEqual(expected);
   });
 
-  it("aliases equal Colour helpers plus scale size ordinal re-export (#830)", () => {
-    const expected = new Set([...expectedColourAliases(), "ScaleSizeOrdinal"]);
+  it("aliases equal Colour helpers plus style ordinal re-exports (#830/#832)", () => {
+    const colour = expectedColourAliases();
+    // Discrete style shells re-export Ordinal component names (no extra files).
+    const ordinal = new Set([
+      "ScaleSizeOrdinal",
+      "ScaleAlphaOrdinal",
+      "ScaleLinewidthOrdinal",
+      "ScaleShapeOrdinal",
+    ]);
+    const expected = new Set([...colour, ...ordinal]);
     const actual = manifestAliases();
     for (const a of expected) {
       expect(actual.has(a), `missing alias ${a}`).toBe(true);
@@ -54,10 +62,10 @@ describe("SHELL_MANIFEST completeness", () => {
     expect(actual).toEqual(expected);
   });
 
-  it("cardinality: 80 component files + 16 aliases", () => {
+  it("cardinality: 80 component files + 19 aliases", () => {
     expect(SHELL_MANIFEST).toHaveLength(80);
-    // 15 Colour aliases + ScaleSizeOrdinal (#830)
-    expect(manifestAliases().size).toBe(16);
+    // 15 Colour + Size/Linewidth/Alpha/Shape Ordinal (#830/#832)
+    expect(manifestAliases().size).toBe(19);
     // Cross-check family buckets against the verified ledger.
     const byFamily = new Map<string, number>();
     for (const s of SHELL_MANIFEST) {
@@ -160,7 +168,7 @@ describe("index region rewrite", () => {
     expect(region.startsWith(REGION_START)).toBe(true);
     expect(region.endsWith(REGION_END)).toBe(true);
     const exportCount = (region.match(/^export \{ default as /gm) ?? []).length;
-    expect(exportCount).toBe(80 + 16);
+    expect(exportCount).toBe(80 + 19);
     expect(region).toContain(
       'export { default as ScaleColourContinuous } from "./scale/ScaleColorContinuous.svelte";',
     );
