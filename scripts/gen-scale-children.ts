@@ -70,7 +70,7 @@ function colourAliases(stem: string): string[] {
  *   finite-style         8
  *   ----------------------
  *   92 component files + 25 aliases
- *     (18 Colour + Size/Linewidth/Alpha/Shape Ordinal re-exports, #830/#832)
+ *     (21 Colour + 4 Size/Linewidth/Alpha/Shape Ordinal re-exports, #830/#832)
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
@@ -130,7 +130,7 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscretePositionScaleOptions",
   ]),
 
-  // --- color-fill (42 components + 24 Colour aliases) ----------------------
+  // --- color-fill (42 components + 21 Colour aliases) ----------------------
   // optionsTypes match the slice-3 hand-written shells exactly.
   shell(
     "scaleColorContinuous",
