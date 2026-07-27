@@ -9,7 +9,6 @@ import type { PathsBatch } from "../scene.js";
 import { encodeKey } from "../scales/state.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import {
   DEFAULT_BOXPLOT_WIDTH,
@@ -17,7 +16,12 @@ import {
   positionOf,
   removedWarning,
 } from "./geometry-shared.js";
-import { numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
+import {
+  constantStyle,
+  numericStyleVector,
+  paintVector,
+  type ResolvedStyleScales,
+} from "./geometry-style.js";
 import { areaGroupFillOf } from "./geometry-paths-area-fill.js";
 
 function sortRowsByY(rows: number[], y: Float64Array): number[] {
@@ -52,22 +56,6 @@ function bucketViolinRows(
   }
   removedWarning(removed, frame.binding.index, warnings);
   return order.map((k) => map.get(k)!);
-}
-
-function strokeOf(
-  frame: LayerFrame,
-  color: ResolvedColorScale | null,
-  rows: readonly number[],
-): string | null {
-  const { binding } = frame;
-  let stroke: string | null = binding.color.constant;
-  if (color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null)) {
-    const first = rows[0]!;
-    const value =
-      frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[first]!;
-    stroke = colorOf(color, value);
-  }
-  return stroke;
 }
 
 export function violinBatch(
@@ -160,7 +148,7 @@ export function violinBatch(
       cursor++;
     }
     fills.push(areaGroupFillOf(frame, fill, rows) ?? fillPaintResolved?.fallback ?? null);
-    let stroke = strokeOf(frame, color, rows);
+    let stroke = paintVector(frame, "color", color, [rows[0]!])[0]!;
     if (stroke === null && strokePaintResolved !== undefined) {
       stroke = strokePaintResolved.fallback;
     }
@@ -175,17 +163,13 @@ export function violinBatch(
     styles,
   );
   const subpathCount = pathOffsets.length - 1;
-  const constantAlpha =
-    typeof binding.alpha.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1);
+  const constantAlpha = constantStyle(binding, params, "alpha", 1);
   const alphas =
     mappedAlphas ??
     (subpathCount > 1 && constantAlpha !== 1
       ? Float32Array.from({ length: subpathCount }, () => constantAlpha)
       : undefined);
-  const linewidth =
-    typeof binding.linewidth.constant === "number"
-      ? binding.linewidth.constant
-      : (params.linewidth ?? 0.5);
+  const linewidth = constantStyle(binding, params, "linewidth", 0.5);
 
   return {
     kind: "paths",

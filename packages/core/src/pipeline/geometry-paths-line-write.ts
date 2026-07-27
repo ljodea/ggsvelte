@@ -2,9 +2,9 @@
  * Write sorted line subpaths into path buffers.
  */
 import type { LayerFrame, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import { positionOf } from "./geometry-shared.js";
+import { paintVector } from "./geometry-style.js";
 
 export function writeLineSubpaths(input: {
   frame: LayerFrame;
@@ -20,7 +20,6 @@ export function writeLineSubpaths(input: {
   strokes: (string | null)[];
 } {
   const { frame, fx, color, subpaths, includeFrameRows = false } = input;
-  const { binding } = frame;
 
   let total = 0;
   for (const rows of subpaths) total += rows.length;
@@ -42,14 +41,7 @@ export function writeLineSubpaths(input: {
       if (frameRowIndex !== undefined) frameRowIndex[cursor] = row;
       cursor++;
     }
-    let stroke: string | null = binding.color.constant;
-    if (color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null)) {
-      const first = rows[0]!;
-      const value =
-        frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[first]!;
-      stroke = colorOf(color, value);
-    }
-    strokes.push(stroke);
+    strokes.push(paintVector(frame, "color", color, [rows[0]!])[0]!);
   }
   pathOffsets[subpaths.length] = cursor;
   return {

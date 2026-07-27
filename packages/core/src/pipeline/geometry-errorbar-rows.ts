@@ -5,9 +5,9 @@
  * dense reuses typed arrays, sparse compact slices (like rule segments/glyphs).
  */
 import type { LayerFrame, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import { positionOf } from "./geometry-shared.js";
+import { mappedPaintVector } from "./geometry-style.js";
 
 export interface EmittedErrorbars {
   segments: Float32Array;
@@ -27,12 +27,11 @@ export function emitErrorbarRows(input: {
   xSpanOf: (row: number, center: number) => readonly [number, number];
 }): EmittedErrorbars {
   const { frame, fx, color, wantsColors, xSpanOf } = input;
-  const { binding, n } = frame;
+  const { n } = frame;
   // 3 segments × 4 floats per kept row; 3 row ids per kept row.
   const segments = new Float32Array(n * 12);
   const rowIndex = new Uint32Array(n * 3);
   const styleRows = new Uint32Array(n * 3);
-  const strokes = wantsColors && color !== null ? Array.from<string>({ length: n * 3 }) : null;
   let kept = 0; // kept *rows*
   let removed = 0;
 
@@ -81,14 +80,6 @@ export function emitErrorbarRows(input: {
     styleRows[ro] = row;
     styleRows[ro + 1] = row;
     styleRows[ro + 2] = row;
-    if (strokes !== null) {
-      const value =
-        frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
-      const c = colorOf(color!, value);
-      strokes[ro] = c;
-      strokes[ro + 1] = c;
-      strokes[ro + 2] = c;
-    }
     kept++;
   }
 
@@ -103,14 +94,24 @@ export function emitErrorbarRows(input: {
       removed,
     };
   }
+  const styleSlice = styleRows.subarray(0, keptSegments);
+  const outStrokes =
+    wantsColors && color !== null ? mappedPaintVector(frame, "color", color, styleSlice) : null;
   if (kept === n) {
-    return { segments, rowIndex, styleRows, strokes, keptSegments, removed };
+    return {
+      segments,
+      rowIndex,
+      styleRows,
+      strokes: outStrokes,
+      keptSegments,
+      removed,
+    };
   }
   return {
     segments: segments.subarray(0, kept * 12).slice(),
     rowIndex: rowIndex.subarray(0, keptSegments).slice(),
-    styleRows: styleRows.subarray(0, keptSegments).slice(),
-    strokes: strokes === null ? null : strokes.slice(0, keptSegments),
+    styleRows: styleSlice.slice(),
+    strokes: outStrokes,
     keptSegments,
     removed,
   };

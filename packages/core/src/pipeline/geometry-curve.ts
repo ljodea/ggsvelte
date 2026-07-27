@@ -13,12 +13,13 @@ import { linetypeIndex, type Linetype } from "../scales/style.js";
 import { tessellateCurve } from "../stats/curve.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import { DEFAULT_RULE_LINEWIDTH, positionOf, removedWarning } from "./geometry-shared.js";
 import {
+  constantStyle,
   indexedStyleVector,
   numericStyleVector,
+  paintVector,
   type ResolvedStyleScales,
 } from "./geometry-style.js";
 
@@ -80,13 +81,7 @@ export function curveBatch(
     pathOffsets[s] = cursor;
     const { row, positions: pts, count } = sampled[s]!;
     styleRows.push(row);
-    let stroke: string | null = binding.color.constant;
-    if (color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null)) {
-      const value =
-        frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
-      stroke = colorOf(color, value);
-    }
-    strokes.push(stroke);
+    strokes.push(paintVector(frame, "color", color, [row])[0]!);
     const sourceRow = frame.rowIndex[row]!;
     for (let i = 0; i < count; i++) {
       positions[cursor * 2] = pts[i * 2]!;
@@ -117,8 +112,6 @@ export function curveBatch(
   const linetypeIndexes = indexedStyleVector(frame, "linetype", styleRows, styles, (value) =>
     linetypeIndex(value as Linetype),
   );
-  const literalLinewidth = binding.linewidth.constant;
-  const literalAlpha = binding.alpha.constant;
   const literalLinetype = binding.linetype.constant;
   // Match segment: map documented `lineend` → PathsBatch.linecap (default butt).
   const linecap = params.lineend ?? "butt";
@@ -133,17 +126,9 @@ export function curveBatch(
     strokes,
     semanticAnchors,
     semanticIndex,
-    linewidth:
-      typeof literalLinewidth === "number"
-        ? literalLinewidth
-        : (params.linewidth ?? DEFAULT_RULE_LINEWIDTH),
+    linewidth: constantStyle(binding, params, "linewidth", DEFAULT_RULE_LINEWIDTH),
     ...(linewidths !== undefined && { linewidths }),
-    alpha:
-      alphas === undefined
-        ? typeof literalAlpha === "number"
-          ? literalAlpha
-          : (params.alpha ?? 1)
-        : 1,
+    alpha: alphas === undefined ? constantStyle(binding, params, "alpha", 1) : 1,
     ...(alphas !== undefined && { alphas }),
     ...(typeof literalLinetype === "string" && { linetype: literalLinetype as Linetype }),
     ...(linetypeIndexes !== undefined && { linetypeIndexes }),

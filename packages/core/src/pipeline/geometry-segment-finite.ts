@@ -9,10 +9,9 @@ import type { SegmentParams } from "@ggsvelte/spec";
 import type { SegmentsBatch } from "../scene.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import { positionOf, removedWarning } from "./geometry-shared.js";
-import type { ResolvedStyleScales } from "./geometry-style.js";
+import { mappedPaintVector, type ResolvedStyleScales } from "./geometry-style.js";
 import { packSegmentsBatch } from "./geometry-segments-pack.js";
 
 export function finiteSegmentBatch(
@@ -31,7 +30,6 @@ export function finiteSegmentBatch(
   const segments = new Float32Array(capacity * 4);
   const rowIndex = new Uint32Array(capacity);
   const styleRows = new Uint32Array(capacity);
-  const strokes = wantsColors ? Array.from<string>({ length: capacity }) : null;
   let kept = 0;
   let removed = 0;
 
@@ -51,11 +49,6 @@ export function finiteSegmentBatch(
     segments[o + 3] = fx.innerHeight - t1y * fx.innerHeight;
     rowIndex[kept] = frame.rowIndex[row]!;
     styleRows[kept] = row;
-    if (wantsColors && color !== null && strokes !== null) {
-      const value =
-        frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
-      strokes[kept] = colorOf(color, value);
-    }
     kept++;
   }
 
@@ -65,7 +58,8 @@ export function finiteSegmentBatch(
   const outSegments = kept === capacity ? segments : segments.subarray(0, kept * 4).slice();
   const outRows = kept === capacity ? rowIndex : rowIndex.subarray(0, kept).slice();
   const outStyleRows = kept === capacity ? styleRows : styleRows.subarray(0, kept).slice();
-  const outStrokes = strokes === null ? null : kept === capacity ? strokes : strokes.slice(0, kept);
+  const outStrokes =
+    wantsColors && color !== null ? mappedPaintVector(frame, "color", color, outStyleRows) : null;
 
   const batch = packSegmentsBatch({
     frame,

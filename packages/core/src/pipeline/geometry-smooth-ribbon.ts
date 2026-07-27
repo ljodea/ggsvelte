@@ -5,7 +5,7 @@ import type { GeometryBatch } from "../scene.js";
 
 import type { LayerFrame, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
-import { numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
+import { constantStyle, numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
 import { writeClosedPathGroups } from "./geometry-paths-closed-batch.js";
 import { groupColor, SMOOTH_RIBBON_ALPHA } from "./geometry-smooth-shared.js";
 
@@ -76,12 +76,7 @@ export function buildSmoothRibbonBatch(input: {
     fills,
     closed: true,
     linewidth: 0,
-    alpha:
-      typeof binding.alpha.constant === "number"
-        ? binding.alpha.constant
-        : alphas === undefined
-          ? SMOOTH_RIBBON_ALPHA
-          : 1,
+    alpha: alphas === undefined ? constantStyle(binding, {}, "alpha", SMOOTH_RIBBON_ALPHA) : 1,
     ...(alphas !== undefined && { alphas }),
     curve: "linear",
   };

@@ -5,10 +5,12 @@ import type { PointsBatch } from "../scene.js";
 import { pointShapeIndex, type PointShape } from "../scales/style.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
+
 import type { Frame } from "./geometry-shared.js";
 import {
   indexedStyleVector,
+  constantStyle,
+  mappedPaintVector,
   numericStyleVector,
   type ResolvedStyleScales,
 } from "./geometry-style.js";
@@ -75,7 +77,6 @@ export function pointsBatch(
       ? params.shape
       : undefined;
   const literalSize = binding.size.constant;
-  const literalAlpha = binding.alpha.constant;
   const literalShape = binding.shape.constant;
   let markSize = DEFAULT_POINT_SIZE;
   if (typeof literalSize === "number") markSize = literalSize;
@@ -92,6 +93,7 @@ export function pointsBatch(
   const paintScale = paintWithFill ? fill : color;
   const paintValues = paintWithFill ? frame.fillValues : frame.colorValues;
   const paintChannel = paintWithFill ? binding.fill : binding.color;
+  const paintKey = paintWithFill ? ("fill" as const) : ("color" as const);
 
   const batch: PointsBatch = {
     kind: "points",
@@ -100,7 +102,7 @@ export function pointsBatch(
     positions,
     rowIndex,
     size: markSize,
-    alpha: typeof literalAlpha === "number" ? literalAlpha : (params.alpha ?? 1),
+    alpha: constantStyle(binding, params, "alpha", 1),
     shape:
       typeof literalShape === "string" ? (literalShape as PointShape) : (paramShape ?? "circle"),
     fill: paintChannel.constant,
@@ -117,13 +119,7 @@ export function pointsBatch(
   }
   if (shapeIndexes !== undefined) batch.shapeIndexes = shapeIndexes;
   if (paintScale !== null && (paintValues !== null || paintChannel.scaledConstant !== null)) {
-    const colors = Array.from<string>({ length: collected.kept });
-    for (let j = 0; j < collected.kept; j++) {
-      const row = collected.keptRows[j]!;
-      const value = paintValues === null ? paintChannel.scaledConstant! : paintValues[row]!;
-      colors[j] = colorOf(paintScale, value);
-    }
-    batch.colors = colors;
+    batch.colors = mappedPaintVector(frame, paintKey, paintScale, collected.keptRows);
   }
   return batch;
 }

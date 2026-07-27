@@ -7,8 +7,8 @@
 import { bandKey } from "../scales/train.js";
 
 import type { LayerFrame, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
+import { mappedPaintVector } from "./geometry-style.js";
 import { positionOf } from "./geometry-shared.js";
 
 export interface EmittedGlyphs {
@@ -36,7 +36,6 @@ export function emitGlyphRows(input: {
   const rowIndex = new Uint32Array(n);
   const styleRows = new Uint32Array(n);
   const texts = Array.from<string>({ length: n });
-  const colors = wantsColors ? Array.from<string>({ length: n }) : null;
   let kept = 0;
   let removed = 0;
   for (let row = 0; row < n; row++) {
@@ -53,16 +52,15 @@ export function emitGlyphRows(input: {
     rowIndex[kept] = frame.rowIndex[row]!;
     styleRows[kept] = row;
     texts[kept] = bandKey(label);
-    if (colors !== null && color !== null) {
-      const value =
-        frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
-      colors[kept] = colorOf(color, value);
-    }
     kept++;
   }
 
+  const styleSlice = styleRows.subarray(0, kept);
+  const outColors =
+    wantsColors && color !== null ? mappedPaintVector(frame, "color", color, styleSlice) : null;
+
   if (kept === n) {
-    return { positions, rowIndex, styleRows, texts, colors, kept, removed };
+    return { positions, rowIndex, styleRows, texts, colors: outColors, kept, removed };
   }
   if (kept === 0) {
     return {
@@ -79,9 +77,9 @@ export function emitGlyphRows(input: {
   return {
     positions: positions.subarray(0, kept * 2).slice(),
     rowIndex: rowIndex.subarray(0, kept).slice(),
-    styleRows: styleRows.subarray(0, kept).slice(),
+    styleRows: styleSlice.slice(),
     texts: texts.slice(0, kept),
-    colors: colors === null ? null : colors.slice(0, kept),
+    colors: outColors,
     kept,
     removed,
   };

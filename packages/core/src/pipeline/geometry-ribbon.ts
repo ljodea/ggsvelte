@@ -15,12 +15,14 @@ import {
   sortGroupRowsByX,
 } from "./geometry-shared.js";
 import {
+  constantStyle,
   indexedStyleVector,
   numericStyleVector,
+  paintVector,
   type ResolvedStyleScales,
 } from "./geometry-style.js";
+// paint helpers imported below
 import { areaGroupFillOf } from "./geometry-paths-area-fill.js";
-import { colorOf } from "./types.js";
 
 type Outline = "both" | "upper" | "lower" | "full";
 type LineCap = "butt" | "round" | "square";
@@ -339,13 +341,9 @@ function explicitStrokeColor(
   ) {
     return null;
   }
-  if (color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null)) {
-    const first = rows[0]!;
-    const value =
-      frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[first]!;
-    return colorOf(color, value);
-  }
-  return binding.color.constant;
+  const first = rows[0];
+  if (first === undefined) return binding.color.constant;
+  return paintVector(frame, "color", color, [first])[0]!;
 }
 
 export function ribbonBatches(
@@ -374,9 +372,8 @@ export function ribbonBatches(
   const linetypeIndexes = indexedStyleVector(frame, "linetype", styleRows, styles, (value) =>
     linetypeIndex(value as Linetype),
   );
-  const literalAlpha = frame.binding.alpha.constant;
-  const literalLinewidth = frame.binding.linewidth.constant;
   const literalLinetype = frame.binding.linetype.constant;
+  const constantAlpha = constantStyle(frame.binding, params, "alpha", 1);
   const paint = layerPaintFromParams(frame.binding.layer.params);
   const layerIndex = frame.binding.index;
   const fillPaintResolved =
@@ -398,10 +395,7 @@ export function ribbonBatches(
   };
   const hasExplicitColor =
     strokePaintResolved !== undefined || runs.some((run) => strokeOf(run.rows) !== null);
-  const outlineWidth =
-    typeof literalLinewidth === "number"
-      ? literalLinewidth
-      : (params.linewidth ?? DEFAULT_LINEWIDTH);
+  const outlineWidth = constantStyle(frame.binding, params, "linewidth", DEFAULT_LINEWIDTH);
 
   const out: PathsBatch[] = [];
   const fullStroke = outline === "full" && hasExplicitColor;
@@ -431,12 +425,7 @@ export function ribbonBatches(
     closed: true,
     linewidth: fullStroke ? outlineWidth : 0,
     ...(fullStroke && linewidths !== undefined && { linewidths }),
-    alpha:
-      alphas === undefined
-        ? typeof literalAlpha === "number"
-          ? literalAlpha
-          : (params.alpha ?? 1)
-        : 1,
+    alpha: alphas === undefined ? constantAlpha : 1,
     ...(alphas !== undefined && { alphas }),
     ...(fullStroke &&
       typeof literalLinetype === "string" && { linetype: literalLinetype as Linetype }),
@@ -494,12 +483,7 @@ export function ribbonBatches(
       strokes: open.strokes,
       linewidth: outlineWidth,
       ...(outlineLinewidths !== undefined && { linewidths: outlineLinewidths as Float32Array }),
-      alpha:
-        outlineAlphas === undefined
-          ? typeof literalAlpha === "number"
-            ? literalAlpha
-            : (params.alpha ?? 1)
-          : 1,
+      alpha: outlineAlphas === undefined ? constantAlpha : 1,
       ...(outlineAlphas !== undefined && { alphas: outlineAlphas as Float32Array }),
       ...(typeof literalLinetype === "string" && { linetype: literalLinetype as Linetype }),
       ...(strokePaintResolved !== undefined && { strokePaint: strokePaintResolved }),

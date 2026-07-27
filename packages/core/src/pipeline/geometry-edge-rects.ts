@@ -12,10 +12,12 @@ import { linetypeIndex, type Linetype } from "../scales/style.js";
 import { resolution as resolutionOf } from "../stats/numeric.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
-import { colorOf, PipelineError } from "./types.js";
+import { PipelineError } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import {
   indexedStyleVector,
+  constantStyle,
+  mappedPaintVector,
   numericStyleVector,
   type ResolvedStyleScales,
 } from "./geometry-style.js";
@@ -274,8 +276,7 @@ function styleEdgeBatch(
     rects: emitted.rects,
     rowIndex: emitted.rowIndex,
     fill: binding.fill.constant,
-    alpha:
-      typeof binding.alpha.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1),
+    alpha: constantStyle(binding, params, "alpha", 1),
     anchor: "center",
   };
   const alphas = numericStyleVector(frame, "alpha", emitted.keptRows, styles);
@@ -284,14 +285,7 @@ function styleEdgeBatch(
     batch.alphas = alphas;
   }
   if (fill !== null && (frame.fillValues !== null || binding.fill.scaledConstant !== null)) {
-    batch.fills = Array.from({ length: emitted.kept }, (_, j) =>
-      colorOf(
-        fill,
-        frame.fillValues === null
-          ? binding.fill.scaledConstant!
-          : frame.fillValues[emitted.keptRows[j]!]!,
-      ),
-    );
+    batch.fills = mappedPaintVector(frame, "fill", fill, emitted.keptRows);
   }
   if (withStroke) {
     const wantsMappedStroke =
@@ -305,15 +299,8 @@ function styleEdgeBatch(
       binding.linetype?.field !== null ||
       binding.linetype?.scaledConstant !== null ||
       typeof params.linewidth === "number";
-    if (wantsMappedStroke) {
-      batch.strokes = Array.from({ length: emitted.kept }, (_, j) =>
-        colorOf(
-          color,
-          frame.colorValues === null
-            ? binding.color.scaledConstant!
-            : frame.colorValues[emitted.keptRows[j]!]!,
-        ),
-      );
+    if (wantsMappedStroke && color !== null) {
+      batch.strokes = mappedPaintVector(frame, "color", color, emitted.keptRows);
       batch.stroke = null;
     } else if (constantStroke !== null) {
       batch.stroke = constantStroke;
@@ -322,10 +309,7 @@ function styleEdgeBatch(
       batch.stroke = null;
     }
     if (batch.stroke !== undefined || batch.strokes !== undefined) {
-      batch.strokeWidth =
-        typeof binding.linewidth?.constant === "number"
-          ? binding.linewidth.constant
-          : (params.linewidth ?? DEFAULT_RULE_LINEWIDTH);
+      batch.strokeWidth = constantStyle(binding, params, "linewidth", DEFAULT_RULE_LINEWIDTH);
       const linewidths = numericStyleVector(frame, "linewidth", emitted.keptRows, styles);
       if (linewidths !== undefined) batch.strokeWidths = linewidths;
       if (typeof binding.linetype?.constant === "string") {

@@ -6,13 +6,14 @@ import type { BoxplotParams } from "@ggsvelte/spec";
 import type { GeometryBatch, RectsBatch } from "../scene.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
+
 import type { Frame } from "./geometry-shared.js";
 import {
   DEFAULT_BOXPLOT_WIDTH,
   MAX_BOXPLOT_PANEL_FRAC,
   removedWarning,
 } from "./geometry-shared.js";
+import { constantStyle, mappedPaintVector } from "./geometry-style.js";
 
 /** Median line draws at 2× the box linewidth (ggplot2's fatten = 2). */
 const BOX_MEDIAN_FATTEN = 2;
@@ -116,12 +117,8 @@ function layoutBoxplotBody(
   if (params.width === undefined) {
     widthFrac = Math.min(widthFrac, MAX_BOXPLOT_PANEL_FRAC);
   }
-  const linewidth =
-    typeof binding.linewidth.constant === "number"
-      ? binding.linewidth.constant
-      : (params.linewidth ?? DEFAULT_BOX_LINEWIDTH);
-  const alpha =
-    typeof binding.alpha.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1);
+  const linewidth = constantStyle(binding, params, "linewidth", DEFAULT_BOX_LINEWIDTH);
+  const alpha = constantStyle(binding, params, "alpha", 1);
   const yScale = fx.yScale;
 
   const centerPx: number[] = [];
@@ -191,12 +188,7 @@ function makeBoxplotRectsBatch(
     alpha,
   };
   if (fill !== null && (frame.fillValues !== null || binding.fill.scaledConstant !== null)) {
-    rectsBatchOut.fills = layout.keptRows.map((row) =>
-      colorOf(
-        fill,
-        frame.fillValues === null ? binding.fill.scaledConstant! : frame.fillValues[row]!,
-      ),
-    );
+    rectsBatchOut.fills = mappedPaintVector(frame, "fill", fill, layout.keptRows);
   }
   return rectsBatchOut;
 }

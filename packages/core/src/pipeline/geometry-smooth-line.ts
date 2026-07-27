@@ -9,6 +9,7 @@ import { linetypeIndex, type Linetype } from "../scales/style.js";
 import type { LayerFrame, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import {
+  constantStyle,
   indexedStyleVector,
   numericStyleVector,
   type ResolvedStyleScales,
@@ -51,17 +52,9 @@ export function buildSmoothLineBatch(input: {
     ...(frameRowIndex !== undefined && { frameRowIndex }),
     pathOffsets,
     strokes,
-    linewidth:
-      typeof binding.linewidth.constant === "number"
-        ? binding.linewidth.constant
-        : (params.linewidth ?? DEFAULT_SMOOTH_LINEWIDTH),
+    linewidth: constantStyle(binding, params, "linewidth", DEFAULT_SMOOTH_LINEWIDTH),
     ...(linewidths !== undefined && { linewidths }),
-    alpha:
-      alphas === undefined
-        ? typeof binding.alpha.constant === "number"
-          ? binding.alpha.constant
-          : (params.alpha ?? 1)
-        : 1,
+    alpha: alphas === undefined ? constantStyle(binding, params, "alpha", 1) : 1,
     ...(alphas !== undefined && { alphas }),
     ...(typeof binding.linetype.constant === "string" && {
       linetype: binding.linetype.constant as Linetype,

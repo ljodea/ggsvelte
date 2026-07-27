@@ -6,7 +6,7 @@ import type { PathsBatch } from "../scene.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
-import { numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
+import { constantStyle, numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
 import { bucketByGroup, sortGroupRowsByX } from "./geometry-shared.js";
 import { writeClosedPathGroups } from "./geometry-paths-closed-batch.js";
 import { areaGroupFillOf } from "./geometry-paths-area-fill.js";
@@ -53,8 +53,7 @@ export function areaBatch(
     styles,
   );
   const subpathCount = pathOffsets.length - 1;
-  const constantAlpha =
-    typeof binding.alpha.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1);
+  const constantAlpha = constantStyle(binding, params, "alpha", 1);
   // Multi-group closed fills must carry alpha per subpath. SVG group opacity
   // composites opaque siblings into an offscreen buffer first, so a shared
   // <g opacity> would occlude the rear distribution in the overlap region.

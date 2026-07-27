@@ -8,6 +8,7 @@ import { linetypeIndex, type Linetype } from "../scales/style.js";
 
 import {
   indexedStyleVector,
+  constantStyle,
   numericStyleVector,
   type ResolvedStyleScales,
 } from "./geometry-style.js";
@@ -36,12 +37,8 @@ export function packSegmentsBatch(input: {
     segments,
     rowIndex,
     stroke: binding.color.constant,
-    linewidth:
-      typeof binding.linewidth?.constant === "number"
-        ? binding.linewidth.constant
-        : (params.linewidth ?? DEFAULT_RULE_LINEWIDTH),
-    alpha:
-      typeof binding.alpha?.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1),
+    linewidth: constantStyle(binding, params, "linewidth", DEFAULT_RULE_LINEWIDTH),
+    alpha: constantStyle(binding, params, "alpha", 1),
     ...(typeof binding.linetype?.constant === "string" && {
       linetype: binding.linetype.constant as Linetype,
     }),

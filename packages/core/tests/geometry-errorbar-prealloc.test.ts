@@ -154,4 +154,32 @@ describe("emitErrorbarRows prealloc", () => {
     });
     expect(emitted.strokes).toEqual(["c:red", "c:red", "c:red"]);
   });
+
+  it("indexes mapped strokes by styleRows (3× per kept row) when a middle row drops", () => {
+    const frame = frameOf({
+      n: 3,
+      x: Float64Array.of(0.2, Number.NaN, 0.8),
+      ymin: Float64Array.of(0.1, 0.1, 0.1),
+      ymax: Float64Array.of(0.9, 0.9, 0.9),
+      colorValues: ["a", "b", "c"],
+    });
+    const color = fromAny({
+      scale: {
+        colorOf: (v: unknown) => `c:${String(v)}`,
+        naValue: null,
+        unknownValue: "#999",
+      },
+    });
+    const emitted = emitErrorbarRows({
+      frame,
+      fx: fx(),
+      color,
+      wantsColors: true,
+      xSpanOf: fullSpan,
+    });
+    // Two kept rows × three segments; middle frame row (b) never appears.
+    expect(emitted.keptSegments).toBe(6);
+    expect(emitted.strokes).toEqual(["c:a", "c:a", "c:a", "c:c", "c:c", "c:c"]);
+    expect([...emitted.styleRows]).toEqual([0, 0, 0, 2, 2, 2]);
+  });
 });

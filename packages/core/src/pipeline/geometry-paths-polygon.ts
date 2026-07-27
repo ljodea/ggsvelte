@@ -7,31 +7,16 @@ import type { PathsBatch } from "../scene.js";
 import { linetypeIndex, type Linetype } from "../scales/style.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import { DEFAULT_LINEWIDTH, bucketByGroup, positionOf } from "./geometry-shared.js";
 import {
+  constantStyle,
   indexedStyleVector,
   numericStyleVector,
+  paintVector,
   type ResolvedStyleScales,
 } from "./geometry-style.js";
 import { areaGroupFillOf } from "./geometry-paths-area-fill.js";
-
-function strokeOf(
-  frame: LayerFrame,
-  color: ResolvedColorScale | null,
-  rows: readonly number[],
-): string | null {
-  const { binding } = frame;
-  let stroke: string | null = binding.color.constant;
-  if (color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null)) {
-    const first = rows[0]!;
-    const value =
-      frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[first]!;
-    stroke = colorOf(color, value);
-  }
-  return stroke;
-}
 
 export function polygonBatch(
   frame: LayerFrame,
@@ -91,7 +76,7 @@ export function polygonBatch(
       cursor++;
     }
     fills.push(areaGroupFillOf(frame, fill, rows) ?? fillPaintResolved?.fallback ?? null);
-    let stroke = strokeOf(frame, color, rows);
+    let stroke = paintVector(frame, "color", color, [rows[0]!])[0]!;
     if (stroke === null && strokePaintResolved !== undefined) {
       stroke = strokePaintResolved.fallback;
     }
@@ -110,8 +95,6 @@ export function polygonBatch(
   const linetypeIndexes = indexedStyleVector(frame, "linetype", styleRows, styles, (value) =>
     linetypeIndex(value as Linetype),
   );
-  const literalLinewidth = binding.linewidth.constant;
-  const literalAlpha = binding.alpha.constant;
   const literalLinetype = binding.linetype.constant;
 
   return {
@@ -129,17 +112,9 @@ export function polygonBatch(
     fills,
     closed: true,
     closedFrameRows,
-    linewidth:
-      typeof literalLinewidth === "number"
-        ? literalLinewidth
-        : (params.linewidth ?? DEFAULT_LINEWIDTH),
+    linewidth: constantStyle(binding, params, "linewidth", DEFAULT_LINEWIDTH),
     ...(linewidths !== undefined && { linewidths }),
-    alpha:
-      alphas === undefined
-        ? typeof literalAlpha === "number"
-          ? literalAlpha
-          : (params.alpha ?? 1)
-        : 1,
+    alpha: alphas === undefined ? constantStyle(binding, params, "alpha", 1) : 1,
     ...(alphas !== undefined && { alphas }),
     ...(typeof literalLinetype === "string" && { linetype: literalLinetype as Linetype }),
     ...(linetypeIndexes !== undefined && { linetypeIndexes }),
