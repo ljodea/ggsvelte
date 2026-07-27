@@ -6,25 +6,13 @@
 import type { Density2dParams } from "@ggsvelte/spec";
 
 import { statDensity2d } from "../stats/density-2d.js";
-import type { CellValue, ColumnTable } from "../table.js";
+import type { ColumnTable } from "../table.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import { makeColumnOf, styleColumns } from "./frame-stats-shared.js";
+import { colorColumns, makeColumnOf, styleColumns } from "./frame-stats-shared.js";
 import { positionColumn } from "./temporal-position.js";
-import type { ColorBinding, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
+import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { NO_ROW } from "./types.js";
-
-function colorOrFillValues(
-  binding: ColorBinding,
-  columnOf: (field: string | null) => readonly CellValue[] | null,
-  computed: Readonly<Record<string, Float64Array>>,
-): readonly CellValue[] | null {
-  if ((binding.statColumn ?? null) !== null) {
-    const col = computed[binding.statColumn!];
-    return col === undefined ? null : Array.from(col);
-  }
-  return columnOf(binding.field);
-}
 
 export function buildDensity2dFrame(
   binding: LayerBinding,
@@ -95,8 +83,7 @@ export function buildDensity2dFrame(
     inputGroups: groups,
     inputSourceRows: null,
     rowIndex: Uint32Array.from({ length: outN }, () => NO_ROW),
-    colorValues: colorOrFillValues(binding.color, col, computed),
-    fillValues: colorOrFillValues(binding.fill, col, computed),
+    ...colorColumns(binding, col, computed),
     ...styleColumns(binding, col, computed),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),

@@ -8,6 +8,7 @@ import { scaleTransform } from "../scales/transform.js";
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
 import { binIdColumn } from "./binned-scale.js";
 import {
+  colorColumns,
   makeColumnOf,
   shouldAggregateOnSemanticTemporalX,
   styleColumns,
@@ -110,8 +111,7 @@ export function buildCountFrame(
     inputGroups: groups,
     inputSourceRows: null,
     rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
-    colorValues: col(binding.color.field),
-    fillValues: col(binding.fill.field),
+    ...colorColumns(binding, col, { count: result.count }),
     ...styleColumns(binding, col, { count: result.count }),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),
