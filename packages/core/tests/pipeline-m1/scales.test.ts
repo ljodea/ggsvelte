@@ -23,8 +23,10 @@ describe("scales config surface", () => {
     expect(model.scales.x.type).toBe("time"); // inferred from ISO strings
     const labels = model.scene.axes.x.ticks.map((t) => t.label);
     expect(labels.length).toBeGreaterThan(1);
-    // ~2.5-month span at this width -> calendar-aligned contextual date labels.
-    expect(labels).toContain("Feb 2, 2026");
+    // ~2.5-month same-year span -> span-uniform month+day labels (#962).
+    expect(labels).toContain("Feb 2");
+    expect(labels.every((label) => !/^\d+$/.test(label))).toBe(true);
+    expect(labels.every((label) => /^\w+ \d+$/.test(label))).toBe(true);
   });
 
   it("labels format strings apply (time pattern + numeric format)", () => {
