@@ -1,244 +1,289 @@
-import { describe, expect, test } from "bun:test";
+/**
+ * Behavioral tests for guide fence copy controls.
+ *
+ * Drive the public attachment against a DOM fixture shaped like the HTML
+ * emitted by scripts/llms-markdown.ts — not the module's internal helpers.
+ */
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
 import { MANUAL_COPY_STATUS } from "../apps/docs/src/lib/clipboard";
-import {
-  applyGuideCopyFeedback,
-  createGuideCodeCopyAttachment,
-  GUIDE_CHECK_ICON_SVG,
-  GUIDE_COPY_ICON_SVG,
-  GUIDE_COPY_RESET_MS,
-  guideCopyFeedback,
-  guideCopyIdleFeedback,
-  guideCopyIconSvg,
-} from "../apps/docs/src/lib/guide-code-copy";
+import { attachGuideCodeCopy, GUIDE_COPY_ICON_SVG } from "../apps/docs/src/lib/guide-code-copy";
 
-describe("guideCopyFeedback", () => {
-  test("copied feedback shows check icon, hidden status, and reset timer", () => {
-    expect(guideCopyFeedback("copied")).toEqual({
-      icon: "check",
-      buttonAriaLabel: "Copied",
-      statusText: "Copied.",
-      statusVisuallyHidden: true,
-      resetMs: GUIDE_COPY_RESET_MS,
-    });
-    expect(guideCopyIconSvg("check")).toBe(GUIDE_CHECK_ICON_SVG);
-  });
+/** Matches GUIDE_COPY_RESET_MS in guide-code-copy.ts (private). */
+const GUIDE_COPY_RESET_MS = 2000;
 
-  test("manual feedback keeps copy icon and visible status", () => {
-    expect(guideCopyFeedback("manual")).toEqual({
-      icon: "copy",
-      buttonAriaLabel: "Copy code",
-      statusText: MANUAL_COPY_STATUS,
-      statusVisuallyHidden: false,
-      resetMs: null,
-    });
-    expect(guideCopyIconSvg("copy")).toBe(GUIDE_COPY_ICON_SVG);
-  });
+type ClassList = {
+  add(token: string): void;
+  remove(token: string): void;
+  has(token: string): boolean;
+};
 
-  test("idle feedback restores copy control after successful-copy reset", () => {
-    expect(guideCopyIdleFeedback()).toEqual({
-      icon: "copy",
-      buttonAriaLabel: "Copy code",
-      statusText: "",
-      statusVisuallyHidden: true,
-      resetMs: null,
-    });
-  });
-});
+type FixtureButton = {
+  dataset: { copyCode: string };
+  innerHTML: string;
+  ariaLabel: string;
+  setAttribute(name: string, value: string): void;
+  closest(sel: string): FixtureButton | null;
+};
 
-describe("applyGuideCopyFeedback", () => {
-  test("writes icon, aria-label, status text, and visually-hidden class", () => {
-    const classes = new Set<string>();
-    const button = {
-      innerHTML: "",
-      setAttribute(_name: string, value: string) {
-        this.aria = value;
+type FixtureStatus = {
+  textContent: string;
+  classList: ClassList;
+};
+
+type FixtureCode = { textContent: string };
+type FixturePre = {
+  querySelector(sel: string): FixtureCode | null;
+};
+
+type FixtureDoc = {
+  querySelector(selector: string): FixturePre | FixtureStatus | null;
+};
+
+type FixtureRoot = {
+  ownerDocument: FixtureDoc;
+  contains(node: unknown): boolean;
+  addEventListener(type: string, handler: (event: MouseEvent) => void): void;
+  removeEventListener(type: string, handler: (event: MouseEvent) => void): void;
+  dispatchClick(target: FixtureButton): void;
+};
+
+/**
+ * Mount a single fence matching llms-markdown's `guide-code-copy` markup:
+ * button[data-copy-code] + pre#id > code + #id-status status span.
+ */
+function mountGuideCodeFence(
+  codeText: string,
+  id = "guide-code-1",
+): {
+  root: FixtureRoot;
+  button: FixtureButton;
+  status: FixtureStatus;
+  code: FixtureCode;
+} {
+  const code: FixtureCode = { textContent: codeText };
+  const pre: FixturePre = {
+    querySelector(sel: string) {
+      return sel === "code" ? code : null;
+    },
+  };
+  const statusClasses = new Set<string>(["visually-hidden"]);
+  const status: FixtureStatus = {
+    textContent: "",
+    classList: {
+      add(token: string) {
+        statusClasses.add(token);
       },
-      aria: "",
-    };
-    const status = {
-      textContent: "",
-      classList: {
-        add(token: string) {
-          classes.add(token);
-        },
-        remove(token: string) {
-          classes.delete(token);
-        },
+      remove(token: string) {
+        statusClasses.delete(token);
       },
-    };
+      has(token: string) {
+        return statusClasses.has(token);
+      },
+    },
+  };
+  const button: FixtureButton = {
+    dataset: { copyCode: id },
+    innerHTML: GUIDE_COPY_ICON_SVG,
+    ariaLabel: "Copy code",
+    setAttribute(name: string, value: string) {
+      if (name === "aria-label") this.ariaLabel = value;
+    },
+    closest(sel: string) {
+      return sel === "button[data-copy-code]" ? this : null;
+    },
+  };
+  const doc: FixtureDoc = {
+    querySelector(selector: string) {
+      if (selector === `#${id}`) return pre;
+      if (selector === `#${id}-status`) return status;
+      return null;
+    },
+  };
 
-    applyGuideCopyFeedback({ button, status }, guideCopyFeedback("copied"));
-    expect(button.innerHTML).toBe(GUIDE_CHECK_ICON_SVG);
-    expect(button.aria).toBe("Copied");
+  let clickHandler: ((event: MouseEvent) => void) | undefined;
+  const root: FixtureRoot = {
+    ownerDocument: doc,
+    contains() {
+      return true;
+    },
+    addEventListener(_type: string, handler: (event: MouseEvent) => void) {
+      clickHandler = handler;
+    },
+    removeEventListener() {
+      clickHandler = undefined;
+    },
+    dispatchClick(target: FixtureButton) {
+      if (clickHandler === undefined) throw new Error("no click listener attached");
+      clickHandler({ target } as unknown as MouseEvent);
+    },
+  };
+
+  return { root, button, status, code };
+}
+
+type PendingTimer = { id: number; fn: () => void; ms: number };
+
+function installTimerStubs(): {
+  pending: PendingTimer[];
+  restore: () => void;
+} {
+  const pending: PendingTimer[] = [];
+  let nextId = 1;
+  const realSetTimeout = globalThis.setTimeout;
+  const realClearTimeout = globalThis.clearTimeout;
+
+  globalThis.setTimeout = ((fn: TimerHandler, ms?: number) => {
+    const id = nextId++;
+    pending.push({ id, fn: fn as () => void, ms: ms ?? 0 });
+    return id as unknown as ReturnType<typeof setTimeout>;
+  }) as unknown as typeof setTimeout;
+
+  globalThis.clearTimeout = ((id: ReturnType<typeof setTimeout>) => {
+    const num = id as unknown as number;
+    const idx = pending.findIndex((t) => t.id === num);
+    if (idx >= 0) pending.splice(idx, 1);
+  }) as unknown as typeof clearTimeout;
+
+  return {
+    pending,
+    restore() {
+      globalThis.setTimeout = realSetTimeout;
+      globalThis.clearTimeout = realClearTimeout;
+    },
+  };
+}
+
+function installClipboardStub(mode: "copied" | "manual"): {
+  written: string[];
+  restore: () => void;
+} {
+  const written: string[] = [];
+  const previousNav = Object.getOwnPropertyDescriptor(globalThis, "navigator");
+  const previousWin = Object.getOwnPropertyDescriptor(globalThis, "window");
+  const previousDoc = Object.getOwnPropertyDescriptor(globalThis, "document");
+
+  const clipboard = {
+    writeText(text: string): Promise<void> {
+      if (mode === "manual") return Promise.reject(new Error("clipboard denied"));
+      written.push(text);
+      return Promise.resolve();
+    },
+  };
+
+  Object.defineProperty(globalThis, "navigator", {
+    configurable: true,
+    value: { clipboard },
+  });
+
+  // selectText (manual path) touches window.getSelection + document.createRange.
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: {
+      getSelection: () => ({
+        removeAllRanges() {},
+        addRange() {},
+      }),
+    },
+  });
+  Object.defineProperty(globalThis, "document", {
+    configurable: true,
+    value: {
+      createRange: () => ({
+        selectNodeContents() {},
+      }),
+    },
+  });
+
+  return {
+    written,
+    restore() {
+      if (previousNav === undefined) Reflect.deleteProperty(globalThis, "navigator");
+      else Object.defineProperty(globalThis, "navigator", previousNav);
+      if (previousWin === undefined) Reflect.deleteProperty(globalThis, "window");
+      else Object.defineProperty(globalThis, "window", previousWin);
+      if (previousDoc === undefined) Reflect.deleteProperty(globalThis, "document");
+      else Object.defineProperty(globalThis, "document", previousDoc);
+    },
+  };
+}
+
+/** Flush the fire-and-forget async click handler. */
+async function flushClick(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+}
+
+describe("attachGuideCodeCopy (DOM fixture)", () => {
+  let timers: ReturnType<typeof installTimerStubs>;
+  let clipboard: ReturnType<typeof installClipboardStub> | undefined;
+
+  beforeEach(() => {
+    timers = installTimerStubs();
+  });
+
+  afterEach(() => {
+    timers.restore();
+    clipboard?.restore();
+    clipboard = undefined;
+  });
+
+  test("click Copy swaps to check feedback, then reverts after reset timer", async () => {
+    clipboard = installClipboardStub("copied");
+    const { root, button, status, code } = mountGuideCodeFence('{"field":"weight"}');
+    const destroy = attachGuideCodeCopy(root as unknown as HTMLElement);
+
+    root.dispatchClick(button);
+    await flushClick();
+
+    expect(clipboard.written).toEqual([code.textContent]);
+    // Icon left the idle copy glyph (private check SVG is not exported).
+    expect(button.innerHTML).not.toBe(GUIDE_COPY_ICON_SVG);
+    expect(button.ariaLabel).toBe("Copied");
     expect(status.textContent).toBe("Copied.");
-    expect(classes.has("visually-hidden")).toBe(true);
+    expect(status.classList.has("visually-hidden")).toBe(true);
+    expect(timers.pending).toHaveLength(1);
+    expect(timers.pending[0]?.ms).toBe(GUIDE_COPY_RESET_MS);
 
-    applyGuideCopyFeedback({ button, status }, guideCopyFeedback("manual"));
+    // Fire the reset timer — control returns to idle copy state.
+    timers.pending[0]!.fn();
     expect(button.innerHTML).toBe(GUIDE_COPY_ICON_SVG);
-    expect(button.aria).toBe("Copy code");
-    expect(status.textContent).toBe(MANUAL_COPY_STATUS);
-    expect(classes.has("visually-hidden")).toBe(false);
-  });
-});
-
-describe("createGuideCodeCopyAttachment", () => {
-  test("copied path applies feedback, schedules reset, and destroy clears timer", async () => {
-    const timers = new Map<number, () => void>();
-    let nextId = 1;
-    let cleared: number[] = [];
-    const deps = {
-      copyText: () => Promise.resolve("copied" as const),
-      setTimeout: ((fn: () => void) => {
-        const id = nextId++;
-        timers.set(id, fn);
-        return id as unknown as ReturnType<typeof setTimeout>;
-      }) as typeof setTimeout,
-      clearTimeout: ((id: ReturnType<typeof setTimeout>) => {
-        cleared.push(id as unknown as number);
-        timers.delete(id as unknown as number);
-      }) as typeof clearTimeout,
-    };
-
-    const doc = {
-      querySelector(selector: string) {
-        if (selector === "#guide-code-1") return pre;
-        if (selector === "#guide-code-1-status") return status;
-        return null;
-      },
-    };
-    const code = { textContent: '{"field":"weight"}' };
-    const pre = {
-      querySelector(sel: string) {
-        return sel === "code" ? code : null;
-      },
-    };
-    const classes = new Set<string>(["visually-hidden"]);
-    const status = {
-      textContent: "",
-      classList: {
-        add(t: string) {
-          classes.add(t);
-        },
-        remove(t: string) {
-          classes.delete(t);
-        },
-      },
-    };
-    const button = {
-      dataset: { copyCode: "guide-code-1" },
-      innerHTML: GUIDE_COPY_ICON_SVG,
-      setAttribute(_n: string, v: string) {
-        this.aria = v;
-      },
-      aria: "Copy code",
-      closest(sel: string) {
-        return sel === "button[data-copy-code]" ? this : null;
-      },
-    };
-    let clickHandler: ((event: MouseEvent) => void) | undefined;
-    const node = {
-      ownerDocument: doc,
-      contains() {
-        return true;
-      },
-      addEventListener(_type: string, handler: (event: MouseEvent) => void) {
-        clickHandler = handler;
-      },
-      removeEventListener() {
-        clickHandler = undefined;
-      },
-    };
-
-    const destroy = createGuideCodeCopyAttachment(deps)(node as unknown as HTMLElement);
-    expect(clickHandler).toBeDefined();
-
-    clickHandler!({
-      target: button,
-    } as unknown as MouseEvent);
-    // Flush the fire-and-forget async handler.
-    await Promise.resolve();
-    await Promise.resolve();
-
-    expect(button.innerHTML).toBe(GUIDE_CHECK_ICON_SVG);
-    expect(button.aria).toBe("Copied");
-    expect(status.textContent).toBe("Copied.");
-    expect(classes.has("visually-hidden")).toBe(true);
-    expect(timers.size).toBe(1);
+    expect(button.ariaLabel).toBe("Copy code");
+    expect(status.textContent).toBe("");
+    expect(status.classList.has("visually-hidden")).toBe(true);
 
     destroy();
-    expect(cleared).toEqual([1]);
-    expect(timers.size).toBe(0);
   });
 
-  test("manual path leaves visible status and does not schedule reset", async () => {
-    const scheduled: number[] = [];
-    const deps = {
-      copyText: () => Promise.resolve("manual" as const),
-      setTimeout: ((_fn: () => void) => {
-        scheduled.push(1);
-        return 1 as unknown as ReturnType<typeof setTimeout>;
-      }) as typeof setTimeout,
-      clearTimeout: () => {},
-    };
+  test("clipboard failure keeps copy icon and shows manual status (no reset timer)", async () => {
+    clipboard = installClipboardStub("manual");
+    const { root, button, status } = mountGuideCodeFence("npm install", "guide-code-2");
+    attachGuideCodeCopy(root as unknown as HTMLElement);
 
-    const code = { textContent: "npm install" };
-    const pre = {
-      querySelector(sel: string) {
-        return sel === "code" ? code : null;
-      },
-    };
-    const classes = new Set<string>(["visually-hidden"]);
-    const status = {
-      textContent: "",
-      classList: {
-        add(t: string) {
-          classes.add(t);
-        },
-        remove(t: string) {
-          classes.delete(t);
-        },
-      },
-    };
-    const button = {
-      dataset: { copyCode: "guide-code-2" },
-      innerHTML: GUIDE_COPY_ICON_SVG,
-      setAttribute(_n: string, v: string) {
-        this.aria = v;
-      },
-      aria: "Copy code",
-      closest(sel: string) {
-        return sel === "button[data-copy-code]" ? this : null;
-      },
-    };
-    const doc = {
-      querySelector(selector: string) {
-        if (selector === "#guide-code-2") return pre;
-        if (selector === "#guide-code-2-status") return status;
-        return null;
-      },
-    };
-    let clickHandler: ((event: MouseEvent) => void) | undefined;
-    const node = {
-      ownerDocument: doc,
-      contains() {
-        return true;
-      },
-      addEventListener(_type: string, handler: (event: MouseEvent) => void) {
-        clickHandler = handler;
-      },
-      removeEventListener() {},
-    };
-
-    createGuideCodeCopyAttachment(deps)(node as unknown as HTMLElement);
-    clickHandler!({ target: button } as unknown as MouseEvent);
-    await Promise.resolve();
-    await Promise.resolve();
+    root.dispatchClick(button);
+    await flushClick();
 
     expect(button.innerHTML).toBe(GUIDE_COPY_ICON_SVG);
-    expect(button.aria).toBe("Copy code");
+    expect(button.ariaLabel).toBe("Copy code");
     expect(status.textContent).toBe(MANUAL_COPY_STATUS);
-    expect(classes.has("visually-hidden")).toBe(false);
-    expect(scheduled).toEqual([]);
+    expect(status.classList.has("visually-hidden")).toBe(false);
+    expect(timers.pending).toEqual([]);
+  });
+
+  test("destroy clears a pending reset timer so idle feedback never fires late", async () => {
+    clipboard = installClipboardStub("copied");
+    const { root, button, status } = mountGuideCodeFence("x = 1");
+    const destroy = attachGuideCodeCopy(root as unknown as HTMLElement);
+
+    root.dispatchClick(button);
+    await flushClick();
+    expect(button.ariaLabel).toBe("Copied");
+    expect(timers.pending).toHaveLength(1);
+
+    destroy();
+    expect(timers.pending).toHaveLength(0);
+    // Status remains at the post-copy state; destroy only cancels the timer.
+    expect(status.textContent).toBe("Copied.");
   });
 });
