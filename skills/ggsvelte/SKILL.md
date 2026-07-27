@@ -129,7 +129,7 @@ first-class. Migrate existing code with `npx ggsvelte-codemod --write src`
 | quantitative     | quantitative                          | uncertainty bounds | `errorbar` (map ymin/ymax) or `smooth` (se ribbon)           |
 | any of the above | + one more nominal field              | few values         | same geom + facet wrap on that field                         |
 
-Only the everyday geoms appear above. All 50 geoms (violin, hex, contour, qq,
+Only the everyday geoms appear above. All 49 geoms (violin, hex, contour, qq,
 step, segment, sf/maps, text/label annotation, …), all 28 stats with their
 computed columns, and the position rules live in
 [references/geoms-and-stats.md](references/geoms-and-stats.md) — read it
