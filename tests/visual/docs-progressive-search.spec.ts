@@ -159,9 +159,10 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
     'import { kyotoSakura } from "@ggsvelte/svelte/data"',
   );
   // Every step chart is a build-time render, so the whole lesson is readable
-  // with no JavaScript at all — only the inspect step loses its interaction.
+  // with no JavaScript at all — the finished chart stays a static SVG until
+  // hydrate near-viewport (#972); only inspect interaction needs JS.
   await expect(page.locator(".lesson-block .lesson-output")).toBeVisible();
-  await expect(page.locator("img.lesson-chart")).toHaveCount(7);
+  await expect(page.locator("img.lesson-chart")).toHaveCount(8);
   await expect(
     page.getByRole("heading", { level: 3, name: "Separate the signal from the noise" }),
   ).toBeVisible();
