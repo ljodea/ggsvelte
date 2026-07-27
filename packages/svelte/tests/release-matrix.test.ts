@@ -260,8 +260,8 @@ describe("R-1/R0 release matrix", () => {
     expect(
       legends.map((legend) => [legend.title, legend.entries.map((entry) => entry.value)]),
     ).toEqual([
-      ["colorGroup", ["A", "B"]],
-      ["fillGroup", ["X", "Y"]],
+      ["Color group", ["A", "B"]],
+      ["Fill group", ["X", "Y"]],
     ]);
     const seed = model.candidates.candidate(0)!;
     const inspection = resolveInspection({
