@@ -15,12 +15,12 @@ export function heroThemePaletteSnippet(theme: string, scheme: string): string {
   import { GeomLine, GeomPoint, GGPlot, Labs, Scale, Theme } from "@ggsvelte/svelte";
 
   const temperatures = [
-    { city: "Reykjavik", month: 1, temp: -0.5 },
-    { city: "Reykjavik", month: 7, temp: 10.6 },
-    { city: "Berlin", month: 1, temp: 0.6 },
-    { city: "Berlin", month: 7, temp: 19.0 },
-    { city: "Singapore", month: 1, temp: 26.5 },
-    { city: "Singapore", month: 7, temp: 27.9 },
+    { city: "Price of stocks", month: 1770, temp: 79.6 },
+    { city: "Price of stocks", month: 1820, temp: 68.59 },
+    { city: "Price of bread", month: 1770, temp: 23.47 },
+    { city: "Price of bread", month: 1820, temp: 48.39 },
+    { city: "Exports", month: 1770, temp: 11.58 },
+    { city: "Exports", month: 1820, temp: 50.18 },
     // …full series in your app
   ];
 </script>
@@ -54,11 +54,11 @@ export function heroThemePaletteSnippet(theme: string, scheme: string): string {
 export const SEQUENTIAL_RASTER_SNIPPET = `<script lang="ts">
   import { GeomRaster, GGPlot, Labs, Scale } from "@ggsvelte/svelte";
 
-  // Regular x/y/z surface (48 cells in the live demos).
+  // Macdonell man-count grid (48 cells in the live demos).
   const grid = [
-    { x: 0, y: 0, z: 0.12 },
-    { x: 1, y: 0, z: 0.45 },
-    { x: 2, y: 0, z: 0.88 },
+    { x: 0, y: 0, z: 12 },
+    { x: 1, y: 0, z: 28 },
+    { x: 2, y: 0, z: 41 },
     // …
   ];
 </script>
@@ -72,10 +72,10 @@ export const SEQUENTIAL_RASTER_SNIPPET = `<script lang="ts">
     value={{
       fill: { type: "sequential", scheme: "viridis" },
       // reverse: true
-      // domain: [0.3, 0.7]  // pin inside actual z
+      // domain: [15, 40]  // pin inside actual man counts
       // range: ["#2d1e2f", "#3d5a80", "#e76f51"]
     }}
   />
-  <Labs title="Density surface" x="x" y="y" />
+  <Labs title="Macdonell stature × finger counts" x="Finger index" y="Height index" />
   <GeomRaster />
 </GGPlot>`;

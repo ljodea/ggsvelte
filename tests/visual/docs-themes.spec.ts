@@ -202,14 +202,15 @@ test("sequential color compares direction, custom stops, and a pinned domain on 
     await expect(card.locator(".gg-points circle")).toHaveCount(0);
   }
 
-  // Pinned domain uses actual density z (~0.3–0.7), not the old [0, 100] point lab.
+  // Pinned domain uses Macdonell man-counts mid-window (catalog RASTER_Z_DOMAIN).
   const pinnedLabels = cards.nth(3).locator(".gg-legend-label");
   await expect(pinnedLabels.first()).toBeVisible();
   await expect(pinnedLabels.last()).toBeVisible();
   const firstLabel = (await pinnedLabels.first().textContent()) ?? "";
   const lastLabel = (await pinnedLabels.last().textContent()) ?? "";
   expect(Number(firstLabel)).toBeLessThan(Number(lastLabel));
-  expect(Number(lastLabel)).toBeLessThanOrEqual(1);
+  expect(Number(firstLabel)).toBeGreaterThan(0);
+  expect(Number(lastLabel)).toBeLessThanOrEqual(100);
 
   // One section-level authoring fragment only (not four per-ramp code blocks).
   await expect(region.getByRole("button", { name: /Copy sequential/ })).toHaveCount(1);

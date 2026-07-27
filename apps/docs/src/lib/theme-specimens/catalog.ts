@@ -169,11 +169,11 @@ export const THEME_SPECIMENS: readonly ThemeSpecimenConfig[] = [
   },
 ];
 
-/** Month breaks shared by climate multi-series charts. */
-export const MONTH_BREAKS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
+/** Year breaks shared by the Playfair 1824 multi-series chart. */
+export const MONTH_BREAKS = [1770, 1780, 1790, 1800, 1810, 1820] as const;
 
 /**
- * Continuous z on the raster density surface is roughly 0–1.
+ * Continuous z on the Macdonell man-count raster (thumbnail 8×6 window).
  * Pinned domain uses a mid interval so extremes clip visibly.
  */
-export const RASTER_Z_DOMAIN = [0.3, 0.7] as const;
+export const RASTER_Z_DOMAIN = [15, 40] as const;

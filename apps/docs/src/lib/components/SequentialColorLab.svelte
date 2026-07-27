@@ -57,8 +57,8 @@
   </header>
 
   <p class="lede">
-    Continuous fill on a density surface. Reverse, custom range, and pinned
-    domain should read clearly on the colorbar — not only on a few dots.
+    Continuous fill on a Macdonell man-count grid. Reverse, custom range, and
+    pinned domain should read clearly on the colorbar — not only on a few cells.
   </p>
 
   <ol class="examples" aria-label="Sequential scale examples">
@@ -79,10 +79,10 @@
               <Scale value={{ fill: example.scale }} />
               <Theme name="light" />
               <Labs
-                title={`${example.label} density surface`}
-                x="x"
-                y="y"
-                fill="z"
+                title={`${example.label} Macdonell counts`}
+                x="Finger index"
+                y="Height index"
+                fill="Men"
               />
               <GeomRaster />
             </GGPlot>

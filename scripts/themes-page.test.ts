@@ -307,7 +307,9 @@ describe("themes catalog", () => {
       6,
     );
     expect(RASTER_Z_DOMAIN[0]).toBeLessThan(RASTER_Z_DOMAIN[1]);
-    expect(RASTER_Z_DOMAIN[1]).toBeLessThanOrEqual(1);
+    // Macdonell man-counts (thumbnail window); mid pin sits inside observed z.
+    expect(RASTER_Z_DOMAIN[0]).toBeGreaterThan(0);
+    expect(RASTER_Z_DOMAIN[1]).toBeLessThanOrEqual(100);
   });
 
   it("reports incompatible schemes and palette exhaustion through public boundaries", () => {
