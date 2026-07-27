@@ -2,8 +2,9 @@
   import { base } from "$app/paths";
 
   import { DOCS_TASKS } from "$lib/catalog/docs-tasks";
-  import { DOCS_SEARCH_INDEX } from "$lib/generated/search-index";
+  import { loadDocsSearchIndex } from "$lib/load-docs-search-index";
   import { searchDocs } from "$lib/search";
+  import type { DocsSearchEntry } from "$lib/search-types";
   import { siteSearchKeyAction } from "$lib/site-search-keyboard";
 
   let dialog = $state<HTMLDialogElement>();
@@ -11,7 +12,9 @@
   let returnFocus = $state<HTMLElement>();
   let query = $state("");
   let activeIndex = $state(-1);
-  const results = $derived(searchDocs(query, DOCS_SEARCH_INDEX));
+  let entries = $state<readonly DocsSearchEntry[]>([]);
+  let loadState = $state<"idle" | "loading" | "ready" | "error">("idle");
+  const results = $derived(searchDocs(query, entries));
   const expanded = $derived(query.trim() !== "" && results.length > 0);
   const activeId = $derived(
     activeIndex >= 0 && activeIndex < results.length
@@ -19,12 +22,28 @@
       : undefined,
   );
 
+  async function ensureIndex(): Promise<void> {
+    if (loadState === "ready") return;
+    loadState = "loading";
+    try {
+      entries = await loadDocsSearchIndex();
+      loadState = "ready";
+      if (query.trim() !== "") {
+        activeIndex = results.length > 0 ? 0 : -1;
+      }
+    } catch (error) {
+      console.error("Failed to load docs search index", error);
+      loadState = "error";
+    }
+  }
+
   export function open(trigger: HTMLElement): void {
     returnFocus = trigger;
     query = "";
     activeIndex = -1;
     dialog?.showModal();
     queueMicrotask(() => input?.focus());
+    void ensureIndex();
   }
 
   function close(): void {
@@ -41,7 +60,7 @@
 
   function updateQuery(event: Event): void {
     query = (event.currentTarget as HTMLInputElement).value;
-    activeIndex = searchDocs(query, DOCS_SEARCH_INDEX).length > 0 ? 0 : -1;
+    activeIndex = results.length > 0 ? 0 : -1;
   }
 
   function scrollActiveIntoView(): void {
@@ -66,9 +85,25 @@
     window.location.assign(`${base}${result.href}`);
   }
 
-  function handleKeydown(event: KeyboardEvent): void {
+  async function handleKeydown(event: KeyboardEvent): Promise<void> {
     const action = siteSearchKeyAction(event.key, activeIndex, results.length);
-    if (action.type === "ignore") return;
+    if (action.type === "ignore") {
+      // Enter with no active option is ignored while the index is still loading;
+      // wait for it and select the first match for the current query (#948).
+      if (
+        event.key === "Enter" &&
+        loadState !== "ready" &&
+        query.trim() !== ""
+      ) {
+        event.preventDefault();
+        await ensureIndex();
+        if (results.length > 0) {
+          activeIndex = 0;
+          followActive();
+        }
+      }
+      return;
+    }
     event.preventDefault();
     if (action.type === "move") {
       activeIndex = action.index;
@@ -118,7 +153,11 @@
     />
 
     <p class="search-status" role="status">
-      {#if query.trim() !== ""}
+      {#if loadState === "loading"}
+        Loading search index…
+      {:else if loadState === "error"}
+        Search is unavailable. Close and try again.
+      {:else if query.trim() !== ""}
         {results.length === 0
           ? "No matching documentation."
           : `${results.length} ${results.length === 1 ? "result" : "results"}.`}
