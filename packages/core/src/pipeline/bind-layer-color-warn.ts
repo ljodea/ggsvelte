@@ -16,13 +16,17 @@ export function applyColorOnFillGeomWarning(
       geom === "boxplot" ||
       geom === "density" ||
       geom === "raster") &&
-    (color.field !== null || color.constant !== null || color.scaledConstant !== null)
+    (color.field !== null ||
+      (color.statColumn ?? null) !== null ||
+      color.constant !== null ||
+      color.scaledConstant !== null)
   ) {
     warnings.push({
       code: "color-on-fill-geom",
       message: `Layer ${index} (${geom}): the color channel styles OUTLINES, which this geom does not support as a data channel yet — map "fill" instead. The color mapping is ignored.`,
     });
     color.field = null;
+    color.statColumn = null;
     color.constant = null;
     color.scaledConstant = null;
   }

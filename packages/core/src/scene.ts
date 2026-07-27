@@ -71,14 +71,26 @@ export interface PathsBatch {
    * resolution uses this instead of synthetic render topology indexes. */
   semanticIndex?: Uint32Array;
   /**
-   * Closed ribbons only: frame-row id per **pre-projection** semantic vertex
-   * (upper ascending, then lower descending). Matches emitted vertices after
-   * non-finite edge filtering so coord `semanticIndex` maps to the correct
-   * frame row (#502). Length = pre-projection vertex count.
+   * Closed paths: frame-row id per **pre-projection** semantic vertex — a
+   * ribbon band (upper ascending, then lower descending) or a polygon ring in
+   * authored winding order (#916). Matches emitted vertices after non-finite
+   * edge filtering so coord `semanticIndex` maps to the correct frame row
+   * (#502). Length = pre-projection vertex count.
    */
   closedFrameRows?: Uint32Array;
   /** Start offset (in points) of each subpath; length = subpathCount + 1. */
   pathOffsets: Uint32Array;
+  /**
+   * Additional ring-start vertex indices within a closed filled subpath
+   * (exterior already starts at pathOffsets[s]). Used for polygon holes:
+   * one compound path with multiple M…Z rings (#809 phase 4).
+   */
+  ringStarts?: Uint32Array;
+  /**
+   * Canvas/SVG fill rule for closed filled subpaths. Default / omitted is
+   * nonzero. Set to evenodd when a subpath carries hole rings.
+   */
+  fillRule?: "nonzero" | "evenodd";
   /** Stroke color per subpath (null = theme ink). */
   strokes: (string | null)[];
   /** Fill color per subpath (area polygons; null entries = theme accent).
@@ -208,6 +220,19 @@ export interface GlyphsBatch {
   anchor: "start" | "middle" | "end";
   alpha: number;
   alphas?: Float32Array;
+  /**
+   * Optional background box (geom_label / geom_sf_label). When set, render/hit
+   * use these extents. Constants for padding/radius/stroke width.
+   */
+  boxFill?: string | null;
+  boxFills?: string[];
+  boxStroke?: string | null;
+  boxStrokes?: string[];
+  boxStrokeWidth?: number;
+  boxPadding?: number;
+  boxRadius?: number;
+  boxWidths?: Float32Array;
+  boxHeights?: Float32Array;
 }
 
 export type GeometryBatch = PointsBatch | PathsBatch | RectsBatch | SegmentsBatch | GlyphsBatch;

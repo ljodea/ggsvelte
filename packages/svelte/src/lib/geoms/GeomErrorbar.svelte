@@ -15,8 +15,12 @@
     data?: DataInput | readonly Record<string, unknown>[];
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
     aes?: AesInput;
-    /** The layer's stat: "identity" (default, ymin/ymax mapped) | "summary". */
-    stat?: "identity" | "summary";
+    /**
+     * Layer stat: "identity" (default, ymin/ymax mapped), "unique" (first-wins
+     * aesthetic dedupe; #813), "summary" (mean_se per x group), or
+     * "summary_bin" (mean_se per continuous bin; #817).
+     */
+    stat?: "identity" | "unique" | "summary" | "summary_bin";
   }
 
   const props: Props = $props();
@@ -27,5 +31,10 @@
     "fun",
     "funMin",
     "funMax",
+    "bins",
+    "binwidth",
+    "boundary",
+    "center",
+    "closed",
   ]);
 </script>

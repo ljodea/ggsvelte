@@ -61,7 +61,7 @@ export interface SequentialColorScale {
   at(t: number): string;
   /** True when the numeric domain contains semantic epoch milliseconds. */
   temporal?: boolean;
-  temporalKind?: "date" | "datetime";
+  temporalKind?: "date" | "datetime"; // color ramps never use time-of-day kind
   /** Explicit semantic guide breaks, when authored. */
   guideBreaks?: readonly number[];
 }

@@ -112,9 +112,25 @@ const glyphsOps: KindOps = {
   intersects: anchorInRect,
   aabb(indexes, id) {
     const batch = batchAt(indexes, id);
-    const pad = (batch.kind === "glyphs" ? batch.size : 0) + indexes.hitTolerance;
     const x = indexes.xs[id]!;
     const y = indexes.ys[id]!;
+    if (
+      batch.kind === "glyphs" &&
+      batch.boxWidths !== undefined &&
+      batch.boxHeights !== undefined
+    ) {
+      const pi = indexes.primitiveIds[id]!;
+      const bw = batch.boxWidths[pi]!;
+      const bh = batch.boxHeights[pi]!;
+      const pad = batch.boxPadding ?? 0;
+      let left = x - bw / 2;
+      if (batch.anchor === "start") left = x - pad;
+      else if (batch.anchor === "end") left = x - bw + pad;
+      const top = y - bh / 2;
+      const tol = indexes.hitTolerance;
+      return [left - tol, top - tol, left + bw + tol, top + bh + tol];
+    }
+    const pad = (batch.kind === "glyphs" ? batch.size : 0) + indexes.hitTolerance;
     return [x - pad, y - pad, x + pad, y + pad];
   },
 };

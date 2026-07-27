@@ -22,11 +22,15 @@ export function lineBatch(
   color: ResolvedColorScale | null,
   styles: ResolvedStyleScales,
   warnings: PipelineWarning[],
+  options: { sortByX?: boolean } = {},
 ): PathsBatch | null {
   const { binding } = frame;
   const groupedRows = bucketByGroup(frame, fx, null, warnings);
   if (groupedRows.length === 0) return null;
-  sortGroupRowsByX(groupedRows, frame, fx);
+  // geom_line sorts by x; geom_path keeps data/row order (#788).
+  if (options.sortByX !== false && binding.layer.geom !== "path") {
+    sortGroupRowsByX(groupedRows, frame, fx);
+  }
   const subpaths = splitStyleSubpaths(frame, groupedRows, styles);
   const styleSplit = subpaths.length > groupedRows.length;
 
@@ -52,7 +56,21 @@ export function lineBatch(
     }
   }
 
-  const params = binding.layer.geom === "line" ? (binding.layer.params ?? {}) : {};
+  // Keep geom checks inline so TS narrows layer.params (line/path vs quantile).
+  const params =
+    binding.layer.geom === "line" ||
+    binding.layer.geom === "path" ||
+    binding.layer.geom === "quantile" ||
+    binding.layer.geom === "contour" ||
+    binding.layer.geom === "density_2d" ||
+    binding.layer.geom === "sf"
+      ? (binding.layer.params ?? {})
+      : {};
+  // Quantile/contour/density_2d have no curve param; line/path may set step/linear.
+  const curve =
+    binding.layer.geom === "line" || binding.layer.geom === "path"
+      ? ((binding.layer.params ?? {}).curve ?? "linear")
+      : "linear";
   const styleRows = subpaths.map((rows) => rows[0]!);
   const linewidths = numericStyleVector(frame, "linewidth", styleRows, styles);
   const alphas = numericStyleVector(frame, "alpha", styleRows, styles);
@@ -62,6 +80,8 @@ export function lineBatch(
   const literalLinewidth = binding.linewidth.constant;
   const literalAlpha = binding.alpha.constant;
   const literalLinetype = binding.linetype.constant;
+  const paramLinewidth = "linewidth" in params ? params.linewidth : undefined;
+  const paramAlpha = "alpha" in params ? params.alpha : undefined;
   return {
     kind: "paths",
     layerIndex: binding.index,
@@ -74,18 +94,18 @@ export function lineBatch(
     linewidth:
       typeof literalLinewidth === "number"
         ? literalLinewidth
-        : (params.linewidth ?? DEFAULT_LINEWIDTH),
+        : (paramLinewidth ?? DEFAULT_LINEWIDTH),
     ...(linewidths !== undefined && { linewidths }),
     alpha:
       alphas === undefined
         ? typeof literalAlpha === "number"
           ? literalAlpha
-          : (params.alpha ?? 1)
+          : (paramAlpha ?? 1)
         : 1,
     ...(alphas !== undefined && { alphas }),
     ...(typeof literalLinetype === "string" && { linetype: literalLinetype as Linetype }),
     ...(linetypeIndexes !== undefined && { linetypeIndexes }),
-    curve: params.curve ?? "linear",
+    curve,
     ...(strokePaintResolved !== undefined && { strokePaint: strokePaintResolved }),
     ...(glowResolved !== undefined && { glow: glowResolved }),
   };

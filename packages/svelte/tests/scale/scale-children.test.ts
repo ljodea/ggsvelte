@@ -302,7 +302,9 @@ describe("Scale* export parity with all SCALE_CAPABILITIES families", () => {
         expectedFromHelpers.push("S" + h.slice(1));
       }
     }
-    const expectedExports = new Set(["Scale", ...expectedFromHelpers]);
+    // ScaleSizeOrdinal is a manifest-only alias of ScaleSizeDiscrete (#830);
+    // camel helper scaleSizeOrdinal is snake-exported only, not in this ledger.
+    const expectedExports = new Set(["Scale", "ScaleSizeOrdinal", ...expectedFromHelpers]);
 
     const pkg = SveltePkg as Record<string, unknown>;
     const actualScaleExports = Object.keys(pkg).filter(
@@ -315,8 +317,8 @@ describe("Scale* export parity with all SCALE_CAPABILITIES families", () => {
       expect(pkg[name], `missing export ${name}`).toBeTypeOf("function");
     }
     expect(new Set(actualScaleExports)).toEqual(expectedExports);
-    // 66 shells + 10 aliases + hand-written Scale
-    expect(expectedExports.size).toBe(66 + 10 + 1);
+    // 80 shells + 15 Colour aliases + ScaleSizeOrdinal + hand-written Scale
+    expect(expectedExports.size).toBe(80 + 15 + 1 + 1);
   });
 });
 

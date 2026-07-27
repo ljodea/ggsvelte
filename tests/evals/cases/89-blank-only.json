@@ -1,0 +1,35 @@
+{
+  "id": "89-blank-only",
+  "kind": "chart",
+  "prompt": "Train x and y scales from these range endpoints without drawing any marks (geom_blank only).",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" }
+    ],
+    "rowCount": 2
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 0 },
+      { "x": 100, "y": 50 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "blank",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "blank-only layer: scale training without geometry batches (#791)."
+}
