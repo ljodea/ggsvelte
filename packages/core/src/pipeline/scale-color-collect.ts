@@ -36,7 +36,7 @@ export function collectColorChannelValues(
       for (const v of frameValues) values.push(v);
     }
     // after_stat color/fill (e.g. bin_2d fill = count): values live on the frame.
-    if (channel.statColumn != null && frameValues !== null) {
+    if ((channel.statColumn ?? null) !== null && frameValues !== null) {
       anyField = true;
       // Numeric after_stat columns train continuous/sequential scales.
       for (const v of frameValues) values.push(v);

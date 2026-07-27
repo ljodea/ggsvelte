@@ -55,11 +55,12 @@ export function buildBin2dFrame(
 
   // fill after_stat: prefer statColumn (default count), else carried field.
   let fillValues: readonly CellValue[] | null = null;
-  if (binding.fill.statColumn != null) {
-    const series = columns[binding.fill.statColumn] ?? result.count;
-    fillValues = Array.from(series, (v) => v as CellValue);
-  } else {
+  const fillStat = binding.fill.statColumn ?? null;
+  if (fillStat === null) {
     fillValues = col(binding.fill.field);
+  } else {
+    const series = columns[fillStat] ?? result.count;
+    fillValues = Array.from(series, (v) => v as CellValue);
   }
 
   return {

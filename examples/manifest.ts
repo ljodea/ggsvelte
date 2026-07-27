@@ -101,6 +101,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "bin2d/basic",
+    category: "bin2d",
+    name: "basic",
+    title: "2D bin heatmap",
+    description: "",
+    tags: ["bin2d", "heatmap", "density"],
+    docsSection: "Distributions",
+    hasData: true,
+  },
+  {
     id: "blank/axes-only",
     category: "blank",
     name: "axes-only",
@@ -118,16 +128,6 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     description: "",
     tags: ["blank", "point", "scales", "domain", "theme"],
     docsSection: "Annotations & rules",
-    hasData: true,
-  },
-  {
-    id: "bin2d/basic",
-    category: "bin2d",
-    name: "basic",
-    title: "2D bin heatmap",
-    description: "",
-    tags: ["bin2d", "heatmap", "density"],
-    docsSection: "Distributions",
     hasData: true,
   },
   {

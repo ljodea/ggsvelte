@@ -5,7 +5,6 @@ import { describe, expect, it } from "bun:test";
 import { aes, gg, normalize, validate } from "@ggsvelte/spec";
 
 import { runPipeline } from "../../src/pipeline.ts";
-import type { RectsBatch } from "../../src/scene.ts";
 
 const size = { width: 200, height: 100 };
 
@@ -51,7 +50,7 @@ describe("geom_bin_2d geometry (#799)", () => {
         .spec(),
       size,
     );
-    const rects = model.scene.batches.filter((b) => b.kind === "rects") as RectsBatch[];
+    const rects = model.scene.batches.filter((b) => b.kind === "rects");
     expect(rects.length).toBe(1);
     // drop=true keeps only non-empty cells → 4
     expect(rects[0]!.rects.length / 4).toBe(4);
@@ -66,9 +65,10 @@ describe("geom_bin_2d geometry (#799)", () => {
         .spec(),
       size,
     );
-    const rects = model.scene.batches.find((b) => b.kind === "rects") as RectsBatch;
+    const rects = model.scene.batches.find((b) => b.kind === "rects");
+    expect(rects?.kind).toBe("rects");
     // Full 2×2 grid including empty off-diagonal cells
-    expect(rects.rects.length / 4).toBe(4);
+    expect(rects!.rects.length / 4).toBe(4);
   });
 
   it("more bins produce more occupied cells when points fill space", () => {
@@ -92,9 +92,10 @@ describe("geom_bin_2d geometry (#799)", () => {
         .spec(),
       size,
     );
-    const sparseN = (sparse.scene.batches.find((b) => b.kind === "rects") as RectsBatch).rects
-      .length;
-    const denseN = (dense.scene.batches.find((b) => b.kind === "rects") as RectsBatch).rects.length;
-    expect(denseN).toBeGreaterThan(sparseN);
+    const sparseRects = sparse.scene.batches.find((b) => b.kind === "rects");
+    const denseRects = dense.scene.batches.find((b) => b.kind === "rects");
+    expect(sparseRects?.kind).toBe("rects");
+    expect(denseRects?.kind).toBe("rects");
+    expect(denseRects!.rects.length).toBeGreaterThan(sparseRects!.rects.length);
   });
 });
