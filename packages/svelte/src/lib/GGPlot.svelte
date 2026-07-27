@@ -39,14 +39,7 @@
   import type { CellValue } from "@ggsvelte/core";
   import { sceneLabel } from "@ggsvelte/core";
 
-  import type {
-    LegendFocusEvent,
-    PlotInspection,
-    PlotInteractionEvent,
-    PlotSelection,
-    ZoomDomains,
-  } from "./interaction/interaction.js";
-  import type { PlotInteractionController } from "./interaction/controller.svelte.js";
+  import type { ZoomDomains } from "./interaction/interaction.js";
   import { provideRegistry } from "./geoms/registry.svelte.js";
   import { shouldRenderInteractionLiveRegion } from "./legend/surface.js";
   import { resolveInteractionLiveText } from "./assembly/labels.js";
@@ -60,7 +53,8 @@
     tooltipViewportSize,
   } from "./assembly/layout.js";
   import BoundsEditor from "./interval/BoundsEditor.svelte";
-  import type { GGPlotProps } from "./plot-props.js";
+  import type { EnginePlotProps, GGPlotProps } from "./plot-props.js";
+  import { widenPlotProps } from "./plot-props.js";
   import { createPlotEngine } from "./plot-engine.svelte.js";
   import CaptureSurface from "./surface/CaptureSurface.svelte";
   import LegendFilters from "./legend/LegendFilters.svelte";
@@ -71,35 +65,10 @@
   import Tooltip from "./inspection/Tooltip.svelte";
   import ToolRail from "./chrome/ToolRail.svelte";
 
-  const {
-    spec,
-    data,
-    aes: mapping,
-    layers,
-    a11y,
-    width,
-    height,
-    key: datumKey,
-    inspect = false,
-    select = false,
-    zoom = false,
-    legendFocus = false,
-    legendFilter = false,
-    tool,
-    interaction,
-    interactionScope,
-    ariaLabel,
-    oninspect,
-    onselect,
-    onzoom,
-    onlegendfocus,
-    onlegendfilter,
-    oninteraction,
-    ondiagnostic,
-    ontoolchange,
-    onrender,
-    children,
-  }: GGPlotProps<Row, Identity> = $props();
+  // Do not destructure $props — later destructure freezes values (#1040 / Claude).
+  // Markup reads props.width / props.ariaLabel / props.children; engine gets a
+  // lazy widened view (six PublicKey casts live in widenPlotProps).
+  const props: GGPlotProps<Row, Identity> = $props();
 
   const registry = provideRegistry();
   let root = $state<HTMLDivElement | null>(null);
@@ -107,53 +76,17 @@
   let a11yTableOpen = $state(false);
   const plotId = $props.id();
 
-  const engine = createPlotEngine<Row, Identity>({
+  // Getter so construction does not snapshot $props (state_referenced_locally).
+  // The widened proxy is memoized once; field access stays lazy on the source.
+  let engineProps: EnginePlotProps | undefined;
+  const engine = createPlotEngine({
     registry,
     plotId,
     root: () => root,
     captureSurface: () => captureSurface,
-    spec: () => spec,
-    data: () => data,
-    mapping: () => mapping,
-    layers: () => layers,
-    a11y: () => a11y,
-    width: () => width,
-    height: () => height,
-    datumKey: () => datumKey,
-    inspect: () => inspect,
-    select: () => select,
-    zoom: () => zoom,
-    legendFocus: () => legendFocus,
-    legendFilter: () => legendFilter,
-    tool: () => tool,
-    // The PublicKey → PropertyKey widening casts live HERE (component-local
-    // generic erased at the engine boundary; same widening the pre-S11
-    // factory* aliases performed).
-    interaction: () =>
-      interaction as PlotInteractionController<PropertyKey> | undefined,
-    interactionScope: () => interactionScope,
-    oninspect: () =>
-      oninspect as
-        | ((
-            event: PlotInspection<Record<string, CellValue>, PropertyKey>,
-          ) => void)
-        | undefined,
-    onselect: () =>
-      onselect as ((event: PlotSelection<PropertyKey>) => void) | undefined,
-    onzoom: () => onzoom,
-    onlegendfocus: () =>
-      onlegendfocus as
-        ((event: LegendFocusEvent<PropertyKey>) => void) | undefined,
-    onlegendfilter: () => onlegendfilter,
-    oninteraction: () =>
-      oninteraction as
-        | ((
-            event: PlotInteractionEvent<Record<string, CellValue>, PropertyKey>,
-          ) => void)
-        | undefined,
-    ondiagnostic: () => ondiagnostic,
-    ontoolchange: () => ontoolchange,
-    onrender: () => onrender,
+    get props() {
+      return (engineProps ??= widenPlotProps(props));
+    },
   });
 
   const {
@@ -189,7 +122,7 @@
      the root so SSR registers every layer before root attributes read derived
      plot state; placing them inside the root is too late in Svelte's one-pass
      server evaluation even when they appear first in source order. -->
-{@render children?.()}
+{@render props.children?.()}
 
 <!-- The root div is the plot's stable mount point and carries the
      data-gg-ready readiness signal. Compositing (decision 0006): ordered
@@ -198,7 +131,7 @@
 <div
   bind:this={root}
   class="gg-plot-root"
-  class:gg-container-width={isContainerWidthProp(width)}
+  class:gg-container-width={isContainerWidthProp(props.width)}
   class:gg-with-tool-rail={chromeState.showToolRail}
   class:gg-with-legend-clear={engine.legendClearActive}
   class:gg-with-legend-filters={engine.filterableLegendEntries.length > 0}
@@ -251,7 +184,7 @@
     <MarkStrata
       model={currentModel}
       strata={runtime.strata}
-      {ariaLabel}
+      ariaLabel={props.ariaLabel}
       markLabel={chromeState.markLabel}
       interactionMasks={engine.interactionMasks}
       {a11yTableOpen}
@@ -310,7 +243,7 @@
         bind:element={captureSurface}
         {plotId}
         activeTool={surfaceState.activeTool}
-        ariaLabel={ariaLabel ??
+        ariaLabel={props.ariaLabel ??
           engine.assembled?.labs?.title ??
           sceneLabel(currentModel.scene)}
         ariaControls={resolveCaptureAriaControls({

@@ -26,15 +26,8 @@
  * registers in the component effect tree. No `$props`, `$props.id()`, or
  * context calls live here.
  */
-import type { BatchInteractionMask, CellValue, RenderModel } from "@ggsvelte/core";
-import type {
-  A11yMode,
-  AesInput,
-  DataInput,
-  LayerInput,
-  PortableSpec,
-  SpecInput,
-} from "@ggsvelte/spec";
+import type { BatchInteractionMask } from "@ggsvelte/core";
+import type { PortableSpec } from "@ggsvelte/spec";
 
 import {
   assemblePortableSpec,
@@ -49,29 +42,17 @@ import {
 } from "./diagnostics/composition.js";
 import type { PlotDiagnostic } from "./diagnostics/deprecation.js";
 import type { LayerRegistry } from "./geoms/registry.svelte.js";
-import type { PlotInteractionController } from "./interaction/controller.svelte.js";
 import {
   normalizeInteractionConfig,
-  type InspectInput,
   type InteractionDiagnostic,
-  type InteractionTool,
-  type LegendFocusEvent,
-  type LegendFocusInput,
-  type PlotInspection,
-  type PlotInteractionEvent,
   type PlotInteractionScope,
-  type PlotSelection,
   type ResolvedInteractionConfig,
-  type SelectInput,
-  type ZoomEvent,
-  type ZoomInput,
 } from "./interaction/interaction.js";
 import { collectWiringDiagnostics } from "./interaction/wiring-advisories.js";
 import { createInspectionState } from "./inspection/inspection-state.svelte.js";
 import type { InspectionState } from "./inspection/inspection-state.svelte.js";
 import { createIntervalState } from "./interval/interval-state.svelte.js";
 import type { IntervalState } from "./interval/interval-state.svelte.js";
-import type { LegendFilterEvent, LegendFilterInput } from "./legend/filter.js";
 import { createLegendEntryKeyIndex } from "./legend/entry-key-index.svelte.js";
 import { createLegendFilterState } from "./legend/filter-state.svelte.js";
 import type { FilterableLegendEntry, LegendFilterState } from "./legend/filter-state.svelte.js";
@@ -80,6 +61,11 @@ import { createLegendFocusState } from "./legend/focus-state.svelte.js";
 import type { LegendFocusState } from "./legend/focus-state.svelte.js";
 import { createPlotChromeState } from "./chrome/chrome-state.svelte.js";
 import type { PlotChromeState } from "./chrome/chrome-state.svelte.js";
+import {
+  resolveCapabilities,
+  type EnginePlotProps,
+  type ResolvedPlotCapabilities,
+} from "./plot-props.js";
 import { createPlotAnnouncer } from "./runtime/announcer.svelte.js";
 import type { PlotAnnouncer } from "./runtime/announcer.svelte.js";
 import { createPlotRuntime } from "./runtime/runtime.svelte.js";
@@ -107,51 +93,23 @@ import { createPlotZoomState } from "./zoom/zoom-state.svelte.js";
 import type { PlotZoomState } from "./zoom/zoom-state.svelte.js";
 
 // ---------------------------------------------------------------------------
-// Inputs / return type
+// Host / return type
 // ---------------------------------------------------------------------------
 
-export type PlotEngineInputs<
-  Row extends Record<string, CellValue> = Record<string, CellValue>,
-  Identity extends keyof Row | ((row: Row, index: number) => PropertyKey) = keyof Row,
-> = {
+/**
+ * Host binding for the plot engine (#1040). Props are a single lazy
+ * `EnginePlotProps` surface (GGPlotProps with PublicKey fields widened) —
+ * not a per-field thunk bag. Capability defaults live in `resolveCapabilities`.
+ */
+export type PlotEngineHost = {
   /** Value — created by `provideRegistry()` in GGPlot (context stays there). */
   registry: LayerRegistry;
   /** Plain string from `$props.id()` in GGPlot. */
   plotId: string;
   root: () => HTMLDivElement | null;
   captureSurface: () => HTMLDivElement | null;
-
-  // Reactive props / callbacks as getter thunks (post-destructure names).
-  // Grammar (theme/scales/coord/facet/labs/guides/legend) is children-only (#704).
-  spec: () => SpecInput | undefined;
-  data: () => DataInput | readonly Row[] | undefined;
-  mapping: () => AesInput | undefined;
-  layers: () => LayerInput[] | undefined;
-  a11y: () => A11yMode | undefined;
-  width: () => number | "container" | undefined;
-  height: () => number | undefined;
-  datumKey: () => Identity | undefined;
-  /** Defaulted non-optional after destructure. */
-  inspect: () => InspectInput;
-  select: () => SelectInput;
-  zoom: () => ZoomInput;
-  legendFocus: () => LegendFocusInput;
-  legendFilter: () => LegendFilterInput;
-  tool: () => InteractionTool | undefined;
-  // Widened to PropertyKey at the boundary — PublicKey is component-local.
-  interaction: () => PlotInteractionController<PropertyKey> | undefined;
-  interactionScope: () => PlotInteractionScope | undefined;
-  oninspect: () => ((event: PlotInspection<Record<string, CellValue>>) => void) | undefined;
-  onselect: () => ((event: PlotSelection) => void) | undefined;
-  onzoom: () => ((event: ZoomEvent) => void) | undefined;
-  onlegendfocus: () => ((event: LegendFocusEvent) => void) | undefined;
-  onlegendfilter: () => ((event: LegendFilterEvent) => void) | undefined;
-  oninteraction: () =>
-    | ((event: PlotInteractionEvent<Record<string, CellValue>>) => void)
-    | undefined;
-  ondiagnostic: () => ((diagnostic: PlotDiagnostic) => void) | undefined;
-  ontoolchange: () => ((tool: InteractionTool) => void) | undefined;
-  onrender: () => ((model: RenderModel, spec: PortableSpec) => void) | undefined;
+  /** Live props proxy (or widenPlotProps view). Grammar is children-only (#704). */
+  props: EnginePlotProps;
 };
 
 /**
@@ -199,28 +157,29 @@ export type PlotEngine = {
 // Factory
 // ---------------------------------------------------------------------------
 
-export function createPlotEngine<
-  Row extends Record<string, CellValue> = Record<string, CellValue>,
-  Identity extends keyof Row | ((row: Row, index: number) => PropertyKey) = keyof Row,
->(inputs: PlotEngineInputs<Row, Identity>): PlotEngine {
+export function createPlotEngine(host: PlotEngineHost): PlotEngine {
+  // Capability defaults — pure, lazy per read (do not materialize a full
+  // props snapshot; per-field deps stay on host.props).
+  const caps = (): ResolvedPlotCapabilities => resolveCapabilities(host.props);
+
   // Reading descriptors through toLayerInput goes through live getters, so
   // geom prop changes flow into this $derived without re-registration.
   // Explicit `spec` short-circuits before registry/children so ignored props
   // do not become reactive dependencies of the assembled plot.
   function assembleCurrentSpec(): PortableSpec | null {
-    const spec = inputs.spec();
+    const spec = host.props.spec;
     if (spec !== undefined) return assemblePortableSpec({ spec, layers: [] });
-    const data = inputs.data();
-    const mapping = inputs.mapping();
-    const layers = inputs.layers();
-    const a11y = inputs.a11y();
+    const data = host.props.data;
+    const mapping = host.props.aes;
+    const layers = host.props.layers;
+    const a11y = host.props.a11y;
     return assemblePortableSpec({
       ...(data !== undefined && { data }),
       ...(mapping !== undefined && { aes: mapping }),
       // Mark layers only: a `layers={[…]}` prop suppresses registry marks, not
       // non-mark plot layers (theme/scale/coord/facet/labs/guides/legend).
-      layers: layers ?? inputs.registry.markLayers.map(toLayerInput),
-      plotLayers: inputs.registry.layers.filter((layer) => layer.kind !== "mark"),
+      layers: layers ?? host.registry.markLayers.map(toLayerInput),
+      plotLayers: host.registry.layers.filter((layer) => layer.kind !== "mark"),
       ...(a11y !== undefined && { a11y }),
     });
   }
@@ -238,21 +197,21 @@ export function createPlotEngine<
   // OR assembled.facet (portable-spec embeds). Grammar props removed in 0.13.0 (#704).
   const facetedPlot = $derived(
     isFacetedPlotIntent({
-      plotLayers: inputs.registry.layers,
+      plotLayers: host.registry.layers,
       assembled: assembled(),
     }),
   );
 
   const resolvedInteractionScope: PlotInteractionScope = $derived(
     (() => {
-      const interaction = inputs.interaction();
-      const interactionScope = inputs.interactionScope();
-      const zoom = inputs.zoom();
-      const datumKey = inputs.datumKey();
+      const interaction = host.props.interaction;
+      const interactionScope = host.props.interactionScope;
+      const capabilities = caps();
+      const datumKey = host.props.key;
       return resolveInteractionScope({
         interaction,
         ...(interactionScope !== undefined && { interactionScope }),
-        zoom,
+        zoom: capabilities.zoom,
         faceted: facetedPlot,
         ...(datumKey !== undefined && { datumKey }),
         assembled: assembled(),
@@ -262,25 +221,26 @@ export function createPlotEngine<
 
   const interactionConfig = $derived(
     (() => {
-      const tool = inputs.tool();
+      const tool = host.props.tool;
+      const capabilities = caps();
       return normalizeInteractionConfig(
         {
-          inspect: inputs.inspect(),
-          select: inputs.select(),
-          zoom: inputs.zoom(),
-          legendFocus: inputs.legendFocus(),
+          inspect: capabilities.inspect,
+          select: capabilities.select,
+          zoom: capabilities.zoom,
+          legendFocus: capabilities.legendFocus,
           ...(tool !== undefined && { tool }),
         },
         {
           faceted: facetedPlot,
-          hasKey: inputs.datumKey() !== undefined,
+          hasKey: host.props.key !== undefined,
         },
       );
     })(),
   );
 
   function deliverDiagnostic(diagnostic: PlotDiagnostic): void {
-    const ondiagnostic = inputs.ondiagnostic();
+    const ondiagnostic = host.props.ondiagnostic;
     ondiagnostic?.(diagnostic);
     const nodeEnvironment = (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process
       ?.env?.NODE_ENV;
@@ -297,26 +257,27 @@ export function createPlotEngine<
   // fire once per prop per plot instance — a later capability toggle must
   // not re-advise. Pure collect lives in wiring-advisories.ts; snapshot is
   // taken inside this derived so late-bound handlers still recompute.
-  const wiringDiagnostics = $derived.by((): InteractionDiagnostic[] =>
-    collectWiringDiagnostics({
-      interactionScope: inputs.interactionScope(),
-      interaction: inputs.interaction(),
+  const wiringDiagnostics = $derived.by((): InteractionDiagnostic[] => {
+    const capabilities = caps();
+    return collectWiringDiagnostics({
+      interactionScope: host.props.interactionScope,
+      interaction: host.props.interaction,
       handlers: {
-        oninspect: inputs.oninspect(),
-        onselect: inputs.onselect(),
-        onzoom: inputs.onzoom(),
-        onlegendfocus: inputs.onlegendfocus(),
-        onlegendfilter: inputs.onlegendfilter(),
+        oninspect: host.props.oninspect,
+        onselect: host.props.onselect,
+        onzoom: host.props.onzoom,
+        onlegendfocus: host.props.onlegendfocus,
+        onlegendfilter: host.props.onlegendfilter,
       },
       capabilities: {
-        inspect: inputs.inspect(),
-        select: inputs.select(),
-        zoom: inputs.zoom(),
-        legendFocus: inputs.legendFocus(),
-        legendFilter: inputs.legendFilter(),
+        inspect: capabilities.inspect,
+        select: capabilities.select,
+        zoom: capabilities.zoom,
+        legendFocus: capabilities.legendFocus,
+        legendFilter: capabilities.legendFilter,
       },
-    }),
-  );
+    });
+  });
   // Shared once-per-code-per-prop Set for wiring + composition.
   // Delivery order is fixed: config effect (above) → wiring → composition.
   // Grammar-prop deprecation emission removed in 0.13.0 (#704) — props gone.
@@ -334,7 +295,7 @@ export function createPlotEngine<
   // registry.layers. Last child still wins (shallow merge / last write);
   // delivery is once-per-dedup-key via compositionAdvisoryDedupKey.
   const compositionDiagnostics = $derived.by((): CompositionDiagnostic[] =>
-    collectCompositionDiagnostics(inputs.registry.layers),
+    collectCompositionDiagnostics(host.registry.layers),
   );
   $effect(() => {
     for (const diagnostic of compositionDiagnostics) {
@@ -345,10 +306,8 @@ export function createPlotEngine<
     }
   });
 
-  // The PublicKey → PropertyKey widening casts live at the GGPlot call site;
-  // PlotEngineInputs is already declared in the widened form, so controller
-  // deps consume inputs.interaction / inputs.oninteraction / inputs.oninspect
-  // directly (handler contravariance covers the narrower per-event deps).
+  // PublicKey → PropertyKey widening lives in widenPlotProps (plot-props.ts).
+  // Controllers read host.props handlers directly (already widened).
   // Announcer is declared later; the sink is handler-only (never construction).
   const announceSink = (message: string): void => {
     announcer.announce(message);
@@ -362,14 +321,14 @@ export function createPlotEngine<
   // Construction-time deriveds read interaction/scope/zoomConfig/assembled
   // only — model/announce are deferred getters (later-declared).
   const zoomState = createPlotZoomState({
-    interaction: inputs.interaction,
+    interaction: () => host.props.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     zoomConfig: () => interactionConfig.zoom,
     assembled,
     // Model is declared after the runtime; handlers only.
     model: () => runtime.model,
-    onzoom: () => inputs.onzoom(),
-    oninteraction: inputs.oninteraction,
+    onzoom: () => host.props.onzoom,
+    oninteraction: () => host.props.oninteraction,
     announce: announceSink,
   });
 
@@ -383,11 +342,11 @@ export function createPlotEngine<
   const dataIdentityEpoch = $derived.by(() =>
     dataIdentityEpochToken(
       buildDataIdentityEpochInput({
-        data: inputs.data(),
-        spec: inputs.spec(),
-        layers: inputs.layers(),
+        data: host.props.data,
+        spec: host.props.spec,
+        layers: host.props.layers,
         // Declaration children: markLayers only (not registry.layers) — #609.
-        registryMarkLayers: inputs.registry.markLayers,
+        registryMarkLayers: host.registry.markLayers,
         sourceIdentity: (value: unknown) => identityTracker.sourceIdentity(value),
       }),
     ),
@@ -401,9 +360,9 @@ export function createPlotEngine<
   // model is deferred (declared after the runtime).
   const legendFilterState = createLegendFilterState({
     effectiveSpec: () => zoomState.effectiveSpec,
-    legendFilterProp: () => inputs.legendFilter(),
-    onlegendfilter: () => inputs.onlegendfilter(),
-    oninteraction: inputs.oninteraction,
+    legendFilterProp: () => caps().legendFilter,
+    onlegendfilter: () => host.props.onlegendfilter,
+    oninteraction: () => host.props.oninteraction,
     announce: announceSink,
     // model / catalogEntries close over later bindings (effect-only; not
     // construction-time reads).
@@ -415,17 +374,17 @@ export function createPlotEngine<
   // Factory sits after zoom-respec and legend-filter so every direct
   // construction-time dep is already initialized (TDZ).
   const runtime = createPlotRuntime({
-    widthProp: () => inputs.width(),
-    heightProp: () => inputs.height(),
+    widthProp: () => host.props.width,
+    heightProp: () => host.props.height,
     assembled,
     effectiveSpec: () => zoomState.effectiveSpec,
     effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
     effectiveLegendFilters: () => legendFilterState.filters,
-    root: inputs.root,
+    root: host.root,
     resetZoom: () => {
       zoomState.resetForScales();
     },
-    onrender: () => inputs.onrender(),
+    onrender: () => host.props.onrender,
   });
   // Semantic resolution as soon as the runtime model exists. Early
   // construction makes interval projection safe when a shared controller
@@ -433,9 +392,9 @@ export function createPlotEngine<
   const semanticKeys = createSemanticKeyService({
     model: () => runtime.model,
     assembled,
-    datumKey: () => inputs.datumKey(),
-    data: () => inputs.data(),
-    spec: () => inputs.spec(),
+    datumKey: () => host.props.key,
+    data: () => host.props.data,
+    spec: () => host.props.spec,
     sourceIdentity: (value: unknown) => identityTracker.sourceIdentity(value),
     deliverDiagnostic,
   });
@@ -468,11 +427,11 @@ export function createPlotEngine<
   // ------------------------------------------------- selection
   // Before surface so emit/toggle are direct (not deferred sibling getters).
   const selectionState = createSelectionState({
-    interaction: inputs.interaction,
+    interaction: () => host.props.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     selectConfig: () => interactionConfig.select,
-    onselect: inputs.onselect,
-    oninteraction: inputs.oninteraction,
+    onselect: () => host.props.onselect,
+    oninteraction: () => host.props.oninteraction,
     announce: announceSink,
   });
 
@@ -488,15 +447,15 @@ export function createPlotEngine<
     inspectEnabled: () => inspectEnabled,
     dataIdentityEpoch: () => dataIdentityEpoch,
     keyAt: (index) => semanticKeys.keyAt(index),
-    root: inputs.root,
-    captureSurface: inputs.captureSurface,
-    plotId: () => inputs.plotId,
+    root: host.root,
+    captureSurface: host.captureSurface,
+    plotId: () => host.plotId,
     tooltipHovered: () => tooltipHovered,
     clearTooltipHovered: () => {
       tooltipHovered = false;
     },
-    oninspect: inputs.oninspect,
-    oninteraction: inputs.oninteraction,
+    oninspect: () => host.props.oninspect,
+    oninteraction: () => host.props.oninteraction,
     announce: announceSink,
     clearAnnouncement: () => {
       announcer.clear();
@@ -509,14 +468,14 @@ export function createPlotEngine<
   let semanticCandidateProjection!: ReturnType<typeof createSemanticCandidateProjection>;
   const intervalState = createIntervalState({
     model: () => runtime.model,
-    interaction: inputs.interaction,
+    interaction: () => host.props.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     selectConfig: () => interactionConfig.select,
     effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
     commitZoom: (...args: Parameters<PlotZoomState["commitZoom"]>) => {
       zoomState.commitZoom(...args);
     },
-    captureSurface: inputs.captureSurface,
+    captureSurface: host.captureSurface,
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
     consumptionCandidates: () => semanticCandidateProjection.intervalConsumptionCandidates,
     inspectionPanel: () => inspectionState.inspectionPanel,
@@ -532,14 +491,14 @@ export function createPlotEngine<
   let chromeState!: ReturnType<typeof createPlotChromeState>;
   surfaceState = createSurfaceState({
     model: () => runtime.model,
-    root: inputs.root,
-    toolProp: () => inputs.tool(),
+    root: host.root,
+    toolProp: () => host.props.tool,
     initialTool: () => interactionConfig.initialTool,
     availableTools: () => chromeState.availableTools,
     inspectConfig: () => interactionConfig.inspect,
     selectConfig: () => interactionConfig.select,
     pointSelectEnabled: () => chromeState.canPublishPointSelection,
-    ontoolchange: () => inputs.ontoolchange(),
+    ontoolchange: () => host.props.ontoolchange,
     surfaceInteractive: () => surfaceInteractive,
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
     inspection: () => inspectionState,
@@ -561,16 +520,16 @@ export function createPlotEngine<
   // them install via installHostDerivedEffects (irreducible late data, not a
   // sibling-controller cycle — #627).
   const legendFocusState = createLegendFocusState({
-    interaction: inputs.interaction,
+    interaction: () => host.props.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     legendFocusEnabled: () => legendFocusEnabled,
     legendFocusPreviewEnabled: () => interactionConfig.legendFocus?.preview === true,
-    root: inputs.root,
+    root: host.root,
     entryKeys: () => legendEntryKeys,
     entries: () => interactiveLegendEntries,
     pressed: () => effectiveLegendPressed,
-    onlegendfocus: inputs.onlegendfocus,
-    oninteraction: inputs.oninteraction,
+    onlegendfocus: () => host.props.onlegendfocus,
+    oninteraction: () => host.props.oninteraction,
     announce: announceSink,
   });
   semanticCandidateProjection = createSemanticCandidateProjection({
@@ -602,7 +561,7 @@ export function createPlotEngine<
     },
   });
   // ------------------------------------------------- plot chrome
-  // All inputs earlier-declared. Pure construction-time deriveds —
+  // All host bindings earlier-declared. Pure construction-time deriveds —
   // no $state/handlers/effects.
   chromeState = createPlotChromeState({
     model: () => runtime.model,
@@ -617,7 +576,7 @@ export function createPlotEngine<
     effectiveEmphasisKeys: () => legendFocusState.effectiveEmphasisKeys,
     legendFocusEnabled: () => legendFocusEnabled,
     hasCanvas: () => runtime.hasCanvas,
-    width: () => inputs.width(),
+    width: () => host.props.width,
     resolvedWidth: () => runtime.resolvedWidth,
     resolvedHeight: () => runtime.resolvedHeight,
   });

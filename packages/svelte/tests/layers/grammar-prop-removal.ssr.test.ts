@@ -2,7 +2,7 @@
  * #704: single removal clock for the seven grammar props deprecated in 0.11.0.
  * After 0.13.0 they are gone from GGPlot types, runtime wiring, and exports.
  *
- * Seams: plot-props source, PlotEngineInputs, LayerDescriptor public export.
+ * Seams: plot-props source, engine host (no PlotEngineInputs mirror), LayerDescriptor.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -20,18 +20,10 @@ describe("#704 grammar prop removal", () => {
     }
   });
 
-  it("PlotEngineInputs no longer reads the seven deprecated grammar props", () => {
+  it("PlotEngineInputs is deleted — single prop surface is GGPlotProps/EnginePlotProps (#1040)", () => {
     const source = readFileSync(join(root, "plot-engine.svelte.ts"), "utf8");
-    // The Inputs type block ends before createPlotEngine; props must not appear as thunk fields.
-    const inputsBlock = source.slice(
-      source.indexOf("export type PlotEngineInputs"),
-      source.indexOf("export type PlotEngine"),
-    );
-    for (const prop of GRAMMAR_PROP_NAMES) {
-      expect(inputsBlock, `${prop} still on PlotEngineInputs`).not.toMatch(
-        new RegExp(`\\b${prop}:`),
-      );
-    }
+    expect(source).not.toContain("PlotEngineInputs");
+    expect(source).toContain("PlotEngineHost");
   });
 
   it("engine no longer emits DEPRECATED_PLOT_PROP for grammar props", () => {

@@ -1,16 +1,17 @@
 /**
  * Behaviour coverage for the plot engine factory: assemble → model →
  * interaction config across a chart lifecycle. Guards the #982 merge of
- * orchestrator + interaction assembly (no layout/substring tests).
+ * orchestrator + interaction assembly and the #1040 host.props surface
+ * (no layout/substring tests).
  */
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
 import type { RenderModel } from "@ggsvelte/core";
-import type { PortableSpec } from "@ggsvelte/spec";
 
 import { LayerRegistry } from "../src/lib/geoms/registry.svelte.js";
 import { createPlotEngine } from "../src/lib/plot-engine.svelte.js";
+import type { EnginePlotProps } from "../src/lib/plot-props.js";
 import { withEffectRoot, withFlushedEffectRoot } from "./helpers/effect-root.svelte.js";
 import { reactiveBox } from "./helpers/reactive-box.svelte.js";
 
@@ -21,56 +22,29 @@ const rows = [
   { x: 4, y: 25, cls: "b" },
 ];
 
-function engineInputs(opts: {
-  registry?: LayerRegistry;
-  data?: () => readonly (typeof rows)[number][] | undefined;
-  mapping?: () => { x: string; y: string; color?: string } | undefined;
-  layers?: () => { geom: "point" }[] | undefined;
-  width?: () => number | undefined;
-  height?: () => number | undefined;
-  inspect?: () => boolean;
-  select?: () => boolean;
-  zoom?: () => boolean;
-  onrender?: () => ((model: RenderModel, spec: PortableSpec) => void) | undefined;
-}) {
-  const noop = () => {};
+/** Minimal host: registry + plot id + DOM thunks + lazy props bag (#1040). */
+function engineHost(opts: { registry?: LayerRegistry; props?: EnginePlotProps }) {
   return {
     registry: opts.registry ?? new LayerRegistry(),
     plotId: "plot-engine-lifecycle",
     root: () => null as HTMLDivElement | null,
     captureSurface: () => null as HTMLDivElement | null,
-    spec: () => {},
-    data: opts.data ?? (() => rows),
-    mapping: opts.mapping ?? (() => ({ x: "x", y: "y" })),
-    layers: opts.layers ?? (() => [{ geom: "point" as const }]),
-    a11y: noop,
-    width: opts.width ?? (() => 480),
-    height: opts.height ?? (() => 320),
-    datumKey: noop,
-    inspect: opts.inspect ?? (() => false),
-    select: opts.select ?? (() => false),
-    zoom: opts.zoom ?? (() => false),
-    legendFocus: () => false,
-    legendFilter: () => false,
-    tool: noop,
-    interaction: noop,
-    interactionScope: noop,
-    oninspect: noop,
-    onselect: noop,
-    onzoom: noop,
-    onlegendfocus: noop,
-    onlegendfilter: noop,
-    oninteraction: noop,
-    ondiagnostic: noop,
-    ontoolchange: noop,
-    onrender: opts.onrender ?? noop,
+    props:
+      opts.props ??
+      ({
+        data: rows,
+        aes: { x: "x", y: "y" },
+        layers: [{ geom: "point" as const }],
+        width: 480,
+        height: 320,
+      } satisfies EnginePlotProps),
   };
 }
 
 describe("createPlotEngine chart lifecycle", () => {
   it("assembles a portable spec and produces a render model from data/layers", () => {
     const { value: engine, destroy } = withFlushedEffectRoot(() =>
-      createPlotEngine(engineInputs({})),
+      createPlotEngine(engineHost({})),
     );
 
     expect(engine.assembled).not.toBeNull();
@@ -100,10 +74,18 @@ describe("createPlotEngine chart lifecycle", () => {
     const models: RenderModel[] = [];
     const { value: engine, destroy } = withFlushedEffectRoot(() =>
       createPlotEngine(
-        engineInputs({
-          data: () => data.value,
-          onrender: () => (model) => {
-            models.push(model);
+        engineHost({
+          props: {
+            get data() {
+              return data.value;
+            },
+            aes: { x: "x", y: "y" },
+            layers: [{ geom: "point" }],
+            width: 480,
+            height: 320,
+            onrender: (model: RenderModel) => {
+              models.push(model);
+            },
           },
         }),
       ),
@@ -133,10 +115,23 @@ describe("createPlotEngine chart lifecycle", () => {
     const zoom = reactiveBox(false);
     const { value: engine, destroy } = withFlushedEffectRoot(() =>
       createPlotEngine(
-        engineInputs({
-          inspect: () => inspect.value,
-          select: () => select.value,
-          zoom: () => zoom.value,
+        engineHost({
+          props: {
+            data: rows,
+            aes: { x: "x", y: "y" },
+            layers: [{ geom: "point" }],
+            width: 480,
+            height: 320,
+            get inspect() {
+              return inspect.value;
+            },
+            get select() {
+              return select.value;
+            },
+            get zoom() {
+              return zoom.value;
+            },
+          },
         }),
       ),
     );
@@ -163,10 +158,52 @@ describe("createPlotEngine chart lifecycle", () => {
 
   it("registers effects only under an effect root (no orphan effects at construct)", () => {
     // Construction must not throw effect_orphan; effects own via $effect.root.
-    const { value: engine, destroy } = withEffectRoot(() => createPlotEngine(engineInputs({})));
+    const { value: engine, destroy } = withEffectRoot(() => createPlotEngine(engineHost({})));
     expect(engine.assembled).not.toBeNull();
     // Before flush, model production may not have committed yet — factory must still exist.
     expect(engine.runtime).toBeDefined();
+    destroy();
+  });
+
+  it("spec short-circuit: data changes do not re-assemble when spec is set", () => {
+    // Pins the #1040 lazy-props invariant: assembleCurrentSpec must not
+    // depend on data/aes/layers when an explicit spec is present.
+    const data = reactiveBox(rows);
+    const { value: engine, destroy } = withFlushedEffectRoot(() =>
+      createPlotEngine(
+        engineHost({
+          props: {
+            get data() {
+              return data.value;
+            },
+            aes: { x: "x", y: "y" },
+            layers: [{ geom: "point" }],
+            spec: {
+              data: { values: rows },
+              aes: { x: "x", y: "y" },
+              layers: [{ geom: "point" }],
+            },
+            width: 480,
+            height: 320,
+          },
+        }),
+      ),
+    );
+
+    const firstAssembled = engine.assembled;
+    expect(firstAssembled).not.toBeNull();
+    expect(engine.runtime.model).not.toBeNull();
+    expect(engine.runtime.model!.candidates.size).toBe(4);
+
+    data.set(rows.slice(0, 1));
+    flushSync();
+
+    // Same assembled identity: data was never a dependency under the spec path.
+    expect(engine.assembled).toBe(firstAssembled);
+    // Spec path still renders from the embedded values, not the data prop.
+    expect(engine.runtime.model).not.toBeNull();
+    expect(engine.runtime.model!.candidates.size).toBe(4);
+
     destroy();
   });
 });

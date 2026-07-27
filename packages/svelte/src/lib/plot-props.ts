@@ -1,6 +1,10 @@
 /**
- * Internal props type for <GGPlot>. Not part of the public package surface —
- * the component never exported this type before S11; keep it module-local.
+ * Internal props contract for <GGPlot> + the plot engine (#1040).
+ * Not part of the public package surface — never export from the package root.
+ *
+ * Runtime helpers here own:
+ * - capability defaults (`resolveCapabilities`)
+ * - PublicKey → PropertyKey widening for engine controllers (`widenPlotProps`)
  */
 import type { Snippet } from "svelte";
 
@@ -95,4 +99,97 @@ export interface GGPlotProps<
    *  advisories, scales) and the normalized PortableSpec. */
   onrender?: (model: RenderModel, spec: PortableSpec) => void;
   children?: Snippet;
+}
+
+/** Capability defaults after optional props resolve (engine-facing). */
+export type ResolvedPlotCapabilities = {
+  inspect: InspectInput;
+  select: SelectInput;
+  zoom: ZoomInput;
+  legendFocus: LegendFocusInput;
+  legendFilter: LegendFilterInput;
+};
+
+/**
+ * Defaults the five interaction capability props to `false` when omitted.
+ * Pure — does not clone object-form configs (identity preserved for epoch
+ * and reference-equality consumers).
+ */
+export function resolveCapabilities(
+  props: Pick<GGPlotProps, "inspect" | "select" | "zoom" | "legendFocus" | "legendFilter">,
+): ResolvedPlotCapabilities {
+  return {
+    inspect: props.inspect ?? false,
+    select: props.select ?? false,
+    zoom: props.zoom ?? false,
+    legendFocus: props.legendFocus ?? false,
+    legendFilter: props.legendFilter ?? false,
+  };
+}
+
+/**
+ * Engine-facing props: same surface as `GGPlotProps` with the six
+ * PublicKey-generic fields widened to PropertyKey (controller deps).
+ * Derived via `Omit` — not a hand-restated 30-field mirror (#1040).
+ */
+export type EnginePlotProps = Omit<
+  GGPlotProps,
+  "key" | "interaction" | "oninspect" | "onselect" | "onlegendfocus" | "oninteraction"
+> & {
+  key?: PropertyKey | ((row: Record<string, CellValue>, index: number) => PropertyKey);
+  interaction?: PlotInteractionController<PropertyKey>;
+  oninspect?: (event: PlotInspection<Record<string, CellValue>>) => void;
+  onselect?: (event: PlotSelection) => void;
+  onlegendfocus?: (event: LegendFocusEvent) => void;
+  oninteraction?: (event: PlotInteractionEvent<Record<string, CellValue>>) => void;
+};
+
+const WIDENED_KEYS = new Set([
+  "key",
+  "interaction",
+  "oninspect",
+  "onselect",
+  "onlegendfocus",
+  "oninteraction",
+] as const);
+
+type WidenedKey =
+  | "key"
+  | "interaction"
+  | "oninspect"
+  | "onselect"
+  | "onlegendfocus"
+  | "oninteraction";
+
+/**
+ * Stable lazy view of plot props for the engine. Non-widened fields forward
+ * through the source proxy (per-field reactive deps). The six PublicKey
+ * fields cast once here instead of at the GGPlot call site.
+ */
+export function widenPlotProps<
+  Row extends Record<string, CellValue>,
+  Identity extends keyof Row | ((row: Row, index: number) => PropertyKey),
+>(props: GGPlotProps<Row, Identity>): EnginePlotProps {
+  return new Proxy(props as object, {
+    get(target, prop, receiver) {
+      if (typeof prop === "string" && WIDENED_KEYS.has(prop as WidenedKey)) {
+        // Six precise casts — checked return type is EnginePlotProps.
+        switch (prop as WidenedKey) {
+          case "key":
+            return props.key as EnginePlotProps["key"];
+          case "interaction":
+            return props.interaction as EnginePlotProps["interaction"];
+          case "oninspect":
+            return props.oninspect as EnginePlotProps["oninspect"];
+          case "onselect":
+            return props.onselect as EnginePlotProps["onselect"];
+          case "onlegendfocus":
+            return props.onlegendfocus as EnginePlotProps["onlegendfocus"];
+          case "oninteraction":
+            return props.oninteraction as EnginePlotProps["oninteraction"];
+        }
+      }
+      return Reflect.get(target, prop, receiver);
+    },
+  }) as EnginePlotProps;
 }
