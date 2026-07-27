@@ -1,0 +1,43 @@
+{
+  "id": "90-hline-mean-threshold",
+  "kind": "chart",
+  "prompt": "Scatter y against x and draw a horizontal reference line at y = 10 using geom_hline.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "x": 1, "y": 8 },
+      { "x": 2, "y": 12 },
+      { "x": 3, "y": 9 },
+      { "x": 4, "y": 11 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" }
+        }
+      },
+      {
+        "geom": "rule",
+        "stat": "identity",
+        "position": "identity",
+        "params": { "yintercept": 10 }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Canonical gold for geom_hline sugar: rule + yintercept annotation (#818)."
+}

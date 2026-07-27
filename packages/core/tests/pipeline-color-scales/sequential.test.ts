@@ -40,7 +40,7 @@ describe("sequential color scales", () => {
       { label: "1", fullLabel: "1" },
       { label: "10", fullLabel: "10" },
       { label: "100", fullLabel: "100" },
-      { label: "1,000", fullLabel: "1,000" },
+      { label: "1000", fullLabel: "1000" },
     ]);
     for (const [index, expectedY] of [180, 120, 60, 0].entries())
       expect(legend.ticks[index]?.y).toBeCloseTo(expectedY);

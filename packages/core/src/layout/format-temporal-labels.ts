@@ -73,7 +73,9 @@ function partValue(parts: readonly Intl.DateTimeFormatPart[], type: Intl.DateTim
 
 function displayParts(ms: number, options: TemporalLabelFormatOptions): TemporalDisplayParts {
   const locale = options.locale ?? "en-US";
-  const configuredTimezone = options.kind === "date" ? "UTC" : (options.timezone ?? "UTC");
+  // date and time-of-day are wall-clock-less / fixed UTC; datetime may carry a zone.
+  const configuredTimezone =
+    options.kind === "date" || options.kind === "time" ? "UTC" : (options.timezone ?? "UTC");
   const timezone =
     configuredTimezone === "Z" || configuredTimezone === "Etc/UTC" ? "UTC" : configuredTimezone;
   const d = new Date(ms);
@@ -252,9 +254,13 @@ export function formatTemporalTickSequence(
   const full = compileTemporalLabelFormat(
     options.kind === "date"
       ? "%Y-%m-%d"
-      : needsMilliseconds
-        ? "%Y-%m-%d %H:%M:%S.%L %Z"
-        : "%Y-%m-%d %H:%M:%S %Z",
+      : options.kind === "time"
+        ? needsMilliseconds
+          ? "%H:%M:%S.%L"
+          : "%H:%M:%S"
+        : needsMilliseconds
+          ? "%Y-%m-%d %H:%M:%S.%L %Z"
+          : "%Y-%m-%d %H:%M:%S %Z",
     options,
   );
   if (options.pattern !== undefined) {
@@ -270,23 +276,38 @@ export function formatTemporalTickSequence(
     let label: string;
     switch (options.interval.unit) {
       case "year":
-        label = String(part.year);
+        // time-of-day (#831) lives on 1970-01-01Z — never emit a calendar year.
+        label =
+          options.kind === "time" ? `${pad2(part.hour)}:${pad2(part.minute)}` : String(part.year);
         break;
       case "quarter":
-        label = `Q${String(Math.floor((part.month - 1) / 3) + 1)}${first || changedYear ? ` ${String(part.year)}` : ""}`;
+        label =
+          options.kind === "time"
+            ? `${pad2(part.hour)}:${pad2(part.minute)}`
+            : `Q${String(Math.floor((part.month - 1) / 3) + 1)}${first || changedYear ? ` ${String(part.year)}` : ""}`;
         break;
       case "month":
-        label = `${part.monthShort}${first || changedYear ? ` ${String(part.year)}` : ""}`;
+        label =
+          options.kind === "time"
+            ? `${pad2(part.hour)}:${pad2(part.minute)}`
+            : `${part.monthShort}${first || changedYear ? ` ${String(part.year)}` : ""}`;
         break;
       case "week":
       case "day":
-        label = changedMonth
-          ? `${part.monthShort} ${String(part.day)}, ${String(part.year)}`
-          : String(part.day);
+        label =
+          options.kind === "time"
+            ? `${pad2(part.hour)}:${pad2(part.minute)}`
+            : changedMonth
+              ? `${part.monthShort} ${String(part.day)}, ${String(part.year)}`
+              : String(part.day);
         break;
       case "hour":
       case "minute":
-        label = `${changedMonth || part.day !== previous?.day ? `${part.monthShort} ${String(part.day)} ` : ""}${pad2(part.hour)}:${pad2(part.minute)}`;
+        // time-of-day: never prefix a calendar date — values live on 1970-01-01Z.
+        label =
+          options.kind === "time"
+            ? `${pad2(part.hour)}:${pad2(part.minute)}`
+            : `${changedMonth || part.day !== previous?.day ? `${part.monthShort} ${String(part.day)} ` : ""}${pad2(part.hour)}:${pad2(part.minute)}`;
         break;
       case "second":
         label = `${pad2(part.hour)}:${pad2(part.minute)}:${pad2(part.second)}`;

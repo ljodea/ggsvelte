@@ -63,22 +63,51 @@ export type {
   ColLayerInput,
   DensityLayerInput,
   ErrorbarLayerInput,
+  LinerangeLayerInput,
+  PointrangeLayerInput,
+  CrossbarLayerInput,
   FacetFieldInput,
   FacetInput,
   HistogramLayerInput,
+  FreqpolyLayerInput,
+  HlineLayerInput,
+  JitterLayerInput,
   RibbonLayerInput,
   SegmentLayerInput,
   ViolinLayerInput,
+  PolygonLayerInput,
+  AblineLayerInput,
+  ContourLayerInput,
+  Density2dLayerInput,
+  Density2dFilledLayerInput,
+  DotplotLayerInput,
+  BlankLayerInput,
+  MapLayerInput,
+  SpokeLayerInput,
+  SfLayerInput,
+  SfTextLayerInput,
+  SfLabelLayerInput,
+  CurveLayerInput,
+  RugLayerInput,
+  StepLayerInput,
+  QqLayerInput,
+  QqLineLayerInput,
   LayerInput,
   LineLayerInput,
+  PathLayerInput,
   PointLayerInput,
   RasterLayerInput,
+  HexLayerInput,
   RectLayerInput,
   RuleLayerInput,
+  QuantileLayerInput,
   SmoothLayerInput,
   SpecInput,
   TextLayerInput,
+  LabelLayerInput,
   TileLayerInput,
+  Bin2dLayerInput,
+  VlineLayerInput,
 } from "./normalize-input.js";
 
 /** Canonicalize one channel: bare string -> { field }; clone canonical forms. */
@@ -123,22 +152,55 @@ function resolveLayerAes(plotAes: Aes | undefined, layerAes: Aes | undefined): A
   return Object.keys(out).length === 0 ? undefined : out;
 }
 
-/** Annotation-form rule layers (fixed intercepts) inherit NO plot aes —
- *  ggplot2's `inherit.aes = FALSE` on geom_vline/hline (Hadley lesson 15:
- *  honest, separate signatures for the two rule forms). */
+/** Annotation-form rule / hline / vline layers (fixed intercepts) inherit NO
+ *  plot aes — ggplot2's `inherit.aes = FALSE` on geom_vline/hline (Hadley
+ *  lesson 15: honest, separate signatures for the two rule forms).
+ *  Asymmetric: hline is annotation only when yintercept is set; vline only
+ *  when xintercept is set; rule when either intercept is set. */
 function isAnnotationRule(layer: LayerInput): boolean {
+  const params = layer.params as { xintercept?: unknown; yintercept?: unknown } | undefined;
+  if (layer.geom === "hline") return params?.yintercept !== undefined;
+  if (layer.geom === "vline") return params?.xintercept !== undefined;
   if (layer.geom !== "rule") return false;
-  const params = layer.params;
   return params?.xintercept !== undefined || params?.yintercept !== undefined;
 }
 
+/** Abline is always annotation-style (fixed slope/intercept; no plot aes). */
+function isAnnotationAbline(layer: LayerInput): boolean {
+  return layer.geom === "abline";
+}
+
+/**
+ * Convenience geom aliases (#818 / histogram / freqpoly): rewrite to the
+ * canonical geom name. Pure renames only — no cross-field params surgery.
+ */
+function canonicalGeom(geom: LayerInput["geom"]): LayerSpec["geom"] {
+  if (geom === "histogram") return "bar";
+  if (geom === "freqpoly") return "line";
+  if (geom === "jitter") return "point";
+  if (geom === "hline" || geom === "vline") return "rule";
+  return geom;
+}
+
 function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec {
-  const inherited = isAnnotationRule(layer) ? undefined : plotAes;
-  let aes = resolveLayerAes(inherited, normalizeAes(layer.aes));
+  // Data-driven hline/vline are one-axis rules: drop the orthogonal position
+  // channel from inheritance so plot-level x+y does not trigger rule-both-axes.
+  let layerAesInput = layer.aes;
+  if (layer.geom === "hline" && !isAnnotationRule(layer)) {
+    layerAesInput = { ...layerAesInput, x: null };
+  } else if (layer.geom === "vline" && !isAnnotationRule(layer)) {
+    layerAesInput = { ...layerAesInput, y: null };
+  }
+
+  const inherited = isAnnotationRule(layer) || isAnnotationAbline(layer) ? undefined : plotAes;
+  let aes = resolveLayerAes(inherited, normalizeAes(layerAesInput));
   // Unknown geoms fall back to identity defaults so normalize never throws —
   // validate() rejects them right after with the proper did-you-mean error.
   const defaults = GEOM_DEFAULTS[layer.geom] ?? { stat: "identity", position: "identity" };
-  const stat = layer.stat ?? defaults.stat;
+  // geom_sf: public stat_sf (#809 phase 7). Rewrite legacy portable
+  // `stat: "identity"` so re-normalize stays additive (draw path unchanged).
+  const rawStat = layer.stat ?? defaults.stat;
+  const stat = layer.geom === "sf" && rawStat === "identity" ? "sf" : rawStat;
   // Stat default mappings (ggplot2's `after_stat()` default aes): the count
   // and bin stats map y to their count column; the density stat maps y to
   // its density column.
@@ -148,9 +210,28 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   if (stat === "density" && aes?.y === undefined) {
     aes = { ...aes, y: { stat: "density" } };
   }
-  // The histogram geom is an ALIAS (one canonical form per concept): its
-  // post-normalize representation is a bar layer with the bin stat.
-  const geom = layer.geom === "histogram" ? "bar" : layer.geom;
+  // bin_hex maps fill to after_stat count (ggplot2 geom_hex default aes).
+  if (stat === "bin_hex" && aes?.fill === undefined) {
+    aes = { ...aes, fill: { stat: "count" } };
+  }
+  if (stat === "ecdf" && aes?.y === undefined) {
+    aes = { ...aes, y: { stat: "ecdf" } };
+  }
+  // density_2d_filled defaults fill to after_stat(level) like ggplot2.
+  if (
+    (stat === "density_2d_filled" || layer.geom === "density_2d_filled") &&
+    aes?.fill === undefined
+  ) {
+    aes = { ...aes, fill: { stat: "level" } };
+  }
+  if (stat === "bindot" && aes?.y === undefined) {
+    aes = { ...aes, y: { stat: "stackpos" } };
+  }
+  // bin_2d maps fill to after_stat count (ggplot2 geom_bin2d default aes).
+  if (stat === "bin_2d" && aes?.fill === undefined) {
+    aes = { ...aes, fill: { stat: "count" } };
+  }
+  const geom = canonicalGeom(layer.geom);
   const positionParams =
     "positionParams" in layer && layer.positionParams !== undefined
       ? { ...layer.positionParams }
@@ -160,10 +241,17 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   // "auto" is the render default — one canonical form per concept, so it
   // canonicalizes away (same rule as coord "cartesian" / a11y "auto").
   const render = layer.render === "auto" ? undefined : layer.render;
+  // Jitter alias has no position field on the input type; always use defaults.
+  const position =
+    layer.geom === "jitter"
+      ? defaults.position
+      : "position" in layer && layer.position !== undefined
+        ? layer.position
+        : defaults.position;
   const out = {
     geom,
     stat,
-    position: layer.position ?? defaults.position,
+    position,
     ...(positionParams !== undefined && { positionParams }),
     ...(render !== undefined && { render }),
     ...(aes !== undefined && { aes }),

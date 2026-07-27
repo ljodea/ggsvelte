@@ -1,0 +1,57 @@
+{
+  "id": "63-region-label-fill",
+  "kind": "chart",
+  "prompt": "Plot score against effort for each region as labels with fill-colored background boxes by region.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "effort",
+        "type": "quantitative"
+      },
+      {
+        "name": "score",
+        "type": "quantitative"
+      },
+      {
+        "name": "region",
+        "type": "nominal",
+        "examples": ["North", "South", "East"]
+      }
+    ],
+    "rowCount": 5
+  },
+  "data": {
+    "main": [
+      { "effort": 12, "score": 81, "region": "North" },
+      { "effort": 18, "score": 74, "region": "South" },
+      { "effort": 9, "score": 88, "region": "East" },
+      { "effort": 22, "score": 69, "region": "West" },
+      { "effort": 15, "score": 77, "region": "Central" }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "label",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "effort" },
+          "y": { "field": "score" },
+          "label": { "field": "region" },
+          "fill": { "field": "region" }
+        },
+        "params": {
+          "padding": 4,
+          "radius": 3
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Standalone geom_label with fill mapped to region for box backgrounds."
+}

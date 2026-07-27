@@ -1,0 +1,54 @@
+{
+  "id": "66-growth-quantile",
+  "kind": "chart",
+  "prompt": "Scatter yield against fertilizer dose and overlay linear quantile regression lines at the default 0.25, 0.5, and 0.75 quantiles.",
+  "dataProfile": {
+    "fields": [
+      { "name": "dose", "type": "quantitative" },
+      { "name": "yield", "type": "quantitative" }
+    ],
+    "rowCount": 12
+  },
+  "data": {
+    "main": [
+      { "dose": 1, "yield": 2.1 },
+      { "dose": 2, "yield": 3.4 },
+      { "dose": 3, "yield": 4.0 },
+      { "dose": 4, "yield": 5.5 },
+      { "dose": 5, "yield": 5.8 },
+      { "dose": 6, "yield": 7.2 },
+      { "dose": 7, "yield": 8.1 },
+      { "dose": 8, "yield": 9.4 },
+      { "dose": 2, "yield": 1.8 },
+      { "dose": 4, "yield": 6.9 },
+      { "dose": 6, "yield": 6.0 },
+      { "dose": 8, "yield": 11.2 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "dose" },
+          "y": { "field": "yield" }
+        }
+      },
+      {
+        "geom": "quantile",
+        "stat": "quantile",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "dose" },
+          "y": { "field": "yield" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_quantile defaults to linear y~x RQ at 0.25/0.5/0.75 (#805)."
+}

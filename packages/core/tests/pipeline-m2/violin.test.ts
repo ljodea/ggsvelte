@@ -52,6 +52,24 @@ describe("geom_violin", () => {
     expect(new Set(batch.fills).size).toBe(2);
   });
 
+  it("trains the y scale from the data values, not the violin width", () => {
+    const model = runPipeline(
+      gg(rows(), aes({ x: "cat", y: "v" }))
+        .geomViolin({ n: 32 })
+        .spec(),
+      size,
+    );
+    // ydensity stashes violinwidth (0-1) in frame ymin/ymax for the geometry.
+    // The y axis must still describe v, or every polygon is drawn far off-panel.
+    const [lo, hi] = model.scales.y.domain;
+    expect(hi).toBeGreaterThan(3);
+    const batch = model.scene.batches[0] as PathsBatch;
+    const ys = Array.from(batch.positions).filter((_, i) => i % 2 === 1);
+    expect(Math.min(...ys)).toBeGreaterThan(-size.height);
+    expect(Math.max(...ys)).toBeLessThan(size.height * 2);
+    expect(lo).toBeLessThan(hi);
+  });
+
   it("uses x auto hit mode", () => {
     const model = runPipeline(
       gg(rows(), aes({ x: "cat", y: "v" }))

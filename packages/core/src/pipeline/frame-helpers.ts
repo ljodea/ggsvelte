@@ -13,9 +13,11 @@ export { carriedColumns, deriveLayerGroups } from "./frame-group-columns.js";
 export function emptyFrameExtras(): Pick<
   LayerFrame,
   | "bin"
+  | "binCut"
   | "dodge"
   | "box"
   | "smooth"
+  | "sf"
   | "ymin"
   | "ymax"
   | "xmin"
@@ -28,12 +30,16 @@ export function emptyFrameExtras(): Pick<
   | "offsetY"
   | "xIntercepts"
   | "yIntercepts"
+  | "hexWidth"
+  | "hexHeight"
 > {
   return {
     bin: null,
+    binCut: null,
     dodge: null,
     box: null,
     smooth: null,
+    sf: null,
     ymin: null,
     ymax: null,
     xmin: null,
@@ -46,6 +52,8 @@ export function emptyFrameExtras(): Pick<
     offsetY: null,
     xIntercepts: [],
     yIntercepts: [],
+    hexWidth: null,
+    hexHeight: null,
   };
 }
 

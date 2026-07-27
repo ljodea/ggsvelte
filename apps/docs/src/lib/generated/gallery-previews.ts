@@ -45,10 +45,34 @@ export const GALLERY_PREVIEWS = [
     sha256: "657e28882889051d30f128a66483bb0229a624edd6c2eb8d1ab4d49ebc02db58",
   },
   {
+    id: "bin2d/basic",
+    filename: "bin2d-basic-light.png",
+    path: "/previews/bin2d-basic-light.png",
+    sha256: "b0a1115a204dce5d5582cde656e2fa4fc8d395c49032c32d262aed476423121c",
+  },
+  {
+    id: "blank/axes-only",
+    filename: "blank-axes-only-light.png",
+    path: "/previews/blank-axes-only-light.png",
+    sha256: "2939452e748b0d9b660dbfdb98ca2fbb0cb23e87eee08042e976ae8967c516cd",
+  },
+  {
+    id: "blank/domain-expand",
+    filename: "blank-domain-expand-light.png",
+    path: "/previews/blank-domain-expand-light.png",
+    sha256: "44155b76550fca59d37e31acd3ab437d7d68868f505bd362386d62b195385d7d",
+  },
+  {
     id: "boxplot/by-category",
     filename: "boxplot-by-category-light.png",
     path: "/previews/boxplot-by-category-light.png",
     sha256: "cd66029f5fcfd9832574b1eb685fac131e2850805a85966cada49060b3b95b9f",
+  },
+  {
+    id: "boxplot/violin",
+    filename: "boxplot-violin-light.png",
+    path: "/previews/boxplot-violin-light.png",
+    sha256: "23d86fc50333f3b25c84e520b73915939bda7745a1657a5ba2ebd6e7a19d6522",
   },
   {
     id: "col/basic",
@@ -69,6 +93,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "ee0273feac87f1d3ba711a51828ed04d5fe42f6f49f656e0cada1dcbaca5b47f",
   },
   {
+    id: "col/theme-linedraw",
+    filename: "col-theme-linedraw-light.png",
+    path: "/previews/col-theme-linedraw-light.png",
+    sha256: "f2945fd0fff31178c8bdfe36d1785a51901ada1fc76106efd2d6be20beea10e5",
+  },
+  {
     id: "col/value-labels",
     filename: "col-value-labels-light.png",
     path: "/previews/col-value-labels-light.png",
@@ -78,7 +108,7 @@ export const GALLERY_PREVIEWS = [
     id: "color/binned",
     filename: "color-binned-light.png",
     path: "/previews/color-binned-light.png",
-    sha256: "61049cd4a16b2959b48e1d5b73c5a3407df1743d60d502a50c2c274589e9f532",
+    sha256: "f62ab13b36cd7a0f17fe1f0452517c1a21335b47e894fb9700deb84381513f79",
   },
   {
     id: "color/continuous",
@@ -87,16 +117,52 @@ export const GALLERY_PREVIEWS = [
     sha256: "ad530227b719c0c8b12f928d996f53e213b08121d36b31e82809bac5462807e5",
   },
   {
+    id: "contour/basic",
+    filename: "contour-basic-light.png",
+    path: "/previews/contour-basic-light.png",
+    sha256: "0ede793a6fadca7aeb2e1fc705a6853fff041ecf4685aa538d1dd1c261adc183",
+  },
+  {
+    id: "curve/connectors",
+    filename: "curve-connectors-light.png",
+    path: "/previews/curve-connectors-light.png",
+    sha256: "5787dfdf4af35aa22721d1d7b0053dc73a73a5914b831d33d10a499d80817f0f",
+  },
+  {
+    id: "density/kde-2d",
+    filename: "density-kde-2d-light.png",
+    path: "/previews/density-kde-2d-light.png",
+    sha256: "2484e5beaf043405416d669d1d9b601df11b62ec7c78cfdcd7eb98b5da404800",
+  },
+  {
+    id: "density/kde-2d-filled",
+    filename: "density-kde-2d-filled-light.png",
+    path: "/previews/density-kde-2d-filled-light.png",
+    sha256: "bc55ffc8fb6dcf9992bfeb3a01efa3565bba78ab8c3ca89881e36b2d754dc3ae",
+  },
+  {
     id: "density/overlay",
     filename: "density-overlay-light.png",
     path: "/previews/density-overlay-light.png",
     sha256: "a13b8429c32efa4815fcf3c617fd8197e518e7173a5fd893a191dbe9d45e93e3",
   },
   {
+    id: "dotplot/histodot",
+    filename: "dotplot-histodot-light.png",
+    path: "/previews/dotplot-histodot-light.png",
+    sha256: "6d45f51f3e3f4aac7a30d7924075751119c086186187993a071dbbb7fcaea198",
+  },
+  {
     id: "errorbar/mean-se",
     filename: "errorbar-mean-se-light.png",
     path: "/previews/errorbar-mean-se-light.png",
     sha256: "602aaec5f3f02bd322004d4f3800d414139948cad4d04d35d190ccd0f7542e64",
+  },
+  {
+    id: "errorbar/summary-bin",
+    filename: "errorbar-summary-bin-light.png",
+    path: "/previews/errorbar-summary-bin-light.png",
+    sha256: "06e4a1e517a4630def95e947a30a5e118d2f0d86c3de74323833c04c0af5aec2",
   },
   {
     id: "facet/ordered-side-strips",
@@ -117,10 +183,28 @@ export const GALLERY_PREVIEWS = [
     sha256: "5b90c498aad252a867417319e5fac04e39e2b6ce6bb326ec97c22c112b16da64",
   },
   {
+    id: "freqpoly/basic",
+    filename: "freqpoly-basic-light.png",
+    path: "/previews/freqpoly-basic-light.png",
+    sha256: "29209d4a65b24bba0dad9bb91a70aaa3d547bf4d24689297f8ea391ebf0ec86c",
+  },
+  {
+    id: "hex/basic",
+    filename: "hex-basic-light.png",
+    path: "/previews/hex-basic-light.png",
+    sha256: "e6514f5698e4a33726342f36653b1397e3e0a4d19a1961344dc26e97a01190b0",
+  },
+  {
     id: "histogram/basic",
     filename: "histogram-basic-light.png",
     path: "/previews/histogram-basic-light.png",
     sha256: "c69f977b2621aceaa9ffd0135d6ce1127c637e2d615587762611f970d91e5e48",
+  },
+  {
+    id: "hline/threshold",
+    filename: "hline-threshold-light.png",
+    path: "/previews/hline-threshold-light.png",
+    sha256: "be49fc17cd14fe909bfd878c6b86ef9930b9a57966672c78d09f0897dbd21dfc",
   },
   {
     id: "interaction/brush-zoom",
@@ -159,6 +243,24 @@ export const GALLERY_PREVIEWS = [
     sha256: "be96a7eebfea75f5a8f6beaee4e8322b5c51ee8726656fe840f2040f67784348",
   },
   {
+    id: "jitter/basic",
+    filename: "jitter-basic-light.png",
+    path: "/previews/jitter-basic-light.png",
+    sha256: "5b200ec3afed907940cede09cf159dc882df2279069e906a82324d0a0ee7ddb5",
+  },
+  {
+    id: "label/basic",
+    filename: "label-basic-light.png",
+    path: "/previews/label-basic-light.png",
+    sha256: "d39c6fdddc4a344aaeb47b34e5300b705983afbc717398bf93efd857b67f4bd8",
+  },
+  {
+    id: "line/ecdf",
+    filename: "line-ecdf-light.png",
+    path: "/previews/line-ecdf-light.png",
+    sha256: "50ddc15712530f71fda35c44b4cb11db0ca2ee47fddce5004960322ee18401c3",
+  },
+  {
     id: "line/multi-series",
     filename: "line-multi-series-light.png",
     path: "/previews/line-multi-series-light.png",
@@ -171,6 +273,36 @@ export const GALLERY_PREVIEWS = [
     sha256: "3b444fe28067e31a133c512c117405bbd0f238c60a44d07b8d7d00215dabb780",
   },
   {
+    id: "map/choropleth",
+    filename: "map-choropleth-light.png",
+    path: "/previews/map-choropleth-light.png",
+    sha256: "e30da20b2d785e37d11a646975a11efdb979415cd6ffd5d8ee16d97860a812d8",
+  },
+  {
+    id: "path/connect-hv",
+    filename: "path-connect-hv-light.png",
+    path: "/previews/path-connect-hv-light.png",
+    sha256: "957ba761ba22e2ecfbd69194872b6471f8a52b97887ea152b633b78da9a3f0a0",
+  },
+  {
+    id: "path/ellipse-rings",
+    filename: "path-ellipse-rings-light.png",
+    path: "/previews/path-ellipse-rings-light.png",
+    sha256: "d6b2b537e1c4669d03da7ebe18a48fdabd94e06d8e408aa012e9e00cdba81e9c",
+  },
+  {
+    id: "path/trajectory",
+    filename: "path-trajectory-light.png",
+    path: "/previews/path-trajectory-light.png",
+    sha256: "2ec864cf245cbb1b253a89680e6002a2879c70954c3e4903aee4d2218648a4b8",
+  },
+  {
+    id: "point/abline-identity",
+    filename: "point-abline-identity-light.png",
+    path: "/previews/point-abline-identity-light.png",
+    sha256: "88347d12347639f9758ac38be3244faf3b7cf476432858cc7e11691e9ef0fa8f",
+  },
+  {
     id: "point/canvas-scatter",
     filename: "point-canvas-scatter-light.png",
     path: "/previews/point-canvas-scatter-light.png",
@@ -181,6 +313,18 @@ export const GALLERY_PREVIEWS = [
     filename: "point-fixed-aspect-light.png",
     path: "/previews/point-fixed-aspect-light.png",
     sha256: "a01023c80d53494482d6939976252005279c66fdde9ec71823d19940b181a672",
+  },
+  {
+    id: "point/gradient-continuous",
+    filename: "point-gradient-continuous-light.png",
+    path: "/previews/point-gradient-continuous-light.png",
+    sha256: "52029b5a4a501f00b305ac5f26b69eeb75ded068a91dc1d35a7c7a45481e102a",
+  },
+  {
+    id: "point/hue-discrete",
+    filename: "point-hue-discrete-light.png",
+    path: "/previews/point-hue-discrete-light.png",
+    sha256: "0a438791fffccced034955c736fba5ae0a4bdcc7987880cf3e1042b39e536f32",
   },
   {
     id: "point/jitter",
@@ -201,16 +345,58 @@ export const GALLERY_PREVIEWS = [
     sha256: "d4dff22d6dc70f24c0d452ee4f488909f72dc2fedff68fb59e48f02d14acc15a",
   },
   {
+    id: "point/quantile-lines",
+    filename: "point-quantile-lines-light.png",
+    path: "/previews/point-quantile-lines-light.png",
+    sha256: "3e231b64b2cccd11a5a2c4c7748e1461074f0e01f1173bcd968d8d21a6f5e305",
+  },
+  {
     id: "point/scatter-color",
     filename: "point-scatter-color-light.png",
     path: "/previews/point-scatter-color-light.png",
     sha256: "db5bc0297f0c6d3f194271b375cdac7627b151e43755945be5180b19bdaedd7d",
   },
   {
+    id: "point/stat-manual-mean",
+    filename: "point-stat-manual-mean-light.png",
+    path: "/previews/point-stat-manual-mean-light.png",
+    sha256: "7795cd797aa8457d6ea63b2364ff8e43f0ca871250b0f13d09ecada951b5b142",
+  },
+  {
+    id: "point/stat-unique",
+    filename: "point-stat-unique-light.png",
+    path: "/previews/point-stat-unique-light.png",
+    sha256: "0f22d2ac20a70d65c59e33fe5486c1a5856cb55e8fc105c24952ce7784091102",
+  },
+  {
+    id: "point/steps-binned",
+    filename: "point-steps-binned-light.png",
+    path: "/previews/point-steps-binned-light.png",
+    sha256: "3097ea59517b54c748254fe129f95f52dffab95ecfcfc4338435574f5e9315a0",
+  },
+  {
     id: "point/style-scales",
     filename: "point-style-scales-light.png",
     path: "/previews/point-style-scales-light.png",
     sha256: "3f52ea658edff9c430cede998f7fb33f900de36c3e17dfbbc22f0328cab6a0e7",
+  },
+  {
+    id: "point/void-chrome",
+    filename: "point-void-chrome-light.png",
+    path: "/previews/point-void-chrome-light.png",
+    sha256: "6ea9c8f342288fc5f2069fd6fdd5da6445713d4c3bb6f5bbe29b38ed26d9b9f2",
+  },
+  {
+    id: "polygon/regions",
+    filename: "polygon-regions-light.png",
+    path: "/previews/polygon-regions-light.png",
+    sha256: "79216d10146fd23ddac6fa368be3dd4c87c1ffa5681ee6dbb2b5e1157316c156",
+  },
+  {
+    id: "qq/normal",
+    filename: "qq-normal-light.png",
+    path: "/previews/qq-normal-light.png",
+    sha256: "d839230f6ef08ed5a775e8b88047ecb2734488b40ef8f1187ef4bb1ef3ab6a91",
   },
   {
     id: "raster/grid",
@@ -255,10 +441,52 @@ export const GALLERY_PREVIEWS = [
     sha256: "db94c25dd934a387e9d35657c2789dc098a17e7a886583ca07f3137ad6f8fc11",
   },
   {
+    id: "sf/basic",
+    filename: "sf-basic-light.png",
+    path: "/previews/sf-basic-light.png",
+    sha256: "ab18e17562cdb41056215212f2637717b1a2fd84c187fc5566139ffa9d88c3cf",
+  },
+  {
+    id: "sf/boxed-labels",
+    filename: "sf-boxed-labels-light.png",
+    path: "/previews/sf-boxed-labels-light.png",
+    sha256: "ee33e8fcd2e284c607ec8c4661fb9312ecb90af0cb052abba0a8a5e5ce4baa56",
+  },
+  {
+    id: "sf/geometry-collection",
+    filename: "sf-geometry-collection-light.png",
+    path: "/previews/sf-geometry-collection-light.png",
+    sha256: "82adc75dc8d359ca9b2c49af45f26abc3af229090c587bc86109a130df10b701",
+  },
+  {
+    id: "sf/holes",
+    filename: "sf-holes-light.png",
+    path: "/previews/sf-holes-light.png",
+    sha256: "32e4106b95aa7391426c014e5988bad7f91895f38f8b1a647d8dadcd83661256",
+  },
+  {
+    id: "sf/labels",
+    filename: "sf-labels-light.png",
+    path: "/previews/sf-labels-light.png",
+    sha256: "de80a275be7b22349b7776bb03c41f2f4dc7eb19f4e666d92604329d86232b0f",
+  },
+  {
     id: "smooth/loess-scatter",
     filename: "smooth-loess-scatter-light.png",
     path: "/previews/smooth-loess-scatter-light.png",
     sha256: "e5e8f44de5ea850ec5a6fea1b4a6eede2fbf777f21c15b11823c5c77abd0c724",
+  },
+  {
+    id: "spoke/vector-field",
+    filename: "spoke-vector-field-light.png",
+    path: "/previews/spoke-vector-field-light.png",
+    sha256: "928a63297721edd0993552dd0ff362d981b62f5fb3f842ffb98decd0143ce344",
+  },
+  {
+    id: "step/ecdf",
+    filename: "step-ecdf-light.png",
+    path: "/previews/step-ecdf-light.png",
+    sha256: "1d4f06f678045fc0ce0c7b6c81591fc2b47e38a922733dd2728e65cf70e311c8",
   },
   {
     id: "text/labels",
@@ -271,5 +499,11 @@ export const GALLERY_PREVIEWS = [
     filename: "tile-heatmap-light.png",
     path: "/previews/tile-heatmap-light.png",
     sha256: "0d3949e02777b5dae7cbc1a2c92b67aeb26568065e77df7f86ae805ee98533af",
+  },
+  {
+    id: "vline/cutoff",
+    filename: "vline-cutoff-light.png",
+    path: "/previews/vline-cutoff-light.png",
+    sha256: "4a110ef7063488f0cfab75bba9d533ada264636dc5438b71bb1ac73cd0cac759",
   },
 ] as const satisfies readonly GalleryPreview[];

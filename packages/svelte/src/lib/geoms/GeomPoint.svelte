@@ -28,6 +28,10 @@
     data?: DataInput | readonly Record<string, unknown>[];
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
     aes?: AesInput;
+    /**
+     * identity | unique | summary_bin (#817) | manual (#814).
+     */
+    stat?: "identity" | "unique" | "summary_bin" | "manual";
     /** Position adjustment: "identity" (default) | "jitter" (seeded) | "nudge". */
     position?: PointPosition;
     /** Jitter (width/height/seed) or nudge (x/y) parameters. */
@@ -37,5 +41,17 @@
   }
 
   const props: Props = $props();
-  createGeomLayer("point", () => props, ["alpha", "size", "shape"]);
+  createGeomLayer("point", () => props, [
+    "alpha",
+    "size",
+    "shape",
+    "bins",
+    "binwidth",
+    "boundary",
+    "center",
+    "closed",
+    "fun",
+    "funMin",
+    "funMax",
+  ]);
 </script>
