@@ -5,9 +5,13 @@ import type { RectsBatch } from "../scene.js";
 import { resolution as resolutionOf } from "../stats/numeric.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
-import { numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
+import {
+  constantStyle,
+  mappedPaintVector,
+  numericStyleVector,
+  type ResolvedStyleScales,
+} from "./geometry-style.js";
 import { DEFAULT_BAR_WIDTH, removedWarning } from "./geometry-shared.js";
 import { emitRectRows } from "./geometry-rects-emit.js";
 
@@ -55,8 +59,7 @@ export function rectsBatch(
     rects,
     rowIndex,
     fill: binding.fill.constant,
-    alpha:
-      typeof binding.alpha.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1),
+    alpha: constantStyle(binding, params, "alpha", 1),
   };
   const alphas = numericStyleVector(frame, "alpha", keptRows, styles);
   if (alphas !== undefined) {
@@ -64,12 +67,7 @@ export function rectsBatch(
     batch.alphas = alphas;
   }
   if (fill !== null && (frame.fillValues !== null || binding.fill.scaledConstant !== null)) {
-    batch.fills = Array.from({ length: kept }, (_, j) =>
-      colorOf(
-        fill,
-        frame.fillValues === null ? binding.fill.scaledConstant! : frame.fillValues[keptRows[j]!]!,
-      ),
-    );
+    batch.fills = mappedPaintVector(frame, "fill", fill, keptRows);
   }
   return batch;
 }

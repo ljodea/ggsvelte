@@ -5,9 +5,13 @@ import type { PathsBatch } from "../scene.js";
 
 import { hexVertices } from "../stats/bin-hex.js";
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
-import { numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
+import {
+  constantStyle,
+  numericStyleVector,
+  paintVector,
+  type ResolvedStyleScales,
+} from "./geometry-style.js";
 
 /**
  * Project one data-space hex into panel-local vertices.
@@ -49,15 +53,6 @@ export function hexBatch(
   const closedFrameRows = new Uint32Array(totalVerts);
   const pathOffsets = new Uint32Array(n + 1);
   const keptRows = new Uint32Array(n);
-  const fills: (string | null)[] = [];
-  const strokes: (string | null)[] = [];
-
-  const wantsFill =
-    fill !== null && (frame.fillValues !== null || binding.fill.scaledConstant !== null);
-  const wantsStroke =
-    color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null);
-  const constantStroke = binding.color.constant;
-
   let cursor = 0;
   let subpaths = 0;
   for (let row = 0; row < n; row++) {
@@ -92,20 +87,6 @@ export function hexBatch(
       cursor = start;
       continue;
     }
-    if (wantsFill && fill !== null) {
-      const value =
-        frame.fillValues === null ? binding.fill.scaledConstant! : frame.fillValues[row]!;
-      fills.push(colorOf(fill, value));
-    } else {
-      fills.push(binding.fill.constant);
-    }
-    if (wantsStroke && color !== null) {
-      const value =
-        frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
-      strokes.push(colorOf(color, value));
-    } else {
-      strokes.push(constantStroke);
-    }
     keptRows[subpaths] = row;
     subpaths++;
   }
@@ -118,6 +99,8 @@ export function hexBatch(
   // centers / non-finite projected vertices leave gaps that would misalign alpha
   // and linewidth with the emitted shapes (same pattern as edge-rects keptRows).
   const styleRows = keptRows.subarray(0, subpaths);
+  const fills = paintVector(frame, "fill", fill, styleRows);
+  const strokes = paintVector(frame, "color", color, styleRows);
   const alphas = numericStyleVector(frame, "alpha", styleRows, styles);
   const linewidths = numericStyleVector(frame, "linewidth", styleRows, styles);
 
@@ -132,17 +115,9 @@ export function hexBatch(
     fills,
     closed: true,
     closedFrameRows: closedFrameRows.subarray(0, cursor).slice(),
-    linewidth:
-      typeof binding.linewidth?.constant === "number"
-        ? binding.linewidth.constant
-        : (params.linewidth ?? 0),
+    linewidth: constantStyle(binding, params, "linewidth", 0),
     ...(linewidths !== undefined && { linewidths }),
-    alpha:
-      alphas === undefined
-        ? typeof binding.alpha?.constant === "number"
-          ? binding.alpha.constant
-          : (params.alpha ?? 1)
-        : 1,
+    alpha: alphas === undefined ? constantStyle(binding, params, "alpha", 1) : 1,
     ...(alphas !== undefined && { alphas }),
     curve: "linear",
   };

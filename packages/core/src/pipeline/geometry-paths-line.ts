@@ -8,6 +8,7 @@ import { linetypeIndex, type Linetype } from "../scales/style.js";
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import {
+  constantStyle,
   indexedStyleVector,
   numericStyleVector,
   type ResolvedStyleScales,
@@ -84,11 +85,14 @@ export function lineBatch(
   const linetypeIndexes = indexedStyleVector(frame, "linetype", styleRows, styles, (value) =>
     linetypeIndex(value as Linetype),
   );
-  const literalLinewidth = binding.linewidth.constant;
-  const literalAlpha = binding.alpha.constant;
   const literalLinetype = binding.linetype.constant;
-  const paramLinewidth = "linewidth" in params ? params.linewidth : undefined;
-  const paramAlpha = "alpha" in params ? params.alpha : undefined;
+  const styleParams: { alpha?: number; linewidth?: number } = {};
+  if ("linewidth" in params && typeof params.linewidth === "number") {
+    styleParams.linewidth = params.linewidth;
+  }
+  if ("alpha" in params && typeof params.alpha === "number") {
+    styleParams.alpha = params.alpha;
+  }
   return {
     kind: "paths",
     layerIndex: binding.index,
@@ -98,17 +102,9 @@ export function lineBatch(
     ...(frameRowIndex !== undefined && { frameRowIndex }),
     pathOffsets,
     strokes,
-    linewidth:
-      typeof literalLinewidth === "number"
-        ? literalLinewidth
-        : (paramLinewidth ?? DEFAULT_LINEWIDTH),
+    linewidth: constantStyle(binding, styleParams, "linewidth", DEFAULT_LINEWIDTH),
     ...(linewidths !== undefined && { linewidths }),
-    alpha:
-      alphas === undefined
-        ? typeof literalAlpha === "number"
-          ? literalAlpha
-          : (paramAlpha ?? 1)
-        : 1,
+    alpha: alphas === undefined ? constantStyle(binding, styleParams, "alpha", 1) : 1,
     ...(alphas !== undefined && { alphas }),
     ...(typeof literalLinetype === "string" && { linetype: literalLinetype as Linetype }),
     ...(linetypeIndexes !== undefined && { linetypeIndexes }),

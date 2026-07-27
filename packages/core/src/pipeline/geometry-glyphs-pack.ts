@@ -5,9 +5,13 @@ import type { GlyphsBatch } from "../scene.js";
 import { FONT_METRICS } from "../layout/font-metrics.js";
 import { MetricsTableMeasurer } from "../layout/measure.js";
 
-import { numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
+import {
+  constantStyle,
+  mappedPaintVector,
+  numericStyleVector,
+  type ResolvedStyleScales,
+} from "./geometry-style.js";
 import type { LayerFrame, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
 import { DEFAULT_TEXT_SIZE } from "./geometry-shared.js";
 import type { EmittedGlyphs } from "./geometry-glyphs-rows.js";
 
@@ -51,8 +55,7 @@ export function packGlyphsBatch(input: {
     color: binding.color.constant,
     size: fontSize,
     anchor: params.anchor ?? "middle",
-    alpha:
-      typeof binding.alpha?.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1),
+    alpha: constantStyle(binding, params, "alpha", 1),
   };
   const sizes =
     binding.size === undefined
@@ -93,14 +96,7 @@ export function packGlyphsBatch(input: {
     const wantsFills =
       fill !== null && (frame.fillValues !== null || binding.fill.scaledConstant !== null);
     if (wantsFills && fill !== null) {
-      const fills = Array.from<string>({ length: emitted.kept });
-      for (let j = 0; j < emitted.kept; j++) {
-        const row = emitted.styleRows[j]!;
-        const value =
-          frame.fillValues === null ? binding.fill.scaledConstant! : frame.fillValues[row]!;
-        fills[j] = colorOf(fill, value);
-      }
-      batch.boxFills = fills;
+      batch.boxFills = mappedPaintVector(frame, "fill", fill, emitted.styleRows);
       batch.boxFill = null;
     } else {
       // Constant fill from binding, else theme paper at render time (null).

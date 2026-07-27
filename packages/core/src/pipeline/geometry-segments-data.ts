@@ -2,10 +2,10 @@
  * Emit data-driven vertical/horizontal rule segments with optional colors.
  */
 import type { LayerFrame, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import { positionOf } from "./geometry-shared.js";
 import type { SegmentEmitBuffers } from "./geometry-segments-emit.js";
+import { mappedPaintVector } from "./geometry-style.js";
 
 export function emitDataSegments(input: {
   frame: LayerFrame;
@@ -45,9 +45,7 @@ export function emitDataSegments(input: {
     if (buffers.kept > before) {
       styleRows[before] = row;
       if (wantsColors && color !== null && strokes !== null) {
-        const value =
-          frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
-        strokes[before] = colorOf(color, value);
+        strokes[before] = mappedPaintVector(frame, "color", color, [row])[0]!;
       }
     }
   }

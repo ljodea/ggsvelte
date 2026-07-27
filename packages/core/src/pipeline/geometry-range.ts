@@ -10,7 +10,6 @@ import type { GeometryBatch, PointsBatch, RectsBatch, SegmentsBatch } from "../s
 import { linetypeIndex, pointShapeIndex, type Linetype, type PointShape } from "../scales/style.js";
 
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
-import { colorOf } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import {
   DEFAULT_POINT_SIZE,
@@ -19,7 +18,9 @@ import {
   removedWarning,
 } from "./geometry-shared.js";
 import {
+  constantStyle,
   indexedStyleVector,
+  mappedPaintVector,
   numericStyleVector,
   type ResolvedStyleScales,
 } from "./geometry-style.js";
@@ -39,10 +40,7 @@ function packStrokeBatch(
   linewidthScale = 1,
 ): SegmentsBatch {
   const { binding } = frame;
-  const baseLw =
-    typeof binding.linewidth?.constant === "number"
-      ? binding.linewidth.constant
-      : (params.linewidth ?? DEFAULT_RULE_LINEWIDTH);
+  const baseLw = constantStyle(binding, params, "linewidth", DEFAULT_RULE_LINEWIDTH);
   const batch: SegmentsBatch = {
     kind: "segments",
     layerIndex: binding.index,
@@ -51,8 +49,7 @@ function packStrokeBatch(
     rowIndex,
     stroke: binding.color.constant,
     linewidth: baseLw * linewidthScale,
-    alpha:
-      typeof binding.alpha?.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1),
+    alpha: constantStyle(binding, params, "alpha", 1),
     ...(typeof binding.linetype?.constant === "string" && {
       linetype: binding.linetype.constant as Linetype,
     }),
@@ -93,7 +90,6 @@ export function linerangeBatch(
   const segments = new Float32Array(n * 4);
   const rowIndex = new Uint32Array(n);
   const styleRows = new Uint32Array(n);
-  const strokes = wantsColors && color !== null ? Array.from<string>({ length: n }) : null;
   let kept = 0;
   let removed = 0;
 
@@ -121,11 +117,6 @@ export function linerangeBatch(
     segments[so + 3] = y1;
     rowIndex[kept] = frame.rowIndex[row]!;
     styleRows[kept] = row;
-    if (strokes !== null) {
-      const value =
-        frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
-      strokes[kept] = colorOf(color!, value);
-    }
     kept++;
   }
 
@@ -134,7 +125,8 @@ export function linerangeBatch(
   const outSeg = kept === n ? segments : segments.subarray(0, kept * 4).slice();
   const outRows = kept === n ? rowIndex : rowIndex.subarray(0, kept).slice();
   const outStyle = kept === n ? styleRows : styleRows.subarray(0, kept).slice();
-  const outStrokes = strokes === null ? null : kept === n ? strokes : strokes.slice(0, kept);
+  const outStrokes =
+    wantsColors && color !== null ? mappedPaintVector(frame, "color", color, outStyle) : null;
   return packStrokeBatch(frame, styles, outSeg, outRows, outStyle, outStrokes, params);
 }
 
@@ -172,7 +164,6 @@ function midPointsBatch(
   const positions = new Float32Array(n * 2);
   const rowIndex = new Uint32Array(n);
   const styleRows = new Uint32Array(n);
-  const colors = wantsColors && color !== null ? Array.from<string>({ length: n }) : null;
   let kept = 0;
 
   for (let row = 0; row < n; row++) {
@@ -197,11 +188,6 @@ function midPointsBatch(
     positions[o + 1] = fx.innerHeight - ty * fx.innerHeight;
     rowIndex[kept] = frame.rowIndex[row]!;
     styleRows[kept] = row;
-    if (colors !== null) {
-      const value =
-        frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
-      colors[kept] = colorOf(color!, value);
-    }
     kept++;
   }
   if (kept === 0) return null;
@@ -219,8 +205,7 @@ function midPointsBatch(
       typeof binding.size?.constant === "number"
         ? binding.size.constant
         : (params.size ?? DEFAULT_POINT_SIZE),
-    alpha:
-      typeof binding.alpha?.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1),
+    alpha: constantStyle(binding, params, "alpha", 1),
     shape:
       typeof binding.shape?.constant === "string"
         ? (binding.shape.constant as PointShape)
@@ -238,7 +223,9 @@ function midPointsBatch(
     batch.alphas = alphas;
   }
   if (shapeIndexes !== undefined) batch.shapeIndexes = shapeIndexes;
-  if (colors !== null) batch.colors = kept === n ? colors : colors.slice(0, kept);
+  if (wantsColors && color !== null) {
+    batch.colors = mappedPaintVector(frame, "color", color, outStyle);
+  }
   return batch;
 }
 
@@ -269,14 +256,10 @@ export function crossbarBatches(
   const rects = new Float32Array(n * 4);
   const rectRows = new Uint32Array(n);
   const rectStyle = new Uint32Array(n);
-  const fills = wantsFill && fill !== null ? Array.from<string>({ length: n }) : null;
-  const strokes = wantsStroke && color !== null ? Array.from<string>({ length: n }) : null;
-
   // Mid line: 1 segment per row
   const segs = new Float32Array(n * 4);
   const segRows = new Uint32Array(n);
   const segStyle = new Uint32Array(n);
-  const midStrokes = wantsStroke && color !== null ? Array.from<string>({ length: n }) : null;
 
   let kept = 0;
   let removed = 0;
@@ -328,19 +311,6 @@ export function crossbarBatches(
     segs[ro + 3] = midY;
     segRows[kept] = frame.rowIndex[row]!;
     segStyle[kept] = row;
-
-    if (fills !== null) {
-      const value =
-        frame.fillValues === null ? binding.fill.scaledConstant! : frame.fillValues[row]!;
-      fills[kept] = colorOf(fill!, value);
-    }
-    if (strokes !== null) {
-      const value =
-        frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[row]!;
-      const c = colorOf(color!, value);
-      strokes[kept] = c;
-      if (midStrokes !== null) midStrokes[kept] = c;
-    }
     kept++;
   }
 
@@ -354,17 +324,18 @@ export function crossbarBatches(
   const outSegRows = kept === n ? segRows : segRows.subarray(0, kept).slice();
   const outSegStyle = kept === n ? segStyle : segStyle.subarray(0, kept).slice();
 
-  const strokeWidth =
-    typeof binding.linewidth?.constant === "number"
-      ? binding.linewidth.constant
-      : (params.linewidth ?? DEFAULT_RULE_LINEWIDTH);
+  const strokeWidth = constantStyle(binding, params, "linewidth", DEFAULT_RULE_LINEWIDTH);
+  const outFills =
+    wantsFill && fill !== null ? mappedPaintVector(frame, "fill", fill, outRectStyle) : null;
+  const outStrokes =
+    wantsStroke && color !== null ? mappedPaintVector(frame, "color", color, outRectStyle) : null;
   // ggplot2 geom_crossbar defaults fill = NA (outlined box). Match boxplot
   // body: paper fillRole when no fill is mapped/constant.
   const hasFill =
     binding.fill.constant !== null ||
     binding.fill.field !== null ||
     binding.fill.scaledConstant !== null ||
-    fills !== null;
+    outFills !== null;
   const rectBatch: RectsBatch = {
     kind: "rects",
     layerIndex: binding.index,
@@ -373,8 +344,7 @@ export function crossbarBatches(
     rowIndex: outRectRows,
     fill: binding.fill.constant,
     ...(hasFill ? {} : { fillRole: "paper" as const }),
-    alpha:
-      typeof binding.alpha?.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1),
+    alpha: constantStyle(binding, params, "alpha", 1),
     stroke: binding.color.constant,
     strokeWidth,
     anchor: "center",
@@ -384,8 +354,8 @@ export function crossbarBatches(
     rectBatch.alpha = 1;
     rectBatch.alphas = alphas;
   }
-  if (fills !== null) rectBatch.fills = kept === n ? fills : fills.slice(0, kept);
-  if (strokes !== null) rectBatch.strokes = kept === n ? strokes : strokes.slice(0, kept);
+  if (outFills !== null) rectBatch.fills = outFills;
+  if (outStrokes !== null) rectBatch.strokes = outStrokes;
   // Mapped linewidth/linetype must style the box outline as well as the mid
   // line (STYLE_AESTHETIC_GEOMS enrolls crossbar on both).
   const linewidths = numericStyleVector(frame, "linewidth", outRectStyle, styles);
@@ -404,7 +374,7 @@ export function crossbarBatches(
     outSegs,
     outSegRows,
     outSegStyle,
-    midStrokes === null ? null : kept === n ? midStrokes : midStrokes.slice(0, kept),
+    outStrokes,
     params,
     fatten,
   );
