@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { withGrammarAsSpec } from "./helpers/ggplot-input.js";
 
 import type { RenderModel } from "@ggsvelte/core";
 
@@ -48,27 +49,45 @@ describe("DESIGN.md interaction presentation", () => {
 
   it("refreshes mixed SVG and canvas strata when the explicit chart theme changes", async () => {
     const models: Array<{ theme: string; backends: string[] }> = [];
-    const view = render(GGPlot, {
-      data: rows,
-      aes: { x: "x", y: "y" },
-      layers: [
-        { geom: "point", render: "canvas" },
-        { geom: "line", render: "svg" },
-      ],
-      theme: "dark",
-      width: 480,
-      height: 320,
-      onrender: (model: RenderModel) => {
-        models.push({ theme: model.scene.theme.paper, backends: [...model.layerBackends] });
-      },
-    });
+    const view = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: rows,
+        aes: { x: "x", y: "y" },
+        layers: [
+          { geom: "point", render: "canvas" },
+          { geom: "line", render: "svg" },
+        ],
+        theme: "dark",
+        width: 480,
+        height: 320,
+        onrender: (model: RenderModel) => {
+          models.push({ theme: model.scene.theme.paper, backends: [...model.layerBackends] });
+        },
+      }),
+    );
 
     await expect.poll(() => models.at(-1)?.theme).toBe("#16181d");
     expect(models.at(-1)?.backends).toEqual(["canvas", "svg"]);
     expect(view.container.querySelector(".gg-paper")?.getAttribute("fill")).toContain("#16181d");
     expect(view.container.querySelectorAll("canvas")).toHaveLength(1);
 
-    await view.rerender({ theme: "light" });
+    await view.rerender(
+      withGrammarAsSpec({
+        data: rows,
+        aes: { x: "x", y: "y" },
+        layers: [
+          { geom: "point", render: "canvas" },
+          { geom: "line", render: "svg" },
+        ],
+        theme: "light",
+        width: 480,
+        height: 320,
+        onrender: (model: RenderModel) => {
+          models.push({ theme: model.scene.theme.paper, backends: [...model.layerBackends] });
+        },
+      }),
+    );
 
     await expect.poll(() => models.at(-1)?.theme).toBe("#ffffff");
     expect(models.at(-1)?.backends).toEqual(["canvas", "svg"]);
@@ -166,29 +185,35 @@ describe("DESIGN.md interaction presentation", () => {
   });
 
   it("preserves chart chrome, reports empty state, and supports faceted intervals", () => {
-    const empty = render(GGPlot, {
-      data: [],
-      aes: { x: "x", y: "y" },
-      layers: [{ geom: "point" }],
-      inspect: true,
-      labs: { title: "Empty chart" },
-      width: 480,
-      height: 320,
-    });
+    const empty = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [],
+        aes: { x: "x", y: "y" },
+        layers: [{ geom: "point" }],
+        inspect: true,
+        labs: { title: "Empty chart" },
+        width: 480,
+        height: 320,
+      }),
+    );
     expect(empty.container.querySelector(".gg-empty-state")?.textContent).toBe(
       "No data to display",
     );
     expect(empty.container.textContent).toContain("Empty chart");
 
-    const unavailable = render(GGPlot, {
-      data: rows.map((row) => ({ ...row, facet: row.id })),
-      aes: { x: "x", y: "y" },
-      layers: [{ geom: "point" }],
-      facet: { wrap: "facet" },
-      select: "interval",
-      width: 480,
-      height: 320,
-    });
+    const unavailable = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: rows.map((row) => ({ ...row, facet: row.id })),
+        aes: { x: "x", y: "y" },
+        layers: [{ geom: "point" }],
+        facet: { wrap: "facet" },
+        select: "interval",
+        width: 480,
+        height: 320,
+      }),
+    );
     expect(unavailable.container.querySelector(".gg-capability-status")).toBeNull();
     expect(unavailable.container.textContent).toContain("Select area");
   });

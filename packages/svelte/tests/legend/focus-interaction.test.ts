@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { withGrammarAsSpec } from "../helpers/ggplot-input.js";
 
 import CoincidentLegendFocusPlot from "../fixtures/CoincidentLegendFocusPlot.svelte";
 import LinkedLegendFocusPlot from "../fixtures/LinkedLegendFocusPlot.svelte";
@@ -41,20 +42,23 @@ function overlaps(left: DOMRect, right: DOMRect): boolean {
 describe("style legend focus", () => {
   it("focuses finite shape entries by semantic source value", async () => {
     const events: LegendFocusEvent[] = [];
-    const { container } = render(GGPlot, {
-      data: [
-        { id: "north", x: 1, y: 2, group: "North" },
-        { id: "south", x: 2, y: 3, group: "South" },
-      ],
-      aes: { x: "x", y: "y", shape: "group" },
-      layers: [{ geom: "point" }],
-      scales: { shape: { type: "ordinal", range: ["circle", "triangle"] } },
-      key: "id",
-      legendFocus: true,
-      width: 640,
-      height: 400,
-      onlegendfocus: (event: LegendFocusEvent) => events.push(event),
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [
+          { id: "north", x: 1, y: 2, group: "North" },
+          { id: "south", x: 2, y: 3, group: "South" },
+        ],
+        aes: { x: "x", y: "y", shape: "group" },
+        layers: [{ geom: "point" }],
+        scales: { shape: { type: "ordinal", range: ["circle", "triangle"] } },
+        key: "id",
+        legendFocus: true,
+        width: 640,
+        height: 400,
+        onlegendfocus: (event: LegendFocusEvent) => events.push(event),
+      }),
+    );
     await until(() => container.querySelectorAll(".gg-legend-target").length === 2);
     container.querySelector<HTMLButtonElement>(".gg-legend-target")!.click();
     await until(() => events.length === 1);

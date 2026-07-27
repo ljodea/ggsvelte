@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { withGrammarAsSpec } from "../helpers/ggplot-input.js";
 
 import GGPlot from "../../src/lib/GGPlot.svelte";
 import LegendFilterPlot from "../fixtures/LegendFilterPlot.svelte";
@@ -237,18 +238,21 @@ describe("explicit legend filtering", () => {
   });
 
   it("filters finite shape legends by their semantic source values", async () => {
-    const { container } = render(GGPlot, {
-      data: [
-        { x: 1, y: 1, group: "North" },
-        { x: 2, y: 2, group: "South" },
-      ],
-      aes: { x: "x", y: "y", shape: "group" },
-      layers: [{ geom: "point" }],
-      scales: { shape: { type: "ordinal", range: ["circle", "triangle"] } },
-      legendFilter: true,
-      width: 360,
-      height: 260,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [
+          { x: 1, y: 1, group: "North" },
+          { x: 2, y: 2, group: "South" },
+        ],
+        aes: { x: "x", y: "y", shape: "group" },
+        layers: [{ geom: "point" }],
+        scales: { shape: { type: "ordinal", range: ["circle", "triangle"] } },
+        legendFilter: true,
+        width: 360,
+        height: 260,
+      }),
+    );
     await until(() => container.querySelectorAll(".gg-legend-filters input").length === 2);
     container.querySelector<HTMLInputElement>("input[aria-label='Show North']")!.click();
     await until(
@@ -265,21 +269,24 @@ describe("explicit legend filtering", () => {
 
   it("filters discrete numeric style legends (size/linewidth/alpha) too", async () => {
     let candidates = 0;
-    const { container } = render(GGPlot, {
-      data: [
-        { x: 1, y: 1, group: "North" },
-        { x: 2, y: 2, group: "South" },
-      ],
-      aes: { x: "x", y: "y", size: "group" },
-      layers: [{ geom: "point" }],
-      scales: { size: { type: "ordinal", range: [4, 8] } },
-      legendFilter: true,
-      width: 360,
-      height: 260,
-      onrender: (model: { candidates: { size: number } }) => {
-        candidates = model.candidates.size;
-      },
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [
+          { x: 1, y: 1, group: "North" },
+          { x: 2, y: 2, group: "South" },
+        ],
+        aes: { x: "x", y: "y", size: "group" },
+        layers: [{ geom: "point" }],
+        scales: { size: { type: "ordinal", range: [4, 8] } },
+        legendFilter: true,
+        width: 360,
+        height: 260,
+        onrender: (model: { candidates: { size: number } }) => {
+          candidates = model.candidates.size;
+        },
+      }),
+    );
     // An interactive discrete size legend must expose a filter fieldset, just
     // like shape/linetype — the whitelist previously excluded numeric styles.
     await until(() => container.querySelectorAll(".gg-legend-filters input").length === 2);
@@ -337,26 +344,29 @@ describe("explicit legend filtering", () => {
     // Rowless rule annotation trains the scale but is excluded from the
     // interactive legend domain. That must not disable filters for the data
     // categories that *are* visible.
-    const { container } = render(GGPlot, {
-      data: [
-        { x: 1, y: 1, group: "a" },
-        { x: 2, y: 2, group: "a" },
-        { x: 1, y: 3, group: "b" },
-        { x: 2, y: 4, group: "b" },
-      ],
-      layers: [
-        { geom: "line", aes: { x: "x", y: "y", linetype: "group" } },
-        {
-          geom: "rule",
-          aes: { linetype: { value: "threshold", scale: true } },
-          params: { yintercept: 2 },
-        },
-      ],
-      scales: { linetype: { type: "ordinal" } },
-      legendFilter: true,
-      width: 360,
-      height: 260,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [
+          { x: 1, y: 1, group: "a" },
+          { x: 2, y: 2, group: "a" },
+          { x: 1, y: 3, group: "b" },
+          { x: 2, y: 4, group: "b" },
+        ],
+        layers: [
+          { geom: "line", aes: { x: "x", y: "y", linetype: "group" } },
+          {
+            geom: "rule",
+            aes: { linetype: { value: "threshold", scale: true } },
+            params: { yintercept: 2 },
+          },
+        ],
+        scales: { linetype: { type: "ordinal" } },
+        legendFilter: true,
+        width: 360,
+        height: 260,
+      }),
+    );
     await until(() => container.querySelectorAll(".gg-legend-filters input").length === 2);
 
     expect(container.querySelector("input[aria-label='Show a']")).not.toBeNull();

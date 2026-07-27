@@ -1,5 +1,6 @@
 import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
+import { withGrammarAsSpec } from "../../helpers/ggplot-input.js";
 
 import type { RenderModel } from "@ggsvelte/core";
 import GGPlot from "../../../src/lib/GGPlot.svelte";
@@ -146,19 +147,22 @@ describe("brush precise bounds", () => {
   it("draws precise bounds through the post-stat coordinate projector", async () => {
     let model: RenderModel | null = null;
     const data = [1, 10, 100, 1000].map((x) => ({ x, y: 1 }));
-    const { container } = render(GGPlot, {
-      data,
-      aes: { x: "x", y: "y" },
-      layers: [{ geom: "point" }],
-      scales: { x: { type: "linear", domain: [1, 1000], expand: { mult: 0, add: 0 } } },
-      coord: { type: "transform", x: { transform: "log10", expand: false } },
-      key: "x",
-      select: { type: "interval", mode: "x", persistent: true },
-      onrender: (next: RenderModel) => {
-        model = next;
-      },
-      ...size,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data,
+        aes: { x: "x", y: "y" },
+        layers: [{ geom: "point" }],
+        scales: { x: { type: "linear", domain: [1, 1000], expand: { mult: 0, add: 0 } } },
+        coord: { type: "transform", x: { transform: "log10", expand: false } },
+        key: "x",
+        select: { type: "interval", mode: "x", persistent: true },
+        onrender: (next: RenderModel) => {
+          model = next;
+        },
+        ...size,
+      }),
+    );
     await until(() => model !== null);
     const setBounds = [
       ...container.querySelectorAll<HTMLButtonElement>(".gg-tool-rail button"),

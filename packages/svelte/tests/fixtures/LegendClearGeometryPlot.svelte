@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GGPlot } from "../../src/lib/index.js";
+  import { GGPlot, Labs } from "../../src/lib/index.js";
 
   const rows = [
     { id: "a", x: 1, y: 4, group: "north", region: "west" },
@@ -16,11 +16,12 @@
   legendFocus
   width={420}
   height={280}
-  labs={{
-    title: "Legend recovery geometry",
-    subtitle: "The recovery action stays outside chart chrome.",
-    color: "Group",
-    fill: "Region",
-  }}
   ariaLabel="Legend clear geometry plot"
-/>
+>
+  <Labs
+    title="Legend recovery geometry"
+    subtitle="The recovery action stays outside chart chrome."
+    color="Group"
+    fill="Region"
+  />
+</GGPlot>

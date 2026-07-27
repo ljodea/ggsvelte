@@ -1,5 +1,6 @@
 import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
+import { withGrammarAsSpec } from "../helpers/ggplot-input.js";
 
 import type { RenderModel } from "@ggsvelte/core";
 
@@ -113,25 +114,28 @@ describe("R0 pointer-inspect evidence", () => {
   it("uses the trained semantic-axis formatter for grouped y inspection", async () => {
     let model: RenderModel | null = null;
     const changes: Array<{ mode: string; axisLabel?: string }> = [];
-    const { container } = render(GGPlot, {
-      data: rows,
-      aes: { x: "x", y: "y", color: "group" },
-      layers: [{ geom: "point" }],
-      key: "id",
-      scales: { y: { labels: ".1f" } },
-      inspect: { mode: "y" },
-      onrender: (next: RenderModel) => (model = next),
-      oninspect: (event: { phase: string; mode?: string; axisLabel?: string }) => {
-        if (event.phase === "change" && event.mode !== undefined)
-          changes.push({
-            mode: event.mode,
-            ...(event.axisLabel !== undefined && {
-              axisLabel: event.axisLabel,
-            }),
-          });
-      },
-      ...size,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: rows,
+        aes: { x: "x", y: "y", color: "group" },
+        layers: [{ geom: "point" }],
+        key: "id",
+        scales: { y: { labels: ".1f" } },
+        inspect: { mode: "y" },
+        onrender: (next: RenderModel) => (model = next),
+        oninspect: (event: { phase: string; mode?: string; axisLabel?: string }) => {
+          if (event.phase === "change" && event.mode !== undefined)
+            changes.push({
+              mode: event.mode,
+              ...(event.axisLabel !== undefined && {
+                axisLabel: event.axisLabel,
+              }),
+            });
+        },
+        ...size,
+      }),
+    );
     const candidate = model!.candidates.candidate(0)!;
     pointEvent(container.querySelector(".gg-capture")!, "pointermove", candidate.x, candidate.y);
     await nextFrame();
@@ -142,14 +146,17 @@ describe("R0 pointer-inspect evidence", () => {
   it.each(["x", "y"] as const)(
     "flips the %s dominant-axis crosshair and edge label with coord flip",
     async (mode) => {
-      const { container } = render(GGPlot, {
-        data: rows,
-        aes: { x: "x", y: "y" },
-        layers: [{ geom: "point" }],
-        coord: "flip",
-        inspect: { mode },
-        ...size,
-      });
+      const { container } = render(
+        GGPlot,
+        withGrammarAsSpec({
+          data: rows,
+          aes: { x: "x", y: "y" },
+          layers: [{ geom: "point" }],
+          coord: "flip",
+          inspect: { mode },
+          ...size,
+        }),
+      );
       const surface = container.querySelector<HTMLElement>(".gg-capture")!;
       surface.focus();
       surface.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));

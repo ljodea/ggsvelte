@@ -10,6 +10,7 @@
  */
 import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
+import { withGrammarAsSpec } from "./helpers/ggplot-input.js";
 
 import { aes, gg, normalize } from "@ggsvelte/spec";
 
@@ -160,7 +161,10 @@ describe("stacked bars + legend (M1)", () => {
       height: 320,
     };
     const stable = render(GGPlot, props);
-    const sorted = render(GGPlot, { ...props, legend: { order: "sorted" as const } });
+    const sorted = render(
+      GGPlot,
+      withGrammarAsSpec({ ...props, legend: { order: "sorted" as const } }),
+    );
     const entries = (c: HTMLElement) => {
       const labels = [...c.querySelectorAll(".gg-legend-label")].map((l) => l.textContent ?? "");
       const colors = [...c.querySelectorAll(".gg-legend-swatch")].map(
@@ -204,17 +208,20 @@ describe("declaration-only children (sugar)", () => {
 
   it("new-geom children render the same SVG as the equivalent props (equivalence gate)", () => {
     const children = render(StackedBarPlot, { data: salesRows });
-    const props = render(GGPlot, {
-      data: salesRows,
-      aes: { x: "city", y: "sales", fill: "kind" },
-      layers: [
-        { geom: "col", params: { width: 0.8 } },
-        { geom: "rule", params: { yintercept: 40 } },
-      ],
-      labs: { fill: "Channel" },
-      width: 480,
-      height: 320,
-    });
+    const props = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: salesRows,
+        aes: { x: "city", y: "sales", fill: "kind" },
+        layers: [
+          { geom: "col", params: { width: 0.8 } },
+          { geom: "rule", params: { yintercept: 40 } },
+        ],
+        labs: { fill: "Channel" },
+        width: 480,
+        height: 320,
+      }),
+    );
     const childrenSVG = normalizeUids(children.container.querySelector("svg")?.outerHTML);
     const propsSVG = normalizeUids(props.container.querySelector("svg")?.outerHTML);
     expect(childrenSVG).toBeDefined();

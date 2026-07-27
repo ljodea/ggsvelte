@@ -8,6 +8,7 @@
   import GGPlot from "../../src/lib/GGPlot.svelte";
   import GeomCol from "../../src/lib/geoms/GeomCol.svelte";
   import GeomRule from "../../src/lib/geoms/GeomRule.svelte";
+  import Labs from "../../src/lib/labs/Labs.svelte";
 
   const {
     data,
@@ -21,11 +22,11 @@
 <GGPlot
   {data}
   aes={{ x: "city", y: "sales", fill: "kind" }}
-  labs={{ fill: "Channel" }}
   width={480}
   height={320}
   {onrender}
 >
   <GeomCol width={0.8} />
   <GeomRule yintercept={40} />
+  <Labs fill="Channel" />
 </GGPlot>
