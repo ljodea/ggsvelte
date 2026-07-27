@@ -10,8 +10,7 @@
     "/guide/server-rendering-export": "Server rendering and export",
   };
 
-  // Curated progressive entry points stay short; the full chapter map below
-  // lists every guide. Diagnostics stays in the chapter map and search.
+  // Diagnostics stays in All guides and search, not Start here.
   const tasks = DOCS_TASKS.filter((task) => task.label !== "Diagnostics");
 
   const descriptionByPath = new Map<string, string>([
@@ -49,13 +48,7 @@
 </script>
 
 <article class="docs-landing" aria-labelledby="docs-heading">
-  <header>
-    <h1 id="docs-heading">Documentation</h1>
-    <p class="lede">
-      Progressive guides for the grammar, interaction, production, and release
-      paths — plus the full chapter map below.
-    </p>
-  </header>
+  <h1 id="docs-heading">Documentation</h1>
 
   <nav class="docs-tasks" aria-label="Documentation tasks">
     <h2 id="docs-tasks-heading">Start here</h2>
@@ -121,9 +114,8 @@
 
 <style>
   /*
-   * One border between regions only. Earlier this page stacked
-   * header border-bottom + nav border-top (and the same pattern before
-   * "Also"), which rendered as a double divider with a gap.
+   * One border between content regions (Start here / All guides / Also).
+   * No divider under the bare title — that read as intro chrome.
    */
   .docs-landing > * + * {
     margin-top: 2.5rem;
@@ -131,8 +123,10 @@
     border-top: 1px solid var(--line);
   }
 
-  header {
-    padding-bottom: 0;
+  .docs-landing > h1 + * {
+    margin-top: 2rem;
+    padding-top: 0;
+    border-top: none;
   }
 
   h1 {
@@ -141,14 +135,6 @@
     font-size: clamp(2.7rem, 7vw, 5.75rem);
     line-height: 0.94;
     letter-spacing: -0.035em;
-  }
-
-  .lede {
-    max-width: 42rem;
-    margin: 1.25rem 0 0;
-    color: var(--muted);
-    font-size: 1.05rem;
-    line-height: 1.45;
   }
 
   h2 {
