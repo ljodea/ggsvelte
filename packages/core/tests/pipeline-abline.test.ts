@@ -58,6 +58,19 @@ describe("geom_abline (#790)", () => {
     expect(right).toBeLessThan(left);
   });
 
+  it("does not warn that the annotation layer was skipped", () => {
+    const model = runPipeline(
+      gg(rows, aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .geomAbline({ slope: 1, intercept: 0 })
+        .spec(),
+      size,
+    );
+    // Abline is annotation-only, so every panel frame is rowless by design —
+    // that must not read as "no drawable rows; skipping it" when it renders.
+    expect(model.warnings.filter((w) => w.code === "empty-layer")).toEqual([]);
+  });
+
   it("renders a stroke line in SVG", () => {
     const svg = renderToSVGString(
       gg(rows, aes({ x: "x", y: "y" }))
