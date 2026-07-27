@@ -87,8 +87,8 @@ export default defineConfig({
     // VR / visual-contract seats keep Playwright's default 30s budget.
     { name: "chromium", use: { browserName: "chromium" }, testIgnore: JOURNEYS_SPECS },
     // Docs a11y/structure journeys: cold CI hydrate straddled 30s (~30.2s
-    // observed). 60s remains project scope (#944) while getting-started chart
-    // islands still dominate several journeys (#946 follow-up).
+    // observed). 60s remains project scope (#944); getting-started defers its
+    // live chart until near-viewport (#972) so shell chrome stays interactive.
     {
       name: "journeys",
       use: { browserName: "chromium" },

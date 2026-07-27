@@ -8,9 +8,8 @@
    * from what the reader copies.
    */
   import { base } from "$app/paths";
-  import { GGPlot } from "@ggsvelte/svelte";
   import { kyotoSakura } from "@ggsvelte/svelte/data";
-  import { onMount } from "svelte";
+  import { onMount, type Component } from "svelte";
 
   import {
     foldSakura,
@@ -38,26 +37,41 @@
    */
   const NARROW_CHART = 560;
 
-  let narrowChart = $state(false);
+  /**
+   * Assume narrow until the finished-chart container is measured. Starting at
+   * `false` forced a wide fold on first paint, then a second 838-point fold
+   * when ResizeObserver fired — on mobile that double work blocked chrome for
+   * ~17s before "Open site menu" was tappable (#972). Desktop still flips once
+   * (narrow → wide) when the container is actually wide enough for callouts.
+   */
+  let narrowChart = $state(true);
   let finishedChart = $state<HTMLElement>();
+  /** Live plot component — dynamically imported after first paint (#972). */
+  let LivePlot = $state<Component<{
+    spec: ReturnType<typeof foldSakura>["spec"];
+    key?: string;
+    inspect?: ReturnType<typeof foldSakura>["inspect"];
+    ariaLabel?: string;
+  }> | null>(null);
 
   /**
-   * The finished chart is the page's only live plot, so it is the one the
-   * annotation ladder applies to: below NARROW_CHART the record callouts
-   * would collide with the data.
+   * Fold only when the live plot is mounted. Computing the 838-point spec
+   * during first hydrate (even behind a placeholder) blocked mobile chrome
+   * for ~20s (#972).
    */
   const finished = $derived(
-    foldSakura(SAKURA_STEPS.length, rows, { annotations: !narrowChart }),
+    LivePlot === null
+      ? null
+      : foldSakura(SAKURA_STEPS.length, rows, { annotations: !narrowChart }),
   );
 
   const recordNames = SAKURA_RECORDS.map((record) => record.label).join("; ");
 
   /**
    * Every step chart ships as SVG the library rendered at build time
-   * (scripts/gen-lesson-charts.ts): each one illustrates a single delta, and a
-   * live 838-point plot costs about three seconds of hydration. The finished
-   * chart below the steps is the live one, which is where inspection is worth
-   * demonstrating.
+   * (scripts/gen-lesson-charts.ts): each one illustrates a single delta. The
+   * finished chart is the live 838-point plot — loaded when near the viewport
+   * so mobile chrome stays tappable (#972).
    */
   const chartSrc = (step: number): string =>
     `${base}/lesson/${step < 0 ? "first-render.svg" : `step-${String(step + 1)}.svg`}`;
@@ -65,14 +79,43 @@
   onMount(() => {
     const target = finishedChart;
     if (target === undefined) return;
-    if (typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver((entries) => {
-      const width = entries[0]?.contentRect.width;
-      if (width !== undefined) narrowChart = width < NARROW_CHART;
-    });
-    observer.observe(target);
+    let cancelled = false;
+    let loadStarted = false;
+
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? undefined
+        : new ResizeObserver((entries) => {
+            const width = entries[0]?.contentRect.width;
+            if (width !== undefined) narrowChart = width < NARROW_CHART;
+          });
+    observer?.observe(target);
+
+    const loadLivePlot = (): void => {
+      if (loadStarted || cancelled) return;
+      loadStarted = true;
+      void import("@ggsvelte/svelte").then((mod) => {
+        if (!cancelled) LivePlot = mod.GGPlot;
+      });
+    };
+
+    // Near-viewport only — do not idle-load. An early dynamic import + fold
+    // still monopolizes the main thread and stalls header clicks (#972).
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          loadLivePlot();
+          io.disconnect();
+        }
+      },
+      { rootMargin: "240px 0px" },
+    );
+    io.observe(target);
+
     return () => {
-      observer.disconnect();
+      cancelled = true;
+      observer?.disconnect();
+      io.disconnect();
     };
   });
 </script>
@@ -154,12 +197,22 @@
 
   <h2 id="the-chart">The chart</h2>
   <div class="finished-chart lesson-output" bind:this={finishedChart}>
-    <GGPlot
-      spec={finished.spec}
-      key={finished.key}
-      inspect={finished.inspect}
-      ariaLabel={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
-    />
+    {#if LivePlot && finished}
+      <LivePlot
+        spec={finished.spec}
+        key={finished.key}
+        inspect={finished.inspect}
+        ariaLabel={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
+      />
+    {:else}
+      <img
+        class="lesson-chart"
+        src={chartSrc(SAKURA_STEPS.length - 1)}
+        width={LESSON_CHART_WIDTH}
+        height={LESSON_CHART_HEIGHT}
+        alt={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
+      />
+    {/if}
   </div>
 
   <h2 id="the-finished-file">The finished file</h2>

@@ -134,14 +134,10 @@ test("desktop docs shell exposes chapter, breadcrumb, contents, and sequence nav
 });
 
 test("mobile header and docs navigation are explicit, reachable controls", async ({ page }) => {
-  // Avoid /guide/getting-started here: its lesson chart islands block the main
-  // thread for ~17s before "Open site menu" is tappable (local workers=1), so
-  // dialog + resize straddled the old 30s budget (#946). Shell chrome is shared
-  // across guide pages (DocsShell); /guide/errors exercises the same menus
-  // without that hydrate cost. Journeys project budget stays 60s (#944) because
-  // other journeys still cold-load getting-started — see #972.
+  // getting-started deferred its live GGPlot (#972) so mobile chrome is tappable
+  // in ~1s locally; this journey can stay on the primary guide again.
   await page.setViewportSize({ width: 375, height: 760 });
-  await page.goto("/guide/errors", { waitUntil: "domcontentloaded" });
+  await page.goto(GUIDE_ROUTE, { waitUntil: "domcontentloaded" });
 
   const siteMenu = page.getByRole("button", { name: "Open site menu" });
   await expect(siteMenu).toBeVisible({ timeout: 15_000 });
@@ -166,6 +162,23 @@ test("mobile header and docs navigation are explicit, reachable controls", async
   await expect(chapterDialog).toBeVisible();
   await chapterDialog.getByRole("button", { name: "Close docs navigation" }).click();
   await expectNoHorizontalOverflow(page);
+});
+
+test("getting-started mobile chrome is tappable before the live chart hydrates", async ({
+  page,
+}) => {
+  // Budget guard for #972: cold mobile must not wait on the 838-point GGPlot.
+  test.setTimeout(30_000);
+  const started = Date.now();
+  await page.setViewportSize({ width: 375, height: 760 });
+  await page.goto(GUIDE_ROUTE, { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("button", { name: "Open site menu" })).toBeVisible({
+    timeout: 10_000,
+  });
+  expect(
+    Date.now() - started,
+    "Open site menu should be tappable well under the old ~17s hydrate stall",
+  ).toBeLessThan(8_000);
 });
 
 test("code tabs implement automatic arrow, Home, and End activation with roving tabindex", async ({
