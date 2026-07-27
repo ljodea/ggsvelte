@@ -4,8 +4,14 @@
   "prompt": "Draw an sf choropleth of rate filled polygons from a GeoJSON geometry column.",
   "dataProfile": {
     "fields": [
-      { "name": "geometry", "type": "nominal" },
-      { "name": "rate", "type": "quantitative" }
+      {
+        "name": "geometry",
+        "type": "nominal"
+      },
+      {
+        "name": "rate",
+        "type": "quantitative"
+      }
     ],
     "rowCount": 2
   },
@@ -23,14 +29,18 @@
   },
   "gold": {
     "edition": 1,
-    "data": { "name": "main" },
+    "data": {
+      "name": "main"
+    },
     "layers": [
       {
         "geom": "sf",
-        "stat": "identity",
+        "stat": "sf",
         "position": "identity",
         "aes": {
-          "fill": { "field": "rate" }
+          "fill": {
+            "field": "rate"
+          }
         }
       }
     ]
