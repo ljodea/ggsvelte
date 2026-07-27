@@ -1,17 +1,55 @@
 /**
- * Deep plot-interaction assembly.
+ * Plot engine — controller wiring + host-level deriveds for <GGPlot>.
  *
- * Owns controller construction and shared Candidate projection. Cross-module
- * transition side effects (e.g. inspection dismiss → brush/tool) are applied
- * via `applyInspectionDismissSideEffects` at the surface call site (#627).
- * Leaf modules register their own effects at construction; assembly only
- * wires host-held deriveds into catalog reconcile where data is not available
- * at leaf construction time.
+ * Ownership
+ * ---------
+ * GGPlot owns: root, captureSurface, a11yTableOpen, plotId (component runes /
+ *   bind:this / $props.id / markup-only state). Context (`provideRegistry`) and
+ *   `$props()` also stay in the component.
+ * Engine owns: tooltipHovered, host-level assemble/interaction deriveds, all
+ *   controller construction, and phased effect registration.
+ *
+ * Construction / effect-order contract
+ * ------------------------------------
+ * Construction order is the topological order of direct construction-time
+ * reads; effect registration sequence is load-bearing. Deferred thunks break
+ * the runtime cycles (surface ↔ inspection ↔ interval ↔ selection). This
+ * module preserves the pre-S11 top-to-bottom declaration order from GGPlot.
+ *
+ * Cross-module transition side effects (e.g. inspection dismiss → brush/tool)
+ * are applied via `applyInspectionDismissSideEffects` at the surface call site
+ * (#627). Leaf modules register their own effects at construction; the engine
+ * only wires host-held deriveds into catalog reconcile where data is not
+ * available at leaf construction time.
+ *
+ * Call `createPlotEngine` once during component init so every `$effect`
+ * registers in the component effect tree. No `$props`, `$props.id()`, or
+ * context calls live here.
  */
-import type { CellValue } from "@ggsvelte/core";
-import type { PortableSpec } from "@ggsvelte/spec";
+import type { BatchInteractionMask, CellValue, RenderModel } from "@ggsvelte/core";
+import type {
+  A11yMode,
+  AesInput,
+  CoordSpec,
+  DataInput,
+  FacetInput,
+  GuidesSpec,
+  Labs,
+  LayerInput,
+  LegendSpec,
+  PortableSpec,
+  Scales,
+  SpecInput,
+  ThemeName,
+  ThemeSpec,
+} from "@ggsvelte/spec";
 
-import type { OrchestratorInputs } from "./plot-orchestrator.svelte.js";
+import {
+  assemblePortableSpec,
+  isFacetedPlotIntent,
+  resolveInteractionScope,
+  toLayerInput,
+} from "./assembly/assemble.js";
 import {
   collectCompositionDiagnostics,
   compositionAdvisoryDedupKey,
@@ -22,53 +60,255 @@ import {
   type DeprecationDiagnostic,
   type PlotDiagnostic,
 } from "./diagnostics/deprecation.js";
-import { grammarDeprecationInputs } from "./layers/grammar-families.js";
-import type {
-  InteractionDiagnostic,
-  PlotInteractionScope,
-  ResolvedInteractionConfig,
+import type { LayerRegistry } from "./geoms/registry.svelte.js";
+import type { PlotInteractionController } from "./interaction/controller.svelte.js";
+import {
+  normalizeInteractionConfig,
+  type InspectInput,
+  type InteractionDiagnostic,
+  type InteractionTool,
+  type LegendFocusEvent,
+  type LegendFocusInput,
+  type PlotInspection,
+  type PlotInteractionEvent,
+  type PlotInteractionScope,
+  type PlotSelection,
+  type ResolvedInteractionConfig,
+  type SelectInput,
+  type ZoomEvent,
+  type ZoomInput,
 } from "./interaction/interaction.js";
 import { collectWiringDiagnostics } from "./interaction/wiring-advisories.js";
+import { createInspectionState } from "./inspection/inspection-state.svelte.js";
+import type { InspectionState } from "./inspection/inspection-state.svelte.js";
+import { createIntervalState } from "./interval/interval-state.svelte.js";
+import type { IntervalState } from "./interval/interval-state.svelte.js";
+import { grammarDeprecationInputs } from "./layers/grammar-families.js";
+import type { LegendFilterEvent, LegendFilterInput } from "./legend/filter.js";
+import { createLegendEntryKeyIndex } from "./legend/entry-key-index.svelte.js";
+import { createLegendFilterState } from "./legend/filter-state.svelte.js";
+import type { FilterableLegendEntry, LegendFilterState } from "./legend/filter-state.svelte.js";
+import type { InteractiveLegendEntry, LegendEntryIdentity } from "./legend/focus.js";
+import { createLegendFocusState } from "./legend/focus-state.svelte.js";
+import type { LegendFocusState } from "./legend/focus-state.svelte.js";
+import { createPlotChromeState } from "./chrome/chrome-state.svelte.js";
+import type { PlotChromeState } from "./chrome/chrome-state.svelte.js";
 import { createPlotAnnouncer } from "./runtime/announcer.svelte.js";
+import type { PlotAnnouncer } from "./runtime/announcer.svelte.js";
+import { createPlotRuntime } from "./runtime/runtime.svelte.js";
+import type { PlotRuntime } from "./runtime/runtime.svelte.js";
+import { createSemanticCandidateProjection } from "./runtime/semantic-candidate-projection.svelte.js";
 import { createSourceIdentityTracker, dataIdentityEpochToken } from "./runtime/semantic-keys.js";
 import {
   createSemanticKeyService,
   type SemanticKeyService,
 } from "./runtime/semantic-keys.svelte.js";
-import { createPlotRuntime } from "./runtime/runtime.svelte.js";
-import { createSemanticCandidateProjection } from "./runtime/semantic-candidate-projection.svelte.js";
-import type { LegendEntryIdentity } from "./legend/focus.js";
-import { createLegendFilterState } from "./legend/filter-state.svelte.js";
-import { createLegendEntryKeyIndex } from "./legend/entry-key-index.svelte.js";
-import { createLegendFocusState } from "./legend/focus-state.svelte.js";
-import { createPlotZoomState, type PlotZoomState } from "./zoom/zoom-state.svelte.js";
-import { createIntervalState } from "./interval/interval-state.svelte.js";
-import { createInspectionState } from "./inspection/inspection-state.svelte.js";
+import { createSelectionState } from "./selection/selection-state.svelte.js";
+import type { SelectionState } from "./selection/selection-state.svelte.js";
+import {
+  presentationChromeForKind,
+  type PresentationAnchor,
+  type PresentationChrome,
+} from "./selection/selection.js";
 import { createSurfaceState } from "./surface/surface-state.svelte.js";
-import { createSelectionState, type SelectionState } from "./selection/selection-state.svelte.js";
-import { presentationChromeForKind } from "./selection/selection.js";
-import { createPlotChromeState } from "./chrome/chrome-state.svelte.js";
+import type { SurfaceState } from "./surface/surface-state.svelte.js";
+import { createPlotZoomState } from "./zoom/zoom-state.svelte.js";
+import type { PlotZoomState } from "./zoom/zoom-state.svelte.js";
 
-export type PlotInteractionAssemblyDeps<
+// ---------------------------------------------------------------------------
+// Inputs / return type
+// ---------------------------------------------------------------------------
+
+export type PlotEngineInputs<
   Row extends Record<string, CellValue> = Record<string, CellValue>,
   Identity extends keyof Row | ((row: Row, index: number) => PropertyKey) = keyof Row,
 > = {
-  inputs: OrchestratorInputs<Row, Identity>;
-  assembled: () => PortableSpec | null;
-  interactionConfig: () => ResolvedInteractionConfig;
-  resolvedInteractionScope: () => PlotInteractionScope;
+  /** Value — created by `provideRegistry()` in GGPlot (context stays there). */
+  registry: LayerRegistry;
+  /** Plain string from `$props.id()` in GGPlot. */
+  plotId: string;
+  root: () => HTMLDivElement | null;
+  captureSurface: () => HTMLDivElement | null;
+
+  // Reactive props / callbacks as getter thunks (post-destructure names).
+  spec: () => SpecInput | undefined;
+  data: () => DataInput | readonly Row[] | undefined;
+  mapping: () => AesInput | undefined;
+  layers: () => LayerInput[] | undefined;
+  facet: () => FacetInput | undefined;
+  coord: () => CoordSpec | "flip" | undefined;
+  scales: () => Scales | undefined;
+  guides: () => GuidesSpec | undefined;
+  legend: () => LegendSpec | undefined;
+  theme: () => ThemeName | ThemeSpec | undefined;
+  labs: () => Labs | undefined;
+  a11y: () => A11yMode | undefined;
+  width: () => number | "container" | undefined;
+  height: () => number | undefined;
+  datumKey: () => Identity | undefined;
+  /** Defaulted non-optional after destructure. */
+  inspect: () => InspectInput;
+  select: () => SelectInput;
+  zoom: () => ZoomInput;
+  legendFocus: () => LegendFocusInput;
+  legendFilter: () => LegendFilterInput;
+  tool: () => InteractionTool | undefined;
+  // Widened to PropertyKey at the boundary — PublicKey is component-local.
+  interaction: () => PlotInteractionController<PropertyKey> | undefined;
+  interactionScope: () => PlotInteractionScope | undefined;
+  oninspect: () => ((event: PlotInspection<Record<string, CellValue>>) => void) | undefined;
+  onselect: () => ((event: PlotSelection) => void) | undefined;
+  onzoom: () => ((event: ZoomEvent) => void) | undefined;
+  onlegendfocus: () => ((event: LegendFocusEvent) => void) | undefined;
+  onlegendfilter: () => ((event: LegendFilterEvent) => void) | undefined;
+  oninteraction: () =>
+    | ((event: PlotInteractionEvent<Record<string, CellValue>>) => void)
+    | undefined;
+  ondiagnostic: () => ((diagnostic: PlotDiagnostic) => void) | undefined;
+  ontoolchange: () => ((tool: InteractionTool) => void) | undefined;
+  onrender: () => ((model: RenderModel, spec: PortableSpec) => void) | undefined;
 };
 
-export function createPlotInteractionAssembly<
+/**
+ * Non-generic return surface. Controllers are stable object refs; deriveds
+ * that markup reads are `get` accessors. Internal wiring (deliverDiagnostic,
+ * inspectEnabled, facetedPlot, …) is not exposed.
+ *
+ * Defined once next to the factory that builds it — not hand-mirrored from a
+ * second module (#982).
+ */
+export type PlotEngine = {
+  // Controllers (stable object references)
+  readonly zoomState: PlotZoomState;
+  readonly legendFilterState: LegendFilterState;
+  readonly runtime: PlotRuntime;
+  readonly inspectionState: InspectionState;
+  readonly surfaceState: SurfaceState;
+  readonly selectionState: SelectionState;
+  readonly legendFocusState: LegendFocusState;
+  readonly intervalState: IntervalState;
+  readonly chromeState: PlotChromeState;
+  readonly announcer: PlotAnnouncer;
+
+  // Engine getter accessors — deriveds markup consumes
+  readonly assembled: PortableSpec | null;
+  readonly interactionConfig: ResolvedInteractionConfig;
+  readonly interactive: boolean;
+  readonly surfaceInteractive: boolean;
+  readonly coordFlipped: boolean;
+  readonly legendFocusEnabled: boolean;
+  readonly selectedAnchors: PresentationAnchor[];
+  readonly emphasizedAnchors: PresentationAnchor[];
+  readonly hoverChrome: PresentationChrome;
+  readonly interactionMasks: readonly (BatchInteractionMask | null)[];
+  readonly interactiveLegendEntries: InteractiveLegendEntry[];
+  readonly effectiveLegendPressed: LegendEntryIdentity | null;
+  readonly legendClearActive: boolean;
+  readonly filterableLegendEntries: FilterableLegendEntry[];
+
+  // get/set tooltipHovered (owned here; markup handlers write via engine)
+  tooltipHovered: boolean;
+};
+
+// ---------------------------------------------------------------------------
+// Factory
+// ---------------------------------------------------------------------------
+
+export function createPlotEngine<
   Row extends Record<string, CellValue> = Record<string, CellValue>,
   Identity extends keyof Row | ((row: Row, index: number) => PropertyKey) = keyof Row,
->(deps: PlotInteractionAssemblyDeps<Row, Identity>) {
-  const inputs = deps.inputs;
-  const assembledDerived = $derived(deps.assembled());
+>(inputs: PlotEngineInputs<Row, Identity>): PlotEngine {
+  // Reading descriptors through toLayerInput goes through live getters, so
+  // geom prop changes flow into this $derived without re-registration.
+  // Explicit `spec` short-circuits before registry/children so ignored props
+  // do not become reactive dependencies of the assembled plot.
+  function assembleCurrentSpec(): PortableSpec | null {
+    const spec = inputs.spec();
+    if (spec !== undefined) return assemblePortableSpec({ spec, layers: [] });
+    const data = inputs.data();
+    const mapping = inputs.mapping();
+    const layers = inputs.layers();
+    const facet = inputs.facet();
+    const coord = inputs.coord();
+    const scales = inputs.scales();
+    const guides = inputs.guides();
+    const legend = inputs.legend();
+    const theme = inputs.theme();
+    const labs = inputs.labs();
+    const a11y = inputs.a11y();
+    return assemblePortableSpec({
+      ...(data !== undefined && { data }),
+      ...(mapping !== undefined && { aes: mapping }),
+      // Mark layers only: a `layers={[…]}` prop suppresses registry marks, not
+      // non-mark plot layers (theme/scale/coord/facet/labs/guides/legend).
+      layers: layers ?? inputs.registry.markLayers.map(toLayerInput),
+      plotLayers: inputs.registry.layers.filter((layer) => layer.kind !== "mark"),
+      ...(facet !== undefined && { facet }),
+      ...(coord !== undefined && { coord }),
+      ...(scales !== undefined && { scales }),
+      ...(guides !== undefined && { guides }),
+      ...(legend !== undefined && { legend }),
+      ...(theme !== undefined && { theme }),
+      ...(labs !== undefined && { labs }),
+      ...(a11y !== undefined && { a11y }),
+    });
+  }
+
+  // Svelte 5.33's one-pass SSR can cache a construction-time empty registry
+  // before declaration children initialize. Recompute from the plain registry
+  // on the server; client reads retain normal rune dependency tracking.
+  // Single SSR guard for the whole engine (#982 — previously duplicated across
+  // orchestrator + assembly).
+  const assembledDerived: PortableSpec | null = $derived.by(assembleCurrentSpec);
   const assembled = (): PortableSpec | null =>
-    typeof window === "undefined" ? deps.assembled() : assembledDerived;
-  const interactionConfig = $derived(deps.interactionConfig());
-  const resolvedInteractionScope = $derived(deps.resolvedInteractionScope());
+    typeof window === "undefined" ? assembleCurrentSpec() : assembledDerived;
+
+  // Facet intent: raw prop (before layers register), registry facet plot layer
+  // (<FacetWrap/> / <FacetGrid/> / <Facet/>), OR assembled.facet (portable-spec embeds).
+  const facetedPlot = $derived(
+    isFacetedPlotIntent({
+      facet: inputs.facet(),
+      plotLayers: inputs.registry.layers,
+      assembled: assembled(),
+    }),
+  );
+
+  const resolvedInteractionScope: PlotInteractionScope = $derived(
+    (() => {
+      const interaction = inputs.interaction();
+      const interactionScope = inputs.interactionScope();
+      const zoom = inputs.zoom();
+      const datumKey = inputs.datumKey();
+      return resolveInteractionScope({
+        interaction,
+        ...(interactionScope !== undefined && { interactionScope }),
+        zoom,
+        faceted: facetedPlot,
+        ...(datumKey !== undefined && { datumKey }),
+        assembled: assembled(),
+      });
+    })(),
+  );
+
+  const interactionConfig = $derived(
+    (() => {
+      const tool = inputs.tool();
+      return normalizeInteractionConfig(
+        {
+          inspect: inputs.inspect(),
+          select: inputs.select(),
+          zoom: inputs.zoom(),
+          legendFocus: inputs.legendFocus(),
+          ...(tool !== undefined && { tool }),
+        },
+        {
+          faceted: facetedPlot,
+          hasKey: inputs.datumKey() !== undefined,
+        },
+      );
+    })(),
+  );
+
   function deliverDiagnostic(diagnostic: PlotDiagnostic): void {
     const ondiagnostic = inputs.ondiagnostic();
     ondiagnostic?.(diagnostic);
@@ -160,7 +400,7 @@ export function createPlotInteractionAssembly<
   });
 
   // The PublicKey → PropertyKey widening casts live at the GGPlot call site;
-  // OrchestratorInputs is already declared in the widened form, so controller
+  // PlotEngineInputs is already declared in the widened form, so controller
   // deps consume inputs.interaction / inputs.oninteraction / inputs.oninspect
   // directly (handler contravariance covers the narrower per-event deps).
   // Announcer is declared later; the sink is handler-only (never construction).
