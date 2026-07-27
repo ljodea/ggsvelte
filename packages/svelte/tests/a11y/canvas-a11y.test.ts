@@ -169,4 +169,64 @@ describe("a11yRows", () => {
     // materialize still works with the same batches
     void m;
   });
+
+  it("does not fully sort all distinct indexes when R ≫ CAP (issue #979)", () => {
+    // Pre-fix: [...rowSet].toSorted walks O(R log R). CAP-sized selection must
+    // not sort an array longer than a small multiple of CAP.
+    const R = A11Y_TABLE_CAP * 40;
+    const rows: Record<number, Record<string, unknown>> = {};
+    const indices: number[] = [];
+    for (let i = 0; i < R; i++) {
+      // Scatter indexes so the set is large and unsorted in insertion order.
+      const index = (i * 17 + 3) % (R * 3);
+      rows[index] = { x: index };
+      indices.push(index);
+    }
+    const m = model({
+      layerFields: { 0: [{ field: "x" }] },
+      rows,
+    });
+
+    let largeSorts = 0;
+    const noteLength = (length: number) => {
+      if (length > A11Y_TABLE_CAP * 2) largeSorts++;
+    };
+    const originalSort = Array.prototype.sort;
+    const originalToSorted = Array.prototype.toSorted;
+    const sortSpy = vi.spyOn(Array.prototype, "sort").mockImplementation(function (
+      this: unknown[],
+      compareFn?: (a: unknown, b: unknown) => number,
+    ) {
+      noteLength(this.length);
+      return originalSort.call(
+        this,
+        compareFn as ((a: unknown, b: unknown) => number) | undefined,
+      ) as unknown as typeof this;
+    });
+    const toSortedSpy = vi.spyOn(Array.prototype, "toSorted").mockImplementation(function (
+      this: unknown[],
+      compareFn?: (a: unknown, b: unknown) => number,
+    ) {
+      noteLength(this.length);
+      return originalToSorted.call(
+        this,
+        compareFn as ((a: unknown, b: unknown) => number) | undefined,
+      );
+    });
+
+    try {
+      const table = a11yRows(m, [batch({ layerIndex: 0, rowIndex: indices })]);
+      expect(table.total).toBe(new Set(indices).size);
+      expect(table.rows).toHaveLength(A11Y_TABLE_CAP);
+      // Ascending source-row order among materialised CAP rows.
+      const xs = table.rows.map((r) => r[0] as number);
+      for (let i = 1; i < xs.length; i++) {
+        expect(xs[i]!).toBeGreaterThan(xs[i - 1]!);
+      }
+      expect(largeSorts).toBe(0);
+    } finally {
+      sortSpy.mockRestore();
+      toSortedSpy.mockRestore();
+    }
+  });
 });

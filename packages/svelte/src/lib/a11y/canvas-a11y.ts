@@ -36,8 +36,9 @@ export function a11yMarkCount(batches: readonly GeometryBatch[]): number {
  * - `rows` = up to {@link A11Y_TABLE_CAP} materialised rows in ascending
  *   source-row index order; null `model.row` entries are skipped and do not
  *   count toward the cap.
- * - Sort cost O(R log R) only when materialising (open table); closed UIs
- *   should call {@link a11yMarkCount} instead.
+ * - Selection is a CAP-sized max-heap of successful materialisations
+ *   (O(R log CAP) heap ops, not a full O(R log R) sort). Closed UIs should
+ *   call {@link a11yMarkCount} instead.
  */
 export function a11yRows(
   model: RenderModel,
@@ -49,13 +50,49 @@ export function a11yRows(
     for (const f of model.layerFields[batch.layerIndex] ?? []) fieldSet.add(f.field);
   }
   const fields = [...fieldSet];
-  const rows: CellValue[][] = [];
-  // Full ascending sort of distinct indexes so null rows mid-stream still
-  // advance to later indexes (CAP counts successful materialisations only).
-  for (const index of [...rowSet].toSorted((a, b) => a - b)) {
-    if (rows.length >= A11Y_TABLE_CAP) break;
+  // Max-heap by source-row index (largest index at [0]), size ≤ CAP. Keeps
+  // the CAP smallest indexes that materialise successfully without sorting R.
+  type Entry = { index: number; cells: CellValue[] };
+  const heap: Entry[] = [];
+  const siftDown = (start: number): void => {
+    let i = start;
+    for (;;) {
+      const left = i * 2 + 1;
+      const right = left + 1;
+      let largest = i;
+      if (left < heap.length && heap[left]!.index > heap[largest]!.index) largest = left;
+      if (right < heap.length && heap[right]!.index > heap[largest]!.index) largest = right;
+      if (largest === i) break;
+      const tmp = heap[i]!;
+      heap[i] = heap[largest]!;
+      heap[largest] = tmp;
+      i = largest;
+    }
+  };
+  const siftUp = (start: number): void => {
+    let i = start;
+    while (i > 0) {
+      const parent = (i - 1) >> 1;
+      if (heap[i]!.index <= heap[parent]!.index) break;
+      const tmp = heap[i]!;
+      heap[i] = heap[parent]!;
+      heap[parent] = tmp;
+      i = parent;
+    }
+  };
+  for (const index of rowSet) {
     const row = model.row(index);
-    if (row !== null) rows.push(fields.map((f) => row[f] ?? null));
+    if (row === null) continue;
+    const cells = fields.map((f) => row[f] ?? null);
+    if (heap.length < A11Y_TABLE_CAP) {
+      heap.push({ index, cells });
+      siftUp(heap.length - 1);
+    } else if (index < heap[0]!.index) {
+      heap[0] = { index, cells };
+      siftDown(0);
+    }
   }
-  return { fields, rows, total: rowSet.size };
+  // CAP-or-fewer entries — sorting the heap is O(CAP log CAP), not O(R log R).
+  heap.sort((a, b) => a.index - b.index);
+  return { fields, rows: heap.map((entry) => entry.cells), total: rowSet.size };
 }
