@@ -1,6 +1,9 @@
 /**
  * Delegated copy controls for guide markdown fences (`data-copy-code`).
  * Icons are shared with scripts/llms-markdown.ts (single source).
+ *
+ * Public surface: GUIDE_COPY_ICON_SVG (static HTML) + attachGuideCodeCopy
+ * (Svelte attachment). Everything else is module-private.
  */
 import { copyText, MANUAL_COPY_STATUS } from "./clipboard";
 
@@ -9,10 +12,10 @@ export const GUIDE_COPY_ICON_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256" aria-hidden="true"><path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"/></svg>';
 
 /** Phosphor Check (bold) — client-only feedback after successful copy. */
-export const GUIDE_CHECK_ICON_SVG =
+const GUIDE_CHECK_ICON_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg>';
 
-export const GUIDE_COPY_RESET_MS = 2000;
+const GUIDE_COPY_RESET_MS = 2000;
 
 function cssEscapeIdent(value: string): string {
   if (typeof globalThis.CSS?.escape === "function") return globalThis.CSS.escape(value);
@@ -20,7 +23,7 @@ function cssEscapeIdent(value: string): string {
   return value.replaceAll(/[^a-zA-Z0-9_-]/gu, (ch) => `\\${ch}`);
 }
 
-export type GuideCopyFeedback = {
+type GuideCopyFeedback = {
   readonly icon: "copy" | "check";
   readonly buttonAriaLabel: string;
   readonly statusText: string;
@@ -28,7 +31,7 @@ export type GuideCopyFeedback = {
   readonly resetMs: number | null;
 };
 
-export function guideCopyFeedback(result: "copied" | "manual"): GuideCopyFeedback {
+function guideCopyFeedback(result: "copied" | "manual"): GuideCopyFeedback {
   if (result === "copied") {
     return {
       icon: "check",
@@ -48,7 +51,7 @@ export function guideCopyFeedback(result: "copied" | "manual"): GuideCopyFeedbac
 }
 
 /** Idle control state after a successful-copy reset timer fires. */
-export function guideCopyIdleFeedback(): GuideCopyFeedback {
+function guideCopyIdleFeedback(): GuideCopyFeedback {
   return {
     icon: "copy",
     buttonAriaLabel: "Copy code",
@@ -58,11 +61,11 @@ export function guideCopyIdleFeedback(): GuideCopyFeedback {
   };
 }
 
-export function guideCopyIconSvg(icon: "copy" | "check"): string {
+function guideCopyIconSvg(icon: "copy" | "check"): string {
   return icon === "check" ? GUIDE_CHECK_ICON_SVG : GUIDE_COPY_ICON_SVG;
 }
 
-export interface GuideCopyDomTargets {
+interface GuideCopyDomTargets {
   readonly button: {
     innerHTML: string;
     setAttribute(name: string, value: string): void;
@@ -74,10 +77,7 @@ export interface GuideCopyDomTargets {
 }
 
 /** Apply pure feedback to the button/status nodes used by guide fences. */
-export function applyGuideCopyFeedback(
-  targets: GuideCopyDomTargets,
-  feedback: GuideCopyFeedback,
-): void {
+function applyGuideCopyFeedback(targets: GuideCopyDomTargets, feedback: GuideCopyFeedback): void {
   targets.button.innerHTML = guideCopyIconSvg(feedback.icon);
   targets.button.setAttribute("aria-label", feedback.buttonAriaLabel);
   targets.status.textContent = feedback.statusText;
@@ -85,23 +85,29 @@ export function applyGuideCopyFeedback(
   else targets.status.classList.remove("visually-hidden");
 }
 
-export type GuideCodeCopyDeps = {
+type GuideCodeCopyDeps = {
   readonly copyText: (text: string, fallbackNode: Node) => Promise<"copied" | "manual">;
-  readonly setTimeout: typeof setTimeout;
-  readonly clearTimeout: typeof clearTimeout;
+  /** Subset of setTimeout — only the (fn, ms) form the attachment uses. */
+  readonly setTimeout: (fn: () => void, ms: number) => ReturnType<typeof setTimeout>;
+  readonly clearTimeout: (id: ReturnType<typeof setTimeout>) => void;
 };
 
+/** Live globals so tests can stub clipboard / timers without exporting deps. */
 const defaultDeps: GuideCodeCopyDeps = {
   copyText,
-  setTimeout,
-  clearTimeout,
+  setTimeout(fn, ms) {
+    return globalThis.setTimeout(fn, ms);
+  },
+  clearTimeout(id) {
+    globalThis.clearTimeout(id);
+  },
 };
 
 /**
  * Svelte 5 attachment: delegated click for `button[data-copy-code]` fences.
  * Returns a destroy function that clears pending reset timers.
  */
-export function createGuideCodeCopyAttachment(
+function createGuideCodeCopyAttachment(
   deps: GuideCodeCopyDeps = defaultDeps,
 ): (node: HTMLElement) => () => void {
   return (node: HTMLElement) => {

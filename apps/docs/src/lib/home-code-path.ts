@@ -18,7 +18,7 @@
  * ~10 rows per species; default degree-2 / span 0.75 overfits and jaggeds.
  */
 
-export const HOME_CODE_PATH_SVELTE = `<script lang="ts">
+const HOME_CODE_PATH_SVELTE = `<script lang="ts">
   import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
 
   import { penguins } from "./penguins.js";
@@ -37,7 +37,7 @@ export const HOME_CODE_PATH_SVELTE = `<script lang="ts">
 `;
 
 /** Builder produces PortableSpec; inspect is enabled on the host GGPlot. */
-export const HOME_CODE_PATH_BUILDER = `<script lang="ts">
+const HOME_CODE_PATH_BUILDER = `<script lang="ts">
   import { aes, gg } from "@ggsvelte/spec";
   import { GGPlot } from "@ggsvelte/svelte";
 
@@ -66,7 +66,7 @@ export const HOME_CODE_PATH_BUILDER = `<script lang="ts">
  * `inspect: true` still defaults mode "auto" (path layers use x-crosshair);
  * the homepage host opts into exact via the Svelte/builder tabs above.
  */
-export const HOME_CODE_PATH_SPEC_JSON = `{
+const HOME_CODE_PATH_SPEC_JSON = `{
   "interactions": {
     "inspect": true
   },
@@ -106,6 +106,7 @@ export const HOME_CODE_PATH_SPEC_JSON = `{
 }
 `;
 
+/** Only public home code-path surface — tab labels + sources for CodeTabs. */
 export const HOME_CODE_PATH_TABS: {
   label: string;
   code: string;
