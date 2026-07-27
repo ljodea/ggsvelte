@@ -320,6 +320,22 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CrossbarLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CrossbarLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CrossbarLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "CrossbarParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "CurveLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -564,6 +580,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomCrossbarOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomCurveOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -616,6 +636,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomLinerangeOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomMapOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -629,6 +653,10 @@
           "lifecycle": "experimental"
         },
         "GeomPointOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomPointrangeOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -916,6 +944,22 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "LinerangeLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LinerangeLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LinerangeLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "LinerangeParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "LinetypeName": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1069,6 +1113,22 @@
           "lifecycle": "experimental"
         },
         "PointShapeName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PointrangeLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PointrangeLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PointrangeLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "PointrangeParams": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1296,6 +1356,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeCrossbarLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeCurveLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1352,6 +1416,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeLinerangeLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeMapLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1361,6 +1429,10 @@
           "lifecycle": "experimental"
         },
         "RuntimePointLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimePointrangeLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4749,6 +4821,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GeomCrossbar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeomCurve": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4801,6 +4877,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GeomLinerange": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeomMap": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4810,6 +4890,10 @@
           "lifecycle": "experimental"
         },
         "GeomPoint": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomPointrange": {
           "kind": "value",
           "lifecycle": "experimental"
         },

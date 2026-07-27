@@ -75,13 +75,16 @@ export function assertRequiredChannels(input: {
   if (geom === "contour") {
     requireField(yField, "y", index, geom);
   }
-  if (geom === "errorbar") {
+  if (geom === "errorbar" || geom === "linerange" || geom === "pointrange" || geom === "crossbar") {
     requireField(xField, "x", index, geom);
     if (stat === "summary" || stat === "summary_bin") {
       requireField(yField, "y", index, geom);
     } else {
       requireField(yminField, "ymin", index, geom);
       requireField(ymaxField, "ymax", index, geom);
+      if (geom === "pointrange" || geom === "crossbar") {
+        requireField(yField, "y", index, geom);
+      }
     }
   }
   if (geom === "rect") {

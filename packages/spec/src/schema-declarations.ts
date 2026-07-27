@@ -1651,6 +1651,94 @@ export const SpecDeclarations = {
     },
   ),
 
+  /** Linerange shares errorbar params (width unused; no caps). */
+  LinerangeParams: Type.Ref("ErrorbarParams"),
+
+  PointrangeParams: Type.Object(
+    {
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stem stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Opacity for stem and point. Default 1.",
+        }),
+      ),
+      size: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Mid-point radius in px. Default 2.5.",
+        }),
+      ),
+      shape: Type.Optional(
+        Type.Union(POINT_SHAPE_NAME_SCHEMAS, {
+          description: 'Mid-point shape. Default "circle".',
+        }),
+      ),
+      fun: Type.Optional(
+        Type.Union([Type.Literal("mean"), Type.Literal("median"), Type.Literal("sum")], {
+          description:
+            'STAT SUMMARY ONLY: center summary of y per x group. Default "mean" (mean_se when funMin/funMax omitted).',
+        }),
+      ),
+      funMin: Type.Optional(Type.Ref("SummaryFun")),
+      funMax: Type.Optional(Type.Ref("SummaryFun")),
+    },
+    {
+      additionalProperties: false,
+      description: "Parameters for geom_pointrange (stem + mid point).",
+    },
+  ),
+
+  CrossbarParams: Type.Object(
+    {
+      width: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          maximum: 1,
+          description:
+            "Box width: band-step fraction (band x) or fraction of continuous resolution (same rule as errorbar caps). Default 0.9.",
+        }),
+      ),
+      fatten: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Multiplier for the mid-line linewidth relative to params.linewidth / aes.linewidth. Default 2.5 (ggplot2 geom_crossbar).",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Outline and base mid-line stroke width in px. Default 1.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Box and mid-line opacity. Default 1.",
+        }),
+      ),
+      fun: Type.Optional(
+        Type.Union([Type.Literal("mean"), Type.Literal("median"), Type.Literal("sum")], {
+          description: 'STAT SUMMARY ONLY: center summary. Default "mean".',
+        }),
+      ),
+      funMin: Type.Optional(Type.Ref("SummaryFun")),
+      funMax: Type.Optional(Type.Ref("SummaryFun")),
+    },
+    {
+      additionalProperties: false,
+      description: "Parameters for geom_crossbar (interval box + mid line).",
+    },
+  ),
+
   RectParams: Type.Object(
     {
       linewidth: Type.Optional(
@@ -3353,6 +3441,87 @@ export const SpecDeclarations = {
     },
   ),
 
+  LinerangeLayer: Type.Object(
+    {
+      geom: Type.Literal("linerange", {
+        description:
+          "Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+      }),
+      stat: Type.Optional(
+        Type.Union([Type.Literal("identity"), Type.Literal("summary")], {
+          description:
+            "Identity (map ymin/ymax) or summary (mean_se from aes.y) — same contract as errorbar.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Linerange layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(Type.Ref("DataRef")),
+      params: Type.Optional(Type.Ref("LinerangeParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A linerange layer. Identity: x, ymin, ymax. Summary: x, y. No caps (unlike errorbar).",
+    },
+  ),
+
+  PointrangeLayer: Type.Object(
+    {
+      geom: Type.Literal("pointrange", {
+        description:
+          "Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+      }),
+      stat: Type.Optional(
+        Type.Union([Type.Literal("identity"), Type.Literal("summary")], {
+          description:
+            "Identity (map y, ymin, ymax) or summary (center + mean_se bounds from aes.y).",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Pointrange layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(Type.Ref("DataRef")),
+      params: Type.Optional(Type.Ref("PointrangeParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A pointrange layer. Identity: x, y, ymin, ymax. Summary: x, y. Point size/shape via params or aes.",
+    },
+  ),
+
+  CrossbarLayer: Type.Object(
+    {
+      geom: Type.Literal("crossbar", {
+        description:
+          "Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+      }),
+      stat: Type.Optional(
+        Type.Union([Type.Literal("identity"), Type.Literal("summary")], {
+          description:
+            "Identity (map y, ymin, ymax) or summary (center + mean_se bounds from aes.y).",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Crossbar layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(Type.Ref("DataRef")),
+      params: Type.Optional(Type.Ref("CrossbarParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A crossbar layer. Identity: x, y, ymin, ymax. Box width uses the same resolution rule as errorbar caps. Mid-line linewidth = linewidth * fatten.",
+    },
+  ),
+
   RectLayer: Type.Object(
     {
       geom: Type.Literal("rect", {
@@ -4199,6 +4368,9 @@ export const SpecDeclarations = {
       Type.Ref("Density2dFilledLayer"),
       Type.Ref("DotplotLayer"),
       Type.Ref("ErrorbarLayer"),
+      Type.Ref("LinerangeLayer"),
+      Type.Ref("PointrangeLayer"),
+      Type.Ref("CrossbarLayer"),
       Type.Ref("MapLayer"),
       Type.Ref("RectLayer"),
       Type.Ref("TileLayer"),

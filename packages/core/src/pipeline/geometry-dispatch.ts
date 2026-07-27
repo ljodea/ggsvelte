@@ -23,6 +23,7 @@ import { ablineBatch } from "./geometry-abline.js";
 import { curveBatch } from "./geometry-curve.js";
 import { hexBatch } from "./geometry-hex.js";
 import { rugBatch } from "./geometry-rug.js";
+import { crossbarBatches, linerangeBatch, pointrangeBatches } from "./geometry-range.js";
 
 function single(batch: GeometryBatch | null): GeometryBatch[] {
   return batch === null ? [] : [batch];
@@ -107,6 +108,12 @@ export function dispatchGeometryBatch(
       return boxplotBatches(frame, fx, fill, styles, warnings);
     case "errorbar":
       return single(errorbarBatch(frame, fx, color, styles, warnings));
+    case "linerange":
+      return single(linerangeBatch(frame, fx, color, styles, warnings));
+    case "pointrange":
+      return pointrangeBatches(frame, fx, color, styles, warnings);
+    case "crossbar":
+      return crossbarBatches(frame, fx, color, fill, styles, warnings);
     case "hex":
       return single(hexBatch(frame, fx, fill, color, styles, warnings));
     case "map":

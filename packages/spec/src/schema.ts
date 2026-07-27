@@ -149,6 +149,9 @@ export const Density2dLayerSchema = SpecModule.Import("Density2dLayer");
 export const Density2dFilledLayerSchema = SpecModule.Import("Density2dFilledLayer");
 export const DotplotLayerSchema = SpecModule.Import("DotplotLayer");
 export const ErrorbarLayerSchema = SpecModule.Import("ErrorbarLayer");
+export const LinerangeLayerSchema = SpecModule.Import("LinerangeLayer");
+export const PointrangeLayerSchema = SpecModule.Import("PointrangeLayer");
+export const CrossbarLayerSchema = SpecModule.Import("CrossbarLayer");
 export const RectLayerSchema = SpecModule.Import("RectLayer");
 export const TileLayerSchema = SpecModule.Import("TileLayer");
 export const Bin2dLayerSchema = SpecModule.Import("Bin2dLayer");
@@ -275,6 +278,12 @@ export type DotplotParams = SpecType<"DotplotParams">;
 export type SummaryFun = SpecType<"SummaryFun">;
 /** Errorbar layer params (styling + summary-stat functions). */
 export type ErrorbarParams = SpecType<"ErrorbarParams">;
+/** Linerange params (alias of ErrorbarParams). */
+export type LinerangeParams = SpecType<"LinerangeParams">;
+/** Pointrange params (stem + mid point size/shape). */
+export type PointrangeParams = SpecType<"PointrangeParams">;
+/** Crossbar params (width, fatten, stroke). */
+export type CrossbarParams = SpecType<"CrossbarParams">;
 /** Rect layer params. */
 export type RectParams = SpecType<"RectParams">;
 /** Tile layer params. */
@@ -338,6 +347,12 @@ export type Density2dFilledLayer = LayerWithDataRef<SpecType<"Density2dFilledLay
 export type DotplotLayer = LayerWithDataRef<SpecType<"DotplotLayer">>;
 /** An errorbar layer. */
 export type ErrorbarLayer = LayerWithDataRef<SpecType<"ErrorbarLayer">>;
+/** A linerange layer (stem without caps). */
+export type LinerangeLayer = LayerWithDataRef<SpecType<"LinerangeLayer">>;
+/** A pointrange layer (stem + mid point). */
+export type PointrangeLayer = LayerWithDataRef<SpecType<"PointrangeLayer">>;
+/** A crossbar layer (interval box + mid line). */
+export type CrossbarLayer = LayerWithDataRef<SpecType<"CrossbarLayer">>;
 /** A rect layer (arbitrary xmin/xmax/ymin/ymax regions). */
 export type RectLayer = LayerWithDataRef<SpecType<"RectLayer">>;
 /** A tile layer (center-sized cells). */
@@ -425,6 +440,9 @@ export type LayerSpec =
   | Density2dFilledLayer
   | DotplotLayer
   | ErrorbarLayer
+  | LinerangeLayer
+  | PointrangeLayer
+  | CrossbarLayer
   | RectLayer
   | TileLayer
   | Bin2dLayer
