@@ -265,12 +265,14 @@ exports[`validate — agent errors (snapshot-tested messages) bad enum value wit
     "allowed": [
       "linear",
       "step",
+      "step-hv",
+      "step-vh",
     ],
     "code": "invalid-enum-value",
     "fix": {
       "description": "Set "curve" to "step".",
     },
-    "message": "Invalid value "stepp" for "curve"; allowed: "linear", "step". Did you mean "step"?",
+    "message": "Invalid value "stepp" for "curve"; allowed: "linear", "step", "step-hv", "step-vh". Did you mean "step"?",
     "path": "/layers/0/params/curve",
   },
 ]
@@ -399,9 +401,11 @@ exports[`validate — agent errors (snapshot-tested messages) multiple errors ar
     "allowed": [
       "linear",
       "step",
+      "step-hv",
+      "step-vh",
     ],
     "code": "invalid-enum-value",
-    "message": "Invalid value "zig" for "curve"; allowed: "linear", "step".",
+    "message": "Invalid value "zig" for "curve"; allowed: "linear", "step", "step-hv", "step-vh".",
     "path": "/layers/1/params/curve",
   },
   {

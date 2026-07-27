@@ -100,6 +100,7 @@ export const KNOWN_STATS = [
   "boxplot",
   "density",
   "summary",
+  "ecdf",
   "summary_bin",
   "contour",
   "align",

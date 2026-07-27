@@ -16,6 +16,7 @@ export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
   smooth: [],
   boxplot: [],
   summary: [],
+  ecdf: ["ecdf"],
   // y/ymin/ymax are field-mapped measure outputs (not {stat} y columns).
   summary_bin: [],
   // Contour writes x/y as frame coordinates; after_stat level is not a y column.

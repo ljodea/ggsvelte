@@ -294,6 +294,22 @@ export function layerStructuralErrors(
     }
   }
 
+  if (geom === "line" && stat === "ecdf") {
+    const y = mapped("y");
+    if (y !== undefined && !("stat" in y)) {
+      errors.push({
+        code: "computed-y-mapped",
+        path: `${layerPath}/aes/y`,
+        message:
+          'The ecdf stat computes y (cumulative proportion), so aes.y must not map data. Map only x, or use y: { stat: "ecdf" }.',
+        fix: {
+          description: 'Remove the y mapping (or set y: { stat: "ecdf" }).',
+          example: { geom: "line", stat: "ecdf", aes: { y: null } },
+        },
+      });
+    }
+  }
+
   if (
     geom === "bar" ||
     geom === "histogram" ||

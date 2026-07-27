@@ -135,8 +135,8 @@ export interface PointLayerInput extends LayerInputBase {
 
 export interface LineLayerInput extends LayerInputBase {
   geom: "line";
-  /** identity | unique | bin | align | connect | summary_bin | manual */
-  stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin" | "manual";
+  /** identity | unique | bin | align | connect | summary_bin | manual | ecdf */
+  stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin" | "manual" | "ecdf";
   position?: "identity";
   params?: LineParams;
 }

@@ -69,9 +69,10 @@ export interface GeomLineOptions extends LineParams, GeomDataOption {
    * identity (default) | unique (#813) | bin (freqpoly / #796) |
    * align (shared continuous-x grid for stack/fill; #815) |
    * connect (expand successive points; #816) |
-   * summary_bin (#817) | manual (#814).
+   * summary_bin (#817) | manual (#814) |
+   * ecdf (empirical CDF of x; do not map y — #811).
    */
-  stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin" | "manual";
+  stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin" | "manual" | "ecdf";
 }
 
 /** Path-layer sugar options (data-order polylines; style + optional connect). */
