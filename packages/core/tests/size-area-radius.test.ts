@@ -58,4 +58,18 @@ describe("size area / radius mapping (#830)", () => {
     expect(out[2]).toBeCloseTo(10, 5);
     expect(out[1]).toBeCloseTo(Math.sqrt(52), 5);
   });
+
+  it("area_zero with reverse does not collapse every bubble to zero", () => {
+    const out = sizesFor([0, 25, 100], {
+      type: "sequential",
+      sizeUnit: "area_zero",
+      range: [0, 10],
+      reverse: true,
+    });
+    // reverse swaps range to [10, 0] → max·√(1−t): domain min is largest radius
+    expect(out[0]).toBeCloseTo(10, 5);
+    expect(out[2]).toBeCloseTo(0, 5);
+    // t=0.25 → 10·√0.75
+    expect(out[1]).toBeCloseTo(10 * Math.sqrt(0.75), 5);
+  });
 });

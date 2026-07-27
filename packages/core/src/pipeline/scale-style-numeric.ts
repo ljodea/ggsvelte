@@ -53,10 +53,11 @@ function numericMappedValue(
     if (sizeUnit === "radius") {
       return range[0] + bounded * (range[1] - range[0]);
     }
-    // area_zero: value ∝ area, zero maps to zero radius (ggplot2 scale_size_area).
-    // range[1] is max radius; range[0] is ignored (forced zero at t=0).
+    // area_zero: value ∝ area (ggplot2 scale_size_area). Use both range endpoints
+    // so reverse (which swaps them in place) still maps non-degenerately: [0, max]
+    // → max·√t; [max, 0] → max·√(1−t). Domain still includes 0 via train path.
     if (sizeUnit === "area_zero") {
-      return range[1] * Math.sqrt(bounded);
+      return Math.sqrt(range[0] * range[0] + bounded * (range[1] * range[1] - range[0] * range[0]));
     }
     // default area: interpolate by area between range endpoints (existing contract).
     return Math.sqrt(range[0] * range[0] + bounded * (range[1] * range[1] - range[0] * range[0]));
