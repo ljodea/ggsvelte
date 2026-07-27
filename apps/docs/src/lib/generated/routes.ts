@@ -1917,6 +1917,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "stat-channel-unsupported-warning",
+        title: "stat-channel-unsupported — warning",
+        level: 3,
+      },
+      {
         id: "palette-exhausted-warning",
         title: "palette-exhausted — warning",
         level: 3,
