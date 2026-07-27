@@ -51,6 +51,7 @@ export function assertRequiredChannels(input: {
     geom === "count" ||
     geom === "line" ||
     geom === "path" ||
+    geom === "step" ||
     geom === "col" ||
     geom === "area" ||
     geom === "text" ||

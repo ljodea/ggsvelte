@@ -13,6 +13,17 @@ export interface ColorLegendFormatter {
   fullLabel(value: number): string;
 }
 
+/** Minimum positive adjacent gap among finite break edges (skips non-positive gaps). */
+export function minAdjacentWidth(breaks: readonly number[]): number | undefined {
+  let min: number | undefined;
+  for (let index = 1; index < breaks.length; index++) {
+    const width = breaks[index]! - breaks[index - 1]!;
+    if (!Number.isFinite(width) || width <= 0) continue;
+    if (min === undefined || width < min) min = width;
+  }
+  return min;
+}
+
 function resolveColorLegendFormat(input: {
   domain: readonly [number, number];
   temporalKind: TemporalKind | null;
@@ -20,6 +31,8 @@ function resolveColorLegendFormat(input: {
   config: Pick<ColorScaleSpec, "labels" | "timezone" | "transform"> | undefined;
   name: string;
   warnings: PipelineWarning[];
+  /** When set (binned legends), use bin width for decimals instead of axis tickStep. */
+  formatStep?: number;
 }): ColorLegendFormatter {
   const { domain, temporalKind, config, name, warnings } = input;
   const transform = input.transform ?? config?.transform ?? "identity";
@@ -78,7 +91,11 @@ function resolveColorLegendFormat(input: {
       });
     };
   } else {
-    label = defaultTickFormat(tickStep(domain[0], domain[1], 5));
+    const step =
+      input.formatStep !== undefined && Number.isFinite(input.formatStep) && input.formatStep > 0
+        ? input.formatStep
+        : tickStep(domain[0], domain[1], 5);
+    label = defaultTickFormat(step);
   }
   if (labelFormat !== undefined) {
     const formatter = numberFormatter(labelFormat);
@@ -100,6 +117,7 @@ export function resolveStyleLegendFormat(input: {
   config: { labels?: string; timezone?: string } | undefined;
   name: string;
   warnings: PipelineWarning[];
+  formatStep?: number;
 }): ColorLegendFormatter {
   return resolveColorLegendFormat(input);
 }
@@ -126,6 +144,7 @@ export function resolveBinnedLegendFormat(input: {
   config: ColorScaleSpec;
   name: "color" | "fill";
   warnings: PipelineWarning[];
+  formatStep?: number;
 }): ColorLegendFormatter {
   return resolveColorLegendFormat(input);
 }

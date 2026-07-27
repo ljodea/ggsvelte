@@ -50,6 +50,7 @@ import type {
   Density2dFilledLayer,
   DotplotLayer,
   RugLayer,
+  StepLayer,
   RuleLayer,
   QuantileLayer,
   SmoothLayer,
@@ -90,6 +91,7 @@ export interface RuntimeCountLayer extends WithRuntimeAes<CountLayer> {}
 export interface RuntimeAblineLayer extends WithRuntimeAes<AblineLayer> {}
 export interface RuntimeCurveLayer extends WithRuntimeAes<CurveLayer> {}
 export interface RuntimeRugLayer extends WithRuntimeAes<RugLayer> {}
+export interface RuntimeStepLayer extends WithRuntimeAes<StepLayer> {}
 export interface RuntimeRuleLayer extends WithRuntimeAes<RuleLayer> {}
 export interface RuntimeHlineLayer extends WithRuntimeAes<HlineLayer> {}
 export interface RuntimeVlineLayer extends WithRuntimeAes<VlineLayer> {}
@@ -130,6 +132,7 @@ export type RuntimeLayerSpec =
   | RuntimeAblineLayer
   | RuntimeCurveLayer
   | RuntimeRugLayer
+  | RuntimeStepLayer
   | RuntimeRuleLayer
   | RuntimeHlineLayer
   | RuntimeVlineLayer

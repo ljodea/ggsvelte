@@ -664,6 +664,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomStepOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomTextOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1300,6 +1304,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeStepLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeTextLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1477,6 +1485,22 @@
           "lifecycle": "experimental"
         },
         "StatName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "StepLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "StepLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "StepLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "StepParams": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4574,6 +4598,10 @@
           "lifecycle": "experimental"
         },
         "GeomSpoke": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomStep": {
           "kind": "value",
           "lifecycle": "experimental"
         },

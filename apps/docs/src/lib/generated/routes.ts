@@ -2267,8 +2267,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-720",
-        title: "experimental (720)",
+        id: "experimental-726",
+        title: "experimental (726)",
         level: 3,
       },
       {
@@ -2307,8 +2307,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-506",
-        title: "experimental (506)",
+        id: "experimental-507",
+        title: "experimental (507)",
         level: 3,
       },
       {
@@ -3187,6 +3187,16 @@ export const DOCS_ROUTES = [
     title: "Spoke vector field — ggsvelte gallery",
     description: "Spoke vector field",
     canonicalPath: "/examples/spoke/vector-field",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/step/ecdf",
+    title: "Step ECDF — ggsvelte gallery",
+    description: "Step ECDF",
+    canonicalPath: "/examples/step/ecdf",
     kind: "page",
     index: true,
     sitemap: true,

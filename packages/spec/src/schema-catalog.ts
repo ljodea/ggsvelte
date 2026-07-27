@@ -41,6 +41,7 @@ export const KNOWN_GEOMS = [
   "jitter",
   "spoke",
   "rug",
+  "step",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -161,4 +162,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   jitter: { stat: "identity", position: "jitter" },
   spoke: { stat: "identity", position: "identity" },
   rug: { stat: "identity", position: "identity" },
+  step: { stat: "identity", position: "identity" },
 };

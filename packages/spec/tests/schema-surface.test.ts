@@ -31,6 +31,7 @@ const VALUE_EXPORTS = [
   "SegmentLayerSchema",
   "CountLayerSchema",
   "CurveLayerSchema",
+  "StepLayerSchema",
   "FacetFieldRefSchema",
   "FacetStripSpecSchema",
   "FacetSpecSchema",

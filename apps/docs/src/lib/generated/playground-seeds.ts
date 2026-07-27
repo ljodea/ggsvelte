@@ -668,6 +668,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "step/ecdf",
+    title: "Step ECDF",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6InN0ZXAvZWNkZiJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJ4IjoxLjIsInkiOjAuMTI1fSx7IngiOjIsInkiOjAuMjV9LHsieCI6Mi40LCJ5IjowLjM3NX0seyJ4IjozLjEsInkiOjAuNX0seyJ4IjozLjgsInkiOjAuNjI1fSx7IngiOjQuNSwieSI6MC43NX0seyJ4Ijo1LjIsInkiOjAuODc1fSx7IngiOjYsInkiOjF9XX0sImxheWVycyI6W3siZ2VvbSI6InN0ZXAiLCJzdGF0IjoiaWRlbnRpdHkiLCJwb3NpdGlvbiI6ImlkZW50aXR5IiwiYWVzIjp7IngiOnsiZmllbGQiOiJ4In0sInkiOnsiZmllbGQiOiJ5In19LCJwYXJhbXMiOnsiZGlyZWN0aW9uIjoiaHYiLCJsaW5ld2lkdGgiOjEuOH19LHsiZ2VvbSI6InBvaW50Iiwic3RhdCI6ImlkZW50aXR5IiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoieCJ9LCJ5Ijp7ImZpZWxkIjoieSJ9fSwicGFyYW1zIjp7InNpemUiOjIuMiwiYWxwaGEiOjAuODV9fV0sImxhYnMiOnsidGl0bGUiOiJFbXBpcmljYWwgQ0RGIGFzIGEgc3RlcCBsaW5lIiwic3VidGl0bGUiOiJnZW9tX3N0ZXAgZGlyZWN0aW9uIGh2IOKAlCBob3Jpem9udGFsLCB0aGVuIHZlcnRpY2FsIiwieCI6IngiLCJ5IjoiRsyCKHgpIn0sInRoZW1lIjoiY2xhc3NpYyJ9fQ",
+    },
+  },
+  {
     id: "text/labels",
     title: "Text labels on a scatter",
     compatibility: {

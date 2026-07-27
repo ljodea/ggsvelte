@@ -36,6 +36,7 @@ export function candidateAutoMode(
       return "exact";
     case "line":
     case "path":
+    case "step":
     case "contour":
     case "area":
     case "density":
