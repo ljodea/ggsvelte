@@ -431,12 +431,6 @@
     padding-block: 1rem 2.5rem;
   }
 
-  /* Playground spec: max 4px radius, no decorative shadow (DESIGN.md). */
-  .playground :global(.ui-button) {
-    border-radius: 4px;
-    box-shadow: none;
-  }
-
   .playground-intro {
     margin-bottom: 1.5rem;
   }
