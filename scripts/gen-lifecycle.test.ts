@@ -108,5 +108,17 @@ describe("lifecycle.json", () => {
     for (const name of ["GGPlot", "PortableSpec", "normalize", "validate", "renderToSVGString"]) {
       expect(svelte).toContain(name);
     }
+    // #705: declaration-only Geom* shells are the recommended composition path.
+    for (const name of ["GeomPoint", "GeomLine", "GeomBar", "GeomAbline"]) {
+      expect(svelte).toContain(name);
+    }
+    // Factory/registry stay experimental (not composition surface).
+    const svelteSurface = doc.surfaces.find(
+      (x) => x.package === "@ggsvelte/svelte" && x.entry === ".",
+    )!;
+    for (const name of ["createGeomLayer", "registerLayer", "GeomProps"]) {
+      expect(svelteSurface.exports[name]?.lifecycle).toBe("experimental");
+      expect(svelte).not.toContain(name);
+    }
   });
 });

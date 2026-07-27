@@ -481,14 +481,24 @@ collected into the generated `lifecycle.json` (`bun run lifecycle:gen`;
 staleness-tested). The docs lifecycle page and llms surfaces render from it.
 
 - **experimental** — may change or disappear in any 0.x release without
-  ceremony. The default for everything pre-0.1.0.
-- **stable-intent** — the agent core path: `PortableSpec`, `normalize`,
-  `validate` (+ `ValidateResult`/`SpecError` contracts), `renderToSVGString`,
-  `GGPlot`. Not frozen pre-1.0, but changes are treated as breaking: they get
-  a changeset with a `Migration:` marker, an upgrading-guide section, and a
-  deprecation window of at least one full minor release. The precise rules
-  (windows, fixtures, runtime checks, codemod bar) are decision 0013
-  (`docs/decisions/0013-post-0-1-migration-policy.md`).
+  ceremony. The default for everything not explicitly promoted.
+- **stable-intent** — committed enough that changes pay the migration tax.
+  Two independent reasons to tag a surface (either is enough):
+  1. **Agent core path** — `PortableSpec`, `normalize`, `validate`
+     (+ `ValidateResult`/`SpecError` contracts), `renderToSVGString`,
+     `GGPlot`.
+  2. **Recommended Svelte composition children** — declaration-only
+     `Geom*` shells and the grammar children from #659 (theme / scale /
+     coord / facet / labs / guides / legend). Registry and factory helpers
+     stay experimental.
+     Not frozen pre-1.0, but changes are treated as breaking: they get a
+     changeset with a `Migration:` marker, an upgrading-guide section, and a
+     deprecation window of at least one full minor release. The precise rules
+     (windows, fixtures, runtime checks, codemod bar) are decision 0013
+     (`docs/decisions/0013-post-0-1-migration-policy.md`).
+     Promote when the surface is on the recommended public path, its contract
+     is tested, and you accept that tax — not by calendar age alone, and not
+     only because a live docs `/qa` pass looked fine.
 - **stable** — committed API under semver. Nothing is `stable` pre-1.0.
 - **superseded** — keeps working but stops being recommended; docs point at
   the replacement. This tag exists to protect agent-generated code from

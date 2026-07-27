@@ -11,10 +11,11 @@
  *      file's header comment (required — a file without one is an error).
  *
  * Tags (meanings documented in CONTRIBUTING.md): "experimental",
- * "stable-intent", "stable", "superseded". At 0.1.0 everything is
- * experimental except the agent core path (PortableSpec / normalize /
- * validate / renderToSVGString / GGPlot and their direct result contracts),
- * which is stable-intent.
+ * "stable-intent", "stable", "superseded". stable-intent covers the agent
+ * core path (PortableSpec / normalize / validate / renderToSVGString /
+ * GGPlot and their direct result contracts) plus recommended Svelte
+ * composition children (Geom* shells and grammar children from #659).
+ * Everything else defaults to experimental until deliberately promoted.
  *
  * Usage:
  *   bun scripts/gen-lifecycle.ts           # (re)write lifecycle.json

@@ -77,56 +77,106 @@ export type {
   ZoomInput,
   ZoomOptions,
 } from "./interaction/interaction.js";
+// Geom* declaration-only children (#705) — stable-intent: the recommended
+// Svelte composition surface for layers (same commitment as grammar children
+// from #659). Registry/factory helpers stay experimental (file default).
+/** @lifecycle stable-intent */
 export { default as GeomPoint } from "./geoms/GeomPoint.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomCount } from "./geoms/GeomCount.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomContour } from "./geoms/GeomContour.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomDotplot } from "./geoms/GeomDotplot.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomLine } from "./geoms/GeomLine.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomPath } from "./geoms/GeomPath.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomCol } from "./geoms/GeomCol.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomBar } from "./geoms/GeomBar.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomArea } from "./geoms/GeomArea.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomRule } from "./geoms/GeomRule.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomHline } from "./geoms/GeomHline.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomVline } from "./geoms/GeomVline.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomJitter } from "./geoms/GeomJitter.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomText } from "./geoms/GeomText.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomLabel } from "./geoms/GeomLabel.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomHistogram } from "./geoms/GeomHistogram.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomFreqpoly } from "./geoms/GeomFreqpoly.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomSmooth } from "./geoms/GeomSmooth.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomQuantile } from "./geoms/GeomQuantile.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomBoxplot } from "./geoms/GeomBoxplot.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomDensity } from "./geoms/GeomDensity.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomDensity2d } from "./geoms/GeomDensity2d.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomDensity2dFilled } from "./geoms/GeomDensity2dFilled.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomErrorbar } from "./geoms/GeomErrorbar.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomLinerange } from "./geoms/GeomLinerange.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomPointrange } from "./geoms/GeomPointrange.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomCrossbar } from "./geoms/GeomCrossbar.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomRect } from "./geoms/GeomRect.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomTile } from "./geoms/GeomTile.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomBin2d } from "./geoms/GeomBin2d.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomRaster } from "./geoms/GeomRaster.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomHex } from "./geoms/GeomHex.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomRibbon } from "./geoms/GeomRibbon.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomSegment } from "./geoms/GeomSegment.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomViolin } from "./geoms/GeomViolin.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomFunction } from "./geoms/GeomFunction.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomPolygon } from "./geoms/GeomPolygon.svelte";
 /** @lifecycle stable-intent */
 export { default as GeomAbline } from "./geoms/GeomAbline.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomCurve } from "./geoms/GeomCurve.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomMap } from "./geoms/GeomMap.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomSf } from "./geoms/GeomSf.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomSfText } from "./geoms/GeomSfText.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomSfLabel } from "./geoms/GeomSfLabel.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomBlank } from "./geoms/GeomBlank.svelte";
-
+/** @lifecycle stable-intent */
 export { default as GeomSpoke } from "./geoms/GeomSpoke.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomRug } from "./geoms/GeomRug.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomStep } from "./geoms/GeomStep.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomQq } from "./geoms/GeomQq.svelte";
+/** @lifecycle stable-intent */
 export { default as GeomQqLine } from "./geoms/GeomQqLine.svelte";
 export { registerLayer, registerPlotLayer } from "./geoms/registry.svelte.js";
 export type {
