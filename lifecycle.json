@@ -588,6 +588,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GEOM_PARAM_KEYS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GGBuilder": {
           "kind": "value",
           "lifecycle": "experimental"

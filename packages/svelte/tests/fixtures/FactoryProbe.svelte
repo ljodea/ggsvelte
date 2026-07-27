@@ -1,7 +1,7 @@
 <script lang="ts">
   /**
    * Thin shell that exercises createGeomLayer the same way real Geom*
-   * components do: live $props proxy + param-key whitelist.
+   * components do: live $props proxy + schema-derived param whitelist.
    */
   import type { GeomName } from "@ggsvelte/spec";
   import { untrack } from "svelte";
@@ -13,7 +13,6 @@
 
   interface Props extends GeomProps {
     geom: GeomName;
-    paramKeys: readonly string[];
     /** Any geom params (alpha, size, …) travel via the live props proxy. */
     [key: string]: unknown;
   }
@@ -22,6 +21,5 @@
   createGeomLayer(
     untrack(() => props.geom),
     () => props,
-    untrack(() => props.paramKeys) as readonly (keyof Props & string)[],
   );
 </script>

@@ -3842,14 +3842,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-851",
+    id: "heading:guide-lifecycle:experimental-852",
     kind: "heading",
-    title: "experimental (851)",
+    title: "experimental (852)",
     summary:
-      "experimental (851) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-851",
+      "experimental (852) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-852",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (851)"],
+    exact: ["experimental (852)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -6903,6 +6903,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
     exact: ["GEOM_DEFAULTS"],
+  },
+  {
+    id: "api:ggsvelte-spec:GEOM_PARAM_KEYS",
+    kind: "api",
+    title: "GEOM_PARAM_KEYS",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["GEOM_PARAM_KEYS"],
   },
   {
     id: "api:ggsvelte-spec:GGBuilder",

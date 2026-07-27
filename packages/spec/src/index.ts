@@ -270,6 +270,8 @@ export {
 } from "./hue-grey-palettes.js";
 export { SCALE_CAPABILITIES, STYLE_AESTHETIC_GEOMS } from "./capabilities.js";
 export type { ScaleCapability, StyleAesthetic } from "./capabilities.js";
+/** @lifecycle experimental */
+export { GEOM_PARAM_KEYS } from "./geom-params.js";
 
 // Temporal parsing, inference, and authoring conversions
 export {

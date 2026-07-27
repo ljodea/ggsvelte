@@ -194,6 +194,7 @@ a tag main never publishes). The lockstep test encodes that inequality.
 | `bun run schema:emit`                                         | regenerate `packages/spec/schema/v0.json` (staleness-guarded by a spec test)                                                                      |
 | `bun run lifecycle:gen` / `bun run lifecycle:check`           | (re)generate / staleness-check `lifecycle.json` from the index-file lifecycle tags                                                                |
 | `bun run scale:children:gen` / `bun run scale:children:check` | (re)generate / staleness-check `<Scale*>` shells + the index region from the scale-children manifest (#659)                                       |
+| `bun run geom:children:gen` / `bun run geom:children:check`   | (re)generate / staleness-check `<Geom*>` shells + the index region from KNOWN_GEOMS + *LayerInput (#1039)                                         |
 | `bun run evals`                                               | held-out NL→spec eval harness (tests/evals; OpenRouter API, model via EVAL_MODEL; dry-run with a mock model without OPENROUTER_API_KEY)           |
 | `bun run bench:json`                                          | run the named workloads once, write `bench-results.json` (github-action-benchmark format)                                                         |
 | `bun run bench:budgets`                                       | compare `bench-results.json` against `benchmarks/budgets.json` (provisional budgets, +50%)                                                        |
