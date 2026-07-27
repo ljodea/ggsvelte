@@ -1,8 +1,8 @@
 import { CANVAS_AUTO_THRESHOLD, runPipeline } from "@ggsvelte/core";
 import { describe, expect, test } from "bun:test";
 
-import { CANVAS_SCATTER_MARKS, cloud } from "../point/canvas-scatter/data.ts";
-import spec from "../point/canvas-scatter/spec.ts";
+import { CANVAS_SCATTER_MARKS, cloud } from "../../../examples/point/canvas-scatter/data.ts";
+import spec from "../../../examples/point/canvas-scatter/spec.ts";
 
 describe("point/canvas-scatter showcase", () => {
   test("stays above the canvas auto threshold so VR/docs exercise a canvas stratum", () => {
