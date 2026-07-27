@@ -87,8 +87,8 @@ export default defineConfig({
     // VR / visual-contract seats keep Playwright's default 30s budget.
     { name: "chromium", use: { browserName: "chromium" }, testIgnore: JOURNEYS_SPECS },
     // Docs a11y/structure journeys: cold CI hydrate straddled 30s (~30.2s
-    // observed; mobile dialog + resize worse). 60s is the former per-test
-    // mitigation, applied at project scope so local runs match CI (#944).
+    // observed). 60s remains project scope (#944) while getting-started chart
+    // islands still dominate several journeys (#946 follow-up).
     {
       name: "journeys",
       use: { browserName: "chromium" },

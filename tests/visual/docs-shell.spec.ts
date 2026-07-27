@@ -134,10 +134,14 @@ test("desktop docs shell exposes chapter, breadcrumb, contents, and sequence nav
 });
 
 test("mobile header and docs navigation are explicit, reachable controls", async ({ page }) => {
-  // Lives in the journeys Playwright project (60s budget, #944). Prefer
-  // waitUntil/visibility waits over per-test setTimeout.
+  // Avoid /guide/getting-started here: its lesson chart islands block the main
+  // thread for ~17s before "Open site menu" is tappable (local workers=1), so
+  // dialog + resize straddled the old 30s budget (#946). Shell chrome is shared
+  // across guide pages (DocsShell); /guide/errors exercises the same menus
+  // without that hydrate cost. Journeys project budget stays 60s (#944) because
+  // other journeys still cold-load getting-started — see #972.
   await page.setViewportSize({ width: 375, height: 760 });
-  await page.goto(GUIDE_ROUTE, { waitUntil: "domcontentloaded" });
+  await page.goto("/guide/errors", { waitUntil: "domcontentloaded" });
 
   const siteMenu = page.getByRole("button", { name: "Open site menu" });
   await expect(siteMenu).toBeVisible({ timeout: 15_000 });
