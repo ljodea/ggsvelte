@@ -90,6 +90,7 @@ export { default as GeomHline } from "./geoms/GeomHline.svelte";
 export { default as GeomVline } from "./geoms/GeomVline.svelte";
 export { default as GeomJitter } from "./geoms/GeomJitter.svelte";
 export { default as GeomText } from "./geoms/GeomText.svelte";
+export { default as GeomLabel } from "./geoms/GeomLabel.svelte";
 export { default as GeomHistogram } from "./geoms/GeomHistogram.svelte";
 export { default as GeomFreqpoly } from "./geoms/GeomFreqpoly.svelte";
 export { default as GeomSmooth } from "./geoms/GeomSmooth.svelte";

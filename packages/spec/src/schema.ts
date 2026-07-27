@@ -139,6 +139,7 @@ export const HlineLayerSchema = SpecModule.Import("HlineLayer");
 export const VlineLayerSchema = SpecModule.Import("VlineLayer");
 export const JitterLayerSchema = SpecModule.Import("JitterLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
+export const LabelLayerSchema = SpecModule.Import("LabelLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
 export const QuantileLayerSchema = SpecModule.Import("QuantileLayer");
 export const ContourLayerSchema = SpecModule.Import("ContourLayer");
@@ -257,6 +258,8 @@ export type QqParams = SpecType<"QqParams">;
 export type QqLineParams = SpecType<"QqLineParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
+/** Label layer params (text + background box). */
+export type LabelParams = SpecType<"LabelParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
 export type SmoothParams = SpecType<"SmoothParams">;
 /** Quantile layer params (quantiles/n + styling). */
@@ -324,6 +327,8 @@ export type VlineLayer = LayerWithDataRef<SpecType<"VlineLayer">>;
 export type JitterLayer = LayerWithDataRef<SpecType<"JitterLayer">>;
 /** A text-label layer. */
 export type TextLayer = LayerWithDataRef<SpecType<"TextLayer">>;
+/** A label layer (text with background box). */
+export type LabelLayer = LayerWithDataRef<SpecType<"LabelLayer">>;
 /** A smooth (fitted trend) layer. */
 export type SmoothLayer = LayerWithDataRef<SpecType<"SmoothLayer">>;
 /** A quantile regression layer. */
@@ -425,6 +430,7 @@ export type LayerSpec =
   | VlineLayer
   | JitterLayer
   | TextLayer
+  | LabelLayer
   | SmoothLayer
   | QuantileLayer
   | ContourLayer

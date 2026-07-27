@@ -47,6 +47,7 @@ import type {
   SmoothParams,
   StackablePosition,
   TextParams,
+  LabelParams,
   TileParams,
   Bin2dParams,
 } from "./schema.js";
@@ -373,6 +374,16 @@ export interface GeomPolygonOptions extends PolygonParams, GeomDataOption {
 export interface GeomTextOptions extends TextParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+  position?: "identity" | "nudge";
+  positionParams?: PositionParams;
+}
+
+/** Label-layer sugar options: text with background box. */
+export interface GeomLabelOptions extends LabelParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+  position?: "identity" | "nudge";
+  positionParams?: PositionParams;
   /** "identity" (default) or "unique" (dedupe mapped aesthetics; first wins). */
   stat?: "identity" | "unique";
 }

@@ -103,6 +103,7 @@ export type {
   SmoothLayerInput,
   SpecInput,
   TextLayerInput,
+  LabelLayerInput,
   TileLayerInput,
   Bin2dLayerInput,
   VlineLayerInput,

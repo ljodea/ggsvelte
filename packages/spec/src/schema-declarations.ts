@@ -2657,6 +2657,65 @@ export const SpecDeclarations = {
     },
   ),
 
+  LabelParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Label opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      size: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Font size in px. Must be greater than 0. Default 11.",
+        }),
+      ),
+      anchor: Type.Optional(
+        Type.Union([Type.Literal("start"), Type.Literal("middle"), Type.Literal("end")], {
+          description:
+            'Horizontal text anchor relative to the (x, y) position: "start", "middle" (default), or "end".',
+        }),
+      ),
+      dx: Type.Optional(
+        Type.Number({
+          description: "Horizontal offset in px applied after positioning. Default 0.",
+        }),
+      ),
+      dy: Type.Optional(
+        Type.Number({
+          description:
+            "Vertical offset in px applied after positioning (positive = down). Default 0.",
+        }),
+      ),
+      padding: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Uniform box padding around the text in px (ggplot2 label.padding). Default 3.",
+        }),
+      ),
+      radius: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          description: "Corner radius of the background box in px (ggplot2 label.r). Default 3.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          description: "Box outline stroke width in px (ggplot2 label.size analogue). Default 0.5.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Styling parameters for the label geom (text with background box; no collision detection).",
+    },
+  ),
+
   // --- rendering backend -------------------------------------------------------
 
   RenderBackend: Type.Union([Type.Literal("svg"), Type.Literal("canvas"), Type.Literal("auto")], {
@@ -3828,6 +3887,39 @@ export const SpecDeclarations = {
     },
   ),
 
+  LabelLayer: Type.Object(
+    {
+      geom: Type.Literal("label", {
+        description:
+          "Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Label layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Union([Type.Literal("identity"), Type.Literal("nudge")], {
+          description:
+            'Position adjustment: "identity" (default) or "nudge" (fixed offsets — set positionParams.x/y).',
+        }),
+      ),
+      positionParams: Type.Optional(Type.Ref("PositionParams")),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("LabelParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A label layer (text + background box). Requires x, y, and label channels. color styles text/outline; fill styles the box.",
+    },
+  ),
+
   SegmentLayer: Type.Object(
     {
       geom: Type.Literal("segment", {
@@ -4264,6 +4356,7 @@ export const SpecDeclarations = {
       Type.Ref("VlineLayer"),
       Type.Ref("JitterLayer"),
       Type.Ref("TextLayer"),
+      Type.Ref("LabelLayer"),
       Type.Ref("SmoothLayer"),
       Type.Ref("QuantileLayer"),
       Type.Ref("QqLayer"),

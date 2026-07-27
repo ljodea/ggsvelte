@@ -2277,8 +2277,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-802",
-        title: "experimental (802)",
+        id: "experimental-808",
+        title: "experimental (808)",
         level: 3,
       },
       {
@@ -2317,8 +2317,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-514",
-        title: "experimental (514)",
+        id: "experimental-515",
+        title: "experimental (515)",
         level: 3,
       },
       {
@@ -2867,6 +2867,16 @@ export const DOCS_ROUTES = [
     title: "geom_jitter sugar — ggsvelte gallery",
     description: "geom_jitter sugar",
     canonicalPath: "/examples/jitter/basic",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/label/basic",
+    title: "Labels with background boxes — ggsvelte gallery",
+    description: "Labels with background boxes",
+    canonicalPath: "/examples/label/basic",
     kind: "page",
     index: true,
     sitemap: true,

@@ -73,6 +73,7 @@ export type {
   GeomQqLineOptions,
   GeomSmoothOptions,
   GeomTextOptions,
+  GeomLabelOptions,
   GeomTileOptions,
   GeomBin2dOptions,
   GeomVlineOptions,

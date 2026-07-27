@@ -507,6 +507,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "label/basic",
+    category: "label",
+    name: "basic",
+    title: "Labels with background boxes",
+    description: "",
+    tags: ["label", "text", "point"],
+    docsSection: "Labels & text",
+    hasData: true,
+  },
+  {
     id: "line/ecdf",
     category: "line",
     name: "ecdf",

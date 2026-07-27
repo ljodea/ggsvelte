@@ -98,6 +98,7 @@ export function dispatchGeometryBatch(
     case "polygon":
       return single(polygonBatch(frame, fx, color, fill, styles, warnings));
     case "text":
+    case "label":
     case "sf_text":
     case "sf_label":
       return single(glyphsBatch(frame, fx, color, fill, styles, warnings));
