@@ -43,6 +43,12 @@ describe("mapped style capability contract", () => {
       scale_size_datetime: "scaleSizeDatetime",
       scale_size_manual: "scaleSizeManual",
       scale_size_identity: "scaleSizeIdentity",
+      scale_size: "scaleSizeContinuous",
+      scale_size_area: "scaleSizeArea",
+      scale_size_binned_area: "scaleSizeBinnedArea",
+      scale_size_ordinal: "scaleSizeOrdinal",
+      scale_radius: "scaleRadius",
+      scaleSizeOrdinal: "scaleSizeDiscrete",
       scale_linewidth_continuous: "scaleLinewidthContinuous",
       scale_linewidth_discrete: "scaleLinewidthDiscrete",
       scale_linewidth_binned: "scaleLinewidthBinned",
@@ -90,6 +96,15 @@ describe("mapped style capability contract", () => {
     expect(call("scaleSizeContinuous", { range: [2, 10] })).toEqual({
       size: { type: "sequential", range: [2, 10] },
     });
+    expect(call("scaleSizeArea", { maxSize: 8 })).toEqual({
+      size: { type: "sequential", range: [0, 8], sizeUnit: "area_zero" },
+    });
+    expect(call("scaleRadius", { range: [1, 6] })).toEqual({
+      size: { type: "sequential", range: [1, 6], sizeUnit: "radius" },
+    });
+    expect(call("scaleSizeBinnedArea")).toEqual({
+      size: { type: "binned", range: [0, 6], sizeUnit: "area_zero" },
+    });
     expect(call("scaleLinewidthBinned", { breaks: [0, 10, 20] })).toEqual({
       linewidth: { type: "binned", breaks: [0, 10, 20] },
     });
@@ -108,6 +123,22 @@ describe("mapped style capability contract", () => {
       shape: { type: "ordinal", domain: ["a", "b"] },
     });
     expect(call("scale_linewidth")).toEqual({ linewidth: { type: "sequential" } });
+  });
+
+  it("accepts sizeUnit on size scales and rejects it on alpha (#830)", () => {
+    const sizeOk = validateStyle("size", {
+      type: "sequential",
+      range: [0, 6],
+      sizeUnit: "area_zero",
+    });
+    expect(sizeOk.ok).toBe(true);
+
+    const alphaBad = validateStyle("alpha", {
+      type: "sequential",
+      range: [0.2, 0.8],
+      sizeUnit: "radius",
+    });
+    expect(alphaBad.ok).toBe(false);
   });
 
   it("exposes scale-local guides through every constrained style helper type", () => {

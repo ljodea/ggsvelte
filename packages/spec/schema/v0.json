@@ -5181,7 +5181,7 @@
               "type": "array",
               "items": {
                 "type": "number",
-                "exclusiveMinimum": 0
+                "minimum": 0
               },
               "minItems": 1
             },
@@ -5202,11 +5202,11 @@
             },
             "naValue": {
               "type": "number",
-              "exclusiveMinimum": 0
+              "minimum": 0
             },
             "unknownValue": {
               "type": "number",
-              "exclusiveMinimum": 0
+              "minimum": 0
             },
             "onExhaust": {
               "anyOf": [
@@ -5225,10 +5225,27 @@
             },
             "guide": {
               "$ref": "#/$defs/GuideSpec"
+            },
+            "sizeUnit": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "area"
+                },
+                {
+                  "type": "string",
+                  "const": "radius"
+                },
+                {
+                  "type": "string",
+                  "const": "area_zero"
+                }
+              ],
+              "description": "Size encoding unit (size aesthetic only). \"area\" (default) interpolates by area between range endpoints; \"radius\" maps linearly to radius; \"area_zero\" maps value proportionally to area with zero→zero (ggplot2 scale_size_area / scale_size_binned_area)."
             }
           },
           "additionalProperties": false,
-          "description": "Configuration for a positive numeric size or linewidth scale."
+          "description": "Configuration for a non-negative numeric size or linewidth scale."
         },
         {
           "anyOf": [
@@ -5269,7 +5286,7 @@
                   "type": "array",
                   "items": {
                     "type": "number",
-                    "exclusiveMinimum": 0
+                    "minimum": 0
                   },
                   "minItems": 2
                 },
@@ -5296,7 +5313,7 @@
                   "type": "array",
                   "items": {
                     "type": "number",
-                    "exclusiveMinimum": 0
+                    "minimum": 0
                   },
                   "minItems": 1
                 },
@@ -5444,7 +5461,7 @@
                   "type": "array",
                   "items": {
                     "type": "number",
-                    "exclusiveMinimum": 0
+                    "minimum": 0
                   },
                   "minItems": 2
                 },
