@@ -610,9 +610,26 @@
             {
               "type": "string",
               "const": "step"
+            },
+            {
+              "type": "string",
+              "const": "step-hv"
+            },
+            {
+              "type": "string",
+              "const": "step-vh"
             }
           ],
-          "description": "Interpolation between points: \"linear\" (straight segments, default) or \"step\" (horizontal-then-vertical steps, changing at the midpoint between x positions)."
+          "description": "Interpolation: \"linear\" (default), \"step\" (mid-x corners), \"step-hv\" (horizontal then vertical — correct for ECDF), or \"step-vh\"."
+        },
+        "pad": {
+          "type": "boolean",
+          "description": "With stat ecdf: when true (default), prepend (xmin, 0) so step stairs start at zero. Finite-clamped (ggplot2 uses ±Inf)."
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "With stat ecdf: evaluate on n equally spaced x in [min, max] per group; omit for one point per unique x."
         },
         "connection": {
           "anyOf": [
@@ -721,7 +738,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin (#817), or manual (#814) controls."
+      "description": "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin (#817), manual (#814), or ecdf pad/n (#811) controls."
     },
     "StepParams": {
       "type": "object",
@@ -2439,7 +2456,7 @@
         "geom": {
           "type": "string",
           "const": "line",
-          "description": "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts. With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816)."
+          "description": "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816)."
         },
         "stat": {
           "anyOf": [
@@ -2477,9 +2494,14 @@
               "type": "string",
               "const": "manual",
               "description": "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814)."
+            },
+            {
+              "type": "string",
+              "const": "ecdf",
+              "description": "Empirical CDF of x; y defaults to {\"stat\": \"ecdf\"} — do NOT map aes.y to a field. Prefer params.curve \"step-hv\" for ECDF stairs (#811)."
             }
           ],
-          "description": "Line stat: \"identity\" (default), \"unique\", \"bin\", \"align\", \"connect\", \"summary_bin\" (#817), or \"manual\" (#814)."
+          "description": "Line stat: \"identity\" (default), \"unique\", \"bin\", \"align\", \"connect\", \"summary_bin\" (#817), \"manual\" (#814), or \"ecdf\" (#811)."
         },
         "position": {
           "type": "string",
@@ -2501,7 +2523,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "A line layer. Identity: requires x and y. Bin (freqpoly): requires continuous x; y is computed by the bin stat. Rows are sorted by x within each group before connecting."
+      "description": "A line layer. Identity: requires x and y. Bin (freqpoly): requires continuous x; y is computed by the bin stat. Ecdf: requires x only (y is computed). Rows are sorted by x within each group before connecting."
     },
     "StepLayer": {
       "type": "object",

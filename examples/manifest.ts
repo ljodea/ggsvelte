@@ -497,6 +497,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "line/ecdf",
+    category: "line",
+    name: "ecdf",
+    title: "Empirical CDF",
+    description: "",
+    tags: ["line", "ecdf", "stat", "step"],
+    docsSection: "Lines & time",
+    hasData: true,
+  },
+  {
     id: "line/multi-series",
     category: "line",
     name: "multi-series",

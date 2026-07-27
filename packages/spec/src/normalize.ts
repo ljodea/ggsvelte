@@ -207,6 +207,9 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   if (stat === "bin_hex" && aes?.fill === undefined) {
     aes = { ...aes, fill: { stat: "count" } };
   }
+  if (stat === "ecdf" && aes?.y === undefined) {
+    aes = { ...aes, y: { stat: "ecdf" } };
+  }
   // density_2d_filled defaults fill to after_stat(level) like ggplot2.
   if (
     (stat === "density_2d_filled" || layer.geom === "density_2d_filled") &&

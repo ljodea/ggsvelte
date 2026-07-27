@@ -64,6 +64,7 @@ export function assertRequiredChannels(input: {
     geom === "density_2d_filled"
   ) {
     requireField(xField, "x", index, geom);
+    // yStatColumn set (e.g. ecdf) means y is computed — skip field requirement.
     if (yStatColumn === null) requireField(yField, "y", index, geom);
   }
   if (geom === "bar" || geom === "density" || geom === "contour" || geom === "dotplot")

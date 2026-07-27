@@ -224,9 +224,10 @@ test("install copy and code tabs share the manual-copy fallback", async ({ page 
 test("gallery exposes every generated preview exactly once", async ({ page }) => {
   await page.goto("/examples");
   // One meta.json per example under examples/ (grows when new specimens land).
-  // 78 previews − 3 interaction expositions; + point/abline-identity (#790),
-  // step/ecdf (#789), point/steps-binned (#827), hex/basic (#800), and qq/normal (#804).
-  const exampleCount = 75;
+  // 79 previews − 3 interaction expositions; + point/abline-identity (#790),
+  // step/ecdf (#789), point/steps-binned (#827), hex/basic (#800), qq/normal
+  // (#804), and line/ecdf (stat_ecdf, #811).
+  const exampleCount = 76;
   await expect(page.locator(".example-grid li")).toHaveCount(exampleCount);
   await expect(page.locator('img[src*="/previews/"]')).toHaveCount(exampleCount);
 });

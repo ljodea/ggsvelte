@@ -363,6 +363,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "line/ecdf",
+    title: "Empirical CDF",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6ImxpbmUvZWNkZiJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJ4IjoxLjF9LHsieCI6MS40fSx7IngiOjEuOH0seyJ4IjoyfSx7IngiOjJ9LHsieCI6Mi41fSx7IngiOjIuOX0seyJ4IjozLjJ9LHsieCI6My41fSx7IngiOjMuOH0seyJ4Ijo0LjF9LHsieCI6NC42fV19LCJsYXllcnMiOlt7Imdlb20iOiJsaW5lIiwic3RhdCI6ImVjZGYiLCJwb3NpdGlvbiI6ImlkZW50aXR5IiwiYWVzIjp7IngiOnsiZmllbGQiOiJ4In0sInkiOnsic3RhdCI6ImVjZGYifX0sInBhcmFtcyI6eyJjdXJ2ZSI6InN0ZXAtaHYiLCJsaW5ld2lkdGgiOjEuOCwicGFkIjp0cnVlfX1dLCJsYWJzIjp7InRpdGxlIjoiRW1waXJpY2FsIENERiIsInN1YnRpdGxlIjoic3RhdCBlY2RmICsgY3VydmUgc3RlcC1odiAoaG9yaXpvbnRhbCB0aGVuIHZlcnRpY2FsKSIsIngiOiJ4IiwieSI6IkbMgih4KSJ9LCJ0aGVtZSI6ImNsYXNzaWMifX0",
+    },
+  },
+  {
     id: "line/multi-series",
     title: "Multi-series line chart",
     compatibility: {
