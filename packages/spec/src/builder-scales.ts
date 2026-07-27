@@ -319,6 +319,10 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
     scaleLinewidthDiscrete(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleLinewidthDiscrete(options));
     }
+    /** ggplot2 scale_linewidth_ordinal — same as discrete (`type: "ordinal"`, #832). */
+    scaleLinewidthOrdinal(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleLinewidthDiscrete(options));
+    }
     scaleLinewidthBinned(options: SequentialStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleLinewidthBinned(options));
     }
@@ -341,6 +345,10 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
     scaleAlphaDiscrete(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleAlphaDiscrete(options));
     }
+    /** ggplot2 scale_alpha_ordinal — same as discrete (`type: "ordinal"`, #832). */
+    scaleAlphaOrdinal(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleAlphaDiscrete(options));
+    }
     scaleAlphaBinned(options: SequentialStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleAlphaBinned(options));
     }
@@ -358,6 +366,10 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
     }
 
     scaleShapeDiscrete(options: DiscreteFiniteStyleScaleOptions<PointShapeName> = {}): GGBuilder {
+      return this.scales(scaleShapeDiscrete(options));
+    }
+    /** ggplot2 scale_shape_ordinal — same as discrete (`type: "ordinal"`, #832). */
+    scaleShapeOrdinal(options: DiscreteFiniteStyleScaleOptions<PointShapeName> = {}): GGBuilder {
       return this.scales(scaleShapeDiscrete(options));
     }
     scaleShapeBinned(options: BinnedFiniteStyleScaleOptions<PointShapeName> = {}): GGBuilder {

@@ -69,7 +69,7 @@ function colourAliases(stem: string): string[] {
  *   numeric-style       21
  *   finite-style         8
  *   ----------------------
- *   77 component files + 15 Colour aliases
+ *   77 component files + 18 aliases (15 Colour + 3 Ordinal re-exports, #832)
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
@@ -264,16 +264,27 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "IdentityColorScaleOptions",
   ]),
 
-  // --- numeric-style (21) --------------------------------------------------
+  // --- numeric-style (21 components; Linewidth/Alpha Discrete gain Ordinal
+  // re-export aliases for ggplot2 scale_*_ordinal, #832) -------------------
   ...(["Size", "Linewidth", "Alpha"] as const).flatMap((aes) => {
     const base = `scale${aes}`;
+    const discreteAliases =
+      aes === "Linewidth"
+        ? (["ScaleLinewidthOrdinal"] as const)
+        : aes === "Alpha"
+          ? (["ScaleAlphaOrdinal"] as const)
+          : undefined;
     return [
       shell(`${base}Continuous`, "numeric-style", "SequentialStyleScaleOptions", [
         "SequentialStyleScaleOptions",
       ]),
-      shell(`${base}Discrete`, "numeric-style", "DiscreteNumericStyleScaleOptions", [
+      shell(
+        `${base}Discrete`,
+        "numeric-style",
         "DiscreteNumericStyleScaleOptions",
-      ]),
+        ["DiscreteNumericStyleScaleOptions"],
+        discreteAliases === undefined ? undefined : [...discreteAliases],
+      ),
       shell(`${base}Binned`, "numeric-style", "SequentialStyleScaleOptions", [
         "SequentialStyleScaleOptions",
       ]),
@@ -293,10 +304,14 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
   }),
 
   // --- finite-style (8) — generics MUST be pinned to the aesthetic ----------
-  shell("scaleShapeDiscrete", "finite-style", "DiscreteFiniteStyleScaleOptions<PointShapeName>", [
-    "DiscreteFiniteStyleScaleOptions",
-    "PointShapeName",
-  ]),
+  // Ordinal shells re-export Discrete (ggplot2 scale_*_ordinal; #832).
+  shell(
+    "scaleShapeDiscrete",
+    "finite-style",
+    "DiscreteFiniteStyleScaleOptions<PointShapeName>",
+    ["DiscreteFiniteStyleScaleOptions", "PointShapeName"],
+    ["ScaleShapeOrdinal"],
+  ),
   shell("scaleShapeBinned", "finite-style", "BinnedFiniteStyleScaleOptions<PointShapeName>", [
     "BinnedFiniteStyleScaleOptions",
     "PointShapeName",
