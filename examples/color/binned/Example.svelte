@@ -5,7 +5,7 @@
     GuideColorsteps,
     Labs,
     ScaleColorBinned,
-    ThemeLight,
+    ThemeBw,
   } from "@ggsvelte/svelte";
 
   import { jevonsTrials } from "./data.js";
@@ -17,7 +17,7 @@
   width={640}
   height={400}
 >
-  <ThemeLight />
+  <ThemeBw />
   <ScaleColorBinned
     breaks={[0, 5, 20, 60, 130]}
     range={["#d3d3d0", "#8ba89c", "#4f8a6e", "#1e5c43"]}

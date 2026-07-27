@@ -6,14 +6,21 @@ import { pathToFileURL } from "node:url";
 
 import { chromium } from "@playwright/test";
 
-import { renderToSVGString } from "../packages/core/src/index.js";
-import { THEME_NAMES, type SpecInput, type ThemeName } from "../packages/spec/src/index.js";
+import { BUILTIN_THEMES, renderToSVGString } from "../packages/core/src/index.js";
+import {
+  THEME_NAME_ALIASES,
+  THEME_NAMES,
+  type SpecInput,
+  type ThemeName,
+} from "../packages/spec/src/index.js";
 
 const ROOT = dirname(import.meta.dirname);
 const OUT = join(ROOT, "artifacts/theme-equivalence");
 const SVG_OUT = join(OUT, "svg");
 const FONT_DIR = "../../../packages/svelte/src/lib/fonts";
-const themes = THEME_NAMES;
+// Alias names (grey/gray → ggplot2) share the canonical evidence files; do not
+// emit duplicate 1440×960 PNG/SVG (theme-contract resolves via THEME_NAME_ALIASES).
+const themes = THEME_NAMES.filter((theme) => !(theme in THEME_NAME_ALIASES));
 const matchedReferenceThemes = new Set<ThemeName>(["ggplot2", "hrbr", "few"]);
 
 const values = [
@@ -85,10 +92,15 @@ for (const theme of themes) {
   await Bun.write(svgPath, svg);
   await page.goto(pathToFileURL(svgPath).href);
   await page.evaluate(() => document.fonts.ready);
-  const fontReady = await page.evaluate(() => document.fonts.check('11.5px "Roboto Condensed"'));
-  if (!fontReady) throw new Error(`Roboto Condensed failed to load for ${theme}`);
+  // Only themes that use the embedded Roboto Condensed face need this gate.
+  // Snapshot theme `test` intentionally uses a system stack (#823).
+  const usesRoboto = BUILTIN_THEMES[theme].fontFamily.includes("Roboto Condensed");
+  if (usesRoboto) {
+    const fontReady = await page.evaluate(() => document.fonts.check('11.5px "Roboto Condensed"'));
+    if (!fontReady) throw new Error(`Roboto Condensed failed to load for ${theme}`);
+  }
   await page.locator("svg").screenshot({ path: join(OUT, `ggsvelte-${theme}.png`) });
-  metrics[theme] = await page.evaluate(() => {
+  metrics[theme] = await page.evaluate((checkRoboto: boolean) => {
     const rootSvg = document.querySelector("svg")!;
     const computed = getComputedStyle(rootSvg);
     const grids = [...document.querySelectorAll<SVGLineElement>(".gg-grid line")];
@@ -98,7 +110,9 @@ for (const theme of themes) {
       fontFamily: computed.fontFamily,
       fontSize: computed.fontSize,
       fontWeight: computed.fontWeight,
-      fontReady: document.fonts.check('11.5px "Roboto Condensed"'),
+      fontReady: checkRoboto
+        ? document.fonts.check('11.5px "Roboto Condensed"')
+        : document.fonts.status === "loaded",
       axisLines: document.querySelectorAll(".gg-axis-line").length,
       panelBorders: document.querySelectorAll(".gg-panel-border").length,
       tickLines: document.querySelectorAll(".gg-tick line").length,
@@ -112,7 +126,7 @@ for (const theme of themes) {
         (node) => node.textContent,
       ),
     };
-  });
+  }, usesRoboto);
 }
 
 await browser.close();

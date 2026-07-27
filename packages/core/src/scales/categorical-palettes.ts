@@ -2,6 +2,11 @@
  * Named categorical color palettes and scheme registry for ordinal color
  * scales. Pure data — training lives in train.ts.
  */
+// Palettes live in @ggsvelte/spec (authoring + portable schemes). Core only
+// consumes the frozen 10-stop tables for CATEGORICAL_SCHEMES — do not re-export
+// builders here (knip: unused package exports).
+import { GREY_PALETTE_10, HUE_PALETTE_10 } from "@ggsvelte/spec";
+
 import { COLORBREWER_QUALITATIVE } from "./colorbrewer-palettes.js";
 
 /**
@@ -81,4 +86,7 @@ export const CATEGORICAL_SCHEMES = {
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
   ...COLORBREWER_QUALITATIVE,
+  hue: HUE_PALETTE_10,
+  grey: GREY_PALETTE_10,
+  gray: GREY_PALETTE_10,
 } as const satisfies Readonly<Record<string, readonly string[]>>;

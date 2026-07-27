@@ -45,7 +45,7 @@ describe("temporal label formatting", () => {
     expect(kolkata(historical)).not.toBe("+0000");
   });
 
-  it("contextualizes reversed temporal labels in visual order", () => {
+  it("keeps reversed month labels span-uniform with year on every tick (#962)", () => {
     const plan = planTemporalAxis({
       aesthetic: "x",
       panelIndex: 0,
@@ -59,13 +59,11 @@ describe("temporal label formatting", () => {
       marginCapPx: 80,
       config: { dateBreaks: "1 month" },
     });
-    // Visual leading tick (rightmost domain value under reverse) keeps year context.
-    const visualLeading = plan.ticks.at(-1)!;
-    expect(visualLeading.label).toMatch(/2026|Feb/);
-    expect(visualLeading.label).not.toBe("Feb");
+    const labels = plan.ticks.map((tick) => tick.label);
+    expect(labels.every((label) => /^\w+ \d{4}$/.test(label))).toBe(true);
   });
 
-  it("builds contextual visible labels and standalone full labels", () => {
+  it("builds span-uniform visible labels and standalone full labels (#962)", () => {
     const values = [
       Date.UTC(2025, 10, 1),
       Date.UTC(2025, 11, 1),
@@ -78,12 +76,53 @@ describe("temporal label formatting", () => {
       locale: "en-US",
       timezone: "UTC",
     });
-    expect(labels.map((label) => label.label)).toEqual(["Nov 2025", "Dec", "Jan 2026", "Feb"]);
+    expect(labels.map((label) => label.label)).toEqual([
+      "Nov 2025",
+      "Dec 2025",
+      "Jan 2026",
+      "Feb 2026",
+    ]);
     expect(labels.map((label) => label.fullLabel)).toEqual([
       "2025-11-01",
       "2025-12-01",
       "2026-01-01",
       "2026-02-01",
+    ]);
+  });
+
+  it("never mixes full dates with bare day numbers on day intervals (#962)", () => {
+    const values = [
+      Date.UTC(2001, 2, 26),
+      Date.UTC(2001, 3, 9),
+      Date.UTC(2001, 3, 16),
+      Date.UTC(2001, 3, 23),
+    ];
+    const labels = formatTemporalTickSequence(values, {
+      kind: "date",
+      interval: { unit: "day", step: 1, key: "1 day" },
+      locale: "en-US",
+      timezone: "UTC",
+    });
+    expect(labels.map((label) => label.label)).toEqual(["Mar 26", "Apr 9", "Apr 16", "Apr 23"]);
+    expect(labels.every((label) => !/^\d+$/.test(label.label))).toBe(true);
+  });
+
+  it("uses one hour format across a multi-day datetime sequence (#962)", () => {
+    const values = [
+      Date.UTC(2024, 2, 10, 14, 0),
+      Date.UTC(2024, 2, 10, 18, 0),
+      Date.UTC(2024, 2, 11, 2, 0),
+    ];
+    const labels = formatTemporalTickSequence(values, {
+      kind: "datetime",
+      interval: { unit: "hour", step: 4, key: "4 hours" },
+      locale: "en-US",
+      timezone: "UTC",
+    });
+    expect(labels.map((label) => label.label)).toEqual([
+      "Mar 10 14:00",
+      "Mar 10 18:00",
+      "Mar 11 02:00",
     ]);
   });
 

@@ -1,0 +1,33 @@
+{
+  "id": "99-function-identity-xlim",
+  "kind": "chart",
+  "prompt": "Draw y = x as a geom_function identity curve over xlim from 0 to 10 with 21 evaluation points.",
+  "dataProfile": {
+    "fields": [{ "name": "dummy", "type": "quantitative" }],
+    "rowCount": 1
+  },
+  "data": {
+    "main": [{ "dummy": 0 }]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "function",
+        "stat": "function",
+        "position": "identity",
+        "aes": {
+          "y": { "stat": "y" }
+        },
+        "params": {
+          "fun": "identity",
+          "n": 21,
+          "xlim": [0, 10]
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_function with params.xlim and no mapped x — domain comes from xlim (#797)."
+}

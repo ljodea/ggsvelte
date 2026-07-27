@@ -1,0 +1,41 @@
+{
+  "id": "71-manual-first-row",
+  "kind": "chart",
+  "prompt": "Keep only the first row per series with stat manual fun first on points colored by series.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "series", "type": "nominal" }
+    ],
+    "rowCount": 6
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 1, "series": "A" },
+      { "x": 1, "y": 2, "series": "A" },
+      { "x": 2, "y": 3, "series": "A" },
+      { "x": 0, "y": 4, "series": "B" },
+      { "x": 1, "y": 5, "series": "B" },
+      { "x": 2, "y": 6, "series": "B" }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "manual",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "color": { "field": "series" }
+        },
+        "params": { "fun": "first" }
+      }
+    ]
+  },
+  "notes": "stat_manual first: keeps one source row per aesthetic group (not aggregate)."
+}

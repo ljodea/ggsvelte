@@ -92,7 +92,10 @@ ndensity`; density→`density, scaled`; smooth→`y, ymin, ymax, se`;
   `model.guidePlans` for the selected interval and visible/full labels.
 - **temporal override rules**: `.scaleXDate()`/`.scaleYDate()` serialize mapped
   authoring `Date` cells as calendar dates; `.scaleXDatetime()`/
-  `.scaleYDatetime()` preserve instants.
+  `.scaleYDatetime()` preserve instants; `.scaleXTime()`/`.scaleYTime()`
+  (ggplot2 `scale_*_time`) are time-of-day only — portable numbers are
+  **seconds since midnight** (mapped to epoch ms on 1970-01-01Z); `Date` cells
+  use the UTC clock portion; default labels `%H:%M:%S`.
   Explicit `linear`/`binned` (including authored alias `log`) disables temporal inference, so numeric strings stay
   quantitative. Explicit ordinal color/fill keeps temporal-looking labels as
   separate groups; sequential temporal color/fill uses parsed domains and

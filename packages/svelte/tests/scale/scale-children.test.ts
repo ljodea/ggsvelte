@@ -293,7 +293,7 @@ describe("scales prop deprecation advisories", () => {
 });
 
 describe("Scale* export parity with all SCALE_CAPABILITIES families", () => {
-  it("13: exported Scale* set === all families ∪ {Scale} ∪ Colour aliases", () => {
+  it("13: exported Scale* set === all families ∪ {Scale} ∪ Colour + style Ordinal aliases", () => {
     const expectedFromHelpers: string[] = [];
     for (const cap of SCALE_CAPABILITIES) {
       for (const h of cap.helpers) {
@@ -302,7 +302,15 @@ describe("Scale* export parity with all SCALE_CAPABILITIES families", () => {
         expectedFromHelpers.push("S" + h.slice(1));
       }
     }
-    const expectedExports = new Set(["Scale", ...expectedFromHelpers]);
+    // Discrete style shells re-export Ordinal component names (ggplot2
+    // scale_*_ordinal, #830/#832). Alias-only — not SCALE_CAPABILITIES camel helpers.
+    const styleOrdinalAliases = [
+      "ScaleSizeOrdinal",
+      "ScaleAlphaOrdinal",
+      "ScaleLinewidthOrdinal",
+      "ScaleShapeOrdinal",
+    ];
+    const expectedExports = new Set(["Scale", ...expectedFromHelpers, ...styleOrdinalAliases]);
 
     const pkg = SveltePkg as Record<string, unknown>;
     const actualScaleExports = Object.keys(pkg).filter(
@@ -315,8 +323,8 @@ describe("Scale* export parity with all SCALE_CAPABILITIES families", () => {
       expect(pkg[name], `missing export ${name}`).toBeTypeOf("function");
     }
     expect(new Set(actualScaleExports)).toEqual(expectedExports);
-    // 69 shells + 12 Colour aliases + hand-written Scale
-    expect(expectedExports.size).toBe(69 + 12 + 1);
+    // 98 shells + 28 aliases (Colour + style Ordinal re-exports) + hand-written Scale
+    expect(expectedExports.size).toBe(98 + 28 + 1);
   });
 });
 

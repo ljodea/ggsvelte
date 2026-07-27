@@ -1,0 +1,40 @@
+{
+  "id": "65-sensor-bin2d-fill-count",
+  "kind": "chart",
+  "prompt": "Heatmap of temperature against humidity using 2D rectangular bins with fill by count.",
+  "dataProfile": {
+    "fields": [
+      { "name": "humidity", "type": "quantitative" },
+      { "name": "temperature", "type": "quantitative" }
+    ],
+    "rowCount": 6
+  },
+  "data": {
+    "main": [
+      { "humidity": 40, "temperature": 18 },
+      { "humidity": 42, "temperature": 19 },
+      { "humidity": 70, "temperature": 28 },
+      { "humidity": 72, "temperature": 27 },
+      { "humidity": 55, "temperature": 22 },
+      { "humidity": 58, "temperature": 23 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "bin_2d",
+        "stat": "bin_2d",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "humidity" },
+          "y": { "field": "temperature" },
+          "fill": { "stat": "count" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "bin_2d with explicit fill after_stat count."
+}

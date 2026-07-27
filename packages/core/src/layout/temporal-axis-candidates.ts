@@ -60,7 +60,8 @@ export function temporalOptions(input: TemporalAxisPlanInput) {
   return {
     kind: input.kind,
     locale: input.config.locale ?? "en-US",
-    timezone: input.kind === "date" ? "UTC" : (input.config.timezone ?? "UTC"),
+    timezone:
+      input.kind === "date" || input.kind === "time" ? "UTC" : (input.config.timezone ?? "UTC"),
     weekStart: input.config.weekStart ?? "monday",
     ...(input.config.disambiguation !== undefined && {
       disambiguation: input.config.disambiguation,
@@ -73,9 +74,9 @@ function buildTicks(
   intervalValue: TemporalInterval,
   input: TemporalAxisPlanInput,
 ): AxisGuideTick[] {
-  // Contextual abbreviations depend on sequence order. When the axis is reversed,
-  // format in visual order so the leftmost/topmost tick keeps full context, then
-  // map labels back onto ascending semantic values.
+  // Visible labels are span-uniform (#962). Reverse still formats in visual
+  // order so measurement matches what the reader sees left-to-right / top-to-bottom;
+  // the format itself no longer depends on neighbour context.
   const formatOrder = input.reverse ? values.toReversed() : values;
   const formatted = formatTemporalTickSequence(formatOrder, {
     ...temporalOptions(input),
@@ -201,7 +202,11 @@ export function automaticCandidate(input: TemporalAxisPlanInput): TemporalCandid
       ? AUTOMATIC_INTERVALS.filter((candidate) =>
           ["day", "week", "month", "quarter", "year"].includes(candidate.unit),
         )
-      : AUTOMATIC_INTERVALS;
+      : input.kind === "time"
+        ? AUTOMATIC_INTERVALS.filter((candidate) =>
+            ["millisecond", "second", "minute", "hour"].includes(candidate.unit),
+          )
+        : AUTOMATIC_INTERVALS;
   const span = Math.max(1, input.domain[1] - input.domain[0]);
   const previousApprox =
     input.previousInterval === undefined || input.previousInterval === null

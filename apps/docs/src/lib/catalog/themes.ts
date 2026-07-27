@@ -8,12 +8,19 @@ const THEME_LABELS = {
   minimal: "Minimal",
   ggplot2: "ggplot2",
   classic: "Classic",
+  bw: "B&W",
   hrbr: "HRBR",
   few: "Few",
   clean: "Clean",
   fivethirtyeight: "FiveThirtyEight",
   economist: "Economist",
   tufte: "Tufte",
+  linedraw: "Linedraw",
+  void: "Void",
+  // Aliases of the ggplot2 grey-panel look (theme_grey / theme_gray, #824).
+  grey: "Grey",
+  gray: "Gray",
+  test: "Test",
 } as const satisfies Record<ThemeName, string>;
 
 const PALETTE_LABELS = {
@@ -22,6 +29,10 @@ const PALETTE_LABELS = {
   flexoki: "Flexoki",
   tableau10: "Tableau 10",
   colorblind: "Colorblind",
+  hue: "Hue",
+  grey: "Grey",
+  gray: "Gray",
+  // ColorBrewer qualitative (#825) — keep the upstream palette names.
   Set1: "Set1",
   Set2: "Set2",
   Set3: "Set3",
@@ -38,12 +49,18 @@ const THEME_DEMO_SCHEMES = {
   minimal: "colorblind",
   ggplot2: "observable10",
   classic: "tableau10",
+  bw: "tableau10",
   hrbr: "ipsum",
   few: "tableau10",
   clean: "flexoki",
   fivethirtyeight: "tableau10",
   economist: "flexoki",
   tufte: "colorblind",
+  linedraw: "colorblind",
+  void: "colorblind",
+  grey: "observable10",
+  gray: "observable10",
+  test: "colorblind",
 } as const satisfies Record<ThemeName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
 
 export const THEME_OPTIONS = THEME_NAMES.map((name) => ({

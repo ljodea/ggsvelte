@@ -10,7 +10,7 @@ import type { CellValue } from "../table.js";
 
 import { fallbackColors, warnUnknownColors } from "./scale-color-family-helpers.js";
 import { resolveSequentialRange } from "./scale-color-sequential-domain.js";
-import { resolveBinnedLegendFormat } from "./scale-color-sequential-format.js";
+import { minAdjacentWidth, resolveBinnedLegendFormat } from "./scale-color-sequential-format.js";
 import type { ColorResolution } from "./scale-color-types.js";
 import { resolveColorValueView } from "./scale-color-values.js";
 import { PipelineError, type PipelineWarning } from "./types.js";
@@ -157,7 +157,8 @@ export function resolveBinnedColorScale(input: {
     colors: Object.freeze(colors),
     naValue,
     unknownValue,
-    ...(view.temporalKind !== null && { temporalKind: view.temporalKind }),
+    ...(view.temporalKind !== null &&
+      view.temporalKind !== "time" && { temporalKind: view.temporalKind }),
     colorOf(value: unknown): string | undefined {
       if (value === null || value === undefined) return naValue;
       const semantic = view.semanticOf(value);
@@ -174,12 +175,14 @@ export function resolveBinnedColorScale(input: {
     }).length,
     warnings,
   );
+  const formatStep = minAdjacentWidth(breaks);
   const formatter = resolveBinnedLegendFormat({
     domain,
     temporalKind: view.temporalKind,
     config,
     name,
     warnings,
+    ...(formatStep !== undefined && { formatStep }),
   });
   const steps = breaks.slice(0, -1).map((lower, index) => {
     const upper = breaks[index + 1]!;

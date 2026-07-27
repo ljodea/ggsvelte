@@ -99,6 +99,7 @@ describe("emitGlyphRows prealloc (#555)", () => {
       frame,
       emitted,
       wantsColors: false,
+      styles: fromPartial({}),
       params: {},
     });
     expect(batch?.kind).toBe("glyphs");
@@ -125,6 +126,14 @@ describe("emitGlyphRows prealloc (#555)", () => {
       dy: 0,
     });
     expect(emitted.kept).toBe(0);
-    expect(packGlyphsBatch({ frame, emitted, wantsColors: false, params: {} })).toBeNull();
+    expect(
+      packGlyphsBatch({
+        frame,
+        emitted,
+        wantsColors: false,
+        styles: fromPartial({}),
+        params: {},
+      }),
+    ).toBeNull();
   });
 });

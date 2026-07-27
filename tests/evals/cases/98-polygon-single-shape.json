@@ -1,0 +1,37 @@
+{
+  "id": "98-polygon-single-shape",
+  "kind": "chart",
+  "prompt": "Plot a single closed quadrilateral from its four corner points with geom_polygon.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 0 },
+      { "x": 4, "y": 0.5 },
+      { "x": 3.5, "y": 3 },
+      { "x": 0.5, "y": 2.5 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "polygon",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_polygon with no grouping aesthetic: one closed ring in data order (#807)."
+}

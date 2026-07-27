@@ -5,7 +5,7 @@
  */
 
 /** Qualitative (max-n) */
-export const CB_SET1 = [
+const CB_SET1 = [
   "#e41a1c",
   "#377eb8",
   "#4daf4a",
@@ -26,7 +26,7 @@ export const CB_SET2 = [
   "#e5c494",
   "#b3b3b3",
 ] as const;
-export const CB_SET3 = [
+const CB_SET3 = [
   "#8dd3c7",
   "#ffffb3",
   "#bebada",
@@ -40,7 +40,7 @@ export const CB_SET3 = [
   "#ccebc5",
   "#ffed6f",
 ] as const;
-export const CB_DARK2 = [
+const CB_DARK2 = [
   "#1b9e77",
   "#d95f02",
   "#7570b3",
@@ -50,7 +50,7 @@ export const CB_DARK2 = [
   "#a6761d",
   "#666666",
 ] as const;
-export const CB_PAIRED = [
+const CB_PAIRED = [
   "#a6cee3",
   "#1f78b4",
   "#b2df8a",
@@ -64,7 +64,7 @@ export const CB_PAIRED = [
   "#ffff99",
   "#b15928",
 ] as const;
-export const CB_ACCENT = [
+const CB_ACCENT = [
   "#7fc97f",
   "#beaed4",
   "#fdc086",
@@ -87,7 +87,7 @@ export const CB_BLUES = [
   "#08519c",
   "#08306b",
 ] as const;
-export const CB_GREENS = [
+const CB_GREENS = [
   "#f7fcf5",
   "#e5f5e0",
   "#c7e9c0",
@@ -98,7 +98,7 @@ export const CB_GREENS = [
   "#006d2c",
   "#00441b",
 ] as const;
-export const CB_REDS = [
+const CB_REDS = [
   "#fff5f0",
   "#fee0d2",
   "#fcbba1",
@@ -109,7 +109,7 @@ export const CB_REDS = [
   "#a50f15",
   "#67000d",
 ] as const;
-export const CB_ORANGES = [
+const CB_ORANGES = [
   "#fff5eb",
   "#fee6ce",
   "#fdd0a2",
@@ -120,7 +120,7 @@ export const CB_ORANGES = [
   "#a63603",
   "#7f2704",
 ] as const;
-export const CB_PURPLES = [
+const CB_PURPLES = [
   "#fcfbfd",
   "#efedf5",
   "#dadaeb",
@@ -131,7 +131,7 @@ export const CB_PURPLES = [
   "#54278f",
   "#3f007d",
 ] as const;
-export const CB_GREYS = [
+const CB_GREYS = [
   "#ffffff",
   "#f0f0f0",
   "#d9d9d9",
@@ -142,7 +142,7 @@ export const CB_GREYS = [
   "#252525",
   "#000000",
 ] as const;
-export const CB_YLORRD = [
+const CB_YLORRD = [
   "#ffffcc",
   "#ffeda0",
   "#fed976",
@@ -153,7 +153,7 @@ export const CB_YLORRD = [
   "#bd0026",
   "#800026",
 ] as const;
-export const CB_YLGNB = [
+const CB_YLGNB = [
   "#ffffd9",
   "#edf8b1",
   "#c7e9b4",
@@ -164,7 +164,7 @@ export const CB_YLGNB = [
   "#253494",
   "#081d58",
 ] as const;
-export const CB_BUPU = [
+const CB_BUPU = [
   "#f7fcfd",
   "#e0ecf4",
   "#bfd3e6",
@@ -177,7 +177,7 @@ export const CB_BUPU = [
 ] as const;
 
 /** Diverging 11-class */
-export const CB_RDYLBU = [
+const CB_RDYLBU = [
   "#a50026",
   "#d73027",
   "#f46d43",
@@ -190,7 +190,7 @@ export const CB_RDYLBU = [
   "#4575b4",
   "#313695",
 ] as const;
-export const CB_RDBU = [
+const CB_RDBU = [
   "#67001f",
   "#b2182b",
   "#d6604d",
@@ -203,7 +203,7 @@ export const CB_RDBU = [
   "#2166ac",
   "#053061",
 ] as const;
-export const CB_BRBG = [
+const CB_BRBG = [
   "#543005",
   "#8c510a",
   "#bf812d",
@@ -216,7 +216,7 @@ export const CB_BRBG = [
   "#01665e",
   "#003c30",
 ] as const;
-export const CB_SPECTRAL = [
+const CB_SPECTRAL = [
   "#9e0142",
   "#d53e4f",
   "#f46d43",
@@ -229,7 +229,7 @@ export const CB_SPECTRAL = [
   "#3288bd",
   "#5e4fa2",
 ] as const;
-export const CB_PUOR = [
+const CB_PUOR = [
   "#7f3b08",
   "#b35806",
   "#e08214",
@@ -254,7 +254,7 @@ export const COLORBREWER_QUALITATIVE = {
 } as const satisfies Readonly<Record<string, readonly string[]>>;
 
 /** Sequential + diverging ramps for distiller/fermenter (and ordinal if chosen). */
-export const COLORBREWER_CONTINUOUS = {
+const COLORBREWER_CONTINUOUS = {
   Blues: CB_BLUES,
   Greens: CB_GREENS,
   Reds: CB_REDS,
@@ -270,27 +270,6 @@ export const COLORBREWER_CONTINUOUS = {
   Spectral: CB_SPECTRAL,
   PuOr: CB_PUOR,
 } as const satisfies Readonly<Record<string, readonly string[]>>;
-
-export const COLORBREWER_QUALITATIVE_NAMES = Object.keys(
-  COLORBREWER_QUALITATIVE,
-) as (keyof typeof COLORBREWER_QUALITATIVE)[];
-
-export const COLORBREWER_CONTINUOUS_NAMES = Object.keys(
-  COLORBREWER_CONTINUOUS,
-) as (keyof typeof COLORBREWER_CONTINUOUS)[];
-
-export const COLORBREWER_PALETTE_NAMES = [
-  ...COLORBREWER_QUALITATIVE_NAMES,
-  ...COLORBREWER_CONTINUOUS_NAMES,
-] as const;
-
-export type ColorBrewerPaletteName = (typeof COLORBREWER_PALETTE_NAMES)[number];
-
-export function isColorBrewerPalette(name: string): name is ColorBrewerPaletteName {
-  return (
-    Object.hasOwn(COLORBREWER_QUALITATIVE, name) || Object.hasOwn(COLORBREWER_CONTINUOUS, name)
-  );
-}
 
 export function colorBrewerStops(name: string): readonly string[] | undefined {
   if (Object.hasOwn(COLORBREWER_QUALITATIVE, name)) {

@@ -1,0 +1,43 @@
+{
+  "id": "77-density-2d-filled-bins",
+  "kind": "chart",
+  "prompt": "Draw filled 2d density contours of x and y using 4 bins on a 30 by 30 grid.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" }
+    ],
+    "rowCount": 8
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 0 },
+      { "x": 0.2, "y": 0.1 },
+      { "x": 0.1, "y": -0.1 },
+      { "x": 3, "y": 3 },
+      { "x": 3.1, "y": 2.9 },
+      { "x": 2.9, "y": 3.1 },
+      { "x": 1.5, "y": 1.5 },
+      { "x": 1.6, "y": 1.4 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "density_2d_filled",
+        "stat": "density_2d_filled",
+        "position": "identity",
+        "params": { "bins": 4, "n": 30 },
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "fill": { "stat": "level" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "density_2d_filled with explicit bins and n (#802 phase 2)."
+}

@@ -1,5 +1,5 @@
 /**
- * Text glyph geometry batch builder.
+ * Text / label glyph geometry batch builder.
  */
 import type { GlyphsBatch } from "../scene.js";
 
@@ -14,6 +14,7 @@ export function glyphsBatch(
   frame: LayerFrame,
   fx: Frame,
   color: ResolvedColorScale | null,
+  fill: ResolvedColorScale | null,
   styles: ResolvedStyleScales,
   warnings: PipelineWarning[],
 ): GlyphsBatch | null {
@@ -24,6 +25,9 @@ export function glyphsBatch(
     dx?: number;
     dy?: number;
     alpha?: number;
+    padding?: number;
+    radius?: number;
+    linewidth?: number;
   };
   const wantsColors =
     color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null);
@@ -36,5 +40,15 @@ export function glyphsBatch(
     dy: params.dy ?? 0,
   });
   removedWarning(emitted.removed, binding.index, warnings);
-  return packGlyphsBatch({ frame, emitted, wantsColors, styles, params });
+  // geom_label (#792) and sf_label (#809) share the same box chrome.
+  const withBox = binding.layer.geom === "label" || binding.layer.geom === "sf_label";
+  return packGlyphsBatch({
+    frame,
+    emitted,
+    wantsColors,
+    styles,
+    params,
+    withBox,
+    fill,
+  });
 }

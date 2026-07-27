@@ -1,0 +1,59 @@
+{
+  "id": "97-range-geoms-summary",
+  "kind": "chart",
+  "prompt": "Use geom_linerange, geom_pointrange, and geom_crossbar with summary (mean ± se) per treatment.",
+  "dataProfile": {
+    "fields": [
+      { "name": "treatment", "type": "nominal", "examples": ["control", "dose"] },
+      { "name": "value", "type": "quantitative" }
+    ],
+    "rowCount": 8
+  },
+  "data": {
+    "main": [
+      { "treatment": "control", "value": 4 },
+      { "treatment": "control", "value": 5 },
+      { "treatment": "control", "value": 6 },
+      { "treatment": "control", "value": 4.5 },
+      { "treatment": "dose", "value": 7 },
+      { "treatment": "dose", "value": 8 },
+      { "treatment": "dose", "value": 9 },
+      { "treatment": "dose", "value": 7.5 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "linerange",
+        "stat": "summary",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "treatment" },
+          "y": { "field": "value" }
+        }
+      },
+      {
+        "geom": "pointrange",
+        "stat": "summary",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "treatment" },
+          "y": { "field": "value" }
+        }
+      },
+      {
+        "geom": "crossbar",
+        "stat": "summary",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "treatment" },
+          "y": { "field": "value" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Interval family + summary (#793)."
+}

@@ -80,6 +80,9 @@ export interface ThemeTokens {
   axisLineY: boolean;
   ticksX: boolean;
   ticksY: boolean;
+  /** When false, axis tick labels are suppressed (theme_void). Default true. */
+  labelsX: boolean;
+  labelsY: boolean;
   gridX: boolean;
   gridY: boolean;
   showPanelBorder: boolean;
@@ -143,6 +146,8 @@ const HRBR_BASE: FoundationThemeTokens = {
   axisLineY: false,
   ticksX: false,
   ticksY: false,
+  labelsX: true,
+  labelsY: true,
   gridX: true,
   gridY: true,
   showPanelBorder: false,
@@ -195,6 +200,32 @@ export function themed(
 }
 
 /**
+ * Grey-panel ggplot2 complete-theme tokens. Shared by registered names
+ * `ggplot2`, `grey`, and `gray` (UK/US theme_grey / theme_gray aliases, #824).
+ * LEGACY_BUILTIN_THEMES spreads BUILTIN_THEMES so the aliases inherit there too.
+ */
+const GGPLOT2_GREY = themed({
+  ink: "#333333",
+  panel: "#ebebeb",
+  grid: "#ffffff",
+  axisText: "#4d4d4d",
+  tickColor: "#333333",
+  fontSize: 11,
+  axisTextSize: 12,
+  fontWeight: 400,
+  titleSize: 13.2,
+  subtitleSize: 11,
+  axisTitleSize: 11,
+  captionSize: 8.8,
+  stripSize: 8.8,
+  tickWidth: 0.5,
+  tickLength: 3.67,
+  gridWidth: 0.5,
+  ticksX: true,
+  ticksY: true,
+});
+
+/**
  * Built-in themes for edition 2. The default deliberately follows
  * hrbrthemes' quiet hierarchy: real typography, hairline grids, and no heavy
  * axis frame. Named presets retain the structural contracts of their R
@@ -244,26 +275,10 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     axisLine: "#6b717b",
     tickColor: "#6b717b",
   }),
-  ggplot2: themed({
-    ink: "#333333",
-    panel: "#ebebeb",
-    grid: "#ffffff",
-    axisText: "#4d4d4d",
-    tickColor: "#333333",
-    fontSize: 11,
-    axisTextSize: 12,
-    fontWeight: 400,
-    titleSize: 13.2,
-    subtitleSize: 11,
-    axisTitleSize: 11,
-    captionSize: 8.8,
-    stripSize: 8.8,
-    tickWidth: 0.5,
-    tickLength: 3.67,
-    gridWidth: 0.5,
-    ticksX: true,
-    ticksY: true,
-  }),
+  ggplot2: GGPLOT2_GREY,
+  // theme_grey / theme_gray name parity — same token map as ggplot2 (#824).
+  grey: GGPLOT2_GREY,
+  gray: GGPLOT2_GREY,
   classic: themed({
     ink: "#000000",
     grid: "none",
@@ -286,6 +301,37 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     ticksY: true,
     gridX: false,
     gridY: false,
+  }),
+  // theme_bw complete-theme role (#820): white panel, grey grid, rectangular
+  // border for print/B&W reproduction. Distinct from ggplot2 (grey panel,
+  // white grid) and light (thinner chrome, lighter border).
+  bw: themed({
+    ink: "#333333",
+    paper: "#ffffff",
+    panel: "#ffffff",
+    grid: "#e5e5e5",
+    axisText: "#4d4d4d",
+    axisLine: "#333333",
+    tickColor: "#333333",
+    panelBorder: "#333333",
+    fontSize: 11,
+    axisTextSize: 12,
+    fontWeight: 400,
+    titleSize: 13.2,
+    subtitleSize: 11,
+    axisTitleSize: 11,
+    captionSize: 8.8,
+    stripSize: 8.8,
+    axisLineWidth: 0.5,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.5,
+    panelBorderWidth: 0.5,
+    ticksX: true,
+    ticksY: true,
+    axisLineX: false,
+    axisLineY: false,
+    showPanelBorder: true,
   }),
   few: themed({
     ink: "#333333",
@@ -356,6 +402,93 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     gridWidth: 0,
     gridX: false,
     gridY: false,
+  }),
+  // theme_linedraw: white panel + black grid/border/ticks (line-art / B&W print).
+  // Hairline black grid (0.3) avoids solid graph paper; panel border carries the
+  // frame (axisLineX/Y stay false from HRBR_BASE). Accent stays monochrome so
+  // unmapped marks and focus chrome do not introduce a brand hue.
+  linedraw: themed({
+    ink: "#000000",
+    paper: "#ffffff",
+    panel: "#ffffff",
+    accent: "#000000",
+    grid: "#000000",
+    axisText: "#000000",
+    axisLine: "#000000",
+    tickColor: "#000000",
+    panelBorder: "#000000",
+    fontSize: 11,
+    axisTextSize: 12,
+    fontWeight: 400,
+    titleSize: 13.2,
+    subtitleSize: 11,
+    axisTitleSize: 11,
+    captionSize: 8.8,
+    stripSize: 8.8,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.3,
+    panelBorderWidth: 0.5,
+    ticksX: true,
+    ticksY: true,
+    showPanelBorder: true,
+  }),
+  // ggplot2 theme_void: no axes, grid, or panel chrome; marks (and legends) remain.
+  void: themed({
+    paper: "none",
+    panel: "none",
+    grid: "none",
+    gridWidth: 0,
+    gridX: false,
+    gridY: false,
+    axisLineX: false,
+    axisLineY: false,
+    ticksX: false,
+    ticksY: false,
+    labelsX: false,
+    labelsY: false,
+    showPanelBorder: false,
+    tickLength: 0,
+  }),
+  // theme_test (#823): pinned high-contrast chrome for package tests / VR.
+  // Explicit literals — not an alias of light/classic — so product sweeps
+  // cannot retarget snapshot chrome. Stability over brand aesthetics.
+  test: themed({
+    ink: "#000000",
+    paper: "#ffffff",
+    panel: "#ffffff",
+    accent: "#000000",
+    grid: "#cccccc",
+    axisText: "#000000",
+    axisLine: "#000000",
+    tickColor: "#000000",
+    panelBorder: "#000000",
+    fontFamily: "Helvetica, Arial, sans-serif",
+    fontSize: 11,
+    axisTextSize: 12,
+    fontWeight: 400,
+    titleSize: 14,
+    titleWeight: 700,
+    subtitleSize: 12,
+    subtitleWeight: 400,
+    axisTitleSize: 11,
+    axisTitleWeight: 400,
+    captionSize: 9,
+    stripSize: 11,
+    stripWeight: 400,
+    axisLineWidth: 0.5,
+    tickWidth: 0.5,
+    tickLength: 4,
+    gridWidth: 0.5,
+    panelBorderWidth: 0.5,
+    gridDasharray: "",
+    axisLineX: true,
+    axisLineY: true,
+    ticksX: true,
+    ticksY: true,
+    gridX: true,
+    gridY: true,
+    showPanelBorder: true,
   }),
 });
 
