@@ -8,7 +8,7 @@ import type { PositionScale } from "../scales/train.js";
 import type { FacetPanelDef } from "./facets.js";
 import { collectAxisInputs } from "./scale-axis-collect.js";
 import { trainAxis } from "./scale-axis-train.js";
-import type { Advisory, LayerFrame, PipelineWarning } from "./types.js";
+import type { Advisory, LayerFrame, PipelineWarning, ScaleDiagnostic } from "./types.js";
 import { trainFreePanelScales } from "./train-pipeline-scales-position-free.js";
 
 export interface TrainedPositionScales {
@@ -18,6 +18,8 @@ export interface TrainedPositionScales {
   xInputs: ReturnType<typeof collectAxisInputs>;
   yInputs: ReturnType<typeof collectAxisInputs>;
   allFrames: LayerFrame[];
+  /** Rich diagnostics from scale training (structured facts at emission, #628). */
+  scaleDiagnostics: ScaleDiagnostic[];
 }
 
 export function trainPipelinePositionScales(input: {
@@ -38,6 +40,10 @@ export function trainPipelinePositionScales(input: {
   const yTraining = trainAxis("y", yInputs, scalesConfig.y);
   advisories.push(...xTraining.advisories, ...yTraining.advisories);
   warnings.push(...xTraining.warnings, ...yTraining.warnings);
+  const scaleDiagnostics: ScaleDiagnostic[] = [
+    ...xTraining.scaleDiagnostics,
+    ...yTraining.scaleDiagnostics,
+  ];
 
   const panelScales = trainFreePanelScales({
     scalesConfig,
@@ -48,7 +54,8 @@ export function trainPipelinePositionScales(input: {
     fixedX: xTraining.scale,
     fixedY: yTraining.scale,
     warnings,
+    scaleDiagnostics,
   });
 
-  return { xTraining, yTraining, panelScales, xInputs, yInputs, allFrames };
+  return { xTraining, yTraining, panelScales, xInputs, yInputs, allFrames, scaleDiagnostics };
 }

@@ -3,9 +3,11 @@
  */
 import type { PositionScaleSpec } from "@ggsvelte/spec";
 
+import { emitScaleBaselineTransformedOrigin } from "./diagnostics-emit.js";
 import { axisTransform } from "./position-program.js";
 import type { AxisInputs } from "./scale-axis-types.js";
 import type { Advisory } from "./types.js";
+import type { ScaleDiagnostic } from "./types-scale-diagnostics.js";
 
 /**
  * Family- and transform-aware zero forcing for bar/area measure axes. It forces
@@ -19,6 +21,7 @@ export function maybeForceZeroForBars(
   config: PositionScaleSpec | undefined,
   type: "linear" | "time",
   advisories: Advisory[],
+  scaleDiagnostics: ScaleDiagnostic[],
 ): boolean | undefined {
   let zero = config?.zero;
   const transform = axisTransform(config, type);
@@ -38,15 +41,12 @@ export function maybeForceZeroForBars(
     });
   }
   // log10 has no semantic-zero image; bar/col/area/histogram/density baseline
-  // at the transformed-space origin (semantic 1) instead. One deduplicated
-  // per-axis advisory — this runs once per axis training call.
+  // at the transformed-space origin (semantic 1) instead. Structured facts
+  // project lean + rich channels once (#628).
   if (inputs.barMeasure && transform.key === "log10") {
-    advisories.push({
-      code: "scale-baseline-transformed-origin",
-      path: `scales.${axis}`,
-      chosen: "bars/areas/density baseline at the transformed-space origin 0 (semantic 1)",
-      howToOverride: "log10 has no semantic-zero image; this baseline is not configurable.",
-    });
+    const event = emitScaleBaselineTransformedOrigin(axis);
+    advisories.push(event.advisory);
+    scaleDiagnostics.push(event.diagnostic);
   }
   return zero;
 }

@@ -7,6 +7,7 @@ import type { CandidateStore } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
 
 import { assembleRenderModel } from "./assemble-render-model.js";
+import { dedupeScaleDiagnostics } from "./diagnostics-emit.js";
 import type { PanelLayoutResult } from "./panel-layout.js";
 import type { PreparedPanels } from "./prepare-panels.js";
 import type { TrainedPipelineScales } from "./train-pipeline-scales.js";
@@ -65,7 +66,13 @@ export function assembleFinalizeRenderModel(input: {
     warnings: input.warnings,
     advisories: input.advisories,
     scaleDecisions: prepared.scaleDecisions,
-    scaleDiagnostics: prepared.scaleDiagnostics,
+    // Prepare-time (transform/temporal, one-per-field) + train-time dual-channel
+    // (#628). Only training diagnostics need once-per-axis dedupe (free panels
+    // can re-emit the same break/baseline event); prepare entries stay distinct.
+    scaleDiagnostics: [
+      ...prepared.scaleDiagnostics,
+      ...dedupeScaleDiagnostics(trained.scaleDiagnostics),
+    ],
     guidePlans: Object.freeze([
       ...panelLayout.guidePlans,
       ...(colorResolution.guidePlan === null ? [] : [colorResolution.guidePlan]),
