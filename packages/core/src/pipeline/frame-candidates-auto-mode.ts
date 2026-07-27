@@ -37,6 +37,7 @@ export function candidateAutoMode(
     case "line":
     case "qq_line":
     case "path":
+    case "step":
     case "contour":
     case "area":
     case "density":

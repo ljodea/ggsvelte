@@ -40,6 +40,7 @@ import {
   SfLabelLayerSchema,
   SpokeLayerSchema,
   RugLayerSchema,
+  StepLayerSchema,
   QqLayerSchema,
   QqLineLayerSchema,
   RuleLayerSchema,
@@ -74,6 +75,7 @@ export const GEOM_BRANCHES = {
 
   spoke: SpokeLayerSchema,
   rug: RugLayerSchema,
+  step: StepLayerSchema,
   qq: QqLayerSchema,
   qq_line: QqLineLayerSchema,
   rule: RuleLayerSchema,

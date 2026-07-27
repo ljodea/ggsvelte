@@ -30,6 +30,7 @@ const VALUE_EXPORTS = [
   "RibbonLayerSchema",
   "SegmentLayerSchema",
   "CurveLayerSchema",
+  "StepLayerSchema",
   "QqLayerSchema",
   "QqLineLayerSchema",
   "FacetFieldRefSchema",

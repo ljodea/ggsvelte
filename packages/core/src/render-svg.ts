@@ -20,7 +20,9 @@
  * Implementation split:
  * - render-svg-format.ts — px / escapeXML
  * - render-svg-marks.ts — countMarks, pathData, batch emitters
- * - render-svg-scene.ts — chrome + sceneLabel + sceneToSVGString
+ * - render-svg-panel-chrome.ts — axes, grid, strips, axis titles
+ * - render-svg-legend.ts — discrete / steps / ramp legend SVG
+ * - render-svg-scene.ts — sceneLabel + sceneToSVGString assembly
  */
 import type { GGBuilder, SpecInput } from "@ggsvelte/spec";
 

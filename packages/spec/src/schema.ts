@@ -130,6 +130,7 @@ export const SfLabelLayerSchema = SpecModule.Import("SfLabelLayer");
 
 export const SpokeLayerSchema = SpecModule.Import("SpokeLayer");
 export const RugLayerSchema = SpecModule.Import("RugLayer");
+export const StepLayerSchema = SpecModule.Import("StepLayer");
 export const QqLayerSchema = SpecModule.Import("QqLayer");
 export const QqLineLayerSchema = SpecModule.Import("QqLineLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
@@ -215,6 +216,8 @@ export type PointParams = SpecType<"PointParams">;
 export type LineParams = SpecType<"LineParams">;
 /** Path layer params (no bin knobs). */
 export type PathParams = SpecType<"PathParams">;
+/** Step layer params (ggplot2 geom_step direction). */
+export type StepParams = SpecType<"StepParams">;
 /** Col layer params. */
 export type ColParams = SpecType<"ColParams">;
 /** Bar/histogram layer params (styling + stat-bin controls). */
@@ -360,6 +363,8 @@ export type SpokeParams = SpecType<"SpokeParams">;
 export type SpokeLayer = LayerWithDataRef<SpecType<"SpokeLayer">>;
 /** A marginal rug layer (edge ticks). */
 export type RugLayer = LayerWithDataRef<SpecType<"RugLayer">>;
+/** A step-line layer (ggplot2 geom_step). */
+export type StepLayer = LayerWithDataRef<SpecType<"StepLayer">>;
 export type QqLayer = LayerWithDataRef<SpecType<"QqLayer">>;
 export type QqLineLayer = LayerWithDataRef<SpecType<"QqLineLayer">>;
 /** One plot layer, discriminated by `geom`. */
@@ -383,6 +388,7 @@ export type LayerSpec =
   | BlankLayer
   | SpokeLayer
   | RugLayer
+  | StepLayer
   | RuleLayer
   | HlineLayer
   | VlineLayer

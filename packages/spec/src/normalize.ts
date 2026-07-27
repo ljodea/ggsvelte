@@ -84,6 +84,7 @@ export type {
   SfLabelLayerInput,
   CurveLayerInput,
   RugLayerInput,
+  StepLayerInput,
   QqLayerInput,
   QqLineLayerInput,
   LayerInput,
