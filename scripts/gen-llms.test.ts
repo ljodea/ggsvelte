@@ -8,13 +8,8 @@ import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import {
-  ADVISORY_CATALOG,
-  CLI_DIAGNOSTIC_CATALOG,
-  PIPELINE_ERROR_CATALOG,
-  PIPELINE_WARNING_CATALOG,
-} from "@ggsvelte/core";
-import { ERROR_CATALOG, LINT_CATALOG } from "@ggsvelte/spec";
+import { ADVISORY_CATALOG, CLI_DIAGNOSTIC_CATALOG, PIPELINE_WARNING_CATALOG } from "@ggsvelte/core";
+import { ERROR_CATALOG, LINT_CATALOG, PIPELINE_ERROR_CATALOG } from "@ggsvelte/spec";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction/interaction.ts";
 
 import { EXAMPLES } from "../examples/manifest.ts";

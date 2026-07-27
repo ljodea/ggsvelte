@@ -2146,6 +2146,27 @@ The accepted lifecycle and deprecation policy remains in
 [Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
 rather than creating a second policy.
 
+## 0.11 to 0.12
+
+### Manual color domain/range diagnostic code
+
+Validation used to emit the code \`scale-manual-domain-range\` when a manual
+color/fill scale had mismatched domain and range lengths. It now emits
+\`color-manual-domain-range\` — the same string the pipeline already used —
+so agents and the error-reference page have one name for that fault.
+
+If your tooling matches \`SpecError.code\` or docs anchors by string, update:
+
+- code: \`scale-manual-domain-range\` → \`color-manual-domain-range\`
+- docs anchor: \`#scale-manual-domain-range\` → \`#color-manual-domain-range\`
+  (pipeline entry is now \`#color-manual-domain-range-pipeline\` when both
+  sources appear on the page)
+
+Pipeline-only and validation-only catalogs remain separate objects, but dual
+codes share one prose source in \`@ggsvelte/spec\`. \`PIPELINE_ERROR_CATALOG\`
+is also exported from \`@ggsvelte/spec\` (and still re-exported from
+\`@ggsvelte/core\`).
+
 ## 0.10 to 0.11
 
 ### Compose the theme as a child layer

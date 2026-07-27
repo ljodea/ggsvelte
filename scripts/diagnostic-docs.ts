@@ -1,9 +1,5 @@
-import {
-  CLI_DIAGNOSTIC_CATALOG,
-  PIPELINE_ERROR_CATALOG,
-  PIPELINE_WARNING_CATALOG,
-} from "@ggsvelte/core";
-import { ERROR_CATALOG } from "@ggsvelte/spec";
+import { CLI_DIAGNOSTIC_CATALOG, PIPELINE_WARNING_CATALOG } from "@ggsvelte/core";
+import { ERROR_CATALOG, PIPELINE_ERROR_CATALOG } from "@ggsvelte/spec";
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../packages/svelte/src/lib/interaction/interaction.js";
 
 export type DiagnosticDocSource = "validation" | "pipeline" | "warning" | "interaction" | "cli";

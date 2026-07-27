@@ -443,8 +443,8 @@ exports[`ERROR_CATALOG coverage [scale-range-color] is reproducible; message + f
 exports[`ERROR_CATALOG coverage [scale-type-transform-conflict] is reproducible; message + fix snapshot 1`] = `
 {
   "catalog": {
-    "fix": "Use identity for temporal/discrete/manual/identity scales, or choose a quantitative family.",
-    "summary": "A scale family is incompatible with its requested transform.",
+    "fix": "Use identity for temporal/discrete/manual/identity scales; for base-10 log use type: "linear" with transform: "log10"; or choose a quantitative family that admits the transform.",
+    "summary": "A scale declares an incompatible type/family with its transform (temporal/discrete/manual/identity with a non-identity transform, or type: "log" with a non-log10 transform).",
     "tier": 1,
   },
   "instance": {
@@ -459,15 +459,15 @@ exports[`ERROR_CATALOG coverage [scale-type-transform-conflict] is reproducible;
 }
 `;
 
-exports[`ERROR_CATALOG coverage [scale-manual-domain-range] is reproducible; message + fix snapshot 1`] = `
+exports[`ERROR_CATALOG coverage [color-manual-domain-range] is reproducible; message + fix snapshot 1`] = `
 {
   "catalog": {
-    "fix": "Provide exactly one range color for each explicit domain value.",
-    "summary": "A manual color scale has different domain and range lengths.",
+    "fix": "Provide exactly one range color for every domain value.",
+    "summary": "A manual color/fill scale has a different number of domain values and range colors.",
     "tier": 1,
   },
   "instance": {
-    "code": "scale-manual-domain-range",
+    "code": "color-manual-domain-range",
     "fix": {
       "description": "Provide exactly one range color for each explicit domain value.",
     },
@@ -610,7 +610,7 @@ exports[`ERROR_CATALOG coverage [rule-form-missing] is reproducible; message + f
 {
   "catalog": {
     "fix": "Set params.yintercept/xintercept (annotation) or map aes.x/aes.y (data-driven).",
-    "summary": "A rule layer has neither intercept params nor a mapped aes.x/aes.y.",
+    "summary": "A rule layer has neither intercept params nor a mapped aes.x/aes.y — nothing to draw.",
     "tier": 2,
   },
   "instance": {
