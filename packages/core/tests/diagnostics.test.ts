@@ -1,14 +1,13 @@
 /**
- * Diagnostics-catalog completeness (M3 error-catalog audit): the catalogs under
- * src/diagnostics.ts (+ diagnostics-*-catalog.ts modules) must cover every code
- * the core sources can emit, and carry no dead entries. Enforced by scanning
- * emission sites — adding a new `new PipelineError("x", ...)` or
- * `warnings.push({ code: "x", ... })` without a catalog entry fails this test,
- * and so does cataloging a code nothing emits.
+ * Diagnostics catalog completeness (#628 / M3 audit).
  *
- * Catalog modules themselves are excluded from the dead-entry corpus (their
- * keys would otherwise always "appear"). Dynamic style emissions rewrite
- * ScaleWarningCode as `style-${code}` in scale-style-discrete.ts.
+ * Primary: typed emission registries match catalogs 1:1 (`satisfies Record`).
+ * Dual-channel codes must declare a structured emit module — evidence is never
+ * recovered from message text for those paths.
+ *
+ * Secondary: constructor/literal inventory still catches uncatalogued new codes
+ * at emission sites that have not yet migrated to typed factories. That scan is
+ * not the source of truth for "is this catalog entry intentional?"
  */
 import { describe, expect, it } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
@@ -20,6 +19,12 @@ import {
   PIPELINE_ERROR_CATALOG,
   PIPELINE_WARNING_CATALOG,
 } from "../src/diagnostics.ts";
+import {
+  ADVISORY_EMISSION_REGISTRY,
+  CLI_EMISSION_REGISTRY,
+  ERROR_EMISSION_REGISTRY,
+  WARNING_EMISSION_REGISTRY,
+} from "../src/diagnostics-emission-registry.ts";
 
 const SRC = join(import.meta.dir, "..", "src");
 
@@ -33,19 +38,20 @@ function sourceFiles(dir: string): string[] {
   return out;
 }
 
-/** Pure catalog tables — not emission sites. */
+/** Catalog + registry modules are not emission sites. */
 function isCatalogSource(path: string): boolean {
   const name = basename(path);
   return (
     name === "diagnostics.ts" ||
     name === "diagnostics-error-catalog.ts" ||
-    name === "diagnostics-warning-catalog.ts"
+    name === "diagnostics-warning-catalog.ts" ||
+    name === "diagnostics-emission-registry.ts" ||
+    name === "diagnostics-emit.ts"
   );
 }
 
 const files = sourceFiles(SRC).map((path) => ({ path, text: readFileSync(path, "utf8") }));
 const emissionFiles = files.filter((f) => !isCatalogSource(f.path));
-const emissionText = emissionFiles.map((f) => f.text).join("\n");
 
 /** Codes thrown as PipelineError / ScaleConfigError (constructor literals). */
 function emittedErrorCodes(): Set<string> {
@@ -87,18 +93,48 @@ function stylePrefixedScaleWarningCodes(): Set<string> {
   return new Set([...scaleWarningCodes()].map((c) => `style-${c}`));
 }
 
-function isEmittedOutsideCatalog(code: string): boolean {
-  if (emissionText.includes(`"${code}"`)) return true;
-  if (stylePrefixedScaleWarningCodes().has(code)) return true;
-  return false;
-}
-
 const errorCatalog = new Set(Object.keys(PIPELINE_ERROR_CATALOG));
 const warningCatalog = new Set(Object.keys(PIPELINE_WARNING_CATALOG));
 const advisoryCatalog = new Set(Object.keys(ADVISORY_CATALOG));
 const cliCatalog = new Set(Object.keys(CLI_DIAGNOSTIC_CATALOG));
 
-describe("diagnostics catalog completeness", () => {
+function sortedKeys(record: Record<string, unknown>): string[] {
+  return Object.keys(record).toSorted();
+}
+
+describe("diagnostics emission registry (primary completeness, #628)", () => {
+  it("warning registry keys match PIPELINE_WARNING_CATALOG exactly", () => {
+    expect(sortedKeys(WARNING_EMISSION_REGISTRY)).toEqual(sortedKeys(PIPELINE_WARNING_CATALOG));
+  });
+
+  it("advisory registry keys match ADVISORY_CATALOG exactly", () => {
+    expect(sortedKeys(ADVISORY_EMISSION_REGISTRY)).toEqual(sortedKeys(ADVISORY_CATALOG));
+  });
+
+  it("error registry keys match PIPELINE_ERROR_CATALOG exactly", () => {
+    expect(sortedKeys(ERROR_EMISSION_REGISTRY)).toEqual(sortedKeys(PIPELINE_ERROR_CATALOG));
+  });
+
+  it("cli registry keys match CLI_DIAGNOSTIC_CATALOG exactly", () => {
+    expect(sortedKeys(CLI_EMISSION_REGISTRY)).toEqual(sortedKeys(CLI_DIAGNOSTIC_CATALOG));
+  });
+
+  it("dual-channel scale-training codes are owned by diagnostics-emit", () => {
+    expect(WARNING_EMISSION_REGISTRY["scale-break-outside-domain"].dualChannelModule).toBe(
+      "pipeline/diagnostics-emit",
+    );
+    expect(ADVISORY_EMISSION_REGISTRY["scale-baseline-transformed-origin"].dualChannelModule).toBe(
+      "pipeline/diagnostics-emit",
+    );
+  });
+
+  it("advisory and warning namespaces do not overlap (one code, one channel)", () => {
+    const overlap = [...advisoryCatalog].filter((c) => warningCatalog.has(c));
+    expect(overlap).toEqual([]);
+  });
+});
+
+describe("diagnostics emission inventory (secondary, untyped sites)", () => {
   it("every thrown PipelineError/ScaleConfigError code is cataloged", () => {
     const missing = [...emittedErrorCodes()].filter((c) => !errorCatalog.has(c));
     expect(missing).toEqual([]);
@@ -118,18 +154,5 @@ describe("diagnostics catalog completeness", () => {
   it("style-prefixed ScaleWarningCode emissions are cataloged as warnings", () => {
     const missing = [...stylePrefixedScaleWarningCodes()].filter((c) => !warningCatalog.has(c));
     expect(missing).toEqual([]);
-  });
-
-  it("no dead catalog entries: every cataloged code is emitted outside catalogs", () => {
-    const dead: string[] = [];
-    for (const code of [...errorCatalog, ...warningCatalog, ...advisoryCatalog, ...cliCatalog]) {
-      if (!isEmittedOutsideCatalog(code)) dead.push(code);
-    }
-    expect(dead).toEqual([]);
-  });
-
-  it("advisory and warning namespaces do not overlap (one code, one channel)", () => {
-    const overlap = [...advisoryCatalog].filter((c) => warningCatalog.has(c));
-    expect(overlap).toEqual([]);
   });
 });

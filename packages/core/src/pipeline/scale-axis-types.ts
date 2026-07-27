@@ -7,6 +7,7 @@ import type { PositionScale } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 
 import type { Advisory, PipelineWarning } from "./types.js";
+import type { ScaleDiagnostic } from "./types-scale-diagnostics.js";
 
 /** Geoms whose marks extend from a zero baseline on the measure (y) axis. */
 export function isBarLike(geom: LayerSpec["geom"]): boolean {
@@ -17,6 +18,8 @@ export interface AxisTraining {
   scale: PositionScale;
   advisories: Advisory[];
   warnings: PipelineWarning[];
+  /** Rich dual-channel diagnostics emitted with structured facts (#628). */
+  scaleDiagnostics: ScaleDiagnostic[];
 }
 
 export interface AxisInputs {

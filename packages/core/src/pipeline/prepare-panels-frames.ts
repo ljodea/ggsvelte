@@ -24,6 +24,7 @@ import { xConversionOf, yConversionOf } from "./temporal-position.js";
 import type { PositionConversionContext } from "./temporal-position.js";
 import { preflightTemporalBindings } from "./temporal-preflight.js";
 import type { ColumnTransformConfig } from "../scales/transform.js";
+import { DIAGNOSTIC_EVIDENCE_VALUE_LIMIT } from "./diagnostics-emit.js";
 
 const DOCS = "https://ggsvelte.sh/guide/errors";
 
@@ -61,13 +62,10 @@ function unifyBinnedStyleExtents(
   }
 }
 
-/** Up to `limit` finite semantic values that failed the transform (invalid). */
-function sampleFailingSemantic(
-  view: { semantic: Float64Array; valid: Uint8Array },
-  limit: number,
-): number[] {
+/** Up to the central evidence limit of finite semantic values that failed the transform. */
+function sampleFailingSemantic(view: { semantic: Float64Array; valid: Uint8Array }): number[] {
   const out: number[] = [];
-  for (let i = 0; i < view.semantic.length && out.length < limit; i++) {
+  for (let i = 0; i < view.semantic.length && out.length < DIAGNOSTIC_EVIDENCE_VALUE_LIMIT; i++) {
     const value = view.semantic[i]!;
     if (view.valid[i] === 0 && Number.isFinite(value)) out.push(value);
   }
@@ -112,7 +110,7 @@ function emitTransformDomainWarnings(
     const view = table.transformed(field, conversion.sourceParser, conversion.options, transform);
     const key = transform.transform.key;
     if (view.invalidTransform > 0) {
-      const samples = sampleFailingSemantic(view, 5);
+      const samples = sampleFailingSemantic(view);
       warnings.push({
         code: "scale-transform-domain",
         message: `Removed ${view.invalidTransform} value(s) outside the ${key} transform domain on the ${axis} scale (field "${field}").`,

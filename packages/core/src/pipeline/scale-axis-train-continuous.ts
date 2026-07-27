@@ -6,11 +6,13 @@ import type { PositionScaleSpec } from "@ggsvelte/spec";
 import type { ContinuousConfig } from "../scales/train.js";
 import { ScaleConfigError, trainContinuous } from "../scales/train.js";
 
+import { emitScaleBreakOutsideDomain } from "./diagnostics-emit.js";
 import { axisTransform, resolveScaleExpansion } from "./position-program.js";
 import { continuousDomainOf } from "./scale-axis-domain.js";
 import type { AxisInputs, AxisTraining } from "./scale-axis-types.js";
 import type { Advisory, PipelineWarning } from "./types.js";
 import { PipelineError } from "./types.js";
+import type { ScaleDiagnostic } from "./types-scale-diagnostics.js";
 import { maybeForceZeroForBars } from "./scale-axis-train-continuous-zero.js";
 import { pushContinuousTrainingWarnings } from "./scale-axis-train-continuous-warn.js";
 
@@ -22,7 +24,8 @@ export function trainContinuousAxis(
   advisories: Advisory[],
   warnings: PipelineWarning[],
 ): AxisTraining {
-  const zero = maybeForceZeroForBars(axis, inputs, config, type, advisories);
+  const scaleDiagnostics: ScaleDiagnostic[] = [];
+  const zero = maybeForceZeroForBars(axis, inputs, config, type, advisories, scaleDiagnostics);
 
   const domain = continuousDomainOf(config, axis);
   const transform = axisTransform(config, type);
@@ -47,8 +50,8 @@ export function trainContinuousAxis(
   }
   pushContinuousTrainingWarnings(axis, type, training, warnings);
   // Explicit continuous breaks outside the trained (expanded, ggplot2-correct)
-  // display domain are dropped by the layout tick filter; surface that drop as
-  // a warning so it is observable (matches temporal-break-outside-domain).
+  // display domain are dropped by the layout tick filter. Structured facts
+  // project lean + rich channels once (#628) — no post-hoc message parsing.
   if (type !== "time" && config?.breaks !== undefined) {
     const [lo, hi] = training.scale.domain;
     const outside = config.breaks.filter(
@@ -56,11 +59,10 @@ export function trainContinuousAxis(
         typeof value === "number" && Number.isFinite(value) && (value < lo || value > hi),
     );
     if (outside.length > 0) {
-      warnings.push({
-        code: "scale-break-outside-domain",
-        message: `Omitted ${outside.length} explicit ${axis} break(s) outside the trained domain [${lo}, ${hi}]: ${outside.join(", ")}.`,
-      });
+      const event = emitScaleBreakOutsideDomain(axis, outside, lo, hi);
+      warnings.push(event.warning);
+      scaleDiagnostics.push(event.diagnostic);
     }
   }
-  return { scale: training.scale, advisories, warnings };
+  return { scale: training.scale, advisories, warnings, scaleDiagnostics };
 }

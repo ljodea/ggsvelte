@@ -16,7 +16,14 @@ import type { PositionConversionContext } from "./temporal-position.js";
 import { trainPipelineColorScales } from "./train-pipeline-scales-color.js";
 import { trainPipelinePositionScales } from "./train-pipeline-scales-position.js";
 import { trainPipelineStyleScales } from "./train-pipeline-scales-style.js";
-import type { Advisory, LayerBinding, LayerFrame, PipelineWarning, RunOptions } from "./types.js";
+import type {
+  Advisory,
+  LayerBinding,
+  LayerFrame,
+  PipelineWarning,
+  RunOptions,
+  ScaleDiagnostic,
+} from "./types.js";
 
 export interface TrainedPipelineScales {
   xTraining: ReturnType<typeof trainAxis>;
@@ -29,6 +36,8 @@ export interface TrainedPipelineScales {
   yInputs: ReturnType<typeof collectAxisInputs>;
   scalesConfig: NonNullable<PortableSpec["scales"]>;
   allFrames: LayerFrame[];
+  /** Rich diagnostics from positional scale training (#628). */
+  scaleDiagnostics: ScaleDiagnostic[];
 }
 
 export interface TrainPipelineScalesInput {

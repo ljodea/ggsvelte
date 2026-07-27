@@ -18,12 +18,12 @@ import {
   dedupeRenderModelDiagnostics,
   freezeRenderModelDomains,
 } from "./assemble-render-model-domains.js";
+import { dedupeScaleDiagnostics } from "./diagnostics-emit.js";
 import {
   buildRenderModelAxisFormatters,
   buildRenderModelScales,
 } from "./assemble-render-model-scales.js";
 import { createRenderModelLifecycle } from "./assemble-render-model-lifecycle.js";
-import { scaleTrainingDiagnostics } from "./assemble-render-model-scale-training-diagnostics.js";
 import type { SourceRegistry } from "./source-registry.js";
 import type { PositionConversionContext } from "./temporal-position.js";
 import type {
@@ -222,11 +222,12 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
     scales,
     warnings: diagnostics.warnings,
     advisories: diagnostics.advisories,
-    scaleDiagnostics: [
+    // Training rich diagnostics are emitted with structured facts at train time
+    // (#628); assembly only dedupes and appends guide-plan materializations.
+    scaleDiagnostics: dedupeScaleDiagnostics([
       ...input.scaleDiagnostics,
-      ...scaleTrainingDiagnostics(diagnostics.warnings, diagnostics.advisories),
       ...guidePlanDiagnostics(input),
-    ],
+    ]),
     scaleDecisions: input.scaleDecisions.map((decision) => ({
       ...decision,
       domain: decision.aesthetic === "x" ? [...input.xScale.domain] : [...input.yScale.domain],

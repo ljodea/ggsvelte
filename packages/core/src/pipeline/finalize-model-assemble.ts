@@ -65,7 +65,8 @@ export function assembleFinalizeRenderModel(input: {
     warnings: input.warnings,
     advisories: input.advisories,
     scaleDecisions: prepared.scaleDecisions,
-    scaleDiagnostics: prepared.scaleDiagnostics,
+    // Prepare-time (transform/temporal) + train-time structured dual-channel (#628).
+    scaleDiagnostics: [...prepared.scaleDiagnostics, ...trained.scaleDiagnostics],
     guidePlans: Object.freeze([
       ...panelLayout.guidePlans,
       ...(colorResolution.guidePlan === null ? [] : [colorResolution.guidePlan]),

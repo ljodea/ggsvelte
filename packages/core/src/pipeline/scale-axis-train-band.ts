@@ -26,5 +26,5 @@ export function trainBandAxis(
       message: `The ${axis} band scale has no categories.`,
     });
   }
-  return { scale, advisories, warnings };
+  return { scale, advisories, warnings, scaleDiagnostics: [] };
 }

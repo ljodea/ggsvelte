@@ -3,13 +3,15 @@
  * (M3 error-catalog audit). Error *prose* for pipeline codes lives in
  * @ggsvelte/spec (`PIPELINE_ERROR_CATALOG`, #987); this package re-exports it
  * and owns warnings, advisories, CLI diagnostics, and every emission site.
- * diagnostics.test.ts scans the core sources to prove catalogs are complete
- * in both directions (every emitted code is cataloged; every cataloged code
- * is emitted somewhere).
+ * Catalog completeness is primary via typed emission registries
+ * (`diagnostics-emission-registry.ts`, #628). Dual-channel rich diagnostics
+ * project lean + rich from structured facts in `pipeline/diagnostics-emit.ts`
+ * — never by parsing human-readable messages.
  *
  * Large tables:
  * - diagnostics-error-catalog.ts — re-exports PIPELINE_ERROR_CATALOG from spec
  * - diagnostics-warning-catalog.ts — PIPELINE_WARNING_CATALOG
+ * - diagnostics-emission-registry.ts — checked catalog↔emission membership
  * This file keeps advisories, CLI diagnostics, and re-exports the public surface.
  *
  * Naming note: `palette-exhausted` appears as BOTH an error and a warning by
