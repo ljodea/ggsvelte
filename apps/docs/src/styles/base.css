@@ -165,14 +165,25 @@ pre {
   max-width: 44rem;
 }
 
+/*
+ * Shared host code surface (#696): one radius/type/padding for docs pre
+ * blocks. Call sites: .prose pre, PlaygroundEvents, PlaygroundPrompt,
+ * CodeTabs. Layout-only extras (max-height, margin, white-space) stay local.
+ */
+.code-surface,
 .prose pre {
   overflow-x: auto;
-  margin: 1.5rem 0;
   padding: 1rem;
-  border-radius: 3px;
+  border-radius: var(--radius);
   background: var(--code-paper);
   color: var(--code-ink);
-  line-height: 1.55;
+  font-family: var(--code-font);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.prose pre {
+  margin: 1.5rem 0;
 }
 
 /* highlight.js / svelte-highlight: keep our dark code surface, keep theme tokens */

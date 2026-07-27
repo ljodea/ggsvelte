@@ -65,7 +65,8 @@
               <span>#{entry.sequence} · {entry.source}</span>
             </header>
             <!-- svelte-ignore a11y_no_noninteractive_tabindex (event JSON is scrollable) -->
-            <pre tabindex="0"><code>{entry.json}</code></pre>
+            <pre class="code-surface" tabindex="0"><code>{entry.json}</code
+              ></pre>
           </li>
         {/each}
       </ol>
@@ -149,11 +150,6 @@
   pre {
     max-height: 16rem;
     margin: 0.45rem 0 0;
-    overflow: auto;
-    padding: 0.65rem;
-    background: var(--code-paper);
-    color: var(--code-ink);
-    font: 0.7rem/1.5 var(--code-font);
   }
 
   @media (max-width: 44.99rem) {

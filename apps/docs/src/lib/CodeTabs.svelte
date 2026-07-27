@@ -117,7 +117,7 @@
   >
     <!-- svelte-ignore a11y_no_noninteractive_tabindex (scrollable code must be keyboard reachable) -->
     <div
-      class="scroll-region"
+      class="scroll-region code-surface"
       role="region"
       aria-label="Code example"
       tabindex="0"
@@ -191,11 +191,14 @@
     background: color-mix(in srgb, var(--accent) 12%, transparent);
   }
 
+  /*
+   * code-surface puts padding on the box; here the box is the scrollport.
+   * Keep padding on the scrollable pre so inline-end gap survives horizontal
+   * scroll (Blink/WebKit drop scrollport padding at the end of overflow).
+   */
   .scroll-region {
     max-width: 100%;
-    overflow-x: auto;
-    background: var(--code-paper);
-    color: var(--code-ink);
+    padding: 0;
   }
 
   .scroll-region :global(pre.hljs),
@@ -205,15 +208,13 @@
     padding: 1rem;
     background: transparent !important;
     color: inherit;
-    font-family: var(--code-font);
-    font-size: 0.8rem;
-    line-height: 1.5;
+    font: inherit;
   }
 
   .scroll-region :global(code.hljs),
   .scroll-region :global(code) {
     background: transparent !important;
-    font-family: inherit;
+    font: inherit;
   }
 
   @media (max-width: 35rem) {

@@ -120,7 +120,9 @@
       {#if failure.details !== undefined && failure.details.length > 0}
         <details bind:open={detailsOpen} class="details">
           <summary>Details</summary>
-          <pre class="details-pre">{formatDetails(failure.details)}</pre>
+          <pre class="details-pre code-surface">{formatDetails(
+              failure.details,
+            )}</pre>
         </details>
       {/if}
       <p class="next-action">
@@ -265,13 +267,7 @@
 
   .details-pre {
     max-height: 12rem;
-    overflow: auto;
     margin: 0.35rem 0 0;
-    padding: 0.65rem;
-    background: var(--code-paper);
-    color: var(--code-ink);
-    font: 0.75rem/1.45 var(--code-font);
-    border-radius: 4px;
     white-space: pre-wrap;
   }
 
