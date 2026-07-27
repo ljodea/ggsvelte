@@ -41,7 +41,7 @@ describe("shared .code-surface in base.css (#696)", () => {
     for (const prop of SURFACE_PROPS) {
       expect(base).toMatch(
         new RegExp(
-          `\\.code-surface[^{]*\\{[^}]*${prop.replace(/[()]/g, "\\$&").replace(/: /, "\\s*:\\s*")}`,
+          `\\.code-surface[^{]*\\{[^}]*${prop.replaceAll(/[()]/g, "\\$&").replaceAll(": ", "\\s*:\\s*")}`,
           "s",
         ),
       );
