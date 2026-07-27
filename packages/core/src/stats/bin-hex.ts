@@ -16,7 +16,7 @@
  */
 import type { CellValue } from "../table.js";
 
-export interface BinHexParamsInput {
+interface BinHexParamsInput {
   bins?: number | undefined;
   drop?: boolean | undefined;
 }

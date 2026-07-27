@@ -296,6 +296,7 @@ export const STYLE_AESTHETIC_GEOMS = {
   linewidth: [
     "line",
     "path",
+    "step",
     "freqpoly",
     "rule",
     "hline",
@@ -325,6 +326,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "jitter",
     "line",
     "path",
+    "step",
     "freqpoly",
     "col",
     "bar",
@@ -363,6 +365,7 @@ export const STYLE_AESTHETIC_GEOMS = {
   linetype: [
     "line",
     "path",
+    "step",
     "freqpoly",
     "rule",
     "hline",

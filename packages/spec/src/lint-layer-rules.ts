@@ -53,16 +53,16 @@ export function collectLayerLintAdvisories(input: {
         : (defaults?.position ?? "identity");
 
     // --- line-over-nominal-x ------------------------------------------------
-    if (geom === "line") {
+    if (geom === "line" || geom === "step") {
       const x = fieldOf(layerAes, "x");
       if (x !== null && x.info.type === "nominal") {
         advisories.push({
           code: "line-over-nominal-x",
           path: `/layers/${i}/aes/x`,
-          message: `This line layer connects points across "${x.field}", a nominal (unordered) field — the line's slopes carry no meaning.`,
+          message: `This ${geom} layer connects points across "${x.field}", a nominal (unordered) field — the line's slopes carry no meaning.`,
           suggestion: {
             description:
-              'Use geom "col" (or "bar" with the count stat) for per-category values; keep "line" only for ordered x (numbers, dates, or a genuinely ordinal field).',
+              'Use geom "col" (or "bar" with the count stat) for per-category values; keep "line"/"step" only for ordered x (numbers, dates, or a genuinely ordinal field).',
             example: { geom: "col" },
           },
         });

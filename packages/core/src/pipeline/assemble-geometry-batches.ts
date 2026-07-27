@@ -53,6 +53,7 @@ export function buildGeometryBatches(input: {
       const pathLike =
         geom === "line" ||
         geom === "path" ||
+        geom === "step" ||
         geom === "contour" ||
         geom === "density_2d" ||
         geom === "density_2d_filled" ||

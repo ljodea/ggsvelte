@@ -116,6 +116,7 @@ export { default as GeomBlank } from "./geoms/GeomBlank.svelte";
 
 export { default as GeomSpoke } from "./geoms/GeomSpoke.svelte";
 export { default as GeomRug } from "./geoms/GeomRug.svelte";
+export { default as GeomStep } from "./geoms/GeomStep.svelte";
 export { registerLayer, registerPlotLayer } from "./geoms/registry.svelte.js";
 export type {
   Layer,

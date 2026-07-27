@@ -55,6 +55,7 @@ import type {
   GeomSfLabelOptions,
   GeomBlankOptions,
   GeomSpokeOptions,
+  GeomStepOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -388,6 +389,14 @@ export class GGBuilderCore {
    */
   geomRug(options: GeomRugOptions = {}): GGBuilder {
     return this.layer(layerFrom("rug", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'step', ... }). Step lines with direction
+   * "hv" (default), "vh", or "mid" (ggplot2 geom_step). Same channels as line.
+   */
+  geomStep(options: GeomStepOptions = {}): GGBuilder {
+    return this.layer(layerFrom("step", options));
   }
 
   /**
