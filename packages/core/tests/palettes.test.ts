@@ -84,9 +84,7 @@ describe("named categorical palettes through the pipeline", () => {
   it("rejects incompatible schemes at the render boundary", () => {
     for (const color of [
       { type: "sequential" as const, scheme: "ipsum" as const },
-      // Ordinal+viridis is valid (#828 discrete sampling); manual still rejects
-      // sequential-family scheme names.
-      { type: "manual" as const, scheme: "viridis" as const },
+      { type: "binned" as const, scheme: "ipsum" as const },
     ]) {
       try {
         runPipeline(
