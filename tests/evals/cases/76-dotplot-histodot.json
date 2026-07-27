@@ -1,0 +1,39 @@
+{
+  "id": "76-dotplot-histodot",
+  "kind": "chart",
+  "prompt": "Make a histodot dotplot of measurement values with binwidth 0.5.",
+  "dataProfile": {
+    "fields": [{ "name": "measurement", "type": "quantitative" }],
+    "rowCount": 8
+  },
+  "data": {
+    "main": [
+      { "measurement": 1.1 },
+      { "measurement": 1.2 },
+      { "measurement": 2.0 },
+      { "measurement": 2.1 },
+      { "measurement": 3.0 },
+      { "measurement": 3.1 },
+      { "measurement": 3.05 },
+      { "measurement": 4.0 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "dotplot",
+        "stat": "bindot",
+        "position": "identity",
+        "params": { "binwidth": 0.5 },
+        "aes": {
+          "x": { "field": "measurement" },
+          "y": { "stat": "stackpos" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_dotplot defaults to histodot bindot stacks (#803)."
+}

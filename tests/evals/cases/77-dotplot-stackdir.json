@@ -1,0 +1,37 @@
+{
+  "id": "77-dotplot-stackdir",
+  "kind": "chart",
+  "prompt": "Draw a center-stacked histodot of value with binwidth 1.",
+  "dataProfile": {
+    "fields": [{ "name": "value", "type": "quantitative" }],
+    "rowCount": 6
+  },
+  "data": {
+    "main": [
+      { "value": 1.2 },
+      { "value": 1.4 },
+      { "value": 2.1 },
+      { "value": 2.3 },
+      { "value": 2.0 },
+      { "value": 3.5 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "dotplot",
+        "stat": "bindot",
+        "position": "identity",
+        "params": { "binwidth": 1, "stackdir": "center" },
+        "aes": {
+          "x": { "field": "value" },
+          "y": { "stat": "stackpos" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_dotplot with stackdir center (#803)."
+}

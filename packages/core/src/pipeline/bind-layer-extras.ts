@@ -22,6 +22,8 @@ export function resolveLabelWeightColorFill(input: {
   labelField: string | null;
   labelConstant: string | null;
   weightField: string | null;
+  zField: string | null;
+  mapIdField: string | null;
   color: ColorBinding;
   fill: ColorBinding;
   size: StyleBinding;
@@ -39,24 +41,47 @@ export function resolveLabelWeightColorFill(input: {
     if ("field" in label) labelField = checkField(label, "label", index, table, warnings);
     else if ("value" in label) labelConstant = String(label.value);
   }
-  if (geom === "text" && labelField === null && labelConstant === null) {
+  if (
+    (geom === "text" || geom === "sf_text" || geom === "sf_label") &&
+    labelField === null &&
+    labelConstant === null
+  ) {
     throw new PipelineError(
       "missing-channel",
       `/layers/${index}/aes/label`,
-      'The text geom requires a "label" channel (map it with aes).',
+      `The ${geom} geom requires a "label" channel (map it with aes).`,
     );
   }
   const weightField = checkField(aes.weight, "weight", index, table, warnings);
+  const zField = checkField(aes.z, "z", index, table, warnings);
+  if (geom === "contour" && zField === null) {
+    throw new PipelineError(
+      "missing-channel",
+      `/layers/${index}/aes/z`,
+      'The contour geom requires a continuous "z" channel (map it with aes).',
+    );
+  }
+  const mapIdField = checkField(aes.map_id, "map_id", index, table, warnings);
+  if (geom === "map" && mapIdField === null) {
+    throw new PipelineError(
+      "missing-channel",
+      `/layers/${index}/aes/map_id`,
+      'The map geom requires a "map_id" channel (map it with aes).',
+    );
+  }
 
-  const color = colorBinding(aes.color, "color", index, table, warnings);
-  const fill = colorBinding(aes.fill, "fill", index, table, warnings);
+  const color = colorBinding(aes.color, "color", stat, index, table, warnings);
+  const fill = colorBinding(aes.fill, "fill", stat, index, table, warnings);
   applyColorOnFillGeomWarning(geom, index, color, warnings);
   const size = styleBinding(aes.size, "size", geom, stat, index, table, warnings);
   const linewidth = styleBinding(aes.linewidth, "linewidth", geom, stat, index, table, warnings);
   const alpha = styleBinding(aes.alpha, "alpha", geom, stat, index, table, warnings);
   const shape = styleBinding(aes.shape, "shape", geom, stat, index, table, warnings);
   const linetype = styleBinding(aes.linetype, "linetype", geom, stat, index, table, warnings);
-  if (weightField !== null && (stat === "boxplot" || stat === "smooth" || stat === "summary")) {
+  if (
+    weightField !== null &&
+    (stat === "boxplot" || stat === "smooth" || stat === "summary" || stat === "summary_bin")
+  ) {
     warnings.push({
       code: "weight-unsupported",
       message: `Layer ${index}: the ${stat} stat does not support aes.weight; the weight mapping is ignored.`,
@@ -67,6 +92,8 @@ export function resolveLabelWeightColorFill(input: {
     labelField,
     labelConstant,
     weightField,
+    zField,
+    mapIdField,
     color,
     fill,
     size,

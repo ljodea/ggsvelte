@@ -2,7 +2,9 @@
  * Two-pass panel layout: facet grids and single-panel plots, including
  * axis-title/legend chrome and free-scale edge axes.
  */
-import type { CoordFixedSpec, PortableSpec, TemporalKind } from "@ggsvelte/spec";
+import type { PortableSpec, TemporalKind } from "@ggsvelte/spec";
+
+import type { FixedAspectCoordSpec } from "./panel-layout-fixed.js";
 
 import {
   assertLegendBlockFitsPlacedArea,
@@ -33,7 +35,7 @@ export function computePanelLayout(input: {
   faceted: boolean;
   freeX: boolean;
   freeY: boolean;
-  coordFixed?: CoordFixedSpec | undefined;
+  coordFixed?: FixedAspectCoordSpec | undefined;
   nrow: number;
   ncol: number;
   facetPanels: readonly FacetPanelDef[];

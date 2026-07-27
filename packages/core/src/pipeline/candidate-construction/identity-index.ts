@@ -107,7 +107,7 @@ export function buildCandidateIdentityIndex(
           appendSourceRowByGroupKey(sourceRowsByGroupY, key, sourceRow);
         }
       }
-      if (stat === "bin") {
+      if (stat === "bin" || stat === "summary_bin") {
         buildBinLineageBuckets({
           frame,
           panelIndex,

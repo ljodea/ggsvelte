@@ -61,7 +61,8 @@ export function shouldConfirmDiscardForUndo(state: PlaygroundState): boolean {
 }
 
 /**
- * Confirm-gate only; empty id / missing sample lookup stay in the component.
+ * Confirm-gate only; empty id / missing sample lookup live in
+ * `planSampleLoad` (`playground-workbench-actions.ts`).
  * Guards an unshared agent-generated (custom) chart or an in-flight candidate.
  */
 export function shouldConfirmDiscardForSampleLoad(state: PlaygroundState): boolean {

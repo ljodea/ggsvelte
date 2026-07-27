@@ -109,13 +109,13 @@ function renderPoints(batch: PointsBatch, theme: ThemeTokens): string {
   return parts.join("");
 }
 
-/** Path data for one subpath ('step' bends at the midpoint between x values). */
-export function pathData(
+/** Path data for one closed/open ring span ('step' bends at midpoints). */
+function pathRingData(
   positions: Float32Array,
   start: number,
   end: number,
   curve: PathsBatch["curve"],
-  closed = false,
+  closed: boolean,
 ): string {
   if (end <= start) return "";
   const parts: string[] = [`M${px(positions[start * 2]!)} ${px(positions[start * 2 + 1]!)}`];
@@ -134,6 +134,36 @@ export function pathData(
   return parts.join("");
 }
 
+/**
+ * Path data for one subpath. When `ringStarts` lists interior ring starts inside
+ * [start, end), emits multiple M…Z rings for even-odd polygon holes.
+ */
+export function pathData(
+  positions: Float32Array,
+  start: number,
+  end: number,
+  curve: PathsBatch["curve"],
+  closed = false,
+  ringStarts?: ArrayLike<number>,
+): string {
+  if (end <= start) return "";
+  if (ringStarts === undefined || ringStarts.length === 0 || !closed) {
+    return pathRingData(positions, start, end, curve, closed);
+  }
+  const cuts: number[] = [start];
+  for (let i = 0; i < ringStarts.length; i++) {
+    const b = ringStarts[i]!;
+    if (b > start && b < end) cuts.push(b);
+  }
+  cuts.push(end);
+  const parts: string[] = [];
+  for (let i = 0; i + 1 < cuts.length; i++) {
+    const d = pathRingData(positions, cuts[i]!, cuts[i + 1]!, curve, true);
+    if (d !== "") parts.push(d);
+  }
+  return parts.join("");
+}
+
 function dashAttrFromDash(dash: readonly number[]): string {
   return dash.length === 0 ? "" : ` stroke-dasharray="${dash.join(" ")}"`;
 }
@@ -149,6 +179,12 @@ function renderPaths(
   ];
   const themeColors = { ink: themeVar("ink", theme), accent: themeVar("accent", theme) };
   const subpaths = batch.pathOffsets.length - 1;
+  const fillRuleAttr =
+    batch.fillRule === "evenodd"
+      ? ' fill-rule="evenodd"'
+      : batch.fillRule === "nonzero"
+        ? ' fill-rule="nonzero"'
+        : "";
   for (let s = 0; s < subpaths; s++) {
     const d = pathData(
       batch.positions,
@@ -156,6 +192,7 @@ function renderPaths(
       batch.pathOffsets[s + 1]!,
       batch.curve,
       batch.closed === true,
+      batch.ringStarts,
     );
     if (d === "") continue;
     const style = resolvePathMark(batch, s, themeColors);
@@ -168,12 +205,12 @@ function renderPaths(
       );
       if (style.stroke === "none") {
         parts.push(
-          `<path d="${d}" fill="${fill}" stroke="none"${alpha === undefined ? "" : alphaAttr(alpha)}/>`,
+          `<path d="${d}" fill="${fill}" stroke="none"${fillRuleAttr}${alpha === undefined ? "" : alphaAttr(alpha)}/>`,
         );
       } else {
         const stroke = paintStroke(style.stroke, batch.strokePaint, mode);
         parts.push(
-          `<path d="${d}" fill="${fill}" stroke="${stroke}" stroke-width="${px(style.width)}"${dashAttrFromDash(style.dash)}${alpha === undefined ? "" : alphaAttr(alpha)} stroke-linejoin="${style.linejoin}" stroke-linecap="${style.linecap}"/>`,
+          `<path d="${d}" fill="${fill}" stroke="${stroke}" stroke-width="${px(style.width)}"${dashAttrFromDash(style.dash)}${fillRuleAttr}${alpha === undefined ? "" : alphaAttr(alpha)} stroke-linejoin="${style.linejoin}" stroke-linecap="${style.linecap}"/>`,
         );
       }
     } else {
@@ -249,18 +286,50 @@ function renderSegments(batch: SegmentsBatch, theme: ThemeTokens): string {
   return parts.join("");
 }
 
+/** Panel-local box origin for a glyph anchor + box size (geom_label / sf_label). */
+export function labelBoxOrigin(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  anchor: "start" | "middle" | "end",
+  padding: number,
+): { x: number; y: number } {
+  let left = x - width / 2;
+  if (anchor === "start") left = x - padding;
+  else if (anchor === "end") left = x - width + padding;
+  return { x: left, y: y - height / 2 };
+}
+
 function renderGlyphs(batch: GlyphsBatch, theme: ThemeTokens): string {
   const parts: string[] = [
     `<g class="gg-batch gg-glyphs" data-layer="${batch.layerIndex}" font-size="${px(batch.size)}" text-anchor="${batch.anchor}"${alphaAttr(batch.alpha)}>`,
   ];
   const n = batch.texts.length;
   const themeInk = themeVar("ink", theme);
+  const themePaper = themeVar("paper", theme);
+  const hasBox = batch.boxWidths !== undefined && batch.boxHeights !== undefined;
   for (let j = 0; j < n; j++) {
     const fill = batch.colors?.[j] ?? batch.color ?? themeInk;
     const size = batch.sizes?.[j];
     const alpha = batch.alphas?.[j];
+    const tx = batch.positions[j * 2]!;
+    const ty = batch.positions[j * 2 + 1]!;
+    if (hasBox) {
+      const bw = batch.boxWidths![j]!;
+      const bh = batch.boxHeights![j]!;
+      const pad = batch.boxPadding ?? 0;
+      const origin = labelBoxOrigin(tx, ty, bw, bh, batch.anchor, pad);
+      const boxFill = batch.boxFills?.[j] ?? batch.boxFill ?? themePaper;
+      const boxStroke = batch.boxStrokes?.[j] ?? batch.boxStroke ?? themeInk;
+      const sw = batch.boxStrokeWidth ?? 0.5;
+      const rx = batch.boxRadius ?? 0;
+      parts.push(
+        `<rect x="${px(origin.x)}" y="${px(origin.y)}" width="${px(bw)}" height="${px(bh)}" rx="${px(rx)}" ry="${px(rx)}" fill="${boxFill}" stroke="${boxStroke}" stroke-width="${px(sw)}"${alpha === undefined ? "" : alphaAttr(alpha)}/>`,
+      );
+    }
     parts.push(
-      `<text x="${px(batch.positions[j * 2]!)}" y="${px(batch.positions[j * 2 + 1]!)}" dy="0.32em" fill="${fill}"${size === undefined ? "" : ` font-size="${px(size)}"`}${alpha === undefined ? "" : alphaAttr(alpha)}>${escapeXML(batch.texts[j]!)}</text>`,
+      `<text x="${px(tx)}" y="${px(ty)}" dy="0.32em" fill="${fill}"${size === undefined ? "" : ` font-size="${px(size)}"`}${alpha === undefined ? "" : alphaAttr(alpha)}>${escapeXML(batch.texts[j]!)}</text>`,
     );
   }
   parts.push("</g>");

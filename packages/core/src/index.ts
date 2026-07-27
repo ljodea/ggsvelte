@@ -102,6 +102,17 @@ export type {
   PositionScale,
 } from "./scales/train.js";
 export { rampColor, trainSequential, VIRIDIS_RAMP_10 } from "./scales/color.js";
+export {
+  CIVIDIS_RAMP_10,
+  INFERNO_RAMP_10,
+  MAGMA_RAMP_10,
+  PLASMA_RAMP_10,
+  SEQUENTIAL_SCHEME_RAMPS,
+  TURBO_RAMP_10,
+  isSequentialSchemeName,
+  sequentialSchemeRamp,
+} from "./scales/sequential-schemes.js";
+export { sampleSequentialPalette } from "./scales/train-color.js";
 export type { SequentialColorScale, SequentialConfig } from "./scales/color.js";
 
 // Pre-stat position scale transform registry (PR 3)

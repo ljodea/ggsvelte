@@ -43,11 +43,17 @@ export const STAT_COLUMNS: Record<string, readonly string[]> = {
   count: ["count"],
   bin: ["count", "density", "ncount", "ndensity"],
   density: ["density", "count", "scaled", "ndensity"],
+  bindot: ["stackpos"],
   smooth: ["y", "ymin", "ymax", "se"],
   boxplot: ["ymin", "lower", "middle", "upper", "ymax"],
   summary: ["y", "ymin", "ymax"],
   /** after_stat n / prop for geom_count; not published on y (y is position input). */
   sum: ["n", "prop"],
+  summary_bin: ["y", "ymin", "ymax"],
+  contour: ["level"],
+  quantile: ["y"],
+  density_2d: ["level", "density"],
+  density_2d_filled: ["level", "density"],
 };
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -177,7 +183,13 @@ export function dataChecks(
         );
       }
     }
-    if (geom === "histogram" || geom === "density" || (geom === "bar" && stat === "bin")) {
+    if (
+      geom === "histogram" ||
+      geom === "freqpoly" ||
+      geom === "density" ||
+      (geom === "bar" && stat === "bin") ||
+      (geom === "line" && stat === "bin")
+    ) {
       const x = fieldTypeOf("x");
       if (x !== null && (x[1] === "nominal" || x[1] === "ordinal")) {
         typeError(
