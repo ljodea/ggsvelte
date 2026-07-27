@@ -193,7 +193,7 @@
     },
     "interaction/tooltip": {
       "filename": "interaction-tooltip-light.png",
-      "sourceSha256": "5861e092e890a84b4169e79d50e5c74108b642070fcf325449b3e3da6ab07142",
+      "sourceSha256": "d1d0166c68b1f7687b1dc89cd9c6d4c85f660503779a5db19ef634920b5dab3f",
       "pngSha256": "be96a7eebfea75f5a8f6beaee4e8322b5c51ee8726656fe840f2040f67784348"
     },
     "jitter/basic": {

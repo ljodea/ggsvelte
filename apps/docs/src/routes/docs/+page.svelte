@@ -38,10 +38,13 @@
       .replaceAll(/^-+|-+$/g, "")}`;
   }
 
-  // Overview is this page; omit it from the chapter list.
+  // Overview is this page; Getting started is already in Start here.
   const chapters = GUIDE_NAVIGATION.map((group) => ({
     section: group.section,
-    entries: group.entries.filter((entry) => entry.path !== "/docs"),
+    entries: group.entries.filter(
+      (entry) =>
+        entry.path !== "/docs" && entry.path !== "/guide/getting-started",
+    ),
   })).filter((group) => group.entries.length > 0);
 </script>
 

@@ -53,7 +53,7 @@ describe("meta validation", () => {
       touch: "Tap a mark to pin it.",
       references: [
         { label: "Interactions guide", href: "/guide/interactions" },
-        { label: "Migration guide", href: "/guide/migrating-pre-0-1" },
+        { label: "Upgrade guide", href: "/guide/upgrading" },
       ],
       svelteFirst: true,
       fullWidth: true,

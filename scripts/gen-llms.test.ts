@@ -29,7 +29,6 @@ import {
   INTERACTIONS_MD,
   INTERACTION_REFERENCE_MD,
   INTERACTION_REFERENCE_INDEX,
-  MIGRATING_PRE_0_1_MD,
   TEMPORAL_SCALES_MD,
   UPGRADING_MD,
   guidePages,
@@ -302,15 +301,6 @@ describe("guide sections cover their catalogs", () => {
     }
   });
 
-  it("provides a pre-0.1 source migration for every superseded interaction prop", () => {
-    expect(MIGRATING_PRE_0_1_MD).toContain("`tooltip` → `inspect`");
-    expect(MIGRATING_PRE_0_1_MD).toContain('`brush` → `select={{ type: "interval" }}`');
-    expect(MIGRATING_PRE_0_1_MD).toContain("`onhover` → `oninspect`");
-    expect(MIGRATING_PRE_0_1_MD).toContain("`onbrush` → `onselect`");
-    expect(MIGRATING_PRE_0_1_MD).toContain("`TooltipContext` → `PlotInspectionChange`");
-    expect(MIGRATING_PRE_0_1_MD).toContain("`BrushSelection` → `IntervalSelection`");
-  });
-
   it("provides a rolling upgrading guide with a stable per-transition anchor", () => {
     // One section per release transition; changesets link these anchors, so
     // heading ids must come from the same renderer the docs site uses.
@@ -343,12 +333,13 @@ describe("guide sections cover their catalogs", () => {
     // Controller adoption is optional — both APIs remain supported.
     expect(UPGRADING_MD).toContain("createPlotInteraction");
     expect(UPGRADING_MD).toContain("optional");
-    // Deprecated aliases predate 0.2 and point at their own migration page.
+    // Deprecated aliases predate 0.2; guidance stays on this page.
     expect(UPGRADING_MD).toContain("`BrushSelection` → `IntervalSelection`");
     expect(UPGRADING_MD).toContain("`TooltipContext` → `PlotInspectionChange`");
     expect(UPGRADING_MD).toContain("`ZoomDomains` → `ReadonlyZoomDomains`");
     expect(UPGRADING_MD).toContain("deprecated since 0.1.0");
-    expect(UPGRADING_MD).toContain("/guide/migrating-pre-0-1");
+    expect(UPGRADING_MD).toContain("# Upgrade guide");
+    expect(UPGRADING_MD).not.toContain("migrating-pre-0-1");
   });
 });
 
@@ -420,7 +411,7 @@ describe("llms surfaces", () => {
     }
     expect(pages.map((page) => page.slug)).toContain("interactions");
     expect(pages.map((page) => page.slug)).toContain("interaction-reference");
-    expect(pages.map((page) => page.slug)).toContain("migrating-pre-0-1");
+    expect(pages.map((page) => page.slug)).not.toContain("migrating-pre-0-1");
     expect(pages.map((page) => page.slug)).toContain("upgrading");
     expect(pages.map((page) => page.slug)).toContain("compatibility");
   });
@@ -501,7 +492,6 @@ describe("public export surface (split-safe)", () => {
       "INTERACTION_REFERENCE_MD",
       "LAYERS_MARKS_MD",
       "LINKED_VIEWS_MD",
-      "MIGRATING_PRE_0_1_MD",
       "RENDERING_PERFORMANCE_MD",
       "RESPONSIVE_CHARTS_MD",
       "SCALES_GUIDES_MD",

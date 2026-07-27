@@ -2038,87 +2038,12 @@ export const INTERACTION_REFERENCE_INDEX: readonly InteractionReferenceEntry[] =
   },
 ];
 
-export const MIGRATING_PRE_0_1_MD = `# Migrating pre-0.1 interactions
-
-Pre-0.1 props named presentation; current props name intent. Update props,
-callback payloads, and custom tooltip snippets together — no runtime shim.
-
-## Rename the props and callbacks
-
-- \`tooltip\` → \`inspect\`
-- \`brush\` → \`select={{ type: "interval" }}\`
-- \`onhover\` → \`oninspect\`
-- \`onbrush\` → \`onselect\`
-- \`onzoom={(domains) => ...}\` → \`onzoom={(event) => ...}\`
-
-Before:
-
-\`\`\`svelte fragment
-<GGPlot
-  tooltip={true}
-  brush={true}
-  zoom={true}
-  onhover={(hit) => (hovered = hit)}
-  onbrush={(selection) => (brushed = selection)}
-  onzoom={(domains) => (zoomed = domains)}
-/>
-\`\`\`
-
-After:
-
-\`\`\`svelte fragment
-<GGPlot
-  key="id"
-  inspect={true}
-  select={{ type: "interval" }}
-  zoom={true}
-  oninspect={(event) => (inspection = event)}
-  onselect={(event) => (selection = event)}
-  onzoom={(event) => (zoomed = event.domains)}
-/>
-\`\`\`
-
-## Migrate payload handling
-
-\`oninspect\` is a lifecycle. Narrow on \`event.phase === "change"\` before
-reading \`focus\`, \`members\`, or \`mode\`; a clear event deliberately carries
-only its type, phase, and source. Use \`event.focus.row\` instead of resolving a
-renderer hit index yourself.
-
-\`onselect\` also has phases. Interval callbacks receive domain and pixel
-bounds on \`event.domain\` and \`event.pixels\`, and return stable semantic
-\`event.keys\` instead of source-row indices and renderer hits. Point selection
-uses the same callback with \`event.mode === "point"\`.
-
-\`onzoom\` now reports an event. Read \`event.domains\` after an \`end\` phase;
-the \`clear\` phase carries \`domains: null\`.
-
-## Migrate custom tooltip snippets
-
-The snippet argument changed from one renderer hit to a semantic inspection:
-
-- \`TooltipContext\` → \`PlotInspectionChange\`
-- \`context.row\` → \`inspection.focus.row\`
-- \`context.fields\` → \`inspection.focus.fields\`
-- \`BrushSelection\` → \`IntervalSelection\`
-- \`ZoomDomains\` → \`ReadonlyZoomDomains\`
-
-The old type names remain deprecated aliases where a safe alias is possible,
-but the old component props and old callback shapes are removed. Pre-0.1 means
-there is no runtime compatibility shim: TypeScript errors should point directly
-at every source change you need to make.
-
-See [Interactions](/guide/interactions) for current options, event shapes,
-keyboard behavior, and identity requirements.
-`;
-
-export const UPGRADING_MD = `# Upgrade in five minutes
+export const UPGRADING_MD = `# Upgrade guide
 
 One section per released 0.x transition, newest first. Each heading is a
 stable anchor that changesets and release notes link to. Pre-1.0, breaking
 changes ride minor releases; every deprecation or removal ships with a
-migration note here. The pre-release API has its own page:
-[Migrating pre-0.1 interactions](/guide/migrating-pre-0-1).
+migration note here.
 
 ## Five-minute path
 
@@ -2949,6 +2874,6 @@ still compile. Replace them when convenient:
 - \`TooltipContext\` → \`PlotInspectionChange\`
 - \`ZoomDomains\` → \`ReadonlyZoomDomains\`
 
-The payload changes behind these renames are documented in
-[Migrating pre-0.1 interactions](/guide/migrating-pre-0-1#migrate-custom-tooltip-snippets).
+See [Interactions](/guide/interactions) for current options, event shapes,
+and identity requirements.
 `;

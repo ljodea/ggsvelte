@@ -187,17 +187,10 @@ export const GUIDE_CATALOG = [
   },
   {
     slug: "upgrading",
-    title: "Upgrade in five minutes",
+    title: "Upgrade guide",
     description: "Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     section: "Release",
     navigationOrder: 60,
-  },
-  {
-    slug: "migrating-pre-0-1",
-    title: "Migrating pre-0.1 interactions",
-    description: "Move from tooltip and brush props to semantic interaction capabilities.",
-    section: "Release",
-    navigationOrder: 61,
   },
 ] as const satisfies readonly GuideCatalogEntry[];
 
