@@ -152,7 +152,7 @@ export const PIPELINE_ERROR_CATALOG = {
   },
   "coord-fixed-free-scales": {
     summary: "Fixed-aspect coordinates were combined with free positional facet scales.",
-    fix: 'Use facet.scales = "fixed", or remove coord_fixed.',
+    fix: 'Use facet.scales = "fixed", or remove coord_fixed / coord_sf.',
   },
   "coord-fixed-invalid-aspect": {
     summary:

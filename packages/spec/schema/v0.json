@@ -2026,7 +2026,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Parameters for geom_sf (#809): portable GeoJSON Geometry column plus styling. GeometryCollection expands to leaf families; interior rings are even-odd holes. No CRS/coord_sf yet."
+      "description": "Parameters for geom_sf (#809): portable GeoJSON Geometry column plus styling. Interior rings are even-odd holes; GeometryCollection expands. Use coord_sf for fixed-aspect maps (CRS reproject deferred)."
     },
     "TextParams": {
       "type": "object",
@@ -3376,7 +3376,7 @@
         "geom": {
           "type": "string",
           "const": "sf",
-          "description": "Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families and GeometryCollection of those, with even-odd holes; no CRS or coord_sf yet."
+          "description": "Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred)."
         },
         "stat": {
           "type": "string",
@@ -7294,6 +7294,26 @@
       "additionalProperties": false,
       "description": "A fixed-aspect Cartesian coordinate system. Layout fits the largest centered data rectangle after chart chrome is allocated."
     },
+    "CoordSfSpec": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "sf",
+          "description": "Simple-features coordinates for already-projected map data (ggplot2 coord_sf; #809). Fixed-aspect layout; no CRS transform in v1."
+        },
+        "ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Physical y-unit length divided by physical x-unit length (default 1, equal projected units)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Fixed-aspect coordinates for portable geom_sf maps. Data must already be projected; CRS reproject / graticules are deferred."
+    },
     "CoordSpec": {
       "anyOf": [
         {
@@ -7304,9 +7324,12 @@
         },
         {
           "$ref": "#/$defs/CoordFixedSpec"
+        },
+        {
+          "$ref": "#/$defs/CoordSfSpec"
         }
       ],
-      "description": "The plot coordinate system: ordinary Cartesian, flipped Cartesian, post-stat transformed, or fixed-aspect."
+      "description": "The plot coordinate system: ordinary Cartesian, flipped Cartesian, post-stat transformed, fixed-aspect, or simple-features fixed-aspect."
     },
     "PlotSpec": {
       "type": "object",

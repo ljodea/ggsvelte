@@ -2168,7 +2168,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Parameters for geom_sf (#809): portable GeoJSON Geometry column plus styling. GeometryCollection expands to leaf families; interior rings are even-odd holes. No CRS/coord_sf yet.",
+        "Parameters for geom_sf (#809): portable GeoJSON Geometry column plus styling. Interior rings are even-odd holes; GeometryCollection expands. Use coord_sf for fixed-aspect maps (CRS reproject deferred).",
     },
   ),
 
@@ -3240,7 +3240,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("sf", {
         description:
-          "Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families and GeometryCollection of those, with even-odd holes; no CRS or coord_sf yet.",
+          "Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
       }),
       stat: Type.Optional(
         Type.Literal("sf", {
@@ -4534,11 +4534,37 @@ export const SpecDeclarations = {
     },
   ),
 
+  CoordSfSpec: Type.Object(
+    {
+      type: Type.Literal("sf", {
+        description:
+          "Simple-features coordinates for already-projected map data (ggplot2 coord_sf; #809). Fixed-aspect layout; no CRS transform in v1.",
+      }),
+      ratio: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Physical y-unit length divided by physical x-unit length (default 1, equal projected units).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Fixed-aspect coordinates for portable geom_sf maps. Data must already be projected; CRS reproject / graticules are deferred.",
+    },
+  ),
+
   CoordSpec: Type.Union(
-    [Type.Ref("CoordCartesianSpec"), Type.Ref("CoordTransformSpec"), Type.Ref("CoordFixedSpec")],
+    [
+      Type.Ref("CoordCartesianSpec"),
+      Type.Ref("CoordTransformSpec"),
+      Type.Ref("CoordFixedSpec"),
+      Type.Ref("CoordSfSpec"),
+    ],
     {
       description:
-        "The plot coordinate system: ordinary Cartesian, flipped Cartesian, post-stat transformed, or fixed-aspect.",
+        "The plot coordinate system: ordinary Cartesian, flipped Cartesian, post-stat transformed, fixed-aspect, or simple-features fixed-aspect.",
     },
   ),
 

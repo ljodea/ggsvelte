@@ -129,7 +129,7 @@ export const ERROR_CATALOG = {
   "coord-fixed-free-scales": {
     tier: 1,
     summary: "Fixed-aspect coordinates cannot represent free positional facet scales truthfully.",
-    fix: 'Use facet.scales = "fixed", or remove coord_fixed.',
+    fix: 'Use facet.scales = "fixed", or remove coord_fixed / coord_sf.',
   },
   // --- tier 1 structural (grammar rules the schema alone cannot express) ---
   "missing-required-channel": {
