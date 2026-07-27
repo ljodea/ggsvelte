@@ -379,13 +379,26 @@ console.log("prerendered Quickstart verified");
     `import { strict as assert } from "node:assert";
 import { coord_equal, coord_fixed, coord_transform, coordEqual, coordFixed, coordTransform, guideColorsteps, guideLegend, guide_legend, SpecModule, normalize, scaleColorBinned, scaleColourBinned, scaleShapeDiscrete, scaleSizeContinuous, scaleXBinned, scaleXLog10, scale_colour_binned, scale_shape_discrete, scale_x_log10, validate } from "@ggsvelte/spec";
 import { renderToSVGString, runPipeline } from "@ggsvelte/core";
-import { KYOTO_SAKURA_CITATION, kyotoSakura } from "@ggsvelte/svelte/data";
+import {
+  KYOTO_SAKURA_CITATION,
+  MPG_CITATION,
+  PALMER_PENGUINS_CITATION,
+  kyotoSakura,
+  mpg,
+  palmerPenguins,
+} from "@ggsvelte/svelte/data";
 
-// The bundled dataset resolves from the packed tarball's subpath export, which
-// is what makes the copy-pasted quickstart file build in a bare app.
+// Bundled datasets resolve from the packed tarball's subpath export, which is
+// what makes a copy-pasted quickstart file build in a bare app.
 assert.equal(kyotoSakura.length, 838);
 assert.equal(kyotoSakura[0].year, 812);
 assert.match(KYOTO_SAKURA_CITATION, /Aono/);
+assert.equal(palmerPenguins.length, 333);
+assert.equal(palmerPenguins[0].species, "Adelie");
+assert.match(PALMER_PENGUINS_CITATION, /Horst/);
+assert.equal(mpg.length, 234);
+assert.equal(mpg[0].manufacturer, "audi");
+assert.match(MPG_CITATION, /EPA/);
 
 const pointParamsSchema = SpecModule.Import("PointParams");
 void pointParamsSchema;

@@ -133,12 +133,18 @@ ${QUICKSTART_BUILDER_FRAGMENT}
 
 ## Bundled data
 
-\`@ggsvelte/svelte/data\` exports \`kyotoSakura\`: 838 peak cherry-blossom
-dates for Kyoto, 812-2026 CE, with \`year\`, \`bloomDate\`, \`bloomDoy\` and
-\`bloomRefDate\` (the bloom day projected onto a common non-leap year so a date
-axis can draw it). The docs site serves the same rows as JSON at
-/kyoto-sakura.json. Data copyright Yasuyuki Aono; cite
-\`KYOTO_SAKURA_CITATION\` when publishing charts made from it.
+\`@ggsvelte/svelte/data\` exports three cited teaching tables (each also served
+as JSON under the same name on the docs site):
+
+- \`kyotoSakura\` — 838 peak cherry-blossom dates for Kyoto, 812-2026 CE
+  (\`year\`, \`bloomDate\`, \`bloomDoy\`, \`bloomRefDate\`). Time series. Data
+  copyright Yasuyuki Aono; cite \`KYOTO_SAKURA_CITATION\`.
+- \`palmerPenguins\` — 333 complete Palmer Archipelago penguin measurements
+  (\`species\`, \`island\`, bill/flipper/mass, \`sex\`, \`year\`, stable \`id\`).
+  Distribution and categorical groups. CC0; cite \`PALMER_PENGUINS_CITATION\`.
+- \`mpg\` — 234 EPA fuel-economy rows for 38 popular models, 1999/2008
+  (\`manufacturer\`, \`model\`, \`displ\`, \`class\`, \`drv\`, \`cty\`, \`hwy\`, …).
+  Categorical comparison. Cite \`MPG_CITATION\`.
 
 ## Grammar vocabulary
 

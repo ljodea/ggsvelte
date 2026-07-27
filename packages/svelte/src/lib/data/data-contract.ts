@@ -14,9 +14,15 @@
 import type { DataInput } from "@ggsvelte/spec";
 
 import { kyotoSakura } from "./kyoto-sakura.js";
+import { mpg } from "./mpg.js";
+import { palmerPenguins } from "./palmer-penguins.js";
 
 /** Every bundled dataset must be assignable to the plot `data` prop. */
 type BundledDataset = DataInput;
 
 const kyotoSakuraIsPlottable: BundledDataset = kyotoSakura;
+const mpgIsPlottable: BundledDataset = mpg;
+const palmerPenguinsIsPlottable: BundledDataset = palmerPenguins;
 void kyotoSakuraIsPlottable;
+void mpgIsPlottable;
+void palmerPenguinsIsPlottable;
