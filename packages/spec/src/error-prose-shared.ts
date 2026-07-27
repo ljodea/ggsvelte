@@ -96,6 +96,3 @@ export const DUAL_ERROR_PROSE = {
     fix: "Remove the mapping or move it to one of the compatible geoms listed in the error.",
   },
 } as const satisfies Record<string, SharedErrorProse>;
-
-/** Dual-channel code names (keys of DUAL_ERROR_PROSE). */
-export type DualErrorCode = keyof typeof DUAL_ERROR_PROSE;
