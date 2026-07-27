@@ -209,7 +209,7 @@ function gridCellSegments(
   return segs;
 }
 
-/** Stitch undirected segments into polylines (open or closed). */
+/** Stitch undirected segments into polylines (open or closed). O(E) total. */
 export function stitchSegments(segments: Array<[Pt, Pt]>): Pt[][] {
   if (segments.length === 0) return [];
   type Edge = { a: string; b: string; pa: Pt; pb: Pt; used: boolean };
@@ -221,30 +221,66 @@ export function stitchSegments(segments: Array<[Pt, Pt]>): Pt[][] {
     used: false,
   }));
   const adj = new Map<string, number[]>();
+  const remDeg = new Map<string, number>();
   for (let i = 0; i < edges.length; i++) {
     const e = edges[i]!;
     if (!adj.has(e.a)) adj.set(e.a, []);
     if (!adj.has(e.b)) adj.set(e.b, []);
     adj.get(e.a)!.push(i);
     adj.get(e.b)!.push(i);
+    remDeg.set(e.a, (remDeg.get(e.a) ?? 0) + 1);
+    remDeg.set(e.b, (remDeg.get(e.b) ?? 0) + 1);
   }
 
-  const polylines: Pt[][] = [];
-  for (let start = 0; start < edges.length; start++) {
-    if (edges[start]!.used) continue;
-    // Prefer starting at an endpoint (degree 1).
-    let seed = start;
-    for (let i = start; i < edges.length; i++) {
-      if (edges[i]!.used) continue;
-      const da = adj.get(edges[i]!.a)?.filter((j) => !edges[j]!.used).length ?? 0;
-      const db = adj.get(edges[i]!.b)?.filter((j) => !edges[j]!.used).length ?? 0;
-      if (da === 1 || db === 1) {
-        seed = i;
-        break;
+  // Prefer degree-1 seeds without O(E) unused-edge rescans: maintain a stack of
+  // edges that currently touch a remaining-degree-1 vertex (#977).
+  const open: number[] = [];
+  const inOpen = new Uint8Array(edges.length);
+  const enqueueIfEndpoint = (ei: number): void => {
+    if (edges[ei]!.used || inOpen[ei] === 1) return;
+    const e = edges[ei]!;
+    if ((remDeg.get(e.a) ?? 0) === 1 || (remDeg.get(e.b) ?? 0) === 1) {
+      open.push(ei);
+      inOpen[ei] = 1;
+    }
+  };
+  for (let i = 0; i < edges.length; i++) enqueueIfEndpoint(i);
+
+  const markUsed = (ei: number): void => {
+    const e = edges[ei]!;
+    if (e.used) return;
+    e.used = true;
+    for (const v of [e.a, e.b] as const) {
+      const d = (remDeg.get(v) ?? 0) - 1;
+      remDeg.set(v, d);
+      if (d === 1) {
+        for (const nei of adj.get(v) ?? []) {
+          if (!edges[nei]!.used) enqueueIfEndpoint(nei);
+        }
       }
     }
+  };
+
+  let scan = 0;
+  const nextSeed = (): number => {
+    while (open.length > 0) {
+      const ei = open.pop()!;
+      inOpen[ei] = 0;
+      if (!edges[ei]!.used) return ei;
+    }
+    while (scan < edges.length && edges[scan]!.used) scan++;
+    return scan < edges.length ? scan : -1;
+  };
+
+  const polylines: Pt[][] = [];
+  for (;;) {
+    const seed = nextSeed();
+    if (seed < 0) break;
     const e0 = edges[seed]!;
-    e0.used = true;
+    markUsed(seed);
+    // prefix collects the backward walk with push; reverse once at the end
+    // instead of chain.unshift per edge (O(E²) → O(E)).
+    const prefix: Pt[] = [];
     const chain: Pt[] = [e0.pa, e0.pb];
     // Extend forward from pb
     let head = e0.b;
@@ -253,7 +289,7 @@ export function stitchSegments(segments: Array<[Pt, Pt]>): Pt[][] {
       const cand = (adj.get(head) ?? []).find((j) => !edges[j]!.used);
       if (cand === undefined) break;
       const e = edges[cand]!;
-      e.used = true;
+      markUsed(cand);
       if (e.a === head) {
         chain.push(e.pb);
         head = e.b;
@@ -269,16 +305,18 @@ export function stitchSegments(segments: Array<[Pt, Pt]>): Pt[][] {
       const cand = (adj.get(tail) ?? []).find((j) => !edges[j]!.used);
       if (cand === undefined) break;
       const e = edges[cand]!;
-      e.used = true;
+      markUsed(cand);
       if (e.a === tail) {
-        chain.unshift(e.pb);
+        prefix.push(e.pb);
         tail = e.b;
       } else {
-        chain.unshift(e.pa);
+        prefix.push(e.pa);
         tail = e.a;
       }
     }
-    if (chain.length >= 2) polylines.push(chain);
+    prefix.reverse();
+    const poly = prefix.length === 0 ? chain : prefix.concat(chain);
+    if (poly.length >= 2) polylines.push(poly);
   }
   return polylines;
 }

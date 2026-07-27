@@ -1,7 +1,7 @@
 /**
  * Pure stat_contour marching-squares isolines (#801).
  */
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, spyOn } from "bun:test";
 
 import { cellSegments, contourLevels, stitchSegments, statContour } from "../src/stats/contour.ts";
 
@@ -53,6 +53,91 @@ describe("stitchSegments", () => {
     ]);
     expect(lines.length).toBe(1);
     expect(lines[0]!.length).toBe(3);
+  });
+
+  it("extends both directions into one polyline", () => {
+    // Middle segment first so seed may start mid-chain; must still stitch ends.
+    const lines = stitchSegments([
+      [
+        { x: 1, y: 0 },
+        { x: 2, y: 0 },
+      ],
+      [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+      ],
+      [
+        { x: 2, y: 0 },
+        { x: 3, y: 0 },
+      ],
+    ]);
+    expect(lines.length).toBe(1);
+    const xs = lines[0]!.map((p) => p.x).toSorted((a, b) => a - b);
+    expect(xs).toEqual([0, 1, 2, 3]);
+  });
+
+  it("closes a square loop as one polyline", () => {
+    const lines = stitchSegments([
+      [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+      ],
+      [
+        { x: 1, y: 0 },
+        { x: 1, y: 1 },
+      ],
+      [
+        { x: 1, y: 1 },
+        { x: 0, y: 1 },
+      ],
+      [
+        { x: 0, y: 1 },
+        { x: 0, y: 0 },
+      ],
+    ]);
+    expect(lines.length).toBe(1);
+    // Closed loop: 4 edges → 5 vertices when first point is repeated, or 4 without.
+    // Current stitch emits chain length = edges+1 for open; for closed, head meets tail.
+    expect(lines[0]!.length).toBeGreaterThanOrEqual(4);
+    expect(lines[0]!.length).toBeLessThanOrEqual(5);
+  });
+
+  it("keeps multi-component isolines separate", () => {
+    const lines = stitchSegments([
+      [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+      ],
+      [
+        { x: 10, y: 0 },
+        { x: 11, y: 0 },
+      ],
+    ]);
+    expect(lines.length).toBe(2);
+    expect(lines.every((line) => line.length === 2)).toBe(true);
+  });
+
+  it("does not Array.unshift while stitching a long open chain (issue #977)", () => {
+    // Pre-fix: seeding at the high end of an open chain walks backward with
+    // chain.unshift per edge → O(E²) copies. Reverse edge order surfaces that.
+    const n = 2_000;
+    const segments: Array<[{ x: number; y: number }, { x: number; y: number }]> = [];
+    for (let i = 0; i < n; i++) {
+      segments.push([
+        { x: i, y: 0 },
+        { x: i + 1, y: 0 },
+      ]);
+    }
+    segments.reverse();
+    const unshiftSpy = spyOn(Array.prototype, "unshift");
+    try {
+      const lines = stitchSegments(segments);
+      expect(lines.length).toBe(1);
+      expect(lines[0]!.length).toBe(n + 1);
+      expect(unshiftSpy).not.toHaveBeenCalled();
+    } finally {
+      unshiftSpy.mockRestore();
+    }
   });
 });
 
