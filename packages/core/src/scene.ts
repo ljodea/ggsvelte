@@ -71,10 +71,11 @@ export interface PathsBatch {
    * resolution uses this instead of synthetic render topology indexes. */
   semanticIndex?: Uint32Array;
   /**
-   * Closed ribbons only: frame-row id per **pre-projection** semantic vertex
-   * (upper ascending, then lower descending). Matches emitted vertices after
-   * non-finite edge filtering so coord `semanticIndex` maps to the correct
-   * frame row (#502). Length = pre-projection vertex count.
+   * Closed paths: frame-row id per **pre-projection** semantic vertex — a
+   * ribbon band (upper ascending, then lower descending) or a polygon ring in
+   * authored winding order (#916). Matches emitted vertices after non-finite
+   * edge filtering so coord `semanticIndex` maps to the correct frame row
+   * (#502). Length = pre-projection vertex count.
    */
   closedFrameRows?: Uint32Array;
   /** Start offset (in points) of each subpath; length = subpathCount + 1. */

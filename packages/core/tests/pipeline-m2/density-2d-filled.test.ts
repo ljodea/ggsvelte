@@ -71,6 +71,40 @@ describe("density_2d_filled geom (#802 phase 2)", () => {
     expect(spec.layers[0]?.aes?.fill).toEqual({ stat: "level" });
   });
 
+  /**
+   * A filled band hit must report the vertex it actually landed on. Ring
+   * vertices keep authored winding, so resolving them through the x-sorted
+   * band reconstruction reported a neighbouring ring's row and with it the
+   * wrong after_stat level/density (#916). Semantic x is a monotone function
+   * of pixel x, so correct resolution makes the two orders agree.
+   */
+  it("resolves filled-ring hits to their own vertex (#916)", () => {
+    const data = cloud(80);
+    const model = runPipeline(
+      gg(data, aes({ x: "x", y: "y" }))
+        .geomDensity2dFilled({ n: 30, bins: 5 })
+        .spec(),
+      size,
+    );
+    if (model.scene.batches.length === 0) return;
+    const batch = model.scene.batches[0] as PathsBatch;
+    expect(batch.closedFrameRows).toBeDefined();
+    expect(batch.semanticIndex).toBeUndefined(); // no coord transform in this spec
+
+    const hits: { x: number; xValue: number }[] = [];
+    for (let id = 0; id < model.candidates.size; id++) {
+      const candidate = model.candidates.candidate(id);
+      if (candidate === null || typeof candidate.xValue !== "number") continue;
+      hits.push({ x: candidate.x, xValue: candidate.xValue });
+    }
+    expect(hits.length).toBeGreaterThan(1);
+
+    hits.sort((a, b) => a.x - b.x);
+    for (let i = 1; i < hits.length; i++) {
+      expect(hits[i]!.xValue).toBeGreaterThanOrEqual(hits[i - 1]!.xValue - 1e-9);
+    }
+  });
+
   it("uses exact auto hit mode", () => {
     const data = cloud(80);
     const model = runPipeline(
