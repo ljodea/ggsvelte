@@ -78,6 +78,84 @@ describe("candidate spatial query hot path (issue #214) — points-queries", () 
     expect(hypot).toHaveBeenCalledTimes(1);
     hypot.mockRestore();
   });
+  it("hitTest honors per-point sizes without rescanning the full sizes array (issue #978)", () => {
+    // Variable aes(size): max query pad must still cover the largest mark, but
+    // hitTest must not O(P)-scan batch.sizes on every probe (build precomputes).
+    const count = 5_000;
+    const positions = new Float32Array(count * 2);
+    const rawSizes = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      // Sparse grid so one probe has a single clear hit under reverse paint order.
+      positions[i * 2] = (i % 100) * 2;
+      positions[i * 2 + 1] = Math.floor(i / 100) * 2;
+      rawSizes[i] = 2;
+    }
+    // Large bubble on the right of the default 200×120 panel.
+    const largeIndex = count - 1;
+    positions[largeIndex * 2] = 160;
+    positions[largeIndex * 2 + 1] = 60;
+    rawSizes[largeIndex] = 40;
+
+    const plotScene = scene();
+    plotScene.batches = [
+      {
+        kind: "points",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions,
+        rowIndex: Uint32Array.from({ length: count }, (_, index) => index),
+        size: 2,
+        sizes: rawSizes,
+        alpha: 1,
+        shape: "circle",
+        fill: null,
+      },
+    ];
+    const store = buildCandidateStore(plotScene);
+    void store.x;
+
+    // Probe on the large bubble center and near its hit edge (size + default tol 3).
+    expect(store.hitTest(160, 60)?.id).toBe(largeIndex);
+    expect(store.hitTest(160 + 35, 60)?.id).toBe(largeIndex);
+    expect(store.hitTest(160 + 50, 60)).toBeNull();
+
+    const batch = plotScene.batches[0]!;
+    if (batch.kind !== "points" || batch.sizes === undefined) {
+      throw new Error("expected points batch with sizes");
+    }
+    // TypedArray brand breaks Proxy for-of; instrument with an indexable iterable
+    // so a full maxRadius scan is visible as O(P) iterator steps.
+    const originalSizes = batch.sizes;
+    let sizeIterSteps = 0;
+    batch.sizes = {
+      length: originalSizes.length,
+      [Symbol.iterator](): Iterator<number> {
+        let i = 0;
+        return {
+          next(): IteratorResult<number> {
+            if (i >= originalSizes.length) return { done: true, value: undefined };
+            sizeIterSteps++;
+            return { done: false, value: originalSizes[i++]! };
+          },
+        };
+      },
+    } as unknown as Float32Array;
+    // pointHitDistance reads sizes[primitive] — keep indexed access working.
+    for (let i = 0; i < originalSizes.length; i++) {
+      Object.defineProperty(batch.sizes, i, {
+        enumerable: true,
+        get(): number {
+          return originalSizes[i]!;
+        },
+      });
+    }
+
+    sizeIterSteps = 0;
+    // Any interior hit is fine — we only police full-array iteration for maxRadius.
+    expect(store.hitTest(10, 10)).not.toBeNull();
+    // Pre-fix: for (const r of batch.sizes) walks every element each probe.
+    expect(sizeIterSteps).toBe(0);
+  });
   it("queryRect does not read every batch for a tight brush on a large point cloud", () => {
     const count = 8_000;
     const cols = Math.ceil(Math.sqrt(count));
