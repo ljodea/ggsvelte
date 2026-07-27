@@ -21,3 +21,15 @@ export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
   // Contour writes x/y as frame coordinates; after_stat level is not a y column.
   contour: [],
 };
+
+/**
+ * color/fill `{ stat }` columns each stat exposes. Only the density_2d frame
+ * builder resolves an after_stat column into colour values
+ * (`frame-stats-density-2d.ts`); every other frame builds colour from the
+ * mapped field alone, so an `{ stat }` mapping there is dropped (#915).
+ * Stats absent from this map publish nothing for colour.
+ */
+export const STAT_COLOR_COLUMNS: Record<string, readonly string[]> = {
+  density_2d: ["level", "density"],
+  density_2d_filled: ["level", "density"],
+};
