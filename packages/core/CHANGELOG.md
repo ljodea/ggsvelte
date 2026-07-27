@@ -1,5 +1,693 @@
 # @ggsvelte/core
 
+## 0.12.0
+
+### Minor Changes
+
+- 3ec23b0: # Add geom_path — data-order polylines (#788)
+
+  ggplot2 `geom_path` connects observations in row/data order within each group (no x-sort). `geom_line` continues to sort by x.
+
+  - PortableSpec: `geom: "path"` (PathLayer, same params as line)
+  - Builder: `.geomPath()`; Svelte: `<GeomPath />`
+  - Core: reuses line path batch builder with `sortByX: false`
+
+  Migration: none — additive
+
+- c2e3856: <!-- markdownlint-disable MD041 -->
+
+  feat(#789): first-class geom_step (hv / vh / mid)
+
+  Add `geom: "step"` with `params.direction` matching ggplot2 geom_step:
+  default `"hv"`, plus `"vh"` and `"mid"`. Surfaces: JSON/schema, builder
+  `.geomStep()`, and `<GeomStep />`. Step corner emission is shared across SVG,
+  canvas, and coord projection (`path-step.ts`). Existing `line` +
+  `curve: "step"` mid-style remains.
+
+  Migration: none — additive
+
+- f2c0997: <!-- markdownlint-disable MD041 -->
+
+  feat: geom_blank for scale training without marks (#791)
+
+  Add ggplot2-style `blank` geom that trains scales from mapped aesthetics and
+  emits no geometry batches or interaction candidates. Surfaces: PortableSpec,
+  `geomBlank()`, and `<GeomBlank>`.
+
+  Migration: none — additive
+
+- e90a228: <!-- markdownlint-disable MD041 -->
+
+  feat(geom): linerange, pointrange, and crossbar interval family (#793)
+
+  ggplot2-compatible range geoms beyond errorbar: stem-only linerange, stem +
+  mid point pointrange, and box + mid line crossbar (width/fatten). Builder and
+  `<Geom*>` sugar included.
+
+  Migration: none — additive
+
+- 38af6a8: <!-- markdownlint-disable MD041 -->
+
+  feat: geom_curve curved connectors (#794)
+
+  Add ggplot2-style `curve` geom: curved connectors from (x,y) to (xend,yend)
+  tessellated as a quadratic Bezier in panel px (aspect-safe curvature). Params:
+  curvature (default 0.5), angle (degrees, default 90), ncp (density knob).
+  One path subpath per row; one semantic candidate per curve.
+
+  Intentional subset: quadratic Bezier approximation, not full grid xspline.
+  Migration: none — additive
+
+- cac7d43: <!-- markdownlint-disable MD041 -->
+
+  feat(#795): geom_count + stat_sum overplotting counts
+
+  Add `stat: "sum"` (after_stat `n` and `prop` within group) and `geom: "count"`
+  sugar (point marks; size defaults to `{ stat: "n" }`). Also
+  `.geomPoint({ stat: "sum" })` / `<GeomCount />`.
+
+  Migration: none — additive
+
+- f0f379c: <!-- markdownlint-disable MD041 -->
+
+  feat(#797): geom_function + stat_function named analytic curves
+
+  Portable registry (`identity`, `dnorm`, `pnorm`, `linear`) evaluated on a
+  grid — domain from `params.xlim`, own continuous `aes.x`, or peer-layer x.
+  Surfaces: `.geomFunction()`, `<GeomFunction />`, example `line/function`.
+
+  Migration: none — additive
+
+- 40a43f9: # Add geom_bin_2d + stat_bin_2d heatmap (#799)
+
+  2D rectangular binning with after_stat `fill=count` by default (ggplot2
+  `geom_bin2d` / `stat_bin_2d`). Reuses edge-rect geometry and 1D break helpers.
+
+  - PortableSpec: `geom: "bin_2d"` / `stat: "bin_2d"` with `params.bins`,
+    `binwidth`, and `drop`
+  - Builder: `.geomBin2d()`; Svelte: `<GeomBin2d />`
+  - Color binding accepts after_stat columns (`count`, `density`, `ncount`,
+    `ndensity`) for fill
+
+  Migration: none — additive
+
+- 158576b: # Add geom_hex / stat_bin_hex — hexagonal bin heatmap (#800)
+
+  ggplot2-compatible 2D hexagonal binning heatmap:
+
+  - Stat `bin_hex`: pointy-top axial lattice; fill defaults to after_stat count
+  - Geometry: one closed path subpath per occupied hex
+  - Surfaces: PortableSpec, `.geomHex()`, `<GeomHex />`
+  - Params (v1): `bins` (default 30), `drop` (default true), `alpha`, `linewidth`
+
+  Migration: none — additive
+
+- a832c75: <!-- markdownlint-disable MD041 -->
+
+  feat: geom_contour + stat_contour isolines (#801)
+
+  Add `geom: "contour"` (default `stat: "contour"`) for open isoline polylines
+  over a regular continuous x×y×z grid. Levels from `params.breaks`,
+  `binwidth`, or `bins` (default 10, min..max inclusive). Clean-room marching
+  squares (no R/C++). Builder `.geomContour()` and Svelte `<GeomContour />`.
+
+  v1: open path polylines only; no contour_filled / irregular triangulation /
+  default color-by-level. Incomplete grid cells are skipped; groups without a
+  usable grid or levels are dropped with a warning.
+
+  Migration: none — additive
+
+- c11861d: <!-- markdownlint-disable MD041 -->
+
+  # feat: geom_density_2d_filled closed KDE rings (#802 phase 2)
+
+  Add `geom: "density_2d_filled"` / `stat: "density_2d_filled"` with builder
+  `.geomDensity2dFilled()` and Svelte `<GeomDensity2dFilled />`. Same product
+  Gaussian KDE as density_2d; closed isoline rings become filled paths. Open
+  rings are dropped with a warning. Fill defaults to `after_stat(level)` via
+  `ColorBinding.statColumn`.
+
+  Migration: none — additive
+
+- b90e651: <!-- markdownlint-disable MD041 -->
+
+  feat: geom_density_2d + stat_density_2d KDE isolines (#802)
+
+  Add `geom: "density_2d"` (default `stat: "density_2d"`) for bivariate product
+  Gaussian KDE isolines. Bandwidth MASS bandwidth.nrd then kde2d h/4 (or
+  `params.h`); grid `n`×`n` (default 100) over a 5%-expanded data range;
+  levels via breaks / binwidth / bins. Clean-room MS via shared contour
+  helpers. Builder `.geomDensity2d()` and Svelte `<GeomDensity2d />`.
+
+  v1: open polylines only — no density_2d_filled, no weights, no contour_var
+  other than density. Groups with fewer than two points are dropped with a
+  warning.
+
+  Migration: none — additive
+
+- ccbb798: <!-- markdownlint-disable MD041 -->
+
+  feat: geom_dotplot + stat_bindot histodot stacked dots (#803)
+
+  Add `geom: "dotplot"` (default `stat: "bindot"`) for histodot stacked points:
+  fixed bins via shared bin-breaks, one point per observation, stackdir
+  up|down|center|centerwhole, stackratio, and diameter from binwidth × x-scale
+  (dotsize; size px override). y is after_stat `stackpos` only. Builder
+  `.geomDotplot()` and Svelte `<GeomDotplot />`.
+
+  v1: histodot only — no Wilkinson dotdensity, no binaxis=y, no weights.
+
+  Migration: none — additive
+
+- 7f89e9c: <!-- markdownlint-disable MD041 -->
+
+  feat(geom): geom_qq + geom_qq_line normal Q–Q plots (#804)
+
+  ggplot2-compatible Q–Q scatter and reference line: `aes.sample`, `stat_qq` /
+  `stat_qq_line` (normal theory quantiles + quartile line), builder
+  `.geomQq()` / `.geomQqLine()`, and `<GeomQq />` / `<GeomQqLine />`.
+
+  Migration: none — additive
+
+- 78fef28: <!-- markdownlint-disable MD041 -->
+
+  feat: geom_quantile + stat_quantile linear RQ lines (#805)
+
+  Add `geom: "quantile"` (default `stat: "quantile"`) with linear y~x
+  quantile regression at `params.quantiles` (default 0.25/0.5/0.75).
+  Builder `.geomQuantile()` and Svelte `<GeomQuantile />`.
+
+  v1: linear rq only (no rqss / formula / weights). Pinball-minimizing
+  order-statistic intercept; pairwise-slope exact search for small n.
+  Migration: none — additive
+
+- 0ab78a4: <!-- markdownlint-disable MD041 -->
+
+  feat(geom): add geom_rug marginal edge ticks (#806)
+
+  ggplot2-compatible rug layer: short ticks along panel edges with `sides`
+  (`bltr`) and panel-fraction `length`. Builder `.geomRug()` and `<GeomRug />`.
+
+  Migration: none — additive
+
+- a120bed: <!-- markdownlint-disable MD041 -->
+
+  feat: geom_map fortified region join for choropleths (#808)
+
+  Add ggplot2-style `map` geom: join a fortified map table to value rows via
+  `aes.map_id` and `params.map` / `params.mapId`. Coordinates from map
+  `long`+`lat` or `x`+`y`; optional multipoly `group`. Renders closed filled
+  paths per region; missing regions drop with `map-region-missing` warning.
+
+  Intentional subset: no network fetches, no sf/CRS, no public geom_polygon.
+
+  Migration: none — additive
+
+- 3fb062a: <!-- markdownlint-disable MD041 -->
+
+  feat: coord_sf fixed-aspect maps for already-projected data (#809 phase 8)
+
+  Add PortableSpec `{ type: "sf", ratio? }` reusing coord_fixed layout for geom_sf
+  maps. Public helpers `coordSf` / `coord_sf`, builder `.coordSf()`, and
+  `<CoordSf>`. No CRS reproject or graticules in v1.
+
+  Migration: none — additive
+
+- da5825e: <!-- markdownlint-disable MD041 -->
+
+  # feat: geom_sf_label boxed SF labels (#809 phase 3)
+
+  Add `geom_sf_label`: labels at `stat_sf_coordinates` representative points with
+  a measured rounded background box. `color` is ink + box stroke; `fill` is the
+  box background. Params: padding, radius, linewidth, size, anchor, dx/dy.
+
+  Builder `.geomSfLabel()` and Svelte `<GeomSfLabel />`. GlyphsBatch optional box
+  fields; SVG draws rect then text; hit uses box AABB. Shared path for future
+  `geom_label` (#792).
+
+  Migration: none — additive
+
+- 962bf83: <!-- markdownlint-disable MD041 -->
+
+  # feat: geom_sf_text + stat_sf_coordinates labels (#809 phase 2)
+
+  Add `stat_sf_coordinates` (one representative (x,y) per GeoJSON feature) and
+  `geom_sf_text` which defaults to that stat and draws `aes.label` at the point.
+  Point as-is; MultiPoint/LineString vertex mean; Polygon exterior shoelace
+  centroid; Multi* uses the first component only in v1.
+
+  Builder `.geomSfText()` and Svelte `<GeomSfText />`. Requires `aes.label`;
+  geometry still as JSON strings in a data column.
+
+  Migration: none — additive
+
+- 2154fe1: <!-- markdownlint-disable MD041 -->
+
+  # feat: geom_sf portable GeoJSON geometries phase 1 (#809)
+
+  Add `geom: "sf"` for already-projected GeoJSON Geometry values stored as JSON
+  strings in a data column (default `geometry`). Point/LineString/Polygon and
+  their Multi* variants expand to points, open paths, or closed filled rings.
+  Interior rings emit a warning; GeometryCollection and mixed families error.
+
+  Builder `.geomSf()` and Svelte `<GeomSf />`. No CRS / `coord_sf` in this phase.
+
+  Migration: none — additive
+
+- cb8ba46: <!-- markdownlint-disable MD041 -->
+
+  feat: GeometryCollection expand for geom_sf (#809 phase 6)
+
+  Flatten GeoJSON GeometryCollection (recursively) to leaf point/line/polygon
+  geometries for draw and labels. Homogeneous collections render; mixed families
+  still raise sf-geometry-mixed. Compatible with even-odd holes and Multi* labels.
+
+  Migration: none — additive
+
+- 5584a49: <!-- markdownlint-disable MD041 -->
+
+  feat: multi-part SF labels via stat_sf_coordinates (#809 phase 5)
+
+  MultiPoint / MultiLineString / MultiPolygon expand to one label per geometry
+  part (exterior centroid / vertex mean). Duplicates feature aesthetics onto each
+  part.
+
+  Migration: <https://ggsvelte.sh/guide/statistics-positions#sf-text-labels-geom-sf-text>
+
+- 757b3f5: <!-- markdownlint-disable MD041 -->
+
+  feat: geom_sf polygon holes via even-odd rings (#809 phase 4)
+
+  Interior GeoJSON rings are drawn as even-odd holes (SVG/canvas/hit-test).
+  Removes the `sf-holes-ignored` warning. No CRS/coord_sf yet.
+
+  Migration: none — additive
+
+- 26cfa45: <!-- markdownlint-disable MD041 -->
+
+  feat: public stat_sf as geom_sf default (#809 phase 7)
+
+  Add `KNOWN_STATS` value `"sf"` (ggplot2 `stat_sf` geometry expand) as the
+  default for `geom_sf`, and route expand through the normal non-identity stat
+  path instead of a geom-only special case.
+
+  `normalize()` rewrites legacy portable `stat: "identity"` on `geom_sf` to
+  `stat: "sf"`; draw/hit behavior is unchanged. Canonical stamps use `"sf"`.
+
+  Migration: none — additive
+
+- 1bc9988: <!-- markdownlint-disable MD041 -->
+
+  feat: geom_spoke origin + angle + radius segments (#810)
+
+  Add ggplot2-style `spoke` geom: endpoints derived as
+  `xend = x + radius·cos(angle)`, `yend = y + radius·sin(angle)` in data space
+  (then the same position transform as x/y). Angle is radians. Reuses segment
+  rendering. CHANNELS gain `angle` and `radius`; constants via `params.angle` /
+  `params.radius` when not mapped. Continuous x/y required.
+
+  Migration: none — additive
+
+- f08091b: <!-- markdownlint-disable MD041 -->
+
+  feat(#811): stat_ecdf empirical CDF + line curve step-hv
+
+  Add `stat: "ecdf"` on line layers (y defaults to `{ stat: "ecdf" }`) with
+  `params.pad` / `params.n`. Prefer `curve: "step-hv"` for right-continuous
+  stairs (mid `step` is wrong for ECDFs). Finite-clamp pad (prepend xmin,0;
+  ggplot2 uses ±Inf). Shared path-step helper for step-hv / step-vh / mid.
+
+  Migration: none — additive
+
+- dbb883b: <!-- markdownlint-disable MD041 -->
+
+  feat: stat_ellipse bivariate normal confidence rings (#812)
+
+  Add `stat: "ellipse"` on path layers (ggplot2 stat_ellipse, type "norm" only).
+  Per-group mean + sample covariance → χ²-scaled ellipse perimeter; segments
+  samples + closing duplicate for a closed path ring. Params: level (0.95),
+  type ("norm"), segments (51 before close).
+
+  Intentional subset: path-only; type norm only (not t/euclid).
+
+  Migration: none — additive
+
+- 985ae06: <!-- markdownlint-disable MD041 -->
+
+  # feat: stat_unique first-wins aesthetic dedupe (#813)
+
+  Add `stat: "unique"` for identity-capable geoms (point, line, path, text, col,
+  area, rect, ribbon, rule, segment, errorbar). Drops duplicate rows on the
+  combination of mapped aesthetic fields before drawing; first occurrence wins;
+  panel-local.
+
+  Not offered on bar/histogram/density/smooth/boxplot or tile/raster in this
+  release.
+
+  Migration: none — additive
+
+- fb9a751: <!-- markdownlint-disable MD041 -->
+
+  # feat: stat_manual portable named per-group transforms (#814)
+
+  Add `stat: "manual"` on point, line, and path with required `params.fun`
+  from a portable named registry (`first` | `last` | `mean` | `median` |
+  `min` | `max` | `sum`). first/last keep one source row per aesthetic group;
+  aggregate funs collapse each group to one synthetic row (x and y aggregated
+  independently). No JS callbacks (PortableSpec only).
+
+  Missing `fun` fails loud (`manual-fun-required`); unknown `fun` is schema
+  `invalid-enum-value`.
+
+  Migration: none — additive
+
+- c0ba287: <!-- markdownlint-disable MD041 -->
+
+  feat: stat_align shared continuous-x grid for stack (#815)
+
+  Add `stat: "align"` on area and line layers. Union all finite x across groups,
+  linearly interpolate each series onto that grid, and set y=0 outside a group's
+  range so continuous-x stack/fill aligns.
+
+  Area/Line use own stat unions (not shared IdentityOrUniqueStat).
+
+  Migration: none — additive
+
+- 05b0736: <!-- markdownlint-disable MD041 -->
+
+  # feat: stat_connect named path joins for path/line (#816)
+
+  Add `stat: "connect"` on path and line with `params.connection`
+  (`hv` default, `vh`, `mid`, `linear`). Expands successive finite
+  points into intermediate vertices so stepped/path displays do not
+  rely on geom curve flags alone.
+
+  Path uses data order; line expands after x-sort and skips post-stat
+  x-sort so tied-x elbows stay intact. Custom connection matrices
+  deferred.
+
+  Migration: none — additive
+
+- 623b9c1: <!-- markdownlint-disable MD041 -->
+
+  # feat: stat_summary_bin continuous x binned y summary (#817)
+
+  Add `stat: "summary_bin"` on point, line, and errorbar — bin continuous x with
+  the same break rules as `stat_bin`, then summarize y per non-empty
+  (group × bin) with the shared summary fun registry (default mean ± se).
+
+  Emits `x` (bin center), `xmin`/`xmax`, and `y`/`ymin`/`ymax`. Empty bins are
+  omitted. No weight channel, no summary_2d/hex in v1.
+
+  Migration: none — additive
+
+- 0c4919c: <!-- markdownlint-disable MD041 -->
+
+  feat(#820): add `bw` / `ThemeBw` complete theme
+
+  Print-friendly white panel, grey grid, and dark rectangular border matching
+  the ggplot2 `theme_bw` complete-theme role (clean-room; not R source).
+  Available as PortableSpec `theme: "bw"`, builder `.theme("bw")`, and
+  `<ThemeBw />`.
+
+  Migration: none — additive
+
+- 769bcbf: # Add theme_linedraw (`linedraw` / ThemeLinedraw)
+
+  Add `linedraw` theme (`theme: "linedraw"`, `<ThemeLinedraw />`) — white panel with black grid, ticks, and panel border for high-contrast line-art / B&W print chrome (#821).
+
+  Migration: none — additive
+
+- d6c72c8: <!-- markdownlint-disable MD041 -->
+
+  feat(#823): add `test` / `ThemeTest` snapshot theme
+
+  Pinned high-contrast complete theme for package tests and VR (ggplot2
+  `theme_test` role, clean-room). Available as PortableSpec `theme: "test"`,
+  builder `.theme("test")`, and `<ThemeTest />`. Not an alias of product themes.
+
+  Migration: none — additive
+
+- 1a4401d: # Add theme_grey / theme_gray aliases (`grey` / `gray`)
+
+  Register `grey` and `gray` as first-class theme names that share the existing ggplot2 grey-panel token map (`theme: "grey"`, `theme: "gray"`, `<ThemeGrey />`, `<ThemeGray />`). UK/US spellings for ggplot2 `theme_grey` / `theme_gray` muscle memory (#824).
+
+  Migration: none — additive
+
+- 1876fc4: # Add ColorBrewer scale helpers (#825)
+
+  - Palette tables (public ColorBrewer max-n hex) + scheme registration
+  - `scale_*_brewer` (discrete), `scale_*_distiller` (continuous), `scale_*_fermenter` (binned)
+  - color/colour/fill spellings + Svelte `<ScaleColorBrewer />` etc.
+  - `palette` → `scheme`, `direction: -1` → `reverse: true`
+
+  v1 palettes: Set1/2/3, Dark2, Paired, Accent; Blues/Greens/Reds/Oranges/Purples/Greys/YlOrRd/YlGnBu/BuPu; RdYlBu/RdBu/BrBG/Spectral/PuOr.
+
+  Migration: none — additive
+
+- 20b4ddb: <!-- markdownlint-disable MD041 -->
+
+  feat(#828): scale_*_viridis_c/d/b named constructors
+
+  ggplot2-style continuous, discrete, and binned viridis-family helpers for
+  color/fill (plus colour aliases and Svelte shells). Discrete scales sample
+  evenly across the ramp; `option` selects viridis/magma/plasma/inferno/cividis/turbo.
+
+  Migration: none — additive
+
+- dfbab7c: # Add size area / radius scale family (#830)
+
+  - `sizeUnit`: `"area"` (default continuous), `"radius"` (linear), `"area_zero"` (zero→zero area)
+  - Helpers: `scaleSizeArea` / `scaleSizeBinnedArea` / `scaleRadius` / `scaleSizeOrdinal` + snake aliases; bare `scale_size`
+  - `maxSize` option on area helpers (default 6) when `range` is omitted
+  - Svelte: `<ScaleSizeArea />`, `<ScaleSizeBinnedArea />`, `<ScaleRadius />`, `<ScaleSizeOrdinal />`
+  - Range values may be 0 so zero-area bubbles are portable
+
+  Migration: none — additive
+
+- 52d05ee: # Add scale_x_time / scale_y_time time-of-day position scales (#831)
+
+  - New `temporalKind: "time"` for time-of-day (distinct from date/datetime)
+  - Helpers: `scaleXTime` / `scaleYTime` / `scale_x_time` / `scale_y_time` + builder methods
+  - Portable numbers are **seconds since midnight** → epoch ms on 1970-01-01Z; Date values use UTC clock portion
+  - Default axis labels use `%H:%M:%S`; tick intervals prefer hour/minute/second
+  - Svelte: `<ScaleXTime />` / `<ScaleYTime />`
+
+  Migration: none — additive
+
+- 1f60f29: <!-- markdownlint-disable MD041 -->
+
+  fix: humanize default axis and legend titles from field names (#961)
+
+  When `labs` omits a channel, guide titles now use `humanizeFieldTitle` —
+  camelCase/snake_case field names become sentence case (`bloomRefDate` →
+  `Bloom ref date`). Single-token names (`year`, `Region`, `count`) stay as
+  authored. Explicit `labs` values (including `""` to hide) are unchanged.
+
+  Also exports `spaceFieldName` / `humanizeFieldTitle` from `@ggsvelte/core`;
+  tooltip `<dt>` labels share the spacing helper.
+
+  Migration: none — additive
+
+  Default axis/legend titles for multi-word field names change from raw
+  identifiers to sentence case (e.g. `bloomRefDate` → `Bloom ref date`). Set
+  `labs` explicitly to keep a previous string.
+
+### Patch Changes
+
+- eeaa980: <!-- markdownlint-disable MD041 -->
+
+  fix: leave modest integer tick labels ungrouped (#779)
+
+  `defaultTickFormat` only applies thousands grouping when the tick step is
+  at least 1000, so year-like domains (e.g. 800–2030) render `1000` instead of
+  `1,000`. Huge-number axes keep commas. Authors can still force grouping with
+  `labels: ",d"`.
+
+  Migration: charts whose continuous tick step is under 1000 may lose commas
+  on four-digit labels; use `labels: ",d"` (or `",.Nf"`) to restore grouping.
+
+- 3388a69: # Scope interaction nearest-hits to the semantic viewport panel
+
+  Faceted hover and point select can no longer seed another facet's candidate (#787).
+
+- 5ad437b: # Add geom_abline slope/intercept reference lines
+
+  Annotation-only `geom: "abline"` with `params.slope` (default 1) and `params.intercept` (default 0). Clips y = intercept + slope·x to continuous panel domains and emits a segment batch. Builder `.geomAbline()` and `<GeomAbline />` (#790).
+
+- 93dd535: # Preserve geom_sf polygon holes under coord_transform (#809 phase 9)
+
+  `projectPathBatch` now projects each even-odd ring independently, remaps
+  `ringStarts` after tessellation, and keeps `fillRule: "evenodd"`. Multi-ring
+  compounds with any invalid vertex still drop whole. Replaces the #941 stopgap
+  that stripped interior rings under active projectors.
+
+- be9687f: # Add theme_void / ThemeVoid chrome-free theme
+
+  Add `theme: "void"` / `<ThemeVoid />` (ggplot2 theme_void) — no axes, grid, or panel chrome for maps and pure-mark composition (#822).
+
+  New theme tokens `labelsX` / `labelsY` gate axis tick labels (and layout margin) so void can suppress text without changing tick-mark behavior on existing themes.
+
+- 6ff72f5: # Add scale_*_gradient / gradient2 / gradientn helpers
+
+  ggplot2-shaped continuous colour constructors for color and fill: two-stop `gradient`, three-stop diverging `gradient2`, and n-stop `gradientn` (colours/colors/values). Map onto sequential scales with explicit range (#826). No asymmetric `midpoint` domain remapping in v1.
+
+- 8114eb2: # Add scale_*_steps / steps2 / stepsn helpers
+
+  ggplot2-shaped binned continuous colour constructors for color and fill: two-stop `steps`, three-stop diverging `steps2`, and n-stop `stepsn`. Map onto `type: "binned"` with explicit hex range (#827). No midpoint domain remapping in v1.
+
+- 8f75eb3: # Add scale_*_hue / grey / gray / ordinal discrete colour helpers
+
+  Register portable schemes `hue`, `grey`, and `gray`, plus ggplot2-shaped constructors for color and fill. Custom hue h/c/l or grey start/end bake a 10-stop range; defaults use named schemes. `scale_*_ordinal` aliases discrete (#829).
+
+- 0c12fcb: # Add bare scale_alpha / scale_linewidth and ordinal style aliases (#832)
+
+  ggplot2 ergonomics for style scales:
+
+  - Bare `scale_alpha` / `scale_linewidth` → continuous helpers
+  - `scale_alpha_ordinal` / `scale_linewidth_ordinal` / `scale_shape_ordinal` (and camelCase peers) → existing discrete helpers (`type: "ordinal"`)
+  - Svelte re-exports: `<ScaleAlphaOrdinal />`, `<ScaleLinewidthOrdinal />`, `<ScaleShapeOrdinal />` (same shells as Discrete)
+
+  Deferred: `scale_shape_continuous` / `scale_linetype_continuous` (ggplot2 warns/errors).
+
+  Migration: none — additive
+
+- 0e8dbda: <!-- markdownlint-disable MD041 -->
+
+  fix: bin-edge lineage replays the stat's own cut (#905)
+
+  `stat_bin` and `stat_summary_bin` cut rows on ggplot2's **fuzzed** break grid
+  but emitted only the exact edges, so interaction lineage — which re-derived
+  membership from those edges — disagreed with the stat for any value inside the
+  fuzz band around an interior break. A hovered bin could report a row that never
+  contributed to it while omitting one that did.
+
+  The binning stats now carry the cut they performed (fuzzed grid, closed side,
+  and per-row bin index), and both lineage consumers replay it, so represented
+  rows always match the rows the stat consumed.
+
+  Migration: none — interaction lineage only
+
+- f6eb71a: <!-- markdownlint-disable MD041 -->
+
+  fix: warn when an after_stat color/fill mapping is ignored (#915)
+
+  An `{ stat }` mapping on `color`/`fill` was accepted for every geom but only
+  `density_2d` / `density_2d_filled` ever resolve one into colour values, so
+  elsewhere it was dropped without a diagnostic. Those cases now emit a
+  `stat-channel-unsupported` warning naming the stat and the requested column.
+
+  This is a warning rather than an error: the layer still renders exactly as
+  before, and after-stat colour is a mapping we intend to support more widely
+  (tracked separately).
+
+  Migration: none — diagnostic only
+
+- fac1f70: <!-- markdownlint-disable MD041 -->
+
+  fix: resolve polygon-ring hits to their own frame row (#916)
+
+  Hits on closed filled rings (`geom_density_2d_filled`, `geom_polygon`,
+  `geom_sf`) resolved through the x-sorted 2×N band reconstruction whenever no
+  coord transform was active, so a vertex could report a neighbouring ring's
+  row — and with it the wrong `after_stat(level)` / `after_stat(density)`.
+  Candidate resolution now prefers the exact per-vertex rows the geometry already
+  emits (`closedFrameRows`) for every closed path, not only after coord
+  projection.
+
+  Migration: none — hit resolution only
+
+- 57d6688: <!-- markdownlint-disable MD041 -->
+
+  fix: trim canvas-scatter showcase so VR smoke stays under budget (#926)
+
+  Reduce the gallery specimen from 10k to 2.5k marks (still above
+  `CANVAS_AUTO_THRESHOLD`) so Playwright VR/gallery capture finish without a
+  180s timeout mask. Wall time under headless Chromium scaled roughly with mark
+  count (~156s at 10k → ~42s at 2.5k).
+
+  Migration: none — docs/example display density only; no public API change.
+
+- bbbcbd6: <!-- markdownlint-disable MD041 -->
+
+  fix: keep binned legend bin edges distinguishable (#955)
+
+  Default binned colour and numeric-style legends formatted edges with axis
+  `tickStep(domain, 5)` precision, so fractional bins on a small domain (e.g.
+  0–4 over 5 bins) could collapse adjacent edges to the same label and emit
+  degenerate ranges like `"2–2"`. Labels now derive decimals from the minimum
+  adjacent bin width so distinct edges stay distinct; integer-edge legends and
+  explicit `labels` formats are unchanged.
+
+  Migration: none — display-only for affected fractional-bin legends
+
+- 36ef799: <!-- markdownlint-disable MD041 -->
+
+  fix: use one consistent format for default temporal tick labels (#962)
+
+  Default (no `dateLabels`) tick sequences no longer mix full dates with bare
+  day numbers, or months with/without years, on the same axis. Visible labels
+  are chosen from the whole sequence span (`Mon d`, or `Mon d, yyyy` when the
+  span crosses years; months/quarters/hours follow the same span-uniform rule).
+  Explicit `dateLabels` and standalone `fullLabel` values are unchanged.
+
+  Migration: none — display-only for default temporal tick abbreviations.
+
+- Updated dependencies [3ec23b0]
+- Updated dependencies [c2e3856]
+- Updated dependencies [5ad437b]
+- Updated dependencies [f2c0997]
+- Updated dependencies [e90a228]
+- Updated dependencies [38af6a8]
+- Updated dependencies [cac7d43]
+- Updated dependencies [a89cc93]
+- Updated dependencies [f0f379c]
+- Updated dependencies [40a43f9]
+- Updated dependencies [158576b]
+- Updated dependencies [a832c75]
+- Updated dependencies [c11861d]
+- Updated dependencies [b90e651]
+- Updated dependencies [ccbb798]
+- Updated dependencies [7f89e9c]
+- Updated dependencies [78fef28]
+- Updated dependencies [0ab78a4]
+- Updated dependencies [a120bed]
+- Updated dependencies [3fb062a]
+- Updated dependencies [da5825e]
+- Updated dependencies [962bf83]
+- Updated dependencies [2154fe1]
+- Updated dependencies [cb8ba46]
+- Updated dependencies [5584a49]
+- Updated dependencies [757b3f5]
+- Updated dependencies [26cfa45]
+- Updated dependencies [1bc9988]
+- Updated dependencies [f08091b]
+- Updated dependencies [dbb883b]
+- Updated dependencies [985ae06]
+- Updated dependencies [fb9a751]
+- Updated dependencies [c0ba287]
+- Updated dependencies [05b0736]
+- Updated dependencies [623b9c1]
+- Updated dependencies [f9690fd]
+- Updated dependencies [0c4919c]
+- Updated dependencies [769bcbf]
+- Updated dependencies [be9687f]
+- Updated dependencies [d6c72c8]
+- Updated dependencies [1a4401d]
+- Updated dependencies [1876fc4]
+- Updated dependencies [6ff72f5]
+- Updated dependencies [8114eb2]
+- Updated dependencies [20b4ddb]
+- Updated dependencies [8f75eb3]
+- Updated dependencies [dfbab7c]
+- Updated dependencies [52d05ee]
+- Updated dependencies [0c12fcb]
+- Updated dependencies [4771f3e]
+- Updated dependencies [57d6688]
+- Updated dependencies [1f60f29]
+- Updated dependencies [4428488]
+  - @ggsvelte/spec@0.12.0
+
 ## 0.11.1
 
 ### Patch Changes
