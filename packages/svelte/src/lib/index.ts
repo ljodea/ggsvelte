@@ -375,6 +375,12 @@ export { default as ScaleColourDatetime } from "./scale/ScaleColorDatetime.svelt
 export { default as ScaleColourManual } from "./scale/ScaleColorManual.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourIdentity } from "./scale/ScaleColorIdentity.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleLinewidthOrdinal } from "./scale/ScaleLinewidthDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleAlphaOrdinal } from "./scale/ScaleAlphaDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleShapeOrdinal } from "./scale/ScaleShapeDiscrete.svelte";
 // </generated:scale-children>
 
 // Coord children (#659 slice 5) — stable-intent: named shells + <Coord>
