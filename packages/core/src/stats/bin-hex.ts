@@ -113,6 +113,11 @@ function finiteRange(values: Float64Array): [number, number] | null {
   return [min, max];
 }
 
+/** Map key for (group slot, axial q, axial r) bins. */
+function hexBinKey(gs: number, q: number, r: number): string {
+  return `${gs}:${q}:${r}`;
+}
+
 export function statBinHex(input: BinHexStatInput): BinHexStatResult {
   const { x, y, groups, weights } = input;
   const params = input.params ?? {};
@@ -164,7 +169,6 @@ export function statBinHex(input: BinHexStatInput): BinHexStatResult {
 
   // Key: groupSlot | q | r  → count
   const counts = new Map<string, number>();
-  const keyOf = (gs: number, q: number, r: number) => `${gs}:${q}:${r}`;
   let dropped = 0;
 
   for (let i = 0; i < nIn; i++) {
@@ -179,7 +183,7 @@ export function statBinHex(input: BinHexStatInput): BinHexStatResult {
     const ny = (yv - ymin) / spanY;
     const { q, r } = pixelToAxial(nx, ny, s);
     const gs = groupSlot.get(groups[i]!)!;
-    const key = keyOf(gs, q, r);
+    const key = hexBinKey(gs, q, r);
     let w = 1;
     if (weights !== null && weights !== undefined) {
       w = Number.isFinite(weights[i]!) ? weights[i]! : 0;

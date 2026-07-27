@@ -52,11 +52,11 @@ export function buildBinHexFrame(
 
   let fillValues: readonly CellValue[] | null = null;
   const fillStat = binding.fill.statColumn ?? null;
-  if (fillStat !== null) {
+  if (fillStat === null) {
+    fillValues = col(binding.fill.field);
+  } else {
     const series = columns[fillStat] ?? result.count;
     fillValues = Array.from(series, (v) => v as CellValue);
-  } else {
-    fillValues = col(binding.fill.field);
   }
 
   return {
