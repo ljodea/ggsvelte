@@ -3872,14 +3872,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/svelte"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-482",
+    id: "heading:guide-lifecycle:experimental-484",
     kind: "heading",
-    title: "experimental (482)",
+    title: "experimental (484)",
     summary:
-      "experimental (482) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-482",
+      "experimental (484) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-484",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (482)"],
+    exact: ["experimental (484)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-138",
@@ -17610,6 +17610,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["coordFixed"],
   },
   {
+    id: "api:ggsvelte-svelte:coordSf",
+    kind: "api",
+    title: "coordSf",
+    summary: "@ggsvelte/svelte · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "experimental"],
+    exact: ["coordSf"],
+  },
+  {
     id: "api:ggsvelte-svelte:coordTransform",
     kind: "api",
     title: "coordTransform",
@@ -17635,6 +17644,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-svelte",
     keywords: ["@ggsvelte/svelte", ".", "value", "experimental"],
     exact: ["coord_fixed"],
+  },
+  {
+    id: "api:ggsvelte-svelte:coord_sf",
+    kind: "api",
+    title: "coord_sf",
+    summary: "@ggsvelte/svelte · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "experimental"],
+    exact: ["coord_sf"],
   },
   {
     id: "api:ggsvelte-svelte:coord_transform",

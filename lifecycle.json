@@ -5457,6 +5457,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "coordSf": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "coordTransform": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5466,6 +5470,10 @@
           "lifecycle": "experimental"
         },
         "coord_fixed": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "coord_sf": {
           "kind": "value",
           "lifecycle": "experimental"
         },
