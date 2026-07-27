@@ -4,8 +4,8 @@ import { DEFAULT_MISSING_COLOR } from "./scales/engine.js";
 import { encodeKey } from "./scales/state.js";
 import { bandKey } from "./scales/train.js";
 import type { SceneLegend, SceneLegendEntry } from "./scene.js";
+import { disambiguatedLabels } from "./domain-labels.js";
 import {
-  disambiguatedLabels,
   LEGEND_ROW_HEIGHT,
   legendTitleHeight,
   PADDING,

@@ -1,7 +1,7 @@
 /** Identity color/fill scale family (pass-through source colors). */
 import type { ColorScaleSpec } from "@ggsvelte/spec";
 
-import { disambiguatedLabels } from "../legend.js";
+import { disambiguatedLabels } from "../domain-labels.js";
 import { normalizeColor } from "../scales/color.js";
 import type { IdentityColorScale } from "../scales/non-position-color.js";
 import { encodeKey } from "../scales/state.js";

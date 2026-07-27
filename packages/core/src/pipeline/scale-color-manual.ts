@@ -1,7 +1,7 @@
 /** Manual color/fill scale family (explicit domain ↔ range). */
 import type { ColorScaleSpec } from "@ggsvelte/spec";
 
-import { disambiguatedLabels } from "../legend.js";
+import { disambiguatedLabels } from "../domain-labels.js";
 import { normalizeColor } from "../scales/color.js";
 import type { ManualColorScale } from "../scales/non-position-color.js";
 import { encodeKey } from "../scales/state.js";

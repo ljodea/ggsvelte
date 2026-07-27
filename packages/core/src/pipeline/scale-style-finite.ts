@@ -2,7 +2,7 @@
 import { LINETYPE_NAMES, POINT_SHAPE_NAMES } from "@ggsvelte/spec";
 
 import { numberFormatter } from "../layout/format.js";
-import { disambiguatedLabels } from "../legend.js";
+import { disambiguatedLabels } from "../domain-labels.js";
 import type { Linetype, PointShape, StyleScale } from "../scales/style.js";
 import { encodeKey, type ScaleState } from "../scales/state.js";
 import { finiteExtent } from "../scales/train.js";

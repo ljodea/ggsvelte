@@ -9,7 +9,6 @@ import { MetricsTableMeasurer } from "../src/layout/measure.ts";
 import {
   assertLegendBlockFitsPlacedArea,
   buildLegends,
-  disambiguatedLabels,
   type DiscreteLegendInput,
   type LegendInput,
 } from "../src/legend.ts";
@@ -27,16 +26,6 @@ function discrete(overrides: Partial<DiscreteLegendInput> = {}): DiscreteLegendI
     ...overrides,
   };
 }
-
-describe("disambiguatedLabels", () => {
-  it("leaves unique band keys alone", () => {
-    expect(disambiguatedLabels(["a", "b", 1])).toEqual(["a", "b", "1"]);
-  });
-
-  it("suffixes colliding band keys with value kind", () => {
-    expect(disambiguatedLabels(["1", 1])).toEqual(["1 (text)", "1 (number)"]);
-  });
-});
 
 describe("buildLegends domain order", () => {
   it("orders present-first-seen by firstSeen within domain", () => {
