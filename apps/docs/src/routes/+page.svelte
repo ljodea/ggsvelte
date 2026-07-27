@@ -131,7 +131,11 @@
     <h2 id="code-path-heading">
       Svelte for builders, JSON for embedded agents.
     </h2>
-    <p>Same chart as Svelte, builder TypeScript, or Spec (JSON).</p>
+    <p>
+      Svelte components help human-agent teams reason about visualizations
+      together. JSON specs allow agents operating in webapps to make interactive
+      charts on demand for rendering on-the-fly.
+    </p>
   </div>
   <CodeTabs {tabs} />
 </section>
