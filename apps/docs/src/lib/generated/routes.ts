@@ -1998,6 +1998,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "abline-scale-unsupported",
+        title: "abline-scale-unsupported",
+        level: 3,
+      },
+      {
         id: "interaction-diagnostics-ggsvelte-svelte",
         title: "Interaction diagnostics (@ggsvelte/svelte)",
         level: 2,
