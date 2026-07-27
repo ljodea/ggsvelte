@@ -48,9 +48,9 @@ export type SurfaceKeyboardInput = {
    */
   readonly inspectionPanel: PanelBounds | null;
   /**
-   * Host: `model?.scene.panels[0]`. Panel-center fallback for `begin-area`
-   * when no inspection anchor; also nudge clamp fallback after inspectionPanel.
-   * Host still uses `panelId(0)` for dispatch (index-based).
+   * Host: first semantic-viewport panel bounds (`panelBoundsFrom(viewport.panels[0].bounds)`).
+   * Panel-center fallback for `begin-area` when no inspection anchor; also
+   * nudge clamp fallback after inspectionPanel (#1038).
    */
   readonly firstPanel: PanelBounds | undefined;
 };

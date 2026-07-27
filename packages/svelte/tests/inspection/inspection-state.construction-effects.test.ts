@@ -16,7 +16,6 @@ import {
   createInspectionState,
   createInteractionReducer,
   defaultInspect,
-  hitFromCandidate,
   modelFor,
   mountInspectionController,
   noInspect,
@@ -128,8 +127,8 @@ describe("createInspectionState scene-reconcile effect", () => {
       },
     });
 
-    const { candidate, hit } = candidateHit(modelA);
-    state.setInspection(hit, "pointer", "transient", "xy", candidate);
+    const { candidate } = candidateHit(modelA);
+    state.setInspection(candidate, "pointer", "transient", "xy");
     flushSync();
     expect(state.inspection?.state).toBe("transient");
     events.length = 0;
@@ -279,9 +278,9 @@ describe("createInspectionState callback replacement", () => {
       oninteraction: () => interactionBox.value,
     });
 
-    const { candidate, hit } = candidateHit(model);
+    const { candidate } = candidateHit(model);
     // No callbacks → resolve still works; no events.
-    state.setInspection(hit, "pointer", "transient", "xy", candidate);
+    state.setInspection(candidate, "pointer", "transient", "xy");
     flushSync();
     expect(inspectEvents).toEqual([]);
 
@@ -310,9 +309,9 @@ describe("createInspectionState callback replacement", () => {
     }
     if (other === null) {
       // Same seed after clear still emits change when fingerprint differs from clear.
-      state.setInspection(hit, "pointer", "transient", "xy", candidate);
+      state.setInspection(candidate, "pointer", "transient", "xy");
     } else {
-      state.setInspection(hitFromCandidate(other), "pointer", "transient", "xy", other);
+      state.setInspection(other, "pointer", "transient", "xy");
     }
     flushSync();
     expect(inspectEvents).toContain("change");

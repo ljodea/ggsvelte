@@ -78,6 +78,14 @@ export interface SemanticViewportPanel {
   ): CandidateMatch | null;
 }
 
+/** Capture-element client box used by `locate` (DOM-free; host supplies rect). */
+export interface ClientRect {
+  readonly left: number;
+  readonly top: number;
+  readonly width: number;
+  readonly height: number;
+}
+
 export interface SemanticViewport {
   readonly panels: readonly SemanticViewportPanel[];
   panel(id: string): SemanticViewportPanel | null;
@@ -88,6 +96,13 @@ export interface SemanticViewport {
    * callers do not reimplement it divergently (#787).
    */
   panelAtOrOnly(point: Readonly<{ x: number; y: number }>): SemanticViewportPanel | null;
+  /**
+   * Map a client pointer position into plot/scene coordinates.
+   * Owns scene scaling and the zero-size guard. Out-of-bounds clients are not
+   * clamped (callers may drag past the capture edge). Host extracts the rect
+   * from the event target — core stays DOM-free (#1038).
+   */
+  locate(clientX: number, clientY: number, rect: ClientRect): Readonly<{ x: number; y: number }>;
 }
 
 type ViewportScales = {
@@ -323,13 +338,18 @@ function createPanel(
   };
 }
 
-export function createSemanticViewport(
-  panels: readonly ScenePanel[],
-  scales: ViewportScales,
-  coordProjectors: readonly PanelCoordProjector[],
-  flipped: boolean,
-  candidates: CandidateStore,
-): SemanticViewport {
+export type CreateSemanticViewportInput = {
+  readonly panels: readonly ScenePanel[];
+  readonly scales: ViewportScales;
+  readonly coordProjectors: readonly PanelCoordProjector[];
+  readonly flipped: boolean;
+  readonly candidates: CandidateStore;
+  /** Plot pixel size used by `locate` for client → scene scaling. */
+  readonly sceneSize: Readonly<{ width: number; height: number }>;
+};
+
+export function createSemanticViewport(input: CreateSemanticViewportInput): SemanticViewport {
+  const { panels, scales, coordProjectors, flipped, candidates, sceneSize } = input;
   const viewportPanels = panels.map((panel, panelIndex) =>
     createPanel(
       panel,
@@ -358,6 +378,13 @@ export function createSemanticViewport(
     panelAt,
     panelAtOrOnly(point) {
       return panelAt(point) ?? (viewportPanels.length === 1 ? (viewportPanels[0] ?? null) : null);
+    },
+    locate(clientX, clientY, rect) {
+      if (rect.width === 0 || rect.height === 0) return { x: 0, y: 0 };
+      return {
+        x: ((clientX - rect.left) / rect.width) * sceneSize.width,
+        y: ((clientY - rect.top) / rect.height) * sceneSize.height,
+      };
     },
   };
 }

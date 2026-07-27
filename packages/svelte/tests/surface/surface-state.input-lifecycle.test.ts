@@ -6,7 +6,6 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { CandidateFacts } from "@ggsvelte/core";
 
-import { hitFromCandidate } from "../../src/lib/surface/plot-px.js";
 import { TOUCH_INSPECT_CLICK_SUPPRESS_MS } from "../../src/lib/surface/pointer.js";
 import {
   firstCandidate,
@@ -21,13 +20,7 @@ describe("createSurfaceState onPointerLeave", () => {
   it("leave clears transient inspection and queues via the deferred microtask", async () => {
     const h = mountSurfaceComposite({ registerEffects: false });
     const candidate = firstCandidate(h.model);
-    h.inspection.setInspection(
-      hitFromCandidate(candidate),
-      "pointer",
-      "transient",
-      "xy",
-      candidate,
-    );
+    h.inspection.setInspection(candidate, "pointer", "transient", "xy");
     flushSync();
     expect(h.inspection.inspection).not.toBeNull();
 
@@ -71,7 +64,7 @@ describe("createSurfaceState keyboard surface", () => {
       if (c !== null && (leftmost === null || c.x < leftmost.x)) leftmost = c;
     }
     if (leftmost === null) throw new Error("expected candidates");
-    h.inspection.setInspection(hitFromCandidate(leftmost), "keyboard", "transient", "xy", leftmost);
+    h.inspection.setInspection(leftmost, "keyboard", "transient", "xy");
     flushSync();
     const before = h.inspection.inspection?.focus.anchor;
     expect(before).toBeDefined();
@@ -90,13 +83,7 @@ describe("createSurfaceState keyboard surface", () => {
   it("Enter/Space pin when inspect tool has pin; Escape dismisses and clears brush draft", () => {
     const h = mountSurfaceComposite({ registerEffects: false });
     const candidate = firstCandidate(h.model);
-    h.inspection.setInspection(
-      hitFromCandidate(candidate),
-      "keyboard",
-      "transient",
-      "xy",
-      candidate,
-    );
+    h.inspection.setInspection(candidate, "keyboard", "transient", "xy");
     flushSync();
 
     h.surface.onSurfaceKeyDown(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
@@ -128,13 +115,7 @@ describe("createSurfaceState keyboard surface", () => {
     h.surface.chooseTool("point");
     flushSync();
     const candidate = firstCandidate(h.model);
-    h.inspection.setInspection(
-      hitFromCandidate(candidate),
-      "keyboard",
-      "transient",
-      "xy",
-      candidate,
-    );
+    h.inspection.setInspection(candidate, "keyboard", "transient", "xy");
     flushSync();
     h.toggleCalls.length = 0;
     h.surface.onSurfaceKeyDown(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
@@ -151,13 +132,7 @@ describe("createSurfaceState onSurfaceBlur", () => {
     const candidate = firstCandidate(h.model);
 
     // Transient inspection
-    h.inspection.setInspection(
-      hitFromCandidate(candidate),
-      "pointer",
-      "transient",
-      "xy",
-      candidate,
-    );
+    h.inspection.setInspection(candidate, "pointer", "transient", "xy");
     flushSync();
     expect(h.inspection.inspection?.state).toBe("transient");
 
@@ -178,13 +153,7 @@ describe("createSurfaceState onSurfaceBlur", () => {
     expect(h.inspection.inspection).toBeNull();
 
     // Pinned survives genuine blur
-    h.inspection.setInspection(
-      hitFromCandidate(candidate),
-      "pointer",
-      "transient",
-      "xy",
-      candidate,
-    );
+    h.inspection.setInspection(candidate, "pointer", "transient", "xy");
     flushSync();
     h.inspection.toggleInspectionPin("keyboard");
     flushSync();
@@ -284,7 +253,7 @@ describe("createSurfaceState pointer cancel vs lost capture", () => {
     const first = firstCandidate(h.model);
     const second = secondCandidate(h.model, first.id);
 
-    h.inspection.setInspection(hitFromCandidate(first), "pointer", "transient", "xy", first);
+    h.inspection.setInspection(first, "pointer", "transient", "xy");
     flushSync();
     h.inspection.toggleInspectionPin("pointer");
     flushSync();
@@ -331,7 +300,7 @@ describe("createSurfaceState pointer cancel vs lost capture", () => {
     const first = firstCandidate(h.model);
     const second = secondCandidate(h.model, first.id);
 
-    h.inspection.setInspection(hitFromCandidate(first), "pointer", "transient", "xy", first);
+    h.inspection.setInspection(first, "pointer", "transient", "xy");
     flushSync();
     h.inspection.toggleInspectionPin("pointer");
     flushSync();

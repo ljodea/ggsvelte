@@ -16,7 +16,6 @@ import {
   createInspectionState,
   type InspectionStateDeps,
 } from "../../src/lib/inspection/inspection-state.svelte.js";
-import { hitFromCandidate } from "../../src/lib/surface/plot-px.js";
 import { withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
 import { modelFor } from "../helpers/model.js";
 
@@ -90,15 +89,16 @@ export function firstCandidate(model: RenderModel): CandidateFacts {
 
 export function candidateHit(model: RenderModel): {
   candidate: CandidateFacts;
-  hit: ReturnType<typeof hitFromCandidate>;
+  /** Same object as candidate; kept so older tests can destructure `{ hit, candidate }`. */
+  hit: CandidateFacts;
 } {
   const candidate = firstCandidate(model);
-  return { candidate, hit: hitFromCandidate(candidate) };
+  return { candidate, hit: candidate };
 }
 
 type ConcreteMode = "exact" | "x" | "y" | "xy";
 
-/** Apply transient/pinned inspection without threading CandidateFacts.mode (oxlint). */
+/** Apply transient/pinned inspection. */
 export function applyInspect(
   state: ReturnType<typeof createInspectionState>,
   candidate: CandidateFacts,
@@ -106,13 +106,7 @@ export function applyInspect(
   inspectionState: "transient" | "pinned" = "transient",
   concreteMode: ConcreteMode = "xy",
 ): void {
-  state.setInspection(
-    hitFromCandidate(candidate),
-    source,
-    inspectionState,
-    concreteMode,
-    candidate,
-  );
+  state.setInspection(candidate, source, inspectionState, concreteMode);
 }
 
 export type InspectionHarness = {
@@ -243,6 +237,6 @@ export function mountInspectionController(
 }
 
 // Re-exports used by construction / armed-getter suites
-export { createInspectionState, createInteractionReducer, modelFor, hitFromCandidate };
+export { createInspectionState, createInteractionReducer, modelFor };
 export { withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
 export type { InspectionStateDeps, RenderModel, CandidateFacts, PortableSpec };

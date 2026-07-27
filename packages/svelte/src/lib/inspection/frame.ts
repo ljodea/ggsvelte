@@ -8,20 +8,19 @@
 import type { CandidateFacts, CandidateMatch } from "@ggsvelte/core";
 
 import type { InteractionSource } from "../interaction/interaction.js";
-import { hitFromCandidate, type SceneHit } from "../surface/plot-px.js";
 
 /** Host inspection lifecycle state used across pure inspection tables. */
 export type InspectionHostState = "none" | "transient" | "pinned";
 
 /**
  * Host queue payload for pointer-move / touch-inspect frames and pending pin restore.
- * `concreteMode` + `candidate` are coupled: both present only when nearest match exists.
+ * `concreteMode` is present only when a nearest match supplied the mode.
+ * Candidate is the sole hit authority — no parallel SceneHit projection (#1038).
  */
 export type QueuedPointerInspection = {
-  hit: SceneHit | null;
+  candidate: CandidateFacts | null;
   source: InteractionSource;
   concreteMode?: "exact" | "x" | "y" | "xy";
-  candidate?: CandidateFacts;
 };
 
 /**
@@ -29,18 +28,16 @@ export type QueuedPointerInspection = {
  * Match is a single object: mode and candidate always come from the same nearest hit.
  */
 export function buildQueuedPointerInspection(input: {
-  readonly hit: SceneHit | null;
   readonly source: InteractionSource;
   readonly match: CandidateMatch | null;
 }): QueuedPointerInspection {
   if (input.match === null) {
-    return { hit: input.hit, source: input.source };
+    return { candidate: null, source: input.source };
   }
   return {
-    hit: input.hit,
+    candidate: input.match,
     source: input.source,
     concreteMode: input.match.mode,
-    candidate: input.match,
   };
 }
 
@@ -68,12 +65,11 @@ export function buildQueuedInspectFrame(input: {
     const fallback = input.fallbackCandidate();
     if (fallback === null)
       return {
-        queued: { hit: null, source: input.source },
+        queued: { candidate: null, source: input.source },
         candidate: null,
       };
-    const hit = hitFromCandidate(fallback);
     return {
-      queued: { hit, source: input.source, candidate: fallback },
+      queued: { candidate: fallback, source: input.source },
       candidate: {
         epoch: input.epoch,
         id: fallback.id,
@@ -84,10 +80,8 @@ export function buildQueuedInspectFrame(input: {
     };
   }
   const match = input.match;
-  const hit = hitFromCandidate(match);
   return {
     queued: buildQueuedPointerInspection({
-      hit,
       source: input.source,
       match,
     }),

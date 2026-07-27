@@ -129,6 +129,8 @@ export type { CoordAxisProjector, PanelCoordProjector } from "./coord-projector.
 // Model-owned plot-pixel ↔ semantic projection
 export type {
   AxisEditModel,
+  ClientRect,
+  CreateSemanticViewportInput,
   NormalizedSpan,
   PlotRect,
   SemanticViewportAxisSelection,

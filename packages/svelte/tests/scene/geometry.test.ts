@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { clamp, frozenZoomDomains, normalizedRect } from "../../src/lib/scene/geometry.js";
+import {
+  clamp,
+  frozenZoomDomains,
+  normalizedRect,
+  panelBoundsFrom,
+} from "../../src/lib/scene/geometry.js";
 
 describe("clamp", () => {
   it("bounds values inclusively", () => {
@@ -32,6 +37,26 @@ describe("normalizedRect", () => {
       y0: 8,
       x1: 10,
       y1: 20,
+    });
+  });
+});
+
+describe("panelBoundsFrom", () => {
+  it("converts PlotRect bounds into xywh for clamp/center callers", () => {
+    expect(panelBoundsFrom({ x0: 12, y0: 34, x1: 112, y1: 84 })).toEqual({
+      x: 12,
+      y: 34,
+      width: 100,
+      height: 50,
+    });
+  });
+
+  it("handles a non-origin panel (faceted offset)", () => {
+    expect(panelBoundsFrom({ x0: 200, y0: 100, x1: 380, y1: 280 })).toEqual({
+      x: 200,
+      y: 100,
+      width: 180,
+      height: 180,
     });
   });
 });

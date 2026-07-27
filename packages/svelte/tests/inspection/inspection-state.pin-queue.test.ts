@@ -15,7 +15,6 @@ import {
   createInteractionReducer,
   defaultInspect,
   firstCandidate,
-  hitFromCandidate,
   keyAtForModel,
   largeGroupSpec,
   modeXInspect,
@@ -38,8 +37,8 @@ describe("createInspectionState setInspection", () => {
       },
     });
 
-    const { candidate, hit } = candidateHit(model);
-    state.setInspection(hit, "pointer", "transient", "xy", candidate);
+    const { candidate } = candidateHit(model);
+    state.setInspection(candidate, "pointer", "transient", "xy");
     flushSync();
     expect(state.inspection).not.toBeNull();
     expect(state.inspection?.state).toBe("transient");
@@ -48,7 +47,7 @@ describe("createInspectionState setInspection", () => {
     expect(events[0]?.phase).toBe("change");
 
     // Same fingerprint → skip emit.
-    state.setInspection(hit, "pointer", "transient", "xy", candidate);
+    state.setInspection(candidate, "pointer", "transient", "xy");
     flushSync();
     expect(events).toHaveLength(1);
 
@@ -82,7 +81,7 @@ describe("createInspectionState setInspection", () => {
       maxDistance: 1e6,
     });
     // Tap applies a different candidate without waiting for the frame.
-    state.setInspection(hitFromCandidate(tap), "touch", "transient", "xy", tap);
+    state.setInspection(tap, "touch", "transient", "xy");
     flushSync();
     expect(state.inspection?.focus.anchor).toEqual({ x: tap.x, y: tap.y });
 
@@ -106,8 +105,8 @@ describe("createInspectionState pin cycle", () => {
       },
     });
 
-    const { candidate, hit } = candidateHit(model);
-    state.setInspection(hit, "pointer", "transient", "xy", candidate);
+    const { candidate } = candidateHit(model);
+    state.setInspection(candidate, "pointer", "transient", "xy");
     flushSync();
     expect(state.inspection?.state).toBe("transient");
 
@@ -131,7 +130,7 @@ describe("createInspectionState pin cycle", () => {
     });
 
     const first = candidateHit(model);
-    state.setInspection(first.hit, "pointer", "transient", "xy", first.candidate);
+    state.setInspection(first.candidate, "pointer", "transient", "xy");
     flushSync();
     state.toggleInspectionPin("pointer");
     flushSync();
@@ -403,8 +402,8 @@ describe("createInspectionState schedulePointerInspect / onInspectPointerFrame",
     });
     controller = state;
 
-    const { candidate, hit } = candidateHit(model);
-    state.setInspection(hit, "pointer", "transient", "xy", candidate);
+    const { candidate } = candidateHit(model);
+    state.setInspection(candidate, "pointer", "transient", "xy");
     flushSync();
     expect(state.inspection?.state).toBe("transient");
 
@@ -453,8 +452,8 @@ describe("createInspectionState setInspection(null) clear ordering", () => {
       return controller;
     });
 
-    const { candidate, hit } = candidateHit(model);
-    handle.value.setInspection(hit, "pointer", "transient", "xy", candidate);
+    const { candidate } = candidateHit(model);
+    handle.value.setInspection(candidate, "pointer", "transient", "xy");
     flushSync();
     log.length = 0;
 
@@ -485,8 +484,7 @@ describe("createInspectionState completeness selection", () => {
     });
 
     const candidate = firstCandidate(model);
-    const hit = hitFromCandidate(candidate);
-    state.setInspection(hit, "pointer", "transient", "x", candidate);
+    state.setInspection(candidate, "pointer", "transient", "x");
     flushSync();
     expect(state.inspection).not.toBeNull();
     const transientCount = state.inspection!.members.length;
@@ -497,7 +495,7 @@ describe("createInspectionState completeness selection", () => {
     // Re-resolve via clear + apply so resolveInspectionCompleteness re-runs.
     state.setInspection(null, "pointer");
     flushSync();
-    state.setInspection(hit, "pointer", "transient", "x", candidate);
+    state.setInspection(candidate, "pointer", "transient", "x");
     flushSync();
     expect(state.inspection!.members.length).toBeGreaterThan(8);
     expect(state.inspection!.members.length).toBe(12);

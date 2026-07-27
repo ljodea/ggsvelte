@@ -452,4 +452,102 @@ describe("RenderModel semantic viewport", () => {
       })?.id,
     ).toBe(first.id);
   });
+
+  it("locate maps client coordinates into scene space under CSS scale", () => {
+    // Scene 400×200; CSS-scaled capture rect 200×100 at (100,100) → 2× scale on both axes.
+    const model = runPipeline(
+      gg(
+        [
+          { x: 0, y: 0 },
+          { x: 10, y: 10 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .scales({
+          x: { domain: [0, 10], nice: false, expand: { mult: 0, add: 0 } },
+          y: { domain: [0, 10], nice: false, expand: { mult: 0, add: 0 } },
+        })
+        .spec(),
+      { width: 400, height: 200 },
+    );
+    expect(model.scene.width).toBe(400);
+    expect(model.scene.height).toBe(200);
+    expect(
+      model.viewport.locate(150, 120, { left: 100, top: 100, width: 200, height: 100 }),
+    ).toEqual({ x: 100, y: 40 });
+  });
+
+  it("locate accounts for non-zero rect offset and non-square CSS scale", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 0, y: 0 },
+          { x: 10, y: 10 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .spec(),
+      { width: 300, height: 150 },
+    );
+    // rect 100×50 → scale 3× on x, 3× on y; client at rect origin → plot origin.
+    expect(model.viewport.locate(40, 60, { left: 40, top: 60, width: 100, height: 50 })).toEqual({
+      x: 0,
+      y: 0,
+    });
+    // Mid-rect client: ((90-40)/100)*300 = 150, ((85-60)/50)*150 = 75.
+    expect(model.viewport.locate(90, 85, { left: 40, top: 60, width: 100, height: 50 })).toEqual({
+      x: 150,
+      y: 75,
+    });
+  });
+
+  it("locate returns origin when the capture element has zero size", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 0, y: 0 },
+          { x: 10, y: 10 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 200 },
+    );
+    expect(model.viewport.locate(10, 10, { left: 0, top: 0, width: 0, height: 50 })).toEqual({
+      x: 0,
+      y: 0,
+    });
+    expect(model.viewport.locate(10, 10, { left: 0, top: 0, width: 50, height: 0 })).toEqual({
+      x: 0,
+      y: 0,
+    });
+  });
+
+  it("locate does not clamp out-of-bounds client coordinates", () => {
+    // Drag past the capture edge must keep negative / past-edge plot coords.
+    const model = runPipeline(
+      gg(
+        [
+          { x: 0, y: 0 },
+          { x: 10, y: 10 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomPoint()
+        .spec(),
+      { width: 100, height: 100 },
+    );
+    expect(model.viewport.locate(50, 50, { left: 100, top: 100, width: 100, height: 100 })).toEqual(
+      {
+        x: -50,
+        y: -50,
+      },
+    );
+    expect(
+      model.viewport.locate(250, 250, { left: 100, top: 100, width: 100, height: 100 }),
+    ).toEqual({ x: 150, y: 150 });
+  });
 });

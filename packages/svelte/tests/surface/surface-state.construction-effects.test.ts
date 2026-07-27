@@ -4,7 +4,6 @@
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
-import { hitFromCandidate } from "../../src/lib/surface/plot-px.js";
 import { withEffectRoot } from "../helpers/effect-root.svelte.js";
 import {
   continuousSpec,
@@ -348,13 +347,7 @@ describe("createSurfaceState outside-pointer effect", () => {
   it("pinned + outside pointerdown closes; inside does not; window blur cancels draft", () => {
     const h = mountSurfaceComposite({ registerEffects: true });
     const candidate = firstCandidate(h.model);
-    h.inspection.setInspection(
-      hitFromCandidate(candidate),
-      "pointer",
-      "transient",
-      "xy",
-      candidate,
-    );
+    h.inspection.setInspection(candidate, "pointer", "transient", "xy");
     flushSync();
     h.inspection.toggleInspectionPin("pointer");
     flushSync();

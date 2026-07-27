@@ -39,10 +39,9 @@ import {
   type IntervalQueryScene,
 } from "../interval/query.js";
 import { BRUSH_SECOND_CORNER_ANNOUNCEMENT } from "../assembly/labels.js";
-import { normalizedRect } from "../scene/geometry.js";
+import { normalizedRect, panelBoundsFrom } from "../scene/geometry.js";
 import { brushAtPoint, brushWithEnd } from "./area-brush.js";
 import type { FinishBrushAction } from "./brush-finish.js";
-import { hitFromCandidate, plotPointFromClient } from "./plot-px.js";
 import { resolveSurfaceKeyAction } from "./keyboard.js";
 import {
   advanceTouchInspectMoved,
@@ -240,10 +239,11 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
     x: number;
     y: number;
   } {
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    const scene = deps.model()?.scene;
-    if (scene === undefined) return { x: 0, y: 0 };
-    return plotPointFromClient(event.clientX, event.clientY, rect, scene);
+    const model = deps.model();
+    if (model === null) return { x: 0, y: 0 };
+    const target = event.currentTarget as HTMLElement | null;
+    if (target === null) return { x: 0, y: 0 };
+    return model.viewport.locate(event.clientX, event.clientY, target.getBoundingClientRect());
   }
 
   function panelAtPoint(point: Readonly<{ x: number; y: number }>) {
@@ -464,9 +464,7 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
           maxDistance: action.maxDistance,
         });
         if (match !== null && match !== undefined) {
-          deps
-            .inspection()
-            .setInspection(hitFromCandidate(match), "touch", action.state, match.mode, match);
+          deps.inspection().setInspection(match, "touch", action.state, match.mode);
           suppressClickUntil = performance.now() + TOUCH_INSPECT_CLICK_SUPPRESS_MS;
         }
         break;
@@ -511,7 +509,11 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
       sourceKeys: inspection.inspection?.focus.sourceKeys ?? [],
       inspectionAnchor: inspection.inspection?.focus.anchor ?? null,
       inspectionPanel: inspection.inspectionPanel,
-      firstPanel: deps.model()?.scene.panels[0],
+      // Viewport is the sole panel authority — not scene.panels[0] (#1038).
+      firstPanel: (() => {
+        const panel = deps.model()?.viewport.panels[0];
+        return panel === undefined ? undefined : panelBoundsFrom(panel.bounds);
+      })(),
     });
     if (preventDefault) event.preventDefault();
     switch (action.type) {

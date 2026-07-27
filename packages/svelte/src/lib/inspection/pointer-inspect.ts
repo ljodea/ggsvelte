@@ -18,7 +18,6 @@ import type { CandidateFacts, RenderModel } from "@ggsvelte/core";
 
 import type { InteractionAction, InteractionFrameToken } from "../interaction/reducer.js";
 import type { InteractionSource } from "../interaction/interaction.js";
-import type { SceneHit } from "../surface/plot-px.js";
 import {
   buildQueuedInspectFrame,
   resolveQueuedInspectFrameAction,
@@ -57,11 +56,10 @@ export type PointerInspectQueueDeps = {
   /** Host: `inspection === null ? "none" : inspection.state`. */
   inspectionState: () => InspectionHostState;
   setInspection: (
-    hit: SceneHit | null,
+    candidate: CandidateFacts | null,
     source: InteractionSource,
     state?: "transient" | "pinned",
     concreteMode?: "exact" | "x" | "y" | "xy",
-    candidate?: CandidateFacts,
   ) => void;
 };
 
@@ -164,13 +162,7 @@ export function createPointerInspectQueue(deps: PointerInspectQueueDeps): Pointe
         return true;
       case "apply-pending":
         if (pending !== null) {
-          deps.setInspection(
-            pending.hit,
-            pending.source,
-            "transient",
-            pending.concreteMode,
-            pending.candidate,
-          );
+          deps.setInspection(pending.candidate, pending.source, "transient", pending.concreteMode);
         }
         return true;
     }

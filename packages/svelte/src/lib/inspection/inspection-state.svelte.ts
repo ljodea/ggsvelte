@@ -21,7 +21,7 @@
  */
 import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
 
-import type { PanelBounds } from "../scene/geometry.js";
+import { panelBoundsFrom, type PanelBounds } from "../scene/geometry.js";
 
 import { createInspectionCoordinator } from "./coordinator.js";
 import type { createInteractionReducer } from "../interaction/reducer.js";
@@ -34,7 +34,6 @@ import type {
 } from "../interaction/interaction.js";
 import { inspectionLiveText as inspectionLiveTextFor } from "../assembly/labels.js";
 import { plotTooltipDomId } from "../assembly/layout.js";
-import { hitFromCandidate, type SceneHit } from "../surface/plot-px.js";
 import {
   resolveInspectionCompleteness,
   resolveInspectionMode,
@@ -107,11 +106,10 @@ export type InspectionState = {
   /** Seed candidate for presentation chrome (kind); not emitted on public events. */
   readonly inspectionSeed: CandidateFacts | null;
   setInspection(
-    hit: SceneHit | null,
+    candidate: CandidateFacts | null,
     source: InteractionSource,
     state?: "transient" | "pinned",
     concreteMode?: "exact" | "x" | "y" | "xy",
-    candidate?: CandidateFacts,
   ): void;
   toggleInspectionPin(source: InteractionSource): void;
   /**
@@ -185,8 +183,8 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     model: () => deps.model(),
     reducer: () => reducerOf(),
     inspectionState: () => (inspection === null ? "none" : inspection.state),
-    setInspection: (hit, source, state, concreteMode, candidate) => {
-      setInspection(hit, source, state, concreteMode, candidate);
+    setInspection: (candidate, source, state, concreteMode) => {
+      setInspection(candidate, source, state, concreteMode);
     },
   });
 
@@ -200,14 +198,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     if (panelId === null) return null;
     const viewportPanel = deps.model()!.viewport.panel(panelId);
     if (viewportPanel === null) return null;
-    const { x0, y0, x1, y1 } = viewportPanel.bounds;
-    return {
-      id: viewportPanel.id,
-      x: x0,
-      y: y0,
-      width: x1 - x0,
-      height: y1 - y0,
-    };
+    return { id: viewportPanel.id, ...panelBoundsFrom(viewportPanel.bounds) };
   });
 
   // Coordinator closes over keyAt — handler-only invocation (deferred).
@@ -218,17 +209,13 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   let reconciledRun = -1;
 
   function resolveInspection(
-    hit: SceneHit,
+    seed: CandidateFacts,
     source: InteractionSource,
     state: "transient" | "pinned" = "transient",
     concreteMode?: "exact" | "x" | "y" | "xy",
-    candidate?: CandidateFacts,
   ) {
     const model = deps.model();
     if (model === null) throw new Error("Cannot resolve inspection without a render model");
-    const seed =
-      candidate ?? model.candidates.nearest(hit.x, hit.y, { mode: "exact", maxDistance: 0 });
-    if (seed === null) throw new Error("Inspection hit was not present in the candidate store");
     const requested = deps.inspectConfig()?.mode ?? "auto";
     const mode = resolveInspectionMode({
       concreteMode,
@@ -275,17 +262,16 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
   }
 
   function setInspection(
-    hit: SceneHit | null,
+    candidate: CandidateFacts | null,
     source: InteractionSource,
     state: "transient" | "pinned" = "transient",
     concreteMode?: "exact" | "x" | "y" | "xy",
-    candidate?: CandidateFacts,
   ): void {
     // Announcement clear runs before priority gates (including ignored
     // keyboard/touch requests while pinned).
     if (
       shouldClearInspectionAnnouncement({
-        hasHit: hit !== null,
+        hasHit: candidate !== null,
         source,
       })
     )
@@ -298,7 +284,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
       pointerQueue.cancel({ pendingPinned: "preserve" });
     }
     const action = resolveSetInspectionAction({
-      hasHit: hit !== null,
+      hasHit: candidate !== null,
       requestedState: state,
       currentState: inspection === null ? "none" : inspection.state,
       tooltipHovered: deps.tooltipHovered(),
@@ -318,8 +304,8 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
         return;
       }
       case "apply": {
-        // hit is non-null when action is apply (pure gate).
-        const resolved = resolveInspection(hit!, source, state, concreteMode, candidate);
+        // candidate is non-null when action is apply (pure gate).
+        const resolved = resolveInspection(candidate!, source, state, concreteMode);
         // Null resolve re-enters clear gates via setInspection(null, source).
         if (resolved === null) {
           setInspection(null, source);
@@ -361,23 +347,16 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
         inspection = null;
         inspectionSeed = null;
         setInspection(
-          pinAction.pending.hit,
+          pinAction.pending.candidate,
           pinAction.pending.source,
           "transient",
           pinAction.pending.concreteMode,
-          pinAction.pending.candidate,
         );
         return;
       }
       case "flip": {
         const nextState = pinAction.state;
-        const resolved = resolveInspection(
-          hitFromCandidate(inspectionSeed!),
-          source,
-          nextState,
-          inspection!.mode,
-          inspectionSeed!,
-        );
+        const resolved = resolveInspection(inspectionSeed!, source, nextState, inspection!.mode);
         if (resolved === null) return;
         inspection = resolved.snapshot;
         inspectionSeed = resolved.seed;
@@ -455,7 +434,7 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     const candidate = deps.model()?.candidates.candidate(id);
     if (candidate === null || candidate === undefined) return;
     activeCandidateId = id;
-    setInspection(hitFromCandidate(candidate), "keyboard", "transient", undefined, candidate);
+    setInspection(candidate, "keyboard", "transient");
   }
 
   function navigate(delta: number): void {
