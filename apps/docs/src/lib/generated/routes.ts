@@ -2018,6 +2018,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "hex-band-scale",
+        title: "hex-band-scale",
+        level: 3,
+      },
+      {
+        id: "hex-missing-size",
+        title: "hex-missing-size",
+        level: 3,
+      },
+      {
         id: "interaction-diagnostics-ggsvelte-svelte",
         title: "Interaction diagnostics (@ggsvelte/svelte)",
         level: 2,

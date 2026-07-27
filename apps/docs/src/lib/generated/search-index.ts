@@ -3354,6 +3354,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["function-fun-unknown"],
   },
   {
+    id: "heading:guide-errors:hex-band-scale",
+    kind: "heading",
+    title: "hex-band-scale",
+    summary:
+      "hex-band-scale in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#hex-band-scale",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["hex-band-scale"],
+  },
+  {
+    id: "heading:guide-errors:hex-missing-size",
+    kind: "heading",
+    title: "hex-missing-size",
+    summary:
+      "hex-missing-size in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#hex-missing-size",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["hex-missing-size"],
+  },
+  {
     id: "heading:guide-errors:interaction-diagnostics-ggsvelte-svelte",
     kind: "heading",
     title: "Interaction diagnostics (@ggsvelte/svelte)",
@@ -23668,6 +23688,34 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["function-fun-unknown", "warning:function-fun-unknown"],
+  },
+  {
+    id: "diagnostic:warning:hex-band-scale",
+    kind: "diagnostic",
+    title: "hex-band-scale · warning",
+    summary:
+      "geom_hex needs continuous x and y scales for hexagonal binning; the layer is skipped on band axes.",
+    href: "/guide/errors#hex-band-scale",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["hex-band-scale", "warning:hex-band-scale"],
+  },
+  {
+    id: "diagnostic:warning:hex-missing-size",
+    kind: "diagnostic",
+    title: "hex-missing-size · warning",
+    summary:
+      "geom_hex is missing per-cell width/height from bin_hex (identity or incomplete frame); the layer is skipped.",
+    href: "/guide/errors#hex-missing-size",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["hex-missing-size", "warning:hex-missing-size"],
   },
   {
     id: "diagnostic:interaction:INTERACTION_INTERVAL_FACET_UNSUPPORTED",
