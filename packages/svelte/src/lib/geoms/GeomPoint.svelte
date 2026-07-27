@@ -29,9 +29,10 @@
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
     aes?: AesInput;
     /**
-     * identity | unique | summary_bin (#817) | manual (#814).
+     * identity | unique | summary_bin (#817) | manual (#814) |
+     * sum (geom_count overplotting; #795).
      */
-    stat?: "identity" | "unique" | "summary_bin" | "manual";
+    stat?: "identity" | "unique" | "summary_bin" | "manual" | "sum";
     /** Position adjustment: "identity" (default) | "jitter" (seeded) | "nudge". */
     position?: PointPosition;
     /** Jitter (width/height/seed) or nudge (x/y) parameters. */

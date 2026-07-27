@@ -6,7 +6,7 @@ import { encodeKey, type ScaleState } from "../scales/state.js";
 import { finiteExtent } from "../scales/train.js";
 import type { CellValue } from "../table.js";
 
-import { resolveStyleLegendFormat } from "./scale-color-sequential-format.js";
+import { minAdjacentWidth, resolveStyleLegendFormat } from "./scale-color-sequential-format.js";
 import { discreteStyleResolution, styleGuideEntry } from "./scale-style-discrete.js";
 import type { NumericStyleAesthetic, StyleResolution } from "./scale-style-types.js";
 import { resolveNumericStyleValueView, type NumericStyleConfig } from "./scale-style-values.js";
@@ -24,7 +24,10 @@ const NUMERIC_DEFAULT_CONSTANT: Record<NumericStyleAesthetic, number> = {
 };
 
 function numericOutputValid(aesthetic: NumericStyleAesthetic, value: number): boolean {
-  return Number.isFinite(value) && (aesthetic === "alpha" ? value >= 0 && value <= 1 : value > 0);
+  if (!Number.isFinite(value)) return false;
+  if (aesthetic === "alpha") return value >= 0 && value <= 1;
+  // size may be 0 under sizeUnit area_zero (zero→zero area, #830); linewidth ≥ 0.
+  return value >= 0;
 }
 
 function numericFallback(
@@ -42,9 +45,21 @@ function numericMappedValue(
   aesthetic: NumericStyleAesthetic,
   t: number,
   range: readonly [number, number],
+  sizeUnit: "area" | "radius" | "area_zero" | undefined,
 ): number {
   const bounded = Math.min(1, Math.max(0, t));
   if (aesthetic === "size") {
+    // radius: linear length map (ggplot2 scale_radius).
+    if (sizeUnit === "radius") {
+      return range[0] + bounded * (range[1] - range[0]);
+    }
+    // area_zero: value ∝ area (ggplot2 scale_size_area). Use both range endpoints
+    // so reverse (which swaps them in place) still maps non-degenerately: [0, max]
+    // → max·√t; [max, 0] → max·√(1−t). Domain still includes 0 via train path.
+    if (sizeUnit === "area_zero") {
+      return Math.sqrt(range[0] * range[0] + bounded * (range[1] * range[1] - range[0] * range[0]));
+    }
+    // default area: interpolate by area between range endpoints (existing contract).
     return Math.sqrt(range[0] * range[0] + bounded * (range[1] * range[1] - range[0] * range[0]));
   }
   return range[0] + bounded * (range[1] - range[0]);
@@ -106,7 +121,7 @@ function numericSequentialResolution(input: {
     );
   }
   const extent = finiteExtent([view.semantic]);
-  const domain =
+  let domain =
     boundaryDomain ??
     (mappedDomain?.[0] !== undefined && mappedDomain[1] !== undefined
       ? ([mappedDomain[0], mappedDomain[1]] as [number, number])
@@ -117,6 +132,12 @@ function numericSequentialResolution(input: {
       `/scales/${aesthetic}`,
       `No finite values can train the ${aesthetic} scale.`,
     );
+  }
+  // scale_size_area: force the domain to include zero so zero→zero area (#830).
+  if (aesthetic === "size" && config?.sizeUnit === "area_zero") {
+    const lo = Math.min(domain[0], domain[1], 0);
+    const hi = Math.max(domain[0], domain[1], 0);
+    domain = [lo, hi];
   }
   const low = Math.min(domain[0], domain[1]);
   const high = Math.max(domain[0], domain[1]);
@@ -183,7 +204,7 @@ function numericSequentialResolution(input: {
     } else {
       t = high === low ? 0.5 : (bounded - low) / (high - low);
     }
-    return numericMappedValue(aesthetic, t, range);
+    return numericMappedValue(aesthetic, t, range, config?.sizeUnit);
   };
   let unknownCount = 0;
   for (const value of values) {
@@ -218,12 +239,14 @@ function numericSequentialResolution(input: {
     kind === "binned"
       ? boundaries.slice(0, -1)
       : ((sequentialBreaks as number[] | undefined) ?? linearTicks(low, high, 5));
+  const formatStep = kind === "binned" ? minAdjacentWidth(boundaries) : undefined;
   const formatter = resolveStyleLegendFormat({
     domain,
     temporalKind: view.temporalKind,
     config,
     name: aesthetic,
     warnings,
+    ...(formatStep !== undefined && { formatStep }),
   });
   const entries = ticks.map((value, index) =>
     styleGuideEntry(
@@ -398,7 +421,7 @@ export function resolveNumericStyleScale(input: {
   const range = [
     ...(config?.range ??
       Array.from({ length: 5 }, (_, index) =>
-        numericMappedValue(aesthetic, index / 4, defaultRange),
+        numericMappedValue(aesthetic, index / 4, defaultRange, config?.sizeUnit),
       )),
   ];
   if (config?.reverse === true) range.reverse();

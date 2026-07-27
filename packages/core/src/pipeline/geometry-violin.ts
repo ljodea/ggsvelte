@@ -1,0 +1,209 @@
+/**
+ * Violin path geometry: mirrored density polygons per (x, group).
+ */
+import type { ViolinParams } from "@ggsvelte/spec";
+
+import { layerPaintFromParams, resolveGlow, resolveGradientPaint } from "../mark-paint.js";
+import type { PathsBatch } from "../scene.js";
+
+import { encodeKey } from "../scales/state.js";
+
+import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
+import { colorOf } from "./types.js";
+import type { Frame } from "./geometry-shared.js";
+import {
+  DEFAULT_BOXPLOT_WIDTH,
+  MAX_BOXPLOT_PANEL_FRAC,
+  positionOf,
+  removedWarning,
+} from "./geometry-shared.js";
+import { numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
+import { areaGroupFillOf } from "./geometry-paths-area-fill.js";
+
+function sortRowsByY(rows: number[], y: Float64Array): number[] {
+  return rows.toSorted((a, b) => y[a]! - y[b]!);
+}
+
+/** Bucket by (x category, group) so each violin is a separate closed path. */
+function bucketViolinRows(
+  frame: LayerFrame,
+  fx: Frame,
+  y: Float64Array,
+  warnings: PipelineWarning[],
+): number[][] {
+  const map = new Map<string, number[]>();
+  const order: string[] = [];
+  let removed = 0;
+  for (let row = 0; row < frame.n; row++) {
+    const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
+    const ty = positionOf(fx.yScale, y, frame.yValues, row);
+    if (Number.isNaN(tx) || Number.isNaN(ty)) {
+      removed++;
+      continue;
+    }
+    const key = `${encodeKey(frame.xValues?.[row] ?? null)}\0${frame.groups[row]!}`;
+    let rows = map.get(key);
+    if (rows === undefined) {
+      rows = [];
+      map.set(key, rows);
+      order.push(key);
+    }
+    rows.push(row);
+  }
+  removedWarning(removed, frame.binding.index, warnings);
+  return order.map((k) => map.get(k)!);
+}
+
+function strokeOf(
+  frame: LayerFrame,
+  color: ResolvedColorScale | null,
+  rows: readonly number[],
+): string | null {
+  const { binding } = frame;
+  let stroke: string | null = binding.color.constant;
+  if (color !== null && (frame.colorValues !== null || binding.color.scaledConstant !== null)) {
+    const first = rows[0]!;
+    const value =
+      frame.colorValues === null ? binding.color.scaledConstant! : frame.colorValues[first]!;
+    stroke = colorOf(color, value);
+  }
+  return stroke;
+}
+
+export function violinBatch(
+  frame: LayerFrame,
+  fx: Frame,
+  fill: ResolvedColorScale | null,
+  color: ResolvedColorScale | null,
+  styles: ResolvedStyleScales,
+  warnings: PipelineWarning[],
+): PathsBatch | null {
+  const { binding } = frame;
+  if (frame.yNumeric === null || frame.ymin === null) return null;
+  // ymin carries unitless violinwidth (0–1 × scale factor) from ydensity frame.
+  const violinwidth = frame.ymin;
+  const y = frame.yNumeric;
+
+  const groupRows = bucketViolinRows(frame, fx, y, warnings);
+  if (groupRows.length === 0) return null;
+
+  const params = (binding.layer.params ?? {}) as ViolinParams;
+  const widthParam = params.width ?? DEFAULT_BOXPLOT_WIDTH;
+  // Same band-fraction model as boxplot (normalized units, not px yet).
+  let widthFrac = widthParam * (fx.xScale.type === "band" ? fx.xScale.step : 1);
+  if (params.width === undefined && fx.xScale.type === "band") {
+    widthFrac = Math.min(widthFrac, MAX_BOXPLOT_PANEL_FRAC);
+  }
+
+  const paint = layerPaintFromParams(binding.layer.params);
+  const fillPaintResolved =
+    paint.fillPaint === null
+      ? undefined
+      : resolveGradientPaint(paint.fillPaint, binding.index, "fill");
+  const strokePaintResolved =
+    paint.strokePaint === null
+      ? undefined
+      : resolveGradientPaint(paint.strokePaint, binding.index, "stroke");
+  const glowResolved = paint.glow === null ? undefined : resolveGlow(paint.glow, binding.index);
+
+  const sortedGroups: number[][] = [];
+  let total = 0;
+  for (const rows of groupRows) {
+    const sorted = sortRowsByY(rows, y);
+    if (sorted.length < 2) continue;
+    sortedGroups.push(sorted);
+    total += sorted.length * 2;
+  }
+  if (sortedGroups.length === 0) return null;
+
+  const positions = new Float32Array(total * 2);
+  const rowIndex = new Uint32Array(total);
+  const closedFrameRows = new Uint32Array(total);
+  const pathOffsets = new Uint32Array(sortedGroups.length + 1);
+  const fills: (string | null)[] = [];
+  const strokes: (string | null)[] = [];
+  let cursor = 0;
+
+  for (let s = 0; s < sortedGroups.length; s++) {
+    pathOffsets[s] = cursor;
+    const rows = sortedGroups[s]!;
+    const first = rows[0]!;
+    let center = positionOf(fx.xScale, frame.xNumeric, frame.xValues, first);
+    let w = widthFrac;
+    if (frame.dodge !== null) {
+      const slotCount = Math.max(1, frame.dodge.slotCounts[first]!);
+      const slot = frame.dodge.slot[first]!;
+      w = widthFrac / slotCount;
+      center = center + widthFrac * ((slot + 0.5) / slotCount - 0.5);
+    }
+    const centerPx = center * fx.innerWidth;
+    const halfMaxPx = (w / 2) * fx.innerWidth;
+
+    // Right edge ascending in y, then left edge descending → closed violin.
+    for (const row of rows) {
+      const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
+      const half = halfMaxPx * Math.max(0, violinwidth[row]!);
+      positions[cursor * 2] = centerPx + half;
+      positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
+      rowIndex[cursor] = frame.rowIndex[row]!;
+      closedFrameRows[cursor] = row;
+      cursor++;
+    }
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const row = rows[i]!;
+      const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
+      const half = halfMaxPx * Math.max(0, violinwidth[row]!);
+      positions[cursor * 2] = centerPx - half;
+      positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
+      rowIndex[cursor] = frame.rowIndex[row]!;
+      closedFrameRows[cursor] = row;
+      cursor++;
+    }
+    fills.push(areaGroupFillOf(frame, fill, rows) ?? fillPaintResolved?.fallback ?? null);
+    let stroke = strokeOf(frame, color, rows);
+    if (stroke === null && strokePaintResolved !== undefined) {
+      stroke = strokePaintResolved.fallback;
+    }
+    strokes.push(stroke);
+  }
+  pathOffsets[sortedGroups.length] = cursor;
+
+  const mappedAlphas = numericStyleVector(
+    frame,
+    "alpha",
+    sortedGroups.map((rows) => rows[0]!),
+    styles,
+  );
+  const subpathCount = pathOffsets.length - 1;
+  const constantAlpha =
+    typeof binding.alpha.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1);
+  const alphas =
+    mappedAlphas ??
+    (subpathCount > 1 && constantAlpha !== 1
+      ? Float32Array.from({ length: subpathCount }, () => constantAlpha)
+      : undefined);
+  const linewidth =
+    typeof binding.linewidth.constant === "number"
+      ? binding.linewidth.constant
+      : (params.linewidth ?? 0.5);
+
+  return {
+    kind: "paths",
+    layerIndex: binding.index,
+    panelIndex: 0,
+    positions: positions.subarray(0, cursor * 2).slice(),
+    rowIndex: rowIndex.subarray(0, cursor).slice(),
+    closedFrameRows: closedFrameRows.subarray(0, cursor).slice(),
+    pathOffsets,
+    strokes,
+    fills,
+    closed: true,
+    linewidth,
+    alpha: alphas === undefined ? constantAlpha : 1,
+    ...(alphas !== undefined && { alphas }),
+    curve: "linear",
+    ...(fillPaintResolved !== undefined && { fillPaint: fillPaintResolved }),
+    ...(strokePaintResolved !== undefined && { strokePaint: strokePaintResolved }),
+    ...(glowResolved !== undefined && { glow: glowResolved }),
+  };
+}

@@ -1,0 +1,61 @@
+{
+  "id": "96-range-geoms-identity",
+  "kind": "chart",
+  "prompt": "Show geom_linerange, geom_pointrange, and geom_crossbar for each group: identity stems/boxes from lo to hi with mid at mid.",
+  "dataProfile": {
+    "fields": [
+      { "name": "group", "type": "nominal", "examples": ["a", "b", "c"] },
+      { "name": "mid", "type": "quantitative" },
+      { "name": "lo", "type": "quantitative" },
+      { "name": "hi", "type": "quantitative" }
+    ],
+    "rowCount": 3
+  },
+  "data": {
+    "main": [
+      { "group": "a", "mid": 5, "lo": 3, "hi": 7 },
+      { "group": "b", "mid": 8, "lo": 6, "hi": 10 },
+      { "group": "c", "mid": 2, "lo": 1, "hi": 4 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "linerange",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "group" },
+          "ymin": { "field": "lo" },
+          "ymax": { "field": "hi" }
+        }
+      },
+      {
+        "geom": "pointrange",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "group" },
+          "y": { "field": "mid" },
+          "ymin": { "field": "lo" },
+          "ymax": { "field": "hi" }
+        }
+      },
+      {
+        "geom": "crossbar",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "group" },
+          "y": { "field": "mid" },
+          "ymin": { "field": "lo" },
+          "ymax": { "field": "hi" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Interval family identity forms (#793): linerange, pointrange, crossbar."
+}

@@ -42,14 +42,13 @@ export function makeAxisFormatter(
   if (labels === undefined) {
     if (scale.type !== "time") return undefined;
     const kind = resolvedTemporalKind ?? config?.temporalKind ?? "datetime";
-    const format = compileTemporalLabelFormat(
-      kind === "date" ? "%Y-%m-%d" : "%Y-%m-%d %H:%M:%S %Z",
-      {
-        kind,
-        locale: config?.locale ?? "en-US",
-        timezone: config?.timezone ?? "UTC",
-      },
-    );
+    const defaultPattern =
+      kind === "date" ? "%Y-%m-%d" : kind === "time" ? "%H:%M:%S" : "%Y-%m-%d %H:%M:%S %Z";
+    const format = compileTemporalLabelFormat(defaultPattern, {
+      kind,
+      locale: config?.locale ?? "en-US",
+      timezone: config?.timezone ?? "UTC",
+    });
     return (value) => format(value as number);
   }
   if (scale.type === "band") {

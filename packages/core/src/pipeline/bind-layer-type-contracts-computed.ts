@@ -36,7 +36,28 @@ export function validateComputedYAndBinContracts(input: {
       "The density geom computes y with the density stat, so aes.y must not map data. Map only x.",
     );
   }
-  if (stat === "bin" || stat === "summary_bin") {
+  if ((geom === "function" || stat === "function") && yField !== null) {
+    throw new PipelineError(
+      "computed-y-mapped",
+      `/layers/${index}/aes/y`,
+      "The function geom/stat computes y from the named function, so aes.y must not map data.",
+    );
+  }
+  if (stat === "ecdf" && yField !== null) {
+    throw new PipelineError(
+      "computed-y-mapped",
+      `/layers/${index}/aes/y`,
+      "The ecdf stat computes y (cumulative proportion), so aes.y must not map data. Map only x.",
+    );
+  }
+  if ((geom === "dotplot" || stat === "bindot") && yField !== null) {
+    throw new PipelineError(
+      "computed-y-mapped",
+      `/layers/${index}/aes/y`,
+      "The dotplot geom computes y with the bindot stat, so aes.y must not map data. Map only x.",
+    );
+  }
+  if (stat === "bin" || stat === "summary_bin" || stat === "bindot") {
     const p = params as BarParams;
     if (p.center !== undefined && p.boundary !== undefined) {
       throw new PipelineError(
@@ -46,13 +67,13 @@ export function validateComputedYAndBinContracts(input: {
       );
     }
     if (xField !== null && positionFieldType(table, xField, xConversion) === "nominal") {
-      throw new PipelineError(
-        "channel-type-mismatch",
-        `/layers/${index}/aes/x`,
+      const msg =
         stat === "summary_bin"
           ? `The summary_bin stat needs a continuous x, but field "${xField}" is nominal.`
-          : `The bin stat needs a continuous x, but field "${xField}" is nominal. Use geom "bar" (the count stat) to count categories instead.`,
-      );
+          : stat === "bindot"
+            ? `The bindot stat needs a continuous x, but field "${xField}" is nominal.`
+            : `The bin stat needs a continuous x, but field "${xField}" is nominal. Use geom "bar" (the count stat) to count categories instead.`;
+      throw new PipelineError("channel-type-mismatch", `/layers/${index}/aes/x`, msg);
     }
   }
 }

@@ -19,7 +19,12 @@ export function computePanelBinRanges(
 ): Array<[number, number] | undefined> {
   return bindings.map((binding, index) => {
     const stat = binding.layer.stat ?? "identity";
-    if ((stat !== "bin" && stat !== "summary_bin") || !faceted || freeX || binding.xField === null)
+    if (
+      (stat !== "bin" && stat !== "summary_bin" && stat !== "bindot") ||
+      !faceted ||
+      freeX ||
+      binding.xField === null
+    )
       return void 0;
     const table = tables[index] ?? tables[0];
     if (table === undefined || !table.has(binding.xField)) return void 0;

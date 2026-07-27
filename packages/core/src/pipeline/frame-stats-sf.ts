@@ -63,14 +63,17 @@ function pushRing(
   sourceRow: number,
   ring: unknown,
   minVerts: number,
+  /** Polygon rings close via `closed: true`; open lines must keep a genuine loop vertex. */
+  dropClosingDuplicate: boolean,
 ): boolean {
   if (!Array.isArray(ring)) return false;
   const pts: SfPosition[] = [];
   for (const c of ring) {
     if (isFinitePair(c)) pts.push([c[0], c[1]]);
   }
-  // Drop closing duplicate if present (polygonBatch closes via closed: true).
-  if (pts.length >= 2) {
+  // Drop GeoJSON ring-closing duplicate so polygonBatch can re-close via closed: true.
+  // LineString/MultiLineString are open paths — keep the vertex so a closed loop draws fully.
+  if (dropClosingDuplicate && pts.length >= 2) {
     const first = pts.at(0)!;
     const last = pts.at(-1)!;
     if (first[0] === last[0] && first[1] === last[1]) pts.pop();
@@ -119,6 +122,7 @@ function pushPolygonRings(
       sourceRow,
       rings[r],
       3,
+      true,
     );
   }
 }
@@ -140,6 +144,35 @@ export function buildSfFrame(
     );
   }
 
+  // Empty facet panel / zero-row layer data: match other geoms (empty frame,
+  // warnEmptyLayers downstream). Do not throw — prepare-panels only skips when
+  // every layer is empty, so per-panel empties still reach buildSfFrame.
+  if (table.rowCount === 0) {
+    return {
+      binding,
+      table,
+      n: 0,
+      xValues: null,
+      xNumeric: new Float64Array(0),
+      yValues: null,
+      yNumeric: new Float64Array(0),
+      groups: [],
+      inputGroups: groups,
+      inputSourceRows: null,
+      rowIndex: new Uint32Array(0),
+      colorValues: null,
+      fillValues: null,
+      sizeValues: null,
+      linewidthValues: null,
+      alphaValues: null,
+      shapeValues: null,
+      linetypeValues: null,
+      labelValues: null,
+      ...emptyFrameExtras(),
+      sf: { kind: "polygon" },
+    };
+  }
+
   const geomCol = table.column(field);
   const outX: number[] = [];
   const outY: number[] = [];
@@ -153,7 +186,7 @@ export function buildSfFrame(
   const layerPath = `/layers/${index}`;
 
   const emitLeaf = (leaf: SfLeaf, row: number): void => {
-    const kind = sfKindOf(leaf.type);
+    const kind = sfKindOf(leaf.type, layerPath);
     if (layerKind === null) layerKind = kind;
     else if (layerKind !== kind) {
       throw new PipelineError(
@@ -202,7 +235,20 @@ export function buildSfFrame(
     }
     if (leaf.type === "LineString") {
       const g = ringId++;
-      pushRing(outX, outY, outGroups, outRingIndex, outRowIndex, valueRows, g, 0, row, coords, 2);
+      pushRing(
+        outX,
+        outY,
+        outGroups,
+        outRingIndex,
+        outRowIndex,
+        valueRows,
+        g,
+        0,
+        row,
+        coords,
+        2,
+        false,
+      );
       return;
     }
     if (leaf.type === "MultiLineString") {
@@ -215,7 +261,20 @@ export function buildSfFrame(
       }
       for (const line of coords) {
         const g = ringId++;
-        pushRing(outX, outY, outGroups, outRingIndex, outRowIndex, valueRows, g, 0, row, line, 2);
+        pushRing(
+          outX,
+          outY,
+          outGroups,
+          outRingIndex,
+          outRowIndex,
+          valueRows,
+          g,
+          0,
+          row,
+          line,
+          2,
+          false,
+        );
       }
       return;
     }
@@ -247,10 +306,10 @@ export function buildSfFrame(
   };
 
   for (let row = 0; row < table.rowCount; row++) {
-    const path = `/layers/${index}/data/${field}`;
-    const parsed = parseSfGeometry(geomCol[row]!, path);
+    const cellPath = `/layers/${index}/data/${field}`;
+    const parsed = parseSfGeometry(geomCol[row]!, cellPath);
     // GeometryCollection expands to leaves; groups continue across parts (ringId++).
-    const leaves = expandSfLeaves(parsed, path);
+    const leaves = expandSfLeaves(parsed, cellPath);
     for (const leaf of leaves) emitLeaf(leaf, row);
   }
 

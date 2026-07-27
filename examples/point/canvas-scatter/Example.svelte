@@ -7,7 +7,9 @@
     ThemeDark,
   } from "@ggsvelte/svelte";
 
-  import { cloud } from "./data.js";
+  import { CANVAS_SCATTER_MARKS, cloud } from "./data.js";
+
+  const title = `${CANVAS_SCATTER_MARKS.toLocaleString("en-US")} points on a canvas stratum`;
 </script>
 
 <GGPlot
@@ -18,6 +20,6 @@
 >
   <ThemeDark />
   <ScaleColorManual domain={["a", "b"]} values={["#da702c", "#4385be"]} />
-  <Labs title="10,000 points on a canvas stratum" x="x" y="y" color="Cluster" />
+  <Labs {title} x="x" y="y" color="Cluster" />
   <GeomPoint size={1.2} alpha={0.4} />
 </GGPlot>

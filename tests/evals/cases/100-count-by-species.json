@@ -1,0 +1,42 @@
+{
+  "id": "100-count-by-species",
+  "kind": "chart",
+  "prompt": "Plot width against depth with geom_count, coloured by species.",
+  "dataProfile": {
+    "fields": [
+      { "name": "width", "type": "quantitative" },
+      { "name": "depth", "type": "quantitative" },
+      { "name": "species", "type": "nominal" }
+    ],
+    "rowCount": 6
+  },
+  "data": {
+    "main": [
+      { "width": 1, "depth": 1, "species": "a" },
+      { "width": 1, "depth": 1, "species": "a" },
+      { "width": 2, "depth": 2, "species": "a" },
+      { "width": 2, "depth": 2, "species": "b" },
+      { "width": 3, "depth": 1, "species": "b" },
+      { "width": 3, "depth": 1, "species": "b" }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "count",
+        "stat": "sum",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "width" },
+          "y": { "field": "depth" },
+          "color": { "field": "species" },
+          "size": { "stat": "n" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_count grouped by a discrete colour aesthetic; counts are per (group, x, y) (#795)."
+}

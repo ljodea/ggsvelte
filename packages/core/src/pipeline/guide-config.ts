@@ -4,6 +4,7 @@ import type { GuideSpec, GuidesSpec, Scales, StyleAesthetic } from "@ggsvelte/sp
 import type { GuidePlan } from "../layout/guide-plan-types.js";
 import type { DiscreteLegendInput, LegendInput, ResolvedLegendAppearance } from "../legend.js";
 import { encodeKey } from "../scales/state.js";
+import type { ThemeTokens } from "../theme.js";
 
 import { PipelineError, type LayerBinding } from "./types.js";
 
@@ -31,6 +32,12 @@ export function resolveAxisGuide(
   aesthetic: "x" | "y",
   scales: Scales,
   guides: GuidesSpec | undefined,
+  /**
+   * Resolved plot theme. `labelsX` / `labelsY` AND with guide showLabels so
+   * theme_void (and role overrides) suppress tick labels and margin reserve
+   * without touching showTicks (render already gates tick marks via theme.ticks*).
+   */
+  theme?: Pick<ThemeTokens, "labelsX" | "labelsY">,
 ): AxisGuideAppearance {
   const local = typedGuide(scales[aesthetic]?.guide);
   const top = guides?.[aesthetic];
@@ -44,11 +51,13 @@ export function resolveAxisGuide(
       : top === undefined
         ? localAxis
         : undefined;
+  const themeAllowsLabels =
+    theme === undefined || (aesthetic === "x" ? theme.labelsX : theme.labelsY);
   return {
     visible: true,
     ...(chosen?.title !== undefined && { title: chosen.title }),
     showTicks: chosen?.showTicks ?? true,
-    showLabels: chosen?.showLabels ?? true,
+    showLabels: (chosen?.showLabels ?? true) && themeAllowsLabels,
     collision: chosen?.collision ?? "auto",
     ...(chosen?.theme !== undefined && { theme: chosen.theme }),
   };

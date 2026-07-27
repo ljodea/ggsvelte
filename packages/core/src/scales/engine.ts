@@ -9,7 +9,9 @@
  * - transform registry as the only forward/valid source for sequential color
  */
 import { CATEGORICAL_PALETTE_10, CATEGORICAL_SCHEMES } from "./categorical-palettes.js";
+import { colorBrewerStops } from "./colorbrewer-palettes.js";
 import { normalizeColor } from "./normalize-color.js";
+import { sequentialSchemeRamp } from "./sequential-schemes.js";
 import { VIRIDIS_RAMP_10 } from "./viridis-ramp.js";
 
 /** Default NA / unknown color when authors omit either side. */
@@ -68,24 +70,34 @@ export function resolveOrdinalPaletteStops(
   } = {},
 ): readonly string[] {
   if (input.range !== undefined) return input.range;
-  if (input.scheme === "viridis") return VIRIDIS_RAMP_10;
+  // Sequential-family schemes are sampled to domain size in trainColor; the
+  // raw ramp is only a fallback placeholder for fingerprinting.
+  const sequential = sequentialSchemeRamp(input.scheme);
+  if (sequential !== undefined) return sequential;
   if (input.scheme !== undefined) {
     const named = CATEGORICAL_SCHEMES[input.scheme as keyof typeof CATEGORICAL_SCHEMES];
     if (named !== undefined) return named;
+    // ColorBrewer sequential/diverging may also be used ordinally (brewer type=seq).
+    const brewer = colorBrewerStops(input.scheme);
+    if (brewer !== undefined) return brewer;
   }
   return CATEGORICAL_PALETTE_10;
 }
 
 /**
- * Pipeline-facing sequential range. Explicit range wins; `scheme: "viridis"`
- * selects the built-in ramp; edition ramps apply only when they differ from
- * viridis (edition-1 byte-stability).
+ * Pipeline-facing sequential range. Explicit range wins; a named sequential
+ * scheme selects its built-in ramp; edition ramps apply only when they differ
+ * from viridis (edition-1 byte-stability via VIRIDIS_RAMP_10 identity).
  */
 export function resolveSequentialPipelineRange(
   config: PaletteConfig | undefined,
   editionRamp: readonly string[],
 ): readonly string[] | undefined {
   const edition = editionRamp === VIRIDIS_RAMP_10 ? undefined : editionRamp;
-  const namedSchemeRamp = config?.scheme === "viridis" ? VIRIDIS_RAMP_10 : undefined;
+  // main's named sequential schemes first (viridis and friends); ColorBrewer
+  // palette names fall through to the brewer tables (#825).
+  const namedSchemeRamp =
+    sequentialSchemeRamp(config?.scheme) ??
+    (config?.scheme === undefined ? undefined : colorBrewerStops(config.scheme));
   return config?.range ?? namedSchemeRamp ?? edition;
 }

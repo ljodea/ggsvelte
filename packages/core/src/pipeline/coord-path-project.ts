@@ -1,5 +1,6 @@
 import type { PanelCoordProjector } from "../coord-projector.js";
 import type { PathsBatch } from "../scene.js";
+import { isStepCurve, stepCorners, stepCornersPerSegment } from "../path-step.js";
 
 import type { PipelineWarning } from "./types.js";
 import {
@@ -22,6 +23,7 @@ function expandedStepVertices(
   start: number,
   end: number,
   maxSyntheticVertices: number,
+  curve: "step" | "step-hv" | "step-vh",
 ): { positions: number[]; rows: number[]; anchors: number[]; indices: number[] } {
   if (end <= start) return { positions: [], rows: [], anchors: [], indices: [] };
   const p = [positions[start * 2]!, positions[start * 2 + 1]!];
@@ -34,19 +36,16 @@ function expandedStepVertices(
     const priorY = positions[(i - 1) * 2 + 1]!;
     const x = positions[i * 2]!;
     const y = positions[i * 2 + 1]!;
-    const mid = (priorX + x) / 2;
-    if (syntheticVertices < maxSyntheticVertices) {
-      p.push(mid, priorY);
-      r.push(rows[i - 1] ?? 0xffffffff);
+    const corners = stepCorners(priorX, priorY, x, y, curve);
+    for (let c = 0; c < corners.length; c++) {
+      if (syntheticVertices >= maxSyntheticVertices) break;
+      const corner = corners[c]!;
+      p.push(corner.x, corner.y);
+      // First mid corner inherits prior row; subsequent (and hv/vh) use current.
+      const usePrior = curve === "step" && c === 0;
+      r.push(rows[usePrior ? i - 1 : i] ?? 0xffffffff);
       a.push(0);
-      indices.push(i - 1);
-      syntheticVertices++;
-    }
-    if (syntheticVertices < maxSyntheticVertices) {
-      p.push(mid, y);
-      r.push(rows[i] ?? 0xffffffff);
-      a.push(0);
-      indices.push(i);
+      indices.push(usePrior ? i - 1 : i);
       syntheticVertices++;
     }
     p.push(x, y);
@@ -119,24 +118,37 @@ export function projectPathBatch(
   /**
    * Project a half-open source vertex range [runStart, runEnd) into `projected`.
    * Returns false when the range is empty.
+   *
+   * Per-ring subpath vertex budget: each call resets subpathExtraRemaining, so
+   * an N-ring compound can use up to N × MAX_COORD_VERTICES_PER_SUBPATH of
+   * tessellation budget (panel cap still shared via panelExtraRemaining).
    */
   const projectRun = (runStart: number, runEnd: number): boolean => {
     if (runEnd <= runStart) return false;
     const authoredCount = runEnd - runStart;
-    const desiredStepCorners = batch.curve === "step" ? Math.max(0, 2 * (authoredCount - 1)) : 0;
+    const stepMode = isStepCurve(batch.curve) ? batch.curve : null;
+    const desiredStepCorners =
+      stepMode === null ? 0 : Math.max(0, stepCornersPerSegment(stepMode) * (authoredCount - 1));
     const stepCornerAllowance = Math.min(
       panelExtraRemaining,
       Math.max(0, MAX_COORD_VERTICES_PER_SUBPATH - authoredCount),
     );
     const source =
-      batch.curve === "step"
-        ? expandedStepVertices(unprojected, batch.rowIndex, runStart, runEnd, stepCornerAllowance)
-        : {
+      stepMode === null
+        ? {
             positions: Array.from(unprojected.slice(runStart * 2, runEnd * 2)),
             rows: Array.from(batch.rowIndex.slice(runStart, runEnd)),
             anchors: Array.from({ length: authoredCount }, () => 1),
             indices: indexRange(runStart, runEnd),
-          };
+          }
+        : expandedStepVertices(
+            unprojected,
+            batch.rowIndex,
+            runStart,
+            runEnd,
+            stepCornerAllowance,
+            stepMode,
+          );
     const count = source.rows.length;
     if (count === 0) return false;
     const emittedStepCorners = Math.max(0, count - authoredCount);
@@ -209,8 +221,11 @@ export function projectPathBatch(
       continue;
     }
 
-    // Hole rings (#809 phase 9): project each ring separately so tessellation
-    // never invents an exterior→hole chord, then remap ringStarts.
+    // Hole rings (#809 phase 9): project each ring of this compound separately
+    // so tessellation never invents an exterior→hole chord, then remap
+    // ringStarts to post-projection vertex indices (per-compound interior breaks).
+    // Without fills, ringStarts is not remapped (undefined consumers); fall
+    // through to run-splitting and clear metadata at the end.
     const holeCompound =
       batch.closed === true &&
       batch.fills !== undefined &&
@@ -223,11 +238,24 @@ export function projectPathBatch(
         if (b > start && b < end) cuts.push(b);
       }
       cuts.push(end);
+      // No interior cuts in this subpath → ordinary single-ring project.
+      if (cuts.length === 2) {
+        if (!projectRun(start, end)) continue;
+        offsets.push(projected.length / 2);
+        strokes.push(batch.strokes[s] ?? null);
+        fills?.push(batch.fills?.[s] ?? null);
+        linewidths?.push(batch.linewidths?.[s] ?? batch.linewidth);
+        alphas?.push(batch.alphas?.[s] ?? batch.alpha);
+        linetypeIndexes?.push(batch.linetypeIndexes?.[s] ?? 0);
+        continue;
+      }
       let emittedAny = false;
       for (let c = 0; c + 1 < cuts.length; c++) {
         const rs = cuts[c]!;
         const re = cuts[c + 1]!;
         if (re <= rs) continue;
+        // First ring of this compound is not a ringStarts entry; subsequent
+        // successful rings record the current projected vertex cursor.
         if (emittedAny) remappedRingStarts.push(projected.length / 2);
         if (projectRun(rs, re)) emittedAny = true;
       }
@@ -294,7 +322,7 @@ export function projectPathBatch(
   }
   // Step corners were expanded explicitly before projection; renderer-side
   // step interpolation would otherwise create unprojected synthetic corners.
-  if (batch.curve === "step") batch.curve = "linear";
+  if (isStepCurve(batch.curve)) batch.curve = "linear";
   if (capped) {
     warnings.push({
       code: "coord-tessellation-cap",

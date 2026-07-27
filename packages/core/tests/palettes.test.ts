@@ -84,7 +84,7 @@ describe("named categorical palettes through the pipeline", () => {
   it("rejects incompatible schemes at the render boundary", () => {
     for (const color of [
       { type: "sequential" as const, scheme: "ipsum" as const },
-      { type: "ordinal" as const, scheme: "viridis" as const },
+      { type: "binned" as const, scheme: "ipsum" as const },
     ]) {
       try {
         runPipeline(
@@ -102,6 +102,17 @@ describe("named categorical palettes through the pipeline", () => {
         );
       }
     }
+  });
+
+  it("allows ordinal + sequential-family scheme at the render boundary (#828)", () => {
+    const result = runPipeline(
+      gg([{ x: 1, y: 1, category: "a" }], aes({ x: "x", y: "y", color: "category" }))
+        .geomPoint()
+        .scales({ color: { type: "ordinal", scheme: "viridis" } })
+        .spec(),
+      { width: 640, height: 400 },
+    );
+    expect(result.scales.color?.kind).toBe("ordinal");
   });
 
   it("reports malformed non-array ranges through spec validation", () => {

@@ -20,14 +20,19 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 /** Channels every geom needs mapped (after plot-aes inheritance). */
 const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   point: ["x", "y"],
+  count: ["x", "y"],
+  jitter: ["x", "y"],
   line: ["x", "y"],
   path: ["x", "y"], // data-order polylines (#788); same channels as line
+  step: ["x", "y"],
   col: ["x", "y"],
   bar: ["x"],
   histogram: ["x"],
   freqpoly: ["x"],
   area: ["x", "y"],
   rule: [], // form-checked separately
+  hline: [], // form-checked like rule (yintercept / aes.y)
+  vline: [], // form-checked like rule (xintercept / aes.x)
   text: ["x", "y", "label"],
   sf_text: ["label"], // x/y come from stat_sf_coordinates (#809 phase 2)
   sf_label: ["label"],
@@ -36,17 +41,35 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   boxplot: ["x", "y"],
   density: ["x"],
   errorbar: ["x"], // ymin/ymax vs y are stat-dependent, checked separately
+  linerange: ["x"],
+  pointrange: ["x"],
+  crossbar: ["x"],
   rect: ["xmin", "xmax", "ymin", "ymax"],
   segment: ["x", "y", "xend", "yend"],
+  violin: ["x", "y"],
+  function: [], // domain from xlim / peer / optional x; y is after_stat
+  polygon: ["x", "y"],
+  spoke: ["x", "y"], // angle/radius: aes or params — checked below
   curve: ["x", "y", "xend", "yend"],
+  rug: [], // sides-dependent; checked separately
   tile: ["x", "y"],
   raster: ["x", "y"],
   ribbon: [], // orientation-dependent; checked separately
+  contour: ["x", "y", "z"],
+  quantile: ["x", "y"],
+  density_2d: ["x", "y"],
+  density_2d_filled: ["x", "y"],
+  dotplot: ["x"],
+  map: ["map_id"],
+  blank: [], // trains whatever is mapped; nothing required
 };
 
-function hasIntercepts(layer: Record<string, unknown>): boolean {
+/** Asymmetric intercept presence for rule / hline / vline form checks. */
+function hasGeomIntercepts(geom: string, layer: Record<string, unknown>): boolean {
   const params = layer["params"];
   if (!isRecord(params)) return false;
+  if (geom === "hline") return params["yintercept"] !== undefined;
+  if (geom === "vline") return params["xintercept"] !== undefined;
   return params["xintercept"] !== undefined || params["yintercept"] !== undefined;
 }
 
@@ -132,11 +155,12 @@ export function layerStructuralErrors(
   const layerAes = isRecord(layer["aes"]) ? (layer["aes"] as Aes) : undefined;
   const layerPath = `/layers/${index}`;
   const mapped = (channel: ChannelName) => effectiveChannel(plotAes, layerAes, channel);
-  // Annotation-form rules (fixed intercepts) inherit NO plot aes — normalize
-  // drops it — so a plot-level style meant for other layers must not trip the
-  // geom-capability check here. Match the rule-form x/y handling below by
-  // consulting only the rule's OWN aes for these layers.
-  const annotationRule = geom === "rule" && hasIntercepts(layer);
+  // Annotation-form rules / hline / vline (fixed intercepts) inherit NO plot
+  // aes — normalize drops it — so a plot-level style meant for other layers
+  // must not trip the geom-capability check here. Match the rule-form x/y
+  // handling below by consulting only the layer's OWN aes for these layers.
+  const isRuleFamily = geom === "rule" || geom === "hline" || geom === "vline";
+  const annotationRule = isRuleFamily && hasGeomIntercepts(geom, layer);
 
   for (const aesthetic of Object.keys(STYLE_AESTHETIC_GEOMS) as StyleAesthetic[]) {
     const value = annotationRule ? (layerAes?.[aesthetic] ?? undefined) : mapped(aesthetic);
@@ -153,36 +177,56 @@ export function layerStructuralErrors(
     });
   }
 
-  if (geom === "rule") {
-    const intercepts = hasIntercepts(layer);
+  if (isRuleFamily) {
+    const intercepts = hasGeomIntercepts(geom, layer);
     // The annotation form inherits NO plot aes (normalize drops it, matching
     // ggplot2's inherit.aes = FALSE) — only the layer's OWN x/y mappings
-    // conflict with intercepts.
+    // conflict with intercepts. Data-driven hline/vline sugar also nulls the
+    // orthogonal axis during normalize; pre-normalize validation still sees
+    // raw layer aes here.
     const own = (channel: "x" | "y") => layerAes?.[channel] ?? undefined;
-    const x = intercepts ? own("x") : mapped("x");
-    const y = intercepts ? own("y") : mapped("y");
+    let x = intercepts ? own("x") : mapped("x");
+    let y = intercepts ? own("y") : mapped("y");
+    // Pre-normalize data-driven aliases: orthogonal axis is not part of the form.
+    if (!intercepts && geom === "hline") x = undefined;
+    if (!intercepts && geom === "vline") y = undefined;
+    const interceptHint =
+      geom === "hline"
+        ? "params.yintercept"
+        : geom === "vline"
+          ? "params.xintercept"
+          : "params.xintercept/yintercept";
+    const dataHint = geom === "hline" ? "aes.y" : geom === "vline" ? "aes.x" : "aes.x/aes.y";
     if (intercepts && (x !== undefined || y !== undefined)) {
       errors.push({
         code: "rule-form-ambiguous",
         path: layerPath,
-        message:
-          "This rule layer mixes the annotation form (params.xintercept/yintercept) with mapped aes.x/aes.y. Use fixed intercepts OR a data mapping, never both.",
+        message: `This ${geom} layer mixes the annotation form (${interceptHint}) with mapped ${dataHint}. Use fixed intercepts OR a data mapping, never both.`,
         fix: {
           description:
-            "Remove the intercept params (data-driven form), or unset aes.x/aes.y with null (annotation form).",
-          example: { geom: "rule", aes: { x: null, y: null }, params: { yintercept: 0 } },
+            "Remove the intercept params (data-driven form), or unset the position aes with null (annotation form).",
+          example:
+            geom === "vline"
+              ? { geom: "vline", params: { xintercept: 0 } }
+              : { geom: geom === "hline" ? "hline" : "rule", params: { yintercept: 0 } },
         },
       });
     } else if (!intercepts && x === undefined && y === undefined) {
       errors.push({
         code: "rule-form-missing",
         path: layerPath,
-        message:
-          "This rule layer has neither fixed intercepts (params.xintercept/yintercept) nor a mapped aes.x/aes.y — nothing to draw.",
+        message: `This ${geom} layer has neither fixed intercepts (${interceptHint}) nor a mapped ${dataHint} — nothing to draw.`,
         fix: {
           description:
-            "Set params.yintercept (or xintercept) for an annotation, or map aes.x/aes.y to a field for data-driven rules.",
-          example: { geom: "rule", params: { yintercept: 0 } },
+            geom === "hline"
+              ? "Set params.yintercept for an annotation, or map aes.y for data-driven rules."
+              : geom === "vline"
+                ? "Set params.xintercept for an annotation, or map aes.x for data-driven rules."
+                : "Set params.yintercept (or xintercept) for an annotation, or map aes.x/aes.y to a field for data-driven rules.",
+          example:
+            geom === "vline"
+              ? { geom: "vline", params: { xintercept: 0 } }
+              : { geom: geom === "hline" ? "hline" : "rule", params: { yintercept: 0 } },
         },
       });
     } else if (!intercepts && x !== undefined && y !== undefined) {
@@ -241,18 +285,73 @@ export function layerStructuralErrors(
     }
   }
 
+  if (geom === "function" || stat === "function") {
+    const y = mapped("y");
+    if (y !== undefined && !("stat" in y)) {
+      errors.push({
+        code: "computed-y-mapped",
+        path: `${layerPath}/aes/y`,
+        message:
+          "The function geom/stat computes y from the named function, so aes.y must not map data. Unset y with null.",
+        fix: {
+          description: "Remove the y mapping (or unset an inherited one with null).",
+          example: { geom: "function", aes: { y: null }, params: { fun: "dnorm", xlim: [-3, 3] } },
+        },
+      });
+    }
+  }
+
+  if (geom === "dotplot" || stat === "bindot") {
+    const y = mapped("y");
+    if (y !== undefined && !("stat" in y)) {
+      errors.push({
+        code: "computed-y-mapped",
+        path: `${layerPath}/aes/y`,
+        message:
+          "The dotplot geom computes y stack positions with the bindot stat, so aes.y must not map data. Map only x, or unset y with null.",
+        fix: {
+          description: "Remove the y mapping (or unset an inherited one with null).",
+          example: { geom: "dotplot", aes: { y: null } },
+        },
+      });
+    }
+  }
+
+  if (geom === "line" && stat === "ecdf") {
+    const y = mapped("y");
+    if (y !== undefined && !("stat" in y)) {
+      errors.push({
+        code: "computed-y-mapped",
+        path: `${layerPath}/aes/y`,
+        message:
+          'The ecdf stat computes y (cumulative proportion), so aes.y must not map data. Map only x, or use y: { stat: "ecdf" }.',
+        fix: {
+          description: 'Remove the y mapping (or set y: { stat: "ecdf" }).',
+          example: { geom: "line", stat: "ecdf", aes: { y: null } },
+        },
+      });
+    }
+  }
+
   if (
     geom === "bar" ||
     geom === "histogram" ||
     geom === "freqpoly" ||
+    geom === "dotplot" ||
     (geom === "line" && (stat === "bin" || stat === "summary_bin")) ||
     (geom === "point" && stat === "summary_bin") ||
     (geom === "errorbar" && stat === "summary_bin") ||
-    stat === "summary_bin"
+    stat === "summary_bin" ||
+    stat === "bindot"
   ) {
     const params = isRecord(layer["params"]) ? layer["params"] : {};
     const binStat =
-      geom === "histogram" || geom === "freqpoly" || stat === "bin" || stat === "summary_bin";
+      geom === "histogram" ||
+      geom === "freqpoly" ||
+      geom === "dotplot" ||
+      stat === "bin" ||
+      stat === "summary_bin" ||
+      stat === "bindot";
     if (binStat && params["center"] !== undefined && params["boundary"] !== undefined) {
       errors.push({
         code: "bin-center-and-boundary",
@@ -266,15 +365,19 @@ export function layerStructuralErrors(
     }
   }
 
-  if (geom === "errorbar") {
+  if (geom === "errorbar" || geom === "linerange" || geom === "pointrange" || geom === "crossbar") {
     const needed: ChannelName[] =
-      stat === "summary" || stat === "summary_bin" ? ["y"] : ["ymin", "ymax"];
+      stat === "summary" || stat === "summary_bin"
+        ? ["y"]
+        : geom === "pointrange" || geom === "crossbar"
+          ? ["y", "ymin", "ymax"]
+          : ["ymin", "ymax"];
     for (const channel of needed) {
       if (mapped(channel) === undefined) {
         errors.push({
           code: "missing-required-channel",
           path: `${layerPath}/aes/${channel}`,
-          message: `The errorbar geom with the ${stat} stat requires a "${channel}" channel; map it in the layer's aes or the plot-level aes.`,
+          message: `The ${geom} geom with the ${stat} stat requires a "${channel}" channel; map it in the layer's aes or the plot-level aes.`,
           fix: {
             description: `Map "${channel}" to a data field.`,
             example: { [channel]: CHANNEL_FIX_EXAMPLE },
@@ -306,6 +409,66 @@ export function layerStructuralErrors(
     }
   }
 
+  if (geom === "spoke") {
+    const params = isRecord(layer["params"]) ? layer["params"] : {};
+    for (const channel of ["angle", "radius"] as const) {
+      const fromAes = mapped(channel);
+      const fromParams = params[channel];
+      if (fromAes === undefined && fromParams === undefined) {
+        errors.push({
+          code: "missing-required-channel",
+          path: `${layerPath}/aes/${channel}`,
+          message: `The spoke geom requires "${channel}" via aes.${channel} or params.${channel}.`,
+          fix: {
+            description: `Map aes.${channel} to a field, or set params.${channel} to a constant.`,
+            example:
+              channel === "angle"
+                ? { geom: "spoke", params: { angle: 0, radius: 1 } }
+                : { geom: "spoke", params: { radius: 1, angle: 0 } },
+          },
+        });
+      }
+      // Runtime only materializes field angle/radius (checkField); aes constants
+      // would pass validation then throw in requireField — reject early. Prefer
+      // params.angle / params.radius for constants (ggplot2-compatible).
+      if (fromAes !== undefined && !("field" in fromAes) && fromParams === undefined) {
+        errors.push({
+          code: "missing-required-channel",
+          path: `${layerPath}/aes/${channel}`,
+          message: `The spoke geom requires aes.${channel} to map a data field (not a constant or stat). Use params.${channel} for a fixed value.`,
+          fix: {
+            description: `Map aes.${channel} to a field, or set params.${channel} to a constant.`,
+            example:
+              channel === "angle"
+                ? { geom: "spoke", params: { angle: 0, radius: 1 } }
+                : { geom: "spoke", params: { radius: 1, angle: 0 } },
+          },
+        });
+      }
+    }
+  }
+
+  if (geom === "rug") {
+    const params = isRecord(layer["params"]) ? layer["params"] : {};
+    const sides = typeof params["sides"] === "string" ? params["sides"] : "bl";
+    if (/[bt]/.test(sides) && mapped("x") === undefined) {
+      pushMissingChannel(
+        errors,
+        layerPath,
+        "x",
+        `The rug geom with sides "${sides}" requires an "x" channel for bottom/top ticks; map aes.x or narrow params.sides.`,
+      );
+    }
+    if (/[lr]/.test(sides) && mapped("y") === undefined) {
+      pushMissingChannel(
+        errors,
+        layerPath,
+        "y",
+        `The rug geom with sides "${sides}" requires a "y" channel for left/right ticks; map aes.y or narrow params.sides.`,
+      );
+    }
+  }
+
   errors.push(...paintStructuralErrors(layer, layerPath, plotAes));
 
   for (const channel of REQUIRED_CHANNELS[geom] ?? []) {
@@ -314,6 +477,7 @@ export function layerStructuralErrors(
         geom === "histogram" ||
         geom === "freqpoly" ||
         geom === "density" ||
+        geom === "dotplot" ||
         (geom === "line" && stat === "bin")) &&
       channel !== "x"
     ) {
@@ -332,8 +496,8 @@ export function layerStructuralErrors(
       });
       continue;
     }
-    // Segment runtime only materializes field endpoints (checkField); constants/stat
-    // mappings would pass validation then throw in requireField — reject early.
+    // Segment/curve runtime only materializes field endpoints (checkField);
+    // constants/stat mappings would pass validation then throw in requireField.
     if (
       (geom === "segment" || geom === "curve") &&
       (channel === "x" || channel === "y" || channel === "xend" || channel === "yend") &&
@@ -343,6 +507,18 @@ export function layerStructuralErrors(
         code: "missing-required-channel",
         path: `${layerPath}/aes/${channel}`,
         message: `The ${geom} geom requires aes.${channel} to map a data field (not a constant or stat).`,
+        fix: {
+          description: `Map "${channel}" to a data field.`,
+          example: { [channel]: CHANNEL_FIX_EXAMPLE },
+        },
+      });
+    }
+    // Spoke origin x/y are field-only in the pipeline (same requireField path).
+    if (geom === "spoke" && (channel === "x" || channel === "y") && !("field" in value)) {
+      errors.push({
+        code: "missing-required-channel",
+        path: `${layerPath}/aes/${channel}`,
+        message: `The spoke geom requires aes.${channel} to map a data field (not a constant or stat).`,
         fix: {
           description: `Map "${channel}" to a data field.`,
           example: { [channel]: CHANNEL_FIX_EXAMPLE },

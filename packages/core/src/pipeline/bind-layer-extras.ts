@@ -22,6 +22,9 @@ export function resolveLabelWeightColorFill(input: {
   labelField: string | null;
   labelConstant: string | null;
   weightField: string | null;
+  sampleField: string | null;
+  zField: string | null;
+  mapIdField: string | null;
   color: ColorBinding;
   fill: ColorBinding;
   size: StyleBinding;
@@ -40,7 +43,7 @@ export function resolveLabelWeightColorFill(input: {
     else if ("value" in label) labelConstant = String(label.value);
   }
   if (
-    (geom === "text" || geom === "sf_text" || geom === "sf_label") &&
+    (geom === "text" || geom === "label" || geom === "sf_text" || geom === "sf_label") &&
     labelField === null &&
     labelConstant === null
   ) {
@@ -51,9 +54,33 @@ export function resolveLabelWeightColorFill(input: {
     );
   }
   const weightField = checkField(aes.weight, "weight", index, table, warnings);
+  const sampleField = checkField(aes.sample, "sample", index, table, warnings);
+  if ((geom === "qq" || geom === "qq_line") && sampleField === null) {
+    throw new PipelineError(
+      "missing-channel",
+      `/layers/${index}/aes/sample`,
+      `The ${geom} geom requires a "sample" channel (map the distribution column with aes.sample).`,
+    );
+  }
+  const zField = checkField(aes.z, "z", index, table, warnings);
+  if (geom === "contour" && zField === null) {
+    throw new PipelineError(
+      "missing-channel",
+      `/layers/${index}/aes/z`,
+      'The contour geom requires a continuous "z" channel (map it with aes).',
+    );
+  }
+  const mapIdField = checkField(aes.map_id, "map_id", index, table, warnings);
+  if (geom === "map" && mapIdField === null) {
+    throw new PipelineError(
+      "missing-channel",
+      `/layers/${index}/aes/map_id`,
+      'The map geom requires a "map_id" channel (map it with aes).',
+    );
+  }
 
-  const color = colorBinding(aes.color, "color", index, table, warnings);
-  const fill = colorBinding(aes.fill, "fill", index, table, warnings);
+  const color = colorBinding(aes.color, "color", stat, index, table, warnings);
+  const fill = colorBinding(aes.fill, "fill", stat, index, table, warnings);
   applyColorOnFillGeomWarning(geom, index, color, warnings);
   const size = styleBinding(aes.size, "size", geom, stat, index, table, warnings);
   const linewidth = styleBinding(aes.linewidth, "linewidth", geom, stat, index, table, warnings);
@@ -74,6 +101,9 @@ export function resolveLabelWeightColorFill(input: {
     labelField,
     labelConstant,
     weightField,
+    sampleField,
+    zField,
+    mapIdField,
     color,
     fill,
     size,

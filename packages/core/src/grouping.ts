@@ -57,6 +57,7 @@ const NON_GROUPING_CHANNELS: ReadonlySet<string> = new Set([
   "group",
   "label",
   "weight",
+  "sample",
   "width",
   "height",
   "xmin",
@@ -67,6 +68,9 @@ const NON_GROUPING_CHANNELS: ReadonlySet<string> = new Set([
   // that never consume them; they must not join the discrete interaction.
   "xend",
   "yend",
+  // Spoke direction/length — same inheritance risk as xend/yend (#810).
+  "angle",
+  "radius",
 ]);
 
 /** Distinct sentinel for null cells so null forms its own interaction level. */

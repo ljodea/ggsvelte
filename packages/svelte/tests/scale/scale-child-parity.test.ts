@@ -102,6 +102,14 @@ function representativeProps(helper: string): Record<string, unknown> {
   ) {
     return { colours: ["#000000", "#ffffff"] as const };
   }
+  // stepsn likewise requires ≥2 explicit stops (no defaults; #827).
+  if (
+    helper === "scaleColorStepsn" ||
+    helper === "scaleFillStepsn" ||
+    helper === "scaleColourStepsn"
+  ) {
+    return { colours: ["#000000", "#ffffff"] as const };
+  }
   return {};
 }
 
@@ -144,9 +152,9 @@ async function waitRegistry(get: () => LayerRegistry | undefined): Promise<Layer
 
 const helpers = shellHelpers();
 
-describe("scale-child parity (all 75 shells)", () => {
-  it(`enumerates exactly 75 helpers (got ${String(helpers.length)})`, () => {
-    expect(helpers).toHaveLength(75);
+describe("scale-child parity (all 98 shells)", () => {
+  it(`enumerates exactly 98 helpers (got ${String(helpers.length)})`, () => {
+    expect(helpers).toHaveLength(98);
   });
 
   for (const helper of helpers) {
@@ -267,7 +275,7 @@ describe("live prop update (one per family, ADR-0001 getter)", () => {
 });
 
 /**
- * The 75-shell sweep above runs on ScaleRegistryHost, which provides the
+ * The 98-shell sweep above runs on ScaleRegistryHost, which provides the
  * registry WITHOUT mounting <GGPlot> — pipeline training rejects many
  * scale+data combinations that are orthogonal to shell→helper parity. That
  * leaves the sweep proving "the shell registers the right fragment" but not

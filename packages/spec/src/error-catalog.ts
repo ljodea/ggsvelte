@@ -92,7 +92,7 @@ export const ERROR_CATALOG = {
   "scale-scheme-type": {
     tier: 1,
     summary: "A named color scheme is incompatible with the configured color scale type.",
-    fix: 'Use a categorical scheme with "ordinal", or "viridis"/hex stops with "sequential".',
+    fix: 'Use a categorical scheme with "ordinal" (or a sequential-family scheme like "viridis" for discrete viridis), or "viridis"/hex stops with "sequential".',
   },
   "scale-range-color": {
     tier: 1,

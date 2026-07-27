@@ -1,0 +1,41 @@
+{
+  "id": "99-violin-by-group",
+  "kind": "chart",
+  "prompt": "Show the distribution of score for each group as a violin plot.",
+  "dataProfile": {
+    "fields": [
+      { "name": "group", "type": "nominal" },
+      { "name": "score", "type": "quantitative" }
+    ],
+    "rowCount": 8
+  },
+  "data": {
+    "main": [
+      { "group": "a", "score": 1 },
+      { "group": "a", "score": 2 },
+      { "group": "a", "score": 2.5 },
+      { "group": "a", "score": 3 },
+      { "group": "b", "score": 4 },
+      { "group": "b", "score": 5 },
+      { "group": "b", "score": 5.5 },
+      { "group": "b", "score": 6 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "violin",
+        "stat": "ydensity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "group" },
+          "y": { "field": "score" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Canonical gold for geom_violin: mirrored ydensity polygons per discrete x (#798)."
+}

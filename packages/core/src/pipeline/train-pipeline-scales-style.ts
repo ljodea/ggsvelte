@@ -1,6 +1,7 @@
 /** Resolve all mapped non-color style scales for one pipeline run. */
 import type { PortableSpec, StyleAesthetic } from "@ggsvelte/spec";
 
+import { humanizeFieldTitle } from "../humanize-field.js";
 import type { ColumnTable } from "../table.js";
 
 import { resolveStyleScale } from "./scale-style.js";
@@ -35,7 +36,7 @@ export function trainPipelineStyleScales(input: {
       sourceTable,
       config: scalesConfig[aesthetic],
       prevState: options.prevScales?.[aesthetic] ?? null,
-      title: labs[aesthetic] ?? firstField,
+      title: labs[aesthetic] ?? humanizeFieldTitle(firstField),
       warnings,
     });
   }

@@ -1,0 +1,45 @@
+{
+  "id": "83-sf-points",
+  "kind": "chart",
+  "prompt": "Plot sf point geometries from a GeoJSON geometry column on a map-like layer.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "geometry",
+        "type": "nominal"
+      },
+      {
+        "name": "name",
+        "type": "nominal"
+      }
+    ],
+    "rowCount": 2
+  },
+  "data": {
+    "main": [
+      {
+        "geometry": "{\"type\":\"Point\",\"coordinates\":[1,2]}",
+        "name": "a"
+      },
+      {
+        "geometry": "{\"type\":\"Point\",\"coordinates\":[3,4]}",
+        "name": "b"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "sf",
+        "stat": "sf",
+        "position": "identity"
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_sf Point family (#809 phase 1)."
+}

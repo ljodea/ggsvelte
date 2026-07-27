@@ -3,6 +3,7 @@
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 
+import { humanizeFieldTitle } from "../humanize-field.js";
 import type { ThemeTokens } from "../theme.js";
 
 import { AXIS_TITLE_BAND, CAPTION_BAND, SUBTITLE_BAND, TITLE_BAND } from "./layout-helpers.js";
@@ -31,12 +32,13 @@ export function resolvePanelLayoutLabs(input: {
   const title = labs.title ?? "";
   const subtitle = labs.subtitle ?? "";
   const caption = labs.caption ?? "";
-  const xTitle = labs.x ?? allFrames.find((f) => f.binding.xField !== null)?.binding.xField ?? "";
-  const yTitle =
-    labs.y ??
+  const xField = allFrames.find((f) => f.binding.xField !== null)?.binding.xField ?? "";
+  const yField =
     allFrames.find((f) => f.binding.yField !== null)?.binding.yField ??
     allFrames.find((f) => f.binding.yStatColumn !== null)?.binding.yStatColumn ??
     "";
+  const xTitle = labs.x ?? humanizeFieldTitle(xField);
+  const yTitle = labs.y ?? humanizeFieldTitle(yField);
   const titleBand = Math.max(TITLE_BAND, theme.titleSize + 7);
   const subtitleBand = Math.max(SUBTITLE_BAND, theme.subtitleSize + 4);
   const captionBand = Math.max(CAPTION_BAND, theme.captionSize + 5);

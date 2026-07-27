@@ -78,29 +78,56 @@ export type {
   ZoomOptions,
 } from "./interaction/interaction.js";
 export { default as GeomPoint } from "./geoms/GeomPoint.svelte";
+export { default as GeomCount } from "./geoms/GeomCount.svelte";
+export { default as GeomContour } from "./geoms/GeomContour.svelte";
+export { default as GeomDotplot } from "./geoms/GeomDotplot.svelte";
 export { default as GeomLine } from "./geoms/GeomLine.svelte";
 export { default as GeomPath } from "./geoms/GeomPath.svelte";
 export { default as GeomCol } from "./geoms/GeomCol.svelte";
 export { default as GeomBar } from "./geoms/GeomBar.svelte";
 export { default as GeomArea } from "./geoms/GeomArea.svelte";
 export { default as GeomRule } from "./geoms/GeomRule.svelte";
+export { default as GeomHline } from "./geoms/GeomHline.svelte";
+export { default as GeomVline } from "./geoms/GeomVline.svelte";
+export { default as GeomJitter } from "./geoms/GeomJitter.svelte";
 export { default as GeomText } from "./geoms/GeomText.svelte";
+export { default as GeomLabel } from "./geoms/GeomLabel.svelte";
 export { default as GeomHistogram } from "./geoms/GeomHistogram.svelte";
 export { default as GeomFreqpoly } from "./geoms/GeomFreqpoly.svelte";
 export { default as GeomSmooth } from "./geoms/GeomSmooth.svelte";
 export { default as GeomQuantile } from "./geoms/GeomQuantile.svelte";
 export { default as GeomBoxplot } from "./geoms/GeomBoxplot.svelte";
 export { default as GeomDensity } from "./geoms/GeomDensity.svelte";
+export { default as GeomDensity2d } from "./geoms/GeomDensity2d.svelte";
+export { default as GeomDensity2dFilled } from "./geoms/GeomDensity2dFilled.svelte";
 export { default as GeomErrorbar } from "./geoms/GeomErrorbar.svelte";
+export { default as GeomLinerange } from "./geoms/GeomLinerange.svelte";
+export { default as GeomPointrange } from "./geoms/GeomPointrange.svelte";
+export { default as GeomCrossbar } from "./geoms/GeomCrossbar.svelte";
 export { default as GeomRect } from "./geoms/GeomRect.svelte";
 export { default as GeomTile } from "./geoms/GeomTile.svelte";
+export { default as GeomBin2d } from "./geoms/GeomBin2d.svelte";
 export { default as GeomRaster } from "./geoms/GeomRaster.svelte";
+export { default as GeomHex } from "./geoms/GeomHex.svelte";
 export { default as GeomRibbon } from "./geoms/GeomRibbon.svelte";
 export { default as GeomSegment } from "./geoms/GeomSegment.svelte";
+export { default as GeomViolin } from "./geoms/GeomViolin.svelte";
+export { default as GeomFunction } from "./geoms/GeomFunction.svelte";
+export { default as GeomPolygon } from "./geoms/GeomPolygon.svelte";
+/** @lifecycle stable-intent */
+export { default as GeomAbline } from "./geoms/GeomAbline.svelte";
 export { default as GeomCurve } from "./geoms/GeomCurve.svelte";
+export { default as GeomMap } from "./geoms/GeomMap.svelte";
 export { default as GeomSf } from "./geoms/GeomSf.svelte";
 export { default as GeomSfText } from "./geoms/GeomSfText.svelte";
 export { default as GeomSfLabel } from "./geoms/GeomSfLabel.svelte";
+export { default as GeomBlank } from "./geoms/GeomBlank.svelte";
+
+export { default as GeomSpoke } from "./geoms/GeomSpoke.svelte";
+export { default as GeomRug } from "./geoms/GeomRug.svelte";
+export { default as GeomStep } from "./geoms/GeomStep.svelte";
+export { default as GeomQq } from "./geoms/GeomQq.svelte";
+export { default as GeomQqLine } from "./geoms/GeomQqLine.svelte";
 export { registerLayer, registerPlotLayer } from "./geoms/registry.svelte.js";
 export type {
   Layer,
@@ -144,6 +171,8 @@ export { default as ThemeTufte } from "./theme/ThemeTufte.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeLinedraw } from "./theme/ThemeLinedraw.svelte";
 /** @lifecycle stable-intent */
+export { default as ThemeVoid } from "./theme/ThemeVoid.svelte";
+/** @lifecycle stable-intent */
 export { default as ThemeGrey } from "./theme/ThemeGrey.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeGray } from "./theme/ThemeGray.svelte";
@@ -182,9 +211,13 @@ export { default as ScaleXDate } from "./scale/ScaleXDate.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleXDatetime } from "./scale/ScaleXDatetime.svelte";
 /** @lifecycle stable-intent */
+export { default as ScaleXTime } from "./scale/ScaleXTime.svelte";
+/** @lifecycle stable-intent */
 export { default as ScaleYDate } from "./scale/ScaleYDate.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleYDatetime } from "./scale/ScaleYDatetime.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleYTime } from "./scale/ScaleYTime.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleXDiscrete } from "./scale/ScaleXDiscrete.svelte";
 /** @lifecycle stable-intent */
@@ -195,6 +228,18 @@ export { default as ScaleColorContinuous } from "./scale/ScaleColorContinuous.sv
 export { default as ScaleColorDiscrete } from "./scale/ScaleColorDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColorBinned } from "./scale/ScaleColorBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorBrewer } from "./scale/ScaleColorBrewer.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorDistiller } from "./scale/ScaleColorDistiller.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorFermenter } from "./scale/ScaleColorFermenter.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorSteps } from "./scale/ScaleColorSteps.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorSteps2 } from "./scale/ScaleColorSteps2.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorStepsn } from "./scale/ScaleColorStepsn.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColorGradient } from "./scale/ScaleColorGradient.svelte";
 /** @lifecycle stable-intent */
@@ -226,6 +271,12 @@ export { default as ScaleFillDiscrete } from "./scale/ScaleFillDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleFillBinned } from "./scale/ScaleFillBinned.svelte";
 /** @lifecycle stable-intent */
+export { default as ScaleFillSteps } from "./scale/ScaleFillSteps.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillSteps2 } from "./scale/ScaleFillSteps2.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillStepsn } from "./scale/ScaleFillStepsn.svelte";
+/** @lifecycle stable-intent */
 export { default as ScaleFillGradient } from "./scale/ScaleFillGradient.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleFillGradient2 } from "./scale/ScaleFillGradient2.svelte";
@@ -249,6 +300,24 @@ export { default as ScaleFillDatetime } from "./scale/ScaleFillDatetime.svelte";
 export { default as ScaleFillManual } from "./scale/ScaleFillManual.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleFillIdentity } from "./scale/ScaleFillIdentity.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillBrewer } from "./scale/ScaleFillBrewer.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillDistiller } from "./scale/ScaleFillDistiller.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillFermenter } from "./scale/ScaleFillFermenter.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorViridisC } from "./scale/ScaleColorViridisC.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorViridisD } from "./scale/ScaleColorViridisD.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorViridisB } from "./scale/ScaleColorViridisB.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillViridisC } from "./scale/ScaleFillViridisC.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillViridisD } from "./scale/ScaleFillViridisD.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillViridisB } from "./scale/ScaleFillViridisB.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleSizeContinuous } from "./scale/ScaleSizeContinuous.svelte";
 /** @lifecycle stable-intent */
@@ -292,6 +361,12 @@ export { default as ScaleAlphaManual } from "./scale/ScaleAlphaManual.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleAlphaIdentity } from "./scale/ScaleAlphaIdentity.svelte";
 /** @lifecycle stable-intent */
+export { default as ScaleSizeArea } from "./scale/ScaleSizeArea.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleSizeBinnedArea } from "./scale/ScaleSizeBinnedArea.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleRadius } from "./scale/ScaleRadius.svelte";
+/** @lifecycle stable-intent */
 export { default as ScaleShapeDiscrete } from "./scale/ScaleShapeDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleShapeBinned } from "./scale/ScaleShapeBinned.svelte";
@@ -313,6 +388,18 @@ export { default as ScaleColourContinuous } from "./scale/ScaleColorContinuous.s
 export { default as ScaleColourDiscrete } from "./scale/ScaleColorDiscrete.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourBinned } from "./scale/ScaleColorBinned.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourBrewer } from "./scale/ScaleColorBrewer.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourDistiller } from "./scale/ScaleColorDistiller.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourFermenter } from "./scale/ScaleColorFermenter.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourSteps } from "./scale/ScaleColorSteps.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourSteps2 } from "./scale/ScaleColorSteps2.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourStepsn } from "./scale/ScaleColorStepsn.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourGradient } from "./scale/ScaleColorGradient.svelte";
 /** @lifecycle stable-intent */
@@ -337,6 +424,20 @@ export { default as ScaleColourDatetime } from "./scale/ScaleColorDatetime.svelt
 export { default as ScaleColourManual } from "./scale/ScaleColorManual.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourIdentity } from "./scale/ScaleColorIdentity.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourViridisC } from "./scale/ScaleColorViridisC.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourViridisD } from "./scale/ScaleColorViridisD.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourViridisB } from "./scale/ScaleColorViridisB.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleSizeOrdinal } from "./scale/ScaleSizeDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleLinewidthOrdinal } from "./scale/ScaleLinewidthDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleAlphaOrdinal } from "./scale/ScaleAlphaDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleShapeOrdinal } from "./scale/ScaleShapeDiscrete.svelte";
 // </generated:scale-children>
 
 // Coord children (#659 slice 5) — stable-intent: named shells + <Coord>
@@ -441,9 +542,11 @@ export {
   GGBuilder,
   coord_equal,
   coord_fixed,
+  coord_sf,
   coord_transform,
   coordEqual,
   coordFixed,
+  coordSf,
   coordTransform,
   isPortable,
   lintSpec,
@@ -482,6 +585,9 @@ export {
   scaleColorLog10,
   scaleColorManual,
   scaleColorSqrt,
+  scaleColorViridisB,
+  scaleColorViridisC,
+  scaleColorViridisD,
   scaleContinuousIdentity,
   scaleDiscreteIdentity,
   scaleDiscreteManual,
@@ -499,6 +605,9 @@ export {
   scaleColourLog10,
   scaleColourManual,
   scaleColourSqrt,
+  scaleColourViridisB,
+  scaleColourViridisC,
+  scaleColourViridisD,
   scaleFillBinned,
   scaleFillContinuous,
   scaleFillDate,
@@ -508,6 +617,9 @@ export {
   scaleFillLog10,
   scaleFillManual,
   scaleFillSqrt,
+  scaleFillViridisB,
+  scaleFillViridisC,
+  scaleFillViridisD,
   scale_color_binned,
   scale_color_continuous,
   scale_color_date,
@@ -517,6 +629,9 @@ export {
   scale_color_log10,
   scale_color_manual,
   scale_color_sqrt,
+  scale_color_viridis_b,
+  scale_color_viridis_c,
+  scale_color_viridis_d,
   scale_colour_binned,
   scale_colour_continuous,
   scale_colour_date,
@@ -526,6 +641,9 @@ export {
   scale_colour_log10,
   scale_colour_manual,
   scale_colour_sqrt,
+  scale_colour_viridis_b,
+  scale_colour_viridis_c,
+  scale_colour_viridis_d,
   scale_fill_binned,
   scale_fill_continuous,
   scale_fill_date,
@@ -535,10 +653,14 @@ export {
   scale_fill_log10,
   scale_fill_manual,
   scale_fill_sqrt,
+  scale_fill_viridis_b,
+  scale_fill_viridis_c,
+  scale_fill_viridis_d,
   scaleXBinned,
   scaleXContinuous,
   scaleXDate,
   scaleXDatetime,
+  scaleXTime,
   scaleXDiscrete,
   scaleXLog10,
   scaleXReverse,
@@ -547,6 +669,7 @@ export {
   scaleYContinuous,
   scaleYDate,
   scaleYDatetime,
+  scaleYTime,
   scaleYDiscrete,
   scaleYLog10,
   scaleYReverse,
@@ -555,6 +678,7 @@ export {
   scale_x_continuous,
   scale_x_date,
   scale_x_datetime,
+  scale_x_time,
   scale_x_discrete,
   scale_x_log10,
   scale_x_reverse,
@@ -563,6 +687,7 @@ export {
   scale_y_continuous,
   scale_y_date,
   scale_y_datetime,
+  scale_y_time,
   scale_y_discrete,
   scale_y_log10,
   scale_y_reverse,
@@ -657,6 +782,8 @@ export type {
   TemporalColorScaleOptions,
   TransformedColorScaleOptions,
   TransformedPositionScaleOptions,
+  ViridisOptionName,
+  ViridisScaleOptions,
   TemporalDecision,
   TemporalDisambiguation,
   TemporalInterval,

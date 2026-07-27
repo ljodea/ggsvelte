@@ -9,10 +9,12 @@ import {
   guideLegend,
   normalize,
   scaleColorBinned,
+  scaleColorBrewer,
   scaleColorContinuous,
   scaleColorDate,
   scaleColorDatetime,
   scaleColorDiscrete,
+  scaleColorDistiller,
   scaleColorIdentity,
   scaleColorLog10,
   scaleColorManual,
@@ -22,11 +24,13 @@ import {
   scaleColourDate,
   scaleColourDatetime,
   scaleColourDiscrete,
+  scaleColourDistiller,
   scaleColourIdentity,
   scaleColourLog10,
   scaleColourManual,
   scaleColourSqrt,
   scaleFillBinned,
+  scaleFillBrewer,
   scaleFillContinuous,
   scaleFillDate,
   scaleFillDatetime,
@@ -36,6 +40,7 @@ import {
   scaleFillManual,
   scaleFillSqrt,
   scale_color_binned,
+  scale_color_brewer,
   scale_color_continuous,
   scale_color_date,
   scale_color_datetime,
@@ -45,6 +50,7 @@ import {
   scale_color_manual,
   scale_color_sqrt,
   scale_colour_binned,
+  scale_colour_brewer,
   scale_colour_continuous,
   scale_colour_date,
   scale_colour_datetime,
@@ -54,10 +60,12 @@ import {
   scale_colour_manual,
   scale_colour_sqrt,
   scale_fill_binned,
+  scale_fill_brewer,
   scale_fill_continuous,
   scale_fill_date,
   scale_fill_datetime,
   scale_fill_discrete,
+  scale_fill_fermenter,
   scale_fill_identity,
   scale_fill_log10,
   scale_fill_manual,
@@ -234,5 +242,32 @@ describe("color/fill scale authoring API", () => {
     expect(
       validScale({ type: "binned", breaks: Array.from({ length: 66 }, (_, index) => index) }),
     ).toBe(false);
+  });
+});
+
+describe("ColorBrewer helpers (#825)", () => {
+  it("maps palette to scheme and direction -1 to reverse", () => {
+    expect(scale_color_brewer({ palette: "Set2" })).toEqual({
+      color: { type: "ordinal", scheme: "Set2" },
+    });
+    expect(scaleColorDistiller({ palette: "Blues", direction: -1 })).toEqual({
+      color: { type: "sequential", scheme: "Blues", reverse: true },
+    });
+    expect(scale_fill_fermenter({ palette: "RdYlBu" })).toEqual({
+      fill: { type: "binned", scheme: "RdYlBu" },
+    });
+  });
+
+  it("accepts ColorBrewer schemes in tier-1 validation", () => {
+    expect(validScale({ type: "ordinal", scheme: "Set2" })).toBe(true);
+    expect(validScale({ type: "sequential", scheme: "Blues" })).toBe(true);
+    expect(validScale({ type: "binned", scheme: "RdYlBu", breaks: [0, 1, 2] })).toBe(true);
+    expect(validScale({ type: "ordinal", scheme: "NotAPalette" })).toBe(false);
+  });
+
+  it("exports colour and fill alias identity", () => {
+    expect(scale_colour_brewer).toBe(scaleColorBrewer);
+    expect(scaleColourDistiller).toBe(scaleColorDistiller);
+    expect(scale_fill_brewer).toBe(scaleFillBrewer);
   });
 });

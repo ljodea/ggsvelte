@@ -76,7 +76,7 @@ describe("measured temporal axis GuidePlan", () => {
     });
     expect(plan.source).toBe("explicit");
     expect(plan.interval).toBeNull();
-    expect(plan.ticks.map((tick) => tick.label)).toEqual(["Jan 2024", "Jan 2025", "Feb"]);
+    expect(plan.ticks.map((tick) => tick.label)).toEqual(["Jan 2024", "Jan 2025", "Feb 2025"]);
   });
 
   it("keeps interval tie-breaks stable at neighboring integer widths", () => {

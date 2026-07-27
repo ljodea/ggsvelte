@@ -167,11 +167,10 @@ const INTERACTION_HANDLERS: Record<
 for (const scenario of SMOKE_SCENARIOS) {
   if (scenario.kind === "example") {
     test(`${scenario.exampleId} — ${scenario.theme}`, async ({ page }) => {
-      // 10k-mark canvas specimen hydrates a large client bundle + paints on the
-      // main thread; under CI load this regularly exceeds the default 30s budget
-      // before data-gg-ready flips (and before Playwright can even query the DOM).
+      // Canvas-scatter mark count is tuned just above CANVAS_AUTO_THRESHOLD
+      // (#926); under CI load hydrate still straddles the default 30s budget.
       if (scenario.exampleId === "point/canvas-scatter") {
-        test.setTimeout(120_000);
+        test.setTimeout(60_000);
       }
       await shotExample(page, scenario.exampleId, scenario.theme, scenario.basename);
     });
