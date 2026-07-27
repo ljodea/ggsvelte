@@ -74,6 +74,7 @@ export const WARNING_EMISSION_REGISTRY = {
   "quantile-group-dropped": { channel: "warning" },
   "manual-group-dropped": { channel: "warning" },
   "ellipse-group-dropped": { channel: "warning" },
+  "stat-channel-unsupported": { channel: "warning" },
   "palette-exhausted": { channel: "warning" },
   "fingerprint-mismatch": { channel: "warning" },
   "version-mismatch": { channel: "warning" },

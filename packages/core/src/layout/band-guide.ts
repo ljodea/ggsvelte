@@ -38,6 +38,7 @@ import {
   wrapLabel,
   type BandLayoutEntry,
 } from "./band-label-layout.js";
+import type { GuideDegradedCode } from "./guide-degraded-codes.js";
 import { truncateToFit } from "./truncate.js";
 
 export type {
@@ -134,7 +135,7 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
       ellipsis,
       true,
     );
-    const degraded: string[] = [];
+    const degraded: GuideDegradedCode[] = [];
     if (marginOverflow) degraded.push("band-label-margin-overflow");
     let overlap = false;
     if (opts?.reportOverlap === true && entries.length > 0) {
@@ -226,7 +227,7 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
     if (!force && (wrapLeft > marginCapPx + 1e-6 || wrapRight > marginCapPx + 1e-6)) {
       return null;
     }
-    const degraded: string[] = [];
+    const degraded: GuideDegradedCode[] = [];
     let marginOverflow = false;
     if (force) {
       if (wrapOverlap) degraded.push("band-label-overlap");
@@ -300,7 +301,7 @@ export function planBandAxis(input: BandAxisPlanInput): BandAxisPlan {
   };
 
   const rotatedPlan = (angle: number, hybrid?: RotatedLineSource): BandAxisPlan => {
-    const degraded: string[] = [];
+    const degraded: GuideDegradedCode[] = [];
     let labelEvery = 1;
     let overlap = false;
     let marginOverflow = false;

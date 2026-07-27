@@ -158,6 +158,7 @@ export {
 export type {
   AdvisoryCode,
   CLIDiagnosticCode,
+  DiagnosticCode,
   PipelineErrorCatalogEntry,
   PipelineErrorCode,
   PipelineWarningCode,

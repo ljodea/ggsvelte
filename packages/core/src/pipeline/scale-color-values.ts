@@ -11,6 +11,8 @@ import { encodeKey } from "../scales/state.js";
 import type { CellValue } from "../table.js";
 import { cellToNumber } from "../table.js";
 
+import type { PipelineErrorCode } from "../diagnostics-error-catalog.js";
+
 import { PipelineError, type PipelineWarning } from "./types.js";
 
 export interface ColorValueView {
@@ -22,7 +24,7 @@ export interface ColorValueView {
 
 function colorScaleError(
   name: "color" | "fill",
-  code: string,
+  code: PipelineErrorCode,
   problem: string,
   cause: string,
   fixes: readonly { description: string }[],

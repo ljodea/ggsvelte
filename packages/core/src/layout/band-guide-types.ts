@@ -1,6 +1,7 @@
 /**
  * Band axis guide plan types — shared by the planner and guide-plan contracts.
  */
+import type { GuideDegradedCode } from "./guide-degraded-codes.js";
 import type { TextMeasurer } from "./measure.js";
 
 export type BandLabelMode = "single-line" | "wrapped" | "rotated";
@@ -85,7 +86,7 @@ export interface BandAxisPlan {
   leftOverhang: number;
   overlap: boolean;
   marginOverflow: boolean;
-  degraded: string[];
+  degraded: GuideDegradedCode[];
   /**
    * True when `scales.*.guide.mode` forced the presentation (not auto).
    * Suppresses heuristic wrap/rotate advisories that would re-suggest the pin.

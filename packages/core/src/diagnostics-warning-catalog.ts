@@ -132,6 +132,10 @@ export const PIPELINE_WARNING_CATALOG = {
     summary:
       "An ellipse group had fewer than two finite (x,y) points or zero variance and was dropped.",
   },
+  "stat-channel-unsupported": {
+    summary:
+      "A color/fill after-stat mapping names an output the selected stat does not publish; the mapping is ignored (style channels throw the same code as an error).",
+  },
   "palette-exhausted": {
     summary:
       "A discrete color scale ran out of palette entries and cycled (the default onExhaust).",

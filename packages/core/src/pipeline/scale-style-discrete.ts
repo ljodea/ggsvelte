@@ -12,6 +12,7 @@ import {
 import type { CellValue } from "../table.js";
 
 import type { StyleResolution } from "./scale-style-types.js";
+import { styleWarningCode } from "./style-warning-code.js";
 import { PipelineError, type PipelineWarning } from "./types.js";
 
 export function styleGuideEntry(
@@ -88,7 +89,10 @@ export function discreteStyleResolution(input: {
     throw error;
   }
   for (const warning of trained.warnings) {
-    warnings.push({ code: `style-${warning.code}`, message: `${aesthetic}: ${warning.message}` });
+    warnings.push({
+      code: styleWarningCode(warning.code),
+      message: `${aesthetic}: ${warning.message}`,
+    });
   }
   const resolvedDomain = trained.domain as CellValue[];
   const scale: StyleScale = Object.freeze({

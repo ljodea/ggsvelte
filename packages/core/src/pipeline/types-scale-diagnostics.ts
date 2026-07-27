@@ -1,5 +1,7 @@
 import type { PositionScaleSpec } from "@ggsvelte/spec";
 
+import type { DiagnosticCode } from "../diagnostics.js";
+
 export interface ScaleDiagnosticFix {
   description: string;
   portable?: unknown;
@@ -7,7 +9,8 @@ export interface ScaleDiagnosticFix {
 }
 
 export interface ScaleDiagnostic {
-  code: string;
+  /** Catalogued code (any channel; dual-channel codes are legal). */
+  code: DiagnosticCode;
   severity: "advisory" | "warning" | "error";
   path: string;
   problem: string;
