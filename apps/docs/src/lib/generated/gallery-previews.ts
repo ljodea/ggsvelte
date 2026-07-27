@@ -267,6 +267,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "2ec864cf245cbb1b253a89680e6002a2879c70954c3e4903aee4d2218648a4b8",
   },
   {
+    id: "point/abline-identity",
+    filename: "point-abline-identity-light.png",
+    path: "/previews/point-abline-identity-light.png",
+    sha256: "88347d12347639f9758ac38be3244faf3b7cf476432858cc7e11691e9ef0fa8f",
+  },
+  {
     id: "point/canvas-scatter",
     filename: "point-canvas-scatter-light.png",
     path: "/previews/point-canvas-scatter-light.png",

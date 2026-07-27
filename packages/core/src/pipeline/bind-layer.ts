@@ -54,7 +54,7 @@ export function bindLayer(
   // or invalid style vectors. Reject it here (scaled/literal constants are
   // still fine). Compatibility with the rule geom is enforced upstream, so only
   // linewidth/linetype/alpha realistically reach this guard.
-  if (position.ruleForm === "annotation") {
+  if (position.ruleForm === "annotation" || layer.geom === "abline") {
     const styleBindings = {
       size: extras.size,
       linewidth: extras.linewidth,

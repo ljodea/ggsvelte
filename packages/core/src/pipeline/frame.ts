@@ -25,7 +25,7 @@ export function buildFrame(
   // Annotation frames are rowless (n=0, empty inputGroups). Do not derive or
   // overwrite pre-stat groups — identity index would otherwise retain O(n)
   // source memberships for a layer with no source rows.
-  if (binding.ruleForm === "annotation") {
+  if (binding.ruleForm === "annotation" || binding.layer.geom === "abline") {
     return buildAnnotationFrame(binding, table);
   }
 

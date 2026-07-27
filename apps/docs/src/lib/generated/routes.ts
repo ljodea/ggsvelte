@@ -1998,6 +1998,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "abline-scale-unsupported",
+        title: "abline-scale-unsupported",
+        level: 3,
+      },
+      {
         id: "interaction-diagnostics-ggsvelte-svelte",
         title: "Interaction diagnostics (@ggsvelte/svelte)",
         level: 2,
@@ -2262,8 +2267,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-681",
-        title: "experimental (681)",
+        id: "experimental-687",
+        title: "experimental (687)",
         level: 3,
       },
       {
@@ -2307,8 +2312,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "stable-intent-138",
-        title: "stable-intent (138)",
+        id: "stable-intent-139",
+        title: "stable-intent (139)",
         level: 3,
       },
     ],
@@ -2892,6 +2897,16 @@ export const DOCS_ROUTES = [
     title: "Path trajectory (data order) — ggsvelte gallery",
     description: "Path trajectory (data order)",
     canonicalPath: "/examples/path/trajectory",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/point/abline-identity",
+    title: "Abline identity reference — ggsvelte gallery",
+    description: "Abline identity reference",
+    canonicalPath: "/examples/point/abline-identity",
     kind: "page",
     index: true,
     sitemap: true,

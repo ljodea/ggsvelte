@@ -1919,6 +1919,70 @@
       "additionalProperties": false,
       "description": "Parameters for geom spoke: optional constant angle/radius plus segment-like stroke styling."
     },
+    "AblineParams": {
+      "type": "object",
+      "properties": {
+        "slope": {
+          "type": "number",
+          "description": "Line slope (rise/run). Default 1 (identity line when intercept is 0)."
+        },
+        "intercept": {
+          "type": "number",
+          "description": "Y-intercept in data units. Default 0."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Line opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px. Must be greater than 0. Default 1."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Annotation parameters for geom abline: y = intercept + slope · x, clipped to the panel. Annotation-only in v1 (no data-mapped slope/intercept)."
+    },
+    "AblineLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "abline",
+          "description": "Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Abline layers use fixed params as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Abline layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. Abline v1 ignores row data (annotation-only)."
+        },
+        "params": {
+          "$ref": "#/$defs/AblineParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A slope/intercept reference-line layer (ggplot2 geom_abline). Annotation-only: set params.slope and params.intercept."
+    },
     "CurveParams": {
       "type": "object",
       "properties": {
@@ -3827,6 +3891,9 @@
         },
         {
           "$ref": "#/$defs/SegmentLayer"
+        },
+        {
+          "$ref": "#/$defs/AblineLayer"
         },
         {
           "$ref": "#/$defs/CurveLayer"

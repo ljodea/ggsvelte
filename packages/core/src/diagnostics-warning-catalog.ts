@@ -182,6 +182,10 @@ export const PIPELINE_WARNING_CATALOG = {
     summary:
       "A fixed-aspect data rectangle is below the documented readable minimum; the ratio remains exact and minor furniture is removed.",
   },
+  "abline-scale-unsupported": {
+    summary:
+      "geom_abline needs continuous x and y scales to clip y = intercept + slope · x; the layer is skipped on band axes.",
+  },
 } as const satisfies Record<string, { summary: string }>;
 
 export type PipelineWarningCode = keyof typeof PIPELINE_WARNING_CATALOG;

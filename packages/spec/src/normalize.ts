@@ -71,6 +71,7 @@ export type {
   JitterLayerInput,
   RibbonLayerInput,
   SegmentLayerInput,
+  AblineLayerInput,
   ContourLayerInput,
   Density2dLayerInput,
   Density2dFilledLayerInput,
@@ -153,6 +154,11 @@ function isAnnotationRule(layer: LayerInput): boolean {
   return params?.xintercept !== undefined || params?.yintercept !== undefined;
 }
 
+/** Abline is always annotation-style (fixed slope/intercept; no plot aes). */
+function isAnnotationAbline(layer: LayerInput): boolean {
+  return layer.geom === "abline";
+}
+
 /**
  * Convenience geom aliases (#818 / histogram / freqpoly): rewrite to the
  * canonical geom name. Pure renames only — no cross-field params surgery.
@@ -175,7 +181,7 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
     layerAesInput = { ...layerAesInput, y: null };
   }
 
-  const inherited = isAnnotationRule(layer) ? undefined : plotAes;
+  const inherited = isAnnotationRule(layer) || isAnnotationAbline(layer) ? undefined : plotAes;
   let aes = resolveLayerAes(inherited, normalizeAes(layerAesInput));
   // Unknown geoms fall back to identity defaults so normalize never throws —
   // validate() rejects them right after with the proper did-you-mean error.

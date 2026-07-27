@@ -408,6 +408,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "point/abline-identity",
+    title: "Abline identity reference",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6InBvaW50L2FibGluZS1pZGVudGl0eSJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJ4IjowLjIsInkiOjAuM30seyJ4IjowLjUsInkiOjAuNDV9LHsieCI6MC44LCJ5IjowLjl9LHsieCI6MS4yLCJ5IjoxLjF9LHsieCI6MS41LCJ5IjoxLjR9LHsieCI6MS44LCJ5IjoyfSx7IngiOjIuMiwieSI6Mi4xfSx7IngiOjIuNSwieSI6Mi43fV19LCJsYXllcnMiOlt7Imdlb20iOiJwb2ludCIsInN0YXQiOiJpZGVudGl0eSIsInBvc2l0aW9uIjoiaWRlbnRpdHkiLCJhZXMiOnsieCI6eyJmaWVsZCI6IngifSwieSI6eyJmaWVsZCI6InkifX0sInBhcmFtcyI6eyJzaXplIjozLjV9fSx7Imdlb20iOiJhYmxpbmUiLCJzdGF0IjoiaWRlbnRpdHkiLCJwb3NpdGlvbiI6ImlkZW50aXR5IiwicGFyYW1zIjp7InNsb3BlIjoxLCJpbnRlcmNlcHQiOjAsImxpbmV3aWR0aCI6MS4yfX1dLCJsYWJzIjp7InRpdGxlIjoiZ2VvbV9hYmxpbmUiLCJzdWJ0aXRsZSI6IklkZW50aXR5IHJlZmVyZW5jZSB5ID0geCBjbGlwcGVkIHRvIHRoZSBwYW5lbCIsIngiOiJ4IiwieSI6InkifSwidGhlbWUiOiJtaW5pbWFsIn19",
+    },
+  },
+  {
     id: "point/canvas-scatter",
     title: "Canvas scatter (10,000 points)",
     compatibility: {

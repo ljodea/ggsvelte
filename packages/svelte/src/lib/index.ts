@@ -104,6 +104,8 @@ export { default as GeomTile } from "./geoms/GeomTile.svelte";
 export { default as GeomRaster } from "./geoms/GeomRaster.svelte";
 export { default as GeomRibbon } from "./geoms/GeomRibbon.svelte";
 export { default as GeomSegment } from "./geoms/GeomSegment.svelte";
+/** @lifecycle stable-intent */
+export { default as GeomAbline } from "./geoms/GeomAbline.svelte";
 export { default as GeomCurve } from "./geoms/GeomCurve.svelte";
 export { default as GeomMap } from "./geoms/GeomMap.svelte";
 export { default as GeomSf } from "./geoms/GeomSf.svelte";
