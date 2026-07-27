@@ -20787,7 +20787,7 @@ export const DOCS_SEARCH_INDEX = [
     keywords: [
       "validation",
       "error",
-      'Use a categorical scheme with "ordinal", or "viridis"/hex stops with "sequential".',
+      'Use a categorical scheme with "ordinal" (or a sequential-family scheme like "viridis" for discrete viridis), or "viridis"/hex stops with "sequential".',
     ],
     exact: ["scale-scheme-type", "validation:scale-scheme-type"],
   },
