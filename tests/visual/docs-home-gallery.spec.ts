@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import {
   GALLERY_FILTER_JOURNEY_CATEGORY,
   GALLERY_FILTER_JOURNEY_QUERY,
-} from "../../apps/docs/src/lib/gallery-filter-journey";
+} from "../fixtures/gallery-filter-journey";
 
 async function expectNoOverflow(page: import("@playwright/test").Page): Promise<void> {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(

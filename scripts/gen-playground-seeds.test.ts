@@ -10,7 +10,7 @@ import {
   playgroundBuilderOutput,
   playgroundSvelteOutput,
 } from "../apps/docs/src/lib/playground-output";
-import { PLAYGROUND_SAMPLES } from "../apps/docs/src/lib/playground-samples";
+import { PLAYGROUND_SAMPLES } from "./playground-samples";
 import { evaluatePlaygroundCompatibility, generatePlaygroundSeeds } from "./gen-playground-seeds";
 
 const validSpec: PortableSpec = {

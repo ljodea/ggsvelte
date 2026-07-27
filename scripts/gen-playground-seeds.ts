@@ -14,7 +14,7 @@ import {
 import {
   PLAYGROUND_SAMPLES as SOURCE_SAMPLES,
   type PlaygroundSample,
-} from "../apps/docs/src/lib/playground-samples.js";
+} from "./playground-samples.js";
 import { EXAMPLES } from "../examples/manifest.js";
 import { defineArtifact, formatGeneratedSource } from "./artifact.ts";
 import { manifestArtifact } from "./gen-manifest.ts";
