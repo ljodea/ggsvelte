@@ -25,6 +25,8 @@ export function makeLayerBinding(input: {
   heightField: string | null;
   xendField: string | null;
   yendField: string | null;
+  angleField: string | null;
+  radiusField: string | null;
   ribbonOrientation?: "x" | "y";
   color: LayerBinding["color"];
   fill: LayerBinding["fill"];
@@ -36,6 +38,9 @@ export function makeLayerBinding(input: {
   labelField: string | null;
   labelConstant: string | null;
   weightField: string | null;
+  sampleField: string | null;
+  zField: string | null;
+  mapIdField: string | null;
   ruleForm: LayerBinding["ruleForm"];
 }): LayerBinding {
   return {
@@ -56,6 +61,10 @@ export function makeLayerBinding(input: {
     heightField: input.heightField,
     xendField: input.xendField,
     yendField: input.yendField,
+    angleField: input.angleField,
+    radiusField: input.radiusField,
+    zField: input.zField,
+    mapIdField: input.mapIdField,
     ...(input.ribbonOrientation !== undefined && { ribbonOrientation: input.ribbonOrientation }),
     color: input.color,
     fill: input.fill,
@@ -67,6 +76,7 @@ export function makeLayerBinding(input: {
     labelField: input.labelField,
     labelConstant: input.labelConstant,
     weightField: input.weightField,
+    sampleField: input.sampleField,
     ruleForm: input.ruleForm,
   };
 }

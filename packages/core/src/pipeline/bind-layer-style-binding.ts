@@ -59,9 +59,14 @@ export function styleBinding(
       count: ["count"],
       bin: ["count", "density", "ncount", "ndensity"],
       density: ["density", "count", "scaled", "ndensity"],
+      bindot: ["stackpos"],
       smooth: ["y", "ymin", "ymax", "se"],
       summary: ["y", "ymin", "ymax"],
+      summary_bin: ["y", "ymin", "ymax"],
       boxplot: ["ymin", "lower", "middle", "upper", "ymax"],
+      ecdf: ["ecdf"],
+      qq: ["sample", "theoretical"],
+      qq_line: ["sample", "theoretical"],
     };
     if (!(outputs[stat] ?? []).includes(channel.stat)) {
       throw new PipelineError(

@@ -62,19 +62,32 @@ export function polygonBatch(
   for (const rows of groupRows) total += rows.length;
   const positions = new Float32Array(total * 2);
   const rowIndex = new Uint32Array(total);
+  // One frame-row id per vertex so coord-projected closed paths resolve
+  // tooltips to the correct region (not ribbon 2×N layout; #808/#502).
+  const closedFrameRows = new Uint32Array(total);
   const pathOffsets = new Uint32Array(groupRows.length + 1);
   const fills: (string | null)[] = [];
   const strokes: (string | null)[] = [];
+  const ringStarts: number[] = [];
+  const ringIndex = frame.sf?.ringIndex;
   let cursor = 0;
   for (let s = 0; s < groupRows.length; s++) {
     pathOffsets[s] = cursor;
     const rows = groupRows[s]!;
+    let prevRing = ringIndex?.[rows[0]!] ?? 0;
     for (const row of rows) {
+      const rIdx = ringIndex?.[row] ?? 0;
+      if (rIdx !== prevRing) {
+        // Additional ring start (hole) inside this subpath — exterior is pathOffsets[s].
+        ringStarts.push(cursor);
+        prevRing = rIdx;
+      }
       const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
       const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
       positions[cursor * 2] = tx * fx.innerWidth;
       positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
       rowIndex[cursor] = frame.rowIndex[row]!;
+      closedFrameRows[cursor] = row;
       cursor++;
     }
     fills.push(areaGroupFillOf(frame, fill, rows) ?? fillPaintResolved?.fallback ?? null);
@@ -86,6 +99,7 @@ export function polygonBatch(
   }
   pathOffsets[groupRows.length] = cursor;
 
+  // polygon and map (geom_map is polygon-with-join; #808) share this batch.
   const params = (binding.layer.params ?? {}) as {
     alpha?: number;
     linewidth?: number;
@@ -107,9 +121,14 @@ export function polygonBatch(
     positions,
     rowIndex,
     pathOffsets,
+    ...(ringStarts.length > 0 && {
+      ringStarts: Uint32Array.from(ringStarts),
+      fillRule: "evenodd" as const,
+    }),
     strokes,
     fills,
     closed: true,
+    closedFrameRows,
     linewidth:
       typeof literalLinewidth === "number"
         ? literalLinewidth

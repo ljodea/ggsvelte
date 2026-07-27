@@ -134,11 +134,13 @@ test("desktop docs shell exposes chapter, breadcrumb, contents, and sequence nav
 });
 
 test("mobile header and docs navigation are explicit, reachable controls", async ({ page }) => {
+  // Lives in the journeys Playwright project (60s budget, #944). Prefer
+  // waitUntil/visibility waits over per-test setTimeout.
   await page.setViewportSize({ width: 375, height: 760 });
-  await page.goto(GUIDE_ROUTE);
+  await page.goto(GUIDE_ROUTE, { waitUntil: "domcontentloaded" });
 
   const siteMenu = page.getByRole("button", { name: "Open site menu" });
-  await expect(siteMenu).toBeVisible();
+  await expect(siteMenu).toBeVisible({ timeout: 15_000 });
   await siteMenu.click();
   const siteDialog = page.getByRole("dialog");
   await expect(siteDialog.getByRole("navigation", { name: "Primary" })).toBeVisible();
@@ -205,6 +207,7 @@ test("appearance control remains usable when browser storage is unavailable", as
 });
 
 test("route metadata is canonical, singular, and aliases are noindex", async ({ page }) => {
+  // Search index is lazy-loaded (#948); journeys project budget is 60s (#944).
   await page.goto(GUIDE_ROUTE);
   await expect(page).toHaveTitle("Getting started — ggsvelte");
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);

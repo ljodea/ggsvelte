@@ -1,0 +1,39 @@
+{
+  "id": "81-ellipse-only",
+  "kind": "chart",
+  "prompt": "Draw bivariate normal confidence ellipse rings for x and y with path geometry.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" }
+    ],
+    "rowCount": 6
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 0 },
+      { "x": 1, "y": 0.2 },
+      { "x": 0.2, "y": 1 },
+      { "x": -0.5, "y": 0.4 },
+      { "x": 0.4, "y": -0.3 },
+      { "x": -0.2, "y": -0.5 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "path",
+        "stat": "ellipse",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "stat_ellipse path-only without points (#812)."
+}

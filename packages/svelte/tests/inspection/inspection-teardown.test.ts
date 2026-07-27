@@ -283,7 +283,9 @@ describe("resolveInspectionEmitAction", () => {
 });
 
 describe("planInspectionDismiss", () => {
-  it("plans escape with invalidate, brush clear, and optional returnToInspect", () => {
+  it("plans escape with invalidate, brush clear, pending discard, and optional returnToInspect", () => {
+    // #856: Escape ends the pin session — discard pending pin stash so a
+    // later re-pin cannot restore a pre-Escape candidate.
     expect(
       planInspectionDismiss({
         kind: "escape",
@@ -292,7 +294,7 @@ describe("planInspectionDismiss", () => {
       }),
     ).toEqual({
       emitClear: true,
-      clearPendingPinned: false,
+      clearPendingPinned: true,
       coordinator: "invalidate",
       clearBrush: true,
       clearTooltipHovered: true,
@@ -307,7 +309,7 @@ describe("planInspectionDismiss", () => {
       }),
     ).toEqual({
       emitClear: false,
-      clearPendingPinned: false,
+      clearPendingPinned: true,
       coordinator: "invalidate",
       clearBrush: true,
       clearTooltipHovered: true,

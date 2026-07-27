@@ -97,6 +97,25 @@ describe("renderToSVGString — determinism + equivalence (M0c gate)", () => {
     expect(d.split("L").length).toBe(4);
   });
 
+  it("geom step hv/vh insert one corner; mid inserts two", () => {
+    const stepRows = [
+      { x: 0, y: 0 },
+      { x: 10, y: 10 },
+    ];
+    const pathD = (direction: "hv" | "vh" | "mid") => {
+      const svg = renderToSVGString(gg(stepRows, aes({ x: "x", y: "y" })).geomStep({ direction }), {
+        width: 400,
+        height: 300,
+      });
+      return /<path d="([^"]+)"/.exec(svg)?.[1] ?? "";
+    };
+    // M + 1 corner L + endpoint L → 3 L segments for hv/vh
+    expect(pathD("hv").split("L").length).toBe(3);
+    expect(pathD("vh").split("L").length).toBe(3);
+    // M + 2 mid Ls + endpoint → 4
+    expect(pathD("mid").split("L").length).toBe(4);
+  });
+
   it("enforces maxMarks", () => {
     expect(() =>
       renderToSVGString(gg(rows, aes({ x: "x", y: "y" })).geomPoint(), {

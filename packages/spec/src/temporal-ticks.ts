@@ -152,7 +152,8 @@ export function temporalIntervalTicks(
     return fixedIntervalTicks(min, max, fixedMs * interval.step, limit, interval.key);
   }
 
-  const timezone = options.kind === "date" ? "UTC" : (options.timezone ?? "UTC");
+  const timezone =
+    options.kind === "date" || options.kind === "time" ? "UTC" : (options.timezone ?? "UTC");
   const weekStart = WEEKDAY_NUMBER[options.weekStart ?? "monday"];
   if (timezone === "UTC" || timezone === "Etc/UTC" || timezone === "Z") {
     return utcCalendarTicks(min, max, interval, weekStart, limit);

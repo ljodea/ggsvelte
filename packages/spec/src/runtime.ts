@@ -24,8 +24,18 @@ import type {
   DensityLayer,
   ErrorbarLayer,
   HistogramLayer,
+  FreqpolyLayer,
+  HlineLayer,
+  JitterLayer,
   LayerSpec,
   LineLayer,
+  MapLayer,
+  BlankLayer,
+  SfLayer,
+  SfTextLayer,
+  SfLabelLayer,
+  SpokeLayer,
+  PathLayer,
   PointLayer,
   PortableSpec,
   RasterLayer,
@@ -33,10 +43,22 @@ import type {
   RibbonLayer,
   SegmentLayer,
   PolygonLayer,
+  AblineLayer,
+  ContourLayer,
+  CurveLayer,
+  Density2dLayer,
+  Density2dFilledLayer,
+  DotplotLayer,
+  RugLayer,
+  StepLayer,
+  QqLayer,
+  QqLineLayer,
   RuleLayer,
+  QuantileLayer,
   SmoothLayer,
   TextLayer,
   TileLayer,
+  VlineLayer,
 } from "./schema.js";
 
 /** A function channel accessor: computes the channel value per row. */
@@ -59,42 +81,87 @@ type WithRuntimeAes<Layer extends LayerSpec> = Omit<Layer, "aes"> & {
 
 export interface RuntimePointLayer extends WithRuntimeAes<PointLayer> {}
 export interface RuntimeLineLayer extends WithRuntimeAes<LineLayer> {}
+export interface RuntimePathLayer extends WithRuntimeAes<PathLayer> {}
 export interface RuntimeColLayer extends WithRuntimeAes<ColLayer> {}
 export interface RuntimeBarLayer extends WithRuntimeAes<BarLayer> {}
 export interface RuntimeHistogramLayer extends WithRuntimeAes<HistogramLayer> {}
+export interface RuntimeFreqpolyLayer extends WithRuntimeAes<FreqpolyLayer> {}
 export interface RuntimeAreaLayer extends WithRuntimeAes<AreaLayer> {}
 export interface RuntimeRibbonLayer extends WithRuntimeAes<RibbonLayer> {}
 export interface RuntimeSegmentLayer extends WithRuntimeAes<SegmentLayer> {}
 export interface RuntimePolygonLayer extends WithRuntimeAes<PolygonLayer> {}
+export interface RuntimeAblineLayer extends WithRuntimeAes<AblineLayer> {}
+export interface RuntimeCurveLayer extends WithRuntimeAes<CurveLayer> {}
+export interface RuntimeRugLayer extends WithRuntimeAes<RugLayer> {}
+export interface RuntimeStepLayer extends WithRuntimeAes<StepLayer> {}
+export interface RuntimeQqLayer extends WithRuntimeAes<QqLayer> {}
+export interface RuntimeQqLineLayer extends WithRuntimeAes<QqLineLayer> {}
 export interface RuntimeRuleLayer extends WithRuntimeAes<RuleLayer> {}
+export interface RuntimeHlineLayer extends WithRuntimeAes<HlineLayer> {}
+export interface RuntimeVlineLayer extends WithRuntimeAes<VlineLayer> {}
+export interface RuntimeJitterLayer extends WithRuntimeAes<JitterLayer> {}
 export interface RuntimeTextLayer extends WithRuntimeAes<TextLayer> {}
 export interface RuntimeSmoothLayer extends WithRuntimeAes<SmoothLayer> {}
+export interface RuntimeQuantileLayer extends WithRuntimeAes<QuantileLayer> {}
 export interface RuntimeBoxplotLayer extends WithRuntimeAes<BoxplotLayer> {}
 export interface RuntimeDensityLayer extends WithRuntimeAes<DensityLayer> {}
 export interface RuntimeErrorbarLayer extends WithRuntimeAes<ErrorbarLayer> {}
 export interface RuntimeRectLayer extends WithRuntimeAes<RectLayer> {}
 export interface RuntimeTileLayer extends WithRuntimeAes<TileLayer> {}
 export interface RuntimeRasterLayer extends WithRuntimeAes<RasterLayer> {}
+export interface RuntimeContourLayer extends WithRuntimeAes<ContourLayer> {}
+export interface RuntimeDensity2dLayer extends WithRuntimeAes<Density2dLayer> {}
+export interface RuntimeDensity2dFilledLayer extends WithRuntimeAes<Density2dFilledLayer> {}
+export interface RuntimeDotplotLayer extends WithRuntimeAes<DotplotLayer> {}
+export interface RuntimeMapLayer extends WithRuntimeAes<MapLayer> {}
+export interface RuntimeBlankLayer extends WithRuntimeAes<BlankLayer> {}
+export interface RuntimeSfLayer extends WithRuntimeAes<SfLayer> {}
+export interface RuntimeSfTextLayer extends WithRuntimeAes<SfTextLayer> {}
+export interface RuntimeSfLabelLayer extends WithRuntimeAes<SfLabelLayer> {}
+
+export interface RuntimeSpokeLayer extends WithRuntimeAes<SpokeLayer> {}
 
 export type RuntimeLayerSpec =
   | RuntimePointLayer
   | RuntimeLineLayer
+  | RuntimePathLayer
   | RuntimeColLayer
   | RuntimeBarLayer
   | RuntimeHistogramLayer
+  | RuntimeFreqpolyLayer
   | RuntimeAreaLayer
   | RuntimeRibbonLayer
   | RuntimeSegmentLayer
   | RuntimePolygonLayer
+  | RuntimeAblineLayer
+  | RuntimeCurveLayer
+  | RuntimeRugLayer
+  | RuntimeStepLayer
+  | RuntimeQqLayer
+  | RuntimeQqLineLayer
   | RuntimeRuleLayer
+  | RuntimeHlineLayer
+  | RuntimeVlineLayer
+  | RuntimeJitterLayer
   | RuntimeTextLayer
   | RuntimeSmoothLayer
+  | RuntimeQuantileLayer
   | RuntimeBoxplotLayer
   | RuntimeDensityLayer
   | RuntimeErrorbarLayer
   | RuntimeRectLayer
   | RuntimeTileLayer
-  | RuntimeRasterLayer;
+  | RuntimeRasterLayer
+  | RuntimeContourLayer
+  | RuntimeDensity2dLayer
+  | RuntimeDensity2dFilledLayer
+  | RuntimeDotplotLayer
+  | RuntimeMapLayer
+  | RuntimeSfLayer
+  | RuntimeSfTextLayer
+  | RuntimeSfLabelLayer
+  | RuntimeBlankLayer
+  | RuntimeSpokeLayer;
 
 /** The in-memory spec superset ({ fn } channel accessors allowed). */
 type RuntimeSpecPortableFields = Omit<PortableSpec, "aes" | "layers">;

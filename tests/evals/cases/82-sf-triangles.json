@@ -1,0 +1,50 @@
+{
+  "id": "82-sf-triangles",
+  "kind": "chart",
+  "prompt": "Draw an sf choropleth of rate filled polygons from a GeoJSON geometry column.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "geometry",
+        "type": "nominal"
+      },
+      {
+        "name": "rate",
+        "type": "quantitative"
+      }
+    ],
+    "rowCount": 2
+  },
+  "data": {
+    "main": [
+      {
+        "geometry": "{\"type\":\"Polygon\",\"coordinates\":[[[0,0],[1,0],[0.5,1],[0,0]]]}",
+        "rate": 10
+      },
+      {
+        "geometry": "{\"type\":\"Polygon\",\"coordinates\":[[[1,0],[2,0],[1.5,1],[1,0]]]}",
+        "rate": 20
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "sf",
+        "stat": "sf",
+        "position": "identity",
+        "aes": {
+          "fill": {
+            "field": "rate"
+          }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_sf with fill from rate; geometry column of GeoJSON strings (#809)."
+}

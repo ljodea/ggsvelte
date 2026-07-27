@@ -88,12 +88,14 @@ export function appendTemporalKindMismatch(
     axis: "x" | "y";
     path: string;
     field: string;
-    expected: "date" | "datetime" | undefined;
-    actual: "date" | "datetime" | null;
+    expected: "date" | "datetime" | "time" | undefined;
+    actual: "date" | "datetime" | "time" | null;
   },
 ): void {
   const { axis, path, field, expected, actual } = input;
   if (expected === undefined || actual === null || actual === expected) return;
+  // scale_*_time reduces date/datetime to UTC clock portion (#831); not a mismatch.
+  if (expected === "time" && (actual === "date" || actual === "datetime")) return;
   errors.push({
     code: "scale-type-mismatch",
     path,

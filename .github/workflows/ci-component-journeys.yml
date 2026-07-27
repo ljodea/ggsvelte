@@ -73,16 +73,12 @@ jobs:
         run: DOCS_BUILD_MODE=cloudflare-preview bun run build:docs
       - name: docs shell, home/gallery, progressive, themes, interaction, playground journeys
         if: steps.content_hash.outputs.hit != 'true'
-        # Enumerate every non-pixel docs journey. --grep-invert drops visual-contract
-        # screenshots so content PRs never pay full-page goldens here.
+        # The journeys Playwright project selects the docs a11y/structure specs
+        # (60s budget, #944). --grep-invert drops visual-contract screenshots so
+        # content PRs never pay full-page goldens here.
         run: >-
           bun run test:visual --
-          docs-shell.spec.ts
-          docs-home-gallery.spec.ts
-          docs-progressive-search.spec.ts
-          docs-themes.spec.ts
-          interaction-accessibility.spec.ts
-          playground.spec.ts
+          --project journeys
           --grep-invert 'visual contract'
       - uses: ./.github/actions/ci-content-hash-write
         if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'

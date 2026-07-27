@@ -63,13 +63,14 @@ function colourAliases(stem: string): string[] {
  * Complete shell ledger. Cardinality (asserted in tests):
  *   position-continuous  8
  *   position-binned      2
- *   position-temporal    4
+ *   position-temporal    6  (date/datetime/time × x/y)
  *   position-discrete    2
- *   color-fill          18
- *   numeric-style       21
+ *   color-fill          42
+ *   numeric-style       24  (21 base + size area/radius family #830)
  *   finite-style         8
  *   ----------------------
- *   63 component files + 9 Colour aliases
+ *   92 component files + 25 aliases
+ *     (21 Colour + 4 Size/Linewidth/Alpha/Shape Ordinal re-exports, #830/#832)
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
@@ -113,11 +114,13 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "ContinuousPositionScaleOptions",
   ]),
 
-  // --- position-temporal (4) -----------------------------------------------
+  // --- position-temporal (6) -----------------------------------------------
   shell("scaleXDate", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
   shell("scaleXDatetime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
+  shell("scaleXTime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
   shell("scaleYDate", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
   shell("scaleYDatetime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
+  shell("scaleYTime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
 
   // --- position-discrete (2) -----------------------------------------------
   shell("scaleXDiscrete", "position-discrete", "DiscretePositionScaleOptions", [
@@ -127,7 +130,7 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscretePositionScaleOptions",
   ]),
 
-  // --- color-fill (18 components + 9 Colour aliases) -----------------------
+  // --- color-fill (42 components + 21 Colour aliases) ----------------------
   // optionsTypes match the slice-3 hand-written shells exactly.
   shell(
     "scaleColorContinuous",
@@ -149,6 +152,69 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "BinnedColorScaleOptions",
     ["BinnedColorScaleOptions"],
     colourAliases("Binned"),
+  ),
+  shell(
+    "scaleColorSteps",
+    "color-fill",
+    "StepsScaleOptions",
+    ["StepsScaleOptions"],
+    colourAliases("Steps"),
+  ),
+  shell(
+    "scaleColorSteps2",
+    "color-fill",
+    "Steps2ScaleOptions",
+    ["Steps2ScaleOptions"],
+    colourAliases("Steps2"),
+  ),
+  shell(
+    "scaleColorStepsn",
+    "color-fill",
+    "StepsnScaleOptions",
+    ["StepsnScaleOptions"],
+    colourAliases("Stepsn"),
+  ),
+  shell(
+    "scaleColorGradient",
+    "color-fill",
+    "GradientScaleOptions",
+    ["GradientScaleOptions"],
+    colourAliases("Gradient"),
+  ),
+  shell(
+    "scaleColorGradient2",
+    "color-fill",
+    "Gradient2ScaleOptions",
+    ["Gradient2ScaleOptions"],
+    colourAliases("Gradient2"),
+  ),
+  shell(
+    "scaleColorGradientn",
+    "color-fill",
+    "GradientnScaleOptions",
+    ["GradientnScaleOptions"],
+    colourAliases("Gradientn"),
+  ),
+  shell(
+    "scaleColorHue",
+    "color-fill",
+    "HueScaleOptions",
+    ["HueScaleOptions"],
+    colourAliases("Hue"),
+  ),
+  shell(
+    "scaleColorGrey",
+    "color-fill",
+    "GreyScaleOptions",
+    ["GreyScaleOptions"],
+    colourAliases("Grey"),
+  ),
+  shell(
+    "scaleColorOrdinal",
+    "color-fill",
+    "OrdinalColorScaleOptions",
+    ["OrdinalColorScaleOptions"],
+    colourAliases("Ordinal"),
   ),
   shell(
     "scaleColorLog10",
@@ -199,6 +265,15 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscreteColorScaleOptions",
   ]),
   shell("scaleFillBinned", "color-fill", "BinnedColorScaleOptions", ["BinnedColorScaleOptions"]),
+  shell("scaleFillSteps", "color-fill", "StepsScaleOptions", ["StepsScaleOptions"]),
+  shell("scaleFillSteps2", "color-fill", "Steps2ScaleOptions", ["Steps2ScaleOptions"]),
+  shell("scaleFillStepsn", "color-fill", "StepsnScaleOptions", ["StepsnScaleOptions"]),
+  shell("scaleFillGradient", "color-fill", "GradientScaleOptions", ["GradientScaleOptions"]),
+  shell("scaleFillGradient2", "color-fill", "Gradient2ScaleOptions", ["Gradient2ScaleOptions"]),
+  shell("scaleFillGradientn", "color-fill", "GradientnScaleOptions", ["GradientnScaleOptions"]),
+  shell("scaleFillHue", "color-fill", "HueScaleOptions", ["HueScaleOptions"]),
+  shell("scaleFillGrey", "color-fill", "GreyScaleOptions", ["GreyScaleOptions"]),
+  shell("scaleFillOrdinal", "color-fill", "OrdinalColorScaleOptions", ["OrdinalColorScaleOptions"]),
   shell("scaleFillLog10", "color-fill", "TransformedColorScaleOptions", [
     "TransformedColorScaleOptions",
   ]),
@@ -213,17 +288,54 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
   shell("scaleFillIdentity", "color-fill", "IdentityColorScaleOptions", [
     "IdentityColorScaleOptions",
   ]),
+  shell(
+    "scaleColorViridisC",
+    "color-fill",
+    "ViridisScaleOptions",
+    ["ViridisScaleOptions"],
+    colourAliases("ViridisC"),
+  ),
+  shell(
+    "scaleColorViridisD",
+    "color-fill",
+    "ViridisScaleOptions",
+    ["ViridisScaleOptions"],
+    colourAliases("ViridisD"),
+  ),
+  shell(
+    "scaleColorViridisB",
+    "color-fill",
+    "ViridisScaleOptions",
+    ["ViridisScaleOptions"],
+    colourAliases("ViridisB"),
+  ),
+  shell("scaleFillViridisC", "color-fill", "ViridisScaleOptions", ["ViridisScaleOptions"]),
+  shell("scaleFillViridisD", "color-fill", "ViridisScaleOptions", ["ViridisScaleOptions"]),
+  shell("scaleFillViridisB", "color-fill", "ViridisScaleOptions", ["ViridisScaleOptions"]),
 
-  // --- numeric-style (21) --------------------------------------------------
+  // --- numeric-style (24: 21 base + size area/radius #830; Discrete shells
+  // re-export Ordinal component names for ggplot2 scale_*_ordinal, #830/#832)
   ...(["Size", "Linewidth", "Alpha"] as const).flatMap((aes) => {
     const base = `scale${aes}`;
+    const discreteAliases =
+      aes === "Size"
+        ? (["ScaleSizeOrdinal"] as const)
+        : aes === "Linewidth"
+          ? (["ScaleLinewidthOrdinal"] as const)
+          : aes === "Alpha"
+            ? (["ScaleAlphaOrdinal"] as const)
+            : undefined;
     return [
       shell(`${base}Continuous`, "numeric-style", "SequentialStyleScaleOptions", [
         "SequentialStyleScaleOptions",
       ]),
-      shell(`${base}Discrete`, "numeric-style", "DiscreteNumericStyleScaleOptions", [
+      shell(
+        `${base}Discrete`,
+        "numeric-style",
         "DiscreteNumericStyleScaleOptions",
-      ]),
+        ["DiscreteNumericStyleScaleOptions"],
+        discreteAliases === undefined ? undefined : [...discreteAliases],
+      ),
       shell(`${base}Binned`, "numeric-style", "SequentialStyleScaleOptions", [
         "SequentialStyleScaleOptions",
       ]),
@@ -241,12 +353,22 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
       ]),
     ];
   }),
+  // size area / radius family (#830)
+  shell("scaleSizeArea", "numeric-style", "SizeAreaScaleOptions", ["SizeAreaScaleOptions"]),
+  shell("scaleSizeBinnedArea", "numeric-style", "SizeAreaScaleOptions", ["SizeAreaScaleOptions"]),
+  shell("scaleRadius", "numeric-style", "SequentialStyleScaleOptions", [
+    "SequentialStyleScaleOptions",
+  ]),
 
   // --- finite-style (8) — generics MUST be pinned to the aesthetic ----------
-  shell("scaleShapeDiscrete", "finite-style", "DiscreteFiniteStyleScaleOptions<PointShapeName>", [
-    "DiscreteFiniteStyleScaleOptions",
-    "PointShapeName",
-  ]),
+  // Ordinal shells re-export Discrete (ggplot2 scale_*_ordinal; #832).
+  shell(
+    "scaleShapeDiscrete",
+    "finite-style",
+    "DiscreteFiniteStyleScaleOptions<PointShapeName>",
+    ["DiscreteFiniteStyleScaleOptions", "PointShapeName"],
+    ["ScaleShapeOrdinal"],
+  ),
   shell("scaleShapeBinned", "finite-style", "BinnedFiniteStyleScaleOptions<PointShapeName>", [
     "BinnedFiniteStyleScaleOptions",
     "PointShapeName",

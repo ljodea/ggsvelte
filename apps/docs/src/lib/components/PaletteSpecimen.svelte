@@ -7,9 +7,11 @@
     Scale,
     Theme,
   } from "@ggsvelte/svelte";
-  import type { ThemeName } from "@ggsvelte/spec";
+  import type { CATEGORICAL_SCHEME_NAMES, ThemeName } from "@ggsvelte/spec";
 
   import { languages } from "$lib/theme-specimens/data";
+
+  type CategoricalSchemeName = (typeof CATEGORICAL_SCHEME_NAMES)[number];
 
   const {
     name,
@@ -19,7 +21,7 @@
     reverse,
     paperTheme,
   }: {
-    name: "observable10" | "ipsum" | "flexoki" | "tableau10" | "colorblind";
+    name: CategoricalSchemeName;
     label: string;
     colors: readonly string[];
     capacity: number;

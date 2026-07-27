@@ -91,18 +91,13 @@ export function colorScaleStructuralErrors(scales: Record<string, unknown>): Spe
           example: "viridis",
         },
       });
-    } else if (
-      (type === "ordinal" || type === "manual") &&
-      typeof scheme === "string" &&
-      SEQUENTIAL_SCHEMES.has(scheme)
-    ) {
+    } else if (type === "manual" && typeof scheme === "string" && SEQUENTIAL_SCHEMES.has(scheme)) {
+      // Ordinal may use sequential-family schemes (scale_*_viridis_d samples the
+      // ramp across the trained domain). Manual still rejects named schemes.
       errors.push({
         code: "scale-scheme-type",
         path: `/scales/${channel}/scheme`,
-        message:
-          type === "ordinal"
-            ? 'The sequential scheme "viridis" cannot be used with an ordinal color scale.'
-            : 'The sequential scheme "viridis" cannot be used with a manual color scale.',
+        message: `The sequential scheme "${scheme}" cannot be used with a manual color scale.`,
         fix: {
           description: "Use a categorical scheme or provide an ordinal range of CSS colors.",
           example: "observable10",
