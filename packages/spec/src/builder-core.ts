@@ -61,6 +61,7 @@ import type {
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
+  GeomBin2dOptions,
 } from "./builder-options.js";
 import type {
   A11yMode,
@@ -308,6 +309,11 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'tile', ... }) — center-sized cells at x/y. */
   geomTile(options: GeomTileOptions = {}): GGBuilder {
     return this.layer(layerFrom("tile", options));
+  }
+
+  /** Sugar for .layer({ geom: 'bin_2d', ... }) — 2D rectangular bin heatmap. */
+  geomBin2d(options: GeomBin2dOptions = {}): GGBuilder {
+    return this.layer(layerFrom("bin_2d", options));
   }
 
   /** Sugar for .layer({ geom: 'raster', ... }) — equal-cell dense grid. */

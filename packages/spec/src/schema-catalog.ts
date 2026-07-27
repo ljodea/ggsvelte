@@ -27,6 +27,7 @@ export const KNOWN_GEOMS = [
   "ribbon",
   "segment",
   "hex",
+  "bin_2d",
   "abline",
   "curve",
   "contour",
@@ -97,6 +98,7 @@ export const KNOWN_STATS = [
   "count",
   "bin",
   "bin_hex",
+  "bin_2d",
   "smooth",
   "quantile",
   "boxplot",
@@ -171,4 +173,5 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   step: { stat: "identity", position: "identity" },
   qq: { stat: "qq", position: "identity" },
   qq_line: { stat: "qq_line", position: "identity" },
+  bin_2d: { stat: "bin_2d", position: "identity" },
 };

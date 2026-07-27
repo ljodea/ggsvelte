@@ -101,18 +101,38 @@ export function hexVertices(
   return out;
 }
 
-function finiteRange(values: Float64Array): [number, number] | null {
-  let min = Infinity;
-  let max = -Infinity;
-  for (let i = 0; i < values.length; i++) {
-    const v = values[i]!;
-    if (!Number.isFinite(v)) continue;
-    if (v < min) min = v;
-    if (v > max) max = v;
+/**
+ * Axis range over rows where *both* x and y are finite — matches the binning
+ * drop predicate so incomplete pairs cannot stretch the unit-square lattice.
+ */
+function finitePairRanges(
+  x: Float64Array,
+  y: Float64Array,
+): { x: [number, number]; y: [number, number] } | null {
+  let xmin = Infinity;
+  let xmax = -Infinity;
+  let ymin = Infinity;
+  let ymax = -Infinity;
+  const n = Math.min(x.length, y.length);
+  for (let i = 0; i < n; i++) {
+    const xv = x[i]!;
+    const yv = y[i]!;
+    if (!Number.isFinite(xv) || !Number.isFinite(yv)) continue;
+    if (xv < xmin) xmin = xv;
+    if (xv > xmax) xmax = xv;
+    if (yv < ymin) ymin = yv;
+    if (yv > ymax) ymax = yv;
   }
-  if (min > max) return null;
-  if (min === max) return [min - 0.5, max + 0.5];
-  return [min, max];
+  if (xmin > xmax || ymin > ymax) return null;
+  if (xmin === xmax) {
+    xmin -= 0.5;
+    xmax += 0.5;
+  }
+  if (ymin === ymax) {
+    ymin -= 0.5;
+    ymax += 0.5;
+  }
+  return { x: [xmin, xmax], y: [ymin, ymax] };
 }
 
 /** Map key for (group slot, axial q, axial r) bins. */
@@ -190,12 +210,11 @@ export function statBinHex(input: BinHexStatInput): BinHexStatResult {
     usedDefaultBins,
   });
 
-  const xRange = finiteRange(x);
-  const yRange = finiteRange(y);
-  if (xRange === null || yRange === null) return empty(nIn);
+  const ranges = finitePairRanges(x, y);
+  if (ranges === null) return empty(nIn);
 
-  const [xmin, xmax] = xRange;
-  const [ymin, ymax] = yRange;
+  const [xmin, xmax] = ranges.x;
+  const [ymin, ymax] = ranges.y;
   const spanX = xmax - xmin;
   const spanY = ymax - ymin;
 

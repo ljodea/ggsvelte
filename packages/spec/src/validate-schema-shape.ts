@@ -50,6 +50,7 @@ import {
   SmoothLayerSchema,
   TextLayerSchema,
   TileLayerSchema,
+  Bin2dLayerSchema,
   VlineLayerSchema,
 } from "./schema.js";
 import { mapValueErrors, unknownGeomError } from "./validate-map-errors.js";
@@ -95,6 +96,7 @@ export const GEOM_BRANCHES = {
   errorbar: ErrorbarLayerSchema,
   rect: RectLayerSchema,
   tile: TileLayerSchema,
+  bin_2d: Bin2dLayerSchema,
   raster: RasterLayerSchema,
   hex: HexLayerSchema,
 } as const;

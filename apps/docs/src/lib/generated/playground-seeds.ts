@@ -76,6 +76,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "bin2d/basic",
+    title: "2D bin heatmap",
+    compatibility: {
+      supported: false,
+      reason:
+        "This example is larger than the 12 KiB share limit. Open a smaller example or sample.",
+    },
+  },
+  {
     id: "blank/axes-only",
     title: "geom_blank axes only",
     compatibility: {

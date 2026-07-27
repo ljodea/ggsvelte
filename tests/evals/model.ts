@@ -682,16 +682,45 @@ export class MockResponder implements Responder {
         pick.mentionedQuant() ??
         pick.quant() ??
         "y";
-      const aes: MockAes = {
-        x: f(x),
-        y: f(y),
-        fill: { stat: "count" },
-      };
       const layer: MockLayer = {
         geom: "hex",
         stat: "bin_hex",
         position: "identity",
-        aes,
+        aes: {
+          x: f(x),
+          y: f(y),
+          fill: { stat: "count" },
+        },
+      };
+      const binsMatchHex = prompt.match(/\b(\d+)\s*bins?\b/);
+      if (binsMatchHex !== null) layer.params = { bins: Number(binsMatchHex[1]) };
+      spec.layers.push(layer);
+      xField = x;
+    } else if (
+      /\bgeom[_\s]?bin[_ ]?2d\b|\bbin[_ ]?2d\b|\b2d bin(?:ned)? heatmap\b|\b2d rectangular bins?\b|\brectangular bins?\b.*\bheatmap\b|\bheatmap\b.*\brectangular bins?\b|\bbin heatmap\b/.test(
+        prompt,
+      )
+    ) {
+      // Prefer domain field names used in eval golds (distance/delay, humidity/temp).
+      const x =
+        fieldNamed("distance") ??
+        fieldNamed("humidity") ??
+        fieldNamed("x") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "x";
+      const y =
+        fieldNamed("delay") ??
+        fieldNamed("temperature") ??
+        fieldNamed("y") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "y";
+      const layer: MockLayer = {
+        geom: "bin_2d",
+        stat: "bin_2d",
+        position: "identity",
+        aes: { x: f(x), y: f(y), fill: { stat: "count" } },
       };
       const binsMatch = prompt.match(/\b(\d+)\s*bins?\b/);
       if (binsMatch !== null) layer.params = { bins: Number(binsMatch[1]) };

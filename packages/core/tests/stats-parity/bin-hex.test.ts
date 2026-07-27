@@ -98,6 +98,29 @@ describe("statBinHex (#800)", () => {
     expect(result.count.length).toBe(1);
   });
 
+  it("does not stretch the lattice by incomplete x/y pairs", () => {
+    // Finite-only rows sit near (1,1); a lone x=100 with NaN y must not widen x.
+    const clean = statBinHex({
+      x: Float64Array.from([1, 1.1]),
+      y: Float64Array.from([1, 1.1]),
+      groups: [0, 0],
+      params: { bins: 4, drop: true },
+    });
+    const polluted = statBinHex({
+      x: Float64Array.from([1, 1.1, 100]),
+      y: Float64Array.from([1, 1.1, Number.NaN]),
+      groups: [0, 0, 0],
+      params: { bins: 4, drop: true },
+    });
+    expect(polluted.dropped).toBe(1);
+    // Same occupied cells / centers as the clean pair (range is pair-finite).
+    expect(polluted.count.length).toBe(clean.count.length);
+    for (let i = 0; i < clean.x.length; i++) {
+      expect(polluted.x[i]).toBeCloseTo(clean.x[i]!, 10);
+      expect(polluted.y[i]).toBeCloseTo(clean.y[i]!, 10);
+    }
+  });
+
   it("emits positive width/height for each hex", () => {
     const result = statBinHex({
       x: Float64Array.from([0, 1, 0, 1]),
