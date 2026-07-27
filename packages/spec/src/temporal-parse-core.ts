@@ -68,7 +68,14 @@ export const TemporalParserSpecSchema = Type.Union(
 );
 
 export type TemporalParserSpec = Static<typeof TemporalParserSpecSchema>;
-export type TemporalKind = "date" | "datetime";
+/**
+ * Temporal precision for position/time scales.
+ * - `date` — calendar day (UTC)
+ * - `datetime` — full instant
+ * - `time` — time-of-day only (`scale_x_time` / `scale_y_time`; portable
+ *   numbers are **seconds since midnight**, mapped to epoch ms on 1970-01-01Z)
+ */
+export type TemporalKind = "date" | "datetime" | "time";
 export type TemporalPrecision =
   | "year"
   | "quarter"
@@ -247,7 +254,7 @@ export function partsToEpoch(
 
   // Calendar dates are timezone-free values. Keep them on UTC calendar
   // boundaries so ticks preserve their represented date.
-  const timezone = kind === "date" ? "UTC" : (options.timezone ?? "UTC");
+  const timezone = kind === "date" || kind === "time" ? "UTC" : (options.timezone ?? "UTC");
   if (timezone === "UTC" || timezone === "Etc/UTC" || timezone === "Z") {
     const epochMs = utcEpoch(parts);
     return Number.isFinite(epochMs)

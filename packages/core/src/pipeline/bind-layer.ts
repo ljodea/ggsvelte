@@ -92,6 +92,8 @@ export function bindLayer(
     heightField: position.heightField,
     xendField: position.xendField,
     yendField: position.yendField,
+    angleField: position.angleField,
+    radiusField: position.radiusField,
     ...(position.ribbonOrientation !== undefined && {
       ribbonOrientation: position.ribbonOrientation,
     }),
@@ -105,6 +107,8 @@ export function bindLayer(
     labelField: extras.labelField,
     labelConstant: extras.labelConstant,
     weightField: extras.weightField,
+    zField: extras.zField,
+    mapIdField: extras.mapIdField,
     ruleForm: position.ruleForm,
   });
 }

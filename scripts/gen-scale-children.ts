@@ -63,13 +63,13 @@ function colourAliases(stem: string): string[] {
  * Complete shell ledger. Cardinality (asserted in tests):
  *   position-continuous  8
  *   position-binned      2
- *   position-temporal    4
+ *   position-temporal    6  (date/datetime/time × x/y)
  *   position-discrete    2
- *   color-fill          18
+ *   color-fill          30
  *   numeric-style       21
  *   finite-style         8
  *   ----------------------
- *   63 component files + 9 Colour aliases
+ *   77 component files + 15 Colour aliases
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
@@ -113,11 +113,13 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "ContinuousPositionScaleOptions",
   ]),
 
-  // --- position-temporal (4) -----------------------------------------------
+  // --- position-temporal (6) -----------------------------------------------
   shell("scaleXDate", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
   shell("scaleXDatetime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
+  shell("scaleXTime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
   shell("scaleYDate", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
   shell("scaleYDatetime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
+  shell("scaleYTime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
 
   // --- position-discrete (2) -----------------------------------------------
   shell("scaleXDiscrete", "position-discrete", "DiscretePositionScaleOptions", [
@@ -127,7 +129,7 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscretePositionScaleOptions",
   ]),
 
-  // --- color-fill (18 components + 9 Colour aliases) -----------------------
+  // --- color-fill (30 components + 15 Colour aliases) ----------------------
   // optionsTypes match the slice-3 hand-written shells exactly.
   shell(
     "scaleColorContinuous",
@@ -149,6 +151,48 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "BinnedColorScaleOptions",
     ["BinnedColorScaleOptions"],
     colourAliases("Binned"),
+  ),
+  shell(
+    "scaleColorGradient",
+    "color-fill",
+    "GradientScaleOptions",
+    ["GradientScaleOptions"],
+    colourAliases("Gradient"),
+  ),
+  shell(
+    "scaleColorGradient2",
+    "color-fill",
+    "Gradient2ScaleOptions",
+    ["Gradient2ScaleOptions"],
+    colourAliases("Gradient2"),
+  ),
+  shell(
+    "scaleColorGradientn",
+    "color-fill",
+    "GradientnScaleOptions",
+    ["GradientnScaleOptions"],
+    colourAliases("Gradientn"),
+  ),
+  shell(
+    "scaleColorHue",
+    "color-fill",
+    "HueScaleOptions",
+    ["HueScaleOptions"],
+    colourAliases("Hue"),
+  ),
+  shell(
+    "scaleColorGrey",
+    "color-fill",
+    "GreyScaleOptions",
+    ["GreyScaleOptions"],
+    colourAliases("Grey"),
+  ),
+  shell(
+    "scaleColorOrdinal",
+    "color-fill",
+    "OrdinalColorScaleOptions",
+    ["OrdinalColorScaleOptions"],
+    colourAliases("Ordinal"),
   ),
   shell(
     "scaleColorLog10",
@@ -199,6 +243,12 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscreteColorScaleOptions",
   ]),
   shell("scaleFillBinned", "color-fill", "BinnedColorScaleOptions", ["BinnedColorScaleOptions"]),
+  shell("scaleFillGradient", "color-fill", "GradientScaleOptions", ["GradientScaleOptions"]),
+  shell("scaleFillGradient2", "color-fill", "Gradient2ScaleOptions", ["Gradient2ScaleOptions"]),
+  shell("scaleFillGradientn", "color-fill", "GradientnScaleOptions", ["GradientnScaleOptions"]),
+  shell("scaleFillHue", "color-fill", "HueScaleOptions", ["HueScaleOptions"]),
+  shell("scaleFillGrey", "color-fill", "GreyScaleOptions", ["GreyScaleOptions"]),
+  shell("scaleFillOrdinal", "color-fill", "OrdinalColorScaleOptions", ["OrdinalColorScaleOptions"]),
   shell("scaleFillLog10", "color-fill", "TransformedColorScaleOptions", [
     "TransformedColorScaleOptions",
   ]),

@@ -17,12 +17,18 @@ describe("themes catalog", () => {
       { name: "minimal", scheme: "colorblind" },
       { name: "ggplot2", scheme: "observable10" },
       { name: "classic", scheme: "tableau10" },
+      { name: "bw", scheme: "tableau10" },
       { name: "hrbr", scheme: "ipsum" },
       { name: "few", scheme: "tableau10" },
       { name: "clean", scheme: "flexoki" },
       { name: "fivethirtyeight", scheme: "tableau10" },
       { name: "economist", scheme: "flexoki" },
       { name: "tufte", scheme: "colorblind" },
+      { name: "linedraw", scheme: "colorblind" },
+      { name: "void", scheme: "colorblind" },
+      { name: "grey", scheme: "observable10" },
+      { name: "gray", scheme: "observable10" },
+      { name: "test", scheme: "colorblind" },
     ]);
 
     expect(CATEGORICAL_PALETTES).toEqual([
@@ -106,6 +112,57 @@ describe("themes catalog", () => {
           "#CC79A7",
         ],
       },
+      {
+        name: "hue",
+        label: "Hue",
+        capacity: 10,
+        colors: [
+          "#ff794d",
+          "#ffe44d",
+          "#afff4d",
+          "#4dff55",
+          "#4dffc1",
+          "#4dd2ff",
+          "#4d67ff",
+          "#9d4dff",
+          "#ff4df6",
+          "#ff4d8b",
+        ],
+      },
+      {
+        name: "grey",
+        label: "Grey",
+        capacity: 10,
+        colors: [
+          "#333333",
+          "#444444",
+          "#555555",
+          "#666666",
+          "#777777",
+          "#888888",
+          "#999999",
+          "#aaaaaa",
+          "#bbbbbb",
+          "#cccccc",
+        ],
+      },
+      {
+        name: "gray",
+        label: "Gray",
+        capacity: 10,
+        colors: [
+          "#333333",
+          "#444444",
+          "#555555",
+          "#666666",
+          "#777777",
+          "#888888",
+          "#999999",
+          "#aaaaaa",
+          "#bbbbbb",
+          "#cccccc",
+        ],
+      },
     ]);
 
     expect(VIRIDIS_COLORS).toEqual([
@@ -122,9 +179,14 @@ describe("themes catalog", () => {
     ]);
   });
 
-  it("lists every public theme as a full-width specimen with a real chart kind", () => {
+  it("lists every non-alias theme as a full-width specimen with a real chart kind", () => {
+    // grey/gray are name aliases of ggplot2 (#824) — they stay in THEME_OPTIONS
+    // (picker/lab) but do not duplicate the ggplot2 portrait on /themes.
+    const specimenThemes = THEME_OPTIONS.filter(
+      (theme) => theme.name !== "grey" && theme.name !== "gray",
+    );
     expect(THEME_SPECIMENS.map((specimen) => specimen.name)).toEqual(
-      THEME_OPTIONS.map((theme) => theme.name),
+      specimenThemes.map((theme) => theme.name),
     );
     for (const specimen of THEME_SPECIMENS) {
       expect(specimen.caption.length).toBeGreaterThan(12);

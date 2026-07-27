@@ -1,0 +1,44 @@
+{
+  "id": "69-flow-arcs-curve",
+  "kind": "chart",
+  "prompt": "Show directed flow arcs as curved segments: each row maps x/y start and xend/yend end, colored by group, with moderate curvature.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "xend", "type": "quantitative" },
+      { "name": "yend", "type": "quantitative" },
+      { "name": "group", "type": "nominal" }
+    ],
+    "rowCount": 5
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 1, "xend": 1, "yend": 1.5, "group": "A" },
+      { "x": 0, "y": 2, "xend": 1.5, "yend": 2.2, "group": "B" },
+      { "x": 0, "y": 3, "xend": 0.8, "yend": 3.4, "group": "A" },
+      { "x": 0, "y": 4, "xend": 2, "yend": 4.1, "group": "C" },
+      { "x": 0, "y": 5, "xend": 1.2, "yend": 5.3, "group": "B" }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "curve",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "xend": { "field": "xend" },
+          "yend": { "field": "yend" },
+          "color": { "field": "group" }
+        },
+        "params": { "curvature": 0.5 }
+      }
+    ]
+  },
+  "notes": "Data-driven curved connectors with mapped color; second corpus cover for geom curve."
+}

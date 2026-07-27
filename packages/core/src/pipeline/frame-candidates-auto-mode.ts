@@ -19,23 +19,34 @@ export function candidateAutoMode(
     // is opt-in — auto→xy drew a full crosshair and multi-member tooltips on
     // dense scatters without adding much (#754).
     case "point":
+    case "dotplot":
     case "text":
+    case "sf_text":
+    case "sf_label":
       return "exact";
     case "col":
     case "bar":
     case "rect":
     case "tile":
     case "raster":
+    case "density_2d_filled":
+    case "map":
+    case "sf":
       return "exact";
     case "line":
+    case "path":
+    case "contour":
     case "area":
     case "density":
     case "smooth":
+    case "quantile":
+    case "density_2d":
     case "errorbar":
     case "boxplot":
       return "x";
     case "ribbon":
       return binding.ribbonOrientation === "y" ? "y" : "x";
+    case "spoke":
     case "segment":
       // Geometry-based mode in defaultAutoMode (long horizontal → "y", vertical → "x").
       return undefined;

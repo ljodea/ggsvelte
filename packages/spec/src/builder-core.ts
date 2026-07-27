@@ -4,8 +4,10 @@
  */
 import {
   coordFixed,
+  coordSf,
   coordTransform,
   type CoordFixedOptions,
+  type CoordSfOptions,
   type CoordTransformOptions,
 } from "./coord-helpers.js";
 import { SpecValidationError } from "./errors.js";
@@ -24,16 +26,33 @@ import type {
   GeomBoxplotOptions,
   GeomColOptions,
   GeomDensityOptions,
+  GeomDensity2dOptions,
+  GeomDensity2dFilledOptions,
+  GeomDotplotOptions,
   GeomErrorbarOptions,
   GeomRibbonOptions,
   GeomHistogramOptions,
+  GeomFreqpolyOptions,
+  GeomHlineOptions,
+  GeomJitterOptions,
   GeomLineOptions,
+  GeomPathOptions,
   GeomPointOptions,
   GeomRasterOptions,
   GeomRectOptions,
   GeomRuleOptions,
   GeomSegmentOptions,
   GeomAblineOptions,
+  GeomVlineOptions,
+  GeomQuantileOptions,
+  GeomCurveOptions,
+  GeomContourOptions,
+  GeomMapOptions,
+  GeomSfOptions,
+  GeomSfTextOptions,
+  GeomSfLabelOptions,
+  GeomBlankOptions,
+  GeomSpokeOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -144,6 +163,21 @@ export class GGBuilderCore {
     return this.layer(layerFrom("line", options));
   }
 
+  /** Sugar for .layer({ geom: 'quantile', ... }) — linear QR lines (#805). */
+  geomQuantile(options: GeomQuantileOptions = {}): GGBuilder {
+    return this.layer(layerFrom("quantile", options));
+  }
+
+  /** Sugar for .layer({ geom: 'contour', ... }) — isolines over a z grid (#801). */
+  geomContour(options: GeomContourOptions = {}): GGBuilder {
+    return this.layer(layerFrom("contour", options));
+  }
+
+  /** Sugar for .layer({ geom: 'path', ... }) — connect in data order (#788). */
+  geomPath(options: GeomPathOptions = {}): GGBuilder {
+    return this.layer(layerFrom("path", options));
+  }
+
   /** Sugar for .layer({ geom: 'col', ... }) — bars from pre-computed heights. */
   geomCol(options: GeomColOptions = {}): GGBuilder {
     return this.layer(layerFrom("col", options));
@@ -167,6 +201,44 @@ export class GGBuilderCore {
     return this.layer(layerFrom("rule", options));
   }
 
+  /**
+   * Sugar for .layer({ geom: 'hline', ... }) — horizontal reference lines
+   * (ggplot2 geom_hline; normalize() → rule). Annotation: yintercept.
+   */
+  geomHline(options: GeomHlineOptions = {}): GGBuilder {
+    return this.layer(layerFrom("hline", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'vline', ... }) — vertical reference lines
+   * (ggplot2 geom_vline; normalize() → rule). Annotation: xintercept.
+   */
+  geomVline(options: GeomVlineOptions = {}): GGBuilder {
+    return this.layer(layerFrom("vline", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'jitter', ... }) — points with position jitter
+   * (ggplot2 geom_jitter; normalize() → point + position jitter). Flat
+   * width/height/seed are assembled into positionParams here (not by normalize).
+   */
+  geomJitter(options: GeomJitterOptions = {}): GGBuilder {
+    const { width, height, seed, positionParams, ...rest } = options;
+    const mergedPositionParams = {
+      ...positionParams,
+      ...(width !== undefined && { width }),
+      ...(height !== undefined && { height }),
+      ...(seed !== undefined && { seed }),
+    };
+    const hasPositionParams = Object.keys(mergedPositionParams).length > 0;
+    return this.layer(
+      layerFrom("jitter", {
+        ...rest,
+        ...(hasPositionParams && { positionParams: mergedPositionParams }),
+      }),
+    );
+  }
+
   /** Sugar for .layer({ geom: 'text', ... }). */
   geomText(options: GeomTextOptions = {}): GGBuilder {
     return this.layer(layerFrom("text", options));
@@ -175,6 +247,14 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'histogram', ... }) — binned bars over continuous x. */
   geomHistogram(options: GeomHistogramOptions = {}): GGBuilder {
     return this.layer(layerFrom("histogram", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'freqpoly', ... }) — binned frequency polygon
+   * (normalize → line + stat bin; ggplot2 geom_freqpoly).
+   */
+  geomFreqpoly(options: GeomFreqpolyOptions = {}): GGBuilder {
+    return this.layer(layerFrom("freqpoly", options));
   }
 
   /** Sugar for .layer({ geom: 'smooth', ... }) — fitted trend + se ribbon. */
@@ -190,6 +270,21 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'density', ... }) — gaussian KDE area. */
   geomDensity(options: GeomDensityOptions = {}): GGBuilder {
     return this.layer(layerFrom("density", options));
+  }
+
+  /** Sugar for .layer({ geom: 'density_2d', ... }) — bivariate KDE isolines (#802). */
+  geomDensity2d(options: GeomDensity2dOptions = {}): GGBuilder {
+    return this.layer(layerFrom("density_2d", options));
+  }
+
+  /** Sugar for .layer({ geom: 'dotplot', ... }) — histodot stacked dots (#803). */
+  geomDotplot(options: GeomDotplotOptions = {}): GGBuilder {
+    return this.layer(layerFrom("dotplot", options));
+  }
+
+  /** Sugar for filled 2D KDE rings (#802 phase 2). */
+  geomDensity2dFilled(options: GeomDensity2dFilledOptions = {}): GGBuilder {
+    return this.layer(layerFrom("density_2d_filled", options));
   }
 
   /**
@@ -240,6 +335,47 @@ export class GGBuilderCore {
   }
 
   /**
+   * Sugar for .layer({ geom: 'curve', ... }) — curved connectors from
+   * (x,y) to (xend,yend) (ggplot2 geom_curve).
+   */
+  geomCurve(options: GeomCurveOptions = {}): GGBuilder {
+    return this.layer(layerFrom("curve", options));
+  }
+
+  /** Sugar for .layer({ geom: 'map', ... }) — fortified map join (#808). */
+  geomMap(options: GeomMapOptions): GGBuilder {
+    return this.layer(layerFrom("map", options));
+  }
+
+  /** Sugar for .layer({ geom: 'sf', ... }) — portable GeoJSON geometries (#809). */
+  geomSf(options: GeomSfOptions = {}): GGBuilder {
+    return this.layer(layerFrom("sf", options));
+  }
+
+  /** Sugar for .layer({ geom: 'sf_text', ... }) — labels at SF centroids (#809). */
+  geomSfText(options: GeomSfTextOptions = {}): GGBuilder {
+    return this.layer(layerFrom("sf_text", options));
+  }
+
+  /** Sugar for .layer({ geom: 'sf_label', ... }) — boxed labels at SF centroids (#809). */
+  geomSfLabel(options: GeomSfLabelOptions = {}): GGBuilder {
+    return this.layer(layerFrom("sf_label", options));
+  }
+
+  /** Sugar for .layer({ geom: 'spoke', ... }) — origin + angle + radius (#810). */
+  geomSpoke(options: GeomSpokeOptions = {}): GGBuilder {
+    return this.layer(layerFrom("spoke", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'blank', ... }) — trains scales from mapped
+   * aesthetics without drawing marks (ggplot2 geom_blank).
+   */
+  geomBlank(options: GeomBlankOptions = {}): GGBuilder {
+    return this.layer(layerFrom("blank", options));
+  }
+
+  /**
    * Facet into small multiples: wrap form ({ wrap, ncol? }) or grid form
    * ({ rows, cols }). Bare strings are field shorthand. Field objects accept
    * closed `levels` order and a display `labels` map. `strip.position` is
@@ -273,6 +409,14 @@ export class GGBuilderCore {
   /** Equal-unit spelling of coordFixed(). */
   coordEqual(options: CoordFixedOptions = {}): GGBuilder {
     return this.coord(coordFixed(options));
+  }
+
+  /**
+   * Fixed-aspect coordinates for already-projected geom_sf maps (ggplot2
+   * coord_sf subset; #809). No CRS reproject in v1.
+   */
+  coordSf(options: CoordSfOptions = {}): GGBuilder {
+    return this.coord(coordSf(options));
   }
 
   /** Set the accessibility mode ("force-svg" keeps every layer in SVG). */

@@ -1,0 +1,47 @@
+{
+  "id": "88-blank-domain",
+  "kind": "chart",
+  "prompt": "Scatter the measured points, but expand the axes to also include the planned range columns x_plan and y_plan without drawing those plan rows as marks (use geom_blank).",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "x_plan", "type": "quantitative" },
+      { "name": "y_plan", "type": "quantitative" }
+    ],
+    "rowCount": 3
+  },
+  "data": {
+    "main": [
+      { "x": 1, "y": 2, "x_plan": 0, "y_plan": 0 },
+      { "x": 2, "y": 3, "x_plan": 5, "y_plan": 10 },
+      { "x": 3, "y": 1, "x_plan": 10, "y_plan": 5 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" }
+        }
+      },
+      {
+        "geom": "blank",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x_plan" },
+          "y": { "field": "y_plan" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_blank trains scales from mapped aesthetics without marks (#791)."
+}
