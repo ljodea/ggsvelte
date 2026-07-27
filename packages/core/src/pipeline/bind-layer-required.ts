@@ -60,7 +60,8 @@ export function assertRequiredChannels(input: {
     geom === "tile" ||
     geom === "raster" ||
     geom === "density_2d" ||
-    geom === "density_2d_filled"
+    geom === "density_2d_filled" ||
+    geom === "bin_2d"
   ) {
     requireField(xField, "x", index, geom);
     // yStatColumn set (e.g. ecdf) means y is computed — skip field requirement.

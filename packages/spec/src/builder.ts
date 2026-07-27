@@ -69,6 +69,7 @@ export type {
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
+  GeomBin2dOptions,
   GeomVlineOptions,
 } from "./builder-options.js";
 

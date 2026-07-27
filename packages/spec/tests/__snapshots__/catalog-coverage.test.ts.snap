@@ -131,6 +131,7 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
       "raster",
       "ribbon",
       "segment",
+      "bin_2d",
       "abline",
       "curve",
       "contour",
@@ -156,7 +157,7 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
         "geom": "point",
       },
     },
-    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "abline", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "sf_label", "blank", "jitter", "spoke", "rug", "step", "qq", "qq_line".",
+    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "bin_2d", "abline", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "sf_label", "blank", "jitter", "spoke", "rug", "step", "qq", "qq_line".",
     "path": "/layers/0/geom",
   },
 }
@@ -193,6 +194,7 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
       "raster",
       "ribbon",
       "segment",
+      "bin_2d",
       "abline",
       "curve",
       "contour",
@@ -218,7 +220,7 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
         "geom": "point",
       },
     },
-    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "abline", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "sf_label", "blank", "jitter", "spoke", "rug", "step", "qq", "qq_line". Did you mean "point"?",
+    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "bin_2d", "abline", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "sf_label", "blank", "jitter", "spoke", "rug", "step", "qq", "qq_line". Did you mean "point"?",
     "path": "/layers/0/geom",
   },
 }

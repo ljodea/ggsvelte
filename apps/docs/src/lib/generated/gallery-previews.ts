@@ -45,6 +45,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "657e28882889051d30f128a66483bb0229a624edd6c2eb8d1ab4d49ebc02db58",
   },
   {
+    id: "bin2d/basic",
+    filename: "bin2d-basic-light.png",
+    path: "/previews/bin2d-basic-light.png",
+    sha256: "b0a1115a204dce5d5582cde656e2fa4fc8d395c49032c32d262aed476423121c",
+  },
+  {
     id: "blank/axes-only",
     filename: "blank-axes-only-light.png",
     path: "/previews/blank-axes-only-light.png",

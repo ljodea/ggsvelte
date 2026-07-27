@@ -33,6 +33,7 @@ export function candidateAutoMode(
     case "density_2d_filled":
     case "map":
     case "sf":
+    case "bin_2d":
       return "exact";
     case "line":
     case "qq_line":
