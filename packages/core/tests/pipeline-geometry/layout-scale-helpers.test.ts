@@ -41,8 +41,7 @@ describe("placeSceneLegends", () => {
 
 describe("computeFacetPanelSize", () => {
   it("divides remaining grid width across columns", async () => {
-    const { computeFacetPanelSize } =
-      await import("../../src/pipeline/panel-layout-facet-cells-size.ts");
+    const { computeFacetPanelSize } = await import("../../src/pipeline/panel-layout-facet.ts");
     const panels = computeFacetPanelSize({
       nrow: 1,
       ncol: 2,
@@ -95,8 +94,7 @@ describe("geometryPanelFrame", () => {
 
 describe("packFacetPanelPlacement", () => {
   it("shows y-axis only for column 0 when freeV is false", async () => {
-    const { packFacetPanelPlacement } =
-      await import("../../src/pipeline/panel-layout-facet-place-pack.ts");
+    const { packFacetPanelPlacement } = await import("../../src/pipeline/panel-layout-facet.ts");
     const placement = packFacetPanelPlacement({
       def: fromAny({ col: 1, row: 0 }),
       colX: 20,

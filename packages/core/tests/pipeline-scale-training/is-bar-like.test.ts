@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from "bun:test";
 
-import { isBarLike } from "../../src/pipeline/scale-training.ts";
+import { isBarLike } from "../../src/pipeline/scale-axis-train.ts";
 
 describe("isBarLike", () => {
   it("recognizes bar/col/area only", () => {

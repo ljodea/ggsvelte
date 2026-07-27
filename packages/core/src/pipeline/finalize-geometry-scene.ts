@@ -8,7 +8,8 @@ import { perfMark, perfMeasure } from "../perf.js";
 import type { Scene } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
 
-import { assembleScene, buildGeometryBatches } from "./assemble-scene.js";
+import { buildGeometryBatches } from "./assemble-geometry-batches.js";
+import { assembleScene } from "./assemble-scene-build.js";
 import { resolveAxisGuide } from "./guide-config.js";
 import type { PanelLayoutResult } from "./panel-layout.js";
 import type { PreparedPanels } from "./prepare-panels.js";

@@ -5,7 +5,8 @@ import type { PortableSpec } from "@ggsvelte/spec";
 
 import type { PositionScale } from "../scales/train.js";
 
-import { collectAxisInputs, trainAxis } from "./scale-training.js";
+import { collectAxisInputs } from "./scale-axis-collect.js";
+import { trainAxis } from "./scale-axis-train.js";
 import type { Advisory, LayerFrame, PipelineWarning } from "./types.js";
 
 export function trainFreePanelScales(input: {

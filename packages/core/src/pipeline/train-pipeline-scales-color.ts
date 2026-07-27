@@ -7,7 +7,7 @@ import type { EditionDefaults } from "../editions.js";
 import { humanizeFieldTitle } from "../humanize-field.js";
 import type { ColumnTable } from "../table.js";
 
-import { resolveColorScale } from "./scale-training.js";
+import { resolveColorScale } from "./scale-color.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning, RunOptions } from "./types.js";
 
 export function trainPipelineColorScales(input: {

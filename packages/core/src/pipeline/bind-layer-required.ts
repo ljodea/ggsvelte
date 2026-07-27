@@ -1,7 +1,7 @@
 /**
  * Required-channel checks for bindLayer by geom/stat.
  */
-import { requireField } from "./bind-layer-helpers.js";
+import { requireField } from "./bind-layer-check-field.js";
 import type { RuleForm } from "./types.js";
 
 export function assertRequiredChannels(input: {

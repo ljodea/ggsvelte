@@ -4,12 +4,9 @@
  */
 import { describe, expect, it } from "bun:test";
 
-import {
-  resolveLayerBackends,
-  resolveLayerFields,
-  resolveLayerScaledConstants,
-} from "../src/pipeline/layer-contracts.ts";
-import { bindLayer } from "../src/pipeline/bind.ts";
+import { resolveLayerBackends } from "../src/pipeline/layer-backends.ts";
+import { resolveLayerFields, resolveLayerScaledConstants } from "../src/pipeline/layer-fields.ts";
+import { bindLayer } from "../src/pipeline/bind-layer.ts";
 import type { Advisory } from "../src/pipeline/types.ts";
 import { ColumnTable } from "../src/table.ts";
 import type { GeometryBatch } from "../src/scene.ts";

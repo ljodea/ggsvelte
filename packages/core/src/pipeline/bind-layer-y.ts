@@ -5,7 +5,8 @@ import type { Aes } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
-import { STAT_Y_COLUMNS, checkField } from "./bind-layer-helpers.js";
+import { STAT_Y_COLUMNS } from "./bind-layer-stat-columns.js";
+import { checkField } from "./bind-layer-check-field.js";
 import type { PipelineWarning } from "./types.js";
 import { PipelineError } from "./types.js";
 

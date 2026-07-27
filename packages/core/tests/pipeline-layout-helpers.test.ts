@@ -185,8 +185,7 @@ describe("axisTicks", () => {
 
 describe("singlePanelMarginReserve", () => {
   it("reserves bottom/left for titles and right for legends", async () => {
-    const { singlePanelMarginReserve } =
-      await import("../src/pipeline/panel-layout-single-reserve.ts");
+    const { singlePanelMarginReserve } = await import("../src/pipeline/panel-layout-single.ts");
     expect(singlePanelMarginReserve("", "", 18, 0)).toEqual({});
     expect(singlePanelMarginReserve("x", "y", 18, 40)).toEqual({
       bottom: 18,

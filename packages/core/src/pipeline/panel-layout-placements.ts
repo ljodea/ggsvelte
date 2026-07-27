@@ -3,11 +3,11 @@
  */
 import type { LayoutAxisPresentation } from "../layout/layout.js";
 
-import type { PanelLayoutChrome } from "./panel-layout-chrome.js";
-import { placeFacetPanelsFromChrome } from "./panel-layout-placements-facet.js";
-import { placeSinglePanelFromChrome } from "./panel-layout-placements-single.js";
-import type { PanelPlacement } from "./panel-layout-types.js";
 import type { FacetPanelDef } from "./facets.js";
+import type { PanelLayoutChrome } from "./panel-layout-chrome.js";
+import { placeFacetPanelsFromChrome } from "./panel-layout-facet.js";
+import { placeSinglePanelFromChrome } from "./panel-layout-single.js";
+import type { PanelPlacement } from "./panel-layout-types.js";
 import type { RunOptions } from "./types.js";
 
 export function buildPanelPlacements(input: {

@@ -5,11 +5,8 @@ import type { PortableSpec } from "@ggsvelte/spec";
 import type { CellValue } from "../table.js";
 import type { Scene } from "../scene.js";
 
-import {
-  resolveLayerBackends,
-  resolveLayerFields,
-  resolveLayerScaledConstants,
-} from "./layer-contracts.js";
+import { resolveLayerBackends } from "./layer-backends.js";
+import { resolveLayerFields, resolveLayerScaledConstants } from "./layer-fields.js";
 import type { PreparedPanels } from "./prepare-panels.js";
 import type { Advisory, LayerBackend, LayerBinding, MappedField, RunOptions } from "./types.js";
 

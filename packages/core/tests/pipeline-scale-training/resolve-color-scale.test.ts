@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from "bun:test";
 
-import { resolveColorScale } from "../../src/pipeline/scale-training.ts";
+import { resolveColorScale } from "../../src/pipeline/scale-color.ts";
 import { EDITION_DEFAULTS } from "../../src/editions.ts";
 import { ColumnTable } from "../../src/table.ts";
 import type { Advisory, PipelineWarning } from "../../src/pipeline/types.ts";
