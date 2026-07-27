@@ -5,37 +5,18 @@ import {
   interactionExpositionSlug,
   isInteractionExposition,
 } from "../apps/docs/src/lib/catalog/interaction-exposition.ts";
-import { CLI_REFERENCE_OPTIONS } from "./cli-docs.ts";
 import { GUIDE_CATALOG, type GuideCatalogEntry } from "../apps/docs/src/lib/catalog/guide.ts";
+import type { DocsRouteMetadata } from "../apps/docs/src/lib/route-types.ts";
+import { CLI_REFERENCE_OPTIONS } from "./cli-docs.ts";
 
-export type DocsRouteKind = "page" | "alias" | "endpoint" | "performance";
-export type DocsShell = "site" | "docs";
-
-export interface RouteNavigation {
-  section: string;
-  label: string;
-  order: number;
-}
-
-export interface RouteHeading {
-  id: string;
-  title: string;
-  level: number;
-}
-
-export interface DocsRouteRecord {
-  path: string;
-  title: string;
-  description: string;
-  canonicalPath: string;
-  kind: DocsRouteKind;
-  index: boolean;
-  sitemap: boolean;
-  shell: DocsShell;
-  navigation?: RouteNavigation;
-  primaryNavigationOwner?: "reference";
-  headings?: RouteHeading[];
-}
+/** Script-side name for the shared route metadata contract (`DocsRouteMetadata`). */
+export type DocsRouteRecord = DocsRouteMetadata;
+export type {
+  DocsRouteKind,
+  DocsShell,
+  RouteHeading,
+  RouteNavigation,
+} from "../apps/docs/src/lib/route-types.ts";
 
 const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
   {
