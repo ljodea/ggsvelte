@@ -218,18 +218,12 @@ export function statQqLine(input: QqLineStatInput): QqLineStatResult {
       tMin = x0;
       tMax = x1;
     }
-    rows.push({
-      t: tMin,
-      s: intercept + slope * tMin,
-      g: groupOrder[s]!,
-      sampleRow: sampleRows[s]!,
-    });
-    rows.push({
-      t: tMax,
-      s: intercept + slope * tMax,
-      g: groupOrder[s]!,
-      sampleRow: sampleRows[s]!,
-    });
+    const g = groupOrder[s]!;
+    const sampleRow = sampleRows[s]!;
+    rows.push(
+      { t: tMin, s: intercept + slope * tMin, g, sampleRow },
+      { t: tMax, s: intercept + slope * tMax, g, sampleRow },
+    );
   }
 
   const nOut = rows.length;

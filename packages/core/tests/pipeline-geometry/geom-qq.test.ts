@@ -57,7 +57,7 @@ describe("geom_qq geometry (#804)", () => {
         .spec(),
       size,
     );
-    const points = model.scene.batches.filter((b) => b.kind === "points") as PointsBatch[];
+    const points = model.scene.batches.filter((b): b is PointsBatch => b.kind === "points");
     expect(points).toHaveLength(1);
     expect(points[0]!.positions.length / 2).toBe(5);
     expect(points[0]!.size).toBe(3);
@@ -70,7 +70,7 @@ describe("geom_qq geometry (#804)", () => {
         .spec(),
       size,
     );
-    const paths = model.scene.batches.filter((b) => b.kind === "paths") as PathsBatch[];
+    const paths = model.scene.batches.filter((b): b is PathsBatch => b.kind === "paths");
     expect(paths.length).toBeGreaterThanOrEqual(1);
     // One subpath with 2 vertices (4 floats) or positions covering 2 points
     const path = paths[0]!;
@@ -100,11 +100,15 @@ describe("geom_qq geometry (#804)", () => {
         .spec(),
       { width: 400, height: 300 },
     );
-    const yDomain = model.scales.y.domain as [number, number];
-    expect(yDomain[0]).toBeLessThanOrEqual(Math.min(...samples));
-    expect(yDomain[1]).toBeGreaterThanOrEqual(Math.max(...samples));
+    const lo = model.scales.y.domain[0];
+    const hi = model.scales.y.domain[1];
+    if (typeof lo !== "number" || typeof hi !== "number") {
+      throw new TypeError("expected continuous y domain for qq sample axis");
+    }
+    expect(lo).toBeLessThanOrEqual(Math.min(...samples));
+    expect(hi).toBeGreaterThanOrEqual(Math.max(...samples));
     // Points must land inside the plot height (broken training puts them off-panel).
-    const points = model.scene.batches.filter((b) => b.kind === "points") as PointsBatch[];
+    const points = model.scene.batches.filter((b): b is PointsBatch => b.kind === "points");
     expect(points).toHaveLength(1);
     const ys: number[] = [];
     const pos = points[0]!.positions;
