@@ -126,7 +126,7 @@ be added for pure-TS spec files if the transform demands it.
 
 Audited against `resolveInteractionScope` (`assembly/assemble.ts`),
 `normalizeInteractionConfig` (`interaction/interaction.ts`), the orchestrator
-wiring (`plot-orchestrator.svelte.ts`), and `legend/filter-state.svelte.ts`.
+wiring (`plot-engine.svelte.ts`), and `legend/filter-state.svelte.ts`.
 Capabilities are strictly opt-in (`undefined`/`false` ⇒ off; `legendFilter`
 defaults to `false` in `GGPlot`).
 

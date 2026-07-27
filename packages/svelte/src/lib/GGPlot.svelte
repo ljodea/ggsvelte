@@ -33,7 +33,7 @@
    * on commit ($effect cleanup — runs after the DOM has moved to the new
    * model) and the last one on unmount.
    *
-   * Controller wiring lives in `plot-orchestrator.svelte.ts` (construction /
+   * Controller wiring lives in `plot-engine.svelte.ts` (construction /
    * effect-order contract documented there).
    */
   import type { CellValue } from "@ggsvelte/core";
@@ -61,7 +61,7 @@
   } from "./assembly/layout.js";
   import BoundsEditor from "./interval/BoundsEditor.svelte";
   import type { GGPlotProps } from "./plot-props.js";
-  import { createPlotOrchestrator } from "./plot-orchestrator.svelte.js";
+  import { createPlotEngine } from "./plot-engine.svelte.js";
   import CaptureSurface from "./surface/CaptureSurface.svelte";
   import LegendFilters from "./legend/LegendFilters.svelte";
   import LegendTargets from "./legend/LegendTargets.svelte";
@@ -114,7 +114,7 @@
   let a11yTableOpen = $state(false);
   const plotId = $props.id();
 
-  const engine = createPlotOrchestrator<Row, Identity>({
+  const engine = createPlotEngine<Row, Identity>({
     registry,
     plotId,
     root: () => root,
@@ -141,7 +141,7 @@
     legendFilter: () => legendFilter,
     tool: () => tool,
     // The PublicKey → PropertyKey widening casts live HERE (component-local
-    // generic erased at the orchestrator boundary; same widening the pre-S11
+    // generic erased at the engine boundary; same widening the pre-S11
     // factory* aliases performed).
     interaction: () =>
       interaction as PlotInteractionController<PropertyKey> | undefined,

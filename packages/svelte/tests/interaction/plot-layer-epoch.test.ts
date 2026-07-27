@@ -1,7 +1,7 @@
 /**
  * #609 data-identity epoch must keep reading mark descriptors' `.data`
  * after the LayerRegistry union widening. Guards
- * plot-interaction-assembly.svelte.ts:154 (`inputs.registry.markLayers`).
+ * plot-engine.svelte.ts data-identity epoch (`inputs.registry.markLayers`).
  *
  * Wire-through only: observe the production path, never recompute the epoch
  * token in the test body (that would be a LayerRegistry tautology).
@@ -77,7 +77,7 @@ describe("#609 epoch with non-mark layers registered", () => {
   });
 
   it("pinned inspection clears when geom-child layer-local data is replaced (markLayers epoch path)", async () => {
-    // Production path: plot-interaction-assembly fingerprints
+    // Production path: plot-engine fingerprints
     // inputs.registry.markLayers when the layers prop is absent. Only mark
     // descriptors expose .data — so a geom child's layer-local replacement
     // must bump dataIdentityEpoch. reconcilePinned returns null on epoch
