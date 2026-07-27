@@ -42,6 +42,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   errorbar: ["x"], // ymin/ymax vs y are stat-dependent, checked separately
   rect: ["xmin", "xmax", "ymin", "ymax"],
   segment: ["x", "y", "xend", "yend"],
+  polygon: ["x", "y"],
   spoke: ["x", "y"], // angle/radius: aes or params — checked below
   curve: ["x", "y", "xend", "yend"],
   rug: [], // sides-dependent; checked separately

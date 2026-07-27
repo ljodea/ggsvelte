@@ -306,6 +306,11 @@
       "sourceSha256": "3629ec64109b22c2f3b03b62668d6cc55c334683e45ff8c9362c2a9db7feb2f8",
       "pngSha256": "6ea9c8f342288fc5f2069fd6fdd5da6445713d4c3bb6f5bbe29b38ed26d9b9f2"
     },
+    "polygon/regions": {
+      "filename": "polygon-regions-light.png",
+      "sourceSha256": "b69a28e0aebf57fc16372ad8acae2511b7f34c2794820e54a5f6c80217357e87",
+      "pngSha256": "79216d10146fd23ddac6fa368be3dd4c87c1ffa5681ee6dbb2b5e1157316c156"
+    },
     "qq/normal": {
       "filename": "qq-normal-light.png",
       "sourceSha256": "c34d77e7d4c00e633f6d3704410f175841271e8c79b683092c16823e90038a21",

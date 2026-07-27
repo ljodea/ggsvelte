@@ -225,8 +225,9 @@ test("gallery exposes every generated preview exactly once", async ({ page }) =>
   await page.goto("/examples");
   // One meta.json per example under examples/ (grows when new specimens land).
   // Total previews − 3 interaction expositions; includes hex/basic (#800),
-  // bin2d/basic (#799), qq/normal (#804), line/ecdf (#811), etc.
-  const exampleCount = 77;
+  // bin2d/basic (#799), qq/normal (#804), line/ecdf (#811),
+  // polygon/regions (#807), etc.
+  const exampleCount = 78;
   await expect(page.locator(".example-grid li")).toHaveCount(exampleCount);
   await expect(page.locator('img[src*="/previews/"]')).toHaveCount(exampleCount);
 });

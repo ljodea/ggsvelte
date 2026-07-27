@@ -43,6 +43,7 @@ import type {
   RectLayer,
   RibbonLayer,
   SegmentLayer,
+  PolygonLayer,
   AblineLayer,
   ContourLayer,
   CurveLayer,
@@ -90,6 +91,7 @@ export interface RuntimeFreqpolyLayer extends WithRuntimeAes<FreqpolyLayer> {}
 export interface RuntimeAreaLayer extends WithRuntimeAes<AreaLayer> {}
 export interface RuntimeRibbonLayer extends WithRuntimeAes<RibbonLayer> {}
 export interface RuntimeSegmentLayer extends WithRuntimeAes<SegmentLayer> {}
+export interface RuntimePolygonLayer extends WithRuntimeAes<PolygonLayer> {}
 export interface RuntimeAblineLayer extends WithRuntimeAes<AblineLayer> {}
 export interface RuntimeCurveLayer extends WithRuntimeAes<CurveLayer> {}
 export interface RuntimeRugLayer extends WithRuntimeAes<RugLayer> {}
@@ -134,6 +136,7 @@ export type RuntimeLayerSpec =
   | RuntimeAreaLayer
   | RuntimeRibbonLayer
   | RuntimeSegmentLayer
+  | RuntimePolygonLayer
   | RuntimeAblineLayer
   | RuntimeCurveLayer
   | RuntimeRugLayer

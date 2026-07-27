@@ -727,6 +727,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "polygon/regions",
+    category: "polygon",
+    name: "regions",
+    title: "Two regions as polygons",
+    description: "",
+    tags: ["polygon", "fill", "group", "choropleth"],
+    docsSection: "Rectangles & grids",
+    hasData: true,
+  },
+  {
     id: "qq/normal",
     category: "qq",
     name: "normal",

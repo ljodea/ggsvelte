@@ -71,6 +71,7 @@ export type {
   JitterLayerInput,
   RibbonLayerInput,
   SegmentLayerInput,
+  PolygonLayerInput,
   AblineLayerInput,
   ContourLayerInput,
   Density2dLayerInput,

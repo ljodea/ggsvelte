@@ -120,6 +120,7 @@ export const FreqpolyLayerSchema = SpecModule.Import("FreqpolyLayer");
 export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
+export const PolygonLayerSchema = SpecModule.Import("PolygonLayer");
 export const AblineLayerSchema = SpecModule.Import("AblineLayer");
 export const CurveLayerSchema = SpecModule.Import("CurveLayer");
 export const MapLayerSchema = SpecModule.Import("MapLayer");
@@ -234,6 +235,8 @@ export type HlineParams = SpecType<"HlineParams">;
 export type VlineParams = SpecType<"VlineParams">;
 /** Segment layer params (styling + lineend). */
 export type SegmentParams = SpecType<"SegmentParams">;
+/** Polygon layer params (fill/stroke styling). */
+export type PolygonParams = SpecType<"PolygonParams">;
 export type AblineParams = SpecType<"AblineParams">;
 /** Curve layer params (curvature/angle/ncp + stroke). */
 export type CurveParams = SpecType<"CurveParams">;
@@ -344,6 +347,8 @@ export type HexLayer = LayerWithDataRef<SpecType<"HexLayer">>;
 export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 /** A finite segment layer ((x,y)→(xend,yend)). */
 export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
+/** A closed polygon layer ((x,y) vertices in data order). */
+export type PolygonLayer = LayerWithDataRef<SpecType<"PolygonLayer">>;
 /** A slope/intercept reference line layer (geom_abline). */
 export type AblineLayer = LayerWithDataRef<SpecType<"AblineLayer">>;
 /** A curve layer (curved connectors). */
@@ -389,6 +394,7 @@ export type LayerSpec =
   | AreaLayer
   | RibbonLayer
   | SegmentLayer
+  | PolygonLayer
   | AblineLayer
   | CurveLayer
   | MapLayer

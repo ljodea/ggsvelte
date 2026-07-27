@@ -569,6 +569,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "polygon/regions",
+    title: "Two regions as polygons",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6InBvbHlnb24vcmVnaW9ucyJ9LCJzcGVjIjp7ImVkaXRpb24iOjIsImRhdGEiOnsidmFsdWVzIjpbeyJ4IjowLCJ5IjowLCJyZWdpb24iOiJXZXN0In0seyJ4IjoyLCJ5IjowLCJyZWdpb24iOiJXZXN0In0seyJ4IjoxLCJ5IjoyLCJyZWdpb24iOiJXZXN0In0seyJ4IjoyLjIsInkiOjAsInJlZ2lvbiI6IkVhc3QifSx7IngiOjQsInkiOjAsInJlZ2lvbiI6IkVhc3QifSx7IngiOjQsInkiOjEuNSwicmVnaW9uIjoiRWFzdCJ9LHsieCI6MywieSI6Mi4yLCJyZWdpb24iOiJFYXN0In0seyJ4IjoyLjIsInkiOjEuMiwicmVnaW9uIjoiRWFzdCJ9XX0sImxheWVycyI6W3siZ2VvbSI6InBvbHlnb24iLCJzdGF0IjoiaWRlbnRpdHkiLCJwb3NpdGlvbiI6ImlkZW50aXR5IiwiYWVzIjp7IngiOnsiZmllbGQiOiJ4In0sInkiOnsiZmllbGQiOiJ5In0sImZpbGwiOnsiZmllbGQiOiJyZWdpb24ifSwiZ3JvdXAiOnsiZmllbGQiOiJyZWdpb24ifX0sInBhcmFtcyI6eyJhbHBoYSI6MC44NSwibGluZXdpZHRoIjoxLjV9fV0sInNjYWxlcyI6eyJmaWxsIjp7InR5cGUiOiJtYW51YWwiLCJkb21haW4iOlsiV2VzdCIsIkVhc3QiXSwicmFuZ2UiOlsiIzRjNzhhOCIsIiNmNTg1MTgiXX19LCJsYWJzIjp7InRpdGxlIjoiVHdvIHJlZ2lvbnMgYXMgcG9seWdvbnMiLCJzdWJ0aXRsZSI6IlZlcnRpY2VzIGNvbm5lY3QgaW4gZGF0YSBvcmRlcjsgdGhlIHBhdGggY2xvc2VzIGltcGxpY2l0bHkiLCJ4IjoieCIsInkiOiJ5IiwiZmlsbCI6IiJ9LCJ0aGVtZSI6ImNsYXNzaWMifX0",
+    },
+  },
+  {
     id: "qq/normal",
     title: "Normal Q–Q plot",
     compatibility: {

@@ -94,6 +94,8 @@ export function dispatchGeometryBatch(
       return single(curveBatch(frame, fx, color, styles, warnings));
     case "rug":
       return single(rugBatch(frame, fx, color, styles, warnings));
+    case "polygon":
+      return single(polygonBatch(frame, fx, color, fill, styles, warnings));
     case "text":
     case "sf_text":
     case "sf_label":

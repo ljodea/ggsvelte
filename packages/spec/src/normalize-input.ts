@@ -36,6 +36,7 @@ import type {
   VlineParams,
   RugParams,
   SegmentParams,
+  PolygonParams,
   AblineParams,
   CurveParams,
   MapParams,
@@ -334,6 +335,13 @@ export interface SegmentLayerInput extends LayerInputBase {
   params?: SegmentParams;
 }
 
+export interface PolygonLayerInput extends LayerInputBase {
+  geom: "polygon";
+  stat?: "identity";
+  position?: "identity";
+  params?: PolygonParams;
+}
+
 export interface QqLayerInput extends LayerInputBase {
   geom: "qq";
   stat?: "qq";
@@ -451,6 +459,7 @@ export type LayerInput =
   | RasterLayerInput
   | HexLayerInput
   | SegmentLayerInput
+  | PolygonLayerInput
   | CurveLayerInput
   | MapLayerInput
   | SfLayerInput

@@ -56,6 +56,7 @@ export type {
   GeomRuleOptions,
   GeomRugOptions,
   GeomSegmentOptions,
+  GeomPolygonOptions,
   GeomAblineOptions,
   GeomCurveOptions,
   GeomMapOptions,
