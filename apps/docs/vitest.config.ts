@@ -1,13 +1,12 @@
 // Docs app component tests: vitest 4 browser mode + Playwright chromium.
 // Same harness pattern as packages/svelte (issue #991).
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
 
-const root = path.dirname(fileURLToPath(import.meta.url));
+const root = import.meta.dirname;
 
 export default defineConfig({
   plugins: [svelte()],

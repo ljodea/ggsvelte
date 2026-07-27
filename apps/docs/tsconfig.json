@@ -12,5 +12,8 @@
     // No ambient @types (the hoisted @types/bun's import.meta declarations
     // clash with vite/client's): the app code uses no bun/node globals.
     "types": []
-  }
+  },
+  // Component tests live under vitest browser mode (issue #991), not
+  // svelte-check — same split as packages/svelte (tests not in its include).
+  "exclude": ["tests/**"]
 }

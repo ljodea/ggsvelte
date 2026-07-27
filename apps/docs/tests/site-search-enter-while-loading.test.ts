@@ -35,11 +35,15 @@ const navigate = vi.hoisted(() => ({
 
 vi.mock("$lib/load-docs-search-index", () => ({
   loadDocsSearchIndex: () => loadControl.load(),
-  resetDocsSearchIndexLoaderForTests: () => loadControl.reset(),
+  resetDocsSearchIndexLoaderForTests: () => {
+    loadControl.reset();
+  },
 }));
 
 vi.mock("$lib/site-search-navigate", () => ({
-  assignDocsLocation: (href: string) => navigate.assign(href),
+  assignDocsLocation: (href: string): void => {
+    navigate.assign(href);
+  },
 }));
 
 import SiteSearch from "$lib/components/SiteSearch.svelte";
@@ -73,7 +77,8 @@ describe("SiteSearch Enter while index is loading (#948)", () => {
     document.body.append(trigger);
 
     try {
-      const { container, component } = render(SiteSearch);
+      const { container, component } = render(SiteSearch, {});
+
       siteSearchExports(component).open(trigger);
       flushSync();
 
