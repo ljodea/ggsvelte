@@ -67,7 +67,7 @@ import type { PlotZoomState } from "../zoom/zoom-state.svelte.js";
 /** Component-held reducer shape — factory creates it inside the module. */
 type InteractionReducer = ReturnType<typeof createInteractionReducer>;
 
-export type BrushRect = {
+type BrushRect = {
   x0: number;
   y0: number;
   x1: number;
