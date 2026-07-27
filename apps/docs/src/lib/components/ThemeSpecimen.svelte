@@ -64,7 +64,7 @@
         {scheme}
         height={plotHeight}
         {legendFocus}
-        ariaLabel={`${label} theme multi-series temperatures`}
+        ariaLabel={`${label} theme Playfair multi-series`}
       />
     {:else if kind === "ridership-line"}
       <GGPlot
@@ -74,15 +74,15 @@
         inspect={{ mode: "x" }}
         {legendFocus}
         height={plotHeight}
-        ariaLabel={`${label} theme ridership series`}
+        ariaLabel={`${label} theme Playfair wheat and wages`}
       >
         <Theme {name} />
         <Scale value={{ color: colorScale }} />
         <Labs
-          title="Daily transit ridership"
-          x="Month"
-          y="Daily riders (thousands)"
-          color="Mode"
+          title="Playfair wheat price & weekly wage"
+          x="Year"
+          y="Shillings"
+          color="Series"
         />
         <GeomLine linewidth={2} />
         <GeomPoint size={2.8} />
@@ -90,20 +90,20 @@
     {:else if kind === "attendees-dodge"}
       <GGPlot
         data={attendees}
-        aes={{ x: "track", fill: "level" }}
+        aes={{ x: "track", fill: "level", weight: "deaths" }}
         key="id"
         inspect={{ mode: "xy" }}
         {legendFocus}
         height={plotHeight}
-        ariaLabel={`${label} theme dodged bars`}
+        ariaLabel={`${label} theme Edgeworth dodged bars`}
       >
         <Theme {name} />
         <Scale value={{ fill: colorScale }} />
         <Labs
-          title="Conference attendees by track and experience"
-          x="Track"
-          y="Attendees"
-          fill="Experience"
+          title="Edgeworth county deaths, 1876–82"
+          x="Year"
+          y="Deaths per million"
+          fill="County"
         />
         <GeomBar position="dodge" />
       </GGPlot>
@@ -115,20 +115,20 @@
         inspect={{ mode: "x" }}
         {legendFocus}
         height={plotHeight}
-        ariaLabel={`${label} theme stacked generation`}
+        ariaLabel={`${label} theme Nightingale stacked area`}
       >
         <Theme {name} />
         <Scale
           value={{
-            x: { labels: "d", nice: false },
+            x: { nice: false },
             fill: colorScale,
           }}
         />
         <Labs
-          title="Electricity generation mix"
+          title="Crimean deaths by cause, 1854–56"
           x="Year"
-          y="Generation (TWh)"
-          fill="Source"
+          y="Deaths per 1,000 per year"
+          fill="Cause"
         />
         <GeomArea alpha={0.9} />
       </GGPlot>
@@ -138,10 +138,10 @@
         aes={{ x: "year", y: "value" }}
         inspect={{ mode: "x" }}
         height={plotHeight}
-        ariaLabel={`${label} theme long-run series`}
+        ariaLabel={`${label} theme Bowley exports`}
       >
         <Theme {name} />
-        <Labs title="Long-run index, 1835–2025" x="Year" y="Index" />
+        <Labs title="British exports, 1855–1899" x="Year" y="£ millions" />
         <GeomLine linewidth={1.5} />
       </GGPlot>
     {:else if kind === "penguins-scatter"}
@@ -172,7 +172,7 @@
         inspect={{ mode: "xy" }}
         {legendFocus}
         height={plotHeight}
-        ariaLabel={`${label} theme income scatter`}
+        ariaLabel={`${label} theme cholera density scatter`}
       >
         <Theme {name} />
         <Scale
@@ -182,10 +182,10 @@
           }}
         />
         <Labs
-          title="Income and life expectancy"
-          x="GDP per capita (USD, log scale)"
-          y="Life expectancy (years)"
-          color="Region"
+          title="Cholera death rate vs density, 1849"
+          x="People per acre (log scale)"
+          y="Death rate per 10,000"
+          color="Water supply"
         />
         <GeomPoint size={3.5} />
         <GeomSmooth method="lm" se={false} />
@@ -196,10 +196,14 @@
         aes={{ x: "quarter", y: "amount" }}
         inspect={{ mode: "xy" }}
         height={plotHeight}
-        ariaLabel={`${label} theme revenue columns`}
+        ariaLabel={`${label} theme Salk trial columns`}
       >
         <Theme {name} />
-        <Labs title="Quarterly revenue" x="Quarter" y="Revenue (€ thousands)" />
+        <Labs
+          title="Salk trial paralytic polio rates"
+          x="Group"
+          y="Cases per 100,000"
+        />
         <GeomCol width={0.7} />
         <GeomText aes={{ label: "label" }} dy={-8} size={11} />
       </GGPlot>
@@ -209,14 +213,14 @@
         aes={{ x: "rent", y: "livability" }}
         inspect={{ mode: "xy" }}
         height={plotHeight}
-        ariaLabel={`${label} theme labeled cities`}
+        ariaLabel={`${label} theme Langren longitude labels`}
       >
         <Theme {name} />
-        <Scale value={{ x: { labels: ",d" } }} />
+        <Scale value={{ x: { labels: ".1f" } }} />
         <Labs
-          title="Livability vs median rent"
-          x="Median monthly rent (USD)"
-          y="Livability index"
+          title="Van Langren longitude estimates, 1644"
+          x="Toledo–Rome longitude (°)"
+          y="Estimate rank"
         />
         <GeomPoint size={3} />
         <GeomText aes={{ label: "city" }} dy={-9} size={10} />

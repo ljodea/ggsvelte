@@ -64,9 +64,9 @@
       <Scale value={{ fill: { type: "ordinal", scheme: name, reverse } }} />
       <Guides value={{ fill: { type: "none" } }} />
       <Labs
-        title="Survey respondents by language"
-        x="Language"
-        y="Respondents"
+        title="Spanish Armada squadron tonnage, 1588"
+        x="Squadron"
+        y="Tons"
       />
       <GeomCol width={0.75} />
     </GGPlot>
