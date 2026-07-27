@@ -8,8 +8,7 @@ same chart as PortableSpec JSON — validate, apply the fix, render headless.
 [`skills/ggsvelte`](skills/ggsvelte/SKILL.md).
 
 [Documentation](https://ggsvelte.sh/) · [Examples](https://ggsvelte.sh/examples) ·
-[Getting started](https://ggsvelte.sh/guide/getting-started) ·
-[Playground](https://ggsvelte.sh/playground)
+[Getting started](https://ggsvelte.sh/guide/getting-started)
 
 ## Install
 

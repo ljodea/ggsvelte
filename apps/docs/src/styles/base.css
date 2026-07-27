@@ -167,7 +167,7 @@ pre {
 
 /*
  * Shared host code surface (#696): one radius/type/padding for docs pre
- * blocks. Call sites: .prose pre, PlaygroundEvents, PlaygroundPrompt,
+ * blocks. Call sites: .prose pre, CodeTabs,
  * CodeTabs. Layout-only extras (max-height, margin, white-space) stay local.
  */
 .code-surface,

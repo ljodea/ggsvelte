@@ -105,7 +105,7 @@ jobs:
       - name: build packaged interaction test target
         if: steps.content_hash.outputs.hit != 'true'
         run: DOCS_BUILD_MODE=cloudflare-preview bun run build:docs
-      - name: docs shell, home/gallery, progressive, themes, interaction, playground journeys
+      - name: docs shell, home/gallery, progressive, themes, interaction journeys
         if: steps.content_hash.outputs.hit != 'true'
         # The journeys Playwright project selects the docs a11y/structure specs
         # (60s budget, #944). --grep-invert drops visual-contract screenshots so

@@ -31,16 +31,6 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Gallery"],
   },
   {
-    id: "page:playground",
-    kind: "page",
-    title: "PortableSpec playground",
-    summary:
-      "Edit a bounded PortableSpec locally. Export Svelte, builder TypeScript, JSON, or SVG.",
-    href: "/playground",
-    keywords: [],
-    exact: ["PortableSpec playground"],
-  },
-  {
     id: "page:themes",
     kind: "page",
     title: "Chart themes and color scales",

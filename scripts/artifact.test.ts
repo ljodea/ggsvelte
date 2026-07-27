@@ -333,7 +333,6 @@ describe("docs generator freshness gates stay individually invokable", () => {
       "gen-docs-search.ts --check",
       "gen-lesson-charts.ts --check",
       "gen-gallery-previews.ts --check",
-      "gen-playground-seeds.ts --check",
     ];
     for (const script of [manifest.scripts["build"], manifest.scripts["check"]]) {
       for (const needle of required) {

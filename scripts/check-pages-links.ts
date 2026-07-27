@@ -3,7 +3,6 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { posix, resolve } from "node:path";
 
 import { resolveDocsBuildConfig } from "../apps/docs/build-mode.ts";
-import { decodePlaygroundHash } from "../apps/docs/src/lib/playground-codec.ts";
 
 export const requiredPages = [
   "docs.html",
@@ -11,7 +10,6 @@ export const requiredPages = [
   "guide/interactions.html",
   "guide/interaction-reference.html",
   "guide/upgrading.html",
-  "playground.html",
   "themes.html",
   "interactions.html",
   "reference/interactions.html",
@@ -91,9 +89,6 @@ export function findBrokenFragments(
     if (target === null) return false;
     const page = candidates(target).find((candidate) => files.has(candidate));
     if (page === undefined || !page.endsWith(".html")) return false;
-    if (page === "playground.html" && fragment.startsWith("play=")) {
-      return decodePlaygroundHash(`#${fragment}`).status !== "ok";
-    }
     return !(anchors.get(page)?.has(fragment) ?? false);
   });
 }

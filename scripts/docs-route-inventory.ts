@@ -52,17 +52,6 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     shell: "site",
   },
   {
-    path: "/playground",
-    title: "PortableSpec playground — ggsvelte",
-    description:
-      "Edit a bounded PortableSpec locally. Export Svelte, builder TypeScript, JSON, or SVG.",
-    canonicalPath: "/playground",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "site",
-  },
-  {
     path: "/themes",
     title: "Chart themes and color scales — ggsvelte",
     description: "Built-in chart themes, categorical palettes, and sequential scales.",

@@ -236,7 +236,7 @@ describe("guide sections cover their catalogs", () => {
     expect(INTERACTIONS_MD).toContain("without retraining scales");
     expect(INTERACTIONS_MD).toContain("/examples/interactions/inspection");
     expect(INTERACTIONS_MD).toContain("/interactions/linked-views");
-    expect(INTERACTIONS_MD).toContain("/playground");
+    expect(INTERACTIONS_MD).not.toContain("/playground");
     expect(INTERACTIONS_MD).toContain('inspect={{ mode: "x",');
     expect(INTERACTIONS_MD).toContain('select={{ type: "interval", mode: "xy",');
     expect(INTERACTIONS_MD).toContain('key="id"');
@@ -397,7 +397,7 @@ describe("llms surfaces", () => {
     expect(txt.startsWith("# ggsvelte\n")).toBe(true);
     for (const page of pages) expect(txt).toContain(`(https://ggsvelte.sh/guide/${page.slug})`);
     expect(txt).toContain("(https://ggsvelte.sh/schema/v0.json)");
-    expect(txt).toContain("(https://ggsvelte.sh/playground)");
+    expect(txt).not.toContain("(https://ggsvelte.sh/playground)");
     expect(txt).toContain("(https://ggsvelte.sh/reference/interactions)");
     for (const ex of EXAMPLES) {
       const exposition =

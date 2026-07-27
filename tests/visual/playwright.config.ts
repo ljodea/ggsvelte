@@ -52,7 +52,7 @@ export const vrContextOptions: BrowserContextOptions = { reducedMotion: "reduce"
 
 /** Specs that the component-journeys CI job runs (#944). */
 const JOURNEYS_SPECS =
-  /(?:docs-shell|docs-home-gallery|docs-progressive-search|docs-themes|interaction-accessibility|playground)\.spec\.ts$/;
+  /(?:docs-shell|docs-home-gallery|docs-progressive-search|docs-themes|interaction-accessibility)\.spec\.ts$/;
 
 export default defineConfig({
   testDir: ".",

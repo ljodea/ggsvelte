@@ -20,11 +20,6 @@ export function primaryNavLinks(path: string, owner?: PrimaryNavOwner): readonly
       active: path.startsWith("/examples"),
     },
     {
-      label: "Playground",
-      href: "/playground",
-      active: path === "/playground",
-    },
-    {
       label: "Themes",
       href: "/themes",
       active: path === "/themes",

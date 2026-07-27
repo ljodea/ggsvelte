@@ -48,7 +48,7 @@ curl --fail --silent --show-error https://ggsvelte.sh/sitemap.xml
 curl --fail --silent --show-error https://ggsvelte.sh/llms.txt | head
 ```
 
-Inspect the home page, Getting Started, one gallery detail, Playground, Themes, and Reference in both webmaster tools. Track these states independently:
+Inspect the home page, Getting Started, one gallery detail, Themes, and Reference in both webmaster tools. Track these states independently:
 
 - property ownership verified;
 - sitemap submitted;

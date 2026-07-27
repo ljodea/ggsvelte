@@ -21,7 +21,6 @@ for (const width of [375, 768, 1024, 1280, 1600]) {
 for (const route of [
   "/examples/point/scatter-color",
   "/reference/interactions",
-  "/playground",
   "/guide/errors#unknown-field",
 ]) {
   test(`${route} keeps wide content locally contained on mobile`, async ({ page }) => {

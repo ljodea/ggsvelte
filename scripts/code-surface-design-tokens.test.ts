@@ -1,10 +1,9 @@
 /**
  * Shared docs code-surface treatment (issue #696 point 2).
  *
- * Four call sites used to diverge on radius (0/3px/4px), font-size
- * (0.7/0.75/0.8rem), padding (0.65rem/1rem), and line-height (1.45/1.5/1.55).
- * One `.code-surface` rule in base.css is the source of truth; the four sites
- * must use it instead of re-stating surface tokens.
+ * Call sites used to diverge on radius, font-size, padding, and line-height.
+ * One `.code-surface` rule in base.css is the source of truth; remaining
+ * sites must use it instead of re-stating surface tokens.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -13,8 +12,6 @@ import { describe, expect, it } from "bun:test";
 
 const ROOT = join(import.meta.dir, "..");
 const BASE = join(ROOT, "apps/docs/src/styles/base.css");
-const EVENTS = join(ROOT, "apps/docs/src/lib/components/PlaygroundEvents.svelte");
-const PROMPT = join(ROOT, "apps/docs/src/lib/components/PlaygroundPrompt.svelte");
 const TABS = join(ROOT, "apps/docs/src/lib/CodeTabs.svelte");
 
 const SURFACE_PROPS = [
@@ -36,7 +33,6 @@ describe("shared .code-surface in base.css (#696)", () => {
   const base = readFileSync(BASE, "utf8");
 
   it("defines .code-surface with the canonical host code tokens", () => {
-    // Selector group must include .code-surface so all four sites share one rule.
     expect(base).toMatch(/\.code-surface\b/);
     for (const prop of SURFACE_PROPS) {
       expect(base).toMatch(
@@ -49,37 +45,13 @@ describe("shared .code-surface in base.css (#696)", () => {
   });
 
   it("styles .prose pre via the shared surface (not a one-off 3px radius)", () => {
-    // .prose pre must be co-selected with .code-surface or be a pure margin wrapper.
     expect(base).toMatch(/\.code-surface\s*,\s*\.prose\s+pre|\.prose\s+pre\s*,\s*\.code-surface/);
     expect(base).not.toMatch(/\.prose\s+pre\s*\{[^}]*border-radius\s*:\s*3px/s);
   });
 });
 
-describe("four code-block call sites use .code-surface (#696)", () => {
-  const events = readFileSync(EVENTS, "utf8");
-  const prompt = readFileSync(PROMPT, "utf8");
+describe("code-block call sites use .code-surface (#696)", () => {
   const tabs = readFileSync(TABS, "utf8");
-
-  it("PlaygroundEvents applies code-surface and does not restate surface tokens", () => {
-    expect(events).toMatch(/class="[^"]*\bcode-surface\b[^"]*"/);
-    const css = styleBlock(events);
-    // Only the event JSON pre rule — summary chrome may use other sizes.
-    expect(css).toMatch(/pre\s*\{[^}]*max-height/s);
-    expect(css).not.toMatch(/pre\s*\{[^}]*border-radius\s*:/s);
-    expect(css).not.toMatch(/pre\s*\{[^}]*background\s*:\s*var\(--code-paper\)/s);
-    expect(css).not.toMatch(/pre\s*\{[^}]*font(?:-size)?\s*:\s*0\.7rem/s);
-    expect(css).not.toMatch(/pre\s*\{[^}]*padding\s*:\s*0\.65rem/s);
-  });
-
-  it("PlaygroundPrompt details pre applies code-surface and does not restate surface tokens", () => {
-    expect(prompt).toMatch(/class="[^"]*\bcode-surface\b[^"]*"/);
-    const css = styleBlock(prompt);
-    // Layout-only extras (max-height, margin, white-space) are fine; surface tokens are not.
-    expect(css).not.toMatch(/\.details-pre[^{]*\{[^}]*border-radius\s*:/s);
-    expect(css).not.toMatch(/\.details-pre[^{]*\{[^}]*background\s*:\s*var\(--code-paper\)/s);
-    expect(css).not.toMatch(/\.details-pre[^{]*\{[^}]*font\s*:\s*0\.75rem/s);
-    expect(css).not.toMatch(/\.details-pre[^{]*\{[^}]*padding\s*:\s*0\.65rem/s);
-  });
 
   it("CodeTabs scroll region applies code-surface and inherits type from it", () => {
     expect(tabs).toMatch(/class="[^"]*\bcode-surface\b[^"]*"/);

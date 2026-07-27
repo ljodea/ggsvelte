@@ -20,10 +20,7 @@ export default {
       directives: docsCspDirectives(build.mode),
     },
     prerender: {
-      handleMissingId: ({ id, message }) => {
-        // Versioned playground fragments are application state, not document
-        // anchors. Every ordinary missing heading id remains a build failure.
-        if (id.startsWith("play=v1.")) return;
+      handleMissingId: ({ message }) => {
         throw new Error(message);
       },
     },

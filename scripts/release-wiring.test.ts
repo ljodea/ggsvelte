@@ -80,7 +80,9 @@ describe("R0 release wiring", () => {
     // but absent from ci-unit.yml is a local-only suite that merges green.
     const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
     const rootSuites = suiteArgs(pkg.scripts["test"] ?? "");
-    expect(rootSuites).toContain("workers/playground-api");
+    expect(rootSuites).toContain("packages/spec");
+    expect(rootSuites).toContain("scripts");
+    expect(rootSuites).not.toContain("workers/playground-api");
 
     // Folded (`run: >`) scalar — collapse whitespace, then take the single
     // coverage invocation up to the next step. Anchored on `--coverage` so the
@@ -96,38 +98,6 @@ describe("R0 release wiring", () => {
     for (const suite of rootSuites) {
       expect(ciSuites, `ci-unit.yml runs ${suite}`).toContain(suite);
     }
-  });
-
-  it("typechecks the playground-api worker inside `bun run check` (issue #725)", () => {
-    // The worker has no build step — wrangler bundles straight from source — so
-    // this dedicated project is its only tsc coverage. The root tsconfig.json
-    // includes workers/** for oxlint --type-aware, but nothing ever ran tsc on
-    // it (#725), and type-aware lint rules are a strict subset of tsc
-    // diagnostics: assignability and optionality errors slipped through.
-    const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
-    expect(pkg.scripts["check:workers"]).toContain("tsc -p workers/playground-api");
-    // Chained into `check`, which ci-unit.yml runs and `build` re-enters.
-    expect(pkg.scripts["check"]).toContain("bun run check:workers");
-    // Whole-line: `bun run check:pages-links` &c must not satisfy this.
-    expect(read(".github/workflows/ci-unit.yml")).toMatch(/^\s*run: bun run check$/mu);
-
-    // src alone would leave the bun:test suite unchecked, and 15 of the 41
-    // errors the project first surfaced were in it.
-    const project = read("workers/playground-api/tsconfig.json");
-    for (const glob of ['"src/**/*.ts"', '"test/**/*.ts"']) {
-      expect(project, `worker tsconfig includes ${glob}`).toContain(glob);
-    }
-    // eval/** stays out on purpose: it imports the docs client's envelope
-    // parser, and apps/docs is checked by svelte-check under a config that does
-    // not extend tsconfig.base.json. Pulling it in would make docs edits fail
-    // this worker gate instead of check:docs.
-    expect(project).not.toContain('"eval/');
-    // Tripwire on the reason, not just the outcome: if that import goes away,
-    // eval/** can be folded into the project and this test should be revisited.
-    expect(
-      read("workers/playground-api/eval/run-eval.ts"),
-      "eval/** exclusion is justified by its apps/docs import",
-    ).toContain("apps/docs/src/lib/playground-agent-envelope");
   });
 
   it("typechecks scripts/ci-routing inside `bun run check` (issue #734)", () => {
@@ -256,7 +226,7 @@ describe("R0 release wiring", () => {
     expect(read("tests/visual/playwright.config.ts")).toContain("docs-progressive-search");
     expect(read("tests/visual/playwright.config.ts")).toContain("docs-themes");
     expect(read("tests/visual/playwright.config.ts")).toContain("interaction-accessibility");
-    expect(read("tests/visual/playwright.config.ts")).toContain("playground");
+    expect(read("tests/visual/playwright.config.ts")).not.toContain("playground");
     // ci-gate: package component = svelte+svelte-fx+spikes; docs_journeys is independent.
     expect(ci).toContain("COMPONENT_SVELTE_RES");
     expect(ci).toContain("COMPONENT_SVELTE_FX_RES");

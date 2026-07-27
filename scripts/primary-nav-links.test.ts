@@ -8,7 +8,6 @@ describe("primaryNavLinks", () => {
     expect(links.map((link) => link.label)).toEqual([
       "Docs",
       "Gallery",
-      "Playground",
       "Themes",
       "Interactions",
       "Reference",
@@ -18,13 +17,10 @@ describe("primaryNavLinks", () => {
     expect(links.find((link) => link.href === "/reference")?.active).toBe(false);
   });
 
-  test("marks gallery children and exact playground/themes/interactions", () => {
+  test("marks gallery children and exact themes/interactions", () => {
     expect(
       primaryNavLinks("/examples/point/scatter").find((link) => link.href === "/examples")?.active,
     ).toBe(true);
-    expect(primaryNavLinks("/playground").find((link) => link.href === "/playground")?.active).toBe(
-      true,
-    );
     expect(primaryNavLinks("/themes").find((link) => link.href === "/themes")?.active).toBe(true);
     expect(
       primaryNavLinks("/interactions").find((link) => link.href === "/interactions")?.active,

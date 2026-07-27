@@ -2,29 +2,12 @@
   // Root project for repo tooling scripts only. The publishable packages use
   // `tsc -b` project references (packages/spec, packages/core); the svelte
   // package is checked by svelte-check from its own directory. This config
-  // exists so oxlint --type-aware has type information for scripts/ and the
-  // Cloudflare workers under workers/ (which have no build step of their own —
-  // wrangler bundles them straight from source). The worker code uses
-  // web-standard APIs only (Request, Response, URL); bun's types cover them,
-  // so no @cloudflare/workers-types.
+  // exists so oxlint --type-aware has type information for scripts/.
   //
   // tsc is NOT run on this config, and `check` does not need it to be: every
   // file it covers now belongs to a narrower project that `check` does run —
-  // workers/playground-api/tsconfig.json via check:workers (#725),
   // scripts/ci-routing/tsconfig.json via check:scripts-ci-routing (#737), and
   // scripts/tsconfig.json via check:scripts (#734).
-  //
-  // Running tsc here would report one error the per-project gates correctly do
-  // not, and it is an artifact of the combined program rather than a bug:
-  //
-  //   workers/playground-api/test/handler.test.ts: 'duplex' does not exist in
-  //   type 'RequestInit'
-  //
-  // `duplex: "half"` is required for the streaming-request-body test. It only
-  // fails here because scripts/** membership pulls @types/node into the program
-  // and its RequestInit shadows bun's, which does declare `duplex`. Under
-  // workers/playground-api/tsconfig.json the line is clean. Anything that wires
-  // tsc into this config has to split the global types, not re-suppress the line.
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
@@ -34,5 +17,5 @@
     "allowImportingTsExtensions": true,
     "types": ["bun"]
   },
-  "include": ["scripts/**/*.ts", "workers/**/*.ts"]
+  "include": ["scripts/**/*.ts"]
 }
