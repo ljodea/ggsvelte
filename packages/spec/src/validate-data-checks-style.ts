@@ -2,8 +2,9 @@
  * Style aesthetic data-aware scale checks (shape/linetype finite symbols;
  * size/linewidth/alpha sequential/binned + temporal).
  *
- * Field types come from the last-wins union FieldEvidenceMap built by the
- * orchestrator — not per-layer evidenceForUse (position uses that for #609).
+ * Field types prefer per-use evidenceForUse (same path as position #609) so
+ * multi-table layers that share a field name keep their own type view (#844).
+ * The last-wins union FieldEvidenceMap is only the fallback.
  *
  * Shared temporal memoization: validate-data-checks-temporal.ts.
  * Position: validate-data-checks-position.ts. Color: validate-data-checks-color.ts.
@@ -12,7 +13,7 @@
 import type { SpecError } from "./errors.js";
 import { parseTemporalColumn, type TemporalDecision } from "./temporal-column.js";
 import { parseTemporal } from "./temporal-parse.js";
-import type { FieldEvidenceMap } from "./validate-data-evidence.js";
+import type { FieldEvidenceEntry, FieldEvidenceMap } from "./validate-data-evidence.js";
 import {
   temporalDecisionForField,
   temporalParserUsable,
@@ -225,20 +226,28 @@ function numericStyleConstantError(input: {
 /**
  * Shape/linetype: continuous fields need an explicit finite-style scale type.
  * Order: runs before numeric style / position / color so diagnostic order is stable.
+ * Uses evidenceForUse when provided so multi-table same-name fields stay independent (#844).
  */
 export function checkFiniteStyleScaleDataCompatibility(input: {
   scales: Record<string, unknown> | undefined;
   fields: FieldEvidenceMap;
+  /**
+   * Optional per-use evidence lookup. When provided, prefer it over the
+   * last-wins `fields` union so multi-table layers with the same field name
+   * keep their own type evidence (#609 / #844).
+   */
+  evidenceForUse?: (use: ChannelFieldUse) => FieldEvidenceEntry | undefined;
   finiteStyleFields: Record<"shape" | "linetype", ChannelFieldUse[]>;
 }): SpecError[] {
   const { scales, fields, finiteStyleFields } = input;
   const errors: SpecError[] = [];
-  const typeOf = (field: string) => fields.get(field)?.type ?? null;
+  const evidenceOf = (use: ChannelFieldUse) => input.evidenceForUse?.(use) ?? fields.get(use.field);
+  const typeOf = (use: ChannelFieldUse) => evidenceOf(use)?.type ?? null;
   for (const aesthetic of ["shape", "linetype"] as const) {
     const config = scales?.[aesthetic] as { type?: string } | undefined;
     if (config?.type !== undefined) continue;
     for (const use of finiteStyleFields[aesthetic]) {
-      const type = typeOf(use.field);
+      const type = typeOf(use);
       if (type !== "quantitative" && type !== "temporal") continue;
       // A binned finite style requires numeric values: the runtime rejects
       // temporal (date/datetime) values with `unsupported-aesthetic-scale`
@@ -264,13 +273,18 @@ export function checkFiniteStyleScaleDataCompatibility(input: {
 
 /**
  * Size/linewidth/alpha sequential/binned scale vs field/constant types (incl. temporal).
- * Uses the last-wins union FieldEvidenceMap (not per-layer evidenceForUse — position
- * uses that path for #609). Same-name fields across multi-table layers share one type
- * view here; see follow-up for aligning style with per-layer evidence if needed.
+ * Prefers per-use evidenceForUse over the last-wins union so multi-table same-name
+ * fields keep independent types (#609 / #844).
  */
 export function checkNumericStyleScaleDataCompatibility(input: {
   scales: Record<string, unknown> | undefined;
   fields: FieldEvidenceMap;
+  /**
+   * Optional per-use evidence lookup. When provided, prefer it over the
+   * last-wins `fields` union so multi-table layers with the same field name
+   * keep their own type evidence (#609 / #844).
+   */
+  evidenceForUse?: (use: ChannelFieldUse) => FieldEvidenceEntry | undefined;
   numericStyleFields: Record<"size" | "linewidth" | "alpha", ChannelFieldUse[]>;
   numericStyleScaledConstants: Record<"size" | "linewidth" | "alpha", unknown[]>;
   temporalDecisionCache: TemporalDecisionCache;
@@ -278,7 +292,8 @@ export function checkNumericStyleScaleDataCompatibility(input: {
   const { scales, fields, numericStyleFields, numericStyleScaledConstants, temporalDecisionCache } =
     input;
   const errors: SpecError[] = [];
-  const typeOf = (field: string) => fields.get(field)?.type ?? null;
+  const evidenceOf = (use: ChannelFieldUse) => input.evidenceForUse?.(use) ?? fields.get(use.field);
+  const typeOf = (use: ChannelFieldUse) => evidenceOf(use)?.type ?? null;
   // color check: a continuous ramp needs quantitative or temporal values, so a
   // nominal/ordinal field trains no finite domain and the runtime throws
   // `style-domain-empty` (scale-style.ts). Reject it at validation time with the
@@ -347,7 +362,7 @@ export function checkNumericStyleScaleDataCompatibility(input: {
     // list, so an all-invalid field/constant is censored when any sibling trains.
     let fieldTrainsScale = false;
     for (const use of numericStyleFields[aesthetic]) {
-      const type = typeOf(use.field);
+      const type = typeOf(use);
       if (type === "temporal") {
         fieldTrainsScale = true;
         continue;
@@ -356,7 +371,7 @@ export function checkNumericStyleScaleDataCompatibility(input: {
       const decision = temporalDecisionForField(
         temporalDecisionCache,
         use.field,
-        fields.get(use.field),
+        evidenceOf(use),
         parser as Parameters<typeof temporalDecisionForField>[3],
         temporalOptions as Parameters<typeof temporalDecisionForField>[4],
       );
@@ -388,7 +403,7 @@ export function checkNumericStyleScaleDataCompatibility(input: {
 
     // Pass 2: field diagnostics (use channel-wide censor recovery).
     for (const use of numericStyleFields[aesthetic]) {
-      const type = typeOf(use.field);
+      const type = typeOf(use);
       // A quantitative field carrying temporal options fails at resolve time
       // unless a working parser (or censor recovery) yields temporal values —
       // mirror the color checker rather than deferring unconditionally.
@@ -398,7 +413,7 @@ export function checkNumericStyleScaleDataCompatibility(input: {
         const decision = temporalDecisionForField(
           temporalDecisionCache,
           use.field,
-          fields.get(use.field),
+          evidenceOf(use),
           parser as Parameters<typeof temporalDecisionForField>[3],
           temporalOptions as Parameters<typeof temporalDecisionForField>[4],
         );

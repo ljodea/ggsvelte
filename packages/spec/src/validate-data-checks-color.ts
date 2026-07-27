@@ -1,5 +1,7 @@
 /**
  * Color/fill data-aware scale checks (manual domain/range, sequential, temporal).
+ * Prefers per-use evidenceForUse over the last-wins union so multi-table same-name
+ * fields keep independent types (#609 / #844).
  * Shared temporal memoization: validate-data-checks-temporal.ts.
  * Position: validate-data-checks-position.ts. Style: validate-data-checks-style.ts.
  * Orchestrator: validate-data-checks.ts.
@@ -9,7 +11,7 @@ import { configuredColorScaleType } from "./scale-helpers.js";
 import type { ColorScaleSpec } from "./schema.js";
 import { SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
 import { parseTemporalColumn } from "./temporal-column.js";
-import type { FieldEvidenceMap } from "./validate-data-evidence.js";
+import type { FieldEvidenceEntry, FieldEvidenceMap } from "./validate-data-evidence.js";
 import {
   temporalDecisionForField,
   temporalParserUsable,
@@ -33,9 +35,9 @@ function colorTemporalCensorRecovery(input: {
   config: ColorScaleSpec | undefined;
   colorFields: readonly ChannelFieldUse[];
   colorScaledConstants: readonly unknown[];
-  fields: FieldEvidenceMap;
   temporalDecisionCache: TemporalDecisionCache;
-  typeOf: (field: string) => string | null;
+  evidenceOf: (use: ChannelFieldUse) => FieldEvidenceEntry | undefined;
+  typeOf: (use: ChannelFieldUse) => string | null;
 }): {
   hasExplicitDomain: boolean;
   hasBinnedBreaks: boolean;
@@ -51,7 +53,7 @@ function colorTemporalCensorRecovery(input: {
   kindConflicts: boolean;
   conflictingKind: string | null;
 } {
-  const { config, colorFields, colorScaledConstants, fields, temporalDecisionCache, typeOf } =
+  const { config, colorFields, colorScaledConstants, temporalDecisionCache, typeOf, evidenceOf } =
     input;
   const parseUsable = temporalParserUsable(config?.parse);
   const temporalOptionsUsable =
@@ -139,7 +141,7 @@ function colorTemporalCensorRecovery(input: {
     config?.disambiguation !== undefined;
   if (temporalInputsUsable && requestsTemporal) {
     for (const use of colorFields) {
-      const type = typeOf(use.field);
+      const type = typeOf(use);
       // Always reparse under the configured parser — type:"temporal" from default
       // evidence does not mean the value trains when parse is an explicit override.
       if (
@@ -153,7 +155,7 @@ function colorTemporalCensorRecovery(input: {
       const decision = temporalDecisionForField(
         temporalDecisionCache,
         use.field,
-        fields.get(use.field),
+        evidenceOf(use),
         parser,
         temporalOptions,
       );
@@ -292,6 +294,12 @@ function expectedManualDomainLength(
 export function checkColorScaleDataCompatibility(input: {
   scales: Record<string, unknown> | undefined;
   fields: FieldEvidenceMap;
+  /**
+   * Optional per-use evidence lookup. When provided, prefer it over the
+   * last-wins `fields` union so multi-table layers with the same field name
+   * keep their own type evidence (#609 / #844).
+   */
+  evidenceForUse?: (use: ChannelFieldUse) => FieldEvidenceEntry | undefined;
   colorFields: Record<"color" | "fill", ChannelFieldUse[]>;
   /** Scaled constants (`{ value, scale: true }`) included in runtime domain training. */
   colorScaledConstants?: Record<"color" | "fill", readonly unknown[]>;
@@ -300,7 +308,8 @@ export function checkColorScaleDataCompatibility(input: {
   const { scales, fields, colorFields, temporalDecisionCache } = input;
   const colorScaledConstants = input.colorScaledConstants ?? { color: [], fill: [] };
   const errors: SpecError[] = [];
-  const typeOf = (field: string) => fields.get(field)?.type ?? null;
+  const evidenceOf = (use: ChannelFieldUse) => input.evidenceForUse?.(use) ?? fields.get(use.field);
+  const typeOf = (use: ChannelFieldUse) => evidenceOf(use)?.type ?? null;
 
   for (const channel of COLOR_CHANNELS) {
     const config = scales?.[channel] as ColorScaleSpec | undefined;
@@ -311,7 +320,7 @@ export function checkColorScaleDataCompatibility(input: {
       const range = config.range;
       const expected = expectedManualDomainLength(
         config.domain,
-        colorFields[channel].map((use) => fields.get(use.field)?.values),
+        colorFields[channel].map((use) => evidenceOf(use)?.values),
         colorScaledConstants[channel],
       );
       const rangeMismatch =
@@ -348,8 +357,8 @@ export function checkColorScaleDataCompatibility(input: {
       config,
       colorFields: colorFields[channel],
       colorScaledConstants: colorScaledConstants[channel],
-      fields,
       temporalDecisionCache,
+      evidenceOf,
       typeOf,
     });
     // Runtime collects all channel values into one temporal column; a kind
@@ -370,7 +379,7 @@ export function checkColorScaleDataCompatibility(input: {
     }
 
     for (const use of colorFields[channel]) {
-      const type = typeOf(use.field);
+      const type = typeOf(use);
       if (
         type === "temporal" &&
         config?.transform !== undefined &&
@@ -396,7 +405,7 @@ export function checkColorScaleDataCompatibility(input: {
         // it); handing it to temporalDecisionForField would throw instead of
         // yielding the schema diagnostic. Defer to that diagnostic.
         if (!temporalParserUsable(config?.parse)) continue;
-        const info = fields.get(use.field);
+        const info = evidenceOf(use);
         const decision = temporalDecisionForField(
           temporalDecisionCache,
           use.field,
@@ -467,7 +476,7 @@ export function checkColorScaleDataCompatibility(input: {
         continue;
       }
 
-      const info = fields.get(use.field);
+      const info = evidenceOf(use);
       const decision = temporalDecisionForField(
         temporalDecisionCache,
         use.field,
