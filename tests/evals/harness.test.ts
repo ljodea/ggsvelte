@@ -159,19 +159,23 @@ describe("case corpus", () => {
     }
   });
 
-  test("golds are canonical, valid against their profile, and render", () => {
-    for (const c of cases) {
-      if (c.gold === null) continue;
-      const result = validate(c.gold, { profile: c.dataProfile });
-      if (!result.ok) {
-        throw new Error(`${c.id}: gold invalid: ${JSON.stringify(result.errors)}`);
+  test(
+    "golds are canonical, valid against their profile, and render",
+    () => {
+      for (const c of cases) {
+        if (c.gold === null) continue;
+        const result = validate(c.gold, { profile: c.dataProfile });
+        if (!result.ok) {
+          throw new Error(`${c.id}: gold invalid: ${JSON.stringify(result.errors)}`);
+        }
+        // Canonical = a normalize() fixed point.
+        expect(normalize(c.gold as unknown as SpecInput)).toEqual(c.gold);
+        const render = renderCheck(c.gold, c);
+        if (!render.ok) throw new Error(`${c.id}: gold render failed: ${render.error}`);
       }
-      // Canonical = a normalize() fixed point.
-      expect(normalize(c.gold as unknown as SpecInput)).toEqual(c.gold);
-      const render = renderCheck(c.gold, c);
-      if (!render.ok) throw new Error(`${c.id}: gold render failed: ${render.error}`);
-    }
-  });
+    },
+    { timeout: 60_000 },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -179,7 +183,7 @@ describe("case corpus", () => {
 // ---------------------------------------------------------------------------
 
 describe("dry-run pipeline", () => {
-  // Corpus keeps growing (hex, qq, …); give the mock pass over every case room.
+  // Corpus keeps growing (hex, qq, range geoms, …); give the mock pass room.
   test(
     "runs all cases, exercises repair, and scores refusals",
     async () => {
@@ -218,7 +222,7 @@ describe("dry-run pipeline", () => {
         expect(value).toBeLessThanOrEqual(1);
       }
     },
-    { timeout: 30_000 },
+    { timeout: 60_000 },
   );
 
   test("repair can be disabled", async () => {

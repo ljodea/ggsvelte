@@ -16,6 +16,9 @@ import type {
   Density2dParams,
   DotplotParams,
   ErrorbarParams,
+  LinerangeParams,
+  PointrangeParams,
+  CrossbarParams,
   RibbonParams,
   FacetScales,
   GuidesSpec,
@@ -286,6 +289,27 @@ export interface ErrorbarLayerInput extends LayerInputBase {
   params?: ErrorbarParams;
 }
 
+export interface LinerangeLayerInput extends LayerInputBase {
+  geom: "linerange";
+  stat?: "identity" | "summary";
+  position?: "identity";
+  params?: LinerangeParams;
+}
+
+export interface PointrangeLayerInput extends LayerInputBase {
+  geom: "pointrange";
+  stat?: "identity" | "summary";
+  position?: "identity";
+  params?: PointrangeParams;
+}
+
+export interface CrossbarLayerInput extends LayerInputBase {
+  geom: "crossbar";
+  stat?: "identity" | "summary";
+  position?: "identity";
+  params?: CrossbarParams;
+}
+
 export interface RectLayerInput extends LayerInputBase {
   geom: "rect";
   stat?: "identity" | "unique";
@@ -452,6 +476,9 @@ export type LayerInput =
   | Density2dFilledLayerInput
   | DotplotLayerInput
   | ErrorbarLayerInput
+  | LinerangeLayerInput
+  | PointrangeLayerInput
+  | CrossbarLayerInput
   | AblineLayerInput
   | RectLayerInput
   | TileLayerInput
