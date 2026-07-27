@@ -2262,8 +2262,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-670",
-        title: "experimental (670)",
+        id: "experimental-675",
+        title: "experimental (675)",
         level: 3,
       },
       {
@@ -2302,8 +2302,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-479",
-        title: "experimental (479)",
+        id: "experimental-482",
+        title: "experimental (482)",
         level: 3,
       },
       {
