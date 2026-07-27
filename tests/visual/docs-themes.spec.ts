@@ -11,10 +11,36 @@ test("themes is a first-class route from site navigation and the homepage", asyn
   ).toBeVisible();
 
   await page.goto("/?theme=light");
-  // Homepage Contracts section (post-#371 copy) links themes with this accessible name.
+  await expect(page.getByRole("link", { name: "Built-in chart themes" })).toHaveAttribute(
+    "href",
+    /\/themes$/,
+  );
+});
+
+test("palettes is a first-class route from site navigation and the homepage", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/palettes?theme=light");
   await expect(
-    page.getByRole("link", { name: "Built-in themes, palettes, scales" }),
-  ).toHaveAttribute("href", /\/themes$/);
+    page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Palettes" }),
+  ).toHaveAttribute("aria-current", "page");
+  await expect(
+    page.getByRole("navigation", { name: "Footer" }).getByRole("link", { name: "Palettes" }),
+  ).toBeVisible();
+
+  // Palettes sits between Themes and Interactions in primary nav order.
+  const primary = page.getByRole("navigation", { name: "Primary" });
+  const labels = await primary.getByRole("link").allTextContents();
+  const themesIdx = labels.indexOf("Themes");
+  const palettesIdx = labels.indexOf("Palettes");
+  const interactionsIdx = labels.indexOf("Interactions");
+  expect(themesIdx).toBeGreaterThanOrEqual(0);
+  expect(palettesIdx).toBe(themesIdx + 1);
+  expect(interactionsIdx).toBe(palettesIdx + 1);
+
+  await page.goto("/?theme=light");
+  await expect(
+    page.getByRole("link", { name: "Categorical palettes and sequential scales" }),
+  ).toHaveAttribute("href", /\/palettes$/);
 });
 
 test("theme code uses the shared manual-copy fallback", async ({ page }) => {
@@ -114,7 +140,7 @@ test("chart theme stays separate until follow-docs appearance is explicit", asyn
 test("categorical palettes show ordered swatches and reverse without hex code chrome", async ({
   page,
 }) => {
-  await page.goto("/themes?theme=light");
+  await page.goto("/palettes?theme=light");
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
@@ -182,7 +208,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
 test("sequential color compares direction, custom stops, and a pinned domain on raster", async ({
   page,
 }) => {
-  await page.goto("/themes?theme=light");
+  await page.goto("/palettes?theme=light");
 
   const region = page.getByRole("region", { name: "Sequential color scales" });
   const cards = region
@@ -225,6 +251,17 @@ for (const width of [375, 768, 1024, 1280, 1600]) {
     // Wait for the themes specimen list so layout is past first paint/fonts;
     // a one-shot scrollWidth check races chart/font settling on CI.
     await expect(page.getByRole("list", { name: "Built-in chart themes" })).toBeVisible();
+    await page.waitForFunction(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+      undefined,
+      { timeout: 10_000 },
+    );
+  });
+
+  test(`palettes has no horizontal overflow at ${String(width)}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/palettes?theme=light");
+    await expect(page.getByRole("list", { name: "Categorical palettes" })).toBeVisible();
     await page.waitForFunction(
       () => document.documentElement.scrollWidth <= window.innerWidth,
       undefined,

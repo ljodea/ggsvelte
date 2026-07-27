@@ -33,11 +33,20 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "page:themes",
     kind: "page",
-    title: "Chart themes and color scales",
-    summary: "Built-in chart themes, categorical palettes, and sequential scales.",
+    title: "Chart themes",
+    summary: "Built-in chart themes for paper, grids, axes, and type.",
     href: "/themes",
     keywords: [],
-    exact: ["Chart themes and color scales"],
+    exact: ["Chart themes"],
+  },
+  {
+    id: "page:palettes",
+    kind: "page",
+    title: "Color palettes",
+    summary: "Categorical palettes and sequential color scales for data encoding.",
+    href: "/palettes",
+    keywords: [],
+    exact: ["Color palettes"],
   },
   {
     id: "page:interactions",

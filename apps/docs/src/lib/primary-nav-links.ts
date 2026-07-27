@@ -25,6 +25,11 @@ export function primaryNavLinks(path: string, owner?: PrimaryNavOwner): readonly
       active: path === "/themes",
     },
     {
+      label: "Palettes",
+      href: "/palettes",
+      active: path === "/palettes",
+    },
+    {
       label: "Interactions",
       href: "/interactions",
       active: path === "/interactions" || path.startsWith("/interactions/"),

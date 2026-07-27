@@ -34,6 +34,7 @@ describe("docs route inventory", () => {
     expect(paths.has("/examples/interactions/inspection")).toBe(true);
     expect(paths.has("/playground")).toBe(false);
     expect(paths.has("/themes")).toBe(true);
+    expect(paths.has("/palettes")).toBe(true);
     expect(paths.has("/reference/interactions")).toBe(true);
     expect(paths.has("/reference/cli")).toBe(true);
     expect(paths.has("/__perf/r3-interaction")).toBe(true);
@@ -100,9 +101,22 @@ describe("docs route inventory", () => {
   it("publishes the themes destination with canonical acquisition metadata", () => {
     expect(createDocsRouteInventory().find((entry) => entry.path === "/themes")).toEqual({
       path: "/themes",
-      title: "Chart themes and color scales — ggsvelte",
-      description: "Built-in chart themes, categorical palettes, and sequential scales.",
+      title: "Chart themes — ggsvelte",
+      description: "Built-in chart themes for paper, grids, axes, and type.",
       canonicalPath: "/themes",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "site",
+    });
+  });
+
+  it("publishes the palettes destination with canonical acquisition metadata", () => {
+    expect(createDocsRouteInventory().find((entry) => entry.path === "/palettes")).toEqual({
+      path: "/palettes",
+      title: "Color palettes — ggsvelte",
+      description: "Categorical palettes and sequential color scales for data encoding.",
+      canonicalPath: "/palettes",
       kind: "page",
       index: true,
       sitemap: true,

@@ -834,7 +834,7 @@ Use a named categorical scheme when color identifies groups:
 
 Stable assignments preserve category identity as rows filter or reorder. See
 registered schemes and capacities on
-[Themes and color](/themes). Palette exhaustion is
+[Color palettes](/palettes). Palette exhaustion is
 \`onExhaust: "cycle"\` (default, warn once) or \`"error"\` — diagnostics at
 [palette-exhausted](/guide/errors#palette-exhausted) and
 [palette-exhausted — warning](/guide/errors#palette-exhausted-warning).
@@ -1144,8 +1144,9 @@ Registered theme name; mappings unchanged:
 </GGPlot>
 \`\`\`
 
-Eighteen registered theme names (sixteen distinct looks), categorical palettes,
-and sequential ramps: [Themes and color](/themes). \`theme: "bw"\` /
+Eighteen registered theme names (sixteen distinct looks) on
+[Chart themes](/themes); categorical palettes and sequential ramps on
+[Color palettes](/palettes). \`theme: "bw"\` /
 \`<ThemeBw />\` is a white-panel print theme (grey grid + rectangular border).
 \`theme: "linedraw"\` / \`<ThemeLinedraw />\` is monochrome line-art chrome
 (black hairline grid and panel border). \`theme: "void"\` / \`<ThemeVoid />\`

@@ -2,8 +2,6 @@
   import { base } from "$app/paths";
 
   import ChartThemeLab from "$lib/components/ChartThemeLab.svelte";
-  import PaletteGallery from "$lib/components/PaletteGallery.svelte";
-  import SequentialColorLab from "$lib/components/SequentialColorLab.svelte";
   import ThemeSpecimen from "$lib/components/ThemeSpecimen.svelte";
   import { THEME_SPECIMENS } from "$lib/theme-specimens/catalog";
 </script>
@@ -11,10 +9,11 @@
 <main class="themes-page">
   <header class="themes-intro">
     <p class="eyebrow">Themes</p>
-    <h1>Themes and color</h1>
+    <h1>Chart themes</h1>
     <p>
-      Chart themes style paper, grids, axes, and type. Palettes encode data.
-      Site light/dark is separate unless you wire them yourself.
+      Chart themes style paper, grids, axes, and type. Data color lives on
+      <a href={`${base}/palettes`}>palettes</a>. Site light/dark is separate
+      unless you wire them yourself.
     </p>
     <p class="guide-link">
       Token-level theme and scale reference:
@@ -45,12 +44,13 @@
     </ol>
   </section>
 
-  <PaletteGallery />
-  <SequentialColorLab />
-
   <nav class="learning-path" aria-label="Next steps">
     <p class="eyebrow">Next</p>
     <ul>
+      <li>
+        <a href={`${base}/palettes`}>Palettes</a>
+        — categorical schemes and sequential ramps
+      </li>
       <li>
         <a href={`${base}/guide/themes-color`}>Themes and color guide</a>
         — prop model and color rules
@@ -94,6 +94,10 @@
     margin: 0;
     color: var(--muted);
     font-size: 1.02rem;
+  }
+
+  .themes-intro a {
+    color: var(--ink);
   }
 
   .guide-link {
