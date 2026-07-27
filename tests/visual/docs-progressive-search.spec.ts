@@ -116,8 +116,23 @@ test("Docs landing and sidebar expose the full path without duplicate Reference"
     /\/guide\/responsive-charts$/,
   );
   // Diagnostics is deliberately absent from the landing tasks; it stays in
-  // the sidebar and search.
+  // the chapter map, sidebar, and search.
   await expect(tasks.getByRole("link", { name: /Diagnostics/ })).toHaveCount(0);
+
+  // Full chapter index on the landing page (not just the four task hubs).
+  const index = page.getByRole("navigation", { name: "All documentation guides" });
+  await expect(index.getByRole("heading", { level: 3 })).toHaveText([
+    "Start",
+    "Core grammar",
+    "Interaction",
+    "Production",
+    "Reference",
+    "Release",
+  ]);
+  await expect(index.getByRole("link", { name: /Data and mappings/ })).toBeVisible();
+  await expect(index.getByRole("link", { name: /Dates without preprocessing/ })).toBeVisible();
+  await expect(index.getByRole("link", { name: /Errors reference/ })).toBeVisible();
+  await expect(index.getByRole("link", { name: /Upgrade in five minutes/ })).toBeVisible();
 
   const sidebar = page.getByRole("navigation", { name: "Guide chapters" });
   await expect(sidebar.getByRole("heading", { level: 2 })).toHaveText([

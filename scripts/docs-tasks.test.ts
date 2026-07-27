@@ -1,6 +1,8 @@
 import { describe, expect, it } from "bun:test";
 
 import { DOCS_TASKS } from "../apps/docs/src/lib/catalog/docs-tasks.ts";
+import { GUIDE_CATALOG } from "../apps/docs/src/lib/catalog/guide.ts";
+import { GUIDE_NAVIGATION } from "../apps/docs/src/lib/generated/routes.ts";
 
 // Typed wide rather than `as const`: DOCS_TASKS is a const-asserted literal, so
 // an `as const` expectation compares two readonly tuple types and toEqual has no
@@ -26,6 +28,35 @@ describe("Docs entry points", () => {
     for (const task of DOCS_TASKS) {
       expect(task.description.length).toBeGreaterThan(20);
       expect(task.hrefs[0]?.startsWith("/")).toBe(true);
+    }
+  });
+
+  it("keeps progressive tasks as a short subset of the full guide map", () => {
+    // The landing page still exposes DOCS_TASKS as "Start here", but the
+    // chapter index must list far more than those four hubs.
+    const taskDestinations = new Set(DOCS_TASKS.flatMap((task) => [...task.hrefs]));
+    const chapterPaths = GUIDE_NAVIGATION.flatMap((group) =>
+      group.entries.map((entry) => entry.path),
+    ).filter((path) => path !== "/docs");
+    expect(chapterPaths.length).toBeGreaterThan(taskDestinations.size * 2);
+    for (const href of taskDestinations) {
+      // Diagnostics (/guide/errors) and every progressive hub must resolve
+      // somewhere in the published navigation tree.
+      expect(chapterPaths.some((path) => path === href)).toBe(true);
+    }
+  });
+
+  it("publishes a description for every guide chapter on the landing map", () => {
+    const guidePaths = new Set(GUIDE_CATALOG.map((entry) => `/guide/${entry.slug}`));
+    for (const entry of GUIDE_CATALOG) {
+      expect(entry.description.length).toBeGreaterThan(20);
+    }
+    // Every navigable /guide/* chapter path is covered by catalog descriptions.
+    for (const group of GUIDE_NAVIGATION) {
+      for (const entry of group.entries) {
+        if (!entry.path.startsWith("/guide/")) continue;
+        expect(guidePaths.has(entry.path)).toBe(true);
+      }
     }
   });
 });
