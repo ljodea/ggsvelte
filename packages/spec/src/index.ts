@@ -571,6 +571,8 @@ export type {
   NumericStyleScaleOptions,
   SequentialStyleScaleOptions,
   SizeAreaScaleOptions,
+  SizeSequentialStyleScaleOptions,
+  SizeTemporalNumericStyleScaleOptions,
   TemporalNumericStyleScaleOptions,
   SequentialColorScaleOptions,
   TemporalColorScaleOptions,

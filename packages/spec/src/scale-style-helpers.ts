@@ -13,12 +13,21 @@ type NumericStyleAesthetic = "size" | "linewidth" | "alpha";
 type FiniteStyleAesthetic = "shape" | "linetype";
 type NumericStyleScaleSpec = PositiveStyleScaleSpec;
 
-export type NumericStyleScaleOptions = Omit<NumericStyleScaleSpec, "type">;
+/**
+ * Portable size/linewidth config options. `sizeUnit` is size-only at runtime;
+ * it is stripped from alpha helper option types (SequentialStyleScaleOptions).
+ */
+export type NumericStyleScaleOptions = Omit<NumericStyleScaleSpec, "type"> & {
+  sizeUnit?: "area" | "radius" | "area_zero";
+};
+/** Continuous/binned options shared by size, linewidth, and alpha (no sizeUnit). */
 export type SequentialStyleScaleOptions = Omit<
   NumericStyleScaleOptions,
-  "domainMode" | "onExhaust"
-> & {
-  /** Size aesthetic only (#830). */
+  "domainMode" | "onExhaust" | "sizeUnit"
+>;
+/** Size sequential/binned options — may set sizeUnit (#830). */
+export type SizeSequentialStyleScaleOptions = SequentialStyleScaleOptions & {
+  /** Size aesthetic only; runtime ignores this for linewidth. */
   sizeUnit?: "area" | "radius" | "area_zero";
 };
 export type DiscreteNumericStyleScaleOptions = Pick<
@@ -26,6 +35,10 @@ export type DiscreteNumericStyleScaleOptions = Pick<
   "domain" | "domainMode" | "range" | "reverse" | "naValue" | "unknownValue" | "onExhaust" | "guide"
 >;
 export type TemporalNumericStyleScaleOptions = Omit<SequentialStyleScaleOptions, "temporalKind">;
+export type SizeTemporalNumericStyleScaleOptions = Omit<
+  SizeSequentialStyleScaleOptions,
+  "temporalKind"
+>;
 export type ManualNumericStyleScaleOptions = Pick<
   NumericStyleScaleSpec,
   "domain" | "naValue" | "unknownValue" | "guide"
@@ -112,24 +125,24 @@ function manualFiniteStyleScale(
   return { [aesthetic]: { type: "manual", ...rest, range: [...values] } };
 }
 
-export type SizeAreaScaleOptions = SequentialStyleScaleOptions & {
+export type SizeAreaScaleOptions = SizeSequentialStyleScaleOptions & {
   /** Max radius when range is omitted (ggplot2 `max_size`; default 6). */
   maxSize?: number;
 };
 
-export function scaleSizeContinuous(options: SequentialStyleScaleOptions = {}): Scales {
+export function scaleSizeContinuous(options: SizeSequentialStyleScaleOptions = {}): Scales {
   return numericStyleScale("size", "sequential", options);
 }
 export function scaleSizeDiscrete(options: DiscreteNumericStyleScaleOptions = {}): Scales {
   return numericStyleScale("size", "ordinal", options);
 }
-export function scaleSizeBinned(options: SequentialStyleScaleOptions = {}): Scales {
+export function scaleSizeBinned(options: SizeSequentialStyleScaleOptions = {}): Scales {
   return numericStyleScale("size", "binned", options);
 }
-export function scaleSizeDate(options: TemporalNumericStyleScaleOptions = {}): Scales {
+export function scaleSizeDate(options: SizeTemporalNumericStyleScaleOptions = {}): Scales {
   return numericStyleScale("size", "sequential", options, "date");
 }
-export function scaleSizeDatetime(options: TemporalNumericStyleScaleOptions = {}): Scales {
+export function scaleSizeDatetime(options: SizeTemporalNumericStyleScaleOptions = {}): Scales {
   return numericStyleScale("size", "sequential", options, "datetime");
 }
 export function scaleSizeManual(options: ManualNumericStyleScaleOptions): Scales {
@@ -165,7 +178,7 @@ export function scaleSizeBinnedArea(options: SizeAreaScaleOptions = {}): Scales 
 }
 
 /** ggplot2 `scale_radius` — map value linearly to radius (not area). */
-export function scaleRadius(options: SequentialStyleScaleOptions = {}): Scales {
+export function scaleRadius(options: SizeSequentialStyleScaleOptions = {}): Scales {
   return numericStyleScale("size", "sequential", {
     ...options,
     sizeUnit: "radius",

@@ -95,6 +95,8 @@ import {
   type ManualNumericStyleScaleOptions,
   type SequentialStyleScaleOptions,
   type SizeAreaScaleOptions,
+  type SizeSequentialStyleScaleOptions,
+  type SizeTemporalNumericStyleScaleOptions,
   type TemporalNumericStyleScaleOptions,
 } from "./scale-style-helpers.js";
 import type { LinetypeName, PointShapeName } from "./schema-names.js";
@@ -296,19 +298,19 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
       return this.scales(scaleFillIdentity(options));
     }
 
-    scaleSizeContinuous(options: SequentialStyleScaleOptions = {}): GGBuilder {
+    scaleSizeContinuous(options: SizeSequentialStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleSizeContinuous(options));
     }
     scaleSizeDiscrete(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleSizeDiscrete(options));
     }
-    scaleSizeBinned(options: SequentialStyleScaleOptions = {}): GGBuilder {
+    scaleSizeBinned(options: SizeSequentialStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleSizeBinned(options));
     }
-    scaleSizeDate(options: TemporalNumericStyleScaleOptions = {}): GGBuilder {
+    scaleSizeDate(options: SizeTemporalNumericStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleSizeDate(options));
     }
-    scaleSizeDatetime(options: TemporalNumericStyleScaleOptions = {}): GGBuilder {
+    scaleSizeDatetime(options: SizeTemporalNumericStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleSizeDatetime(options));
     }
     scaleSizeManual(options: ManualNumericStyleScaleOptions): GGBuilder {
@@ -326,7 +328,7 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
       return this.scales(scaleSizeBinnedArea(options));
     }
     /** ggplot2 scale_radius — linear radius mapping (#830). */
-    scaleRadius(options: SequentialStyleScaleOptions = {}): GGBuilder {
+    scaleRadius(options: SizeSequentialStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleRadius(options));
     }
     /** ggplot2 scale_size_ordinal (#830). */

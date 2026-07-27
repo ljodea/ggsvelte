@@ -107,6 +107,22 @@ describe("mapped style capability contract", () => {
     expect(call("scaleLinetypeDiscrete")).toEqual({ linetype: { type: "ordinal" } });
   });
 
+  it("accepts sizeUnit on size scales and rejects it on alpha (#830)", () => {
+    const sizeOk = validateStyle("size", {
+      type: "sequential",
+      range: [0, 6],
+      sizeUnit: "area_zero",
+    });
+    expect(sizeOk.ok).toBe(true);
+
+    const alphaBad = validateStyle("alpha", {
+      type: "sequential",
+      range: [0.2, 0.8],
+      sizeUnit: "radius",
+    });
+    expect(alphaBad.ok).toBe(false);
+  });
+
   it("exposes scale-local guides through every constrained style helper type", () => {
     const guide = spec.guideLegend({ force: true });
     expect(spec.scaleSizeDiscrete({ guide })).toEqual({
