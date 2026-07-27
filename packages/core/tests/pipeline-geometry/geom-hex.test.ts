@@ -1,10 +1,15 @@
 /**
  * geom_hex + stat_bin_hex (#800).
  */
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 import { aes, gg, normalize, validate } from "@ggsvelte/spec";
 
 import { runPipeline } from "../../src/pipeline.ts";
+import { hexBatch } from "../../src/pipeline/geometry-hex.ts";
+import type { Frame } from "../../src/pipeline/geometry-shared.ts";
+import type { ResolvedStyleScales } from "../../src/pipeline/geometry-style.ts";
+import type { LayerFrame } from "../../src/pipeline/types.ts";
 import type { PathsBatch } from "../../src/scene.ts";
 
 const size = { width: 200, height: 100 };
@@ -93,5 +98,61 @@ describe("geom_hex geometry (#800)", () => {
     const denseN =
       (dense.scene.batches.find((b) => b.kind === "paths") as PathsBatch).pathOffsets.length - 1;
     expect(denseN).toBeGreaterThanOrEqual(sparseN);
+  });
+
+  it("maps alpha/linewidth to kept subpaths when some hexes drop", () => {
+    // Three candidate cells; middle center is non-finite so only rows 0 and 2 emit.
+    const frame = fromAny({
+      n: 3,
+      xNumeric: new Float64Array([0.2, Number.NaN, 0.8]),
+      yNumeric: new Float64Array([0.2, 0.5, 0.8]),
+      hexWidth: new Float64Array([0.2, 0.2, 0.2]),
+      hexHeight: new Float64Array([0.2, 0.2, 0.2]),
+      rowIndex: new Uint32Array([0, 1, 2]),
+      fillValues: null,
+      colorValues: null,
+      alphaValues: [0.2, 0.5, 0.9],
+      linewidthValues: [0.5, 1.5, 2.5],
+      binding: {
+        index: 0,
+        fill: { field: null, statColumn: null, constant: "#111", scaledConstant: null },
+        color: { field: null, statColumn: null, constant: null, scaledConstant: null },
+        alpha: { field: "a", statColumn: null, constant: null, scaledConstant: null },
+        linewidth: { field: "lw", statColumn: null, constant: null, scaledConstant: null },
+        layer: { geom: "hex", params: {} },
+      },
+    }) as LayerFrame;
+    const fx = fromAny({
+      xScale: {
+        type: "linear",
+        normalizeTransformed: (v: number) => v,
+      },
+      yScale: {
+        type: "linear",
+        normalizeTransformed: (v: number) => v,
+      },
+      innerWidth: 100,
+      innerHeight: 100,
+    }) as Frame;
+    const styles = fromAny({
+      alpha: { scale: { valueOf: (v: unknown) => Number(v) } },
+      linewidth: { scale: { valueOf: (v: unknown) => Number(v) } },
+      size: null,
+      shape: null,
+      linetype: null,
+    }) as ResolvedStyleScales;
+
+    const batch = hexBatch(frame, fx, null, null, styles, []);
+    expect(batch).not.toBeNull();
+    const nHex = batch!.pathOffsets.length - 1;
+    expect(nHex).toBe(2);
+    expect(batch!.alphas).toBeDefined();
+    expect(batch!.alphas!.length).toBe(2);
+    expect(batch!.alphas![0]).toBeCloseTo(0.2);
+    expect(batch!.alphas![1]).toBeCloseTo(0.9);
+    expect(batch!.linewidths).toBeDefined();
+    expect(batch!.linewidths!.length).toBe(2);
+    expect(batch!.linewidths![0]).toBeCloseTo(0.5);
+    expect(batch!.linewidths![1]).toBeCloseTo(2.5);
   });
 });

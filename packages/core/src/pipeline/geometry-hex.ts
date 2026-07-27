@@ -45,6 +45,7 @@ export function hexBatch(
   const positions = new Float32Array(totalVerts * 2);
   const rowIndex = new Uint32Array(totalVerts);
   const pathOffsets = new Uint32Array(n + 1);
+  const keptRows = new Uint32Array(n);
   const fills: (string | null)[] = [];
   const strokes: (string | null)[] = [];
 
@@ -101,6 +102,7 @@ export function hexBatch(
     } else {
       strokes.push(constantStroke);
     }
+    keptRows[subpaths] = row;
     subpaths++;
   }
   pathOffsets[subpaths] = cursor;
@@ -108,7 +110,10 @@ export function hexBatch(
   if (cursor === 0 || subpaths === 0) return null;
 
   const params = (binding.layer.params ?? {}) as { alpha?: number; linewidth?: number };
-  const styleRows = Uint32Array.from({ length: n }, (_, i) => i);
+  // Style vectors must index by kept subpath order (not raw frame rows): dropped
+  // centers / non-finite projected vertices leave gaps that would misalign alpha
+  // and linewidth with the emitted shapes (same pattern as edge-rects keptRows).
+  const styleRows = keptRows.subarray(0, subpaths);
   const alphas = numericStyleVector(frame, "alpha", styleRows, styles);
   const linewidths = numericStyleVector(frame, "linewidth", styleRows, styles);
 
