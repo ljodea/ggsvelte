@@ -167,8 +167,8 @@ describe("range geoms geometry (#793)", () => {
       },
       size,
     );
-    const segs = model.scene.batches.filter((b) => b.kind === "segments") as SegmentsBatch[];
-    const pts = model.scene.batches.filter((b) => b.kind === "points") as PointsBatch[];
+    const segs = model.scene.batches.filter((b) => b.kind === "segments");
+    const pts = model.scene.batches.filter((b) => b.kind === "points");
     expect(segs[0]!.segments.length / 4).toBe(1);
     expect(pts[0]!.positions.length / 2).toBe(1);
   });
