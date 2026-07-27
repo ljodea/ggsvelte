@@ -11,6 +11,7 @@ import type { LlmsFullExample } from "$scripts/gen-llms";
 import { buildLlmsFull, docsDiscoveryFacts, pruneSpecData } from "$scripts/gen-llms";
 
 import { EXAMPLES } from "$lib/examples";
+import { indexExampleModulesById, requireExampleModule } from "$lib/example-module-index";
 import { docsBuildConfig } from "$lib/server/build-config";
 import { GUIDE_PAGES } from "$lib/guide";
 
@@ -25,18 +26,19 @@ const svelteSources = import.meta.glob<string>("$examples/*/*/Example.svelte", {
   eager: true,
 });
 
-function pick<T>(table: Record<string, T>, suffix: string): T {
-  const key = Object.keys(table).find((k) => k.endsWith(suffix));
-  if (key === undefined) {
-    throw new Error(`llms-full: example module not found: *${suffix}`);
-  }
-  return table[key];
-}
+// Module-scoped id maps: O(n) once per table, O(1) per EXAMPLE (was O(n²)).
+const specsById = indexExampleModulesById(specs, "spec.ts");
+const svelteSourcesById = indexExampleModulesById(svelteSources, "Example.svelte");
 
 export function GET(): Response {
   const config = docsBuildConfig();
   const examples: LlmsFullExample[] = EXAMPLES.map((entry) => {
-    const full = pick(specs, `/${entry.id}/spec.ts`).default;
+    const full = requireExampleModule(
+      specsById,
+      entry.id,
+      "spec.ts",
+      "llms-full: example module",
+    ).default;
     // Cap inline data so one 10k-row example cannot dominate the corpus.
     const { spec, prunedRows } = pruneSpecData(full, 20);
     const suffix =
@@ -44,7 +46,12 @@ export function GET(): Response {
     return {
       ...entry,
       specJSON: JSON.stringify(spec, null, 2) + suffix,
-      svelteSource: pick(svelteSources, `/${entry.id}/Example.svelte`),
+      svelteSource: requireExampleModule(
+        svelteSourcesById,
+        entry.id,
+        "Example.svelte",
+        "llms-full: example module",
+      ),
     };
   });
   return new Response(

@@ -7,6 +7,8 @@
 import type { PortableSpec } from "@ggsvelte/spec";
 import type { Component } from "svelte";
 
+import { indexExampleModulesById, requireExampleModule } from "./example-module-index.js";
+
 export { EXAMPLES } from "$examples/manifest";
 export type { ExampleManifestEntry } from "$examples/manifest";
 
@@ -21,13 +23,11 @@ const svelteSources = import.meta.glob<string>("$examples/*/*/Example.svelte", {
   import: "default",
 });
 
-function pick<T>(table: Record<string, () => Promise<T>>, suffix: string): () => Promise<T> {
-  const key = Object.keys(table).find((k) => k.endsWith(suffix));
-  if (key === undefined) {
-    throw new Error(`example module not found: *${suffix} (manifest out of sync with the tree?)`);
-  }
-  return table[key];
-}
+// Module-scoped id maps: O(n) once, O(1) per loadExample (was O(n) per pick).
+const componentsById = indexExampleModulesById(components, "Example.svelte");
+const specsById = indexExampleModulesById(specs, "spec.ts");
+const specSourcesById = indexExampleModulesById(specSources, "spec.ts");
+const svelteSourcesById = indexExampleModulesById(svelteSources, "Example.svelte");
 
 export interface LoadedExample {
   component: Component;
@@ -39,10 +39,10 @@ export interface LoadedExample {
 /** Load one example's live component, canonical spec, and raw sources. */
 export async function loadExample(id: string): Promise<LoadedExample> {
   const [component, spec, specSource, svelteSource] = await Promise.all([
-    pick(components, `/${id}/Example.svelte`)(),
-    pick(specs, `/${id}/spec.ts`)(),
-    pick(specSources, `/${id}/spec.ts`)(),
-    pick(svelteSources, `/${id}/Example.svelte`)(),
+    requireExampleModule(componentsById, id, "Example.svelte")(),
+    requireExampleModule(specsById, id, "spec.ts")(),
+    requireExampleModule(specSourcesById, id, "spec.ts")(),
+    requireExampleModule(svelteSourcesById, id, "Example.svelte")(),
   ]);
   return {
     component: component.default,
