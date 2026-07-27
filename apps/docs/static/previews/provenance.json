@@ -253,8 +253,8 @@
     },
     "point/canvas-scatter": {
       "filename": "point-canvas-scatter-light.png",
-      "sourceSha256": "dd7eac3cde73be8e80764027c9c930e3518153e41b47b4890124f847eef81219",
-      "pngSha256": "297f6c0c6dd84b25b6b4346a9141811a342ffa9d822fe0c94fa0348f274c78ae"
+      "sourceSha256": "d0b5fcc09f49b04be0cb2e9f74e10f03339af779fc6183bbe655fe84b1119498",
+      "pngSha256": "6a83545566705ea7101c0382f5e895bab46cd36b3448e2ad46095c8dbe5eadc7"
     },
     "point/count": {
       "filename": "point-count-light.png",
