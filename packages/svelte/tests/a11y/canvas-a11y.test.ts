@@ -169,4 +169,47 @@ describe("a11yRows", () => {
     // materialize still works with the same batches
     void m;
   });
+
+  it("skips model.row for indexes that cannot enter a full CAP heap", () => {
+    // After CAP successful materialisations fill the heap, larger indexes must
+    // not pay model.row (Devin review on #1002). Ascending insertion order
+    // fills 0..CAP-1 first so the remaining 200 large indexes skip entirely.
+    const row = vi.fn((index: number) => ({ x: index }));
+    const indices: number[] = [];
+    for (let i = 0; i < A11Y_TABLE_CAP + 200; i++) indices.push(i);
+    const m = fromAny<RenderModel>({
+      layerFields: { 0: [{ field: "x" }] },
+      row,
+    });
+    const table = a11yRows(m, [batch({ layerIndex: 0, rowIndex: indices })]);
+    expect(table.rows).toHaveLength(A11Y_TABLE_CAP);
+    expect(table.rows[0]).toEqual([0]);
+    expect(table.rows[A11Y_TABLE_CAP - 1]).toEqual([A11Y_TABLE_CAP - 1]);
+    expect(row).toHaveBeenCalledTimes(A11Y_TABLE_CAP);
+  });
+
+  it("selects the CAP smallest indexes from a large shuffled set (issue #979)", () => {
+    // Heap selection must match full-sort semantics without requiring an R-length sort.
+    const R = A11Y_TABLE_CAP * 40;
+    const indices: number[] = [];
+    for (let i = 0; i < R; i++) {
+      // Scatter indexes so insertion order is not ascending.
+      indices.push((i * 17 + 3) % (R * 3));
+    }
+    const distinct = [...new Set(indices)];
+    distinct.sort((a, b) => a - b);
+    const expected = distinct.slice(0, A11Y_TABLE_CAP);
+    const row = vi.fn((index: number) => ({ x: index }));
+    const m = fromAny<RenderModel>({
+      layerFields: { 0: [{ field: "x" }] },
+      row,
+    });
+    const table = a11yRows(m, [batch({ layerIndex: 0, rowIndex: indices })]);
+    expect(table.total).toBe(distinct.length);
+    expect(table.rows).toHaveLength(A11Y_TABLE_CAP);
+    expect(table.rows.map((r) => r[0])).toEqual(expected);
+    // Never materialise every distinct index when the CAP-smallest already fill the heap mid-scan.
+    expect(row.mock.calls.length).toBeLessThan(distinct.length);
+    expect(row.mock.calls.length).toBeGreaterThanOrEqual(A11Y_TABLE_CAP);
+  });
 });
