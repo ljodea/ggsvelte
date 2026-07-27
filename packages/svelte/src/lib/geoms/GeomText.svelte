@@ -18,6 +18,8 @@
     data?: DataInput | readonly Record<string, unknown>[];
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
     aes?: AesInput;
+    /** "identity" (default) or "unique" (first-wins aesthetic dedupe; #813). */
+    stat?: "identity" | "unique";
     /** Position adjustment: "identity" (default) | "nudge" (positionParams.x/y). */
     position?: "identity" | "nudge";
     /** Nudge offsets (data units / band-step fractions). */

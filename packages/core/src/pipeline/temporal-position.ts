@@ -23,7 +23,7 @@ export interface PositionConversionContext {
   sourceParser: TemporalParserSpec | "auto";
   options: ParsedColumnOptions;
   requestedTime: boolean;
-  requestedKind?: "date" | "datetime";
+  requestedKind?: "date" | "datetime" | "time";
   forcedDiscrete: boolean;
   /** Explicit linear/log scale with no temporal options: numeric coercion only. */
   forcedNonTemporal: boolean;
@@ -63,18 +63,24 @@ export function yConversionOf(binding: {
  * Read a position column as scale-space numbers. With a pre-stat transform the
  * cached transformed view (OOB/NA/forward) is returned; otherwise the semantic
  * numeric view (identity). The two coincide for identity + unpinned + no-NA.
+ *
+ * When `requestedKind === "time"`, values are projected into time-of-day scale
+ * space (epoch ms on 1970-01-01Z) so marks, domains, and axis ticks share one
+ * coordinate system — portable numbers are seconds since midnight (#831).
  */
 export function positionColumn(
   table: ColumnTable,
   field: string,
   conversion: PositionConversionContext,
-  transform: ColumnTransformConfig | undefined,
+  transform?: ColumnTransformConfig,
 ): Float64Array {
-  if (transform === undefined) {
-    return table.numeric(field, conversion.sourceParser, conversion.options);
-  }
-  return table.transformed(field, conversion.sourceParser, conversion.options, transform)
-    .transformed;
+  const base =
+    transform === undefined
+      ? table.numeric(field, conversion.sourceParser, conversion.options)
+      : table.transformed(field, conversion.sourceParser, conversion.options, transform)
+          .transformed;
+  if (conversion.requestedKind !== "time") return base;
+  return mapToTimeOfDayMs(table.column(field), base);
 }
 
 export function positionFieldType(
@@ -112,6 +118,46 @@ export interface ConvertedPositionValues {
   decision: TemporalDecision;
 }
 
+/**
+ * Map a cell to time-of-day scale space (epoch ms on 1970-01-01Z).
+ * Portable numbers are **seconds since midnight** (#831).
+ */
+function cellToTimeOfDayMs(value: CellValue): number {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value * 1000;
+  }
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) return Number.NaN;
+    return (
+      ((value.getUTCHours() * 60 + value.getUTCMinutes()) * 60 + value.getUTCSeconds()) * 1000 +
+      value.getUTCMilliseconds()
+    );
+  }
+  return Number.NaN;
+}
+
+function mapToTimeOfDayMs(values: readonly CellValue[], base: Float64Array): Float64Array {
+  const out = new Float64Array(values.length);
+  for (let index = 0; index < values.length; index++) {
+    const value = values[index]!;
+    if (typeof value === "number" || value instanceof Date) {
+      out[index] = cellToTimeOfDayMs(value);
+      continue;
+    }
+    // Parsed ISO/datetime strings already land as epoch ms in `base`.
+    const ms = base[index]!;
+    if (!Number.isFinite(ms)) {
+      out[index] = Number.NaN;
+      continue;
+    }
+    const d = new Date(ms);
+    out[index] =
+      ((d.getUTCHours() * 60 + d.getUTCMinutes()) * 60 + d.getUTCSeconds()) * 1000 +
+      d.getUTCMilliseconds();
+  }
+  return out;
+}
+
 export function positionValuesToNumeric(
   values: readonly CellValue[],
   conversion: PositionConversionContext,
@@ -126,8 +172,10 @@ export function positionValuesToNumeric(
   });
   const temporal =
     !conversion.forcedNonTemporal &&
-    (conversion.parser !== "auto" || parsed.decision.status === "temporal");
-  const numeric = conversion.forcedNonTemporal
+    (conversion.parser !== "auto" ||
+      parsed.decision.status === "temporal" ||
+      conversion.requestedKind === "time");
+  let numeric = conversion.forcedNonTemporal
     ? cellsToQuantitative(values)
     : temporal
       ? parsed.semantic.slice()
@@ -146,6 +194,10 @@ export function positionValuesToNumeric(
         numeric[index] = value;
       }
     }
+  }
+  // scale_*_time: portable numbers are seconds since midnight (#831).
+  if (conversion.requestedKind === "time") {
+    numeric = mapToTimeOfDayMs(values, numeric);
   }
   return { values: numeric, decision: parsed.decision };
 }

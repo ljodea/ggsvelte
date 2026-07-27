@@ -102,6 +102,8 @@
     dasharray: string | undefined;
     linecap: "butt" | "round" | "square";
     linejoin: "miter" | "round" | "bevel";
+    /** Even-odd for polygon holes (#809 phase 4); undefined = SVG default nonzero. */
+    fillRule: "nonzero" | "evenodd" | undefined;
   }
 
   const subpaths: Subpath[] = $derived.by(() => {
@@ -115,6 +117,7 @@
         batch.pathOffsets[s + 1]!,
         batch.curve,
         batch.closed === true,
+        batch.ringStarts,
       );
       if (d === "") continue;
       const style = resolvePathMark(batch, s, themeColors);
@@ -128,6 +131,7 @@
         dasharray: style.dash.length === 0 ? undefined : style.dash.join(" "),
         linecap: style.linecap,
         linejoin: style.linejoin,
+        fillRule: batch.fillRule,
       });
     }
     return out;
@@ -338,6 +342,7 @@
       <path
         d={p.d}
         fill={p.fill}
+        fill-rule={p.fillRule}
         stroke={p.stroke}
         stroke-width={p.stroke === "none" ? undefined : p.linewidth}
         stroke-dasharray={p.stroke === "none" ? undefined : p.dasharray}

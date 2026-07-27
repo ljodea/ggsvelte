@@ -1,5 +1,6 @@
 import type {
   CoordFixedSpec,
+  CoordSfSpec,
   CoordSpec,
   CoordTransformAxisSpec,
   CoordTransformSpec,
@@ -64,3 +65,26 @@ export const coordEqual = coordFixed;
 /** ggplot2-style aliases over the same implementation. */
 export const coord_fixed = coordFixed;
 export const coord_equal = coordEqual;
+
+export interface CoordSfOptions {
+  /**
+   * Physical y-unit length / x-unit length (default 1). Use 1 for equal
+   * projected metres; set explicitly for lon/lat display corrections.
+   */
+  ratio?: number;
+}
+
+/**
+ * Fixed-aspect coordinates for already-projected geom_sf maps (ggplot2
+ * `coord_sf` subset). No CRS transform or graticules in v1 — data must
+ * already be in plot space (#809 phase 8).
+ */
+export function coordSf(options: CoordSfOptions = {}): CoordSfSpec {
+  return {
+    type: "sf",
+    ...(options.ratio !== undefined && options.ratio !== 1 && { ratio: options.ratio }),
+  };
+}
+
+/** ggplot2-style alias for coordSf(). */
+export const coord_sf = coordSf;

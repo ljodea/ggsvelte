@@ -26,7 +26,7 @@ export interface ScaleDecision {
   field: string;
   status: "temporal" | "nominal";
   parser: string | null;
-  kind: "date" | "datetime" | null;
+  kind: "date" | "datetime" | "time" | null;
   precision: "year" | "quarter" | "month" | "date" | "minute" | "second" | "millisecond" | null;
   evidence: readonly (string | number | boolean | null)[];
   validatedCount: number;

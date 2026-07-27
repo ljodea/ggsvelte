@@ -15,7 +15,7 @@ import type { PathsBatch, RectsBatch, SegmentsBatch } from "../scene.js";
 import type { Linetype } from "../scales/style.js";
 import type { ThemeTokens } from "../theme.js";
 import { themeVar } from "../theme.js";
-import { isStepCurve, stepCorners } from "../path-step.js";
+import { stepCorners } from "../path-step.js";
 import type { ColorResolver } from "./canvas-dom.js";
 import { maskIncludes, type PrimitiveFocusMask } from "./canvas-marks-mask.js";
 
@@ -51,17 +51,18 @@ function applyGlow(ctx: CanvasRenderingContext2D, glow: PathsBatch["glow"]): () 
   };
 }
 
-function traceSubpath(
+function traceRing(
   ctx: CanvasRenderingContext2D,
   batch: PathsBatch,
   start: number,
   end: number,
 ): void {
+  if (end <= start) return;
   ctx.moveTo(batch.positions[start * 2]!, batch.positions[start * 2 + 1]!);
   for (let i = start + 1; i < end; i++) {
     const x = batch.positions[i * 2]!;
     const y = batch.positions[i * 2 + 1]!;
-    if (isStepCurve(batch.curve)) {
+    if (batch.curve === "step" || batch.curve === "step-hv" || batch.curve === "step-vh") {
       const prevX = batch.positions[(i - 1) * 2]!;
       const prevY = batch.positions[(i - 1) * 2 + 1]!;
       for (const c of stepCorners(prevX, prevY, x, y, batch.curve)) {
@@ -71,6 +72,30 @@ function traceSubpath(
     ctx.lineTo(x, y);
   }
   if (batch.closed === true) ctx.closePath();
+}
+
+/** Trace one subpath; hole rings (ringStarts) become extra moveTo/closePath rings. */
+function traceSubpath(
+  ctx: CanvasRenderingContext2D,
+  batch: PathsBatch,
+  start: number,
+  end: number,
+): void {
+  if (end <= start) return;
+  const breaks = batch.ringStarts;
+  if (breaks === undefined || breaks.length === 0 || batch.closed !== true) {
+    traceRing(ctx, batch, start, end);
+    return;
+  }
+  const cuts: number[] = [start];
+  for (let i = 0; i < breaks.length; i++) {
+    const b = breaks[i]!;
+    if (b > start && b < end) cuts.push(b);
+  }
+  cuts.push(end);
+  for (let i = 0; i + 1 < cuts.length; i++) {
+    traceRing(ctx, batch, cuts[i]!, cuts[i + 1]!);
+  }
 }
 
 function linetypeAt(batch: PathsBatch | SegmentsBatch | RectsBatch, index: number): Linetype {
@@ -120,7 +145,8 @@ export function drawPaths(
     if (isArea) {
       const solid = style.fill === "none" ? themeColors.accent : style.fill;
       ctx.fillStyle = resolvePaintStyle(ctx, solid, batch.fillPaint, bounds, resolve);
-      ctx.fill();
+      if (batch.fillRule === "evenodd") ctx.fill("evenodd");
+      else ctx.fill();
       if (style.stroke !== "none") {
         const strokeStyle = resolvePaintStyle(
           ctx,
@@ -173,7 +199,8 @@ export function drawPathsSubset(
     ctx.globalAlpha = baseAlpha * (batch.alphas?.[s] ?? 1);
     if (isArea) {
       ctx.fillStyle = resolve(batch.fills![s] ?? themeVar("accent", theme));
-      ctx.fill();
+      if (batch.fillRule === "evenodd") ctx.fill("evenodd");
+      else ctx.fill();
       const strokeColor = batch.strokes[s];
       const linewidth = batch.linewidths?.[s] ?? batch.linewidth;
       if (areaOutlineActive(strokeColor, linewidth)) {

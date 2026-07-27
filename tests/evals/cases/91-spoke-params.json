@@ -1,0 +1,37 @@
+{
+  "id": "91-spoke-params",
+  "kind": "chart",
+  "prompt": "From each (x,y) draw a geom_spoke of constant angle 0 and radius 1 (params, not columns).",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" }
+    ],
+    "rowCount": 3
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 0 },
+      { "x": 1, "y": 1 },
+      { "x": 2, "y": 0.5 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "spoke",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" }
+        },
+        "params": { "angle": 0, "radius": 1 }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Constant angle/radius via params when not mapped (#810)."
+}

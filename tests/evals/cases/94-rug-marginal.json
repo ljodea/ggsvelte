@@ -1,0 +1,47 @@
+{
+  "id": "94-rug-marginal",
+  "kind": "chart",
+  "prompt": "Scatter plot of sepal length against petal length, with geom_rug marginal ticks on the bottom and left edges.",
+  "dataProfile": {
+    "fields": [
+      { "name": "sepal", "type": "quantitative" },
+      { "name": "petal", "type": "quantitative" }
+    ],
+    "rowCount": 5
+  },
+  "data": {
+    "main": [
+      { "sepal": 5.1, "petal": 1.4 },
+      { "sepal": 4.9, "petal": 1.5 },
+      { "sepal": 6.3, "petal": 4.7 },
+      { "sepal": 6.7, "petal": 5.6 },
+      { "sepal": 5.8, "petal": 4.1 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "sepal" },
+          "y": { "field": "petal" }
+        }
+      },
+      {
+        "geom": "rug",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "sepal" },
+          "y": { "field": "petal" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_rug default sides \"bl\" draw bottom + left ticks; needs both x and y (#806)."
+}

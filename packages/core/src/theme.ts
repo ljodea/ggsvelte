@@ -91,6 +91,8 @@ export function resolveTheme(
     axisLineY: theme.axisLineY ?? base.axisLineY,
     ticksX: theme.ticksX ?? base.ticksX,
     ticksY: theme.ticksY ?? base.ticksY,
+    labelsX: theme.labelsX ?? base.labelsX,
+    labelsY: theme.labelsY ?? base.labelsY,
     gridX: theme.gridX ?? base.gridX,
     gridY: theme.gridY ?? base.gridY,
     showPanelBorder: theme.showPanelBorder ?? base.showPanelBorder,

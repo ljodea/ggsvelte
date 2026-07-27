@@ -14,6 +14,8 @@
     data?: DataInput | readonly Record<string, unknown>[];
     /** Layer-level aes (bare-string shorthand allowed); merges over plot aes. */
     aes?: AesInput;
+    /** "identity" (default) or "unique" (first-wins aesthetic dedupe; #813). */
+    stat?: "identity" | "unique";
   }
 
   const props: Props = $props();

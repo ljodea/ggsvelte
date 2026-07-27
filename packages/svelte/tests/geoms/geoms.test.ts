@@ -1,5 +1,5 @@
 /**
- * Parameterized suite over all 12 declaration-only Geom* components.
+ * Parameterized suite over all declaration-only Geom* components.
  * Mounts each under GGPlot, asserts layer registration via the assembled
  * PortableSpec (toLayerInput path), and checks a representative param
  * forwards into layer.params.
@@ -14,8 +14,11 @@ import GeomBar from "../../src/lib/geoms/GeomBar.svelte";
 import GeomBoxplot from "../../src/lib/geoms/GeomBoxplot.svelte";
 import GeomCol from "../../src/lib/geoms/GeomCol.svelte";
 import GeomDensity from "../../src/lib/geoms/GeomDensity.svelte";
+import GeomDotplot from "../../src/lib/geoms/GeomDotplot.svelte";
 import GeomErrorbar from "../../src/lib/geoms/GeomErrorbar.svelte";
 import GeomHistogram from "../../src/lib/geoms/GeomHistogram.svelte";
+import GeomHline from "../../src/lib/geoms/GeomHline.svelte";
+import GeomJitter from "../../src/lib/geoms/GeomJitter.svelte";
 import GeomLine from "../../src/lib/geoms/GeomLine.svelte";
 import GeomPoint from "../../src/lib/geoms/GeomPoint.svelte";
 import GeomRaster from "../../src/lib/geoms/GeomRaster.svelte";
@@ -23,8 +26,10 @@ import GeomRect from "../../src/lib/geoms/GeomRect.svelte";
 import GeomRule from "../../src/lib/geoms/GeomRule.svelte";
 import GeomSegment from "../../src/lib/geoms/GeomSegment.svelte";
 import GeomSmooth from "../../src/lib/geoms/GeomSmooth.svelte";
+import GeomStep from "../../src/lib/geoms/GeomStep.svelte";
 import GeomText from "../../src/lib/geoms/GeomText.svelte";
 import GeomTile from "../../src/lib/geoms/GeomTile.svelte";
+import GeomVline from "../../src/lib/geoms/GeomVline.svelte";
 import SingleGeomPlot from "../fixtures/SingleGeomPlot.svelte";
 import { render } from "../helpers/render.js";
 
@@ -139,6 +144,42 @@ const cases: readonly GeomCase[] = [
     markSelector: ".gg-segments line",
   },
   {
+    name: "GeomHline",
+    Component: GeomHline,
+    geom: "hline",
+    assembledGeom: "rule",
+    data: xy,
+    aes: { x: "x", y: "y" },
+    geomProps: { yintercept: 12, linewidth: 1.25 },
+    paramKey: "yintercept",
+    paramValue: 12,
+    markSelector: ".gg-segments line",
+  },
+  {
+    name: "GeomVline",
+    Component: GeomVline,
+    geom: "vline",
+    assembledGeom: "rule",
+    data: xy,
+    aes: { x: "x", y: "y" },
+    geomProps: { xintercept: 2, linewidth: 1.1 },
+    paramKey: "xintercept",
+    paramValue: 2,
+    markSelector: ".gg-segments line",
+  },
+  {
+    name: "GeomJitter",
+    Component: GeomJitter,
+    geom: "jitter",
+    assembledGeom: "point",
+    data: xy,
+    aes: { x: "x", y: "y" },
+    geomProps: { size: 4, alpha: 0.7, width: 0.15, seed: 3 },
+    paramKey: "size",
+    paramValue: 4,
+    markSelector: ".gg-points circle",
+  },
+  {
     name: "GeomText",
     Component: GeomText,
     geom: "text",
@@ -182,6 +223,17 @@ const cases: readonly GeomCase[] = [
     paramKey: "width",
     paramValue: 0.5,
     markSelector: ".gg-rects rect",
+  },
+  {
+    name: "GeomDotplot",
+    Component: GeomDotplot,
+    geom: "dotplot",
+    data: xy,
+    aes: { x: "x" },
+    geomProps: { binwidth: 1, stackdir: "up", alpha: 0.85 },
+    paramKey: "binwidth",
+    paramValue: 1,
+    markSelector: ".gg-points circle",
   },
   {
     name: "GeomDensity",
@@ -264,6 +316,17 @@ const cases: readonly GeomCase[] = [
     paramKey: "linewidth",
     paramValue: 2,
     markSelector: ".gg-segments line",
+  },
+  {
+    name: "GeomStep",
+    Component: GeomStep,
+    geom: "step",
+    data: xy,
+    aes: { x: "x", y: "y" },
+    geomProps: { direction: "hv", linewidth: 2 },
+    paramKey: "direction",
+    paramValue: "hv",
+    markSelector: ".gg-paths path",
   },
 ];
 

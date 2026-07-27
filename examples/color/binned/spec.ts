@@ -17,7 +17,7 @@ export default defineExample(
     .guides({
       color: guideColorsteps({ position: "bottom", direction: "horizontal" }),
     })
-    .theme("light")
+    .theme("bw")
     .labs({
       title: "How many beans can you see at once?",
       subtitle: "Jevons threw beans into a box 1,027 times — never wrong up to four",

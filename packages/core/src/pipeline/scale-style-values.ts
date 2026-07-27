@@ -32,6 +32,8 @@ export interface NumericStyleConfig {
   onExhaust?: "cycle" | "error";
   labels?: string;
   guide?: GuideSpec;
+  /** Size aesthetic only — see PositiveStyleScaleSpec.sizeUnit (#830). */
+  sizeUnit?: "area" | "radius" | "area_zero";
 }
 
 export interface NumericStyleValueView {

@@ -48,6 +48,10 @@ export function shouldAggregateOnSemanticTemporalX(
 ): boolean {
   const conversion: PositionConversionContext = binding.xConversion;
   if (conversion.forcedDiscrete || conversion.forcedNonTemporal) return false;
+  // time-of-day (#831): scale space is ms-of-day via positionColumn /
+  // positionValuesToNumeric, not raw parseTemporal epoch semantics (and not
+  // portable seconds). Aggregate on source cells, then convert for xNumeric.
+  if (conversion.requestedKind === "time") return false;
   const geom = binding.layer.geom;
   const barDiscretizes =
     (geom === "bar" || geom === "col") && binding.layer.stat !== "bin" && !conversion.requestedTime;

@@ -255,12 +255,18 @@ describe("Theme* export parity with THEME_NAMES", () => {
       minimal: "ThemeMinimal",
       ggplot2: "ThemeGgplot2",
       classic: "ThemeClassic",
+      bw: "ThemeBw",
       hrbr: "ThemeHrbr",
       few: "ThemeFew",
       clean: "ThemeClean",
       fivethirtyeight: "ThemeFivethirtyeight",
       economist: "ThemeEconomist",
       tufte: "ThemeTufte",
+      linedraw: "ThemeLinedraw",
+      void: "ThemeVoid",
+      grey: "ThemeGrey",
+      gray: "ThemeGray",
+      test: "ThemeTest",
     };
 
     const expectedExports = new Set(["Theme", ...Object.values(nameToExport)]);

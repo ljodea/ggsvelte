@@ -95,7 +95,7 @@ export function statEcdf(input: EcdfStatInput): EcdfStatResult {
       evalX = [];
       for (let j = 0; j < nObs; j++) {
         const v = values[j]!;
-        if (evalX.length === 0 || evalX[evalX.length - 1]! !== v) evalX.push(v);
+        if (evalX.length === 0 || evalX.at(-1)! !== v) evalX.push(v);
       }
     }
 

@@ -35,6 +35,21 @@ const compileOnlyTemporalTypeAssertions = (): void => {
 void compileOnlyTemporalTypeAssertions;
 
 describe("temporal scale schema", () => {
+  it("accepts temporalKind time for time-of-day position scales (#831)", () => {
+    expect(
+      validate({
+        layers: [{ geom: "point" }],
+        scales: { x: { type: "time", temporalKind: "time" } },
+      }).ok,
+    ).toBe(true);
+    expect(
+      validate({
+        layers: [{ geom: "point" }],
+        scales: { y: { type: "time", temporalKind: "time", dateLabels: "%H:%M" } },
+      }).ok,
+    ).toBe(true);
+  });
+
   it("accepts every portable parser shape and temporal option", () => {
     for (const parse of [
       "iso",

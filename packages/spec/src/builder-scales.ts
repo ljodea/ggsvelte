@@ -13,6 +13,9 @@ import {
   scaleColorLog10,
   scaleColorManual,
   scaleColorSqrt,
+  scaleColorViridisB,
+  scaleColorViridisC,
+  scaleColorViridisD,
   scaleFillBinned,
   scaleFillContinuous,
   scaleFillDate,
@@ -22,10 +25,14 @@ import {
   scaleFillLog10,
   scaleFillManual,
   scaleFillSqrt,
+  scaleFillViridisB,
+  scaleFillViridisC,
+  scaleFillViridisD,
   scaleXBinned,
   scaleXContinuous,
   scaleXDate,
   scaleXDatetime,
+  scaleXTime,
   scaleXDiscrete,
   scaleXLog10,
   scaleXReverse,
@@ -34,6 +41,7 @@ import {
   scaleYContinuous,
   scaleYDate,
   scaleYDatetime,
+  scaleYTime,
   scaleYDiscrete,
   scaleYLog10,
   scaleYReverse,
@@ -48,6 +56,7 @@ import {
   type TemporalColorScaleOptions,
   type TemporalScaleOptions,
   type TransformedColorScaleOptions,
+  type ViridisScaleOptions,
   type TransformedPositionScaleOptions,
 } from "./scale-helpers.js";
 import {
@@ -73,13 +82,17 @@ import {
   scaleShapeDiscrete,
   scaleShapeIdentity,
   scaleShapeManual,
+  scaleSizeArea,
   scaleSizeBinned,
+  scaleSizeBinnedArea,
   scaleSizeContinuous,
   scaleSizeDate,
   scaleSizeDatetime,
   scaleSizeDiscrete,
   scaleSizeIdentity,
   scaleSizeManual,
+  scaleSizeOrdinal,
+  scaleRadius,
   type BinnedFiniteStyleScaleOptions,
   type DiscreteFiniteStyleScaleOptions,
   type DiscreteNumericStyleScaleOptions,
@@ -88,6 +101,9 @@ import {
   type ManualFiniteStyleScaleOptions,
   type ManualNumericStyleScaleOptions,
   type SequentialStyleScaleOptions,
+  type SizeAreaScaleOptions,
+  type SizeSequentialStyleScaleOptions,
+  type SizeTemporalNumericStyleScaleOptions,
   type TemporalNumericStyleScaleOptions,
 } from "./scale-style-helpers.js";
 import type { LinetypeName, PointShapeName } from "./schema-names.js";
@@ -115,6 +131,11 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
       return this.scales(scaleXDatetime(options));
     }
 
+    /** Configure the x scale as time-of-day (seconds since midnight, #831). */
+    scaleXTime(options: TemporalScaleOptions = {}): GGBuilder {
+      return this.scales(scaleXTime(options));
+    }
+
     /** Configure the y scale as calendar dates. */
     scaleYDate(options: TemporalScaleOptions = {}): GGBuilder {
       return this.scales(scaleYDate(options));
@@ -123,6 +144,11 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
     /** Configure the y scale as date-time instants. */
     scaleYDatetime(options: TemporalScaleOptions = {}): GGBuilder {
       return this.scales(scaleYDatetime(options));
+    }
+
+    /** Configure the y scale as time-of-day (seconds since midnight, #831). */
+    scaleYTime(options: TemporalScaleOptions = {}): GGBuilder {
+      return this.scales(scaleYTime(options));
     }
 
     /** Force x values to remain discrete categories. */
@@ -234,6 +260,21 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
       return this.scales(scaleColorIdentity(options));
     }
 
+    /** Configure color with a viridis-family continuous ramp (#828). */
+    scaleColorViridisC(options: ViridisScaleOptions = {}): GGBuilder {
+      return this.scales(scaleColorViridisC(options));
+    }
+
+    /** Configure color with discrete samples of a viridis-family ramp (#828). */
+    scaleColorViridisD(options: ViridisScaleOptions = {}): GGBuilder {
+      return this.scales(scaleColorViridisD(options));
+    }
+
+    /** Configure color as viridis-family colorsteps (#828). */
+    scaleColorViridisB(options: ViridisScaleOptions = {}): GGBuilder {
+      return this.scales(scaleColorViridisB(options));
+    }
+
     /** Configure fill as a continuous sequential ramp. */
     scaleFillContinuous(options: SequentialColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleFillContinuous(options));
@@ -279,19 +320,34 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
       return this.scales(scaleFillIdentity(options));
     }
 
-    scaleSizeContinuous(options: SequentialStyleScaleOptions = {}): GGBuilder {
+    /** Configure fill with a viridis-family continuous ramp (#828). */
+    scaleFillViridisC(options: ViridisScaleOptions = {}): GGBuilder {
+      return this.scales(scaleFillViridisC(options));
+    }
+
+    /** Configure fill with discrete samples of a viridis-family ramp (#828). */
+    scaleFillViridisD(options: ViridisScaleOptions = {}): GGBuilder {
+      return this.scales(scaleFillViridisD(options));
+    }
+
+    /** Configure fill as viridis-family colorsteps (#828). */
+    scaleFillViridisB(options: ViridisScaleOptions = {}): GGBuilder {
+      return this.scales(scaleFillViridisB(options));
+    }
+
+    scaleSizeContinuous(options: SizeSequentialStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleSizeContinuous(options));
     }
     scaleSizeDiscrete(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleSizeDiscrete(options));
     }
-    scaleSizeBinned(options: SequentialStyleScaleOptions = {}): GGBuilder {
+    scaleSizeBinned(options: SizeSequentialStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleSizeBinned(options));
     }
-    scaleSizeDate(options: TemporalNumericStyleScaleOptions = {}): GGBuilder {
+    scaleSizeDate(options: SizeTemporalNumericStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleSizeDate(options));
     }
-    scaleSizeDatetime(options: TemporalNumericStyleScaleOptions = {}): GGBuilder {
+    scaleSizeDatetime(options: SizeTemporalNumericStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleSizeDatetime(options));
     }
     scaleSizeManual(options: ManualNumericStyleScaleOptions): GGBuilder {
@@ -300,11 +356,31 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
     scaleSizeIdentity(options: IdentityNumericStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleSizeIdentity(options));
     }
+    /** ggplot2 scale_size_area — zero→zero area mapping (#830). */
+    scaleSizeArea(options: SizeAreaScaleOptions = {}): GGBuilder {
+      return this.scales(scaleSizeArea(options));
+    }
+    /** ggplot2 scale_size_binned_area (#830). */
+    scaleSizeBinnedArea(options: SizeAreaScaleOptions = {}): GGBuilder {
+      return this.scales(scaleSizeBinnedArea(options));
+    }
+    /** ggplot2 scale_radius — linear radius mapping (#830). */
+    scaleRadius(options: SizeSequentialStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleRadius(options));
+    }
+    /** ggplot2 scale_size_ordinal (#830). */
+    scaleSizeOrdinal(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleSizeOrdinal(options));
+    }
 
     scaleLinewidthContinuous(options: SequentialStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleLinewidthContinuous(options));
     }
     scaleLinewidthDiscrete(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleLinewidthDiscrete(options));
+    }
+    /** ggplot2 scale_linewidth_ordinal — same as discrete (`type: "ordinal"`, #832). */
+    scaleLinewidthOrdinal(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleLinewidthDiscrete(options));
     }
     scaleLinewidthBinned(options: SequentialStyleScaleOptions = {}): GGBuilder {
@@ -329,6 +405,10 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
     scaleAlphaDiscrete(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleAlphaDiscrete(options));
     }
+    /** ggplot2 scale_alpha_ordinal — same as discrete (`type: "ordinal"`, #832). */
+    scaleAlphaOrdinal(options: DiscreteNumericStyleScaleOptions = {}): GGBuilder {
+      return this.scales(scaleAlphaDiscrete(options));
+    }
     scaleAlphaBinned(options: SequentialStyleScaleOptions = {}): GGBuilder {
       return this.scales(scaleAlphaBinned(options));
     }
@@ -346,6 +426,10 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
     }
 
     scaleShapeDiscrete(options: DiscreteFiniteStyleScaleOptions<PointShapeName> = {}): GGBuilder {
+      return this.scales(scaleShapeDiscrete(options));
+    }
+    /** ggplot2 scale_shape_ordinal — same as discrete (`type: "ordinal"`, #832). */
+    scaleShapeOrdinal(options: DiscreteFiniteStyleScaleOptions<PointShapeName> = {}): GGBuilder {
       return this.scales(scaleShapeDiscrete(options));
     }
     scaleShapeBinned(options: BinnedFiniteStyleScaleOptions<PointShapeName> = {}): GGBuilder {

@@ -1,8 +1,9 @@
 /**
  * Step-line corner insertion for SVG/canvas path emission and coord projection.
- * - step (mid): corner at midpoint x (line curve:"step")
- * - step-hv: horizontal then vertical (ggplot2 geom_step direction "hv"; ECDF-correct)
- * - step-vh: vertical then horizontal
+ * Modes:
+ * - step (mid): corner at midpoint x (existing line curve:"step")
+ * - step-hv: horizontal then vertical (ggplot2 direction "hv")
+ * - step-vh: vertical then horizontal (ggplot2 direction "vh")
  */
 export type PathStepCurve = "step" | "step-hv" | "step-vh";
 
@@ -18,8 +19,13 @@ export function stepCorners(
   y: number,
   curve: PathStepCurve,
 ): readonly { x: number; y: number }[] {
-  if (curve === "step-hv") return [{ x, y: prevY }];
-  if (curve === "step-vh") return [{ x: prevX, y }];
+  if (curve === "step-hv") {
+    return [{ x, y: prevY }];
+  }
+  if (curve === "step-vh") {
+    return [{ x: prevX, y }];
+  }
+  // mid
   const mid = (prevX + x) / 2;
   return [
     { x: mid, y: prevY },
@@ -27,6 +33,7 @@ export function stepCorners(
   ];
 }
 
+/** Max synthetic vertices per authored segment for tessellation budgeting. */
 export function stepCornersPerSegment(curve: PathStepCurve): number {
   return curve === "step" ? 2 : 1;
 }

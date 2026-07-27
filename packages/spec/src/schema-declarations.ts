@@ -39,7 +39,27 @@ const HEX_COLOR = Type.String({
 const forbiddenColorOption = () => Type.Optional(Type.Never());
 const forbiddenStyleOption = () => Type.Optional(Type.Never());
 
-function numericStyleScaleSpec(rangeValue: ReturnType<typeof Type.Number>, description: string) {
+/** Size aesthetic only (#830). Shared onto PositiveStyleScaleSpec (size+linewidth). */
+const sizeUnitField = {
+  /**
+   * Size-only rescaling mode (ignored for linewidth). Default `area` matches
+   * the existing continuous size map (area between range endpoints).
+   * `radius` is linear; `area_zero` forces zero→zero area (ggplot2 scale_size_area).
+   */
+  sizeUnit: Type.Optional(
+    Type.Union([Type.Literal("area"), Type.Literal("radius"), Type.Literal("area_zero")], {
+      description:
+        'Size encoding unit (size aesthetic only). "area" (default) interpolates by area between range endpoints; "radius" maps linearly to radius; "area_zero" maps value proportionally to area with zero→zero (ggplot2 scale_size_area / scale_size_binned_area).',
+    }),
+  ),
+};
+
+function numericStyleScaleSpec(
+  rangeValue: ReturnType<typeof Type.Number>,
+  description: string,
+  /** Extra optional fields on the base object (e.g. sizeUnit for PositiveStyleScaleSpec). */
+  extraFields: typeof sizeUnitField | Record<string, never> = {},
+) {
   return Type.Intersect([
     Type.Object(
       {
@@ -77,6 +97,7 @@ function numericStyleScaleSpec(rangeValue: ReturnType<typeof Type.Number>, descr
         onExhaust: Type.Optional(Type.Union([Type.Literal("cycle"), Type.Literal("error")])),
         labels: Type.Optional(Type.String()),
         guide: Type.Optional(Type.Ref("GuideSpec")),
+        ...extraFields,
       },
       { additionalProperties: false, description },
     ),
@@ -437,6 +458,30 @@ export const SpecDeclarations = {
             "Cell height for geom tile (data units after position transform; not a trained position scale). Prefer params.height for a constant.",
         }),
       ),
+      z: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Surface height for geom contour / stat contour (quantitative grid values over continuous x×y; #801).",
+        }),
+      ),
+      map_id: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Region join key for geom_map (value-table column matched to the map data id column; #808).",
+        }),
+      ),
+      angle: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Spoke direction in radians (geom spoke; 0 = +x, π/2 = +y). Quantitative only. May also be set as params.angle.",
+        }),
+      ),
+      radius: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Spoke length in data units (geom spoke). Quantitative only. May also be set as params.radius.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -577,10 +622,70 @@ export const SpecDeclarations = {
             'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
         }),
       ),
+      bins: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          description:
+            "STAT SUMMARY_BIN ONLY (#817): number of bins (integer ≥ 1). Default 30 — advisory. Overridden by binwidth.",
+        }),
+      ),
+      binwidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "STAT SUMMARY_BIN ONLY: bin width in data units (must be greater than 0). Takes precedence over bins.",
+        }),
+      ),
+      boundary: Type.Optional(
+        Type.Number({
+          description:
+            "STAT SUMMARY_BIN ONLY: align a bin EDGE with this x value. Mutually exclusive with center.",
+        }),
+      ),
+      center: Type.Optional(
+        Type.Number({
+          description:
+            "STAT SUMMARY_BIN ONLY: align a bin CENTER with this x value. Mutually exclusive with boundary.",
+        }),
+      ),
+      closed: Type.Optional(
+        Type.Union([Type.Literal("right"), Type.Literal("left")], {
+          description:
+            'STAT SUMMARY_BIN ONLY: which edge of each bin is inclusive: "right" (default) or "left".',
+        }),
+      ),
+      fun: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("first"),
+            Type.Literal("last"),
+            Type.Literal("mean"),
+            Type.Literal("median"),
+            Type.Literal("min"),
+            Type.Literal("max"),
+            Type.Literal("sum"),
+          ],
+          {
+            description:
+              'SUMMARY_BIN center fun (mean/median/sum; #817) or MANUAL named transform (first|last|mean|median|min|max|sum; #814). Required when stat is "manual".',
+          },
+        ),
+      ),
+      funMin: Type.Optional(
+        Type.Ref("SummaryFun", {
+          description: "STAT SUMMARY_BIN ONLY: lower bound summary (ymin).",
+        }),
+      ),
+      funMax: Type.Optional(
+        Type.Ref("SummaryFun", {
+          description: "STAT SUMMARY_BIN ONLY: upper bound summary (ymax).",
+        }),
+      ),
     },
     {
       additionalProperties: false,
-      description: "Styling parameters for the point geom.",
+      description:
+        "Styling parameters for the point geom, plus summary_bin (#817) and/or manual (#814) controls.",
     },
   ),
 
@@ -626,6 +731,87 @@ export const SpecDeclarations = {
             "With stat ecdf: evaluate on n equally spaced x in [min, max] per group; omit for one point per unique x.",
         }),
       ),
+      connection: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("hv", {
+              description: "STAT CONNECT: horizontal then vertical (default).",
+            }),
+            Type.Literal("vh", {
+              description: "STAT CONNECT: vertical then horizontal.",
+            }),
+            Type.Literal("mid", {
+              description: "STAT CONNECT: step at the midpoint between adjacent x values.",
+            }),
+            Type.Literal("linear", {
+              description: "STAT CONNECT: straight segment (identity vertices).",
+            }),
+          ],
+          {
+            description:
+              'STAT CONNECT ONLY (#816): how successive points join — "hv" (default), "vh", "mid", or "linear". Ignored for other stats.',
+          },
+        ),
+      ),
+      bins: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          description:
+            "STAT BIN / SUMMARY_BIN: number of bins (integer ≥ 1). Default 30 — an advisory reminds you to pick a real value. Overridden by binwidth.",
+        }),
+      ),
+      binwidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "STAT BIN / SUMMARY_BIN: bin width in data units (must be greater than 0). Takes precedence over bins.",
+        }),
+      ),
+      boundary: Type.Optional(
+        Type.Number({
+          description:
+            "STAT BIN / SUMMARY_BIN: align a bin EDGE with this x value. Mutually exclusive with center.",
+        }),
+      ),
+      center: Type.Optional(
+        Type.Number({
+          description:
+            "STAT BIN / SUMMARY_BIN: align a bin CENTER with this x value. Mutually exclusive with boundary.",
+        }),
+      ),
+      closed: Type.Optional(
+        Type.Union([Type.Literal("right"), Type.Literal("left")], {
+          description:
+            'STAT BIN / SUMMARY_BIN: which edge of each bin is inclusive: "right" (default) or "left".',
+        }),
+      ),
+      fun: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("first"),
+            Type.Literal("last"),
+            Type.Literal("mean"),
+            Type.Literal("median"),
+            Type.Literal("min"),
+            Type.Literal("max"),
+            Type.Literal("sum"),
+          ],
+          {
+            description:
+              'SUMMARY_BIN center fun (mean/median/sum; #817) or MANUAL named transform (first|last|mean|median|min|max|sum; #814). Required when stat is "manual".',
+          },
+        ),
+      ),
+      funMin: Type.Optional(
+        Type.Ref("SummaryFun", {
+          description: "STAT SUMMARY_BIN ONLY: lower bound summary (ymin).",
+        }),
+      ),
+      funMax: Type.Optional(
+        Type.Ref("SummaryFun", {
+          description: "STAT SUMMARY_BIN ONLY: upper bound summary (ymax).",
+        }),
+      ),
       strokePaint: Type.Optional(
         Type.Ref("GradientPaint", {
           description:
@@ -640,7 +826,149 @@ export const SpecDeclarations = {
     },
     {
       additionalProperties: false,
-      description: "Styling parameters for the line geom (plus ecdf pad/n when stat is ecdf).",
+      description:
+        "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin (#817), manual (#814), or ecdf pad/n (#811) controls.",
+    },
+  ),
+
+  /** Path stroke params (no bin knobs — path never uses stat bin). */
+  StepParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Step-line opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.5.",
+        }),
+      ),
+      direction: Type.Optional(
+        Type.Union([Type.Literal("hv"), Type.Literal("vh"), Type.Literal("mid")], {
+          description:
+            'Step corner placement (ggplot2 geom_step): "hv" horizontal then vertical (default), "vh" vertical then horizontal, "mid" change at the midpoint between x positions.',
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description: "Styling parameters for the step geom (ggplot2 geom_step).",
+    },
+  ),
+
+  PathParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Path opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.5.",
+        }),
+      ),
+      curve: Type.Optional(
+        Type.Union([Type.Literal("linear"), Type.Literal("step")], {
+          description:
+            'Interpolation between points: "linear" (straight segments, default) or "step" (horizontal-then-vertical steps).',
+        }),
+      ),
+      connection: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("hv", {
+              description: "STAT CONNECT: horizontal then vertical (default).",
+            }),
+            Type.Literal("vh", {
+              description: "STAT CONNECT: vertical then horizontal.",
+            }),
+            Type.Literal("mid", {
+              description: "STAT CONNECT: step at the midpoint between adjacent x values.",
+            }),
+            Type.Literal("linear", {
+              description: "STAT CONNECT: straight segment (identity vertices).",
+            }),
+          ],
+          {
+            description:
+              'STAT CONNECT ONLY (#816): how successive points join — "hv" (default), "vh", "mid", or "linear". Ignored for other stats.',
+          },
+        ),
+      ),
+      fun: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("first"),
+            Type.Literal("last"),
+            Type.Literal("mean"),
+            Type.Literal("median"),
+            Type.Literal("min"),
+            Type.Literal("max"),
+            Type.Literal("sum"),
+          ],
+          {
+            description:
+              'STAT MANUAL ONLY (#814): portable named transform (first|last|mean|median|min|max|sum). Required when stat is "manual".',
+          },
+        ),
+      ),
+      level: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          exclusiveMaximum: 1,
+          description:
+            "STAT ELLIPSE ONLY: confidence level of the bivariate normal ellipse, strictly between 0 and 1. Default 0.95.",
+        }),
+      ),
+      type: Type.Optional(
+        Type.Literal("norm", {
+          description:
+            'STAT ELLIPSE ONLY: construction type. Only "norm" (bivariate normal) is supported in v1.',
+        }),
+      ),
+      segments: Type.Optional(
+        Type.Integer({
+          minimum: 3,
+          maximum: 500,
+          description:
+            "STAT ELLIPSE ONLY: number of perimeter samples before the closing duplicate (output length = segments + 1). Default 51.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Styling parameters for the path geom (data-order polylines), plus optional connect/manual/ellipse controls.",
     },
   ),
 
@@ -819,6 +1147,105 @@ export const SpecDeclarations = {
     },
   ),
 
+  QuantileParams: Type.Object(
+    {
+      quantiles: Type.Optional(
+        Type.Array(
+          Type.Number({
+            exclusiveMinimum: 0,
+            exclusiveMaximum: 1,
+            description: "One conditional quantile τ strictly between 0 and 1.",
+          }),
+          {
+            minItems: 1,
+            description:
+              "Conditional quantiles of y to fit and draw. Each entry must be in (0, 1). Default [0.25, 0.5, 0.75].",
+          },
+        ),
+      ),
+      n: Type.Optional(
+        Type.Integer({
+          minimum: 2,
+          maximum: 5000,
+          description:
+            "Number of evaluation points along x (integer 2–5000). Default 80. Linear fits need only endpoints; denser grids help nonlinear coords.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width of quantile lines in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Line opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description: "Within-mark gradient stroke paint for quantile lines (not a data scale).",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for the quantile geom (linear y~x quantile regression lines; #805). method rqss is intentionally omitted in v1.",
+    },
+  ),
+
+  ContourParams: Type.Object(
+    {
+      bins: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          description:
+            "Number of evenly spaced contour levels from min(z) to max(z) inclusive (integer ≥ 1). Default 10. Overridden by breaks or binwidth.",
+        }),
+      ),
+      binwidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Contour level step in z units (must be greater than 0). Takes precedence over bins; overridden by breaks.",
+        }),
+      ),
+      breaks: Type.Optional(
+        Type.Array(Type.Number(), {
+          minItems: 1,
+          description:
+            "Explicit contour levels (finite numbers). Overrides bins and binwidth when non-empty.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width of contour lines in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Line opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom_contour isolines (#801). v1: regular grid only; contour_filled deferred.",
+    },
+  ),
+
   BoxplotParams: Type.Object(
     {
       width: Type.Optional(
@@ -860,6 +1287,93 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description: "Styling parameters for the boxplot geom.",
+    },
+  ),
+
+  DotplotParams: Type.Object(
+    {
+      bins: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          description:
+            "Number of bins (integer ≥ 1). Default 30 — advisory when neither bins nor binwidth is set. Overridden by binwidth.",
+        }),
+      ),
+      binwidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Histodot bin width in data units (must be greater than 0). Takes precedence over bins. Also drives default point diameter via the x scale.",
+        }),
+      ),
+      boundary: Type.Optional(
+        Type.Number({
+          description: "Align a bin edge to this value (mutually exclusive with center).",
+        }),
+      ),
+      center: Type.Optional(
+        Type.Number({
+          description: "Align a bin center to this value (mutually exclusive with boundary).",
+        }),
+      ),
+      closed: Type.Optional(
+        Type.Union([Type.Literal("right"), Type.Literal("left")], {
+          description:
+            'Which side of each bin is closed: "right" (default, (lo, hi]) or "left" ([lo, hi)).',
+        }),
+      ),
+      stackdir: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("up"),
+            Type.Literal("down"),
+            Type.Literal("center"),
+            Type.Literal("centerwhole"),
+          ],
+          {
+            description:
+              'Stack direction: "up" (default), "down", "center", or "centerwhole" (integer-aligned center).',
+          },
+        ),
+      ),
+      stackratio: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Relative spacing between stacked dots (must be greater than 0). Default 1.",
+        }),
+      ),
+      dotsize: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Multiplier on diameter derived from binwidth × x-scale (must be greater than 0). Default 1. Ignored when params.size is set.",
+        }),
+      ),
+      size: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Point radius in px (must be greater than 0). When set, overrides binwidth-derived sizing.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Point opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      shape: Type.Optional(
+        Type.Union(POINT_SHAPE_NAME_SCHEMAS, {
+          description:
+            'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom_dotplot (histodot binning + stacked dots; #803). method=dotdensity and binaxis=y are not in v1.",
     },
   ),
 
@@ -919,6 +1433,74 @@ export const SpecDeclarations = {
     },
   ),
 
+  Density2dParams: Type.Object(
+    {
+      h: Type.Optional(
+        Type.Union(
+          [
+            Type.Number({ exclusiveMinimum: 0 }),
+            Type.Array(Type.Number({ exclusiveMinimum: 0 }), { minItems: 2, maxItems: 2 }),
+          ],
+          {
+            description:
+              "Kernel bandwidth: one positive number for both axes, or [hx, hy]. Omit for MASS bandwidth.nrd per axis (then kde2d h/4 scaling).",
+          },
+        ),
+      ),
+      adjust: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Bandwidth multiplier (must be greater than 0). Default 1.",
+        }),
+      ),
+      n: Type.Optional(
+        Type.Integer({
+          minimum: 10,
+          maximum: 200,
+          description:
+            "Grid resolution per axis for the KDE surface (integer 10–200). Default 100.",
+        }),
+      ),
+      bins: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          description:
+            "Number of contour levels of the density surface (integer ≥ 1). Default 10. Overridden by breaks.",
+        }),
+      ),
+      binwidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Contour level step in density units. Overridden by breaks.",
+        }),
+      ),
+      breaks: Type.Optional(
+        Type.Array(Type.Number(), {
+          minItems: 1,
+          description: "Explicit density contour levels. Overrides bins and binwidth.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width of density contours in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Line opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom_density_2d / geom_density_2d_filled (bivariate KDE; #802). contour_var density only.",
+    },
+  ),
+
   SummaryFun: Type.Union(
     [
       Type.Literal("mean"),
@@ -970,14 +1552,46 @@ export const SpecDeclarations = {
       funMax: Type.Optional(
         Type.Ref("SummaryFun", {
           description:
-            "STAT SUMMARY ONLY: summary function for the upper bound (ymax). Overrides the mean_se default.",
+            "STAT SUMMARY / SUMMARY_BIN: summary function for the upper bound (ymax). Overrides the mean_se default.",
+        }),
+      ),
+      bins: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          description:
+            "STAT SUMMARY_BIN ONLY (#817): number of bins (integer ≥ 1). Default 30 — advisory. Overridden by binwidth.",
+        }),
+      ),
+      binwidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "STAT SUMMARY_BIN ONLY: bin width in data units (must be greater than 0). Takes precedence over bins.",
+        }),
+      ),
+      boundary: Type.Optional(
+        Type.Number({
+          description:
+            "STAT SUMMARY_BIN ONLY: align a bin EDGE with this x value. Mutually exclusive with center.",
+        }),
+      ),
+      center: Type.Optional(
+        Type.Number({
+          description:
+            "STAT SUMMARY_BIN ONLY: align a bin CENTER with this x value. Mutually exclusive with boundary.",
+        }),
+      ),
+      closed: Type.Optional(
+        Type.Union([Type.Literal("right"), Type.Literal("left")], {
+          description:
+            'STAT SUMMARY_BIN ONLY: which edge of each bin is inclusive: "right" (default) or "left".',
         }),
       ),
     },
     {
       additionalProperties: false,
       description:
-        'Parameters for the errorbar geom: styling plus the summary-stat functions (fun, funMin, funMax) used when stat is "summary".',
+        "Parameters for the errorbar geom: styling plus summary / summary_bin functions and summary_bin binning controls (#817).",
     },
   ),
 
@@ -1309,6 +1923,86 @@ export const SpecDeclarations = {
     },
   ),
 
+  HlineParams: Type.Object(
+    {
+      yintercept: Type.Optional(
+        Type.Ref("RuleIntercept", {
+          description:
+            "ANNOTATION FORM ONLY: draw a horizontal rule at each of these fixed y positions. Mutually exclusive with mapping aes.y on this layer.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Rule opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for the hline alias (ggplot2 geom_hline). Annotation form sets yintercept; data-driven form maps aes.y. Canonicalized by normalize() to a rule layer.",
+    },
+  ),
+
+  VlineParams: Type.Object(
+    {
+      xintercept: Type.Optional(
+        Type.Ref("RuleIntercept", {
+          description:
+            "ANNOTATION FORM ONLY: draw a vertical rule at each of these fixed x positions. Mutually exclusive with mapping aes.x on this layer.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Rule opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for the vline alias (ggplot2 geom_vline). Annotation form sets xintercept; data-driven form maps aes.x. Canonicalized by normalize() to a rule layer.",
+    },
+  ),
+
   SegmentParams: Type.Object(
     {
       alpha: Type.Optional(
@@ -1345,6 +2039,317 @@ export const SpecDeclarations = {
       additionalProperties: false,
       description:
         "Styling parameters for the segment geom (finite line from (x,y) to (xend,yend)).",
+    },
+  ),
+
+  RugParams: Type.Object(
+    {
+      sides: Type.Optional(
+        Type.String({
+          pattern: "^[bltr]+$",
+          minLength: 1,
+          description:
+            'Which panel edges get ticks: any non-empty combination of "b" (bottom), "l" (left), "t" (top), "r" (right). Default "bl". Duplicates are treated as a set. Sides b/t require aes.x; sides l/r require aes.y.',
+        }),
+      ),
+      length: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          maximum: 1,
+          description:
+            'Tick length as a fraction of the panel size along the tick axis (panel-fraction npc analogue of ggplot2 unit(0.03, "npc")). Default 0.03.',
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Tick opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom_rug: panel-edge sides, panel-fraction length, and stroke styling.",
+    },
+  ),
+
+  SpokeParams: Type.Object(
+    {
+      angle: Type.Optional(
+        Type.Number({
+          description:
+            "Constant spoke direction in radians when aes.angle is not mapped. 0 = +x, π/2 = +y.",
+        }),
+      ),
+      radius: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Constant spoke length in data units when aes.radius is not mapped. Must be greater than 0.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Spoke opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      lineend: Type.Optional(
+        Type.Union([Type.Literal("butt"), Type.Literal("round"), Type.Literal("square")], {
+          description: 'SVG stroke-linecap for spoke ends. Default "butt".',
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom spoke: optional constant angle/radius plus segment-like stroke styling.",
+    },
+  ),
+
+  AblineParams: Type.Object(
+    {
+      slope: Type.Optional(
+        Type.Number({
+          description: "Line slope (rise/run). Default 1 (identity line when intercept is 0).",
+        }),
+      ),
+      intercept: Type.Optional(
+        Type.Number({
+          description: "Y-intercept in data units. Default 0.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Line opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Annotation parameters for geom abline: y = intercept + slope · x, clipped to the panel. Annotation-only in v1 (no data-mapped slope/intercept).",
+    },
+  ),
+
+  AblineLayer: Type.Object(
+    {
+      geom: Type.Literal("abline", {
+        description:
+          "Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Abline layers use fixed params as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Abline layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description: "Optional layer-local data. Abline v1 ignores row data (annotation-only).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("AblineParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A slope/intercept reference-line layer (ggplot2 geom_abline). Annotation-only: set params.slope and params.intercept.",
+    },
+  ),
+
+  CurveParams: Type.Object(
+    {
+      curvature: Type.Optional(
+        Type.Number({
+          description:
+            "Amount of bend away from the straight chord. 0 is a straight line; ggplot2 default 0.5. Positive bows to the right of the start→end direction when angle is 90.",
+        }),
+      ),
+      angle: Type.Optional(
+        Type.Number({
+          description:
+            "Control-point direction relative to the chord, in degrees. ggplot2 default 90 (perpendicular).",
+        }),
+      ),
+      ncp: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          maximum: 50,
+          description:
+            "Smoothness density knob (ggplot2 ncp). Maps to tessellation sample count = max(8, ncp×8); not multi-control xspline. Default 5.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Curve opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+      lineend: Type.Optional(
+        Type.Union([Type.Literal("butt"), Type.Literal("round"), Type.Literal("square")], {
+          description: 'SVG stroke-linecap for curve ends. Default "butt".',
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom curve: curvature/angle/ncp plus segment-like stroke styling.",
+    },
+  ),
+
+  MapParams: Type.Object(
+    {
+      map: Type.Ref("DataRef", {
+        description:
+          "Fortified map coordinates ({ values }, { columns }, or { name } against spec.datasets). Must include long+lat or x+y, plus a region id column.",
+      }),
+      mapId: Type.Optional(
+        Type.String({
+          minLength: 1,
+          description:
+            'Join column name in the map data (matched to aes.map_id). Default: "region", then "id".',
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Region fill opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Region outline stroke width in px. Must be greater than 0. Default 1.5.",
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description: "Within-mark gradient fill paint (not a data scale).",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description: "Within-mark gradient stroke paint (not a data scale).",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom_map (#808): fortified map DataRef plus optional join column and polygon styling.",
+    },
+  ),
+
+  SfParams: Type.Object(
+    {
+      geometry: Type.Optional(
+        Type.String({
+          minLength: 1,
+          description:
+            'Name of the data column holding GeoJSON Geometry JSON strings. Default "geometry". Already-projected coordinates only (#809 phase 1).',
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Mark opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px for lines/polygon outlines. Must be greater than 0.",
+        }),
+      ),
+      size: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Point radius in px when geometries are Point/MultiPoint.",
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description: "Within-mark gradient fill paint (polygon family; not a data scale).",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description: "Within-mark gradient stroke paint (not a data scale).",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom_sf (#809): portable GeoJSON Geometry column plus styling. Interior rings are even-odd holes; GeometryCollection expands. Use coord_sf for fixed-aspect maps (CRS reproject deferred).",
     },
   ),
 
@@ -1405,16 +2410,55 @@ export const SpecDeclarations = {
     },
   ),
 
+  /** Identity-capable layers may also use unique (first-wins aesthetic dedupe). */
+  IdentityOrUniqueStat: Type.Union(
+    [
+      Type.Literal("identity", {
+        description: "Draw each data row as-is (no aggregation or row filter).",
+      }),
+      Type.Literal("unique", {
+        description:
+          "Drop duplicate rows on the combination of mapped aesthetic fields before drawing; first occurrence wins (ggplot2's stat_unique). Panel-local.",
+      }),
+    ],
+    {
+      description:
+        'Layer stat: "identity" (default) or "unique" (dedupe mapped aesthetics, first wins).',
+    },
+  ),
+
   // --- layers (discriminated by geom) ----------------------------------------
 
   PointLayer: Type.Object(
     {
       geom: Type.Literal("point", {
         description:
-          "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views.",
+          "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
       }),
       stat: Type.Optional(
-        Type.Literal("identity", { description: "Point layers draw the data as-is." }),
+        Type.Union(
+          [
+            Type.Literal("identity", {
+              description: "Draw each data row as-is (default).",
+            }),
+            Type.Literal("unique", {
+              description:
+                "Drop duplicate rows on mapped aesthetics before drawing; first wins (#813).",
+            }),
+            Type.Literal("summary_bin", {
+              description:
+                "Bin continuous x and summarize y per (group × bin); default mean ± se (#817).",
+            }),
+            Type.Literal("manual", {
+              description:
+                "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814).",
+            }),
+          ],
+          {
+            description:
+              'Point stat: "identity" (default), "unique", "summary_bin" (#817), or "manual" (#814).',
+          },
+        ),
       ),
       position: Type.Optional(
         Type.Union([Type.Literal("identity"), Type.Literal("jitter"), Type.Literal("nudge")], {
@@ -1444,13 +2488,48 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("line", {
         description:
-          "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv).",
+          "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
       }),
       stat: Type.Optional(
-        Type.Union([Type.Literal("identity"), Type.Literal("ecdf")], {
-          description:
-            'Line stat: "identity" (default — draw mapped x/y) or "ecdf" (empirical CDF of x; y defaults to {stat:"ecdf"}; do not map field y). Prefer params.curve "step-hv" for ECDF stairs.',
-        }),
+        Type.Union(
+          [
+            Type.Literal("identity", {
+              description: "Draw each data row as-is (default — map aes.y).",
+            }),
+            Type.Literal("unique", {
+              description:
+                "Drop duplicate rows on mapped aesthetics before drawing (first wins; #813).",
+            }),
+            Type.Literal("bin", {
+              description:
+                'Continuous x binned; the canonical form of geom freqpoly. Do NOT map aes.y to a field; y defaults to {"stat": "count"}.',
+            }),
+            Type.Literal("align", {
+              description:
+                "Interpolate each group onto the union of finite x values so continuous-x stack/fill aligns (#815). Outside a group's x range y is 0.",
+            }),
+            Type.Literal("connect", {
+              description:
+                "Expand successive points into connection vertices (params.connection: hv|vh|mid|linear; #816). Expands in x order; geometry does not re-sort after connect.",
+            }),
+            Type.Literal("summary_bin", {
+              description:
+                "Bin continuous x and summarize y per (group × bin); default mean ± se; connect centers in x order (#817).",
+            }),
+            Type.Literal("manual", {
+              description:
+                "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814).",
+            }),
+            Type.Literal("ecdf", {
+              description:
+                'Empirical CDF of x; y defaults to {"stat": "ecdf"} — do NOT map aes.y to a field. Prefer params.curve "step-hv" for ECDF stairs (#811).',
+            }),
+          ],
+          {
+            description:
+              'Line stat: "identity" (default), "unique", "bin", "align", "connect", "summary_bin" (#817), "manual" (#814), or "ecdf" (#811).',
+          },
+        ),
       ),
       position: Type.Optional(
         Type.Literal("identity", { description: "Line layers use identity positioning." }),
@@ -1468,7 +2547,91 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "A line layer. Identity: requires x and y. Ecdf: requires x only (y is computed). Rows sorted by x within each group before connecting.",
+        "A line layer. Identity: requires x and y. Bin (freqpoly): requires continuous x; y is computed by the bin stat. Ecdf: requires x only (y is computed). Rows are sorted by x within each group before connecting.",
+    },
+  ),
+
+  StepLayer: Type.Object(
+    {
+      geom: Type.Literal("step", {
+        description:
+          "Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Step layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Step layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data.",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("StepParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A step-line layer (ggplot2 geom_step). Requires x and y. params.direction is hv (default), vh, or mid.",
+    },
+  ),
+
+  PathLayer: Type.Object(
+    {
+      geom: Type.Literal("path", {
+        description:
+          "Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+      }),
+      stat: Type.Optional(
+        Type.Union(
+          [
+            Type.Literal("identity", {
+              description: "Draw each data row as-is (default).",
+            }),
+            Type.Literal("unique", {
+              description:
+                "Drop duplicate rows on mapped aesthetics before drawing (first wins; #813).",
+            }),
+            Type.Literal("connect", {
+              description:
+                "Expand successive points into connection vertices (params.connection: hv|vh|mid|linear; default hv; #816). ggplot2 stat_connect default geom is path.",
+            }),
+            Type.Literal("manual", {
+              description:
+                "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814).",
+            }),
+            Type.Literal("ellipse", {
+              description:
+                "Bivariate normal confidence ellipse per group (ggplot2 stat_ellipse, type norm). Emits perimeter samples suitable for path; requires quantitative x and y (#812).",
+            }),
+          ],
+          {
+            description:
+              'Path stat: "identity" (default), "unique", "connect", "manual" (#814), or "ellipse" (#812).',
+          },
+        ),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Path layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("PathParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A path layer. Identity/connect/manual: requires x and y; rows stay in data order. Ellipse: quantitative x and y; one closed ring per group.",
     },
   ),
 
@@ -1478,9 +2641,7 @@ export const SpecDeclarations = {
         description:
           "Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Col layers draw the given y values as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(Type.Ref("StackablePosition")),
       render: Type.Optional(Type.Ref("RenderBackend")),
       aes: Type.Optional(Type.Ref("Aes")),
@@ -1559,6 +2720,38 @@ export const SpecDeclarations = {
     },
   ),
 
+  FreqpolyLayer: Type.Object(
+    {
+      geom: Type.Literal("freqpoly", {
+        description:
+          "Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("bin", {
+          description:
+            'Freqpoly layers bin continuous x values. y defaults to {"stat": "count"}; set y to {"stat": "density"} for a density polygon.',
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Freqpoly layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("LineParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        'A frequency-polygon layer (alias for line + stat bin). Requires continuous x; y is computed by the bin stat. Default position "identity". Set params.binwidth or params.bins (default 30, with an advisory).',
+    },
+  ),
+
   SmoothLayer: Type.Object(
     {
       geom: Type.Literal("smooth", {
@@ -1588,6 +2781,70 @@ export const SpecDeclarations = {
       additionalProperties: false,
       description:
         "A fitted-trend layer. Requires quantitative x and y channels. Usually layered over a point layer of the same data.",
+    },
+  ),
+
+  QuantileLayer: Type.Object(
+    {
+      geom: Type.Literal("quantile", {
+        description:
+          "Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("quantile", {
+          description:
+            "Quantile layers fit linear RQ per group × τ and evaluate on a grid of params.n points.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Quantile layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("QuantileParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A quantile-regression layer. Requires quantitative x and y. Default quantiles [0.25, 0.5, 0.75]. v1 is linear y~x only (no rqss).",
+    },
+  ),
+
+  ContourLayer: Type.Object(
+    {
+      geom: Type.Literal("contour", {
+        description:
+          "Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("contour", {
+          description:
+            "Contour layers run clean-room marching-squares isolines per group over a complete rectangular grid.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Contour layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("ContourParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A contour isoline layer. Requires continuous x, y, and z on a regular complete grid. Levels from params.breaks, binwidth, or bins (default 10).",
     },
   ),
 
@@ -1625,6 +2882,38 @@ export const SpecDeclarations = {
     },
   ),
 
+  DotplotLayer: Type.Object(
+    {
+      geom: Type.Literal("dotplot", {
+        description:
+          "Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("bindot", {
+          description:
+            'Histodot bindot: fixed bins, one mark per observation stacked within (group × bin). y defaults to {"stat": "stackpos"}.',
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Dotplot layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("DotplotParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A stacked-dot layer. Requires continuous x; y is stackpos from bindot. Map fill/color for groups. v1: method histodot only.",
+    },
+  ),
+
   DensityLayer: Type.Object(
     {
       geom: Type.Literal("density", {
@@ -1657,6 +2946,72 @@ export const SpecDeclarations = {
     },
   ),
 
+  Density2dLayer: Type.Object(
+    {
+      geom: Type.Literal("density_2d", {
+        description:
+          "2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("density_2d", {
+          description:
+            "density_2d layers estimate a product-Gaussian KDE per group on an n×n grid and extract isolines.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "density_2d layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("Density2dParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A 2D density contour layer. Requires continuous x and y. Contours of estimated density (not a precomputed z grid).",
+    },
+  ),
+
+  Density2dFilledLayer: Type.Object(
+    {
+      geom: Type.Literal("density_2d_filled", {
+        description:
+          "2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("density_2d_filled", {
+          description:
+            "Same KDE + isolines as density_2d, keeping closed rings only for filled paths.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", {
+          description: "density_2d_filled layers use identity positioning.",
+        }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data.",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("Density2dParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A filled 2D density layer. Requires continuous x and y. Fill defaults to after_stat(level).",
+    },
+  ),
+
   ErrorbarLayer: Type.Object(
     {
       geom: Type.Literal("errorbar", {
@@ -1664,10 +3019,28 @@ export const SpecDeclarations = {
           "Errorbar geometry: a vertical range with caps at ymin and ymax, one per data row (identity stat) or per x group (summary stat).",
       }),
       stat: Type.Optional(
-        Type.Union([Type.Literal("identity"), Type.Literal("summary")], {
-          description:
-            'The errorbar\'s stat: "identity" (default — map aes.ymin and aes.ymax to data fields) or "summary" (compute y/ymin/ymax per x group from aes.y; default mean ± standard error, ggplot2\'s mean_se).',
-        }),
+        Type.Union(
+          [
+            Type.Literal("identity", {
+              description: "Map aes.ymin and aes.ymax to data fields (default).",
+            }),
+            Type.Literal("unique", {
+              description: "Drop duplicate rows on mapped aesthetics before drawing; first wins.",
+            }),
+            Type.Literal("summary", {
+              description:
+                "Compute y/ymin/ymax per x group from aes.y; default mean ± standard error (ggplot2 mean_se).",
+            }),
+            Type.Literal("summary_bin", {
+              description:
+                "Bin continuous x and summarize y per (group × bin); default mean ± se (#817).",
+            }),
+          ],
+          {
+            description:
+              'The errorbar\'s stat: "identity" (default), "unique", "summary" (per x group), or "summary_bin" (per bin; #817).',
+          },
+        ),
       ),
       position: Type.Optional(
         Type.Literal("identity", { description: "Errorbar layers use identity positioning." }),
@@ -1685,7 +3058,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "An errorbar layer. Identity stat: requires x, ymin, and ymax channels. Summary stat: requires x and y channels (bounds computed by params.fun/funMin/funMax, default mean_se).",
+        "An errorbar layer. Identity: requires x, ymin, ymax. Summary / summary_bin: requires x and y (bounds from params.fun/funMin/funMax, default mean_se).",
     },
   ),
 
@@ -1695,9 +3068,7 @@ export const SpecDeclarations = {
         description:
           "Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands.",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Rect layers draw the data as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
         Type.Literal("identity", { description: "Rect layers use identity positioning." }),
       ),
@@ -1780,10 +3151,27 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("area", {
         description:
-          "Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts.",
+          "Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts. With stat align, series with different x samples share a common grid for stack/fill.",
       }),
       stat: Type.Optional(
-        Type.Literal("identity", { description: "Area layers draw the data as-is." }),
+        Type.Union(
+          [
+            Type.Literal("identity", {
+              description: "Draw each data row as-is (default).",
+            }),
+            Type.Literal("unique", {
+              description: "Drop duplicate rows on mapped aesthetics before drawing (first wins).",
+            }),
+            Type.Literal("align", {
+              description:
+                "Interpolate each group onto the union of finite x values so continuous-x stack/fill aligns (#815). Outside a group's x range y is 0.",
+            }),
+          ],
+          {
+            description:
+              'Area stat: "identity" (default), "unique" (first-wins dedupe), or "align" (shared x grid for stacking).',
+          },
+        ),
       ),
       position: Type.Optional(Type.Ref("StackablePosition")),
       render: Type.Optional(Type.Ref("RenderBackend")),
@@ -1799,7 +3187,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        'An area layer. Requires x and y channels; rows are sorted by x within each group. Default position "stack".',
+        'An area layer. Requires x and y channels; rows are sorted by x within each group. Default position "stack". Use stat "align" when groups have different continuous x samples.',
     },
   ),
 
@@ -1809,9 +3197,7 @@ export const SpecDeclarations = {
         description:
           "Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Ribbon layers draw precomputed bounds as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
         Type.Literal("identity", { description: "Ribbon layers use identity positioning." }),
       ),
@@ -1838,9 +3224,7 @@ export const SpecDeclarations = {
         description:
           "Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Rule layers draw the given positions as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
         Type.Literal("identity", { description: "Rule layers use identity positioning." }),
       ),
@@ -1861,15 +3245,103 @@ export const SpecDeclarations = {
     },
   ),
 
+  HlineLayer: Type.Object(
+    {
+      geom: Type.Literal("hline", {
+        description:
+          "Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Hline layers draw the given positions as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Hline layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("HlineParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A horizontal reference-line layer alias (normalize() → rule). Annotation: params.yintercept. Data-driven: map aes.y.",
+    },
+  ),
+
+  VlineLayer: Type.Object(
+    {
+      geom: Type.Literal("vline", {
+        description:
+          "Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Vline layers draw the given positions as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Vline layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("VlineParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A vertical reference-line layer alias (normalize() → rule). Annotation: params.xintercept. Data-driven: map aes.x.",
+    },
+  ),
+
+  JitterLayer: Type.Object(
+    {
+      geom: Type.Literal("jitter", {
+        description:
+          "Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Jitter layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("jitter", {
+          description: 'Jitter layers always use position "jitter" (the alias purpose).',
+        }),
+      ),
+      positionParams: Type.Optional(Type.Ref("PositionParams")),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("PointParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        'A scatter layer with position "jitter" (alias; normalize() → point). Requires x and y channels. Jitter width/height/seed live on positionParams.',
+    },
+  ),
+
   TextLayer: Type.Object(
     {
       geom: Type.Literal("text", {
         description:
           "Text geometry: one label per data row at (x, y). No collision detection — labels draw exactly where placed. Requires x, y, and label channels.",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Text layers draw the data as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
         Type.Union([Type.Literal("identity"), Type.Literal("nudge")], {
           description:
@@ -1899,9 +3371,7 @@ export const SpecDeclarations = {
         description:
           "Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel.",
       }),
-      stat: Type.Optional(
-        Type.Literal("identity", { description: "Segment layers draw the data as-is." }),
-      ),
+      stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
         Type.Literal("identity", { description: "Segment layers use identity positioning." }),
       ),
@@ -1922,25 +3392,408 @@ export const SpecDeclarations = {
     },
   ),
 
+  CurveLayer: Type.Object(
+    {
+      geom: Type.Literal("curve", {
+        description:
+          "Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Curve layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Curve layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("CurveParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A curved-segment layer. Requires x, y, xend, and yend field channels (like geom segment).",
+    },
+  ),
+
+  MapLayer: Type.Object(
+    {
+      geom: Type.Literal("map", {
+        description:
+          "Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Map layers expand joins then draw as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Map layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local value data (region ids + fill aesthetics). When omitted, inherits plot data.",
+        }),
+      ),
+      params: Type.Ref("MapParams"),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A choropleth/map layer. Requires aes.map_id and params.map. Coordinates come from the map data (long/lat or x/y).",
+    },
+  ),
+
+  SfLayer: Type.Object(
+    {
+      geom: Type.Literal("sf", {
+        description:
+          "Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("sf", {
+          description:
+            "Geometry expand (ggplot2 stat_sf; #809): portable GeoJSON → drawable point/line/polygon parts.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "SF layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data.",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("SfParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        'An sf geometry layer. Requires a geometry column of GeoJSON Geometry JSON strings (params.geometry, default "geometry"). Coordinates must already be projected. Default stat is "sf".',
+    },
+  ),
+
+  SfTextParams: Type.Object(
+    {
+      geometry: Type.Optional(
+        Type.String({
+          minLength: 1,
+          description:
+            'Name of the data column holding GeoJSON Geometry JSON strings. Default "geometry".',
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Text opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      size: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Font size in px. Must be greater than 0. Default 11.",
+        }),
+      ),
+      anchor: Type.Optional(
+        Type.Union([Type.Literal("start"), Type.Literal("middle"), Type.Literal("end")], {
+          description:
+            'Horizontal text anchor relative to the representative point: "start", "middle" (default), or "end".',
+        }),
+      ),
+      dx: Type.Optional(
+        Type.Number({
+          description: "Horizontal offset in px applied after positioning. Default 0.",
+        }),
+      ),
+      dy: Type.Optional(
+        Type.Number({
+          description:
+            "Vertical offset in px applied after positioning (positive = down). Default 0.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description: "Parameters for geom_sf_text (#809 phase 2): geometry column plus text styling.",
+    },
+  ),
+
+  SfTextLayer: Type.Object(
+    {
+      geom: Type.Literal("sf_text", {
+        description:
+          "Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+      }),
+      stat: Type.Optional(
+        Type.Literal("sf_coordinates", {
+          description:
+            "Extract (x,y) representative points from geometry (Multi* → one point per part).",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "SF text layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data.",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("SfTextParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        'An sf text layer. Requires aes.label and a geometry column (params.geometry, default "geometry"). Does not require aes.x/y.',
+    },
+  ),
+
+  SfLabelParams: Type.Object(
+    {
+      geometry: Type.Optional(
+        Type.String({
+          minLength: 1,
+          description:
+            'Name of the data column holding GeoJSON Geometry JSON strings. Default "geometry".',
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Label opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      size: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Font size in px. Must be greater than 0. Default 11.",
+        }),
+      ),
+      anchor: Type.Optional(
+        Type.Union([Type.Literal("start"), Type.Literal("middle"), Type.Literal("end")], {
+          description:
+            'Horizontal text anchor relative to the representative point: "start", "middle" (default), or "end".',
+        }),
+      ),
+      dx: Type.Optional(
+        Type.Number({
+          description: "Horizontal offset in px applied after positioning. Default 0.",
+        }),
+      ),
+      dy: Type.Optional(
+        Type.Number({
+          description:
+            "Vertical offset in px applied after positioning (positive = down). Default 0.",
+        }),
+      ),
+      padding: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          description: "Box padding around the text in px. Default 3.",
+        }),
+      ),
+      radius: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          description: "Box corner radius in px. Default 3.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Box stroke width in px. Default 0.5.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom_sf_label (#809 phase 3): geometry column, text styling, and label box chrome.",
+    },
+  ),
+
+  SfLabelLayer: Type.Object(
+    {
+      geom: Type.Literal("sf_label", {
+        description:
+          "Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("sf_coordinates", {
+          description:
+            "Extract (x,y) representative points from geometry (Multi* → one point per part).",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "SF label layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data.",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("SfLabelParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "An sf label layer with a background box. Requires aes.label and a geometry column. Does not require aes.x/y.",
+    },
+  ),
+
+  BlankParams: Type.Object(
+    {},
+    {
+      additionalProperties: false,
+      description:
+        "Blank layers have no paint/stat params; the object exists only so LayerSpec has a uniform optional params field.",
+    },
+  ),
+
+  BlankLayer: Type.Object(
+    {
+      geom: Type.Literal("blank", {
+        description:
+          "Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", {
+          description: "Blank layers pass data through for scale training only.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Blank layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data.",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("BlankParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "An empty layer that trains scales from mapped aesthetics without emitting geometry (ggplot2's geom_blank).",
+    },
+  ),
+
+  RugLayer: Type.Object(
+    {
+      geom: Type.Literal("rug", {
+        description:
+          "Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Rug layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Rug layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("RugParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        'A marginal rug layer. Default sides "bl" require both x and y; restrict sides when only one channel is mapped.',
+    },
+  ),
+
+  SpokeLayer: Type.Object(
+    {
+      geom: Type.Literal("spoke", {
+        description:
+          "Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Spoke layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Spoke layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("SpokeParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A spoke layer. Requires x and y; angle and radius from aes and/or params (constants). Angle is radians.",
+    },
+  ),
+
   LayerSpec: Type.Union(
     [
       Type.Ref("PointLayer"),
       Type.Ref("LineLayer"),
+      Type.Ref("PathLayer"),
+      Type.Ref("StepLayer"),
       Type.Ref("ColLayer"),
       Type.Ref("BarLayer"),
       Type.Ref("HistogramLayer"),
+      Type.Ref("FreqpolyLayer"),
       Type.Ref("AreaLayer"),
       Type.Ref("RibbonLayer"),
       Type.Ref("RuleLayer"),
+      Type.Ref("HlineLayer"),
+      Type.Ref("VlineLayer"),
+      Type.Ref("JitterLayer"),
       Type.Ref("TextLayer"),
       Type.Ref("SmoothLayer"),
+      Type.Ref("QuantileLayer"),
+      Type.Ref("ContourLayer"),
       Type.Ref("BoxplotLayer"),
       Type.Ref("DensityLayer"),
+      Type.Ref("Density2dLayer"),
+      Type.Ref("Density2dFilledLayer"),
+      Type.Ref("DotplotLayer"),
       Type.Ref("ErrorbarLayer"),
+      Type.Ref("MapLayer"),
       Type.Ref("RectLayer"),
       Type.Ref("TileLayer"),
       Type.Ref("RasterLayer"),
       Type.Ref("SegmentLayer"),
+      Type.Ref("AblineLayer"),
+      Type.Ref("CurveLayer"),
+      Type.Ref("SfLayer"),
+      Type.Ref("SfTextLayer"),
+      Type.Ref("SfLabelLayer"),
+      Type.Ref("BlankLayer"),
+      Type.Ref("SpokeLayer"),
+      Type.Ref("RugLayer"),
     ],
     {
       description:
@@ -2016,9 +3869,9 @@ export const SpecDeclarations = {
           }),
         ),
         temporalKind: Type.Optional(
-          Type.Union([Type.Literal("date"), Type.Literal("datetime")], {
+          Type.Union([Type.Literal("date"), Type.Literal("datetime"), Type.Literal("time")], {
             description:
-              'Temporal precision intent. "date" uses calendar dates; "datetime" uses instants. Supplying this option requests a time scale.',
+              'Temporal precision intent. "date" uses calendar dates; "datetime" uses instants; "time" is time-of-day (portable numbers are seconds since midnight). Supplying this option requests a time scale.',
           }),
         ),
         parse: Type.Optional(
@@ -2243,7 +4096,7 @@ export const SpecDeclarations = {
         scheme: Type.Optional(
           Type.Union(COLOR_SCHEME_NAME_SCHEMAS, {
             description:
-              'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "tableau10", and "colorblind"; or sequential "viridis" (default). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
+              'Named color scheme: categorical "observable10" (default), "ipsum", "flexoki", "tableau10", "colorblind", "hue", "grey", and "gray"; or sequential family "viridis" (default), "magma", "plasma", "inferno", "cividis", "turbo". Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family.',
           }),
         ),
         reverse: Type.Optional(
@@ -2356,9 +4209,16 @@ export const SpecDeclarations = {
     ]),
   ]),
 
+  /**
+   * Size + linewidth share this schema. `sizeUnit` is size-only at runtime
+   * (ignored for linewidth); alpha uses AlphaScaleSpec without sizeUnit so
+   * the option cannot validate as a silent no-op (#830).
+   */
   PositiveStyleScaleSpec: numericStyleScaleSpec(
-    Type.Number({ exclusiveMinimum: 0 }),
-    "Configuration for a positive numeric size or linewidth scale.",
+    // minimum 0 allows scale_size_area zero-area radii; linewidth 0 is also valid.
+    Type.Number({ minimum: 0 }),
+    "Configuration for a non-negative numeric size or linewidth scale.",
+    sizeUnitField,
   ),
 
   AlphaScaleSpec: numericStyleScaleSpec(
@@ -2672,6 +4532,16 @@ export const SpecDeclarations = {
       axisLineY: Type.Optional(Type.Boolean()),
       ticksX: Type.Optional(Type.Boolean()),
       ticksY: Type.Optional(Type.Boolean()),
+      labelsX: Type.Optional(
+        Type.Boolean({
+          description: "When false, suppress x-axis tick labels (theme_void).",
+        }),
+      ),
+      labelsY: Type.Optional(
+        Type.Boolean({
+          description: "When false, suppress y-axis tick labels (theme_void).",
+        }),
+      ),
       gridX: Type.Optional(Type.Boolean()),
       gridY: Type.Optional(Type.Boolean()),
       showPanelBorder: Type.Optional(Type.Boolean()),
@@ -2917,11 +4787,37 @@ export const SpecDeclarations = {
     },
   ),
 
+  CoordSfSpec: Type.Object(
+    {
+      type: Type.Literal("sf", {
+        description:
+          "Simple-features coordinates for already-projected map data (ggplot2 coord_sf; #809). Fixed-aspect layout; no CRS transform in v1.",
+      }),
+      ratio: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Physical y-unit length divided by physical x-unit length (default 1, equal projected units).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Fixed-aspect coordinates for portable geom_sf maps. Data must already be projected; CRS reproject / graticules are deferred.",
+    },
+  ),
+
   CoordSpec: Type.Union(
-    [Type.Ref("CoordCartesianSpec"), Type.Ref("CoordTransformSpec"), Type.Ref("CoordFixedSpec")],
+    [
+      Type.Ref("CoordCartesianSpec"),
+      Type.Ref("CoordTransformSpec"),
+      Type.Ref("CoordFixedSpec"),
+      Type.Ref("CoordSfSpec"),
+    ],
     {
       description:
-        "The plot coordinate system: ordinary Cartesian, flipped Cartesian, post-stat transformed, or fixed-aspect.",
+        "The plot coordinate system: ordinary Cartesian, flipped Cartesian, post-stat transformed, fixed-aspect, or simple-features fixed-aspect.",
     },
   ),
 
