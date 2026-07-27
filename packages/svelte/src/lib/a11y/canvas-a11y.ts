@@ -81,13 +81,15 @@ export function a11yRows(
     }
   };
   for (const index of rowSet) {
+    // Skip indexes that cannot enter a full heap before paying model.row().
+    if (heap.length >= A11Y_TABLE_CAP && index >= heap[0]!.index) continue;
     const row = model.row(index);
     if (row === null) continue;
     const cells = fields.map((f) => row[f] ?? null);
     if (heap.length < A11Y_TABLE_CAP) {
       heap.push({ index, cells });
       siftUp(heap.length - 1);
-    } else if (index < heap[0]!.index) {
+    } else {
       heap[0] = { index, cells };
       siftDown(0);
     }

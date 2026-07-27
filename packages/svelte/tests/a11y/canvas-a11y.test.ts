@@ -170,63 +170,46 @@ describe("a11yRows", () => {
     void m;
   });
 
-  it("does not fully sort all distinct indexes when R ≫ CAP (issue #979)", () => {
-    // Pre-fix: [...rowSet].toSorted walks O(R log R). CAP-sized selection must
-    // not sort an array longer than a small multiple of CAP.
+  it("skips model.row for indexes that cannot enter a full CAP heap", () => {
+    // After CAP successful materialisations fill the heap, larger indexes must
+    // not pay model.row (Devin review on #1002). Ascending insertion order
+    // fills 0..CAP-1 first so the remaining 200 large indexes skip entirely.
+    const row = vi.fn((index: number) => ({ x: index }));
+    const indices: number[] = [];
+    for (let i = 0; i < A11Y_TABLE_CAP + 200; i++) indices.push(i);
+    const m = fromAny<RenderModel>({
+      layerFields: { 0: [{ field: "x" }] },
+      row,
+    });
+    const table = a11yRows(m, [batch({ layerIndex: 0, rowIndex: indices })]);
+    expect(table.rows).toHaveLength(A11Y_TABLE_CAP);
+    expect(table.rows[0]).toEqual([0]);
+    expect(table.rows[A11Y_TABLE_CAP - 1]).toEqual([A11Y_TABLE_CAP - 1]);
+    expect(row).toHaveBeenCalledTimes(A11Y_TABLE_CAP);
+  });
+
+  it("selects the CAP smallest indexes from a large shuffled set (issue #979)", () => {
+    // Heap selection must match full-sort semantics without requiring an R-length sort.
     const R = A11Y_TABLE_CAP * 40;
-    const rows: Record<number, Record<string, unknown>> = {};
     const indices: number[] = [];
     for (let i = 0; i < R; i++) {
-      // Scatter indexes so the set is large and unsorted in insertion order.
-      const index = (i * 17 + 3) % (R * 3);
-      rows[index] = { x: index };
-      indices.push(index);
+      // Scatter indexes so insertion order is not ascending.
+      indices.push((i * 17 + 3) % (R * 3));
     }
-    const m = model({
+    const distinct = [...new Set(indices)];
+    distinct.sort((a, b) => a - b);
+    const expected = distinct.slice(0, A11Y_TABLE_CAP);
+    const row = vi.fn((index: number) => ({ x: index }));
+    const m = fromAny<RenderModel>({
       layerFields: { 0: [{ field: "x" }] },
-      rows,
+      row,
     });
-
-    let largeSorts = 0;
-    const noteLength = (length: number) => {
-      if (length > A11Y_TABLE_CAP * 2) largeSorts++;
-    };
-    const originalSort = Array.prototype.sort;
-    const originalToSorted = Array.prototype.toSorted;
-    const sortSpy = vi.spyOn(Array.prototype, "sort").mockImplementation(function (
-      this: unknown[],
-      compareFn?: (a: unknown, b: unknown) => number,
-    ) {
-      noteLength(this.length);
-      return originalSort.call(
-        this,
-        compareFn as ((a: unknown, b: unknown) => number) | undefined,
-      ) as unknown as typeof this;
-    });
-    const toSortedSpy = vi.spyOn(Array.prototype, "toSorted").mockImplementation(function (
-      this: unknown[],
-      compareFn?: (a: unknown, b: unknown) => number,
-    ) {
-      noteLength(this.length);
-      return originalToSorted.call(
-        this,
-        compareFn as ((a: unknown, b: unknown) => number) | undefined,
-      );
-    });
-
-    try {
-      const table = a11yRows(m, [batch({ layerIndex: 0, rowIndex: indices })]);
-      expect(table.total).toBe(new Set(indices).size);
-      expect(table.rows).toHaveLength(A11Y_TABLE_CAP);
-      // Ascending source-row order among materialised CAP rows.
-      const xs = table.rows.map((r) => r[0] as number);
-      for (let i = 1; i < xs.length; i++) {
-        expect(xs[i]!).toBeGreaterThan(xs[i - 1]!);
-      }
-      expect(largeSorts).toBe(0);
-    } finally {
-      sortSpy.mockRestore();
-      toSortedSpy.mockRestore();
-    }
+    const table = a11yRows(m, [batch({ layerIndex: 0, rowIndex: indices })]);
+    expect(table.total).toBe(distinct.length);
+    expect(table.rows).toHaveLength(A11Y_TABLE_CAP);
+    expect(table.rows.map((r) => r[0])).toEqual(expected);
+    // Never materialise every distinct index when the CAP-smallest already fill the heap mid-scan.
+    expect(row.mock.calls.length).toBeLessThan(distinct.length);
+    expect(row.mock.calls.length).toBeGreaterThanOrEqual(A11Y_TABLE_CAP);
   });
 });
