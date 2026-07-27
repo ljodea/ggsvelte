@@ -99,4 +99,25 @@ describe("geom_function", () => {
     expect(codes).toContain("function-fun-unknown");
     expect(codes).not.toContain("function-domain-missing");
   });
+
+  it("forwards the evaluation grid through scale x transform (log10)", () => {
+    const model = runPipeline(
+      gg({ x: [1, 10, 100] })
+        .geomFunction({ fun: "identity", n: 3, xlim: [1, 100] })
+        .scales({ x: { type: "linear", transform: "log10", nice: false } })
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PathsBatch;
+    expect(batch.kind).toBe("paths");
+    // Grid evaluated at data x={1, 50.5, 100}; with log10 the mid vertex must
+    // sit near log10(50.5)/log10(100) ≈ 0.85 of the path span — not 0.5 as a
+    // linear placement of raw data x would produce.
+    const midX = batch.positions[2]!;
+    const left = batch.positions[0]!;
+    const right = batch.positions[4]!;
+    const t = (midX - left) / (right - left);
+    expect(t).toBeGreaterThan(0.8);
+    expect(t).toBeLessThan(0.9);
+  });
 });

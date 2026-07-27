@@ -2297,8 +2297,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-279",
-        title: "experimental (279)",
+        id: "experimental-282",
+        title: "experimental (282)",
         level: 3,
       },
       {
@@ -2852,6 +2852,16 @@ export const DOCS_ROUTES = [
     title: "geom_jitter sugar — ggsvelte gallery",
     description: "geom_jitter sugar",
     canonicalPath: "/examples/jitter/basic",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/line/ecdf",
+    title: "Empirical CDF — ggsvelte gallery",
+    description: "Empirical CDF",
+    canonicalPath: "/examples/line/ecdf",
     kind: "page",
     index: true,
     sitemap: true,

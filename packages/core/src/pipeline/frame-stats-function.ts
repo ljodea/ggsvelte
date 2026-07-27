@@ -14,10 +14,10 @@ import { NO_ROW } from "./types.js";
 
 function ownXDomain(binding: LayerBinding, table: ColumnTable): [number, number] | null {
   if (binding.xField === null || !table.has(binding.xField)) return null;
+  // Raw (untransformed) data extent — f() evaluates in data units; xlim is also
+  // author-supplied data units. Transform is applied to the resulting grid only.
   return (
-    finiteExtent([
-      positionColumn(table, binding.xField, binding.xConversion, binding.xTransform),
-    ]) ?? null
+    finiteExtent([positionColumn(table, binding.xField, binding.xConversion, undefined)]) ?? null
   );
 }
 
@@ -25,7 +25,7 @@ export function buildFunctionFrame(
   binding: LayerBinding,
   table: ColumnTable,
   warnings: PipelineWarning[],
-  /** Peer-layer continuous x extent when xlim is omitted. */
+  /** Peer-layer continuous x extent when xlim is omitted (raw data units). */
   peerDomain?: [number, number],
 ): LayerFrame {
   const { layer, index } = binding;
@@ -59,6 +59,9 @@ export function buildFunctionFrame(
 
   removedStatWarning(0, index, "function evaluation", warnings);
   const columnOf = makeColumnOf(binding)(result, null);
+  // f() ran in data units; place the curve in transformed scale-space like other
+  // frames (xNumeric is consumed as already-transformed by axis training).
+  const xNumeric = forwardMeasureOnce(result.x, binding.xTransform);
   const yNumeric = forwardMeasureOnce(result.y, binding.yTransform);
   const outN = result.x.length;
   return {
@@ -66,7 +69,7 @@ export function buildFunctionFrame(
     table,
     n: outN,
     xValues: null,
-    xNumeric: result.x,
+    xNumeric,
     yValues: null,
     yNumeric,
     groups: result.groups,

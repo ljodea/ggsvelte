@@ -102,6 +102,7 @@ export const KNOWN_STATS = [
   "density",
   "summary",
   "function",
+  "ecdf",
   "summary_bin",
   "contour",
   "align",

@@ -7,6 +7,7 @@ import type { ColumnTable } from "../table.js";
 import { buildAlignFrame } from "./frame-stats-align.js";
 import { buildBindotFrame } from "./frame-stats-bindot.js";
 import { buildBinFrame, buildCountFrame, buildDensityFrame } from "./frame-stats-binning.js";
+import { buildEcdfFrame } from "./frame-stats-ecdf.js";
 import { buildConnectFrame } from "./frame-stats-connect.js";
 import { buildDensity2dFrame } from "./frame-stats-density-2d.js";
 import { buildEllipseFrame } from "./frame-stats-ellipse.js";
@@ -49,6 +50,7 @@ export function buildNonIdentityFrame(
   if (stat === "bindot")
     return buildBindotFrame(binding, table, groups, warnings, advisories, binRange);
   if (stat === "density") return buildDensityFrame(binding, table, groups, warnings);
+  if (stat === "ecdf") return buildEcdfFrame(binding, table, groups, warnings);
   if (stat === "density_2d" || stat === "density_2d_filled") {
     return buildDensity2dFrame(binding, table, groups, warnings);
   }

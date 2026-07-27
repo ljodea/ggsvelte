@@ -711,9 +711,30 @@ export const SpecDeclarations = {
         }),
       ),
       curve: Type.Optional(
-        Type.Union([Type.Literal("linear"), Type.Literal("step")], {
+        Type.Union(
+          [
+            Type.Literal("linear"),
+            Type.Literal("step"),
+            Type.Literal("step-hv"),
+            Type.Literal("step-vh"),
+          ],
+          {
+            description:
+              'Interpolation: "linear" (default), "step" (mid-x corners), "step-hv" (horizontal then vertical — correct for ECDF), or "step-vh".',
+          },
+        ),
+      ),
+      pad: Type.Optional(
+        Type.Boolean({
           description:
-            'Interpolation between points: "linear" (straight segments, default) or "step" (horizontal-then-vertical steps, changing at the midpoint between x positions).',
+            "With stat ecdf: when true (default), prepend (xmin, 0) so step stairs start at zero. Finite-clamped (ggplot2 uses ±Inf).",
+        }),
+      ),
+      n: Type.Optional(
+        Type.Integer({
+          minimum: 1,
+          description:
+            "With stat ecdf: evaluate on n equally spaced x in [min, max] per group; omit for one point per unique x.",
         }),
       ),
       connection: Type.Optional(
@@ -812,7 +833,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin (#817), or manual (#814) controls.",
+        "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin (#817), manual (#814), or ecdf pad/n (#811) controls.",
     },
   ),
 
@@ -2609,7 +2630,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("line", {
         description:
-          "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts. With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+          "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
       }),
       stat: Type.Optional(
         Type.Union(
@@ -2641,10 +2662,14 @@ export const SpecDeclarations = {
               description:
                 "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814).",
             }),
+            Type.Literal("ecdf", {
+              description:
+                'Empirical CDF of x; y defaults to {"stat": "ecdf"} — do NOT map aes.y to a field. Prefer params.curve "step-hv" for ECDF stairs (#811).',
+            }),
           ],
           {
             description:
-              'Line stat: "identity" (default), "unique", "bin", "align", "connect", "summary_bin" (#817), or "manual" (#814).',
+              'Line stat: "identity" (default), "unique", "bin", "align", "connect", "summary_bin" (#817), "manual" (#814), or "ecdf" (#811).',
           },
         ),
       ),
@@ -2664,7 +2689,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "A line layer. Identity: requires x and y. Bin (freqpoly): requires continuous x; y is computed by the bin stat. Rows are sorted by x within each group before connecting.",
+        "A line layer. Identity: requires x and y. Bin (freqpoly): requires continuous x; y is computed by the bin stat. Ecdf: requires x only (y is computed). Rows are sorted by x within each group before connecting.",
     },
   ),
 

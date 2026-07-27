@@ -3391,6 +3391,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "EcdfStatInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "EcdfStatResult": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "EditionDefaults": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4232,6 +4240,10 @@
           "lifecycle": "experimental"
         },
         "statCount": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "statEcdf": {
           "kind": "value",
           "lifecycle": "experimental"
         },

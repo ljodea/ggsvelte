@@ -186,6 +186,11 @@
       "sourceSha256": "7aae9c345fc7b22892ec0f44c044783c3080d4eb58d79fafe446aea4815fbe5c",
       "pngSha256": "5b200ec3afed907940cede09cf159dc882df2279069e906a82324d0a0ee7ddb5"
     },
+    "line/ecdf": {
+      "filename": "line-ecdf-light.png",
+      "sourceSha256": "d471551633c7bf1f3b844babb7bf362456f0b77c36f5accdfc726db1a36a9b29",
+      "pngSha256": "50ddc15712530f71fda35c44b4cb11db0ca2ee47fddce5004960322ee18401c3"
+    },
     "line/function": {
       "filename": "line-function-light.png",
       "sourceSha256": "476d3658027ddc820a489a2f183b57ac8bea3f65dd66de5f3ea33d48574c40a7",

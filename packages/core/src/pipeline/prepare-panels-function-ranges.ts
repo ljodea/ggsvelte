@@ -27,7 +27,9 @@ export function computeFunctionPeerDomains(
     const table = tables[index] ?? tables[0];
     if (table === undefined || !table.has(binding.xField)) continue;
     const extent = finiteExtent([
-      positionColumn(table, binding.xField, binding.xConversion, binding.xTransform),
+      // Raw data extents so geom_function evaluates f() in data units (xlim is
+      // also raw). The frame then forwards the grid through xTransform.
+      positionColumn(table, binding.xField, binding.xConversion, undefined),
     ]);
     if (extent === null) continue;
     unionLo = Math.min(unionLo, extent[0]);
