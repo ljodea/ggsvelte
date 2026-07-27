@@ -1,5 +1,111 @@
 # @ggsvelte/svelte
 
+## 0.13.0
+
+### Minor Changes
+
+- 34183f1: <!-- markdownlint-disable MD041 -->
+
+  Add `palmerPenguins` and `mpg` to `@ggsvelte/svelte/data` so the bundled
+  teaching surface covers the three shapes the guide needs: time series
+  (`kyotoSakura`), continuous distribution with groups (`palmerPenguins`, CC0),
+  and categorical comparison (`mpg`, EPA / ggplot2 subset). Each ships with a
+  citation export, a docs JSON asset pinned to the package rows, and NOTICE
+  attribution.
+
+  Migration: none — additive
+
+- dfa1ba0: <!-- markdownlint-disable MD041 -->
+
+  Remove the seven deprecated grammar props from `<GGPlot>` (`theme`, `scales`,
+  `coord`, `facet`, `labs`, `guides`, `legend`) and the `LayerDescriptor` type
+  alias. Compose grammar as declaration-only children; use
+  `MarkLayerDescriptor`. Run `npx ggsvelte-codemod --write` on old source.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-12-to-0-13>
+
+- cce4f5a: # One diagnostic prose source (#987)
+
+  - Move `PIPELINE_ERROR_CATALOG` into `@ggsvelte/spec` (re-exported from core)
+  - Dual-channel codes share `DUAL_ERROR_PROSE` so summary/fix cannot drift
+  - Rename validation code `scale-manual-domain-range` → `color-manual-domain-range`
+  - Docs error-reference imports pipeline error prose from `@ggsvelte/spec`
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-11-to-0-12>
+
+### Patch Changes
+
+- 10979c1: <!-- markdownlint-disable MD041 -->
+
+  lifecycle: promote Geom* declaration-only shells to stable-intent (#705)
+
+  Tag every public `<Geom*>` component stable-intent so the recommended Svelte
+  composition path matches theme/scale/coord grammar children. Registry and
+  factory helpers stay experimental. Tag-only change — no runtime API change.
+
+  Migration: none — additive
+
+- 5b54dcb: # Extract dataChecks layer walk; per-layer style/color evidence (#844)
+
+  Move geom/stat type rules, field existence, and channel collection into
+  `validate-data-checks-layer.ts` so `dataChecks` is a thin orchestrator
+  (evidence → walk → style/position/color checkers).
+
+  Style and color scale checks now take the same per-use `evidenceForUse`
+  path as position (#609): multi-table layers that share a field name keep
+  their own type view, so a later quantitative layer no longer last-wins-hides
+  an earlier sequential/finite-style mismatch.
+
+  Migration: none — validation is stricter only for multi-table same-name
+  field cases that previously under-reported scale-type-mismatch.
+
+- 45a4a31: <!-- markdownlint-disable MD041 -->
+
+  refactor(svelte): extract pure data-identity epoch input builder
+
+  Move markLayers-vs-layers-prop, ready-without-assembled, and explicit-spec
+  content pick into buildDataIdentityEpochInput next to dataIdentityEpochToken.
+  plot-engine keeps the tracker and $derived call site.
+
+- a955cf2: <!-- markdownlint-disable MD041 -->
+
+  refactor(svelte): thin scene-reconcile apply out of InspectionState $effect
+
+  `applySceneInspectReconcile(plan, bag)` owns the clear-disabled / invalidate-*
+  side-effect table; the factory `$effect` is a short plan → apply shell (#855).
+
+- c550483: <!-- markdownlint-disable MD041 -->
+
+  perf(svelte): CAP-sized heap for canvas a11y table row select
+
+  Opening the canvas a11y table no longer fully sorts every distinct source-row
+  index. Keep a max-heap of the CAP smallest indexes that materialise so cost is
+  O(R log CAP) instead of O(R log R) when R ≫ 100.
+
+- 2531cb5: <!-- markdownlint-disable MD041 -->
+
+  docs(svelte): rewrite the shipped agent skill artifact for the 0.12 API
+
+  The skill (`skills/ggsvelte/`, shipped in the package tarball) now teaches
+  child-layer composition as the canonical Svelte form, draws the JSON-vs-props
+  aes distinction, covers the 0.11.0 grammar-prop deprecation and codemod, and
+  adds a `references/` tree with exhaustive geom/stat/theme/palette/scale
+  inventories checked against the spec catalogs by `scripts/skill-content.test.ts`.
+
+- Updated dependencies [f6d99d5]
+- Updated dependencies [dfa1ba0]
+- Updated dependencies [d800541]
+- Updated dependencies [5b54dcb]
+- Updated dependencies [d4934b0]
+- Updated dependencies [3e463ae]
+- Updated dependencies [20a3e17]
+- Updated dependencies [58bccd6]
+- Updated dependencies [ee099ba]
+- Updated dependencies [3c5fba6]
+- Updated dependencies [cce4f5a]
+  - @ggsvelte/core@0.13.0
+  - @ggsvelte/spec@0.13.0
+
 ## 0.12.0
 
 ### Minor Changes
