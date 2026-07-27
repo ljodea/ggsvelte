@@ -60,6 +60,7 @@ export function buildGeometryBatches(input: {
         geom === "density_2d_filled" ||
         geom === "area" ||
         geom === "density" ||
+        geom === "violin" ||
         geom === "smooth" ||
         geom === "quantile" ||
         geom === "ribbon" ||

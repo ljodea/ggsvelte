@@ -47,6 +47,7 @@ import type {
   GeomRuleOptions,
   GeomRugOptions,
   GeomSegmentOptions,
+  GeomViolinOptions,
   GeomFunctionOptions,
   GeomPolygonOptions,
   GeomAblineOptions,
@@ -366,6 +367,11 @@ export class GGBuilderCore {
    */
   geomSegment(options: GeomSegmentOptions = {}): GGBuilder {
     return this.layer(layerFrom("segment", options));
+  }
+
+  /** Sugar for .layer({ geom: 'violin', ... }) — mirrored y-density polygons. */
+  geomViolin(options: GeomViolinOptions = {}): GGBuilder {
+    return this.layer(layerFrom("violin", options));
   }
 
   /** Sugar for .layer({ geom: 'qq', ... }) — Q–Q scatter (requires aes.sample). */

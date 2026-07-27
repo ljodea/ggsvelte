@@ -756,6 +756,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomViolinOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomVlineOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1544,6 +1548,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeViolinLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeVlineLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1943,6 +1951,22 @@
         "ValidateResult": {
           "kind": "type",
           "lifecycle": "stable-intent"
+        },
+        "ViolinLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ViolinLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ViolinLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ViolinParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
         },
         "ViridisOptionName": {
           "kind": "type",
@@ -5014,6 +5038,10 @@
           "lifecycle": "experimental"
         },
         "GeomTile": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomViolin": {
           "kind": "value",
           "lifecycle": "experimental"
         },

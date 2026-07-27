@@ -25,6 +25,19 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
   // Dotplot stackdir "up"/"down" benefit from a zero baseline so the first
   // stack row sits on the axis (ggplot2 count-unit stacks).
   if (isBarLike(geom) || geom === "density" || geom === "dotplot") acc.barMeasure = true;
+  // geom_violin stashes unitless violinwidth (0-1) in ymin/ymax for the
+  // geometry to widen polygons; those are not y positions, so training on them
+  // would shrink the axis to 0-1 and throw every polygon off-panel (#798).
+  if (geom === "violin") {
+    if (frame.yNumeric !== null) acc.numeric.push(frame.yNumeric);
+    if (binding.yField !== null) {
+      const fieldType = positionFieldType(frame.table, binding.yField, yConversion);
+      acc.typeParts.add(fieldType);
+      if (fieldType === "nominal") acc.anyDiscrete = true;
+      if (fieldType !== "temporal") acc.allTemporal = false;
+    }
+    return;
+  }
   if (frame.ymin !== null && frame.ymax !== null) {
     acc.numeric.push(frame.ymin, frame.ymax);
     // Bands need not cover the center line (se: false smooths have

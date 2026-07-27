@@ -204,6 +204,10 @@ export const PIPELINE_WARNING_CATALOG = {
     summary:
       "geom_hex is missing per-cell width/height from bin_hex (identity or incomplete frame); the layer is skipped.",
   },
+  "ydensity-group-dropped": {
+    summary:
+      "geom_violin needs at least two data points per group to estimate a density; smaller groups are dropped.",
+  },
 } as const satisfies Record<string, { summary: string }>;
 
 export type PipelineWarningCode = keyof typeof PIPELINE_WARNING_CATALOG;

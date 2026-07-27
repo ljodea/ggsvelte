@@ -45,6 +45,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   crossbar: ["x"],
   rect: ["xmin", "xmax", "ymin", "ymax"],
   segment: ["x", "y", "xend", "yend"],
+  violin: ["x", "y"],
   function: [], // domain from xlim / peer / optional x; y is after_stat
   polygon: ["x", "y"],
   spoke: ["x", "y"], // angle/radius: aes or params — checked below

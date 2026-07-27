@@ -110,6 +110,7 @@ export { default as GeomRaster } from "./geoms/GeomRaster.svelte";
 export { default as GeomHex } from "./geoms/GeomHex.svelte";
 export { default as GeomRibbon } from "./geoms/GeomRibbon.svelte";
 export { default as GeomSegment } from "./geoms/GeomSegment.svelte";
+export { default as GeomViolin } from "./geoms/GeomViolin.svelte";
 export { default as GeomFunction } from "./geoms/GeomFunction.svelte";
 export { default as GeomPolygon } from "./geoms/GeomPolygon.svelte";
 /** @lifecycle stable-intent */

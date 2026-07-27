@@ -55,6 +55,7 @@ export function candidateAutoMode(
     case "pointrange":
     case "crossbar":
     case "boxplot":
+    case "violin":
       return "x";
     case "ribbon":
       return binding.ribbonOrientation === "y" ? "y" : "x";

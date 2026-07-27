@@ -1200,6 +1200,79 @@
       "additionalProperties": false,
       "description": "Parameters for geom_contour isolines (#801). v1: regular grid only; contour_filled deferred."
     },
+    "ViolinParams": {
+      "type": "object",
+      "properties": {
+        "bw": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Kernel bandwidth in data units (must be greater than 0). Omit for R's bw.nrd0 rule-of-thumb default."
+        },
+        "adjust": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Bandwidth multiplier (must be greater than 0). Default 1."
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 4096,
+          "description": "Number of density grid points (2–4096). Default 512."
+        },
+        "trim": {
+          "type": "boolean",
+          "description": "When true (default), trim the density to the data range; when false, extend cut·bw tails like density()."
+        },
+        "scale": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "area"
+            },
+            {
+              "type": "string",
+              "const": "count"
+            },
+            {
+              "type": "string",
+              "const": "width"
+            }
+          ],
+          "description": "Relative violin max-width scaling: \"area\" (default), \"count\", or \"width\" (equal max width)."
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Max violin width as a fraction of the discrete x band (like boxplot). Default 0.75."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fill opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Outline stroke width in px. Must be greater than 0. Default 0.5."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for the violin geom (mirrored y-density polygons)."
+    },
     "BoxplotParams": {
       "type": "object",
       "properties": {
@@ -3314,6 +3387,52 @@
       "additionalProperties": false,
       "description": "A contour isoline layer. Requires continuous x, y, and z on a regular complete grid. Levels from params.breaks, binwidth, or bins (default 10)."
     },
+    "ViolinLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "violin",
+          "description": "Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge."
+        },
+        "stat": {
+          "type": "string",
+          "const": "ydensity",
+          "description": "Violin layers run a y-oriented KDE per x category and group."
+        },
+        "position": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "dodge"
+            },
+            {
+              "type": "string",
+              "const": "identity"
+            }
+          ],
+          "description": "Position adjustment: \"dodge\" (default) or \"identity\"."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/ViolinParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A violin layer. Requires discrete x and continuous y. Densities are computed by the ydensity stat."
+    },
     "BoxplotLayer": {
       "type": "object",
       "required": [
@@ -4832,6 +4951,9 @@
         },
         {
           "$ref": "#/$defs/BoxplotLayer"
+        },
+        {
+          "$ref": "#/$defs/ViolinLayer"
         },
         {
           "$ref": "#/$defs/DensityLayer"

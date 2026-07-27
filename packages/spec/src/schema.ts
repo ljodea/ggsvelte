@@ -120,6 +120,7 @@ export const FreqpolyLayerSchema = SpecModule.Import("FreqpolyLayer");
 export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
+export const ViolinLayerSchema = SpecModule.Import("ViolinLayer");
 export const FunctionLayerSchema = SpecModule.Import("FunctionLayer");
 export const PolygonLayerSchema = SpecModule.Import("PolygonLayer");
 export const AblineLayerSchema = SpecModule.Import("AblineLayer");
@@ -240,6 +241,7 @@ export type HlineParams = SpecType<"HlineParams">;
 export type VlineParams = SpecType<"VlineParams">;
 /** Segment layer params (styling + lineend). */
 export type SegmentParams = SpecType<"SegmentParams">;
+export type ViolinParams = SpecType<"ViolinParams">;
 /** Function layer params (named fun + grid). */
 export type FunctionParams = SpecType<"FunctionParams">;
 /** Named portable function registry entry. */
@@ -374,6 +376,8 @@ export type HexLayer = LayerWithDataRef<SpecType<"HexLayer">>;
 export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 /** A finite segment layer ((x,y)→(xend,yend)). */
 export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
+/** A violin (mirrored y-density) layer. */
+export type ViolinLayer = LayerWithDataRef<SpecType<"ViolinLayer">>;
 /** An analytic function path layer (y = f(x) grid). */
 export type FunctionLayer = LayerWithDataRef<SpecType<"FunctionLayer">>;
 /** A closed polygon layer ((x,y) vertices in data order). */
@@ -423,6 +427,7 @@ export type LayerSpec =
   | AreaLayer
   | RibbonLayer
   | SegmentLayer
+  | ViolinLayer
   | FunctionLayer
   | PolygonLayer
   | AblineLayer

@@ -69,6 +69,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "cd66029f5fcfd9832574b1eb685fac131e2850805a85966cada49060b3b95b9f",
   },
   {
+    id: "boxplot/violin",
+    filename: "boxplot-violin-light.png",
+    path: "/previews/boxplot-violin-light.png",
+    sha256: "23d86fc50333f3b25c84e520b73915939bda7745a1657a5ba2ebd6e7a19d6522",
+  },
+  {
     id: "col/basic",
     filename: "col-basic-light.png",
     path: "/previews/col-basic-light.png",

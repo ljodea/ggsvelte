@@ -1,0 +1,42 @@
+{
+  "id": "99-violin-filled",
+  "kind": "chart",
+  "prompt": "Draw a violin plot of latency per region, filled by region.",
+  "dataProfile": {
+    "fields": [
+      { "name": "region", "type": "nominal" },
+      { "name": "latency", "type": "quantitative" }
+    ],
+    "rowCount": 8
+  },
+  "data": {
+    "main": [
+      { "region": "east", "latency": 10 },
+      { "region": "east", "latency": 12 },
+      { "region": "east", "latency": 13 },
+      { "region": "east", "latency": 15 },
+      { "region": "west", "latency": 20 },
+      { "region": "west", "latency": 22 },
+      { "region": "west", "latency": 23 },
+      { "region": "west", "latency": 25 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "violin",
+        "stat": "ydensity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "region" },
+          "y": { "field": "latency" },
+          "fill": { "field": "region" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_violin with a mapped fill (#798)."
+}

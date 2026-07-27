@@ -493,6 +493,19 @@ export class MockResponder implements Responder {
       }
       spec.layers.push(layer);
       xField = x;
+    } else if (/\bgeom[_\s]?violin\b|\bviolin plots?\b|\bviolin\b/.test(prompt)) {
+      // geom_violin: mirrored ydensity polygons per discrete x (#798).
+      const x = pick.mentionedCat() ?? pick.cat() ?? "x";
+      const y = pick.mentionedQuant() ?? pick.quant() ?? "y";
+      const layer: MockLayer = { geom: "violin", aes: { x: f(x), y: f(y) } };
+      colorFor("fill", layer.aes);
+      // mentionedCat() is consumed by x above, so "filled by <that field>"
+      // falls back to the discrete x — the usual violin spelling.
+      if (layer.aes.fill === undefined && /filled by|fill by/.test(prompt)) {
+        layer.aes.fill = f(x);
+      }
+      spec.layers.push(layer);
+      xField = x;
     } else if (
       !/\bscatter\b/.test(prompt) &&
       /\bas labels?\b|\bgeom[_\s]?label\b/.test(prompt) &&

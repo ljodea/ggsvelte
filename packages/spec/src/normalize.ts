@@ -74,6 +74,7 @@ export type {
   JitterLayerInput,
   RibbonLayerInput,
   SegmentLayerInput,
+  ViolinLayerInput,
   FunctionLayerInput,
   PolygonLayerInput,
   AblineLayerInput,

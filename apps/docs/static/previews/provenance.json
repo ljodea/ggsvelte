@@ -51,6 +51,11 @@
       "sourceSha256": "36cf6d5d53badd6bc8b64cbb16dcd8c137bb1780461b5796f51ea5ebcae2001c",
       "pngSha256": "cd66029f5fcfd9832574b1eb685fac131e2850805a85966cada49060b3b95b9f"
     },
+    "boxplot/violin": {
+      "filename": "boxplot-violin-light.png",
+      "sourceSha256": "bbc5d28f1a5e8c2723fc5463b73530ef020cf0b4890e2ccaed1395cde301130f",
+      "pngSha256": "23d86fc50333f3b25c84e520b73915939bda7745a1657a5ba2ebd6e7a19d6522"
+    },
     "col/basic": {
       "filename": "col-basic-light.png",
       "sourceSha256": "f57e050ff73917e9de5b7f65cf9f47ce42eec3038009c3dd653d5ed4cff58d79",

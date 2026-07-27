@@ -1302,6 +1302,85 @@ export const SpecDeclarations = {
     },
   ),
 
+  ViolinParams: Type.Object(
+    {
+      bw: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Kernel bandwidth in data units (must be greater than 0). Omit for R's bw.nrd0 rule-of-thumb default.",
+        }),
+      ),
+      adjust: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Bandwidth multiplier (must be greater than 0). Default 1.",
+        }),
+      ),
+      n: Type.Optional(
+        Type.Integer({
+          minimum: 2,
+          maximum: 4096,
+          description: "Number of density grid points (2–4096). Default 512.",
+        }),
+      ),
+      trim: Type.Optional(
+        Type.Boolean({
+          description:
+            "When true (default), trim the density to the data range; when false, extend cut·bw tails like density().",
+        }),
+      ),
+      scale: Type.Optional(
+        Type.Union([Type.Literal("area"), Type.Literal("count"), Type.Literal("width")], {
+          description:
+            'Relative violin max-width scaling: "area" (default), "count", or "width" (equal max width).',
+        }),
+      ),
+      width: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          maximum: 1,
+          description:
+            "Max violin width as a fraction of the discrete x band (like boxplot). Default 0.75.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Fill opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Outline stroke width in px. Must be greater than 0. Default 0.5.",
+        }),
+      ),
+      fillPaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient fill paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description: "Parameters for the violin geom (mirrored y-density polygons).",
+    },
+  ),
+
   BoxplotParams: Type.Object(
     {
       width: Type.Optional(
@@ -3313,6 +3392,39 @@ export const SpecDeclarations = {
     },
   ),
 
+  ViolinLayer: Type.Object(
+    {
+      geom: Type.Literal("violin", {
+        description:
+          "Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("ydensity", {
+          description: "Violin layers run a y-oriented KDE per x category and group.",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Union([Type.Literal("dodge"), Type.Literal("identity")], {
+          description: 'Position adjustment: "dodge" (default) or "identity".',
+        }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("ViolinParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A violin layer. Requires discrete x and continuous y. Densities are computed by the ydensity stat.",
+    },
+  ),
+
   BoxplotLayer: Type.Object(
     {
       geom: Type.Literal("boxplot", {
@@ -4482,6 +4594,7 @@ export const SpecDeclarations = {
       Type.Ref("QqLineLayer"),
       Type.Ref("ContourLayer"),
       Type.Ref("BoxplotLayer"),
+      Type.Ref("ViolinLayer"),
       Type.Ref("DensityLayer"),
       Type.Ref("Density2dLayer"),
       Type.Ref("Density2dFilledLayer"),

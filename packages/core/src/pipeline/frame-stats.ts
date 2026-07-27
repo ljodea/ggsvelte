@@ -14,6 +14,7 @@ import { buildConnectFrame } from "./frame-stats-connect.js";
 import { buildDensity2dFrame } from "./frame-stats-density-2d.js";
 import { buildEllipseFrame } from "./frame-stats-ellipse.js";
 import { buildBoxplotFrame, buildSmoothFrame, buildSummaryFrame } from "./frame-stats-fit.js";
+import { buildYDensityFrame } from "./frame-stats-ydensity.js";
 import { buildFunctionFrame } from "./frame-stats-function.js";
 import { buildQqFrame, buildQqLineFrame } from "./frame-stats-qq.js";
 import { buildManualFrame } from "./frame-stats-manual.js";
@@ -54,6 +55,7 @@ export function buildNonIdentityFrame(
     return buildBindotFrame(binding, table, groups, warnings, advisories, binRange);
   if (stat === "bin_2d") return buildBin2dFrame(binding, table, groups, warnings, advisories);
   if (stat === "density") return buildDensityFrame(binding, table, groups, warnings);
+  if (stat === "ydensity") return buildYDensityFrame(binding, table, groups, warnings);
   if (stat === "ecdf") return buildEcdfFrame(binding, table, groups, warnings);
   if (stat === "density_2d" || stat === "density_2d_filled") {
     return buildDensity2dFrame(binding, table, groups, warnings);

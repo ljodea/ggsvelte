@@ -31,6 +31,7 @@ import type {
   VlineParams,
   RugParams,
   SegmentParams,
+  ViolinParams,
   FunctionParams,
   PolygonParams,
   AblineParams,
@@ -375,6 +376,13 @@ export interface GeomQqLineOptions extends QqLineParams, GeomDataOption {
 export interface GeomPolygonOptions extends PolygonParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
+}
+
+/** Violin-layer sugar options. */
+export interface GeomViolinOptions extends ViolinParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+  position?: "dodge" | "identity";
 }
 
 /** Text-layer sugar options: params plus an optional layer-level aes. */

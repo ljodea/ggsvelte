@@ -19,6 +19,7 @@ import { boxplotBatches, errorbarBatch, smoothBatches } from "./geometry-composi
 import { edgeRectsBatch, rasterRectsBatch, tileRectsBatch } from "./geometry-edge-rects.js";
 import { ribbonBatches } from "./geometry-ribbon.js";
 import { finiteSegmentBatch } from "./geometry-segment-finite.js";
+import { violinBatch } from "./geometry-violin.js";
 import { ablineBatch } from "./geometry-abline.js";
 import { curveBatch } from "./geometry-curve.js";
 import { hexBatch } from "./geometry-hex.js";
@@ -109,6 +110,8 @@ export function dispatchGeometryBatch(
       return boxplotBatches(frame, fx, fill, styles, warnings);
     case "errorbar":
       return single(errorbarBatch(frame, fx, color, styles, warnings));
+    case "violin":
+      return single(violinBatch(frame, fx, fill, color, styles, warnings));
     case "linerange":
       return single(linerangeBatch(frame, fx, color, styles, warnings));
     case "pointrange":

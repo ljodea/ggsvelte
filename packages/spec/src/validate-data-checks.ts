@@ -45,6 +45,7 @@ export const STAT_COLUMNS: Record<string, readonly string[]> = {
   bin_hex: ["count", "density", "ncount", "ndensity"],
   bin_2d: ["count", "density", "ncount", "ndensity"],
   density: ["density", "count", "scaled", "ndensity"],
+  ydensity: ["density", "count", "scaled", "violinwidth", "y"],
   bindot: ["stackpos"],
   smooth: ["y", "ymin", "ymax", "se"],
   boxplot: ["ymin", "lower", "middle", "upper", "ymax"],

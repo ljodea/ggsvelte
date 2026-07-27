@@ -39,6 +39,7 @@ import type {
   VlineParams,
   RugParams,
   SegmentParams,
+  ViolinParams,
   FunctionParams,
   PolygonParams,
   AblineParams,
@@ -369,6 +370,13 @@ export interface SegmentLayerInput extends LayerInputBase {
   params?: SegmentParams;
 }
 
+export interface ViolinLayerInput extends LayerInputBase {
+  geom: "violin";
+  stat?: "ydensity";
+  position?: "dodge" | "identity";
+  params?: ViolinParams;
+}
+
 export interface FunctionLayerInput extends LayerInputBase {
   geom: "function";
   stat?: "function";
@@ -502,8 +510,9 @@ export type LayerInput =
   | TileLayerInput
   | Bin2dLayerInput
   | RasterLayerInput
-  | HexLayerInput
   | SegmentLayerInput
+  | ViolinLayerInput
+  | HexLayerInput
   | FunctionLayerInput
   | PolygonLayerInput
   | CurveLayerInput

@@ -2028,6 +2028,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "ydensity-group-dropped",
+        title: "ydensity-group-dropped",
+        level: 3,
+      },
+      {
         id: "interaction-diagnostics-ggsvelte-svelte",
         title: "Interaction diagnostics (@ggsvelte/svelte)",
         level: 2,
@@ -2292,8 +2297,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-816",
-        title: "experimental (816)",
+        id: "experimental-822",
+        title: "experimental (822)",
         level: 3,
       },
       {
@@ -2332,8 +2337,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-516",
-        title: "experimental (516)",
+        id: "experimental-517",
+        title: "experimental (517)",
         level: 3,
       },
       {
@@ -2622,6 +2627,16 @@ export const DOCS_ROUTES = [
     title: "Boxplot by category — ggsvelte gallery",
     description: "Boxplot by category",
     canonicalPath: "/examples/boxplot/by-category",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/boxplot/violin",
+    title: "Violin plots of Michelson's runs — ggsvelte gallery",
+    description: "Violin plots of Michelson's runs",
+    canonicalPath: "/examples/boxplot/violin",
     kind: "page",
     index: true,
     sitemap: true,
