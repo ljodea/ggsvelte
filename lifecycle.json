@@ -4227,6 +4227,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "humanizeFieldTitle": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "inferDiscreteness": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4404,6 +4408,10 @@
           "lifecycle": "experimental"
         },
         "serializeScaleState": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "spaceFieldName": {
           "kind": "value",
           "lifecycle": "experimental"
         },

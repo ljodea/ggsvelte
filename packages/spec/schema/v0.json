@@ -8199,39 +8199,39 @@
         },
         "x": {
           "type": "string",
-          "description": "X axis title. Defaults to the mapped field name."
+          "description": "X axis title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "y": {
           "type": "string",
-          "description": "Y axis title. Defaults to the mapped field name."
+          "description": "Y axis title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "color": {
           "type": "string",
-          "description": "Color legend title. Defaults to the mapped field name."
+          "description": "Color legend title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "fill": {
           "type": "string",
-          "description": "Fill legend title. Defaults to the mapped field name."
+          "description": "Fill legend title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "size": {
           "type": "string",
-          "description": "Size legend title. Defaults to the mapped field name."
+          "description": "Size legend title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "linewidth": {
           "type": "string",
-          "description": "Linewidth legend title. Defaults to the mapped field name."
+          "description": "Linewidth legend title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "alpha": {
           "type": "string",
-          "description": "Alpha legend title. Defaults to the mapped field name."
+          "description": "Alpha legend title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "shape": {
           "type": "string",
-          "description": "Shape legend title. Defaults to the mapped field name."
+          "description": "Shape legend title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "linetype": {
           "type": "string",
-          "description": "Linetype legend title. Defaults to the mapped field name."
+          "description": "Linetype legend title. Defaults to a humanized form of the mapped field name (sentence case)."
         }
       },
       "additionalProperties": false,
