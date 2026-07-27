@@ -157,7 +157,7 @@ describe("geom_rug geometry (#806)", () => {
         },
         aes: { x: { field: "x" }, y: { field: "y" } },
         layers: [{ geom: "rug", params: { sides: "bl", length: 0.1 } }],
-      } as import("@ggsvelte/spec").PortableSpec,
+      },
       size,
     );
     const batch = model.scene.batches.find((b) => b.kind === "segments");
@@ -179,7 +179,7 @@ describe("geom_rug geometry (#806)", () => {
     }
     // y is default/placeholder domain — tick length must not expand it to data-like range
     if (model.scales.y.type !== "band") {
-      const span = Number(model.scales.y.domain[1]) - Number(model.scales.y.domain[0]);
+      const span = model.scales.y.domain[1] - model.scales.y.domain[0];
       expect(span).toBeLessThan(20);
     }
   });

@@ -20,7 +20,7 @@ const DEFAULT_SIDES = "bl";
 const DEFAULT_LENGTH = 0.03;
 
 function parseRugSides(sides: string | undefined): Set<"b" | "l" | "t" | "r"> {
-  const raw = sides && sides.length > 0 ? sides : DEFAULT_SIDES;
+  const raw = sides !== undefined && sides.length > 0 ? sides : DEFAULT_SIDES;
   const out = new Set<"b" | "l" | "t" | "r">();
   for (const ch of raw) {
     if (ch === "b" || ch === "l" || ch === "t" || ch === "r") out.add(ch);

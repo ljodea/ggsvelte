@@ -119,7 +119,7 @@ export function assertRequiredChannels(input: {
     }
   }
   if (geom === "rug") {
-    const sides = rugSides && rugSides.length > 0 ? rugSides : "bl";
+    const sides = rugSides !== undefined && rugSides.length > 0 ? rugSides : "bl";
     if (/[bt]/.test(sides)) requireField(xField, "x", index, geom);
     if (/[lr]/.test(sides)) requireField(yField, "y", index, geom);
   }
