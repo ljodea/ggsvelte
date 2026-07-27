@@ -247,14 +247,16 @@ describe("R0 release wiring", () => {
     expect(journeysJob).toContain("packages-dist");
     expect(journeysJob).toContain("bun run build:docs");
     expect(journeysJob).not.toContain("bun run test:interaction-perf");
-    expect(journeysJob).toContain("interaction-accessibility.spec.ts");
-    expect(journeysJob).toContain("docs-home-gallery.spec.ts");
-    expect(journeysJob).toContain("docs-progressive-search.spec.ts");
-    expect(journeysJob).toContain("docs-themes.spec.ts");
     expect(journeysJob).toContain("--grep-invert 'visual contract'");
     expect(journeysJob).toContain("--project journeys");
     expect(read("tests/visual/playwright.config.ts")).toContain('name: "journeys"');
     expect(read("tests/visual/playwright.config.ts")).toContain("timeout: 60_000");
+    expect(read("tests/visual/playwright.config.ts")).toContain("docs-shell");
+    expect(read("tests/visual/playwright.config.ts")).toContain("docs-home-gallery");
+    expect(read("tests/visual/playwright.config.ts")).toContain("docs-progressive-search");
+    expect(read("tests/visual/playwright.config.ts")).toContain("docs-themes");
+    expect(read("tests/visual/playwright.config.ts")).toContain("interaction-accessibility");
+    expect(read("tests/visual/playwright.config.ts")).toContain("playground");
     // ci-gate: package component = svelte+svelte-fx+spikes; docs_journeys is independent.
     expect(ci).toContain("COMPONENT_SVELTE_RES");
     expect(ci).toContain("COMPONENT_SVELTE_FX_RES");
