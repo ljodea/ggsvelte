@@ -321,18 +321,18 @@ export function formatTemporalTickSequence(
               : `${part.monthShort} ${String(part.day)}`;
         break;
       case "hour":
-      case "minute":
+      case "minute": {
         // time-of-day: never prefix a calendar date — values live on 1970-01-01Z.
-        if (options.kind === "time") {
-          label = `${pad2(part.hour)}:${pad2(part.minute)}`;
-        } else if (!multiDay) {
-          label = `${pad2(part.hour)}:${pad2(part.minute)}`;
-        } else if (!multiYear) {
-          label = `${part.monthShort} ${String(part.day)} ${pad2(part.hour)}:${pad2(part.minute)}`;
+        const clock = `${pad2(part.hour)}:${pad2(part.minute)}`;
+        if (options.kind === "time" || !multiDay) {
+          label = clock;
+        } else if (multiYear) {
+          label = `${part.monthShort} ${String(part.day)}, ${String(part.year)} ${clock}`;
         } else {
-          label = `${part.monthShort} ${String(part.day)}, ${String(part.year)} ${pad2(part.hour)}:${pad2(part.minute)}`;
+          label = `${part.monthShort} ${String(part.day)} ${clock}`;
         }
         break;
+      }
       case "second":
         label = `${pad2(part.hour)}:${pad2(part.minute)}:${pad2(part.second)}`;
         break;
