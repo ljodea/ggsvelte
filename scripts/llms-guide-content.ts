@@ -166,15 +166,12 @@ export const DATA_MAPPINGS_MD = `# Data and mappings
 
 ## Map fields to position
 
-Numeric fields to position channels:
-
 \`\`\`svelte fragment
 aes={{ x: "weight", y: "economy" }}
 \`\`\`
 
-Change the mapping without reshaping rows, or change rows without changing the
-grammar. The [scatter with color example](/examples/point/scatter-color) adds a
-discrete color channel on the same positions.
+[Scatter with color](/examples/point/scatter-color) adds a discrete color channel
+on the same positions.
 
 ## Keep data local
 
@@ -190,8 +187,6 @@ mappings.
 
 ## Compose layers
 
-Line first, points on top:
-
 \`\`\`svelte fragment
 <GeomLine />
 <GeomPoint />
@@ -199,13 +194,7 @@ Line first, points on top:
 
 Layers inherit plot mappings unless a layer supplies its own mapping or data.
 [Multi-series line](/examples/line/multi-series) uses the same pattern with a
-stable discrete color scale.
-
-## Choose a mark for the question
-
-Points for records, lines for ordered series, columns for precomputed heights,
-bars for counts, rules/text for annotation. [Examples](/examples) shows each
-mark on real data.
+stable discrete color scale. [Examples](/examples) for every mark on real data.
 `;
 
 export const STATISTICS_POSITIONS_MD = `# Statistics and positions
@@ -214,8 +203,6 @@ Stats derive marks from mapped rows. Positions control how derived marks share
 coordinate space.
 
 ## Statistical summaries
-
-Fitted trend over points:
 
 \`\`\`svelte fragment
 <GeomPoint />
@@ -1046,8 +1033,6 @@ trained scales (flip, etc.) without rewriting aesthetic mappings.
 
 ## Facet a comparison
 
-One grammar, one panel per group:
-
 \`\`\`svelte fragment
 <GGPlot data={cars} aes={{ x: "weight", y: "economy" }}>
   <FacetWrap field="vehicleClass" ncol={2} />
@@ -1055,15 +1040,12 @@ One grammar, one panel per group:
 </GGPlot>
 \`\`\`
 
-Fixed scales: compare magnitudes across panels. Free scales: within-panel shape
-at the cost of cross-panel magnitude. [facet wrap](/examples/facet/wrap),
-[free-y](/examples/facet/wrap-free-y).
+[facet wrap](/examples/facet/wrap), [free-y](/examples/facet/wrap-free-y).
 
 ## Coordinates
 
 Prefer \`coord flip\` for horizontal bars over swapping x/y semantics.
-[Horizontal bar](/examples/bar/horizontal) keeps category on x, value on y, then
-flips presentation.
+[Horizontal bar](/examples/bar/horizontal).
 
 ## Scale transforms versus coordinate transforms
 
@@ -1189,8 +1171,6 @@ export const INSPECT_PIN_MD = `# Inspect and pin
 Chart-local: semantic crosshair, HTML tooltip, keyboard traversal, optional pin.
 
 ## Inspect and pin
-
-Stable row key + inspect:
 
 \`\`\`svelte fragment
 <GGPlot

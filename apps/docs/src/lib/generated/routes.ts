@@ -303,11 +303,6 @@ export const DOCS_ROUTES = [
         title: "Compose layers",
         level: 2,
       },
-      {
-        id: "choose-a-mark-for-the-question",
-        title: "Choose a mark for the question",
-        level: 2,
-      },
     ],
   },
   {

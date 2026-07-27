@@ -30,8 +30,8 @@
       A layered grammar of graphics implemented for agents
     </h1>
     <p>
-      Made for human-agent teams building embedded agents who need to make
-      reliable interactive visualizations on-demand.
+      ggplot2's grammar for Svelte. Every plot is strict JSON: validate,
+      correct, render headless.
     </p>
   </div>
 
@@ -131,11 +131,7 @@
     <h2 id="code-path-heading">
       Svelte for builders, JSON for embedded agents.
     </h2>
-    <p>
-      Svelte components help human-agent teams reason about visualizations
-      together. JSON specs allow agents operating in webapps to make interactive
-      charts on demand for rendering on-the-fly.
-    </p>
+    <p>Author in Svelte. Agents emit the same chart as PortableSpec JSON.</p>
   </div>
   <CodeTabs {tabs} />
 </section>
