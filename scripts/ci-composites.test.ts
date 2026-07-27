@@ -26,6 +26,9 @@ const PLAYWRIGHT_VERSION_SYNC_JOBS = [
 const PACKAGES_DIST_CONSUMERS = [
   "consumer-compat",
   "component-svelte",
+  // The collect job runs the SSR lane and resolves the config for the coverage
+  // merge, so it needs packages/*/dist just as its shards do (issue #1035).
+  "component-svelte-coverage",
   "component-svelte-fx",
   "component-spikes",
   "component-journeys",
@@ -41,6 +44,7 @@ const SETUP_BUN_JOBS = [
   "compatibility-matrix",
   "consumer-compat",
   "component-svelte",
+  "component-svelte-coverage",
   "component-svelte-fx",
   "component-spikes",
   "component-journeys",
@@ -60,6 +64,7 @@ const BUN_INSTALL_JOBS = [
   "checks",
   "unit",
   "component-svelte",
+  "component-svelte-coverage",
   "component-svelte-fx",
   "component-spikes",
   "component-journeys",
@@ -73,6 +78,7 @@ const BUN_INSTALL_JOBS = [
 
 const CONTAINER_BUN_INSTALL_JOBS = new Set([
   "component-svelte",
+  "component-svelte-coverage",
   "component-svelte-fx",
   "component-spikes",
   "component-journeys",
@@ -136,9 +142,10 @@ describe("ci-download-packages-dist composite", () => {
         /download-artifact@[0-9a-f]+[\s\S]{0,120}name:\s*packages-dist/,
       );
     }
-    // Exactly six uses in ci.yml (component-svelte split into chromium + fx).
+    // One use per consumer, and no others: component-svelte is chromium shards
+    // plus a coverage-merge collect job, alongside fx / spikes / journeys.
     const uses = ci.match(/uses: \.\/\.github\/actions\/ci-download-packages-dist/g) ?? [];
-    expect(uses.length).toBe(6);
+    expect(uses.length).toBe(PACKAGES_DIST_CONSUMERS.length);
   });
 });
 

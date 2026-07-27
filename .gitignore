@@ -12,6 +12,8 @@ apps/docs/test-results/
 spikes/browser/test-results/
 benchmarks/results/
 .vitest-attachments/
+# vitest --reporter=blob output; written by sharded component runs (issue #1035)
+.vitest-reports/
 spikes/**/__screenshots__/
 packages/svelte/tests/__screenshots__/
 *.tsbuildinfo

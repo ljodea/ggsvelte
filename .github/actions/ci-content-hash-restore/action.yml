@@ -22,6 +22,13 @@ inputs:
     description: Optional Playwright container tag for component shards
     required: false
     default: ""
+  shard:
+    description: >
+      Optional matrix fan-out leg as "<index>/<total>" (1-based), matching the
+      vitest / playwright --shard spelling. Legs of one execution hash the same
+      content but run disjoint test files, so each needs its own marker.
+    required: false
+    default: ""
   matrix_node:
     description: Optional consumer matrix node major (with other matrix_* inputs)
     required: false
@@ -71,6 +78,7 @@ runs:
         DISABLE: ${{ inputs.disable }}
         EXECUTION: ${{ inputs.execution }}
         CONTAINER_TAG: ${{ inputs.container_tag }}
+        SHARD: ${{ inputs.shard }}
         MATRIX_NODE: ${{ inputs.matrix_node }}
         MATRIX_PM: ${{ inputs.matrix_pm }}
         MATRIX_PM_VERSION: ${{ inputs.matrix_pm_version }}
@@ -91,6 +99,9 @@ runs:
         args=(--execution "${EXECUTION}" --os "${RUNNER_OS}")
         if [ -n "${CONTAINER_TAG}" ]; then
           args+=(--container-tag "${CONTAINER_TAG}")
+        fi
+        if [ -n "${SHARD}" ]; then
+          args+=(--shard "${SHARD}")
         fi
         if [ -n "${MATRIX_NODE}" ]; then
           args+=(
@@ -113,7 +124,7 @@ runs:
       if: steps.compute.outputs.bypass != 'true'
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
-        path: .ci-content-hash/${{ inputs.execution }}.ok
+        path: ${{ steps.compute.outputs.marker_path }}
         # Exact key only (no restore-keys) — incomplete or wrong-tree hits are unsafe.
         key: ${{ steps.compute.outputs.cache_key }}
 
@@ -125,7 +136,11 @@ runs:
         # env-indirection: step outputs must not expand into the script body (zizmor).
         CONTENT_HASH: ${{ steps.compute.outputs.hash }}
         EXECUTION: ${{ inputs.execution }}
+        SHARD: ${{ inputs.shard }}
       run: |
         set -euo pipefail
-        bun scripts/ci-routing.ts validate-success-marker \
-          --execution "${EXECUTION}" --hash "${CONTENT_HASH}"
+        args=(--execution "${EXECUTION}" --hash "${CONTENT_HASH}")
+        if [ -n "${SHARD}" ]; then
+          args+=(--shard "${SHARD}")
+        fi
+        bun scripts/ci-routing.ts validate-success-marker "${args[@]}"

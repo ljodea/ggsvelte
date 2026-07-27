@@ -28,6 +28,7 @@ import {
   successMarkerPath,
   validateSuccessMarker,
   type CacheableExecution,
+  type ExecutionShard,
 } from "./content-hash";
 import { runDetectChanges, type DetectChangesInput, type DetectChangesIo } from "./detect-changes";
 
@@ -125,9 +126,9 @@ function printHelp(): void {
   bun scripts/ci-routing.ts plan [--files ... | --from-git --base <ref> | --stdin] [--force-all]
   bun scripts/ci-routing.ts emit-github-output [--files ... | --from-git --base <ref> | --stdin] [--force-all]
   bun scripts/ci-routing.ts detect-changes
-  bun scripts/ci-routing.ts hash-inputs --execution <name> [--os <runner.os>] [--container-tag <tag>] [--matrix-node N --matrix-pm NAME --matrix-pm-version V --matrix-svelte V] [--runtime-node-version V --runtime-pm-version V]
-  bun scripts/ci-routing.ts write-success-marker --execution <name> --hash <hex>
-  bun scripts/ci-routing.ts validate-success-marker --execution <name> --hash <hex>
+  bun scripts/ci-routing.ts hash-inputs --execution <name> [--os <runner.os>] [--container-tag <tag>] [--shard I/N] [--matrix-node N --matrix-pm NAME --matrix-pm-version V --matrix-svelte V] [--runtime-node-version V --runtime-pm-version V]
+  bun scripts/ci-routing.ts write-success-marker --execution <name> --hash <hex> [--shard I/N]
+  bun scripts/ci-routing.ts validate-success-marker --execution <name> --hash <hex> [--shard I/N]
   bun scripts/ci-routing.ts gate --required <file|-> --results <file|->
   bun scripts/ci-routing.ts ci-gate
   bun scripts/ci-routing.ts vr-gate
@@ -327,10 +328,32 @@ function parseCacheableExecution(raw: string | undefined): CacheableExecution {
   return raw as CacheableExecution;
 }
 
+/**
+ * `--shard <index>/<total>` (1-based), matching the vitest / playwright CLI
+ * spelling the component jobs already pass through. Absent means unsharded.
+ * Fail-closed: a malformed value must not silently degrade to unsharded, or a
+ * typo in a matrix leg would make every leg share one marker.
+ */
+function parseShardFlag(args: string[]): ExecutionShard | undefined {
+  const raw = flagValue(args, "--shard");
+  if (raw === undefined) return undefined;
+  const match = /^(\d+)\/(\d+)$/.exec(raw);
+  if (match === null) {
+    throw new Error(`--shard must look like <index>/<total> (1-based); got "${raw}"`);
+  }
+  const index = Number(match[1]);
+  const total = Number(match[2]);
+  if (total < 1 || index < 1 || index > total) {
+    throw new Error(`--shard index must be within 1..total; got "${raw}"`);
+  }
+  return { index, total };
+}
+
 async function runHashInputsCli(args: string[]): Promise<void> {
   const execution = parseCacheableExecution(flagValue(args, "--execution"));
   const os = flagValue(args, "--os") ?? process.env["RUNNER_OS"] ?? "unknown";
   const containerTag = flagValue(args, "--container-tag");
+  const shard = parseShardFlag(args);
   const matrixNode = flagValue(args, "--matrix-node");
   const matrixPm = flagValue(args, "--matrix-pm");
   const matrixPmVersion = flagValue(args, "--matrix-pm-version");
@@ -374,10 +397,11 @@ async function runHashInputsCli(args: string[]): Promise<void> {
     hash,
     os,
     ...(containerTag === undefined ? {} : { containerTag }),
+    ...(shard === undefined ? {} : { shard }),
     ...(matrix === undefined ? {} : { matrix }),
     ...(runtime === undefined ? {} : { runtime }),
   });
-  const marker = successMarkerPath(execution);
+  const marker = successMarkerPath(execution, shard);
   const body = [
     `hash=${hash}`,
     `cache_key=${cacheKey}`,
@@ -399,12 +423,18 @@ function runWriteSuccessMarkerCli(args: string[]): void {
   if (hash === undefined || hash.length === 0) {
     throw new Error("write-success-marker requires --hash <hex>");
   }
-  const path = successMarkerPath(execution);
+  const shard = parseShardFlag(args);
+  const path = successMarkerPath(execution, shard);
   const dir = path.slice(0, path.lastIndexOf("/"));
   mkdirSync(dir, { recursive: true });
   writeFileSync(
     path,
-    serializeSuccessMarker({ schema: CONTENT_HASH_SCHEMA, execution, hash }),
+    serializeSuccessMarker({
+      schema: CONTENT_HASH_SCHEMA,
+      execution,
+      hash,
+      ...(shard === undefined ? {} : { shard }),
+    }),
     "utf8",
   );
   process.stdout.write(`${path}\n`);
@@ -416,7 +446,8 @@ async function runValidateSuccessMarkerCli(args: string[]): Promise<void> {
   if (hash === undefined || hash.length === 0) {
     throw new Error("validate-success-marker requires --hash <hex>");
   }
-  const path = successMarkerPath(execution);
+  const shard = parseShardFlag(args);
+  const path = successMarkerPath(execution, shard);
   const file = Bun.file(path);
   if (!(await file.exists())) {
     process.stdout.write("hit=false\n");
@@ -425,7 +456,11 @@ async function runValidateSuccessMarkerCli(args: string[]): Promise<void> {
   }
   const body = await file.text();
   const marker = parseSuccessMarker(body);
-  const ok = validateSuccessMarker(marker, { execution, hash });
+  const ok = validateSuccessMarker(marker, {
+    execution,
+    hash,
+    ...(shard === undefined ? {} : { shard }),
+  });
   const line = `hit=${ok ? "true" : "false"}\n`;
   process.stdout.write(line);
   writeGithubOutput(line);

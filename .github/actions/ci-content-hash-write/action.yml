@@ -12,6 +12,13 @@ inputs:
   hash:
     description: Content hash from ci-content-hash-restore
     required: true
+  shard:
+    description: >
+      Optional matrix fan-out leg as "<index>/<total>" (1-based). Must match the
+      value passed to ci-content-hash-restore, or the leg writes a marker it can
+      never restore.
+    required: false
+    default: ""
 
 runs:
   using: composite
@@ -22,7 +29,11 @@ runs:
         # env-indirection: inputs must not expand into the script body (zizmor).
         CONTENT_HASH: ${{ inputs.hash }}
         EXECUTION: ${{ inputs.execution }}
+        SHARD: ${{ inputs.shard }}
       run: |
         set -euo pipefail
-        bun scripts/ci-routing.ts write-success-marker \
-          --execution "${EXECUTION}" --hash "${CONTENT_HASH}"
+        args=(--execution "${EXECUTION}" --hash "${CONTENT_HASH}")
+        if [ -n "${SHARD}" ]; then
+          args+=(--shard "${SHARD}")
+        fi
+        bun scripts/ci-routing.ts write-success-marker "${args[@]}"

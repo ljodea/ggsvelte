@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { readdirSync, readFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import {
@@ -24,6 +25,7 @@ import {
   requireJobInputDigests,
   serializeSuccessMarker,
   shouldBypassContentCache,
+  successMarkerPath,
   validateSuccessMarker,
   type JobName,
 } from "./ci-routing.ts";
@@ -1000,6 +1002,81 @@ describe("contentHashCacheKey", () => {
   });
 });
 
+describe("sharded executions cache independently", () => {
+  // Component suites fan out over matrix shards (vitest --shard / playwright
+  // --shard). Each leg runs on its own runner but hashes the same content, so
+  // shard identity MUST reach the cache key and the success marker. Without it
+  // a passing shard 1 would write the marker that a failing shard 2 later
+  // restores as a hit — a false green on the next run with identical content.
+  test("shard index and total change the cache key", () => {
+    const base = { execution: "component_svelte_fx" as const, hash: "abc123", os: "Linux" };
+    const unsharded = contentHashCacheKey(base);
+    const one = contentHashCacheKey({ ...base, shard: { index: 1, total: 3 } });
+    const two = contentHashCacheKey({ ...base, shard: { index: 2, total: 3 } });
+    const twoOfFour = contentHashCacheKey({ ...base, shard: { index: 2, total: 4 } });
+
+    expect(one).toContain("shard1of3");
+    expect(one).not.toBe(two);
+    expect(one).not.toBe(unsharded);
+    // Re-shaping the fan-out must not let an old leg's marker validate.
+    expect(two).not.toBe(twoOfFour);
+    // The unsharded key stays byte-identical so unsharded executions keep
+    // their existing caches when this dimension is added.
+    expect(unsharded).toBe(`ggsvelte-ch-v${CONTENT_HASH_SCHEMA}-component_svelte_fx-Linux-abc123`);
+  });
+
+  test("shard gets its own success-marker path", () => {
+    expect(successMarkerPath("component_svelte_fx")).toBe(
+      ".ci-content-hash/component_svelte_fx.ok",
+    );
+    expect(successMarkerPath("component_svelte_fx", { index: 2, total: 3 })).toBe(
+      ".ci-content-hash/component_svelte_fx-2of3.ok",
+    );
+  });
+
+  test("a marker from another shard does not validate", () => {
+    const marker = parseSuccessMarker(
+      serializeSuccessMarker({
+        schema: CONTENT_HASH_SCHEMA,
+        execution: "component_svelte_fx",
+        hash: "abc",
+        shard: { index: 1, total: 3 },
+      }),
+    );
+    expect(marker).toEqual({
+      schema: CONTENT_HASH_SCHEMA,
+      execution: "component_svelte_fx",
+      hash: "abc",
+      shard: { index: 1, total: 3 },
+    });
+
+    const expected = { execution: "component_svelte_fx" as const, hash: "abc" };
+    expect(validateSuccessMarker(marker, { ...expected, shard: { index: 1, total: 3 } })).toBe(
+      true,
+    );
+    // The false-green this guards: shard 1's marker satisfying shard 2.
+    expect(validateSuccessMarker(marker, { ...expected, shard: { index: 2, total: 3 } })).toBe(
+      false,
+    );
+    expect(validateSuccessMarker(marker, { ...expected, shard: { index: 1, total: 4 } })).toBe(
+      false,
+    );
+    // An unsharded expectation must not accept a sharded marker, or vice versa.
+    expect(validateSuccessMarker(marker, expected)).toBe(false);
+    const unsharded = parseSuccessMarker(
+      serializeSuccessMarker({
+        schema: CONTENT_HASH_SCHEMA,
+        execution: "component_svelte_fx",
+        hash: "abc",
+      }),
+    );
+    expect(validateSuccessMarker(unsharded, { ...expected, shard: { index: 1, total: 3 } })).toBe(
+      false,
+    );
+    expect(validateSuccessMarker(unsharded, expected)).toBe(true);
+  });
+});
+
 describe("git ls-tree digests include mode", () => {
   test("mode-only change changes the entry digest", () => {
     const blob = parseGitLsTreeLine(
@@ -1124,6 +1201,102 @@ async function spawnCiRoutingCli(
   ]);
   return { stdout, stderr, exitCode };
 }
+
+/**
+ * Spawn the routing CLI in a throwaway cwd so marker writes land there rather
+ * than in the repo tree.
+ */
+async function spawnCiRoutingCliIn(
+  cwd: string,
+  args: string[],
+): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+  const proc = Bun.spawn(["bun", join(import.meta.dir, "ci-routing.ts"), ...args], {
+    cwd,
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ]);
+  return { stdout, stderr, exitCode };
+}
+
+describe("success-marker CLI carries shard identity", () => {
+  test("a shard validates only its own marker", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "ci-routing-shard-"));
+    try {
+      const write = await spawnCiRoutingCliIn(cwd, [
+        "write-success-marker",
+        "--execution",
+        "component_svelte_fx",
+        "--hash",
+        "abc123",
+        "--shard",
+        "1/3",
+      ]);
+      expect(write.exitCode).toBe(0);
+      expect(write.stdout.trim()).toBe(".ci-content-hash/component_svelte_fx-1of3.ok");
+
+      const own = await spawnCiRoutingCliIn(cwd, [
+        "validate-success-marker",
+        "--execution",
+        "component_svelte_fx",
+        "--hash",
+        "abc123",
+        "--shard",
+        "1/3",
+      ]);
+      expect(own.stdout).toContain("hit=true");
+
+      // Shard 2 has written no marker of its own: it must miss, not inherit
+      // shard 1's success.
+      const other = await spawnCiRoutingCliIn(cwd, [
+        "validate-success-marker",
+        "--execution",
+        "component_svelte_fx",
+        "--hash",
+        "abc123",
+        "--shard",
+        "2/3",
+      ]);
+      expect(other.stdout).toContain("hit=false");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  test("hash-inputs emits a shard-scoped cache key and marker path", async () => {
+    const out = await spawnCiRoutingCli([
+      "hash-inputs",
+      "--execution",
+      "component_svelte_fx",
+      "--os",
+      "Linux",
+      "--shard",
+      "2/3",
+    ]);
+    expect(out.exitCode).toBe(0);
+    expect(out.stdout).toContain("shard2of3");
+    expect(out.stdout).toContain("marker_path=.ci-content-hash/component_svelte_fx-2of3.ok");
+  });
+
+  test("a malformed --shard is rejected rather than silently unsharded", async () => {
+    for (const bad of ["0/3", "4/3", "1", "x/3", "1/0"]) {
+      const out = await spawnCiRoutingCli([
+        "write-success-marker",
+        "--execution",
+        "component_svelte_fx",
+        "--hash",
+        "abc123",
+        "--shard",
+        bad,
+      ]);
+      expect(out.exitCode, bad).not.toBe(0);
+    }
+  });
+});
 
 describe("ci-routing module tree (split-safe)", () => {
   test("subtree files set ci_routing, force full surface, and bypass content cache", () => {
