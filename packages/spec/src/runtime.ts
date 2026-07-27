@@ -58,6 +58,7 @@ import type {
   SmoothLayer,
   TextLayer,
   TileLayer,
+  Bin2dLayer,
   VlineLayer,
 } from "./schema.js";
 
@@ -108,6 +109,7 @@ export interface RuntimeDensityLayer extends WithRuntimeAes<DensityLayer> {}
 export interface RuntimeErrorbarLayer extends WithRuntimeAes<ErrorbarLayer> {}
 export interface RuntimeRectLayer extends WithRuntimeAes<RectLayer> {}
 export interface RuntimeTileLayer extends WithRuntimeAes<TileLayer> {}
+export interface RuntimeBin2dLayer extends WithRuntimeAes<Bin2dLayer> {}
 export interface RuntimeRasterLayer extends WithRuntimeAes<RasterLayer> {}
 export interface RuntimeContourLayer extends WithRuntimeAes<ContourLayer> {}
 export interface RuntimeDensity2dLayer extends WithRuntimeAes<Density2dLayer> {}
@@ -151,6 +153,7 @@ export type RuntimeLayerSpec =
   | RuntimeErrorbarLayer
   | RuntimeRectLayer
   | RuntimeTileLayer
+  | RuntimeBin2dLayer
   | RuntimeRasterLayer
   | RuntimeContourLayer
   | RuntimeDensity2dLayer

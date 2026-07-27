@@ -16,9 +16,7 @@ function ownXDomain(binding: LayerBinding, table: ColumnTable): [number, number]
   if (binding.xField === null || !table.has(binding.xField)) return null;
   // Raw (untransformed) data extent — f() evaluates in data units; xlim is also
   // author-supplied data units. Transform is applied to the resulting grid only.
-  return (
-    finiteExtent([positionColumn(table, binding.xField, binding.xConversion, undefined)]) ?? null
-  );
+  return finiteExtent([positionColumn(table, binding.xField, binding.xConversion)]) ?? null;
 }
 
 export function buildFunctionFrame(

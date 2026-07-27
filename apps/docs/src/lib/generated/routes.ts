@@ -2282,8 +2282,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-774",
-        title: "experimental (774)",
+        id: "experimental-780",
+        title: "experimental (780)",
         level: 3,
       },
       {
@@ -2322,8 +2322,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-509",
-        title: "experimental (509)",
+        id: "experimental-510",
+        title: "experimental (510)",
         level: 3,
       },
       {
@@ -2572,6 +2572,16 @@ export const DOCS_ROUTES = [
     title: "Stacked bar chart — ggsvelte gallery",
     description: "Stacked bar chart",
     canonicalPath: "/examples/bar/stacked",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/bin2d/basic",
+    title: "2D bin heatmap — ggsvelte gallery",
+    description: "2D bin heatmap",
+    canonicalPath: "/examples/bin2d/basic",
     kind: "page",
     index: true,
     sitemap: true,

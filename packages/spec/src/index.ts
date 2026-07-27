@@ -33,6 +33,7 @@ export {
   ErrorbarLayerSchema,
   RectLayerSchema,
   TileLayerSchema,
+  Bin2dLayerSchema,
   RasterLayerSchema,
   RibbonLayerSchema,
   SegmentLayerSchema,
@@ -119,6 +120,8 @@ export type {
   RectParams,
   TileLayer,
   TileParams,
+  Bin2dLayer,
+  Bin2dParams,
   RasterLayer,
   RasterParams,
   RibbonLayer,
@@ -699,6 +702,7 @@ export type {
   RuntimeSpec,
   RuntimeTextLayer,
   RuntimeTileLayer,
+  RuntimeBin2dLayer,
   RuntimeVlineLayer,
 } from "./runtime.js";
 
@@ -750,6 +754,7 @@ export type {
   QuantileLayerInput,
   SmoothLayerInput,
   TileLayerInput,
+  Bin2dLayerInput,
   SpecInput,
   TextLayerInput,
   VlineLayerInput,
@@ -827,6 +832,7 @@ export type {
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
+  GeomBin2dOptions,
   GeomVlineOptions,
 } from "./builder.js";
 

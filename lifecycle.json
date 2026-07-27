@@ -104,6 +104,22 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "Bin2dLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "Bin2dLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "Bin2dLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "Bin2dParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "BinnedColorScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -549,6 +565,10 @@
           "lifecycle": "experimental"
         },
         "GeomBarOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomBin2dOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1217,6 +1237,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeBarLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeBin2dLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4662,6 +4686,10 @@
           "lifecycle": "experimental"
         },
         "GeomBar": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomBin2d": {
           "kind": "value",
           "lifecycle": "experimental"
         },

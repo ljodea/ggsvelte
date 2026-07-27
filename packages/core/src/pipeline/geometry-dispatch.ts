@@ -72,6 +72,7 @@ export function dispatchGeometryBatch(
     case "bar":
       return single(rectsBatch(frame, fx, fill, styles, warnings));
     case "rect":
+    case "bin_2d":
       return single(edgeRectsBatch(frame, fx, fill, color, styles, warnings));
     case "tile":
       return single(tileRectsBatch(frame, fx, fill, color, styles, warnings));

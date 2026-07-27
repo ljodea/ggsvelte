@@ -44,6 +44,7 @@ import type {
   StackablePosition,
   TextParams,
   TileParams,
+  Bin2dParams,
 } from "./schema.js";
 
 /** Shared sugar for per-layer data (#589). */
@@ -182,6 +183,12 @@ export interface GeomRectOptions extends RectParams, GeomDataOption {
 
 /** Tile-layer sugar options: params plus optional layer-level aes. */
 export interface GeomTileOptions extends TileParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** bin_2d heatmap sugar options. */
+export interface GeomBin2dOptions extends Bin2dParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }
