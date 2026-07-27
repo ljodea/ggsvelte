@@ -309,11 +309,14 @@ describe("R0 release wiring", () => {
     // Protocol lives in composites (single source of truth).
     expect(restore).toContain("hash-inputs");
     expect(restore).toContain("validate-success-marker");
-    expect(restore).toContain(".ci-content-hash/");
     expect(restore).toContain("shell: bash");
+    // The cached path is whatever hash-inputs computed, not a fixed name:
+    // sharded executions get one marker per matrix leg (issue #1035), so a
+    // hardcoded `.ci-content-hash/<execution>.ok` would cache the wrong file.
+    expect(restore).toContain("path: ${{ steps.compute.outputs.marker_path }}");
     // Exact key only — no restore-keys on the success-marker cache step.
     const markerCache = restore.slice(
-      restore.indexOf("path: .ci-content-hash/"),
+      restore.indexOf("id: marker_cache"),
       restore.indexOf("validate-success-marker"),
     );
     expect(markerCache).toContain("key:");
@@ -351,8 +354,6 @@ describe("R0 release wiring", () => {
     expect(unitJob).toContain("CI_DISABLE_CONTENT_HASH");
 
     // Distinct physical keys for component shards (Codex P1).
-    // component-svelte is longer (coverage + Codecov upload steps) — use a
-    // generous window so the content-hash write is still inside the slice.
     for (const [job, execution] of [
       ["component-svelte", "component_svelte"],
       ["component-svelte-fx", "component_svelte_fx"],
@@ -364,8 +365,46 @@ describe("R0 release wiring", () => {
       expect(slice).toContain("uses: ./.github/actions/ci-content-hash-restore");
       expect(slice).toContain(`execution: ${execution}`);
       expect(slice).toContain("container_tag:");
-      expect(slice).toContain("uses: ./.github/actions/ci-content-hash-write");
     }
+
+    // Sharded executions (issue #1035) must not let one matrix leg's success
+    // green-cache a failing sibling. Two shapes are valid, and each component
+    // execution must use exactly one of them:
+    //   - self-marking: the leg writes its own per-shard marker (--shard I/N)
+    //   - collect-marked: a downstream job that `needs` every leg writes the
+    //     single unsharded marker once they have all passed
+    for (const [job, execution] of [
+      ["component-svelte-fx", "component_svelte_fx"],
+      ["component-journeys", "component_journeys"],
+    ] as const) {
+      const slice = ciJob(ci, job);
+      expect(slice, job).toContain("matrix:");
+      expect(slice, job).toContain("uses: ./.github/actions/ci-content-hash-write");
+      // Both the restore and the write must carry the leg identity, or the
+      // legs would share one marker.
+      const shardArgs = slice.match(/shard: \$\{\{ matrix\.shard }}\/\d+/g) ?? [];
+      expect(shardArgs.length, `${execution} passes shard to restore and write`).toBe(2);
+      // The CLI shard and the marker shard must agree.
+      expect(slice, job).toContain("--shard=${{ matrix.shard }}");
+    }
+
+    // component-svelte is collect-marked: shards emit blob reports and write no
+    // marker; the collect job merges them, gates coverage, and marks success.
+    const svelteShards = ciJob(ci, "component-svelte");
+    expect(svelteShards).toContain("matrix:");
+    expect(svelteShards).toContain("--reporter=blob");
+    expect(svelteShards).not.toContain("uses: ./.github/actions/ci-content-hash-write");
+    // vitest writes blob reports to `.vitest-reports/`, and upload-artifact's
+    // glob skips dotfiles unless told otherwise — without this the upload finds
+    // nothing, fails on `if-no-files-found: error`, and the collect job is
+    // skipped for want of blobs. Cost one CI round on PR #1036.
+    expect(svelteShards).toContain("include-hidden-files: true");
+    const svelteCollect = ciJob(ci, "component-svelte-coverage");
+    expect(svelteCollect.length).toBeGreaterThan(0);
+    expect(svelteCollect).toContain("needs: component-svelte");
+    expect(svelteCollect).toContain("--merge-reports");
+    expect(svelteCollect).toContain("uses: ./.github/actions/ci-content-hash-write");
+    expect(svelteCollect).toContain("execution: component_svelte");
 
     // Consumer: runtime resolution stays in the job; matrix dims pass into restore composite.
     const consumerJob = ciJob(ci, "consumer-compat");

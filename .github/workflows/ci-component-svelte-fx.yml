@@ -23,7 +23,16 @@ env:
 
 jobs:
   component-svelte-fx:
-    name: component-svelte-fx (packages/svelte firefox + webkit)
+    # Sharded fan-out (issue #1035). 122 test files x 2 engines = 244 file-runs,
+    # and vitest --shard splits that (file x project) task list, so a leg runs
+    # ~61 file-runs of mixed firefox/webkit. Coverage-free, so no merge step.
+    name: component-svelte-fx (firefox + webkit ${{ matrix.shard }}/4)
+    strategy:
+      # Report every failing leg in one run: a shard that dies on a browser
+      # harness flake must not hide a real failure in a sibling.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
 
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -52,6 +61,10 @@ jobs:
           bypass: ${{ inputs.bypass_content_cache }}
           disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
           container_tag: ${{ inputs.playwright_container_tag }}
+          # No collect job aggregates these legs, so each shard owns its own
+          # marker. A shared one would let a passing leg green-cache a failing
+          # sibling on the next run with identical content.
+          shard: ${{ matrix.shard }}/4
       - uses: ./.github/actions/ci-bun-install
         if: steps.content_hash.outputs.hit != 'true'
         with:
@@ -69,17 +82,18 @@ jobs:
       - name: component tests (packages/svelte, firefox + webkit)
         if: steps.content_hash.outputs.hit != 'true'
         working-directory: packages/svelte
-        run: bunx --bun vitest run --project firefox --project webkit
+        run: bunx --bun vitest run --project firefox --project webkit --shard=${{ matrix.shard }}/4
       - uses: ./.github/actions/ci-content-hash-write
         if: success() && steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         with:
           execution: component_svelte_fx
           hash: ${{ steps.content_hash.outputs.hash }}
+          shard: ${{ matrix.shard }}/4
       - name: upload packages/svelte-fx failure artifacts
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: component-svelte-fx-failure-artifacts
+          name: component-svelte-fx-failure-artifacts-${{ matrix.shard }}
           path: packages/svelte/test-results/
           if-no-files-found: ignore
           retention-days: 7

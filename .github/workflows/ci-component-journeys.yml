@@ -25,7 +25,22 @@ jobs:
   component-journeys:
     # Non-pixel docs/structure/a11y journeys. Routed via docs_journeys so
     # content-only PRs still get structure coverage without VR pixels.
-    name: component-journeys (docs a11y playwright)
+    #
+    # Sharded fan-out (issue #1035): 97 journey tests ran ~8min on two workers,
+    # the longest job on the critical path. Playwright shards natively and each
+    # leg gets its own runner, so per-test speed is preserved — unlike raising
+    # `workers`, which splits one runner's cores across more concurrent browsers
+    # and pushes cold-hydrate tests toward the 60s project budget (#944).
+    #
+    # The static docs build is repeated per leg rather than built once and
+    # fanned out: at ~70s it is cheaper to redo in parallel than to serialise a
+    # build job plus artifact upload/download ahead of every shard.
+    name: component-journeys (docs a11y playwright ${{ matrix.shard }}/4)
+    strategy:
+      # Report every failing leg in one run rather than cancelling siblings.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
 
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -54,6 +69,10 @@ jobs:
           bypass: ${{ inputs.bypass_content_cache }}
           disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
           container_tag: ${{ inputs.playwright_container_tag }}
+          # No collect job aggregates these legs, so each shard owns its own
+          # marker. A shared one would let a passing leg green-cache a failing
+          # sibling on the next run with identical content.
+          shard: ${{ matrix.shard }}/4
       - uses: ./.github/actions/ci-bun-install
         if: steps.content_hash.outputs.hit != 'true'
         with:
@@ -95,16 +114,18 @@ jobs:
           bun run test:visual --
           --project journeys
           --grep-invert 'visual contract'
+          --shard=${{ matrix.shard }}/4
       - uses: ./.github/actions/ci-content-hash-write
         if: steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         with:
           execution: component_journeys
           hash: ${{ steps.content_hash.outputs.hash }}
+          shard: ${{ matrix.shard }}/4
       - name: upload journey failure artifacts
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: component-journeys-failure-artifacts
+          name: component-journeys-failure-artifacts-${{ matrix.shard }}
           path: |
             tests/visual/test-results/
             tests/visual/playwright-report/

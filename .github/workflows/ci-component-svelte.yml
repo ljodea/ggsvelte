@@ -25,8 +25,31 @@ env:
   PLAYWRIGHT_CONTAINER_TAG: ${{ inputs.playwright_container_tag }}
 
 jobs:
+  # Sharded chromium fan-out (issue #1035). Each leg runs ~41 of the 122 test
+  # files and emits a vitest blob report; the collect job below merges those
+  # blobs into one coverage report, enforces the thresholds, and uploads it.
+  #
+  # Why shard rather than raise maxWorkers: the suite spends ~95% of its time in
+  # per-file module import, not in test bodies (measured on this suite: `tests
+  # 22s` against `import 669s`). Those imports are served by ONE vite dev server
+  # per vitest process, so extra workers contend on it — 2→4 workers measured
+  # only 1.41x while cumulative import time rose. A shard gets its own runner
+  # and its own vite server, so it scales near-linearly (measured 2.48x on 3).
+  #
+  # Content-hash: every leg here — shards and collect — restores the SAME
+  # unsharded `component_svelte` marker, and only collect writes it (after all
+  # shards passed). One marker for one indivisible execution: the legs cannot
+  # disagree about whether to skip, so collect can never wake up to a cache hit
+  # with no blobs to merge. component-svelte-fx and component-journeys have no
+  # collect job and so use per-shard markers instead.
   component-svelte:
-    name: component-svelte (packages/svelte chromium + coverage + ssr)
+    name: component-svelte (chromium + coverage ${{ matrix.shard }}/3)
+    strategy:
+      # Report every failing leg in one run: a shard that dies on a browser
+      # harness flake must not hide a real failure in a sibling.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
 
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -65,29 +88,116 @@ jobs:
           package: playwright
           scope: packages/svelte
           container_tag: ${{ inputs.playwright_container_tag }}
-      # Chromium collects browser v8 coverage (CDP; works under bun) and enforces
-      # thresholds. SSR runs under bun without --coverage: @vitest/coverage-v8
-      # needs Node inspector Coverage APIs that bun does not implement
-      # ("Coverage APIs are not supported"). Local `test:coverage` can still
-      # collect SSR lcov under node for offline use. Firefox/webkit run in the
-      # parallel component-svelte-fx job (coverage-free).
+      # Chromium collects browser v8 coverage (CDP; works under bun). Thresholds
+      # are forced to 0 HERE and enforced once in the collect job: a shard sees
+      # only its own third of the suite, so the configured gate would fail on
+      # every leg. The blob report carries this shard's raw coverage forward.
       #
       # One shell retry: vitest `retry` only re-runs failed *tests*, not suite
       # import / iframe / coverage-v8 dynamic-import harness failures (PR #440).
       - name: component tests (packages/svelte, chromium + coverage)
         if: steps.content_hash.outputs.hit != 'true'
         working-directory: packages/svelte
+        env:
+          SHARD: ${{ matrix.shard }}/3
         run: |
           set -euo pipefail
-          if bunx --bun vitest run --coverage --project chromium; then
+          shard_args=(
+            --coverage --project chromium "--shard=${SHARD}" --reporter=blob
+            --coverage.thresholds.statements=0 --coverage.thresholds.branches=0
+            --coverage.thresholds.functions=0 --coverage.thresholds.lines=0
+          )
+          if bunx --bun vitest run "${shard_args[@]}"; then
             exit 0
           fi
-          echo "::warning::chromium+coverage failed once; retrying once for browser harness flake"
-          bunx --bun vitest run --coverage --project chromium
+          echo "::warning::chromium+coverage shard ${SHARD} failed once; retrying once for browser harness flake"
+          bunx --bun vitest run "${shard_args[@]}"
+      - name: upload chromium blob report
+        if: success() && steps.content_hash.outputs.hit != 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: component-svelte-blob-${{ matrix.shard }}
+          path: packages/svelte/.vitest-reports/
+          # `.vitest-reports` is a dotted directory and upload-artifact's glob
+          # skips hidden entries by default, so without this the upload finds
+          # nothing and the collect job starves for blobs.
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+      - name: upload packages/svelte failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: component-svelte-failure-artifacts-${{ matrix.shard }}
+          path: packages/svelte/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # Merge the shards' blob reports into one coverage report, enforce the
+  # thresholds the shards skipped, and upload the combined lcov. Also runs the
+  # SSR lane, which is ~15s and needs no browser — cheaper here than paying for
+  # it on a shard. Owns the content-hash marker for the whole execution.
+  component-svelte-coverage:
+    name: component-svelte (coverage merge + ssr)
+    needs: component-svelte
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      # Keep in sync with inputs.playwright_container_tag above.
+      image: ghcr.io/${{ github.repository }}/ci-runner:${{ inputs.playwright_container_tag }}
+    defaults:
+      run:
+        shell: bash
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/ci-setup-bun
+      - uses: ./.github/actions/ci-content-hash-restore
+        id: content_hash
+        with:
+          execution: component_svelte
+          bypass: ${{ inputs.bypass_content_cache }}
+          disable: ${{ vars.CI_DISABLE_CONTENT_HASH }}
+          container_tag: ${{ inputs.playwright_container_tag }}
+      - uses: ./.github/actions/ci-bun-install
+        if: steps.content_hash.outputs.hit != 'true'
+        with:
+          cache_key_prefix: bun-container
+      - uses: ./.github/actions/ci-download-packages-dist
+        if: steps.content_hash.outputs.hit != 'true'
+      - name: download chromium blob reports
+        if: steps.content_hash.outputs.hit != 'true'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: component-svelte-blob-*
+          merge-multiple: true
+          path: packages/svelte/.vitest-reports/
+      # SSR runs under bun without --coverage: @vitest/coverage-v8 needs Node
+      # inspector Coverage APIs that bun does not implement ("Coverage APIs are
+      # not supported"). Local `test:coverage` can still collect SSR lcov under
+      # node for offline use.
       - name: component tests (packages/svelte, SSR)
         if: steps.content_hash.outputs.hit != 'true'
         working-directory: packages/svelte
         run: bunx --bun vitest run --config vitest.ssr.config.ts
+      # --project chromium keeps coverage-v8 from rejecting the firefox/webkit
+      # instances the config also declares; it does not re-run anything. This is
+      # the ONLY place the configured thresholds are enforced.
+      - name: merge shard coverage and enforce thresholds
+        if: steps.content_hash.outputs.hit != 'true'
+        working-directory: packages/svelte
+        run: |
+          set -euo pipefail
+          shards=$(find .vitest-reports -name 'blob-*.json' | wc -l)
+          if [ "${shards}" -eq 0 ]; then
+            echo "::error::no blob reports to merge — shard artifacts missing"
+            exit 1
+          fi
+          echo "merging ${shards} chromium blob report(s)"
+          bunx --bun vitest --merge-reports --project chromium --coverage
       - name: rewrite svelte lcov paths to monorepo root
         # vitest writes SF:src/lib/... relative to packages/svelte; Codecov
         # components filter packages/svelte/** so paths must be repo-rooted.
@@ -127,18 +237,11 @@ jobs:
           fail_ci_if_error: true
       - uses: ./.github/actions/ci-content-hash-write
         # Require success so a Codecov upload failure cannot green-cache the job.
+        # `needs: component-svelte` already guarantees every shard passed.
         if: success() && steps.content_hash.outputs.hit != 'true' && steps.content_hash.outputs.bypass != 'true'
         with:
           execution: component_svelte
           hash: ${{ steps.content_hash.outputs.hash }}
-      - name: upload packages/svelte failure artifacts
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: component-svelte-failure-artifacts
-          path: packages/svelte/test-results/
-          if-no-files-found: ignore
-          retention-days: 7
 
   # Parallel sibling of component-svelte: firefox + webkit only (no coverage).
   # Distinct content-hash execution so a chromium cache hit cannot skip these

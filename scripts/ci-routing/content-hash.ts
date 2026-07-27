@@ -399,10 +399,26 @@ export function shouldBypassContentCache(changes: ChangeFlags, options: PlanOpti
   if (options.forceAll === true) return true;
   return changes.lockfile || changes.ci_workflow || changes.ci_routing || changes.ci_actions;
 }
+/**
+ * One leg of a matrixed fan-out (vitest / playwright `--shard=index/total`).
+ * 1-based `index`, matching both runners' CLI convention.
+ *
+ * Shard identity is part of cache identity: the legs hash the same content but
+ * execute disjoint test files, so a marker written by one leg must never
+ * satisfy another. `total` is included so re-shaping the fan-out (3 → 4 legs)
+ * misses every old marker instead of reusing legs that now cover other files.
+ */
+export type ExecutionShard = {
+  index: number;
+  total: number;
+};
+
 export type ContentHashCacheKeyInput = {
   execution: CacheableExecution;
   hash: string;
   os: string;
+  /** Fan-out leg for sharded component executions. */
+  shard?: ExecutionShard;
   /** Extra dimensions for matrixed jobs (consumer). */
   matrix?: {
     node: string;
@@ -427,6 +443,9 @@ export function contentHashCacheKey(input: ContentHashCacheKeyInput): string {
   if (input.containerTag !== undefined && input.containerTag.length > 0) {
     parts.push(sanitizeKeyPart(input.containerTag));
   }
+  if (input.shard !== undefined) {
+    parts.push(formatShardKeyPart(input.shard));
+  }
   if (input.matrix !== undefined) {
     parts.push(
       `node${sanitizeKeyPart(input.matrix.node)}`,
@@ -449,10 +468,34 @@ function sanitizeKeyPart(value: string): string {
   return value.replaceAll(/[^a-zA-Z0-9._-]+/g, "");
 }
 
+/** `shard1of3` — stable in both cache keys and marker filenames. */
+function formatShardKeyPart(shard: ExecutionShard): string {
+  return `shard${shard.index}of${shard.total}`;
+}
+
+function parseShard(value: unknown): ExecutionShard | null {
+  if (value === null || typeof value !== "object") return null;
+  const obj = value as Record<string, unknown>;
+  const index = obj["index"];
+  const total = obj["total"];
+  if (!Number.isInteger(index) || !Number.isInteger(total)) return null;
+  const i = index as number;
+  const t = total as number;
+  if (i < 1 || t < 1 || i > t) return null;
+  return { index: i, total: t };
+}
+
+function sameShard(a: ExecutionShard | undefined, b: ExecutionShard | undefined): boolean {
+  if (a === undefined || b === undefined) return a === undefined && b === undefined;
+  return a.index === b.index && a.total === b.total;
+}
+
 export type SuccessMarker = {
   schema: number;
   execution: CacheableExecution;
   hash: string;
+  /** Present only for legs of a sharded execution. */
+  shard?: ExecutionShard;
 };
 
 export function serializeSuccessMarker(marker: SuccessMarker): string {
@@ -468,11 +511,17 @@ export function parseSuccessMarker(body: string): SuccessMarker | null {
     if (typeof obj["execution"] !== "string") return null;
     if (typeof obj["hash"] !== "string" || obj["hash"].length === 0) return null;
     if (!(CACHEABLE_EXECUTIONS as readonly string[]).includes(obj["execution"])) return null;
-    return {
+    const base = {
       schema: obj["schema"],
       execution: obj["execution"] as CacheableExecution,
       hash: obj["hash"],
     };
+    if (obj["shard"] === undefined) return base;
+    // A shard field that is present but unreadable is a corrupt marker, not an
+    // unsharded one — fail closed rather than validating against the wrong leg.
+    const shard = parseShard(obj["shard"]);
+    if (shard === null) return null;
+    return { ...base, shard };
   } catch {
     return null;
   }
@@ -480,20 +529,27 @@ export function parseSuccessMarker(body: string): SuccessMarker | null {
 
 export function validateSuccessMarker(
   marker: SuccessMarker | null,
-  expected: { execution: CacheableExecution; hash: string; schema?: number },
+  expected: {
+    execution: CacheableExecution;
+    hash: string;
+    schema?: number;
+    shard?: ExecutionShard;
+  },
 ): boolean {
   if (marker === null) return false;
   const schema = expected.schema ?? CONTENT_HASH_SCHEMA;
   return (
     marker.schema === schema &&
     marker.execution === expected.execution &&
-    marker.hash === expected.hash
+    marker.hash === expected.hash &&
+    sameShard(marker.shard, expected.shard)
   );
 }
 
 /** Success-marker path relative to repo root (actions/cache path). */
-export function successMarkerPath(execution: CacheableExecution): string {
-  return `.ci-content-hash/${execution}.ok`;
+export function successMarkerPath(execution: CacheableExecution, shard?: ExecutionShard): string {
+  const leg = shard === undefined ? "" : `-${shard.index}of${shard.total}`;
+  return `.ci-content-hash/${execution}${leg}.ok`;
 }
 
 /** Parse one `git ls-tree -r` line into mode/type/oid/path. */
