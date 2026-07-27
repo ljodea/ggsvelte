@@ -27,6 +27,11 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "flexoki",
   "tableau10",
   "colorblind",
+  /** Even HSL hues — ggplot2-shaped scale_*_hue default discrete path (#829). */
+  "hue",
+  /** Greyscale discrete — scale_*_grey / scale_*_gray (#829). */
+  "grey",
+  "gray",
 ] as const;
 
 /**
@@ -92,15 +97,35 @@ export const THEME_NAMES = [
   "minimal",
   "ggplot2",
   "classic",
+  "bw",
   "hrbr",
   "few",
   "clean",
   "fivethirtyeight",
   "economist",
   "tufte",
+  "linedraw",
+  "void",
+  "grey",
+  "gray",
+  // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters
+  // append after product themes (and after name aliases).
+  "test",
 ] as const;
 
 type ThemeNameValue = (typeof THEME_NAMES)[number];
+
+/**
+ * Registered theme names that share another theme's token map / evidence.
+ * Keys are first-class ThemeName values (PortableSpec accepts them); values
+ * are the canonical theme that owns the built-in tokens and visual evidence.
+ * UK `grey` and US `gray` both alias the grey-panel `ggplot2` look (#824).
+ */
+export const THEME_NAME_ALIASES = {
+  grey: "ggplot2",
+  gray: "ggplot2",
+} as const satisfies Partial<Record<ThemeNameValue, ThemeNameValue>>;
+
 /** TypeBox literals for theme names (used by ThemeName def). */
 export const THEME_NAME_SCHEMAS = THEME_NAMES.map((name) => Type.Literal(name)) as unknown as [
   TLiteral<ThemeNameValue>,

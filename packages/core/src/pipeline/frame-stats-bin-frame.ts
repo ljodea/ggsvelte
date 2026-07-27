@@ -19,6 +19,7 @@ type BinResult = {
   xmin: Float64Array;
   xmax: Float64Array;
   carried: Record<string, import("../table.js").CellValue[]>;
+  cut: { fuzzy: readonly number[]; rightClosed: boolean; binIndex: Int32Array };
 };
 
 export function packBinLayerFrame(
@@ -55,6 +56,8 @@ export function packBinLayerFrame(
     ...styleColumns(binding, col, columns),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),
+    // Lineage replays the stat's own cut instead of re-deriving from edges (#905).
+    binCut: result.cut,
     xmin: result.xmin,
     xmax: result.xmax,
   };

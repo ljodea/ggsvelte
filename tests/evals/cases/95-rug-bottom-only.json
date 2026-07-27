@@ -1,0 +1,29 @@
+{
+  "id": "95-rug-bottom-only",
+  "kind": "chart",
+  "prompt": "Show the distribution of response times as geom_rug ticks along the bottom edge only, a bit longer than the default at 0.06 of the panel.",
+  "dataProfile": {
+    "fields": [{ "name": "ms", "type": "quantitative" }],
+    "rowCount": 6
+  },
+  "data": {
+    "main": [{ "ms": 12 }, { "ms": 18 }, { "ms": 19 }, { "ms": 31 }, { "ms": 44 }, { "ms": 61 }]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "rug",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "ms" }
+        },
+        "params": { "sides": "b", "length": 0.06 }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Narrowing params.sides to \"b\" makes x the only required channel; length is a panel fraction (#806)."
+}

@@ -4,18 +4,90 @@
 import { flushSync } from "svelte";
 import { describe, expect, it, vi } from "vitest";
 
-import type { CellValue } from "@ggsvelte/core";
+import type { CandidateFacts, CellValue } from "@ggsvelte/core";
 
 import type { PlotInspection } from "../../src/lib/interaction/interaction.js";
 import { applyInspectionDismissSideEffects } from "../../src/lib/interaction/transition-owner.js";
 import {
   candidateHit,
   continuousSpec,
+  hitFromCandidate,
   modelFor,
   mountInspectionController,
 } from "./inspection-state.harness.js";
 
 describe("createInspectionState dismissInspection", () => {
+  it("escape discards pending pin stash so re-pin cannot restore a pre-Escape candidate (#856)", () => {
+    const model = modelFor(continuousSpec());
+    const { state, flushFrame, destroy } = mountInspectionController({
+      model: () => model,
+      deferredFrames: true,
+    });
+
+    const first = candidateHit(model);
+    state.setInspection(first.hit, "pointer", "transient", "xy", first.candidate);
+    flushSync();
+    state.toggleInspectionPin("pointer");
+    flushSync();
+    expect(state.inspection?.state).toBe("pinned");
+
+    let second: CandidateFacts | null = null;
+    for (let id = 0; id < model.candidates.size; id++) {
+      const candidate = model.candidates.candidate(id);
+      if (candidate !== null && candidate.id !== first.candidate.id) {
+        second = candidate;
+        break;
+      }
+    }
+    if (second === null) throw new Error("expected a second candidate");
+
+    // While pinned, a flushed inspect stashes rather than applying.
+    state.schedulePointerInspect({
+      point: { x: second.x, y: second.y },
+      source: "pointer",
+      mode: "xy",
+      maxDistance: 1e6,
+    });
+    flushFrame();
+    flushSync();
+    expect(state.inspection?.state).toBe("pinned");
+
+    // Escape ends the session — stash must not survive.
+    state.dismissInspection("escape", "keyboard");
+    flushSync();
+    expect(state.inspection).toBeNull();
+
+    // New transient + pin (third candidate), then unpin: must flip the current
+    // seed, not restore-pending the pre-Escape stash (second).
+    let third: CandidateFacts | null = null;
+    for (let id = 0; id < model.candidates.size; id++) {
+      const candidate = model.candidates.candidate(id);
+      if (candidate !== null && candidate.id !== first.candidate.id && candidate.id !== second.id) {
+        third = candidate;
+        break;
+      }
+    }
+    if (third === null) throw new Error("expected a third candidate");
+
+    state.setInspection(hitFromCandidate(third), "pointer", "transient", "xy", third);
+    flushSync();
+    state.toggleInspectionPin("pointer");
+    flushSync();
+    expect(state.inspection?.state).toBe("pinned");
+    expect(state.inspection?.focus.anchor).toEqual({ x: third.x, y: third.y });
+
+    state.toggleInspectionPin("pointer");
+    flushSync();
+    expect(state.inspection?.state).toBe("transient");
+    expect(state.inspection?.focus.anchor).toEqual({ x: third.x, y: third.y });
+    expect(state.inspection?.focus.anchor).not.toEqual({
+      x: second.x,
+      y: second.y,
+    });
+
+    destroy();
+  });
+
   it("escape vs close: clears tooltip/pending, brush, chooseTool, refocus, emit-clear", async () => {
     const model = modelFor(continuousSpec());
     let tooltipHovered = true;

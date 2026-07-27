@@ -315,8 +315,8 @@ describe("Scale* export parity with all SCALE_CAPABILITIES families", () => {
       expect(pkg[name], `missing export ${name}`).toBeTypeOf("function");
     }
     expect(new Set(actualScaleExports)).toEqual(expectedExports);
-    // 69 shells + 12 Colour aliases + hand-written Scale
-    expect(expectedExports.size).toBe(69 + 12 + 1);
+    // Shells + Colour aliases + hand-written Scale (cardinality from gen-scale-children).
+    expect(expectedExports.size).toBe(83 + 18 + 1);
   });
 });
 

@@ -129,7 +129,7 @@ export const ERROR_CATALOG = {
   "coord-fixed-free-scales": {
     tier: 1,
     summary: "Fixed-aspect coordinates cannot represent free positional facet scales truthfully.",
-    fix: 'Use facet.scales = "fixed", or remove coord_fixed.',
+    fix: 'Use facet.scales = "fixed", or remove coord_fixed / coord_sf.',
   },
   // --- tier 1 structural (grammar rules the schema alone cannot express) ---
   "missing-required-channel": {
@@ -226,6 +226,12 @@ export const ERROR_CATALOG = {
     tier: 2,
     summary: "A { stat } channel names a column the layer's stat does not generate.",
     fix: "Use one of the columns the stat generates (the error lists them), or change the layer's stat.",
+  },
+  "manual-fun-required": {
+    // Structural grammar (layerStructuralErrors) — opt-in tier-2 only; not plain validate().
+    tier: 2,
+    summary: "A layer uses stat manual without params.fun.",
+    fix: "Set params.fun to one of first|last|mean|median|min|max|sum (portable named registry; #814).",
   },
   "invalid-data-profile": {
     tier: 2,
