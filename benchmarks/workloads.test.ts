@@ -174,7 +174,7 @@ const SMOKE_CATALOG = [
 // Documented full-size catalog ids. Must match budgets.json and
 // `buildWorkloads(false)` (verified under WORKLOAD_FULL_CATALOG=1).
 // Regenerate:
-//   bun -e 'import { buildWorkloads } from "./benchmarks/workloads.ts";
+//   bun -e 'import { buildWorkloads } from "./benchmarks/workloads/index.ts";
 //     console.log(JSON.stringify(buildWorkloads(false).map(w => w.id), null, 2))'
 const FULL_CATALOG_IDS = [
   "pipeline scatter 1k",
