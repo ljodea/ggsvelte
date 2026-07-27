@@ -12,6 +12,8 @@ type PointBatchIndex = {
   readonly batchIndex: number;
   readonly ids: number[];
   readonly spatial: StaticQuadtree;
+  /** max(batch.size, …batch.sizes) * 1.25 — query pad without hitTolerance. */
+  readonly maxRadius: number;
 };
 
 export type SpatialIndex = {
@@ -84,6 +86,7 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes): SpatialIndex 
   // Pointer hit testing preserves reverse paint order and per-batch point
   // radius without expanding every query by the largest point in the scene.
   // This mirrors paint batches while remaining private to CandidateStore.
+  // maxRadius is fixed at build so hitTest never O(P)-scans batch.sizes (#978).
   const pointBatchIndexes = [...pointIdsByBatch.entries()].map(([batchIndex, ids]) => {
     const pointXs = new Float64Array(ids.length);
     const pointYs = new Float64Array(ids.length);
@@ -91,10 +94,20 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes): SpatialIndex 
       pointXs[i] = xs[ids[i]!]!;
       pointYs[i] = ys[ids[i]!]!;
     }
+    const batch = scene.batches[batchIndex]!;
+    let maxRadius = 0;
+    if (batch.kind === "points") {
+      maxRadius = batch.size;
+      if (batch.sizes !== undefined) {
+        for (const radius of batch.sizes) maxRadius = Math.max(maxRadius, radius);
+      }
+      maxRadius *= 1.25;
+    }
     return {
       batchIndex,
       ids,
       spatial: new StaticQuadtree(pointXs, pointYs),
+      maxRadius,
     };
   });
   pointIdsByBatch.clear();

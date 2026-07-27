@@ -18,6 +18,8 @@ type PointBatchIndex = {
   readonly spatial: {
     queryRect(loX: number, loY: number, hiX: number, hiY: number): number[];
   };
+  /** Precomputed max(batch.size, …sizes) * 1.25; see spatial-index build. */
+  readonly maxRadius: number;
 };
 
 export type TopmostHitContext = {
@@ -78,11 +80,7 @@ export function resolveTopmostHit(
         (px < panel.x || px > panel.x + panel.width || py < panel.y || py > panel.y + panel.height))
     )
       continue;
-    let maxRadius = batch.size;
-    if (batch.sizes !== undefined) {
-      for (const radius of batch.sizes) maxRadius = Math.max(maxRadius, radius);
-    }
-    maxRadius *= 1.25;
+    const maxRadius = entry.maxRadius;
     const localIds = entry.spatial
       .queryRect(
         px - maxRadius - hitTolerance,
