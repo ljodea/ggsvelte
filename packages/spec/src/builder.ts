@@ -51,6 +51,7 @@ export type {
   GeomQuantileOptions,
   GeomContourOptions,
   GeomRasterOptions,
+  GeomHexOptions,
   GeomRectOptions,
   GeomRuleOptions,
   GeomRugOptions,

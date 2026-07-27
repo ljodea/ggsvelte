@@ -8,6 +8,7 @@ import { buildAlignFrame } from "./frame-stats-align.js";
 import { buildBindotFrame } from "./frame-stats-bindot.js";
 import { buildBinFrame, buildCountFrame, buildDensityFrame } from "./frame-stats-binning.js";
 import { buildBin2dFrame } from "./frame-stats-bin-2d.js";
+import { buildBinHexFrame } from "./frame-stats-bin-hex.js";
 import { buildEcdfFrame } from "./frame-stats-ecdf.js";
 import { buildConnectFrame } from "./frame-stats-connect.js";
 import { buildDensity2dFrame } from "./frame-stats-density-2d.js";
@@ -44,6 +45,7 @@ export function buildNonIdentityFrame(
   if (stat === "ellipse") return buildEllipseFrame(binding, table, groups, warnings);
   if (stat === "count") return buildCountFrame(binding, table, groups, warnings);
   if (stat === "bin") return buildBinFrame(binding, table, groups, warnings, advisories, binRange);
+  if (stat === "bin_hex") return buildBinHexFrame(binding, table, groups, warnings, advisories);
   if (stat === "summary_bin")
     return buildSummaryBinFrame(binding, table, groups, warnings, advisories, binRange);
   if (stat === "bindot")

@@ -59,6 +59,7 @@ export function styleBinding(
       count: ["count"],
       bin: ["count", "density", "ncount", "ndensity"],
       bin_2d: ["count", "density", "ncount", "ndensity"],
+      bin_hex: ["count", "density", "ncount", "ndensity"],
       density: ["density", "count", "scaled", "ndensity"],
       bindot: ["stackpos"],
       smooth: ["y", "ymin", "ymax", "se"],

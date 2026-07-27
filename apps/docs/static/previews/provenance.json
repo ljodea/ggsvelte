@@ -146,6 +146,11 @@
       "sourceSha256": "debd3a7f3545a99ee4f83a4a89b9456a559339c725b7b1727596104e69d76569",
       "pngSha256": "29209d4a65b24bba0dad9bb91a70aaa3d547bf4d24689297f8ea391ebf0ec86c"
     },
+    "hex/basic": {
+      "filename": "hex-basic-light.png",
+      "sourceSha256": "a9fb882b805da1a661942ee64641ac85e4de9508a4d9459ab48e482d8862a49e",
+      "pngSha256": "e6514f5698e4a33726342f36653b1397e3e0a4d19a1961344dc26e97a01190b0"
+    },
     "histogram/basic": {
       "filename": "histogram-basic-light.png",
       "sourceSha256": "49122556a7f21ec9a57652a005ab87da2025a1328520b3d07e70656bd02d1869",

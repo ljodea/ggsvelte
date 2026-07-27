@@ -1,10 +1,11 @@
 /**
  * after_stat color/fill diagnostics (#915).
  *
- * Only density_2d / density_2d_filled wire an after_stat column into
- * color/fill (`frame-stats-density-2d.ts` — every other frame builds
- * color/fill from the mapped *field* alone). Elsewhere an `{ stat }` colour
- * mapping was accepted and then silently dropped, with no diagnostic.
+ * density_2d / density_2d_filled and bin_hex resolve after_stat colour into
+ * frame color/fill values. Every other frame builds colour from the mapped
+ * *field* alone; an `{ stat }` colour mapping there is accepted only when the
+ * stat publishes the column, then dropped without a painted value — so those
+ * stats emit `stat-channel-unsupported` when the column is not published.
  */
 import { describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
@@ -66,6 +67,16 @@ describe("after_stat color/fill (#915)", () => {
     const model = runPipeline(
       gg(cloud(60), aes({ x: "x", y: "y", color: { stat: "level" } }))
         .geomDensity2d({ n: 20, bins: 4 })
+        .spec(),
+      size,
+    );
+    expect(statChannelWarnings(model.warnings)).toEqual([]);
+  });
+
+  it("stays silent for geom_hex color/fill = after_stat(count)", () => {
+    const model = runPipeline(
+      gg(cloud(40), aes({ x: "x", y: "y", color: { stat: "count" }, fill: { stat: "count" } }))
+        .geomHex({ bins: 8 })
         .spec(),
       size,
     );

@@ -31,6 +31,7 @@ export function candidateAutoMode(
     case "tile":
     case "raster":
     case "polygon":
+    case "hex":
     case "density_2d_filled":
     case "map":
     case "sf":

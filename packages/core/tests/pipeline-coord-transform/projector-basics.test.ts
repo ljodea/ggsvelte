@@ -71,7 +71,7 @@ describe("pipeline post-stat coord_transform — projector basics", () => {
     const axis = model.scene.panels[0]!.axisX!;
     expect(model.scene.panels[0]!.grid.x).toHaveLength(5);
     expect(axis.filter((tick) => tick.label !== "")).toHaveLength(3);
-    expect(axis.find((tick) => tick.value === 1000)?.label).toBe("1,000");
+    expect(axis.find((tick) => tick.value === 1000)?.label).toBe("1000");
   });
   it("measures projected-label overlap with the resolved guide font size", () => {
     const renderAt = (labelSize: number) =>

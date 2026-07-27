@@ -87,8 +87,9 @@ export function defaultLogTickFormat(v: number): string {
 
 /**
  * Default numeric tick formatter: decimals derived from the step so labels
- * across one axis agree, thousands grouping for readability (this is what
- * makes huge-number labels wide — the fixture we care about), exponential
+ * across one axis agree. Thousands grouping only when the tick step is at
+ * least 1000 — year-like and other modest integer domains stay ungrouped
+ * (#779), while huge-number axes keep commas for readability. Exponential
  * fallback beyond 1e18 where grouping stops being legible.
  */
 export function defaultTickFormat(step: number): (v: number) => string {
@@ -96,12 +97,14 @@ export function defaultTickFormat(step: number): (v: number) => string {
     !Number.isFinite(step) || step === 0
       ? 0
       : Math.max(0, Math.min(20, -Math.floor(Math.log10(Math.abs(step)))));
+  const useGrouping = Number.isFinite(step) && Math.abs(step) >= 1000;
   return (v: number) => {
     if (!Number.isFinite(v)) return String(v);
     if (Math.abs(v) >= 1e18) return v.toExponential(2);
     return v.toLocaleString("en-US", {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
+      useGrouping,
     });
   };
 }

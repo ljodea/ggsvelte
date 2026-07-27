@@ -30,6 +30,8 @@ export function emptyFrameExtras(): Pick<
   | "offsetY"
   | "xIntercepts"
   | "yIntercepts"
+  | "hexWidth"
+  | "hexHeight"
 > {
   return {
     bin: null,
@@ -50,6 +52,8 @@ export function emptyFrameExtras(): Pick<
     offsetY: null,
     xIntercepts: [],
     yIntercepts: [],
+    hexWidth: null,
+    hexHeight: null,
   };
 }
 
