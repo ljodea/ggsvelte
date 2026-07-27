@@ -143,7 +143,7 @@ describe("resolveSetInspectionAction", () => {
 });
 
 const samplePending = {
-  hit: null,
+  candidate: null,
   source: "pointer" as const,
   concreteMode: "exact" as const,
 };

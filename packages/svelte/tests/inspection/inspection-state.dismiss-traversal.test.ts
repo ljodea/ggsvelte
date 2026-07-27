@@ -11,7 +11,6 @@ import { applyInspectionDismissSideEffects } from "../../src/lib/interaction/tra
 import {
   candidateHit,
   continuousSpec,
-  hitFromCandidate,
   modelFor,
   mountInspectionController,
 } from "./inspection-state.harness.js";
@@ -25,7 +24,7 @@ describe("createInspectionState dismissInspection", () => {
     });
 
     const first = candidateHit(model);
-    state.setInspection(first.hit, "pointer", "transient", "xy", first.candidate);
+    state.setInspection(first.candidate, "pointer", "transient", "xy");
     flushSync();
     state.toggleInspectionPin("pointer");
     flushSync();
@@ -69,7 +68,7 @@ describe("createInspectionState dismissInspection", () => {
     }
     if (third === null) throw new Error("expected a third candidate");
 
-    state.setInspection(hitFromCandidate(third), "pointer", "transient", "xy", third);
+    state.setInspection(third, "pointer", "transient", "xy");
     flushSync();
     state.toggleInspectionPin("pointer");
     flushSync();
@@ -109,8 +108,8 @@ describe("createInspectionState dismissInspection", () => {
       },
     });
 
-    const { candidate, hit } = candidateHit(model);
-    state.setInspection(hit, "pointer", "transient", "xy", candidate);
+    const { candidate } = candidateHit(model);
+    state.setInspection(candidate, "pointer", "transient", "xy");
     flushSync();
     events.length = 0;
 
@@ -134,7 +133,7 @@ describe("createInspectionState dismissInspection", () => {
 
     // close with restoreFocus schedules captureSurface focus.
     tooltipHovered = true;
-    state.setInspection(hit, "pointer", "transient", "xy", candidate);
+    state.setInspection(candidate, "pointer", "transient", "xy");
     flushSync();
     events.length = 0;
     const closePlan = state.closeInspection("pointer", true);

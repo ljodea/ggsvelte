@@ -12,6 +12,16 @@ export type PanelBounds = {
   readonly height: number;
 };
 
+/** Convert viewport `PlotRect` bounds into the xywh shape keyboard/clamp callers use. */
+export function panelBoundsFrom(rect: PlotRect): PanelBounds {
+  return {
+    x: rect.x0,
+    y: rect.y0,
+    width: rect.x1 - rect.x0,
+    height: rect.y1 - rect.y0,
+  };
+}
+
 /** Continuous zoom domain bag used by brush-to-zoom commit paths. */
 export type ContinuousZoomDomains = {
   x?: [number, number];

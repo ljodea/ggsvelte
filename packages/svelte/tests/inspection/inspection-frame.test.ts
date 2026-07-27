@@ -106,14 +106,6 @@ describe("resolveQueuedInspectFrameAction", () => {
 });
 
 describe("buildQueuedPointerInspection", () => {
-  const hit = {
-    layerIndex: 0,
-    panelIndex: 0,
-    rowIndex: 1,
-    x: 10,
-    y: 20,
-    kind: "point" as const,
-  };
   const match = {
     id: 3,
     mode: "xy" as const,
@@ -130,22 +122,19 @@ describe("buildQueuedPointerInspection", () => {
   it("omits mode/candidate when nearest match is null", () => {
     expect(
       buildQueuedPointerInspection({
-        hit,
         source: "pointer",
         match: null,
       }),
-    ).toEqual({ hit, source: "pointer" });
+    ).toEqual({ candidate: null, source: "pointer" });
   });
 
   it("couples concreteMode and candidate from the same match object", () => {
     expect(
       buildQueuedPointerInspection({
-        hit,
         source: "touch",
         match,
       }),
     ).toEqual({
-      hit,
       source: "touch",
       concreteMode: "xy",
       candidate: match,
@@ -158,7 +147,6 @@ describe("buildQueuedPointerInspection", () => {
     const exactMatch = { ...match, mode: "exact" as const, autoMode: "exact" as const };
     expect(
       buildQueuedPointerInspection({
-        hit,
         source: "pointer",
         match: exactMatch,
       }).concreteMode,
@@ -218,14 +206,6 @@ describe("buildQueuedInspectFrame", () => {
     expect(fallbackCalls).toBe(1);
     expect(built).toEqual({
       queued: {
-        hit: {
-          layerIndex: 0,
-          panelIndex: 0,
-          rowIndex: 9,
-          x: 1,
-          y: 2,
-          kind: "points",
-        },
         source: "pointer",
         candidate: fallback,
       },
@@ -239,7 +219,7 @@ describe("buildQueuedInspectFrame", () => {
     });
   });
 
-  it("builds hit + queued mode + candidate from match without calling fallback", () => {
+  it("builds queued mode + candidate from match without calling fallback", () => {
     let fallbackCalls = 0;
     const built = buildQueuedInspectFrame({
       match,
@@ -252,14 +232,6 @@ describe("buildQueuedInspectFrame", () => {
     });
     expect(fallbackCalls).toBe(0);
     expect(built.queued).toEqual({
-      hit: {
-        layerIndex: 1,
-        panelIndex: 2,
-        rowIndex: 1,
-        x: 12,
-        y: 24,
-        kind: "point",
-      },
       source: "touch",
       concreteMode: "xy",
       candidate: match,

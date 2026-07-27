@@ -21,7 +21,7 @@
    * strata (SVG chrome-bottom, mark strata in svg/canvas, SVG chrome-top) —
    * document order = paint order, no z-index anywhere. Every stratum is
    * pointer-events: none; ONE transparent capture layer (last child) owns
-   * all pointer events and resolves them through the plot-px hit index, so
+   * all pointer events and resolves them through the semantic viewport, so
    * hover/tooltip/brush never care which stratum painted a mark. Hover,
    * tooltip, and the transient brush are pure overlays — the pipeline NEVER
    * re-runs for them. Brush-to-zoom is an intentional respec (explicit

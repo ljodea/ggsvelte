@@ -3882,14 +3882,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-287",
+    id: "heading:guide-lifecycle:experimental-289",
     kind: "heading",
-    title: "experimental (287)",
+    title: "experimental (289)",
     summary:
-      "experimental (287) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-287",
+      "experimental (289) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-289",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (287)"],
+    exact: ["experimental (289)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -13674,6 +13674,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["CellValue"],
   },
   {
+    id: "api:ggsvelte-core:ClientRect",
+    kind: "api",
+    title: "ClientRect",
+    summary: "@ggsvelte/core · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "type", "experimental"],
+    exact: ["ClientRect"],
+  },
+  {
     id: "api:ggsvelte-core:ColorScale",
     kind: "api",
     title: "ColorScale",
@@ -13789,6 +13798,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "type", "experimental"],
     exact: ["CountStatResult"],
+  },
+  {
+    id: "api:ggsvelte-core:CreateSemanticViewportInput",
+    kind: "api",
+    title: "CreateSemanticViewportInput",
+    summary: "@ggsvelte/core · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "type", "experimental"],
+    exact: ["CreateSemanticViewportInput"],
   },
   {
     id: "api:ggsvelte-core:DEFAULT_FONT_STACK",
