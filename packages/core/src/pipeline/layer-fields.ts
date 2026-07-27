@@ -23,26 +23,55 @@ export function resolveLayerFields(
         fields.push(source === undefined ? { channel, field } : { channel, field, source });
     };
     const stat = binding.layer.stat ?? "identity";
-    if (stat === "identity") {
+    const manualFun =
+      stat === "manual"
+        ? ((binding.layer.params as { fun?: string } | undefined)?.fun ?? null)
+        : null;
+    // unique / manual first|last / ellipse use identity-like field maps.
+    // ellipse emits path vertices still keyed to source groups (no after_stat y).
+    const identityLike =
+      stat === "identity" ||
+      stat === "unique" ||
+      stat === "ellipse" ||
+      (stat === "manual" && (manualFun === "first" || manualFun === "last"));
+    if (identityLike) {
       push("x", binding.xField);
       push("y", binding.yField);
     } else {
       // Synthesized stat rows have no source row. Advertise only semantic
       // generated channels that CandidateFacts can resolve truthfully.
       if (binding.xField !== null) push("x", "x", "stat");
-      if (stat === "count" || stat === "bin" || stat === "density") {
-        push("y", binding.yStatColumn ?? (stat === "density" ? "density" : "count"), "stat");
+      if (stat === "count" || stat === "bin" || stat === "density" || stat === "bindot") {
+        push(
+          "y",
+          binding.yStatColumn ??
+            (stat === "density" ? "density" : stat === "bindot" ? "stackpos" : "count"),
+          "stat",
+        );
       } else if (stat === "boxplot") {
         push("y", "middle", "stat");
-      } else if (stat === "smooth" || stat === "summary") {
+      } else if (
+        stat === "smooth" ||
+        stat === "summary" ||
+        stat === "summary_bin" ||
+        stat === "connect" ||
+        stat === "quantile" ||
+        stat === "manual" ||
+        stat === "contour" ||
+        stat === "density_2d" ||
+        stat === "density_2d_filled"
+      ) {
         push("y", "y", "stat");
+      }
+      if (stat === "contour" || stat === "density_2d" || stat === "density_2d_filled") {
+        push("level", "level", "stat");
       }
     }
     push("ymin", binding.yminField);
     push("ymax", binding.ymaxField);
     push("xmin", binding.xminField);
     push("xmax", binding.xmaxField);
-    if (binding.layer.geom === "segment") {
+    if (binding.layer.geom === "segment" || binding.layer.geom === "curve") {
       push("xend", binding.xendField);
       push("yend", binding.yendField);
     }

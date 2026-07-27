@@ -18,6 +18,28 @@ import type {
 } from "./types.js";
 import { PipelineError } from "./types.js";
 
+/**
+ * Time-of-day scales (#831) accept portable seconds-since-midnight numbers and
+ * Date values (UTC clock portion) without requiring string temporal parse.
+ */
+function columnAcceptsTimeOfDay(table: ColumnTable, field: string): boolean {
+  const raw = table.column(field);
+  let saw = false;
+  for (const value of raw) {
+    if (value === null || value === undefined) continue;
+    if (typeof value === "number" && Number.isFinite(value)) {
+      saw = true;
+      continue;
+    }
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      saw = true;
+      continue;
+    }
+    return false;
+  }
+  return saw;
+}
+
 export function preflightTemporalFields(input: {
   table: ColumnTable;
   bindings: readonly LayerBinding[];
@@ -122,7 +144,12 @@ export function preflightTemporalFields(input: {
               documentationUrl: docs("temporal-parse-failed"),
             });
           }
-        } else if (conversion.requestedTime && decision.status !== "temporal") {
+        } else if (
+          conversion.requestedTime &&
+          decision.status !== "temporal" &&
+          // scale_*_time: numbers = seconds since midnight; Dates = UTC clock (#831).
+          !(conversion.requestedKind === "time" && columnAcceptsTimeOfDay(layerTable, field))
+        ) {
           const candidates =
             decision.candidates.length > 0 ? ` Candidates: ${decision.candidates.join(", ")}.` : "";
           const message = `The ${axis} scale requests temporal values, but field "${field}" could not be parsed strictly.${candidates} Set scales.${axis}.parse explicitly or use type: "band".`;
@@ -146,11 +173,17 @@ export function preflightTemporalFields(input: {
             documentationUrl: docs("temporal-parse-failed"),
           });
         }
-        if (
+        // time-of-day may reduce date/datetime to clock portion; other kind
+        // mismatches still fail.
+        const kindMismatch =
           decision.kind !== null &&
           conversion.requestedKind !== undefined &&
-          decision.kind !== conversion.requestedKind
-        ) {
+          decision.kind !== conversion.requestedKind &&
+          !(
+            conversion.requestedKind === "time" &&
+            (decision.kind === "date" || decision.kind === "datetime")
+          );
+        if (kindMismatch) {
           const message = `The ${axis} scale requests ${conversion.requestedKind} values, but field "${field}" parses as ${decision.kind}. Choose the matching date/datetime scale or parser.`;
           throw new PipelineError(
             "temporal-parse-failed",

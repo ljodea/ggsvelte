@@ -3,7 +3,14 @@ import { describe, expect, it } from "vitest";
 import { runPipeline } from "@ggsvelte/core";
 import { aes, gg } from "@ggsvelte/spec";
 
-import { coord_equal, coord_fixed, coordEqual, coordFixed } from "../../src/lib/index.js";
+import {
+  coord_equal,
+  coord_fixed,
+  coord_sf,
+  coordEqual,
+  coordFixed,
+  coordSf,
+} from "../../src/lib/index.js";
 import SceneView from "../../src/lib/scene/SceneView.svelte";
 import { render } from "../helpers/render.js";
 
@@ -18,6 +25,12 @@ describe("fixed-aspect scene", () => {
     expect(coord_equal).toBe(coordEqual);
     expect(coordEqual).toBe(coordFixed);
     expect(coordFixed({ ratio: 2 })).toEqual({ type: "fixed", ratio: 2 });
+  });
+
+  it("re-exports the simple-features coordinate helper as a value, not only its types", () => {
+    expect(coord_sf).toBe(coordSf);
+    expect(coordSf()).toEqual({ type: "sf" });
+    expect(coordSf({ ratio: 2 })).toEqual({ type: "sf", ratio: 2 });
   });
 
   it("renders the theme-owned allocation behind only the fitted data rectangle", () => {

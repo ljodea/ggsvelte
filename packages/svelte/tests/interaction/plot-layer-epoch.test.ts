@@ -106,7 +106,7 @@ describe("#609 epoch with non-mark layers registered", () => {
     const capture = view.container.querySelector(".gg-capture")!;
     expect(capture).not.toBeNull();
 
-    // Touch tap pins when inspect.pin is enabled (see r0-evidence / pointer-up).
+    // Touch tap pins when inspect.pin is enabled (see r0-evidence/touch-interval / pointer-up).
     pointEvent(capture, "pointerdown", seed!.x, seed!.y, "touch", 9);
     pointEvent(capture, "pointerup", seed!.x, seed!.y, "touch", 9);
     await expect

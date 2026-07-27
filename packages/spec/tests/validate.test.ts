@@ -167,23 +167,14 @@ describe("validate — agent errors (snapshot-tested messages)", () => {
     ]);
   });
 
-  it("rejects the sequential scheme on an ordinal scale with a named fix", () => {
-    const errors = errorsOf({
+  it("allows sequential-family schemes on ordinal color scales for discrete viridis (#828)", () => {
+    // Manual color scales reject `scheme` at the TypeBox branch (range-only);
+    // ordinal may name a sequential-family scheme for discrete sampling.
+    const result = validate({
       layers: [{ geom: "point" }],
       scales: { fill: { type: "ordinal", scheme: "viridis" } },
     });
-
-    expect(errors).toEqual([
-      {
-        code: "scale-scheme-type",
-        path: "/scales/fill/scheme",
-        message: 'The sequential scheme "viridis" cannot be used with an ordinal color scale.',
-        fix: {
-          description: "Use a categorical scheme or provide an ordinal range of CSS colors.",
-          example: "observable10",
-        },
-      },
-    ]);
+    expect(result.ok).toBe(true);
   });
 
   it("rejects non-hex custom color stops before rendering", () => {

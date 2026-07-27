@@ -62,8 +62,8 @@ export function normalizeCoord(coord: CoordSpec | undefined): CoordSpec | undefi
       ? ({ ...record } as CoordSpec)
       : undefined;
   if (record["type"] === "flip") return { ...record } as CoordSpec;
-  if (record["type"] === "fixed") {
-    const fixed = { ...record } as unknown as { type: "fixed"; ratio?: unknown };
+  if (record["type"] === "fixed" || record["type"] === "sf") {
+    const fixed = { ...record } as unknown as { type: "fixed" | "sf"; ratio?: unknown };
     if (fixed.ratio === 1 || fixed.ratio === undefined) delete fixed.ratio;
     return fixed as CoordSpec;
   }

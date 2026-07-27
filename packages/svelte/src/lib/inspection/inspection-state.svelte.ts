@@ -306,6 +306,9 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
       case "ignore":
         return;
       case "clear": {
+        // Clear ends the session — discard any orphan pending pin stash so a
+        // later re-pin cannot restore-pending a pre-clear candidate (#856).
+        pointerQueue.cancel({ pendingPinned: "discard" });
         if (action.emitClear) emitInspection({ type: "inspect", phase: "clear", source });
         inspection = null;
         inspectionSeed = null;
