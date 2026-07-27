@@ -63,7 +63,7 @@
     "build:cloudflare": "bun run build && bun run build:docs && bun run check:pages-links && bun scripts/deployment-artifact.ts",
     "smoke:deployment": "bun scripts/deployment-smoke-cli.ts",
     "schema:emit": "bun packages/spec/scripts/emit-schema.ts",
-    "test:components": "cd packages/svelte && bun run --bun test",
+    "test:components": "cd packages/svelte && bun run --bun test && cd ../../apps/docs && bun run --bun test",
     "bench": "cd benchmarks && bun run bench",
     "bench:smoke": "cd benchmarks && bun run bench:smoke",
     "bench:json": "cd benchmarks && bun run bench:json",

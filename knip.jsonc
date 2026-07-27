@@ -71,9 +71,9 @@
     },
     "apps/docs": {
       // svelte.config.js / vite.config.ts are auto-entries via knip's
-      // svelte plugin.
-      "entry": ["src/routes/**/+*.ts", "src/lib/**/*.ts"],
-      "project": ["src/**/*.ts", "*.{js,ts}"],
+      // svelte plugin. Component tests (issue #991) are vitest browser entries.
+      "entry": ["src/routes/**/+*.ts", "src/lib/**/*.ts", "tests/**/*.test.ts"],
+      "project": ["src/**/*.ts", "tests/**/*.ts", "*.{js,ts}"],
       // Imported only from .svelte files / the $examples alias, which knip
       // does not trace. phosphor-svelte / bits-ui are deep-imported only from .svelte.
       "ignoreDependencies": ["@ggsvelte/examples", "phosphor-svelte", "bits-ui"],
