@@ -117,7 +117,7 @@
   >
     <!-- svelte-ignore a11y_no_noninteractive_tabindex (scrollable code must be keyboard reachable) -->
     <div
-      class="scroll-region"
+      class="scroll-region code-surface"
       role="region"
       aria-label="Code example"
       tabindex="0"
@@ -193,27 +193,22 @@
 
   .scroll-region {
     max-width: 100%;
-    overflow-x: auto;
-    background: var(--code-paper);
-    color: var(--code-ink);
   }
 
   .scroll-region :global(pre.hljs),
   .scroll-region :global(pre) {
     min-width: max-content;
     margin: 0;
-    padding: 1rem;
+    padding: 0;
     background: transparent !important;
     color: inherit;
-    font-family: var(--code-font);
-    font-size: 0.8rem;
-    line-height: 1.5;
+    font: inherit;
   }
 
   .scroll-region :global(code.hljs),
   .scroll-region :global(code) {
     background: transparent !important;
-    font-family: inherit;
+    font: inherit;
   }
 
   @media (max-width: 35rem) {
