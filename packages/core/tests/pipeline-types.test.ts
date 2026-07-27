@@ -13,10 +13,10 @@ describe("pipeline types contract", () => {
   });
 
   it("PipelineError is a structured tier-1 error", () => {
-    const err = new PipelineError("test-code", "/path", "message");
+    const err = new PipelineError("renderer-failure", "/path", "message");
     expect(err).toBeInstanceOf(Error);
     expect(err.name).toBe("PipelineError");
-    expect(err.code).toBe("test-code");
+    expect(err.code).toBe("renderer-failure");
     expect(err.path).toBe("/path");
     expect(err.message).toBe("message");
   });
