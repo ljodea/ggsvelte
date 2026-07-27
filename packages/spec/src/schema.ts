@@ -120,6 +120,7 @@ export const FreqpolyLayerSchema = SpecModule.Import("FreqpolyLayer");
 export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
+export const AblineLayerSchema = SpecModule.Import("AblineLayer");
 export const CurveLayerSchema = SpecModule.Import("CurveLayer");
 export const MapLayerSchema = SpecModule.Import("MapLayer");
 export const BlankLayerSchema = SpecModule.Import("BlankLayer");
@@ -226,6 +227,7 @@ export type HlineParams = SpecType<"HlineParams">;
 export type VlineParams = SpecType<"VlineParams">;
 /** Segment layer params (styling + lineend). */
 export type SegmentParams = SpecType<"SegmentParams">;
+export type AblineParams = SpecType<"AblineParams">;
 /** Curve layer params (curvature/angle/ncp + stroke). */
 export type CurveParams = SpecType<"CurveParams">;
 /** Simple-features layer params (geometry column + styling; #809 phase 1). */
@@ -325,6 +327,8 @@ export type RasterLayer = LayerWithDataRef<SpecType<"RasterLayer">>;
 export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 /** A finite segment layer ((x,y)→(xend,yend)). */
 export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
+/** A slope/intercept reference line layer (geom_abline). */
+export type AblineLayer = LayerWithDataRef<SpecType<"AblineLayer">>;
 /** A curve layer (curved connectors). */
 export type CurveLayer = LayerWithDataRef<SpecType<"CurveLayer">>;
 /** A choropleth/map layer (#808). */
@@ -364,6 +368,7 @@ export type LayerSpec =
   | AreaLayer
   | RibbonLayer
   | SegmentLayer
+  | AblineLayer
   | CurveLayer
   | MapLayer
   | SfLayer

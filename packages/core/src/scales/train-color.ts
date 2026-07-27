@@ -45,7 +45,9 @@ export function trainColor(
     ...(config.scheme !== undefined && { scheme: config.scheme }),
   });
   // Placeholder range for trainDiscrete fingerprint/assignment; sequential
-  // schemes re-sample after domain length is known.
+  // schemes re-sample after domain length is known. Do not forward onExhaust:
+  // the 10-stop ramp is not the final palette, so exhaustion against it is
+  // spurious (sampleSequentialPalette always yields exactly k colors).
   const range = config.reverse === true ? baseRange.toReversed() : baseRange;
   const scheme =
     config.range === undefined
@@ -61,7 +63,8 @@ export function trainColor(
       ...(scheme !== undefined && { scheme }),
       ...(config.domain !== undefined && { domain: config.domain }),
       ...(config.domainMode !== undefined && { domainMode: config.domainMode }),
-      ...(config.onExhaust !== undefined && { onExhaust: config.onExhaust }),
+      ...(sequentialRamp === undefined &&
+        config.onExhaust !== undefined && { onExhaust: config.onExhaust }),
     },
     prevState ?? null,
   );
@@ -79,7 +82,7 @@ export function trainColor(
         return i === undefined ? undefined : colors[i % colors.length];
       },
       state: result.state,
-      warnings: result.warnings,
+      warnings: result.warnings.filter((w) => w.code !== "palette-exhausted"),
     };
   }
 

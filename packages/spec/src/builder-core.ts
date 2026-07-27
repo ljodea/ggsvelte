@@ -43,6 +43,7 @@ import type {
   GeomRuleOptions,
   GeomRugOptions,
   GeomSegmentOptions,
+  GeomAblineOptions,
   GeomVlineOptions,
   GeomQuantileOptions,
   GeomCurveOptions,
@@ -324,6 +325,14 @@ export class GGBuilderCore {
    */
   geomSegment(options: GeomSegmentOptions = {}): GGBuilder {
     return this.layer(layerFrom("segment", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'abline', ... }). Annotation form: slope and
+   * intercept (defaults 1 and 0). Line is clipped to the panel domain.
+   */
+  geomAbline(options: GeomAblineOptions = {}): GGBuilder {
+    return this.layer(layerFrom("abline", options));
   }
 
   /**

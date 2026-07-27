@@ -46,4 +46,18 @@ describe("sampleSequentialPalette / trainColor sequential discrete (#828)", () =
     expect(scale.colorOf("a")).toBe(forward.colorOf("c"));
     expect(scale.colorOf("c")).toBe(forward.colorOf("a"));
   });
+
+  it("does not exhaust against the 10-stop table for k>10 (#828)", () => {
+    const cats = Array.from({ length: 12 }, (_, i) => `c${i}`);
+    const soft = trainColor(cats, null, { scheme: "viridis" });
+    expect(soft.domain).toHaveLength(12);
+    expect(soft.warnings.some((w) => w.code === "palette-exhausted")).toBe(false);
+    expect(soft.colorOf("c0")).toBeDefined();
+    expect(soft.colorOf("c11")).toBeDefined();
+    // onExhaust:error must not throw — sampling always yields k colors.
+    expect(() => trainColor(cats, null, { scheme: "viridis", onExhaust: "error" })).not.toThrow();
+    const strict = trainColor(cats, null, { scheme: "viridis", onExhaust: "error" });
+    expect(strict.domain).toHaveLength(12);
+    expect(strict.warnings.some((w) => w.code === "palette-exhausted")).toBe(false);
+  });
 });
