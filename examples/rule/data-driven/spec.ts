@@ -1,4 +1,4 @@
-import { aes, gg } from "@ggsvelte/spec";
+import { aes, gg, guideNone } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
 import { longitudeEstimates } from "./data.js";
@@ -8,8 +8,12 @@ export default defineExample(
   // spanning the panel. Van Langren's own graph was exactly this - a
   // one-dimensional strip of the estimates - which makes the rug not a
   // restyling of his chart but a reconstruction of it.
+  //
+  // y is synthetic for panel-spanning vertical rules; suppress the 0–1
+  // axis ladder (#700).
   gg(longitudeEstimates, aes({ x: "longitude" }))
     .geomRule({ alpha: 0.35, linewidth: 1.5 })
+    .guides({ y: guideNone() })
     .theme("minimal")
     .labs({
       title: "The first statistical graph was a rug",
