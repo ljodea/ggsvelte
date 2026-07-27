@@ -208,6 +208,10 @@ test("appearance control remains usable when browser storage is unavailable", as
 });
 
 test("route metadata is canonical, singular, and aliases are noindex", async ({ page }) => {
+  // Three full navigations (guide, alias, 404), each hydrating the generated
+  // search index (~760KB) — measured 17s locally and 30.2s on CI journeys,
+  // straddling the default 30s budget regardless of the change under test.
+  test.setTimeout(60_000);
   await page.goto(GUIDE_ROUTE);
   await expect(page).toHaveTitle("Getting started — ggsvelte");
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
