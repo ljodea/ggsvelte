@@ -18,7 +18,12 @@ export function assertRequiredChannels(input: {
   xmaxField?: string | null;
   xendField?: string | null;
   yendField?: string | null;
+  angleField?: string | null;
+  radiusField?: string | null;
+  layerParams?: unknown;
   ribbonOrientation?: "x" | "y";
+  /** Effective rug sides string (default bl) when geom is rug. */
+  rugSides?: string;
 }): void {
   const {
     geom,
@@ -34,28 +39,40 @@ export function assertRequiredChannels(input: {
     xmaxField = null,
     xendField = null,
     yendField = null,
+    angleField = null,
+    radiusField = null,
+    layerParams,
     ribbonOrientation,
+    rugSides,
   } = input;
 
   if (
     geom === "point" ||
     geom === "line" ||
+    geom === "path" ||
     geom === "col" ||
     geom === "area" ||
     geom === "text" ||
     geom === "smooth" ||
+    geom === "quantile" ||
     geom === "boxplot" ||
     geom === "tile" ||
     geom === "raster" ||
-    geom === "hex"
+    geom === "hex" ||
+    geom === "density_2d" ||
+    geom === "density_2d_filled"
   ) {
     requireField(xField, "x", index, geom);
     if (yStatColumn === null) requireField(yField, "y", index, geom);
   }
-  if (geom === "bar" || geom === "density") requireField(xField, "x", index, geom);
+  if (geom === "bar" || geom === "density" || geom === "contour" || geom === "dotplot")
+    requireField(xField, "x", index, geom);
+  if (geom === "contour") {
+    requireField(yField, "y", index, geom);
+  }
   if (geom === "errorbar") {
     requireField(xField, "x", index, geom);
-    if (stat === "summary") {
+    if (stat === "summary" || stat === "summary_bin") {
       requireField(yField, "y", index, geom);
     } else {
       requireField(yminField, "ymin", index, geom);
@@ -82,10 +99,29 @@ export function assertRequiredChannels(input: {
   }
   if (geom === "rule" && ruleForm === "vertical") requireField(xField, "x", index, geom);
   if (geom === "rule" && ruleForm === "horizontal") requireField(yField, "y", index, geom);
-  if (geom === "segment") {
+  if (geom === "segment" || geom === "curve") {
     requireField(xField, "x", index, geom);
     requireField(yField, "y", index, geom);
     requireField(xendField, "xend", index, geom);
     requireField(yendField, "yend", index, geom);
+  }
+  if (geom === "spoke") {
+    requireField(xField, "x", index, geom);
+    requireField(yField, "y", index, geom);
+    const params =
+      typeof layerParams === "object" && layerParams !== null
+        ? (layerParams as Record<string, unknown>)
+        : {};
+    if (angleField === null && params["angle"] === undefined) {
+      requireField(angleField, "angle", index, geom);
+    }
+    if (radiusField === null && params["radius"] === undefined) {
+      requireField(radiusField, "radius", index, geom);
+    }
+  }
+  if (geom === "rug") {
+    const sides = rugSides !== undefined && rugSides.length > 0 ? rugSides : "bl";
+    if (/[bt]/.test(sides)) requireField(xField, "x", index, geom);
+    if (/[lr]/.test(sides)) requireField(yField, "y", index, geom);
   }
 }

@@ -15,11 +15,15 @@ function resolveCandidateFieldChannels(fields: readonly MappedField[]): {
   colorField: string | undefined;
   fillField: string | undefined;
 } {
+  // Only source-table fields (not after_stat / source:"stat" names like stackpos).
+  // bindot keeps real source rowIndex for aesthetics but y is computed (#803).
+  const sourceField = (channel: string) =>
+    fields.find((field) => field.channel === channel && field.source !== "stat")?.field;
   return {
-    xField: fields.find((field) => field.channel === "x")?.field,
-    yField: fields.find((field) => field.channel === "y")?.field,
-    colorField: fields.find((field) => field.channel === "color")?.field,
-    fillField: fields.find((field) => field.channel === "fill")?.field,
+    xField: sourceField("x"),
+    yField: sourceField("y"),
+    colorField: sourceField("color"),
+    fillField: sourceField("fill"),
   };
 }
 

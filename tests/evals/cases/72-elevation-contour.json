@@ -1,0 +1,44 @@
+{
+  "id": "72-elevation-contour",
+  "kind": "chart",
+  "prompt": "Draw contour isolines of elevation z over a regular grid of x and y.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" },
+      { "name": "z", "type": "quantitative" }
+    ],
+    "rowCount": 9
+  },
+  "data": {
+    "main": [
+      { "x": 0, "y": 0, "z": 0 },
+      { "x": 1, "y": 0, "z": 1 },
+      { "x": 2, "y": 0, "z": 0 },
+      { "x": 0, "y": 1, "z": 1 },
+      { "x": 1, "y": 1, "z": 2 },
+      { "x": 2, "y": 1, "z": 1 },
+      { "x": 0, "y": 2, "z": 0 },
+      { "x": 1, "y": 2, "z": 1 },
+      { "x": 2, "y": 2, "z": 0 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "contour",
+        "stat": "contour",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" },
+          "z": { "field": "z" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_contour defaults to stat contour isolines over a regular grid (#801)."
+}

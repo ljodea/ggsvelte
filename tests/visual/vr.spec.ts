@@ -171,7 +171,7 @@ for (const scenario of SMOKE_SCENARIOS) {
       // main thread; under CI load this regularly exceeds the default 30s budget
       // before data-gg-ready flips (and before Playwright can even query the DOM).
       if (scenario.exampleId === "point/canvas-scatter") {
-        test.setTimeout(120_000);
+        test.setTimeout(180_000);
       }
       await shotExample(page, scenario.exampleId, scenario.theme, scenario.basename);
     });

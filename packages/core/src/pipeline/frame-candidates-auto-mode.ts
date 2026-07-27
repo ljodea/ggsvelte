@@ -19,7 +19,10 @@ export function candidateAutoMode(
     // is opt-in — auto→xy drew a full crosshair and multi-member tooltips on
     // dense scatters without adding much (#754).
     case "point":
+    case "dotplot":
     case "text":
+    case "sf_text":
+    case "sf_label":
       return "exact";
     case "col":
     case "bar":
@@ -27,19 +30,30 @@ export function candidateAutoMode(
     case "tile":
     case "raster":
     case "hex":
+    case "density_2d_filled":
+    case "map":
+    case "sf":
       return "exact";
     case "line":
+    case "path":
+    case "contour":
     case "area":
     case "density":
     case "smooth":
+    case "quantile":
+    case "density_2d":
     case "errorbar":
     case "boxplot":
       return "x";
     case "ribbon":
       return binding.ribbonOrientation === "y" ? "y" : "x";
+    case "spoke":
     case "segment":
       // Geometry-based mode in defaultAutoMode (long horizontal → "y", vertical → "x").
       return undefined;
+    case "rug":
+      // Edge chrome: short ticks stay exact-only (not axis-group hover).
+      return "exact";
     case "rule": {
       if (binding.ruleForm === "vertical") return "x";
       if (binding.ruleForm === "horizontal") return "y";

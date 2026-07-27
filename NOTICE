@@ -82,3 +82,16 @@ Gorman at Palmer Station, Antarctica, as part of the Palmer Long Term
 Ecological Research programme, and are published by the Environmental Data
 Initiative. The package authors ask that the LTER programme be acknowledged
 in any publication using the data, which this notice does.
+
+Google turbo colormap (bundled sequential scheme stops)
+-------------------------------------------------------
+packages/core/src/scales/sequential-schemes.ts includes a 10-stop sample of
+Google's turbo colormap used when authors select scheme/option "turbo".
+
+  Copyright 2019 Google LLC
+  License: Apache License 2.0
+  https://www.apache.org/licenses/LICENSE-2.0
+  https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html
+
+The stops are a clean-room hex sample of the published map for portable
+scheme lookup — not a copy of ggplot2 R sources.

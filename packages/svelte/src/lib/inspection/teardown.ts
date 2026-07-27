@@ -151,9 +151,9 @@ export type InspectionDismissKind = "escape" | "close";
  * Used by a single host `dismissInspection` that Escape and closeInspection share.
  *
  * Escape (keyboard): invalidate coordinator, clear brush, optional returnToInspect;
- * does **not** clear pendingPinnedPointer (preserved host behavior — may be
- * intentional for pin-restore after tool reset).
- * Close: release pinned, clear pending, optional restore focus to capture surface.
+ * discards pending pin stash so a later re-pin cannot restore a pre-Escape
+ * candidate (#856). Close: release pinned, clear pending, optional restore
+ * focus to capture surface.
  */
 export type InspectionDismissPlan = {
   readonly emitClear: boolean;
@@ -181,7 +181,7 @@ export function planInspectionDismiss(input: {
   if (input.kind === "escape") {
     return {
       emitClear: input.hasInspection,
-      clearPendingPinned: false,
+      clearPendingPinned: true,
       coordinator: "invalidate",
       clearBrush: true,
       clearTooltipHovered: true,

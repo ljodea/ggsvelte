@@ -1,0 +1,43 @@
+{
+  "id": "91-vline-cutoff",
+  "kind": "chart",
+  "prompt": "Plot y vs x with a vertical cutoff line at x = 2.5 via geom_vline.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" }
+    ],
+    "rowCount": 4
+  },
+  "data": {
+    "main": [
+      { "x": 1, "y": 3 },
+      { "x": 2, "y": 5 },
+      { "x": 3, "y": 4 },
+      { "x": 4, "y": 6 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" }
+        }
+      },
+      {
+        "geom": "rule",
+        "stat": "identity",
+        "position": "identity",
+        "params": { "xintercept": 2.5 }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Canonical gold for geom_vline sugar: rule + xintercept annotation (#818)."
+}

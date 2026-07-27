@@ -16,7 +16,10 @@ export function applyColorOnFillGeomWarning(
       geom === "boxplot" ||
       geom === "density" ||
       geom === "raster") &&
-    (color.field !== null || color.constant !== null || color.scaledConstant !== null)
+    (color.field !== null ||
+      (color.statColumn ?? null) !== null ||
+      color.constant !== null ||
+      color.scaledConstant !== null)
   ) {
     warnings.push({
       code: "color-on-fill-geom",

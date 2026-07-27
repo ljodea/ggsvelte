@@ -51,8 +51,8 @@ export function buildBinHexFrame(
   const col = columnOf(result, null);
 
   let fillValues: readonly CellValue[] | null = null;
-  if (binding.fill.statColumn !== null) {
-    const series = columns[binding.fill.statColumn] ?? result.count;
+  if ((binding.fill.statColumn ?? null) !== null) {
+    const series = columns[binding.fill.statColumn!] ?? result.count;
     fillValues = Array.from(series, (v) => v as CellValue);
   } else {
     fillValues = col(binding.fill.field);
