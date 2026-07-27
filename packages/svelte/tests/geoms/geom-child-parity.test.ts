@@ -101,15 +101,15 @@ describe("geom-child parity (all KNOWN_GEOMS shells)", () => {
       });
       const registry = await waitMark(() => host);
       expect(registry.markLayers).toHaveLength(1);
-      const layer = toLayerInput(registry.markLayers[0]!);
+      const layer = toLayerInput(registry.markLayers[0]);
       expect(layer.geom).toBe(geom);
 
-      if (paramKey !== undefined) {
-        expect(layer.params).toBeDefined();
-        expect(layer.params).toHaveProperty(paramKey, shellProps[paramKey]);
-      } else {
+      if (paramKey === undefined) {
         // blank (and any future zero-param geom)
         expect(layer.params).toBeUndefined();
+      } else {
+        expect(layer.params).toBeDefined();
+        expect(layer.params).toHaveProperty(paramKey, shellProps[paramKey]);
       }
     });
   }

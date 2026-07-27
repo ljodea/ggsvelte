@@ -54,8 +54,8 @@ function resolveDeclaration(name: string, seen: Set<string> = new Set()): TSchem
 /** Params type name for a geom (e.g. "point" → "PointParams"), or null if none. */
 function paramsTypeNameForGeom(geom: GeomName): string | null {
   for (const key of Object.keys(SpecDeclarations) as DeclKey[]) {
-    // Layer schemas are *Layer (PointLayer, …), not the bare name "Layer".
-    if (!String(key).endsWith("Layer")) continue;
+    // Layer schemas are *Layer (PointLayer, …).
+    if (!key.endsWith("Layer")) continue;
     const layer = SpecDeclarations[key] as TSchema & {
       properties?: { geom?: { const?: string }; params?: unknown };
     };

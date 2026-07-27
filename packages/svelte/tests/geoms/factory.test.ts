@@ -26,8 +26,9 @@ describe("createGeomLayer", () => {
       },
     });
     expect(registry).toBeDefined();
-    expect(registry!.markLayers).toHaveLength(1);
-    const layer = toLayerInput(registry!.markLayers[0]!);
+    const host = registry as LayerRegistry;
+    expect(host.markLayers).toHaveLength(1);
+    const layer = toLayerInput(host.markLayers[0]);
     expect(layer.geom).toBe("point");
     expect(layer.aes).toEqual({ color: "cls" });
     expect(layer.position).toBe("jitter");
@@ -46,7 +47,7 @@ describe("createGeomLayer", () => {
       },
     });
     expect(registry).toBeDefined();
-    const layer = toLayerInput(registry!.markLayers[0]!);
+    const layer = toLayerInput((registry as LayerRegistry).markLayers[0]);
     expect(layer.params).toEqual({ linewidth: 2 });
   });
 
@@ -62,7 +63,7 @@ describe("createGeomLayer", () => {
       },
     });
     expect(registry).toBeDefined();
-    const layer = toLayerInput(registry!.markLayers[0]!);
+    const layer = toLayerInput((registry as LayerRegistry).markLayers[0]);
     expect(layer.params).toEqual({ linewidth: 2 });
     expect(layer.params).not.toHaveProperty("notALineParam");
   });
@@ -76,7 +77,7 @@ describe("createGeomLayer", () => {
       },
     });
     expect(registry).toBeDefined();
-    const layer = toLayerInput(registry!.markLayers[0]!);
+    const layer = toLayerInput((registry as LayerRegistry).markLayers[0]);
     expect(layer.params).toBeUndefined();
   });
 
@@ -90,8 +91,9 @@ describe("createGeomLayer", () => {
       },
     });
     expect(registry).toBeDefined();
-    expect(registry!.markLayers).toHaveLength(1);
-    const descriptor = registry!.markLayers[0]!;
+    const host = registry as LayerRegistry;
+    expect(host.markLayers).toHaveLength(1);
+    const descriptor = host.markLayers[0];
     expect(toLayerInput(descriptor).params).toEqual({ size: 3 });
 
     await view.rerender({
@@ -102,9 +104,10 @@ describe("createGeomLayer", () => {
         registry = r;
       },
     });
-    expect(registry!.markLayers).toHaveLength(1);
+    const next = registry as LayerRegistry;
+    expect(next.markLayers).toHaveLength(1);
     // Same descriptor instance when host is stable; getters see new props.
-    expect(registry!.markLayers[0]).toBe(descriptor);
-    expect(toLayerInput(registry!.markLayers[0]!).params).toEqual({ size: 9, alpha: 0.25 });
+    expect(next.markLayers[0]).toBe(descriptor);
+    expect(toLayerInput(next.markLayers[0]).params).toEqual({ size: 9, alpha: 0.25 });
   });
 });

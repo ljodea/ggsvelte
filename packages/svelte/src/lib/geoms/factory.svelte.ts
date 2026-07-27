@@ -44,7 +44,7 @@ export interface GeomProps {
  * getters). Param whitelist is `GEOM_PARAM_KEYS[geom]`; aes/stat/position/
  * positionParams travel structurally.
  */
-export function createGeomLayer<P extends GeomProps>(geom: GeomName, getProps: () => P): void {
+export function createGeomLayer(geom: GeomName, getProps: () => GeomProps): void {
   const paramKeys = GEOM_PARAM_KEYS[geom];
   if (paramKeys === undefined) {
     throw new Error(`createGeomLayer: no GEOM_PARAM_KEYS entry for geom "${geom}"`);
