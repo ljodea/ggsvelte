@@ -96,4 +96,58 @@ describe("collectAxisInputs — evidence collection", () => {
     expect(xIn.numeric.length).toBeGreaterThanOrEqual(2);
     expect(xIn.anyDiscrete).toBe(false);
   });
+
+  it("trains y center for pointrange/crossbar when it escapes ymin/ymax (#793)", () => {
+    // Center y=10 is outside [ymin=0, ymax=2]; both geoms draw that center.
+    for (const geom of ["pointrange", "crossbar"] as const) {
+      const table = ColumnTable.fromRows([{ g: "a", y: 10, lo: 0, hi: 2 }]);
+      const binding: LayerBinding = {
+        layer: {
+          geom,
+          aes: {
+            x: { field: "g" },
+            y: { field: "y" },
+            ymin: { field: "lo" },
+            ymax: { field: "hi" },
+          },
+        },
+        index: 0,
+        xField: "g",
+        yField: "y",
+        yStatColumn: null,
+        yminField: "lo",
+        ymaxField: "hi",
+        xminField: null,
+        xmaxField: null,
+        color: { field: null, constant: null, scaledConstant: null },
+        fill: { field: null, constant: null, scaledConstant: null },
+        labelField: null,
+        labelConstant: null,
+        weightField: null,
+        ruleForm: null,
+      };
+      const frame: LayerFrame = {
+        binding,
+        table,
+        n: 1,
+        xValues: table.column("g"),
+        xNumeric: null,
+        yNumeric: Float64Array.of(10),
+        groups: [0],
+        inputGroups: [0],
+        rowIndex: new Uint32Array([0]),
+        colorValues: null,
+        fillValues: null,
+        labelValues: null,
+        ...emptyExtras(),
+        ymin: Float64Array.of(0),
+        ymax: Float64Array.of(2),
+      };
+      const yIn = collectAxisInputs("y", [frame], undefined, []);
+      const flat = yIn.numeric.flatMap((arr) => [...arr]);
+      expect(flat).toContain(10);
+      expect(flat).toContain(0);
+      expect(flat).toContain(2);
+    }
+  });
 });

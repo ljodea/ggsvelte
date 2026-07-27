@@ -29,7 +29,11 @@ export function collectAxisInputsY(frame: LayerFrame, acc: AxisCollectAcc): void
     acc.numeric.push(frame.ymin, frame.ymax);
     // Bands need not cover the center line (se: false smooths have
     // NaN bands; the summary center can escape min/max bounds).
-    if ((geom === "smooth" || geom === "errorbar") && frame.yNumeric !== null) {
+    // pointrange/crossbar draw the center (point / mid line), so train it too.
+    if (
+      (geom === "smooth" || geom === "errorbar" || geom === "pointrange" || geom === "crossbar") &&
+      frame.yNumeric !== null
+    ) {
       acc.numeric.push(frame.yNumeric);
     }
     if (frame.box !== null) acc.numeric.push(frame.box.outlierY);
