@@ -1,0 +1,55 @@
+{
+  "id": "67-growth-quantile-custom",
+  "kind": "chart",
+  "prompt": "Plot yield vs dose with quantile regression lines only at the median (0.5) and the 0.9 upper tail.",
+  "dataProfile": {
+    "fields": [
+      { "name": "dose", "type": "quantitative" },
+      { "name": "yield", "type": "quantitative" }
+    ],
+    "rowCount": 10
+  },
+  "data": {
+    "main": [
+      { "dose": 1, "yield": 2.0 },
+      { "dose": 2, "yield": 3.1 },
+      { "dose": 3, "yield": 3.9 },
+      { "dose": 4, "yield": 5.2 },
+      { "dose": 5, "yield": 6.0 },
+      { "dose": 6, "yield": 7.1 },
+      { "dose": 7, "yield": 8.0 },
+      { "dose": 8, "yield": 9.3 },
+      { "dose": 3, "yield": 5.5 },
+      { "dose": 6, "yield": 9.8 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "dose" },
+          "y": { "field": "yield" }
+        }
+      },
+      {
+        "geom": "quantile",
+        "stat": "quantile",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "dose" },
+          "y": { "field": "yield" }
+        },
+        "params": {
+          "quantiles": [0.5, 0.9]
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Custom params.quantiles subset of (0,1) for geom_quantile (#805)."
+}

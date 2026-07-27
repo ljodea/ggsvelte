@@ -78,7 +78,7 @@ describe("steps scale helpers (#827)", () => {
         aes: {
           x: { field: "x" },
           y: { field: "y" },
-          ...(scales.color !== undefined ? { color: { field: "v" } } : { fill: { field: "v" } }),
+          ...(scales.color === undefined ? { fill: { field: "v" } } : { color: { field: "v" } }),
         },
         layers: [point],
         scales,

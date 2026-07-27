@@ -63,13 +63,13 @@ function colourAliases(stem: string): string[] {
  * Complete shell ledger. Cardinality (asserted in tests):
  *   position-continuous  8
  *   position-binned      2
- *   position-temporal    4
+ *   position-temporal    6  (date/datetime/time × x/y)
  *   position-discrete    2
- *   color-fill          24
+ *   color-fill          36
  *   numeric-style       21
  *   finite-style         8
  *   ----------------------
- *   69 component files + 12 Colour aliases
+ *   83 component files + 18 Colour aliases
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
@@ -113,11 +113,13 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "ContinuousPositionScaleOptions",
   ]),
 
-  // --- position-temporal (4) -----------------------------------------------
+  // --- position-temporal (6) -----------------------------------------------
   shell("scaleXDate", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
   shell("scaleXDatetime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
+  shell("scaleXTime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
   shell("scaleYDate", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
   shell("scaleYDatetime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
+  shell("scaleYTime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
 
   // --- position-discrete (2) -----------------------------------------------
   shell("scaleXDiscrete", "position-discrete", "DiscretePositionScaleOptions", [
@@ -127,7 +129,7 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscretePositionScaleOptions",
   ]),
 
-  // --- color-fill (24 components + 12 Colour aliases) ----------------------
+  // --- color-fill (36 components + 18 Colour aliases) ----------------------
   // optionsTypes match the slice-3 hand-written shells exactly.
   shell(
     "scaleColorContinuous",
@@ -170,6 +172,48 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "StepsnScaleOptions",
     ["StepsnScaleOptions"],
     colourAliases("Stepsn"),
+  ),
+  shell(
+    "scaleColorGradient",
+    "color-fill",
+    "GradientScaleOptions",
+    ["GradientScaleOptions"],
+    colourAliases("Gradient"),
+  ),
+  shell(
+    "scaleColorGradient2",
+    "color-fill",
+    "Gradient2ScaleOptions",
+    ["Gradient2ScaleOptions"],
+    colourAliases("Gradient2"),
+  ),
+  shell(
+    "scaleColorGradientn",
+    "color-fill",
+    "GradientnScaleOptions",
+    ["GradientnScaleOptions"],
+    colourAliases("Gradientn"),
+  ),
+  shell(
+    "scaleColorHue",
+    "color-fill",
+    "HueScaleOptions",
+    ["HueScaleOptions"],
+    colourAliases("Hue"),
+  ),
+  shell(
+    "scaleColorGrey",
+    "color-fill",
+    "GreyScaleOptions",
+    ["GreyScaleOptions"],
+    colourAliases("Grey"),
+  ),
+  shell(
+    "scaleColorOrdinal",
+    "color-fill",
+    "OrdinalColorScaleOptions",
+    ["OrdinalColorScaleOptions"],
+    colourAliases("Ordinal"),
   ),
   shell(
     "scaleColorLog10",
@@ -223,6 +267,12 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
   shell("scaleFillSteps", "color-fill", "StepsScaleOptions", ["StepsScaleOptions"]),
   shell("scaleFillSteps2", "color-fill", "Steps2ScaleOptions", ["Steps2ScaleOptions"]),
   shell("scaleFillStepsn", "color-fill", "StepsnScaleOptions", ["StepsnScaleOptions"]),
+  shell("scaleFillGradient", "color-fill", "GradientScaleOptions", ["GradientScaleOptions"]),
+  shell("scaleFillGradient2", "color-fill", "Gradient2ScaleOptions", ["Gradient2ScaleOptions"]),
+  shell("scaleFillGradientn", "color-fill", "GradientnScaleOptions", ["GradientnScaleOptions"]),
+  shell("scaleFillHue", "color-fill", "HueScaleOptions", ["HueScaleOptions"]),
+  shell("scaleFillGrey", "color-fill", "GreyScaleOptions", ["GreyScaleOptions"]),
+  shell("scaleFillOrdinal", "color-fill", "OrdinalColorScaleOptions", ["OrdinalColorScaleOptions"]),
   shell("scaleFillLog10", "color-fill", "TransformedColorScaleOptions", [
     "TransformedColorScaleOptions",
   ]),

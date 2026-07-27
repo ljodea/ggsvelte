@@ -49,7 +49,7 @@ export type DiscretePositionScaleOptions = Omit<
 
 function temporalScale(
   axis: "x" | "y",
-  temporalKind: "date" | "datetime",
+  temporalKind: "date" | "datetime" | "time",
   options: TemporalScaleOptions = {},
 ): Scales {
   return { [axis]: { type: "time", temporalKind, ...options } };
@@ -89,6 +89,19 @@ export function scaleYDatetime(options: TemporalScaleOptions = {}): Scales {
   return temporalScale("y", "datetime", options);
 }
 
+/**
+ * Time-of-day position scale (ggplot2 `scale_x_time`).
+ * Portable numbers are **seconds since midnight** (0…86400); see TemporalKind `"time"`.
+ */
+export function scaleXTime(options: TemporalScaleOptions = {}): Scales {
+  return temporalScale("x", "time", options);
+}
+
+/** Time-of-day position scale (ggplot2 `scale_y_time`). */
+export function scaleYTime(options: TemporalScaleOptions = {}): Scales {
+  return temporalScale("y", "time", options);
+}
+
 export function scaleXDiscrete(options: DiscretePositionScaleOptions = {}): Scales {
   return discreteScale("x", options);
 }
@@ -99,8 +112,10 @@ export function scaleYDiscrete(options: DiscretePositionScaleOptions = {}): Scal
 
 export const scale_x_date = scaleXDate;
 export const scale_x_datetime = scaleXDatetime;
+export const scale_x_time = scaleXTime;
 export const scale_y_date = scaleYDate;
 export const scale_y_datetime = scaleYDatetime;
+export const scale_y_time = scaleYTime;
 export const scale_x_discrete = scaleXDiscrete;
 export const scale_y_discrete = scaleYDiscrete;
 
