@@ -3995,9 +3995,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "0.12 to 0.13",
     summary:
-      "0.12 to 0.13 in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "0.12 to 0.13 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#0-12-to-0-13",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["0.12 to 0.13"],
   },
   {
@@ -4005,9 +4005,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Grammar props removed from <GGPlot>",
     summary:
-      "Grammar props removed from <GGPlot> in Upgrade in five minutes. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+      "Grammar props removed from <GGPlot> in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     href: "/guide/upgrading#grammar-props-removed-from-ggplot",
-    keywords: ["Upgrade in five minutes", "Release"],
+    keywords: ["Upgrade guide", "Release"],
     exact: ["Grammar props removed from <GGPlot>"],
   },
   {

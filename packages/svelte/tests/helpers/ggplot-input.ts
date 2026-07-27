@@ -92,5 +92,5 @@ export function withGrammarAsSpec<T extends GrammarBag>(
     ...(a11y !== undefined && { a11y }),
   };
 
-  return { ...rest, spec } as never;
+  return { ...rest, spec };
 }
