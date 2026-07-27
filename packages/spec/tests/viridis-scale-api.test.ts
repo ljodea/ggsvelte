@@ -75,7 +75,7 @@ describe("viridis named scale helpers (#828)", () => {
         aes: {
           x: { field: "x" },
           y: { field: "y" },
-          color: { field: scales.color !== undefined ? "c" : "v" },
+          color: { field: scales.color === undefined ? "v" : "c" },
           ...(scales.fill !== undefined && { fill: { field: "c" } }),
         },
         layers: [point],

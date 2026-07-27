@@ -375,6 +375,12 @@ export { default as ScaleColourViridisC } from "./scale/ScaleColorViridisC.svelt
 export { default as ScaleColourViridisD } from "./scale/ScaleColorViridisD.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourViridisB } from "./scale/ScaleColorViridisB.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleLinewidthOrdinal } from "./scale/ScaleLinewidthDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleAlphaOrdinal } from "./scale/ScaleAlphaDiscrete.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleShapeOrdinal } from "./scale/ScaleShapeDiscrete.svelte";
 // </generated:scale-children>
 
 // Coord children (#659 slice 5) — stable-intent: named shells + <Coord>
