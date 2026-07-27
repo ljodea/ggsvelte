@@ -354,6 +354,15 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
     },
   },
   {
+    id: "line/function",
+    title: "Normal PDF with geom_function",
+    compatibility: {
+      supported: true,
+      fragment:
+        "#play=v1.eyJ2ZXJzaW9uIjoxLCJzb3VyY2UiOnsia2luZCI6ImV4YW1wbGUiLCJpZCI6ImxpbmUvZnVuY3Rpb24ifSwic3BlYyI6eyJlZGl0aW9uIjoyLCJkYXRhIjp7InZhbHVlcyI6W3sieCI6LTIuMSwieSI6MH0seyJ4IjotMS40LCJ5IjowfSx7IngiOi0wLjgsInkiOjB9LHsieCI6LTAuMywieSI6MH0seyJ4IjowLjEsInkiOjB9LHsieCI6MC40LCJ5IjowfSx7IngiOjAuOSwieSI6MH0seyJ4IjoxLjMsInkiOjB9LHsieCI6MS44LCJ5IjowfSx7IngiOjIuNCwieSI6MH1dfSwibGF5ZXJzIjpbeyJnZW9tIjoicG9pbnQiLCJzdGF0IjoiaWRlbnRpdHkiLCJwb3NpdGlvbiI6ImlkZW50aXR5IiwiYWVzIjp7IngiOnsiZmllbGQiOiJ4In0sInkiOnsiZmllbGQiOiJ5In19LCJwYXJhbXMiOnsic2l6ZSI6Mi41LCJhbHBoYSI6MC41NX19LHsiZ2VvbSI6ImZ1bmN0aW9uIiwic3RhdCI6ImZ1bmN0aW9uIiwicG9zaXRpb24iOiJpZGVudGl0eSIsImFlcyI6eyJ4Ijp7ImZpZWxkIjoieCJ9LCJ5Ijp7InN0YXQiOiJ5In19LCJwYXJhbXMiOnsiZnVuIjoiZG5vcm0iLCJuIjoyMDEsInhsaW0iOlstMy41LDMuNV0sImFyZ3MiOnsibWVhbiI6MCwic2QiOjF9LCJsaW5ld2lkdGgiOjIsImFscGhhIjowLjk1fX1dLCJsYWJzIjp7InRpdGxlIjoiU3RhbmRhcmQgbm9ybWFsIGRlbnNpdHkiLCJzdWJ0aXRsZSI6Imdlb21fZnVuY3Rpb24gZXZhbHVhdGVzIGEgcG9ydGFibGUgbmFtZWQgZnVuY3Rpb24gKGRub3JtKSBvbiBhIGdyaWQiLCJ4IjoieCIsInkiOiJkZW5zaXR5In0sInRoZW1lIjoiY2xhc3NpYyJ9fQ",
+    },
+  },
+  {
     id: "line/multi-series",
     title: "Multi-series line chart",
     compatibility: {

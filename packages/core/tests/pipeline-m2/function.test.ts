@@ -53,7 +53,7 @@ describe("geom_function", () => {
       size,
     );
     // Function path present; domain spans point x
-    const paths = model.scene.batches.filter((b) => b.kind === "paths") as PathsBatch[];
+    const paths = model.scene.batches.filter((b): b is PathsBatch => b.kind === "paths");
     expect(paths.length).toBe(1);
     expect(paths[0]!.pathOffsets[1]).toBe(5);
     if (model.scales.x.type !== "band") {

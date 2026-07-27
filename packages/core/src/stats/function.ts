@@ -24,7 +24,7 @@ export interface FunctionArgs {
 }
 
 export interface FunctionParamsInput {
-  fun?: FunctionRegistryName | string;
+  fun?: string;
   n?: number;
   xlim?: readonly [number, number] | number[];
   args?: FunctionArgs;

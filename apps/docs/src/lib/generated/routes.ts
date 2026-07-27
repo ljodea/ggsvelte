@@ -2003,6 +2003,21 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "function-domain-missing",
+        title: "function-domain-missing",
+        level: 3,
+      },
+      {
+        id: "function-fun-missing",
+        title: "function-fun-missing",
+        level: 3,
+      },
+      {
+        id: "function-fun-unknown",
+        title: "function-fun-unknown",
+        level: 3,
+      },
+      {
         id: "interaction-diagnostics-ggsvelte-svelte",
         title: "Interaction diagnostics (@ggsvelte/svelte)",
         level: 2,
@@ -2267,8 +2282,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-733",
-        title: "experimental (733)",
+        id: "experimental-741",
+        title: "experimental (741)",
         level: 3,
       },
       {
@@ -2307,8 +2322,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-506",
-        title: "experimental (506)",
+        id: "experimental-507",
+        title: "experimental (507)",
         level: 3,
       },
       {
@@ -2837,6 +2852,16 @@ export const DOCS_ROUTES = [
     title: "geom_jitter sugar — ggsvelte gallery",
     description: "geom_jitter sugar",
     canonicalPath: "/examples/jitter/basic",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/line/function",
+    title: "Normal PDF with geom_function — ggsvelte gallery",
+    description: "Normal PDF with geom_function",
+    canonicalPath: "/examples/line/function",
     kind: "page",
     index: true,
     sitemap: true,

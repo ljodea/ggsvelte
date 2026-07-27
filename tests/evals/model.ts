@@ -377,6 +377,47 @@ export class MockResponder implements Responder {
 
     // --- geom selection (keyword templates, most specific first) -----------
     if (
+      /\bgeom[_\s]?function\b|\bstat[_\s]?function\b|\bdnorm\b|\bpnorm\b|\banalytical? (?:curve|function)\b|\bnormal density\b/.test(
+        prompt,
+      )
+    ) {
+      // geom_function / stat_function: portable named registry curve (#797).
+      const fun = /\bpnorm\b/.test(prompt)
+        ? "pnorm"
+        : /\bdnorm\b|\bnormal density\b|\bpdf\b/.test(prompt)
+          ? "dnorm"
+          : /\blinear\b/.test(prompt)
+            ? "linear"
+            : "identity";
+      const params: Record<string, unknown> = { fun };
+      const xlimMatch = prompt.match(/\bxlim from (\d+(?:\.\d+)?) to (\d+(?:\.\d+)?)/i);
+      if (xlimMatch) {
+        params["xlim"] = [Number(xlimMatch[1]), Number(xlimMatch[2])];
+      } else if (/\bxlim\b|\[-?3/.test(prompt)) {
+        params["xlim"] = [-3, 3];
+      }
+      const nMatch = prompt.match(/\b(\d+)\s+evaluation points?\b/i);
+      if (nMatch) params["n"] = Number(nMatch[1]);
+      else if (fun === "dnorm") params["n"] = 101;
+      if (fun === "dnorm" || fun === "pnorm") params["args"] = { mean: 0, sd: 1 };
+
+      const x = fieldNamed("x") ?? pick.quant();
+      if (x !== undefined && fieldNamed("y") !== undefined) {
+        spec.layers.push({
+          geom: "point",
+          aes: { x: f(x), y: f("y") },
+        });
+      }
+      const functionAes: MockAes = { y: { stat: "y" } };
+      if (x !== undefined) functionAes.x = f(x);
+      spec.layers.push({
+        geom: "function",
+        stat: "function",
+        aes: functionAes,
+        params,
+      });
+      if (x !== undefined) xField = x;
+    } else if (
       /\bgeom[_\s]?spoke\b|\bspoke\b|\bvector field\b/.test(prompt) &&
       (fieldNamed("angle") !== undefined ||
         fieldNamed("radius") !== undefined ||

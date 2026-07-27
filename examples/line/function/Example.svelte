@@ -18,7 +18,7 @@
     x="x"
     y="density"
   />
-  <GeomPoint aes={{ y: { value: 0 } }} size={2.5} alpha={0.55} />
+  <GeomPoint aes={{ y: "y" }} size={2.5} alpha={0.55} />
   <GeomFunction
     fun="dnorm"
     n={201}

@@ -5,8 +5,10 @@ import { samples } from "./data.js";
 
 export default defineExample(
   // Analytic standard-normal PDF over a rug-like scatter (ggplot2 geom_function).
+  // Point y lives in the data (and point-layer aes only) so geom_function keeps
+  // after_stat y and does not inherit a constant y mapping (#883 Devin review).
   gg(samples, aes({ x: "x" }))
-    .geomPoint({ aes: { y: { value: 0 } }, size: 2.5, alpha: 0.55 })
+    .geomPoint({ aes: { y: "y" }, size: 2.5, alpha: 0.55 })
     .geomFunction({
       fun: "dnorm",
       n: 201,
