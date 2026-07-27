@@ -177,6 +177,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "29209d4a65b24bba0dad9bb91a70aaa3d547bf4d24689297f8ea391ebf0ec86c",
   },
   {
+    id: "hex/basic",
+    filename: "hex-basic-light.png",
+    path: "/previews/hex-basic-light.png",
+    sha256: "bd0fcdc18cc1cde8d754ef90caaadf880d38e1c8dd1585e54ff7ea958eaaa9bf",
+  },
+  {
     id: "histogram/basic",
     filename: "histogram-basic-light.png",
     path: "/previews/histogram-basic-light.png",

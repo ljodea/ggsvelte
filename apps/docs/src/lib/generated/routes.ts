@@ -2003,6 +2003,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "hex-band-scale",
+        title: "hex-band-scale",
+        level: 3,
+      },
+      {
+        id: "hex-missing-size",
+        title: "hex-missing-size",
+        level: 3,
+      },
+      {
         id: "interaction-diagnostics-ggsvelte-svelte",
         title: "Interaction diagnostics (@ggsvelte/svelte)",
         level: 2,
@@ -2267,8 +2277,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-715",
-        title: "experimental (715)",
+        id: "experimental-721",
+        title: "experimental (721)",
         level: 3,
       },
       {
@@ -2307,8 +2317,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-505",
-        title: "experimental (505)",
+        id: "experimental-506",
+        title: "experimental (506)",
         level: 3,
       },
       {
@@ -2777,6 +2787,16 @@ export const DOCS_ROUTES = [
     title: "Frequency polygon — ggsvelte gallery",
     description: "Frequency polygon",
     canonicalPath: "/examples/freqpoly/basic",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/hex/basic",
+    title: "Hexagonal bin heatmap — ggsvelte gallery",
+    description: "Hexagonal bin heatmap",
+    canonicalPath: "/examples/hex/basic",
     kind: "page",
     index: true,
     sitemap: true,

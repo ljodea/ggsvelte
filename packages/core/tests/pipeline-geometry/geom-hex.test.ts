@@ -10,7 +10,6 @@ import { hexBatch } from "../../src/pipeline/geometry-hex.ts";
 import type { Frame } from "../../src/pipeline/geometry-shared.ts";
 import type { ResolvedStyleScales } from "../../src/pipeline/geometry-style.ts";
 import type { LayerFrame } from "../../src/pipeline/types.ts";
-import type { PathsBatch } from "../../src/scene.ts";
 
 const size = { width: 200, height: 100 };
 
@@ -61,7 +60,7 @@ describe("geom_hex geometry (#800)", () => {
         .spec(),
       size,
     );
-    const paths = model.scene.batches.filter((b) => b.kind === "paths") as PathsBatch[];
+    const paths = model.scene.batches.filter((b) => b.kind === "paths");
     expect(paths.length).toBe(1);
     const batch = paths[0]!;
     expect(batch.closed).toBe(true);
@@ -93,16 +92,18 @@ describe("geom_hex geometry (#800)", () => {
         .spec(),
       size,
     );
-    const sparseN =
-      (sparse.scene.batches.find((b) => b.kind === "paths") as PathsBatch).pathOffsets.length - 1;
-    const denseN =
-      (dense.scene.batches.find((b) => b.kind === "paths") as PathsBatch).pathOffsets.length - 1;
+    const sparsePaths = sparse.scene.batches.find((b) => b.kind === "paths");
+    const densePaths = dense.scene.batches.find((b) => b.kind === "paths");
+    expect(sparsePaths?.kind).toBe("paths");
+    expect(densePaths?.kind).toBe("paths");
+    const sparseN = sparsePaths!.pathOffsets.length - 1;
+    const denseN = densePaths!.pathOffsets.length - 1;
     expect(denseN).toBeGreaterThanOrEqual(sparseN);
   });
 
   it("maps alpha/linewidth to kept subpaths when some hexes drop", () => {
     // Three candidate cells; middle center is non-finite so only rows 0 and 2 emit.
-    const frame = fromAny({
+    const frame = fromAny<LayerFrame>({
       n: 3,
       xNumeric: new Float64Array([0.2, Number.NaN, 0.8]),
       yNumeric: new Float64Array([0.2, 0.5, 0.8]),
@@ -121,8 +122,8 @@ describe("geom_hex geometry (#800)", () => {
         linewidth: { field: "lw", statColumn: null, constant: null, scaledConstant: null },
         layer: { geom: "hex", params: {} },
       },
-    }) as LayerFrame;
-    const fx = fromAny({
+    });
+    const fx = fromAny<Frame>({
       xScale: {
         type: "linear",
         normalizeTransformed: (v: number) => v,
@@ -133,14 +134,14 @@ describe("geom_hex geometry (#800)", () => {
       },
       innerWidth: 100,
       innerHeight: 100,
-    }) as Frame;
-    const styles = fromAny({
-      alpha: { scale: { valueOf: (v: unknown) => Number(v) } },
-      linewidth: { scale: { valueOf: (v: unknown) => Number(v) } },
+    });
+    const styles = fromAny<ResolvedStyleScales>({
+      alpha: { scale: { valueOf: Number } },
+      linewidth: { scale: { valueOf: Number } },
       size: null,
       shape: null,
       linetype: null,
-    }) as ResolvedStyleScales;
+    });
 
     const batch = hexBatch(frame, fx, null, null, styles, []);
     expect(batch).not.toBeNull();
