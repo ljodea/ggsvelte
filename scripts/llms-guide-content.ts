@@ -1125,8 +1125,7 @@ warning. See the runnable [fixed-aspect example](/examples/point/fixed-aspect).
 Non-identity coordinate transforms reject band and temporal axes with
 \`coord-transform-continuous\` or \`coord-transform-temporal\`. Domains that
 cross log10/sqrt boundaries fail with \`coord-transform-domain\` and exact
-recovery guidance. See the runnable **Post-stat coordinate transform** sample
-in the [gallery](/examples).
+recovery guidance.
 `;
 
 export const THEMES_COLOR_MD = `# Themes and color
