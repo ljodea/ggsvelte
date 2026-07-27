@@ -152,6 +152,14 @@ export const THEME_SPECIMENS: readonly ThemeSpecimenConfig[] = [
     legendFocus: true,
   },
   {
+    name: "void",
+    label: BY_NAME.void.label,
+    caption: "No axes, grid, or panel — marks only (maps, logos, free-form).",
+    kind: "cities-labels",
+    scheme: BY_NAME.void.scheme,
+    legendFocus: false,
+  },
+  {
     name: "test",
     label: BY_NAME.test.label,
     caption: "Pinned high-contrast chrome for package tests and VR.",

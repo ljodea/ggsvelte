@@ -140,7 +140,11 @@ export function trainSequentialColorScale(input: {
   const semanticColorOf = (value: unknown): string | undefined => scale.colorOf(value);
   return {
     ...scale,
-    ...(view.temporalKind !== null && { temporal: true, temporalKind: view.temporalKind }),
+    ...(view.temporalKind !== null &&
+      view.temporalKind !== "time" && {
+        temporal: true,
+        temporalKind: view.temporalKind,
+      }),
     ...(guideBreaks !== undefined && {
       guideBreaks: Object.freeze(guideBreaks as number[]),
     }),

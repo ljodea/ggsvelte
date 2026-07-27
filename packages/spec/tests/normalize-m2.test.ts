@@ -75,4 +75,15 @@ describe("normalize — M2 statistical layer", () => {
     });
     expect(normalize(spec as SpecInput)).toEqual(spec);
   });
+
+  it("defaults geom_sf to stat sf and rewrites legacy identity (#809 phase 7)", () => {
+    const omitted = normalize({ layers: [{ geom: "sf" }] });
+    expect(omitted.layers[0]).toMatchObject({ geom: "sf", stat: "sf", position: "identity" });
+
+    const legacy = normalize({
+      layers: [{ geom: "sf", stat: "identity" as "sf" }],
+    });
+    expect(legacy.layers[0]).toMatchObject({ geom: "sf", stat: "sf" });
+    expect(normalize(legacy as SpecInput)).toEqual(legacy);
+  });
 });

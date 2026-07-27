@@ -134,11 +134,17 @@ test("desktop docs shell exposes chapter, breadcrumb, contents, and sequence nav
 });
 
 test("mobile header and docs navigation are explicit, reachable controls", async ({ page }) => {
+  // Avoid /guide/getting-started here: its lesson chart islands block the main
+  // thread for ~17s before "Open site menu" is tappable (local workers=1), so
+  // dialog + resize straddled the old 30s budget (#946). Shell chrome is shared
+  // across guide pages (DocsShell); /guide/errors exercises the same menus
+  // without that hydrate cost. Journeys project budget stays 60s (#944) because
+  // other journeys still cold-load getting-started — see #972.
   await page.setViewportSize({ width: 375, height: 760 });
-  await page.goto(GUIDE_ROUTE);
+  await page.goto("/guide/errors", { waitUntil: "domcontentloaded" });
 
   const siteMenu = page.getByRole("button", { name: "Open site menu" });
-  await expect(siteMenu).toBeVisible();
+  await expect(siteMenu).toBeVisible({ timeout: 15_000 });
   await siteMenu.click();
   const siteDialog = page.getByRole("dialog");
   await expect(siteDialog.getByRole("navigation", { name: "Primary" })).toBeVisible();
@@ -205,6 +211,7 @@ test("appearance control remains usable when browser storage is unavailable", as
 });
 
 test("route metadata is canonical, singular, and aliases are noindex", async ({ page }) => {
+  // Search index is lazy-loaded (#948); journeys project budget is 60s (#944).
   await page.goto(GUIDE_ROUTE);
   await expect(page).toHaveTitle("Getting started — ggsvelte");
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);

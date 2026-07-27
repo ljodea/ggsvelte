@@ -13,7 +13,12 @@ import type {
   CoordSpec,
   DataRef,
   DensityParams,
+  Density2dParams,
+  DotplotParams,
   ErrorbarParams,
+  LinerangeParams,
+  PointrangeParams,
+  CrossbarParams,
   RibbonParams,
   FacetScales,
   GuidesSpec,
@@ -26,22 +31,39 @@ import type {
   PointPosition,
   PositionParams,
   RasterParams,
+  HexParams,
   RectParams,
   RenderBackend,
   RuleParams,
+  HlineParams,
+  VlineParams,
+  RugParams,
   SegmentParams,
+  ViolinParams,
+  FunctionParams,
+  PolygonParams,
+  AblineParams,
   CurveParams,
+  MapParams,
+  BlankParams,
   SfParams,
   SfTextParams,
   SfLabelParams,
+  SpokeParams,
+  StepParams,
+  QqParams,
+  QqLineParams,
   Scales,
   QuantileParams,
+  ContourParams,
   SmoothParams,
   StackablePosition,
   TextParams,
+  LabelParams,
   ThemeName,
   ThemeSpec,
   TileParams,
+  Bin2dParams,
 } from "./schema.js";
 
 /** Channel form accepted at the TS/builder level: bare string = { field }. */
@@ -61,6 +83,7 @@ export interface AesInput {
   group?: ChannelInput;
   label?: ChannelInput;
   weight?: ChannelInput;
+  sample?: ChannelInput;
   ymin?: ChannelInput;
   ymax?: ChannelInput;
   xmin?: ChannelInput;
@@ -69,6 +92,10 @@ export interface AesInput {
   yend?: ChannelInput;
   width?: ChannelInput;
   height?: ChannelInput;
+  z?: ChannelInput;
+  map_id?: ChannelInput;
+  angle?: ChannelInput;
+  radius?: ChannelInput;
 }
 
 interface LayerInputBase {
@@ -109,7 +136,15 @@ export interface FacetInput {
 
 export interface PointLayerInput extends LayerInputBase {
   geom: "point";
-  stat?: "identity" | "unique" | "summary_bin" | "manual";
+  stat?: "identity" | "unique" | "summary_bin" | "manual" | "sum";
+  position?: PointPosition;
+  positionParams?: PositionParams;
+  params?: PointParams;
+}
+
+export interface CountLayerInput extends LayerInputBase {
+  geom: "count";
+  stat?: "sum";
   position?: PointPosition;
   positionParams?: PositionParams;
   params?: PointParams;
@@ -117,16 +152,16 @@ export interface PointLayerInput extends LayerInputBase {
 
 export interface LineLayerInput extends LayerInputBase {
   geom: "line";
-  /** identity | unique | bin | align | connect | summary_bin | manual */
-  stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin" | "manual";
+  /** identity | unique | bin | align | connect | summary_bin | manual | ecdf */
+  stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin" | "manual" | "ecdf";
   position?: "identity";
   params?: LineParams;
 }
 
 export interface PathLayerInput extends LayerInputBase {
   geom: "path";
-  /** identity | unique | connect | manual (#814) */
-  stat?: "identity" | "unique" | "connect" | "manual";
+  /** identity | unique | connect | manual (#814) | ellipse (#812) */
+  stat?: "identity" | "unique" | "connect" | "manual" | "ellipse";
   position?: "identity";
   params?: PathParams;
 }
@@ -172,12 +207,42 @@ export interface RuleLayerInput extends LayerInputBase {
   params?: RuleParams;
 }
 
+export interface HlineLayerInput extends LayerInputBase {
+  geom: "hline";
+  stat?: "identity";
+  position?: "identity";
+  params?: HlineParams;
+}
+
+export interface VlineLayerInput extends LayerInputBase {
+  geom: "vline";
+  stat?: "identity";
+  position?: "identity";
+  params?: VlineParams;
+}
+
+export interface JitterLayerInput extends LayerInputBase {
+  geom: "jitter";
+  stat?: "identity";
+  position?: "jitter";
+  positionParams?: PositionParams;
+  params?: PointParams;
+}
+
 export interface TextLayerInput extends LayerInputBase {
   geom: "text";
   stat?: "identity" | "unique";
   position?: "identity" | "nudge";
   positionParams?: PositionParams;
   params?: TextParams;
+}
+
+export interface LabelLayerInput extends LayerInputBase {
+  geom: "label";
+  stat?: "identity";
+  position?: "identity" | "nudge";
+  positionParams?: PositionParams;
+  params?: LabelParams;
 }
 
 export interface SmoothLayerInput extends LayerInputBase {
@@ -194,6 +259,13 @@ export interface QuantileLayerInput extends LayerInputBase {
   params?: QuantileParams;
 }
 
+export interface ContourLayerInput extends LayerInputBase {
+  geom: "contour";
+  stat?: "contour";
+  position?: "identity";
+  params?: ContourParams;
+}
+
 export interface BoxplotLayerInput extends LayerInputBase {
   geom: "boxplot";
   stat?: "boxplot";
@@ -208,11 +280,53 @@ export interface DensityLayerInput extends LayerInputBase {
   params?: DensityParams;
 }
 
+export interface Density2dLayerInput extends LayerInputBase {
+  geom: "density_2d";
+  stat?: "density_2d";
+  position?: "identity";
+  params?: Density2dParams;
+}
+
+export interface Density2dFilledLayerInput extends LayerInputBase {
+  geom: "density_2d_filled";
+  stat?: "density_2d_filled";
+  position?: "identity";
+  params?: Density2dParams;
+}
+
+export interface DotplotLayerInput extends LayerInputBase {
+  geom: "dotplot";
+  stat?: "bindot";
+  position?: "identity";
+  params?: DotplotParams;
+}
+
 export interface ErrorbarLayerInput extends LayerInputBase {
   geom: "errorbar";
   stat?: "identity" | "unique" | "summary" | "summary_bin";
   position?: "identity";
   params?: ErrorbarParams;
+}
+
+export interface LinerangeLayerInput extends LayerInputBase {
+  geom: "linerange";
+  stat?: "identity" | "summary";
+  position?: "identity";
+  params?: LinerangeParams;
+}
+
+export interface PointrangeLayerInput extends LayerInputBase {
+  geom: "pointrange";
+  stat?: "identity" | "summary";
+  position?: "identity";
+  params?: PointrangeParams;
+}
+
+export interface CrossbarLayerInput extends LayerInputBase {
+  geom: "crossbar";
+  stat?: "identity" | "summary";
+  position?: "identity";
+  params?: CrossbarParams;
 }
 
 export interface RectLayerInput extends LayerInputBase {
@@ -229,11 +343,25 @@ export interface TileLayerInput extends LayerInputBase {
   params?: TileParams;
 }
 
+export interface Bin2dLayerInput extends LayerInputBase {
+  geom: "bin_2d";
+  stat?: "bin_2d";
+  position?: "identity";
+  params?: Bin2dParams;
+}
+
 export interface RasterLayerInput extends LayerInputBase {
   geom: "raster";
   stat?: "identity";
   position?: "identity";
   params?: RasterParams;
+}
+
+export interface HexLayerInput extends LayerInputBase {
+  geom: "hex";
+  stat?: "bin_hex";
+  position?: "identity";
+  params?: HexParams;
 }
 
 export interface RibbonLayerInput extends LayerInputBase {
@@ -250,11 +378,60 @@ export interface SegmentLayerInput extends LayerInputBase {
   params?: SegmentParams;
 }
 
+export interface ViolinLayerInput extends LayerInputBase {
+  geom: "violin";
+  stat?: "ydensity";
+  position?: "dodge" | "identity";
+  params?: ViolinParams;
+}
+
+export interface FunctionLayerInput extends LayerInputBase {
+  geom: "function";
+  stat?: "function";
+  position?: "identity";
+  params: FunctionParams;
+}
+
+export interface PolygonLayerInput extends LayerInputBase {
+  geom: "polygon";
+  stat?: "identity";
+  position?: "identity";
+  params?: PolygonParams;
+}
+
+export interface QqLayerInput extends LayerInputBase {
+  geom: "qq";
+  stat?: "qq";
+  position?: "identity";
+  params?: QqParams;
+}
+
+export interface QqLineLayerInput extends LayerInputBase {
+  geom: "qq_line";
+  stat?: "qq_line";
+  position?: "identity";
+  params?: QqLineParams;
+}
+
+export interface AblineLayerInput extends LayerInputBase {
+  geom: "abline";
+  stat?: "identity";
+  position?: "identity";
+  params?: AblineParams;
+}
+
 export interface CurveLayerInput extends LayerInputBase {
   geom: "curve";
   stat?: "identity";
   position?: "identity";
   params?: CurveParams;
+}
+
+export interface MapLayerInput extends LayerInputBase {
+  geom: "map";
+  stat?: "identity";
+  position?: "identity";
+  params: MapParams;
 }
 
 export interface SfLayerInput extends LayerInputBase {
@@ -279,6 +456,34 @@ export interface SfLabelLayerInput extends LayerInputBase {
   params?: SfLabelParams;
 }
 
+export interface BlankLayerInput extends LayerInputBase {
+  geom: "blank";
+  stat?: "identity";
+  position?: "identity";
+  params?: BlankParams;
+}
+
+export interface SpokeLayerInput extends LayerInputBase {
+  geom: "spoke";
+  stat?: "identity";
+  position?: "identity";
+  params?: SpokeParams;
+}
+
+export interface RugLayerInput extends LayerInputBase {
+  geom: "rug";
+  stat?: "identity";
+  position?: "identity";
+  params?: RugParams;
+}
+
+export interface StepLayerInput extends LayerInputBase {
+  geom: "step";
+  stat?: "identity";
+  position?: "identity";
+  params?: StepParams;
+}
+
 /** Layer accepted at the TS/builder level. */
 export type LayerInput =
   | PointLayerInput
@@ -291,20 +496,45 @@ export type LayerInput =
   | AreaLayerInput
   | RibbonLayerInput
   | RuleLayerInput
+  | HlineLayerInput
+  | VlineLayerInput
+  | JitterLayerInput
   | TextLayerInput
+  | LabelLayerInput
   | SmoothLayerInput
   | QuantileLayerInput
+  | ContourLayerInput
   | BoxplotLayerInput
   | DensityLayerInput
+  | Density2dLayerInput
+  | Density2dFilledLayerInput
+  | DotplotLayerInput
   | ErrorbarLayerInput
+  | LinerangeLayerInput
+  | PointrangeLayerInput
+  | CrossbarLayerInput
+  | AblineLayerInput
   | RectLayerInput
   | TileLayerInput
+  | Bin2dLayerInput
   | RasterLayerInput
   | SegmentLayerInput
+  | CountLayerInput
+  | ViolinLayerInput
+  | HexLayerInput
+  | FunctionLayerInput
+  | PolygonLayerInput
   | CurveLayerInput
+  | MapLayerInput
   | SfLayerInput
   | SfTextLayerInput
-  | SfLabelLayerInput;
+  | SfLabelLayerInput
+  | BlankLayerInput
+  | SpokeLayerInput
+  | RugLayerInput
+  | StepLayerInput
+  | QqLayerInput
+  | QqLineLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

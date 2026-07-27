@@ -16,6 +16,7 @@ const THEME_LABELS = {
   economist: "Economist",
   tufte: "Tufte",
   linedraw: "Linedraw",
+  void: "Void",
   // Aliases of the ggplot2 grey-panel look (theme_grey / theme_gray, #824).
   grey: "Grey",
   gray: "Gray",
@@ -31,6 +32,13 @@ const PALETTE_LABELS = {
   hue: "Hue",
   grey: "Grey",
   gray: "Gray",
+  // ColorBrewer qualitative (#825) — keep the upstream palette names.
+  Set1: "Set1",
+  Set2: "Set2",
+  Set3: "Set3",
+  Dark2: "Dark2",
+  Paired: "Paired",
+  Accent: "Accent",
 } as const satisfies Record<(typeof CATEGORICAL_SCHEME_NAMES)[number], string>;
 
 /** Categorical scheme paired with each theme demo so paper + marks read as a set. */
@@ -49,6 +57,7 @@ const THEME_DEMO_SCHEMES = {
   economist: "flexoki",
   tufte: "colorblind",
   linedraw: "colorblind",
+  void: "colorblind",
   grey: "observable10",
   gray: "observable10",
   test: "colorblind",

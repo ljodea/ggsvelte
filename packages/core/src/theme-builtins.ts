@@ -80,6 +80,9 @@ export interface ThemeTokens {
   axisLineY: boolean;
   ticksX: boolean;
   ticksY: boolean;
+  /** When false, axis tick labels are suppressed (theme_void). Default true. */
+  labelsX: boolean;
+  labelsY: boolean;
   gridX: boolean;
   gridY: boolean;
   showPanelBorder: boolean;
@@ -143,6 +146,8 @@ const HRBR_BASE: FoundationThemeTokens = {
   axisLineY: false,
   ticksX: false,
   ticksY: false,
+  labelsX: true,
+  labelsY: true,
   gridX: true,
   gridY: true,
   showPanelBorder: false,
@@ -427,6 +432,23 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     ticksX: true,
     ticksY: true,
     showPanelBorder: true,
+  }),
+  // ggplot2 theme_void: no axes, grid, or panel chrome; marks (and legends) remain.
+  void: themed({
+    paper: "none",
+    panel: "none",
+    grid: "none",
+    gridWidth: 0,
+    gridX: false,
+    gridY: false,
+    axisLineX: false,
+    axisLineY: false,
+    ticksX: false,
+    ticksY: false,
+    labelsX: false,
+    labelsY: false,
+    showPanelBorder: false,
+    tickLength: 0,
   }),
   // theme_test (#823): pinned high-contrast chrome for package tests / VR.
   // Explicit literals — not an alias of light/classic — so product sweeps

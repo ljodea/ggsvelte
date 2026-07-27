@@ -1,0 +1,40 @@
+{
+  "id": "84-sf-text-labels",
+  "kind": "chart",
+  "prompt": "Label each GeoJSON polygon region with its name using geom_sf_text.",
+  "dataProfile": {
+    "fields": [
+      { "name": "geometry", "type": "nominal" },
+      { "name": "name", "type": "nominal" }
+    ],
+    "rowCount": 2
+  },
+  "data": {
+    "main": [
+      {
+        "geometry": "{\"type\":\"Polygon\",\"coordinates\":[[[0,0],[2,0],[2,2],[0,2],[0,0]]]}",
+        "name": "A"
+      },
+      {
+        "geometry": "{\"type\":\"Polygon\",\"coordinates\":[[[2.5,0],[4.5,0],[4.5,2],[2.5,2],[2.5,0]]]}",
+        "name": "B"
+      }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "sf_text",
+        "stat": "sf_coordinates",
+        "position": "identity",
+        "aes": {
+          "label": { "field": "name" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_sf_text labels at representative points (#809 phase 2)."
+}

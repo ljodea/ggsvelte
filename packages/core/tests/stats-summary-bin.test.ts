@@ -23,6 +23,20 @@ describe("statSummaryBin", () => {
     expect(result.ymax[0]!).toBe(10);
   });
 
+  it("returns an empty result and an empty cut when no x is finite", () => {
+    const result = statSummaryBin({
+      x: Float64Array.from([Number.NaN, Number.POSITIVE_INFINITY]),
+      y: Float64Array.from([1, 2]),
+      groups: [0, 0],
+      params: { binwidth: 1, boundary: 0 },
+    });
+    expect(result.x.length).toBe(0);
+    expect(result.dropped).toBe(2);
+    // No grid was built, so lineage has no cut to replay (#905).
+    expect(result.cut.binIndex.length).toBe(0);
+    expect(result.cut.fuzzy).toEqual([]);
+  });
+
   it("omits empty middle bins", () => {
     const result = statSummaryBin({
       x: Float64Array.from([0.5, 2.5]),

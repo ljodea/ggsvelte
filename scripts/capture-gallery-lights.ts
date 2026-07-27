@@ -89,14 +89,14 @@ async function main(): Promise<void> {
         timezoneId: "UTC",
       });
       const page = await context.newPage();
-      // The 10k-mark canvas specimen hydrates a large client bundle and paints
-      // on the main thread, so networkidle alone can outlast Playwright's 30s
-      // default (vr.spec.ts grants that scenario 120s for the same reason).
-      // Budget generously for every page: readiness is gated by settle(), not
-      // by the clock, so a slow example waits instead of shipping a half-drawn
-      // preview — and a genuinely hung one still fails rather than hanging.
-      page.setDefaultNavigationTimeout(120_000);
-      page.setDefaultTimeout(120_000);
+      // Canvas-scatter (and dense examples) can monopolize the main thread
+      // during hydrate (#926); networkidle alone can outlast Playwright's 30s
+      // default. Budget generously for every page: readiness is gated by
+      // settle(), not by the clock, so a slow example waits instead of shipping
+      // a half-drawn preview — and a genuinely hung one still fails rather
+      // than hanging.
+      page.setDefaultNavigationTimeout(60_000);
+      page.setDefaultTimeout(60_000);
       const url = `${BASE}/examples/${entry.id}?vr&theme=light`;
       await page.goto(url, { waitUntil: "networkidle" });
       await page.locator("html").getAttribute("data-vr");

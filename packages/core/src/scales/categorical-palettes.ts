@@ -7,6 +7,8 @@
 // builders here (knip: unused package exports).
 import { GREY_PALETTE_10, HUE_PALETTE_10 } from "@ggsvelte/spec";
 
+import { COLORBREWER_QUALITATIVE } from "./colorbrewer-palettes.js";
+
 /**
  * Default categorical palette: 10 colors in the Observable 10 family.
  * The palette is a plain value — its fingerprint (not its identity) keys
@@ -83,6 +85,7 @@ export const CATEGORICAL_SCHEMES = {
   flexoki: FLEXOKI_PALETTE,
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
+  ...COLORBREWER_QUALITATIVE,
   hue: HUE_PALETTE_10,
   grey: GREY_PALETTE_10,
   gray: GREY_PALETTE_10,

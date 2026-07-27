@@ -27,6 +27,13 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "flexoki",
   "tableau10",
   "colorblind",
+  // ColorBrewer qualitative (#825)
+  "Set1",
+  "Set2",
+  "Set3",
+  "Dark2",
+  "Paired",
+  "Accent",
   /** Even HSL hues — ggplot2-shaped scale_*_hue default discrete path (#829). */
   "hue",
   /** Greyscale discrete — scale_*_grey / scale_*_gray (#829). */
@@ -34,8 +41,35 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "gray",
 ] as const;
 
-/** Named sequential color schemes known to this schema version. */
-export const SEQUENTIAL_SCHEME_NAMES = ["viridis"] as const;
+/**
+ * Named sequential color schemes known to this schema version.
+ * Viridis family maps (matplotlib/CC0 samples + Google turbo) plus the
+ * ColorBrewer sequential and diverging ramps (#825); used by continuous/binned
+ * color scales and by scale_*_viridis_* discrete sampling.
+ */
+export const SEQUENTIAL_SCHEME_NAMES = [
+  "viridis",
+  "magma",
+  "plasma",
+  "inferno",
+  "cividis",
+  "turbo",
+  // ColorBrewer sequential + diverging ramps (#825)
+  "Blues",
+  "Greens",
+  "Reds",
+  "Oranges",
+  "Purples",
+  "Greys",
+  "YlOrRd",
+  "YlGnBu",
+  "BuPu",
+  "RdYlBu",
+  "RdBu",
+  "BrBG",
+  "Spectral",
+  "PuOr",
+] as const;
 
 export const COLOR_SCHEME_NAMES = [
   ...CATEGORICAL_SCHEME_NAMES,
@@ -94,6 +128,7 @@ export const THEME_NAMES = [
   "economist",
   "tufte",
   "linedraw",
+  "void",
   "grey",
   "gray",
   // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters

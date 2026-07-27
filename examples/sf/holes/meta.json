@@ -1,0 +1,5 @@
+{
+  "title": "Simple features polygon holes",
+  "tags": ["sf", "geojson", "polygon", "hole", "evenodd", "fill", "map", "geom"],
+  "docsSection": "Maps & spatial"
+}

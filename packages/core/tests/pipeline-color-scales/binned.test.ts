@@ -61,7 +61,7 @@ describe("binned color scales", () => {
         upper: 1000,
         lowerInclusive: true,
         upperInclusive: true,
-        label: "100–1,000",
+        label: "100–1000",
         color: "#eeeeee",
       },
     ]);
@@ -94,6 +94,22 @@ describe("binned color scales", () => {
     const colorsteps = binned.guidePlans.find((candidate) => candidate.type === "colorsteps");
     if (colorsteps?.type !== "colorsteps") throw new Error("expected colorsteps plan");
     expect(colorsteps.steps.map((step) => step.label)).toEqual(["1.0–10.0", "10.0–100.0"]);
+  });
+
+  it("keeps adjacent default bin edges distinguishable in legend labels (#955)", () => {
+    // Domain 0–4 / 5 equal bins → edges 0, 0.8, 1.6, 2.4, 3.2, 4. Axis-style
+    // tickStep(domain, 5) precision used to collapse 1.6 and 2.4 both to "2"
+    // and emit a degenerate "2–2" step.
+    const model = runPipeline(pointSpec([0, 1, 2, 3, 4], { type: "binned" }), size);
+    const colorsteps = model.guidePlans.find((candidate) => candidate.type === "colorsteps");
+    if (colorsteps?.type !== "colorsteps") throw new Error("expected colorsteps plan");
+    expect(colorsteps.steps.map((step) => step.label)).toEqual([
+      "0.0–0.8",
+      "0.8–1.6",
+      "1.6–2.4",
+      "2.4–3.2",
+      "3.2–4.0",
+    ]);
   });
 
   it("rejects a binned domain that disagrees with explicit boundaries", () => {

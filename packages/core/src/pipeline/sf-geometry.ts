@@ -51,28 +51,32 @@ export function parseSfGeometry(raw: CellValue, path: string): SfParsed {
       "geom_sf geometry cell is not valid JSON.",
     );
   }
-  if (
-    parsed === null ||
-    typeof parsed !== "object" ||
-    Array.isArray(parsed) ||
-    !("type" in parsed) ||
-    typeof (parsed as { type: unknown }).type !== "string"
-  ) {
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
     throw new PipelineError(
       "sf-geometry-invalid",
       path,
       'geom_sf geometry must be a GeoJSON Geometry object with a string "type".',
     );
   }
-  const geom = parsed as { type: string; coordinates?: unknown; geometries?: unknown };
+  const record = parsed as Record<string, unknown>;
+  const type = record["type"];
+  if (typeof type !== "string") {
+    throw new PipelineError(
+      "sf-geometry-invalid",
+      path,
+      'geom_sf geometry must be a GeoJSON Geometry object with a string "type".',
+    );
+  }
+  const coordinates = record["coordinates"];
+  const geometries = record["geometries"];
   return {
-    type: geom.type,
-    ...(geom.coordinates !== undefined && { coordinates: geom.coordinates }),
-    ...(geom.geometries !== undefined && { geometries: geom.geometries }),
+    type,
+    ...(coordinates !== undefined && { coordinates }),
+    ...(geometries !== undefined && { geometries }),
   };
 }
 
-export function sfKindOf(type: string): SfKind {
+export function sfKindOf(type: string, path = "/geometry"): SfKind {
   switch (type) {
     case "Point":
     case "MultiPoint":
@@ -86,19 +90,30 @@ export function sfKindOf(type: string): SfKind {
     default:
       throw new PipelineError(
         "sf-geometry-unsupported",
-        "/geometry",
+        path,
         `geom_sf does not support GeoJSON type "${type}" in v1 (point/line/polygon families only; no CRS).`,
       );
   }
 }
 
+/** Max GeometryCollection nesting depth (prevents unbounded recursion). */
+const MAX_GEOMETRY_COLLECTION_DEPTH = 32;
+
 /**
  * Flatten GeometryCollection (recursively) to leaf Point/Line/Polygon families.
  * Empty collections yield []. Mixed families are not filtered here — callers
- * enforce layer homogeneity via {@link sfKindOf}.
+ * enforce layer homogeneity via {@link sfKindOf}. Nesting is capped at
+ * {@link MAX_GEOMETRY_COLLECTION_DEPTH}.
  */
-export function expandSfLeaves(geom: SfParsed, path: string): SfLeaf[] {
+export function expandSfLeaves(geom: SfParsed, path: string, depth = 0): SfLeaf[] {
   if (geom.type === "GeometryCollection") {
+    if (depth >= MAX_GEOMETRY_COLLECTION_DEPTH) {
+      throw new PipelineError(
+        "sf-geometry-invalid",
+        path,
+        `GeometryCollection nesting exceeds ${MAX_GEOMETRY_COLLECTION_DEPTH} levels.`,
+      );
+    }
     if (!Array.isArray(geom.geometries)) {
       throw new PipelineError(
         "sf-geometry-invalid",
@@ -130,17 +145,18 @@ export function expandSfLeaves(geom: SfParsed, path: string): SfLeaf[] {
             ...(c.geometries !== undefined && { geometries: c.geometries }),
           },
           path,
+          depth + 1,
         ),
       );
     }
     return out;
   }
   // Validate leaf family (throws on Feature, CRS objects, etc.).
-  sfKindOf(geom.type);
+  sfKindOf(geom.type, path);
   return [{ type: geom.type, coordinates: geom.coordinates }];
 }
 
-/** All label points for a geometry (GeometryCollection + Multi* expand). */
+/** Label points for a geometry: GeometryCollection expands to one point per leaf. */
 export function representativePointsForGeometry(
   geom: SfParsed,
   path: string,

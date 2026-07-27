@@ -1,0 +1,50 @@
+{
+  "id": "78-map-choropleth",
+  "kind": "chart",
+  "prompt": "Draw a choropleth with geom map joining region rates to fortified long/lat polygons.",
+  "dataProfile": {
+    "fields": [
+      { "name": "region", "type": "nominal" },
+      { "name": "rate", "type": "quantitative" }
+    ],
+    "rowCount": 3
+  },
+  "data": {
+    "main": [
+      { "region": "West", "rate": 12 },
+      { "region": "East", "rate": 28 },
+      { "region": "North", "rate": 19 }
+    ]
+  },
+  "gold": {
+    "edition": 2,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "map",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "map_id": { "field": "region" },
+          "fill": { "field": "rate" }
+        },
+        "params": {
+          "map": {
+            "values": [
+              { "long": 0, "lat": 0, "region": "West" },
+              { "long": 1, "lat": 0, "region": "West" },
+              { "long": 0.5, "lat": 1, "region": "West" },
+              { "long": 1.2, "lat": 0, "region": "East" },
+              { "long": 2.2, "lat": 0, "region": "East" },
+              { "long": 1.7, "lat": 1, "region": "East" },
+              { "long": 0.4, "lat": 1.2, "region": "North" },
+              { "long": 1.8, "lat": 1.2, "region": "North" },
+              { "long": 1.1, "lat": 2, "region": "North" }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "notes": "geom_map: join value rows to fortified map via map_id; closed filled paths. Inline map values (eval harness drops datasets)."
+}

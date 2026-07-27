@@ -140,7 +140,9 @@ describe("temporal pipeline: stats and facets", () => {
       expect(segments.segments.length / 4).toBe(3);
     }
     expect(model.scene.axes.x.ticks.filter((tick) => tick.kind === "major")).toHaveLength(1);
-    expect(model.scene.axes.x.ticks[0]!.label).toContain("2025");
+    // Single-year day span → span-uniform month+day (#962); year lives on fullLabel.
+    expect(model.scene.axes.x.ticks[0]!.label).toBe("Feb 1");
+    expect(model.scene.axes.x.ticks[0]!.fullLabel).toContain("2025");
   });
 
   it("keeps raw category labels for banded temporal count bars", () => {

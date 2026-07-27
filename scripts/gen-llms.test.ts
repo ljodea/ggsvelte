@@ -30,6 +30,7 @@ import {
   buildLlmsIndex,
   GETTING_STARTED_MD,
   COMPATIBILITY_MD,
+  STATISTICS_POSITIONS_MD,
   INTERACTIONS_MD,
   INTERACTION_REFERENCE_MD,
   INTERACTION_REFERENCE_INDEX,
@@ -209,6 +210,15 @@ describe("guide sections cover their catalogs", () => {
     expect(TEMPORAL_SCALES_MD).toContain("scaleDecisions");
     expect(TEMPORAL_SCALES_MD).toContain('.scaleXDate({ parse: "dmy" })');
     expect(TEMPORAL_SCALES_MD).toContain("scale_x_discrete()");
+  });
+
+  it("documents multi-part SF labels: MultiPoint per point, LineString vertex mean", () => {
+    // #809 phase 5: MultiPoint emits one label per finite point (not a single mean).
+    // LineString still uses the vertex mean. The guide must not contradict itself.
+    expect(STATISTICS_POSITIONS_MD).toContain("### SF text labels");
+    expect(STATISTICS_POSITIONS_MD).toContain("one label per part");
+    expect(STATISTICS_POSITIONS_MD).toContain("LineString uses the vertex mean");
+    expect(STATISTICS_POSITIONS_MD).not.toContain("MultiPoint/LineString use the vertex mean");
   });
 
   it("documents the machine-checked packed-consumer support contract", () => {

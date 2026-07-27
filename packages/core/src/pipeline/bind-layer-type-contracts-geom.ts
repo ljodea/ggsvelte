@@ -46,6 +46,21 @@ export function validateGeomChannelTypeContracts(input: {
       }
     }
   }
+  if (layer.stat === "ellipse") {
+    for (const [channel, field] of [
+      ["x", xField],
+      ["y", yField],
+    ] as const) {
+      const conversion = channel === "x" ? xConversion : yConversion;
+      if (field !== null && positionFieldType(table, field, conversion) === "nominal") {
+        throw new PipelineError(
+          "channel-type-mismatch",
+          `/layers/${index}/aes/${channel}`,
+          `The ellipse stat needs quantitative x and y, but field "${field}" (${channel}) is nominal.`,
+        );
+      }
+    }
+  }
   if (geom === "boxplot") {
     if (xField !== null && positionFieldType(table, xField, xConversion) !== "nominal") {
       throw new PipelineError(
@@ -75,6 +90,22 @@ export function validateGeomChannelTypeContracts(input: {
         "channel-type-mismatch",
         `/layers/${index}/aes/y`,
         `The raster geom needs continuous y, but field "${yField}" is nominal. Use geom "tile" for discrete axes.`,
+      );
+    }
+  }
+  if (geom === "spoke") {
+    if (xField !== null && positionFieldType(table, xField, xConversion) === "nominal") {
+      throw new PipelineError(
+        "channel-type-mismatch",
+        `/layers/${index}/aes/x`,
+        `The spoke geom needs continuous x for endpoint math (x + radius·cos(angle)); field "${xField}" is nominal.`,
+      );
+    }
+    if (yField !== null && positionFieldType(table, yField, yConversion) === "nominal") {
+      throw new PipelineError(
+        "channel-type-mismatch",
+        `/layers/${index}/aes/y`,
+        `The spoke geom needs continuous y for endpoint math (y + radius·sin(angle)); field "${yField}" is nominal.`,
       );
     }
   }

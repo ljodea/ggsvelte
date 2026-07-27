@@ -1,7 +1,6 @@
-import type { BarParams } from "@ggsvelte/spec";
-
 import { bandKey } from "../../scales/train.js";
 import { ColumnTable } from "../../table.js";
+import { binIndexOf } from "../../stats/bin-breaks.js";
 import { assignBinId } from "../binned-scale.js";
 import { shouldAggregateOnSemanticTemporalX } from "../frame-stats-shared.js";
 import { positionColumn, xConversionOf } from "../temporal-position.js";
@@ -60,19 +59,17 @@ export function appendSourceRowByGroupKey(
 
 interface BinEdge {
   frameRow: number;
-  lo: number;
-  hi: number;
-  first: boolean;
-  last: boolean;
   bucket: number[];
 }
 
 /**
  * Assign each source row to at most one bin in a single pass over the panel
- * rows (O(n log k) per group via binary search on ordered bin edges), instead
- * of re-scanning the full group once per output bin (O(k·g)).
- * When bin edges are absent, every mark represents the full group: members are
- * collected once per group and shared across that group's frame rows (O(n+k)).
+ * rows, replaying the stat's own cut (O(n log B) binary search over the fuzzed
+ * break grid, then an O(1) grid-bin → frame-row lookup) instead of re-scanning
+ * the full group once per output bin (O(k·g)).
+ * When the stat's cut or bin edges are absent, every mark represents the full
+ * group: members are collected once per group and shared across that group's
+ * frame rows (O(n+k)).
  */
 export function buildBinLineageBuckets(input: {
   frame: FinalizedLayerFrame;
@@ -86,9 +83,13 @@ export function buildBinLineageBuckets(input: {
 
   // Pre-stat groups cached on the frame during buildFrame (issue #217).
   const inputGroups = frame.inputGroups;
-  const closed = ((frame.binding.layer.params ?? {}) as BarParams).closed ?? "right";
   const binsByGroup = new Map<number, BinEdge[]>();
-  const missingEdges = frame.xmin === null || frame.xmax === null;
+  // Without the stat's own cut we cannot reproduce its fuzzed membership, so
+  // fall back to the same conservative "mark represents the whole group"
+  // behaviour used when bin edges are absent.
+  const cut = frame.binCut;
+  const missingEdges =
+    frame.xmin === null || frame.xmax === null || cut === undefined || cut === null;
   /** group → frame rows (missing-edges path only; enables O(n+k) fill). */
   const frameRowsByGroup = missingEdges ? new Map<number, number[]>() : null;
 
@@ -102,16 +103,7 @@ export function buildBinLineageBuckets(input: {
     }
     const bucket: number[] = [];
     sourceRowsByGroupBin.set(`${panelIndex}:${layerIndex}:${group}:${frameRow}`, bucket);
-    const first = frameRow === 0 || frame.groups[frameRow - 1] !== group;
-    const last = frameRow === frame.n - 1 || frame.groups[frameRow + 1] !== group;
-    const edge: BinEdge = {
-      frameRow,
-      lo: frame.xmin![frameRow]!,
-      hi: frame.xmax![frameRow]!,
-      first,
-      last,
-      bucket,
-    };
+    const edge: BinEdge = { frameRow, bucket };
     const list = binsByGroup.get(group);
     if (list === undefined) binsByGroup.set(group, [edge]);
     else list.push(edge);
@@ -137,8 +129,13 @@ export function buildBinLineageBuckets(input: {
     return;
   }
 
-  for (const bins of binsByGroup.values()) {
-    bins.sort((a, b) => a.lo - b.lo || a.hi - b.hi);
+  // Grid bin index → the frame row that emitted it. summary_bin omits empty
+  // bins, so the grid index is not the frame row.
+  const edgeByGridBin = new Map<number, Map<number, BinEdge>>();
+  for (const [group, bins] of binsByGroup) {
+    const byGridBin = new Map<number, BinEdge>();
+    for (const edge of bins) byGridBin.set(cut!.binIndex[edge.frameRow]!, edge);
+    edgeByGridBin.set(group, byGridBin);
   }
 
   // Bin edges are in scale space after pre-stat transforms; compare source
@@ -151,42 +148,14 @@ export function buildBinLineageBuckets(input: {
   );
   for (let localRow = 0; localRow < inputGroups.length; localRow++) {
     const group = inputGroups[localRow]!;
-    const bins = binsByGroup.get(group);
-    if (bins === undefined || bins.length === 0) continue;
+    const byGridBin = edgeByGridBin.get(group);
+    if (byGridBin === undefined || byGridBin.size === 0) continue;
     const value = xNumeric[localRow]!;
     if (!Number.isFinite(value)) continue;
-    const idx = findBinIndex(value, bins, closed);
-    if (idx < 0) continue;
-    const sourceRow = globalSourceRowForInputRow(frame, localRow);
-    bins[idx]!.bucket.push(sourceRow);
+    // Replay the stat's own cut (fuzzed breaks) — exact-edge predicates
+    // disagree with it inside the fuzz band around a break (#905).
+    const edge = byGridBin.get(binIndexOf(value, cut!.fuzzy, cut!.rightClosed));
+    if (edge === undefined) continue;
+    edge.bucket.push(globalSourceRowForInputRow(frame, localRow));
   }
-}
-
-function findBinIndex(value: number, bins: readonly BinEdge[], closed: "right" | "left"): number {
-  if (closed === "right") {
-    // First bin with hi >= value, then verify left edge (lo, hi] / first [lo, hi].
-    let lo = 0;
-    let hi = bins.length;
-    while (lo < hi) {
-      const mid = (lo + hi) >> 1;
-      if (bins[mid]!.hi < value) lo = mid + 1;
-      else hi = mid;
-    }
-    if (lo >= bins.length) return -1;
-    const bin = bins[lo]!;
-    return value <= bin.hi && (value > bin.lo || (bin.first && value >= bin.lo)) ? lo : -1;
-  }
-
-  // Last bin with lo <= value, then verify right edge [lo, hi) / last [lo, hi].
-  let lo = 0;
-  let hi = bins.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >> 1;
-    if (bins[mid]!.lo <= value) lo = mid + 1;
-    else hi = mid;
-  }
-  const idx = lo - 1;
-  if (idx < 0) return -1;
-  const bin = bins[idx]!;
-  return value >= bin.lo && (value < bin.hi || (bin.last && value <= bin.hi)) ? idx : -1;
 }

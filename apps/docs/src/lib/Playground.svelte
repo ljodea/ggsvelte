@@ -43,8 +43,6 @@
     PLAYGROUND_SAMPLE_DISCARD_CONFIRM,
     PLAYGROUND_UNDO_DISCARD_CONFIRM,
     shouldClearPlayHashAfterPromotion,
-    shouldConfirmDiscardForSampleLoad,
-    shouldConfirmDiscardForUndo,
   } from "$lib/playground-link-policy";
   import { playgroundOutputs } from "$lib/playground-output";
   import { playgroundShareCopyStatus } from "$lib/playground-output-status";
@@ -56,9 +54,13 @@
     reportPlaygroundDiagnostic,
     setPlaygroundHistoryHash,
     stagePlaygroundSeed,
-    stagePlaygroundUndo,
     type PlaygroundDiagnostic,
   } from "$lib/playground-state";
+  import {
+    planSampleLoad,
+    planUndoChart,
+    workbenchCandidateRef,
+  } from "$lib/playground-workbench-actions";
   import {
     defaultPlaygroundInteractions,
     type PlaygroundAgentEnvelope,
@@ -173,10 +175,7 @@
   }
 
   function activeCandidate(): PlaygroundCandidateRef | null {
-    const candidate = workbench.candidate;
-    return candidate === null
-      ? null
-      : { generation: candidate.generation, origin: candidate.origin };
+    return workbenchCandidateRef(workbench);
   }
 
   function replaceLocationHash(hash: string | null): void {
@@ -245,37 +244,35 @@
   });
 
   function undoChart(): void {
-    if (workbench.undoSnapshots.length === 0 || workbench.candidate !== null)
-      return;
-    if (busy) return;
-    if (shouldConfirmDiscardForUndo(workbench)) {
+    let plan = planUndoChart(workbench, busy, false);
+    if (plan.kind === "noop") return;
+    if (plan.kind === "needs_confirm") {
       const discard = window.confirm(PLAYGROUND_UNDO_DISCARD_CONFIRM);
       if (!discard) return;
+      plan = planUndoChart(workbench, busy, true);
+      if (plan.kind !== "stage") return;
     }
-    const previous = activeCandidate();
-    const next = stagePlaygroundUndo(workbench);
-    workbench = next;
-    noteStagedCandidate(previous, next);
+    workbench = plan.workbench;
+    noteStagedCandidate(plan.previous, plan.workbench);
   }
 
   function loadSample(id: string): boolean {
-    if (id === "") return false;
-    if (shouldConfirmDiscardForSampleLoad(workbench)) {
+    let plan = planSampleLoad(workbench, id, PLAYGROUND_SAMPLES, false);
+    if (plan.kind === "noop") return false;
+    if (plan.kind === "needs_confirm") {
       const discard = window.confirm(PLAYGROUND_SAMPLE_DISCARD_CONFIRM);
       if (!discard) return false;
+      plan = planSampleLoad(workbench, id, PLAYGROUND_SAMPLES, true);
+      if (plan.kind !== "load") return false;
     }
-    const sample = PLAYGROUND_SAMPLES.find((entry) => entry.id === id);
-    if (sample === undefined) return false;
     cancelActiveRun();
-    const previous = activeCandidate();
-    const next = stagePlaygroundSeed(workbench, sample.seed, "source");
-    workbench = next;
-    interactions = defaultPlaygroundInteractions();
-    pendingInteractions = null;
-    pendingSuccess = null;
-    mockNotice = false;
-    agent = createPlaygroundAgentState();
-    noteStagedCandidate(previous, next);
+    workbench = plan.workbench;
+    interactions = plan.interactions;
+    pendingInteractions = plan.pendingInteractions;
+    pendingSuccess = plan.pendingSuccess;
+    mockNotice = plan.mockNotice;
+    agent = plan.agent;
+    noteStagedCandidate(plan.previous, plan.workbench);
     return true;
   }
 

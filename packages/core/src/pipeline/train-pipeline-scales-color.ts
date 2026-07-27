@@ -4,6 +4,7 @@
 import type { PortableSpec } from "@ggsvelte/spec";
 
 import type { EditionDefaults } from "../editions.js";
+import { humanizeFieldTitle } from "../humanize-field.js";
 import type { ColumnTable } from "../table.js";
 
 import { resolveColorScale } from "./scale-training.js";
@@ -54,7 +55,7 @@ export function trainPipelineColorScales(input: {
     sourceTable,
     scalesConfig.color,
     options.prevScales?.["color"] ?? null,
-    labs.color ?? firstColorField ?? "",
+    labs.color ?? humanizeFieldTitle(firstColorField ?? ""),
     warnings,
     advisories,
     editionDefaults,
@@ -67,7 +68,7 @@ export function trainPipelineColorScales(input: {
     sourceTable,
     scalesConfig.fill,
     options.prevScales?.["fill"] ?? null,
-    labs.fill ?? firstFillField ?? "",
+    labs.fill ?? humanizeFieldTitle(firstFillField ?? ""),
     warnings,
     advisories,
     editionDefaults,

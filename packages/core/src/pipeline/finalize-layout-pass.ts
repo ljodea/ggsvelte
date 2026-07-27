@@ -42,7 +42,7 @@ export function finalizePanelLayoutPass(input: {
     const kinds = prepared.scaleDecisions
       .filter((decision) => decision.aesthetic === axis && decision.status === "temporal")
       .map((decision) => decision.kind)
-      .filter((kind): kind is "date" | "datetime" => kind !== null);
+      .filter((kind): kind is "date" | "datetime" | "time" => kind !== null);
     if (kinds.length > 0) return kinds.includes("datetime") ? "datetime" : kinds[0]!;
 
     const scalarValues: CellValue[] = [];
@@ -79,8 +79,8 @@ export function finalizePanelLayoutPass(input: {
     return scale.type === "time" && conversion.requestedTime ? "datetime" : null;
   };
 
-  const xGuide = resolveAxisGuide("x", scalesConfig, normalized.guides);
-  const yGuide = resolveAxisGuide("y", scalesConfig, normalized.guides);
+  const xGuide = resolveAxisGuide("x", scalesConfig, normalized.guides, theme);
+  const yGuide = resolveAxisGuide("y", scalesConfig, normalized.guides, theme);
   const labs = { ...normalized.labs };
   if (xGuide.visible) {
     if (xGuide.title !== undefined) labs.x = xGuide.title;

@@ -50,6 +50,10 @@ const snapshotDir = process.env["VR_SNAPSHOT_DIR"] ?? "__screenshots__";
  */
 export const vrContextOptions: BrowserContextOptions = { reducedMotion: "reduce" };
 
+/** Specs that the component-journeys CI job runs (#944). */
+const JOURNEYS_SPECS =
+  /(?:docs-shell|docs-home-gallery|docs-progressive-search|docs-themes|interaction-accessibility|playground)\.spec\.ts$/;
+
 export default defineConfig({
   testDir: ".",
   outputDir: "./test-results",
@@ -79,7 +83,19 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
-  projects: [{ name: "chromium", use: { browserName: "chromium" } }],
+  projects: [
+    // VR / visual-contract seats keep Playwright's default 30s budget.
+    { name: "chromium", use: { browserName: "chromium" }, testIgnore: JOURNEYS_SPECS },
+    // Docs a11y/structure journeys: cold CI hydrate straddled 30s (~30.2s
+    // observed). 60s remains project scope (#944) while getting-started chart
+    // islands still dominate several journeys (#946 follow-up).
+    {
+      name: "journeys",
+      use: { browserName: "chromium" },
+      testMatch: JOURNEYS_SPECS,
+      timeout: 60_000,
+    },
+  ],
   webServer: {
     command: "bun ../../scripts/serve-docs.ts",
     port: 4173,

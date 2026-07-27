@@ -1,0 +1,43 @@
+{
+  "id": "68-scatter-hex-heatmap",
+  "kind": "chart",
+  "prompt": "Draw a hexagonal bin heatmap of delay against distance.",
+  "dataProfile": {
+    "fields": [
+      { "name": "distance", "type": "quantitative" },
+      { "name": "delay", "type": "quantitative" }
+    ],
+    "rowCount": 8
+  },
+  "data": {
+    "main": [
+      { "distance": 200, "delay": 5 },
+      { "distance": 210, "delay": 8 },
+      { "distance": 800, "delay": 40 },
+      { "distance": 820, "delay": 35 },
+      { "distance": 400, "delay": 12 },
+      { "distance": 410, "delay": 15 },
+      { "distance": 900, "delay": 55 },
+      { "distance": 150, "delay": 2 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "hex",
+        "stat": "bin_hex",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "distance" },
+          "y": { "field": "delay" },
+          "fill": { "stat": "count" }
+        },
+        "params": { "bins": 10 }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_hex hexagonal heatmap of continuous x/y."
+}

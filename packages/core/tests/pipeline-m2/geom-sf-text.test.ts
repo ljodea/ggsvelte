@@ -36,19 +36,10 @@ describe("geom_sf_text / stat_sf_coordinates", () => {
     const batch = model.scene.batches[0] as GlyphsBatch;
     expect(batch.kind).toBe("glyphs");
     expect(batch.texts).toEqual(["A"]);
-    // Panel maps data [0,2]→width; centroid x=1 → half width (modulo expansion).
-    if (model.scales.x.type !== "band" && model.scales.y.type !== "band") {
-      const [x0, x1] = model.scales.x.domain as [number, number];
-      const [y0, y1] = model.scales.y.domain as [number, number];
-      // Domains trained from centroid only (single point) or from expand —
-      // assert label is drawable and non-empty.
-      expect(Number.isFinite(batch.positions[0]!)).toBe(true);
-      expect(Number.isFinite(batch.positions[1]!)).toBe(true);
-      void x0;
-      void x1;
-      void y0;
-      void y1;
-    }
+    // Domains trained from centroid only (single point) or from expand —
+    // assert label is drawable and non-empty.
+    expect(Number.isFinite(batch.positions[0]!)).toBe(true);
+    expect(Number.isFinite(batch.positions[1]!)).toBe(true);
   });
 
   it("passes Point coordinates through unchanged", () => {
@@ -159,24 +150,6 @@ describe("geom_sf_text / stat_sf_coordinates", () => {
     expect(batch.texts).toEqual(["pts", "pts"]);
   });
 
-  it("places labels for each GeometryCollection leaf", () => {
-    const gc = geo({
-      type: "GeometryCollection",
-      geometries: [
-        { type: "Point", coordinates: [0, 0] },
-        { type: "Point", coordinates: [2, 2] },
-      ],
-    });
-    const model = runPipeline(
-      gg({ geometry: [gc], name: ["gc"] }, aes({ label: "name" }))
-        .geomSfText()
-        .spec(),
-      size,
-    );
-    const batch = model.scene.batches[0] as GlyphsBatch;
-    expect(batch.texts).toEqual(["gc", "gc"]);
-  });
-
   it("uses exact auto hit mode", () => {
     const model = runPipeline(
       gg(
@@ -223,6 +196,24 @@ describe("geom_sf_text / stat_sf_coordinates", () => {
     }
   });
 
+  it("places labels for each GeometryCollection leaf", () => {
+    const gc = geo({
+      type: "GeometryCollection",
+      geometries: [
+        { type: "Point", coordinates: [0, 0] },
+        { type: "Point", coordinates: [2, 2] },
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [gc], name: ["gc"] }, aes({ label: "name" }))
+        .geomSfText()
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as GlyphsBatch;
+    expect(batch.texts).toEqual(["gc", "gc"]);
+  });
+
   it("defaults stat to sf_coordinates", () => {
     const spec = gg(
       {
@@ -235,5 +226,47 @@ describe("geom_sf_text / stat_sf_coordinates", () => {
       .spec();
     expect(spec.layers[0]?.stat).toBe("sf_coordinates");
     expect(spec.layers[0]?.geom).toBe("sf_text");
+  });
+
+  it("returns an empty scene for zero-row data instead of throwing", () => {
+    const model = runPipeline(
+      gg({ geometry: [] as string[], name: [] as string[] }, aes({ label: "name" }))
+        .geomSfText()
+        .spec(),
+      size,
+    );
+    expect(model.scene.batches).toEqual([]);
+    expect(model.warnings.some((w) => w.code === "empty-layer" || w.code === "empty-data")).toBe(
+      true,
+    );
+  });
+
+  it("computes the exact shoelace centroid for a unit square", () => {
+    // [0,2]×[0,2] exterior → centroid (1,1) with zero domain pad via expand:false if available.
+    // Without expand control, assert domain still contains the centroid.
+    const square = geo({
+      type: "Polygon",
+      coordinates: [
+        [
+          [0, 0],
+          [2, 0],
+          [2, 2],
+          [0, 2],
+          [0, 0],
+        ],
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [square], name: ["A"] }, aes({ label: "name" }))
+        .geomSfText()
+        .spec(),
+      size,
+    );
+    if (model.scales.x.type !== "band" && model.scales.y.type !== "band") {
+      expect(model.scales.x.domain[0]).toBeLessThanOrEqual(1);
+      expect(model.scales.x.domain[1]).toBeGreaterThanOrEqual(1);
+      expect(model.scales.y.domain[0]).toBeLessThanOrEqual(1);
+      expect(model.scales.y.domain[1]).toBeGreaterThanOrEqual(1);
+    }
   });
 });

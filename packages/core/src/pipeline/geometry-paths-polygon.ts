@@ -62,6 +62,9 @@ export function polygonBatch(
   for (const rows of groupRows) total += rows.length;
   const positions = new Float32Array(total * 2);
   const rowIndex = new Uint32Array(total);
+  // One frame-row id per vertex so coord-projected closed paths resolve
+  // tooltips to the correct region (not ribbon 2×N layout; #808/#502).
+  const closedFrameRows = new Uint32Array(total);
   const pathOffsets = new Uint32Array(groupRows.length + 1);
   const fills: (string | null)[] = [];
   const strokes: (string | null)[] = [];
@@ -84,6 +87,7 @@ export function polygonBatch(
       positions[cursor * 2] = tx * fx.innerWidth;
       positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
       rowIndex[cursor] = frame.rowIndex[row]!;
+      closedFrameRows[cursor] = row;
       cursor++;
     }
     fills.push(areaGroupFillOf(frame, fill, rows) ?? fillPaintResolved?.fallback ?? null);
@@ -95,6 +99,7 @@ export function polygonBatch(
   }
   pathOffsets[groupRows.length] = cursor;
 
+  // polygon and map (geom_map is polygon-with-join; #808) share this batch.
   const params = (binding.layer.params ?? {}) as {
     alpha?: number;
     linewidth?: number;
@@ -123,6 +128,7 @@ export function polygonBatch(
     strokes,
     fills,
     closed: true,
+    closedFrameRows,
     linewidth:
       typeof literalLinewidth === "number"
         ? literalLinewidth
