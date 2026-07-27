@@ -33,6 +33,7 @@ import {
   THEME_NAMES,
   validate,
 } from "@ggsvelte/spec";
+import type { SpecInput } from "@ggsvelte/spec";
 import { deprecatedGrammarPropPattern } from "../packages/svelte/src/lib/layers/grammar-families.ts";
 import { codeBlocks } from "./guide-code-contract.ts";
 
@@ -68,7 +69,7 @@ describe("skill fence contract", () => {
     it(`${file.name}: every complete JSON fence normalizes and validates`, () => {
       for (const block of codeBlocks(file.markdown)) {
         if (block.language !== "json" || block.classification !== "complete") continue;
-        const spec = normalize(JSON.parse(block.source));
+        const spec = normalize(JSON.parse(block.source) as SpecInput);
         // Tier 2 ({}): skill specs carry inline data, so data-aware checks
         // run too — the same bar examples/define.ts sets.
         const result = validate(spec, {});
