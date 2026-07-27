@@ -1,24 +1,15 @@
 <script lang="ts">
-  import {
-    GeomLine,
-    GeomPoint,
-    GGPlot,
-    Labs,
-    Scale,
-    Theme,
-  } from "@ggsvelte/svelte";
   import type { ThemeName } from "@ggsvelte/spec";
   import { onMount } from "svelte";
 
   import { CATEGORICAL_PALETTES, THEME_OPTIONS } from "$lib/catalog/themes";
   import CopyCode from "$lib/components/CopyCode.svelte";
+  import TemperaturesSpecimen from "$lib/components/TemperaturesSpecimen.svelte";
   import {
     readDocsAppearance,
     watchDocsAppearance,
     type DocsAppearance,
   } from "$lib/docs-appearance";
-  import { MONTH_BREAKS } from "$lib/theme-specimens/catalog";
-  import { temperaturesKeyed } from "$lib/theme-specimens/data";
   import { heroThemePaletteSnippet } from "$lib/theme-specimens/snippets";
 
   type SchemeName = (typeof CATEGORICAL_PALETTES)[number]["name"];
@@ -67,31 +58,13 @@
   </p>
 
   <div class="plot-panel">
-    <GGPlot
-      data={temperaturesKeyed}
-      aes={{ x: "month", y: "temp", color: "city" }}
-      key="id"
-      inspect={{ mode: "x" }}
-      legendFocus
+    <TemperaturesSpecimen
+      theme={resolvedTheme}
+      {scheme}
       height={400}
+      legendFocus={true}
       ariaLabel={`${resolvedTheme} theme with ${scheme} palette`}
-    >
-      <Theme name={resolvedTheme} />
-      <Scale
-        value={{
-          x: { breaks: [...MONTH_BREAKS] },
-          color: { type: "ordinal", scheme },
-        }}
-      />
-      <Labs
-        title="Monthly mean temperature"
-        x="Month"
-        y="Temperature (°C)"
-        color="City"
-      />
-      <GeomLine linewidth={2} />
-      <GeomPoint size={2.5} />
-    </GGPlot>
+    />
   </div>
 
   <div class="controls">

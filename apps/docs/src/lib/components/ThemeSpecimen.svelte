@@ -15,11 +15,11 @@
   } from "@ggsvelte/svelte";
   import type { ThemeName } from "@ggsvelte/spec";
 
+  import TemperaturesSpecimen from "$lib/components/TemperaturesSpecimen.svelte";
   import type {
     SchemeName,
     ThemeSpecimenKind,
   } from "$lib/theme-specimens/catalog";
-  import { MONTH_BREAKS } from "$lib/theme-specimens/catalog";
   import {
     attendees,
     cities,
@@ -29,7 +29,6 @@
     penguins,
     revenue,
     ridership,
-    temperaturesKeyed,
   } from "$lib/theme-specimens/data";
 
   const {
@@ -60,31 +59,13 @@
 
   <div class="plot-panel">
     {#if kind === "temps-line"}
-      <GGPlot
-        data={temperaturesKeyed}
-        aes={{ x: "month", y: "temp", color: "city" }}
-        key="id"
-        inspect={{ mode: "x" }}
-        {legendFocus}
+      <TemperaturesSpecimen
+        theme={name}
+        {scheme}
         height={plotHeight}
+        {legendFocus}
         ariaLabel={`${label} theme multi-series temperatures`}
-      >
-        <Theme {name} />
-        <Scale
-          value={{
-            x: { breaks: [...MONTH_BREAKS] },
-            color: colorScale,
-          }}
-        />
-        <Labs
-          title="Monthly mean temperature"
-          x="Month"
-          y="Temperature (°C)"
-          color="City"
-        />
-        <GeomLine linewidth={2} />
-        <GeomPoint size={2.5} />
-      </GGPlot>
+      />
     {:else if kind === "ridership-line"}
       <GGPlot
         data={ridership}
