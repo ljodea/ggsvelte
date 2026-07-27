@@ -463,7 +463,7 @@ export const PLAYGROUND_EXAMPLES: readonly GeneratedPlaygroundExample[] = [
   },
   {
     id: "point/canvas-scatter",
-    title: "Canvas scatter (10,000 points)",
+    title: "Canvas scatter (2,500 points)",
     compatibility: {
       supported: false,
       reason: "This example has more than 500 inline rows. Use a smaller sample in the playground.",

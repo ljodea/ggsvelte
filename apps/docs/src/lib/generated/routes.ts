@@ -2989,8 +2989,8 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/canvas-scatter",
-    title: "Canvas scatter (10,000 points) — ggsvelte gallery",
-    description: "Canvas scatter (10,000 points)",
+    title: "Canvas scatter (2,500 points) — ggsvelte gallery",
+    description: "Canvas scatter (2,500 points)",
     canonicalPath: "/examples/point/canvas-scatter",
     kind: "page",
     index: true,

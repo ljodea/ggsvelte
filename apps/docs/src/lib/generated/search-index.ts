@@ -5056,18 +5056,18 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:point:canvas-scatter",
     kind: "example",
-    title: "Canvas scatter (10,000 points)",
-    summary: "Canvas scatter (10,000 points) (Points & scatter)",
+    title: "Canvas scatter (2,500 points)",
+    summary: "Canvas scatter (2,500 points) (Points & scatter)",
     href: "/examples/point/canvas-scatter",
     keywords: [
-      "Canvas scatter (10,000 points)",
+      "Canvas scatter (2,500 points)",
       "Points & scatter",
       "point",
       "canvas",
       "performance",
       "theme",
     ],
-    exact: ["Canvas scatter (10,000 points)"],
+    exact: ["Canvas scatter (2,500 points)"],
   },
   {
     id: "example:point:fixed-aspect",

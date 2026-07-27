@@ -610,7 +610,7 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     id: "point/canvas-scatter",
     category: "point",
     name: "canvas-scatter",
-    title: "Canvas scatter (10,000 points)",
+    title: "Canvas scatter (2,500 points)",
     description: "",
     tags: ["point", "canvas", "performance", "theme"],
     docsSection: "Points & scatter",
