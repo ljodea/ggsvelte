@@ -1,6 +1,5 @@
-import type { BarParams } from "@ggsvelte/spec";
-
 import { bandKey } from "../../scales/train.js";
+import { binIndexOf } from "../../stats/bin-breaks.js";
 import type { ColumnTable } from "../../table.js";
 import { shouldAggregateOnSemanticTemporalX } from "../frame-stats-shared.js";
 import { positionColumn, xConversionOf, yConversionOf } from "../temporal-position.js";
@@ -36,13 +35,11 @@ export function filterBinRepresentedRows(input: {
   baseRows: readonly number[];
 }): number[] {
   const { frame, table, frameRow, field, baseRows } = input;
-  if (frame.xmin === null || frame.xmax === null) return [...baseRows];
-  const hi = frame.xmax[frameRow]!;
-  const lo = frame.xmin[frameRow]!;
-  const closed = ((frame.binding.layer.params ?? {}) as BarParams).closed ?? "right";
-  const frameGroup = frame.groups[frameRow];
-  const firstInGroup = frameRow === 0 || frame.groups[frameRow - 1] !== frameGroup;
-  const lastInGroup = frameRow === frame.n - 1 || frame.groups[frameRow + 1] !== frameGroup;
+  const cut = frame.binCut;
+  // Without the stat's own cut we cannot reproduce its fuzzed membership.
+  if (frame.xmin === null || frame.xmax === null || cut === undefined || cut === null)
+    return [...baseRows];
+  const gridBin = cut.binIndex[frameRow]!;
   // Edges are scale-space; filter source rows after the same transform.
   const numeric = positionColumn(
     table,
@@ -53,9 +50,9 @@ export function filterBinRepresentedRows(input: {
   return baseRows.filter((row) => {
     const value = numeric[row]!;
     if (!Number.isFinite(value)) return false;
-    return closed === "right"
-      ? value <= hi && (value > lo || (firstInGroup && value >= lo))
-      : value >= lo && (value < hi || (lastInGroup && value <= hi));
+    // Replay the stat's own cut so this fallback path agrees with the indexed
+    // buckets, including inside the fuzz band around a break (#905).
+    return binIndexOf(value, cut.fuzzy, cut.rightClosed) === gridBin;
   });
 }
 

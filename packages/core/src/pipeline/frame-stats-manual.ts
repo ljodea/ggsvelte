@@ -109,6 +109,7 @@ export function buildManualFrame(
             yId: sliceBinIds(full.bin.yId, keep),
           };
     return {
+      binCut: null,
       binding,
       table,
       n: keep.length,

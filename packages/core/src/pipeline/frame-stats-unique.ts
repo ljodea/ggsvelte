@@ -123,6 +123,7 @@ export function buildUniqueFrame(
         };
 
   return {
+    binCut: null,
     binding,
     table,
     n: keep.length,
