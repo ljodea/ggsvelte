@@ -175,6 +175,64 @@ function layersDataOrderToken(
 }
 
 /**
+ * Input bag for {@link dataIdentityEpochToken}. Built by the host (or
+ * {@link buildDataIdentityEpochInput}) so epoch construction stays pure.
+ */
+export type DataIdentityEpochTokenInput = {
+  readonly ready: boolean;
+  readonly dataToken: string;
+  readonly specToken: string;
+  readonly data: unknown;
+  readonly datasets: unknown;
+  readonly layers?: readonly { readonly data?: unknown }[];
+  readonly sourceIdentity: (value: unknown) => string;
+};
+
+/**
+ * Host-side assembly of {@link DataIdentityEpochTokenInput} from plot props.
+ *
+ * Pure: no runes, no assembled PortableSpec. Owns the markLayers-vs-layers-prop
+ * guard (#609), the ready-without-assembled rule, and the explicit-spec content
+ * pick (prop `data` is ignored when `spec` is an object — matches
+ * assemblePortableSpec).
+ */
+export function buildDataIdentityEpochInput(input: {
+  readonly data: unknown;
+  readonly spec: unknown;
+  readonly layers: readonly { readonly data?: unknown }[] | undefined;
+  readonly registryMarkLayers: readonly { readonly data?: unknown }[];
+  readonly sourceIdentity: (value: unknown) => string;
+}): DataIdentityEpochTokenInput {
+  // MUST use markLayers when layers prop is absent: the widened Layer union
+  // has no `.data` at the top level, so reading registry.layers would silently
+  // drop layer-local data from the #609 epoch.
+  const layerDescriptors =
+    input.layers === undefined
+      ? input.registryMarkLayers
+      : input.layers.map((layer) => ({ data: layer.data }));
+  const ready = input.spec !== undefined || layerDescriptors.length > 0;
+  // assemblePortableSpec: explicit `spec` wins and ignores the data prop —
+  // fingerprint the rendered source only.
+  const contentData =
+    input.spec !== undefined && typeof input.spec === "object"
+      ? (input.spec as { data?: unknown }).data
+      : input.data;
+  const contentDatasets =
+    input.spec !== undefined && typeof input.spec === "object"
+      ? (input.spec as { datasets?: unknown }).datasets
+      : undefined;
+  return {
+    ready,
+    dataToken: input.sourceIdentity(input.data),
+    specToken: input.sourceIdentity(input.spec),
+    data: contentData ?? null,
+    datasets: contentDatasets ?? null,
+    layers: layerDescriptors,
+    sourceIdentity: input.sourceIdentity,
+  };
+}
+
+/**
  * Stable data/spec identity token for inspection reconcile epochs.
  *
  * Host supplies:
@@ -189,15 +247,7 @@ function layersDataOrderToken(
  * Ready=false (no plot yet) → `"no-data"`. Complexity: O(R) over row refs,
  * not O(R·F) deep cell serialization.
  */
-export function dataIdentityEpochToken(input: {
-  readonly ready: boolean;
-  readonly dataToken: string;
-  readonly specToken: string;
-  readonly data: unknown;
-  readonly datasets: unknown;
-  readonly layers?: readonly { readonly data?: unknown }[];
-  readonly sourceIdentity: (value: unknown) => string;
-}): string {
+export function dataIdentityEpochToken(input: DataIdentityEpochTokenInput): string {
   if (!input.ready) return "no-data";
   return `${input.dataToken}:${input.specToken}:${dataContentOrderToken(input.data, input.sourceIdentity)}:${datasetsOrderToken(input.datasets, input.sourceIdentity)}:${layersDataOrderToken(input.layers, input.sourceIdentity)}`;
 }
