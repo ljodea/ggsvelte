@@ -37,6 +37,8 @@ import type {
   SfLabelParams,
   SpokeParams,
   StepParams,
+  QqParams,
+  QqLineParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -306,6 +308,18 @@ export interface GeomRugOptions extends RugParams, GeomDataOption {
 
 /** Step-layer sugar options: params (direction hv/vh/mid) plus optional aes. */
 export interface GeomStepOptions extends StepParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Q–Q scatter sugar options (requires aes.sample). */
+export interface GeomQqOptions extends QqParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Q–Q reference line sugar options (requires aes.sample). */
+export interface GeomQqLineOptions extends QqLineParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

@@ -65,6 +65,8 @@ export function styleBinding(
       summary_bin: ["y", "ymin", "ymax"],
       boxplot: ["ymin", "lower", "middle", "upper", "ymax"],
       ecdf: ["ecdf"],
+      qq: ["sample", "theoretical"],
+      qq_line: ["sample", "theoretical"],
     };
     if (!(outputs[stat] ?? []).includes(channel.stat)) {
       throw new PipelineError(

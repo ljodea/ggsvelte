@@ -57,11 +57,11 @@ export function pointsBatch(
   if (collected.kept === 0) return null;
 
   const { positions, rowIndex } = packPointPixels(collected, frame, fx);
-  // point / dotplot / geom_sf point family share this builder.
+  // point / qq / dotplot / geom_sf point family share this builder.
   // SfParams has size/alpha (not shape); DotplotParams adds binwidth/dotsize.
   const geom = binding.layer.geom;
   const params =
-    geom === "point" || geom === "dotplot" || geom === "sf"
+    geom === "point" || geom === "qq" || geom === "dotplot" || geom === "sf"
       ? ((binding.layer.params ?? {}) as {
           size?: number;
           alpha?: number;
@@ -70,7 +70,8 @@ export function pointsBatch(
           dotsize?: number;
         })
       : {};
-  const paramShape = geom === "point" || geom === "dotplot" ? params.shape : undefined;
+  const paramShape =
+    geom === "point" || geom === "qq" || geom === "dotplot" ? params.shape : undefined;
   const literalSize = binding.size.constant;
   const literalAlpha = binding.alpha.constant;
   const literalShape = binding.shape.constant;

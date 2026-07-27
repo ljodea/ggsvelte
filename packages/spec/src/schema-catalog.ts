@@ -41,6 +41,8 @@ export const KNOWN_GEOMS = [
   "spoke",
   "rug",
   "step",
+  "qq",
+  "qq_line",
 ] as const;
 export type GeomName = (typeof KNOWN_GEOMS)[number];
 
@@ -81,6 +83,7 @@ export const CHANNELS = [
   "map_id",
   "angle",
   "radius",
+  "sample",
 ] as const;
 export type ChannelName = (typeof CHANNELS)[number];
 
@@ -107,6 +110,8 @@ export const KNOWN_STATS = [
   "ellipse",
   "sf",
   "sf_coordinates",
+  "qq",
+  "qq_line",
 ] as const;
 export type StatName = (typeof KNOWN_STATS)[number];
 
@@ -161,4 +166,6 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   spoke: { stat: "identity", position: "identity" },
   rug: { stat: "identity", position: "identity" },
   step: { stat: "identity", position: "identity" },
+  qq: { stat: "qq", position: "identity" },
+  qq_line: { stat: "qq_line", position: "identity" },
 };

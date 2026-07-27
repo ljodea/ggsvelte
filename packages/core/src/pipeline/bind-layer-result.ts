@@ -38,6 +38,7 @@ export function makeLayerBinding(input: {
   labelField: string | null;
   labelConstant: string | null;
   weightField: string | null;
+  sampleField: string | null;
   zField: string | null;
   mapIdField: string | null;
   ruleForm: LayerBinding["ruleForm"];
@@ -75,6 +76,7 @@ export function makeLayerBinding(input: {
     labelField: input.labelField,
     labelConstant: input.labelConstant,
     weightField: input.weightField,
+    sampleField: input.sampleField,
     ruleForm: input.ruleForm,
   };
 }
