@@ -56,6 +56,8 @@ import type {
   GeomBlankOptions,
   GeomSpokeOptions,
   GeomStepOptions,
+  GeomQqOptions,
+  GeomQqLineOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,
@@ -327,6 +329,16 @@ export class GGBuilderCore {
    */
   geomSegment(options: GeomSegmentOptions = {}): GGBuilder {
     return this.layer(layerFrom("segment", options));
+  }
+
+  /** Sugar for .layer({ geom: 'qq', ... }) — Q–Q scatter (requires aes.sample). */
+  geomQq(options: GeomQqOptions = {}): GGBuilder {
+    return this.layer(layerFrom("qq", options));
+  }
+
+  /** Sugar for .layer({ geom: 'qq_line', ... }) — Q–Q reference line. */
+  geomQqLine(options: GeomQqLineOptions = {}): GGBuilder {
+    return this.layer(layerFrom("qq_line", options));
   }
 
   /**

@@ -632,6 +632,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomQqLineOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomQqOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomQuantileOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1056,6 +1064,38 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "QqLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "QqLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "QqLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "QqLineLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "QqLineLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "QqLineLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "QqLineParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "QqParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "QuantileLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1261,6 +1301,14 @@
           "lifecycle": "experimental"
         },
         "RuntimePointLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeQqLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeQqLineLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4683,6 +4731,14 @@
         },
         "GeomProps": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomQq": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomQqLine": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "GeomQuantile": {

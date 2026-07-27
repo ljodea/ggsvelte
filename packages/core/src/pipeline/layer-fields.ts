@@ -59,7 +59,9 @@ export function resolveLayerFields(
         stat === "manual" ||
         stat === "contour" ||
         stat === "density_2d" ||
-        stat === "density_2d_filled"
+        stat === "density_2d_filled" ||
+        stat === "qq" ||
+        stat === "qq_line"
       ) {
         push("y", "y", "stat");
       }
@@ -86,6 +88,7 @@ export function resolveLayerFields(
     }
     push("label", binding.labelField);
     push("weight", binding.weightField);
+    push("sample", binding.sampleField);
     return fields;
   });
 }

@@ -132,6 +132,8 @@ export const SfLabelLayerSchema = SpecModule.Import("SfLabelLayer");
 export const SpokeLayerSchema = SpecModule.Import("SpokeLayer");
 export const RugLayerSchema = SpecModule.Import("RugLayer");
 export const StepLayerSchema = SpecModule.Import("StepLayer");
+export const QqLayerSchema = SpecModule.Import("QqLayer");
+export const QqLineLayerSchema = SpecModule.Import("QqLineLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const HlineLayerSchema = SpecModule.Import("HlineLayer");
 export const VlineLayerSchema = SpecModule.Import("VlineLayer");
@@ -250,6 +252,8 @@ export type SfTextParams = SpecType<"SfTextParams">;
 export type SfLabelParams = SpecType<"SfLabelParams">;
 /** Rug layer params (sides, length, stroke styling). */
 export type RugParams = SpecType<"RugParams">;
+export type QqParams = SpecType<"QqParams">;
+export type QqLineParams = SpecType<"QqLineParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
@@ -370,6 +374,8 @@ export type SpokeLayer = LayerWithDataRef<SpecType<"SpokeLayer">>;
 export type RugLayer = LayerWithDataRef<SpecType<"RugLayer">>;
 /** A step-line layer (ggplot2 geom_step). */
 export type StepLayer = LayerWithDataRef<SpecType<"StepLayer">>;
+export type QqLayer = LayerWithDataRef<SpecType<"QqLayer">>;
+export type QqLineLayer = LayerWithDataRef<SpecType<"QqLineLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -409,7 +415,9 @@ export type LayerSpec =
   | ErrorbarLayer
   | RectLayer
   | TileLayer
-  | RasterLayer;
+  | RasterLayer
+  | QqLayer
+  | QqLineLayer;
 /** Stackable position adjustment names. */
 export type StackablePosition = SpecType<"StackablePosition">;
 /** Position adjustments accepted by point layers. */

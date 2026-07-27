@@ -37,6 +37,7 @@ export function dispatchGeometryBatch(
 ): GeometryBatch[] {
   switch (frame.binding.layer.geom) {
     case "point":
+    case "qq":
       return single(pointsBatch(frame, fx, color, styles, warnings));
     case "dotplot":
       // Pass fill so histodot dots honor aes.fill (ggplot2 fill grouping; #900).
@@ -51,8 +52,9 @@ export function dispatchGeometryBatch(
       );
     }
     case "function":
+    case "qq_line":
     case "quantile":
-      // Fitted QR grids are already sorted by x; treat like line.
+      // Fitted QR grids / QQ line endpoints are already ordered; treat like line.
       return single(lineBatch(frame, fx, color, styles, warnings));
     case "path":
       // Data-order polylines (ggplot2 geom_path); no x-sort (#788).

@@ -59,6 +59,7 @@ export function lineBatch(
   // Keep geom checks inline so TS narrows layer.params (line/path vs quantile/function).
   const params =
     binding.layer.geom === "line" ||
+    binding.layer.geom === "qq_line" ||
     binding.layer.geom === "path" ||
     binding.layer.geom === "step" ||
     binding.layer.geom === "quantile" ||

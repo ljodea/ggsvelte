@@ -86,6 +86,8 @@ export type {
   CurveLayerInput,
   RugLayerInput,
   StepLayerInput,
+  QqLayerInput,
+  QqLineLayerInput,
   LayerInput,
   LineLayerInput,
   PathLayerInput,
