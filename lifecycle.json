@@ -3359,6 +3359,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "DEFAULT_FONT_STACK": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "DEFAULT_LAYOUT_THEME": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3549,6 +3553,10 @@
         },
         "MetricsTable": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "MetricsTableMeasurer": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "NamedData": {
