@@ -176,7 +176,7 @@ function shell(geom: GeomName): ShellSpec {
   };
 }
 
-export const SHELL_MANIFEST: readonly ShellSpec[] = EXPORT_ORDER.map(shell);
+export const SHELL_MANIFEST: readonly ShellSpec[] = EXPORT_ORDER.map((geom) => shell(geom));
 
 // ---------------------------------------------------------------------------
 // Paths + markers
