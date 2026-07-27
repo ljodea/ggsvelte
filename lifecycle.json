@@ -1400,6 +1400,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "SizeSequentialStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SizeTemporalNumericStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "SmoothLayer": {
           "kind": "type",
           "lifecycle": "experimental"
