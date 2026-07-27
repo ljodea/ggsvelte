@@ -9,7 +9,7 @@
    */
   import { base } from "$app/paths";
   import { kyotoSakura } from "@ggsvelte/svelte/data";
-  import { onMount, type Component } from "svelte";
+  import { onMount } from "svelte";
 
   import {
     foldSakura,
@@ -46,13 +46,10 @@
    */
   let narrowChart = $state(true);
   let finishedChart = $state<HTMLElement>();
-  /** Live plot component — dynamically imported after first paint (#972). */
-  let LivePlot = $state<Component<{
-    spec: ReturnType<typeof foldSakura>["spec"];
-    key?: string;
-    inspect?: ReturnType<typeof foldSakura>["inspect"];
-    ariaLabel?: string;
-  }> | null>(null);
+  /** Live plot component — dynamically imported when near the viewport (#972). */
+  let LivePlot = $state<null | (typeof import("@ggsvelte/svelte"))["GGPlot"]>(
+    null,
+  );
 
   /**
    * Fold only when the live plot is mounted. Computing the 838-point spec
