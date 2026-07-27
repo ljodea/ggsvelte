@@ -3359,10 +3359,6 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "DEFAULT_FONT_STACK": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "DEFAULT_LAYOUT_THEME": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3553,10 +3549,6 @@
         },
         "MetricsTable": {
           "kind": "type",
-          "lifecycle": "experimental"
-        },
-        "MetricsTableMeasurer": {
-          "kind": "value",
           "lifecycle": "experimental"
         },
         "NamedData": {
@@ -4075,6 +4067,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "humanizeFieldTitle": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "inferDiscreteness": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4252,6 +4248,10 @@
           "lifecycle": "experimental"
         },
         "serializeScaleState": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "spaceFieldName": {
           "kind": "value",
           "lifecycle": "experimental"
         },
