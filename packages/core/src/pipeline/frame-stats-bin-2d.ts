@@ -4,10 +4,9 @@
 import type { ColumnTable } from "../table.js";
 
 import { statBin2d } from "../stats/bin-2d.js";
-import type { CellValue } from "../table.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import { makeColumnOf, styleColumns } from "./frame-stats-shared.js";
+import { colorColumns, makeColumnOf, styleColumns } from "./frame-stats-shared.js";
 import { positionColumn } from "./temporal-position.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { NO_ROW } from "./types.js";
@@ -53,16 +52,6 @@ export function buildBin2dFrame(
   };
   const col = columnOf(result, null);
 
-  // fill after_stat: prefer statColumn (default count), else carried field.
-  let fillValues: readonly CellValue[] | null = null;
-  const fillStat = binding.fill.statColumn ?? null;
-  if (fillStat === null) {
-    fillValues = col(binding.fill.field);
-  } else {
-    const series = columns[fillStat] ?? result.count;
-    fillValues = Array.from(series, (v) => v as CellValue);
-  }
-
   return {
     binding,
     table,
@@ -75,8 +64,8 @@ export function buildBin2dFrame(
     inputGroups: groups,
     inputSourceRows: null,
     rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
-    colorValues: col(binding.color.field),
-    fillValues,
+    // after_stat color/fill (default fill = count; #799 / #953).
+    ...colorColumns(binding, col, columns),
     ...styleColumns(binding, col, columns),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),

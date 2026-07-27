@@ -6,7 +6,7 @@ import type { ColumnTable } from "../table.js";
 import { scaleTransform } from "../scales/transform.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import { makeColumnOf, styleColumns } from "./frame-stats-shared.js";
+import { colorColumns, makeColumnOf, styleColumns } from "./frame-stats-shared.js";
 import { transformedZeroBaseline } from "./position-baseline.js";
 import { forwardMeasureOnce } from "./stat-measure-transform.js";
 import { positionColumn } from "./temporal-position.js";
@@ -60,8 +60,7 @@ export function buildDensityFrame(
     inputGroups: groups,
     inputSourceRows: null,
     rowIndex: Uint32Array.from({ length: outN }, () => NO_ROW),
-    colorValues: col(binding.color.field),
-    fillValues: col(binding.fill.field),
+    ...colorColumns(binding, col, columns),
     ...styleColumns(binding, col, columns),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),

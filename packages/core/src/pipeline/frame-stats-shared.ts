@@ -4,7 +4,7 @@
 import type { CellValue } from "../table.js";
 
 import type { PositionConversionContext } from "./temporal-position.js";
-import type { LayerBinding, LayerFrame } from "./types.js";
+import type { ColorBinding, LayerBinding, LayerFrame } from "./types.js";
 
 export type CarriedColumnOf = (
   result: { carried: Record<string, CellValue[]> },
@@ -14,6 +14,29 @@ export type CarriedColumnOf = (
 export function makeColumnOf(binding: LayerBinding): CarriedColumnOf {
   return (result, x) => (field) =>
     field === null ? null : field === binding.xField ? x : (result.carried[field] ?? null);
+}
+
+/**
+ * Resolve color/fill from a mapped field or an after_stat computed column (#953).
+ * Float64 after-stat series become CellValue arrays for scale training.
+ */
+export function colorColumns(
+  binding: LayerBinding,
+  columnOf: (field: string | null) => readonly CellValue[] | null,
+  computed: Readonly<Record<string, Float64Array | readonly CellValue[]>> = {},
+): Pick<LayerFrame, "colorValues" | "fillValues"> {
+  const valueOf = (channel: ColorBinding): readonly CellValue[] | null => {
+    const stat = channel.statColumn ?? null;
+    if (stat !== null) {
+      const col = computed[stat];
+      return col === undefined ? null : Array.from(col);
+    }
+    return columnOf(channel.field);
+  };
+  return {
+    colorValues: valueOf(binding.color),
+    fillValues: valueOf(binding.fill),
+  };
 }
 
 /** Resolve source/carried and after-stat style columns through one contract. */

@@ -1,11 +1,9 @@
 /**
  * after_stat color/fill diagnostics (#915).
  *
- * density_2d / density_2d_filled and bin_hex resolve after_stat colour into
- * frame color/fill values. Every other frame builds colour from the mapped
- * *field* alone; an `{ stat }` colour mapping there is accepted only when the
- * stat publishes the column, then dropped without a painted value — so those
- * stats emit `stat-channel-unsupported` when the column is not published.
+ * Supported stats (bin, count, density, density_2d, bin_hex, …) publish
+ * columns in STAT_COLOR_COLUMNS and resolve them via colorColumns (#953).
+ * Unsupported stats still emit `stat-channel-unsupported`.
  */
 import { describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
@@ -28,18 +26,14 @@ function cloud(n: number): { x: number[]; y: number[] } {
 }
 
 describe("after_stat color/fill (#915)", () => {
-  it("warns when a stat does not publish the after_stat fill column", () => {
+  it("stays silent for geom_histogram fill = after_stat(count) (#953)", () => {
     const model = runPipeline(
       gg({ x: [1, 2, 2, 3, 3, 3] }, aes({ x: "x", fill: { stat: "count" } }))
         .geomHistogram({ binwidth: 1, boundary: 0 })
         .spec(),
       size,
     );
-    const messages = statChannelWarnings(model.warnings);
-    expect(messages.length).toBe(1);
-    expect(messages[0]).toContain("fill");
-    expect(messages[0]).toContain("count");
-    // Diagnostic only — the layer still renders exactly as before.
+    expect(statChannelWarnings(model.warnings)).toEqual([]);
     expect(model.scene.batches.length).toBeGreaterThan(0);
   });
 

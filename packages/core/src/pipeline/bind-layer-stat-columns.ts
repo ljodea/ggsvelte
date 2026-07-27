@@ -28,16 +28,18 @@ export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
 };
 
 /**
- * color/fill `{ stat }` columns each stat exposes. Frame builders that resolve
- * after_stat colour: density_2d / density_2d_filled (`frame-stats-density-2d.ts`)
- * and bin_hex (`frame-stats-bin-hex.ts` fill + color). Every other frame builds
- * colour from the mapped field alone, so an `{ stat }` mapping there is dropped
- * (#915). Stats absent from this map publish nothing for colour.
+ * color/fill `{ stat }` columns each stat exposes. Frame builders resolve these
+ * via `colorColumns` in `frame-stats-shared.ts` (#953). Stats absent from this
+ * map publish nothing for colour — bind emits `stat-channel-unsupported` (#915).
  */
 export const STAT_COLOR_COLUMNS: Record<string, readonly string[]> = {
+  // bin / histogram: count + density family (ggplot2 after_stat on fill/color).
+  bin: ["count", "density", "ncount", "ndensity"],
   bin_2d: ["count", "density", "ncount", "ndensity"],
-  density_2d: ["level", "density"],
-  density_2d_filled: ["level", "density"],
   // bin_hex fill defaults to after_stat count (ggplot2 geom_hex; #800).
   bin_hex: ["count", "density", "ncount", "ndensity"],
+  count: ["count"],
+  density: ["density", "count", "scaled", "ndensity"],
+  density_2d: ["level", "density"],
+  density_2d_filled: ["level", "density"],
 };
