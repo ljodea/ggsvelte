@@ -134,9 +134,8 @@ test("desktop docs shell exposes chapter, breadcrumb, contents, and sequence nav
 });
 
 test("mobile header and docs navigation are explicit, reachable controls", async ({ page }) => {
-  // Dialog open/close + viewport resize can exceed the default 30s budget under
-  // cold static-server load (repeated flake on CI journeys).
-  test.setTimeout(60_000);
+  // Lives in the journeys Playwright project (60s budget, #944). Prefer
+  // waitUntil/visibility waits over per-test setTimeout.
   await page.setViewportSize({ width: 375, height: 760 });
   await page.goto(GUIDE_ROUTE, { waitUntil: "domcontentloaded" });
 
@@ -208,10 +207,7 @@ test("appearance control remains usable when browser storage is unavailable", as
 });
 
 test("route metadata is canonical, singular, and aliases are noindex", async ({ page }) => {
-  // Search index is lazy-loaded on first open (#948). Pre-fix CI sat at ~30s with
-  // the index in every navigation; keep a modest raised budget until a few green
-  // journeys runs confirm the default 30s is safe again.
-  test.setTimeout(45_000);
+  // Search index is lazy-loaded (#948); journeys project budget is 60s (#944).
   await page.goto(GUIDE_ROUTE);
   await expect(page).toHaveTitle("Getting started — ggsvelte");
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
