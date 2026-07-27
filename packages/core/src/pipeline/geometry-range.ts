@@ -161,6 +161,9 @@ function midPointsBatch(
   styles: ResolvedStyleScales,
 ): PointsBatch | null {
   if (frame.yNumeric === null && frame.yValues === null) return null;
+  // Same band/ymin/ymax gate as linerangeBatch — continuous interval only.
+  if (frame.ymin === null || frame.ymax === null || fx.yScale.type === "band") return null;
+  const yScale = fx.yScale;
   const { binding, n } = frame;
   const params = (binding.layer.params ?? {}) as PointrangeParams;
   const wantsColors =
@@ -177,8 +180,8 @@ function midPointsBatch(
     const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
     // Match linerangeBatch: drop when interval bounds are missing so a
     // pointrange never draws a floating mid point without a stem.
-    const t0 = frame.ymin !== null ? fx.yScale.normalizeTransformed(frame.ymin[row]!) : undefined;
-    const t1 = frame.ymax !== null ? fx.yScale.normalizeTransformed(frame.ymax[row]!) : undefined;
+    const t0 = yScale.normalizeTransformed(frame.ymin[row]!);
+    const t1 = yScale.normalizeTransformed(frame.ymax[row]!);
     if (
       Number.isNaN(tx) ||
       Number.isNaN(ty) ||
