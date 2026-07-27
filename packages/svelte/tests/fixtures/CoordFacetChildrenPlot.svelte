@@ -25,8 +25,6 @@
   import type { LayerRegistry } from "../../src/lib/geoms/registry.svelte.js";
 
   const {
-    coordProp,
-    facetProp,
     useCoordFlip = false,
     useCoordFixed = false,
     useCoordTransform = false,
@@ -58,8 +56,6 @@
     onrender,
     ondiagnostic,
   }: {
-    coordProp?: CoordSpec | "flip";
-    facetProp?: FacetInput;
     useCoordFlip?: boolean;
     useCoordFixed?: boolean;
     useCoordTransform?: boolean;
@@ -125,8 +121,6 @@
     data={rows}
     aes={{ x: "x", y: "y" }}
     layers={layersProp}
-    coord={coordProp}
-    facet={facetProp}
     width={480}
     height={320}
     {onrender}
@@ -143,8 +137,6 @@
   <GGPlot
     data={rows}
     aes={useColGeom ? { x: "cat", y: "v" } : { x: "x", y: "y" }}
-    coord={coordProp}
-    facet={facetProp}
     width={480}
     height={320}
     {onrender}

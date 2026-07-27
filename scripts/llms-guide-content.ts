@@ -2078,21 +2078,35 @@ codes share one prose source in \`@ggsvelte/spec\`. \`PIPELINE_ERROR_CATALOG\`
 is also exported from \`@ggsvelte/spec\` (and still re-exported from
 \`@ggsvelte/core\`).
 
+## 0.12 to 0.13
+
+### Grammar props removed from \`<GGPlot>\`
+
+The seven grammar props deprecated in 0.11.0 — \`theme\`, \`scales\`, \`coord\`,
+\`facet\`, \`labs\`, \`guides\`, and \`legend\` — are **removed** from
+\`<GGPlot>\` in 0.13.0. Compose them only as declaration-only children. The
+\`ggsvelte-codemod\` still rewrites old source that uses the prop form.
+
+\`LayerDescriptor\` is removed; use \`MarkLayerDescriptor\`.
+
 ## 0.10 to 0.11
 
 ### Compose the theme as a child layer
 
-The \`theme\` prop on \`<GGPlot>\` is deprecated since 0.11.0 (removable in
-0.13.0). Compose the theme as a declaration-only child instead — named shells
+The \`theme\` prop on \`<GGPlot>\` was deprecated in 0.11.0 and **removed in
+0.13.0**. Compose the theme as a declaration-only child — named shells
 for every built-in theme, or the generic \`<Theme>\` escape hatch for dynamic
-names and role overrides. When both a prop and a child are present, the child
-wins.
+names and role overrides.
 
 Before:
 
 \`\`\`svelte fragment
 <script lang="ts">
   import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+
+  // Historical pre-0.13 GGPlot grammar prop (removed). Cast for typecheck.
+  /* oxlint-disable-next-line typescript/no-explicit-any -- intentional pre-removal fixture */
+  const Plot = GGPlot as any;
 
   const rows = [
     { x: 1, y: 2 },
@@ -2101,9 +2115,9 @@ Before:
 </script>
 
 <!-- Before 0.11: theme was a top-level GGPlot prop. -->
-<GGPlot data={rows} aes={{ x: "x", y: "y" }} theme="dark">
+<Plot data={rows} aes={{ x: "x", y: "y" }} theme="dark">
   <GeomPoint />
-</GGPlot>
+</Plot>
 \`\`\`
 
 After:
@@ -2125,18 +2139,16 @@ After:
 </GGPlot>
 \`\`\`
 
-\`LayerDescriptor\` is also renamed to \`MarkLayerDescriptor\` (the old name
-remains a type-only alias until 0.13.0).
+\`LayerDescriptor\` was renamed to \`MarkLayerDescriptor\` in 0.11.0 and the
+alias was removed in 0.13.0.
 
 ### Compose scales as child layers
 
-The \`scales\` prop on \`<GGPlot>\` is deprecated since 0.11.0 (removable in
-0.13.0). Compose scales as declaration-only children instead — named shells
+The \`scales\` prop on \`<GGPlot>\` was deprecated in 0.11.0 and **removed in
+0.13.0**. Compose scales as declaration-only children — named shells
 for every color/fill helper (\`<ScaleColorDiscrete/>\`, \`<ScaleFillManual/>\`,
 British \`Colour\` aliases, …), or the generic \`<Scale value={…}>\` escape hatch
-for raw fragments, computed scales, and families without shells yet
-(position/style ship in a later slice). When both a prop and a child configure
-the same channel, the child wins. Two children on one channel emit a
+for raw fragments and computed scales. Two children on one channel emit a
 \`DUPLICATE_SCALE_CHANNEL\` advisory (last child still wins).
 
 Named shells route through the matching helpers, so migrating a raw fragment
@@ -2155,6 +2167,10 @@ Before:
     scaleColorDiscrete,
   } from "@ggsvelte/svelte";
 
+  // Historical pre-0.13 GGPlot grammar prop (removed). Cast for typecheck.
+  /* oxlint-disable-next-line typescript/no-explicit-any -- intentional pre-removal fixture */
+  const Plot = GGPlot as any;
+
   const rows = [
     { x: 1, y: 2, c: "a" },
     { x: 2, y: 4, c: "b" },
@@ -2162,13 +2178,13 @@ Before:
 </script>
 
 <!-- Before 0.11: scales was a top-level GGPlot prop. -->
-<GGPlot
+<Plot
   data={rows}
   aes={{ x: "x", y: "y", color: "c" }}
   scales={scaleColorDiscrete({ scheme: "colorblind" })}
 >
   <GeomPoint />
-</GGPlot>
+</Plot>
 \`\`\`
 
 After:
@@ -2200,42 +2216,38 @@ After:
 
 ### Compose coord as a child layer
 
-The \`coord\` prop on \`<GGPlot>\` is deprecated since 0.11.0 (removable in
-0.13.0). Compose the coordinate system as a declaration-only child instead —
+The \`coord\` prop on \`<GGPlot>\` was deprecated in 0.11.0 and **removed in
+0.13.0**. Compose the coordinate system as a declaration-only child —
 \`<CoordFlip/>\`, \`<CoordFixed/>\` / \`<CoordEqual/>\`, \`<CoordTransform/>\`,
-\`<CoordCartesian/>\`, or the generic \`<Coord value={…}>\` escape hatch. When
-both a prop and a child are present, the child fully replaces the prop
-(REPLACE family). Two coord children emit a \`DUPLICATE_PLOT_LAYER\` advisory
-(last child still wins).
+\`<CoordCartesian/>\`, or the generic \`<Coord value={…}>\` escape hatch. Two
+coord children emit a \`DUPLICATE_PLOT_LAYER\` advisory (last child still wins).
 
 ### Compose facet as a child layer
 
-The \`facet\` prop on \`<GGPlot>\` is deprecated since 0.11.0 (removable in
-0.13.0). Compose facets as declaration-only children instead — \`<FacetWrap
+The \`facet\` prop on \`<GGPlot>\` was deprecated in 0.11.0 and **removed in
+0.13.0**. Compose facets as declaration-only children — \`<FacetWrap
 field="g"/>\`, \`<FacetGrid rows="a" cols="b"/>\`, or the complete
 \`<Facet wrap={…} />\` surface. Keep \`strip\` nested
-(\`strip={{position,show}}\`). When both a prop and a child are present, the
-child fully replaces the prop (REPLACE family). Two facet children emit a
+(\`strip={{position,show}}\`). Two facet children emit a
 \`DUPLICATE_PLOT_LAYER\` advisory (last child still wins). Bare \`<Facet/>\`
 with no wrap/rows/cols fails validation (\`facet-form-missing\`).
 
 ### Compose labs as a child layer
 
-The \`labs\` prop on \`<GGPlot>\` is deprecated since 0.11.0 (removable in
-0.13.0). Compose labels as a declaration-only child instead —
+The \`labs\` prop on \`<GGPlot>\` was deprecated in 0.11.0 and **removed in
+0.13.0**. Compose labels as a declaration-only child —
 \`<Labs title="Sales" subtitle="FY25" x="Quarter" color="Region"/>\`. There is
 no \`<Labs value={…}>\` escape hatch because Labs is a flat bag of strings:
 \`<Labs {...computed} />\` already covers the computed case.
 
-labs is a MERGE family, so a child adds to (rather than replaces) the prop and
-its siblings: two \`<Labs/>\` children setting different keys both survive. Two
-children setting the SAME key emit a \`DUPLICATE_MERGE_KEY\` advisory and the
-later one wins.
+labs is a MERGE family: two \`<Labs/>\` children setting different keys both
+survive. Two children setting the SAME key emit a \`DUPLICATE_MERGE_KEY\`
+advisory and the later one wins.
 
 ### Compose guides as child layers
 
-The \`guides\` prop on \`<GGPlot>\` is deprecated since 0.11.0 (removable in
-0.13.0). Guides are keyed by aesthetic, so the child form is one shell per
+The \`guides\` prop on \`<GGPlot>\` was deprecated in 0.11.0 and **removed in
+0.13.0**. Guides are keyed by aesthetic, so the child form is one shell per
 guide TYPE taking a \`channel\` prop — the aesthetic is a key, never part of the
 component name: \`<GuideAxis channel="x" showTicks={false}/>\`,
 \`<GuideLegend channel="color" position="bottom"/>\`,
@@ -2244,18 +2256,17 @@ component name: \`<GuideAxis channel="x" showTicks={false}/>\`,
 guide bags.
 
 guides is a MERGE family keyed by channel, but the value AT a channel is
-replaced whole — a child never field-merges into a prop's guide object. Two
-guide children on one channel emit a \`DUPLICATE_MERGE_KEY\` advisory (last
-child still wins). A top-level guide child still wins over a scale-local
-\`guide\` on the same channel, exactly as the \`guides\` prop did.
+replaced whole. Two guide children on one channel emit a
+\`DUPLICATE_MERGE_KEY\` advisory (last child still wins). A top-level guide
+child still wins over a scale-local \`guide\` on the same channel.
 
 The shells carry no scale knowledge and do not guess: \`<GuideColorbar/>\` over
 a discrete color scale fails loudly rather than silently degrading to a legend.
 
 ### Compose legend as a child layer
 
-The \`legend\` prop on \`<GGPlot>\` is deprecated since 0.11.0 (removable in
-0.13.0). Compose it as \`<Legend order="sorted"/>\`.
+The \`legend\` prop on \`<GGPlot>\` was deprecated in 0.11.0 and **removed in
+0.13.0**. Compose it as \`<Legend order="sorted"/>\`.
 
 \`<Legend order>\` is the plot-wide entry-SORT enum
 (\`"stable-domain"\` | \`"present-first-seen"\` | \`"sorted"\`); ordering never
@@ -2380,6 +2391,10 @@ through identity:
 <script lang="ts">
   import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
 
+  // Historical pre-0.13 GGPlot grammar prop (removed). Cast for typecheck.
+  /* oxlint-disable-next-line typescript/no-explicit-any -- intentional pre-removal fixture */
+  const Plot = GGPlot as any;
+
   // Before 0.8, applications precomputed symbol radii.
   const rows = [
     { x: 1, y: 2, radius: 2 },
@@ -2388,13 +2403,13 @@ through identity:
   ];
 </script>
 
-<GGPlot
+<Plot
   data={rows}
   aes={{ x: "x", y: "y", size: "radius" }}
   scales={{ size: { type: "identity" } }}
 >
   <GeomPoint />
-</GGPlot>
+</Plot>
 \`\`\`
 
 In 0.8, keep the source measure and let the scale interpolate in symbol area:
@@ -2404,7 +2419,7 @@ In 0.8, keep the source measure and let the scale interpolate in symbol area:
   import {
     GeomPoint,
     GGPlot,
-    scaleSizeContinuous,
+    ScaleSizeContinuous,
   } from "@ggsvelte/svelte";
 
   // In 0.8, map the semantic measure and let size interpolate in symbol area.
@@ -2415,11 +2430,8 @@ In 0.8, keep the source measure and let the scale interpolate in symbol area:
   ];
 </script>
 
-<GGPlot
-  data={rows}
-  aes={{ x: "x", y: "y", size: "magnitude" }}
-  scales={scaleSizeContinuous({ range: [2, 9] })}
->
+<GGPlot data={rows} aes={{ x: "x", y: "y", size: "magnitude" }}>
+  <ScaleSizeContinuous range={[2, 9]} />
   <GeomPoint />
 </GGPlot>
 \`\`\`
@@ -2464,7 +2476,7 @@ In 0.8, declare the alternate presentation directly:
 
 \`\`\`svelte fragment
 <script lang="ts">
-  import { GGPlot, GeomPoint, guideLegend } from "@ggsvelte/svelte";
+  import { GGPlot, GeomPoint, GuideLegend } from "@ggsvelte/svelte";
 
   // Since 0.8, guide presentation is portable and responsive without changing scale math.
   const rows = [
@@ -2473,13 +2485,8 @@ In 0.8, declare the alternate presentation directly:
   ];
 </script>
 
-<GGPlot
-  data={rows}
-  aes={{ x: "x", y: "y", color: "region" }}
-  guides={{
-    color: guideLegend({ position: "bottom", direction: "horizontal" }),
-  }}
->
+<GGPlot data={rows} aes={{ x: "x", y: "y", color: "region" }}>
+  <GuideLegend channel="color" position="bottom" direction="horizontal" />
   <GeomPoint />
 </GGPlot>
 \`\`\`
@@ -2524,7 +2531,7 @@ Since 0.9, remove that wrapper workaround and author the coordinate directly:
 
 \`\`\`svelte fragment
 <script lang="ts">
-  import { coordFixed, GGPlot, GeomLine } from "@ggsvelte/svelte";
+  import { CoordFixed, GGPlot, GeomLine } from "@ggsvelte/svelte";
 
   // Since 0.9, constrain the measured data rectangle instead of the outer box.
   const circle = [
@@ -2536,7 +2543,8 @@ Since 0.9, remove that wrapper workaround and author the coordinate directly:
   ];
 </script>
 
-<GGPlot data={circle} aes={{ x: "x", y: "y" }} coord={coordFixed()}>
+<GGPlot data={circle} aes={{ x: "x", y: "y" }}>
+  <CoordFixed />
   <GeomLine />
 </GGPlot>
 \`\`\`
@@ -2569,6 +2577,10 @@ Before 0.7, an explicit continuous color domain clamped implicitly:
 <script lang="ts">
   import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
 
+  // Historical pre-0.13 GGPlot grammar prop (removed). Cast for typecheck.
+  /* oxlint-disable-next-line typescript/no-explicit-any -- intentional pre-removal fixture */
+  const Plot = GGPlot as any;
+
   const rows = [
     { x: 1, y: 2, score: -10 },
     { x: 2, y: 3, score: 50 },
@@ -2576,13 +2588,13 @@ Before 0.7, an explicit continuous color domain clamped implicitly:
   ];
 </script>
 
-<GGPlot
+<Plot
   data={rows}
   aes={{ x: "x", y: "y", color: "score" }}
   scales={{ color: { type: "sequential", domain: [0, 100] } }}
 >
   <GeomPoint />
-</GGPlot>
+</Plot>
 \`\`\`
 
 In 0.7, opt into clamping when it is the intended encoding:
@@ -2592,7 +2604,7 @@ In 0.7, opt into clamping when it is the intended encoding:
   import {
     GeomPoint,
     GGPlot,
-    scaleColorContinuous,
+    ScaleColorContinuous,
   } from "@ggsvelte/svelte";
 
   const rows = [
@@ -2602,14 +2614,8 @@ In 0.7, opt into clamping when it is the intended encoding:
   ];
 </script>
 
-<GGPlot
-  data={rows}
-  aes={{ x: "x", y: "y", color: "score" }}
-  scales={scaleColorContinuous({
-    domain: [0, 100],
-    oob: "squish",
-  })}
->
+<GGPlot data={rows} aes={{ x: "x", y: "y", color: "score" }}>
+  <ScaleColorContinuous domain={[0, 100]} oob="squish" />
   <GeomPoint />
 </GGPlot>
 \`\`\`
@@ -2640,6 +2646,10 @@ Before 0.6, this fit used the old late log projection:
 <script lang="ts">
   import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
 
+  // Historical pre-0.13 GGPlot grammar prop (removed). Cast for typecheck.
+  /* oxlint-disable-next-line typescript/no-explicit-any -- intentional pre-removal fixture */
+  const Plot = GGPlot as any;
+
   const rows = [
     { latency: 1, throughput: 8 },
     { latency: 10, throughput: 18 },
@@ -2648,14 +2658,14 @@ Before 0.6, this fit used the old late log projection:
   ];
 </script>
 
-<GGPlot
+<Plot
   data={rows}
   aes={{ x: "latency", y: "throughput" }}
   scales={{ x: { type: "log", domain: [1, 1000] } }}
 >
   <GeomPoint />
   <GeomSmooth method="lm" />
-</GGPlot>
+</Plot>
 \`\`\`
 
 In 0.6, make the pre-stat transform and limit policy explicit, then compare the
@@ -2669,7 +2679,7 @@ multiplicative display expansion, including pinned domains.
     GeomPoint,
     GeomSmooth,
     GGPlot,
-    scaleXLog10,
+    ScaleXLog10,
   } from "@ggsvelte/svelte";
 
   const rows = [
@@ -2680,16 +2690,13 @@ multiplicative display expansion, including pinned domains.
   ];
 </script>
 
-<GGPlot
-  data={rows}
-  aes={{ x: "latency", y: "throughput" }}
-  scales={scaleXLog10({
-    domain: [1, 1000],
-    oob: "censor",
-    expand: { mult: 0, add: 0 },
-    nice: false,
-  })}
->
+<GGPlot data={rows} aes={{ x: "latency", y: "throughput" }}>
+  <ScaleXLog10
+    domain={[1, 1000]}
+    oob="censor"
+    expand={{ mult: 0, add: 0 }}
+    nice={false}
+  />
   <GeomPoint />
   <GeomSmooth method="lm" />
 </GGPlot>

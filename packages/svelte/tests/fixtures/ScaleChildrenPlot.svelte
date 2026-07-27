@@ -19,7 +19,6 @@
   import type { LayerRegistry } from "../../src/lib/geoms/registry.svelte.js";
 
   const {
-    scalesProp,
     scaleValue,
     colorScheme,
     useScaleColorDiscrete = false,
@@ -33,7 +32,6 @@
     onrender,
     ondiagnostic,
   }: {
-    scalesProp?: Scales;
     scaleValue?: Scales;
     colorScheme?: string;
     useScaleColorDiscrete?: boolean;
@@ -79,7 +77,6 @@
     data={rows}
     aes={{ x: "x", y: "y", color: "c" }}
     layers={layersProp}
-    scales={scalesProp}
     width={480}
     height={320}
     {onrender}
@@ -93,7 +90,6 @@
   <GGPlot
     data={rows}
     aes={{ x: "x", y: "y", color: "c", fill: "f" }}
-    scales={scalesProp}
     width={480}
     height={320}
     {onrender}

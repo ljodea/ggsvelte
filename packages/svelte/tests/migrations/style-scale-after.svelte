@@ -2,7 +2,7 @@
   import {
     GeomPoint,
     GGPlot,
-    scaleSizeContinuous,
+    ScaleSizeContinuous,
   } from "../../src/lib/index.js";
 
   // In 0.8, map the semantic measure and let size interpolate in symbol area.
@@ -13,10 +13,7 @@
   ];
 </script>
 
-<GGPlot
-  data={rows}
-  aes={{ x: "x", y: "y", size: "magnitude" }}
-  scales={scaleSizeContinuous({ range: [2, 9] })}
->
+<GGPlot data={rows} aes={{ x: "x", y: "y", size: "magnitude" }}>
+  <ScaleSizeContinuous range={[2, 9]} />
   <GeomPoint />
 </GGPlot>

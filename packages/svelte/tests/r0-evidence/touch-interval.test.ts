@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { withGrammarAsSpec } from "../helpers/ggplot-input.js";
 
 import type { RenderModel } from "@ggsvelte/core";
 
@@ -392,21 +393,24 @@ describe("R0 touch-interval evidence", () => {
       const ends: Array<{
         domain: { x?: [unknown, unknown]; y?: [unknown, unknown] };
       }> = [];
-      const view = render(GGPlot, {
-        data: value.data,
-        aes: value.aes,
-        layers: [{ geom: "point" }],
-        key: "id",
-        scales: value.scales,
-        select: value.select,
-        onselect: (event: {
-          phase: string;
-          domain: { x?: [unknown, unknown]; y?: [unknown, unknown] };
-        }) => {
-          if (event.phase === "end") ends.push(event);
-        },
-        ...size,
-      });
+      const view = render(
+        GGPlot,
+        withGrammarAsSpec({
+          data: value.data,
+          aes: value.aes,
+          layers: [{ geom: "point" }],
+          key: "id",
+          scales: value.scales,
+          select: value.select,
+          onselect: (event: {
+            phase: string;
+            domain: { x?: [unknown, unknown]; y?: [unknown, unknown] };
+          }) => {
+            if (event.phase === "end") ends.push(event);
+          },
+          ...size,
+        }),
+      );
       await dragArea(view.container, { x: 120, y: 80 }, { x: 360, y: 250 });
       await expect.poll(() => ends.length).toBe(1);
       const domain = ends[0].domain[value.channel];
@@ -424,23 +428,26 @@ describe("R0 touch-interval evidence", () => {
       domain: { x?: [number, number]; y?: [number, number] };
       keys: readonly PropertyKey[];
     }> = [];
-    const { container } = render(GGPlot, {
-      data: rows,
-      aes: { x: "x", y: "y" },
-      layers: [{ geom: "point" }],
-      coord: "flip",
-      key: "id",
-      select: { type: "interval", mode: "x" },
-      onrender: (next: RenderModel) => (model = next),
-      onselect: (event: {
-        phase: string;
-        domain: { x?: [number, number]; y?: [number, number] };
-        keys: readonly PropertyKey[];
-      }) => {
-        if (event.phase === "end") ends.push(event);
-      },
-      ...size,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: rows,
+        aes: { x: "x", y: "y" },
+        layers: [{ geom: "point" }],
+        coord: "flip",
+        key: "id",
+        select: { type: "interval", mode: "x" },
+        onrender: (next: RenderModel) => (model = next),
+        onselect: (event: {
+          phase: string;
+          domain: { x?: [number, number]; y?: [number, number] };
+          keys: readonly PropertyKey[];
+        }) => {
+          if (event.phase === "end") ends.push(event);
+        },
+        ...size,
+      }),
+    );
     const rendered = model as RenderModel | null;
     if (rendered === null) throw new Error("expected a rendered flip model");
     const panel = rendered.scene.panels[0];

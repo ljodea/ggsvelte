@@ -3,7 +3,7 @@
     GeomPoint,
     GeomSmooth,
     GGPlot,
-    scaleXLog10,
+    ScaleXLog10,
   } from "../../src/lib/index.js";
 
   const rows = [
@@ -14,16 +14,13 @@
   ];
 </script>
 
-<GGPlot
-  data={rows}
-  aes={{ x: "latency", y: "throughput" }}
-  scales={scaleXLog10({
-    domain: [1, 1000],
-    oob: "censor",
-    expand: { mult: 0, add: 0 },
-    nice: false,
-  })}
->
+<GGPlot data={rows} aes={{ x: "latency", y: "throughput" }}>
+  <ScaleXLog10
+    domain={[1, 1000]}
+    oob="censor"
+    expand={{ mult: 0, add: 0 }}
+    nice={false}
+  />
   <GeomPoint />
   <GeomSmooth method="lm" />
 </GGPlot>

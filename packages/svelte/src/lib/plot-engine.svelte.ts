@@ -30,18 +30,10 @@ import type { BatchInteractionMask, CellValue, RenderModel } from "@ggsvelte/cor
 import type {
   A11yMode,
   AesInput,
-  CoordSpec,
   DataInput,
-  FacetInput,
-  GuidesSpec,
-  Labs,
   LayerInput,
-  LegendSpec,
   PortableSpec,
-  Scales,
   SpecInput,
-  ThemeName,
-  ThemeSpec,
 } from "@ggsvelte/spec";
 
 import {
@@ -55,11 +47,7 @@ import {
   compositionAdvisoryDedupKey,
   type CompositionDiagnostic,
 } from "./diagnostics/composition.js";
-import {
-  deprecatedPropDiagnostic,
-  type DeprecationDiagnostic,
-  type PlotDiagnostic,
-} from "./diagnostics/deprecation.js";
+import type { PlotDiagnostic } from "./diagnostics/deprecation.js";
 import type { LayerRegistry } from "./geoms/registry.svelte.js";
 import type { PlotInteractionController } from "./interaction/controller.svelte.js";
 import {
@@ -83,7 +71,6 @@ import { createInspectionState } from "./inspection/inspection-state.svelte.js";
 import type { InspectionState } from "./inspection/inspection-state.svelte.js";
 import { createIntervalState } from "./interval/interval-state.svelte.js";
 import type { IntervalState } from "./interval/interval-state.svelte.js";
-import { grammarDeprecationInputs } from "./layers/grammar-families.js";
 import type { LegendFilterEvent, LegendFilterInput } from "./legend/filter.js";
 import { createLegendEntryKeyIndex } from "./legend/entry-key-index.svelte.js";
 import { createLegendFilterState } from "./legend/filter-state.svelte.js";
@@ -135,17 +122,11 @@ export type PlotEngineInputs<
   captureSurface: () => HTMLDivElement | null;
 
   // Reactive props / callbacks as getter thunks (post-destructure names).
+  // Grammar (theme/scales/coord/facet/labs/guides/legend) is children-only (#704).
   spec: () => SpecInput | undefined;
   data: () => DataInput | readonly Row[] | undefined;
   mapping: () => AesInput | undefined;
   layers: () => LayerInput[] | undefined;
-  facet: () => FacetInput | undefined;
-  coord: () => CoordSpec | "flip" | undefined;
-  scales: () => Scales | undefined;
-  guides: () => GuidesSpec | undefined;
-  legend: () => LegendSpec | undefined;
-  theme: () => ThemeName | ThemeSpec | undefined;
-  labs: () => Labs | undefined;
   a11y: () => A11yMode | undefined;
   width: () => number | "container" | undefined;
   height: () => number | undefined;
@@ -232,13 +213,6 @@ export function createPlotEngine<
     const data = inputs.data();
     const mapping = inputs.mapping();
     const layers = inputs.layers();
-    const facet = inputs.facet();
-    const coord = inputs.coord();
-    const scales = inputs.scales();
-    const guides = inputs.guides();
-    const legend = inputs.legend();
-    const theme = inputs.theme();
-    const labs = inputs.labs();
     const a11y = inputs.a11y();
     return assemblePortableSpec({
       ...(data !== undefined && { data }),
@@ -247,13 +221,6 @@ export function createPlotEngine<
       // non-mark plot layers (theme/scale/coord/facet/labs/guides/legend).
       layers: layers ?? inputs.registry.markLayers.map(toLayerInput),
       plotLayers: inputs.registry.layers.filter((layer) => layer.kind !== "mark"),
-      ...(facet !== undefined && { facet }),
-      ...(coord !== undefined && { coord }),
-      ...(scales !== undefined && { scales }),
-      ...(guides !== undefined && { guides }),
-      ...(legend !== undefined && { legend }),
-      ...(theme !== undefined && { theme }),
-      ...(labs !== undefined && { labs }),
       ...(a11y !== undefined && { a11y }),
     });
   }
@@ -267,11 +234,10 @@ export function createPlotEngine<
   const assembled = (): PortableSpec | null =>
     typeof window === "undefined" ? assembleCurrentSpec() : assembledDerived;
 
-  // Facet intent: raw prop (before layers register), registry facet plot layer
-  // (<FacetWrap/> / <FacetGrid/> / <Facet/>), OR assembled.facet (portable-spec embeds).
+  // Facet intent: registry facet plot layer (<FacetWrap/> / <FacetGrid/> / <Facet/>),
+  // OR assembled.facet (portable-spec embeds). Grammar props removed in 0.13.0 (#704).
   const facetedPlot = $derived(
     isFacetedPlotIntent({
-      facet: inputs.facet(),
       plotLayers: inputs.registry.layers,
       assembled: assembled(),
     }),
@@ -351,36 +317,12 @@ export function createPlotEngine<
       },
     }),
   );
-  // Shared once-per-code-per-prop Set for wiring + deprecation + composition.
-  // Delivery order is fixed: config effect (above) → wiring → deprecation →
-  // composition. Do not reorder these $effect registrations.
+  // Shared once-per-code-per-prop Set for wiring + composition.
+  // Delivery order is fixed: config effect (above) → wiring → composition.
+  // Grammar-prop deprecation emission removed in 0.13.0 (#704) — props gone.
   const deliveredAdvisories = new Set<string>();
   $effect(() => {
     for (const diagnostic of wiringDiagnostics) {
-      const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
-      if (deliveredAdvisories.has(dedupKey)) continue;
-      deliveredAdvisories.add(dedupKey);
-      deliverDiagnostic(diagnostic);
-    }
-  });
-
-  // Grammar-prop deprecations (#659 / #785): table-driven via GRAMMAR_FAMILIES.
-  // One advisory per deprecated prop that is !== undefined. Decidable from
-  // raw props — assembly does not participate. Reuses deliverDiagnostic and
-  // the same code:prop dedup Set as wiring. Emission order is DEPRECATION_EMIT_ORDER.
-  const deprecationDiagnostics = $derived.by((): DeprecationDiagnostic[] =>
-    grammarDeprecationInputs({
-      theme: inputs.theme,
-      scales: inputs.scales,
-      coord: inputs.coord,
-      facet: inputs.facet,
-      guides: inputs.guides,
-      legend: inputs.legend,
-      labs: inputs.labs,
-    }).map((input) => deprecatedPropDiagnostic(input)),
-  );
-  $effect(() => {
-    for (const diagnostic of deprecationDiagnostics) {
       const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
       if (deliveredAdvisories.has(dedupKey)) continue;
       deliveredAdvisories.add(dedupKey);

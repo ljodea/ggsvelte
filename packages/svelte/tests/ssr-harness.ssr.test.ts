@@ -6,6 +6,7 @@ import { createPlotInteraction } from "../src/lib/interaction/controller.svelte.
 import GGPlotHydrationFixture from "./fixtures/GGPlotHydrationFixture.svelte";
 import HydrationFixture from "./fixtures/HydrationFixture.svelte";
 import QuickstartSsrFixture from "./fixtures/QuickstartSsrFixture.svelte";
+import { withGrammarAsSpec } from "./helpers/ggplot-input.js";
 import { renderSsrFixture } from "./helpers/ssr.js";
 
 const rows = [
@@ -89,27 +90,31 @@ describe("SSR release fixture", () => {
   });
 
   it("server-renders binned colorsteps from the same semantic guide payload", () => {
-    const fixture = renderSsrFixture(GGPlot, {
-      data: [
-        { x: 1, y: 1, score: 1 },
-        { x: 2, y: 2, score: 10 },
-        { x: 3, y: 3, score: 100 },
-      ],
-      aes: { x: "x", y: "y", color: "score" },
-      layers: [{ geom: "point" }],
-      scales: {
-        color: {
-          type: "binned",
-          breaks: [1, 10, 100],
-          range: ["#111", "#eee"],
+    // scales/guides are no longer GGPlot props (#704) — fold into PortableSpec.
+    const fixture = renderSsrFixture(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [
+          { x: 1, y: 1, score: 1 },
+          { x: 2, y: 2, score: 10 },
+          { x: 3, y: 3, score: 100 },
+        ],
+        aes: { x: "x", y: "y", color: "score" },
+        layers: [{ geom: "point" }],
+        scales: {
+          color: {
+            type: "binned",
+            breaks: [1, 10, 100],
+            range: ["#111", "#eee"],
+          },
         },
-      },
-      guides: {
-        color: { type: "colorsteps", position: "bottom", direction: "horizontal" },
-      },
-      width: 480,
-      height: 320,
-    });
+        guides: {
+          color: { type: "colorsteps", position: "bottom", direction: "horizontal" },
+        },
+        width: 480,
+        height: 320,
+      }),
+    );
 
     expect(fixture.body.match(/gg-legend-step/g)).toHaveLength(2);
     expect(fixture.body).toContain("gg-legend-bottom gg-legend-horizontal");

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { withGrammarAsSpec } from "../helpers/ggplot-input.js";
 
 import { encodeKey, type RenderModel } from "@ggsvelte/core";
 import GGPlot from "../../src/lib/GGPlot.svelte";
@@ -10,13 +11,16 @@ import { rows, size, requireModel } from "./interaction-harness.js";
 describe("facets + flip through the component", () => {
   it("renders one clipped panel group per facet value with strips", () => {
     const data = rows.map((r, i) => ({ ...r, g: i < 2 ? "p1" : "p2" }));
-    const { container } = render(GGPlot, {
-      data,
-      aes: { x: "x", y: "y" },
-      layers: [{ geom: "point" }],
-      facet: { wrap: "g" },
-      ...size,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data,
+        aes: { x: "x", y: "y" },
+        layers: [{ geom: "point" }],
+        facet: { wrap: "g" },
+        ...size,
+      }),
+    );
     expect(container.querySelectorAll(".gg-panel")).toHaveLength(2);
     expect(container.querySelectorAll("clipPath")).toHaveLength(2);
     const strips = [...container.querySelectorAll(".gg-strip text")].map((t) => t.textContent);
@@ -27,16 +31,19 @@ describe("facets + flip through the component", () => {
   });
 
   it("coord flip renders horizontal bars", () => {
-    const { container } = render(GGPlot, {
-      data: [
-        { cat: "one", v: 4 },
-        { cat: "two", v: 8 },
-      ],
-      aes: { x: "cat", y: "v" },
-      layers: [{ geom: "col" }],
-      coord: "flip",
-      ...size,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [
+          { cat: "one", v: 4 },
+          { cat: "two", v: 8 },
+        ],
+        aes: { x: "cat", y: "v" },
+        layers: [{ geom: "col" }],
+        coord: "flip",
+        ...size,
+      }),
+    );
     const rects = [...container.querySelectorAll(".gg-rects rect")];
     expect(rects).toHaveLength(2);
     for (const rect of rects) {
@@ -56,25 +63,28 @@ describe("facets + flip through the component", () => {
       keys: "typed-category-id",
       intervals: "typed-category-facets",
     } as const;
-    const { container } = render(GGPlot, {
-      data: [
-        { id: "number-north", facet: "north", category: 1, y: 1 },
-        { id: "string-north", facet: "north", category: "1", y: 2 },
-        { id: "number-south", facet: "south", category: 1, y: 3 },
-        { id: "string-south", facet: "south", category: "1", y: 4 },
-      ],
-      aes: { x: "category", y: "y" },
-      layers: [{ geom: "point" }],
-      facet: { wrap: "facet" },
-      key: "id",
-      select: { type: "interval", preset: "cross-panel" },
-      interaction,
-      interactionScope,
-      onrender: (next: RenderModel) => {
-        model = next;
-      },
-      ...size,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [
+          { id: "number-north", facet: "north", category: 1, y: 1 },
+          { id: "string-north", facet: "north", category: "1", y: 2 },
+          { id: "number-south", facet: "south", category: 1, y: 3 },
+          { id: "string-south", facet: "south", category: "1", y: 4 },
+        ],
+        aes: { x: "category", y: "y" },
+        layers: [{ geom: "point" }],
+        facet: { wrap: "facet" },
+        key: "id",
+        select: { type: "interval", preset: "cross-panel" },
+        interaction,
+        interactionScope,
+        onrender: (next: RenderModel) => {
+          model = next;
+        },
+        ...size,
+      }),
+    );
     await until(() => model !== null);
     const originPanel = requireModel(model).scene.panels[0];
     if (originPanel === undefined) throw new Error("expected origin panel");
@@ -101,21 +111,24 @@ describe("facets + flip through the component", () => {
       keys: "shared-row",
       intervals: "shared-facets",
     } as const;
-    const { container } = render(GGPlot, {
-      data: [
-        { id: "north", facet: "North", x: 1, y: 1 },
-        { id: "south", facet: "South", x: 2, y: 2 },
-      ],
-      aes: { x: "x", y: "y" },
-      layers: [{ geom: "point" }],
-      facet: { wrap: "facet" },
-      key: "id",
-      select: { type: "interval", mode: "x", preset: "union" },
-      interaction,
-      interactionScope,
-      onrender: (next: RenderModel) => (model = next),
-      ...size,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [
+          { id: "north", facet: "North", x: 1, y: 1 },
+          { id: "south", facet: "South", x: 2, y: 2 },
+        ],
+        aes: { x: "x", y: "y" },
+        layers: [{ geom: "point" }],
+        facet: { wrap: "facet" },
+        key: "id",
+        select: { type: "interval", mode: "x", preset: "union" },
+        interaction,
+        interactionScope,
+        onrender: (next: RenderModel) => (model = next),
+        ...size,
+      }),
+    );
     await until(() => model?.scene.panels.length === 2);
     const renderedModel = requireModel(model);
     for (const panel of renderedModel.scene.panels) {
@@ -161,23 +174,26 @@ describe("facets + flip through the component", () => {
       keys: "typed-facet-row",
       intervals: "typed-facet-controls",
     } as const;
-    const { container } = render(GGPlot, {
-      data: [
-        { id: "number", facet: 1, x: 1, y: 1 },
-        { id: "text", facet: "1", x: 2, y: 2 },
-      ],
-      aes: { x: "x", y: "y" },
-      layers: [{ geom: "point" }],
-      facet: { wrap: "facet" },
-      key: "id",
-      select: { type: "interval", mode: "x", preset: "union" },
-      interaction,
-      interactionScope,
-      onrender: (next: RenderModel) => {
-        model = next;
-      },
-      ...size,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [
+          { id: "number", facet: 1, x: 1, y: 1 },
+          { id: "text", facet: "1", x: 2, y: 2 },
+        ],
+        aes: { x: "x", y: "y" },
+        layers: [{ geom: "point" }],
+        facet: { wrap: "facet" },
+        key: "id",
+        select: { type: "interval", mode: "x", preset: "union" },
+        interaction,
+        interactionScope,
+        onrender: (next: RenderModel) => {
+          model = next;
+        },
+        ...size,
+      }),
+    );
     await until(() => model?.scene.panels.length === 2);
     const renderedModel = requireModel(model);
     for (const panel of renderedModel.scene.panels) {
@@ -223,13 +239,16 @@ describe("facets + flip through the component", () => {
       onrender: (next: RenderModel) => (model = next),
       ...size,
     };
-    const view = render(GGPlot, {
-      ...base,
-      data: [
-        { id: "north", facet: "North", x: 1, y: 1 },
-        { id: "south", facet: "South", x: 2, y: 2 },
-      ],
-    });
+    const view = render(
+      GGPlot,
+      withGrammarAsSpec({
+        ...base,
+        data: [
+          { id: "north", facet: "North", x: 1, y: 1 },
+          { id: "south", facet: "South", x: 2, y: 2 },
+        ],
+      }),
+    );
     await until(() => model?.scene.panels.length === 2);
     const north = model!.scene.panels.find((panel) => panel.strip === "North")!;
     interaction.setInterval(
@@ -262,10 +281,12 @@ describe("facets + flip through the component", () => {
     edit.click();
     await until(() => view.container.querySelector(".gg-bounds-editor") !== null);
 
-    await view.rerender({
-      ...base,
-      data: [{ id: "south", facet: "South", x: 2, y: 2 }],
-    });
+    await view.rerender(
+      withGrammarAsSpec({
+        ...base,
+        data: [{ id: "south", facet: "South", x: 2, y: 2 }],
+      }),
+    );
     await until(() => view.container.querySelector(".gg-bounds-editor") === null);
     await until(() =>
       (view.container.querySelector("[aria-live='polite']")?.textContent ?? "").includes(

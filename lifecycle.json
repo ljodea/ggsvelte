@@ -5293,10 +5293,6 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "LayerDescriptor": {
-          "kind": "type",
-          "lifecycle": "experimental"
-        },
         "LayerInput": {
           "kind": "type",
           "lifecycle": "experimental"

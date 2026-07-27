@@ -1,14 +1,12 @@
 /**
- * Coord + facet children + prop deprecations (#659 slice 5).
- * Covers parity, REPLACE precedence, live getters, deprecation + composition
- * advisories, spec short-circuit, and bare Facet validation.
+ * Coord + facet children (#659 slice 5 / #704).
+ * GGPlot coord/facet props removed in 0.13.0 — child layers only.
  */
 import { flushSync } from "svelte";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { coordFixed, coordTransform, type PortableSpec } from "../../src/lib/index.js";
+import { type PortableSpec } from "../../src/lib/index.js";
 import type { PlotDiagnostic } from "../../src/lib/diagnostics/deprecation.js";
-import { isDeprecationDiagnostic } from "../../src/lib/diagnostics/deprecation.js";
 import {
   isCompositionDiagnostic,
   isDuplicatePlotLayerDiagnostic,
@@ -48,67 +46,46 @@ function assembleWithProps(props: Record<string, unknown>): Promise<PortableSpec
 }
 
 describe("Coord/Facet children → assembled PortableSpec", () => {
-  it('1a: <CoordFlip/> assembles same coord as coord="flip" and coord={{type:"flip"}}', async () => {
+  it('1a: <CoordFlip/> assembles { type: "flip" }', async () => {
     const fromChild = await assembleWithProps({ useCoordFlip: true });
-    const fromString = await assembleWithProps({ coordProp: "flip" });
-    const fromObject = await assembleWithProps({ coordProp: { type: "flip" } });
     expect(fromChild.coord).toEqual({ type: "flip" });
-    expect(fromChild.coord).toEqual(fromString.coord);
-    expect(fromChild.coord).toEqual(fromObject.coord);
   });
 
-  it("1b: <CoordFixed ratio={2}/> matches coord={coordFixed({ratio:2})}", async () => {
+  it("1b: <CoordFixed ratio={2}/> assembles fixed ratio 2", async () => {
     const fromChild = await assembleWithProps({ useCoordFixed: true, fixedRatio: 2 });
-    const fromProp = await assembleWithProps({
-      coordProp: coordFixed({ ratio: 2 }),
-    });
     expect(fromChild.coord).toEqual({ type: "fixed", ratio: 2 });
-    expect(fromChild.coord).toEqual(fromProp.coord);
   });
 
-  it('1c: <CoordTransform x="log10"/> matches coord={coordTransform({x:"log10"})}', async () => {
+  it('1c: <CoordTransform x="log10"/> assembles transform coord', async () => {
     const fromChild = await assembleWithProps({
       useCoordTransform: true,
       transformX: "log10",
     });
-    const fromProp = await assembleWithProps({
-      coordProp: coordTransform({ x: "log10" }),
-    });
-    expect(fromChild.coord).toEqual(fromProp.coord);
     expect(fromChild.coord?.type).toBe("transform");
+    expect(fromChild.coord).toEqual({ type: "transform", x: { transform: "log10" } });
   });
 
-  it('1d: <FacetWrap field="g"/> matches facet={{wrap:"g"}}', async () => {
+  it('1d: <FacetWrap field="g"/> assembles wrap facet', async () => {
     const fromChild = await assembleWithProps({ useFacetWrap: true, facetField: "g" });
-    const fromProp = await assembleWithProps({ facetProp: { wrap: "g" } });
-    expect(fromChild.facet).toEqual(fromProp.facet);
     expect(fromChild.facet?.wrap).toEqual({ field: "g" });
   });
 
-  it('1e: <FacetGrid rows="a" cols="b"/> matches facet={{rows:"a",cols:"b"}}', async () => {
+  it('1e: <FacetGrid rows="a" cols="b"/> assembles grid facet', async () => {
     const fromChild = await assembleWithProps({
       useFacetGrid: true,
       facetRows: "a",
       facetCols: "b",
     });
-    const fromProp = await assembleWithProps({
-      facetProp: { rows: "a", cols: "b" },
-    });
-    expect(fromChild.facet).toEqual(fromProp.facet);
     expect(fromChild.facet?.rows).toEqual({ field: "a" });
     expect(fromChild.facet?.cols).toEqual({ field: "b" });
   });
 
-  it("1f: <Coord value/> escape hatch matches the equivalent coord prop", async () => {
+  it("1f: <Coord value/> escape hatch assembles the given coord", async () => {
     const fromChild = await assembleWithProps({
       useCoordValue: true,
       coordValue: { type: "fixed", ratio: 3 },
     });
-    const fromProp = await assembleWithProps({
-      coordProp: coordFixed({ ratio: 3 }),
-    });
     expect(fromChild.coord).toEqual({ type: "fixed", ratio: 3 });
-    expect(fromChild.coord).toEqual(fromProp.coord);
   });
 
   it('1g: <Coord value="flip"/> canonicalises the bare string like <CoordFlip/>', async () => {
@@ -129,18 +106,9 @@ describe("Coord/Facet children → assembled PortableSpec", () => {
       facetScales: "free_y",
       facetStrip: { position: "bottom", show: true },
     });
-    const fromProp = await assembleWithProps({
-      facetProp: {
-        wrap: "g",
-        ncol: 2,
-        scales: "free_y",
-        strip: { position: "bottom", show: true },
-      },
-    });
-    expect(fromChild.facet).toEqual(fromProp.facet);
+    expect(fromChild.facet?.wrap).toEqual({ field: "g" });
     expect(fromChild.facet?.ncol).toBe(2);
     expect(fromChild.facet?.scales).toBe("free_y");
-    // strip stays NESTED — it is not flattened onto the facet root.
     expect(fromChild.facet?.strip).toEqual({ position: "bottom", show: true });
   });
 
@@ -152,15 +120,8 @@ describe("Coord/Facet children → assembled PortableSpec", () => {
       facetScales: "free",
       facetStrip: { position: "top", show: false },
     });
-    const fromProp = await assembleWithProps({
-      facetProp: {
-        rows: "a",
-        cols: "b",
-        scales: "free",
-        strip: { position: "top", show: false },
-      },
-    });
-    expect(fromChild.facet).toEqual(fromProp.facet);
+    expect(fromChild.facet?.rows).toEqual({ field: "a" });
+    expect(fromChild.facet?.cols).toEqual({ field: "b" });
     expect(fromChild.facet?.scales).toBe("free");
     expect(fromChild.facet?.strip).toEqual({ position: "top", show: false });
   });
@@ -181,48 +142,6 @@ describe("Coord/Facet children → assembled PortableSpec", () => {
   it("2: <CoordCartesian/> → assembled coord is ABSENT", async () => {
     const spec = await assembleWithProps({ useCoordCartesian: true });
     expect(spec.coord).toBeUndefined();
-  });
-
-  it("3a: children win over prop (REPLACE): coord=flip + <CoordFixed/> → fixed only", async () => {
-    const spec = await assembleWithProps({
-      coordProp: "flip",
-      useCoordFixed: true,
-      fixedRatio: 2,
-    });
-    expect(spec.coord).toEqual({ type: "fixed", ratio: 2 });
-    expect(spec.coord?.type).not.toBe("flip");
-  });
-
-  it("3b: children win over prop (REPLACE): facet wrap + <FacetGrid/> → grid only", async () => {
-    const spec = await assembleWithProps({
-      facetProp: { wrap: "g" },
-      useFacetGrid: true,
-      facetRows: "a",
-      facetCols: "b",
-    });
-    expect(spec.facet?.rows).toEqual({ field: "a" });
-    expect(spec.facet?.cols).toEqual({ field: "b" });
-    expect(spec.facet?.wrap).toBeUndefined();
-  });
-
-  it("4: prop + child emits DEPRECATION only — NOT composition", async () => {
-    const { diagnostics, ondiagnostic } = collect();
-    let assembled: PortableSpec | null = null;
-    render(CoordFacetChildrenPlot, {
-      coordProp: "flip",
-      useCoordFixed: true,
-      fixedRatio: 2,
-      ondiagnostic,
-      onrender: (_model: unknown, spec: PortableSpec) => {
-        assembled = spec;
-      },
-    });
-    await waitAssembled(() => assembled);
-    await expect
-      .poll(() => diagnostics.filter((d) => d.code === "DEPRECATED_PLOT_PROP"))
-      .toHaveLength(1);
-    expect(diagnostics.filter((d) => d.code === "DUPLICATE_PLOT_LAYER")).toHaveLength(0);
-    expect(diagnostics.filter((d) => d.code === "DUPLICATE_SCALE_CHANNEL")).toHaveLength(0);
   });
 
   it("5: spec prop short-circuits with coord/facet children present", async () => {
@@ -396,91 +315,5 @@ describe("Coord/Facet children → assembled PortableSpec", () => {
         useBareFacet: true,
       }),
     ).toThrow(/neither wrap nor rows\/cols|facet-form-missing/);
-  });
-});
-
-describe("coord/facet prop deprecation advisories", () => {
-  it("10a: coord prop advisory shape: since/removeIn/prop/docUrl/suggestions", async () => {
-    const { diagnostics, ondiagnostic } = collect();
-    render(CoordFacetChildrenPlot, {
-      coordProp: "flip",
-      ondiagnostic,
-    });
-    await expect
-      .poll(() => diagnostics.filter((d) => d.code === "DEPRECATED_PLOT_PROP"))
-      .toHaveLength(1);
-    const advisory = diagnostics.find((d) => d.code === "DEPRECATED_PLOT_PROP")!;
-    expect(isDeprecationDiagnostic(advisory)).toBe(true);
-    if (!isDeprecationDiagnostic(advisory)) throw new Error("expected deprecation");
-    expect(advisory.prop).toBe("coord");
-    expect(advisory.since).toBe("0.11.0");
-    expect(advisory.removeIn).toBe("0.13.0");
-    expect(advisory.docUrl).toContain("compose-coord-as-a-child-layer");
-    expect(advisory.suggestions.length).toBeGreaterThan(0);
-  });
-
-  it("10b: facet prop advisory shape: since/removeIn/prop/docUrl/suggestions", async () => {
-    const { diagnostics, ondiagnostic } = collect();
-    render(CoordFacetChildrenPlot, {
-      facetProp: { wrap: "g" },
-      ondiagnostic,
-    });
-    await expect
-      .poll(() => diagnostics.filter((d) => d.code === "DEPRECATED_PLOT_PROP"))
-      .toHaveLength(1);
-    const advisory = diagnostics.find((d) => d.code === "DEPRECATED_PLOT_PROP")!;
-    expect(isDeprecationDiagnostic(advisory)).toBe(true);
-    if (!isDeprecationDiagnostic(advisory)) throw new Error("expected deprecation");
-    expect(advisory.prop).toBe("facet");
-    expect(advisory.since).toBe("0.11.0");
-    expect(advisory.removeIn).toBe("0.13.0");
-    expect(advisory.docUrl).toContain("compose-facet-as-a-child-layer");
-    expect(advisory.suggestions.length).toBeGreaterThan(0);
-  });
-
-  it("10c: child-only plot fires no DEPRECATED_PLOT_PROP", async () => {
-    const { diagnostics, ondiagnostic } = collect();
-    let assembled: PortableSpec | null = null;
-    render(CoordFacetChildrenPlot, {
-      useCoordFlip: true,
-      useFacetWrap: true,
-      ondiagnostic,
-      onrender: (_model: unknown, spec: PortableSpec) => {
-        assembled = spec;
-      },
-    });
-    await waitAssembled(() => assembled);
-    await new Promise((resolve) => {
-      setTimeout(resolve, 0);
-    });
-    expect(diagnostics.filter((d) => d.code === "DEPRECATED_PLOT_PROP")).toHaveLength(0);
-  });
-
-  it("10d: dev console.warn fallback with no handler; silent under production", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {
-      /* swallow */
-    });
-    try {
-      vi.stubGlobal("process", { env: { NODE_ENV: "development" } });
-      render(CoordFacetChildrenPlot, { coordProp: "flip" });
-      await expect
-        .poll(() =>
-          warn.mock.calls.some((call) => String(call[0]).includes("DEPRECATED_PLOT_PROP")),
-        )
-        .toBe(true);
-
-      warn.mockClear();
-      vi.stubGlobal("process", { env: { NODE_ENV: "production" } });
-      render(CoordFacetChildrenPlot, { facetProp: { wrap: "g" } });
-      await new Promise((resolve) => {
-        setTimeout(resolve, 20);
-      });
-      expect(warn.mock.calls.some((call) => String(call[0]).includes("DEPRECATED_PLOT_PROP"))).toBe(
-        false,
-      );
-    } finally {
-      warn.mockRestore();
-      vi.unstubAllGlobals();
-    }
   });
 });

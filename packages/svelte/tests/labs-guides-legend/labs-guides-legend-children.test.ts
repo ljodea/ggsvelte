@@ -1,18 +1,12 @@
 /**
- * Labs + guides + legend children + prop deprecations (#659 slice 6).
- *
- * These three are the keyed-MERGE families: unlike coord/facet/theme (REPLACE),
- * a second child does not replace the first — it shallow-merges over it, so the
- * only thing lost is the individual key both children set. The suite pins that
- * distinction, the D2 children-win-over-props rule, and the advisory that fires
- * when two children collide on one key.
+ * Labs + guides + legend children (#659 slice 6 / #704).
+ * GGPlot labs/guides/legend props removed in 0.13.0 — child layers only.
  */
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
 import type { PortableSpec } from "../../src/lib/index.js";
 import type { PlotDiagnostic } from "../../src/lib/diagnostics/deprecation.js";
-import type { LayerRegistry } from "../../src/lib/geoms/registry.svelte.js";
 import {
   duplicateMergeKeyDiagnostic,
   isCompositionDiagnostic,
@@ -52,7 +46,7 @@ function assembleWithProps(props: Record<string, unknown>): Promise<PortableSpec
 }
 
 describe("<Labs> child → assembled PortableSpec", () => {
-  it("1a: <Labs title subtitle x color/> matches the equivalent labs prop", async () => {
+  it("1a: <Labs title subtitle x color/> assembles labs bag", async () => {
     const fromChild = await assembleWithProps({
       useLabs: true,
       labsTitle: "Sales",
@@ -60,44 +54,18 @@ describe("<Labs> child → assembled PortableSpec", () => {
       labsX: "Quarter",
       labsColor: "Region",
     });
-    const fromProp = await assembleWithProps({
-      labsProp: { title: "Sales", subtitle: "FY25", x: "Quarter", color: "Region" },
-    });
     expect(fromChild.labs).toEqual({
       title: "Sales",
       subtitle: "FY25",
       x: "Quarter",
       color: "Region",
     });
-    expect(fromChild.labs).toEqual(fromProp.labs);
   });
 
   it("1b: undefined <Labs> props are stripped, not emitted as undefined keys", async () => {
     const assembled = await assembleWithProps({ useLabs: true, labsTitle: "Only a title" });
     expect(assembled.labs).toEqual({ title: "Only a title" });
     expect(Object.keys(assembled.labs ?? {})).toEqual(["title"]);
-  });
-
-  it("1c: labs is a MERGE family — a child keeps prop keys it does not set", async () => {
-    const assembled = await assembleWithProps({
-      labsProp: { title: "From prop", caption: "kept" },
-      useLabs: true,
-      labsX: "From child",
-    });
-    expect(assembled.labs).toEqual({
-      title: "From prop",
-      caption: "kept",
-      x: "From child",
-    });
-  });
-
-  it("1d: on a shared key the child wins over the prop (D2)", async () => {
-    const assembled = await assembleWithProps({
-      labsProp: { title: "From prop" },
-      useLabs: true,
-      labsTitle: "From child",
-    });
-    expect(assembled.labs?.title).toBe("From child");
   });
 
   it("1e: two <Labs> children merge across distinct keys — MERGE, not REPLACE", async () => {
@@ -121,17 +89,13 @@ describe("<Labs> child → assembled PortableSpec", () => {
 });
 
 describe("Guide children → assembled PortableSpec", () => {
-  it('3a: <GuideLegend channel="color" position="bottom"/> matches guideLegend() under the prop', async () => {
+  it('3a: <GuideLegend channel="color" position="bottom"/> assembles guide bag', async () => {
     const fromChild = await assembleWithProps({
       useGuideLegend: true,
       guideChannel: "color",
       guidePosition: "bottom",
     });
-    const fromProp = await assembleWithProps({
-      guidesProp: { color: { type: "legend", position: "bottom" } },
-    });
     expect(fromChild.guides).toEqual({ color: { type: "legend", position: "bottom" } });
-    expect(fromChild.guides).toEqual(fromProp.guides);
   });
 
   it("3b: the channel prop keys the guide — it never leaks into the guide object", async () => {
@@ -170,41 +134,18 @@ describe("Guide children → assembled PortableSpec", () => {
 
   it('3d: <GuideNone channel="size"/> equals guides={{size:{type:"none"}}}', async () => {
     const fromChild = await assembleWithProps({ useGuideNone: true, guideChannel: "size" });
-    const fromProp = await assembleWithProps({ guidesProp: { size: { type: "none" } } });
-    expect(fromChild.guides).toEqual(fromProp.guides);
+    expect(fromChild.guides?.size).toEqual({ type: "none" });
   });
 
-  it("3e: <Guides value/> escape hatch matches the equivalent guides prop", async () => {
+  it("3e: <Guides value/> escape hatch assembles the bag", async () => {
     const fromChild = await assembleWithProps({
       useGuidesValue: true,
       guidesValue: { color: { type: "none" }, x: { type: "axis", showTicks: false } },
     });
-    const fromProp = await assembleWithProps({
-      guidesProp: { color: { type: "none" }, x: { type: "axis", showTicks: false } },
-    });
-    expect(fromChild.guides).toEqual(fromProp.guides);
-  });
-
-  it("3f: guides is a MERGE family — a child keeps prop channels it does not set", async () => {
-    const assembled = await assembleWithProps({
-      guidesProp: { x: { type: "axis", showTicks: false } },
-      useGuideLegend: true,
-      guideChannel: "color",
-    });
-    expect(assembled.guides).toEqual({
+    expect(fromChild.guides).toEqual({
+      color: { type: "none" },
       x: { type: "axis", showTicks: false },
-      color: { type: "legend" },
     });
-  });
-
-  it("3g: on a shared channel the child replaces the whole prop guide, not field-by-field", async () => {
-    const assembled = await assembleWithProps({
-      guidesProp: { color: { type: "legend", position: "right", title: "kept?" } },
-      useGuideLegend: true,
-      guideChannel: "color",
-      guidePosition: "bottom",
-    });
-    expect(assembled.guides?.color).toEqual({ type: "legend", position: "bottom" });
   });
 
   it("3h: two guide children on distinct channels merge; neither is dropped", async () => {
@@ -237,18 +178,7 @@ describe("Guide children → assembled PortableSpec", () => {
 describe("<Legend> child → assembled PortableSpec", () => {
   it('4a: <Legend order="sorted"/> matches legend={{order:"sorted"}}', async () => {
     const fromChild = await assembleWithProps({ useLegend: true, legendOrder: "sorted" });
-    const fromProp = await assembleWithProps({ legendProp: { order: "sorted" } });
     expect(fromChild.legend).toEqual({ order: "sorted" });
-    expect(fromChild.legend).toEqual(fromProp.legend);
-  });
-
-  it("4b: on the shared order key the child wins over the prop (D2)", async () => {
-    const assembled = await assembleWithProps({
-      legendProp: { order: "stable-domain" },
-      useLegend: true,
-      legendOrder: "present-first-seen",
-    });
-    expect(assembled.legend?.order).toBe("present-first-seen");
   });
 
   it("4d: an undefined order is stripped, never emitted as an undefined key", async () => {
@@ -338,27 +268,6 @@ describe("keyed-MERGE duplicate advisories", () => {
     expect(diagnostics.filter((d) => d.code === "DUPLICATE_MERGE_KEY")).toHaveLength(0);
   });
 
-  it("5d: a prop plus a child on the same key is a deprecation, never a duplicate", async () => {
-    const { diagnostics, ondiagnostic } = collect();
-    let assembled: PortableSpec | null = null;
-    render(LabsGuidesLegendPlot, {
-      labsProp: { title: "From prop" },
-      useLabs: true,
-      labsTitle: "From child",
-      ondiagnostic,
-      onrender: (_model: unknown, spec: PortableSpec) => {
-        assembled = spec;
-      },
-    });
-    await waitAssembled(() => assembled);
-    expect(diagnostics.filter((d) => d.code === "DUPLICATE_MERGE_KEY")).toHaveLength(0);
-    expect(
-      diagnostics.filter(
-        (d) => d.code === "DEPRECATED_PLOT_PROP" && "prop" in d && d.prop === "labs",
-      ),
-    ).toHaveLength(1);
-  });
-
   it("5e: the scale-only DUPLICATE_SCALE_CHANNEL code is untouched by the merge-key family", async () => {
     const { diagnostics, ondiagnostic } = collect();
     let assembled: PortableSpec | null = null;
@@ -378,82 +287,6 @@ describe("keyed-MERGE duplicate advisories", () => {
 });
 
 describe("ADR 0001 live getters", () => {
-  it("7a: a labs prop update changes the assembled spec without re-registration", async () => {
-    let assembled: PortableSpec | null = null;
-    let host: LayerRegistry | undefined;
-    const view = render(LabsGuidesLegendPlot, {
-      useLabs: true,
-      labsTitle: "First",
-      captureRegistry: (registry: LayerRegistry) => {
-        host = registry;
-      },
-      onrender: (_model: unknown, spec: PortableSpec) => {
-        assembled = spec;
-      },
-      ondiagnostic: () => {},
-    });
-    await waitAssembled(() => assembled);
-    expect(assembled!.labs).toEqual({ title: "First" });
-    expect(host).toBeDefined();
-    const countAfterInit = host!.registrationCount;
-    expect(countAfterInit).toBeGreaterThan(0);
-
-    assembled = null;
-    await view.rerender({
-      useLabs: true,
-      labsTitle: "Second",
-      captureRegistry: (registry: LayerRegistry) => {
-        host = registry;
-      },
-      onrender: (_model: unknown, spec: PortableSpec) => {
-        assembled = spec;
-      },
-      ondiagnostic: () => {},
-    });
-    flushSync();
-    await waitAssembled(() => assembled);
-    expect(assembled!.labs).toEqual({ title: "Second" });
-    expect(host!.registrationCount).toBe(countAfterInit);
-  });
-
-  it("7b: a guide prop update flows through without re-registration", async () => {
-    let assembled: PortableSpec | null = null;
-    let host: LayerRegistry | undefined;
-    const view = render(LabsGuidesLegendPlot, {
-      useGuideLegend: true,
-      guideChannel: "color",
-      guidePosition: "right",
-      captureRegistry: (registry: LayerRegistry) => {
-        host = registry;
-      },
-      onrender: (_model: unknown, spec: PortableSpec) => {
-        assembled = spec;
-      },
-      ondiagnostic: () => {},
-    });
-    await waitAssembled(() => assembled);
-    expect(assembled!.guides?.color).toEqual({ type: "legend", position: "right" });
-    const countAfterInit = host!.registrationCount;
-
-    assembled = null;
-    await view.rerender({
-      useGuideLegend: true,
-      guideChannel: "color",
-      guidePosition: "bottom",
-      captureRegistry: (registry: LayerRegistry) => {
-        host = registry;
-      },
-      onrender: (_model: unknown, spec: PortableSpec) => {
-        assembled = spec;
-      },
-      ondiagnostic: () => {},
-    });
-    flushSync();
-    await waitAssembled(() => assembled);
-    expect(assembled!.guides?.color).toEqual({ type: "legend", position: "bottom" });
-    expect(host!.registrationCount).toBe(countAfterInit);
-  });
-
   it("7c: the duplicate-key advisory fires once per key across repeated updates", async () => {
     const { diagnostics, ondiagnostic } = collect();
     let assembled: PortableSpec | null = null;
@@ -514,65 +347,5 @@ describe("scale-local guide vs top-level guide child", () => {
     });
     expect(assembled.guides?.color).toEqual({ type: "legend", position: "bottom" });
     expect(assembled.scales?.color?.guide).toEqual({ type: "legend", title: "from the scale" });
-  });
-});
-
-describe("labs prop deprecation", () => {
-  it("2a: the labs prop emits one DEPRECATED_PLOT_PROP advisory naming the child form", async () => {
-    const { diagnostics, ondiagnostic } = collect();
-    let assembled: PortableSpec | null = null;
-    render(LabsGuidesLegendPlot, {
-      labsProp: { title: "x" },
-      ondiagnostic,
-      onrender: (_model: unknown, spec: PortableSpec) => {
-        assembled = spec;
-      },
-    });
-    await waitAssembled(() => assembled);
-    const advisories = diagnostics.filter(
-      (d) => d.code === "DEPRECATED_PLOT_PROP" && "prop" in d && d.prop === "labs",
-    );
-    expect(advisories).toHaveLength(1);
-    expect(advisories[0].message).toContain("labs");
-    expect(advisories[0].docUrl).toContain("compose-labs-as-a-child-layer");
-  });
-
-  it("2c: the guides and legend props each emit their own advisory", async () => {
-    const { diagnostics, ondiagnostic } = collect();
-    let assembled: PortableSpec | null = null;
-    render(LabsGuidesLegendPlot, {
-      guidesProp: { color: { type: "none" } },
-      legendProp: { order: "sorted" },
-      ondiagnostic,
-      onrender: (_model: unknown, spec: PortableSpec) => {
-        assembled = spec;
-      },
-    });
-    await waitAssembled(() => assembled);
-    for (const [prop, anchor] of [
-      ["guides", "compose-guides-as-child-layers"],
-      ["legend", "compose-legend-as-a-child-layer"],
-    ] as const) {
-      const advisories = diagnostics.filter(
-        (d) => d.code === "DEPRECATED_PLOT_PROP" && "prop" in d && d.prop === prop,
-      );
-      expect(advisories, `expected one advisory for the ${prop} prop`).toHaveLength(1);
-      expect(advisories[0].docUrl).toContain(anchor);
-    }
-  });
-
-  it("2b: no labs prop → no labs deprecation advisory", async () => {
-    const { diagnostics, ondiagnostic } = collect();
-    let assembled: PortableSpec | null = null;
-    render(LabsGuidesLegendPlot, {
-      useLabs: true,
-      labsTitle: "child only",
-      ondiagnostic,
-      onrender: (_model: unknown, spec: PortableSpec) => {
-        assembled = spec;
-      },
-    });
-    await waitAssembled(() => assembled);
-    expect(diagnostics.filter((d) => "prop" in d && d.prop === "labs")).toHaveLength(0);
   });
 });

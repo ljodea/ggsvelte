@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { withGrammarAsSpec } from "../../helpers/ggplot-input.js";
 
 import { encodeKey, type RenderModel } from "@ggsvelte/core";
 import GGPlot from "../../../src/lib/GGPlot.svelte";
@@ -19,30 +20,33 @@ describe("brush gesture select", () => {
       keys: "typed-brush",
       intervals: "typed-brush",
     } as const;
-    const { container } = render(GGPlot, {
-      data: [
-        { id: "number", x: 1, y: 1 },
-        { id: "string", x: "1", y: 2 },
-      ],
-      aes: { x: "x", y: "y" },
-      layers: [{ geom: "point" }],
-      scales: { x: { type: "band" } },
-      key: "id",
-      select: { type: "interval", mode: "x", preset: "cross-panel" },
-      interaction,
-      interactionScope,
-      onselect: (event: {
-        phase: string;
-        domain: { x?: readonly [unknown, unknown] };
-        keys: readonly PropertyKey[];
-      }) => {
-        if (event.phase === "end") ended.push(event);
-      },
-      onrender: (next: RenderModel) => {
-        model = next;
-      },
-      ...size,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [
+          { id: "number", x: 1, y: 1 },
+          { id: "string", x: "1", y: 2 },
+        ],
+        aes: { x: "x", y: "y" },
+        layers: [{ geom: "point" }],
+        scales: { x: { type: "band" } },
+        key: "id",
+        select: { type: "interval", mode: "x", preset: "cross-panel" },
+        interaction,
+        interactionScope,
+        onselect: (event: {
+          phase: string;
+          domain: { x?: readonly [unknown, unknown] };
+          keys: readonly PropertyKey[];
+        }) => {
+          if (event.phase === "end") ended.push(event);
+        },
+        onrender: (next: RenderModel) => {
+          model = next;
+        },
+        ...size,
+      }),
+    );
     await until(() => model !== null);
     const first = model!.candidates.candidate(0)!;
     const second = model!.candidates.candidate(1)!;
@@ -160,27 +164,30 @@ describe("brush gesture select", () => {
       intervals: "empty-panel",
     } as const;
     const ended: Array<{ keys: readonly PropertyKey[] }> = [];
-    const { container } = render(GGPlot, {
-      data: [
-        { id: "p", r: "r1", c: "c1", cat: "m", y: 1 },
-        { id: "q", r: "r2", c: "c2", cat: "n", y: 2 },
-      ],
-      aes: { x: "cat", y: "y" },
-      layers: [{ geom: "point" }],
-      scales: { x: { type: "band" } },
-      facet: { rows: "r", cols: "c", scales: "free" },
-      key: "id",
-      select: { type: "interval", mode: "x", persistent: true },
-      interaction,
-      interactionScope,
-      onselect: (event: { phase: string; keys: readonly PropertyKey[] }) => {
-        if (event.phase === "end") ended.push(event);
-      },
-      onrender: (next: RenderModel) => {
-        model = next;
-      },
-      ...size,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [
+          { id: "p", r: "r1", c: "c1", cat: "m", y: 1 },
+          { id: "q", r: "r2", c: "c2", cat: "n", y: 2 },
+        ],
+        aes: { x: "cat", y: "y" },
+        layers: [{ geom: "point" }],
+        scales: { x: { type: "band" } },
+        facet: { rows: "r", cols: "c", scales: "free" },
+        key: "id",
+        select: { type: "interval", mode: "x", persistent: true },
+        interaction,
+        interactionScope,
+        onselect: (event: { phase: string; keys: readonly PropertyKey[] }) => {
+          if (event.phase === "end") ended.push(event);
+        },
+        onrender: (next: RenderModel) => {
+          model = next;
+        },
+        ...size,
+      }),
+    );
     await until(() => model !== null);
     // The r1/c2 combination has no rows: with free scales its band domain is
     // empty, so no semantic axis survives the x selection mode. Brushing it
@@ -282,24 +289,27 @@ describe("brush gesture select", () => {
   it("keeps the first facet as origin during two-corner pointer selection", async () => {
     let model: RenderModel | null = null;
     let endedPanelId: string | null | undefined;
-    const { container } = render(GGPlot, {
-      data: [
-        { id: "north-1", region: "north", x: 1, y: 1 },
-        { id: "south-1", region: "south", x: 2, y: 2 },
-      ],
-      aes: { x: "x", y: "y" },
-      facet: { wrap: "region" },
-      layers: [{ geom: "point" }],
-      key: "id",
-      select: "interval",
-      onselect: (event: { phase: string; panelId?: string | null }) => {
-        if (event.phase === "end") endedPanelId = event.panelId;
-      },
-      onrender: (next: RenderModel) => {
-        model = next;
-      },
-      ...size,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [
+          { id: "north-1", region: "north", x: 1, y: 1 },
+          { id: "south-1", region: "south", x: 2, y: 2 },
+        ],
+        aes: { x: "x", y: "y" },
+        facet: { wrap: "region" },
+        layers: [{ geom: "point" }],
+        key: "id",
+        select: "interval",
+        onselect: (event: { phase: string; panelId?: string | null }) => {
+          if (event.phase === "end") endedPanelId = event.panelId;
+        },
+        onrender: (next: RenderModel) => {
+          model = next;
+        },
+        ...size,
+      }),
+    );
     const panels = requireModel(model).scene.panels;
     expect(panels).toHaveLength(2);
     const first = panels[0];

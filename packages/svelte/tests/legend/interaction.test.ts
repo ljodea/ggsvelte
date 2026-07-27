@@ -1,5 +1,6 @@
 import { fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
+import { withGrammarAsSpec } from "../helpers/ggplot-input.js";
 
 import type { SceneLegend, ThemeTokens } from "@ggsvelte/core";
 
@@ -139,24 +140,27 @@ describe("static Legend", () => {
   });
 
   it("renders binned colors and colorsteps through the public GGPlot composition", () => {
-    const { container } = render(GGPlot, {
-      data: [
-        { x: 1, y: 1, score: 1 },
-        { x: 2, y: 2, score: 10 },
-        { x: 3, y: 3, score: 100 },
-      ],
-      aes: { x: "x", y: "y", color: "score" },
-      layers: [{ geom: "point" }],
-      scales: {
-        color: {
-          type: "binned",
-          breaks: [1, 10, 100],
-          range: ["#111", "#eee"],
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [
+          { x: 1, y: 1, score: 1 },
+          { x: 2, y: 2, score: 10 },
+          { x: 3, y: 3, score: 100 },
+        ],
+        aes: { x: "x", y: "y", color: "score" },
+        layers: [{ geom: "point" }],
+        scales: {
+          color: {
+            type: "binned",
+            breaks: [1, 10, 100],
+            range: ["#111", "#eee"],
+          },
         },
-      },
-      width: 640,
-      height: 400,
-    });
+        width: 640,
+        height: 400,
+      }),
+    );
     expect(container.querySelectorAll(".gg-legend-step")).toHaveLength(2);
     expect(
       [...container.querySelectorAll(".gg-legend-label")].map((label) => label.textContent),

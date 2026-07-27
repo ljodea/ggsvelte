@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { withGrammarAsSpec } from "../../helpers/ggplot-input.js";
 
 import type { RenderModel } from "@ggsvelte/core";
 import GGPlot from "../../../src/lib/GGPlot.svelte";
@@ -51,21 +52,24 @@ describe("brush-to-zoom", () => {
 
   it("brush zoom replaces explicit coordinate limits with the brushed viewport", async () => {
     let model: RenderModel | null = null;
-    const { container } = render(GGPlot, {
-      data: [1, 10, 100, 1000].map((x) => ({ x, y: 1 })),
-      aes: { x: "x", y: "y" },
-      layers: [{ geom: "point" }],
-      scales: { x: { type: "linear", domain: [1, 1000], expand: { mult: 0, add: 0 } } },
-      coord: {
-        type: "transform",
-        x: { transform: "log10", limits: [1, 1000], expand: false },
-      },
-      zoom: { mode: "x" },
-      onrender: (next: RenderModel) => {
-        model = next;
-      },
-      ...size,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: [1, 10, 100, 1000].map((x) => ({ x, y: 1 })),
+        aes: { x: "x", y: "y" },
+        layers: [{ geom: "point" }],
+        scales: { x: { type: "linear", domain: [1, 1000], expand: { mult: 0, add: 0 } } },
+        coord: {
+          type: "transform",
+          x: { transform: "log10", limits: [1, 1000], expand: false },
+        },
+        zoom: { mode: "x" },
+        onrender: (next: RenderModel) => {
+          model = next;
+        },
+        ...size,
+      }),
+    );
     await until(() => model !== null);
     const before = requireModel(model);
     const panel = before.scene.panels[0];

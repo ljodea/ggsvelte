@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { withGrammarAsSpec } from "../helpers/ggplot-input.js";
 
 import GGPlot from "../../src/lib/GGPlot.svelte";
 import { render } from "../helpers/render.js";
@@ -78,17 +79,20 @@ describe("canvas strata (decision 0006 graduated)", () => {
 
   it("canvas a11y open state is shared across interleaved canvas strata", async () => {
     // canvas → svg → canvas yields two canvas strata (contiguous same-backend merges).
-    const { container } = render(GGPlot, {
-      data: rows,
-      aes: { x: "x", y: "y" },
-      layers: [
-        { geom: "point" as const, render: "canvas" as const, params: { size: 6 } },
-        { geom: "line" as const },
-        { geom: "point" as const, render: "canvas" as const, params: { size: 4 } },
-      ],
-      theme: "light" as const,
-      ...size,
-    });
+    const { container } = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: rows,
+        aes: { x: "x", y: "y" },
+        layers: [
+          { geom: "point" as const, render: "canvas" as const, params: { size: 6 } },
+          { geom: "line" as const },
+          { geom: "point" as const, render: "canvas" as const, params: { size: 4 } },
+        ],
+        theme: "light" as const,
+        ...size,
+      }),
+    );
     const toggles = [...container.querySelectorAll<HTMLButtonElement>(".gg-a11y-toggle")];
     expect(toggles).toHaveLength(2);
     expect(toggles.every((t) => t.getAttribute("aria-expanded") === "false")).toBe(true);

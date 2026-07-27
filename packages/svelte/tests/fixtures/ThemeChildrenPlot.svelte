@@ -1,10 +1,10 @@
 <script lang="ts">
   /**
-   * Host for theme-child component tests (#659 slice 2).
+   * Host for theme-child component tests (#659 slice 2 / #704).
    * Mounts GeomPoint + Theme/ThemeDark children under GGPlot and optionally
    * captures the plot registry for registrationCount assertions.
    */
-  import type { ThemeName, ThemeSpec } from "@ggsvelte/spec";
+  import type { ThemeName } from "@ggsvelte/spec";
 
   import type { PlotDiagnostic } from "../../src/lib/diagnostics/deprecation.js";
   import type { PortableSpec, RenderModel } from "../../src/lib/index.js";
@@ -16,7 +16,6 @@
   import type { LayerRegistry } from "../../src/lib/geoms/registry.svelte.js";
 
   const {
-    themeProp,
     themeName,
     themeInk,
     useThemeDark = false,
@@ -27,7 +26,6 @@
     onrender,
     ondiagnostic,
   }: {
-    themeProp?: ThemeName | ThemeSpec;
     themeName?: ThemeName;
     themeInk?: string;
     useThemeDark?: boolean;
@@ -65,7 +63,6 @@
   <GGPlot
     data={rows}
     aes={{ x: "x", y: "y" }}
-    theme={themeProp}
     width={480}
     height={320}
     {onrender}

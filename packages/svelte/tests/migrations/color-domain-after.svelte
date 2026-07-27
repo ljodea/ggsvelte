@@ -2,7 +2,7 @@
   import {
     GeomPoint,
     GGPlot,
-    scaleColorContinuous,
+    ScaleColorContinuous,
   } from "../../src/lib/index.js";
 
   const rows = [
@@ -12,13 +12,7 @@
   ];
 </script>
 
-<GGPlot
-  data={rows}
-  aes={{ x: "x", y: "y", color: "score" }}
-  scales={scaleColorContinuous({
-    domain: [0, 100],
-    oob: "squish",
-  })}
->
+<GGPlot data={rows} aes={{ x: "x", y: "y", color: "score" }}>
+  <ScaleColorContinuous domain={[0, 100]} oob="squish" />
   <GeomPoint />
 </GGPlot>
