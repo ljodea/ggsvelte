@@ -13,13 +13,11 @@
   const {
     capture,
     geom,
-    paramKeys,
     layerRender,
     ...rest
   }: {
     capture?: (registry: LayerRegistry) => void;
     geom: GeomName;
-    paramKeys: readonly string[];
     /** Maps to GeomProps.render (backend hint). */
     layerRender?: "svg" | "canvas" | "auto";
     [key: string]: unknown;
@@ -30,4 +28,4 @@
   untrack(() => capture?.(registry));
 </script>
 
-<FactoryProbe {geom} {paramKeys} render={layerRender} {...rest} />
+<FactoryProbe {geom} render={layerRender} {...rest} />

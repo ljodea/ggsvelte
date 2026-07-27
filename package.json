@@ -50,6 +50,8 @@
     "lifecycle:check": "bun scripts/gen-lifecycle.ts --check",
     "scale:children:gen": "bun scripts/gen-scale-children.ts",
     "scale:children:check": "bun scripts/gen-scale-children.ts --check",
+    "geom:children:gen": "bun scripts/gen-geom-children.ts",
+    "geom:children:check": "bun scripts/gen-geom-children.ts --check",
     "knip": "bun node_modules/.bin/knip",
     "lint:package": "bun scripts/package-lint.ts",
     "lint:actions": "bun scripts/actionlint.ts",

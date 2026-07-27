@@ -7,7 +7,7 @@
  * `value` getter over the child's `$props`, unregister in `onDestroy`.
  *
  * Theme stays in `theme/factory.svelte.ts` (role whitelist + ThemeName|ThemeSpec
- * shape). Marks stay in `geoms/factory.svelte.ts` (paramKeys whitelist).
+ * shape). Marks stay in `geoms/factory.svelte.ts` (GEOM_PARAM_KEYS whitelist).
  * Guides' `splitChannel` stays in `guides/factory.svelte.ts` (real behaviour).
  */
 import type { Layer } from "../geoms/registry.svelte.js";

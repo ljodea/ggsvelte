@@ -2,21 +2,23 @@
  * Factory for declaration-only geom components (decision 0001, mechanism A).
  *
  * Every <GeomX> component is a thin shell: it destructures nothing, passes
- * its live `$props()` proxy plus the geom's param-key list here, and this
- * factory registers a layer descriptor whose getters read the proxy — so
- * prop updates flow into the plot's derived spec without re-registration.
+ * its live `$props()` proxy here, and this factory registers a layer
+ * descriptor whose getters read the proxy — so prop updates flow into the
+ * plot's derived spec without re-registration. Param keys come from
+ * `GEOM_PARAM_KEYS` (#1039), not a hand-copied third argument.
  *
  * Init-time registration only (never in $effect); inert without a <GGPlot>
  * ancestor; unregisters on destroy (all measured in the M0a-1 spike).
  */
-import type {
-  AesInput,
-  DataInput,
-  GeomName,
-  PositionName,
-  PositionParams,
-  RenderBackend,
-  StatName,
+import {
+  GEOM_PARAM_KEYS,
+  type AesInput,
+  type DataInput,
+  type GeomName,
+  type PositionName,
+  type PositionParams,
+  type RenderBackend,
+  type StatName,
 } from "@ggsvelte/spec";
 
 import { registerLayer } from "./registry.svelte.js";
@@ -39,14 +41,14 @@ export interface GeomProps {
 /**
  * Register a geom layer from a component's live props proxy (passed as an
  * accessor so the proxy is only ever read lazily, inside the descriptor's
- * getters). `paramKeys` whitelists which props become layer params;
- * aes/stat/position/positionParams travel structurally.
+ * getters). Param whitelist is `GEOM_PARAM_KEYS[geom]`; aes/stat/position/
+ * positionParams travel structurally.
  */
-export function createGeomLayer<P extends GeomProps>(
-  geom: GeomName,
-  getProps: () => P,
-  paramKeys: readonly (keyof P & string)[],
-): void {
+export function createGeomLayer<P extends GeomProps>(geom: GeomName, getProps: () => P): void {
+  const paramKeys = GEOM_PARAM_KEYS[geom];
+  if (paramKeys === undefined) {
+    throw new Error(`createGeomLayer: no GEOM_PARAM_KEYS entry for geom "${geom}"`);
+  }
   registerLayer({
     geom,
     get stat() {
