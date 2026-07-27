@@ -35,6 +35,21 @@ interface BinPayload {
   yId: Int32Array | null;
 }
 
+/**
+ * The cut a binning stat actually performed, carried so interaction lineage
+ * reproduces it instead of re-deriving membership from the emitted (unfuzzed)
+ * edges. ggplot2 fuzzes breaks by 1e-8 × the median gap before cutting, so
+ * exact-edge predicates disagree with the stat inside that band (#905).
+ */
+interface BinCutPayload {
+  /** Fuzzed break grid passed to `binIndexOf` by the stat. */
+  fuzzy: readonly number[];
+  /** `closed: "right"` — resolved by the stat, not re-read from params. */
+  rightClosed: boolean;
+  /** Grid bin index per frame row (frame rows may omit empty bins). */
+  binIndex: Int32Array;
+}
+
 /** Dodge position slots (owned by bar/boxplot position + rect layout). */
 interface DodgePayload {
   slot: Uint32Array;
@@ -127,6 +142,8 @@ export interface LayerFrame extends LayerFrameCore {
   inputSourceRows: number[] | null;
   /** Discrete bin ids — only bin/count/rect consumers read this. */
   bin: BinPayload | null;
+  /** Stat-owned bin cut — only bin-edge interaction lineage reads this. */
+  binCut: BinCutPayload | null;
   /** Dodge slots — only bar/boxplot position + layout consumers read this. */
   dodge: DodgePayload | null;
   /** Boxplot hinges/outliers — only boxplot geometry + outlier lineage. */

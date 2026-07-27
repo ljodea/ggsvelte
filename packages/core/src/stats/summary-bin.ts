@@ -49,6 +49,12 @@ export interface SummaryBinStatResult {
   carried: Record<string, CellValue[]>;
   dropped: number;
   usedDefaultBins: boolean;
+  /**
+   * The cut actually performed: the fuzzed grid handed to `binIndexOf` plus the
+   * grid bin index per emitted row. Interaction lineage replays this instead of
+   * re-deriving membership from the unfuzzed `xmin`/`xmax` edges (#905).
+   */
+  cut: { fuzzy: readonly number[]; rightClosed: boolean; binIndex: Int32Array };
 }
 
 export function statSummaryBin(input: SummaryBinStatInput): SummaryBinStatResult {
@@ -69,6 +75,7 @@ export function statSummaryBin(input: SummaryBinStatInput): SummaryBinStatResult
     carried: Object.fromEntries(carriedNames.map((n) => [n, []])),
     dropped,
     usedDefaultBins,
+    cut: { fuzzy: [], rightClosed: true, binIndex: new Int32Array(0) },
   });
 
   let min = Infinity;
@@ -131,6 +138,7 @@ export function statSummaryBin(input: SummaryBinStatInput): SummaryBinStatResult
   const outYmax: number[] = [];
   const outGroups: number[] = [];
   const sampleRows: number[] = [];
+  const outBinIndex: number[] = [];
 
   for (const g of groupOrder) {
     for (let bin = 0; bin < binCount; bin++) {
@@ -148,6 +156,7 @@ export function statSummaryBin(input: SummaryBinStatInput): SummaryBinStatResult
       outYmax.push(summarized.ymax);
       outGroups.push(g);
       sampleRows.push(bucket.sampleRow);
+      outBinIndex.push(bin);
     }
   }
 
@@ -168,5 +177,10 @@ export function statSummaryBin(input: SummaryBinStatInput): SummaryBinStatResult
     carried,
     dropped,
     usedDefaultBins,
+    cut: {
+      fuzzy: breaks.fuzzy,
+      rightClosed: breaks.rightClosed,
+      binIndex: Int32Array.from(outBinIndex),
+    },
   };
 }

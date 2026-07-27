@@ -71,6 +71,8 @@ export function buildSummaryBinFrame(
     }),
     labelValues: col(binding.labelField),
     ...emptyFrameExtras(),
+    // Lineage replays the stat's own cut instead of re-deriving from edges (#905).
+    binCut: result.cut,
     ymin: result.ymin,
     ymax: result.ymax,
     xmin: result.xmin,

@@ -69,6 +69,12 @@ export interface BinStatResult {
   dropped: number;
   /** True when neither bins nor binwidth was given (default bins = 30). */
   usedDefaultBins: boolean;
+  /**
+   * The cut actually performed: the fuzzed grid handed to `binIndexOf` plus the
+   * grid bin index per emitted row. Interaction lineage replays this instead of
+   * re-deriving membership from the unfuzzed `xmin`/`xmax` edges (#905).
+   */
+  cut: { fuzzy: readonly number[]; rightClosed: boolean; binIndex: Int32Array };
 }
 
 export function statBin(input: BinStatInput): BinStatResult {
@@ -98,6 +104,7 @@ export function statBin(input: BinStatInput): BinStatResult {
     carried: Object.fromEntries(carriedNames.map((n) => [n, []])),
     dropped: x.length,
     usedDefaultBins,
+    cut: { fuzzy: [], rightClosed: true, binIndex: new Int32Array(0) },
   };
   if (min > max) return empty;
 
@@ -155,6 +162,7 @@ export function statBin(input: BinStatInput): BinStatResult {
   const outNcount = new Float64Array(n);
   const outNdensity = new Float64Array(n);
   const outGroups: number[] = [];
+  const outBinIndex = new Int32Array(n);
   const carried: Record<string, CellValue[]> = {};
   for (const name of carriedNames) carried[name] = [];
 
@@ -178,6 +186,7 @@ export function statBin(input: BinStatInput): BinStatResult {
       const hi = breaks.breaks[b + 1]!;
       const width = hi - lo;
       const c = counts[row]!;
+      outBinIndex[row] = b;
       outX[row] = (lo + hi) / 2;
       outXmin[row] = lo;
       outXmax[row] = hi;
@@ -204,5 +213,10 @@ export function statBin(input: BinStatInput): BinStatResult {
     carried,
     dropped,
     usedDefaultBins,
+    cut: {
+      fuzzy: breaks.fuzzy,
+      rightClosed: breaks.rightClosed,
+      binIndex: outBinIndex,
+    },
   };
 }
