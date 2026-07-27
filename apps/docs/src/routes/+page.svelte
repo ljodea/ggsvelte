@@ -131,7 +131,7 @@
     <h2 id="code-path-heading">
       Svelte for builders, JSON for embedded agents.
     </h2>
-    <p>Author in Svelte. Agents emit the same chart as PortableSpec JSON.</p>
+    <p>Same chart as Svelte, builder TypeScript, or Spec (JSON).</p>
   </div>
   <CodeTabs {tabs} />
 </section>
