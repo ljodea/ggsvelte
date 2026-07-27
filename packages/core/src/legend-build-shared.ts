@@ -1,12 +1,14 @@
 /** Shared legend layout metrics, style resolution, and label presentation helpers. */
 import type { TextMeasurer } from "./layout/measure.js";
 import { truncateToFit } from "./layout/truncate.js";
-import { bandKey } from "./scales/train.js";
 import {
   type LegendInput,
   type ResolvedLegendAppearance,
   LegendLayoutError,
 } from "./legend-build-types.js";
+
+// Re-export so legend-build/legend keep a stable path during the domain-labels split (#841).
+export { disambiguatedLabels } from "./domain-labels.js";
 
 const FONT_SIZE = 11;
 const TITLE_HEIGHT = 18;
@@ -21,22 +23,6 @@ const HORIZONTAL_RAMP_LENGTH = 180;
 
 /** Ellipsis for legend entry truncation (same glyph as axis paths). */
 const LEGEND_ELLIPSIS = "…";
-
-function valueKind(value: unknown): string {
-  if (value instanceof Date) return "date";
-  if (value === null) return "null";
-  if (typeof value === "string") return "text";
-  return typeof value;
-}
-
-export function disambiguatedLabels(values: readonly unknown[]): string[] {
-  const raw = values.map((value) => bandKey(value));
-  const counts = new Map<string, number>();
-  for (const label of raw) counts.set(label, (counts.get(label) ?? 0) + 1);
-  return raw.map((label, index) =>
-    (counts.get(label) ?? 0) > 1 ? `${label} (${valueKind(values[index])})` : label,
-  );
-}
 
 /** Binary-search truncation shared with axis layout, honoring guide typography. */
 function truncate(

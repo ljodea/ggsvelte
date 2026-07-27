@@ -2,7 +2,7 @@
  * Pack ordinal ColorScale into ColorResolution + palette-inferred advisory.
  */
 import type { ColorScaleSpec } from "@ggsvelte/spec";
-import { disambiguatedLabels } from "../legend.js";
+import { disambiguatedLabels } from "../domain-labels.js";
 import { resolveMissingColors } from "../scales/engine.js";
 import type { ColorScale } from "../scales/train.js";
 import type { CellValue } from "../table.js";

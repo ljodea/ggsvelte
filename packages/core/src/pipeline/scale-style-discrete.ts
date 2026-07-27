@@ -1,7 +1,7 @@
 /** Shared ordinal/manual discrete training and guide assembly for style aesthetics. */
 import type { StyleAesthetic } from "@ggsvelte/spec";
 
-import { disambiguatedLabels } from "../legend.js";
+import { disambiguatedLabels } from "../domain-labels.js";
 import type { StyleOutput, StyleScale } from "../scales/style.js";
 import {
   encodeKey,

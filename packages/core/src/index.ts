@@ -220,8 +220,11 @@ export type {
   TickFormatter,
 } from "./layout/layout.js";
 
+// Domain presentation labels (scale-domain; legend.ts re-exports for one-release compat)
+export { disambiguatedLabels } from "./domain-labels.js";
+
 // Legends
-export { buildLegends, disambiguatedLabels, LEGEND_ROW_HEIGHT } from "./legend.js";
+export { buildLegends, LEGEND_ROW_HEIGHT } from "./legend.js";
 export type {
   DiscreteLegendInput,
   LegendBlock,
