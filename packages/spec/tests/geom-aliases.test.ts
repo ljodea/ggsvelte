@@ -8,6 +8,7 @@ import { describe, expect, it } from "bun:test";
 
 import { ALIAS_GEOMS, GEOM_ALIASES, KNOWN_GEOMS } from "../src/schema-catalog.ts";
 import { normalize } from "../src/normalize.ts";
+import { validate } from "../src/validate.ts";
 import type { SpecInput } from "../src/normalize.ts";
 
 /** Minimal x/y mapping so every alias normalizes without a required-channel gap. */
@@ -37,5 +38,41 @@ describe("geom aliases (#1042)", () => {
 
   it("lists aliases that are real geom names", () => {
     for (const alias of ALIAS_GEOMS) expect(KNOWN_GEOMS).toContain(alias);
+  });
+
+  /**
+   * normalize() never throws on an unknown geom — it passes the name through so
+   * validate() can reject it with a did-you-mean error. A name that collides
+   * with an inherited Object property must take that same path: a prototype
+   * lookup would hand back a function where the geom string belongs.
+   */
+  it("passes an unknown geom through, even one named after an Object property", () => {
+    for (const geom of ["constructor", "toString", "valueOf", "hasOwnProperty", "poimt"]) {
+      const spec = normalize({ layers: [{ geom, aes: xy }] } as SpecInput);
+      expect(spec.layers[0]?.geom).toBe(geom);
+    }
+  });
+
+  /**
+   * Same prototype-chain trap on the defaults lookup one line down. Without an
+   * own-key check, GEOM_DEFAULTS["constructor"] is a function, so the `??`
+   * fallback never fires and the layer loses stat and position — which sends
+   * validate() down a shape error instead of the did-you-mean it promises.
+   */
+  it("fills identity defaults for an unknown geom named after an Object property", () => {
+    for (const geom of ["constructor", "toString", "poimt"]) {
+      const spec = normalize({ layers: [{ geom, aes: xy }] } as SpecInput);
+      expect(spec.layers[0]?.stat).toBe("identity");
+      expect(spec.layers[0]?.position).toBe("identity");
+    }
+  });
+
+  it("rejects an unknown geom with the did-you-mean error, whatever it is named", () => {
+    for (const geom of ["constructor", "toString", "poimt"]) {
+      const result = validate(normalize({ layers: [{ geom, aes: xy }] } as SpecInput));
+      expect(result.ok).toBe(false);
+      if (result.ok) continue;
+      expect(result.errors.map((error) => error.code)).toContain("unknown-geom");
+    }
   });
 });

@@ -150,7 +150,10 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
         const layer = layers[i];
         if (!isRecord(layer)) continue;
         const geom = layer["geom"];
-        if (typeof geom !== "string" || !(geom in GEOM_BRANCHES)) continue;
+        // Own-key check, as in validate-schema-shape: `in` walks the prototype
+        // chain, so a geom named "constructor" would reach Value.Check with a
+        // function in place of a schema.
+        if (typeof geom !== "string" || !Object.hasOwn(GEOM_BRANCHES, geom)) continue;
         const branch = GEOM_BRANCHES[geom as keyof typeof GEOM_BRANCHES];
         if (!Value.Check(branch, layer)) continue; // shape errors already reported
         errors.push(...layerStructuralErrors(layer, geom, i, plotAes));

@@ -26,4 +26,10 @@ rest are still legal input. `STAT_Y_COLUMNS` is now keyed by `StatName` and
 total, which names the ten stats that publish no y-mappable column instead of
 hiding them behind a `?? []`.
 
+Also fixes a geom lookup that walked the prototype chain. A layer named after
+an inherited `Object` property — `geom: "constructor"`, `"toString"`,
+`"valueOf"` — lost its `stat` and `position` in `normalize()` and then failed
+validation with a shape error instead of the `unknown-geom` did-you-mean the
+error contract promises. Every geom name is now an own-key lookup.
+
 Migration: <https://ggsvelte.sh/guide/upgrading#0-12-to-0-13>

@@ -182,7 +182,12 @@ function isAnnotationAbline(layer: LayerInput): boolean {
  * pipeline records off (#1042) rather than a fact buried in this branch.
  */
 function canonicalGeom(geom: LayerInput["geom"]): NormalizedGeomName {
-  return geom in GEOM_ALIASES ? GEOM_ALIASES[geom as AliasGeomName] : (geom as NormalizedGeomName);
+  // Own-key check, not `in`: `in` walks the prototype chain, so a geom named
+  // "constructor" or "toString" would read as an alias and rewrite to a
+  // function. Unknown names must pass through for validate() to reject.
+  return Object.hasOwn(GEOM_ALIASES, geom)
+    ? GEOM_ALIASES[geom as AliasGeomName]
+    : (geom as NormalizedGeomName);
 }
 
 function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): NormalizedLayerSpec {
@@ -199,7 +204,12 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): Normalized
   let aes = resolveLayerAes(inherited, normalizeAes(layerAesInput));
   // Unknown geoms fall back to identity defaults so normalize never throws —
   // validate() rejects them right after with the proper did-you-mean error.
-  const defaults = GEOM_DEFAULTS[layer.geom] ?? { stat: "identity", position: "identity" };
+  // Own-key check for the same reason as canonicalGeom: plain `[…]` on a geom
+  // named "constructor" returns a function, which is truthy, so `??` would not
+  // fire and the layer would lose stat and position.
+  const defaults = Object.hasOwn(GEOM_DEFAULTS, layer.geom)
+    ? GEOM_DEFAULTS[layer.geom]
+    : { stat: "identity" as const, position: "identity" as const };
   // geom_sf: public stat_sf (#809 phase 7). Rewrite legacy portable
   // `stat: "identity"` so re-normalize stays additive (draw path unchanged).
   const rawStat = layer.stat ?? defaults.stat;

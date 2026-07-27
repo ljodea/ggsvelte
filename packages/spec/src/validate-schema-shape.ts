@@ -134,7 +134,10 @@ function mapLayerShapeErrors(layer: unknown, layerPath: string): SpecError[] {
     ];
   }
   const geom = layer["geom"];
-  if (typeof geom !== "string" || !(geom in GEOM_BRANCHES)) {
+  // Own-key check: `in` walks the prototype chain, so a geom named
+  // "constructor" would pass this guard and hand Value.Errors a function
+  // instead of a schema — reporting invalid-type rather than the did-you-mean.
+  if (typeof geom !== "string" || !Object.hasOwn(GEOM_BRANCHES, geom)) {
     return [unknownGeomError(geom, layerPath)];
   }
   const branch = GEOM_BRANCHES[geom as keyof typeof GEOM_BRANCHES];
