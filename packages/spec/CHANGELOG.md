@@ -1,5 +1,43 @@
 # @ggsvelte/spec
 
+## 0.13.0
+
+### Minor Changes
+
+- dfa1ba0: <!-- markdownlint-disable MD041 -->
+
+  Remove the seven deprecated grammar props from `<GGPlot>` (`theme`, `scales`,
+  `coord`, `facet`, `labs`, `guides`, `legend`) and the `LayerDescriptor` type
+  alias. Compose grammar as declaration-only children; use
+  `MarkLayerDescriptor`. Run `npx ggsvelte-codemod --write` on old source.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-12-to-0-13>
+
+- cce4f5a: # One diagnostic prose source (#987)
+
+  - Move `PIPELINE_ERROR_CATALOG` into `@ggsvelte/spec` (re-exported from core)
+  - Dual-channel codes share `DUAL_ERROR_PROSE` so summary/fix cannot drift
+  - Rename validation code `scale-manual-domain-range` → `color-manual-domain-range`
+  - Docs error-reference imports pipeline error prose from `@ggsvelte/spec`
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-11-to-0-12>
+
+### Patch Changes
+
+- 5b54dcb: # Extract dataChecks layer walk; per-layer style/color evidence (#844)
+
+  Move geom/stat type rules, field existence, and channel collection into
+  `validate-data-checks-layer.ts` so `dataChecks` is a thin orchestrator
+  (evidence → walk → style/position/color checkers).
+
+  Style and color scale checks now take the same per-use `evidenceForUse`
+  path as position (#609): multi-table layers that share a field name keep
+  their own type view, so a later quantitative layer no longer last-wins-hides
+  an earlier sequential/finite-style mismatch.
+
+  Migration: none — validation is stricter only for multi-table same-name
+  field cases that previously under-reported scale-type-mismatch.
+
 ## 0.12.0
 
 ### Minor Changes

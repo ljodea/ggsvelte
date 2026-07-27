@@ -1,5 +1,115 @@
 # @ggsvelte/core
 
+## 0.13.0
+
+### Minor Changes
+
+- dfa1ba0: <!-- markdownlint-disable MD041 -->
+
+  Remove the seven deprecated grammar props from `<GGPlot>` (`theme`, `scales`,
+  `coord`, `facet`, `labs`, `guides`, `legend`) and the `LayerDescriptor` type
+  alias. Compose grammar as declaration-only children; use
+  `MarkLayerDescriptor`. Run `npx ggsvelte-codemod --write` on old source.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-12-to-0-13>
+
+- 3e463ae: <!-- markdownlint-disable MD041 -->
+
+  feat(core): resolve after_stat color/fill outside density_2d (#953)
+
+  Migration: none — additive
+
+  `aes(fill = after_stat(count))` on histograms and the same pattern for
+  `density` / `ncount` / `ndensity`, plus count and density stats, now map
+  into continuous fill/color scales and legends. Shared `colorColumns`
+  helper; `STAT_COLOR_COLUMNS` extended so #915 no longer warns for these.
+
+- cce4f5a: # One diagnostic prose source (#987)
+
+  - Move `PIPELINE_ERROR_CATALOG` into `@ggsvelte/spec` (re-exported from core)
+  - Dual-channel codes share `DUAL_ERROR_PROSE` so summary/fix cannot drift
+  - Rename validation code `scale-manual-domain-range` → `color-manual-domain-range`
+  - Docs error-reference imports pipeline error prose from `@ggsvelte/spec`
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-11-to-0-12>
+
+### Patch Changes
+
+- f6d99d5: <!-- markdownlint-disable MD041 -->
+
+  fix(core): emit dual-channel scale diagnostics from structured facts
+
+  Scale-training rich diagnostics (break-outside-domain, baseline transformed
+  origin) are built at emission time with typed facts. Evidence is no longer
+  recovered by parsing human-readable warning messages. Catalog completeness
+  is primary via a typed emission registry (#628).
+
+- d800541: <!-- markdownlint-disable MD041 -->
+
+  refactor(core): host disambiguatedLabels next to domain labeling
+
+  Move the scale-domain label helper out of legend layout builders into
+  domain-labels.ts. Public export and legend re-export stay stable.
+
+- 5b54dcb: # Extract dataChecks layer walk; per-layer style/color evidence (#844)
+
+  Move geom/stat type rules, field existence, and channel collection into
+  `validate-data-checks-layer.ts` so `dataChecks` is a thin orchestrator
+  (evidence → walk → style/position/color checkers).
+
+  Style and color scale checks now take the same per-use `evidenceForUse`
+  path as position (#609): multi-table layers that share a field name keep
+  their own type view, so a later quantitative layer no longer last-wins-hides
+  an earlier sequential/finite-style mismatch.
+
+  Migration: none — validation is stricter only for multi-table same-name
+  field cases that previously under-reported scale-type-mismatch.
+
+- d4934b0: <!-- markdownlint-disable MD041 -->
+
+  perf(core): memoize geom_map join index across facet panels
+
+  Fortified map table + byKey index are built once per LayerBinding (WeakMap)
+  instead of once per panel. `map-region-missing` is also emitted at most once
+  per layer per run.
+
+- 20a3e17: <!-- markdownlint-disable MD041 -->
+
+  perf(core): O(E) contour polyline stitch (no Array.unshift)
+
+  Backward isoline extend used `chain.unshift` per edge and re-filtered
+  adjacency for degree-1 seeds. Push into a prefix + reverse once, and keep
+  remaining degrees + an endpoint-edge stack so stitch is linear in edge count.
+
+- 58bccd6: <!-- markdownlint-disable MD041 -->
+
+  perf(core): precompute per-point-batch maxRadius for hitTest
+
+  Variable aes(size) used to re-scan `batch.sizes` on every pointer probe.
+  Build stores max(batch.size, …sizes)×1.25 on the spatial point-batch entry
+  so resolveTopmostHit only expands the query pad from that value.
+
+- ee099ba: <!-- markdownlint-disable MD041 -->
+
+  refactor(core): inline empty pipeline barrels and type satellites
+
+  Delete pure re-export facades and one-type satellites in packages/core
+  pipeline. Collapse panel-layout from 34 files to 7 by inlining sole-importer
+  modules into chrome, facet, single, and the orchestrator.
+
+- 3c5fba6: <!-- markdownlint-disable MD041 -->
+
+  refactor(core): collapse boxplot geometry family; delete dead smooth-line write
+
+  Merge the 12-file boxplot geometry tree into geometry-boxplot.ts +
+  geometry-boxplot-body.ts. Delete orphaned geometry-smooth-line-write.ts
+  (no src/ importers; only a test kept it alive).
+
+- Updated dependencies [dfa1ba0]
+- Updated dependencies [5b54dcb]
+- Updated dependencies [cce4f5a]
+  - @ggsvelte/spec@0.13.0
+
 ## 0.12.0
 
 ### Minor Changes
