@@ -118,6 +118,10 @@ jobs:
         with:
           name: component-svelte-blob-${{ matrix.shard }}
           path: packages/svelte/.vitest-reports/
+          # `.vitest-reports` is a dotted directory and upload-artifact's glob
+          # skips hidden entries by default, so without this the upload finds
+          # nothing and the collect job starves for blobs.
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 1
       - name: upload packages/svelte failure artifacts

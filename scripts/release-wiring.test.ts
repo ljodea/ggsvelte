@@ -394,6 +394,11 @@ describe("R0 release wiring", () => {
     expect(svelteShards).toContain("matrix:");
     expect(svelteShards).toContain("--reporter=blob");
     expect(svelteShards).not.toContain("uses: ./.github/actions/ci-content-hash-write");
+    // vitest writes blob reports to `.vitest-reports/`, and upload-artifact's
+    // glob skips dotfiles unless told otherwise — without this the upload finds
+    // nothing, fails on `if-no-files-found: error`, and the collect job is
+    // skipped for want of blobs. Cost one CI round on PR #1036.
+    expect(svelteShards).toContain("include-hidden-files: true");
     const svelteCollect = ciJob(ci, "component-svelte-coverage");
     expect(svelteCollect.length).toBeGreaterThan(0);
     expect(svelteCollect).toContain("needs: component-svelte");
