@@ -1,10 +1,10 @@
 /**
  * M2 pipeline — geom_map fortified region join (#808).
  */
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, spyOn } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
 import { PipelineError, runPipeline } from "../../src/pipeline.ts";
-import { buildMapFrame } from "../../src/pipeline/frame-stats-map.ts";
+import { buildMapFrame, resolveMapJoinIndex } from "../../src/pipeline/frame-stats-map.ts";
 import type { PathsBatch } from "../../src/scene.ts";
 import { ColumnTable } from "../../src/table.ts";
 
@@ -244,5 +244,66 @@ describe("geom_map", () => {
         size,
       ),
     ).toThrow(/map-id-column-missing|zone_typo/);
+  });
+
+  it("memoizes fortified map table + byKey once per layer across facet panels (#910)", () => {
+    // Pre-fix: buildMapFrame called ColumnTable.fromColumns(map) once per panel.
+    const fromColumns = spyOn(ColumnTable, "fromColumns");
+    try {
+      const model = runPipeline(
+        gg(
+          {
+            state: ["A", "B", "A", "B"],
+            rate: [10, 20, 11, 21],
+            panel: ["p1", "p1", "p2", "p2"],
+          },
+          aes({ map_id: "state", fill: "rate" }),
+        )
+          .geomMap({ map: { columns: fortified } })
+          .facet({ wrap: "panel" })
+          .spec(),
+        size,
+      );
+      expect(model.scene.panels.length).toBe(2);
+      // Two region paths total still materialise across panels.
+      const batch = pathBatch(model);
+      expect(batch.pathOffsets.length - 1).toBeGreaterThanOrEqual(2);
+      const mapBuilds = fromColumns.mock.calls.filter((args) => args[0] === fortified).length;
+      expect(mapBuilds).toBe(1);
+    } finally {
+      fromColumns.mockRestore();
+    }
+  });
+
+  it("emits map-region-missing at most once per layer under facets (#910)", () => {
+    const model = runPipeline(
+      gg(
+        {
+          state: ["A", "missing", "B", "also-missing"],
+          rate: [10, 1, 20, 2],
+          panel: ["p1", "p1", "p2", "p2"],
+        },
+        aes({ map_id: "state", fill: "rate" }),
+      )
+        .geomMap({ map: { columns: fortified } })
+        .facet({ wrap: "panel" })
+        .spec(),
+      size,
+    );
+    expect(model.scene.panels.length).toBe(2);
+    const missing = model.warnings.filter((w) => w.code === "map-region-missing");
+    expect(missing).toHaveLength(1);
+  });
+
+  it("resolveMapJoinIndex returns the same object for the same binding", () => {
+    const binding = {
+      layer: { geom: "map", params: { map: { columns: fortified } } },
+      index: 0,
+      mapIdField: "state",
+    } as never;
+    const a = resolveMapJoinIndex(binding);
+    const b = resolveMapJoinIndex(binding);
+    expect(a).toBe(b);
+    expect(a.byKey.get("A")?.length).toBe(3);
   });
 });
