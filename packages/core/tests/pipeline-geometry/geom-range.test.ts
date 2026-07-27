@@ -100,6 +100,21 @@ describe("range geoms geometry (#793)", () => {
     expect(mid.linewidth).toBe(3);
   });
 
+  it("crossbar defaults to hollow (paper) when fill is unmapped", () => {
+    const model = runPipeline(
+      gg(
+        { g: ["a"], mid: [2], lo: [1], hi: [3] },
+        aes({ x: "g", y: "mid", ymin: "lo", ymax: "hi" }),
+      )
+        .geomCrossbar()
+        .spec(),
+      size,
+    );
+    const rect = model.scene.batches[0] as RectsBatch;
+    expect(rect.fill).toBeNull();
+    expect(rect.fillRole).toBe("paper");
+  });
+
   it("crossbar width uses errorbar resolution rule on continuous x", () => {
     const model = runPipeline(
       gg(

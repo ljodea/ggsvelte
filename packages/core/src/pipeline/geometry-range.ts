@@ -342,6 +342,13 @@ export function crossbarBatches(
     typeof binding.linewidth?.constant === "number"
       ? binding.linewidth.constant
       : (params.linewidth ?? DEFAULT_RULE_LINEWIDTH);
+  // ggplot2 geom_crossbar defaults fill = NA (outlined box). Match boxplot
+  // body: paper fillRole when no fill is mapped/constant.
+  const hasFill =
+    binding.fill.constant !== null ||
+    binding.fill.field !== null ||
+    binding.fill.scaledConstant !== null ||
+    fills !== null;
   const rectBatch: RectsBatch = {
     kind: "rects",
     layerIndex: binding.index,
@@ -349,6 +356,7 @@ export function crossbarBatches(
     rects: outRects,
     rowIndex: outRectRows,
     fill: binding.fill.constant,
+    ...(hasFill ? {} : { fillRole: "paper" as const }),
     alpha:
       typeof binding.alpha?.constant === "number" ? binding.alpha.constant : (params.alpha ?? 1),
     stroke: binding.color.constant,
@@ -362,6 +370,17 @@ export function crossbarBatches(
   }
   if (fills !== null) rectBatch.fills = kept === n ? fills : fills.slice(0, kept);
   if (strokes !== null) rectBatch.strokes = kept === n ? strokes : strokes.slice(0, kept);
+  // Mapped linewidth/linetype must style the box outline as well as the mid
+  // line (STYLE_AESTHETIC_GEOMS enrolls crossbar on both).
+  const linewidths = numericStyleVector(frame, "linewidth", outRectStyle, styles);
+  if (linewidths !== undefined) rectBatch.strokeWidths = linewidths;
+  if (typeof binding.linetype?.constant === "string") {
+    rectBatch.linetype = binding.linetype.constant as Linetype;
+  }
+  const linetypeIndexes = indexedStyleVector(frame, "linetype", outRectStyle, styles, (value) =>
+    linetypeIndex(value as Linetype),
+  );
+  if (linetypeIndexes !== undefined) rectBatch.linetypeIndexes = linetypeIndexes;
 
   const mid = packStrokeBatch(
     frame,
