@@ -667,6 +667,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "point/steps-binned",
+    category: "point",
+    name: "steps-binned",
+    title: "Stepped binned colour scale",
+    description: "",
+    tags: ["point", "color", "steps", "binned", "scale"],
+    docsSection: "Points & scatter",
+    hasData: true,
+  },
+  {
     id: "point/style-scales",
     category: "point",
     name: "style-scales",

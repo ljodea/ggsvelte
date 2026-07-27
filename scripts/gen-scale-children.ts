@@ -65,12 +65,12 @@ function colourAliases(stem: string): string[] {
  *   position-binned      2
  *   position-temporal    6  (date/datetime/time × x/y)
  *   position-discrete    2
- *   color-fill          36
+ *   color-fill          42
  *   numeric-style       24  (21 base + size area/radius family #830)
  *   finite-style         8
  *   ----------------------
- *   86 component files + 22 aliases
- *     (18 Colour + Size/Linewidth/Alpha/Shape Ordinal re-exports, #830/#832)
+ *   92 component files + 25 aliases
+ *     (21 Colour + 4 Size/Linewidth/Alpha/Shape Ordinal re-exports, #830/#832)
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
@@ -130,7 +130,7 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscretePositionScaleOptions",
   ]),
 
-  // --- color-fill (36 components + 18 Colour aliases) ----------------------
+  // --- color-fill (42 components + 21 Colour aliases) ----------------------
   // optionsTypes match the slice-3 hand-written shells exactly.
   shell(
     "scaleColorContinuous",
@@ -152,6 +152,27 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "BinnedColorScaleOptions",
     ["BinnedColorScaleOptions"],
     colourAliases("Binned"),
+  ),
+  shell(
+    "scaleColorSteps",
+    "color-fill",
+    "StepsScaleOptions",
+    ["StepsScaleOptions"],
+    colourAliases("Steps"),
+  ),
+  shell(
+    "scaleColorSteps2",
+    "color-fill",
+    "Steps2ScaleOptions",
+    ["Steps2ScaleOptions"],
+    colourAliases("Steps2"),
+  ),
+  shell(
+    "scaleColorStepsn",
+    "color-fill",
+    "StepsnScaleOptions",
+    ["StepsnScaleOptions"],
+    colourAliases("Stepsn"),
   ),
   shell(
     "scaleColorGradient",
@@ -244,6 +265,9 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscreteColorScaleOptions",
   ]),
   shell("scaleFillBinned", "color-fill", "BinnedColorScaleOptions", ["BinnedColorScaleOptions"]),
+  shell("scaleFillSteps", "color-fill", "StepsScaleOptions", ["StepsScaleOptions"]),
+  shell("scaleFillSteps2", "color-fill", "Steps2ScaleOptions", ["Steps2ScaleOptions"]),
+  shell("scaleFillStepsn", "color-fill", "StepsnScaleOptions", ["StepsnScaleOptions"]),
   shell("scaleFillGradient", "color-fill", "GradientScaleOptions", ["GradientScaleOptions"]),
   shell("scaleFillGradient2", "color-fill", "Gradient2ScaleOptions", ["Gradient2ScaleOptions"]),
   shell("scaleFillGradientn", "color-fill", "GradientnScaleOptions", ["GradientnScaleOptions"]),

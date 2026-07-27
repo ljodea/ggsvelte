@@ -456,3 +456,94 @@ export const scale_fill_hue = scaleFillHue;
 export const scale_fill_grey = scaleFillGrey;
 export const scale_fill_gray = scaleFillGray;
 export const scale_fill_ordinal = scaleFillOrdinal;
+
+// --- steps / steps2 / stepsn (#827) ----------------------------------------
+// Binned continuous colour with hard steps (ggplot2 scale_*_steps*).
+
+/** Two-stop stepped continuous colour (default navy → sky). */
+export type StepsScaleOptions = Omit<BinnedColorScaleOptions, "scheme" | "range"> & {
+  low?: string;
+  high?: string;
+};
+
+/**
+ * Three-stop stepped diverging colour.
+ * v1: no `midpoint` param (asymmetric domain remapping deferred).
+ */
+export type Steps2ScaleOptions = Omit<BinnedColorScaleOptions, "scheme" | "range"> & {
+  low?: string;
+  mid?: string;
+  high?: string;
+};
+
+/** N-stop stepped colour; requires ≥2 hex stops via colours/colors/values. */
+export type StepsnScaleOptions = Omit<BinnedColorScaleOptions, "scheme" | "range"> & {
+  colours?: readonly string[];
+  colors?: readonly string[];
+  values?: readonly string[];
+};
+
+const STEPS_DEFAULT_LOW = "#132B43";
+const STEPS_DEFAULT_HIGH = "#56B1F7";
+const STEPS2_DEFAULT_LOW = "#B2182B";
+const STEPS2_DEFAULT_MID = "#F7F7F7";
+const STEPS2_DEFAULT_HIGH = "#2166AC";
+
+function stepsRange(options: StepsScaleOptions): BinnedColorScaleOptions {
+  const { low = STEPS_DEFAULT_LOW, high = STEPS_DEFAULT_HIGH, ...rest } = options;
+  return { ...rest, range: [low, high] };
+}
+
+function steps2Range(options: Steps2ScaleOptions): BinnedColorScaleOptions {
+  const {
+    low = STEPS2_DEFAULT_LOW,
+    mid = STEPS2_DEFAULT_MID,
+    high = STEPS2_DEFAULT_HIGH,
+    ...rest
+  } = options;
+  return { ...rest, range: [low, mid, high] };
+}
+
+function stepsnRange(options: StepsnScaleOptions): BinnedColorScaleOptions {
+  const { colours, colors, values, ...rest } = options;
+  const stops = colours ?? colors ?? values;
+  if (stops === undefined || stops.length < 2) {
+    throw new Error(
+      "scale_*_stepsn requires colours/colors/values with at least 2 #rgb/#rrggbb stops.",
+    );
+  }
+  return { ...rest, range: [...stops] };
+}
+
+export function scaleColorSteps(options: StepsScaleOptions = {}): Scales {
+  return colorScale("color", "binned", stepsRange(options));
+}
+export function scaleColorSteps2(options: Steps2ScaleOptions = {}): Scales {
+  return colorScale("color", "binned", steps2Range(options));
+}
+export function scaleColorStepsn(options: StepsnScaleOptions = {}): Scales {
+  return colorScale("color", "binned", stepsnRange(options));
+}
+
+export function scaleFillSteps(options: StepsScaleOptions = {}): Scales {
+  return colorScale("fill", "binned", stepsRange(options));
+}
+export function scaleFillSteps2(options: Steps2ScaleOptions = {}): Scales {
+  return colorScale("fill", "binned", steps2Range(options));
+}
+export function scaleFillStepsn(options: StepsnScaleOptions = {}): Scales {
+  return colorScale("fill", "binned", stepsnRange(options));
+}
+
+export const scaleColourSteps = scaleColorSteps;
+export const scaleColourSteps2 = scaleColorSteps2;
+export const scaleColourStepsn = scaleColorStepsn;
+export const scale_color_steps = scaleColorSteps;
+export const scale_color_steps2 = scaleColorSteps2;
+export const scale_color_stepsn = scaleColorStepsn;
+export const scale_colour_steps = scaleColorSteps;
+export const scale_colour_steps2 = scaleColorSteps2;
+export const scale_colour_stepsn = scaleColorStepsn;
+export const scale_fill_steps = scaleFillSteps;
+export const scale_fill_steps2 = scaleFillSteps2;
+export const scale_fill_stepsn = scaleFillStepsn;
