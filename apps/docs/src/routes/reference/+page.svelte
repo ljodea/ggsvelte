@@ -35,8 +35,9 @@
     <a href={`${base}/kyoto-sakura.json`}>
       <strong><code>@ggsvelte/svelte/data</code></strong>
       <span>
-        Bundled datasets. <code>kyotoSakura</code>: 838 Kyoto cherry-blossom
-        dates, 812&ndash;2026 CE (Aono). Also served as JSON.
+        Bundled datasets. <code>kyotoSakura</code> (time series),
+        <code>palmerPenguins</code> (distribution / groups),
+        <code>mpg</code> (categorical comparison). Also served as JSON.
       </span>
     </a>
     <a href={`${base}/schema/v0.json`}>

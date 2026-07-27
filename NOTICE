@@ -83,6 +83,41 @@ Ecological Research programme, and are published by the Environmental Data
 Initiative. The package authors ask that the LTER programme be acknowledged
 in any publication using the data, which this notice does.
 
+Palmer Archipelago penguins (bundled teaching dataset)
+------------------------------------------------------
+packages/svelte/src/lib/data/palmer-penguins.ts and the docs asset
+apps/docs/static/palmer-penguins.json contain 333 complete penguin body
+measurements (Adelie, Chinstrap, Gentoo) from Palmer Station, Antarctica,
+2007–2009.
+
+  Collected by Dr Kristen Gorman at Palmer Station as part of the Palmer
+  Long Term Ecological Research programme; published by the Environmental
+  Data Initiative.
+  Package authors: Allison Horst, Alison Hill and Kristen Gorman.
+  Source package: https://allisonhorst.github.io/palmerpenguins/
+  License: CC0 1.0 Universal (public domain dedication).
+
+ggsvelte redistributes the complete-cases rows (11 incomplete of 344 dropped)
+with the LTER acknowledgement the package authors request. Anyone publishing
+charts made from this data should cite the package authors and acknowledge
+Palmer LTER (see the PALMER_PENGUINS_CITATION export).
+
+EPA fuel economy — popular models (bundled teaching dataset)
+------------------------------------------------------------
+packages/svelte/src/lib/data/mpg.ts and the docs asset apps/docs/static/mpg.json
+contain 234 vehicle configurations for 38 popular models in model years 1999
+and 2008.
+
+  Underlying measurements: U.S. Environmental Protection Agency fuel-economy
+  data published at https://fueleconomy.gov/. U.S. government works are not
+  subject to copyright in the United States.
+  Popular-model subset and column layout: ggplot2::mpg
+  (https://ggplot2.tidyverse.org/reference/mpg.html), MIT License.
+
+ggsvelte redistributes the same popular-model subset used as ggplot2's classic
+teaching table. Cite the EPA source for the measurements and ggplot2 for the
+subset definition when publishing charts (see the MPG_CITATION export).
+
 Google turbo colormap (bundled sequential scheme stops)
 -------------------------------------------------------
 packages/core/src/scales/sequential-schemes.ts includes a 10-stop sample of
