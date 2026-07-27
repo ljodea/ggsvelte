@@ -363,7 +363,7 @@
     },
     "rule/data-driven": {
       "filename": "rule-data-driven-light.png",
-      "sourceSha256": "0aed803d3fba83e8187a7d45c723439c1b1b0403e8b17c609e963e5a353ac7e9",
+      "sourceSha256": "dc3f3289ae5ac1022dc0919da0158cea724af83859b6d46810529ecd34b68dd1",
       "pngSha256": "238f83b3dc85f85ca10f40eb158f116b7dfb3dd0245bc93a501383f67fef0ed8"
     },
     "segment/annotations": {
