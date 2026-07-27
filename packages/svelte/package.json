@@ -69,7 +69,7 @@
     "@vitest/coverage-v8": "^4.1.10",
     "axe-core": "^4.11.1",
     "playwright": "1.61.1",
-    "svelte": "^5.56.5",
+    "svelte": "^5.56.7",
     "svelte-check": "^4.7.3",
     "typescript": "^6.0.3",
     "vite": "^8.1.5",
