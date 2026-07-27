@@ -51,6 +51,7 @@ import {
   type SchedulePointerInspectInput,
 } from "./pointer-inspect.js";
 import {
+  applySceneInspectReconcile,
   planInspectionDismiss,
   planSceneInspectReconcile,
   resolveInspectionEmitAction,
@@ -519,61 +520,59 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
       modelRunId: currentModel?.runId ?? null,
       reconciledRun,
     });
-    switch (plan.type) {
-      case "noop":
-      case "skip":
-        return;
-      case "clear-disabled":
-        inspectionCoordinator.invalidate();
+    // Thin plan → apply shell (#855). getInspectionState stays a thunk so
+    // same-run skip does not subscribe to hover inspection updates.
+    applySceneInspectReconcile(plan, {
+      model: currentModel,
+      dataIdentityEpoch: deps.dataIdentityEpoch,
+      clearInspection() {
         inspection = null;
         inspectionSeed = null;
-        clearDismissedLatch();
-        // Inspect-only cancel: move-area schedules must survive.
-        pointerQueue.cancel({ pendingPinned: "discard" });
-        return;
-      case "invalidate-clear-transient":
-      case "invalidate-idle":
-      case "invalidate-reconcile-pinned": {
-        // currentModel is non-null for invalidate-* (plan requires run advance).
-        const runId = currentModel!.runId;
-        // invalidate dispatch already cancels all scheduled pointer work.
-        reducerOf().dispatch({ type: "invalidate", reason: "scene" });
-        pointerQueue.clearForSceneInvalidate();
-        clearDismissedLatch();
+      },
+      setInspectionFromReconcile({ snapshot, seed }) {
+        inspection = snapshot;
+        inspectionSeed = seed;
+      },
+      setActiveCandidateId(id) {
+        activeCandidateId = id;
+      },
+      clearDismissedLatch,
+      setReconciledRun(runId) {
         reconciledRun = runId;
-        if (plan.type === "invalidate-clear-transient") {
-          inspectionCoordinator.release("transient");
-          inspection = null;
-          inspectionSeed = null;
-          return;
-        }
-        if (plan.type === "invalidate-idle") return;
-        const reconciled = inspectionCoordinator.reconcilePinned({
-          model: currentModel!,
-          identityEpoch: deps.dataIdentityEpoch(),
-          layoutEpoch: runId,
+      },
+      dispatchSceneInvalidate() {
+        reducerOf().dispatch({ type: "invalidate", reason: "scene" });
+      },
+      cancelPointerDiscardPending() {
+        pointerQueue.cancel({ pendingPinned: "discard" });
+      },
+      clearPointerForSceneInvalidate() {
+        pointerQueue.clearForSceneInvalidate();
+      },
+      coordinatorInvalidate() {
+        inspectionCoordinator.invalidate();
+      },
+      releaseTransient() {
+        inspectionCoordinator.release("transient");
+      },
+      reconcilePinned(input) {
+        return inspectionCoordinator.reconcilePinned({
+          ...input,
           source: "programmatic",
           completeness: "complete",
         });
-        if (reconciled === null) {
-          // Failed pinned reconcile: clear inspection only (not area Escape).
-          emitInspection({
-            type: "inspect",
-            phase: "clear",
-            source: "programmatic",
-          });
-          inspection = null;
-          inspectionSeed = null;
-        } else {
-          inspection = reconciled.snapshot;
-          inspectionSeed = reconciled.seed;
-          activeCandidateId = reconciled.seed.id;
-          if (reconciled.semanticChanged)
-            emitInspection(reconciled.snapshot, reconciled.semanticFingerprint);
-        }
-        break;
-      }
-    }
+      },
+      emitClearProgrammatic() {
+        emitInspection({
+          type: "inspect",
+          phase: "clear",
+          source: "programmatic",
+        });
+      },
+      emitSemanticChange(snapshot, semanticFingerprint) {
+        emitInspection(snapshot, semanticFingerprint);
+      },
+    });
   });
 
   return {

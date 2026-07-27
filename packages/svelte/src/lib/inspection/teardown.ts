@@ -1,12 +1,19 @@
 /**
- * Pure decision tables for capture-surface inspection *teardown* policy:
- * blur/outside dismiss, scene-run reconcile, emit fingerprint, escape/close plan.
- * Callers own reducer dispatch, field clears, coordinator, and focus.
+ * Decision tables and scene-reconcile apply for capture-surface inspection
+ * *teardown* policy: blur/outside dismiss, scene-run reconcile (plan + bag
+ * apply), emit fingerprint, escape/close plan.
+ *
+ * Plan helpers are pure. `applySceneInspectReconcile` only calls the host bag
+ * (reducer, coordinator, queue, field writes) — no $effect registration.
  */
 
-import type { InteractionSource } from "../interaction/interaction.js";
+import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
+
+import type { InteractionSource, PlotInspectionChange } from "../interaction/interaction.js";
 import { clearInspectionFingerprint } from "./coordinator.js";
 import type { InspectionHostState } from "./frame.js";
+
+type InspectionChangeSnapshot = PlotInspectionChange<Record<string, CellValue>, PropertyKey>;
 
 // ---- surface blur / outside pointer dismiss ----
 
@@ -98,6 +105,113 @@ export function planSceneInspectReconcile(input: {
     return { type: "invalidate-reconcile-pinned" };
   }
   return { type: "invalidate-idle" };
+}
+
+/**
+ * Host mutators for `applySceneInspectReconcile`. The `$effect` shell owns
+ * plan + bag wiring; this bag owns field writes and coordinator/queue/reducer.
+ */
+export type SceneInspectReconcileBag = {
+  /**
+   * Current model when the effect ran. Required non-null for invalidate-*
+   * plans (plan guarantees run advanced). clear-disabled / noop / skip may
+   * pass null.
+   */
+  readonly model: RenderModel | null;
+  readonly dataIdentityEpoch: () => PropertyKey;
+  /** Clear live inspection + seed (transient clear, disabled clear, failed pin). */
+  clearInspection(): void;
+  /** Commit a successful pinned reconcile (snapshot + seed). */
+  setInspectionFromReconcile(input: {
+    readonly snapshot: InspectionChangeSnapshot;
+    readonly seed: CandidateFacts;
+  }): void;
+  setActiveCandidateId(id: number | null): void;
+  clearDismissedLatch(): void;
+  setReconciledRun(runId: number): void;
+  /** Reducer `{ type: "invalidate", reason: "scene" }` (cancels all scheduled pointer). */
+  dispatchSceneInvalidate(): void;
+  /** clear-disabled: discard pending pin stash; inspect-only cancel. */
+  cancelPointerDiscardPending(): void;
+  /** invalidate-*: clear queue fields only (after dispatchSceneInvalidate). */
+  clearPointerForSceneInvalidate(): void;
+  coordinatorInvalidate(): void;
+  releaseTransient(): void;
+  reconcilePinned(input: {
+    readonly model: RenderModel;
+    readonly identityEpoch: PropertyKey;
+    readonly layoutEpoch: PropertyKey;
+  }): {
+    readonly snapshot: InspectionChangeSnapshot;
+    readonly seed: CandidateFacts;
+    readonly semanticChanged: boolean;
+    readonly semanticFingerprint: string;
+  } | null;
+  emitClearProgrammatic(): void;
+  emitSemanticChange(snapshot: InspectionChangeSnapshot, semanticFingerprint: string): void;
+};
+
+/**
+ * Apply a scene-run inspection reconcile plan via host mutators.
+ *
+ * Keeps the factory `$effect` as plan → apply. Ordering is load-bearing:
+ * invalidate-* dispatches reducer invalidate before queue field clears; pinned
+ * reconcile failure emits programmatic clear then clears fields.
+ */
+export function applySceneInspectReconcile(
+  plan: SceneInspectReconcilePlan,
+  bag: SceneInspectReconcileBag,
+): void {
+  switch (plan.type) {
+    case "noop":
+    case "skip":
+      return;
+    case "clear-disabled":
+      bag.coordinatorInvalidate();
+      bag.clearInspection();
+      bag.clearDismissedLatch();
+      // Inspect-only cancel: move-area schedules must survive.
+      bag.cancelPointerDiscardPending();
+      return;
+    case "invalidate-clear-transient":
+    case "invalidate-idle":
+    case "invalidate-reconcile-pinned": {
+      // Plan requires run advance → model is non-null for invalidate-*.
+      const model = bag.model;
+      if (model === null) return;
+      const runId = model.runId;
+      // invalidate dispatch already cancels all scheduled pointer work.
+      bag.dispatchSceneInvalidate();
+      bag.clearPointerForSceneInvalidate();
+      bag.clearDismissedLatch();
+      bag.setReconciledRun(runId);
+      if (plan.type === "invalidate-clear-transient") {
+        bag.releaseTransient();
+        bag.clearInspection();
+        return;
+      }
+      if (plan.type === "invalidate-idle") return;
+      const reconciled = bag.reconcilePinned({
+        model,
+        identityEpoch: bag.dataIdentityEpoch(),
+        layoutEpoch: runId,
+      });
+      if (reconciled === null) {
+        // Failed pinned reconcile: clear inspection only (not area Escape).
+        bag.emitClearProgrammatic();
+        bag.clearInspection();
+      } else {
+        bag.setInspectionFromReconcile({
+          snapshot: reconciled.snapshot,
+          seed: reconciled.seed,
+        });
+        bag.setActiveCandidateId(reconciled.seed.id);
+        if (reconciled.semanticChanged) {
+          bag.emitSemanticChange(reconciled.snapshot, reconciled.semanticFingerprint);
+        }
+      }
+    }
+  }
 }
 
 // ---- inspection emission fingerprint gate ----
