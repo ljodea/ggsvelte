@@ -242,10 +242,14 @@ Every public export carries a lifecycle tag (generated into
 
 - **experimental** — may change or disappear in any 0.x release. The default
   for APIs not explicitly promoted.
-- **stable-intent** — the agent core path (PortableSpec, normalize, validate,
-  renderToSVGString, GGPlot and their direct result contracts). Not frozen
+- **stable-intent** — committed enough that changes pay the migration tax.
+  Covers (1) the agent core path (PortableSpec, normalize, validate,
+  renderToSVGString, GGPlot and their direct result contracts) and
+  (2) the recommended Svelte composition children (\`Geom*\` shells and the
+  theme/scale/coord/facet/labs/guides/legend grammar children). Not frozen
   pre-1.0, but changes here are treated as breaking: they get a changeset, a
-  migration note, and a deprecation window where feasible.
+  migration note, and a deprecation window where feasible. Registry and
+  factory helpers stay experimental.
 - **stable** — committed API under semver (none in v0.1).
 - **superseded** — keeps working but stops being recommended; docs point to
   the replacement. Protects agent-generated code from silent breakage.

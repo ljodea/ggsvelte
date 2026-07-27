@@ -4987,119 +4987,119 @@
         },
         "GeomArea": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomBar": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomBin2d": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomBlank": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomBoxplot": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomCol": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomContour": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomCount": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomCrossbar": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomCurve": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomDensity": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomDensity2d": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomDensity2dFilled": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomDotplot": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomErrorbar": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomFreqpoly": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomFunction": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomHex": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomHistogram": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomHline": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomJitter": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomLabel": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomLine": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomLinerange": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomMap": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomPath": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomPoint": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomPointrange": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomPolygon": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomProps": {
           "kind": "type",
@@ -5107,79 +5107,79 @@
         },
         "GeomQq": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomQqLine": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomQuantile": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomRaster": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomRect": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomRibbon": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomRug": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomRule": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomSegment": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomSf": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomSfLabel": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomSfText": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomSmooth": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomSpoke": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomStep": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomText": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomTile": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomViolin": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GeomVline": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "GuideAxis": {
           "kind": "value",
