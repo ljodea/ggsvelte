@@ -85,6 +85,51 @@ describe("fitLinearQuantileRegression", () => {
     expect(shifted.slope).toBeCloseTo(base.slope, 8);
     expect(shifted.intercept).toBeCloseTo(base.intercept + 10, 8);
   });
+
+  // n > PAIRWISE_CAP (150) forces the bisection path (not pairwise LP vertices).
+  it("large-n collinear recovers y = 1 + 2x on the bisection path", () => {
+    const n = 300;
+    const x = new Float64Array(n);
+    const y = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      x[i] = i;
+      y[i] = 1 + 2 * i;
+    }
+    for (const tau of [0.25, 0.5, 0.75]) {
+      const fit = fitLinearQuantileRegression(x, y, tau);
+      expect(fit).not.toBeNull();
+      expect(fit!.intercept).toBeCloseTo(1, 6);
+      expect(fit!.slope).toBeCloseTo(2, 6);
+    }
+  });
+
+  it("large-n steep collinear recovers y = 1 + 500x (expand from default bracket)", () => {
+    const n = 300;
+    const x = new Float64Array(n);
+    const y = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      x[i] = i;
+      y[i] = 1 + 500 * i;
+    }
+    const fit = fitLinearQuantileRegression(x, y, 0.5);
+    expect(fit).not.toBeNull();
+    expect(fit!.intercept).toBeCloseTo(1, 4);
+    expect(fit!.slope).toBeCloseTo(500, 4);
+  });
+
+  it("large-n steep negative collinear recovers y = 1 - 200x", () => {
+    const n = 300;
+    const x = new Float64Array(n);
+    const y = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      x[i] = i;
+      y[i] = 1 - 200 * i;
+    }
+    const fit = fitLinearQuantileRegression(x, y, 0.5);
+    expect(fit).not.toBeNull();
+    expect(fit!.intercept).toBeCloseTo(1, 4);
+    expect(fit!.slope).toBeCloseTo(-200, 4);
+  });
 });
 
 describe("statQuantile", () => {

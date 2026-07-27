@@ -7,7 +7,8 @@
  * Fit: for fixed slope b, optimal intercept is the pinball-minimizing
  * order statistic of residuals y − b·x (⌈τ n⌉-th). Optimal slope chosen
  * among pairwise slopes (LP vertex property) for n ≤ PAIRWISE_CAP;
- * otherwise derivative-bisection on the profiled pinball loss.
+ * otherwise derivative-bisection on the profiled pinball loss without
+ * pairwise enumeration (default bracket + expand until subgradient signs differ).
  */
 
 import type { CellValue } from "../table.js";
@@ -138,22 +139,8 @@ function fitByBisection(
   rows: readonly number[],
   tau: number,
 ): QuantileFit {
-  // Bracket from data pairwise extremes + OLS-ish range.
   let lo = -1;
   let hi = 1;
-  const slopes = pairwiseSlopes(x, y, rows);
-  if (slopes.length > 1) {
-    let minS = slopes[0]!;
-    let maxS = slopes[0]!;
-    for (const s of slopes) {
-      if (s < minS) minS = s;
-      if (s > maxS) maxS = s;
-    }
-    const pad = Math.max(1, (maxS - minS) * 0.5, Math.abs(minS), Math.abs(maxS));
-    lo = minS - pad;
-    hi = maxS + pad;
-  }
-  // Expand until subgradient signs differ (or cap).
   for (let expand = 0; expand < 20; expand++) {
     const sLo = slopeSubgradientSign(x, y, rows, lo, tau);
     const sHi = slopeSubgradientSign(x, y, rows, hi, tau);
