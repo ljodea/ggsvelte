@@ -156,6 +156,8 @@ export function buildUniqueFrame(
     offsetY: sliceFloat(full.offsetY, keep),
     xIntercepts: full.xIntercepts,
     yIntercepts: full.yIntercepts,
+    hexWidth: sliceFloat(full.hexWidth, keep),
+    hexHeight: sliceFloat(full.hexHeight, keep),
     bin,
     dodge: null,
     box: null,

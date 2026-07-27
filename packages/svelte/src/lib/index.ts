@@ -103,6 +103,7 @@ export { default as GeomRect } from "./geoms/GeomRect.svelte";
 export { default as GeomTile } from "./geoms/GeomTile.svelte";
 export { default as GeomBin2d } from "./geoms/GeomBin2d.svelte";
 export { default as GeomRaster } from "./geoms/GeomRaster.svelte";
+export { default as GeomHex } from "./geoms/GeomHex.svelte";
 export { default as GeomRibbon } from "./geoms/GeomRibbon.svelte";
 export { default as GeomSegment } from "./geoms/GeomSegment.svelte";
 /** @lifecycle stable-intent */

@@ -592,6 +592,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomHexOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomHistogramOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -734,6 +738,22 @@
         },
         "HUE_PALETTE_10": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "HexLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "HexLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "HexLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "HexParams": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "HistogramLayer": {
@@ -1261,6 +1281,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeFreqpolyLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeHexLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4702,6 +4726,10 @@
           "lifecycle": "experimental"
         },
         "GeomFreqpoly": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomHex": {
           "kind": "value",
           "lifecycle": "experimental"
         },

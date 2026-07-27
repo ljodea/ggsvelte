@@ -1824,6 +1824,41 @@ export const SpecDeclarations = {
     },
   ),
 
+  HexParams: Type.Object(
+    {
+      bins: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description:
+            "Approximate number of hex bins across the x range (ggplot2 bins). Default 30.",
+        }),
+      ),
+      drop: Type.Optional(
+        Type.Boolean({
+          description: "When true (default), omit zero-count hexes from the output.",
+        }),
+      ),
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Hex opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          description: "Outline stroke width in px when color is set. Default 0 (no outline).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Parameters for geom/stat hex (hexagonal 2D binning heatmap). fill defaults to after_stat count.",
+    },
+  ),
+
   PositionParams: Type.Object(
     {
       width: Type.Optional(
@@ -3333,6 +3368,37 @@ export const SpecDeclarations = {
     },
   ),
 
+  HexLayer: Type.Object(
+    {
+      geom: Type.Literal("hex", {
+        description:
+          "Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("bin_hex", {
+          description: "Hexagonal binning stat (default for this geom).",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "hex layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("HexParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A hexagonal bin heatmap layer. Requires continuous x and y; fill defaults to after_stat count.",
+    },
+  ),
+
   AreaLayer: Type.Object(
     {
       geom: Type.Literal("area", {
@@ -3974,6 +4040,7 @@ export const SpecDeclarations = {
       Type.Ref("TileLayer"),
       Type.Ref("Bin2dLayer"),
       Type.Ref("RasterLayer"),
+      Type.Ref("HexLayer"),
       Type.Ref("SegmentLayer"),
       Type.Ref("AblineLayer"),
       Type.Ref("CurveLayer"),

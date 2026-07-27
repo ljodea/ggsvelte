@@ -151,6 +151,7 @@ export const RectLayerSchema = SpecModule.Import("RectLayer");
 export const TileLayerSchema = SpecModule.Import("TileLayer");
 export const Bin2dLayerSchema = SpecModule.Import("Bin2dLayer");
 export const RasterLayerSchema = SpecModule.Import("RasterLayer");
+export const HexLayerSchema = SpecModule.Import("HexLayer");
 export const AesSchema = SpecModule.Import("Aes");
 export const ChannelValueSchema = SpecModule.Import("ChannelValue");
 export const DataRefSchema = SpecModule.Import("DataRef");
@@ -276,6 +277,8 @@ export type TileParams = SpecType<"TileParams">;
 export type Bin2dParams = SpecType<"Bin2dParams">;
 /** Raster layer params. */
 export type RasterParams = SpecType<"RasterParams">;
+/** Hex bin heatmap params. */
+export type HexParams = SpecType<"HexParams">;
 /** Ribbon layer params (outline, orientation, stroke ends). */
 export type RibbonParams = SpecType<"RibbonParams">;
 /** Jitter/nudge position parameters. */
@@ -335,6 +338,8 @@ export type TileLayer = LayerWithDataRef<SpecType<"TileLayer">>;
 export type Bin2dLayer = LayerWithDataRef<SpecType<"Bin2dLayer">>;
 /** A raster layer (equal-cell dense grid). */
 export type RasterLayer = LayerWithDataRef<SpecType<"RasterLayer">>;
+/** A hexagonal bin heatmap layer. */
+export type HexLayer = LayerWithDataRef<SpecType<"HexLayer">>;
 /** A ribbon (interval band) layer. */
 export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 /** A finite segment layer ((x,y)→(xend,yend)). */
@@ -412,6 +417,7 @@ export type LayerSpec =
   | TileLayer
   | Bin2dLayer
   | RasterLayer
+  | HexLayer
   | QqLayer
   | QqLineLayer;
 /** Stackable position adjustment names. */

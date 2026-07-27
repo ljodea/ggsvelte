@@ -92,6 +92,7 @@ export type {
   PathLayerInput,
   PointLayerInput,
   RasterLayerInput,
+  HexLayerInput,
   RectLayerInput,
   RuleLayerInput,
   QuantileLayerInput,
@@ -202,6 +203,10 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   }
   if (stat === "density" && aes?.y === undefined) {
     aes = { ...aes, y: { stat: "density" } };
+  }
+  // bin_hex maps fill to after_stat count (ggplot2 geom_hex default aes).
+  if (stat === "bin_hex" && aes?.fill === undefined) {
+    aes = { ...aes, fill: { stat: "count" } };
   }
   if (stat === "ecdf" && aes?.y === undefined) {
     aes = { ...aes, y: { stat: "ecdf" } };

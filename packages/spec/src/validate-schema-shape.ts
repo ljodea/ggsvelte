@@ -28,6 +28,7 @@ import {
   PlotSpecSchema,
   PointLayerSchema,
   RasterLayerSchema,
+  HexLayerSchema,
   RectLayerSchema,
   RibbonLayerSchema,
   SegmentLayerSchema,
@@ -97,6 +98,7 @@ export const GEOM_BRANCHES = {
   tile: TileLayerSchema,
   bin_2d: Bin2dLayerSchema,
   raster: RasterLayerSchema,
+  hex: HexLayerSchema,
 } as const;
 
 function isRecord(v: unknown): v is Record<string, unknown> {
