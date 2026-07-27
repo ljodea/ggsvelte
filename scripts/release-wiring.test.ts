@@ -252,6 +252,9 @@ describe("R0 release wiring", () => {
     expect(journeysJob).toContain("docs-progressive-search.spec.ts");
     expect(journeysJob).toContain("docs-themes.spec.ts");
     expect(journeysJob).toContain("--grep-invert 'visual contract'");
+    expect(journeysJob).toContain("--project journeys");
+    expect(read("tests/visual/playwright.config.ts")).toContain('name: "journeys"');
+    expect(read("tests/visual/playwright.config.ts")).toContain("timeout: 60_000");
     // ci-gate: package component = svelte+svelte-fx+spikes; docs_journeys is independent.
     expect(ci).toContain("COMPONENT_SVELTE_RES");
     expect(ci).toContain("COMPONENT_SVELTE_FX_RES");

@@ -75,8 +75,10 @@ jobs:
         if: steps.content_hash.outputs.hit != 'true'
         # Enumerate every non-pixel docs journey. --grep-invert drops visual-contract
         # screenshots so content PRs never pay full-page goldens here.
+        # --project journeys selects the 60s-budget Playwright project (#944).
         run: >-
           bun run test:visual --
+          --project journeys
           docs-shell.spec.ts
           docs-home-gallery.spec.ts
           docs-progressive-search.spec.ts
