@@ -3,7 +3,7 @@
  *
  * Pure PortableSpec builders (plus the seeded PRNG they share). The
  * budget-sensitive registry that wires sizes, labels, and measured `fn`
- * closures lives in `workloads.ts`.
+ * closures lives under `workloads/` (concatenated by `workloads/index.ts`).
  */
 import {
   aes,

@@ -1,6 +1,6 @@
 /**
  * JSON emission mode (M3 budgets): runs every FULL-SIZE workload from
- * workloads.ts a bounded number of iterations and writes the medians to
+ * workloads/ a bounded number of iterations and writes the medians to
  * `bench-results.json` at the REPO ROOT in github-action-benchmark
  * customSmallerIsBetter format:
  *
@@ -11,7 +11,7 @@
  * `check-budgets.ts` gates the output against budgets.json.
  *
  * Canvas workloads run against a stub 2d context (bun has no raster), so
- * they measure JS COMMAND-GENERATION cost only — see workloads.ts.
+ * they measure JS COMMAND-GENERATION cost only — see workloads/.
  *
  * bench-results.json is a build artifact: it must stay gitignored, never
  * committed.

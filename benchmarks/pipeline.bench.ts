@@ -7,7 +7,7 @@
  * - `bun run bench` — full suite.
  * - `bun run bench:smoke` (BENCH_SMOKE=1) — 1k only; the CI bench-smoke job.
  *
- * Workload definitions live in workloads.ts (ONE source shared by the full
+ * Workload definitions live in workloads/ (ONE source shared by the full
  * suite, the smoke suite, and the JSON/budget mode). Data is generated from
  * a seeded PRNG so runs are comparable.
  */
