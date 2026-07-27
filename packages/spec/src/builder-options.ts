@@ -37,6 +37,7 @@ import type {
   SfTextParams,
   SfLabelParams,
   SpokeParams,
+  StepParams,
   SmoothParams,
   StackablePosition,
   TextParams,
@@ -305,6 +306,12 @@ export interface GeomRugOptions extends RugParams, GeomDataOption {
 
 /** Function-layer sugar: named fun required (+ grid / domain / paint). */
 export interface GeomFunctionOptions extends FunctionParams, GeomDataOption {
+  aes?: AesInput;
+  render?: RenderBackend;
+}
+
+/** Step-layer sugar options: params (direction hv/vh/mid) plus optional aes. */
+export interface GeomStepOptions extends StepParams, GeomDataOption {
   aes?: AesInput;
   render?: RenderBackend;
 }

@@ -1,5 +1,5 @@
 /**
- * Parameterized suite over all 12 declaration-only Geom* components.
+ * Parameterized suite over all declaration-only Geom* components.
  * Mounts each under GGPlot, asserts layer registration via the assembled
  * PortableSpec (toLayerInput path), and checks a representative param
  * forwards into layer.params.
@@ -27,6 +27,7 @@ import GeomRule from "../../src/lib/geoms/GeomRule.svelte";
 import GeomSegment from "../../src/lib/geoms/GeomSegment.svelte";
 import GeomFunction from "../../src/lib/geoms/GeomFunction.svelte";
 import GeomSmooth from "../../src/lib/geoms/GeomSmooth.svelte";
+import GeomStep from "../../src/lib/geoms/GeomStep.svelte";
 import GeomText from "../../src/lib/geoms/GeomText.svelte";
 import GeomTile from "../../src/lib/geoms/GeomTile.svelte";
 import GeomVline from "../../src/lib/geoms/GeomVline.svelte";
@@ -326,6 +327,17 @@ const cases: readonly GeomCase[] = [
     geomProps: { fun: "dnorm", n: 21, xlim: [-2, 2], linewidth: 2 },
     paramKey: "fun",
     paramValue: "dnorm",
+    markSelector: ".gg-paths path",
+  },
+  {
+    name: "GeomStep",
+    Component: GeomStep,
+    geom: "step",
+    data: xy,
+    aes: { x: "x", y: "y" },
+    geomProps: { direction: "hv", linewidth: 2 },
+    paramKey: "direction",
+    paramValue: "hv",
     markSelector: ".gg-paths path",
   },
 ];

@@ -54,6 +54,7 @@ export function buildGeometryBatches(input: {
         geom === "line" ||
         geom === "function" ||
         geom === "path" ||
+        geom === "step" ||
         geom === "contour" ||
         geom === "density_2d" ||
         geom === "density_2d_filled" ||

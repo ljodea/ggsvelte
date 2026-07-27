@@ -435,6 +435,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "928a63297721edd0993552dd0ff362d981b62f5fb3f842ffb98decd0143ce344",
   },
   {
+    id: "step/ecdf",
+    filename: "step-ecdf-light.png",
+    path: "/previews/step-ecdf-light.png",
+    sha256: "1d4f06f678045fc0ce0c7b6c81591fc2b47e38a922733dd2728e65cf70e311c8",
+  },
+  {
     id: "text/labels",
     filename: "text-labels-light.png",
     path: "/previews/text-labels-light.png",

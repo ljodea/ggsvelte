@@ -39,7 +39,27 @@ const HEX_COLOR = Type.String({
 const forbiddenColorOption = () => Type.Optional(Type.Never());
 const forbiddenStyleOption = () => Type.Optional(Type.Never());
 
-function numericStyleScaleSpec(rangeValue: ReturnType<typeof Type.Number>, description: string) {
+/** Size aesthetic only (#830). Shared onto PositiveStyleScaleSpec (size+linewidth). */
+const sizeUnitField = {
+  /**
+   * Size-only rescaling mode (ignored for linewidth). Default `area` matches
+   * the existing continuous size map (area between range endpoints).
+   * `radius` is linear; `area_zero` forces zero→zero area (ggplot2 scale_size_area).
+   */
+  sizeUnit: Type.Optional(
+    Type.Union([Type.Literal("area"), Type.Literal("radius"), Type.Literal("area_zero")], {
+      description:
+        'Size encoding unit (size aesthetic only). "area" (default) interpolates by area between range endpoints; "radius" maps linearly to radius; "area_zero" maps value proportionally to area with zero→zero (ggplot2 scale_size_area / scale_size_binned_area).',
+    }),
+  ),
+};
+
+function numericStyleScaleSpec(
+  rangeValue: ReturnType<typeof Type.Number>,
+  description: string,
+  /** Extra optional fields on the base object (e.g. sizeUnit for PositiveStyleScaleSpec). */
+  extraFields: typeof sizeUnitField | Record<string, never> = {},
+) {
   return Type.Intersect([
     Type.Object(
       {
@@ -77,6 +97,7 @@ function numericStyleScaleSpec(rangeValue: ReturnType<typeof Type.Number>, descr
         onExhaust: Type.Optional(Type.Union([Type.Literal("cycle"), Type.Literal("error")])),
         labels: Type.Optional(Type.String()),
         guide: Type.Optional(Type.Ref("GuideSpec")),
+        ...extraFields,
       },
       { additionalProperties: false, description },
     ),
@@ -790,6 +811,45 @@ export const SpecDeclarations = {
   ),
 
   /** Path stroke params (no bin knobs — path never uses stat bin). */
+  StepParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Step-line opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.5.",
+        }),
+      ),
+      direction: Type.Optional(
+        Type.Union([Type.Literal("hv"), Type.Literal("vh"), Type.Literal("mid")], {
+          description:
+            'Step corner placement (ggplot2 geom_step): "hv" horizontal then vertical (default), "vh" vertical then horizontal, "mid" change at the midpoint between x positions.',
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description: "Styling parameters for the step geom (ggplot2 geom_step).",
+    },
+  ),
+
   PathParams: Type.Object(
     {
       alpha: Type.Optional(
@@ -2552,6 +2612,35 @@ export const SpecDeclarations = {
     },
   ),
 
+  StepLayer: Type.Object(
+    {
+      geom: Type.Literal("step", {
+        description:
+          "Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Step layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Step layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data.",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("StepParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A step-line layer (ggplot2 geom_step). Requires x and y. params.direction is hv (default), vh, or mid.",
+    },
+  ),
+
   PathLayer: Type.Object(
     {
       geom: Type.Literal("path", {
@@ -3765,6 +3854,7 @@ export const SpecDeclarations = {
       Type.Ref("PointLayer"),
       Type.Ref("LineLayer"),
       Type.Ref("PathLayer"),
+      Type.Ref("StepLayer"),
       Type.Ref("ColLayer"),
       Type.Ref("BarLayer"),
       Type.Ref("HistogramLayer"),
@@ -4214,9 +4304,16 @@ export const SpecDeclarations = {
     ]),
   ]),
 
+  /**
+   * Size + linewidth share this schema. `sizeUnit` is size-only at runtime
+   * (ignored for linewidth); alpha uses AlphaScaleSpec without sizeUnit so
+   * the option cannot validate as a silent no-op (#830).
+   */
   PositiveStyleScaleSpec: numericStyleScaleSpec(
-    Type.Number({ exclusiveMinimum: 0 }),
-    "Configuration for a positive numeric size or linewidth scale.",
+    // minimum 0 allows scale_size_area zero-area radii; linewidth 0 is also valid.
+    Type.Number({ minimum: 0 }),
+    "Configuration for a non-negative numeric size or linewidth scale.",
+    sizeUnitField,
   ),
 
   AlphaScaleSpec: numericStyleScaleSpec(

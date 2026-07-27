@@ -719,6 +719,49 @@
       "additionalProperties": false,
       "description": "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin (#817), or manual (#814) controls."
     },
+    "StepParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Step-line opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px. Must be greater than 0. Default 1.5."
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "hv"
+            },
+            {
+              "type": "string",
+              "const": "vh"
+            },
+            {
+              "type": "string",
+              "const": "mid"
+            }
+          ],
+          "description": "Step corner placement (ggplot2 geom_step): \"hv\" horizontal then vertical (default), \"vh\" vertical then horizontal, \"mid\" change at the midpoint between x positions."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the step geom (ggplot2 geom_step)."
+    },
     "PathParams": {
       "type": "object",
       "properties": {
@@ -2460,6 +2503,44 @@
       "additionalProperties": false,
       "description": "A line layer. Identity: requires x and y. Bin (freqpoly): requires continuous x; y is computed by the bin stat. Rows are sorted by x within each group before connecting."
     },
+    "StepLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "step",
+          "description": "Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Step layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Step layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data."
+        },
+        "params": {
+          "$ref": "#/$defs/StepParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A step-line layer (ggplot2 geom_step). Requires x and y. params.direction is hv (default), vh, or mid."
+    },
     "PathLayer": {
       "type": "object",
       "required": [
@@ -3954,6 +4035,9 @@
           "$ref": "#/$defs/PathLayer"
         },
         {
+          "$ref": "#/$defs/StepLayer"
+        },
+        {
           "$ref": "#/$defs/ColLayer"
         },
         {
@@ -5168,7 +5252,7 @@
               "type": "array",
               "items": {
                 "type": "number",
-                "exclusiveMinimum": 0
+                "minimum": 0
               },
               "minItems": 1
             },
@@ -5189,11 +5273,11 @@
             },
             "naValue": {
               "type": "number",
-              "exclusiveMinimum": 0
+              "minimum": 0
             },
             "unknownValue": {
               "type": "number",
-              "exclusiveMinimum": 0
+              "minimum": 0
             },
             "onExhaust": {
               "anyOf": [
@@ -5212,10 +5296,27 @@
             },
             "guide": {
               "$ref": "#/$defs/GuideSpec"
+            },
+            "sizeUnit": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "area"
+                },
+                {
+                  "type": "string",
+                  "const": "radius"
+                },
+                {
+                  "type": "string",
+                  "const": "area_zero"
+                }
+              ],
+              "description": "Size encoding unit (size aesthetic only). \"area\" (default) interpolates by area between range endpoints; \"radius\" maps linearly to radius; \"area_zero\" maps value proportionally to area with zero→zero (ggplot2 scale_size_area / scale_size_binned_area)."
             }
           },
           "additionalProperties": false,
-          "description": "Configuration for a positive numeric size or linewidth scale."
+          "description": "Configuration for a non-negative numeric size or linewidth scale."
         },
         {
           "anyOf": [
@@ -5256,7 +5357,7 @@
                   "type": "array",
                   "items": {
                     "type": "number",
-                    "exclusiveMinimum": 0
+                    "minimum": 0
                   },
                   "minItems": 2
                 },
@@ -5283,7 +5384,7 @@
                   "type": "array",
                   "items": {
                     "type": "number",
-                    "exclusiveMinimum": 0
+                    "minimum": 0
                   },
                   "minItems": 1
                 },
@@ -5431,7 +5532,7 @@
                   "type": "array",
                   "items": {
                     "type": "number",
-                    "exclusiveMinimum": 0
+                    "minimum": 0
                   },
                   "minItems": 2
                 },

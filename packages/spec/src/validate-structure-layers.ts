@@ -23,6 +23,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   jitter: ["x", "y"],
   line: ["x", "y"],
   path: ["x", "y"], // data-order polylines (#788); same channels as line
+  step: ["x", "y"],
   col: ["x", "y"],
   bar: ["x"],
   histogram: ["x"],
