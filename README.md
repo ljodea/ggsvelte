@@ -2,8 +2,10 @@
 
 [![codecov](https://codecov.io/gh/ljodea/ggsvelte/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ljodea/ggsvelte)
 
-A layered grammar of graphics for Svelte 5. Map data to aesthetics, add geoms, then
-compose statistics, scales, facets, coordinates, themes, and interaction.
+ggplot2's layered grammar for Svelte 5. Author with components; agents emit the
+same chart as PortableSpec JSON — validate, apply the fix, render headless.
+`@ggsvelte/svelte` ships the agent skill at
+[`skills/ggsvelte`](skills/ggsvelte/SKILL.md).
 
 [Documentation](https://ggsvelte.sh/) · [Examples](https://ggsvelte.sh/examples) ·
 [Getting started](https://ggsvelte.sh/guide/getting-started) ·
@@ -16,13 +18,20 @@ bun add @ggsvelte/svelte
 # or: npm install @ggsvelte/svelte
 ```
 
-Requires Node.js 22+ and Svelte 5.33.1+. npm, pnpm, and Bun installs are tested on
-Ubuntu and Windows.
+Requires Node.js 22+ and Svelte 5.33.1+. CI covers npm, pnpm, and Bun on Ubuntu
+and Windows.
+
+## Agents
+
+- Skill: [`skills/ggsvelte/SKILL.md`](skills/ggsvelte/SKILL.md) (also published
+  under `node_modules/@ggsvelte/svelte/skills/ggsvelte/`)
+- Schema: [`schema/v0.json`](https://ggsvelte.sh/schema/v0.json)
+- Corpus: [`llms.txt`](https://ggsvelte.sh/llms.txt) ·
+  [`llms-full.txt`](https://ggsvelte.sh/llms-full.txt)
+- `validate()` errors are `{ code, path, message, fix }` with a
+  machine-applicable `fix.example`
 
 ## Examples
-
-Each image is generated from the Svelte file shown above it. Open a chart for the
-live output and complete source.
 
 ### [Loess trend with uncertainty](https://ggsvelte.sh/examples/smooth/loess-scatter)
 
@@ -321,12 +330,11 @@ live output and complete source.
 
 [![Eleven old maps of the Great Lakes coloured by publication year against the true positions](apps/docs/static/previews/color-continuous-light.png)](https://ggsvelte.sh/examples/color/continuous)
 
-Guide presentation stays separate from scale math. Use
-`<GuideColorbar channel="color" position="bottom" />` (or
-`<GuideLegend channel="color" position="bottom" />`, `<GuideNone channel="size" />`)
-to title, orient, place, suppress, or force axes and non-position guides. Automatic
-legends use the right side only while at least 320px of panel remains, then move below
-with complete accessible labels and unchanged scale assignments.
+Guides are separate from scale math:
+`<GuideColorbar channel="color" position="bottom" />`,
+`<GuideLegend channel="color" position="bottom" />`,
+`<GuideNone channel="size" />`. Auto non-position guides sit on the right while
+≥320px of panel remains, then move below; scale assignments stay fixed.
 
 ### [Boxplots](https://ggsvelte.sh/examples/boxplot/by-category)
 
@@ -441,8 +449,7 @@ with complete accessible labels and unchanged scale assignments.
 
 ## Themes
 
-Chart themes are independent of the site's light or dark appearance. The same spec can
-use a built-in theme or explicit theme tokens.
+Plot theme tokens are independent of site light/dark.
 
 |                                                           Tufte                                                           |                                                             Economist                                                             |
 | :-----------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------: |
@@ -452,27 +459,13 @@ use a built-in theme or explicit theme tokens.
 
 [Compare every theme and palette](https://ggsvelte.sh/themes).
 
-## Composition
-
-- Geoms share one layer model, so points, lines, intervals, summaries, annotations,
-  and text can occupy the same plot.
-- Statistics and positions include binning, density, loess and linear fits, stacking,
-  filling, dodging, and seeded jitter.
-- Scales cover continuous, discrete, temporal, binned, transformed, color/fill, size, linewidth, alpha, shape, and linetype data.
-- Facets train fixed or free panel scales; coordinates can flip axes, project final geometry after statistics, or preserve exact physical data-unit ratios with `coordFixed()`.
-- Inspection, selection, zoom, and legend controls emit semantic Svelte events.
-- Ordinary layers render as SVG. Dense point layers move to canvas while axes, text,
-  legends, and accessible descriptions remain in the DOM.
-
 ## Packages
 
-| Package                               | Surface                                                                 |
-| ------------------------------------- | ----------------------------------------------------------------------- |
-| [`@ggsvelte/svelte`](packages/svelte) | Svelte 5 components, package re-exports, and the CLI                    |
-| [`@ggsvelte/spec`](packages/spec)     | Portable types, JSON Schema, validation, normalization, and the builder |
-| [`@ggsvelte/core`](packages/core)     | Framework-independent pipeline, SVG renderer, canvas, and hit testing   |
-
-Most applications need only `@ggsvelte/svelte`.
+| Package                               | Surface                                                             |
+| ------------------------------------- | ------------------------------------------------------------------- |
+| [`@ggsvelte/svelte`](packages/svelte) | Svelte 5 components, re-exports, CLI, agent skill                   |
+| [`@ggsvelte/spec`](packages/spec)     | PortableSpec types, JSON Schema, validate/normalize, fluent builder |
+| [`@ggsvelte/core`](packages/core)     | Pipeline, headless SVG, canvas, hit testing                         |
 
 ## Reference
 
@@ -483,16 +476,10 @@ Most applications need only `@ggsvelte/svelte`.
 - [Compatibility](https://ggsvelte.sh/guide/compatibility)
 - [Upgrading](https://ggsvelte.sh/guide/upgrading)
 
-Machine-readable documentation is available at
-[`llms.txt`](https://ggsvelte.sh/llms.txt),
-[`llms-full.txt`](https://ggsvelte.sh/llms-full.txt), and
-[`schema/v0.json`](https://ggsvelte.sh/schema/v0.json).
-
 ## Release status
 
-ggsvelte remains pre-1.0. Package manifests are the version source of truth. Lifecycle
-and compatibility contracts are documented in
-[`lifecycle.json`](lifecycle.json) and the
+Pre-1.0. Package manifests are the version source of truth. Lifecycle and
+compatibility contracts live in [`lifecycle.json`](lifecycle.json) and the
 [lifecycle guide](https://ggsvelte.sh/guide/lifecycle).
 
 ## Contributing
@@ -501,5 +488,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-[MIT](LICENSE) © Liam O'Dea. Loess reference implementation attribution is recorded in
-[NOTICE](NOTICE).
+[MIT](LICENSE) © Liam O'Dea. Loess reference attribution is in [NOTICE](NOTICE).
