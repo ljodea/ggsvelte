@@ -45,17 +45,17 @@
     justify-content: center;
     gap: 0.4rem;
     border: 1px solid transparent;
-    border-radius: 0.5rem;
+    border-radius: var(--radius);
     padding: 0.5rem 0.9rem;
     font: 600 0.875rem/1.2 var(--body-font);
     letter-spacing: -0.01em;
     text-decoration: none;
     cursor: pointer;
+    box-shadow: none;
     transition:
       background-color 120ms ease,
       border-color 120ms ease,
       color 120ms ease,
-      box-shadow 120ms ease,
       opacity 120ms ease;
   }
 
@@ -75,7 +75,6 @@
     border-color: var(--accent);
     background: var(--accent);
     color: #fff;
-    box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 12%, transparent);
   }
 
   :global(
@@ -89,7 +88,6 @@
     border-color: var(--line);
     background: var(--paper);
     color: var(--ink);
-    box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
   }
 
   :global(
@@ -103,7 +101,6 @@
     border-color: transparent;
     background: transparent;
     color: var(--ink);
-    box-shadow: none;
   }
 
   :global(.ui-button--ghost:hover:not(:disabled):not([aria-disabled="true"])) {
