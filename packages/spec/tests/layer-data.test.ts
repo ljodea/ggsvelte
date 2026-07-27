@@ -160,6 +160,121 @@ describe("layer data schema + normalize", () => {
     expect(mismatch.length).toBeGreaterThanOrEqual(1);
     expect(mismatch.some((e) => e.message.includes("v"))).toBe(true);
   });
+
+  // #844 — style/color scale checks use the same per-layer evidence path as
+  // position (#609). Same-named fields on multi-table layers must keep their
+  // own type view; a later layer must not last-wins-hide an earlier mismatch.
+  it("color sequential still mismatches when a later quantitative layer shares field name v", () => {
+    const result = validate(
+      {
+        scales: { color: { type: "sequential" } },
+        layers: [
+          {
+            geom: "point",
+            data: {
+              values: [
+                { x: 1, y: 1, v: "a" },
+                { x: 2, y: 2, v: "b" },
+              ],
+            },
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "v" } },
+          },
+          {
+            geom: "point",
+            data: {
+              values: [
+                { x: 3, y: 3, v: 10 },
+                { x: 4, y: 4, v: 20 },
+              ],
+            },
+            aes: { x: { field: "x" }, y: { field: "y" }, color: { field: "v" } },
+          },
+        ],
+      },
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const mismatch = result.errors.filter((e) => e.code === "scale-type-mismatch");
+    expect(mismatch.length).toBeGreaterThanOrEqual(1);
+    // Color field mismatches path to the layer aes that owns the field (not /scales/color).
+    expect(mismatch.some((e) => e.message.includes("v") && e.path === "/layers/0/aes/color")).toBe(
+      true,
+    );
+  });
+
+  it("size sequential still mismatches when a later quantitative layer shares field name v", () => {
+    const result = validate(
+      {
+        scales: { size: { type: "sequential" } },
+        layers: [
+          {
+            geom: "point",
+            data: {
+              values: [
+                { x: 1, y: 1, v: "a" },
+                { x: 2, y: 2, v: "b" },
+              ],
+            },
+            aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "v" } },
+          },
+          {
+            geom: "point",
+            data: {
+              values: [
+                { x: 3, y: 3, v: 10 },
+                { x: 4, y: 4, v: 20 },
+              ],
+            },
+            aes: { x: { field: "x" }, y: { field: "y" }, size: { field: "v" } },
+          },
+        ],
+      },
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const mismatch = result.errors.filter((e) => e.code === "scale-type-mismatch");
+    expect(mismatch.length).toBeGreaterThanOrEqual(1);
+    expect(mismatch.some((e) => e.message.includes("v") && e.path === "/scales/size")).toBe(true);
+  });
+
+  it("shape finite-style still mismatches when a later nominal layer shares field name v", () => {
+    // Finite style errors when type is omitted and a field is continuous.
+    // Last-wins would keep only the nominal second layer and skip the error.
+    const result = validate(
+      {
+        layers: [
+          {
+            geom: "point",
+            data: {
+              values: [
+                { x: 1, y: 1, v: 1.5 },
+                { x: 2, y: 2, v: 2.5 },
+              ],
+            },
+            aes: { x: { field: "x" }, y: { field: "y" }, shape: { field: "v" } },
+          },
+          {
+            geom: "point",
+            data: {
+              values: [
+                { x: 3, y: 3, v: "a" },
+                { x: 4, y: 4, v: "b" },
+              ],
+            },
+            aes: { x: { field: "x" }, y: { field: "y" }, shape: { field: "v" } },
+          },
+        ],
+      },
+      {},
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const mismatch = result.errors.filter((e) => e.code === "scale-type-mismatch");
+    expect(mismatch.length).toBeGreaterThanOrEqual(1);
+    expect(mismatch.some((e) => e.message.includes("v") && e.path === "/scales/shape")).toBe(true);
+  });
 });
 
 describe("layer data builder", () => {

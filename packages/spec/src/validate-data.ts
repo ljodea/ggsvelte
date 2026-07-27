@@ -6,11 +6,15 @@
  *
  * Implementation is split:
  *  - validate-data-evidence.ts — FieldEvidenceMap construction + effectiveChannel
- *  - validate-data-checks.ts — dataChecks orchestrator + STAT_COLUMNS + layer walk
+ *  - validate-data-checks.ts — dataChecks orchestrator (evidence → walk → checkers)
+ *  - validate-data-checks-layer.ts — geom/stat rules + field walk + channel collection
  *  - validate-data-checks-temporal.ts — shared temporalDecisionForField memoization
  *  - validate-data-checks-position.ts — pre-evidence temporal config + x/y scale types
  *  - validate-data-checks-color.ts — color/fill scale types + manual domain/range
  *  - validate-data-checks-style.ts — shape/linetype + size/linewidth/alpha scale types
+ *
+ * Style and color scale checks use per-layer evidenceForUse like position
+ * (#609 / #844) so multi-table same-name fields keep independent type views.
  *
  * Checks:
  *  - field existence: every { field } channel must name an available field
