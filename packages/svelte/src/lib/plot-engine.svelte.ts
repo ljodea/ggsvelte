@@ -206,12 +206,12 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     (() => {
       const interaction = host.props.interaction;
       const interactionScope = host.props.interactionScope;
-      const capabilities = caps();
       const datumKey = host.props.key;
       return resolveInteractionScope({
         interaction,
         ...(interactionScope !== undefined && { interactionScope }),
-        zoom: capabilities.zoom,
+        // Single-field default — do not call caps() (would subscribe all five).
+        zoom: host.props.zoom ?? false,
         faceted: facetedPlot,
         ...(datumKey !== undefined && { datumKey }),
         assembled: assembled(),
@@ -360,7 +360,8 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   // model is deferred (declared after the runtime).
   const legendFilterState = createLegendFilterState({
     effectiveSpec: () => zoomState.effectiveSpec,
-    legendFilterProp: () => caps().legendFilter,
+    // Single-field default — avoid caps() so this derived only tracks legendFilter.
+    legendFilterProp: () => host.props.legendFilter ?? false,
     onlegendfilter: () => host.props.onlegendfilter,
     oninteraction: () => host.props.oninteraction,
     announce: announceSink,

@@ -144,23 +144,6 @@ export type EnginePlotProps = Omit<
   oninteraction?: (event: PlotInteractionEvent<Record<string, CellValue>>) => void;
 };
 
-const WIDENED_KEYS = new Set([
-  "key",
-  "interaction",
-  "oninspect",
-  "onselect",
-  "onlegendfocus",
-  "oninteraction",
-] as const);
-
-type WidenedKey =
-  | "key"
-  | "interaction"
-  | "oninspect"
-  | "onselect"
-  | "onlegendfocus"
-  | "oninteraction";
-
 /**
  * Stable lazy view of plot props for the engine. Non-widened fields forward
  * through the source proxy (per-field reactive deps). The six PublicKey
@@ -170,26 +153,28 @@ export function widenPlotProps<
   Row extends Record<string, CellValue>,
   Identity extends keyof Row | ((row: Row, index: number) => PropertyKey),
 >(props: GGPlotProps<Row, Identity>): EnginePlotProps {
-  return new Proxy(props as object, {
+  const handler: ProxyHandler<GGPlotProps<Row, Identity>> = {
     get(target, prop, receiver) {
-      if (typeof prop === "string" && WIDENED_KEYS.has(prop as WidenedKey)) {
-        // Six precise casts — checked return type is EnginePlotProps.
-        switch (prop as WidenedKey) {
-          case "key":
-            return props.key as EnginePlotProps["key"];
-          case "interaction":
-            return props.interaction as EnginePlotProps["interaction"];
-          case "oninspect":
-            return props.oninspect as EnginePlotProps["oninspect"];
-          case "onselect":
-            return props.onselect as EnginePlotProps["onselect"];
-          case "onlegendfocus":
-            return props.onlegendfocus as EnginePlotProps["onlegendfocus"];
-          case "oninteraction":
-            return props.oninteraction as EnginePlotProps["oninteraction"];
-        }
+      // Six precise casts — only these fields change assignability.
+      if (prop === "key") return target.key as EnginePlotProps["key"];
+      if (prop === "interaction") {
+        return target.interaction as EnginePlotProps["interaction"];
       }
-      return Reflect.get(target, prop, receiver);
+      if (prop === "oninspect") {
+        return target.oninspect as EnginePlotProps["oninspect"];
+      }
+      if (prop === "onselect") {
+        return target.onselect as EnginePlotProps["onselect"];
+      }
+      if (prop === "onlegendfocus") {
+        return target.onlegendfocus as EnginePlotProps["onlegendfocus"];
+      }
+      if (prop === "oninteraction") {
+        return target.oninteraction as EnginePlotProps["oninteraction"];
+      }
+      return Reflect.get(target, prop, receiver) as EnginePlotProps[keyof EnginePlotProps];
     },
-  }) as EnginePlotProps;
+  };
+  // Proxy of GGPlotProps is the EnginePlotProps view; bridge via unknown once.
+  return new Proxy(props, handler) as unknown as EnginePlotProps;
 }
