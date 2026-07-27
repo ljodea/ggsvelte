@@ -59,6 +59,16 @@ describe("statFunction", () => {
     const result = statFunction({ params: { fun: "identity", n: 11 } });
     expect(result.x.length).toBe(0);
     expect(result.domainMissing).toBe(true);
+    expect(result.funUnknown).toBe(false);
+  });
+
+  it("marks unknown fun without claiming domainMissing when xlim is set", () => {
+    const result = statFunction({
+      params: { fun: "not_a_real_fun", n: 5, xlim: [-1, 1] },
+    });
+    expect(result.x.length).toBe(0);
+    expect(result.funUnknown).toBe(true);
+    expect(result.domainMissing).toBe(false);
   });
 
   it("uses provided domain when xlim omitted", () => {

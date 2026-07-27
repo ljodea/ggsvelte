@@ -39,25 +39,22 @@ export function buildFunctionFrame(
   const domain = own ?? peerDomain ?? null;
   const result = statFunction({ params, domain });
 
-  if (result.domainMissing) {
-    warnings.push({
-      code: "function-domain-missing",
-      message: `Layer ${index} (function): could not resolve an x evaluation domain. Set params.xlim to [min, max], map continuous aes.x, or add another layer that trains x.`,
-    });
-  }
   if (typeof params.fun !== "string" || params.fun.length === 0) {
     warnings.push({
       code: "function-fun-missing",
       message: `Layer ${index} (function): params.fun is required (registry: identity, dnorm, pnorm, linear).`,
     });
-  } else {
-    const known = ["identity", "dnorm", "pnorm", "linear"];
-    if (!known.includes(params.fun) && !result.domainMissing) {
-      warnings.push({
-        code: "function-fun-unknown",
-        message: `Layer ${index} (function): unknown fun "${params.fun}". Known: ${known.join(", ")}.`,
-      });
-    }
+  } else if (result.funUnknown) {
+    warnings.push({
+      code: "function-fun-unknown",
+      message: `Layer ${index} (function): unknown fun "${params.fun}". Known: identity, dnorm, pnorm, linear.`,
+    });
+  }
+  if (result.domainMissing) {
+    warnings.push({
+      code: "function-domain-missing",
+      message: `Layer ${index} (function): could not resolve an x evaluation domain. Set params.xlim to [min, max], map continuous aes.x, or add another layer that trains x.`,
+    });
   }
 
   removedStatWarning(0, index, "function evaluation", warnings);

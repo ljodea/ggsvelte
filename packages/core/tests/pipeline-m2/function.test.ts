@@ -4,8 +4,10 @@
 import { describe, expect, it } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
 import { runPipeline } from "../../src/pipeline.ts";
+import { buildFunctionFrame } from "../../src/pipeline/frame-stats-function.ts";
 import type { PathsBatch } from "../../src/scene.ts";
 import { dnorm } from "../../src/stats/function.ts";
+import { ColumnTable } from "../../src/table.ts";
 
 const size = { width: 640, height: 400 };
 
@@ -68,5 +70,33 @@ describe("geom_function", () => {
       size,
     );
     expect(model.candidates.candidate(0)?.autoMode).toBe("x");
+  });
+
+  it("warns function-fun-unknown (not domain-missing) for typo'd fun with xlim", () => {
+    // Schema rejects unknown fun names; this guards the frame path used by
+    // unvalidated runPipeline callers (Devin review on #883).
+    const style = { field: null, statColumn: null, constant: null, scaledConstant: null };
+    const warnings: { code: string }[] = [];
+    buildFunctionFrame(
+      {
+        layer: { geom: "function", params: { fun: "dnormm", n: 11, xlim: [-1, 1] } },
+        index: 0,
+        xField: null,
+        color: { field: null },
+        fill: { field: null },
+        size: style,
+        linewidth: style,
+        alpha: style,
+        shape: style,
+        linetype: style,
+        labelField: null,
+      } as never,
+      ColumnTable.fromRows([{ x: 0 }]),
+      warnings as never,
+      [-1, 1],
+    );
+    const codes = warnings.map((w) => w.code);
+    expect(codes).toContain("function-fun-unknown");
+    expect(codes).not.toContain("function-domain-missing");
   });
 });

@@ -10,12 +10,7 @@
   import { samples } from "./data.js";
 </script>
 
-<GGPlot
-  data={samples}
-  aes={{ x: "x", y: { value: 0 } }}
-  width={640}
-  height={400}
->
+<GGPlot data={samples} aes={{ x: "x" }} width={640} height={400}>
   <ThemeClassic />
   <Labs
     title="Standard normal density"
@@ -23,7 +18,7 @@
     x="x"
     y="density"
   />
-  <GeomPoint size={2.5} alpha={0.55} />
+  <GeomPoint aes={{ y: { value: 0 } }} size={2.5} alpha={0.55} />
   <GeomFunction
     fun="dnorm"
     n={201}

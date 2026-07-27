@@ -5,8 +5,8 @@ import { samples } from "./data.js";
 
 export default defineExample(
   // Analytic standard-normal PDF over a rug-like scatter (ggplot2 geom_function).
-  gg(samples, aes({ x: "x", y: { value: 0 } }))
-    .geomPoint({ size: 2.5, alpha: 0.55 })
+  gg(samples, aes({ x: "x" }))
+    .geomPoint({ aes: { y: { value: 0 } }, size: 2.5, alpha: 0.55 })
     .geomFunction({
       fun: "dnorm",
       n: 201,

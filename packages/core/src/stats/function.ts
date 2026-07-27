@@ -42,6 +42,8 @@ export interface FunctionStatResult {
   groups: number[];
   carried: Record<string, never>;
   domainMissing: boolean;
+  /** True when params.fun is a non-empty name not in the portable registry. */
+  funUnknown: boolean;
 }
 
 /** Standard normal PDF (mean, sd). */
@@ -120,19 +122,27 @@ function resolveDomain(
  */
 export function statFunction(input: FunctionStatInput): FunctionStatResult {
   const params = input.params ?? {};
-  const empty: FunctionStatResult = {
+  const emptyArrays = {
     x: new Float64Array(0),
     y: new Float64Array(0),
-    groups: [],
-    carried: {},
-    domainMissing: true,
+    groups: [] as number[],
+    carried: {} as Record<string, never>,
   };
   const funName = typeof params.fun === "string" ? params.fun : "";
   const fn = resolveFunctionFn(funName, params.args ?? {});
-  if (fn === null) return empty;
-
   const domain = resolveDomain(params, input.domain);
-  if (domain === null) return empty;
+  if (fn === null) {
+    // Keep domainMissing orthogonal to funUnknown so callers can emit the
+    // right warning when an unrecognized name is supplied with a valid domain.
+    return {
+      ...emptyArrays,
+      domainMissing: domain === null,
+      funUnknown: funName.length > 0,
+    };
+  }
+  if (domain === null) {
+    return { ...emptyArrays, domainMissing: true, funUnknown: false };
+  }
 
   const nRaw = params.n ?? 101;
   const n = Math.max(2, Math.min(10_000, Math.floor(nRaw)));
@@ -147,5 +157,5 @@ export function statFunction(input: FunctionStatInput): FunctionStatResult {
     y[i] = fn(xi);
     groups.push(0);
   }
-  return { x, y, groups, carried: {}, domainMissing: false };
+  return { x, y, groups, carried: {}, domainMissing: false, funUnknown: false };
 }
