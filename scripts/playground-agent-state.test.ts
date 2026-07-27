@@ -77,6 +77,26 @@ describe("playground agent client", () => {
     expect(result.envelope.spec).toBeDefined();
   });
 
+  // Production default is mock until the worker is deployed. Every other unit
+  // test passes an explicit mode and Playwright uses ?gg-api=live, so this is
+  // the only assertion that pins the no-option path.
+  test("default mode (no options, no query hook) is mock", async () => {
+    let fetchCalled = false;
+    const result = await generateChart(
+      { prompt: "hi", datasetId: "penguins" },
+      {
+        fetchFn: () => {
+          fetchCalled = true;
+          return Promise.resolve(new Response("{}", { status: 500 }));
+        },
+      },
+    );
+    expect(fetchCalled).toBe(false);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.model).toBe("mock");
+  });
+
   test("fetch rejection maps to network (OV8-2)", async () => {
     const result = await generateChart(
       { prompt: "hi", datasetId: "penguins" },
