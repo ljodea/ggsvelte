@@ -65,6 +65,7 @@ import type {
   GeomQqLineOptions,
   GeomSmoothOptions,
   GeomTextOptions,
+  GeomLabelOptions,
   GeomTileOptions,
   GeomBin2dOptions,
 } from "./builder-options.js";
@@ -253,6 +254,11 @@ export class GGBuilderCore {
   /** Sugar for .layer({ geom: 'text', ... }). */
   geomText(options: GeomTextOptions = {}): GGBuilder {
     return this.layer(layerFrom("text", options));
+  }
+
+  /** Sugar for .layer({ geom: 'label', ... }) — text with background box. */
+  geomLabel(options: GeomLabelOptions = {}): GGBuilder {
+    return this.layer(layerFrom("label", options));
   }
 
   /** Sugar for .layer({ geom: 'histogram', ... }) — binned bars over continuous x. */

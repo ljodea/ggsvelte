@@ -327,6 +327,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "sf",
     "sf_text",
     "sf_label",
+    "label",
     "blank",
     "qq",
   ],
@@ -364,6 +365,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "sf",
     "blank",
     "rug",
+    "label",
   ],
   alpha: [
     "point",
@@ -386,6 +388,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "text",
     "sf_text",
     "sf_label",
+    "label",
     "smooth",
     "quantile",
     "contour",

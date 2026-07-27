@@ -494,6 +494,21 @@ export class MockResponder implements Responder {
       spec.layers.push(layer);
       xField = x;
     } else if (
+      !/\bscatter\b/.test(prompt) &&
+      /\bas labels?\b|\bgeom[_\s]?label\b/.test(prompt) &&
+      /background box|label box|boxed label/.test(prompt)
+    ) {
+      // geom_label alone: boxed text marks, no companion point layer (#792).
+      const x = pick.quant() ?? "x";
+      const y = pick.quant() ?? "y";
+      const label = pick.mentionedCat() ?? pick.cat();
+      const aes: MockAes = { x: f(x), y: f(y) };
+      if (label !== undefined) aes.label = f(label);
+      const layer: MockLayer = { geom: "label", aes };
+      colorFor("fill", layer.aes);
+      spec.layers.push(layer);
+      xField = x;
+    } else if (
       /\bgeom[_\s]?polygon\b|\bclosed (?:filled )?(?:region|shape|ring)s?\b|\bfilled regions?\b|\bquadrilateral\b/.test(
         prompt,
       )
@@ -1022,8 +1037,11 @@ export class MockResponder implements Responder {
       if (prompt.includes("label")) {
         const label = pick.mentionedCat();
         if (label !== undefined) {
+          // geom_label when the prompt asks for a background box (#792);
+          // plain geom_text otherwise.
+          const boxed = /background box|label box|boxed label/.test(prompt);
           spec.layers.push({
-            geom: "text",
+            geom: boxed ? "label" : "text",
             aes: { x: f(x), y: f(y), label: f(label) },
           });
         }

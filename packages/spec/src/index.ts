@@ -78,6 +78,7 @@ export {
   SmoothLayerSchema,
   SpecModule,
   TextLayerSchema,
+  LabelLayerSchema,
   THEME_NAMES,
   THEME_NAME_ALIASES,
 } from "./schema.js";
@@ -226,8 +227,10 @@ export type {
   StatName,
   SummaryFun,
   TextLayer,
+  LabelLayer,
   TemporalParserSpec,
   TextParams,
+  LabelParams,
   ThemeName,
   ThemeSpec,
 } from "./schema.js";
@@ -721,6 +724,7 @@ export type {
   RuntimeQuantileLayer,
   RuntimeSpec,
   RuntimeTextLayer,
+  RuntimeLabelLayer,
   RuntimeTileLayer,
   RuntimeBin2dLayer,
   RuntimeVlineLayer,
@@ -782,6 +786,7 @@ export type {
   Bin2dLayerInput,
   SpecInput,
   TextLayerInput,
+  LabelLayerInput,
   VlineLayerInput,
 } from "./normalize.js";
 
@@ -861,6 +866,7 @@ export type {
   GeomQqLineOptions,
   GeomSmoothOptions,
   GeomTextOptions,
+  GeomLabelOptions,
   GeomTileOptions,
   GeomBin2dOptions,
   GeomVlineOptions,

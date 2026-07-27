@@ -2609,6 +2609,64 @@
       "additionalProperties": false,
       "description": "Styling parameters for the text geom (no collision detection: labels draw exactly where placed)."
     },
+    "LabelParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Label opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Font size in px. Must be greater than 0. Default 11."
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "start"
+            },
+            {
+              "type": "string",
+              "const": "middle"
+            },
+            {
+              "type": "string",
+              "const": "end"
+            }
+          ],
+          "description": "Horizontal text anchor relative to the (x, y) position: \"start\", \"middle\" (default), or \"end\"."
+        },
+        "dx": {
+          "type": "number",
+          "description": "Horizontal offset in px applied after positioning. Default 0."
+        },
+        "dy": {
+          "type": "number",
+          "description": "Vertical offset in px applied after positioning (positive = down). Default 0."
+        },
+        "padding": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Uniform box padding around the text in px (ggplot2 label.padding). Default 3."
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Corner radius of the background box in px (ggplot2 label.r). Default 3."
+        },
+        "linewidth": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Box outline stroke width in px (ggplot2 label.size analogue). Default 0.5."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the label geom (text with background box; no collision detection)."
+    },
     "RenderBackend": {
       "anyOf": [
         {
@@ -4122,6 +4180,55 @@
       "additionalProperties": false,
       "description": "A text-label layer. Requires x, y, and label channels."
     },
+    "LabelLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "label",
+          "description": "Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Label layers draw the data as-is."
+        },
+        "position": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "identity"
+            },
+            {
+              "type": "string",
+              "const": "nudge"
+            }
+          ],
+          "description": "Position adjustment: \"identity\" (default) or \"nudge\" (fixed offsets — set positionParams.x/y)."
+        },
+        "positionParams": {
+          "$ref": "#/$defs/PositionParams"
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/LabelParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A label layer (text + background box). Requires x, y, and label channels. color styles text/outline; fill styles the box."
+    },
     "SegmentLayer": {
       "type": "object",
       "required": [
@@ -4704,6 +4811,9 @@
         },
         {
           "$ref": "#/$defs/TextLayer"
+        },
+        {
+          "$ref": "#/$defs/LabelLayer"
         },
         {
           "$ref": "#/$defs/SmoothLayer"

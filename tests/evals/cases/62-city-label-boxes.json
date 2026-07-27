@@ -1,0 +1,65 @@
+{
+  "id": "62-city-label-boxes",
+  "kind": "chart",
+  "prompt": "Scatter population against area and draw city names as labels with background boxes.",
+  "dataProfile": {
+    "fields": [
+      {
+        "name": "area",
+        "type": "quantitative"
+      },
+      {
+        "name": "population",
+        "type": "quantitative"
+      },
+      {
+        "name": "city",
+        "type": "nominal",
+        "examples": ["Oslo", "Bergen", "Trondheim"]
+      }
+    ],
+    "rowCount": 6
+  },
+  "data": {
+    "main": [
+      { "area": 454, "population": 709, "city": "Oslo" },
+      { "area": 465, "population": 289, "city": "Bergen" },
+      { "area": 322, "population": 212, "city": "Trondheim" },
+      { "area": 72, "population": 145, "city": "Stavanger" },
+      { "area": 252, "population": 78, "city": "Tromsø" },
+      { "area": 77, "population": 64, "city": "Kristiansand" }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": {
+      "name": "main"
+    },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "area" },
+          "y": { "field": "population" }
+        }
+      },
+      {
+        "geom": "label",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "area" },
+          "y": { "field": "population" },
+          "label": { "field": "city" }
+        },
+        "params": {
+          "dy": -8
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Point + geom_label with background boxes; label channel mapped to city names."
+}

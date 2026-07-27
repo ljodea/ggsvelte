@@ -62,6 +62,7 @@ import type {
   QuantileLayer,
   SmoothLayer,
   TextLayer,
+  LabelLayer,
   TileLayer,
   Bin2dLayer,
   VlineLayer,
@@ -108,6 +109,7 @@ export interface RuntimeHlineLayer extends WithRuntimeAes<HlineLayer> {}
 export interface RuntimeVlineLayer extends WithRuntimeAes<VlineLayer> {}
 export interface RuntimeJitterLayer extends WithRuntimeAes<JitterLayer> {}
 export interface RuntimeTextLayer extends WithRuntimeAes<TextLayer> {}
+export interface RuntimeLabelLayer extends WithRuntimeAes<LabelLayer> {}
 export interface RuntimeSmoothLayer extends WithRuntimeAes<SmoothLayer> {}
 export interface RuntimeQuantileLayer extends WithRuntimeAes<QuantileLayer> {}
 export interface RuntimeBoxplotLayer extends WithRuntimeAes<BoxplotLayer> {}
@@ -157,6 +159,7 @@ export type RuntimeLayerSpec =
   | RuntimeVlineLayer
   | RuntimeJitterLayer
   | RuntimeTextLayer
+  | RuntimeLabelLayer
   | RuntimeSmoothLayer
   | RuntimeQuantileLayer
   | RuntimeBoxplotLayer

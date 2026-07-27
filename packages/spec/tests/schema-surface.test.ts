@@ -63,6 +63,7 @@ const VALUE_EXPORTS = [
   "SmoothLayerSchema",
   "SpecModule",
   "TextLayerSchema",
+  "LabelLayerSchema",
   "THEME_NAMES",
   "THEME_NAME_ALIASES",
 ] as const;

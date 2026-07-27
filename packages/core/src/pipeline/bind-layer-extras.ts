@@ -43,7 +43,7 @@ export function resolveLabelWeightColorFill(input: {
     else if ("value" in label) labelConstant = String(label.value);
   }
   if (
-    (geom === "text" || geom === "sf_text" || geom === "sf_label") &&
+    (geom === "text" || geom === "label" || geom === "sf_text" || geom === "sf_label") &&
     labelField === null &&
     labelConstant === null
   ) {

@@ -21,6 +21,7 @@ export function candidateAutoMode(
     case "point":
     case "dotplot":
     case "text":
+    case "label":
     case "qq":
     case "sf_text":
     case "sf_label":

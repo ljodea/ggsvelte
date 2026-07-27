@@ -243,6 +243,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "5b200ec3afed907940cede09cf159dc882df2279069e906a82324d0a0ee7ddb5",
   },
   {
+    id: "label/basic",
+    filename: "label-basic-light.png",
+    path: "/previews/label-basic-light.png",
+    sha256: "d39c6fdddc4a344aaeb47b34e5300b705983afbc717398bf93efd857b67f4bd8",
+  },
+  {
     id: "line/ecdf",
     filename: "line-ecdf-light.png",
     path: "/previews/line-ecdf-light.png",
