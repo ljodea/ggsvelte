@@ -401,7 +401,7 @@ export class MockResponder implements Responder {
       else if (fun === "dnorm") params["n"] = 101;
       if (fun === "dnorm" || fun === "pnorm") params["args"] = { mean: 0, sd: 1 };
 
-      const x = fieldNamed("x") ?? pick.quant();
+      const x = fieldNamed("x");
       if (x !== undefined && fieldNamed("y") !== undefined) {
         spec.layers.push({
           geom: "point",
@@ -409,14 +409,21 @@ export class MockResponder implements Responder {
         });
       }
       const functionAes: MockAes = { y: { stat: "y" } };
+      // When xlim is set, x need not be mapped (domain comes from params.xlim).
       if (x !== undefined) functionAes.x = f(x);
+      else if (params["xlim"] === undefined) {
+        const fallbackX = pick.quant();
+        if (fallbackX !== undefined) functionAes.x = f(fallbackX);
+      }
       spec.layers.push({
         geom: "function",
         stat: "function",
         aes: functionAes,
         params,
       });
-      if (x !== undefined) xField = x;
+      if (functionAes.x !== undefined && "field" in functionAes.x) {
+        xField = functionAes.x.field;
+      }
     } else if (
       /\bq-?q\b/.test(prompt) ||
       /\bgeom[_\s]?qq(?:_line)?\b/.test(prompt) ||
