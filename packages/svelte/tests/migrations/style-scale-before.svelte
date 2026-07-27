@@ -1,6 +1,9 @@
 <script lang="ts">
-  // @ts-nocheck — historical GGPlot scales prop (removed in 0.13.0)
   import { GeomPoint, GGPlot } from "../../src/lib/index.js";
+
+  // Historical pre-0.13 GGPlot grammar prop (removed). Cast for typecheck.
+  /* oxlint-disable-next-line typescript/no-explicit-any -- intentional pre-removal fixture */
+  const Plot = GGPlot as any;
 
   // Before 0.8, applications precomputed symbol radii.
   const rows = [
@@ -10,10 +13,10 @@
   ];
 </script>
 
-<GGPlot
+<Plot
   data={rows}
   aes={{ x: "x", y: "y", size: "radius" }}
   scales={{ size: { type: "identity" } }}
 >
   <GeomPoint />
-</GGPlot>
+</Plot>

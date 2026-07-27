@@ -2102,8 +2102,11 @@ Before:
 
 \`\`\`svelte fragment
 <script lang="ts">
-  // @ts-nocheck — historical GGPlot theme prop (removed in 0.13.0)
   import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+
+  // Historical pre-0.13 GGPlot grammar prop (removed). Cast for typecheck.
+  /* oxlint-disable-next-line typescript/no-explicit-any -- intentional pre-removal fixture */
+  const Plot = GGPlot as any;
 
   const rows = [
     { x: 1, y: 2 },
@@ -2112,9 +2115,9 @@ Before:
 </script>
 
 <!-- Before 0.11: theme was a top-level GGPlot prop. -->
-<GGPlot data={rows} aes={{ x: "x", y: "y" }} theme="dark">
+<Plot data={rows} aes={{ x: "x", y: "y" }} theme="dark">
   <GeomPoint />
-</GGPlot>
+</Plot>
 \`\`\`
 
 After:
@@ -2158,12 +2161,15 @@ Before:
 
 \`\`\`svelte fragment
 <script lang="ts">
-  // @ts-nocheck — historical GGPlot scales prop (removed in 0.13.0)
   import {
     GeomPoint,
     GGPlot,
     scaleColorDiscrete,
   } from "@ggsvelte/svelte";
+
+  // Historical pre-0.13 GGPlot grammar prop (removed). Cast for typecheck.
+  /* oxlint-disable-next-line typescript/no-explicit-any -- intentional pre-removal fixture */
+  const Plot = GGPlot as any;
 
   const rows = [
     { x: 1, y: 2, c: "a" },
@@ -2172,13 +2178,13 @@ Before:
 </script>
 
 <!-- Before 0.11: scales was a top-level GGPlot prop. -->
-<GGPlot
+<Plot
   data={rows}
   aes={{ x: "x", y: "y", color: "c" }}
   scales={scaleColorDiscrete({ scheme: "colorblind" })}
 >
   <GeomPoint />
-</GGPlot>
+</Plot>
 \`\`\`
 
 After:
@@ -2383,8 +2389,11 @@ through identity:
 
 \`\`\`svelte fragment
 <script lang="ts">
-  // @ts-nocheck — historical GGPlot scales prop (removed in 0.13.0)
   import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+
+  // Historical pre-0.13 GGPlot grammar prop (removed). Cast for typecheck.
+  /* oxlint-disable-next-line typescript/no-explicit-any -- intentional pre-removal fixture */
+  const Plot = GGPlot as any;
 
   // Before 0.8, applications precomputed symbol radii.
   const rows = [
@@ -2394,13 +2403,13 @@ through identity:
   ];
 </script>
 
-<GGPlot
+<Plot
   data={rows}
   aes={{ x: "x", y: "y", size: "radius" }}
   scales={{ size: { type: "identity" } }}
 >
   <GeomPoint />
-</GGPlot>
+</Plot>
 \`\`\`
 
 In 0.8, keep the source measure and let the scale interpolate in symbol area:
@@ -2566,8 +2575,11 @@ Before 0.7, an explicit continuous color domain clamped implicitly:
 
 \`\`\`svelte fragment
 <script lang="ts">
-  // @ts-nocheck — historical GGPlot scales prop (removed in 0.13.0)
   import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+
+  // Historical pre-0.13 GGPlot grammar prop (removed). Cast for typecheck.
+  /* oxlint-disable-next-line typescript/no-explicit-any -- intentional pre-removal fixture */
+  const Plot = GGPlot as any;
 
   const rows = [
     { x: 1, y: 2, score: -10 },
@@ -2576,13 +2588,13 @@ Before 0.7, an explicit continuous color domain clamped implicitly:
   ];
 </script>
 
-<GGPlot
+<Plot
   data={rows}
   aes={{ x: "x", y: "y", color: "score" }}
   scales={{ color: { type: "sequential", domain: [0, 100] } }}
 >
   <GeomPoint />
-</GGPlot>
+</Plot>
 \`\`\`
 
 In 0.7, opt into clamping when it is the intended encoding:
@@ -2632,8 +2644,11 @@ Before 0.6, this fit used the old late log projection:
 
 \`\`\`svelte fragment
 <script lang="ts">
-  // @ts-nocheck — historical GGPlot scales prop (removed in 0.13.0)
   import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
+
+  // Historical pre-0.13 GGPlot grammar prop (removed). Cast for typecheck.
+  /* oxlint-disable-next-line typescript/no-explicit-any -- intentional pre-removal fixture */
+  const Plot = GGPlot as any;
 
   const rows = [
     { latency: 1, throughput: 8 },
@@ -2643,14 +2658,14 @@ Before 0.6, this fit used the old late log projection:
   ];
 </script>
 
-<GGPlot
+<Plot
   data={rows}
   aes={{ x: "latency", y: "throughput" }}
   scales={{ x: { type: "log", domain: [1, 1000] } }}
 >
   <GeomPoint />
   <GeomSmooth method="lm" />
-</GGPlot>
+</Plot>
 \`\`\`
 
 In 0.6, make the pre-stat transform and limit policy explicit, then compare the

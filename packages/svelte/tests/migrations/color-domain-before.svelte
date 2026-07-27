@@ -1,6 +1,9 @@
 <script lang="ts">
-  // @ts-nocheck — historical GGPlot scales prop (removed in 0.13.0)
   import { GeomPoint, GGPlot } from "../../src/lib/index.js";
+
+  // Historical pre-0.13 GGPlot grammar prop (removed). Cast for typecheck.
+  /* oxlint-disable-next-line typescript/no-explicit-any -- intentional pre-removal fixture */
+  const Plot = GGPlot as any;
 
   const rows = [
     { x: 1, y: 2, score: -10 },
@@ -9,10 +12,10 @@
   ];
 </script>
 
-<GGPlot
+<Plot
   data={rows}
   aes={{ x: "x", y: "y", color: "score" }}
   scales={{ color: { type: "sequential", domain: [0, 100] } }}
 >
   <GeomPoint />
-</GGPlot>
+</Plot>

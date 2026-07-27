@@ -1,6 +1,9 @@
 <script lang="ts">
-  // @ts-nocheck — historical GGPlot scales prop (removed in 0.13.0)
   import { GeomPoint, GeomSmooth, GGPlot } from "../../src/lib/index.js";
+
+  // Historical pre-0.13 GGPlot grammar prop (removed). Cast for typecheck.
+  /* oxlint-disable-next-line typescript/no-explicit-any -- intentional pre-removal fixture */
+  const Plot = GGPlot as any;
 
   const rows = [
     { latency: 1, throughput: 8 },
@@ -10,11 +13,11 @@
   ];
 </script>
 
-<GGPlot
+<Plot
   data={rows}
   aes={{ x: "latency", y: "throughput" }}
   scales={{ x: { type: "log", domain: [1, 1000] } }}
 >
   <GeomPoint />
   <GeomSmooth method="lm" />
-</GGPlot>
+</Plot>

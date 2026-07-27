@@ -1,10 +1,13 @@
 <script lang="ts">
-  // @ts-nocheck — historical GGPlot scales prop (removed in 0.13.0)
   import {
     GeomPoint,
     GGPlot,
     scaleColorDiscrete,
   } from "../../src/lib/index.js";
+
+  // Historical pre-0.13 GGPlot grammar prop (removed). Cast for typecheck.
+  /* oxlint-disable-next-line typescript/no-explicit-any -- intentional pre-removal fixture */
+  const Plot = GGPlot as any;
 
   const rows = [
     { x: 1, y: 2, c: "a" },
@@ -13,10 +16,10 @@
 </script>
 
 <!-- Before 0.11: scales was a top-level GGPlot prop. -->
-<GGPlot
+<Plot
   data={rows}
   aes={{ x: "x", y: "y", color: "c" }}
   scales={scaleColorDiscrete({ scheme: "colorblind" })}
 >
   <GeomPoint />
-</GGPlot>
+</Plot>
