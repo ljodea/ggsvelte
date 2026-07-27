@@ -1,5 +1,5 @@
 /**
- * Strict `dateLabels` grammar and contextual temporal tick label sequences.
+ * Strict `dateLabels` grammar and span-uniform temporal tick label sequences.
  */
 import type { TemporalInterval, TemporalKind } from "@ggsvelte/spec";
 import { temporalLabelConfigurationError } from "@ggsvelte/spec";
@@ -268,11 +268,23 @@ export function formatTemporalTickSequence(
     return values.map((value) => ({ label: visible(value), fullLabel: full(value) }));
   }
   const parts = values.map((value) => displayParts(value, options));
-  const labels = parts.map((part, index) => {
-    const previous = parts[index - 1];
-    const first = previous === undefined;
-    const changedYear = first || part.year !== previous.year;
-    const changedMonth = changedYear || part.month !== previous.month;
+  // Span-uniform visible labels (#962): pick one format from the whole sequence
+  // so an axis never mixes full dates with bare day numbers (or month with/without year).
+  // Use min/max over all parts — order may be reversed or unsorted (explicit breaks).
+  let minYear = Infinity;
+  let maxYear = -Infinity;
+  let minDayKey = Infinity;
+  let maxDayKey = -Infinity;
+  for (const part of parts) {
+    minYear = Math.min(minYear, part.year);
+    maxYear = Math.max(maxYear, part.year);
+    const dayKey = part.year * 12 * 32 + part.month * 32 + part.day;
+    minDayKey = Math.min(minDayKey, dayKey);
+    maxDayKey = Math.max(maxDayKey, dayKey);
+  }
+  const multiYear = parts.length > 0 && minYear !== maxYear;
+  const multiDay = parts.length > 0 && minDayKey !== maxDayKey;
+  const labels = parts.map((part) => {
     let label: string;
     switch (options.interval.unit) {
       case "year":
@@ -280,34 +292,46 @@ export function formatTemporalTickSequence(
         label =
           options.kind === "time" ? `${pad2(part.hour)}:${pad2(part.minute)}` : String(part.year);
         break;
-      case "quarter":
-        label =
-          options.kind === "time"
-            ? `${pad2(part.hour)}:${pad2(part.minute)}`
-            : `Q${String(Math.floor((part.month - 1) / 3) + 1)}${first || changedYear ? ` ${String(part.year)}` : ""}`;
+      case "quarter": {
+        if (options.kind === "time") {
+          label = `${pad2(part.hour)}:${pad2(part.minute)}`;
+          break;
+        }
+        const quarter = `Q${String(Math.floor((part.month - 1) / 3) + 1)}`;
+        label = multiYear ? `${quarter} ${String(part.year)}` : quarter;
         break;
+      }
       case "month":
         label =
           options.kind === "time"
             ? `${pad2(part.hour)}:${pad2(part.minute)}`
-            : `${part.monthShort}${first || changedYear ? ` ${String(part.year)}` : ""}`;
+            : multiYear
+              ? `${part.monthShort} ${String(part.year)}`
+              : part.monthShort;
         break;
       case "week":
       case "day":
+        // Floor is month+day so every tick is self-describing (#962); add year when
+        // the sequence spans more than one calendar year.
         label =
           options.kind === "time"
             ? `${pad2(part.hour)}:${pad2(part.minute)}`
-            : changedMonth
+            : multiYear
               ? `${part.monthShort} ${String(part.day)}, ${String(part.year)}`
-              : String(part.day);
+              : `${part.monthShort} ${String(part.day)}`;
         break;
       case "hour":
       case "minute":
         // time-of-day: never prefix a calendar date — values live on 1970-01-01Z.
-        label =
-          options.kind === "time"
-            ? `${pad2(part.hour)}:${pad2(part.minute)}`
-            : `${changedMonth || part.day !== previous?.day ? `${part.monthShort} ${String(part.day)} ` : ""}${pad2(part.hour)}:${pad2(part.minute)}`;
+        if (options.kind === "time") {
+          label = `${pad2(part.hour)}:${pad2(part.minute)}`;
+        } else if (!multiDay) {
+          label = `${pad2(part.hour)}:${pad2(part.minute)}`;
+        } else if (!multiYear) {
+          label = `${part.monthShort} ${String(part.day)} ${pad2(part.hour)}:${pad2(part.minute)}`;
+        } else {
+          label = `${part.monthShort} ${String(part.day)}, ${String(part.year)} ${pad2(part.hour)}:${pad2(part.minute)}`;
+        }
         break;
       case "second":
         label = `${pad2(part.hour)}:${pad2(part.minute)}:${pad2(part.second)}`;

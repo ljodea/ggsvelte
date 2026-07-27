@@ -74,9 +74,9 @@ function buildTicks(
   intervalValue: TemporalInterval,
   input: TemporalAxisPlanInput,
 ): AxisGuideTick[] {
-  // Contextual abbreviations depend on sequence order. When the axis is reversed,
-  // format in visual order so the leftmost/topmost tick keeps full context, then
-  // map labels back onto ascending semantic values.
+  // Visible labels are span-uniform (#962). Reverse still formats in visual
+  // order so measurement matches what the reader sees left-to-right / top-to-bottom;
+  // the format itself no longer depends on neighbour context.
   const formatOrder = input.reverse ? values.toReversed() : values;
   const formatted = formatTemporalTickSequence(formatOrder, {
     ...temporalOptions(input),
