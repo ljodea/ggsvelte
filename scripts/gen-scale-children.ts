@@ -65,12 +65,12 @@ function colourAliases(stem: string): string[] {
  *   position-binned      2
  *   position-temporal    6  (date/datetime/time × x/y)
  *   position-discrete    2
- *   color-fill          30
+ *   color-fill          36
  *   numeric-style       24  (21 base + size area/radius family #830)
  *   finite-style         8
  *   ----------------------
- *   80 component files + 19 aliases
- *     (15 Colour + Size/Linewidth/Alpha/Shape Ordinal re-exports, #830/#832)
+ *   86 component files + 22 aliases
+ *     (18 Colour + Size/Linewidth/Alpha/Shape Ordinal re-exports, #830/#832)
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
   // --- position-continuous (8) ---------------------------------------------
@@ -130,7 +130,7 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "DiscretePositionScaleOptions",
   ]),
 
-  // --- color-fill (30 components + 15 Colour aliases) ----------------------
+  // --- color-fill (36 components + 18 Colour aliases) ----------------------
   // optionsTypes match the slice-3 hand-written shells exactly.
   shell(
     "scaleColorContinuous",
@@ -264,6 +264,30 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
   shell("scaleFillIdentity", "color-fill", "IdentityColorScaleOptions", [
     "IdentityColorScaleOptions",
   ]),
+  shell(
+    "scaleColorViridisC",
+    "color-fill",
+    "ViridisScaleOptions",
+    ["ViridisScaleOptions"],
+    colourAliases("ViridisC"),
+  ),
+  shell(
+    "scaleColorViridisD",
+    "color-fill",
+    "ViridisScaleOptions",
+    ["ViridisScaleOptions"],
+    colourAliases("ViridisD"),
+  ),
+  shell(
+    "scaleColorViridisB",
+    "color-fill",
+    "ViridisScaleOptions",
+    ["ViridisScaleOptions"],
+    colourAliases("ViridisB"),
+  ),
+  shell("scaleFillViridisC", "color-fill", "ViridisScaleOptions", ["ViridisScaleOptions"]),
+  shell("scaleFillViridisD", "color-fill", "ViridisScaleOptions", ["ViridisScaleOptions"]),
+  shell("scaleFillViridisB", "color-fill", "ViridisScaleOptions", ["ViridisScaleOptions"]),
 
   // --- numeric-style (24: 21 base + size area/radius #830; Discrete shells
   // re-export Ordinal component names for ggplot2 scale_*_ordinal, #830/#832)

@@ -207,8 +207,8 @@ describe("themes catalog", () => {
       incompatible: {
         code: "scale-scheme-type",
         path: "/scales/color/scheme",
-        message: 'The sequential scheme "viridis" cannot be used with an ordinal color scale.',
-        fix: "Use a categorical scheme or provide an ordinal range of CSS colors.",
+        message: 'The categorical scheme "ipsum" cannot be used with a sequential color scale.',
+        fix: 'Use "viridis" or provide a sequential range of #rgb/#rrggbb stops.',
       },
       cycle: {
         code: "palette-exhausted",

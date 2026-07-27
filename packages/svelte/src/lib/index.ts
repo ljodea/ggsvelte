@@ -270,6 +270,18 @@ export { default as ScaleFillManual } from "./scale/ScaleFillManual.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleFillIdentity } from "./scale/ScaleFillIdentity.svelte";
 /** @lifecycle stable-intent */
+export { default as ScaleColorViridisC } from "./scale/ScaleColorViridisC.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorViridisD } from "./scale/ScaleColorViridisD.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColorViridisB } from "./scale/ScaleColorViridisB.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillViridisC } from "./scale/ScaleFillViridisC.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillViridisD } from "./scale/ScaleFillViridisD.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleFillViridisB } from "./scale/ScaleFillViridisB.svelte";
+/** @lifecycle stable-intent */
 export { default as ScaleSizeContinuous } from "./scale/ScaleSizeContinuous.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleSizeDiscrete } from "./scale/ScaleSizeDiscrete.svelte";
@@ -363,6 +375,12 @@ export { default as ScaleColourDatetime } from "./scale/ScaleColorDatetime.svelt
 export { default as ScaleColourManual } from "./scale/ScaleColorManual.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleColourIdentity } from "./scale/ScaleColorIdentity.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourViridisC } from "./scale/ScaleColorViridisC.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourViridisD } from "./scale/ScaleColorViridisD.svelte";
+/** @lifecycle stable-intent */
+export { default as ScaleColourViridisB } from "./scale/ScaleColorViridisB.svelte";
 /** @lifecycle stable-intent */
 export { default as ScaleSizeOrdinal } from "./scale/ScaleSizeDiscrete.svelte";
 /** @lifecycle stable-intent */
@@ -518,6 +536,9 @@ export {
   scaleColorLog10,
   scaleColorManual,
   scaleColorSqrt,
+  scaleColorViridisB,
+  scaleColorViridisC,
+  scaleColorViridisD,
   scaleContinuousIdentity,
   scaleDiscreteIdentity,
   scaleDiscreteManual,
@@ -535,6 +556,9 @@ export {
   scaleColourLog10,
   scaleColourManual,
   scaleColourSqrt,
+  scaleColourViridisB,
+  scaleColourViridisC,
+  scaleColourViridisD,
   scaleFillBinned,
   scaleFillContinuous,
   scaleFillDate,
@@ -544,6 +568,9 @@ export {
   scaleFillLog10,
   scaleFillManual,
   scaleFillSqrt,
+  scaleFillViridisB,
+  scaleFillViridisC,
+  scaleFillViridisD,
   scale_color_binned,
   scale_color_continuous,
   scale_color_date,
@@ -553,6 +580,9 @@ export {
   scale_color_log10,
   scale_color_manual,
   scale_color_sqrt,
+  scale_color_viridis_b,
+  scale_color_viridis_c,
+  scale_color_viridis_d,
   scale_colour_binned,
   scale_colour_continuous,
   scale_colour_date,
@@ -562,6 +592,9 @@ export {
   scale_colour_log10,
   scale_colour_manual,
   scale_colour_sqrt,
+  scale_colour_viridis_b,
+  scale_colour_viridis_c,
+  scale_colour_viridis_d,
   scale_fill_binned,
   scale_fill_continuous,
   scale_fill_date,
@@ -571,6 +604,9 @@ export {
   scale_fill_log10,
   scale_fill_manual,
   scale_fill_sqrt,
+  scale_fill_viridis_b,
+  scale_fill_viridis_c,
+  scale_fill_viridis_d,
   scaleXBinned,
   scaleXContinuous,
   scaleXDate,
@@ -697,6 +733,8 @@ export type {
   TemporalColorScaleOptions,
   TransformedColorScaleOptions,
   TransformedPositionScaleOptions,
+  ViridisOptionName,
+  ViridisScaleOptions,
   TemporalDecision,
   TemporalDisambiguation,
   TemporalInterval,

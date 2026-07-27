@@ -62,10 +62,10 @@ describe("SHELL_MANIFEST completeness", () => {
     expect(actual).toEqual(expected);
   });
 
-  it("cardinality: 80 component files + 19 aliases", () => {
-    expect(SHELL_MANIFEST).toHaveLength(80);
-    // 15 Colour + Size/Linewidth/Alpha/Shape Ordinal (#830/#832)
-    expect(manifestAliases().size).toBe(19);
+  it("cardinality: 86 component files + 22 aliases", () => {
+    expect(SHELL_MANIFEST).toHaveLength(86);
+    // 18 Colour + Size/Linewidth/Alpha/Shape Ordinal (#830/#832)
+    expect(manifestAliases().size).toBe(22);
     // Cross-check family buckets against the verified ledger.
     const byFamily = new Map<string, number>();
     for (const s of SHELL_MANIFEST) {
@@ -75,7 +75,7 @@ describe("SHELL_MANIFEST completeness", () => {
     expect(byFamily.get("position-binned")).toBe(2);
     expect(byFamily.get("position-temporal")).toBe(6);
     expect(byFamily.get("position-discrete")).toBe(2);
-    expect(byFamily.get("color-fill")).toBe(30);
+    expect(byFamily.get("color-fill")).toBe(36);
     expect(byFamily.get("numeric-style")).toBe(24);
     expect(byFamily.get("finite-style")).toBe(8);
     // Families in the ledger match. Set<string>, not the inferred literal union:
@@ -168,7 +168,7 @@ describe("index region rewrite", () => {
     expect(region.startsWith(REGION_START)).toBe(true);
     expect(region.endsWith(REGION_END)).toBe(true);
     const exportCount = (region.match(/^export \{ default as /gm) ?? []).length;
-    expect(exportCount).toBe(80 + 19);
+    expect(exportCount).toBe(86 + 22);
     expect(region).toContain(
       'export { default as ScaleColourContinuous } from "./scale/ScaleColorContinuous.svelte";',
     );

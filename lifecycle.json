@@ -1660,6 +1660,14 @@
           "kind": "type",
           "lifecycle": "stable-intent"
         },
+        "ViridisOptionName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ViridisScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "VlineLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2012,6 +2020,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleColorViridisB": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorViridisC": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorViridisD": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleColourBinned": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2073,6 +2093,18 @@
           "lifecycle": "experimental"
         },
         "scaleColourSqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourViridisB": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourViridisC": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourViridisD": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2149,6 +2181,18 @@
           "lifecycle": "experimental"
         },
         "scaleFillSqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillViridisB": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillViridisC": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillViridisD": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2456,6 +2500,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_color_viridis_b": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_viridis_c": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_viridis_d": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_colour_binned": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2517,6 +2573,18 @@
           "lifecycle": "experimental"
         },
         "scale_colour_sqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_viridis_b": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_viridis_c": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_viridis_d": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2593,6 +2661,18 @@
           "lifecycle": "experimental"
         },
         "scale_fill_sqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_viridis_b": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_viridis_c": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_viridis_d": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2959,6 +3039,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CIVIDIS_RAMP_10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "CLIDiagnosticCode": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3171,6 +3255,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "INFERNO_RAMP_10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "IPSUM_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3235,6 +3323,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "MAGMA_RAMP_10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "MAX_BINNED_BREAKS": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3280,6 +3372,10 @@
           "lifecycle": "experimental"
         },
         "PIPELINE_WARNING_CATALOG": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "PLASMA_RAMP_10": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3427,6 +3523,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "SEQUENTIAL_SCHEME_RAMPS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "STRIP_BAND": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3564,6 +3664,10 @@
           "lifecycle": "experimental"
         },
         "TABLEAU10_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TURBO_RAMP_10": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3771,6 +3875,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "isSequentialSchemeName": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "layout": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3911,6 +4019,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "sampleSequentialPalette": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleTransform": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3920,6 +4032,10 @@
           "lifecycle": "experimental"
         },
         "sceneToSVGString": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "sequentialSchemeRamp": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5009,6 +5125,18 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleColorViridisB": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorViridisC": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorViridisD": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleColourBinned": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -5066,6 +5194,18 @@
           "lifecycle": "stable-intent"
         },
         "ScaleColourSqrt": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourViridisB": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourViridisC": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourViridisD": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -5142,6 +5282,18 @@
           "lifecycle": "stable-intent"
         },
         "ScaleFillSqrt": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillViridisB": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillViridisC": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillViridisD": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -5593,6 +5745,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ViridisOptionName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ViridisScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ZoomDomains": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -5909,6 +6069,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleColorViridisB": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorViridisC": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorViridisD": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleColourBinned": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -5942,6 +6114,18 @@
           "lifecycle": "experimental"
         },
         "scaleColourSqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourViridisB": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourViridisC": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourViridisD": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5990,6 +6174,18 @@
           "lifecycle": "experimental"
         },
         "scaleFillSqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillViridisB": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillViridisC": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillViridisD": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -6237,6 +6433,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_color_viridis_b": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_viridis_c": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_viridis_d": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_colour_binned": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -6270,6 +6478,18 @@
           "lifecycle": "experimental"
         },
         "scale_colour_sqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_viridis_b": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_viridis_c": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_viridis_d": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -6318,6 +6538,18 @@
           "lifecycle": "experimental"
         },
         "scale_fill_sqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_viridis_b": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_viridis_c": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_viridis_d": {
           "kind": "value",
           "lifecycle": "experimental"
         },

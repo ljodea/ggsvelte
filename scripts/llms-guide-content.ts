@@ -868,19 +868,24 @@ scaleColorOrdinal({ scheme: "tableau10" }); // alias of scaleColorDiscrete
 
 ## Continuous, binned, manual, and identity color
 
-Quantitative color/fill defaults to a continuous viridis colorbar. The
-\`identity\`, \`log10\`, and \`sqrt\` transforms run before color-domain training;
-they do not change position statistics. Explicit reference \`breaks\` stay in
-semantic source units.
+Quantitative color/fill defaults to a continuous viridis colorbar. Named
+viridis-family constructors match ggplot2 \`scale_*_viridis_{c,d,b}\`
+(\`option\` selects \`viridis\`/\`magma\`/\`plasma\`/\`inferno\`/\`cividis\`/\`turbo\`;
+\`direction: -1\` reverses). Discrete viridis samples evenly across the ramp.
+The \`identity\`, \`log10\`, and \`sqrt\` transforms run before color-domain
+training; they do not change position statistics. Explicit reference
+\`breaks\` stay in semantic source units.
 
 \`\`\`ts fragment
 import {
   scaleColorLog10,
-  scaleFillContinuous,
+  scaleColorViridisD,
+  scaleFillViridisC,
 } from "@ggsvelte/spec";
 
 const color = scaleColorLog10({ domain: [1, 1000] });
-const fill = scaleFillContinuous({ scheme: "viridis" });
+const fill = scaleFillViridisC({ option: "plasma" });
+const groups = scaleColorViridisD({ option: "viridis" });
 \`\`\`
 
 Binned color/fill uses deterministic \`[lower, upper)\` intervals with the final

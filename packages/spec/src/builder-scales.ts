@@ -13,6 +13,9 @@ import {
   scaleColorLog10,
   scaleColorManual,
   scaleColorSqrt,
+  scaleColorViridisB,
+  scaleColorViridisC,
+  scaleColorViridisD,
   scaleFillBinned,
   scaleFillContinuous,
   scaleFillDate,
@@ -22,6 +25,9 @@ import {
   scaleFillLog10,
   scaleFillManual,
   scaleFillSqrt,
+  scaleFillViridisB,
+  scaleFillViridisC,
+  scaleFillViridisD,
   scaleXBinned,
   scaleXContinuous,
   scaleXDate,
@@ -50,6 +56,7 @@ import {
   type TemporalColorScaleOptions,
   type TemporalScaleOptions,
   type TransformedColorScaleOptions,
+  type ViridisScaleOptions,
   type TransformedPositionScaleOptions,
 } from "./scale-helpers.js";
 import {
@@ -253,6 +260,21 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
       return this.scales(scaleColorIdentity(options));
     }
 
+    /** Configure color with a viridis-family continuous ramp (#828). */
+    scaleColorViridisC(options: ViridisScaleOptions = {}): GGBuilder {
+      return this.scales(scaleColorViridisC(options));
+    }
+
+    /** Configure color with discrete samples of a viridis-family ramp (#828). */
+    scaleColorViridisD(options: ViridisScaleOptions = {}): GGBuilder {
+      return this.scales(scaleColorViridisD(options));
+    }
+
+    /** Configure color as viridis-family colorsteps (#828). */
+    scaleColorViridisB(options: ViridisScaleOptions = {}): GGBuilder {
+      return this.scales(scaleColorViridisB(options));
+    }
+
     /** Configure fill as a continuous sequential ramp. */
     scaleFillContinuous(options: SequentialColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleFillContinuous(options));
@@ -296,6 +318,21 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
     /** Use validated source values directly as fills. */
     scaleFillIdentity(options: IdentityColorScaleOptions = {}): GGBuilder {
       return this.scales(scaleFillIdentity(options));
+    }
+
+    /** Configure fill with a viridis-family continuous ramp (#828). */
+    scaleFillViridisC(options: ViridisScaleOptions = {}): GGBuilder {
+      return this.scales(scaleFillViridisC(options));
+    }
+
+    /** Configure fill with discrete samples of a viridis-family ramp (#828). */
+    scaleFillViridisD(options: ViridisScaleOptions = {}): GGBuilder {
+      return this.scales(scaleFillViridisD(options));
+    }
+
+    /** Configure fill as viridis-family colorsteps (#828). */
+    scaleFillViridisB(options: ViridisScaleOptions = {}): GGBuilder {
+      return this.scales(scaleFillViridisB(options));
     }
 
     scaleSizeContinuous(options: SizeSequentialStyleScaleOptions = {}): GGBuilder {
