@@ -65,6 +65,8 @@ export type {
   GeomSfLabelOptions,
   GeomSpokeOptions,
   GeomStepOptions,
+  GeomQqOptions,
+  GeomQqLineOptions,
   GeomSmoothOptions,
   GeomTextOptions,
   GeomTileOptions,

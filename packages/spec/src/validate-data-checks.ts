@@ -53,6 +53,8 @@ export const STAT_COLUMNS: Record<string, readonly string[]> = {
   quantile: ["y"],
   density_2d: ["level", "density"],
   density_2d_filled: ["level", "density"],
+  qq: ["sample", "theoretical"],
+  qq_line: ["sample", "theoretical"],
 };
 
 function isRecord(v: unknown): v is Record<string, unknown> {

@@ -410,6 +410,12 @@ export const SpecDeclarations = {
             "Statistical weight channel. The count, bin, and density stats sum weights instead of counting rows. Never participates in grouping.",
         }),
       ),
+      sample: Type.Optional(
+        Type.Ref("ChannelValue", {
+          description:
+            "Sample distribution channel for Q–Q plots (ggplot2 aes.sample). The qq / qq_line stats read this column; x/y become theoretical and sample quantiles after the stat. Never participates in grouping.",
+        }),
+      ),
       ymin: Type.Optional(
         Type.Ref("ChannelValue", {
           description:
@@ -1178,6 +1184,56 @@ export const SpecDeclarations = {
       additionalProperties: false,
       description:
         "Parameters for the quantile geom (linear y~x quantile regression lines; #805). method rqss is intentionally omitted in v1.",
+    },
+  ),
+  QqParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Point opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      size: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Point size in px. Must be greater than 0.",
+        }),
+      ),
+      shape: Type.Optional(
+        Type.Union(POINT_SHAPE_NAME_SCHEMAS, {
+          description:
+            'Point shape. One of "circle", "triangle", "square", "diamond", "plus", "cross". Default "circle".',
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Styling for geom_qq (Q–Q scatter). Requires aes.sample; x/y become theoretical and sample quantiles.",
+    },
+  ),
+  QqLineParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Line opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "Styling for geom_qq_line (reference line through sample/theoretical quartile match).",
     },
   ),
 
@@ -2825,6 +2881,62 @@ export const SpecDeclarations = {
         "A quantile-regression layer. Requires quantitative x and y. Default quantiles [0.25, 0.5, 0.75]. v1 is linear y~x only (no rqss).",
     },
   ),
+  QqLayer: Type.Object(
+    {
+      geom: Type.Literal("qq", {
+        description:
+          "Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("qq", { description: "Q–Q quantile pairing (default for this geom)." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "qq layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("QqParams")),
+    },
+    {
+      additionalProperties: false,
+      description: "A Q–Q point layer. Requires the sample channel.",
+    },
+  ),
+  QqLineLayer: Type.Object(
+    {
+      geom: Type.Literal("qq_line", {
+        description:
+          "Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("qq_line", {
+          description: "Q–Q line slope/intercept from quartile match (default for this geom).",
+        }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "qq_line layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime).",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("QqLineParams")),
+    },
+    {
+      additionalProperties: false,
+      description: "A Q–Q reference line layer. Requires the sample channel.",
+    },
+  ),
 
   ContourLayer: Type.Object(
     {
@@ -3815,6 +3927,8 @@ export const SpecDeclarations = {
       Type.Ref("TextLayer"),
       Type.Ref("SmoothLayer"),
       Type.Ref("QuantileLayer"),
+      Type.Ref("QqLayer"),
+      Type.Ref("QqLineLayer"),
       Type.Ref("ContourLayer"),
       Type.Ref("BoxplotLayer"),
       Type.Ref("DensityLayer"),

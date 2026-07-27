@@ -51,6 +51,8 @@ import type {
   DotplotLayer,
   RugLayer,
   StepLayer,
+  QqLayer,
+  QqLineLayer,
   RuleLayer,
   QuantileLayer,
   SmoothLayer,
@@ -91,6 +93,8 @@ export interface RuntimeAblineLayer extends WithRuntimeAes<AblineLayer> {}
 export interface RuntimeCurveLayer extends WithRuntimeAes<CurveLayer> {}
 export interface RuntimeRugLayer extends WithRuntimeAes<RugLayer> {}
 export interface RuntimeStepLayer extends WithRuntimeAes<StepLayer> {}
+export interface RuntimeQqLayer extends WithRuntimeAes<QqLayer> {}
+export interface RuntimeQqLineLayer extends WithRuntimeAes<QqLineLayer> {}
 export interface RuntimeRuleLayer extends WithRuntimeAes<RuleLayer> {}
 export interface RuntimeHlineLayer extends WithRuntimeAes<HlineLayer> {}
 export interface RuntimeVlineLayer extends WithRuntimeAes<VlineLayer> {}
@@ -132,6 +136,8 @@ export type RuntimeLayerSpec =
   | RuntimeCurveLayer
   | RuntimeRugLayer
   | RuntimeStepLayer
+  | RuntimeQqLayer
+  | RuntimeQqLineLayer
   | RuntimeRuleLayer
   | RuntimeHlineLayer
   | RuntimeVlineLayer

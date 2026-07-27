@@ -21,6 +21,7 @@ export function candidateAutoMode(
     case "point":
     case "dotplot":
     case "text":
+    case "qq":
     case "sf_text":
     case "sf_label":
       return "exact";
@@ -35,6 +36,7 @@ export function candidateAutoMode(
     case "sf":
       return "exact";
     case "line":
+    case "qq_line":
     case "path":
     case "step":
     case "contour":

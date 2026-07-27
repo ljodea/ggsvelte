@@ -2277,8 +2277,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-760",
-        title: "experimental (760)",
+        id: "experimental-772",
+        title: "experimental (772)",
         level: 3,
       },
       {
@@ -2317,8 +2317,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-507",
-        title: "experimental (507)",
+        id: "experimental-509",
+        title: "experimental (509)",
         level: 3,
       },
       {
@@ -3067,6 +3067,16 @@ export const DOCS_ROUTES = [
     title: "Void theme — marks without cartesian chrome — ggsvelte gallery",
     description: "Void theme — marks without cartesian chrome",
     canonicalPath: "/examples/point/void-chrome",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "site",
+  },
+  {
+    path: "/examples/qq/normal",
+    title: "Normal Q–Q plot — ggsvelte gallery",
+    description: "Normal Q–Q plot",
+    canonicalPath: "/examples/qq/normal",
     kind: "page",
     index: true,
     sitemap: true,

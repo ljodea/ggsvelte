@@ -107,6 +107,7 @@ export function bindLayer(
     labelField: extras.labelField,
     labelConstant: extras.labelConstant,
     weightField: extras.weightField,
+    sampleField: extras.sampleField,
     zField: extras.zField,
     mapIdField: extras.mapIdField,
     ruleForm: position.ruleForm,

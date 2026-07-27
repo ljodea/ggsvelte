@@ -57,6 +57,7 @@ const NON_GROUPING_CHANNELS: ReadonlySet<string> = new Set([
   "group",
   "label",
   "weight",
+  "sample",
   "width",
   "height",
   "xmin",

@@ -120,6 +120,52 @@ function hexBinKey(gs: number, q: number, r: number): string {
   return `${gs}:${q}:${r}`;
 }
 
+/**
+ * Materialize zero-count axial cells whose centres sit in a one-hex pad of the
+ * unit square, for every group slot. Extracted so `statBinHex` stays under the
+ * max nesting depth for type-aware lint.
+ */
+function fillEmptyLatticeCells(counts: Map<string, number>, groupCount: number, s: number): void {
+  const pad = Math.max(Math.sqrt(3) * s, 2 * s);
+  const sampleCorners: Array<readonly [number, number]> = [
+    [0, 0],
+    [1, 0],
+    [0, 1],
+    [1, 1],
+    [0.5, 0],
+    [0.5, 1],
+    [0, 0.5],
+    [1, 0.5],
+  ];
+  let minQ = Infinity;
+  let maxQ = -Infinity;
+  let minR = Infinity;
+  let maxR = -Infinity;
+  for (const [nx, ny] of sampleCorners) {
+    const axial = pixelToAxial(nx, ny, s);
+    if (axial.q < minQ) minQ = axial.q;
+    if (axial.q > maxQ) maxQ = axial.q;
+    if (axial.r < minR) minR = axial.r;
+    if (axial.r > maxR) maxR = axial.r;
+  }
+  // Expand so edge hexes whose centres sit just outside the corners still
+  // enter the candidate box before the pad filter.
+  minQ -= 2;
+  maxQ += 2;
+  minR -= 2;
+  maxR += 2;
+  for (let gs = 0; gs < groupCount; gs++) {
+    for (let r = minR; r <= maxR; r++) {
+      for (let q = minQ; q <= maxQ; q++) {
+        const { x: ux, y: uy } = axialToPixel(q, r, s);
+        if (ux < -pad || ux > 1 + pad || uy < -pad || uy > 1 + pad) continue;
+        const key = hexBinKey(gs, q, r);
+        if (!counts.has(key)) counts.set(key, 0);
+      }
+    }
+  }
+}
+
 export function statBinHex(input: BinHexStatInput): BinHexStatResult {
   const { x, y, groups, weights } = input;
   const params = input.params ?? {};
@@ -197,44 +243,7 @@ export function statBinHex(input: BinHexStatInput): BinHexStatResult {
   // empty cells appear (counts Map only ever saw occupied keys). Bound by
   // centres inside a one-hex pad of [0,1]² so bins cannot explode unbounded.
   if (!drop && groupOrder.length > 0) {
-    const pad = Math.max(Math.sqrt(3) * s, 2 * s);
-    const sampleCorners: Array<readonly [number, number]> = [
-      [0, 0],
-      [1, 0],
-      [0, 1],
-      [1, 1],
-      [0.5, 0],
-      [0.5, 1],
-      [0, 0.5],
-      [1, 0.5],
-    ];
-    let minQ = Infinity;
-    let maxQ = -Infinity;
-    let minR = Infinity;
-    let maxR = -Infinity;
-    for (const [nx, ny] of sampleCorners) {
-      const axial = pixelToAxial(nx, ny, s);
-      if (axial.q < minQ) minQ = axial.q;
-      if (axial.q > maxQ) maxQ = axial.q;
-      if (axial.r < minR) minR = axial.r;
-      if (axial.r > maxR) maxR = axial.r;
-    }
-    // Expand so edge hexes whose centres sit just outside the corners still
-    // enter the candidate box before the pad filter.
-    minQ -= 2;
-    maxQ += 2;
-    minR -= 2;
-    maxR += 2;
-    for (let gs = 0; gs < groupOrder.length; gs++) {
-      for (let r = minR; r <= maxR; r++) {
-        for (let q = minQ; q <= maxQ; q++) {
-          const { x: ux, y: uy } = axialToPixel(q, r, s);
-          if (ux < -pad || ux > 1 + pad || uy < -pad || uy > 1 + pad) continue;
-          const key = hexBinKey(gs, q, r);
-          if (!counts.has(key)) counts.set(key, 0);
-        }
-      }
-    }
+    fillEmptyLatticeCells(counts, groupOrder.length, s);
   }
 
   // Collect cells.

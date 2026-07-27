@@ -32,6 +32,8 @@ const VALUE_EXPORTS = [
   "SegmentLayerSchema",
   "CurveLayerSchema",
   "StepLayerSchema",
+  "QqLayerSchema",
+  "QqLineLayerSchema",
   "FacetFieldRefSchema",
   "FacetStripSpecSchema",
   "FacetSpecSchema",

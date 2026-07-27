@@ -116,5 +116,7 @@ export interface LayerBinding {
   labelField: string | null;
   labelConstant: string | null;
   weightField: string | null;
+  /** Sample distribution column for qq / qq_line (ggplot2 aes.sample). */
+  sampleField: string | null;
   ruleForm: RuleForm | null;
 }

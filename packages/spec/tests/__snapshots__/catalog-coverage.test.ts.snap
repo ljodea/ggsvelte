@@ -147,6 +147,8 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
       "spoke",
       "rug",
       "step",
+      "qq",
+      "qq_line",
     ],
     "code": "missing-geom",
     "fix": {
@@ -155,7 +157,7 @@ exports[`ERROR_CATALOG coverage [missing-geom] is reproducible; message + fix sn
         "geom": "point",
       },
     },
-    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "hex", "abline", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "sf_label", "blank", "jitter", "spoke", "rug", "step".",
+    "message": "Every layer needs a "geom" discriminator. Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "hex", "abline", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "sf_label", "blank", "jitter", "spoke", "rug", "step", "qq", "qq_line".",
     "path": "/layers/0/geom",
   },
 }
@@ -208,6 +210,8 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
       "spoke",
       "rug",
       "step",
+      "qq",
+      "qq_line",
     ],
     "code": "unknown-geom",
     "fix": {
@@ -216,7 +220,7 @@ exports[`ERROR_CATALOG coverage [unknown-geom] is reproducible; message + fix sn
         "geom": "point",
       },
     },
-    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "hex", "abline", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "sf_label", "blank", "jitter", "spoke", "rug", "step". Did you mean "point"?",
+    "message": "Unknown geom "pont". Allowed geoms: "point", "line", "path", "col", "bar", "histogram", "freqpoly", "area", "rule", "hline", "vline", "text", "smooth", "quantile", "boxplot", "density", "errorbar", "rect", "tile", "raster", "ribbon", "segment", "hex", "abline", "curve", "contour", "density_2d", "density_2d_filled", "dotplot", "map", "sf", "sf_text", "sf_label", "blank", "jitter", "spoke", "rug", "step", "qq", "qq_line". Did you mean "point"?",
     "path": "/layers/0/geom",
   },
 }
@@ -754,7 +758,7 @@ exports[`ERROR_CATALOG coverage [unsupported-geom-aesthetic] is reproducible; me
     "fix": {
       "description": "Remove aes.size or move it to a compatible point layer.",
     },
-    "message": "The line geom does not consume aes.size; supported geoms: point, jitter, text, dotplot, sf, sf_text, sf_label, blank.",
+    "message": "The line geom does not consume aes.size; supported geoms: point, jitter, text, dotplot, sf, sf_text, sf_label, blank, qq.",
     "path": "/layers/0/aes/size",
   },
 }
