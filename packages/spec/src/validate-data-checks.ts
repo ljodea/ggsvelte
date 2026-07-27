@@ -204,7 +204,12 @@ export function dataChecks(
         );
       }
     }
-    if (geom === "errorbar") {
+    if (
+      geom === "errorbar" ||
+      geom === "linerange" ||
+      geom === "pointrange" ||
+      geom === "crossbar"
+    ) {
       for (const channel of ["ymin", "ymax"] as const) {
         const info = fieldTypeOf(channel);
         if (
@@ -214,7 +219,7 @@ export function dataChecks(
         ) {
           typeError(
             channel,
-            `The errorbar geom needs quantitative bounds, but field "${info[0]}" (${channel}) is ${info[1]}.`,
+            `The ${geom} geom needs quantitative bounds, but field "${info[0]}" (${channel}) is ${info[1]}.`,
             "Map the channel to a numeric field.",
           );
         }

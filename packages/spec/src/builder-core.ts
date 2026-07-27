@@ -30,6 +30,9 @@ import type {
   GeomDensity2dFilledOptions,
   GeomDotplotOptions,
   GeomErrorbarOptions,
+  GeomLinerangeOptions,
+  GeomPointrangeOptions,
+  GeomCrossbarOptions,
   GeomRibbonOptions,
   GeomHistogramOptions,
   GeomFreqpolyOptions,
@@ -301,6 +304,21 @@ export class GGBuilderCore {
    */
   geomErrorbar(options: GeomErrorbarOptions = {}): GGBuilder {
     return this.layer(layerFrom("errorbar", options));
+  }
+
+  /** Sugar for .layer({ geom: 'linerange', ... }) — stem without caps. */
+  geomLinerange(options: GeomLinerangeOptions = {}): GGBuilder {
+    return this.layer(layerFrom("linerange", options));
+  }
+
+  /** Sugar for .layer({ geom: 'pointrange', ... }) — stem + mid point. */
+  geomPointrange(options: GeomPointrangeOptions = {}): GGBuilder {
+    return this.layer(layerFrom("pointrange", options));
+  }
+
+  /** Sugar for .layer({ geom: 'crossbar', ... }) — interval box + mid line. */
+  geomCrossbar(options: GeomCrossbarOptions = {}): GGBuilder {
+    return this.layer(layerFrom("crossbar", options));
   }
 
   /** Sugar for .layer({ geom: 'rect', ... }) — arbitrary xmin/xmax/ymin/ymax regions. */

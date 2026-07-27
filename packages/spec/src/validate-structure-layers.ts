@@ -40,6 +40,9 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   boxplot: ["x", "y"],
   density: ["x"],
   errorbar: ["x"], // ymin/ymax vs y are stat-dependent, checked separately
+  linerange: ["x"],
+  pointrange: ["x"],
+  crossbar: ["x"],
   rect: ["xmin", "xmax", "ymin", "ymax"],
   segment: ["x", "y", "xend", "yend"],
   function: [], // domain from xlim / peer / optional x; y is after_stat
@@ -360,15 +363,19 @@ export function layerStructuralErrors(
     }
   }
 
-  if (geom === "errorbar") {
+  if (geom === "errorbar" || geom === "linerange" || geom === "pointrange" || geom === "crossbar") {
     const needed: ChannelName[] =
-      stat === "summary" || stat === "summary_bin" ? ["y"] : ["ymin", "ymax"];
+      stat === "summary" || stat === "summary_bin"
+        ? ["y"]
+        : geom === "pointrange" || geom === "crossbar"
+          ? ["y", "ymin", "ymax"]
+          : ["ymin", "ymax"];
     for (const channel of needed) {
       if (mapped(channel) === undefined) {
         errors.push({
           code: "missing-required-channel",
           path: `${layerPath}/aes/${channel}`,
-          message: `The errorbar geom with the ${stat} stat requires a "${channel}" channel; map it in the layer's aes or the plot-level aes.`,
+          message: `The ${geom} geom with the ${stat} stat requires a "${channel}" channel; map it in the layer's aes or the plot-level aes.`,
           fix: {
             description: `Map "${channel}" to a data field.`,
             example: { [channel]: CHANNEL_FIX_EXAMPLE },

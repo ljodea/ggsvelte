@@ -1651,6 +1651,136 @@
       "additionalProperties": false,
       "description": "Parameters for the errorbar geom: styling plus summary / summary_bin functions and summary_bin binning controls (#817)."
     },
+    "LinerangeParams": {
+      "$ref": "#/$defs/ErrorbarParams"
+    },
+    "PointrangeParams": {
+      "type": "object",
+      "properties": {
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stem stroke width in px. Must be greater than 0. Default 1."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Opacity for stem and point. Default 1."
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Mid-point radius in px. Default 2.5."
+        },
+        "shape": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "circle"
+            },
+            {
+              "type": "string",
+              "const": "triangle"
+            },
+            {
+              "type": "string",
+              "const": "square"
+            },
+            {
+              "type": "string",
+              "const": "diamond"
+            },
+            {
+              "type": "string",
+              "const": "plus"
+            },
+            {
+              "type": "string",
+              "const": "cross"
+            }
+          ],
+          "description": "Mid-point shape. Default \"circle\"."
+        },
+        "fun": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "mean"
+            },
+            {
+              "type": "string",
+              "const": "median"
+            },
+            {
+              "type": "string",
+              "const": "sum"
+            }
+          ],
+          "description": "STAT SUMMARY ONLY: center summary of y per x group. Default \"mean\" (mean_se when funMin/funMax omitted)."
+        },
+        "funMin": {
+          "$ref": "#/$defs/SummaryFun"
+        },
+        "funMax": {
+          "$ref": "#/$defs/SummaryFun"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom_pointrange (stem + mid point)."
+    },
+    "CrossbarParams": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Box width: band-step fraction (band x) or fraction of continuous resolution (same rule as errorbar caps). Default 0.9."
+        },
+        "fatten": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Multiplier for the mid-line linewidth relative to params.linewidth / aes.linewidth. Default 2.5 (ggplot2 geom_crossbar)."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Outline and base mid-line stroke width in px. Default 1."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Box and mid-line opacity. Default 1."
+        },
+        "fun": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "mean"
+            },
+            {
+              "type": "string",
+              "const": "median"
+            },
+            {
+              "type": "string",
+              "const": "sum"
+            }
+          ],
+          "description": "STAT SUMMARY ONLY: center summary. Default \"mean\"."
+        },
+        "funMin": {
+          "$ref": "#/$defs/SummaryFun"
+        },
+        "funMax": {
+          "$ref": "#/$defs/SummaryFun"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom_crossbar (interval box + mid line)."
+    },
     "RectParams": {
       "type": "object",
       "properties": {
@@ -3382,6 +3512,141 @@
       "additionalProperties": false,
       "description": "An errorbar layer. Identity: requires x, ymin, ymax. Summary / summary_bin: requires x and y (bounds from params.fun/funMin/funMax, default mean_se)."
     },
+    "LinerangeLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "linerange",
+          "description": "Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange)."
+        },
+        "stat": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "identity"
+            },
+            {
+              "type": "string",
+              "const": "summary"
+            }
+          ],
+          "description": "Identity (map ymin/ymax) or summary (mean_se from aes.y) — same contract as errorbar."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Linerange layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef"
+        },
+        "params": {
+          "$ref": "#/$defs/LinerangeParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A linerange layer. Identity: x, ymin, ymax. Summary: x, y. No caps (unlike errorbar)."
+    },
+    "PointrangeLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "pointrange",
+          "description": "Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange)."
+        },
+        "stat": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "identity"
+            },
+            {
+              "type": "string",
+              "const": "summary"
+            }
+          ],
+          "description": "Identity (map y, ymin, ymax) or summary (center + mean_se bounds from aes.y)."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Pointrange layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef"
+        },
+        "params": {
+          "$ref": "#/$defs/PointrangeParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A pointrange layer. Identity: x, y, ymin, ymax. Summary: x, y. Point size/shape via params or aes."
+    },
+    "CrossbarLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "crossbar",
+          "description": "Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar)."
+        },
+        "stat": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "identity"
+            },
+            {
+              "type": "string",
+              "const": "summary"
+            }
+          ],
+          "description": "Identity (map y, ymin, ymax) or summary (center + mean_se bounds from aes.y)."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Crossbar layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef"
+        },
+        "params": {
+          "$ref": "#/$defs/CrossbarParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A crossbar layer. Identity: x, y, ymin, ymax. Box width uses the same resolution rule as errorbar caps. Mid-line linewidth = linewidth * fatten."
+    },
     "RectLayer": {
       "type": "object",
       "required": [
@@ -4472,6 +4737,15 @@
         },
         {
           "$ref": "#/$defs/ErrorbarLayer"
+        },
+        {
+          "$ref": "#/$defs/LinerangeLayer"
+        },
+        {
+          "$ref": "#/$defs/PointrangeLayer"
+        },
+        {
+          "$ref": "#/$defs/CrossbarLayer"
         },
         {
           "$ref": "#/$defs/MapLayer"

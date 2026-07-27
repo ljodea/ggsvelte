@@ -318,7 +318,18 @@ export type ScaleCapability = (typeof SCALE_CAPABILITIES)[number];
 /** One checked geom-consumption table for mapped style channels. */
 export const STYLE_AESTHETIC_GEOMS = {
   // blank trains style scales without marks; jitter is sugar for point.
-  size: ["point", "jitter", "text", "dotplot", "sf", "sf_text", "sf_label", "blank", "qq"],
+  size: [
+    "point",
+    "jitter",
+    "text",
+    "dotplot",
+    "pointrange",
+    "sf",
+    "sf_text",
+    "sf_label",
+    "blank",
+    "qq",
+  ],
   linewidth: [
     "line",
     "function",
@@ -335,6 +346,9 @@ export const STYLE_AESTHETIC_GEOMS = {
     "contour",
     "boxplot",
     "errorbar",
+    "linerange",
+    "pointrange",
+    "crossbar",
     "rect",
     "tile",
     "hex",
@@ -381,6 +395,9 @@ export const STYLE_AESTHETIC_GEOMS = {
     "density_2d_filled",
     "dotplot",
     "errorbar",
+    "linerange",
+    "pointrange",
+    "crossbar",
     "rect",
     "tile",
     "hex",
@@ -396,7 +413,7 @@ export const STYLE_AESTHETIC_GEOMS = {
     "blank",
     "rug",
   ],
-  shape: ["point", "jitter", "dotplot", "sf", "blank", "qq"],
+  shape: ["point", "jitter", "dotplot", "pointrange", "sf", "blank", "qq"],
   linetype: [
     "line",
     "function",
@@ -413,6 +430,9 @@ export const STYLE_AESTHETIC_GEOMS = {
     "contour",
     "boxplot",
     "errorbar",
+    "linerange",
+    "pointrange",
+    "crossbar",
     "rect",
     "tile",
     "ribbon",
