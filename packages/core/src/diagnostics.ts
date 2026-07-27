@@ -17,8 +17,10 @@
  * Naming note: `palette-exhausted` appears as BOTH an error and a warning by
  * design (the palette-exhaustion contract): the default `onExhaust: "cycle"`
  * emits the warning; opt-in `onExhaust: "error"` throws the error.
- * `max-marks-exceeded` likewise exists as a PipelineError (renderToSVGString)
- * and a CLI diagnostic (the CLI's own --max-marks check).
+ * `stat-channel-unsupported` is likewise dual-channel: style bindings throw
+ * the error; color/fill bindings warn and ignore the mapping (#915 / #1043).
+ * `max-marks-exceeded` exists as a PipelineError (renderToSVGString) and a CLI
+ * diagnostic (the CLI's own --max-marks check).
  */
 
 export {
@@ -30,6 +32,9 @@ export {
   PIPELINE_WARNING_CATALOG,
   type PipelineWarningCode,
 } from "./diagnostics-warning-catalog.js";
+
+import type { PipelineErrorCode } from "./diagnostics-error-catalog.js";
+import type { PipelineWarningCode } from "./diagnostics-warning-catalog.js";
 
 /**
  * Advisories (`RenderModel.advisories`, Hadley lesson 12): every heuristic
@@ -105,3 +110,14 @@ export const CLI_DIAGNOSTIC_CATALOG = {
 } as const satisfies Record<string, { summary: string }>;
 
 export type CLIDiagnosticCode = keyof typeof CLI_DIAGNOSTIC_CATALOG;
+
+/**
+ * Every catalogued diagnostic code (error, warning, advisory, CLI).
+ * Used on rich `ScaleDiagnostic.code` where dual-channel and multi-channel
+ * codes are legal (`palette-exhausted`, `max-marks-exceeded`, …).
+ */
+export type DiagnosticCode =
+  | PipelineErrorCode
+  | PipelineWarningCode
+  | AdvisoryCode
+  | CLIDiagnosticCode;

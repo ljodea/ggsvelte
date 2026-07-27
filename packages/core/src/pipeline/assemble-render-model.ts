@@ -2,9 +2,10 @@
  * Assemble the public RenderModel (scene, scales, contracts, dispose/row).
  */
 import type { PanelCoordProjector } from "../coord-projector.js";
+import type { BandLabelMode } from "../layout/band-guide.js";
+import type { GuideDegradedCode } from "../layout/guide-degraded-codes.js";
 import type { TickFormatter } from "../layout/layout.js";
 import type { GuidePlan } from "../layout/temporal-guide.js";
-import type { BandLabelMode } from "../layout/band-guide.js";
 import type { ResolvedStyleScale } from "../scales/style.js";
 import type { ScaleState } from "../scales/state.js";
 import type { PositionScale } from "../scales/train.js";
@@ -13,6 +14,7 @@ import type { CellValue, ColumnTable } from "../table.js";
 import type { CandidateStore } from "../candidate-store.js";
 import type { LineageStore } from "../identity.js";
 import { createSemanticViewport } from "../semantic-viewport.js";
+import type { AdvisoryCode } from "../diagnostics.js";
 
 import {
   dedupeRenderModelDiagnostics,
@@ -79,7 +81,20 @@ const COORD_FLIP_FIX = {
   portable: { coord: { type: "flip" } },
 } as const;
 
-function bandGuideDiagnostic(code: string, aesthetic: "x" | "y", mode: BandLabelMode | undefined) {
+type BandGuideDegradedCode = Extract<
+  GuideDegradedCode,
+  "band-label-overlap" | "band-label-margin-overflow"
+>;
+type TemporalGuideDegradedCode = Extract<
+  GuideDegradedCode,
+  "temporal-label-overlap" | "temporal-label-margin-overflow" | "temporal-break-outside-domain"
+>;
+
+function bandGuideDiagnostic(
+  code: BandGuideDegradedCode,
+  aesthetic: "x" | "y",
+  mode: BandLabelMode | undefined,
+): ScaleDiagnostic {
   const margin = code === "band-label-margin-overflow";
   // A margin overflow on a single-line axis is a HORIZONTAL end-cap problem (a
   // wide end label past the panel edge), not a rotated-label bottom-margin one —
@@ -122,7 +137,10 @@ function bandGuideDiagnostic(code: string, aesthetic: "x" | "y", mode: BandLabel
   };
 }
 
-function temporalGuideDiagnostic(code: string, aesthetic: "x" | "y") {
+function temporalGuideDiagnostic(
+  code: TemporalGuideDegradedCode,
+  aesthetic: "x" | "y",
+): ScaleDiagnostic {
   const margin = code === "temporal-label-margin-overflow";
   const outside = code === "temporal-break-outside-domain";
   return {
@@ -160,22 +178,27 @@ function guidePlanDiagnostics(input: AssembleRenderModelInput): RenderModel["sca
           const key = `${code}:${plan.aesthetic}`;
           if (seen.has(key)) return [];
           seen.add(key);
-          return [
-            plan.scaleType === "band"
-              ? bandGuideDiagnostic(code, plan.aesthetic, plan.bandLabelMode)
-              : temporalGuideDiagnostic(code, plan.aesthetic),
-          ];
+          if (plan.scaleType === "band") {
+            if (code !== "band-label-overlap" && code !== "band-label-margin-overflow") return [];
+            return [bandGuideDiagnostic(code, plan.aesthetic, plan.bandLabelMode)];
+          }
+          if (
+            code !== "temporal-label-overlap" &&
+            code !== "temporal-label-margin-overflow" &&
+            code !== "temporal-break-outside-domain"
+          ) {
+            return [];
+          }
+          return [temporalGuideDiagnostic(code, plan.aesthetic)];
         })
       : [],
   );
 }
 
 /** Advisories for the heuristic band label layout the planner chose (Hadley lesson 12). */
-function bandLabelAdvisories(
-  guidePlans: AssembleRenderModelInput["guidePlans"],
-): { code: string; path: string; chosen: string; howToOverride: string }[] {
+function bandLabelAdvisories(guidePlans: AssembleRenderModelInput["guidePlans"]): Advisory[] {
   const seen = new Set<string>();
-  const out: { code: string; path: string; chosen: string; howToOverride: string }[] = [];
+  const out: Advisory[] = [];
   for (const plan of guidePlans) {
     if (plan.type !== "axis" || plan.scaleType !== "band") continue;
     // Author-pinned modes are intentional — do not emit heuristic wrap/rotate advisories.
@@ -185,16 +208,17 @@ function bandLabelAdvisories(
     const key = `${mode}:${plan.aesthetic}`;
     if (seen.has(key)) continue;
     seen.add(key);
+    const code: AdvisoryCode = mode === "wrapped" ? "band-labels-wrapped" : "band-labels-rotated";
     out.push(
       mode === "wrapped"
         ? {
-            code: "band-labels-wrapped",
+            code,
             path: `/scales/${plan.aesthetic}`,
             chosen: "wrapped long labels onto multiple lines",
             howToOverride: `Set scales.${plan.aesthetic}.guide.mode ("single"|"wrap"|"rotate"|"off") or .guide.wrap, use shorter labels, or coordFlip() for horizontal bars.`,
           }
         : {
-            code: "band-labels-rotated",
+            code,
             path: `/scales/${plan.aesthetic}`,
             chosen: `rotated long labels ${String(plan.bandLabelAngle ?? -90)}°`,
             howToOverride: `Set scales.${plan.aesthetic}.guide.mode ("single"|"wrap"|"rotate"|"off") or .guide.angle, or coordFlip() for horizontal category rows.`,

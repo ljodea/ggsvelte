@@ -17,6 +17,7 @@ import {
   explicitCandidate,
   temporalOptions,
 } from "./temporal-axis-candidates.js";
+import type { GuideDegradedCode } from "./guide-degraded-codes.js";
 import type { AxisGuidePlan, AxisGuideTick } from "./guide-plan-types.js";
 import type { TemporalAxisPlanInput, TemporalCandidateEvaluation } from "./temporal-axis-types.js";
 
@@ -92,13 +93,13 @@ export function planTemporalAxis(input: TemporalAxisPlanInput): AxisGuidePlan {
     }
   }
 
-  const degraded = [
-    ...(selected.overlap ? ["temporal-label-overlap"] : []),
-    ...(selected.marginOverflow ? ["temporal-label-margin-overflow"] : []),
+  const degraded: GuideDegradedCode[] = [
+    ...(selected.overlap ? (["temporal-label-overlap"] as const) : []),
+    ...(selected.marginOverflow ? (["temporal-label-margin-overflow"] as const) : []),
     ...(source === "explicit" &&
     input.sourceBreaks !== undefined &&
     input.sourceBreaks.length > selected.ticks.length
-      ? ["temporal-break-outside-domain"]
+      ? (["temporal-break-outside-domain"] as const)
       : []),
   ];
   return Object.freeze({

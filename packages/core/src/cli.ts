@@ -26,6 +26,7 @@
 import type { SpecInput } from "@ggsvelte/spec";
 import { lintSpec, SpecValidationError } from "@ggsvelte/spec";
 
+import type { CLIDiagnosticCode } from "./diagnostics.js";
 import type { NamedData } from "./pipeline.js";
 import { PipelineError, runPipeline } from "./pipeline.js";
 import { countMarks, sceneToSVGString } from "./render-svg.js";
@@ -178,19 +179,24 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
   return out;
 }
 
-function errLine(io: CLIIO, payload: Record<string, unknown>): void {
+function errLine(io: CLIIO, payload: object): void {
   io.writeErr(JSON.stringify(payload));
+}
+
+/** CLI-catalogued error line — code is checked against CLI_DIAGNOSTIC_CATALOG. */
+function cliError(io: CLIIO, code: CLIDiagnosticCode, message: string): void {
+  errLine(io, { kind: "error", code, message });
 }
 
 function parseJSON(io: CLIIO, text: string, what: string): { value: unknown } | null {
   try {
     return { value: JSON.parse(text) as unknown };
   } catch (error) {
-    errLine(io, {
-      kind: "error",
-      code: "invalid-json",
-      message: `${what} is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
-    });
+    cliError(
+      io,
+      "invalid-json",
+      `${what} is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
+    );
     return null;
   }
 }
@@ -210,7 +216,7 @@ export async function runCLI(
   try {
     args = parseArgs(argv);
   } catch (error) {
-    errLine(io, { kind: "error", code: "usage", message: (error as Error).message });
+    cliError(io, "usage", (error as Error).message);
     io.writeErr(USAGE);
     return 2;
   }
@@ -223,13 +229,13 @@ export async function runCLI(
       args.dataPath !== null ||
       args.maxMarks !== null;
     if (hasOtherArguments || options.version === undefined) {
-      errLine(io, {
-        kind: "error",
-        code: "usage",
-        message: hasOtherArguments
+      cliError(
+        io,
+        "usage",
+        hasOtherArguments
           ? "--version must be used without a spec or other options"
           : "--version is unavailable from this programmatic runner",
-      });
+      );
       io.writeErr(USAGE);
       return 2;
     }
@@ -245,11 +251,11 @@ export async function runCLI(
   try {
     specText = args.specPath === null ? await io.readStdin() : io.readFile(args.specPath);
   } catch (error) {
-    errLine(io, {
-      kind: "error",
-      code: "unreadable-input",
-      message: `Cannot read ${args.specPath ?? "stdin"}: ${error instanceof Error ? error.message : String(error)}`,
-    });
+    cliError(
+      io,
+      "unreadable-input",
+      `Cannot read ${args.specPath ?? "stdin"}: ${error instanceof Error ? error.message : String(error)}`,
+    );
     return 2;
   }
   const parsedSpec = parseJSON(io, specText, args.specPath ?? "stdin");
@@ -262,22 +268,22 @@ export async function runCLI(
     try {
       dataText = io.readFile(args.dataPath);
     } catch (error) {
-      errLine(io, {
-        kind: "error",
-        code: "unreadable-input",
-        message: `Cannot read ${args.dataPath}: ${error instanceof Error ? error.message : String(error)}`,
-      });
+      cliError(
+        io,
+        "unreadable-input",
+        `Cannot read ${args.dataPath}: ${error instanceof Error ? error.message : String(error)}`,
+      );
       return 2;
     }
     const parsedData = parseJSON(io, dataText, args.dataPath);
     if (parsedData === null) return 2;
     const parsed = parsedData.value;
     if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-      errLine(io, {
-        kind: "error",
-        code: "invalid-data-file",
-        message: "--data must be a JSON object mapping dataset names to inline data.",
-      });
+      cliError(
+        io,
+        "invalid-data-file",
+        "--data must be a JSON object mapping dataset names to inline data.",
+      );
       return 2;
     }
     data = parsed as Record<string, NamedData>;
@@ -314,11 +320,11 @@ export async function runCLI(
     const limit = args.maxMarks ?? 100_000;
     const marks = countMarks(model.scene);
     if (marks > limit) {
-      errLine(io, {
-        kind: "error",
-        code: "max-marks-exceeded",
-        message: `The plot renders ${marks} marks, more than --max-marks (${limit}).`,
-      });
+      cliError(
+        io,
+        "max-marks-exceeded",
+        `The plot renders ${marks} marks, more than --max-marks (${limit}).`,
+      );
       return 1;
     }
     io.writeOut(sceneToSVGString(model.scene) + "\n");
@@ -340,11 +346,7 @@ export async function runCLI(
       });
       return 1;
     }
-    errLine(io, {
-      kind: "error",
-      code: "internal",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    cliError(io, "internal", error instanceof Error ? error.message : String(error));
     return 1;
   }
 }

@@ -1,5 +1,6 @@
 import type { CoordTransformAxisSpec } from "@ggsvelte/spec";
 
+import type { PipelineErrorCode } from "./diagnostics-error-catalog.js";
 import { PipelineError } from "./pipeline/types.js";
 import type { PositionScale } from "./scales/train.js";
 import { scaleTransform } from "./scales/transform.js";
@@ -15,12 +16,12 @@ export interface CoordAxisProjector {
   invertFraction(fraction: number): number;
 }
 
-function docs(code: string): string {
+function docs(code: PipelineErrorCode): string {
   return `https://ggsvelte.sh/guide/errors#${code}`;
 }
 
 function failure(
-  code: string,
+  code: PipelineErrorCode,
   axis: "x" | "y",
   problem: string,
   cause: string,

@@ -8,6 +8,7 @@ import type { StyleAesthetic, TemporalKind } from "@ggsvelte/spec";
 
 import type { CellValue } from "../table.js";
 import type { BandLabelMode } from "./band-guide.js";
+import type { GuideDegradedCode } from "./guide-degraded-codes.js";
 
 export interface AxisGuideTick {
   value: number | CellValue;
@@ -35,7 +36,7 @@ export interface AxisGuidePlan {
   sourceBreaks?: readonly CellValue[];
   overlap: boolean;
   marginOverflow: boolean;
-  degraded: readonly string[];
+  degraded: readonly GuideDegradedCode[];
   /** Band label layout (measured horizontal band axes only). */
   bandLabelMode?: BandLabelMode;
   /** Band rotation in degrees (auto chooses −45/−90; authors may pin any finite angle). */

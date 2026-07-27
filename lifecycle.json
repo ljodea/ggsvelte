@@ -3675,6 +3675,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "DiagnosticCode": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "DiscreteGuideEntry": {
           "kind": "type",
           "lifecycle": "experimental"

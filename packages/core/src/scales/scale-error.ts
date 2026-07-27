@@ -5,10 +5,12 @@
  * same `code`. Lives in its own leaf module so the transform registry and the
  * trainer can both depend on it without a cycle.
  */
-export class ScaleConfigError extends Error {
-  readonly code: string;
+import type { PipelineErrorCode } from "../diagnostics-error-catalog.js";
 
-  constructor(code: string, message: string) {
+export class ScaleConfigError extends Error {
+  readonly code: PipelineErrorCode;
+
+  constructor(code: PipelineErrorCode, message: string) {
     super(message);
     this.name = "ScaleConfigError";
     this.code = code;
