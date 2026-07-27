@@ -251,26 +251,26 @@ for job markers).
 
 The Svelte package is organized by feature under `packages/svelte/src/lib/`:
 
-| Directory / file        | Role                                                                                                                             |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `geoms/`                | Declaration-only geom children (`GeomPoint`, …) and the geom factory/registry                                                    |
-| `assembly/`             | Labels, layout helpers, chrome-adjacent pure assembly                                                                            |
-| `runtime/`              | Runtime paint, announcer, semantic-key services                                                                                  |
-| `scene/`                | SVG scene tree (`SceneView`, `Batch`, axes, legends paint, strata)                                                               |
-| `a11y/`                 | Canvas-stratum accessibility surface + row materialization                                                                       |
-| `interaction/`          | Tools, reducer, capability, controller                                                                                           |
-| `surface/`              | Capture surface controller (pointer/keyboard/brush)                                                                              |
-| `inspection/`           | Tooltip, inspection coordinator/resolver, inspection state                                                                       |
-| `selection/`            | Point-selection state                                                                                                            |
-| `interval/`             | Interval selection, bounds editor, query                                                                                         |
-| `zoom/`                 | Brush-zoom state                                                                                                                 |
-| `legend/`               | Legend filter/focus controllers, targets, pure surface helpers                                                                   |
-| `chrome/`               | Tool rail, status chrome, theme CSS, chrome state                                                                                |
-| `fonts/`                | Packaged font assets (not TypeScript sources)                                                                                    |
-| `GGPlot.svelte`         | Public component shell                                                                                                           |
-| `plot-engine.svelte.ts` | Controller wiring; owns the construction/effect-order DAG contract (read the file header before reordering factories or effects) |
-| `plot-props.ts`         | GGPlot's **internal** props contract — not re-exported from `index.ts`                                                           |
-| `index.ts`              | The **only** public package entry                                                                                                |
+| Directory / file        | Role                                                                                                                                      |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `geoms/`                | Declaration-only geom children (`GeomPoint`, …) and the geom factory/registry                                                             |
+| `assembly/`             | Labels, layout helpers, chrome-adjacent pure assembly                                                                                     |
+| `runtime/`              | Runtime paint, announcer, semantic-key services                                                                                           |
+| `scene/`                | SVG scene tree (`SceneView`, `Batch`, axes, legends paint, strata)                                                                        |
+| `a11y/`                 | Canvas-stratum accessibility surface + row materialization                                                                                |
+| `interaction/`          | Tools, reducer, capability, controller                                                                                                    |
+| `surface/`              | Capture surface controller (pointer/keyboard/brush)                                                                                       |
+| `inspection/`           | Tooltip, inspection coordinator/resolver, inspection state                                                                                |
+| `selection/`            | Point-selection state                                                                                                                     |
+| `interval/`             | Interval selection, bounds editor, query                                                                                                  |
+| `zoom/`                 | Brush-zoom state                                                                                                                          |
+| `legend/`               | Legend filter/focus controllers, targets, pure surface helpers                                                                            |
+| `chrome/`               | Tool rail, status chrome, theme CSS, chrome state                                                                                         |
+| `fonts/`                | Packaged font assets (not TypeScript sources)                                                                                             |
+| `GGPlot.svelte`         | Public component shell                                                                                                                    |
+| `plot-engine.svelte.ts` | Controller wiring; owns the construction/effect-order DAG contract (read the file header before reordering factories or effects)          |
+| `plot-props.ts`         | GGPlot's **internal** props contract + engine resolve helpers (`resolveCapabilities`, `widenPlotProps`) — not re-exported from `index.ts` |
+| `index.ts`              | The **only** public package entry                                                                                                         |
 
 ### No per-directory barrels
 
