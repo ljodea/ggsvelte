@@ -6,7 +6,11 @@ import type { ColumnTable, CellValue } from "../table.js";
 
 import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
 import { makeColumnOf, styleColumns } from "./frame-stats-shared.js";
-import { positionColumn, positionValuesToNumeric } from "./temporal-position.js";
+import {
+  positionColumn,
+  positionDiscreteness,
+  positionValuesToNumeric,
+} from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 import { NO_ROW } from "./types.js";
 
@@ -18,9 +22,15 @@ function positionCells(
   const field = axis === "x" ? binding.xField! : binding.yField!;
   const conversion = axis === "x" ? binding.xConversion : binding.yConversion;
   const transform = axis === "x" ? binding.xTransform : binding.yTransform;
+  const raw = table.column(field);
+  // Discrete axes have no finite numeric form — text categories come back NaN,
+  // so keying them on the numeric column would drop every row (#795). Key them
+  // on the raw cell like the count stat does, dropping only true nulls.
+  if (positionDiscreteness(table, field, conversion) === "discrete") {
+    return Array.from(raw, (cell) => cell ?? null);
+  }
   // Continuous / temporal: null out non-finite after transform so sum drops them.
   const numeric = positionColumn(table, field, conversion, transform);
-  const raw = table.column(field);
   return Array.from(numeric, (v, i) => {
     if (!Number.isFinite(v)) return null;
     // Preserve original cell for discrete keys when transform is identity.

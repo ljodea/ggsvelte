@@ -72,4 +72,28 @@ describe("geom_count / stat_sum", () => {
       (viaPoint.scene.batches[0] as PointsBatch).positions.length,
     );
   });
+
+  it("keeps rows when the axes are text categories", () => {
+    const rows = [
+      { cat: "a", grade: "hi" },
+      { cat: "a", grade: "hi" },
+      { cat: "a", grade: "lo" },
+      { cat: "b", grade: "hi" },
+      { cat: "b", grade: "lo" },
+      { cat: "b", grade: "lo" },
+    ];
+    // Discrete axes have no finite numeric form, so keying them on the numeric
+    // column drops every row and the layer renders nothing (#795).
+    const model = runPipeline(
+      gg(rows, aes({ x: "cat", y: "grade" }))
+        .geomCount()
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PointsBatch;
+    expect(batch).toBeDefined();
+    // 4 distinct (cat, grade) pairs: a/hi, a/lo, b/hi, b/lo.
+    expect(batch.positions.length / 2).toBe(4);
+    expect(model.warnings.some((w) => w.code === "removed-missing")).toBe(false);
+  });
 });
