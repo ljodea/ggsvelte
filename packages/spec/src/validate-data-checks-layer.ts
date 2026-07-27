@@ -97,7 +97,7 @@ export function collectLayerDataChecks(input: {
     const stat = typeof layer["stat"] === "string" ? layer["stat"] : defaultStat;
 
     const fields: FieldEvidenceMap | null =
-      layerMaps !== null ? (layerMaps[i] ?? plotFields) : plotFields;
+      layerMaps === null ? plotFields : (layerMaps[i] ?? plotFields);
     if (fields === null) continue; // runtime-only named data: skip field checks
     const available = [...fields.keys()];
 
