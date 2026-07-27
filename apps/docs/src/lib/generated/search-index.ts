@@ -3314,6 +3314,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["coord-fixed-degraded"],
   },
   {
+    id: "heading:guide-errors:abline-scale-unsupported",
+    kind: "heading",
+    title: "abline-scale-unsupported",
+    summary:
+      "abline-scale-unsupported in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#abline-scale-unsupported",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["abline-scale-unsupported"],
+  },
+  {
     id: "heading:guide-errors:interaction-diagnostics-ggsvelte-svelte",
     kind: "heading",
     title: "Interaction diagnostics (@ggsvelte/svelte)",
@@ -22137,6 +22147,20 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["coord-fixed-degraded", "warning:coord-fixed-degraded"],
+  },
+  {
+    id: "diagnostic:warning:abline-scale-unsupported",
+    kind: "diagnostic",
+    title: "abline-scale-unsupported · warning",
+    summary:
+      "geom_abline needs continuous x and y scales to clip y = intercept + slope · x; the layer is skipped on band axes.",
+    href: "/guide/errors#abline-scale-unsupported",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["abline-scale-unsupported", "warning:abline-scale-unsupported"],
   },
   {
     id: "diagnostic:interaction:INTERACTION_INTERVAL_FACET_UNSUPPORTED",
