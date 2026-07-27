@@ -52,6 +52,7 @@ export function buildGeometryBatches(input: {
       // topology survives until projectGeometryBatch (#809).
       const pathLike =
         geom === "line" ||
+        geom === "function" ||
         geom === "path" ||
         geom === "step" ||
         geom === "contour" ||
@@ -59,10 +60,15 @@ export function buildGeometryBatches(input: {
         geom === "density_2d_filled" ||
         geom === "area" ||
         geom === "density" ||
+        geom === "violin" ||
         geom === "smooth" ||
         geom === "quantile" ||
         geom === "ribbon" ||
+        geom === "polygon" ||
         geom === "map" ||
+        // Closed hex paths: project once in projectPathBatch (not via projected
+        // panel scales), same as density_2d_filled / map (#800).
+        geom === "hex" ||
         (geom === "sf" && frame.sf?.kind !== "point");
       const built = buildBatch(
         frame,

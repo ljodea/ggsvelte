@@ -20,6 +20,7 @@ export function buildFrame(
   warnings: PipelineWarning[],
   advisories: Advisory[],
   binRange?: [number, number],
+  functionDomain?: [number, number],
   datasets?: import("@ggsvelte/spec").PortableSpec["datasets"],
 ): LayerFrame {
   // Annotation frames are rowless (n=0, empty inputGroups). Do not derive or
@@ -44,6 +45,7 @@ export function buildFrame(
     warnings,
     advisories,
     binRange,
+    functionDomain,
   );
   if (nonIdentity !== null) return { ...nonIdentity, inputGroups };
 

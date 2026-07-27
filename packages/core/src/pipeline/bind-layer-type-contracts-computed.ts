@@ -36,6 +36,20 @@ export function validateComputedYAndBinContracts(input: {
       "The density geom computes y with the density stat, so aes.y must not map data. Map only x.",
     );
   }
+  if ((geom === "function" || stat === "function") && yField !== null) {
+    throw new PipelineError(
+      "computed-y-mapped",
+      `/layers/${index}/aes/y`,
+      "The function geom/stat computes y from the named function, so aes.y must not map data.",
+    );
+  }
+  if (stat === "ecdf" && yField !== null) {
+    throw new PipelineError(
+      "computed-y-mapped",
+      `/layers/${index}/aes/y`,
+      "The ecdf stat computes y (cumulative proportion), so aes.y must not map data. Map only x.",
+    );
+  }
   if ((geom === "dotplot" || stat === "bindot") && yField !== null) {
     throw new PipelineError(
       "computed-y-mapped",

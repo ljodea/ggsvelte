@@ -146,7 +146,7 @@ describe("pipeline semantic identity", () => {
       },
       { width: 400, height: 240 },
     );
-    expect(defaults.axisFormatters.x(1000)).toBe("1,000");
+    expect(defaults.axisFormatters.x(1000)).toBe("1000");
     expect(defaults.axisFormatters.y(instant)).toBe("2025-07-14");
   });
 

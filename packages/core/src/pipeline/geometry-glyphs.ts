@@ -40,8 +40,8 @@ export function glyphsBatch(
     dy: params.dy ?? 0,
   });
   removedWarning(emitted.removed, binding.index, warnings);
-  // geom_label (#792) will share this path when it lands; sf_label ships first.
-  const withBox = binding.layer.geom === "sf_label";
+  // geom_label (#792) and sf_label (#809) share the same box chrome.
+  const withBox = binding.layer.geom === "label" || binding.layer.geom === "sf_label";
   return packGlyphsBatch({
     frame,
     emitted,

@@ -30,6 +30,9 @@ import type {
   GeomDensity2dFilledOptions,
   GeomDotplotOptions,
   GeomErrorbarOptions,
+  GeomLinerangeOptions,
+  GeomPointrangeOptions,
+  GeomCrossbarOptions,
   GeomRibbonOptions,
   GeomHistogramOptions,
   GeomFreqpolyOptions,
@@ -40,10 +43,14 @@ import type {
   GeomPointOptions,
   GeomCountOptions,
   GeomRasterOptions,
+  GeomHexOptions,
   GeomRectOptions,
   GeomRuleOptions,
   GeomRugOptions,
   GeomSegmentOptions,
+  GeomViolinOptions,
+  GeomFunctionOptions,
+  GeomPolygonOptions,
   GeomAblineOptions,
   GeomVlineOptions,
   GeomQuantileOptions,
@@ -56,9 +63,13 @@ import type {
   GeomBlankOptions,
   GeomSpokeOptions,
   GeomStepOptions,
+  GeomQqOptions,
+  GeomQqLineOptions,
   GeomSmoothOptions,
   GeomTextOptions,
+  GeomLabelOptions,
   GeomTileOptions,
+  GeomBin2dOptions,
 } from "./builder-options.js";
 import type {
   A11yMode,
@@ -255,6 +266,11 @@ export class GGBuilderCore {
     return this.layer(layerFrom("text", options));
   }
 
+  /** Sugar for .layer({ geom: 'label', ... }) — text with background box. */
+  geomLabel(options: GeomLabelOptions = {}): GGBuilder {
+    return this.layer(layerFrom("label", options));
+  }
+
   /** Sugar for .layer({ geom: 'histogram', ... }) — binned bars over continuous x. */
   geomHistogram(options: GeomHistogramOptions = {}): GGBuilder {
     return this.layer(layerFrom("histogram", options));
@@ -306,6 +322,21 @@ export class GGBuilderCore {
     return this.layer(layerFrom("errorbar", options));
   }
 
+  /** Sugar for .layer({ geom: 'linerange', ... }) — stem without caps. */
+  geomLinerange(options: GeomLinerangeOptions = {}): GGBuilder {
+    return this.layer(layerFrom("linerange", options));
+  }
+
+  /** Sugar for .layer({ geom: 'pointrange', ... }) — stem + mid point. */
+  geomPointrange(options: GeomPointrangeOptions = {}): GGBuilder {
+    return this.layer(layerFrom("pointrange", options));
+  }
+
+  /** Sugar for .layer({ geom: 'crossbar', ... }) — interval box + mid line. */
+  geomCrossbar(options: GeomCrossbarOptions = {}): GGBuilder {
+    return this.layer(layerFrom("crossbar", options));
+  }
+
   /** Sugar for .layer({ geom: 'rect', ... }) — arbitrary xmin/xmax/ymin/ymax regions. */
   geomRect(options: GeomRectOptions = {}): GGBuilder {
     return this.layer(layerFrom("rect", options));
@@ -316,9 +347,19 @@ export class GGBuilderCore {
     return this.layer(layerFrom("tile", options));
   }
 
+  /** Sugar for .layer({ geom: 'bin_2d', ... }) — 2D rectangular bin heatmap. */
+  geomBin2d(options: GeomBin2dOptions = {}): GGBuilder {
+    return this.layer(layerFrom("bin_2d", options));
+  }
+
   /** Sugar for .layer({ geom: 'raster', ... }) — equal-cell dense grid. */
   geomRaster(options: GeomRasterOptions = {}): GGBuilder {
     return this.layer(layerFrom("raster", options));
+  }
+
+  /** Sugar for .layer({ geom: 'hex', ... }) — hexagonal 2D bin heatmap. */
+  geomHex(options: GeomHexOptions = {}): GGBuilder {
+    return this.layer(layerFrom("hex", options));
   }
 
   /**
@@ -335,6 +376,29 @@ export class GGBuilderCore {
    */
   geomSegment(options: GeomSegmentOptions = {}): GGBuilder {
     return this.layer(layerFrom("segment", options));
+  }
+
+  /** Sugar for .layer({ geom: 'violin', ... }) — mirrored y-density polygons. */
+  geomViolin(options: GeomViolinOptions = {}): GGBuilder {
+    return this.layer(layerFrom("violin", options));
+  }
+
+  /** Sugar for .layer({ geom: 'qq', ... }) — Q–Q scatter (requires aes.sample). */
+  geomQq(options: GeomQqOptions = {}): GGBuilder {
+    return this.layer(layerFrom("qq", options));
+  }
+
+  /** Sugar for .layer({ geom: 'qq_line', ... }) — Q–Q reference line. */
+  geomQqLine(options: GeomQqLineOptions = {}): GGBuilder {
+    return this.layer(layerFrom("qq_line", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'function', ... }). Evaluate a named portable
+   * function (dnorm/pnorm/identity/linear) on a grid and draw a path.
+   */
+  geomFunction(options: GeomFunctionOptions): GGBuilder {
+    return this.layer(layerFrom("function", options));
   }
 
   /**
@@ -400,6 +464,14 @@ export class GGBuilderCore {
    */
   geomStep(options: GeomStepOptions = {}): GGBuilder {
     return this.layer(layerFrom("step", options));
+  }
+
+  /**
+   * Sugar for .layer({ geom: 'polygon', ... }). Map x, y (+ group/fill) for
+   * closed filled polygons in data order (ggplot2 geom_polygon).
+   */
+  geomPolygon(options: GeomPolygonOptions = {}): GGBuilder {
+    return this.layer(layerFrom("polygon", options));
   }
 
   /**

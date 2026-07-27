@@ -22,6 +22,8 @@ export function candidateAutoMode(
     case "count":
     case "dotplot":
     case "text":
+    case "label":
+    case "qq":
     case "sf_text":
     case "sf_label":
       return "exact";
@@ -30,11 +32,17 @@ export function candidateAutoMode(
     case "rect":
     case "tile":
     case "raster":
+    case "polygon":
+    case "hex":
     case "density_2d_filled":
     case "map":
     case "sf":
+    case "bin_2d":
       return "exact";
+
     case "line":
+    case "function":
+    case "qq_line":
     case "path":
     case "step":
     case "contour":
@@ -44,7 +52,11 @@ export function candidateAutoMode(
     case "quantile":
     case "density_2d":
     case "errorbar":
+    case "linerange":
+    case "pointrange":
+    case "crossbar":
     case "boxplot":
+    case "violin":
       return "x";
     case "ribbon":
       return binding.ribbonOrientation === "y" ? "y" : "x";

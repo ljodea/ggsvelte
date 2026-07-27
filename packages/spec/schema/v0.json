@@ -225,6 +225,10 @@
           "$ref": "#/$defs/ChannelValue",
           "description": "Statistical weight channel. The count, bin, and density stats sum weights instead of counting rows. Never participates in grouping."
         },
+        "sample": {
+          "$ref": "#/$defs/ChannelValue",
+          "description": "Sample distribution channel for Q–Q plots (ggplot2 aes.sample). The qq / qq_line stats read this column; x/y become theoretical and sample quantiles after the stat. Never participates in grouping."
+        },
         "ymin": {
           "$ref": "#/$defs/ChannelValue",
           "description": "Lower y bound (errorbar identity, rect edges, ribbon x-orientation). Quantitative values only."
@@ -606,9 +610,26 @@
             {
               "type": "string",
               "const": "step"
+            },
+            {
+              "type": "string",
+              "const": "step-hv"
+            },
+            {
+              "type": "string",
+              "const": "step-vh"
             }
           ],
-          "description": "Interpolation between points: \"linear\" (straight segments, default) or \"step\" (horizontal-then-vertical steps, changing at the midpoint between x positions)."
+          "description": "Interpolation: \"linear\" (default), \"step\" (mid-x corners), \"step-hv\" (horizontal then vertical — correct for ECDF), or \"step-vh\"."
+        },
+        "pad": {
+          "type": "boolean",
+          "description": "With stat ecdf: when true (default), prepend (xmin, 0) so step stairs start at zero. Finite-clamped (ggplot2 uses ±Inf)."
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "With stat ecdf: evaluate on n equally spaced x in [min, max] per group; omit for one point per unique x."
         },
         "connection": {
           "anyOf": [
@@ -717,7 +738,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin (#817), or manual (#814) controls."
+      "description": "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin (#817), manual (#814), or ecdf pad/n (#811) controls."
     },
     "StepParams": {
       "type": "object",
@@ -1078,6 +1099,71 @@
       "additionalProperties": false,
       "description": "Parameters for the quantile geom (linear y~x quantile regression lines; #805). method rqss is intentionally omitted in v1."
     },
+    "QqParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Point opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Point size in px. Must be greater than 0."
+        },
+        "shape": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "circle"
+            },
+            {
+              "type": "string",
+              "const": "triangle"
+            },
+            {
+              "type": "string",
+              "const": "square"
+            },
+            {
+              "type": "string",
+              "const": "diamond"
+            },
+            {
+              "type": "string",
+              "const": "plus"
+            },
+            {
+              "type": "string",
+              "const": "cross"
+            }
+          ],
+          "description": "Point shape. One of \"circle\", \"triangle\", \"square\", \"diamond\", \"plus\", \"cross\". Default \"circle\"."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling for geom_qq (Q–Q scatter). Requires aes.sample; x/y become theoretical and sample quantiles."
+    },
+    "QqLineParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Line opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px. Must be greater than 0. Default 1."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling for geom_qq_line (reference line through sample/theoretical quartile match)."
+    },
     "ContourParams": {
       "type": "object",
       "properties": {
@@ -1114,6 +1200,79 @@
       "additionalProperties": false,
       "description": "Parameters for geom_contour isolines (#801). v1: regular grid only; contour_filled deferred."
     },
+    "ViolinParams": {
+      "type": "object",
+      "properties": {
+        "bw": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Kernel bandwidth in data units (must be greater than 0). Omit for R's bw.nrd0 rule-of-thumb default."
+        },
+        "adjust": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Bandwidth multiplier (must be greater than 0). Default 1."
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 4096,
+          "description": "Number of density grid points (2–4096). Default 512."
+        },
+        "trim": {
+          "type": "boolean",
+          "description": "When true (default), trim the density to the data range; when false, extend cut·bw tails like density()."
+        },
+        "scale": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "area"
+            },
+            {
+              "type": "string",
+              "const": "count"
+            },
+            {
+              "type": "string",
+              "const": "width"
+            }
+          ],
+          "description": "Relative violin max-width scaling: \"area\" (default), \"count\", or \"width\" (equal max width)."
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Max violin width as a fraction of the discrete x band (like boxplot). Default 0.75."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fill opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Outline stroke width in px. Must be greater than 0. Default 0.5."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for the violin geom (mirrored y-density polygons)."
+    },
     "BoxplotParams": {
       "type": "object",
       "properties": {
@@ -1147,6 +1306,102 @@
       },
       "additionalProperties": false,
       "description": "Styling parameters for the boxplot geom."
+    },
+    "FunctionRegistryName": {
+      "anyOf": [
+        {
+          "type": "string",
+          "const": "identity"
+        },
+        {
+          "type": "string",
+          "const": "dnorm"
+        },
+        {
+          "type": "string",
+          "const": "pnorm"
+        },
+        {
+          "type": "string",
+          "const": "linear"
+        }
+      ],
+      "description": "Portable named function for stat/geom function: \"identity\", \"dnorm\" (normal PDF), \"pnorm\" (normal CDF), or \"linear\" (a + b·x)."
+    },
+    "FunctionArgs": {
+      "type": "object",
+      "properties": {
+        "mean": {
+          "type": "number",
+          "description": "Mean for dnorm/pnorm. Default 0."
+        },
+        "sd": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Standard deviation for dnorm/pnorm (must be > 0). Default 1."
+        },
+        "a": {
+          "type": "number",
+          "description": "Intercept for linear (y = a + b·x). Default 0."
+        },
+        "b": {
+          "type": "number",
+          "description": "Slope for linear (y = a + b·x). Default 1."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Named arguments for the registry function."
+    },
+    "FunctionParams": {
+      "type": "object",
+      "required": [
+        "fun"
+      ],
+      "properties": {
+        "fun": {
+          "$ref": "#/$defs/FunctionRegistryName",
+          "description": "Required named function from the portable registry."
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 10000,
+          "description": "Number of evaluation grid points (2–10000). Default 101."
+        },
+        "xlim": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Evaluation domain [min, max] (min < max). When omitted, uses continuous aes.x extent or peer-layer x domain."
+        },
+        "args": {
+          "$ref": "#/$defs/FunctionArgs"
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Path opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stroke width in px. Must be greater than 0. Default 1.5."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom/stat function: named fun, grid size n, optional xlim and args."
     },
     "DotplotParams": {
       "type": "object",
@@ -1469,6 +1724,136 @@
       "additionalProperties": false,
       "description": "Parameters for the errorbar geom: styling plus summary / summary_bin functions and summary_bin binning controls (#817)."
     },
+    "LinerangeParams": {
+      "$ref": "#/$defs/ErrorbarParams"
+    },
+    "PointrangeParams": {
+      "type": "object",
+      "properties": {
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Stem stroke width in px. Must be greater than 0. Default 1."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Opacity for stem and point. Default 1."
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Mid-point radius in px. Default 2.5."
+        },
+        "shape": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "circle"
+            },
+            {
+              "type": "string",
+              "const": "triangle"
+            },
+            {
+              "type": "string",
+              "const": "square"
+            },
+            {
+              "type": "string",
+              "const": "diamond"
+            },
+            {
+              "type": "string",
+              "const": "plus"
+            },
+            {
+              "type": "string",
+              "const": "cross"
+            }
+          ],
+          "description": "Mid-point shape. Default \"circle\"."
+        },
+        "fun": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "mean"
+            },
+            {
+              "type": "string",
+              "const": "median"
+            },
+            {
+              "type": "string",
+              "const": "sum"
+            }
+          ],
+          "description": "STAT SUMMARY ONLY: center summary of y per x group. Default \"mean\" (mean_se when funMin/funMax omitted)."
+        },
+        "funMin": {
+          "$ref": "#/$defs/SummaryFun"
+        },
+        "funMax": {
+          "$ref": "#/$defs/SummaryFun"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom_pointrange (stem + mid point)."
+    },
+    "CrossbarParams": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Box width: band-step fraction (band x) or fraction of continuous resolution (same rule as errorbar caps). Default 0.9."
+        },
+        "fatten": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Multiplier for the mid-line linewidth relative to params.linewidth / aes.linewidth. Default 2.5 (ggplot2 geom_crossbar)."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Outline and base mid-line stroke width in px. Default 1."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Box and mid-line opacity. Default 1."
+        },
+        "fun": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "mean"
+            },
+            {
+              "type": "string",
+              "const": "median"
+            },
+            {
+              "type": "string",
+              "const": "sum"
+            }
+          ],
+          "description": "STAT SUMMARY ONLY: center summary. Default \"mean\"."
+        },
+        "funMin": {
+          "$ref": "#/$defs/SummaryFun"
+        },
+        "funMax": {
+          "$ref": "#/$defs/SummaryFun"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom_crossbar (interval box + mid line)."
+    },
     "RectParams": {
       "type": "object",
       "properties": {
@@ -1498,6 +1883,38 @@
       },
       "additionalProperties": false,
       "description": "Styling parameters for the rect geom (arbitrary xmin/xmax/ymin/ymax regions)."
+    },
+    "Bin2dParams": {
+      "type": "object",
+      "properties": {
+        "bins": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Number of bins on each axis (ggplot2 bins). Default 30. Applies equally to x and y in v1."
+        },
+        "binwidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Shared bin width in data units for both axes (overrides bins). Prefer when the scale units are meaningful."
+        },
+        "drop": {
+          "type": "boolean",
+          "description": "When true (default), omit zero-count bins from the output (ggplot2 drop=TRUE)."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Cell opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Outline stroke width in px when color is set. Must be greater than 0."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom/stat bin_2d (2D rectangular binning heatmap). fill defaults to after_stat count."
     },
     "TileParams": {
       "type": "object",
@@ -1568,6 +1985,33 @@
       },
       "additionalProperties": false,
       "description": "Parameters for the raster geom: equal-cell dense grid (no per-cell stroke)."
+    },
+    "HexParams": {
+      "type": "object",
+      "properties": {
+        "bins": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Approximate number of hex bins across the x range (ggplot2 bins). Default 30."
+        },
+        "drop": {
+          "type": "boolean",
+          "description": "When true (default), omit zero-count hexes from the output."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Hex opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Outline stroke width in px when color is set. Default 0 (no outline)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Parameters for geom/stat hex (hexagonal 2D binning heatmap). fill defaults to after_stat count."
     },
     "PositionParams": {
       "type": "object",
@@ -2083,6 +2527,36 @@
       "additionalProperties": false,
       "description": "Parameters for geom curve: curvature/angle/ncp plus segment-like stroke styling."
     },
+    "PolygonParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Polygon fill/stroke opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "linewidth": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Outline stroke width in px. Must be greater than 0. Default matches line (1.5)."
+        },
+        "fillPaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient fill paint (not a data scale). Requires a solid fallback."
+        },
+        "strokePaint": {
+          "$ref": "#/$defs/GradientPaint",
+          "description": "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback."
+        },
+        "glow": {
+          "$ref": "#/$defs/GlowSpec",
+          "description": "Bounded within-mark glow treatment (not theme decoration)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the polygon geom (closed filled path from (x,y) vertices)."
+    },
     "MapParams": {
       "type": "object",
       "required": [
@@ -2208,6 +2682,64 @@
       "additionalProperties": false,
       "description": "Styling parameters for the text geom (no collision detection: labels draw exactly where placed)."
     },
+    "LabelParams": {
+      "type": "object",
+      "properties": {
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Label opacity. Must be between 0 and 1 (inclusive). Default 1."
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Font size in px. Must be greater than 0. Default 11."
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "start"
+            },
+            {
+              "type": "string",
+              "const": "middle"
+            },
+            {
+              "type": "string",
+              "const": "end"
+            }
+          ],
+          "description": "Horizontal text anchor relative to the (x, y) position: \"start\", \"middle\" (default), or \"end\"."
+        },
+        "dx": {
+          "type": "number",
+          "description": "Horizontal offset in px applied after positioning. Default 0."
+        },
+        "dy": {
+          "type": "number",
+          "description": "Vertical offset in px applied after positioning (positive = down). Default 0."
+        },
+        "padding": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Uniform box padding around the text in px (ggplot2 label.padding). Default 3."
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Corner radius of the background box in px (ggplot2 label.r). Default 3."
+        },
+        "linewidth": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Box outline stroke width in px (ggplot2 label.size analogue). Default 0.5."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Styling parameters for the label geom (text with background box; no collision detection)."
+    },
     "RenderBackend": {
       "anyOf": [
         {
@@ -2270,7 +2802,7 @@
         "geom": {
           "type": "string",
           "const": "point",
-          "description": "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817), manual (#814), or stat sum for geom_count overplotting."
+          "description": "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814)."
         },
         "stat": {
           "anyOf": [
@@ -2348,7 +2880,7 @@
         "geom": {
           "type": "string",
           "const": "line",
-          "description": "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts. With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816)."
+          "description": "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816)."
         },
         "stat": {
           "anyOf": [
@@ -2386,9 +2918,14 @@
               "type": "string",
               "const": "manual",
               "description": "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814)."
+            },
+            {
+              "type": "string",
+              "const": "ecdf",
+              "description": "Empirical CDF of x; y defaults to {\"stat\": \"ecdf\"} — do NOT map aes.y to a field. Prefer params.curve \"step-hv\" for ECDF stairs (#811)."
             }
           ],
-          "description": "Line stat: \"identity\" (default), \"unique\", \"bin\", \"align\", \"connect\", \"summary_bin\" (#817), or \"manual\" (#814)."
+          "description": "Line stat: \"identity\" (default), \"unique\", \"bin\", \"align\", \"connect\", \"summary_bin\" (#817), \"manual\" (#814), or \"ecdf\" (#811)."
         },
         "position": {
           "type": "string",
@@ -2410,7 +2947,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "A line layer. Identity: requires x and y. Bin (freqpoly): requires continuous x; y is computed by the bin stat. Rows are sorted by x within each group before connecting."
+      "description": "A line layer. Identity: requires x and y. Bin (freqpoly): requires continuous x; y is computed by the bin stat. Ecdf: requires x only (y is computed). Rows are sorted by x within each group before connecting."
     },
     "StepLayer": {
       "type": "object",
@@ -2741,6 +3278,82 @@
       "additionalProperties": false,
       "description": "A quantile-regression layer. Requires quantitative x and y. Default quantiles [0.25, 0.5, 0.75]. v1 is linear y~x only (no rqss)."
     },
+    "QqLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "qq",
+          "description": "Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample."
+        },
+        "stat": {
+          "type": "string",
+          "const": "qq",
+          "description": "Q–Q quantile pairing (default for this geom)."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "qq layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/QqParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A Q–Q point layer. Requires the sample channel."
+    },
+    "QqLineLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "qq_line",
+          "description": "Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample."
+        },
+        "stat": {
+          "type": "string",
+          "const": "qq_line",
+          "description": "Q–Q line slope/intercept from quartile match (default for this geom)."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "qq_line layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/QqLineParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A Q–Q reference line layer. Requires the sample channel."
+    },
     "ContourLayer": {
       "type": "object",
       "required": [
@@ -2778,6 +3391,52 @@
       },
       "additionalProperties": false,
       "description": "A contour isoline layer. Requires continuous x, y, and z on a regular complete grid. Levels from params.breaks, binwidth, or bins (default 10)."
+    },
+    "ViolinLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "violin",
+          "description": "Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge."
+        },
+        "stat": {
+          "type": "string",
+          "const": "ydensity",
+          "description": "Violin layers run a y-oriented KDE per x category and group."
+        },
+        "position": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "dodge"
+            },
+            {
+              "type": "string",
+              "const": "identity"
+            }
+          ],
+          "description": "Position adjustment: \"dodge\" (default) or \"identity\"."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/ViolinParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A violin layer. Requires discrete x and continuous y. Densities are computed by the ydensity stat."
     },
     "BoxplotLayer": {
       "type": "object",
@@ -2824,6 +3483,59 @@
       },
       "additionalProperties": false,
       "description": "A boxplot layer. Requires a discrete x channel and a quantitative y channel."
+    },
+    "CountLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "count",
+          "description": "Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates."
+        },
+        "stat": {
+          "type": "string",
+          "const": "sum",
+          "description": "Count layers run stat sum: n and prop per (group, x, y). size defaults to {\"stat\": \"n\"}."
+        },
+        "position": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "identity"
+            },
+            {
+              "type": "string",
+              "const": "jitter"
+            },
+            {
+              "type": "string",
+              "const": "nudge"
+            }
+          ],
+          "description": "Position: \"identity\" (default), \"jitter\", or \"nudge\"."
+        },
+        "positionParams": {
+          "$ref": "#/$defs/PositionParams"
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data."
+        },
+        "params": {
+          "$ref": "#/$defs/PointParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A count (overplotting) layer. Requires x and y. Default size is after_stat n."
     },
     "DotplotLayer": {
       "type": "object",
@@ -3035,6 +3747,141 @@
       "additionalProperties": false,
       "description": "An errorbar layer. Identity: requires x, ymin, ymax. Summary / summary_bin: requires x and y (bounds from params.fun/funMin/funMax, default mean_se)."
     },
+    "LinerangeLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "linerange",
+          "description": "Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange)."
+        },
+        "stat": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "identity"
+            },
+            {
+              "type": "string",
+              "const": "summary"
+            }
+          ],
+          "description": "Identity (map ymin/ymax) or summary (mean_se from aes.y) — same contract as errorbar."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Linerange layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef"
+        },
+        "params": {
+          "$ref": "#/$defs/LinerangeParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A linerange layer. Identity: x, ymin, ymax. Summary: x, y. No caps (unlike errorbar)."
+    },
+    "PointrangeLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "pointrange",
+          "description": "Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange)."
+        },
+        "stat": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "identity"
+            },
+            {
+              "type": "string",
+              "const": "summary"
+            }
+          ],
+          "description": "Identity (map y, ymin, ymax) or summary (center + mean_se bounds from aes.y)."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Pointrange layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef"
+        },
+        "params": {
+          "$ref": "#/$defs/PointrangeParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A pointrange layer. Identity: x, y, ymin, ymax. Summary: x, y. Point size/shape via params or aes."
+    },
+    "CrossbarLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "crossbar",
+          "description": "Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar)."
+        },
+        "stat": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "identity"
+            },
+            {
+              "type": "string",
+              "const": "summary"
+            }
+          ],
+          "description": "Identity (map y, ymin, ymax) or summary (center + mean_se bounds from aes.y)."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Crossbar layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef"
+        },
+        "params": {
+          "$ref": "#/$defs/CrossbarParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A crossbar layer. Identity: x, y, ymin, ymax. Box width uses the same resolution rule as errorbar caps. Mid-line linewidth = linewidth * fatten."
+    },
     "RectLayer": {
       "type": "object",
       "required": [
@@ -3109,6 +3956,44 @@
       "additionalProperties": false,
       "description": "A tile layer. Requires x and y channels; optional width/height (params or aes) size each cell after position transform."
     },
+    "Bin2dLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "bin_2d",
+          "description": "2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false."
+        },
+        "stat": {
+          "type": "string",
+          "const": "bin_2d",
+          "description": "2D binning stat (default for this geom)."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "bin_2d layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/Bin2dParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A 2D bin heatmap layer. Requires continuous x and y; fill defaults to after_stat count."
+    },
     "RasterLayer": {
       "type": "object",
       "required": [
@@ -3146,6 +4031,44 @@
       },
       "additionalProperties": false,
       "description": "A raster layer. Requires x and y (regular spacing); fill maps cell color. No stroke. interpolate must be false when set."
+    },
+    "HexLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "hex",
+          "description": "Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default."
+        },
+        "stat": {
+          "type": "string",
+          "const": "bin_hex",
+          "description": "Hexagonal binning stat (default for this geom)."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "hex layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/HexParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A hexagonal bin heatmap layer. Requires continuous x and y; fill defaults to after_stat count."
     },
     "AreaLayer": {
       "type": "object",
@@ -3434,6 +4357,55 @@
       "additionalProperties": false,
       "description": "A text-label layer. Requires x, y, and label channels."
     },
+    "LabelLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "label",
+          "description": "Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Label layers draw the data as-is."
+        },
+        "position": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "identity"
+            },
+            {
+              "type": "string",
+              "const": "nudge"
+            }
+          ],
+          "description": "Position adjustment: \"identity\" (default) or \"nudge\" (fixed offsets — set positionParams.x/y)."
+        },
+        "positionParams": {
+          "$ref": "#/$defs/PositionParams"
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/LabelParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A label layer (text + background box). Requires x, y, and label channels. color styles text/outline; fill styles the box."
+    },
     "SegmentLayer": {
       "type": "object",
       "required": [
@@ -3470,41 +4442,27 @@
       "additionalProperties": false,
       "description": "A finite segment layer (ggplot2's geom_segment). Requires x, y, xend, and yend channels."
     },
-    "CountLayer": {
+    "FunctionLayer": {
       "type": "object",
       "required": [
-        "geom"
+        "geom",
+        "params"
       ],
       "properties": {
         "geom": {
           "type": "string",
-          "const": "count",
-          "description": "Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates."
+          "const": "function",
+          "description": "Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers."
         },
         "stat": {
           "type": "string",
-          "const": "sum",
-          "description": "Count layers run stat sum: n and prop per (group, x, y). size defaults to {\"stat\": \"n\"}."
+          "const": "function",
+          "description": "Function layers evaluate a named registry function on a grid."
         },
         "position": {
-          "anyOf": [
-            {
-              "type": "string",
-              "const": "identity"
-            },
-            {
-              "type": "string",
-              "const": "jitter"
-            },
-            {
-              "type": "string",
-              "const": "nudge"
-            }
-          ],
-          "description": "Position: \"identity\" (default), \"jitter\", or \"nudge\"."
-        },
-        "positionParams": {
-          "$ref": "#/$defs/PositionParams"
+          "type": "string",
+          "const": "identity",
+          "description": "Function layers use identity positioning."
         },
         "render": {
           "$ref": "#/$defs/RenderBackend"
@@ -3514,14 +4472,15 @@
         },
         "data": {
           "$ref": "#/$defs/DataRef",
-          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data."
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
         },
         "params": {
-          "$ref": "#/$defs/PointParams"
+          "$ref": "#/$defs/FunctionParams",
+          "description": "Function parameters (fun is required)."
         }
       },
       "additionalProperties": false,
-      "description": "A count (overplotting) layer. Requires x and y. Default size is after_stat n."
+      "description": "An analytic function layer (ggplot2's geom_function). y is computed as { stat: y }; do not map data y. Portable fun names only (no JS closures)."
     },
     "CurveLayer": {
       "type": "object",
@@ -3560,6 +4519,44 @@
       },
       "additionalProperties": false,
       "description": "A curved-segment layer. Requires x, y, xend, and yend field channels (like geom segment)."
+    },
+    "PolygonLayer": {
+      "type": "object",
+      "required": [
+        "geom"
+      ],
+      "properties": {
+        "geom": {
+          "type": "string",
+          "const": "polygon",
+          "description": "Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1."
+        },
+        "stat": {
+          "type": "string",
+          "const": "identity",
+          "description": "Polygon layers draw the data as-is."
+        },
+        "position": {
+          "type": "string",
+          "const": "identity",
+          "description": "Polygon layers use identity positioning."
+        },
+        "render": {
+          "$ref": "#/$defs/RenderBackend"
+        },
+        "aes": {
+          "$ref": "#/$defs/Aes"
+        },
+        "data": {
+          "$ref": "#/$defs/DataRef",
+          "description": "Optional layer-local data. When omitted, the layer inherits plot-level data. When present, it may use inline rows, inline columns, or a named dataset (spec.datasets or runtime)."
+        },
+        "params": {
+          "$ref": "#/$defs/PolygonParams"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A closed polygon layer (ggplot2's geom_polygon). Requires x and y channels; vertices connect in data order per group and close implicitly."
     },
     "MapLayer": {
       "type": "object",
@@ -3993,16 +4990,28 @@
           "$ref": "#/$defs/TextLayer"
         },
         {
+          "$ref": "#/$defs/LabelLayer"
+        },
+        {
           "$ref": "#/$defs/SmoothLayer"
         },
         {
           "$ref": "#/$defs/QuantileLayer"
         },
         {
+          "$ref": "#/$defs/QqLayer"
+        },
+        {
+          "$ref": "#/$defs/QqLineLayer"
+        },
+        {
           "$ref": "#/$defs/ContourLayer"
         },
         {
           "$ref": "#/$defs/BoxplotLayer"
+        },
+        {
+          "$ref": "#/$defs/ViolinLayer"
         },
         {
           "$ref": "#/$defs/DensityLayer"
@@ -4017,7 +5026,19 @@
           "$ref": "#/$defs/DotplotLayer"
         },
         {
+          "$ref": "#/$defs/CountLayer"
+        },
+        {
           "$ref": "#/$defs/ErrorbarLayer"
+        },
+        {
+          "$ref": "#/$defs/LinerangeLayer"
+        },
+        {
+          "$ref": "#/$defs/PointrangeLayer"
+        },
+        {
+          "$ref": "#/$defs/CrossbarLayer"
         },
         {
           "$ref": "#/$defs/MapLayer"
@@ -4029,13 +5050,22 @@
           "$ref": "#/$defs/TileLayer"
         },
         {
+          "$ref": "#/$defs/Bin2dLayer"
+        },
+        {
           "$ref": "#/$defs/RasterLayer"
+        },
+        {
+          "$ref": "#/$defs/HexLayer"
         },
         {
           "$ref": "#/$defs/SegmentLayer"
         },
         {
-          "$ref": "#/$defs/CountLayer"
+          "$ref": "#/$defs/FunctionLayer"
+        },
+        {
+          "$ref": "#/$defs/PolygonLayer"
         },
         {
           "$ref": "#/$defs/AblineLayer"
@@ -5174,7 +6204,7 @@
               "type": "array",
               "items": {
                 "type": "number",
-                "exclusiveMinimum": 0
+                "minimum": 0
               },
               "minItems": 1
             },
@@ -5195,11 +6225,11 @@
             },
             "naValue": {
               "type": "number",
-              "exclusiveMinimum": 0
+              "minimum": 0
             },
             "unknownValue": {
               "type": "number",
-              "exclusiveMinimum": 0
+              "minimum": 0
             },
             "onExhaust": {
               "anyOf": [
@@ -5218,10 +6248,27 @@
             },
             "guide": {
               "$ref": "#/$defs/GuideSpec"
+            },
+            "sizeUnit": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "area"
+                },
+                {
+                  "type": "string",
+                  "const": "radius"
+                },
+                {
+                  "type": "string",
+                  "const": "area_zero"
+                }
+              ],
+              "description": "Size encoding unit (size aesthetic only). \"area\" (default) interpolates by area between range endpoints; \"radius\" maps linearly to radius; \"area_zero\" maps value proportionally to area with zero→zero (ggplot2 scale_size_area / scale_size_binned_area)."
             }
           },
           "additionalProperties": false,
-          "description": "Configuration for a positive numeric size or linewidth scale."
+          "description": "Configuration for a non-negative numeric size or linewidth scale."
         },
         {
           "anyOf": [
@@ -5262,7 +6309,7 @@
                   "type": "array",
                   "items": {
                     "type": "number",
-                    "exclusiveMinimum": 0
+                    "minimum": 0
                   },
                   "minItems": 2
                 },
@@ -5289,7 +6336,7 @@
                   "type": "array",
                   "items": {
                     "type": "number",
-                    "exclusiveMinimum": 0
+                    "minimum": 0
                   },
                   "minItems": 1
                 },
@@ -5437,7 +6484,7 @@
                   "type": "array",
                   "items": {
                     "type": "number",
-                    "exclusiveMinimum": 0
+                    "minimum": 0
                   },
                   "minItems": 2
                 },
@@ -7335,39 +8382,39 @@
         },
         "x": {
           "type": "string",
-          "description": "X axis title. Defaults to the mapped field name."
+          "description": "X axis title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "y": {
           "type": "string",
-          "description": "Y axis title. Defaults to the mapped field name."
+          "description": "Y axis title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "color": {
           "type": "string",
-          "description": "Color legend title. Defaults to the mapped field name."
+          "description": "Color legend title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "fill": {
           "type": "string",
-          "description": "Fill legend title. Defaults to the mapped field name."
+          "description": "Fill legend title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "size": {
           "type": "string",
-          "description": "Size legend title. Defaults to the mapped field name."
+          "description": "Size legend title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "linewidth": {
           "type": "string",
-          "description": "Linewidth legend title. Defaults to the mapped field name."
+          "description": "Linewidth legend title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "alpha": {
           "type": "string",
-          "description": "Alpha legend title. Defaults to the mapped field name."
+          "description": "Alpha legend title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "shape": {
           "type": "string",
-          "description": "Shape legend title. Defaults to the mapped field name."
+          "description": "Shape legend title. Defaults to a humanized form of the mapped field name (sentence case)."
         },
         "linetype": {
           "type": "string",
-          "description": "Linetype legend title. Defaults to the mapped field name."
+          "description": "Linetype legend title. Defaults to a humanized form of the mapped field name (sentence case)."
         }
       },
       "additionalProperties": false,

@@ -19,9 +19,12 @@ import { boxplotBatches, errorbarBatch, smoothBatches } from "./geometry-composi
 import { edgeRectsBatch, rasterRectsBatch, tileRectsBatch } from "./geometry-edge-rects.js";
 import { ribbonBatches } from "./geometry-ribbon.js";
 import { finiteSegmentBatch } from "./geometry-segment-finite.js";
+import { violinBatch } from "./geometry-violin.js";
 import { ablineBatch } from "./geometry-abline.js";
 import { curveBatch } from "./geometry-curve.js";
+import { hexBatch } from "./geometry-hex.js";
 import { rugBatch } from "./geometry-rug.js";
+import { crossbarBatches, linerangeBatch, pointrangeBatches } from "./geometry-range.js";
 
 function single(batch: GeometryBatch | null): GeometryBatch[] {
   return batch === null ? [] : [batch];
@@ -38,6 +41,7 @@ export function dispatchGeometryBatch(
   switch (frame.binding.layer.geom) {
     case "point":
     case "count":
+    case "qq":
       return single(pointsBatch(frame, fx, color, styles, warnings));
     case "dotplot":
       // Pass fill so histodot dots honor aes.fill (ggplot2 fill grouping; #900).
@@ -51,8 +55,10 @@ export function dispatchGeometryBatch(
         lineBatch(frame, fx, color, styles, warnings, connectNoSort ? { sortByX: false } : {}),
       );
     }
+    case "function":
+    case "qq_line":
     case "quantile":
-      // Fitted QR grids are already sorted by x; treat like line.
+      // Fitted QR grids / QQ line endpoints are already ordered; treat like line.
       return single(lineBatch(frame, fx, color, styles, warnings));
     case "path":
       // Data-order polylines (ggplot2 geom_path); no x-sort (#788).
@@ -70,6 +76,7 @@ export function dispatchGeometryBatch(
     case "bar":
       return single(rectsBatch(frame, fx, fill, styles, warnings));
     case "rect":
+    case "bin_2d":
       return single(edgeRectsBatch(frame, fx, fill, color, styles, warnings));
     case "tile":
       return single(tileRectsBatch(frame, fx, fill, color, styles, warnings));
@@ -91,7 +98,10 @@ export function dispatchGeometryBatch(
       return single(curveBatch(frame, fx, color, styles, warnings));
     case "rug":
       return single(rugBatch(frame, fx, color, styles, warnings));
+    case "polygon":
+      return single(polygonBatch(frame, fx, color, fill, styles, warnings));
     case "text":
+    case "label":
     case "sf_text":
     case "sf_label":
       return single(glyphsBatch(frame, fx, color, fill, styles, warnings));
@@ -101,6 +111,16 @@ export function dispatchGeometryBatch(
       return boxplotBatches(frame, fx, fill, styles, warnings);
     case "errorbar":
       return single(errorbarBatch(frame, fx, color, styles, warnings));
+    case "violin":
+      return single(violinBatch(frame, fx, fill, color, styles, warnings));
+    case "linerange":
+      return single(linerangeBatch(frame, fx, color, styles, warnings));
+    case "pointrange":
+      return pointrangeBatches(frame, fx, color, styles, warnings);
+    case "crossbar":
+      return crossbarBatches(frame, fx, color, fill, styles, warnings);
+    case "hex":
+      return single(hexBatch(frame, fx, fill, color, styles, warnings));
     case "map":
       // Fortified regions → closed filled paths (ggplot2 geom_map; #808).
       return single(polygonBatch(frame, fx, color, fill, styles, warnings));

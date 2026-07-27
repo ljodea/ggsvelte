@@ -224,9 +224,10 @@ test("install copy and code tabs share the manual-copy fallback", async ({ page 
 test("gallery exposes every generated preview exactly once", async ({ page }) => {
   await page.goto("/examples");
   // One meta.json per example under examples/ (grows when new specimens land).
-  // 76 previews − 3 interaction expositions; + point/abline-identity (#790),
-  // step/ecdf (#789), and point/count (#795).
-  const exampleCount = 73;
+  // Total previews − 3 interaction expositions; includes line/function (#797),
+  // label/basic (#792), hex/basic (#800), bin2d/basic (#799),
+  // polygon/regions (#807), boxplot/violin (#798), point/count (#795), etc.
+  const exampleCount = 82;
   await expect(page.locator(".example-grid li")).toHaveCount(exampleCount);
   await expect(page.locator('img[src*="/previews/"]')).toHaveCount(exampleCount);
 });

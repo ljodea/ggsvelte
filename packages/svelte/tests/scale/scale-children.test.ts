@@ -302,9 +302,14 @@ describe("Scale* export parity with all SCALE_CAPABILITIES families", () => {
         expectedFromHelpers.push("S" + h.slice(1));
       }
     }
-    // Discrete style shells re-export Ordinal component names (ggplot2 scale_*_ordinal, #832).
-    // These are alias-only — not separate SCALE_CAPABILITIES camelCase helpers.
-    const styleOrdinalAliases = ["ScaleAlphaOrdinal", "ScaleLinewidthOrdinal", "ScaleShapeOrdinal"];
+    // Discrete style shells re-export Ordinal component names (ggplot2
+    // scale_*_ordinal, #830/#832). Alias-only — not SCALE_CAPABILITIES camel helpers.
+    const styleOrdinalAliases = [
+      "ScaleSizeOrdinal",
+      "ScaleAlphaOrdinal",
+      "ScaleLinewidthOrdinal",
+      "ScaleShapeOrdinal",
+    ];
     const expectedExports = new Set(["Scale", ...expectedFromHelpers, ...styleOrdinalAliases]);
 
     const pkg = SveltePkg as Record<string, unknown>;
@@ -318,9 +323,8 @@ describe("Scale* export parity with all SCALE_CAPABILITIES families", () => {
       expect(pkg[name], `missing export ${name}`).toBeTypeOf("function");
     }
     expect(new Set(actualScaleExports)).toEqual(expectedExports);
-    // Shells + Colour aliases + style Ordinal aliases + hand-written Scale
-    // (cardinality from gen-scale-children: 83 shells + 21 aliases + 1).
-    expect(expectedExports.size).toBe(83 + 21 + 1);
+    // 92 shells + 25 aliases (Colour + style Ordinal re-exports) + hand-written Scale
+    expect(expectedExports.size).toBe(92 + 25 + 1);
   });
 });
 

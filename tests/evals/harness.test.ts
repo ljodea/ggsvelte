@@ -159,19 +159,23 @@ describe("case corpus", () => {
     }
   });
 
-  test("golds are canonical, valid against their profile, and render", () => {
-    for (const c of cases) {
-      if (c.gold === null) continue;
-      const result = validate(c.gold, { profile: c.dataProfile });
-      if (!result.ok) {
-        throw new Error(`${c.id}: gold invalid: ${JSON.stringify(result.errors)}`);
+  test(
+    "golds are canonical, valid against their profile, and render",
+    () => {
+      for (const c of cases) {
+        if (c.gold === null) continue;
+        const result = validate(c.gold, { profile: c.dataProfile });
+        if (!result.ok) {
+          throw new Error(`${c.id}: gold invalid: ${JSON.stringify(result.errors)}`);
+        }
+        // Canonical = a normalize() fixed point.
+        expect(normalize(c.gold as unknown as SpecInput)).toEqual(c.gold);
+        const render = renderCheck(c.gold, c);
+        if (!render.ok) throw new Error(`${c.id}: gold render failed: ${render.error}`);
       }
-      // Canonical = a normalize() fixed point.
-      expect(normalize(c.gold as unknown as SpecInput)).toEqual(c.gold);
-      const render = renderCheck(c.gold, c);
-      if (!render.ok) throw new Error(`${c.id}: gold render failed: ${render.error}`);
-    }
-  });
+    },
+    { timeout: 60_000 },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -179,42 +183,47 @@ describe("case corpus", () => {
 // ---------------------------------------------------------------------------
 
 describe("dry-run pipeline", () => {
-  test("runs all cases, exercises repair, and scores refusals", async () => {
-    const board = await runEvals({
-      dryRun: true,
-      responder: new MockResponder(),
-      writeOutputs: false,
-      quiet: true,
-    });
-    expect(board.meta.caseCount).toBe(cases.length);
-    expect(board.meta.dryRun).toBe(true);
+  // Corpus keeps growing (hex, qq, range geoms, …); give the mock pass room.
+  test(
+    "runs all cases, exercises repair, and scores refusals",
+    async () => {
+      const board = await runEvals({
+        dryRun: true,
+        responder: new MockResponder(),
+        writeOutputs: false,
+        quiet: true,
+      });
+      expect(board.meta.caseCount).toBe(cases.length);
+      expect(board.meta.dryRun).toBe(true);
 
-    // The mock purposely handles the chart corpus: assert a pass-rate floor.
-    const chartScores = board.cases.filter((c) => c.kind === "chart");
-    const chartPassRate = chartScores.filter((c) => c.pass).length / chartScores.length;
-    expect(chartPassRate).toBeGreaterThanOrEqual(0.85);
+      // The mock purposely handles the chart corpus: assert a pass-rate floor.
+      const chartScores = board.cases.filter((c) => c.kind === "chart");
+      const chartPassRate = chartScores.filter((c) => c.pass).length / chartScores.length;
+      expect(chartPassRate).toBeGreaterThanOrEqual(0.85);
 
-    // The repair round is exercised: at least one case is invalid on the
-    // first attempt and valid after the repair call.
-    const repairedToValid = board.cases.filter(
-      (c) => !c.validity && c.repaired && c.validityAfterRepair,
-    );
-    expect(repairedToValid.length).toBeGreaterThanOrEqual(1);
-    expect(repairedToValid.some((c) => c.pass)).toBe(true);
+      // The repair round is exercised: at least one case is invalid on the
+      // first attempt and valid after the repair call.
+      const repairedToValid = board.cases.filter(
+        (c) => !c.validity && c.repaired && c.validityAfterRepair,
+      );
+      expect(repairedToValid.length).toBeGreaterThanOrEqual(1);
+      expect(repairedToValid.some((c) => c.pass)).toBe(true);
 
-    // Refusal cases score correctly.
-    for (const score of board.cases.filter((c) => c.expectRefusal)) {
-      expect(score.refused).toBe(true);
-      expect(score.pass).toBe(true);
-      expect(score.structural).toBeNull();
-    }
-    expect(board.totals.refusalAccuracy).toBe(1);
+      // Refusal cases score correctly.
+      for (const score of board.cases.filter((c) => c.expectRefusal)) {
+        expect(score.refused).toBe(true);
+        expect(score.pass).toBe(true);
+        expect(score.structural).toBeNull();
+      }
+      expect(board.totals.refusalAccuracy).toBe(1);
 
-    for (const value of Object.values(board.totals)) {
-      expect(value).toBeGreaterThanOrEqual(0);
-      expect(value).toBeLessThanOrEqual(1);
-    }
-  });
+      for (const value of Object.values(board.totals)) {
+        expect(value).toBeGreaterThanOrEqual(0);
+        expect(value).toBeLessThanOrEqual(1);
+      }
+    },
+    { timeout: 60_000 },
+  );
 
   test("repair can be disabled", async () => {
     const board = await runEvals({

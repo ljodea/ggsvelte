@@ -41,8 +41,14 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   boxplot: ["x", "y"],
   density: ["x"],
   errorbar: ["x"], // ymin/ymax vs y are stat-dependent, checked separately
+  linerange: ["x"],
+  pointrange: ["x"],
+  crossbar: ["x"],
   rect: ["xmin", "xmax", "ymin", "ymax"],
   segment: ["x", "y", "xend", "yend"],
+  violin: ["x", "y"],
+  function: [], // domain from xlim / peer / optional x; y is after_stat
+  polygon: ["x", "y"],
   spoke: ["x", "y"], // angle/radius: aes or params — checked below
   curve: ["x", "y", "xend", "yend"],
   rug: [], // sides-dependent; checked separately
@@ -279,6 +285,22 @@ export function layerStructuralErrors(
     }
   }
 
+  if (geom === "function" || stat === "function") {
+    const y = mapped("y");
+    if (y !== undefined && !("stat" in y)) {
+      errors.push({
+        code: "computed-y-mapped",
+        path: `${layerPath}/aes/y`,
+        message:
+          "The function geom/stat computes y from the named function, so aes.y must not map data. Unset y with null.",
+        fix: {
+          description: "Remove the y mapping (or unset an inherited one with null).",
+          example: { geom: "function", aes: { y: null }, params: { fun: "dnorm", xlim: [-3, 3] } },
+        },
+      });
+    }
+  }
+
   if (geom === "dotplot" || stat === "bindot") {
     const y = mapped("y");
     if (y !== undefined && !("stat" in y)) {
@@ -290,6 +312,22 @@ export function layerStructuralErrors(
         fix: {
           description: "Remove the y mapping (or unset an inherited one with null).",
           example: { geom: "dotplot", aes: { y: null } },
+        },
+      });
+    }
+  }
+
+  if (geom === "line" && stat === "ecdf") {
+    const y = mapped("y");
+    if (y !== undefined && !("stat" in y)) {
+      errors.push({
+        code: "computed-y-mapped",
+        path: `${layerPath}/aes/y`,
+        message:
+          'The ecdf stat computes y (cumulative proportion), so aes.y must not map data. Map only x, or use y: { stat: "ecdf" }.',
+        fix: {
+          description: 'Remove the y mapping (or set y: { stat: "ecdf" }).',
+          example: { geom: "line", stat: "ecdf", aes: { y: null } },
         },
       });
     }
@@ -327,15 +365,19 @@ export function layerStructuralErrors(
     }
   }
 
-  if (geom === "errorbar") {
+  if (geom === "errorbar" || geom === "linerange" || geom === "pointrange" || geom === "crossbar") {
     const needed: ChannelName[] =
-      stat === "summary" || stat === "summary_bin" ? ["y"] : ["ymin", "ymax"];
+      stat === "summary" || stat === "summary_bin"
+        ? ["y"]
+        : geom === "pointrange" || geom === "crossbar"
+          ? ["y", "ymin", "ymax"]
+          : ["ymin", "ymax"];
     for (const channel of needed) {
       if (mapped(channel) === undefined) {
         errors.push({
           code: "missing-required-channel",
           path: `${layerPath}/aes/${channel}`,
-          message: `The errorbar geom with the ${stat} stat requires a "${channel}" channel; map it in the layer's aes or the plot-level aes.`,
+          message: `The ${geom} geom with the ${stat} stat requires a "${channel}" channel; map it in the layer's aes or the plot-level aes.`,
           fix: {
             description: `Map "${channel}" to a data field.`,
             example: { [channel]: CHANNEL_FIX_EXAMPLE },

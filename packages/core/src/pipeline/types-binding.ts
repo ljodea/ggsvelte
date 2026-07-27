@@ -13,7 +13,8 @@ export interface ColorBinding {
   field: string | null;
   /**
    * Stat-generated column mapped with { stat } (e.g. after_stat level for
-   * density_2d_filled fill; #802 phase 2). Optional for fixture ergonomics.
+   * density_2d_filled fill; #802 phase 2; after_stat count for bin_hex; #800).
+   * Optional for fixture ergonomics.
    */
   statColumn?: string | null;
   /** Literal (non-scaled) constant, if any. */
@@ -115,5 +116,7 @@ export interface LayerBinding {
   labelField: string | null;
   labelConstant: string | null;
   weightField: string | null;
+  /** Sample distribution column for qq / qq_line (ggplot2 aes.sample). */
+  sampleField: string | null;
   ruleForm: RuleForm | null;
 }

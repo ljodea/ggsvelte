@@ -7,11 +7,17 @@ import type { ColumnTable } from "../table.js";
 import { buildAlignFrame } from "./frame-stats-align.js";
 import { buildBindotFrame } from "./frame-stats-bindot.js";
 import { buildBinFrame, buildCountFrame, buildDensityFrame } from "./frame-stats-binning.js";
+import { buildBin2dFrame } from "./frame-stats-bin-2d.js";
+import { buildBinHexFrame } from "./frame-stats-bin-hex.js";
+import { buildEcdfFrame } from "./frame-stats-ecdf.js";
 import { buildConnectFrame } from "./frame-stats-connect.js";
 import { buildDensity2dFrame } from "./frame-stats-density-2d.js";
 import { buildEllipseFrame } from "./frame-stats-ellipse.js";
 import { buildBoxplotFrame, buildSmoothFrame, buildSummaryFrame } from "./frame-stats-fit.js";
 import { buildSumFrame } from "./frame-stats-sum.js";
+import { buildYDensityFrame } from "./frame-stats-ydensity.js";
+import { buildFunctionFrame } from "./frame-stats-function.js";
+import { buildQqFrame, buildQqLineFrame } from "./frame-stats-qq.js";
 import { buildManualFrame } from "./frame-stats-manual.js";
 import { buildContourFrame } from "./frame-stats-contour.js";
 import { buildQuantileFrame } from "./frame-stats-quantile.js";
@@ -28,6 +34,7 @@ export function buildNonIdentityFrame(
   warnings: PipelineWarning[],
   advisories: Advisory[],
   binRange?: [number, number],
+  functionDomain?: [number, number],
 ): LayerFrame | null {
   const stat = binding.layer.stat ?? "identity";
   if (stat === "identity") return null;
@@ -42,12 +49,16 @@ export function buildNonIdentityFrame(
   if (stat === "ellipse") return buildEllipseFrame(binding, table, groups, warnings);
   if (stat === "count") return buildCountFrame(binding, table, groups, warnings);
   if (stat === "bin") return buildBinFrame(binding, table, groups, warnings, advisories, binRange);
+  if (stat === "bin_hex") return buildBinHexFrame(binding, table, groups, warnings, advisories);
   if (stat === "summary_bin")
     return buildSummaryBinFrame(binding, table, groups, warnings, advisories, binRange);
   if (stat === "bindot")
     return buildBindotFrame(binding, table, groups, warnings, advisories, binRange);
+  if (stat === "bin_2d") return buildBin2dFrame(binding, table, groups, warnings, advisories);
   if (stat === "density") return buildDensityFrame(binding, table, groups, warnings);
   if (stat === "sum") return buildSumFrame(binding, table, groups, warnings);
+  if (stat === "ydensity") return buildYDensityFrame(binding, table, groups, warnings);
+  if (stat === "ecdf") return buildEcdfFrame(binding, table, groups, warnings);
   if (stat === "density_2d" || stat === "density_2d_filled") {
     return buildDensity2dFrame(binding, table, groups, warnings);
   }
@@ -56,6 +67,9 @@ export function buildNonIdentityFrame(
   if (stat === "contour") return buildContourFrame(binding, table, groups, warnings);
   if (stat === "boxplot") return buildBoxplotFrame(binding, table, groups, warnings);
   if (stat === "summary") return buildSummaryFrame(binding, table, groups, warnings);
+  if (stat === "function") return buildFunctionFrame(binding, table, warnings, functionDomain);
+  if (stat === "qq") return buildQqFrame(binding, table, groups, warnings);
+  if (stat === "qq_line") return buildQqLineFrame(binding, table, groups, warnings);
 
   return null;
 }

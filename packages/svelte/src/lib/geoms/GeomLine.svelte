@@ -15,7 +15,8 @@
     /**
      * identity | unique (#813) | bin (freqpoly; #796) |
      * align (shared continuous-x grid for stack/fill; #815) |
-     * connect | summary_bin (#817) | manual (#814).
+     * connect | summary_bin (#817) | manual (#814) |
+     * ecdf (empirical CDF of x; do not map y — #811).
      */
     stat?:
       | "identity"
@@ -24,7 +25,8 @@
       | "align"
       | "connect"
       | "summary_bin"
-      | "manual";
+      | "manual"
+      | "ecdf";
   }
 
   const props: Props = $props();
@@ -32,6 +34,8 @@
     "alpha",
     "linewidth",
     "curve",
+    "pad",
+    "n",
     "bins",
     "binwidth",
     "boundary",

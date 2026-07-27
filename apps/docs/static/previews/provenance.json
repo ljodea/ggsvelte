@@ -31,6 +31,11 @@
       "sourceSha256": "47592cf1390ecea94504fe57cad10e0424f588c8fdfef97eaf71274166601b3b",
       "pngSha256": "657e28882889051d30f128a66483bb0229a624edd6c2eb8d1ab4d49ebc02db58"
     },
+    "bin2d/basic": {
+      "filename": "bin2d-basic-light.png",
+      "sourceSha256": "2e096b03ccccec900e41e3bfe1cf3cd1314c55821efc8a5e226044aa9a91b5f4",
+      "pngSha256": "b0a1115a204dce5d5582cde656e2fa4fc8d395c49032c32d262aed476423121c"
+    },
     "blank/axes-only": {
       "filename": "blank-axes-only-light.png",
       "sourceSha256": "078d4dc764ff3b0cffd25d09ba1909eca67bfcb8c263cef7466b5dcf4d81b27e",
@@ -45,6 +50,11 @@
       "filename": "boxplot-by-category-light.png",
       "sourceSha256": "36cf6d5d53badd6bc8b64cbb16dcd8c137bb1780461b5796f51ea5ebcae2001c",
       "pngSha256": "cd66029f5fcfd9832574b1eb685fac131e2850805a85966cada49060b3b95b9f"
+    },
+    "boxplot/violin": {
+      "filename": "boxplot-violin-light.png",
+      "sourceSha256": "bbc5d28f1a5e8c2723fc5463b73530ef020cf0b4890e2ccaed1395cde301130f",
+      "pngSha256": "23d86fc50333f3b25c84e520b73915939bda7745a1657a5ba2ebd6e7a19d6522"
     },
     "col/basic": {
       "filename": "col-basic-light.png",
@@ -141,6 +151,11 @@
       "sourceSha256": "debd3a7f3545a99ee4f83a4a89b9456a559339c725b7b1727596104e69d76569",
       "pngSha256": "29209d4a65b24bba0dad9bb91a70aaa3d547bf4d24689297f8ea391ebf0ec86c"
     },
+    "hex/basic": {
+      "filename": "hex-basic-light.png",
+      "sourceSha256": "a9fb882b805da1a661942ee64641ac85e4de9508a4d9459ab48e482d8862a49e",
+      "pngSha256": "e6514f5698e4a33726342f36653b1397e3e0a4d19a1961344dc26e97a01190b0"
+    },
     "histogram/basic": {
       "filename": "histogram-basic-light.png",
       "sourceSha256": "49122556a7f21ec9a57652a005ab87da2025a1328520b3d07e70656bd02d1869",
@@ -185,6 +200,21 @@
       "filename": "jitter-basic-light.png",
       "sourceSha256": "7aae9c345fc7b22892ec0f44c044783c3080d4eb58d79fafe446aea4815fbe5c",
       "pngSha256": "5b200ec3afed907940cede09cf159dc882df2279069e906a82324d0a0ee7ddb5"
+    },
+    "label/basic": {
+      "filename": "label-basic-light.png",
+      "sourceSha256": "5225ddf9fc7b93c844673d44c5e891a68809a9476c7c9d99c48e14c981ba8bbd",
+      "pngSha256": "d39c6fdddc4a344aaeb47b34e5300b705983afbc717398bf93efd857b67f4bd8"
+    },
+    "line/ecdf": {
+      "filename": "line-ecdf-light.png",
+      "sourceSha256": "d471551633c7bf1f3b844babb7bf362456f0b77c36f5accdfc726db1a36a9b29",
+      "pngSha256": "50ddc15712530f71fda35c44b4cb11db0ca2ee47fddce5004960322ee18401c3"
+    },
+    "line/function": {
+      "filename": "line-function-light.png",
+      "sourceSha256": "476d3658027ddc820a489a2f183b57ac8bea3f65dd66de5f3ea33d48574c40a7",
+      "pngSha256": "5dd1feed84dc2483b802d010aac11d8e033d4b5390f9167ddacf9e9b81fd6246"
     },
     "line/multi-series": {
       "filename": "line-multi-series-light.png",
@@ -281,6 +311,11 @@
       "sourceSha256": "b89b32026eb42a40b5f7fac934f9e8088fe615eddbdba19bbe5ee81697f40d51",
       "pngSha256": "0f22d2ac20a70d65c59e33fe5486c1a5856cb55e8fc105c24952ce7784091102"
     },
+    "point/steps-binned": {
+      "filename": "point-steps-binned-light.png",
+      "sourceSha256": "bc1c283de8f80a022316b04d4828a9657b20aef863a909295c2e5ced52289e9f",
+      "pngSha256": "3097ea59517b54c748254fe129f95f52dffab95ecfcfc4338435574f5e9315a0"
+    },
     "point/style-scales": {
       "filename": "point-style-scales-light.png",
       "sourceSha256": "81d4be7d9dca5cc1c45558da6a0b3ca303d810443f407648bbf831bedc4cde9f",
@@ -290,6 +325,16 @@
       "filename": "point-void-chrome-light.png",
       "sourceSha256": "3629ec64109b22c2f3b03b62668d6cc55c334683e45ff8c9362c2a9db7feb2f8",
       "pngSha256": "6ea9c8f342288fc5f2069fd6fdd5da6445713d4c3bb6f5bbe29b38ed26d9b9f2"
+    },
+    "polygon/regions": {
+      "filename": "polygon-regions-light.png",
+      "sourceSha256": "b69a28e0aebf57fc16372ad8acae2511b7f34c2794820e54a5f6c80217357e87",
+      "pngSha256": "79216d10146fd23ddac6fa368be3dd4c87c1ffa5681ee6dbb2b5e1157316c156"
+    },
+    "qq/normal": {
+      "filename": "qq-normal-light.png",
+      "sourceSha256": "c34d77e7d4c00e633f6d3704410f175841271e8c79b683092c16823e90038a21",
+      "pngSha256": "d839230f6ef08ed5a775e8b88047ecb2734488b40ef8f1187ef4bb1ef3ab6a91"
     },
     "raster/grid": {
       "filename": "raster-grid-light.png",

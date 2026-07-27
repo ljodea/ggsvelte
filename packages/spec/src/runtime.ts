@@ -23,6 +23,9 @@ import type {
   ColLayer,
   DensityLayer,
   ErrorbarLayer,
+  LinerangeLayer,
+  PointrangeLayer,
+  CrossbarLayer,
   HistogramLayer,
   FreqpolyLayer,
   HlineLayer,
@@ -39,10 +42,14 @@ import type {
   PointLayer,
   PortableSpec,
   RasterLayer,
+  HexLayer,
   RectLayer,
   RibbonLayer,
   SegmentLayer,
   CountLayer,
+  ViolinLayer,
+  FunctionLayer,
+  PolygonLayer,
   AblineLayer,
   ContourLayer,
   CurveLayer,
@@ -51,11 +58,15 @@ import type {
   DotplotLayer,
   RugLayer,
   StepLayer,
+  QqLayer,
+  QqLineLayer,
   RuleLayer,
   QuantileLayer,
   SmoothLayer,
   TextLayer,
+  LabelLayer,
   TileLayer,
+  Bin2dLayer,
   VlineLayer,
 } from "./schema.js";
 
@@ -88,23 +99,34 @@ export interface RuntimeAreaLayer extends WithRuntimeAes<AreaLayer> {}
 export interface RuntimeRibbonLayer extends WithRuntimeAes<RibbonLayer> {}
 export interface RuntimeSegmentLayer extends WithRuntimeAes<SegmentLayer> {}
 export interface RuntimeCountLayer extends WithRuntimeAes<CountLayer> {}
+export interface RuntimeViolinLayer extends WithRuntimeAes<ViolinLayer> {}
+export interface RuntimeFunctionLayer extends WithRuntimeAes<FunctionLayer> {}
+export interface RuntimePolygonLayer extends WithRuntimeAes<PolygonLayer> {}
 export interface RuntimeAblineLayer extends WithRuntimeAes<AblineLayer> {}
 export interface RuntimeCurveLayer extends WithRuntimeAes<CurveLayer> {}
 export interface RuntimeRugLayer extends WithRuntimeAes<RugLayer> {}
 export interface RuntimeStepLayer extends WithRuntimeAes<StepLayer> {}
+export interface RuntimeQqLayer extends WithRuntimeAes<QqLayer> {}
+export interface RuntimeQqLineLayer extends WithRuntimeAes<QqLineLayer> {}
 export interface RuntimeRuleLayer extends WithRuntimeAes<RuleLayer> {}
 export interface RuntimeHlineLayer extends WithRuntimeAes<HlineLayer> {}
 export interface RuntimeVlineLayer extends WithRuntimeAes<VlineLayer> {}
 export interface RuntimeJitterLayer extends WithRuntimeAes<JitterLayer> {}
 export interface RuntimeTextLayer extends WithRuntimeAes<TextLayer> {}
+export interface RuntimeLabelLayer extends WithRuntimeAes<LabelLayer> {}
 export interface RuntimeSmoothLayer extends WithRuntimeAes<SmoothLayer> {}
 export interface RuntimeQuantileLayer extends WithRuntimeAes<QuantileLayer> {}
 export interface RuntimeBoxplotLayer extends WithRuntimeAes<BoxplotLayer> {}
 export interface RuntimeDensityLayer extends WithRuntimeAes<DensityLayer> {}
 export interface RuntimeErrorbarLayer extends WithRuntimeAes<ErrorbarLayer> {}
+export interface RuntimeLinerangeLayer extends WithRuntimeAes<LinerangeLayer> {}
+export interface RuntimePointrangeLayer extends WithRuntimeAes<PointrangeLayer> {}
+export interface RuntimeCrossbarLayer extends WithRuntimeAes<CrossbarLayer> {}
 export interface RuntimeRectLayer extends WithRuntimeAes<RectLayer> {}
 export interface RuntimeTileLayer extends WithRuntimeAes<TileLayer> {}
+export interface RuntimeBin2dLayer extends WithRuntimeAes<Bin2dLayer> {}
 export interface RuntimeRasterLayer extends WithRuntimeAes<RasterLayer> {}
+export interface RuntimeHexLayer extends WithRuntimeAes<HexLayer> {}
 export interface RuntimeContourLayer extends WithRuntimeAes<ContourLayer> {}
 export interface RuntimeDensity2dLayer extends WithRuntimeAes<Density2dLayer> {}
 export interface RuntimeDensity2dFilledLayer extends WithRuntimeAes<Density2dFilledLayer> {}
@@ -129,23 +151,34 @@ export type RuntimeLayerSpec =
   | RuntimeRibbonLayer
   | RuntimeSegmentLayer
   | RuntimeCountLayer
+  | RuntimeViolinLayer
+  | RuntimeFunctionLayer
+  | RuntimePolygonLayer
   | RuntimeAblineLayer
   | RuntimeCurveLayer
   | RuntimeRugLayer
   | RuntimeStepLayer
+  | RuntimeQqLayer
+  | RuntimeQqLineLayer
   | RuntimeRuleLayer
   | RuntimeHlineLayer
   | RuntimeVlineLayer
   | RuntimeJitterLayer
   | RuntimeTextLayer
+  | RuntimeLabelLayer
   | RuntimeSmoothLayer
   | RuntimeQuantileLayer
   | RuntimeBoxplotLayer
   | RuntimeDensityLayer
   | RuntimeErrorbarLayer
+  | RuntimeLinerangeLayer
+  | RuntimePointrangeLayer
+  | RuntimeCrossbarLayer
   | RuntimeRectLayer
   | RuntimeTileLayer
+  | RuntimeBin2dLayer
   | RuntimeRasterLayer
+  | RuntimeHexLayer
   | RuntimeContourLayer
   | RuntimeDensity2dLayer
   | RuntimeDensity2dFilledLayer

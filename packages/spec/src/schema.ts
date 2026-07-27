@@ -121,6 +121,9 @@ export const AreaLayerSchema = SpecModule.Import("AreaLayer");
 export const RibbonLayerSchema = SpecModule.Import("RibbonLayer");
 export const SegmentLayerSchema = SpecModule.Import("SegmentLayer");
 export const CountLayerSchema = SpecModule.Import("CountLayer");
+export const ViolinLayerSchema = SpecModule.Import("ViolinLayer");
+export const FunctionLayerSchema = SpecModule.Import("FunctionLayer");
+export const PolygonLayerSchema = SpecModule.Import("PolygonLayer");
 export const AblineLayerSchema = SpecModule.Import("AblineLayer");
 export const CurveLayerSchema = SpecModule.Import("CurveLayer");
 export const MapLayerSchema = SpecModule.Import("MapLayer");
@@ -132,11 +135,14 @@ export const SfLabelLayerSchema = SpecModule.Import("SfLabelLayer");
 export const SpokeLayerSchema = SpecModule.Import("SpokeLayer");
 export const RugLayerSchema = SpecModule.Import("RugLayer");
 export const StepLayerSchema = SpecModule.Import("StepLayer");
+export const QqLayerSchema = SpecModule.Import("QqLayer");
+export const QqLineLayerSchema = SpecModule.Import("QqLineLayer");
 export const RuleLayerSchema = SpecModule.Import("RuleLayer");
 export const HlineLayerSchema = SpecModule.Import("HlineLayer");
 export const VlineLayerSchema = SpecModule.Import("VlineLayer");
 export const JitterLayerSchema = SpecModule.Import("JitterLayer");
 export const TextLayerSchema = SpecModule.Import("TextLayer");
+export const LabelLayerSchema = SpecModule.Import("LabelLayer");
 export const SmoothLayerSchema = SpecModule.Import("SmoothLayer");
 export const QuantileLayerSchema = SpecModule.Import("QuantileLayer");
 export const ContourLayerSchema = SpecModule.Import("ContourLayer");
@@ -146,9 +152,14 @@ export const Density2dLayerSchema = SpecModule.Import("Density2dLayer");
 export const Density2dFilledLayerSchema = SpecModule.Import("Density2dFilledLayer");
 export const DotplotLayerSchema = SpecModule.Import("DotplotLayer");
 export const ErrorbarLayerSchema = SpecModule.Import("ErrorbarLayer");
+export const LinerangeLayerSchema = SpecModule.Import("LinerangeLayer");
+export const PointrangeLayerSchema = SpecModule.Import("PointrangeLayer");
+export const CrossbarLayerSchema = SpecModule.Import("CrossbarLayer");
 export const RectLayerSchema = SpecModule.Import("RectLayer");
 export const TileLayerSchema = SpecModule.Import("TileLayer");
+export const Bin2dLayerSchema = SpecModule.Import("Bin2dLayer");
 export const RasterLayerSchema = SpecModule.Import("RasterLayer");
+export const HexLayerSchema = SpecModule.Import("HexLayer");
 export const AesSchema = SpecModule.Import("Aes");
 export const ChannelValueSchema = SpecModule.Import("ChannelValue");
 export const DataRefSchema = SpecModule.Import("DataRef");
@@ -231,6 +242,15 @@ export type HlineParams = SpecType<"HlineParams">;
 export type VlineParams = SpecType<"VlineParams">;
 /** Segment layer params (styling + lineend). */
 export type SegmentParams = SpecType<"SegmentParams">;
+export type ViolinParams = SpecType<"ViolinParams">;
+/** Function layer params (named fun + grid). */
+export type FunctionParams = SpecType<"FunctionParams">;
+/** Named portable function registry entry. */
+export type FunctionRegistryName = SpecType<"FunctionRegistryName">;
+/** Args bag for registry functions. */
+export type FunctionArgs = SpecType<"FunctionArgs">;
+/** Polygon layer params (fill/stroke styling). */
+export type PolygonParams = SpecType<"PolygonParams">;
 export type AblineParams = SpecType<"AblineParams">;
 /** Curve layer params (curvature/angle/ncp + stroke). */
 export type CurveParams = SpecType<"CurveParams">;
@@ -244,8 +264,12 @@ export type SfTextParams = SpecType<"SfTextParams">;
 export type SfLabelParams = SpecType<"SfLabelParams">;
 /** Rug layer params (sides, length, stroke styling). */
 export type RugParams = SpecType<"RugParams">;
+export type QqParams = SpecType<"QqParams">;
+export type QqLineParams = SpecType<"QqLineParams">;
 /** Text layer params. */
 export type TextParams = SpecType<"TextParams">;
+/** Label layer params (text + background box). */
+export type LabelParams = SpecType<"LabelParams">;
 /** Smooth layer params (method/se/level/span/degree/n + styling). */
 export type SmoothParams = SpecType<"SmoothParams">;
 /** Quantile layer params (quantiles/n + styling). */
@@ -264,12 +288,22 @@ export type DotplotParams = SpecType<"DotplotParams">;
 export type SummaryFun = SpecType<"SummaryFun">;
 /** Errorbar layer params (styling + summary-stat functions). */
 export type ErrorbarParams = SpecType<"ErrorbarParams">;
+/** Linerange params (alias of ErrorbarParams). */
+export type LinerangeParams = SpecType<"LinerangeParams">;
+/** Pointrange params (stem + mid point size/shape). */
+export type PointrangeParams = SpecType<"PointrangeParams">;
+/** Crossbar params (width, fatten, stroke). */
+export type CrossbarParams = SpecType<"CrossbarParams">;
 /** Rect layer params. */
 export type RectParams = SpecType<"RectParams">;
 /** Tile layer params. */
 export type TileParams = SpecType<"TileParams">;
+/** bin_2d layer params. */
+export type Bin2dParams = SpecType<"Bin2dParams">;
 /** Raster layer params. */
 export type RasterParams = SpecType<"RasterParams">;
+/** Hex bin heatmap params. */
+export type HexParams = SpecType<"HexParams">;
 /** Ribbon layer params (outline, orientation, stroke ends). */
 export type RibbonParams = SpecType<"RibbonParams">;
 /** Jitter/nudge position parameters. */
@@ -303,6 +337,8 @@ export type VlineLayer = LayerWithDataRef<SpecType<"VlineLayer">>;
 export type JitterLayer = LayerWithDataRef<SpecType<"JitterLayer">>;
 /** A text-label layer. */
 export type TextLayer = LayerWithDataRef<SpecType<"TextLayer">>;
+/** A label layer (text with background box). */
+export type LabelLayer = LayerWithDataRef<SpecType<"LabelLayer">>;
 /** A smooth (fitted trend) layer. */
 export type SmoothLayer = LayerWithDataRef<SpecType<"SmoothLayer">>;
 /** A quantile regression layer. */
@@ -321,12 +357,22 @@ export type Density2dFilledLayer = LayerWithDataRef<SpecType<"Density2dFilledLay
 export type DotplotLayer = LayerWithDataRef<SpecType<"DotplotLayer">>;
 /** An errorbar layer. */
 export type ErrorbarLayer = LayerWithDataRef<SpecType<"ErrorbarLayer">>;
+/** A linerange layer (stem without caps). */
+export type LinerangeLayer = LayerWithDataRef<SpecType<"LinerangeLayer">>;
+/** A pointrange layer (stem + mid point). */
+export type PointrangeLayer = LayerWithDataRef<SpecType<"PointrangeLayer">>;
+/** A crossbar layer (interval box + mid line). */
+export type CrossbarLayer = LayerWithDataRef<SpecType<"CrossbarLayer">>;
 /** A rect layer (arbitrary xmin/xmax/ymin/ymax regions). */
 export type RectLayer = LayerWithDataRef<SpecType<"RectLayer">>;
 /** A tile layer (center-sized cells). */
 export type TileLayer = LayerWithDataRef<SpecType<"TileLayer">>;
+/** A 2D bin heatmap layer. */
+export type Bin2dLayer = LayerWithDataRef<SpecType<"Bin2dLayer">>;
 /** A raster layer (equal-cell dense grid). */
 export type RasterLayer = LayerWithDataRef<SpecType<"RasterLayer">>;
+/** A hexagonal bin heatmap layer. */
+export type HexLayer = LayerWithDataRef<SpecType<"HexLayer">>;
 /** A ribbon (interval band) layer. */
 export type RibbonLayer = LayerWithDataRef<SpecType<"RibbonLayer">>;
 /** A finite segment layer ((x,y)→(xend,yend)). */
@@ -335,6 +381,13 @@ export type SegmentLayer = LayerWithDataRef<SpecType<"SegmentLayer">>;
 export type CountLayer = LayerWithDataRef<
   SpecType<"CountLayer">
 >; /** A slope/intercept reference line layer (geom_abline). */
+/** A violin (mirrored y-density) layer. */
+export type ViolinLayer = LayerWithDataRef<SpecType<"ViolinLayer">>;
+/** An analytic function path layer (y = f(x) grid). */
+export type FunctionLayer = LayerWithDataRef<SpecType<"FunctionLayer">>;
+/** A closed polygon layer ((x,y) vertices in data order). */
+export type PolygonLayer = LayerWithDataRef<SpecType<"PolygonLayer">>;
+/** A slope/intercept reference line layer (geom_abline). */
 export type AblineLayer = LayerWithDataRef<SpecType<"AblineLayer">>;
 /** A curve layer (curved connectors). */
 export type CurveLayer = LayerWithDataRef<SpecType<"CurveLayer">>;
@@ -365,6 +418,8 @@ export type SpokeLayer = LayerWithDataRef<SpecType<"SpokeLayer">>;
 export type RugLayer = LayerWithDataRef<SpecType<"RugLayer">>;
 /** A step-line layer (ggplot2 geom_step). */
 export type StepLayer = LayerWithDataRef<SpecType<"StepLayer">>;
+export type QqLayer = LayerWithDataRef<SpecType<"QqLayer">>;
+export type QqLineLayer = LayerWithDataRef<SpecType<"QqLineLayer">>;
 /** One plot layer, discriminated by `geom`. */
 export type LayerSpec =
   | PointLayer
@@ -378,6 +433,9 @@ export type LayerSpec =
   | RibbonLayer
   | SegmentLayer
   | CountLayer
+  | ViolinLayer
+  | FunctionLayer
+  | PolygonLayer
   | AblineLayer
   | CurveLayer
   | MapLayer
@@ -393,6 +451,7 @@ export type LayerSpec =
   | VlineLayer
   | JitterLayer
   | TextLayer
+  | LabelLayer
   | SmoothLayer
   | QuantileLayer
   | ContourLayer
@@ -402,9 +461,16 @@ export type LayerSpec =
   | Density2dFilledLayer
   | DotplotLayer
   | ErrorbarLayer
+  | LinerangeLayer
+  | PointrangeLayer
+  | CrossbarLayer
   | RectLayer
   | TileLayer
-  | RasterLayer;
+  | Bin2dLayer
+  | RasterLayer
+  | HexLayer
+  | QqLayer
+  | QqLineLayer;
 /** Stackable position adjustment names. */
 export type StackablePosition = SpecType<"StackablePosition">;
 /** Position adjustments accepted by point layers. */

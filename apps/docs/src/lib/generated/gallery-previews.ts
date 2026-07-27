@@ -45,6 +45,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "657e28882889051d30f128a66483bb0229a624edd6c2eb8d1ab4d49ebc02db58",
   },
   {
+    id: "bin2d/basic",
+    filename: "bin2d-basic-light.png",
+    path: "/previews/bin2d-basic-light.png",
+    sha256: "b0a1115a204dce5d5582cde656e2fa4fc8d395c49032c32d262aed476423121c",
+  },
+  {
     id: "blank/axes-only",
     filename: "blank-axes-only-light.png",
     path: "/previews/blank-axes-only-light.png",
@@ -61,6 +67,12 @@ export const GALLERY_PREVIEWS = [
     filename: "boxplot-by-category-light.png",
     path: "/previews/boxplot-by-category-light.png",
     sha256: "cd66029f5fcfd9832574b1eb685fac131e2850805a85966cada49060b3b95b9f",
+  },
+  {
+    id: "boxplot/violin",
+    filename: "boxplot-violin-light.png",
+    path: "/previews/boxplot-violin-light.png",
+    sha256: "23d86fc50333f3b25c84e520b73915939bda7745a1657a5ba2ebd6e7a19d6522",
   },
   {
     id: "col/basic",
@@ -177,6 +189,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "29209d4a65b24bba0dad9bb91a70aaa3d547bf4d24689297f8ea391ebf0ec86c",
   },
   {
+    id: "hex/basic",
+    filename: "hex-basic-light.png",
+    path: "/previews/hex-basic-light.png",
+    sha256: "e6514f5698e4a33726342f36653b1397e3e0a4d19a1961344dc26e97a01190b0",
+  },
+  {
     id: "histogram/basic",
     filename: "histogram-basic-light.png",
     path: "/previews/histogram-basic-light.png",
@@ -229,6 +247,24 @@ export const GALLERY_PREVIEWS = [
     filename: "jitter-basic-light.png",
     path: "/previews/jitter-basic-light.png",
     sha256: "5b200ec3afed907940cede09cf159dc882df2279069e906a82324d0a0ee7ddb5",
+  },
+  {
+    id: "label/basic",
+    filename: "label-basic-light.png",
+    path: "/previews/label-basic-light.png",
+    sha256: "d39c6fdddc4a344aaeb47b34e5300b705983afbc717398bf93efd857b67f4bd8",
+  },
+  {
+    id: "line/ecdf",
+    filename: "line-ecdf-light.png",
+    path: "/previews/line-ecdf-light.png",
+    sha256: "50ddc15712530f71fda35c44b4cb11db0ca2ee47fddce5004960322ee18401c3",
+  },
+  {
+    id: "line/function",
+    filename: "line-function-light.png",
+    path: "/previews/line-function-light.png",
+    sha256: "5dd1feed84dc2483b802d010aac11d8e033d4b5390f9167ddacf9e9b81fd6246",
   },
   {
     id: "line/multi-series",
@@ -345,6 +381,12 @@ export const GALLERY_PREVIEWS = [
     sha256: "0f22d2ac20a70d65c59e33fe5486c1a5856cb55e8fc105c24952ce7784091102",
   },
   {
+    id: "point/steps-binned",
+    filename: "point-steps-binned-light.png",
+    path: "/previews/point-steps-binned-light.png",
+    sha256: "3097ea59517b54c748254fe129f95f52dffab95ecfcfc4338435574f5e9315a0",
+  },
+  {
     id: "point/style-scales",
     filename: "point-style-scales-light.png",
     path: "/previews/point-style-scales-light.png",
@@ -355,6 +397,18 @@ export const GALLERY_PREVIEWS = [
     filename: "point-void-chrome-light.png",
     path: "/previews/point-void-chrome-light.png",
     sha256: "6ea9c8f342288fc5f2069fd6fdd5da6445713d4c3bb6f5bbe29b38ed26d9b9f2",
+  },
+  {
+    id: "polygon/regions",
+    filename: "polygon-regions-light.png",
+    path: "/previews/polygon-regions-light.png",
+    sha256: "79216d10146fd23ddac6fa368be3dd4c87c1ffa5681ee6dbb2b5e1157316c156",
+  },
+  {
+    id: "qq/normal",
+    filename: "qq-normal-light.png",
+    path: "/previews/qq-normal-light.png",
+    sha256: "d839230f6ef08ed5a775e8b88047ecb2734488b40ef8f1187ef4bb1ef3ab6a91",
   },
   {
     id: "raster/grid",

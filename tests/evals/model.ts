@@ -377,6 +377,172 @@ export class MockResponder implements Responder {
 
     // --- geom selection (keyword templates, most specific first) -----------
     if (
+      /\bgeom[_\s]?function\b|\bstat[_\s]?function\b|\bdnorm\b|\bpnorm\b|\banalytical? (?:curve|function)\b|\bnormal density\b/.test(
+        prompt,
+      )
+    ) {
+      // geom_function / stat_function: portable named registry curve (#797).
+      const fun = /\bpnorm\b/.test(prompt)
+        ? "pnorm"
+        : /\bdnorm\b|\bnormal density\b|\bpdf\b/.test(prompt)
+          ? "dnorm"
+          : /\blinear\b/.test(prompt)
+            ? "linear"
+            : "identity";
+      const params: Record<string, unknown> = { fun };
+      const xlimMatch = prompt.match(/\bxlim from (\d+(?:\.\d+)?) to (\d+(?:\.\d+)?)/i);
+      if (xlimMatch) {
+        params["xlim"] = [Number(xlimMatch[1]), Number(xlimMatch[2])];
+      } else if (/\bxlim\b|\[-?3/.test(prompt)) {
+        params["xlim"] = [-3, 3];
+      }
+      const nMatch = prompt.match(/\b(\d+)\s+evaluation points?\b/i);
+      if (nMatch) params["n"] = Number(nMatch[1]);
+      else if (fun === "dnorm") params["n"] = 101;
+      if (fun === "dnorm" || fun === "pnorm") params["args"] = { mean: 0, sd: 1 };
+
+      const x = fieldNamed("x");
+      if (x !== undefined && fieldNamed("y") !== undefined) {
+        spec.layers.push({
+          geom: "point",
+          aes: { x: f(x), y: f("y") },
+        });
+      }
+      const functionAes: MockAes = { y: { stat: "y" } };
+      // When xlim is set, x need not be mapped (domain comes from params.xlim).
+      if (x !== undefined) functionAes.x = f(x);
+      else if (params["xlim"] === undefined) {
+        const fallbackX = pick.quant();
+        if (fallbackX !== undefined) functionAes.x = f(fallbackX);
+      }
+      spec.layers.push({
+        geom: "function",
+        stat: "function",
+        aes: functionAes,
+        params,
+      });
+      if (functionAes.x !== undefined && "field" in functionAes.x) {
+        xField = functionAes.x.field;
+      }
+    } else if (
+      /\bgeom[_\s]?linerange\b|\bgeom[_\s]?pointrange\b|\bgeom[_\s]?crossbar\b/.test(prompt)
+    ) {
+      // Interval family beyond errorbar (#793). Multi-geom prompts emit all
+      // named forms so corpus golds with three layers stay mock-reachable.
+      const x = fieldNamed("group") ?? fieldNamed("treatment") ?? pick.cat() ?? "x";
+      const y = fieldNamed("mid") ?? fieldNamed("value") ?? pick.quant() ?? "y";
+      const summary = /\bsummary\b|\bmean\b/.test(prompt);
+      const lo = fieldNamed("lo");
+      const hi = fieldNamed("hi");
+      // Underscore in geom_linerange is a word char, so \b linerange fails —
+      // match bare names with optional geom_ / geom prefix.
+      const named = (
+        [
+          ["linerange", /(?:geom[_\s]?)?linerange/.test(prompt)],
+          ["pointrange", /(?:geom[_\s]?)?pointrange/.test(prompt)],
+          ["crossbar", /(?:geom[_\s]?)?crossbar/.test(prompt)],
+        ] as const
+      ).filter(([, hit]) => hit);
+      for (const [geom] of named.length > 0 ? named : ([["linerange", true]] as const)) {
+        const aes: MockAes = { x: f(x) };
+        if (summary || geom !== "linerange") aes.y = f(y);
+        if (!summary && lo !== undefined && hi !== undefined) {
+          aes.ymin = f(lo);
+          aes.ymax = f(hi);
+        }
+        const layer: MockLayer = { geom, aes };
+        if (summary) layer.stat = "summary";
+        spec.layers.push(layer);
+      }
+      xField = x;
+    } else if (
+      /\bq-?q\b/.test(prompt) ||
+      /\bgeom[_\s]?qq(?:_line)?\b/.test(prompt) ||
+      (/\bnormal\b/.test(prompt) && /\breference line\b/.test(prompt))
+    ) {
+      // geom_qq + geom_qq_line: sample channel (ggplot2 aes.sample) (#804).
+      const sample =
+        fieldNamed("height") ??
+        fieldNamed("latency") ??
+        fieldNamed("sample") ??
+        pick.quant() ??
+        "sample";
+      const sampleAes: MockAes = { sample: f(sample) };
+      spec.layers.push({ geom: "qq", aes: sampleAes });
+      if (
+        /\breference line\b|\bqq_line\b|\bqq-line\b/.test(prompt) ||
+        /\bwith a normal\b/.test(prompt)
+      ) {
+        spec.layers.push({ geom: "qq_line", aes: { sample: f(sample) } });
+      }
+    } else if (
+      (/\bgeom[_\s]?step\b|\bstep (?:line|chart)\b/.test(prompt) ||
+        (/\bstep\b/.test(prompt) &&
+          /\bhold(?:s|ing)?\b|\bcumulative\b|\bthermostat\b|\bsetpoint\b|\bdirection\b/.test(
+            prompt,
+          ))) &&
+      !/stepp?ed/.test(prompt)
+    ) {
+      // geom_step: hv/vh staircase polylines (#789). Not the intentional
+      // "stepped" unknown-geom repair fixture below.
+      const x = pick.temporal() ?? pick.quant() ?? "x";
+      const y = pick.quant() ?? "y";
+      const layer: MockLayer = { geom: "step", aes: { x: f(x), y: f(y) } };
+      if (/\bstart of each interval\b|\bdirection\b.*\bvh\b|\bvh\b/.test(prompt)) {
+        layer.params = { direction: "vh" };
+      }
+      spec.layers.push(layer);
+      xField = x;
+    } else if (/\bgeom[_\s]?count\b|\boverplotting\b/.test(prompt)) {
+      // geom_count: stat sum at unique (x, y); size defaults to after_stat n (#795).
+      const x = fieldNamed("x") ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? pick.quant() ?? "y";
+      const aes: MockAes = { x: f(x), y: f(y) };
+      colorFor("color", aes);
+      spec.layers.push({ geom: "count", aes });
+      xField = x;
+    } else if (/\bgeom[_\s]?violin\b|\bviolin plots?\b|\bviolin\b/.test(prompt)) {
+      // geom_violin: mirrored ydensity polygons per discrete x (#798).
+      const x = pick.mentionedCat() ?? pick.cat() ?? "x";
+      const y = pick.mentionedQuant() ?? pick.quant() ?? "y";
+      const layer: MockLayer = { geom: "violin", aes: { x: f(x), y: f(y) } };
+      colorFor("fill", layer.aes);
+      // mentionedCat() is consumed by x above, so "filled by <that field>"
+      // falls back to the discrete x — the usual violin spelling.
+      if (layer.aes.fill === undefined && /filled by|fill by/.test(prompt)) {
+        layer.aes.fill = f(x);
+      }
+      spec.layers.push(layer);
+      xField = x;
+    } else if (
+      !/\bscatter\b/.test(prompt) &&
+      /\bas labels?\b|\bgeom[_\s]?label\b/.test(prompt) &&
+      /background box|label box|boxed label/.test(prompt)
+    ) {
+      // geom_label alone: boxed text marks, no companion point layer (#792).
+      const x = pick.quant() ?? "x";
+      const y = pick.quant() ?? "y";
+      const label = pick.mentionedCat() ?? pick.cat();
+      const aes: MockAes = { x: f(x), y: f(y) };
+      if (label !== undefined) aes.label = f(label);
+      const layer: MockLayer = { geom: "label", aes };
+      colorFor("fill", layer.aes);
+      spec.layers.push(layer);
+      xField = x;
+    } else if (
+      /\bgeom[_\s]?polygon\b|\bclosed (?:filled )?(?:region|shape|ring)s?\b|\bfilled regions?\b|\bquadrilateral\b/.test(
+        prompt,
+      )
+    ) {
+      // geom_polygon: closed filled rings in data order, one per group (#807).
+      // Vertex fields are positional, not prompt-ordered — prefer literal x/y.
+      const x = fieldNamed("x") ?? pick.quant() ?? "x";
+      const y = fieldNamed("y") ?? pick.quant() ?? "y";
+      const layer: MockLayer = { geom: "polygon", aes: { x: f(x), y: f(y) } };
+      colorFor("fill", layer.aes);
+      spec.layers.push(layer);
+      xField = x;
+    } else if (
       /\bgeom[_\s]?spoke\b|\bspoke\b|\bvector field\b/.test(prompt) &&
       (fieldNamed("angle") !== undefined ||
         fieldNamed("radius") !== undefined ||
@@ -626,6 +792,68 @@ export class MockResponder implements Responder {
       const aes: MockAes = { x: f(x), y: f(y), fill: f(fill) };
       spec.layers.push({ geom: "raster", aes });
       xField = x;
+    } else if (
+      // geom_hex / hexagonal bin heatmap — must win over bare "heatmap" → tile (#800).
+      /\bhex(?:agon(?:al)?)?(?:\s+bin)?\b|\bgeom[_\s]?hex\b|\bbin_hex\b/.test(prompt)
+    ) {
+      const x =
+        fieldNamed("distance") ??
+        fieldNamed("humidity") ??
+        fieldNamed("x") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "x";
+      const y =
+        fieldNamed("delay") ??
+        fieldNamed("temperature") ??
+        fieldNamed("y") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "y";
+      const layer: MockLayer = {
+        geom: "hex",
+        stat: "bin_hex",
+        position: "identity",
+        aes: {
+          x: f(x),
+          y: f(y),
+          fill: { stat: "count" },
+        },
+      };
+      const binsMatchHex = prompt.match(/\b(\d+)\s*bins?\b/);
+      if (binsMatchHex !== null) layer.params = { bins: Number(binsMatchHex[1]) };
+      spec.layers.push(layer);
+      xField = x;
+    } else if (
+      /\bgeom[_\s]?bin[_ ]?2d\b|\bbin[_ ]?2d\b|\b2d bin(?:ned)? heatmap\b|\b2d rectangular bins?\b|\brectangular bins?\b.*\bheatmap\b|\bheatmap\b.*\brectangular bins?\b|\bbin heatmap\b/.test(
+        prompt,
+      )
+    ) {
+      // Prefer domain field names used in eval golds (distance/delay, humidity/temp).
+      const x =
+        fieldNamed("distance") ??
+        fieldNamed("humidity") ??
+        fieldNamed("x") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "x";
+      const y =
+        fieldNamed("delay") ??
+        fieldNamed("temperature") ??
+        fieldNamed("y") ??
+        pick.mentionedQuant() ??
+        pick.quant() ??
+        "y";
+      const layer: MockLayer = {
+        geom: "bin_2d",
+        stat: "bin_2d",
+        position: "identity",
+        aes: { x: f(x), y: f(y), fill: { stat: "count" } },
+      };
+      const binsMatch = prompt.match(/\b(\d+)\s*bins?\b/);
+      if (binsMatch !== null) layer.params = { bins: Number(binsMatch[1]) };
+      spec.layers.push(layer);
+      xField = x;
     } else if (/\b(?:geom )?tiles?\b|heatmap/.test(prompt)) {
       const cats = profile.fields.filter(
         (field) => field.type === "nominal" || field.type === "ordinal",
@@ -830,8 +1058,11 @@ export class MockResponder implements Responder {
       if (prompt.includes("label")) {
         const label = pick.mentionedCat();
         if (label !== undefined) {
+          // geom_label when the prompt asks for a background box (#792);
+          // plain geom_text otherwise.
+          const boxed = /background box|label box|boxed label/.test(prompt);
           spec.layers.push({
-            geom: "text",
+            geom: boxed ? "label" : "text",
             aes: { x: f(x), y: f(y), label: f(label) },
           });
         }

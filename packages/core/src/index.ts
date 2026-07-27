@@ -51,6 +51,8 @@ export { statCount } from "./stats/count.js";
 export type { CountStatInput, CountStatResult } from "./stats/count.js";
 export { statSum } from "./stats/sum.js";
 export type { SumStatInput, SumStatResult } from "./stats/sum.js";
+export { statEcdf } from "./stats/ecdf.js";
+export type { EcdfStatInput, EcdfStatResult } from "./stats/ecdf.js";
 export { positionDodge, positionStack } from "./positions/positions.js";
 export type { DodgeInput, DodgeResult, StackInput, StackResult } from "./positions/positions.js";
 
@@ -160,6 +162,7 @@ export type {
 } from "./diagnostics.js";
 
 // Layout (decision 0003)
+export { humanizeFieldTitle, spaceFieldName } from "./humanize-field.js";
 export { DEFAULT_FONT_STACK, MetricsTableMeasurer } from "./layout/measure.js";
 export type { MetricsTable, TextMeasurer } from "./layout/measure.js";
 export { FONT_METRICS } from "./layout/font-metrics.js";

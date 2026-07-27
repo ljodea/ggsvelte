@@ -58,6 +58,8 @@ export function styleBinding(
       identity: [],
       count: ["count"],
       bin: ["count", "density", "ncount", "ndensity"],
+      bin_2d: ["count", "density", "ncount", "ndensity"],
+      bin_hex: ["count", "density", "ncount", "ndensity"],
       density: ["density", "count", "scaled", "ndensity"],
       bindot: ["stackpos"],
       smooth: ["y", "ymin", "ymax", "se"],
@@ -65,6 +67,9 @@ export function styleBinding(
       summary_bin: ["y", "ymin", "ymax"],
       boxplot: ["ymin", "lower", "middle", "upper", "ymax"],
       sum: ["n", "prop"],
+      ecdf: ["ecdf"],
+      qq: ["sample", "theoretical"],
+      qq_line: ["sample", "theoretical"],
     };
     if (!(outputs[stat] ?? []).includes(channel.stat)) {
       throw new PipelineError(

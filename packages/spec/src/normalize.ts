@@ -63,6 +63,9 @@ export type {
   ColLayerInput,
   DensityLayerInput,
   ErrorbarLayerInput,
+  LinerangeLayerInput,
+  PointrangeLayerInput,
+  CrossbarLayerInput,
   FacetFieldInput,
   FacetInput,
   HistogramLayerInput,
@@ -72,6 +75,9 @@ export type {
   RibbonLayerInput,
   SegmentLayerInput,
   CountLayerInput,
+  ViolinLayerInput,
+  FunctionLayerInput,
+  PolygonLayerInput,
   AblineLayerInput,
   ContourLayerInput,
   Density2dLayerInput,
@@ -86,18 +92,23 @@ export type {
   CurveLayerInput,
   RugLayerInput,
   StepLayerInput,
+  QqLayerInput,
+  QqLineLayerInput,
   LayerInput,
   LineLayerInput,
   PathLayerInput,
   PointLayerInput,
   RasterLayerInput,
+  HexLayerInput,
   RectLayerInput,
   RuleLayerInput,
   QuantileLayerInput,
   SmoothLayerInput,
   SpecInput,
   TextLayerInput,
+  LabelLayerInput,
   TileLayerInput,
+  Bin2dLayerInput,
   VlineLayerInput,
 } from "./normalize-input.js";
 
@@ -205,6 +216,16 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   if (stat === "sum" && aes?.size === undefined) {
     aes = { ...aes, size: { stat: "n" } };
   }
+  if (stat === "function" && aes?.y === undefined) {
+    aes = { ...aes, y: { stat: "y" } };
+  }
+  // bin_hex maps fill to after_stat count (ggplot2 geom_hex default aes).
+  if (stat === "bin_hex" && aes?.fill === undefined) {
+    aes = { ...aes, fill: { stat: "count" } };
+  }
+  if (stat === "ecdf" && aes?.y === undefined) {
+    aes = { ...aes, y: { stat: "ecdf" } };
+  }
   // density_2d_filled defaults fill to after_stat(level) like ggplot2.
   if (
     (stat === "density_2d_filled" || layer.geom === "density_2d_filled") &&
@@ -214,6 +235,10 @@ function normalizeLayer(layer: LayerInput, plotAes: Aes | undefined): LayerSpec 
   }
   if (stat === "bindot" && aes?.y === undefined) {
     aes = { ...aes, y: { stat: "stackpos" } };
+  }
+  // bin_2d maps fill to after_stat count (ggplot2 geom_bin2d default aes).
+  if (stat === "bin_2d" && aes?.fill === undefined) {
+    aes = { ...aes, fill: { stat: "count" } };
   }
   const geom = canonicalGeom(layer.geom);
   const positionParams =

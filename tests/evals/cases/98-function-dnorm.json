@@ -1,0 +1,53 @@
+{
+  "id": "98-function-dnorm",
+  "kind": "chart",
+  "prompt": "Overlay a standard normal density curve on a rug of x samples using geom_function with dnorm.",
+  "dataProfile": {
+    "fields": [
+      { "name": "x", "type": "quantitative" },
+      { "name": "y", "type": "quantitative" }
+    ],
+    "rowCount": 5
+  },
+  "data": {
+    "main": [
+      { "x": -1.2, "y": 0 },
+      { "x": -0.4, "y": 0 },
+      { "x": 0.1, "y": 0 },
+      { "x": 0.8, "y": 0 },
+      { "x": 1.5, "y": 0 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "point",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "field": "y" }
+        }
+      },
+      {
+        "geom": "function",
+        "stat": "function",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "x" },
+          "y": { "stat": "y" }
+        },
+        "params": {
+          "fun": "dnorm",
+          "n": 101,
+          "xlim": [-3, 3],
+          "args": { "mean": 0, "sd": 1 }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Canonical gold for geom_function / stat_function with portable dnorm (#797)."
+}

@@ -104,6 +104,22 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "Bin2dLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "Bin2dLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "Bin2dLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "Bin2dParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "BinnedColorScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -316,6 +332,22 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CrossbarLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CrossbarLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CrossbarLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "CrossbarParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "CurveLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -516,6 +548,30 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "FunctionArgs": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FunctionLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FunctionLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FunctionLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "FunctionParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FunctionRegistryName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GEOM_DEFAULTS": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -540,6 +596,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomBin2dOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomBlankOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -557,6 +617,10 @@
           "lifecycle": "experimental"
         },
         "GeomCountOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomCrossbarOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -588,6 +652,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomFunctionOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomHexOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomHistogramOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -600,7 +672,15 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomLabelOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomLineOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomLinerangeOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -617,6 +697,22 @@
           "lifecycle": "experimental"
         },
         "GeomPointOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomPointrangeOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomPolygonOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomQqLineOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomQqOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -676,6 +772,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomViolinOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomVlineOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -722,6 +822,22 @@
         },
         "HUE_PALETTE_10": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "HexLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "HexLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "HexLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "HexParams": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "HistogramLayer": {
@@ -808,6 +924,22 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "LabelLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LabelLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LabelLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "LabelParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "Labs": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -857,6 +989,22 @@
           "lifecycle": "experimental"
         },
         "LinearPaintOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LinerangeLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LinerangeLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LinerangeLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "LinerangeParams": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1016,6 +1164,38 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "PointrangeLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PointrangeLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PointrangeLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "PointrangeParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PolygonLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PolygonLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PolygonLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "PolygonParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "PortabilityIssue": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1041,6 +1221,38 @@
           "lifecycle": "experimental"
         },
         "ProfileFieldType": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "QqLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "QqLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "QqLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "QqLineLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "QqLineLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "QqLineLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "QqLineParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "QqParams": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1168,6 +1380,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeBin2dLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeBlankLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1189,6 +1405,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeCountLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeCrossbarLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1220,6 +1440,14 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeFunctionLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeHexLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeHistogramLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1232,11 +1460,19 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "RuntimeLabelLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "RuntimeLayerSpec": {
           "kind": "type",
           "lifecycle": "experimental"
         },
         "RuntimeLineLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeLinerangeLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1249,6 +1485,22 @@
           "lifecycle": "experimental"
         },
         "RuntimePointLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimePointrangeLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimePolygonLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeQqLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeQqLineLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1313,6 +1565,10 @@
           "lifecycle": "experimental"
         },
         "RuntimeTileLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RuntimeViolinLayer": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1424,6 +1680,18 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "SizeAreaScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SizeSequentialStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SizeTemporalNumericStyleScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "SmoothLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1501,6 +1769,18 @@
           "lifecycle": "experimental"
         },
         "StepParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "Steps2ScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "StepsScaleOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "StepsnScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1691,6 +1971,22 @@
         "ValidateResult": {
           "kind": "type",
           "lifecycle": "stable-intent"
+        },
+        "ViolinLayer": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ViolinLayerInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ViolinLayerSchema": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ViolinParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
         },
         "ViridisOptionName": {
           "kind": "type",
@@ -2052,6 +2348,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleColorSteps": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorSteps2": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColorStepsn": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleColorViridisB": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2125,6 +2433,18 @@
           "lifecycle": "experimental"
         },
         "scaleColourSqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourSteps": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourSteps2": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleColourStepsn": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2216,6 +2536,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleFillSteps": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillSteps2": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleFillStepsn": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleFillViridisB": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2284,6 +2616,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleRadius": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleShape": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2312,7 +2648,15 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleSizeArea": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleSizeBinned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeBinnedArea": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2337,6 +2681,10 @@
           "lifecycle": "experimental"
         },
         "scaleSizeManual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleSizeOrdinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2516,6 +2864,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_color_steps": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_steps2": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_color_stepsn": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_color_viridis_b": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2589,6 +2949,18 @@
           "lifecycle": "experimental"
         },
         "scale_colour_sqrt": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_steps": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_steps2": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_colour_stepsn": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2680,6 +3052,18 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_fill_steps": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_steps2": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_fill_stepsn": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_fill_viridis_b": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2748,6 +3132,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_radius": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_shape": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2772,7 +3160,19 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_size": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_area": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_size_binned": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_binned_area": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2797,6 +3197,10 @@
           "lifecycle": "experimental"
         },
         "scale_size_manual": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_size_ordinal": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3197,6 +3601,14 @@
         },
         "EDITION_DEFAULTS": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "EcdfStatInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "EcdfStatResult": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "EditionDefaults": {
@@ -3867,6 +4279,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "humanizeFieldTitle": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "inferDiscreteness": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4047,7 +4463,15 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "spaceFieldName": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "statCount": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "statEcdf": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4473,6 +4897,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GeomBin2d": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeomBlank": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4490,6 +4918,10 @@
           "lifecycle": "experimental"
         },
         "GeomCount": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomCrossbar": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4521,6 +4953,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GeomFunction": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomHex": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeomHistogram": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4533,7 +4973,15 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GeomLabel": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeomLine": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomLinerange": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4549,8 +4997,24 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GeomPointrange": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomPolygon": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeomProps": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomQq": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomQqLine": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "GeomQuantile": {
@@ -4610,6 +5074,10 @@
           "lifecycle": "experimental"
         },
         "GeomTile": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomViolin": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -5141,6 +5609,18 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleColorSteps": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorSteps2": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColorStepsn": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleColorViridisB": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -5210,6 +5690,18 @@
           "lifecycle": "stable-intent"
         },
         "ScaleColourSqrt": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourSteps": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourSteps2": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleColourStepsn": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -5301,6 +5793,18 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleFillSteps": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillSteps2": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleFillStepsn": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleFillViridisB": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -5361,6 +5865,10 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleRadius": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleShapeBinned": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -5381,7 +5889,15 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleSizeArea": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleSizeBinned": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleSizeBinnedArea": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -5406,6 +5922,10 @@
           "lifecycle": "stable-intent"
         },
         "ScaleSizeManual": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleSizeOrdinal": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },

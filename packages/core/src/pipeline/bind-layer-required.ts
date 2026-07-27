@@ -54,16 +54,22 @@ export function assertRequiredChannels(input: {
     geom === "step" ||
     geom === "col" ||
     geom === "area" ||
+    geom === "polygon" ||
     geom === "text" ||
+    geom === "label" ||
     geom === "smooth" ||
     geom === "quantile" ||
     geom === "boxplot" ||
+    geom === "violin" ||
     geom === "tile" ||
     geom === "raster" ||
+    geom === "hex" ||
     geom === "density_2d" ||
-    geom === "density_2d_filled"
+    geom === "density_2d_filled" ||
+    geom === "bin_2d"
   ) {
     requireField(xField, "x", index, geom);
+    // yStatColumn set (e.g. ecdf) means y is computed — skip field requirement.
     if (yStatColumn === null) requireField(yField, "y", index, geom);
   }
   if (geom === "bar" || geom === "density" || geom === "contour" || geom === "dotplot")
@@ -71,13 +77,16 @@ export function assertRequiredChannels(input: {
   if (geom === "contour") {
     requireField(yField, "y", index, geom);
   }
-  if (geom === "errorbar") {
+  if (geom === "errorbar" || geom === "linerange" || geom === "pointrange" || geom === "crossbar") {
     requireField(xField, "x", index, geom);
     if (stat === "summary" || stat === "summary_bin") {
       requireField(yField, "y", index, geom);
     } else {
       requireField(yminField, "ymin", index, geom);
       requireField(ymaxField, "ymax", index, geom);
+      if (geom === "pointrange" || geom === "crossbar") {
+        requireField(yField, "y", index, geom);
+      }
     }
   }
   if (geom === "rect") {

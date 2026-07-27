@@ -1,0 +1,39 @@
+{
+  "id": "67-latency-qq-line",
+  "kind": "chart",
+  "prompt": "Q-Q plot of latency with a normal reference line.",
+  "dataProfile": {
+    "fields": [{ "name": "latency", "type": "quantitative" }],
+    "rowCount": 6
+  },
+  "data": {
+    "main": [
+      { "latency": 12 },
+      { "latency": 15 },
+      { "latency": 18 },
+      { "latency": 22 },
+      { "latency": 30 },
+      { "latency": 45 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "qq",
+        "stat": "qq",
+        "position": "identity",
+        "aes": { "sample": { "field": "latency" } }
+      },
+      {
+        "geom": "qq_line",
+        "stat": "qq_line",
+        "position": "identity",
+        "aes": { "sample": { "field": "latency" } }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "Q-Q points plus reference line for a quantitative sample."
+}

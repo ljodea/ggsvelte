@@ -24,6 +24,8 @@ export function collectColorChannelValues(
   for (const frame of frames) {
     const channel = name === "color" ? frame.binding.color : frame.binding.fill;
     const frameValues = name === "color" ? frame.colorValues : frame.fillValues;
+    // Field-mapped or after_stat color/fill (e.g. bin_2d fill = count): values
+    // live on the frame. One push only — do not dual-loop statColumn rows.
     if (frameValues !== null && (channel.field !== null || (channel.statColumn ?? null) !== null)) {
       anyField = true;
       if (

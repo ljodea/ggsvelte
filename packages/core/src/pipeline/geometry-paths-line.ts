@@ -56,18 +56,20 @@ export function lineBatch(
     }
   }
 
-  // Keep geom checks inline so TS narrows layer.params (line/path vs quantile).
+  // Keep geom checks inline so TS narrows layer.params (line/path vs quantile/function).
   const params =
     binding.layer.geom === "line" ||
+    binding.layer.geom === "qq_line" ||
     binding.layer.geom === "path" ||
     binding.layer.geom === "step" ||
     binding.layer.geom === "quantile" ||
     binding.layer.geom === "contour" ||
     binding.layer.geom === "density_2d" ||
-    binding.layer.geom === "sf"
+    binding.layer.geom === "sf" ||
+    binding.layer.geom === "function"
       ? (binding.layer.params ?? {})
       : {};
-  // Quantile/contour/density_2d have no curve param; line/path may set step/linear.
+  // Quantile/contour/density_2d/function have no curve param; line/path may set step/linear.
   // geom_step instead carries params.direction, which picks the step family (#789).
   let curve: PathsBatch["curve"] = "linear";
   if (binding.layer.geom === "step") {

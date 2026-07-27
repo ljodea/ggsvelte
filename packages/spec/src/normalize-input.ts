@@ -16,6 +16,9 @@ import type {
   Density2dParams,
   DotplotParams,
   ErrorbarParams,
+  LinerangeParams,
+  PointrangeParams,
+  CrossbarParams,
   RibbonParams,
   FacetScales,
   GuidesSpec,
@@ -28,6 +31,7 @@ import type {
   PointPosition,
   PositionParams,
   RasterParams,
+  HexParams,
   RectParams,
   RenderBackend,
   RuleParams,
@@ -35,6 +39,9 @@ import type {
   VlineParams,
   RugParams,
   SegmentParams,
+  ViolinParams,
+  FunctionParams,
+  PolygonParams,
   AblineParams,
   CurveParams,
   MapParams,
@@ -44,15 +51,19 @@ import type {
   SfLabelParams,
   SpokeParams,
   StepParams,
+  QqParams,
+  QqLineParams,
   Scales,
   QuantileParams,
   ContourParams,
   SmoothParams,
   StackablePosition,
   TextParams,
+  LabelParams,
   ThemeName,
   ThemeSpec,
   TileParams,
+  Bin2dParams,
 } from "./schema.js";
 
 /** Channel form accepted at the TS/builder level: bare string = { field }. */
@@ -72,6 +83,7 @@ export interface AesInput {
   group?: ChannelInput;
   label?: ChannelInput;
   weight?: ChannelInput;
+  sample?: ChannelInput;
   ymin?: ChannelInput;
   ymax?: ChannelInput;
   xmin?: ChannelInput;
@@ -140,8 +152,8 @@ export interface CountLayerInput extends LayerInputBase {
 
 export interface LineLayerInput extends LayerInputBase {
   geom: "line";
-  /** identity | unique | bin | align | connect | summary_bin | manual */
-  stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin" | "manual";
+  /** identity | unique | bin | align | connect | summary_bin | manual | ecdf */
+  stat?: "identity" | "unique" | "bin" | "align" | "connect" | "summary_bin" | "manual" | "ecdf";
   position?: "identity";
   params?: LineParams;
 }
@@ -225,6 +237,14 @@ export interface TextLayerInput extends LayerInputBase {
   params?: TextParams;
 }
 
+export interface LabelLayerInput extends LayerInputBase {
+  geom: "label";
+  stat?: "identity";
+  position?: "identity" | "nudge";
+  positionParams?: PositionParams;
+  params?: LabelParams;
+}
+
 export interface SmoothLayerInput extends LayerInputBase {
   geom: "smooth";
   stat?: "smooth";
@@ -288,6 +308,27 @@ export interface ErrorbarLayerInput extends LayerInputBase {
   params?: ErrorbarParams;
 }
 
+export interface LinerangeLayerInput extends LayerInputBase {
+  geom: "linerange";
+  stat?: "identity" | "summary";
+  position?: "identity";
+  params?: LinerangeParams;
+}
+
+export interface PointrangeLayerInput extends LayerInputBase {
+  geom: "pointrange";
+  stat?: "identity" | "summary";
+  position?: "identity";
+  params?: PointrangeParams;
+}
+
+export interface CrossbarLayerInput extends LayerInputBase {
+  geom: "crossbar";
+  stat?: "identity" | "summary";
+  position?: "identity";
+  params?: CrossbarParams;
+}
+
 export interface RectLayerInput extends LayerInputBase {
   geom: "rect";
   stat?: "identity" | "unique";
@@ -302,11 +343,25 @@ export interface TileLayerInput extends LayerInputBase {
   params?: TileParams;
 }
 
+export interface Bin2dLayerInput extends LayerInputBase {
+  geom: "bin_2d";
+  stat?: "bin_2d";
+  position?: "identity";
+  params?: Bin2dParams;
+}
+
 export interface RasterLayerInput extends LayerInputBase {
   geom: "raster";
   stat?: "identity";
   position?: "identity";
   params?: RasterParams;
+}
+
+export interface HexLayerInput extends LayerInputBase {
+  geom: "hex";
+  stat?: "bin_hex";
+  position?: "identity";
+  params?: HexParams;
 }
 
 export interface RibbonLayerInput extends LayerInputBase {
@@ -321,6 +376,41 @@ export interface SegmentLayerInput extends LayerInputBase {
   stat?: "identity" | "unique";
   position?: "identity";
   params?: SegmentParams;
+}
+
+export interface ViolinLayerInput extends LayerInputBase {
+  geom: "violin";
+  stat?: "ydensity";
+  position?: "dodge" | "identity";
+  params?: ViolinParams;
+}
+
+export interface FunctionLayerInput extends LayerInputBase {
+  geom: "function";
+  stat?: "function";
+  position?: "identity";
+  params: FunctionParams;
+}
+
+export interface PolygonLayerInput extends LayerInputBase {
+  geom: "polygon";
+  stat?: "identity";
+  position?: "identity";
+  params?: PolygonParams;
+}
+
+export interface QqLayerInput extends LayerInputBase {
+  geom: "qq";
+  stat?: "qq";
+  position?: "identity";
+  params?: QqParams;
+}
+
+export interface QqLineLayerInput extends LayerInputBase {
+  geom: "qq_line";
+  stat?: "qq_line";
+  position?: "identity";
+  params?: QqLineParams;
 }
 
 export interface AblineLayerInput extends LayerInputBase {
@@ -410,6 +500,7 @@ export type LayerInput =
   | VlineLayerInput
   | JitterLayerInput
   | TextLayerInput
+  | LabelLayerInput
   | SmoothLayerInput
   | QuantileLayerInput
   | ContourLayerInput
@@ -419,12 +510,20 @@ export type LayerInput =
   | Density2dFilledLayerInput
   | DotplotLayerInput
   | ErrorbarLayerInput
+  | LinerangeLayerInput
+  | PointrangeLayerInput
+  | CrossbarLayerInput
   | AblineLayerInput
   | RectLayerInput
   | TileLayerInput
+  | Bin2dLayerInput
   | RasterLayerInput
   | SegmentLayerInput
   | CountLayerInput
+  | ViolinLayerInput
+  | HexLayerInput
+  | FunctionLayerInput
+  | PolygonLayerInput
   | CurveLayerInput
   | MapLayerInput
   | SfLayerInput
@@ -433,7 +532,9 @@ export type LayerInput =
   | BlankLayerInput
   | SpokeLayerInput
   | RugLayerInput
-  | StepLayerInput;
+  | StepLayerInput
+  | QqLayerInput
+  | QqLineLayerInput;
 
 /** Spec accepted at the TS/builder level (superset of PortableSpec forms). */
 export interface SpecInput {

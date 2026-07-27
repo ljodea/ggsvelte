@@ -25,9 +25,13 @@ import GeomRaster from "../../src/lib/geoms/GeomRaster.svelte";
 import GeomRect from "../../src/lib/geoms/GeomRect.svelte";
 import GeomRule from "../../src/lib/geoms/GeomRule.svelte";
 import GeomSegment from "../../src/lib/geoms/GeomSegment.svelte";
+import GeomViolin from "../../src/lib/geoms/GeomViolin.svelte";
+import GeomFunction from "../../src/lib/geoms/GeomFunction.svelte";
+import GeomPolygon from "../../src/lib/geoms/GeomPolygon.svelte";
 import GeomSmooth from "../../src/lib/geoms/GeomSmooth.svelte";
 import GeomStep from "../../src/lib/geoms/GeomStep.svelte";
 import GeomText from "../../src/lib/geoms/GeomText.svelte";
+import GeomLabel from "../../src/lib/geoms/GeomLabel.svelte";
 import GeomTile from "../../src/lib/geoms/GeomTile.svelte";
 import GeomVline from "../../src/lib/geoms/GeomVline.svelte";
 import SingleGeomPlot from "../fixtures/SingleGeomPlot.svelte";
@@ -191,6 +195,17 @@ const cases: readonly GeomCase[] = [
     markSelector: ".gg-glyphs text",
   },
   {
+    name: "GeomLabel",
+    Component: GeomLabel,
+    geom: "label",
+    data: xy,
+    aes: { x: "x", y: "y", label: "label" },
+    geomProps: { size: 12, padding: 4, radius: 2 },
+    paramKey: "padding",
+    paramValue: 4,
+    markSelector: ".gg-glyphs text",
+  },
+  {
     name: "GeomHistogram",
     Component: GeomHistogram,
     geom: "histogram",
@@ -316,6 +331,50 @@ const cases: readonly GeomCase[] = [
     paramKey: "linewidth",
     paramValue: 2,
     markSelector: ".gg-segments line",
+  },
+  {
+    name: "GeomViolin",
+    Component: GeomViolin,
+    geom: "violin",
+    data: [
+      { cat: "a", v: 1 },
+      { cat: "a", v: 2 },
+      { cat: "a", v: 3 },
+      { cat: "b", v: 4 },
+      { cat: "b", v: 5 },
+      { cat: "b", v: 6 },
+    ],
+    aes: { x: "cat", y: "v" },
+    geomProps: { alpha: 0.7, scale: "width", n: 32 },
+    paramKey: "alpha",
+    paramValue: 0.7,
+    markSelector: ".gg-areas path",
+  },
+  {
+    name: "GeomFunction",
+    Component: GeomFunction,
+    geom: "function",
+    data: [{ dummy: 0 }],
+    aes: {},
+    geomProps: { fun: "dnorm", n: 21, xlim: [-2, 2], linewidth: 2 },
+    paramKey: "fun",
+    paramValue: "dnorm",
+    markSelector: ".gg-paths path",
+  },
+  {
+    name: "GeomPolygon",
+    Component: GeomPolygon,
+    geom: "polygon",
+    data: [
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 0.5, y: 1 },
+    ],
+    aes: { x: "x", y: "y" },
+    geomProps: { alpha: 0.7, linewidth: 1.5 },
+    paramKey: "alpha",
+    paramValue: 0.7,
+    markSelector: ".gg-areas path",
   },
   {
     name: "GeomStep",
