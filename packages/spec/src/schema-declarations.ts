@@ -790,6 +790,45 @@ export const SpecDeclarations = {
   ),
 
   /** Path stroke params (no bin knobs — path never uses stat bin). */
+  StepParams: Type.Object(
+    {
+      alpha: Type.Optional(
+        Type.Number({
+          minimum: 0,
+          maximum: 1,
+          description: "Step-line opacity. Must be between 0 and 1 (inclusive). Default 1.",
+        }),
+      ),
+      linewidth: Type.Optional(
+        Type.Number({
+          exclusiveMinimum: 0,
+          description: "Stroke width in px. Must be greater than 0. Default 1.5.",
+        }),
+      ),
+      direction: Type.Optional(
+        Type.Union([Type.Literal("hv"), Type.Literal("vh"), Type.Literal("mid")], {
+          description:
+            'Step corner placement (ggplot2 geom_step): "hv" horizontal then vertical (default), "vh" vertical then horizontal, "mid" change at the midpoint between x positions.',
+        }),
+      ),
+      strokePaint: Type.Optional(
+        Type.Ref("GradientPaint", {
+          description:
+            "Within-mark gradient stroke paint (not a data scale). Requires a solid fallback.",
+        }),
+      ),
+      glow: Type.Optional(
+        Type.Ref("GlowSpec", {
+          description: "Bounded within-mark glow treatment (not theme decoration).",
+        }),
+      ),
+    },
+    {
+      additionalProperties: false,
+      description: "Styling parameters for the step geom (ggplot2 geom_step).",
+    },
+  ),
+
   PathParams: Type.Object(
     {
       alpha: Type.Optional(
@@ -2466,6 +2505,35 @@ export const SpecDeclarations = {
     },
   ),
 
+  StepLayer: Type.Object(
+    {
+      geom: Type.Literal("step", {
+        description:
+          "Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+      }),
+      stat: Type.Optional(
+        Type.Literal("identity", { description: "Step layers draw the data as-is." }),
+      ),
+      position: Type.Optional(
+        Type.Literal("identity", { description: "Step layers use identity positioning." }),
+      ),
+      render: Type.Optional(Type.Ref("RenderBackend")),
+      aes: Type.Optional(Type.Ref("Aes")),
+      data: Type.Optional(
+        Type.Ref("DataRef", {
+          description:
+            "Optional layer-local data. When omitted, the layer inherits plot-level data.",
+        }),
+      ),
+      params: Type.Optional(Type.Ref("StepParams")),
+    },
+    {
+      additionalProperties: false,
+      description:
+        "A step-line layer (ggplot2 geom_step). Requires x and y. params.direction is hv (default), vh, or mid.",
+    },
+  ),
+
   PathLayer: Type.Object(
     {
       geom: Type.Literal("path", {
@@ -3646,6 +3714,7 @@ export const SpecDeclarations = {
       Type.Ref("PointLayer"),
       Type.Ref("LineLayer"),
       Type.Ref("PathLayer"),
+      Type.Ref("StepLayer"),
       Type.Ref("ColLayer"),
       Type.Ref("BarLayer"),
       Type.Ref("HistogramLayer"),

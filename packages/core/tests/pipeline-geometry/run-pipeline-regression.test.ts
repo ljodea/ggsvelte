@@ -46,6 +46,52 @@ describe("geometry via runPipeline (regression anchors)", () => {
     expect(batchMarkCount(batch)).toBe(1);
   });
 
+  it("step layer: paths batch with curve from direction (default hv)", () => {
+    const defaultHv = runPipeline(
+      gg(
+        [
+          { x: 0, y: 0 },
+          { x: 1, y: 1 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomStep()
+        .spec(),
+      size,
+    );
+    const hvBatch = defaultHv.scene.batches[0] as PathsBatch;
+    expect(hvBatch.kind).toBe("paths");
+    expect(hvBatch.curve).toBe("step-hv");
+
+    const vh = runPipeline(
+      gg(
+        [
+          { x: 0, y: 0 },
+          { x: 1, y: 1 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomStep({ direction: "vh" })
+        .spec(),
+      size,
+    );
+    expect((vh.scene.batches[0] as PathsBatch).curve).toBe("step-vh");
+
+    const mid = runPipeline(
+      gg(
+        [
+          { x: 0, y: 0 },
+          { x: 1, y: 1 },
+        ],
+        aes({ x: "x", y: "y" }),
+      )
+        .geomStep({ direction: "mid" })
+        .spec(),
+      size,
+    );
+    expect((mid.scene.batches[0] as PathsBatch).curve).toBe("step");
+  });
+
   it("coord flip keeps mark count and remaps point into panel bounds", () => {
     const model = runPipeline(
       gg(

@@ -1,0 +1,38 @@
+{
+  "id": "96-step-cumulative",
+  "kind": "chart",
+  "prompt": "Step line of cumulative signups by day, with the value holding until the next day.",
+  "dataProfile": {
+    "fields": [
+      { "name": "day", "type": "quantitative" },
+      { "name": "signups", "type": "quantitative" }
+    ],
+    "rowCount": 5
+  },
+  "data": {
+    "main": [
+      { "day": 1, "signups": 4 },
+      { "day": 2, "signups": 9 },
+      { "day": 3, "signups": 9 },
+      { "day": 4, "signups": 17 },
+      { "day": 5, "signups": 22 }
+    ]
+  },
+  "gold": {
+    "edition": 1,
+    "data": { "name": "main" },
+    "layers": [
+      {
+        "geom": "step",
+        "stat": "identity",
+        "position": "identity",
+        "aes": {
+          "x": { "field": "day" },
+          "y": { "field": "signups" }
+        }
+      }
+    ]
+  },
+  "expectRefusal": false,
+  "notes": "geom_step default direction \"hv\": hold the value, then rise at the next x (#789)."
+}

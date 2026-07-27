@@ -837,6 +837,16 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     hasData: true,
   },
   {
+    id: "step/ecdf",
+    category: "step",
+    name: "ecdf",
+    title: "Step ECDF",
+    description: "",
+    tags: ["step", "ecdf", "line", "geom"],
+    docsSection: "Lines & time",
+    hasData: true,
+  },
+  {
     id: "text/labels",
     category: "text",
     name: "labels",
