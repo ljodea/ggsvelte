@@ -207,6 +207,52 @@ describe("geom_sf", () => {
     expect(model.candidates.hitTest(hole.px, hole.py)).toBeNull();
   });
 
+  it("under active coord transform keeps exterior only (no merged hole verts)", () => {
+    // #934 / Devin: projectPathBatch dropped ringStarts/fillRule but kept hole
+    // vertices, so exterior+hole merged into one ring (spurious chord). Until
+    // coord_sf remaps multi-ring topology, strip hole verts so only exterior
+    // survives the transform (same as pre-phase-4 exterior-only under transforms).
+    const withHole = geo({
+      type: "Polygon",
+      coordinates: [
+        [
+          [1, 1],
+          [10, 1],
+          [10, 10],
+          [1, 10],
+          [1, 1],
+        ],
+        [
+          [3, 3],
+          [7, 3],
+          [7, 7],
+          [3, 7],
+          [3, 3],
+        ],
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [withHole] }, aes({}))
+        .geomSf()
+        .scales({
+          x: { type: "linear", domain: [1, 100], expand: { mult: 0, add: 0 } },
+          y: { type: "linear", domain: [1, 100], expand: { mult: 0, add: 0 } },
+        })
+        .coordTransform({ x: { transform: "log10", expand: false } })
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PathsBatch;
+    expect(batch.kind).toBe("paths");
+    expect(batch.closed).toBe(true);
+    // Hole metadata must not remain with stale indices.
+    expect(batch.ringStarts).toBeUndefined();
+    expect(batch.fillRule).toBeUndefined();
+    // Exterior only: 4 verts (closing duplicate dropped). Not exterior+hole (8).
+    expect(batch.positions.length / 2).toBe(4);
+    expect(batch.pathOffsets.length - 1).toBe(1);
+  });
+
   it("keeps MultiPolygon parts as separate compounds when one has a hole", () => {
     const multi = geo({
       type: "MultiPolygon",
@@ -610,5 +656,11 @@ describe("geom_sf", () => {
     const batch = model.scene.batches[0] as PathsBatch;
     expect(batch.linewidth).toBe(3.5);
     expect(batch.alpha).toBe(0.25);
+  });
+  it("defaults stat to sf (ggplot2 stat_sf)", () => {
+    const spec = gg({ geometry: [polyA] }, aes({}))
+      .geomSf()
+      .spec();
+    expect(spec.layers[0]?.stat).toBe("sf");
   });
 });

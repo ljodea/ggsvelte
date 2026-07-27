@@ -3243,7 +3243,10 @@ export const SpecDeclarations = {
           "Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
       }),
       stat: Type.Optional(
-        Type.Literal("identity", { description: "SF layers expand geometry then draw as-is." }),
+        Type.Literal("sf", {
+          description:
+            "Geometry expand (ggplot2 stat_sf; #809): portable GeoJSON → drawable point/line/polygon parts.",
+        }),
       ),
       position: Type.Optional(
         Type.Literal("identity", { description: "SF layers use identity positioning." }),
@@ -3261,7 +3264,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        'An sf geometry layer. Requires a geometry column of GeoJSON Geometry JSON strings (params.geometry, default "geometry"). Coordinates must already be projected.',
+        'An sf geometry layer. Requires a geometry column of GeoJSON Geometry JSON strings (params.geometry, default "geometry"). Coordinates must already be projected. Default stat is "sf".',
     },
   ),
 

@@ -134,11 +134,14 @@ test("desktop docs shell exposes chapter, breadcrumb, contents, and sequence nav
 });
 
 test("mobile header and docs navigation are explicit, reachable controls", async ({ page }) => {
+  // Dialog open/close + viewport resize can exceed the default 30s budget under
+  // cold static-server load (repeated flake on CI journeys).
+  test.setTimeout(60_000);
   await page.setViewportSize({ width: 375, height: 760 });
-  await page.goto(GUIDE_ROUTE);
+  await page.goto(GUIDE_ROUTE, { waitUntil: "domcontentloaded" });
 
   const siteMenu = page.getByRole("button", { name: "Open site menu" });
-  await expect(siteMenu).toBeVisible();
+  await expect(siteMenu).toBeVisible({ timeout: 15_000 });
   await siteMenu.click();
   const siteDialog = page.getByRole("dialog");
   await expect(siteDialog.getByRole("navigation", { name: "Primary" })).toBeVisible();

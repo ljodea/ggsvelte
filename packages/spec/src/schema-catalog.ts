@@ -101,6 +101,7 @@ export const KNOWN_STATS = [
   "density_2d_filled",
   "bindot",
   "ellipse",
+  "sf",
   "sf_coordinates",
 ] as const;
 export type StatName = (typeof KNOWN_STATS)[number];
@@ -147,7 +148,7 @@ export const GEOM_DEFAULTS: Record<GeomName, { stat: StatName; position: Positio
   density_2d_filled: { stat: "density_2d_filled", position: "identity" },
   dotplot: { stat: "bindot", position: "identity" },
   map: { stat: "identity", position: "identity" },
-  sf: { stat: "identity", position: "identity" },
+  sf: { stat: "sf", position: "identity" },
   sf_text: { stat: "sf_coordinates", position: "identity" },
   sf_label: { stat: "sf_coordinates", position: "identity" },
   blank: { stat: "identity", position: "identity" },
