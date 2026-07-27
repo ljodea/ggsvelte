@@ -61,3 +61,36 @@ describe("scale-transform-domain rich scaleDiagnostics", () => {
     expect(matches.length).toBe(1);
   });
 });
+
+describe("scale-transform-domain multi-field rich diagnostics (#628)", () => {
+  it("keeps one rich entry per source field on the same axis (not collapsed by path dedupe)", () => {
+    const multiModel = runPipeline(
+      {
+        data: {
+          values: [
+            { a: 1, b: 2, y: 1 },
+            { a: -3, b: -7, y: 2 },
+            { a: 10, b: 20, y: 3 },
+          ],
+        },
+        layers: [
+          { geom: "point", aes: { x: { field: "a" }, y: { field: "y" } } },
+          { geom: "point", aes: { x: { field: "b" }, y: { field: "y" } } },
+        ],
+        scales: { x: { type: "linear", transform: "log10" } },
+      },
+      size,
+    );
+    const lean = multiModel.warnings.filter((w) => w.code === "scale-transform-domain");
+    const rich = multiModel.scaleDiagnostics.filter((d) => d.code === "scale-transform-domain");
+    // Lean messages include the field name; both fields must survive.
+    expect(lean.length).toBe(2);
+    expect(lean.some((w) => w.message.includes('"a"'))).toBe(true);
+    expect(lean.some((w) => w.message.includes('"b"'))).toBe(true);
+    // Rich channel must not collapse distinct fields that share path `/scales/x`.
+    expect(rich.length).toBe(2);
+    expect(rich.every((d) => d.path === "/scales/x")).toBe(true);
+    expect(rich.some((d) => d.cause.includes('"a"'))).toBe(true);
+    expect(rich.some((d) => d.cause.includes('"b"'))).toBe(true);
+  });
+});

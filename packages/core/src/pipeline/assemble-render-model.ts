@@ -18,7 +18,6 @@ import {
   dedupeRenderModelDiagnostics,
   freezeRenderModelDomains,
 } from "./assemble-render-model-domains.js";
-import { dedupeScaleDiagnostics } from "./diagnostics-emit.js";
 import {
   buildRenderModelAxisFormatters,
   buildRenderModelScales,
@@ -223,11 +222,10 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
     warnings: diagnostics.warnings,
     advisories: diagnostics.advisories,
     // Training rich diagnostics are emitted with structured facts at train time
-    // (#628); assembly only dedupes and appends guide-plan materializations.
-    scaleDiagnostics: dedupeScaleDiagnostics([
-      ...input.scaleDiagnostics,
-      ...guidePlanDiagnostics(input),
-    ]),
+    // (#628). Prepare-time transform/OOB entries are one-per-field and share an
+    // axis path — do not collapse them here. Free-panel training dedupe lives
+    // on the training channel before merge (finalize-model-assemble).
+    scaleDiagnostics: [...input.scaleDiagnostics, ...guidePlanDiagnostics(input)],
     scaleDecisions: input.scaleDecisions.map((decision) => ({
       ...decision,
       domain: decision.aesthetic === "x" ? [...input.xScale.domain] : [...input.yScale.domain],
