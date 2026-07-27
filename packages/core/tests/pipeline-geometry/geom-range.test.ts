@@ -53,7 +53,7 @@ describe("range geoms geometry (#793)", () => {
         .spec(),
       size,
     );
-    const segs = model.scene.batches.filter((b) => b.kind === "segments") as SegmentsBatch[];
+    const segs = model.scene.batches.filter((b): b is SegmentsBatch => b.kind === "segments");
     expect(segs).toHaveLength(1);
     expect(segs[0]!.segments.length / 4).toBe(2);
     // Each stem is vertical (same x).
@@ -126,7 +126,7 @@ describe("range geoms geometry (#793)", () => {
         },
         aes: { x: { field: "g" }, ymin: { field: "lo" }, ymax: { field: "hi" } },
         layers: [{ geom: "linerange" }],
-      } as import("@ggsvelte/spec").PortableSpec,
+      },
       size,
     );
     const segs = model.scene.batches[0] as SegmentsBatch;

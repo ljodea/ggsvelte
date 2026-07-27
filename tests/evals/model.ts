@@ -376,7 +376,36 @@ export class MockResponder implements Responder {
       profile.fields.some((field) => field.name === name) ? name : undefined;
 
     // --- geom selection (keyword templates, most specific first) -----------
-    if (
+    if (/\bgeom[_\s]?linerange\b|\bgeom[_\s]?pointrange\b|\bgeom[_\s]?crossbar\b/.test(prompt)) {
+      // Interval family beyond errorbar (#793). Multi-geom prompts emit all
+      // named forms so corpus golds with three layers stay mock-reachable.
+      const x = fieldNamed("group") ?? fieldNamed("treatment") ?? pick.cat() ?? "x";
+      const y = fieldNamed("mid") ?? fieldNamed("value") ?? pick.quant() ?? "y";
+      const summary = /\bsummary\b|\bmean\b/.test(prompt);
+      const lo = fieldNamed("lo");
+      const hi = fieldNamed("hi");
+      // Underscore in geom_linerange is a word char, so \b linerange fails —
+      // match bare names with optional geom_ / geom prefix.
+      const named = (
+        [
+          ["linerange", /(?:geom[_\s]?)?linerange/.test(prompt)],
+          ["pointrange", /(?:geom[_\s]?)?pointrange/.test(prompt)],
+          ["crossbar", /(?:geom[_\s]?)?crossbar/.test(prompt)],
+        ] as const
+      ).filter(([, hit]) => hit);
+      for (const [geom] of named.length > 0 ? named : ([["linerange", true]] as const)) {
+        const aes: MockAes = { x: f(x) };
+        if (summary || geom !== "linerange") aes.y = f(y);
+        if (!summary && lo !== undefined && hi !== undefined) {
+          aes.ymin = f(lo);
+          aes.ymax = f(hi);
+        }
+        const layer: MockLayer = { geom, aes };
+        if (summary) layer.stat = "summary";
+        spec.layers.push(layer);
+      }
+      xField = x;
+    } else if (
       /\bq-?q\b/.test(prompt) ||
       /\bgeom[_\s]?qq(?:_line)?\b/.test(prompt) ||
       (/\bnormal\b/.test(prompt) && /\breference line\b/.test(prompt))
