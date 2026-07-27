@@ -14,16 +14,14 @@
  * Registry (v1): identity, dnorm, pnorm, linear.
  */
 
-export type FunctionRegistryName = "identity" | "dnorm" | "pnorm" | "linear";
-
-export interface FunctionArgs {
+interface FunctionArgs {
   mean?: number;
   sd?: number;
   a?: number;
   b?: number;
 }
 
-export interface FunctionParamsInput {
+interface FunctionParamsInput {
   fun?: string;
   n?: number;
   xlim?: readonly [number, number] | number[];
@@ -73,10 +71,7 @@ export function pnorm(x: number, mean = 0, sd = 1): number {
   return 0.5 * (1 + sign * erf);
 }
 
-export function resolveFunctionFn(
-  name: string,
-  args: FunctionArgs = {},
-): ((x: number) => number) | null {
+function resolveFunctionFn(name: string, args: FunctionArgs = {}): ((x: number) => number) | null {
   const mean = args.mean ?? 0;
   const sd = args.sd ?? 1;
   const a = args.a ?? 0;
