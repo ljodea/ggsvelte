@@ -67,6 +67,26 @@ describe("statBinHex (#800)", () => {
     expect(result.count[0]).toBe(1);
   });
 
+  it("drop=false emits zero-count cells across the lattice", () => {
+    const sparse = statBinHex({
+      x: Float64Array.from([0.1, 0.9]),
+      y: Float64Array.from([0.1, 0.9]),
+      groups: [0, 0],
+      params: { bins: 6, drop: true },
+    });
+    const full = statBinHex({
+      x: Float64Array.from([0.1, 0.9]),
+      y: Float64Array.from([0.1, 0.9]),
+      groups: [0, 0],
+      params: { bins: 6, drop: false },
+    });
+    expect(full.count.length).toBeGreaterThan(sparse.count.length);
+    expect([...full.count].some((c) => c === 0)).toBe(true);
+    // Occupied mass is unchanged — zeros pad the lattice only.
+    const sum = (arr: Float64Array) => [...arr].reduce((a, b) => a + b, 0);
+    expect(sum(full.count)).toBe(sum(sparse.count));
+  });
+
   it("drops non-finite coordinates", () => {
     const result = statBinHex({
       x: Float64Array.from([1, NaN, 2]),

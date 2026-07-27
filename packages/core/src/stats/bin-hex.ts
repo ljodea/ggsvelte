@@ -9,10 +9,12 @@
  * Algorithm:
  *  1. Map data → unit square using data ranges.
  *  2. Bin with pointy-top axial coords at unit size s = 1 / bins.
- *  3. Emit non-empty hex centers (mapped back to data space) + counts.
+ *  3. Emit hex centers (mapped back to data space) + counts.
  *  4. Vertex half-extents: halfWidth/halfHeight in data units for geom.
  *
- * drop defaults true (omit zero-count cells). Weights: NA → 0.
+ * drop defaults true (omit zero-count cells). When false, every lattice cell
+ * whose centre is inside the unit square (for each group) is emitted with
+ * count 0 when empty — ggplot2 stat_bin_hex(drop = FALSE). Weights: NA → 0.
  */
 import type { CellValue } from "../table.js";
 
@@ -189,6 +191,50 @@ export function statBinHex(input: BinHexStatInput): BinHexStatResult {
       w = Number.isFinite(weights[i]!) ? weights[i]! : 0;
     }
     counts.set(key, (counts.get(key) ?? 0) + w);
+  }
+
+  // drop:false — materialize the full axial lattice over the unit square so
+  // empty cells appear (counts Map only ever saw occupied keys). Bound by
+  // centres inside a one-hex pad of [0,1]² so bins cannot explode unbounded.
+  if (!drop && groupOrder.length > 0) {
+    const pad = Math.max(Math.sqrt(3) * s, 2 * s);
+    const sampleCorners: Array<readonly [number, number]> = [
+      [0, 0],
+      [1, 0],
+      [0, 1],
+      [1, 1],
+      [0.5, 0],
+      [0.5, 1],
+      [0, 0.5],
+      [1, 0.5],
+    ];
+    let minQ = Infinity;
+    let maxQ = -Infinity;
+    let minR = Infinity;
+    let maxR = -Infinity;
+    for (const [nx, ny] of sampleCorners) {
+      const axial = pixelToAxial(nx, ny, s);
+      if (axial.q < minQ) minQ = axial.q;
+      if (axial.q > maxQ) maxQ = axial.q;
+      if (axial.r < minR) minR = axial.r;
+      if (axial.r > maxR) maxR = axial.r;
+    }
+    // Expand so edge hexes whose centres sit just outside the corners still
+    // enter the candidate box before the pad filter.
+    minQ -= 2;
+    maxQ += 2;
+    minR -= 2;
+    maxR += 2;
+    for (let gs = 0; gs < groupOrder.length; gs++) {
+      for (let r = minR; r <= maxR; r++) {
+        for (let q = minQ; q <= maxQ; q++) {
+          const { x: ux, y: uy } = axialToPixel(q, r, s);
+          if (ux < -pad || ux > 1 + pad || uy < -pad || uy > 1 + pad) continue;
+          const key = hexBinKey(gs, q, r);
+          if (!counts.has(key)) counts.set(key, 0);
+        }
+      }
+    }
   }
 
   // Collect cells.
