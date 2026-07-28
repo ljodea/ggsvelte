@@ -102,7 +102,7 @@ interface PanelLayoutLabs {
   axisTitleBand: number;
 }
 
-export function flipDisplayTitles(
+function flipDisplayTitles(
   flip: boolean,
   xTitle: string,
   yTitle: string,
@@ -129,7 +129,7 @@ function flipDisplayBreaks(
   return flip ? { hBreaks: yBreaks, vBreaks: xBreaks } : { hBreaks: xBreaks, vBreaks: yBreaks };
 }
 
-export function flipDisplayFreeFlags(
+function flipDisplayFreeFlags(
   flip: boolean,
   freeX: boolean,
   freeY: boolean,

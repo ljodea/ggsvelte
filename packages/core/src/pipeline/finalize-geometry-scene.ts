@@ -10,7 +10,6 @@ import type { ThemeTokens } from "../theme.js";
 
 import { buildGeometryBatches } from "./assemble-geometry-batches.js";
 import { assembleScene } from "./assemble-scene-build.js";
-import { resolveAxisGuide } from "./guide-config.js";
 import type { PanelLayoutResult } from "./panel-layout.js";
 import type { PreparedPanels } from "./prepare-panels.js";
 import type { TrainedPipelineScales } from "./train-pipeline-scales.js";
@@ -66,8 +65,8 @@ export function finalizeGeometryAndScene(input: {
   perfMark("ggsvelte:geometry:end");
   perfMeasure("ggsvelte:geometry", "ggsvelte:geometry:start", "ggsvelte:geometry:end");
 
-  const xGuide = resolveAxisGuide("x", trained.scalesConfig, normalized.guides, theme);
-  const yGuide = resolveAxisGuide("y", trained.scalesConfig, normalized.guides, theme);
+  // Guides were resolved once in finalizePanelLayoutPass / layoutPanels and
+  // carried on panelLayout — do not call resolveAxisGuide again (#1076).
   return assembleScene({
     width: options.width,
     height: options.height,
@@ -78,8 +77,8 @@ export function finalizeGeometryAndScene(input: {
     displayScales: panelLayout.displayScales,
     hTitle: panelLayout.hTitle,
     vTitle: panelLayout.vTitle,
-    hGuide: flip ? yGuide : xGuide,
-    vGuide: flip ? xGuide : yGuide,
+    hGuide: panelLayout.guides.h,
+    vGuide: panelLayout.guides.v,
     coordProjectors,
     ...(options.measureText !== undefined && { measureText: options.measureText }),
     axisTextSize: theme.axisTextSize,

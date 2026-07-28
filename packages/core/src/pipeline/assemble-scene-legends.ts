@@ -4,25 +4,7 @@
 import type { SceneLegend } from "../scene.js";
 
 import { LEGEND_EDGE_PAD } from "./layout-helpers.js";
-
-export function containedRightLegendY(input: {
-  legends: readonly SceneLegend[];
-  panelY: number;
-  minimumY: number;
-  sceneHeight: number;
-  bottomInset: number;
-}): number {
-  const rightExtent = input.legends.reduce(
-    (extent, legend) =>
-      legend.position === "right" ? Math.max(extent, legend.y + legend.height) : extent,
-    0,
-  );
-  if (rightExtent === 0) return input.panelY;
-  return Math.max(
-    input.minimumY,
-    Math.min(input.panelY, input.sceneHeight - input.bottomInset - rightExtent),
-  );
-}
+import { containedRightLegendY } from "./legend-right-y.js";
 
 export function placeSceneLegends(input: {
   legends: readonly SceneLegend[];
