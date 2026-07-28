@@ -2,6 +2,9 @@
 /**
  * Canvas segment drawers with run-length stroke batching.
  * strokePaint/glow follow the paths batch contract (#1112).
+ *
+ * Mark-space gradients use per-segment bounds so canvas matches SVG
+ * objectBoundingBox mapping (one gradient box per <line>/<path>).
  */
 import { canvasGradientStyle, subpathBounds, type ResolvedGradientPaint } from "../mark-paint.js";
 import type { SegmentsBatch } from "../scene.js";
@@ -28,7 +31,7 @@ function traceSegment(ctx: CanvasRenderingContext2D, batch: SegmentsBatch, j: nu
 
 function segmentSolidAt(batch: SegmentsBatch, j: number, themeInk: string): string {
   const stroke = batch.strokes?.[j] ?? batch.stroke;
-  return stroke === null || stroke === undefined ? themeInk : stroke;
+  return stroke ?? themeInk;
 }
 
 function segmentBounds(
@@ -92,6 +95,9 @@ function applyGlow(ctx: CanvasRenderingContext2D, glow: SegmentsBatch["glow"]): 
  * Draw segments with Θ(runs) stroke() calls: mono batches (no per-segment
  * `strokes`) are one path; per-segment colors collapse contiguous same-color
  * runs. Optional `includes` skips primitives for focus-mask subset passes.
+ *
+ * Mark-space strokePaint forces per-segment strokes so each segment gets the
+ * same objectBoundingBox gradient mapping as SVG.
  */
 export function drawSegments(
   ctx: CanvasRenderingContext2D,
@@ -115,12 +121,15 @@ export function drawSegments(
 
   const restoreGlow = applyGlow(ctx, batch.glow);
   const paint = batch.strokePaint;
+  // Mark-space gradients need per-segment bounds (SVG objectBoundingBox parity).
+  // Panel-space ignores bounds, so the batched solid/panel path stays valid.
+  const perSegmentPaint = paint !== undefined && paint.space === "mark";
 
   const mappedStyle =
     batch.linewidths !== undefined ||
     batch.alphas !== undefined ||
     batch.linetypeIndexes !== undefined;
-  if (mappedStyle) {
+  if (mappedStyle || perSegmentPaint) {
     const baseAlpha = ctx.globalAlpha;
     for (let j = 0; j < n; j++) {
       if (includes !== undefined && !includes(j)) continue;
@@ -140,38 +149,20 @@ export function drawSegments(
     return;
   }
 
+  // Solid mono path, or panel-space paint (bounds unused for panel mapping).
   if (batch.strokes === undefined) {
-    // Mono stroke: one gradient over the union of traced segments when paint is set.
-    if (paint !== undefined) {
-      let minX = Infinity;
-      let minY = Infinity;
-      let maxX = -Infinity;
-      let maxY = -Infinity;
-      for (let j = 0; j < n; j++) {
-        if (includes !== undefined && !includes(j)) continue;
-        const b = segmentBounds(batch, j);
-        minX = Math.min(minX, b.x);
-        minY = Math.min(minY, b.y);
-        maxX = Math.max(maxX, b.x + b.width);
-        maxY = Math.max(maxY, b.y + b.height);
-      }
-      const bounds = Number.isFinite(minX)
-        ? {
-            x: minX,
-            y: minY,
-            width: Math.max(maxX - minX, 1e-6),
-            height: Math.max(maxY - minY, 1e-6),
-          }
-        : { x: 0, y: 0, width: 1, height: 1 };
+    const monoSolid = segmentSolidAt(batch, 0, themeInk);
+    if (paint) {
+      // Panel-space ignores bounds; placeholder is unused for mapping.
       ctx.strokeStyle = resolveSegmentStroke(
         ctx,
-        segmentSolidAt(batch, 0, themeInk),
+        monoSolid,
         paint,
-        bounds,
+        { x: 0, y: 0, width: 1, height: 1 },
         resolve,
       );
     } else {
-      ctx.strokeStyle = resolve(segmentSolidAt(batch, 0, themeInk));
+      ctx.strokeStyle = resolve(monoSolid);
     }
     ctx.beginPath();
     let traced = false;
@@ -196,29 +187,14 @@ export function drawSegments(
     const color = segmentSolidAt(batch, runStart, themeInk);
     let runEnd = runStart + 1;
     while (runEnd < n && segmentSolidAt(batch, runEnd, themeInk) === color) runEnd++;
-    // Gradient paint is layer-constant; solid run color still drives fallback.
-    if (paint !== undefined) {
-      let minX = Infinity;
-      let minY = Infinity;
-      let maxX = -Infinity;
-      let maxY = -Infinity;
-      for (let j = runStart; j < runEnd; j++) {
-        if (includes !== undefined && !includes(j)) continue;
-        const b = segmentBounds(batch, j);
-        minX = Math.min(minX, b.x);
-        minY = Math.min(minY, b.y);
-        maxX = Math.max(maxX, b.x + b.width);
-        maxY = Math.max(maxY, b.y + b.height);
-      }
-      const bounds = Number.isFinite(minX)
-        ? {
-            x: minX,
-            y: minY,
-            width: Math.max(maxX - minX, 1e-6),
-            height: Math.max(maxY - minY, 1e-6),
-          }
-        : { x: 0, y: 0, width: 1, height: 1 };
-      ctx.strokeStyle = resolveSegmentStroke(ctx, color, paint, bounds, resolve);
+    if (paint) {
+      ctx.strokeStyle = resolveSegmentStroke(
+        ctx,
+        color,
+        paint,
+        { x: 0, y: 0, width: 1, height: 1 },
+        resolve,
+      );
     } else {
       ctx.strokeStyle = resolve(color);
     }
