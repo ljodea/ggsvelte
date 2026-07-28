@@ -9,6 +9,7 @@
     fieldsForDefaultTooltip,
     formatTooltipCell,
     tooltipFieldLabel,
+    type TooltipAxisFormatters,
     type TooltipFieldLabs,
   } from "./display-members.js";
   import { shouldShowTooltipPinHint } from "./tooltip-chrome.js";
@@ -33,6 +34,11 @@
      * `"transparent"` so default content stays silent (#1069).
      */
     tooltipBorder = "#b8b8b8",
+    /**
+     * Scale-aware x/y formatters from the render model. Position field rows
+     * use these so stat-layer temporal values match the axis header (#1113).
+     */
+    axisFormatters = null,
   }: {
     inspection: PlotInspectionChange<Record<string, CellValue>, PropertyKey>;
     width: number;
@@ -55,6 +61,7 @@
     fontSizePx?: number;
     pin?: boolean;
     tooltipBorder?: string;
+    axisFormatters?: TooltipAxisFormatters | null;
   } = $props();
 
   const showPinHint = $derived(
@@ -119,7 +126,11 @@
   // Collapse identical field blocks for default rendering only (#385). Public
   // `inspection.members` stays full for custom content / oninspect.
   const displayMembers = $derived(
-    collapseIdenticalDisplayMembers(inspection.members, inspection.focus),
+    collapseIdenticalDisplayMembers(
+      inspection.members,
+      inspection.focus,
+      axisFormatters,
+    ),
   );
 
   const shownMembers = $derived(
@@ -165,7 +176,12 @@
             <dt>
               {tooltipFieldLabel(field.field, { channel: field.channel, labs })}
             </dt>
-            <dd>{formatTooltipCell(field.value)}</dd>
+            <dd>
+              {formatTooltipCell(field.value, {
+                channel: field.channel,
+                axisFormatters: member.row === null ? axisFormatters : null,
+              })}
+            </dd>
           {/each}
         </dl>
       {/each}

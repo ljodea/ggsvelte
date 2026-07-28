@@ -6,7 +6,10 @@ import type {
   PlotSelection,
   ReadonlyZoomDomains,
 } from "../interaction/interaction.js";
-import { collapseIdenticalDisplayMembers } from "../inspection/display-members.js";
+import {
+  collapseIdenticalDisplayMembers,
+  formatTooltipCell,
+} from "../inspection/display-members.js";
 
 /** Shared a11y count phrase: "1 datum" / "N data". */
 export function countLabel(count: number): string {
@@ -81,10 +84,14 @@ export function inspectionLiveText(
 ): string {
   // Count distinct default-tooltip payloads so line+point same-data does not
   // announce "2 data" for one observation (#385).
-  const count = collapseIdenticalDisplayMembers(value.members, value.focus).length;
+  const axisFormatters = model?.axisFormatters ?? null;
+  const count = collapseIdenticalDisplayMembers(value.members, value.focus, axisFormatters).length;
   const state = value.state === "pinned" ? ", pinned" : "";
   if (value.mode !== "x" && value.mode !== "y")
     return `${datumLabel(model, value.focus.row)}; ${countLabel(count)}${state}`;
+  // Stat focus (no source row) formats x/y with axis formatters; identity keeps
+  // precise cell values (#1113).
+  const focusFormatters = value.focus.row === null ? axisFormatters : null;
   const seen = new Set<string>();
   const focused = value.focus.fields
     .filter((field) => {
@@ -92,7 +99,13 @@ export function inspectionLiveText(
       seen.add(field.field);
       return true;
     })
-    .map((field) => `${field.field} ${String(field.value ?? "")}`)
+    .map((field) => {
+      const display = formatTooltipCell(field.value, {
+        channel: field.channel,
+        axisFormatters: focusFormatters,
+      });
+      return `${field.field} ${display}`;
+    })
     .join(", ");
   return `${value.mode} ${value.axisLabel}; ${countLabel(count)}${focused ? `; focused ${focused}` : ""}${state}`;
 }

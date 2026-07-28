@@ -10,8 +10,32 @@ import { spaceFieldName, type CellValue } from "@ggsvelte/core";
 
 import type { NonEmptyReadonlyArray, PlotDatum, TooltipField } from "../interaction/interaction.js";
 
-/** Shared with Tooltip.svelte so equality matches what the user sees. */
-export function formatTooltipCell(value: CellValue): string {
+/** Position-axis formatters from `RenderModel.axisFormatters` (scale-aware). */
+export type TooltipAxisFormatters = Readonly<{
+  x: (value: CellValue) => string;
+  y: (value: CellValue) => string;
+}>;
+
+export type FormatTooltipCellOptions = {
+  readonly channel?: string;
+  readonly axisFormatters?: TooltipAxisFormatters | null;
+};
+
+/**
+ * Shared with Tooltip.svelte so equality matches what the user sees.
+ *
+ * Position channels (`x`/`y`) route through `axisFormatters` when provided —
+ * the same path as the axis header — so stat-frame temporal values print as
+ * dates rather than raw epoch milliseconds (#1113). Callers should pass
+ * formatters only for members with no source row (`row === null`); identity
+ * rows keep the plain cell path so linear points keep full precision.
+ */
+export function formatTooltipCell(value: CellValue, options?: FormatTooltipCellOptions): string {
+  const channel = options?.channel;
+  const formatters = options?.axisFormatters;
+  if (formatters !== null && formatters !== undefined && (channel === "x" || channel === "y")) {
+    return formatters[channel](value);
+  }
   if (value === null) return "–";
   if (value instanceof Date) {
     // Invalid Date throws on toISOString — keyboard live-text tokens must not.
@@ -126,12 +150,18 @@ export function fieldsForDefaultTooltip(
  * Uses field *names* (dt text) + formatted values (dd text), not channel —
  * channels are not shown and must not split visually identical rows.
  */
-export function tooltipDisplayPayloadToken(fields: readonly TooltipField[]): string {
+export function tooltipDisplayPayloadToken(
+  fields: readonly TooltipField[],
+  axisFormatters: TooltipAxisFormatters | null = null,
+): string {
   // Length-prefix each segment so field names / values cannot forge delimiters.
   const parts: string[] = [];
   for (const field of fields) {
     const name = field.field;
-    const display = formatTooltipCell(field.value);
+    const display = formatTooltipCell(field.value, {
+      channel: field.channel,
+      axisFormatters,
+    });
     parts.push(`${name.length}:${name}|${display.length}:${display}`);
   }
   return parts.join("\n");
@@ -148,8 +178,14 @@ export function tooltipDisplayPayloadToken(fields: readonly TooltipField[]): str
 export function collapseIdenticalDisplayMembers<Row, Key>(
   members: readonly PlotDatum<Row, Key>[],
   focus: PlotDatum<Row, Key>,
+  axisFormatters: TooltipAxisFormatters | null = null,
 ): NonEmptyReadonlyArray<PlotDatum<Row, Key>> {
   if (members.length === 0) return [focus];
+
+  // Stat members (no source row) use axis formatters for position display;
+  // identity members keep precise cell formatting (#1113).
+  const formattersFor = (member: PlotDatum<Row, Key>): TooltipAxisFormatters | null =>
+    member.row === null ? axisFormatters : null;
 
   const chosen = new Map<string, PlotDatum<Row, Key>>();
   const order: string[] = [];
@@ -157,7 +193,7 @@ export function collapseIdenticalDisplayMembers<Row, Key>(
 
   for (const member of members) {
     if (member === focus) focusInMembers = true;
-    const token = tooltipDisplayPayloadToken(member.fields);
+    const token = tooltipDisplayPayloadToken(member.fields, formattersFor(member));
     const existing = chosen.get(token);
     if (existing === undefined) {
       chosen.set(token, member);
@@ -168,7 +204,7 @@ export function collapseIdenticalDisplayMembers<Row, Key>(
     if (member === focus) chosen.set(token, member);
   }
 
-  const focusToken = tooltipDisplayPayloadToken(focus.fields);
+  const focusToken = tooltipDisplayPayloadToken(focus.fields, formattersFor(focus));
   if (chosen.has(focusToken)) {
     // Same display as a retained member — always surface focus for styling.
     chosen.set(focusToken, focus);
