@@ -5,13 +5,13 @@ import { statDensity } from "../stats/density.js";
 import type { ColumnTable } from "../table.js";
 import { scaleTransform } from "../scales/transform.js";
 
-import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import { colorColumns, makeColumnOf, styleColumns } from "./frame-stats-shared.js";
+import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
+import { makeColumnOf } from "./frame-stats-shared.js";
+import { statLayerFrame } from "./layer-frame.js";
 import { transformedZeroBaseline } from "./position-baseline.js";
 import { forwardMeasureOnce } from "./stat-measure-transform.js";
 import { positionColumn } from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
-import { NO_ROW } from "./types.js";
 
 export function buildDensityFrame(
   binding: LayerBinding,
@@ -42,32 +42,28 @@ export function buildDensityFrame(
     scaled: result.scaled,
     ndensity: result.ndensity,
   };
+  const outN = result.x.length;
   const yNumeric = forwardMeasureOnce(
     columns[binding.yStatColumn ?? "density"] ?? result.density,
     binding.yTransform,
   );
-  const col = columnOf(result, null);
-  const outN = result.x.length;
-  return {
+  return statLayerFrame({
     binding,
     table,
     n: outN,
-    xValues: null,
-    xNumeric: result.x,
-    yValues: null,
-    yNumeric,
+    x: { numeric: result.x },
+    y: { numeric: yNumeric },
     groups: result.groups,
     inputGroups: groups,
-    inputSourceRows: null,
-    rowIndex: Uint32Array.from({ length: outN }, () => NO_ROW),
-    ...colorColumns(binding, col, columns),
-    ...styleColumns(binding, col, columns),
-    labelValues: col(binding.labelField),
-    ...emptyFrameExtras(),
-    // Density renders as an area from the shared transformed-origin baseline.
-    ymin: Float64Array.from({ length: outN }, () =>
-      transformedZeroBaseline(binding.yTransform?.transform ?? scaleTransform("identity")),
-    ),
-    ymax: yNumeric,
-  };
+    columns,
+    columnOf: columnOf(result, null),
+    lineage: "none",
+    extras: {
+      // Density renders as an area from the shared transformed-origin baseline.
+      ymin: Float64Array.from({ length: outN }, () =>
+        transformedZeroBaseline(binding.yTransform?.transform ?? scaleTransform("identity")),
+      ),
+      ymax: yNumeric,
+    },
+  });
 }

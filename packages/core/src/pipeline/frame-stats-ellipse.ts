@@ -4,11 +4,11 @@
 import type { ColumnTable } from "../table.js";
 
 import { statEllipse, type StatEllipseParams } from "../stats/ellipse.js";
-import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import { makeColumnOf, styleColumns } from "./frame-stats-shared.js";
+import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
+import { makeColumnOf } from "./frame-stats-shared.js";
+import { statLayerFrame } from "./layer-frame.js";
 import { positionColumn } from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
-import { NO_ROW } from "./types.js";
 
 export function buildEllipseFrame(
   binding: LayerBinding,
@@ -34,23 +34,16 @@ export function buildEllipseFrame(
       message: `Layer ${index} (ellipse): ${result.droppedGroups} group(s) with fewer than two finite points (or zero variance) have been dropped.`,
     });
   }
-  const col = columnOf(result, null);
-  return {
+  return statLayerFrame({
     binding,
     table,
     n: result.x.length,
-    xValues: null,
-    xNumeric: result.x,
-    yValues: null,
-    yNumeric: result.y,
+    x: { numeric: result.x },
+    y: { numeric: result.y },
     groups: result.groups,
     inputGroups: groups,
-    inputSourceRows: null,
-    rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
-    colorValues: col(binding.color.field),
-    fillValues: col(binding.fill.field),
-    ...styleColumns(binding, col, { x: result.x, y: result.y }),
-    labelValues: col(binding.labelField),
-    ...emptyFrameExtras(),
-  };
+    columns: { x: result.x, y: result.y },
+    columnOf: columnOf(result, null),
+    lineage: "none",
+  });
 }

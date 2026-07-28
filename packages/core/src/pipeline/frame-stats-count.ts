@@ -5,18 +5,13 @@ import { statCount } from "../stats/count.js";
 import { ColumnTable, type CellValue } from "../table.js";
 import { scaleTransform } from "../scales/transform.js";
 
-import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
+import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
 import { binIdColumn } from "./binned-scale.js";
-import {
-  colorColumns,
-  makeColumnOf,
-  shouldAggregateOnSemanticTemporalX,
-  styleColumns,
-} from "./frame-stats-shared.js";
+import { makeColumnOf, shouldAggregateOnSemanticTemporalX } from "./frame-stats-shared.js";
+import { statLayerFrame } from "./layer-frame.js";
 import { forwardMeasureOnce } from "./stat-measure-transform.js";
 import { positionColumn, positionValuesToNumeric } from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
-import { NO_ROW } from "./types.js";
 
 /**
  * Binned count: aggregate by STABLE INTEGER BIN ID (the discrete key), then
@@ -92,30 +87,35 @@ export function buildCountFrame(
         ? result.x
         : result.x.map((value) => xInverse.inverse(value as number))
       : result.x.map((id) => xInverse.inverse(centers![id as number]!));
-  const col = columnOf(result, displayX);
-  return {
+  // Count only forwards y when y is explicitly after_stat(count) — not as a default.
+  const yNumeric =
+    binding.yStatColumn === "count" ? forwardMeasureOnce(result.count, binding.yTransform) : null;
+  return statLayerFrame({
     binding,
     table,
     n: result.x.length,
-    xValues: displayX,
-    xNumeric:
-      binned === null
-        ? temporalX || transformedContinuousX !== null
-          ? Float64Array.from(result.x, (value) => (typeof value === "number" ? value : Number.NaN))
-          : positionValuesToNumeric(result.x, binding.xConversion).values
-        : Float64Array.from(result.x, (id) => centers![id as number]!),
-    yValues: null,
-    yNumeric:
-      binding.yStatColumn === "count" ? forwardMeasureOnce(result.count, binding.yTransform) : null,
+    x: {
+      values: displayX,
+      numeric:
+        binned === null
+          ? temporalX || transformedContinuousX !== null
+            ? Float64Array.from(result.x, (value) =>
+                typeof value === "number" ? value : Number.NaN,
+              )
+            : positionValuesToNumeric(result.x, binding.xConversion).values
+          : Float64Array.from(result.x, (id) => centers![id as number]!),
+    },
+    y: { numeric: yNumeric },
     groups: result.groups,
     inputGroups: groups,
-    inputSourceRows: null,
-    rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
-    ...colorColumns(binding, col, { count: result.count }),
-    ...styleColumns(binding, col, { count: result.count }),
-    labelValues: col(binding.labelField),
-    ...emptyFrameExtras(),
-    bin:
-      binned === null ? null : { xId: Int32Array.from(result.x, (id) => id as number), yId: null },
-  };
+    columns: { count: result.count },
+    columnOf: columnOf(result, displayX),
+    lineage: "none",
+    extras: {
+      bin:
+        binned === null
+          ? null
+          : { xId: Int32Array.from(result.x, (id) => id as number), yId: null },
+    },
+  });
 }

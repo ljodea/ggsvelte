@@ -4,6 +4,8 @@
  * first/last: slice identity frame (real rowIndex).
  * aggregate funs: one synthetic row per group (NO_ROW); x/y aggregated in
  * transformed numeric space; discrete aesthetics from sample row.
+ *
+ * Not yet on statLayerFrame (#1077): slices identity or builds synthetic rows.
  */
 import type { CellValue, ColumnTable } from "../table.js";
 

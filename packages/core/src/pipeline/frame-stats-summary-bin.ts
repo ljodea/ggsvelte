@@ -9,11 +9,11 @@ import type { ColumnTable } from "../table.js";
 
 import { statSummaryBin, type SummaryBinParamsInput } from "../stats/summary-bin.js";
 
-import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import { makeColumnOf, styleColumns } from "./frame-stats-shared.js";
+import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
+import { makeColumnOf } from "./frame-stats-shared.js";
+import { statLayerFrame } from "./layer-frame.js";
 import { positionColumn } from "./temporal-position.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
-import { NO_ROW } from "./types.js";
 
 export function buildSummaryBinFrame(
   binding: LayerBinding,
@@ -48,34 +48,28 @@ export function buildSummaryBinFrame(
       howToOverride: `Set params.binwidth (preferred) or params.bins on layer ${index}.`,
     });
   }
-  const col = columnOf(result, null);
-  const outN = result.x.length;
-  return {
+  return statLayerFrame({
     binding,
     table,
-    n: outN,
-    xValues: null,
-    xNumeric: result.x,
-    yValues: null,
-    yNumeric: result.y,
+    n: result.x.length,
+    x: { numeric: result.x },
+    y: { numeric: result.y },
     groups: result.groups,
     inputGroups: groups,
-    inputSourceRows: null,
-    rowIndex: Uint32Array.from({ length: outN }, () => NO_ROW),
-    colorValues: col(binding.color.field),
-    fillValues: col(binding.fill.field),
-    ...styleColumns(binding, col, {
+    columns: {
       y: result.y,
       ymin: result.ymin,
       ymax: result.ymax,
-    }),
-    labelValues: col(binding.labelField),
-    ...emptyFrameExtras(),
-    // Lineage replays the stat's own cut instead of re-deriving from edges (#905).
-    binCut: result.cut,
-    ymin: result.ymin,
-    ymax: result.ymax,
-    xmin: result.xmin,
-    xmax: result.xmax,
-  };
+    },
+    columnOf: columnOf(result, null),
+    lineage: "none",
+    extras: {
+      // Lineage replays the stat's own cut instead of re-deriving from edges (#905).
+      binCut: result.cut,
+      ymin: result.ymin,
+      ymax: result.ymax,
+      xmin: result.xmin,
+      xmax: result.xmax,
+    },
+  });
 }

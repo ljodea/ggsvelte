@@ -8,11 +8,11 @@ import type { Density2dParams } from "@ggsvelte/spec";
 import { statDensity2d } from "../stats/density-2d.js";
 import type { ColumnTable } from "../table.js";
 
-import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import { colorColumns, makeColumnOf, styleColumns } from "./frame-stats-shared.js";
+import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
+import { makeColumnOf } from "./frame-stats-shared.js";
+import { statLayerFrame } from "./layer-frame.js";
 import { positionColumn } from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
-import { NO_ROW } from "./types.js";
 
 export function buildDensity2dFrame(
   binding: LayerBinding,
@@ -68,24 +68,17 @@ export function buildDensity2dFrame(
     outGroups.push(id);
   }
 
-  const col = columnOf(result, null);
   const computed = { level: result.level, density: result.density };
-  const outN = result.x.length;
-  return {
+  return statLayerFrame({
     binding,
     table,
-    n: outN,
-    xValues: null,
-    xNumeric: result.x,
-    yValues: null,
-    yNumeric: result.y,
+    n: result.x.length,
+    x: { numeric: result.x },
+    y: { numeric: result.y },
     groups: outGroups,
     inputGroups: groups,
-    inputSourceRows: null,
-    rowIndex: Uint32Array.from({ length: outN }, () => NO_ROW),
-    ...colorColumns(binding, col, computed),
-    ...styleColumns(binding, col, computed),
-    labelValues: col(binding.labelField),
-    ...emptyFrameExtras(),
-  };
+    columns: computed,
+    columnOf: columnOf(result, null),
+    lineage: "none",
+  });
 }

@@ -4,17 +4,13 @@
 import type { ErrorbarParams } from "@ggsvelte/spec";
 
 import { statSummary } from "../stats/summary.js";
-import { ColumnTable, type CellValue } from "../table.js";
+import type { CellValue, ColumnTable } from "../table.js";
 
-import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import {
-  makeColumnOf,
-  shouldAggregateOnSemanticTemporalX,
-  styleColumns,
-} from "./frame-stats-shared.js";
+import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
+import { makeColumnOf, shouldAggregateOnSemanticTemporalX } from "./frame-stats-shared.js";
+import { statLayerFrame } from "./layer-frame.js";
 import { positionColumn, positionValuesToNumeric } from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
-import { NO_ROW } from "./types.js";
 
 export function buildSummaryFrame(
   binding: LayerBinding,
@@ -56,32 +52,30 @@ export function buildSummaryFrame(
     transformedContinuousX === null
       ? result.x
       : result.x.map((value) => binding.xTransform!.transform.inverse(value as number));
-  const col = columnOf(result, displayX);
-  return {
+  return statLayerFrame({
     binding,
     table,
     n: result.x.length,
-    xValues: displayX,
-    xNumeric:
-      temporalX || transformedContinuousX !== null
-        ? Float64Array.from(result.x, (value) => (typeof value === "number" ? value : Number.NaN))
-        : positionValuesToNumeric(result.x, binding.xConversion).values,
-    yValues: null,
-    yNumeric: result.y,
+    x: {
+      values: displayX,
+      numeric:
+        temporalX || transformedContinuousX !== null
+          ? Float64Array.from(result.x, (value) => (typeof value === "number" ? value : Number.NaN))
+          : positionValuesToNumeric(result.x, binding.xConversion).values,
+    },
+    y: { numeric: result.y },
     groups: result.groups,
     inputGroups: groups,
-    inputSourceRows: null,
-    rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
-    colorValues: col(binding.color.field),
-    fillValues: col(binding.fill.field),
-    ...styleColumns(binding, col, {
+    columns: {
       y: result.y,
       ymin: result.ymin,
       ymax: result.ymax,
-    }),
-    labelValues: col(binding.labelField),
-    ...emptyFrameExtras(),
-    ymin: result.ymin,
-    ymax: result.ymax,
-  };
+    },
+    columnOf: columnOf(result, displayX),
+    lineage: "none",
+    extras: {
+      ymin: result.ymin,
+      ymax: result.ymax,
+    },
+  });
 }
