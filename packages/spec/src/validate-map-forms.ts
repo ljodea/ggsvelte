@@ -4,32 +4,16 @@
  */
 import type { TLocalizedValidationError } from "typebox/error";
 
+import { CHANNELS } from "./schema-catalog.js";
 import { isRecord, pathSegments, type UnionMemberInfo } from "./validate-schema-walk.js";
 
 export const CHANNEL_FIX_EXAMPLE = { field: "column_name" };
 
-/** Channel names that live under aes (plot- or layer-level). */
-const AES_CHANNEL_KEYS = new Set([
-  "x",
-  "y",
-  "color",
-  "fill",
-  "size",
-  "linewidth",
-  "alpha",
-  "shape",
-  "linetype",
-  "group",
-  "label",
-  "weight",
-  "sample",
-  "ymin",
-  "ymax",
-  "xmin",
-  "xmax",
-  "xend",
-  "yend",
-]);
+/**
+ * Channel names that live under aes (plot- or layer-level).
+ * Derived from CHANNELS so path classification cannot drift behind the catalog (#1078).
+ */
+const AES_CHANNEL_KEYS = new Set<string>(CHANNELS);
 
 /** True only for the channel node itself (`…/aes/<channel>`), not nested paths. */
 export function isChannelPath(path: string): boolean {

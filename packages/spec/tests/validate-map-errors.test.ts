@@ -10,6 +10,8 @@
  */
 import { describe, expect, it } from "bun:test";
 
+import { CHANNELS } from "../src/schema-catalog.ts";
+import { isChannelPath } from "../src/validate-map-forms.ts";
 import { validate } from "../src/validate.ts";
 
 function errorsOf(input: unknown) {
@@ -115,6 +117,31 @@ describe("validate — TypeBox 1.x error mapping (Codex P2 regressions)", () => 
           e.message.includes("mixes"),
       ),
     ).toBe(true);
+  });
+
+  // #1078: AES_CHANNEL_KEYS must cover every CHANNELS entry (was 19 of 25).
+  it("isChannelPath recognizes every CHANNELS name under /aes/", () => {
+    for (const channel of CHANNELS) {
+      expect(isChannelPath(`/layers/0/aes/${channel}`), channel).toBe(true);
+      expect(isChannelPath(`/aes/${channel}`), `plot ${channel}`).toBe(true);
+    }
+    expect(isChannelPath("/layers/0/aes/z/field")).toBe(false);
+    expect(isChannelPath("/layers/0/data")).toBe(false);
+  });
+
+  it("bare-string aes.z gets the friendly channel-form message, not raw union noise", () => {
+    const errors = errorsOf({
+      layers: [
+        {
+          geom: "contour",
+          aes: { x: { field: "a" }, y: { field: "b" }, z: "height" },
+        },
+      ],
+    });
+    expect(errors.some((e) => e.code === "invalid-type" && e.path === "")).toBe(false);
+    const zErr = errors.find((e) => e.path === "/layers/0/aes/z");
+    expect(zErr?.code).toBe("invalid-channel-value");
+    expect(zErr?.message).toContain('canonical form {"field": "height"}');
   });
 
   it("field form with scale (ValueRef-only key) reports unexpected-property", () => {
