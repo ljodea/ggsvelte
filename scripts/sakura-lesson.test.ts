@@ -8,7 +8,6 @@
  * dates must sit ABOVE later ones), not against the spec that requested it.
  */
 import { renderToSVGString, runPipeline } from "@ggsvelte/core";
-import { loessFit } from "../packages/core/src/stats/loess.ts";
 import { validate } from "@ggsvelte/spec";
 import { describe, expect, it } from "bun:test";
 
@@ -19,9 +18,12 @@ import {
   quickstartAriaLabel,
   quickstartTitle,
   SAKURA_BASELINE,
+  SAKURA_BINWIDTH,
+  SAKURA_EPOCHS,
   SAKURA_FINISHED_SVELTE,
-  SAKURA_LOESS_SPAN,
   SAKURA_STEPS,
+  SAKURA_Y_BREAKS,
+  SAKURA_Y_LAB,
 } from "./quickstart.ts";
 
 const rows = kyotoSakura.map((row) => ({ ...row }));
@@ -49,12 +51,12 @@ describe("the sakura lesson folds to renderable specs", () => {
     expect(start.spec.layers).toEqual([{ geom: "point" }]);
     // Year ticks use labels: "d" from the first render so 1000 CE is not "1,000".
     expect(start.spec.scales).toEqual({ x: { type: "linear", labels: "d" } });
-    expect(start.spec.labs).toEqual({ x: "Year", y: "Peak bloom" });
+    expect(start.spec.labs).toEqual({ x: "Year", y: SAKURA_Y_LAB });
     expect(start.spec.theme).toBeUndefined();
     expect(start.key).toBeUndefined();
     expect(start.source).toBe(QUICKSTART_PAGE_SVELTE);
     expect(start.source).toContain('<ScaleXContinuous labels="d" />');
-    expect(start.source).toContain('<Labs x="Year" y="Peak bloom" />');
+    expect(start.source).toContain(`<Labs x="Year" y="${SAKURA_Y_LAB}" />`);
     const model = runPipeline(start.spec, { width: 900, height: 480 });
     expect(model.scene.batches[0]!.kind).toBe("points");
     const yearLabels = model.scene.axes.x?.ticks
@@ -105,7 +107,7 @@ describe("the sakura lesson folds to renderable specs", () => {
     expect(kinds).not.toContain("segment");
     expect(kinds).not.toContain("text");
     expect(kinds).toContain("point");
-    expect(kinds).toContain("smooth");
+    expect(kinds).toContain("line");
     expect(kinds).toContain("rect");
     expect(kinds).toContain("rule");
   });
@@ -140,12 +142,15 @@ describe("the sakura lesson folds to renderable specs", () => {
     // are written independently on purpose: the test is the thing that stops
     // the two from drifting.
     const pairs: [number, string, string][] = [
-      [0, "loess", '"method":"loess"'],
-      [0, `span={${SAKURA_LOESS_SPAN}}`, `"span":${SAKURA_LOESS_SPAN}`],
+      [0, 'stat="summary_bin"', '"stat":"summary_bin"'],
+      [0, 'fun="median"', '"fun":"median"'],
+      [0, `binwidth={${SAKURA_BINWIDTH}}`, `"binwidth":${SAKURA_BINWIDTH}`],
+      [0, 'curve="step-hv"', '"curve":"step-hv"'],
       [0, "alpha={0.5}", '"alpha":0.5'],
       [1, "reverse", '"reverse":true'],
       [1, "ScaleYDate", '"dateLabels":"%b %d"'],
       [1, "ScaleXContinuous", '"labels":"d"'],
+      [1, SAKURA_Y_BREAKS[0], `"breaks":${JSON.stringify([...SAKURA_Y_BREAKS])}`],
       [2, "x: null", '"x":null'],
       [2, 'fill: "epoch"', '"fill":{"field":"epoch"}'],
       [2, "GuideLegend", '"position":"bottom"'],
@@ -176,9 +181,10 @@ describe("the sakura lesson folds to renderable specs", () => {
       "alpha",
       "size",
       "linewidth",
-      "method",
-      "span",
-      "se",
+      "stat",
+      "fun",
+      "binwidth",
+      "curve",
       "yintercept",
       "position",
       "positionParams",
@@ -209,20 +215,15 @@ describe("gate G1 — the reversed temporal y-axis", () => {
 
   it("formats bloom days as dates, not numbers", () => {
     const ticks = yTicks(reversed.spec);
-    expect(ticks.length).toBeGreaterThan(2);
-    for (const tick of ticks) {
-      expect(tick.label).toMatch(/^[A-Z][a-z]{2} \d{2}$/);
-    }
+    expect(ticks.map((tick) => tick.label)).toEqual(["Apr 05", "Apr 15", "Apr 25"]);
   });
 
   it("puts earlier bloom above later bloom", () => {
     const ticks = yTicks(reversed.spec);
-    const march = ticks.find((tick) => tick.label.startsWith("Mar"));
-    const late = ticks.findLast((tick) => tick.label.startsWith("Apr"));
-    expect(march).toBeDefined();
-    expect(late).toBeDefined();
     // SVG y grows downward: earlier date => smaller y => higher on screen.
-    expect(march!.pos).toBeLessThan(late!.pos);
+    expect(ticks[0]!.label).toBe("Apr 05");
+    expect(ticks[2]!.label).toBe("Apr 25");
+    expect(ticks[0]!.pos).toBeLessThan(ticks[2]!.pos);
     for (let i = 1; i < ticks.length; i += 1) {
       expect(ticks[i]!.pos).toBeGreaterThan(ticks[i - 1]!.pos);
     }
@@ -232,40 +233,62 @@ describe("gate G1 — the reversed temporal y-axis", () => {
     const spec = structuredClone(reversed.spec) as { scales: { y: { reverse?: boolean } } };
     delete spec.scales.y.reverse;
     const ticks = yTicks(spec);
-    const march = ticks.find((tick) => tick.label.startsWith("Mar"));
-    const late = ticks.findLast((tick) => tick.label.startsWith("Apr"));
-    expect(march!.pos).toBeGreaterThan(late!.pos);
+    expect(ticks[0]!.label).toBe("Apr 05");
+    expect(ticks[2]!.label).toBe("Apr 25");
+    expect(ticks[0]!.pos).toBeGreaterThan(ticks[2]!.pos);
   });
 });
 
-describe("gate G4 — the loess trend", () => {
-  it("draws a fitted path, not the raw points", () => {
-    const model = runPipeline(foldSakura(1, rows).spec, { width: 900, height: 480 });
+describe("gate G4 — the binned-median step trend", () => {
+  it("draws a step path of bin medians, not a loess or the raw points", () => {
+    // foldSakura(2): trend + reversed date axis (the finished reading order).
+    const model = runPipeline(foldSakura(2, rows).spec, { width: 900, height: 360 });
     const trend = model.scene.batches.find((batch) => batch.kind === "paths");
     expect(trend).toBeDefined();
-    const vertices = Object.keys(trend!.positions).length / 2;
-    expect(vertices).toBeGreaterThan(40);
-    expect(vertices).toBeLessThan(rows.length);
+    expect(trend!.curve).toBe("step-hv");
+    const vertices = trend!.positions.length / 2;
+    // ~1200 years / 25-year bins ≈ 50 non-empty bins — far fewer than 838 points.
+    expect(vertices).toBeGreaterThan(30);
+    expect(vertices).toBeLessThan(80);
+    expect(vertices).toBeLessThan(rows.length / 5);
   });
 
   it("reads as one signal: flat for a millennium, then early", () => {
-    const fit = loessFit(
-      new Float64Array(rows.map((row) => row.year)),
-      new Float64Array(rows.map((row) => row.bloomDoy)),
-      { span: SAKURA_LOESS_SPAN, degree: 2, statistics: false },
-    );
-    expect(fit).not.toBeNull();
-    const at = (year: number): number => fit!.predict(year);
+    const model = runPipeline(foldSakura(2, rows).spec, { width: 900, height: 360 });
+    const trend = model.scene.batches.find((batch) => batch.kind === "paths");
+    expect(trend).toBeDefined();
+    // Screen y grows downward; reverse date scale puts earlier bloom higher
+    // (smaller y). Average the pre-industrial middle third vs the modern last
+    // third — a single end bin can be noisy.
+    const n = trend!.positions.length / 2;
+    const third = Math.floor(n / 3);
+    let midSum = 0;
+    let lateSum = 0;
+    for (let i = third; i < 2 * third; i += 1) midSum += trend!.positions[i * 2 + 1]!;
+    for (let i = n - third; i < n; i += 1) lateSum += trend!.positions[i * 2 + 1]!;
+    expect(lateSum / third).toBeLessThan(midSum / third);
+  });
+});
 
-    // The claim the subtitle makes: about a week earlier than the millennium.
-    expect(at(1900) - at(2026)).toBeGreaterThan(7);
+describe("gate G5 — climate epoch bands claim periods, not the record", () => {
+  it("starts after the first observation and leaves a gap between MWP and LIA", () => {
+    expect(SAKURA_EPOCHS.map((band) => [band.year, band.until])).toEqual([
+      [950, 1250],
+      [1400, 1850],
+      [1850, 2026],
+    ]);
+    // First band does not start at the first observation year.
+    expect(SAKURA_EPOCHS[0]!.year).toBeGreaterThan(812);
+    // Gap between Medieval Warm Period and Little Ice Age.
+    expect(SAKURA_EPOCHS[1]!.year).toBeGreaterThan(SAKURA_EPOCHS[0]!.until);
+  });
 
-    // And the millennium really is flat — every century from 1100 to 1850 sits
-    // within a couple of days of the pre-industrial baseline.
-    const settled: number[] = [];
-    for (let year = 1100; year <= 1850; year += 25) settled.push(at(year));
-    const spread = Math.max(...settled) - Math.min(...settled);
-    expect(spread).toBeLessThan(3);
-    expect(spread).toBeLessThan((at(1900) - at(2026)) / 2);
+  it("folds those bounds into the rect layer and the source const", () => {
+    const folded = foldSakura(3, rows);
+    const epochs = folded.spec.layers.find((layer) => layer.geom === "rect");
+    expect(epochs?.data).toEqual({ values: SAKURA_EPOCHS });
+    expect(folded.source).toContain("year: 950, until: 1250");
+    expect(folded.source).toContain("year: 1400, until: 1850");
+    expect(folded.source).not.toContain("year: 812, until: 1300");
   });
 });

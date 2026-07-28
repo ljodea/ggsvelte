@@ -7,7 +7,7 @@
 
 import type { GuidesSpec, Labs, LayerSpec, PortableSpec, Scales, ThemeName } from "@ggsvelte/spec";
 
-import { SAKURA_STEPS } from "./steps";
+import { SAKURA_STEPS, SAKURA_Y_LAB } from "./steps";
 
 const ARIA_LABEL = "Kyoto peak bloom, 812 to 2026: about a week earlier since 1850";
 
@@ -29,10 +29,10 @@ const BASE_ORDER = ["points"];
 const BASE_CHILDREN: Record<string, string> = { points: "  <GeomPoint />" };
 /** Readable defaults so the first chart does not ship camelCase axis titles or grouped year ticks. */
 const BASE_SCALES: Scales = { x: { type: "linear", labels: "d" } };
-const BASE_LABS: Labs = { x: "Year", y: "Peak bloom" };
+const BASE_LABS: Labs = { x: "Year", y: SAKURA_Y_LAB };
 const BASE_GRAMMAR: Record<string, string> = {
   scaleX: `  <ScaleXContinuous labels="d" />`,
-  labs: `  <Labs x="Year" y="Peak bloom" />`,
+  labs: `  <Labs x="Year" y="${SAKURA_Y_LAB}" />`,
 };
 const BASE_COMPONENTS = ["GeomPoint", "GGPlot", "Labs", "ScaleXContinuous"] as const;
 

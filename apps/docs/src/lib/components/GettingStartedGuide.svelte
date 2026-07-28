@@ -38,6 +38,12 @@
   const NARROW_CHART = 560;
 
   /**
+   * Target width:height for the finished chart. Default plot height is 400
+   * against a container-width plot (~1.6:1); the reference is nearer 2.5:1.
+   */
+  const CHART_ASPECT = 2.5;
+
+  /**
    * Assume narrow until the finished-chart container is measured. Starting at
    * `false` forced a wide fold on first paint, then a second 838-point fold
    * when ResizeObserver fired — on mobile that double work blocked chrome for
@@ -45,6 +51,8 @@
    * (narrow → wide) when the container is actually wide enough for callouts.
    */
   let narrowChart = $state(true);
+  /** Measured container width; drives live plot height at CHART_ASPECT. */
+  let chartWidth = $state(0);
   let finishedChart = $state<HTMLElement>();
   /** Live plot component — dynamically imported when near the viewport (#972). */
   let LivePlot = $state<null | (typeof import("@ggsvelte/svelte"))["GGPlot"]>(
@@ -60,6 +68,13 @@
     LivePlot === null
       ? null
       : foldSakura(SAKURA_STEPS.length, rows, { annotations: !narrowChart }),
+  );
+
+  /** Live plot height from measured width; falls back to the static lesson size. */
+  const liveHeight = $derived(
+    chartWidth > 0
+      ? Math.max(Math.round(chartWidth / CHART_ASPECT), 160)
+      : LESSON_CHART_HEIGHT,
   );
 
   const recordNames = SAKURA_RECORDS.map((record) => record.label).join("; ");
@@ -84,7 +99,10 @@
         ? undefined
         : new ResizeObserver((entries) => {
             const width = entries[0]?.contentRect.width;
-            if (width !== undefined) narrowChart = width < NARROW_CHART;
+            if (width !== undefined) {
+              narrowChart = width < NARROW_CHART;
+              chartWidth = width;
+            }
           });
     observer?.observe(target);
 
@@ -199,6 +217,7 @@
         spec={finished.spec}
         key={finished.key}
         inspect={finished.inspect}
+        height={liveHeight}
         ariaLabel={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
       />
     {:else}
@@ -333,10 +352,10 @@
 
   /*
    * The finished chart gains a tooltip and a pinned-value rail on hydration.
-   * Reserving the space here keeps the page from moving under the reader.
+   * Height tracks the ~2.5:1 live plot; reserve a little extra for chrome.
    */
   .finished-chart {
-    min-height: 32rem;
+    min-height: 22rem;
   }
 
   .lesson-label {
