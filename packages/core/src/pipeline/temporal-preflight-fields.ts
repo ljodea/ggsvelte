@@ -148,7 +148,10 @@ export function preflightTemporalFields(input: {
           conversion.requestedTime &&
           decision.status !== "temporal" &&
           // scale_*_time: numbers = seconds since midnight; Dates = UTC clock (#831).
-          !(conversion.requestedKind === "time" && columnAcceptsTimeOfDay(layerTable, field))
+          !(conversion.requestedKind === "time" && columnAcceptsTimeOfDay(layerTable, field)) &&
+          // monthDay: numbers are instants and Dates carry their own month-day,
+          // both projected onto the reference year without a string parse.
+          !(conversion.requestedKind === "monthDay" && columnAcceptsTimeOfDay(layerTable, field))
         ) {
           const candidates =
             decision.candidates.length > 0 ? ` Candidates: ${decision.candidates.join(", ")}.` : "";
@@ -173,16 +176,17 @@ export function preflightTemporalFields(input: {
             documentationUrl: docs("temporal-parse-failed"),
           });
         }
-        // time-of-day may reduce date/datetime to clock portion; other kind
-        // mismatches still fail.
+        // Both cyclical kinds take a slice of a fuller value and drop the rest:
+        // time-of-day keeps the clock, monthDay keeps the month and day. A
+        // field parsing as date or datetime is what each expects to be handed,
+        // so it is not a mismatch. Every other disagreement still fails.
+        const reducesFullValue =
+          conversion.requestedKind === "time" || conversion.requestedKind === "monthDay";
         const kindMismatch =
           decision.kind !== null &&
           conversion.requestedKind !== undefined &&
           decision.kind !== conversion.requestedKind &&
-          !(
-            conversion.requestedKind === "time" &&
-            (decision.kind === "date" || decision.kind === "datetime")
-          );
+          !(reducesFullValue && (decision.kind === "date" || decision.kind === "datetime"));
         if (kindMismatch) {
           const message = `The ${axis} scale requests ${conversion.requestedKind} values, but field "${field}" parses as ${decision.kind}. Choose the matching date/datetime scale or parser.`;
           throw new PipelineError(
