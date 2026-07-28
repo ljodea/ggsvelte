@@ -263,6 +263,9 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     title: "Add epoch bands",
     outcome: "",
     explanation: "",
+    // inspect: false — bands are labelled decoration (#1068). A full-panel
+    // rect reports distance 0 everywhere it is painted, so without the opt-out
+    // nearest never reaches a bloom observation or the trend.
     fragment: `<GeomRect
   data={epochs}
   aes={{
@@ -271,9 +274,10 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     fill: "epoch",
   }}
   alpha={0.55}
+  inspect={false}
 />
 <GeomRule data={epochEdges} aes={{ y: null, color: { value: "#c8ccd0" } }}
-  linewidth={0.5} />
+  linewidth={0.5} inspect={false} />
 <ScaleFillManual
   domain={[${EPOCH_DOMAIN}]}
   values={[${EPOCH_VALUES}]}
@@ -296,12 +300,14 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
             fill: { field: "epoch" },
           },
           params: { alpha: 0.55 },
+          inspect: false,
         },
         epochEdges: {
           geom: "rule",
           data: { values: SAKURA_EPOCH_EDGES },
           aes: { y: null, color: { value: "#c8ccd0" } },
           params: { linewidth: 0.5 },
+          inspect: false,
         },
       },
       order: ["epochs", "epochEdges", "points", "trend"],
@@ -331,6 +337,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     data={epochEdges}
     aes={{ y: null, color: { value: "#c8ccd0" } }}
     linewidth={0.5}
+    inspect={false}
   />`,
         epochs: `  <GeomRect
     data={epochs}
@@ -344,6 +351,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       fill: "epoch",
     }}
     alpha={0.55}
+    inspect={false}
   />`,
       },
       childOrder: ["epochs", "epochEdges", "points", "trend"],

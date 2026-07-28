@@ -24,6 +24,7 @@ import {
   quickstartTitle,
   SAKURA_BASELINE,
   SAKURA_BINWIDTH,
+  SAKURA_EPOCH_EDGES,
   SAKURA_EPOCHS,
   SAKURA_FINISHED_SVELTE,
   SAKURA_STEPS,
@@ -193,6 +194,8 @@ describe("the sakura lesson folds to renderable specs", () => {
       "yintercept",
       "position",
       "positionParams",
+      // #1068 / #1065: decorative epoch bands opt out of inspection.
+      "inspect",
     ]);
     const children = SAKURA_STEPS.flatMap((step) =>
       Object.values(step.source.children ?? {}),
@@ -314,4 +317,145 @@ describe("gate G6 — finished chart panel aspect, not outer SVG aspect", () => 
       expect(aspect).toBeLessThanOrEqual(SAKURA_PANEL_ASPECT + 0.2);
     }
   });
+});
+
+/** Layer lookup by inline data values — not by geom (finished fold has two rules). */
+function layerWithValues(
+  layers: readonly { data?: { values?: unknown } | unknown }[],
+  values: unknown,
+): number {
+  return layers.findIndex((layer) => {
+    const data = layer.data;
+    return (
+      data !== undefined &&
+      typeof data === "object" &&
+      data !== null &&
+      "values" in data &&
+      data.values === values
+    );
+  });
+}
+
+/**
+ * #1068: epoch bands are labelled decoration. Without `inspect: false` a
+ * full-panel rect reports distance 0 for any pointer inside it, so nearest
+ * never reaches a bloom observation or the trend — the two things the chart
+ * is about. #1065 shipped the opt-out; this gate keeps the lesson using it.
+ */
+describe("gate G7 — epoch bands never capture inspection (#1068)", () => {
+  const size = { width: 900, height: 480 } as const;
+  const epochStep = SAKURA_STEPS[2]!;
+
+  it("opts epochs and epochEdges out of inspection in the step delta", () => {
+    expect(epochStep.id).toBe("add-epoch-bands");
+    const layers = epochStep.spec.layers as
+      | {
+          epochs?: { inspect?: false };
+          epochEdges?: { inspect?: false };
+        }
+      | undefined;
+    expect(layers?.epochs?.inspect).toBe(false);
+    expect(layers?.epochEdges?.inspect).toBe(false);
+  });
+
+  it("folds inspect: false onto both decorative layers from the step that introduces them", () => {
+    // foldSakura(3) = first three steps; step 2 is add-epoch-bands.
+    const folded = foldSakura(3, rows);
+    const epochs = folded.spec.layers[layerWithValues(folded.spec.layers, SAKURA_EPOCHS)];
+    const edges = folded.spec.layers[layerWithValues(folded.spec.layers, SAKURA_EPOCH_EDGES)];
+    expect(epochs?.geom).toBe("rect");
+    expect(edges?.geom).toBe("rule");
+    expect(epochs?.inspect).toBe(false);
+    expect(edges?.inspect).toBe(false);
+  });
+
+  it("prints inspect={false} in the fragment and the folded source the reader copies", () => {
+    // Force the source/fragment red first; the component-prop whitelist is
+    // widened only after this assertion would otherwise fail for the right reason.
+    expect(epochStep.fragment).toContain("inspect={false}");
+    const folded = foldSakura(3, rows);
+    expect(folded.source).toContain("inspect={false}");
+    // Both decorative children, not a single accidental match.
+    expect(folded.source).toMatch(/<GeomRect[\s\S]*?inspect=\{false\}/);
+    expect(folded.source).toMatch(/<GeomRule[\s\S]*?inspect=\{false\}/);
+  });
+
+  for (const annotations of [true, false] as const) {
+    const label = annotations ? "wide (with callouts)" : "narrow (annotations dropped)";
+
+    it(`keeps decorative layers out of candidates on the ${label} finished chart`, () => {
+      // GettingStartedGuide folds with { annotations: !narrowChart }; layer
+      // indexes differ (7 vs 5), so both variants must pass.
+      const folded = foldSakura(SAKURA_STEPS.length, rows, { annotations });
+      const model = runPipeline(folded.spec, size);
+      const layers = folded.spec.layers;
+
+      const epochIndex = layerWithValues(layers, SAKURA_EPOCHS);
+      const edgeIndex = layerWithValues(layers, SAKURA_EPOCH_EDGES);
+      expect(epochIndex, "epochs layer present").toBeGreaterThanOrEqual(0);
+      expect(edgeIndex, "epochEdges layer present").toBeGreaterThanOrEqual(0);
+      // Disambiguate by data, not geom: the finished fold has two rule layers
+      // (epochEdges + baseline).
+      expect(layers[epochIndex]!.geom).toBe("rect");
+      expect(layers[edgeIndex]!.geom).toBe("rule");
+
+      for (let id = 0; id < model.candidates.size; id += 1) {
+        const candidate = model.candidates.candidate(id);
+        if (candidate === null) continue;
+        expect(candidate.layerIndex).not.toBe(epochIndex);
+        expect(candidate.layerIndex).not.toBe(edgeIndex);
+      }
+    });
+
+    it(`lets nearest on an observation reach the points layer on the ${label} chart`, () => {
+      const folded = foldSakura(SAKURA_STEPS.length, rows, { annotations });
+      const model = runPipeline(folded.spec, size);
+      const layers = folded.spec.layers;
+      const pointIndex = layers.findIndex((layer) => layer.geom === "point");
+      const epochIndex = layerWithValues(layers, SAKURA_EPOCHS);
+      expect(pointIndex).toBeGreaterThanOrEqual(0);
+
+      // A late-record observation: on-mark probe must return the bloom point
+      // (year + date), not a band or edge. Off-mark exact returns null after
+      // opt-out — do not expect a substitute point at panel center.
+      let probe: { x: number; y: number; year: number; date: string } | null = null;
+      for (let id = 0; id < model.candidates.size; id += 1) {
+        const candidate = model.candidates.candidate(id);
+        if (candidate === null || candidate.layerIndex !== pointIndex) continue;
+        if (typeof candidate.xValue !== "number") continue;
+        if (candidate.xValue < 1995 || candidate.xValue > 2005) continue;
+        if (typeof candidate.yValue !== "string") continue;
+        probe = {
+          x: candidate.x,
+          y: candidate.y,
+          year: candidate.xValue,
+          date: candidate.yValue,
+        };
+        break;
+      }
+      expect(probe, "expected a point candidate near year 2000").not.toBeNull();
+
+      const hit = model.candidates.nearest(probe!.x, probe!.y, {
+        mode: "exact",
+        maxDistance: 24,
+      });
+      expect(hit).not.toBeNull();
+      expect(hit!.layerIndex).toBe(pointIndex);
+      expect(hit!.xValue).toBe(probe!.year);
+      expect(hit!.yValue).toBe(probe!.date);
+      // Band geometry columns must not leak through the winning candidate.
+      expect(hit!.xValue).not.toBe("top");
+      expect(String(hit!.yValue)).not.toMatch(/^(top|bottom|until)$/);
+
+      // Empty space used to answer as the band (distance 0). After opt-out,
+      // exact mode returns nothing off-mark — or at least never the band.
+      const empty = model.candidates.nearest(size.width / 2, size.height / 2, {
+        mode: "exact",
+        maxDistance: size.width,
+      });
+      if (empty !== null) {
+        expect(empty.layerIndex).not.toBe(epochIndex);
+      }
+    });
+  }
 });
