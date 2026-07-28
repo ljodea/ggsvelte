@@ -1,5 +1,28 @@
 # @ggsvelte/svelte
 
+## 0.14.0
+
+### Patch Changes
+
+- 28ffaf0: <!-- markdownlint-disable MD041 -->
+
+  Generate Geom* shells from the spec schema (`GEOM_PARAM_KEYS`) so param lists are no longer hand-copied. Schema param keys such as `fillPaint`, `strokePaint`, and `glow` now forward into layer params when set on the corresponding shells.
+
+- 9c22922: <!-- markdownlint-disable MD041 -->
+
+  Semantic viewport owns client→plot mapping via `locate`; surface deletes `plot-px`.
+
+  `SemanticViewport.locate(clientX, clientY, rect)` maps capture-element client coordinates into scene pixels (CSS scale, zero-size guard, no OOB clamp). `createSemanticViewport` now takes a single options object including `sceneSize`. Interaction `setInspection` takes `CandidateFacts` only — `SceneHit` / `hitFromCandidate` / `plot-px` are gone (were never public exports).
+
+  Migration: none — additive
+
+- Updated dependencies [6ca5c5d]
+- Updated dependencies [efeea7f]
+- Updated dependencies [28ffaf0]
+- Updated dependencies [9c22922]
+  - @ggsvelte/spec@0.14.0
+  - @ggsvelte/core@0.14.0
+
 ## 0.13.0
 
 ### Minor Changes

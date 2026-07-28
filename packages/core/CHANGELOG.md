@@ -1,5 +1,66 @@
 # @ggsvelte/core
 
+## 0.14.0
+
+### Minor Changes
+
+- 6ca5c5d: <!-- markdownlint-disable MD041 -->
+
+  spec/core: give the post-normalize geom a type the compiler can check (#1042)
+
+  `normalize()` rewrites five convenience geoms away — `histogram` to `bar`,
+  `freqpoly` to `line`, `jitter` to `point`, `hline` and `vline` to `rule` — so
+  only 44 of the 49 names reach the render pipeline. Its return type still named
+  all 49, which is why every per-geom switch in core needed a `default:` arm. A
+  geom missing from one of them rendered nothing, or got the wrong inspect mode,
+  in silence.
+
+  The alias rewrite is now data: `ALIAS_GEOMS` and `GEOM_ALIASES` in
+  `@ggsvelte/spec`, with `NormalizedGeomName`, `NormalizedLayerSpec` and
+  `NormalizedSpec` derived from them. `normalize()` returns `NormalizedSpec` and
+  core carries that type through binding, so the two big switches and the
+  path-projection table are exhaustive: a new geom is a compile error until every
+  one of them names it.
+
+  `PortableSpec` and the emitted JSON Schema are unchanged — `histogram` and the
+  rest are still legal input. `STAT_Y_COLUMNS` is now keyed by `StatName` and
+  total, which names the ten stats that publish no y-mappable column instead of
+  hiding them behind a `?? []`.
+
+  Also fixes a geom lookup that walked the prototype chain. A layer named after
+  an inherited `Object` property — `geom: "constructor"`, `"toString"`,
+  `"valueOf"` — lost its `stat` and `position` in `normalize()` and then failed
+  validation with a shape error instead of the `unknown-geom` did-you-mean the
+  error contract promises. Every geom name is now an own-key lookup.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#0-12-to-0-13>
+
+- 9c22922: <!-- markdownlint-disable MD041 -->
+
+  Semantic viewport owns client→plot mapping via `locate`; surface deletes `plot-px`.
+
+  `SemanticViewport.locate(clientX, clientY, rect)` maps capture-element client coordinates into scene pixels (CSS scale, zero-size guard, no OOB clamp). `createSemanticViewport` now takes a single options object including `sceneSize`. Interaction `setInspection` takes `CandidateFacts` only — `SceneHit` / `hitFromCandidate` / `plot-px` are gone (were never public exports).
+
+  Migration: none — additive
+
+### Patch Changes
+
+- efeea7f: <!-- markdownlint-disable MD041 -->
+
+  fix(core): type diagnostic codes at emit sites
+
+  PipelineWarning, Advisory, PipelineError, ScaleConfigError, and
+  ScaleDiagnostic code fields are catalog unions. Wrong codes fail at
+  compile time; the regex source scanner is retired (#1043).
+
+- 28ffaf0: <!-- markdownlint-disable MD041 -->
+
+  Generate Geom* shells from the spec schema (`GEOM_PARAM_KEYS`) so param lists are no longer hand-copied. Schema param keys such as `fillPaint`, `strokePaint`, and `glow` now forward into layer params when set on the corresponding shells.
+
+- Updated dependencies [6ca5c5d]
+- Updated dependencies [28ffaf0]
+  - @ggsvelte/spec@0.14.0
+
 ## 0.13.0
 
 ### Minor Changes
