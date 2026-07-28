@@ -75,7 +75,9 @@ function displayParts(ms: number, options: TemporalLabelFormatOptions): Temporal
   const locale = options.locale ?? "en-US";
   // date and time-of-day are wall-clock-less / fixed UTC; datetime may carry a zone.
   const configuredTimezone =
-    options.kind === "date" || options.kind === "time" ? "UTC" : (options.timezone ?? "UTC");
+    options.kind === "date" || options.kind === "time" || options.kind === "monthDay"
+      ? "UTC"
+      : (options.timezone ?? "UTC");
   const timezone =
     configuredTimezone === "Z" || configuredTimezone === "Etc/UTC" ? "UTC" : configuredTimezone;
   const d = new Date(ms);
@@ -164,7 +166,7 @@ export function compileTemporalLabelFormat(
   pattern: string,
   options: TemporalLabelFormatOptions,
 ): (ms: number) => string {
-  const error = temporalLabelConfigurationError(pattern);
+  const error = temporalLabelConfigurationError(pattern, options.kind);
   if (error !== null) throw new Error(error);
   return (ms: number) => {
     const d = displayParts(ms, options);
@@ -254,13 +256,18 @@ export function formatTemporalTickSequence(
   const full = compileTemporalLabelFormat(
     options.kind === "date"
       ? "%Y-%m-%d"
-      : options.kind === "time"
-        ? needsMilliseconds
-          ? "%H:%M:%S.%L"
-          : "%H:%M:%S"
-        : needsMilliseconds
-          ? "%Y-%m-%d %H:%M:%S.%L %Z"
-          : "%Y-%m-%d %H:%M:%S %Z",
+      : // monthDay values sit in a reference year that is an implementation
+        // detail. fullLabel is not the visible tick, so a leak here is quiet —
+        // and it reaches the guide plan.
+        options.kind === "monthDay"
+        ? "%b %e"
+        : options.kind === "time"
+          ? needsMilliseconds
+            ? "%H:%M:%S.%L"
+            : "%H:%M:%S"
+          : needsMilliseconds
+            ? "%Y-%m-%d %H:%M:%S.%L %Z"
+            : "%Y-%m-%d %H:%M:%S %Z",
     options,
   );
   if (options.pattern !== undefined) {
@@ -288,9 +295,16 @@ export function formatTemporalTickSequence(
     let label: string;
     switch (options.interval.unit) {
       case "year":
-        // time-of-day (#831) lives on 1970-01-01Z — never emit a calendar year.
+        // Neither cyclical kind has a year to show: time-of-day (#831) lives on
+        // 1970-01-01Z and monthDay on the reference year. A year interval still
+        // reaches here — it is the fallback when an author gives fewer than two
+        // explicit breaks — so it has to answer with something truthful.
         label =
-          options.kind === "time" ? `${pad2(part.hour)}:${pad2(part.minute)}` : String(part.year);
+          options.kind === "time"
+            ? `${pad2(part.hour)}:${pad2(part.minute)}`
+            : options.kind === "monthDay"
+              ? `${part.monthShort} ${String(part.day)}`
+              : String(part.year);
         break;
       case "quarter": {
         if (options.kind === "time") {

@@ -111,7 +111,15 @@ export function makeAxisFormatter(
     if (scale.type !== "time") return undefined;
     const kind = resolvedTemporalKind ?? config?.temporalKind ?? "datetime";
     const defaultPattern =
-      kind === "date" ? "%Y-%m-%d" : kind === "time" ? "%H:%M:%S" : "%Y-%m-%d %H:%M:%S %Z";
+      kind === "date"
+        ? "%Y-%m-%d"
+        : kind === "time"
+          ? "%H:%M:%S"
+          : // The crosshair and tooltip header read through here, so this is
+            // where a month-day axis says "Apr 1" rather than a stamped date.
+            kind === "monthDay"
+            ? "%b %e"
+            : "%Y-%m-%d %H:%M:%S %Z";
     const format = compileTemporalLabelFormat(defaultPattern, {
       kind,
       locale: config?.locale ?? "en-US",

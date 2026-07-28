@@ -5,6 +5,8 @@
 
 import Type, { type Static, type TLiteral } from "typebox";
 
+import type { TemporalScaleKind } from "./temporal-parse-core.js";
+
 export const TEMPORAL_INTERVAL_UNITS = [
   "millisecond",
   "second",
@@ -126,7 +128,19 @@ export const TemporalLabelSpecSchema = Type.String({
     "Strict temporal label format. Supported tokens: %Y %y %m %b %B %d %e %a %A %H %I %M %S %L %p %q %z %Z %%.",
 });
 
-export function temporalLabelConfigurationError(pattern: string): string | null {
+/**
+ * Tokens a month-day axis can fill truthfully: those the month and the day
+ * determine. A year is absent by construction; the clock and zone would print
+ * the same midnight-UTC zeros for every tick; and the weekday belongs to the
+ * reference year, not to the observation — 1 April fell on different weekdays
+ * in 812 and 2001, so printing one would invent a fact.
+ */
+const MONTH_DAY_LABEL_TOKENS = new Set(["m", "b", "B", "d", "e", "q", "%"]);
+
+export function temporalLabelConfigurationError(
+  pattern: string,
+  kind?: TemporalScaleKind,
+): string | null {
   if (pattern.length === 0 || pattern.length > 128) {
     return "dateLabels must contain 1 through 128 characters";
   }
@@ -135,6 +149,9 @@ export function temporalLabelConfigurationError(pattern: string): string | null 
     const token = pattern[++index];
     if (token === undefined || !LABEL_TOKEN_SET.has(token)) {
       return `unsupported dateLabels token %${token ?? ""}`;
+    }
+    if (kind === "monthDay" && !MONTH_DAY_LABEL_TOKENS.has(token)) {
+      return `dateLabels token %${token} has no meaning on a monthDay axis, which knows only a month and a day; use one of %m %b %B %d %e %q`;
     }
   }
   return null;

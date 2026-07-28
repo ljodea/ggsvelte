@@ -184,3 +184,56 @@ describe("temporal label formatting", () => {
     ).toThrow(/%Q/);
   });
 });
+
+describe("month-day labels", () => {
+  const REF = 2000;
+  const options = { kind: "monthDay", locale: "en-US", timezone: "UTC" } as const;
+  const day = { unit: "day", step: 1, key: "1 day" } as const;
+
+  it("names the day without a year", () => {
+    const labels = formatTemporalTickSequence(
+      [Date.UTC(REF, 3, 5), Date.UTC(REF, 3, 15), Date.UTC(REF, 3, 25)],
+      { ...options, interval: day },
+    );
+    expect(labels.map((label) => label.label)).toEqual(["Apr 5", "Apr 15", "Apr 25"]);
+  });
+
+  it("keeps the year out of the full label too", () => {
+    // fullLabel is not the visible tick, so a leak here is easy to miss — it
+    // reaches the guide plan and anything reading it. The datetime default
+    // would render "2000-04-05 00:00:00 UTC", exposing the reference year the
+    // whole kind exists to hide.
+    const [label] = formatTemporalTickSequence([Date.UTC(REF, 3, 5)], {
+      ...options,
+      interval: day,
+    });
+    expect(label!.fullLabel).not.toContain("2000");
+    expect(label!.fullLabel).toBe("Apr 5");
+  });
+
+  it("never emits a bare year, whatever interval it is handed", () => {
+    // A year interval is the fallback when an author gives fewer than two
+    // explicit breaks, so it is reachable without anyone asking for it.
+    for (const unit of ["year", "quarter", "month", "week", "day"] as const) {
+      const [label] = formatTemporalTickSequence([Date.UTC(REF, 3, 5)], {
+        ...options,
+        interval: { unit, step: 1, key: `1 ${unit}` },
+      });
+      expect(label!.label, unit).not.toBe(String(REF));
+      expect(label!.label, unit).not.toContain("2000");
+    }
+  });
+
+  it("still names the month and the quarter, which stand alone without a year", () => {
+    const month = formatTemporalTickSequence([Date.UTC(REF, 3, 1)], {
+      ...options,
+      interval: { unit: "month", step: 1, key: "1 month" },
+    });
+    expect(month[0]!.label).toBe("Apr");
+    const quarter = formatTemporalTickSequence([Date.UTC(REF, 3, 1)], {
+      ...options,
+      interval: { unit: "quarter", step: 1, key: "1 quarter" },
+    });
+    expect(quarter[0]!.label).toBe("Q2");
+  });
+});

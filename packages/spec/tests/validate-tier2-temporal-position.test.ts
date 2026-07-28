@@ -51,6 +51,19 @@ describe("tier 2 — temporal position scale data checks", () => {
       ).toBe(true);
     });
 
+    it("refuses a label format it cannot fill honestly", () => {
+      const withLabels = (dateLabels: string) =>
+        validate(
+          { ...blooms, scales: { y: { type: "time", temporalKind: "monthDay", dateLabels } } },
+          {},
+        );
+      expect(withLabels("%b %e").ok).toBe(true);
+      for (const pattern of ["%Y-%m-%d", "%b %e %Y", "%H:%M", "%a %e %b"]) {
+        const result = withLabels(pattern);
+        expect(result.ok, pattern).toBe(false);
+      }
+    });
+
     it("is a position kind only — colour has no use for it", () => {
       const result = validate(
         {

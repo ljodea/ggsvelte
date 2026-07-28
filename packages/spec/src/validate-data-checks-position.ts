@@ -101,7 +101,7 @@ export function validateTemporalAxisConfiguration(scales: Record<string, unknown
       }
     }
     if (configurationError === null && config?.dateLabels !== undefined) {
-      configurationError = temporalLabelConfigurationError(config.dateLabels);
+      configurationError = temporalLabelConfigurationError(config.dateLabels, config.temporalKind);
     }
     if (configurationError === null && config?.locale !== undefined) {
       configurationError = temporalLocaleConfigurationError(config.locale);

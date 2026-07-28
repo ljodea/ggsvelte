@@ -41,7 +41,7 @@ function preflightTemporalLabels(spec: PortableSpec): void {
   for (const axis of ["x", "y"] as const) {
     const dateLabels = spec.scales?.[axis]?.dateLabels;
     if (typeof dateLabels !== "string") continue;
-    const error = temporalLabelConfigurationError(dateLabels);
+    const error = temporalLabelConfigurationError(dateLabels, spec.scales?.[axis]?.temporalKind);
     if (error === null) continue;
     const path = `/scales/${axis}/dateLabels`;
     throw new PipelineError("invalid-temporal-labels", path, error, {

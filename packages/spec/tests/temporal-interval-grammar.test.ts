@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from "bun:test";
 
-import { parseTemporalInterval } from "../src/index.ts";
+import { parseTemporalInterval, temporalLabelConfigurationError } from "../src/index.ts";
 
 describe("temporal interval grammar", () => {
   it("canonicalizes positive integer calendar intervals", () => {
@@ -47,5 +47,44 @@ describe("temporal interval grammar", () => {
     ]) {
       expect(() => parseTemporalInterval(value), value).toThrow();
     }
+  });
+});
+
+describe("month-day label tokens", () => {
+  // The rule: a token is legal on a month-day axis if and only if the month and
+  // the day determine it. Everything else would be reporting the reference
+  // year's properties as though they belonged to the data.
+  it("accepts the tokens month and day actually determine", () => {
+    for (const pattern of ["%b %e", "%B %d", "%m-%d", "Q%q", "%b %e (%%)"]) {
+      expect(temporalLabelConfigurationError(pattern, "monthDay"), pattern).toBeNull();
+    }
+  });
+
+  it("rejects year tokens, because there is no year to show", () => {
+    for (const pattern of ["%Y-%m-%d", "%b %e %Y", "%y"]) {
+      expect(temporalLabelConfigurationError(pattern, "monthDay"), pattern).toContain("monthDay");
+    }
+  });
+
+  it("rejects clock and zone tokens, which would all print the same zero", () => {
+    for (const pattern of ["%H:%M", "%I %p", "%S", "%L", "%z", "%Z"]) {
+      expect(temporalLabelConfigurationError(pattern, "monthDay"), pattern).not.toBeNull();
+    }
+  });
+
+  it("rejects weekday tokens, which describe the reference year and not the data", () => {
+    // 1 April fell on a different weekday in 812 than in 2001. Printing one
+    // would be inventing a fact.
+    for (const pattern of ["%a %e %b", "%A"]) {
+      expect(temporalLabelConfigurationError(pattern, "monthDay"), pattern).not.toBeNull();
+    }
+  });
+
+  it("leaves every other kind alone", () => {
+    expect(temporalLabelConfigurationError("%Y-%m-%d", "date")).toBeNull();
+    expect(temporalLabelConfigurationError("%H:%M:%S", "time")).toBeNull();
+    expect(temporalLabelConfigurationError("%Y-%m-%d %H:%M %Z", "datetime")).toBeNull();
+    // Omitting the kind stays permissive, so existing callers do not change.
+    expect(temporalLabelConfigurationError("%Y-%m-%d")).toBeNull();
   });
 });

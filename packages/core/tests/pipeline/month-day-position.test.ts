@@ -15,6 +15,7 @@ import { MONTH_DAY_REFERENCE_YEAR, aes, gg, scaleXMonthDay, scaleYMonthDay } fro
 
 import { ColumnTable } from "../../src/table.ts";
 import { runPipeline } from "../../src/pipeline.ts";
+import { axisGuideFor } from "../pipeline-temporal/fixtures.ts";
 import {
   positionColumn,
   positionConversionContext,
@@ -158,6 +159,33 @@ describe("month-day full pipeline", () => {
     expect(yPixels(binned)).toHaveLength(blooms.length);
     for (const [index, y] of yPixels(binned).entries()) {
       expect(y).toBeCloseTo(yPixels(raw)[index]!, 6);
+    }
+  });
+});
+
+describe("month-day labels through the pipeline", () => {
+  const model = runPipeline(
+    gg(blooms, aes({ x: "year", y: "bloom" }))
+      .geomPoint()
+      .scales(scaleYMonthDay({ reverse: true, domain: ["03-18", "05-10"] }))
+      .spec(),
+    size,
+  );
+
+  it("reads back a calendar day, which is the point of the kind", () => {
+    // This is what the crosshair and the tooltip header show. Before the kind
+    // existed it would have read "2000-04-01 00:00:00 UTC" — the reference
+    // year, in the one place a reader was guaranteed to see it.
+    expect(model.axisFormatters.y(Date.UTC(REF, 3, 1))).toBe("Apr 1");
+  });
+
+  it("puts no year on any axis tick, visible label or full", () => {
+    const guide = axisGuideFor(model.guidePlans, "y");
+    expect(guide).toBeDefined();
+    expect(guide?.ticks.length).toBeGreaterThan(0);
+    for (const tick of guide?.ticks ?? []) {
+      expect(tick.label).not.toContain(String(REF));
+      expect(tick.fullLabel).not.toContain(String(REF));
     }
   });
 });
