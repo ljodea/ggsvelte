@@ -68,9 +68,6 @@ export interface PanelLayoutResult {
   stripBand: number;
 }
 
-/** Public name for the layout-owned result (#1076). */
-export type PanelLayout = PanelLayoutResult;
-
 export type DisplayScalesFn = (p: number) => { h: PositionScale; v: PositionScale };
 export type DisplayTemporalFn = (p: number) => {
   h?: TemporalLayoutDomainContext;

@@ -6,8 +6,6 @@ import type { SceneLegend } from "../scene.js";
 import { LEGEND_EDGE_PAD } from "./layout-helpers.js";
 import { containedRightLegendY } from "./legend-right-y.js";
 
-export { containedRightLegendY } from "./legend-right-y.js";
-
 export function placeSceneLegends(input: {
   legends: readonly SceneLegend[];
   legendWidth: number;

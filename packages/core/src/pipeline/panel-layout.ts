@@ -30,12 +30,7 @@ import { buildPanelPlacements } from "./panel-layout-placements.js";
 import type { FacetScaleFreedom, PanelLayoutResult, PanelPlacement } from "./panel-layout-types.js";
 import { PipelineError, type LayerFrame, type PipelineWarning, type RunOptions } from "./types.js";
 
-export type {
-  FacetScaleFreedom,
-  PanelLayout,
-  PanelLayoutResult,
-  PanelPlacement,
-} from "./panel-layout-types.js";
+export type { FacetScaleFreedom, PanelLayoutResult, PanelPlacement } from "./panel-layout-types.js";
 
 /** Input to the panel-layout owner. Freedom is one value, not freeX/freeY per hop. */
 export interface PanelLayoutInput {

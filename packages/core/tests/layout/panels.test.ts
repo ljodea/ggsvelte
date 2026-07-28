@@ -8,8 +8,13 @@ import { describe, expect, it, spyOn } from "bun:test";
 import { aes, gg } from "@ggsvelte/spec";
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import { layoutPanels } from "../../src/layout/panels.ts";
-import type { PanelLayoutInput } from "../../src/layout/panels.ts";
+import {
+  layoutPanels,
+  type FacetScaleFreedom,
+  type PanelLayout,
+  type PanelLayoutInput,
+  type PanelPlacement,
+} from "../../src/layout/panels.ts";
 import * as guideConfig from "../../src/pipeline/guide-config.ts";
 import type { AxisGuideAppearance } from "../../src/pipeline/guide-config.ts";
 import { runPipeline } from "../../src/pipeline.ts";
@@ -66,10 +71,12 @@ function baseInput(over: Partial<PanelLayoutInput> = {}): PanelLayoutInput {
 
 describe("layoutPanels", () => {
   it("is callable with a hand-built input (no runPipeline, no scene)", () => {
-    const result = layoutPanels(baseInput());
+    const freedom: FacetScaleFreedom = { freeX: false, freeY: false };
+    const result: PanelLayout = layoutPanels(baseInput({ freedom }));
+    const panel: PanelPlacement = result.placements[0]!;
     expect(result.placements).toHaveLength(1);
-    expect(result.placements[0]!.width).toBeGreaterThan(200);
-    expect(result.placements[0]!.height).toBeGreaterThan(150);
+    expect(panel.width).toBeGreaterThan(200);
+    expect(panel.height).toBeGreaterThan(150);
     expect(result.guides.h.visible).toBe(true);
     expect(result.guides.v.visible).toBe(true);
     expect(result.hTitle).toBe("X");

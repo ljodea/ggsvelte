@@ -1,6 +1,7 @@
 /**
- * Temporal axis guide planning and stable re-exports for guide plan types,
- * basic (non-temporal) axis assembly, and temporal interval planning.
+ * Temporal axis guide planning and stable re-exports for guide plan types
+ * and temporal interval planning. Non-temporal axis assembly lives in
+ * `basic-axis.ts` (import `planBasicAxis` from there).
  *
  * Guide plan type contracts live in `guide-plan-types.ts`.
  */
@@ -34,7 +35,6 @@ export type {
 } from "./guide-plan-types.js";
 
 export type { TemporalAxisPlanInput } from "./temporal-axis-types.js";
-export { planBasicAxis } from "./basic-axis.js";
 
 export class TemporalGuideIntervalError extends Error {
   override readonly cause: TemporalIntervalError;
