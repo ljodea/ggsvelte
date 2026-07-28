@@ -15,12 +15,14 @@
  * Implementation:
  *  - builder-data.ts — Date snapshot / portable ISO materialization
  *  - builder-options.ts — Geom*Options types
- *  - builder-core.ts — state, geom/facet/coord/labs/theme/spec
- *  - builder-scales.ts — scaleX/Y/Color/Fill sugar mixin
+ *  - builder-core.ts — state, layer/facet/coord/labs/theme/spec
+ *  - builder-geoms.ts — geom* sugar mixin (generated from KNOWN_GEOMS)
+ *  - builder-scales.ts — scaleX/Y/Color/Fill sugar mixin (generated)
  */
 import type { AesInput } from "./normalize.js";
 import { toAuthoringDataRef, type DataInput } from "./builder-data.js";
 import { GGBuilderCore } from "./builder-core.js";
+import { WithBuilderGeoms } from "./builder-geoms.js";
 import { WithBuilderScales } from "./builder-scales.js";
 
 export type {
@@ -92,7 +94,7 @@ export function aes(mapping: AesInput): AesInput {
 }
 
 /** Immutable plot builder. Construct with gg(); finish with .spec(). */
-export class GGBuilder extends WithBuilderScales(GGBuilderCore) {}
+export class GGBuilder extends WithBuilderScales(WithBuilderGeoms(GGBuilderCore)) {}
 
 /** Start a plot: gg(data, aes({ x: 'displ', y: 'hwy' })).geomPoint().spec(). */
 export function gg(data?: DataInput, mapping?: AesInput): GGBuilder {
