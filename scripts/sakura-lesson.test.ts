@@ -331,7 +331,7 @@ describe("gate G8 — annotations that do not fight the chart", () => {
     expect(domainTop <= nameDate, `domain top ${domainTop} must clear name ${nameDate}`).toBe(true);
 
     // Rendered: epoch name screen-y is above (strictly smaller than) band rect top.
-    const svg = renderToSVGString(folded, { width: 900, height: 480 });
+    const svg = renderToSVGString(finishedSpec(), { width: 900, height: 480 });
     const labelY = Number(
       svg.match(/<text[^>]*\by="([\d.]+)"[^>]*>Medieval warm period<\/text>/)?.[1],
     );
