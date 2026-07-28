@@ -151,7 +151,7 @@ export function fieldsForDefaultTooltip(
  */
 export function tooltipDisplayPayloadToken(
   fields: readonly TooltipField[],
-  axisFormatters?: TooltipAxisFormatters | null,
+  axisFormatters: TooltipAxisFormatters | null = null,
 ): string {
   // Length-prefix each segment so field names / values cannot forge delimiters.
   const parts: string[] = [];
@@ -177,7 +177,7 @@ export function tooltipDisplayPayloadToken(
 export function collapseIdenticalDisplayMembers<Row, Key>(
   members: readonly PlotDatum<Row, Key>[],
   focus: PlotDatum<Row, Key>,
-  axisFormatters?: TooltipAxisFormatters | null,
+  axisFormatters: TooltipAxisFormatters | null = null,
 ): NonEmptyReadonlyArray<PlotDatum<Row, Key>> {
   if (members.length === 0) return [focus];
 
