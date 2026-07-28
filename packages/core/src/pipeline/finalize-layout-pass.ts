@@ -8,7 +8,7 @@ import type { ThemeTokens } from "../theme.js";
 
 import { TemporalGuideIntervalError } from "../layout/temporal-guide.js";
 import { prepareLegendInputs, resolveAxisGuide } from "./guide-config.js";
-import { computePanelLayout } from "./panel-layout.js";
+import { layoutPanels } from "./panel-layout.js";
 import type { PanelLayoutResult } from "./panel-layout.js";
 import type { PreparedPanels } from "./prepare-panels.js";
 import type { TrainedPipelineScales } from "./train-pipeline-scales.js";
@@ -105,11 +105,10 @@ export function finalizePanelLayoutPass(input: {
   perfMark("ggsvelte:layout:start");
   let panelLayout: PanelLayoutResult;
   try {
-    panelLayout = computePanelLayout({
+    panelLayout = layoutPanels({
       flip,
       faceted,
-      freeX,
-      freeY,
+      freedom: { freeX, freeY },
       ...((normalized.coord?.type === "fixed" || normalized.coord?.type === "sf") && {
         coordFixed: normalized.coord,
       }),

@@ -1,12 +1,14 @@
 /**
  * Two-pass panel layout: facet grids and single-panel plots, including
  * axis-title/legend chrome and free-scale edge axes.
+ *
+ * Public entry: `layoutPanels` (also re-exported from `layout/panels.ts`).
+ * Owns placement, chrome, and the resolved axis guides for the run so scene
+ * assembly does not re-resolve them (ADR-0003 two-pass layout stands).
  */
 import type { PortableSpec, TemporalKind } from "@ggsvelte/spec";
 
-import type { FixedAspectCoordSpec } from "./panel-layout-fixed.js";
-import { planBasicAxis } from "../layout/temporal-guide.js";
-
+import { planBasicAxis } from "../layout/basic-axis.js";
 import {
   assertLegendBlockFitsPlacedArea,
   LegendLayoutError,
@@ -19,22 +21,57 @@ import type { ThemeTokens } from "../theme.js";
 import type { FacetPanelDef, FacetStripConfig } from "./facets.js";
 import { DEFAULT_FACET_STRIP } from "./facets.js";
 import { measureFacetStripBand } from "./facets-strip.js";
-import { LEGEND_EDGE_PAD } from "./layout-helpers.js";
 import type { AxisGuideAppearance } from "./guide-config.js";
+import { LEGEND_EDGE_PAD } from "./layout-helpers.js";
+import { containedRightLegendY } from "./legend-right-y.js";
 import { resolvePanelLayoutChrome, type PanelLayoutChrome } from "./panel-layout-chrome.js";
-import { containedRightLegendY } from "./assemble-scene-legends.js";
-import { applyFixedAspectLayout } from "./panel-layout-fixed.js";
+import { applyFixedAspectLayout, type FixedAspectCoordSpec } from "./panel-layout-fixed.js";
 import { buildPanelPlacements } from "./panel-layout-placements.js";
-import type { PanelLayoutResult, PanelPlacement } from "./panel-layout-types.js";
+import type { FacetScaleFreedom, PanelLayoutResult, PanelPlacement } from "./panel-layout-types.js";
 import { PipelineError, type LayerFrame, type PipelineWarning, type RunOptions } from "./types.js";
 
-export type { PanelPlacement, PanelLayoutResult } from "./panel-layout-types.js";
+export type {
+  FacetScaleFreedom,
+  PanelLayout,
+  PanelLayoutResult,
+  PanelPlacement,
+} from "./panel-layout-types.js";
+
+/** Input to the panel-layout owner. Freedom is one value, not freeX/freeY per hop. */
+export interface PanelLayoutInput {
+  flip: boolean;
+  faceted: boolean;
+  freedom: FacetScaleFreedom;
+  coordFixed?: FixedAspectCoordSpec | undefined;
+  nrow: number;
+  ncol: number;
+  facetPanels: readonly FacetPanelDef[];
+  strip?: FacetStripConfig;
+  panelScales: readonly { x: PositionScale; y: PositionScale }[];
+  allFrames: readonly LayerFrame[];
+  hGuide: AxisGuideAppearance;
+  vGuide: AxisGuideAppearance;
+  labs: NonNullable<PortableSpec["labs"]>;
+  scalesConfig: NonNullable<PortableSpec["scales"]>;
+  xScale: PositionScale;
+  yScale: PositionScale;
+  xTemporalKind: TemporalKind | null;
+  yTemporalKind: TemporalKind | null;
+  legendInputs: readonly LegendInput[];
+  legendOrder: LegendOrder;
+  theme: ThemeTokens;
+  layoutAxisTitleSize: number;
+  layoutAxisTextSize: number;
+  options: Pick<RunOptions, "width" | "height" | "measureText">;
+  warnings: PipelineWarning[];
+}
 
 function panelLayoutResultFromChrome(
   chrome: PanelLayoutChrome,
   placements: PanelPlacement[],
   strip: import("./facets-types.js").FacetStripConfig,
   stripBand: number,
+  guides: { readonly h: AxisGuideAppearance; readonly v: AxisGuideAppearance },
   degraded = false,
 ): PanelLayoutResult {
   const guidePlans = placements.flatMap((placement, panelIndex) => {
@@ -81,6 +118,10 @@ function panelLayoutResultFromChrome(
     bottomBand: chrome.bottomBand,
     formatX: chrome.formatX,
     formatY: chrome.formatY,
+    formatters: { h: chrome.formatH, v: chrome.formatV },
+    freeH: chrome.freeH,
+    freeV: chrome.freeV,
+    guides,
     displayScales: chrome.displayScales,
     legendBlock: chrome.legendBlock,
     guidePlans: Object.freeze(guidePlans),
@@ -90,38 +131,36 @@ function panelLayoutResultFromChrome(
   };
 }
 
-export function computePanelLayout(input: {
-  flip: boolean;
-  faceted: boolean;
-  freeX: boolean;
-  freeY: boolean;
-  coordFixed?: FixedAspectCoordSpec | undefined;
-  nrow: number;
-  ncol: number;
-  facetPanels: readonly FacetPanelDef[];
-  strip?: FacetStripConfig;
-  panelScales: readonly { x: PositionScale; y: PositionScale }[];
-  allFrames: readonly LayerFrame[];
-  hGuide: AxisGuideAppearance;
-  vGuide: AxisGuideAppearance;
-  labs: NonNullable<PortableSpec["labs"]>;
-  scalesConfig: NonNullable<PortableSpec["scales"]>;
-  xScale: PositionScale;
-  yScale: PositionScale;
-  xTemporalKind: TemporalKind | null;
-  yTemporalKind: TemporalKind | null;
-  legendInputs: readonly LegendInput[];
-  legendOrder: LegendOrder;
-  theme: ThemeTokens;
-  layoutAxisTitleSize: number;
-  layoutAxisTextSize: number;
-  options: Pick<RunOptions, "width" | "height" | "measureText">;
-  warnings: PipelineWarning[];
-}): PanelLayoutResult {
-  const { faceted, nrow, ncol, facetPanels, options } = input;
+/**
+ * Panel placement, chrome, and resolved axis guides.
+ * Owns the two-pass layout (ADR-0003) end to end for this plot run.
+ */
+export function layoutPanels(input: PanelLayoutInput): PanelLayoutResult {
+  const { faceted, nrow, ncol, facetPanels, options, freedom } = input;
   const strip = input.strip ?? DEFAULT_FACET_STRIP;
+  const freeX = freedom.freeX;
+  const freeY = freedom.freeY;
 
-  const chrome = resolvePanelLayoutChrome(input);
+  const chrome = resolvePanelLayoutChrome({
+    flip: input.flip,
+    freeX,
+    freeY,
+    panelScales: input.panelScales,
+    allFrames: input.allFrames,
+    labs: input.labs,
+    scalesConfig: input.scalesConfig,
+    xScale: input.xScale,
+    yScale: input.yScale,
+    xTemporalKind: input.xTemporalKind,
+    yTemporalKind: input.yTemporalKind,
+    legendInputs: input.legendInputs,
+    legendOrder: input.legendOrder,
+    theme: input.theme,
+    layoutAxisTitleSize: input.layoutAxisTitleSize,
+    layoutAxisTextSize: input.layoutAxisTextSize,
+    options: input.options,
+    warnings: input.warnings,
+  });
   let stripBand = measureFacetStripBand({
     faceted,
     strip,
@@ -188,8 +227,8 @@ export function computePanelLayout(input: {
       panelScales: input.panelScales,
       coord: input.coordFixed,
       faceted,
-      freeX: input.freeX,
-      freeY: input.freeY,
+      freeX,
+      freeY,
       scalesConfig: input.scalesConfig,
       warnings: input.warnings,
     });
@@ -224,5 +263,15 @@ export function computePanelLayout(input: {
     );
   }
 
-  return panelLayoutResultFromChrome(chrome, placements, strip, stripBand, degraded);
+  return panelLayoutResultFromChrome(
+    chrome,
+    placements,
+    strip,
+    stripBand,
+    { h: input.hGuide, v: input.vGuide },
+    degraded,
+  );
 }
+
+/** @deprecated Prefer {@link layoutPanels}. */
+export const computePanelLayout = layoutPanels;
