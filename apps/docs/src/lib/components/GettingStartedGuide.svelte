@@ -6,131 +6,33 @@
    * — the same fold that produces the fragments above them and the finished
    * file at the end. Nothing here re-derives a spec, so nothing here can drift
    * from what the reader copies.
+   *
+   * The live finished chart lives in LessonFinishedChart so this file stays
+   * page structure only (prose, static step images, copy blocks).
    */
   import { base } from "$app/paths";
-  import { kyotoSakura } from "@ggsvelte/svelte/data";
-  import { onMount } from "svelte";
 
   import {
-    foldSakura,
     QUICKSTART_PAGE_SVELTE,
     QUICKSTART_PORTABLE_SPEC_FRAGMENT,
     SAKURA_FINISHED_SVELTE,
-    SAKURA_RECORDS,
     SAKURA_STEPS,
   } from "$scripts/quickstart";
   import {
     LESSON_CHART_HEIGHT,
     LESSON_CHART_WIDTH,
-    sakuraFinishedHeight,
   } from "$lib/generated/lesson-charts";
 
   import CopyCode from "./CopyCode.svelte";
-
-  const rows = kyotoSakura.map((row) => ({ ...row }));
-
-  /**
-   * Below this chart width, hand-placed callouts collide with the data, so the
-   * records move into the aria-label only (bands, trend and points never move).
-   * Measured on the chart container, never on the viewport.
-   */
-  const NARROW_CHART = 560;
-
-  /**
-   * Assume narrow until the finished-chart container is measured. Starting at
-   * `false` forced a wide fold on first paint, then a second 838-point fold
-   * when ResizeObserver fired — on mobile that double work blocked chrome for
-   * ~17s before "Open site menu" was tappable (#972). Desktop still flips once
-   * (narrow → wide) when the container is actually wide enough for callouts.
-   *
-   * First paint uses the narrow probe height from the generated size table so
-   * we do not reserve a desktop-tall plot before ResizeObserver fires.
-   */
-  let narrowChart = $state(true);
-  /** Measured container width; drives live plot height via build-time chrome table. */
-  let chartWidth = $state(0);
-  let finishedChart = $state<HTMLElement>();
-  /** Live plot component — dynamically imported when near the viewport (#972). */
-  let LivePlot = $state<null | (typeof import("@ggsvelte/svelte"))["GGPlot"]>(
-    null,
-  );
-
-  /**
-   * Fold only when the live plot is mounted. Computing the 838-point spec
-   * during first hydrate (even behind a placeholder) blocked mobile chrome
-   * for ~20s (#972).
-   */
-  const finished = $derived(
-    LivePlot === null
-      ? null
-      : foldSakura(SAKURA_STEPS.length, rows, { annotations: !narrowChart }),
-  );
-
-  /**
-   * Outer plot height from the build-time size table (pipeline-measured chrome
-   * so the *data panel* stays ~2.5:1). Never invent chrome constants here —
-   * regenerating lesson charts refreshes the table.
-   */
-  const liveHeight = $derived(
-    sakuraFinishedHeight(chartWidth > 0 ? chartWidth : NARROW_CHART),
-  );
-
-  const recordNames = SAKURA_RECORDS.map((record) => record.label).join("; ");
+  import LessonFinishedChart from "./LessonFinishedChart.svelte";
 
   /**
    * Intermediate step charts ship as SVG the library rendered at build time
    * (scripts/gen-lesson-charts.ts). The final "Finish it" step is the live
-   * 838-point plot — loaded when near the viewport so mobile chrome stays
-   * tappable (#972).
+   * 838-point plot in LessonFinishedChart.
    */
   const chartSrc = (step: number): string =>
     `${base}/lesson/${step < 0 ? "first-render.svg" : `step-${String(step + 1)}.svg`}`;
-
-  onMount(() => {
-    const target = finishedChart;
-    if (target === undefined) return;
-    let cancelled = false;
-    let loadStarted = false;
-
-    const observer =
-      typeof ResizeObserver === "undefined"
-        ? undefined
-        : new ResizeObserver((entries) => {
-            const width = entries[0]?.contentRect.width;
-            if (width !== undefined) {
-              narrowChart = width < NARROW_CHART;
-              chartWidth = width;
-            }
-          });
-    observer?.observe(target);
-
-    const loadLivePlot = (): void => {
-      if (loadStarted || cancelled) return;
-      loadStarted = true;
-      void import("@ggsvelte/svelte").then((mod) => {
-        if (!cancelled) LivePlot = mod.GGPlot;
-      });
-    };
-
-    // Near-viewport only — do not idle-load. An early dynamic import + fold
-    // still monopolizes the main thread and stalls header clicks (#972).
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          loadLivePlot();
-          io.disconnect();
-        }
-      },
-      { rootMargin: "240px 0px" },
-    );
-    io.observe(target);
-
-    return () => {
-      cancelled = true;
-      observer?.disconnect();
-      io.disconnect();
-    };
-  });
 </script>
 
 <article class="guide getting-started-guide">
@@ -197,25 +99,7 @@
           <a href={`${base}${step.href}`}>Read {step.chapterTitle}</a>
         </div>
         {#if isFinish}
-          <div class="finished-chart lesson-output" bind:this={finishedChart}>
-            {#if LivePlot && finished}
-              <LivePlot
-                spec={finished.spec}
-                key={finished.key}
-                inspect={finished.inspect}
-                height={liveHeight}
-                ariaLabel={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
-              />
-            {:else}
-              <img
-                class="lesson-chart"
-                src={chartSrc(index)}
-                width={LESSON_CHART_WIDTH}
-                height={LESSON_CHART_HEIGHT}
-                alt={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
-              />
-            {/if}
-          </div>
+          <LessonFinishedChart placeholderSrc={chartSrc(index)} />
         {:else}
           <div class="lesson-output">
             <img
@@ -267,14 +151,21 @@
     border-block: 1px solid var(--line);
   }
 
+  /*
+   * Static step panels are plain divs in this component. The finished chart is
+   * a child component whose root carries .finished-chart — style it with
+   * :global so scoped CSS still pads and separates that slot.
+   */
   .lesson-block > section,
-  .progressive-step > div {
+  .progressive-step > div,
+  .progressive-step > :global(.finished-chart) {
     min-width: 0;
     padding: 1rem;
   }
 
   .lesson-block > section + section,
-  .progressive-step > div + div {
+  .progressive-step > div + div,
+  .progressive-step > div + :global(.finished-chart) {
     border-top: 1px solid var(--line);
   }
 
@@ -289,15 +180,6 @@
     overflow: hidden;
     background: #fff;
     color: #172033;
-  }
-
-  /*
-   * The finished chart gains a tooltip and a pinned-value rail on hydration.
-   * Floor matches the narrow probe height (~280–320px), not the desktop one —
-   * over-reserving leaves empty space under a phone chart.
-   */
-  .finished-chart {
-    min-height: 18rem;
   }
 
   .lesson-label {
@@ -327,7 +209,7 @@
   /*
    * Translucent band fills do not survive forced-colors mode. Epoch names
    * remain available via the bottom legend (and the aria-label on the live
-   * chart).
+   * chart). The live finished chart carries the same rule in its own file.
    */
   @media (forced-colors: active) {
     .lesson-output :global(.gg-marks rect) {
