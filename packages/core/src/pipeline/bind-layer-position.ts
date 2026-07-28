@@ -6,11 +6,9 @@ import type { Aes, LayerSpec, NormalizedLayerSpec } from "@ggsvelte/spec";
 import type { ColumnTable } from "../table.js";
 
 import { checkField } from "./bind-layer-check-field.js";
-import {
-  assertRequiredChannels,
-  resolveRuleForm,
-  validateGeomStatContracts,
-} from "./bind-layer-validate.js";
+import { assertRequiredChannels } from "./bind-layer-required.js";
+import { resolveRuleForm } from "./bind-layer-rule.js";
+import { validateGeomStatContracts } from "./bind-layer-type-contracts.js";
 import { resolveYChannel } from "./bind-layer-y.js";
 import { positionFieldType, type PositionConversionContext } from "./temporal-position.js";
 import { PipelineError } from "./types.js";

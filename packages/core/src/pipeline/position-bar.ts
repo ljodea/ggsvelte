@@ -3,9 +3,8 @@
  */
 import { positionDodge, positionStack } from "../positions/positions.js";
 import { encodeKey } from "../scales/state.js";
-import { scaleTransform } from "../scales/transform.js";
 
-import { transformedZeroBaseline } from "./position-baseline.js";
+import { TRANSFORMED_ZERO_BASELINE } from "./position-baseline.js";
 import { isBarLike } from "./scale-axis-train.js";
 import type { LayerFrame } from "./types.js";
 
@@ -43,9 +42,7 @@ export function applyBarLikePosition(frame: LayerFrame): boolean {
     return true;
   }
   // identity / dodge: bars grow from the shared transformed-origin baseline.
-  const baseline = transformedZeroBaseline(
-    binding.yTransform?.transform ?? scaleTransform("identity"),
-  );
+  const baseline = TRANSFORMED_ZERO_BASELINE;
   const ymin = new Float64Array(frame.n);
   const ymax = new Float64Array(frame.n);
   for (let i = 0; i < frame.n; i++) {

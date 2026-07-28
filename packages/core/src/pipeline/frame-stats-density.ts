@@ -3,12 +3,11 @@
  */
 import { statDensity } from "../stats/density.js";
 import type { ColumnTable } from "../table.js";
-import { scaleTransform } from "../scales/transform.js";
 
 import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
 import { makeColumnOf } from "./frame-stats-shared.js";
 import { statLayerFrame } from "./layer-frame.js";
-import { transformedZeroBaseline } from "./position-baseline.js";
+import { TRANSFORMED_ZERO_BASELINE } from "./position-baseline.js";
 import { forwardMeasureOnce } from "./stat-measure-transform.js";
 import { positionColumn } from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
@@ -61,9 +60,7 @@ export function buildDensityFrame(
     afterStatColor: true,
     extras: {
       // Density renders as an area from the shared transformed-origin baseline.
-      ymin: Float64Array.from({ length: outN }, () =>
-        transformedZeroBaseline(binding.yTransform?.transform ?? scaleTransform("identity")),
-      ),
+      ymin: Float64Array.from({ length: outN }, () => TRANSFORMED_ZERO_BASELINE),
       ymax: yNumeric,
     },
   });

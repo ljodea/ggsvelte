@@ -48,7 +48,7 @@ export function trainContinuousAxis(
     }
     throw error;
   }
-  pushContinuousTrainingWarnings(axis, type, training, warnings);
+  pushContinuousTrainingWarnings(axis, training, warnings);
   // Explicit continuous breaks outside the trained (expanded, ggplot2-correct)
   // display domain are dropped by the layout tick filter. Structured facts
   // project lean + rich channels once (#628) — no post-hoc message parsing.
