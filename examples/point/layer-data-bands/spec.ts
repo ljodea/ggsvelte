@@ -1,38 +1,35 @@
 import { gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { bands, callouts, observations } from "./data.js";
+import { callouts, nationalDebt, warYears } from "./data.js";
 
 export default defineExample(
+  // Three tables, three layers, one panel. The bands and the note are not
+  // measurements and do not belong in the series, so each layer brings its own
+  // data and its own aes rather than inheriting a shape that does not fit.
   gg()
     .geomRect({
-      data: bands,
-      aes: {
-        xmin: "xmin",
-        xmax: "xmax",
-        ymin: "ymin",
-        ymax: "ymax",
-        fill: "region",
-      },
-      alpha: 0.2,
+      data: warYears,
+      aes: { xmin: "xmin", xmax: "xmax", ymin: "ymin", ymax: "ymax", fill: "war" },
+      alpha: 0.18,
     })
-    .geomPoint({
-      data: observations,
-      aes: { x: "x", y: "y", color: "group" },
-      size: 2.5,
-      alpha: 0.85,
+    .geomLine({
+      data: nationalDebt,
+      aes: { x: "year", y: "debt" },
+      linewidth: 1.8,
     })
     .geomText({
       data: callouts,
-      aes: { x: "x", y: "y", label: "label" },
+      aes: { x: "year", y: "debt", label: "label" },
       size: 12,
     })
+    .theme("classic")
     .labs({
-      title: "Per-layer data: observations, bands, and a callout",
-      x: "x",
-      y: "y",
-      color: "Group",
-      fill: "Region",
+      title: "What the wars did to the national debt",
+      subtitle: "Playfair's series, 1770 to 1824, with the war years drawn behind it",
+      x: "Year",
+      y: "Debt (£ millions)",
+      fill: "",
     })
     .spec(),
 );

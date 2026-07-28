@@ -1,27 +1,28 @@
 <script lang="ts">
   import {
+    GeomLine,
     GeomPoint,
     GGPlot,
     Labs,
-    ScaleColorDiscrete,
     ThemeVoid,
   } from "@ggsvelte/svelte";
 
-  import { voidScatter } from "./data.js";
+  import { britishExports } from "./data.js";
 </script>
 
 <GGPlot
-  data={voidScatter}
-  aes={{ x: "x", y: "y", color: "group" }}
+  data={britishExports}
+  aes={{ x: "year", y: "value" }}
   width={640}
   height={400}
 >
   <ThemeVoid />
-  <ScaleColorDiscrete scheme="colorblind" />
   <Labs
-    title="theme_void — marks only"
-    subtitle="No axes, grid, or panel; useful for maps, logos, and free-form composition"
-    color="Group"
+    title="British exports, 1855 to 1899, as a sparkline"
+    subtitle="theme_void keeps the marks and drops every axis, tick and grid line"
+    x=""
+    y=""
   />
-  <GeomPoint size={3.5} />
+  <GeomLine linewidth={1.5} />
+  <GeomPoint size={2.4} alpha={0.8} />
 </GGPlot>

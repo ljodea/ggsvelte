@@ -54,13 +54,13 @@ export const GALLERY_PREVIEWS = [
     id: "blank/axes-only",
     filename: "blank-axes-only-light.png",
     path: "/previews/blank-axes-only-light.png",
-    sha256: "2939452e748b0d9b660dbfdb98ca2fbb0cb23e87eee08042e976ae8967c516cd",
+    sha256: "f48e4129f5bf14895ee3506d039666eff0398f71d44c5791f4ab28241c9c739f",
   },
   {
     id: "blank/domain-expand",
     filename: "blank-domain-expand-light.png",
     path: "/previews/blank-domain-expand-light.png",
-    sha256: "44155b76550fca59d37e31acd3ab437d7d68868f505bd362386d62b195385d7d",
+    sha256: "acb2257d046af636e6152ce797842df04c5bb058963ea39dbf1173d2379a2ced",
   },
   {
     id: "boxplot/by-category",
@@ -330,13 +330,13 @@ export const GALLERY_PREVIEWS = [
     id: "point/gradient-continuous",
     filename: "point-gradient-continuous-light.png",
     path: "/previews/point-gradient-continuous-light.png",
-    sha256: "52029b5a4a501f00b305ac5f26b69eeb75ded068a91dc1d35a7c7a45481e102a",
+    sha256: "0e6f2b815d73aae127dc05c7944f35d324cd3dacc4e12d67345f81e0ef0b41d1",
   },
   {
     id: "point/hue-discrete",
     filename: "point-hue-discrete-light.png",
     path: "/previews/point-hue-discrete-light.png",
-    sha256: "0a438791fffccced034955c736fba5ae0a4bdcc7987880cf3e1042b39e536f32",
+    sha256: "8673f811fb6621b012f4bc47ba917cd4aafecb2209ed7f4751c12b811e1cacfe",
   },
   {
     id: "point/jitter",
@@ -348,7 +348,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/layer-data-bands",
     filename: "point-layer-data-bands-light.png",
     path: "/previews/point-layer-data-bands-light.png",
-    sha256: "a2acf73b0ea0ce725cae64a45c2dcebd274b1be6917426c37d5532a602cf34ee",
+    sha256: "086e355ed5fd2e06e161f2527261ee6cd2f267feb143e51b5bebfd8e688639ae",
   },
   {
     id: "point/log-scale",
@@ -384,19 +384,19 @@ export const GALLERY_PREVIEWS = [
     id: "point/steps-binned",
     filename: "point-steps-binned-light.png",
     path: "/previews/point-steps-binned-light.png",
-    sha256: "3097ea59517b54c748254fe129f95f52dffab95ecfcfc4338435574f5e9315a0",
+    sha256: "399360293a783d412c10d377ce302dca5f1d70df6d67cc30dcf69f6aa5a9a251",
   },
   {
     id: "point/style-scales",
     filename: "point-style-scales-light.png",
     path: "/previews/point-style-scales-light.png",
-    sha256: "3f52ea658edff9c430cede998f7fb33f900de36c3e17dfbbc22f0328cab6a0e7",
+    sha256: "7634bb3fedc89f48ab1ebdfad730ff34a98095c69848df862c3789ecc3b4d687",
   },
   {
     id: "point/void-chrome",
     filename: "point-void-chrome-light.png",
     path: "/previews/point-void-chrome-light.png",
-    sha256: "6ea9c8f342288fc5f2069fd6fdd5da6445713d4c3bb6f5bbe29b38ed26d9b9f2",
+    sha256: "41dccddd67cbd3ed2b924a5ef8d41274cea5a0d5757f9dadeb22550707db8cc9",
   },
   {
     id: "polygon/regions",
