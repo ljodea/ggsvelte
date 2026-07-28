@@ -100,13 +100,25 @@ export function tooltipFieldLabel(
  * Fields shown in the default tooltip body for a member (#754).
  * Axis-mode inspections already print the shared axis value as a header, so
  * repeating the matching channel under every member is pure noise.
+ *
+ * Also drops later channels that re-list the same column name. Position
+ * channels are listed first in layer field maps, so `aes(x = cat, fill = cat)`
+ * on categorical bars keeps the x row (labs-titled) and drops the fill echo.
+ * A11y live-text already dedupes by field name in `labels.ts`; default
+ * tooltips match that contract so paint-only remaps never invent a third row.
  */
 export function fieldsForDefaultTooltip(
   fields: readonly TooltipField[],
   mode: "exact" | "xy" | "x" | "y",
 ): readonly TooltipField[] {
-  if (mode !== "x" && mode !== "y") return fields;
-  return fields.filter((field) => field.channel !== mode);
+  const withoutAxis =
+    mode === "x" || mode === "y" ? fields.filter((field) => field.channel !== mode) : fields;
+  const seenColumns = new Set<string>();
+  return withoutAxis.filter((field) => {
+    if (seenColumns.has(field.field)) return false;
+    seenColumns.add(field.field);
+    return true;
+  });
 }
 
 /**

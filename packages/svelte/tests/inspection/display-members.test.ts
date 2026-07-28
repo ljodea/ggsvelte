@@ -116,6 +116,27 @@ describe("fieldsForDefaultTooltip (#754)", () => {
     expect(fieldsForDefaultTooltip(fields, "exact")).toEqual(fields);
     expect(fieldsForDefaultTooltip(fields, "xy")).toEqual(fields);
   });
+
+  it("collapses later channels that re-list the same column (aes x=cat, fill=cat)", () => {
+    // Palette-style bars: fill maps the category column for paint only.
+    // A11y live-text already dedupes by field name; default tooltips must too
+    // so users never see a third row repeating Squadron under "language".
+    const barFields = [
+      field("x", "language", "Hulks"),
+      field("y", "respondents", 10271),
+      field("fill", "language", "Hulks"),
+    ];
+    const exact = fieldsForDefaultTooltip(barFields, "exact");
+    expect(exact.map((f) => f.channel)).toEqual(["x", "y"]);
+    expect(exact.map((f) => f.field)).toEqual(["language", "respondents"]);
+
+    // Distinct columns stay even when values happen to match.
+    const distinct = [field("x", "name", "Adelie"), field("color", "species", "Adelie")];
+    expect(fieldsForDefaultTooltip(distinct, "exact").map((f) => f.field)).toEqual([
+      "name",
+      "species",
+    ]);
+  });
 });
 
 describe("tooltipDisplayPayloadToken", () => {
