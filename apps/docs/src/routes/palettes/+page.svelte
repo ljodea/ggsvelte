@@ -3,6 +3,10 @@
 
   import PaletteGallery from "$lib/components/PaletteGallery.svelte";
   import SequentialColorLab from "$lib/components/SequentialColorLab.svelte";
+
+  import type { PageProps } from "./$types";
+
+  const { data }: PageProps = $props();
 </script>
 
 <main class="palettes-page">
@@ -20,8 +24,8 @@
     </p>
   </header>
 
-  <PaletteGallery />
-  <SequentialColorLab />
+  <PaletteGallery specimens={data.paletteSpecimens} />
+  <SequentialColorLab examples={data.sequentialExamples} />
 
   <nav class="learning-path" aria-label="Next steps">
     <p class="eyebrow">Next</p>

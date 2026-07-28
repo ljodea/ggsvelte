@@ -11,7 +11,7 @@ describe("documented Quickstart", () => {
 
     const root = container.querySelector<HTMLElement>(".gg-plot-root")!;
     await until(() => root.dataset.ggReady === "false");
-    expect(root.querySelector("svg.gg-plot")?.getAttribute("width")).toBe("640");
+    expect(root.querySelector("svg.gg-plot")?.getAttribute("width")).toBe("832");
     expect(root.querySelector("svg.gg-plot")?.getAttribute("height")).toBe("400");
 
     container.style.width = "420px";

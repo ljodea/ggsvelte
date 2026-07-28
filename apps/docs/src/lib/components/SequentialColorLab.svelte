@@ -1,43 +1,20 @@
 <script lang="ts">
-  import { GeomRaster, GGPlot, Labs, Scale, Theme } from "@ggsvelte/svelte";
   import type { ColorScaleSpec } from "@ggsvelte/spec";
 
   import { VIRIDIS_COLORS } from "$lib/catalog/themes";
   import CopyCode from "$lib/components/CopyCode.svelte";
-  import { RASTER_Z_DOMAIN } from "$lib/theme-specimens/catalog";
-  import { grid } from "$lib/theme-specimens/data";
+  import SequentialDeferredPlot from "$lib/components/SequentialDeferredPlot.svelte";
   import { SEQUENTIAL_RASTER_SNIPPET } from "$lib/theme-specimens/snippets";
 
-  interface SequentialExample {
-    label: string;
-    scale: ColorScaleSpec;
-  }
-
-  const examples: readonly SequentialExample[] = [
-    {
-      label: "Viridis",
-      scale: { type: "sequential", scheme: "viridis" },
-    },
-    {
-      label: "Reversed",
-      scale: { type: "sequential", scheme: "viridis", reverse: true },
-    },
-    {
-      label: "Custom range",
-      scale: {
-        type: "sequential",
-        range: ["#2d1e2f", "#3d5a80", "#e76f51"],
-      },
-    },
-    {
-      label: "Pinned domain",
-      scale: {
-        type: "sequential",
-        scheme: "viridis",
-        domain: [...RASTER_Z_DOMAIN],
-      },
-    },
-  ];
+  const {
+    examples,
+  }: {
+    examples: readonly {
+      label: string;
+      scale: ColorScaleSpec;
+      staticSvg: string;
+    }[];
+  } = $props();
 </script>
 
 <section class="sequential-lab" aria-label="Sequential color scales">
@@ -68,25 +45,11 @@
           <header>
             <h3>{example.label}</h3>
           </header>
-          <div class="plot-panel">
-            <GGPlot
-              data={grid}
-              aes={{ x: "x", y: "y", fill: "z" }}
-              inspect={{ mode: "xy" }}
-              height={360}
-              ariaLabel={`${example.label} sequential color example`}
-            >
-              <Scale value={{ fill: example.scale }} />
-              <Theme name="light" />
-              <Labs
-                title={`${example.label} Macdonell counts`}
-                x="Finger index"
-                y="Height index"
-                fill="Men"
-              />
-              <GeomRaster />
-            </GGPlot>
-          </div>
+          <SequentialDeferredPlot
+            label={example.label}
+            scale={example.scale}
+            staticSvg={example.staticSvg}
+          />
         </article>
       </li>
     {/each}
@@ -176,11 +139,6 @@
     margin: 0;
     font-size: 1.25rem;
     letter-spacing: -0.01em;
-  }
-
-  .plot-panel {
-    width: min(100%, 52rem);
-    min-width: 0;
   }
 
   .section-code {

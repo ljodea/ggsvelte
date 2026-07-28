@@ -51,7 +51,7 @@ ${QUICKSTART_PAGE_SVELTE}
 \`\`\`
 
 Omitted width follows the container; default height is 400px. No chart CSS is
-required. During server rendering the plot uses a deterministic 640 x 400
+required. During server rendering the plot uses a deterministic 832 x 400
 fallback, then measures the real container after hydration; inside
 \`display: none\` or a zero-width track it stays not-ready until the container
 has positive width.
@@ -1267,7 +1267,7 @@ width. [Troubleshooting](/guide/errors#quickstart-troubleshooting).
 
 ## Server fallback and hydration
 
-SSR: 640×400 deterministic fallback, not-ready in HTML, measure after hydration.
+SSR: 832×400 deterministic fallback, not-ready in HTML, measure after hydration.
 Reserve layout space to avoid CLS.
 `;
 

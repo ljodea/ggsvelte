@@ -1,17 +1,8 @@
 <script lang="ts">
-  import {
-    GeomCol,
-    GGPlot,
-    Guides,
-    Labs,
-    Scale,
-    Theme,
-  } from "@ggsvelte/svelte";
-  import type { CATEGORICAL_SCHEME_NAMES, ThemeName } from "@ggsvelte/spec";
   import { onMount } from "svelte";
+  import type { CATEGORICAL_SCHEME_NAMES, ThemeName } from "@ggsvelte/spec";
 
   import { observeNearViewport } from "$lib/near-viewport";
-  import { languages } from "$lib/theme-specimens/data";
 
   type CategoricalSchemeName = (typeof CATEGORICAL_SCHEME_NAMES)[number];
 
@@ -22,6 +13,7 @@
     capacity,
     reverse,
     paperTheme,
+    staticSvg,
   }: {
     name: CategoricalSchemeName;
     label: string;
@@ -29,25 +21,57 @@
     capacity: number;
     reverse: boolean;
     paperTheme: ThemeName;
+    /** Prerendered shell for reverse=false + paperTheme=light. */
+    staticSvg: string;
   } = $props();
 
-  const displayColors = $derived(reverse ? colors.toReversed() : colors);
   const plotHeight = 340;
+  const displayColors = $derived(reverse ? colors.toReversed() : colors);
+  /** Shell matches only the prerender defaults; other control combos need live. */
+  const shellMatches = $derived(!reverse && paperTheme === "light");
 
-  /** Mount the live plot only near the viewport (#1037). */
-  let root = $state<HTMLElement | undefined>();
-  let active = $state(false);
+  let host = $state<HTMLDivElement | null>(null);
+  let Live = $state<
+    typeof import("./PaletteSpecimenLive.svelte").default | null
+  >(null);
 
   onMount(() => {
-    const el = root;
-    if (el === undefined) return;
-    return observeNearViewport(el, () => {
-      active = true;
-    });
+    const el = host;
+    if (el === null) return;
+    let cancelled = false;
+
+    const load = (): void => {
+      if (cancelled || Live !== null) return;
+      void import("./PaletteSpecimenLive.svelte").then((mod) => {
+        if (!cancelled) Live = mod.default;
+      });
+    };
+
+    if (!shellMatches) {
+      load();
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const stop = observeNearViewport(el, load, { rootMargin: "480px 0px" });
+    return () => {
+      cancelled = true;
+      stop();
+    };
+  });
+
+  // When the user flips reverse/paper after mount, upgrade immediately.
+  $effect(() => {
+    if (!shellMatches && Live === null && host !== null) {
+      void import("./PaletteSpecimenLive.svelte").then((mod) => {
+        Live = mod.default;
+      });
+    }
   });
 </script>
 
-<article class="specimen" bind:this={root}>
+<article class="specimen">
   <header>
     <div>
       <h3>{label}</h3>
@@ -67,31 +91,13 @@
     {/each}
   </ul>
 
-  <div class="plot-panel" style:min-height="{plotHeight}px">
-    {#if active}
-      <GGPlot
-        data={languages}
-        aes={{ x: "language", y: "respondents", fill: "language" }}
-        inspect={{ mode: "exact" }}
-        height={plotHeight}
-        ariaLabel={`${label} palette on ${paperTheme} paper`}
-      >
-        <Theme name={paperTheme} />
-        <Scale value={{ fill: { type: "ordinal", scheme: name, reverse } }} />
-        <Guides value={{ fill: { type: "none" } }} />
-        <Labs
-          title="Spanish Armada squadron tonnage, 1588"
-          x="Squadron"
-          y="Tons"
-        />
-        <GeomCol width={0.75} />
-      </GGPlot>
+  <div class="plot-panel" bind:this={host} style:min-height="{plotHeight}px">
+    {#if Live !== null}
+      <Live {name} {label} {reverse} {paperTheme} height={plotHeight} />
+    {:else if shellMatches}
+      {@html staticSvg}
     {:else}
-      <div
-        class="plot-placeholder"
-        style:height="{plotHeight}px"
-        aria-hidden="true"
-      ></div>
+      <div class="plot-shell" style:height={`${String(plotHeight)}px`}></div>
     {/if}
   </div>
 </article>
@@ -148,9 +154,15 @@
     min-width: 0;
   }
 
-  .plot-placeholder {
+  .plot-panel :global(svg) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .plot-shell {
     width: 100%;
-    border-radius: 0.25rem;
-    background: color-mix(in srgb, var(--line) 55%, transparent);
+    background: var(--wash);
+    border: 1px solid var(--line);
   }
 </style>

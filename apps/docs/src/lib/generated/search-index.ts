@@ -24936,7 +24936,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "cli:width",
     kind: "cli",
     title: "--width",
-    summary: "Plot width in px (default: spec.width, then 640)",
+    summary: "Plot width in px (default: spec.width, then 832)",
     href: "/reference/cli#width",
     keywords: ["N"],
     exact: ["--width"],

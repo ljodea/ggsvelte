@@ -4,7 +4,6 @@
 
   import { CATEGORICAL_PALETTES, THEME_OPTIONS } from "$lib/catalog/themes";
   import CopyCode from "$lib/components/CopyCode.svelte";
-  import TemperaturesSpecimen from "$lib/components/TemperaturesSpecimen.svelte";
   import {
     readDocsAppearance,
     watchDocsAppearance,
@@ -14,10 +13,20 @@
 
   type SchemeName = (typeof CATEGORICAL_PALETTES)[number]["name"];
 
+  const {
+    initialStaticSvg,
+  }: {
+    /** Prerendered default-theme shell; live plot replaces it on mount. */
+    initialStaticSvg: string;
+  } = $props();
+
   let explicitTheme = $state<ThemeName>("default");
   let scheme = $state<SchemeName>("observable10");
   let followDocs = $state(false);
   let siteAppearance = $state<DocsAppearance>("light");
+  let LiveTemps = $state<
+    typeof import("./TemperaturesSpecimen.svelte").default | null
+  >(null);
 
   const resolvedTheme = $derived<ThemeName>(
     followDocs ? siteAppearance : explicitTheme,
@@ -41,6 +50,10 @@
   }
 
   onMount(() => {
+    // Above-fold lab: static SVG first, then upgrade to interactive once.
+    void import("./TemperaturesSpecimen.svelte").then((mod) => {
+      LiveTemps = mod.default;
+    });
     syncSiteAppearance();
     return watchDocsAppearance((appearance) => {
       if (followDocs) siteAppearance = appearance;
@@ -58,13 +71,17 @@
   </p>
 
   <div class="plot-panel">
-    <TemperaturesSpecimen
-      theme={resolvedTheme}
-      {scheme}
-      height={400}
-      legendFocus={true}
-      ariaLabel={`${resolvedTheme} theme with ${scheme} palette`}
-    />
+    {#if LiveTemps !== null}
+      <LiveTemps
+        theme={resolvedTheme}
+        {scheme}
+        height={400}
+        legendFocus={true}
+        ariaLabel={`${resolvedTheme} theme with ${scheme} palette`}
+      />
+    {:else}
+      {@html initialStaticSvg}
+    {/if}
   </div>
 
   <div class="controls">
@@ -141,6 +158,12 @@
     width: min(100%, 52rem);
     min-width: 0;
     margin-top: 0.5rem;
+  }
+
+  .plot-panel :global(svg) {
+    display: block;
+    max-width: 100%;
+    height: auto;
   }
 
   .controls {

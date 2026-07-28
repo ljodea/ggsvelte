@@ -365,7 +365,7 @@ assert.ok(html.includes(${JSON.stringify(quickstartTitle())}), "prerendered titl
 assert.ok(html.includes(${JSON.stringify(`aria-label="${quickstartAriaLabel()}"`)}), "accessible name");
 assert.match(html, /class="gg-plot-root[^"]*gg-container-width"/);
 assert.match(html, /data-gg-ready="false"/);
-assert.match(html, /width="640" height="400"/);
+assert.match(html, /width="832" height="400"/);
 assert.match(html, /_app\\/immutable/);
 assert.equal(
   existsSync("build/contract.html") || existsSync("build/contract/index.html"),
