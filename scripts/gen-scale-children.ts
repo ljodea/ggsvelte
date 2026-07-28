@@ -63,13 +63,13 @@ function colourAliases(stem: string): string[] {
  * Complete shell ledger. Cardinality (asserted in tests):
  *   position-continuous  8
  *   position-binned      2
- *   position-temporal    6  (date/datetime/time × x/y)
+ *   position-temporal    8  (date/datetime/time/monthDay × x/y)
  *   position-discrete    2
  *   color-fill          48
  *   numeric-style       24  (21 base + size area/radius family #830)
  *   finite-style         8
  *   ----------------------
- *   98 component files + 28 aliases
+ *   100 component files + 28 aliases
  *     (24 Colour + 4 Size/Linewidth/Alpha/Shape Ordinal re-exports, #830/#832)
  */
 export const SHELL_MANIFEST: readonly ShellSpec[] = [
@@ -114,13 +114,15 @@ export const SHELL_MANIFEST: readonly ShellSpec[] = [
     "ContinuousPositionScaleOptions",
   ]),
 
-  // --- position-temporal (6) -----------------------------------------------
+  // --- position-temporal (8) -----------------------------------------------
   shell("scaleXDate", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
   shell("scaleXDatetime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
   shell("scaleXTime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
   shell("scaleYDate", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
   shell("scaleYDatetime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
   shell("scaleYTime", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
+  shell("scaleXMonthDay", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
+  shell("scaleYMonthDay", "position-temporal", "TemporalScaleOptions", ["TemporalScaleOptions"]),
 
   // --- position-discrete (2) -----------------------------------------------
   shell("scaleXDiscrete", "position-discrete", "DiscretePositionScaleOptions", [

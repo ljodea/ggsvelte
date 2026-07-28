@@ -15,6 +15,10 @@ import {
   scaleYDate,
   scaleYDatetime,
   scaleYTime,
+  scaleXMonthDay,
+  scaleYMonthDay,
+  scale_x_month_day,
+  scale_y_month_day,
   scaleYDiscrete,
   scale_x_date,
   scale_x_datetime,
@@ -41,6 +45,10 @@ describe("temporal scale authoring surfaces", () => {
     expect(temporal?.helpers).toContain("scale_x_time");
     expect(temporal?.helpers).toContain("scaleYTime");
     expect(temporal?.helpers).toContain("scale_y_time");
+    expect(temporal?.helpers).toContain("scaleXMonthDay");
+    expect(temporal?.helpers).toContain("scale_x_month_day");
+    expect(temporal?.helpers).toContain("scaleYMonthDay");
+    expect(temporal?.helpers).toContain("scale_y_month_day");
     expect(
       SCALE_CAPABILITIES.find((capability) => capability.family === "numeric-style")?.runtime,
     ).toBe("implemented");
@@ -53,8 +61,30 @@ describe("temporal scale authoring surfaces", () => {
     expect(scale_y_date).toBe(scaleYDate);
     expect(scale_y_datetime).toBe(scaleYDatetime);
     expect(scale_y_time).toBe(scaleYTime);
+    expect(scale_x_month_day).toBe(scaleXMonthDay);
+    expect(scale_y_month_day).toBe(scaleYMonthDay);
     expect(scale_x_discrete).toBe(scaleXDiscrete);
     expect(scale_y_discrete).toBe(scaleYDiscrete);
+  });
+
+  it("authors a month-day scale, and lets breaks and domain drop the year too", () => {
+    expect(scaleYMonthDay()).toEqual({ y: { type: "time", temporalKind: "monthDay" } });
+    expect(scaleXMonthDay({ dateBreaks: "10 days" })).toEqual({
+      x: { type: "time", temporalKind: "monthDay", dateBreaks: "10 days" },
+    });
+    // The point of the kind is that no year appears anywhere an author or a
+    // reader can see — not in the data, and not in the scale that reads it.
+    expect(
+      scaleYMonthDay({ reverse: true, domain: ["05-10", "03-18"], breaks: ["04-05", "04-15"] }),
+    ).toEqual({
+      y: {
+        type: "time",
+        temporalKind: "monthDay",
+        reverse: true,
+        domain: ["05-10", "03-18"],
+        breaks: ["04-05", "04-15"],
+      },
+    });
   });
 
   it("normalizes helper, builder, and canonical scale configuration equally", () => {

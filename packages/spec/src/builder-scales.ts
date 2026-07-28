@@ -98,6 +98,7 @@ import {
   scaleXDatetime,
   scaleXDiscrete,
   scaleXLog10,
+  scaleXMonthDay,
   scaleXReverse,
   scaleXSqrt,
   scaleXTime,
@@ -107,6 +108,7 @@ import {
   scaleYDatetime,
   scaleYDiscrete,
   scaleYLog10,
+  scaleYMonthDay,
   scaleYReverse,
   scaleYSqrt,
   scaleYTime,
@@ -395,6 +397,9 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
     scaleXLog10(...args: Parameters<typeof scaleXLog10>): GGBuilder {
       return this.scales(scaleXLog10(...args));
     }
+    scaleXMonthDay(...args: Parameters<typeof scaleXMonthDay>): GGBuilder {
+      return this.scales(scaleXMonthDay(...args));
+    }
     scaleXReverse(...args: Parameters<typeof scaleXReverse>): GGBuilder {
       return this.scales(scaleXReverse(...args));
     }
@@ -421,6 +426,9 @@ export function WithBuilderScales<TBase extends ScaleHostConstructor>(Base: TBas
     }
     scaleYLog10(...args: Parameters<typeof scaleYLog10>): GGBuilder {
       return this.scales(scaleYLog10(...args));
+    }
+    scaleYMonthDay(...args: Parameters<typeof scaleYMonthDay>): GGBuilder {
+      return this.scales(scaleYMonthDay(...args));
     }
     scaleYReverse(...args: Parameters<typeof scaleYReverse>): GGBuilder {
       return this.scales(scaleYReverse(...args));

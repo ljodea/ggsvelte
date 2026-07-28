@@ -836,5 +836,5 @@
   { "year": 2023, "bloomDate": "2023-03-25", "bloomDoy": 84, "bloomRefDate": "2001-03-25" },
   { "year": 2024, "bloomDate": "2024-04-04", "bloomDoy": 95, "bloomRefDate": "2001-04-05" },
   { "year": 2025, "bloomDate": "2025-04-04", "bloomDoy": 94, "bloomRefDate": "2001-04-04" },
-  { "year": 2026, "bloomDate": "2026-03-30", "bloomDoy": 89, "bloomRefDate": "2001-03-30" }
+  { "year": 2026, "bloomDate": "2026-03-29", "bloomDoy": 88, "bloomRefDate": "2001-03-29" }
 ]

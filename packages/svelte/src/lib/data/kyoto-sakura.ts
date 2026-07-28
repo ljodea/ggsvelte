@@ -3,16 +3,25 @@
  * Japan — 812 to 2026 CE, 838 observations.
  *
  * The longest continuous phenological record in existence: reconstructed from
- * Heian-court diaries and temple chronicles up to 1888, and from direct
- * observation since. Used here as the getting-started teaching dataset because
- * it carries a real finding — the full-bloom date sat near mid-April for a
+ * Heian-court diaries and temple chronicles, and from direct observation since
+ * the 1880s. Used here as the getting-started teaching dataset because it
+ * carries a real finding — the full-bloom date sat near mid-April for a
  * millennium, then moved roughly ten days earlier in the industrial era.
  *
+ * All dates are proleptic Gregorian, as Aono published them; there is no
+ * calendar seam at 1582.
+ *
  * Data copyright: Yasuyuki Aono (Osaka Prefecture University).
- * Source: http://atmenv.envi.osakafu-u.ac.jp/aono/kyophenotemp4/
  *  - 9th-14th centuries: Aono & Saito (2010), Int. J. Biometeorology 54, 211-219.
  *  - 15th-21st centuries: Aono & Kazui (2008), Int. J. Climatology 28, 905-914.
  * Modern observations are made by a local newspaper in Arashiyama, Kyoto.
+ *
+ * Aono's own site (atmenv.envi.osakafu-u.ac.jp/aono/kyophenotemp4/) closed on
+ * 2025-03-31. His file survives at NOAA NCEI, which is the durable archive:
+ * https://www.ncei.noaa.gov/pub/data/paleo/historical/phenology/japan/
+ * It ends at 2015. Genki Katata (CIGS) took over the series and publishes the
+ * years after it: https://cigs.canon/katata_date/
+ *
  * Redistributed here with attribution for teaching and research use; see NOTICE.
  */
 
@@ -880,7 +889,7 @@ export const kyotoSakura: readonly KyotoSakuraRow[] = [
   { year: 2023, bloomDate: "2023-03-25", bloomDoy: 84, bloomRefDate: "2001-03-25" },
   { year: 2024, bloomDate: "2024-04-04", bloomDoy: 95, bloomRefDate: "2001-04-05" },
   { year: 2025, bloomDate: "2025-04-04", bloomDoy: 94, bloomRefDate: "2001-04-04" },
-  { year: 2026, bloomDate: "2026-03-30", bloomDoy: 89, bloomRefDate: "2001-03-30" },
+  { year: 2026, bloomDate: "2026-03-29", bloomDoy: 88, bloomRefDate: "2001-03-29" },
 ];
 
 /** Citation line for charts that publish this data. */

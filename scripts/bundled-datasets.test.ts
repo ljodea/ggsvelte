@@ -98,12 +98,37 @@ describe("kyotoSakura dataset", () => {
     expect(beat1409.map((row) => row.year)).toEqual([2021, 2023]);
   });
 
+  it("carries the modern years Aono's own file never reached", () => {
+    // KyotoFullFlower7.xls stops at 2015. Everything after it comes from the
+    // Arashiyama newspaper observations, published since 2025 by Genki Katata
+    // (CIGS) rather than Aono, so those years need their own pin: our first
+    // copy took 2026 from a mirror that predated Katata's table and was a day
+    // late. Cross-checked against Katata and Our World in Data.
+    expect(kyotoSakura.find((row) => row.year === 2015)).toMatchObject({
+      bloomDate: "2015-04-03",
+      bloomDoy: 93,
+    });
+    expect(kyotoSakura.find((row) => row.year === 2021)).toMatchObject({
+      bloomDate: "2021-03-26",
+      bloomDoy: 85,
+    });
+    expect(kyotoSakura.at(-1)).toMatchObject({
+      year: 2026,
+      bloomDate: "2026-03-29",
+      bloomDoy: 88,
+    });
+  });
+
   it("names its source", () => {
     expect(KYOTO_SAKURA_CITATION).toContain("Aono");
     expect(KYOTO_SAKURA_CITATION).toContain("812");
     expect(KYOTO_SAKURA_CITATION).toContain("2026");
     expect(NOTICE).toContain("Yasuyuki Aono");
-    expect(NOTICE).toContain("kyophenotemp4");
+    // Aono's own site closed on 2025-03-31, so the notice has to point
+    // somewhere a reader can actually reach: NOAA holds the archived file and
+    // Katata publishes the continuing series.
+    expect(NOTICE).toContain("ncei.noaa.gov");
+    expect(NOTICE).toContain("Katata");
   });
 
   it("keeps the docs static asset identical to the package export", () => {

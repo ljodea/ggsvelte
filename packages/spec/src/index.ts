@@ -342,12 +342,14 @@ export type {
   TemporalDisambiguation,
   TemporalFailure,
   TemporalKind,
+  TemporalScaleKind,
   ParsedTemporalColumn,
   TemporalParseOptions,
   TemporalParseResult,
   TemporalParserName,
   TemporalPrecision,
 } from "./temporal.js";
+export { MONTH_DAY_REFERENCE_YEAR } from "./temporal.js";
 export {
   MAX_TEMPORAL_CANDIDATES,
   MAX_TEMPORAL_MAJOR_TICKS,
@@ -567,6 +569,8 @@ export {
   scaleYDate,
   scaleYDatetime,
   scaleYTime,
+  scaleXMonthDay,
+  scaleYMonthDay,
   scaleYDiscrete,
   scaleYLog10,
   scaleYReverse,
@@ -585,6 +589,8 @@ export {
   scale_y_date,
   scale_y_datetime,
   scale_y_time,
+  scale_x_month_day,
+  scale_y_month_day,
   scale_y_discrete,
   scale_y_log10,
   scale_y_reverse,

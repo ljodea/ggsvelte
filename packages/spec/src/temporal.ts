@@ -22,6 +22,8 @@ export {
   temporalParserConfigurationError,
   type TemporalDisambiguation,
   type TemporalKind,
+  type TemporalScaleKind,
+  MONTH_DAY_REFERENCE_YEAR,
   type TemporalParseOptions,
   type TemporalParseResult,
   type TemporalParserName,

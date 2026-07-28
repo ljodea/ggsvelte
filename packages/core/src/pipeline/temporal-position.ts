@@ -3,6 +3,7 @@ import {
   type PositionScaleSpec,
   type TemporalDecision,
   type TemporalParserSpec,
+  type TemporalScaleKind,
 } from "@ggsvelte/spec";
 
 import {
@@ -23,7 +24,7 @@ export interface PositionConversionContext {
   sourceParser: TemporalParserSpec | "auto";
   options: ParsedColumnOptions;
   requestedTime: boolean;
-  requestedKind?: "date" | "datetime" | "time";
+  requestedKind?: TemporalScaleKind;
   forcedDiscrete: boolean;
   /** Explicit linear/log scale with no temporal options: numeric coercion only. */
   forcedNonTemporal: boolean;

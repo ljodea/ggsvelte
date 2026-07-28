@@ -4,7 +4,7 @@
  * Kept free of tick derivation and margin measurement so consumers can import
  * Domain / Margins / TickFormatter without pulling planner algorithms.
  */
-import type { PositionScaleSpec, TemporalKind } from "@ggsvelte/spec";
+import type { PositionScaleSpec, TemporalScaleKind } from "@ggsvelte/spec";
 
 import type { CellValue } from "../table.js";
 import type { TextMeasurer } from "./measure.js";
@@ -38,7 +38,7 @@ export type Domain =
 export interface TemporalLayoutDomainContext {
   aesthetic: "x" | "y";
   panelIndex: number;
-  kind: TemporalKind;
+  kind: TemporalScaleKind;
   config: PositionScaleSpec;
   sourceBreaks?: readonly CellValue[];
 }

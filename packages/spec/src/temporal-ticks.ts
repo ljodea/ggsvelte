@@ -6,7 +6,7 @@
 import {
   temporalImplementation,
   type TemporalDisambiguation,
-  type TemporalKind,
+  type TemporalScaleKind,
 } from "./temporal-parse.js";
 import {
   MAX_TEMPORAL_MAJOR_TICKS,
@@ -18,7 +18,7 @@ import {
 } from "./temporal-interval.js";
 
 interface TemporalTickOptions {
-  kind: TemporalKind;
+  kind: TemporalScaleKind;
   timezone?: string;
   weekStart?: TemporalWeekStart;
   disambiguation?: TemporalDisambiguation;

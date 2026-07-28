@@ -9,6 +9,60 @@ import { describe, expect, it } from "bun:test";
 import { validate } from "../src/validate.ts";
 
 describe("tier 2 — temporal position scale data checks", () => {
+  describe("monthDay", () => {
+    const blooms = {
+      data: {
+        columns: {
+          year: [812, 1409, 2026],
+          bloom: ["0812-04-01", "1409-03-27", "2026-03-29"],
+        },
+      },
+      layers: [{ geom: "point", aes: { x: { field: "year" }, y: { field: "bloom" } } }],
+    } as const;
+
+    it("accepts full dates, because taking their month-day is the whole job", () => {
+      // The field parses as `date`; the scale asks for `monthDay`. Those differ,
+      // and the kind-mismatch check must not read that as a contradiction.
+      const result = validate(
+        { ...blooms, scales: { y: { type: "time", temporalKind: "monthDay" } } },
+        {},
+      );
+      expect(result.ok).toBe(true);
+    });
+
+    it("accepts bare month-day values and a year-free domain", () => {
+      expect(
+        validate(
+          {
+            data: { columns: { year: [812, 2026], bloom: ["04-01", "03-29"] } },
+            layers: [{ geom: "point", aes: { x: { field: "year" }, y: { field: "bloom" } } }],
+            scales: {
+              y: {
+                type: "time",
+                temporalKind: "monthDay",
+                parse: "md",
+                domain: ["03-18", "05-10"],
+                breaks: ["04-05", "04-15"],
+              },
+            },
+          },
+          {},
+        ).ok,
+      ).toBe(true);
+    });
+
+    it("is a position kind only — colour has no use for it", () => {
+      const result = validate(
+        {
+          ...blooms,
+          scales: { color: { type: "time", temporalKind: "monthDay" } },
+        },
+        {},
+      );
+      expect(result.ok).toBe(false);
+    });
+  });
+
   it("shares value-driven inference and explicit parsing with tier-2 validation", () => {
     const years = {
       data: { columns: { when: ["1835", "1900", "2026"], value: [1, 2, 3] } },

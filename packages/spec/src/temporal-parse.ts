@@ -9,6 +9,7 @@
 
 import {
   DEFAULT_PARTS,
+  MONTH_DAY_REFERENCE_YEAR,
   partsToEpoch,
   temporalParseFailure,
   timezoneValidationFailure,
@@ -24,6 +25,7 @@ import { exactFormatConfigurationError, parseExactFormat } from "./temporal-pars
 
 // Stable public import path: re-export foundation surface from this module.
 export {
+  MONTH_DAY_REFERENCE_YEAR,
   TEMPORAL_PARSER_NAMES,
   TemporalParserSpecSchema,
   TemporalParseError,
@@ -31,6 +33,7 @@ export {
   temporalImplementation,
   type TemporalDisambiguation,
   type TemporalKind,
+  type TemporalScaleKind,
   type TemporalParseOptions,
   type TemporalParseResult,
   type TemporalParserName,
@@ -44,6 +47,8 @@ const YEAR_RE = /^\d{4}$/;
 const YM_RE = /^(\d{4})[-/.](\d{1,2})$/;
 const MY_RE = /^(\d{1,2})[-/.](\d{4})$/;
 const YQ_RE = /^(\d{4})[-/.]?Q([1-4])$/i;
+// Bare month-day, ISO recurring `--MM-DD`, or a full date whose year is dropped.
+const MD_RE = /^(?:--)?(?:(\d{4})[-/.])?(\d{1,2})[-/.](\d{1,2})$/;
 const ORDERED_DATE_RE =
   /^(\d{1,4})([-/.])(\d{1,4})\2(\d{1,4})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?)?$/;
 
@@ -105,6 +110,40 @@ function parsePeriod(
     ),
     "date",
     parser === "yq" ? "quarter" : "month",
+  );
+}
+
+/**
+ * Month-day without a year: `MM-DD`, ISO recurring `--MM-DD`, or a full date
+ * whose year is discarded. Everything resolves into MONTH_DAY_REFERENCE_YEAR,
+ * so the same calendar day from any two years is the same instant.
+ *
+ * Month and day survive; day-of-year does not. That is deliberate — projecting
+ * day-of-year moves every leap-year observation by a day.
+ */
+function parseMonthDay(value: string, options: TemporalParseOptions): TemporalParseResult {
+  const match = MD_RE.exec(value);
+  if (match === null)
+    return temporalParseFailure(
+      "expected MM-DD, --MM-DD, or a full date to take the month-day from",
+    );
+  return withMetadata(
+    partsToEpoch(
+      {
+        year: MONTH_DAY_REFERENCE_YEAR,
+        month: Number(match[2]),
+        day: Number(match[3]),
+        hour: 0,
+        minute: 0,
+        second: 0,
+        millisecond: 0,
+      },
+      options,
+      undefined,
+      "date",
+    ),
+    "date",
+    "date",
   );
 }
 
@@ -192,6 +231,7 @@ export function parseTemporal(
     return temporalParseFailure("expected an exact temporal string");
   if (typeof parser === "object") return parseExactFormat(value, parser.format, options);
   if (parser === "iso") return parseISO(value, options);
+  if (parser === "md") return parseMonthDay(value, options);
   if (parser === "year" || parser === "ym" || parser === "my" || parser === "yq") {
     return parsePeriod(value, parser, options);
   }

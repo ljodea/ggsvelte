@@ -4,7 +4,7 @@
  * Behavior (planning algorithms) lives in temporal-guide.ts and color/legend
  * pipeline modules; this file is pure data shapes only.
  */
-import type { StyleAesthetic, TemporalKind } from "@ggsvelte/spec";
+import type { StyleAesthetic, TemporalScaleKind } from "@ggsvelte/spec";
 
 import type { CellValue } from "../table.js";
 import type { BandLabelMode } from "./band-guide.js";
@@ -25,7 +25,7 @@ export interface AxisGuidePlan {
   scaleType: "linear" | "time" | "band";
   /** Pre-stat numeric transform; time/band plans use identity. */
   transform: "identity" | "log10" | "sqrt";
-  temporalKind: TemporalKind | null;
+  temporalKind: TemporalScaleKind | null;
   domain: readonly [number, number] | readonly CellValue[];
   direction: "ascending" | "descending";
   source: "automatic" | "interval" | "explicit";
@@ -87,7 +87,7 @@ export interface ColorbarGuidePlan {
   domain: readonly [number, number];
   transformedDomain: readonly [number, number];
   transform: "identity" | "log10" | "sqrt";
-  temporalKind: TemporalKind | null;
+  temporalKind: TemporalScaleKind | null;
   direction: "ascending" | "descending";
   ticks: readonly ColorbarGuideTick[];
   stops: readonly (readonly [number, string])[];
@@ -112,7 +112,7 @@ export interface ColorstepsGuidePlan {
   domain: readonly [number, number];
   transformedDomain: readonly [number, number];
   transform: "identity" | "log10" | "sqrt";
-  temporalKind: TemporalKind | null;
+  temporalKind: TemporalScaleKind | null;
   direction: "ascending" | "descending";
   steps: readonly ColorstepsGuideStep[];
   naValue: string;

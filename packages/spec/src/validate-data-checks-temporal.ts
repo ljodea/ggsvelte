@@ -9,6 +9,7 @@ import {
   canonicalTemporalParserKey,
   type TemporalParseOptions,
   type TemporalParserSpec,
+  type TemporalScaleKind,
 } from "./temporal-parse.js";
 import type { FieldEvidenceEntry } from "./validate-data-evidence.js";
 
@@ -88,7 +89,7 @@ export function appendTemporalKindMismatch(
     axis: "x" | "y";
     path: string;
     field: string;
-    expected: "date" | "datetime" | "time" | undefined;
+    expected: TemporalScaleKind | undefined;
     actual: "date" | "datetime" | "time" | null;
   },
 ): void {
@@ -96,6 +97,9 @@ export function appendTemporalKindMismatch(
   if (expected === undefined || actual === null || actual === expected) return;
   // scale_*_time reduces date/datetime to UTC clock portion (#831); not a mismatch.
   if (expected === "time" && (actual === "date" || actual === "datetime")) return;
+  // monthDay takes the month-day off a full date and drops the rest, so a field
+  // parsing as date or datetime is exactly what it expects to be given.
+  if (expected === "monthDay" && (actual === "date" || actual === "datetime")) return;
   errors.push({
     code: "scale-type-mismatch",
     path,
