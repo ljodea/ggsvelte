@@ -214,6 +214,11 @@ export const STATISTICS_POSITIONS_MD = `# Statistics and positions
 Stats derive marks from mapped rows. Positions control how derived marks share
 coordinate space.
 
+The full list of statistical transforms lives in the
+[stat reference](/reference/stats): after_stat columns and which geoms accept
+each value. Open a specific stat, for example [count](/reference/stats/count)
+or [smooth](/reference/stats/smooth).
+
 ## Statistical summaries
 
 \`\`\`svelte fragment

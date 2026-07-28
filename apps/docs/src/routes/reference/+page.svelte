@@ -19,6 +19,12 @@
         schema.</span
       >
     </a>
+    <a href={`${base}/reference/stats`}>
+      <strong>Stat reference</strong>
+      <span
+        >Every statistical transform: after_stat columns and compatible geoms.</span
+      >
+    </a>
     <a href={`${base}/reference/interactions`}>
       <strong>Interaction reference</strong>
       <span>Capabilities, events, diagnostics, accessibility defaults.</span>

@@ -8,6 +8,7 @@ import {
 import { GUIDE_CATALOG, type GuideCatalogEntry } from "../apps/docs/src/lib/catalog/guide.ts";
 import type { DocsRouteMetadata, RouteHeading } from "../apps/docs/src/lib/route-types.ts";
 import { geomReferenceList } from "../packages/spec/src/geom-reference.ts";
+import { statReferenceList } from "../packages/spec/src/stat-reference.ts";
 import { CLI_REFERENCE_OPTIONS } from "./cli-docs.ts";
 
 /** Script-side name for the shared route metadata contract (`DocsRouteMetadata`). */
@@ -111,6 +112,22 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     ],
   },
   {
+    path: "/reference/stats",
+    title: "Stat reference — ggsvelte",
+    description:
+      "Schema-derived API reference for every statistical transform: after_stat columns and compatible geoms.",
+    canonicalPath: "/reference/stats",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: { section: "Reference", label: "Stat reference", order: 52 },
+    headings: [
+      { id: "all-stats", title: "All stats", level: 2 },
+      { id: "how-to-set", title: "How to set a stat", level: 2 },
+    ],
+  },
+  {
     path: "/reference/interactions",
     title: "Search interactions — ggsvelte",
     description:
@@ -120,7 +137,8 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Interaction reference", order: 52 },
+    // order 53 reserved for /reference/positions (next follow-up)
+    navigation: { section: "Reference", label: "Interaction reference", order: 54 },
   },
   {
     path: "/reference/cli",
@@ -132,7 +150,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "CLI reference", order: 53 },
+    navigation: { section: "Reference", label: "CLI reference", order: 55 },
     headings: [
       { id: "input-and-output", title: "Input and output", level: 2 },
       { id: "options", title: "Options", level: 2 },
@@ -185,6 +203,47 @@ function geomDetailRoutes(): DocsRouteRecord[] {
       // summaries share phrasing across aliases or related marks.
       description: `${entry.component}: ${entry.summary}`,
       canonicalPath: `/reference/geoms/${entry.slug}`,
+      kind: "page" as const,
+      index: true,
+      sitemap: true,
+      shell: "docs" as const,
+      headings,
+    };
+  });
+}
+
+/** Same matching rule as apps/docs reference/stats/[name] page load. */
+function statHasRelatedExamples(stat: string): boolean {
+  const compact = stat.replaceAll("_", "");
+  const dashed = stat.replaceAll("_", "-");
+  return EXAMPLES.some(
+    (entry) =>
+      entry.category === stat ||
+      entry.category === compact ||
+      entry.tags.includes(stat) ||
+      entry.tags.includes(dashed) ||
+      entry.tags.includes(`stat-${stat}`) ||
+      entry.tags.includes(`stat_${stat}`),
+  );
+}
+
+/** One indexable page per KNOWN_STATS entry. */
+function statDetailRoutes(): DocsRouteRecord[] {
+  return statReferenceList().map((entry) => {
+    const headings: RouteHeading[] = [
+      { id: "usage", title: "Usage", level: 2 },
+      { id: "generated-columns", title: "Generated columns (after_stat)", level: 2 },
+      { id: "default-for", title: "Default for geoms", level: 2 },
+      { id: "compatible-geoms", title: "Compatible geoms", level: 2 },
+    ];
+    if (statHasRelatedExamples(entry.name)) {
+      headings.push({ id: "examples", title: "Examples", level: 2 });
+    }
+    return {
+      path: `/reference/stats/${entry.slug}`,
+      title: `stat ${entry.name} — ggsvelte`,
+      description: `stat "${entry.name}": ${entry.summary}`,
+      canonicalPath: `/reference/stats/${entry.slug}`,
       kind: "page" as const,
       index: true,
       sitemap: true,
@@ -334,6 +393,7 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
   return validateRouteInventory([
     ...TOP_LEVEL_ROUTES,
     ...geomDetailRoutes(),
+    ...statDetailRoutes(),
     ...guides,
     ...examples,
     ...interactionExpositions,

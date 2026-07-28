@@ -1660,6 +1660,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "STAT_REFERENCE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "STYLE_AESTHETIC_GEOMS": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1825,6 +1829,10 @@
           "lifecycle": "experimental"
         },
         "StatName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "StatReferenceEntry": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -3433,6 +3441,10 @@
           "lifecycle": "experimental"
         },
         "schemaArtifactJSON": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "statReferenceList": {
           "kind": "value",
           "lifecycle": "experimental"
         },

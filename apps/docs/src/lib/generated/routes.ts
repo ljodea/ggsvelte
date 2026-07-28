@@ -113,6 +113,34 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/reference/stats",
+    title: "Stat reference — ggsvelte",
+    description:
+      "Schema-derived API reference for every statistical transform: after_stat columns and compatible geoms.",
+    canonicalPath: "/reference/stats",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Reference",
+      label: "Stat reference",
+      order: 52,
+    },
+    headings: [
+      {
+        id: "all-stats",
+        title: "All stats",
+        level: 2,
+      },
+      {
+        id: "how-to-set",
+        title: "How to set a stat",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/reference/interactions",
     title: "Search interactions — ggsvelte",
     description:
@@ -125,7 +153,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Interaction reference",
-      order: 52,
+      order: 54,
     },
   },
   {
@@ -141,7 +169,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "CLI reference",
-      order: 53,
+      order: 55,
     },
     headings: [
       {
@@ -2554,6 +2582,1040 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/reference/stats/identity",
+    title: "stat identity — ggsvelte",
+    description:
+      'stat "identity": Pass rows through unchanged. Default for most geoms: each mapped row becomes one mark with no aggregation.',
+    canonicalPath: "/reference/stats/identity",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/unique",
+    title: "stat unique — ggsvelte",
+    description:
+      'stat "unique": Keep one row per distinct mapped (x, y) pair (and group). Use when duplicate coordinates would overplot; default for none.',
+    canonicalPath: "/reference/stats/unique",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/manual",
+    title: "stat manual — ggsvelte",
+    description:
+      'stat "manual": Author-supplied after_stat values via params — skip automatic transforms when you already computed summaries.',
+    canonicalPath: "/reference/stats/manual",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/connect",
+    title: "stat connect — ggsvelte",
+    description:
+      'stat "connect": Expand successive points into connection vertices (linear, hv, vh, mid) for stepped or path-style joins between observations.',
+    canonicalPath: "/reference/stats/connect",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/count",
+    title: "stat count — ggsvelte",
+    description:
+      'stat "count": Count rows (or sum weights) per distinct x within each group. Default for geom_bar; publishes after_stat count.',
+    canonicalPath: "/reference/stats/count",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/bin",
+    title: "stat bin — ggsvelte",
+    description:
+      'stat "bin": Bin continuous x into histogram breaks. Publishes count, density, ncount, and ndensity; default for histogram and freqpoly.',
+    canonicalPath: "/reference/stats/bin",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/bin_hex",
+    title: "stat bin_hex — ggsvelte",
+    description:
+      'stat "bin_hex": Hexagonal 2D binning over continuous x and y. Publishes count/density columns for geom_hex heatmaps.',
+    canonicalPath: "/reference/stats/bin_hex",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/bin_2d",
+    title: "stat bin_2d — ggsvelte",
+    description:
+      'stat "bin_2d": Rectangular 2D binning over continuous x and y. Publishes count/density and bin edges for geom_bin_2d tiles.',
+    canonicalPath: "/reference/stats/bin_2d",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/smooth",
+    title: "stat smooth — ggsvelte",
+    description:
+      'stat "smooth": Fit a smoother (lm or loess) and evaluate along x. Publishes y, ymin, ymax, and se; default for geom_smooth.',
+    canonicalPath: "/reference/stats/smooth",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/quantile",
+    title: "stat quantile — ggsvelte",
+    description:
+      'stat "quantile": Estimate conditional quantiles of y given x. Publishes y at each requested probability; default for geom_quantile.',
+    canonicalPath: "/reference/stats/quantile",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/boxplot",
+    title: "stat boxplot — ggsvelte",
+    description:
+      'stat "boxplot": Five-number summary per group (hinges and whiskers). Publishes ymin, lower, middle, upper, ymax; default for geom_boxplot.',
+    canonicalPath: "/reference/stats/boxplot",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/density",
+    title: "stat density — ggsvelte",
+    description:
+      'stat "density": 1D Gaussian kernel density estimate along x. Publishes density, count, scaled, and ndensity; default for geom_density.',
+    canonicalPath: "/reference/stats/density",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/summary",
+    title: "stat summary — ggsvelte",
+    description:
+      'stat "summary": Collapse each discrete-x group to one summary (default mean ± se). Publishes y, ymin, ymax for error-style geoms.',
+    canonicalPath: "/reference/stats/summary",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/sum",
+    title: "stat sum — ggsvelte",
+    description:
+      'stat "sum": Count overlapping points at each (x, y) cell for geom_count. Publishes n and prop (not y).',
+    canonicalPath: "/reference/stats/sum",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/ydensity",
+    title: "stat ydensity — ggsvelte",
+    description:
+      'stat "ydensity": Kernel density along y for violin shapes. Publishes density, count, scaled, violinwidth, and y; default for geom_violin.',
+    canonicalPath: "/reference/stats/ydensity",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/function",
+    title: "stat function — ggsvelte",
+    description:
+      'stat "function": Evaluate a pure function on an x grid. Publishes y; default for geom_function when no data rows drive the mark.',
+    canonicalPath: "/reference/stats/function",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/ecdf",
+    title: "stat ecdf — ggsvelte",
+    description:
+      'stat "ecdf": Empirical cumulative distribution F̂(x). Publishes ecdf; pair with step or path geoms for CDF plots.',
+    canonicalPath: "/reference/stats/ecdf",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/summary_bin",
+    title: "stat summary_bin — ggsvelte",
+    description:
+      'stat "summary_bin": Bin continuous x, then summarize y in each bin (mean ± se by default). Publishes y, ymin, ymax for binned summaries.',
+    canonicalPath: "/reference/stats/summary_bin",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/contour",
+    title: "stat contour — ggsvelte",
+    description:
+      'stat "contour": Marching-squares isolines over a regular x×y×z grid. Publishes level; default for geom_contour.',
+    canonicalPath: "/reference/stats/contour",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/align",
+    title: "stat align — ggsvelte",
+    description:
+      'stat "align": Interpolate series onto a shared x grid so continuous-x stacks and overlays line up (stack-friendly zeros outside range).',
+    canonicalPath: "/reference/stats/align",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/density_2d",
+    title: "stat density_2d — ggsvelte",
+    description:
+      'stat "density_2d": Bivariate KDE with isolines. Publishes level and density; default for geom_density_2d.',
+    canonicalPath: "/reference/stats/density_2d",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/density_2d_filled",
+    title: "stat density_2d_filled — ggsvelte",
+    description:
+      'stat "density_2d_filled": Bivariate KDE with closed density rings for filled contours. Publishes level and density; default for geom_density_2d_filled.',
+    canonicalPath: "/reference/stats/density_2d_filled",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/bindot",
+    title: "stat bindot — ggsvelte",
+    description:
+      'stat "bindot": Histodot binning for geom_dotplot: one stack position per observation. Publishes stackpos (and bin occupancy).',
+    canonicalPath: "/reference/stats/bindot",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/ellipse",
+    title: "stat ellipse — ggsvelte",
+    description:
+      'stat "ellipse": Confidence ellipse over bivariate points (level and type from params). Passes geometry suited to path/polygon-style marks.',
+    canonicalPath: "/reference/stats/ellipse",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/sf",
+    title: "stat sf — ggsvelte",
+    description:
+      'stat "sf": Simple-features geometry expansion for geom_sf: multiparts and holes become drawable rings without after_stat columns.',
+    canonicalPath: "/reference/stats/sf",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/sf_coordinates",
+    title: "stat sf_coordinates — ggsvelte",
+    description:
+      'stat "sf_coordinates": Label anchors from SF geometries for geom_sf_text and geom_sf_label (one point per feature or part).',
+    canonicalPath: "/reference/stats/sf_coordinates",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/qq",
+    title: "stat qq — ggsvelte",
+    description:
+      'stat "qq": Sample vs theoretical quantiles for Q–Q plots. Publishes sample and theoretical; default for geom_qq.',
+    canonicalPath: "/reference/stats/qq",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/stats/qq_line",
+    title: "stat qq_line — ggsvelte",
+    description:
+      'stat "qq_line": Reference line through Q–Q sample/theoretical quantiles. Publishes sample and theoretical; default for geom_qq_line.',
+    canonicalPath: "/reference/stats/qq_line",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "generated-columns",
+        title: "Generated columns (after_stat)",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/guide/getting-started",
     title: "Getting started — ggsvelte",
     description: "Install @ggsvelte/svelte and render one chart from a Svelte file.",
@@ -3508,7 +4570,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Errors reference",
-      order: 53,
+      order: 56,
     },
     headings: [
       {
@@ -4545,7 +5607,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Advisories",
-      order: 54,
+      order: 57,
     },
     headings: [
       {
@@ -4667,7 +5729,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Lifecycle & editions",
-      order: 55,
+      order: 58,
     },
     headings: [
       {
@@ -4686,8 +5748,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-865",
-        title: "experimental (865)",
+        id: "experimental-868",
+        title: "experimental (868)",
         level: 3,
       },
       {
@@ -6089,6 +7151,10 @@ export const GUIDE_NAVIGATION = [
       {
         path: "/reference/geoms",
         label: "Geom reference",
+      },
+      {
+        path: "/reference/stats",
+        label: "Stat reference",
       },
       {
         path: "/reference/interactions",

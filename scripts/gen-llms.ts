@@ -400,6 +400,7 @@ export function buildLlmsIndex(
   }
   lines.push(
     "- [Geom reference](/reference/geoms): every Geom* component with defaults, allowed stats/positions, and params from the schema",
+    "- [Stat reference](/reference/stats): every statistical transform with after_stat columns and compatible geoms",
     "- [Search interaction reference](/reference/interactions): filter interaction capabilities, events, diagnostics, and accessibility guidance",
     "- [JSON Schema v0](/schema/v0.json): the PortableSpec schema (unstable in v0.1)",
     "- [llms-full.txt](/llms-full.txt): all docs prose plus every example (spec JSON + Svelte source)",
