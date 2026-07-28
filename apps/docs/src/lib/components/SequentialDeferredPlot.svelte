@@ -2,6 +2,8 @@
   import { onMount } from "svelte";
   import type { ColorScaleSpec } from "@ggsvelte/spec";
 
+  import { observeNearViewport } from "$lib/near-viewport";
+
   const {
     label,
     scale,
@@ -23,26 +25,24 @@
     const el = host;
     if (el === null) return;
     let cancelled = false;
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          void import("./SequentialColorLabLive.svelte").then((mod) => {
-            if (!cancelled) Live = mod.default;
-          });
-          io.disconnect();
-        }
+    const stop = observeNearViewport(
+      el,
+      () => {
+        if (cancelled || Live !== null) return;
+        void import("./SequentialColorLabLive.svelte").then((mod) => {
+          if (!cancelled) Live = mod.default;
+        });
       },
       { rootMargin: "480px 0px" },
     );
-    io.observe(el);
     return () => {
       cancelled = true;
-      io.disconnect();
+      stop();
     };
   });
 </script>
 
-<div class="plot-panel" bind:this={host}>
+<div class="plot-panel" bind:this={host} style:min-height="{height}px">
   {#if Live !== null}
     <Live {label} {scale} {height} />
   {:else}
