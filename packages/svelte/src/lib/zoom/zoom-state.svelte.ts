@@ -17,6 +17,7 @@ import type {
   ResolvedInteractionConfig,
   ZoomEvent,
 } from "../interaction/interaction.js";
+import { createScopedStore } from "../interaction/scoped-store.svelte.js";
 import { frozenZoomDomains, type ContinuousZoomDomains } from "../scene/geometry.js";
 import { zoomAnnouncement } from "../assembly/labels.js";
 import {
@@ -84,26 +85,46 @@ export type PlotZoomState = {
  * deferred getters (`model`, `announce`).
  */
 export function createPlotZoomState(deps: PlotZoomStateDeps): PlotZoomState {
-  let localZoomDomains = $state<ContinuousZoomDomains | null>(null);
   // Memoize prior bag so selection/emphasis revisions do not retrain zoom.
   let previousEffectiveZoomDomains: ContinuousZoomDomains | null = null;
 
-  const effectiveZoomDomains: ContinuousZoomDomains | null = $derived.by(() => {
-    // Equivalent dependency to the host `controllerRevision` derived —
-    // read interaction revision directly (no extra dep).
-    void (deps.interaction()?.revision ?? 0);
-    let next: ContinuousZoomDomains | null;
-    if (deps.interaction() === undefined) {
-      next = localZoomDomains;
-    } else {
+  const zoomDomains = createScopedStore<ContinuousZoomDomains | null>({
+    initial: null,
+    empty: null,
+    controller: deps.interaction,
+    scope: deps.resolvedInteractionScope,
+    read: (controller, scope) =>
       // Gate shared domains by this plot's resolved zoom mode (null when
       // disabled / faceted-unsupported) so x-only plots ignore y domains.
-      next = filterZoomDomainsByMode(
-        deps.interaction()!.zoom(deps.resolvedInteractionScope()),
-        deps.zoomConfig()?.mode ?? null,
-      );
-    }
-    next = stableZoomDomains(previousEffectiveZoomDomains, next);
+      filterZoomDomainsByMode(controller.zoom(scope), deps.zoomConfig()?.mode ?? null),
+    write: (controller, next, scope, source) => {
+      // Match filterZoomDomainsByMode: x-only plots must not mutate shared y.
+      const mutationScope = filterScopeChannelsByZoomMode(scope, deps.zoomConfig()?.mode ?? null);
+      if (next === null) {
+        const transition = controller.resetZoom({ scope: mutationScope, source });
+        return transition === null ? null : { value: null };
+      }
+      const transition = controller.setZoom(next, { scope: mutationScope, source });
+      if (transition === null) return null;
+      return {
+        value: frozenZoomDomains(
+          continuousZoomDomainsFromScopes(
+            transition.snapshot.zoom,
+            mutationScope.x,
+            mutationScope.y,
+          ),
+        ),
+      };
+    },
+    clearShared: (controller, scope, source) =>
+      controller.resetZoom({
+        scope: filterScopeChannelsByZoomMode(scope, deps.zoomConfig()?.mode ?? null),
+        source,
+      }) !== null,
+  });
+
+  const effectiveZoomDomains: ContinuousZoomDomains | null = $derived.by(() => {
+    const next = stableZoomDomains(previousEffectiveZoomDomains, zoomDomains.value);
     previousEffectiveZoomDomains = next;
     return next;
   });
@@ -116,36 +137,10 @@ export function createPlotZoomState(deps: PlotZoomStateDeps): PlotZoomState {
   const effectiveSpec: PortableSpec | null = $derived.by(resolveEffectiveSpec);
 
   function commitZoom(domains: ContinuousZoomDomains | null, source: InteractionSource): void {
-    let committed: ContinuousZoomDomains | null = domains;
-    if (deps.interaction() === undefined) {
-      if (domains === null && localZoomDomains === null) return;
-      localZoomDomains = domains;
-    } else {
-      // Match filterZoomDomainsByMode: x-only plots must not mutate shared y.
-      const mutationScope = filterScopeChannelsByZoomMode(
-        deps.resolvedInteractionScope(),
-        deps.zoomConfig()?.mode ?? null,
-      );
-      const transition =
-        domains === null
-          ? deps.interaction()!.resetZoom({ scope: mutationScope, source })
-          : deps.interaction()!.setZoom(domains, {
-              scope: mutationScope,
-              source,
-            });
-      if (transition === null) return;
-      if (domains !== null) {
-        committed = frozenZoomDomains(
-          continuousZoomDomainsFromScopes(
-            transition.snapshot.zoom,
-            mutationScope.x,
-            mutationScope.y,
-          ),
-        );
-      }
-    }
-    const event = buildZoomEvent(committed, source);
-    deps.announce(zoomAnnouncement(committed));
+    const committed = zoomDomains.set(domains, source);
+    if (committed === null) return;
+    const event = buildZoomEvent(committed.value, source);
+    deps.announce(zoomAnnouncement(committed.value));
     deps.onzoom()?.(event);
     deps.oninteraction()?.(event);
   }
@@ -193,14 +188,9 @@ export function createPlotZoomState(deps: PlotZoomStateDeps): PlotZoomState {
   }
 
   function resetForScales(): void {
-    if (deps.interaction() === undefined) localZoomDomains = null;
-    else
-      deps.interaction()!.resetZoom({
-        scope: filterScopeChannelsByZoomMode(
-          deps.resolvedInteractionScope(),
-          deps.zoomConfig()?.mode ?? null,
-        ),
-      });
+    // Silent path: no event / announcement. Prefer clear() so local and shared
+    // storage stay interchangeable without an interaction fork at the call site.
+    zoomDomains.clear("programmatic");
   }
 
   return {

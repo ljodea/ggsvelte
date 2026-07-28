@@ -16,6 +16,7 @@ import type {
   PlotInteractionEvent,
   PlotInteractionScope,
 } from "../interaction/interaction.js";
+import { createScopedStore } from "../interaction/scoped-store.svelte.js";
 import { legendFocusAnnouncement } from "../assembly/labels.js";
 import {
   buildInteractiveLegendEntries,
@@ -115,7 +116,24 @@ export type LegendFocusState = {
  * declares entry/pressed deriveds that this factory's compute* methods feed.
  */
 export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusState {
-  let localEmphasisKeys = $state<PropertyKey[]>([]);
+  const emphasisKeys = createScopedStore<readonly PropertyKey[]>({
+    initial: [],
+    controller: deps.interaction,
+    scope: deps.resolvedInteractionScope,
+    read: (controller, scope) => controller.emphasized(scope),
+    write: (controller, next, scope, source) => {
+      const transition = controller.setEmphasis(next, { scope, source });
+      if (transition === null) return null;
+      return {
+        value:
+          transition.snapshot.emphases.find((emphasis) => emphasis.scope === scope.keys)?.keys ??
+          [],
+      };
+    },
+    clearShared: (controller, scope, source) =>
+      controller.clearEmphasis({ scope, source }) !== null,
+    same: samePropertyKeySet,
+  });
   let legendPreview = $state<{
     action: LegendEntryAction;
     keys: readonly PropertyKey[];
@@ -131,17 +149,13 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
   let suppressLegendFocusPreview = false;
 
   const effectiveEmphasisKeys: readonly PropertyKey[] = $derived.by(() => {
-    // Equivalent dependency to the host `controllerRevision` derived —
-    // read interaction revision directly (no extra dep).
-    void (deps.interaction()?.revision ?? 0);
+    const baseKeys = emphasisKeys.value;
     return resolveLegendEmphasisKeys({
       legendFocusEnabled: deps.legendFocusEnabled(),
       previewKeys: legendPreview?.keys ?? null,
-      controllerKeys:
-        deps.interaction() === undefined
-          ? null
-          : deps.interaction()!.emphasized(deps.resolvedInteractionScope()),
-      localKeys: localEmphasisKeys,
+      // Shared: baseKeys are controller-backed. Local: baseKeys fill localKeys.
+      controllerKeys: deps.interaction() === undefined ? null : baseKeys,
+      localKeys: baseKeys,
     });
   });
 
@@ -158,9 +172,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
       // Pure table maps preview source → InteractionSource on non-none actions.
       const dismiss = resolveLegendPreviewDismissAction({
         previewSource: legendPreview?.action.source ?? null,
-        committedEmphasisEmpty:
-          (deps.interaction()?.emphasized(deps.resolvedInteractionScope()) ?? localEmphasisKeys)
-            .length === 0,
+        committedEmphasisEmpty: emphasisKeys.value.length === 0,
       });
       if (dismiss.type === "none") return;
       legendPreview = null;
@@ -202,12 +214,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
     });
     legendPreview = null;
     legendCommitted = null;
-    if (deps.interaction() === undefined) localEmphasisKeys = [];
-    else
-      deps.interaction()!.clearEmphasis({
-        scope: deps.resolvedInteractionScope(),
-        source,
-      });
+    emphasisKeys.clear(source);
     if (emitClear) emitLegendFocus({ type: "legend-focus", phase: "clear", source });
   }
 
@@ -235,8 +242,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
   }
 
   function computeLegendPressed(model: RenderModel | null): LegendEntryIdentity | null {
-    const keys =
-      deps.interaction()?.emphasized(deps.resolvedInteractionScope()) ?? localEmphasisKeys;
+    const keys = emphasisKeys.value;
     if (keys.length === 0 || model === null) return null;
     // Match against all discrete scene legends (not only interactive targets).
     return findLegendPressedIdentity({
@@ -267,12 +273,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
       case "commit":
         legendPreview = null;
         legendCommitted = { identity: action.identity, keys };
-        if (deps.interaction() === undefined) localEmphasisKeys = [...keys];
-        else
-          deps.interaction()!.setEmphasis(keys, {
-            scope: deps.resolvedInteractionScope(),
-            source: commit.source,
-          });
+        emphasisKeys.set([...keys], commit.source);
         emitLegendFocus({
           type: "legend-focus",
           phase: "change",
@@ -440,12 +441,14 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
     });
 
     $effect(() => {
+      const usesLocalEmphasis = deps.interaction() === undefined;
       const plan = planLegendCommittedReconcile({
         committed: legendCommitted,
         entries: deps.entries(),
         keyIndex: deps.entryKeys().legendEntryKeyIndex,
-        usesLocalEmphasis: deps.interaction() === undefined,
-        localEmphasisCount: localEmphasisKeys.length,
+        usesLocalEmphasis,
+        // Only consulted when usesLocalEmphasis; store value is the local shadow.
+        localEmphasisCount: usesLocalEmphasis ? emphasisKeys.value.length : 0,
       });
       switch (plan.type) {
         case "noop":
@@ -455,7 +458,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
           break;
         case "clear-committed-local-emit":
           legendCommitted = null;
-          localEmphasisKeys = [];
+          emphasisKeys.clear("programmatic");
           emitLegendFocus({
             type: "legend-focus",
             phase: "clear",
@@ -486,13 +489,15 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
     });
 
     // Drop chart-local emphasis when legend focus is turned off at runtime.
+    // Shared controller emphasis is intentionally retained (clear-host only).
     $effect(() => {
+      const usesLocalEmphasis = deps.interaction() === undefined;
       const plan = planLegendFocusDisabledClear({
         legendFocusEnabled: deps.legendFocusEnabled(),
         hasPreview: legendPreview !== null,
         hasCommitted: legendCommitted !== null,
-        hasLocalEmphasis: localEmphasisKeys.length > 0,
-        usesLocalEmphasis: deps.interaction() === undefined,
+        hasLocalEmphasis: usesLocalEmphasis && emphasisKeys.value.length > 0,
+        usesLocalEmphasis,
       });
       switch (plan.type) {
         case "noop":
@@ -504,7 +509,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
         case "clear-host-local":
           legendPreview = null;
           legendCommitted = null;
-          localEmphasisKeys = [];
+          emphasisKeys.clear("programmatic");
           break;
       }
     });
