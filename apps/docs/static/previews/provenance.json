@@ -373,28 +373,28 @@
     },
     "sf/basic": {
       "filename": "sf-basic-light.png",
-      "sourceSha256": "3715642aaae172ff1844d1c25e6df3642e46c0ab21c1d7a8a3da65a0867b8c29",
-      "pngSha256": "ab18e17562cdb41056215212f2637717b1a2fd84c187fc5566139ffa9d88c3cf"
+      "sourceSha256": "f48215b8e559eeea94b9c21330bdfa9dad3dfe92bd17a325fca30cbd9cfa5c07",
+      "pngSha256": "1697777b29104ea271474c023bf4442ba6d9f1bcc534ac834bf24f8f019bd146"
     },
     "sf/boxed-labels": {
       "filename": "sf-boxed-labels-light.png",
-      "sourceSha256": "a11d3c47348338c7a3e82658090fd52dafc84743aa92660abec975494f08fc3a",
-      "pngSha256": "ee33e8fcd2e284c607ec8c4661fb9312ecb90af0cb052abba0a8a5e5ce4baa56"
+      "sourceSha256": "efdc31dc1e77e3d0e44ffdf3f3f5c858d405ecbcff9d4852f4ff75dc3046dcb4",
+      "pngSha256": "56846abc4da58ee6a0d09b81ff7586640ee13e2c209e6a4d9884d46c2d15437c"
     },
     "sf/geometry-collection": {
       "filename": "sf-geometry-collection-light.png",
-      "sourceSha256": "6e7845a503ba5198bc34e401f8286d7acb23123abdc69fb2b2579deccb3d3216",
-      "pngSha256": "82adc75dc8d359ca9b2c49af45f26abc3af229090c587bc86109a130df10b701"
+      "sourceSha256": "cc107de7ea1b91e45b09d32ae4664914e8d77f312b6641f7506532cf77c32030",
+      "pngSha256": "f6367b86bd5264974dce2e33b17e70d81046670d8bb7583c31aedb2dd6b00c11"
     },
     "sf/holes": {
       "filename": "sf-holes-light.png",
-      "sourceSha256": "06aa48f93ebb7a38426d12c17cf2ca699c2d78766eb9f327ccdce1c61c9bd981",
-      "pngSha256": "32e4106b95aa7391426c014e5988bad7f91895f38f8b1a647d8dadcd83661256"
+      "sourceSha256": "1b79696190e52d22255ee336f8185a18fd0586ae1a82fc80d459b55ab74fc805",
+      "pngSha256": "9b9f5ea12172c1ceff4e2ef6c2b03ef58e487decdc39a2be23b034a4ef33346f"
     },
     "sf/labels": {
       "filename": "sf-labels-light.png",
-      "sourceSha256": "438a7ef29ae53ccbae7e0af30db661095a63f5357d82866bd46b2bc1d0b82379",
-      "pngSha256": "de80a275be7b22349b7776bb03c41f2f4dc7eb19f4e666d92604329d86232b0f"
+      "sourceSha256": "328138448f0bb81c44a398c4a45fa1c446e84c3f0b372de48168292abf644397",
+      "pngSha256": "38ff01864354573f709d78f1874ef99a24c92da48f9f148bfa7b0c66e46a116b"
     },
     "smooth/loess-scatter": {
       "filename": "smooth-loess-scatter-light.png",

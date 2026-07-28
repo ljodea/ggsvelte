@@ -1,5 +1,6 @@
 {
-  "title": "Simple features polygon holes",
+  "title": "Height bands with holes punched out",
+  "description": "Two slopes of Maunga Whau, each the area inside one contour and outside the next. The interior ring and the even-odd rule are what leave the middle open.",
   "tags": ["sf", "geojson", "polygon", "hole", "evenodd", "fill", "map", "geom"],
   "docsSection": "Maps & spatial"
 }

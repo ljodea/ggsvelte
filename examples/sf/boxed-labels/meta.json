@@ -1,5 +1,6 @@
 {
-  "title": "SF boxed labels",
+  "title": "The same names, on paper",
+  "description": "The Soho pump map again, with each name backed by a measured box. Set beside the plain-text version it shows what the box buys over a busy fill.",
   "tags": ["sf", "sf_label", "label", "box", "geojson", "centroid", "map"],
   "docsSection": "Maps & spatial"
 }

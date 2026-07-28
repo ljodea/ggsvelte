@@ -3245,8 +3245,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/sf/basic",
-    title: "Simple features polygons — ggsvelte gallery",
-    description: "Simple features polygons",
+    title: "Maunga Whau as simple features — ggsvelte gallery",
+    description:
+      "Three closed height rings of an Auckland volcano, each carried as one GeoJSON polygon in a geometry column rather than a table of vertices.",
     canonicalPath: "/examples/sf/basic",
     kind: "page",
     index: true,
@@ -3255,8 +3256,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/sf/boxed-labels",
-    title: "SF boxed labels — ggsvelte gallery",
-    description: "SF boxed labels",
+    title: "The same names, on paper — ggsvelte gallery",
+    description:
+      "The Soho pump map again, with each name backed by a measured box. Set beside the plain-text version it shows what the box buys over a busy fill.",
     canonicalPath: "/examples/sf/boxed-labels",
     kind: "page",
     index: true,
@@ -3265,8 +3267,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/sf/geometry-collection",
-    title: "GeometryCollection expand — ggsvelte gallery",
-    description: "GeometryCollection expand",
+    title: "One feature, two pieces of ground — ggsvelte gallery",
+    description:
+      "Everything above 180 metres on Maunga Whau: the summit ridge and a separate rise, carried in one GeometryCollection and expanded into two closed parts.",
     canonicalPath: "/examples/sf/geometry-collection",
     kind: "page",
     index: true,
@@ -3275,8 +3278,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/sf/holes",
-    title: "Simple features polygon holes — ggsvelte gallery",
-    description: "Simple features polygon holes",
+    title: "Height bands with holes punched out — ggsvelte gallery",
+    description:
+      "Two slopes of Maunga Whau, each the area inside one contour and outside the next. The interior ring and the even-odd rule are what leave the middle open.",
     canonicalPath: "/examples/sf/holes",
     kind: "page",
     index: true,
@@ -3285,8 +3289,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/sf/labels",
-    title: "SF region labels — ggsvelte gallery",
-    description: "SF region labels",
+    title: "Snow's pumps, named in place — ggsvelte gallery",
+    description:
+      "The thirteen Soho neighbourhoods with each pump's street name set at the centre of the area it served, positioned from the geometry rather than from x and y.",
     canonicalPath: "/examples/sf/labels",
     kind: "page",
     index: true,

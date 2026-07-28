@@ -1,15 +1,22 @@
 <script lang="ts">
-  import { GeomSf, GGPlot, Labs, ThemeClassic } from "@ggsvelte/svelte";
+  import {
+    CoordFixed,
+    GeomSf,
+    GGPlot,
+    Labs,
+    ThemeClassic,
+  } from "@ggsvelte/svelte";
 
-  import { donuts } from "./data.js";
+  import { slopeBands } from "./data.js";
 </script>
 
-<GGPlot data={donuts} aes={{ fill: "rate" }} width={640} height={400}>
+<GGPlot data={slopeBands} aes={{ fill: "band" }} width={640} height={400}>
   <ThemeClassic />
+  <CoordFixed />
   <Labs
-    title="geom_sf polygon holes"
-    subtitle="Even-odd interior rings punch holes (#809 phase 4)"
-    fill="rate"
+    title="Two bands of the same hillside"
+    subtitle="Each band is one ring with the next punched out; each hole is the ground above the higher contour"
+    fill="Height band"
   />
-  <GeomSf alpha={0.9} linewidth={0.9} />
+  <GeomSf alpha={0.75} linewidth={0.9} />
 </GGPlot>

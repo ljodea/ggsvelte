@@ -1,27 +1,30 @@
 <script lang="ts">
   import {
+    CoordFixed,
     GeomSf,
     GeomSfText,
     GGPlot,
+    GuideNone,
     Labs,
     ThemeClassic,
   } from "@ggsvelte/svelte";
 
-  import { labeledRegions } from "./data.js";
+  import { pumpNeighbourhoods } from "./data.js";
 </script>
 
 <GGPlot
-  data={labeledRegions}
-  aes={{ fill: "rate", label: "region" }}
+  data={pumpNeighbourhoods}
+  aes={{ fill: "pump", label: "pump" }}
   width={640}
   height={400}
 >
   <ThemeClassic />
+  <CoordFixed />
+  <GuideNone channel="fill" />
   <Labs
-    title="geom_sf_text region labels"
-    subtitle="Labels at representative points from GeoJSON geometries (#809)"
-    fill="rate"
+    title="Every pump in Snow's Soho, named"
+    subtitle="Plain labels at the centre of the area each pump served"
   />
-  <GeomSf alpha={0.55} linewidth={0.8} />
-  <GeomSfText size={14} />
+  <GeomSf alpha={0.35} linewidth={0.8} />
+  <GeomSfText size={11} />
 </GGPlot>

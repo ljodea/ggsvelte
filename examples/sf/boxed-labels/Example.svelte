@@ -1,27 +1,30 @@
 <script lang="ts">
   import {
+    CoordFixed,
     GeomSf,
     GeomSfLabel,
     GGPlot,
+    GuideNone,
     Labs,
     ThemeClassic,
   } from "@ggsvelte/svelte";
 
-  import { boxedRegions } from "./data.js";
+  import { pumpNeighbourhoods } from "./data.js";
 </script>
 
 <GGPlot
-  data={boxedRegions}
-  aes={{ fill: "rate", label: "region" }}
+  data={pumpNeighbourhoods}
+  aes={{ fill: "pump", label: "pump" }}
   width={640}
   height={400}
 >
   <ThemeClassic />
+  <CoordFixed />
+  <GuideNone channel="fill" />
   <Labs
-    title="geom_sf_label boxed labels"
-    subtitle="Measured paper-backed boxes at representative SF points (#809)"
-    fill="rate"
+    title="The same names, on paper"
+    subtitle="geom_sf_label backs each pump's name with a measured box"
   />
-  <GeomSf alpha={0.45} linewidth={0.8} />
-  <GeomSfLabel padding={3} radius={2} size={13} />
+  <GeomSf alpha={0.75} linewidth={0.8} />
+  <GeomSfLabel padding={3} radius={2} size={11} />
 </GGPlot>

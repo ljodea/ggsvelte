@@ -1,18 +1,20 @@
-import { aes, gg } from "@ggsvelte/spec";
+import { aes, gg, guideNone } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { labeledRegions } from "./data.js";
+import { pumpNeighbourhoods } from "./data.js";
 
 export default defineExample(
-  // geom_sf_text: labels at exterior-ring centroids via stat_sf_coordinates.
-  gg(labeledRegions, aes({ fill: "rate", label: "region" }))
-    .geomSf({ alpha: 0.55, linewidth: 0.8 })
-    .geomSfText({ size: 14 })
+  // geom_sf_text puts a plain label at each geometry's representative point,
+  // worked out from the exterior ring rather than supplied as x and y.
+  gg(pumpNeighbourhoods, aes({ fill: "pump", label: "pump" }))
+    .geomSf({ alpha: 0.35, linewidth: 0.8 })
+    .geomSfText({ size: 11 })
+    .guides({ fill: guideNone() })
+    .coordFixed()
     .theme("classic")
     .labs({
-      title: "geom_sf_text region labels",
-      subtitle: "Labels at representative points from GeoJSON geometries (#809)",
-      fill: "rate",
+      title: "Every pump in Snow's Soho, named",
+      subtitle: "Plain labels at the centre of the area each pump served",
     })
     .spec(),
 );

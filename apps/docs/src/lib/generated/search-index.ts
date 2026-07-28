@@ -5475,11 +5475,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:sf:basic",
     kind: "example",
-    title: "Simple features polygons",
-    summary: "Simple features polygons (Maps & spatial)",
+    title: "Maunga Whau as simple features",
+    summary:
+      "Three closed height rings of an Auckland volcano, each carried as one GeoJSON polygon in a geometry column rather than a table of vertices.",
     href: "/examples/sf/basic",
     keywords: [
-      "Simple features polygons",
+      "Maunga Whau as simple features",
       "Maps & spatial",
       "sf",
       "geojson",
@@ -5488,16 +5489,17 @@ export const DOCS_SEARCH_INDEX = [
       "map",
       "geom",
     ],
-    exact: ["Simple features polygons"],
+    exact: ["Maunga Whau as simple features"],
   },
   {
     id: "example:sf:boxed-labels",
     kind: "example",
-    title: "SF boxed labels",
-    summary: "SF boxed labels (Maps & spatial)",
+    title: "The same names, on paper",
+    summary:
+      "The Soho pump map again, with each name backed by a measured box. Set beside the plain-text version it shows what the box buys over a busy fill.",
     href: "/examples/sf/boxed-labels",
     keywords: [
-      "SF boxed labels",
+      "The same names, on paper",
       "Maps & spatial",
       "sf",
       "sf_label",
@@ -5507,16 +5509,17 @@ export const DOCS_SEARCH_INDEX = [
       "centroid",
       "map",
     ],
-    exact: ["SF boxed labels"],
+    exact: ["The same names, on paper"],
   },
   {
     id: "example:sf:geometry-collection",
     kind: "example",
-    title: "GeometryCollection expand",
-    summary: "GeometryCollection expand (Maps & spatial)",
+    title: "One feature, two pieces of ground",
+    summary:
+      "Everything above 180 metres on Maunga Whau: the summit ridge and a separate rise, carried in one GeometryCollection and expanded into two closed parts.",
     href: "/examples/sf/geometry-collection",
     keywords: [
-      "GeometryCollection expand",
+      "One feature, two pieces of ground",
       "Maps & spatial",
       "sf",
       "geojson",
@@ -5526,16 +5529,17 @@ export const DOCS_SEARCH_INDEX = [
       "map",
       "geom",
     ],
-    exact: ["GeometryCollection expand"],
+    exact: ["One feature, two pieces of ground"],
   },
   {
     id: "example:sf:holes",
     kind: "example",
-    title: "Simple features polygon holes",
-    summary: "Simple features polygon holes (Maps & spatial)",
+    title: "Height bands with holes punched out",
+    summary:
+      "Two slopes of Maunga Whau, each the area inside one contour and outside the next. The interior ring and the even-odd rule are what leave the middle open.",
     href: "/examples/sf/holes",
     keywords: [
-      "Simple features polygon holes",
+      "Height bands with holes punched out",
       "Maps & spatial",
       "sf",
       "geojson",
@@ -5546,16 +5550,17 @@ export const DOCS_SEARCH_INDEX = [
       "map",
       "geom",
     ],
-    exact: ["Simple features polygon holes"],
+    exact: ["Height bands with holes punched out"],
   },
   {
     id: "example:sf:labels",
     kind: "example",
-    title: "SF region labels",
-    summary: "SF region labels (Maps & spatial)",
+    title: "Snow's pumps, named in place",
+    summary:
+      "The thirteen Soho neighbourhoods with each pump's street name set at the centre of the area it served, positioned from the geometry rather than from x and y.",
     href: "/examples/sf/labels",
     keywords: [
-      "SF region labels",
+      "Snow's pumps, named in place",
       "Maps & spatial",
       "sf",
       "sf_text",
@@ -5564,7 +5569,7 @@ export const DOCS_SEARCH_INDEX = [
       "centroid",
       "map",
     ],
-    exact: ["SF region labels"],
+    exact: ["Snow's pumps, named in place"],
   },
   {
     id: "example:smooth:loess-scatter",

@@ -1,5 +1,6 @@
 {
-  "title": "SF region labels",
+  "title": "Snow's pumps, named in place",
+  "description": "The thirteen Soho neighbourhoods with each pump's street name set at the centre of the area it served, positioned from the geometry rather than from x and y.",
   "tags": ["sf", "sf_text", "label", "geojson", "centroid", "map"],
   "docsSection": "Maps & spatial"
 }
