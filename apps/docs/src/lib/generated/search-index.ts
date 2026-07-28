@@ -9861,14 +9861,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-872",
+    id: "heading:guide-lifecycle:experimental-875",
     kind: "heading",
-    title: "experimental (872)",
+    title: "experimental (875)",
     summary:
-      "experimental (872) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-872",
+      "experimental (875) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-875",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (872)"],
+    exact: ["experimental (875)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -15550,6 +15550,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["STYLE_AESTHETIC_GEOMS"],
   },
   {
+    id: "api:ggsvelte-spec:STYLE_ORDINAL_SCALE_HELPERS",
+    kind: "api",
+    title: "STYLE_ORDINAL_SCALE_HELPERS",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["STYLE_ORDINAL_SCALE_HELPERS"],
+  },
+  {
     id: "api:ggsvelte-spec:ScaleCapability",
     kind: "api",
     title: "ScaleCapability",
@@ -16540,6 +16549,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["buildSchemaArtifact"],
   },
   {
+    id: "api:ggsvelte-spec:builderScaleHelperNames",
+    kind: "api",
+    title: "builderScaleHelperNames",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["builderScaleHelperNames"],
+  },
+  {
     id: "api:ggsvelte-spec:canonicalMultiScaleChannel",
     kind: "api",
     title: "canonicalMultiScaleChannel",
@@ -17141,6 +17159,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
     exact: ["scaleAlphaOrdinal"],
+  },
+  {
+    id: "api:ggsvelte-spec:scaleCapabilityCamelHelpers",
+    kind: "api",
+    title: "scaleCapabilityCamelHelpers",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["scaleCapabilityCamelHelpers"],
   },
   {
     id: "api:ggsvelte-spec:scaleColorBinned",
