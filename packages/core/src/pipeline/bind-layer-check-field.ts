@@ -1,7 +1,7 @@
 /**
  * Field presence / all-null checks for aes channel resolution.
  */
-import type { ChannelValue } from "@ggsvelte/spec";
+import type { ChannelValue, NormalizedGeomName } from "@ggsvelte/spec";
 import { didYouMean } from "@ggsvelte/spec";
 
 import type { CellValue } from "../table.js";
@@ -49,7 +49,7 @@ export function requireField(
   field: string | null,
   channelName: string,
   layerIndex: number,
-  geom: string,
+  geom: NormalizedGeomName,
 ): string {
   if (field === null) {
     throw new PipelineError(

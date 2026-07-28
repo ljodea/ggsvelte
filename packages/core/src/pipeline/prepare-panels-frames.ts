@@ -1,7 +1,7 @@
 /**
  * Build per-panel LayerFrames: bind layers, stats, position, remap source rows.
  */
-import { configuredColorScaleType, type PortableSpec } from "@ggsvelte/spec";
+import { configuredColorScaleType, type NormalizedSpec, type PortableSpec } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
@@ -179,7 +179,7 @@ import type {
 } from "./types.js";
 
 export function buildPanelFrames(input: {
-  normalized: PortableSpec;
+  normalized: NormalizedSpec;
   layerContexts: readonly {
     sourceTable: ColumnTable;
     filteredTable: ColumnTable;

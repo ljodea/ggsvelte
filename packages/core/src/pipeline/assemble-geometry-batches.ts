@@ -1,6 +1,8 @@
 /**
  * Layer-major geometry batch construction across facet panels.
  */
+import type { NormalizedGeomName } from "@ggsvelte/spec";
+
 import type { PanelCoordProjector } from "../coord-projector.js";
 import type { GeometryBatch } from "../scene.js";
 import type { PositionScale } from "../scales/train.js";
@@ -12,6 +14,71 @@ import { buildBatch, flipBatchInPlace } from "./geometry.js";
 import type { PanelPlacement } from "./panel-layout.js";
 import type { ResolvedStyleScales } from "./geometry-style.js";
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
+
+/**
+ * Which geoms defer projection so path topology survives to
+ * projectGeometryBatch. A path-shaped geom omitted here silently takes the
+ * early panel projector and loses its topology, so the table is total over the
+ * post-normalize geoms: a new geom is a compile error until someone decides
+ * (#1042). `sf` is not a row of its own — see `pathLikeGeom` below.
+ */
+export const PATH_LIKE_GEOMS: Record<NormalizedGeomName, boolean> = {
+  point: false,
+  line: true,
+  path: true,
+  col: false,
+  bar: false,
+  area: true,
+  rule: false,
+  text: false,
+  label: false,
+  smooth: true,
+  quantile: true,
+  boxplot: false,
+  density: true,
+  errorbar: false,
+  linerange: false,
+  pointrange: false,
+  crossbar: false,
+  rect: false,
+  tile: false,
+  raster: false,
+  ribbon: true,
+  segment: false,
+  count: false,
+  violin: true,
+  function: true,
+  polygon: true,
+  // Closed hex paths: project once in projectPathBatch (not via projected
+  // panel scales), same as density_2d_filled / map (#800).
+  hex: true,
+  bin_2d: false,
+  abline: false,
+  curve: false,
+  contour: true,
+  density_2d: true,
+  density_2d_filled: true,
+  dotplot: false,
+  map: true,
+  // Overridden per frame — geom_sf points are ordinary PointsBatch marks and
+  // must take the early projector; path/polygon sf defer like line/map (#809).
+  sf: true,
+  sf_text: false,
+  sf_label: false,
+  blank: false,
+  spoke: false,
+  rug: false,
+  step: true,
+  qq: false,
+  qq_line: false,
+};
+
+/** Whether this frame defers projection. Only `sf` depends on its own data. */
+function pathLikeGeom(frame: LayerFrame): boolean {
+  const geom = frame.binding.layer.geom;
+  if (geom === "sf") return frame.sf?.kind !== "point";
+  return PATH_LIKE_GEOMS[geom];
+}
 
 export function buildGeometryBatches(input: {
   layerCount: number;
@@ -46,30 +113,7 @@ export function buildGeometryBatches(input: {
       if (frame === undefined) continue;
       const placement = placements[p]!;
       const projector = coordProjectors[p];
-      const geom = frame.binding.layer.geom;
-      // geom_sf points are ordinary PointsBatch marks — they must take the
-      // early panel-frame projector. path/polygon sf defer like line/map so
-      // topology survives until projectGeometryBatch (#809).
-      const pathLike =
-        geom === "line" ||
-        geom === "function" ||
-        geom === "path" ||
-        geom === "step" ||
-        geom === "contour" ||
-        geom === "density_2d" ||
-        geom === "density_2d_filled" ||
-        geom === "area" ||
-        geom === "density" ||
-        geom === "violin" ||
-        geom === "smooth" ||
-        geom === "quantile" ||
-        geom === "ribbon" ||
-        geom === "polygon" ||
-        geom === "map" ||
-        // Closed hex paths: project once in projectPathBatch (not via projected
-        // panel scales), same as density_2d_filled / map (#800).
-        geom === "hex" ||
-        (geom === "sf" && frame.sf?.kind !== "point");
+      const pathLike = pathLikeGeom(frame);
       const built = buildBatch(
         frame,
         // Path topology must retain coordinate-invalid authored/stat vertices

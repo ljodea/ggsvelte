@@ -1,7 +1,7 @@
 /**
  * Bind data (plot + per-layer), facet-partition, and build per-panel LayerFrames.
  */
-import type { PortableSpec } from "@ggsvelte/spec";
+import type { NormalizedSpec, PortableSpec } from "@ggsvelte/spec";
 
 import { ColumnTable, type CellValue } from "../table.js";
 
@@ -81,7 +81,7 @@ function unionFacetKeyColumns(
  * Legend filters must not hide layers that merely have a same-named column.
  */
 function layerMapsLegendFilter(
-  layer: PortableSpec["layers"][number],
+  layer: NormalizedSpec["layers"][number],
   plotAes: PortableSpec["aes"],
   clause: NonNullable<RunOptions["rowFilters"]>[number],
 ): boolean {
@@ -95,7 +95,7 @@ function layerMapsLegendFilter(
 function filterLayerTable(
   table: ColumnTable,
   clauses: RunOptions["rowFilters"],
-  layer?: PortableSpec["layers"][number],
+  layer?: NormalizedSpec["layers"][number],
   plotAes?: PortableSpec["aes"],
 ): { table: ColumnTable; sourceRows: number[] | null } {
   if (clauses === undefined || clauses.length === 0) return { table, sourceRows: null };
@@ -108,7 +108,7 @@ function filterLayerTable(
 }
 
 export function preparePanels(
-  normalized: PortableSpec,
+  normalized: NormalizedSpec,
   options: RunOptions,
   warnings: PipelineWarning[],
   advisories: Advisory[],

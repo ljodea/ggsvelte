@@ -1,7 +1,7 @@
 /**
  * Per-layer aes channel resolution and structural geom/stat validation.
  */
-import type { Aes, LayerSpec } from "@ggsvelte/spec";
+import type { Aes, NormalizedLayerSpec } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
@@ -18,7 +18,7 @@ const DEFAULT_BIND_CONVERSIONS = Object.freeze({
 });
 
 export function bindLayer(
-  layer: LayerSpec,
+  layer: NormalizedLayerSpec,
   index: number,
   table: ColumnTable,
   warnings: PipelineWarning[],

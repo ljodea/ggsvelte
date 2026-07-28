@@ -4,7 +4,8 @@ import {
   POINT_SHAPE_NAMES,
   STYLE_AESTHETIC_GEOMS,
   type Aes,
-  type LayerSpec,
+  type NormalizedGeomName,
+  type StatName,
   type StyleAesthetic,
 } from "@ggsvelte/spec";
 
@@ -17,8 +18,8 @@ import { PipelineError } from "./types.js";
 export function styleBinding(
   channel: Aes[StyleAesthetic] | undefined,
   channelName: StyleAesthetic,
-  geom: LayerSpec["geom"],
-  stat: string,
+  geom: NormalizedGeomName,
+  stat: StatName,
   layerIndex: number,
   table: ColumnTable,
   warnings: PipelineWarning[],

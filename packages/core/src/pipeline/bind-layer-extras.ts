@@ -1,7 +1,7 @@
 /**
  * Label, weight, and color/fill resolution after required-channel checks.
  */
-import type { Aes, LayerSpec } from "@ggsvelte/spec";
+import type { Aes, NormalizedGeomName, StatName } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
@@ -14,8 +14,8 @@ import { PipelineError } from "./types.js";
 
 export function resolveLabelWeightColorFill(input: {
   aes: Aes;
-  geom: LayerSpec["geom"];
-  stat: string;
+  geom: NormalizedGeomName;
+  stat: StatName;
   index: number;
   table: ColumnTable;
   warnings: PipelineWarning[];

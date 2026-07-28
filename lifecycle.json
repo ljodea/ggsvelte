@@ -16,6 +16,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ALIAS_GEOMS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "AblineLayer": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -42,6 +46,10 @@
         },
         "AesSchema": {
           "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "AliasGeomName": {
+          "kind": "type",
           "lifecycle": "experimental"
         },
         "AlphaScaleSpec": {
@@ -584,6 +592,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GEOM_ALIASES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GEOM_DEFAULTS": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1113,6 +1125,18 @@
           "lifecycle": "experimental"
         },
         "NoneGuideSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "NormalizedGeomName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "NormalizedLayerSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "NormalizedSpec": {
           "kind": "type",
           "lifecycle": "experimental"
         },

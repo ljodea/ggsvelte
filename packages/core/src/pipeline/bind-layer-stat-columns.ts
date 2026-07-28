@@ -1,7 +1,14 @@
+import type { StatName } from "@ggsvelte/spec";
+
 /**
  * y-channel { stat } columns each stat exposes (module-header contracts).
+ *
+ * Total over StatName, so a new stat is a compile error here rather than a
+ * silent empty row at the read site (#1042). An empty array means the stat
+ * writes y as a frame coordinate and publishes no y-mappable column — a
+ * decision, not an omission.
  */
-export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
+export const STAT_Y_COLUMNS: Record<StatName, readonly string[]> = {
   identity: [],
   unique: [],
   manual: [],
@@ -25,6 +32,25 @@ export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
   summary_bin: [],
   // Contour writes x/y as frame coordinates; after_stat level is not a y column.
   contour: [],
+  // The rest write y straight into the frame, so nothing is y-mappable.
+  // connect expands tied-x step corners into vertices (#816).
+  connect: [],
+  // align only shifts x positions; it never computes a y.
+  align: [],
+  // ellipse writes the ellipse path vertices as x/y.
+  ellipse: [],
+  // 2-d bins put y on the cell centre; their counts go to colour/fill instead
+  // (see STAT_COLOR_COLUMNS): bin_hex #800, bin_2d ggplot2 geom_bin2d.
+  bin_hex: [],
+  bin_2d: [],
+  // Fitted quantile-regression grid: y is the fitted coordinate.
+  quantile: [],
+  // sf / sf_coordinates write geometry and representative-point coordinates.
+  sf: [],
+  sf_coordinates: [],
+  // qq publishes theoretical/sample as frame x/y, not as mappable columns.
+  qq: [],
+  qq_line: [],
 };
 
 /**
@@ -32,7 +58,7 @@ export const STAT_Y_COLUMNS: Record<string, readonly string[]> = {
  * via `colorColumns` in `frame-stats-shared.ts` (#953). Stats absent from this
  * map publish nothing for colour — bind emits `stat-channel-unsupported` (#915).
  */
-export const STAT_COLOR_COLUMNS: Record<string, readonly string[]> = {
+export const STAT_COLOR_COLUMNS: Partial<Record<StatName, readonly string[]>> = {
   // bin / histogram: count + density family (ggplot2 after_stat on fill/color).
   bin: ["count", "density", "ncount", "ndensity"],
   bin_2d: ["count", "density", "ncount", "ndensity"],

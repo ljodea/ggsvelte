@@ -1,7 +1,7 @@
 /**
  * Resolve y field vs stat-column mapping for bindLayer.
  */
-import type { Aes } from "@ggsvelte/spec";
+import type { Aes, StatName } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
@@ -12,7 +12,7 @@ import { PipelineError } from "./types.js";
 
 export function resolveYChannel(input: {
   aes: Aes;
-  stat: string;
+  stat: StatName;
   index: number;
   table: ColumnTable;
   warnings: PipelineWarning[];
@@ -20,7 +20,7 @@ export function resolveYChannel(input: {
   const { aes, stat, index, table, warnings } = input;
   const y = aes.y;
   if (y !== undefined && y !== null && "stat" in y) {
-    const generated = STAT_Y_COLUMNS[stat] ?? [];
+    const generated = STAT_Y_COLUMNS[stat];
     if (!generated.includes(y.stat)) {
       throw new PipelineError(
         "unknown-stat-column",

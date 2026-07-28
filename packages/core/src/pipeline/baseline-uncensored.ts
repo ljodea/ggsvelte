@@ -3,7 +3,7 @@
  * pre-stat frames (#449). Mirrors the Svelte runtime double-pass: train
  * baseline from data without position domain pins so zoom-out is not starved.
  */
-import type { PortableSpec, PositionScaleSpec } from "@ggsvelte/spec";
+import type { NormalizedSpec, PortableSpec, PositionScaleSpec } from "@ggsvelte/spec";
 
 import { computeTrainedBaselineDomains } from "./compute-domains-baseline.js";
 import { preparePanels } from "./prepare-panels.js";
@@ -25,7 +25,7 @@ function stripPositionDomain(config: PositionScaleSpec): PositionScaleSpec {
 }
 
 /** Clone PortableSpec scales without x/y `domain` (keep type/nice/breaks/etc.). */
-function withoutPositionDomains(spec: PortableSpec): PortableSpec {
+function withoutPositionDomains(spec: NormalizedSpec): NormalizedSpec {
   if (spec.scales === undefined) return spec;
   const scales = { ...spec.scales };
   if (scales.x !== undefined) scales.x = stripPositionDomain(scales.x);
@@ -44,7 +44,7 @@ function withoutPositionDomains(spec: PortableSpec): PortableSpec {
  * options.
  */
 export function trainUncensoredBaselineDomains(input: {
-  normalized: PortableSpec;
+  normalized: NormalizedSpec;
   options: RunOptions;
   editionDefaults: EditionDefaults;
 }): ScaleDomainSnapshot {

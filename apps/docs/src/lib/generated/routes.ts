@@ -2296,8 +2296,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-852",
-        title: "experimental (852)",
+        id: "experimental-858",
+        title: "experimental (858)",
         level: 3,
       },
       {
@@ -2385,6 +2385,11 @@ export const DOCS_ROUTES = [
       {
         id: "grammar-props-removed-from-ggplot",
         title: "Grammar props removed from <GGPlot>",
+        level: 3,
+      },
+      {
+        id: "normalize-returns-the-post-normalize-geom-union",
+        title: "normalize() returns the post-normalize geom union",
         level: 3,
       },
       {

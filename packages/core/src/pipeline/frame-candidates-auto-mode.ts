@@ -14,7 +14,8 @@ export function candidateAutoMode(
   binding: LayerBinding,
   primitiveIndex: number,
 ): ResolvedCandidateInspectMode | undefined {
-  switch (binding.layer.geom) {
+  const geom = binding.layer.geom;
+  switch (geom) {
     // Points/text: exact focus + hover ring only. Axis grouping (`x`/`y`/`xy`)
     // is opt-in — auto→xy drew a full crosshair and multi-member tooltips on
     // dense scatters without adding much (#754).
@@ -73,7 +74,20 @@ export function candidateAutoMode(
       const params = (binding.layer.params ?? {}) as { xintercept?: unknown };
       return primitiveIndex < interceptList(params.xintercept).length ? "x" : "y";
     }
-    default:
+    case "abline":
+    case "curve":
+      // Both draw real marks, so "xy" (crosshair + multi-member hover) is
+      // probably wrong for them — but it is what the old `default:` gave, and
+      // changing it is a product call, not a typing one (#1042).
       return "xy";
+    case "blank":
+      // geom_blank emits no hit targets, so the mode is never consulted.
+      return "xy";
+    default: {
+      // No silent fall-through: a geom with no arm above is a compile error
+      // here, not a mark that quietly gets the wrong inspect mode (#1042).
+      const exhaustive: never = geom;
+      throw new Error(`unhandled geom in candidate auto mode: ${String(exhaustive)}`);
+    }
   }
 }

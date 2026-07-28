@@ -38,7 +38,8 @@ export function dispatchGeometryBatch(
   styles: ResolvedStyleScales,
   warnings: PipelineWarning[],
 ): GeometryBatch[] {
-  switch (frame.binding.layer.geom) {
+  const geom = frame.binding.layer.geom;
+  switch (geom) {
     case "point":
     case "count":
     case "qq":
@@ -136,7 +137,12 @@ export function dispatchGeometryBatch(
     case "blank":
       // ggplot2 geom_blank: train scales, emit no marks / hit targets.
       return [];
-    default:
-      return [];
+    default: {
+      // No silent fall-through: `frame.binding.layer.geom` is the post-normalize
+      // union, so a geom with no case above is a compile error here, not a layer
+      // that renders nothing (#1042).
+      const exhaustive: never = geom;
+      throw new Error(`unhandled geom in geometry dispatch: ${String(exhaustive)}`);
+    }
   }
 }

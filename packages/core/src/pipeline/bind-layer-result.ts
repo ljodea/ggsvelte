@@ -1,14 +1,14 @@
 /**
  * Assemble LayerBinding from resolved channel fields and extras.
  */
-import type { LayerSpec } from "@ggsvelte/spec";
+import type { NormalizedLayerSpec } from "@ggsvelte/spec";
 
 import type { ColumnTable } from "../table.js";
 
 import type { LayerBinding } from "./types.js";
 
 export function makeLayerBinding(input: {
-  layer: LayerSpec;
+  layer: NormalizedLayerSpec;
   index: number;
   sourceTable: ColumnTable;
   sourceId: number;

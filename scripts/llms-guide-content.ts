@@ -2087,6 +2087,42 @@ The seven grammar props deprecated in 0.11.0 — \`theme\`, \`scales\`, \`coord\
 
 \`LayerDescriptor\` is removed; use \`MarkLayerDescriptor\`.
 
+### \`normalize()\` returns the post-normalize geom union
+
+\`normalize()\` rewrites five convenience geoms to a canonical name —
+\`histogram\` to \`bar\`, \`freqpoly\` to \`line\`, \`jitter\` to \`point\`,
+\`hline\` and \`vline\` to \`rule\`. Its declared return type used to name all
+49 geoms anyway, so nothing could tell which 44 actually reach the pipeline.
+
+It now returns \`NormalizedSpec\`, whose layers are \`NormalizedLayerSpec\` —
+the same shape, minus the five names normalize has already removed. Alongside
+it, \`@ggsvelte/spec\` exports \`ALIAS_GEOMS\`, \`GEOM_ALIASES\`,
+\`AliasGeomName\` and \`NormalizedGeomName\`.
+
+Authored specs are unaffected: \`PortableSpec\` and the published JSON Schema
+still accept every one of the 49 names, and \`geom: "histogram"\` works exactly
+as before.
+
+One kind of caller changes. Code that reads geoms back off a normalized spec
+and expects all 49 now sees 44:
+
+\`\`\`ts fragment
+// Before — the "histogram" arm was reachable in the type, never at runtime.
+const spec: PortableSpec = normalize(input);
+for (const layer of spec.layers) {
+  if (layer.geom === "histogram") { /* dead branch */ }
+}
+
+// After — narrow before normalize, or drop the branch.
+const spec = normalize(input); // NormalizedSpec
+for (const layer of spec.layers) {
+  if (layer.geom === "bar") { /* what histogram became */ }
+}
+\`\`\`
+
+Annotating the result as \`PortableSpec\` still compiles, so passing a
+normalized spec on to anything that takes one needs no change.
+
 ## 0.10 to 0.11
 
 ### Compose the theme as a child layer
