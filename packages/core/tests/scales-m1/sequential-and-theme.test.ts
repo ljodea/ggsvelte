@@ -254,4 +254,34 @@ describe("theme registry", () => {
     expect(BUILTIN_THEMES.default.selectionFill).toContain("rgba(");
     expect(BUILTIN_THEMES.dark.selectionFill).toContain("rgba(");
   });
+
+  // #1069 — flat tooltip chrome only for unframed gridless themes (tufte/void).
+  // Framed gridless themes (few/classic) keep panelBorder keylines.
+  it("unframed gridless themes derive a flat tooltip keyline; framed ones keep panelBorder", () => {
+    expect(BUILTIN_THEMES.tufte.grid).toBe("none");
+    expect(BUILTIN_THEMES.tufte.tooltipBorder).toBe("transparent");
+    expect(BUILTIN_THEMES.tufte.tooltipBorder).not.toBe(BUILTIN_THEMES.tufte.panelBorder);
+    expect(BUILTIN_THEMES.void.grid).toBe("none");
+    expect(BUILTIN_THEMES.void.tooltipBorder).toBe("transparent");
+
+    // few: gridless but showPanelBorder — keep the panel border keyline.
+    expect(BUILTIN_THEMES.few.grid).toBe("none");
+    expect(BUILTIN_THEMES.few.showPanelBorder).toBe(true);
+    expect(BUILTIN_THEMES.few.tooltipBorder).toBe(BUILTIN_THEMES.few.panelBorder);
+    expect(BUILTIN_THEMES.few.tooltipBorder).not.toBe("transparent");
+
+    // classic: gridless but axis lines — keep the panel border keyline.
+    expect(BUILTIN_THEMES.classic.grid).toBe("none");
+    expect(BUILTIN_THEMES.classic.axisLineX).toBe(true);
+    expect(BUILTIN_THEMES.classic.tooltipBorder).toBe(BUILTIN_THEMES.classic.panelBorder);
+    expect(BUILTIN_THEMES.classic.tooltipBorder).not.toBe("transparent");
+
+    // Themes that still draw a grid keep a visible hairline from the grid color.
+    expect(BUILTIN_THEMES.default.tooltipBorder).toBe(BUILTIN_THEMES.default.grid);
+    expect(BUILTIN_THEMES.default.tooltipBorder).not.toBe("transparent");
+    expect(BUILTIN_THEMES.light.tooltipBorder).toBe(BUILTIN_THEMES.light.grid);
+
+    // Object overrides still win over the derivation.
+    expect(resolveTheme({ name: "tufte", tooltipBorder: "#aabbcc" }).tooltipBorder).toBe("#aabbcc");
+  });
 });
