@@ -76,6 +76,10 @@ describe("positional-read space inventory", () => {
  * Every stat output role. `semantic-measure` = a stat-invented mapped measure
  * forwarded through the axis transform exactly once. `scale-space` = derived
  * FROM already-transformed inputs, never forwarded again.
+ *
+ * After #1077, column-mode y (`y: { column }`) is forwarded inside
+ * `layer-frame.ts` via `statLayerFrame`; adapters may either call
+ * `forwardMeasureOnce` directly or hand off via column mode.
  */
 const PROVENANCE_INVENTORY = [
   { file: "frame-stats-count.ts", role: "semantic-measure", outputs: ["count"] },
@@ -89,27 +93,50 @@ const PROVENANCE_INVENTORY = [
     role: "semantic-measure",
     outputs: ["density", "count", "scaled", "ndensity"],
   },
+  {
+    file: "layer-frame.ts",
+    role: "semantic-measure",
+    outputs: ["yStatColumn column-mode default"],
+  },
   { file: "frame-stats-smooth.ts", role: "scale-space", outputs: ["smooth x/y/bands"] },
   { file: "frame-stats-summary.ts", role: "scale-space", outputs: ["summary aggregates"] },
   { file: "frame-stats-boxplot.ts", role: "scale-space", outputs: ["boxplot aggregates"] },
 ] as const;
 
+/** Direct call or column-mode handoff that layer-frame forwards once. */
+function forwardsSemanticMeasure(src: string): boolean {
+  return src.includes("forwardMeasureOnce") || /y:\s*\{\s*column:/.test(src);
+}
+
 describe("stat-output provenance inventory", () => {
   for (const { file, role } of PROVENANCE_INVENTORY) {
     it(`${file} (${role}) ${role === "semantic-measure" ? "forwards once" : "never re-forwards"}`, () => {
-      const calls = code(file).includes("forwardMeasureOnce");
-      expect(calls).toBe(role === "semantic-measure");
+      const src = code(file);
+      if (role === "semantic-measure") {
+        expect(forwardsSemanticMeasure(src)).toBe(true);
+      } else {
+        expect(src.includes("forwardMeasureOnce")).toBe(false);
+      }
     });
   }
 
-  it("forwardMeasureOnce is called by exactly the semantic-measure producers", () => {
-    const expected = PROVENANCE_INVENTORY.filter((e) => e.role === "semantic-measure")
-      .map((e) => e.file)
-      .toSorted();
+  it("forwardMeasureOnce lives on the known semantic-measure call sites", () => {
+    // Independent list of direct call sites; bin-frame uses column mode instead.
+    const expected = [
+      "frame-stats-count.ts",
+      "frame-stats-density.ts",
+      "layer-frame.ts",
+    ].toSorted();
     const actual = PROVENANCE_INVENTORY.filter((e) => code(e.file).includes("forwardMeasureOnce"))
       .map((e) => e.file)
       .toSorted();
     expect(actual).toEqual(expected);
+  });
+
+  it("bin-frame hands column-mode y to layer-frame instead of calling forwardMeasureOnce", () => {
+    const src = code("frame-stats-bin-frame.ts");
+    expect(src.includes("forwardMeasureOnce")).toBe(false);
+    expect(/y:\s*\{\s*column:\s*"count"/.test(src)).toBe(true);
   });
 
   it("the public MappedField.source flag is not a transform-decision key", () => {

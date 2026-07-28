@@ -17,7 +17,7 @@ import type { LayerBinding, LayerFrame } from "./types.js";
 import { NO_ROW } from "./types.js";
 
 /** Resolved x/y axes, or a y measure column default for forwardMeasureOnce. */
-export type FrameYAxis =
+type FrameYAxis =
   | {
       readonly numeric?: Float64Array | null;
       readonly values?: readonly CellValue[] | null;
@@ -29,13 +29,13 @@ export type FrameYAxis =
       readonly fallback?: Float64Array;
     };
 
-export type FrameXAxis = {
+type FrameXAxis = {
   readonly numeric?: Float64Array | null;
   readonly values?: readonly CellValue[] | null;
 };
 
 /** Optional geom payloads and overrides applied after emptyFrameExtras. */
-export type StatLayerFrameExtras = Partial<
+type StatLayerFrameExtras = Partial<
   Pick<
     LayerFrame,
     | "ymin"
@@ -69,7 +69,7 @@ export type StatLayerFrameExtras = Partial<
   >
 >;
 
-export type StatLayerFrameInput = {
+type StatLayerFrameInput = {
   readonly binding: LayerBinding;
   readonly table: ColumnTable;
   readonly n: number;
