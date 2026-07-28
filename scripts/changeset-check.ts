@@ -1,14 +1,22 @@
 /**
- * Changeset visibility check — non-blocking changeset-bot equivalent.
+ * Changeset visibility check — in-repo changeset-bot equivalent.
  *
  * Changesets only records PRs that add a `.changeset/*.md` file; a PR without
  * one merges silently and never reaches the CHANGELOG or a version bump
  * (release PR #45 shipped ~200 PRs with 4 changelog entries). This script
- * decides whether a PR touches npm-published code without declaring a
- * changeset so the workflow can leave a sticky informational comment.
+ * classifies a PR so the workflow can leave a sticky comment — and fail when
+ * a changeset would pollute Version Packages for docs/examples-only work.
  *
- * Deliberately NOT a merge gate: internal-only changes are the common case in
- * this repo and forcing empty changesets is worse than an ignorable comment.
+ * Verdicts:
+ * - `changeset-present` — has a changeset and touches shipped package code
+ * - `missing` — touches shipped package code, no changeset (advisory only)
+ * - `not-needed` — no shipped package code, no changeset
+ * - `unwarranted` — has a changeset but no shipped package code (blocks merge)
+ *
+ * Missing stays non-blocking: internal-only package changes are common and
+ * forcing empty changesets is worse than an ignorable comment. Unwarranted
+ * blocks: docs/examples/script-only changesets have repeatedly bumped
+ * core/spec/svelte with notes that change nothing consumers import.
  */
 
 import { appendFileSync, existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -22,11 +30,11 @@ export type PublishedPackage = {
   shipped: string[];
 };
 
-export type Verdict = "changeset-present" | "not-needed" | "missing";
+export type Verdict = "changeset-present" | "not-needed" | "missing" | "unwarranted";
 
 export type Decision = {
   verdict: Verdict;
-  /** Published files the PR touches (empty unless verdict is "missing"). */
+  /** Published files the PR touches (set for `missing`; empty otherwise). */
   touched: string[];
 };
 
@@ -68,6 +76,28 @@ export function renderComment(decision: Decision): string {
   if (decision.verdict === "not-needed") {
     return `${COMMENT_MARKER}\n**No changeset needed.** This PR does not touch npm-published package code.\n`;
   }
+  if (decision.verdict === "unwarranted") {
+    return [
+      COMMENT_MARKER,
+      "🚫 **Changeset not allowed here.** This PR adds a `.changeset/*.md` file",
+      "but does **not** change any npm-published package surface.",
+      "",
+      "Docs site, examples, scripts, tests, and CI-only paths must not carry a",
+      "changeset — they pollute the next Version Packages PR and bump",
+      "`@ggsvelte/core` / `@ggsvelte/spec` / `@ggsvelte/svelte` (fixed lockstep)",
+      "with notes that do not change what consumers install.",
+      "",
+      "**Fix:** delete the `.changeset/*.md` file(s) from this PR.",
+      "",
+      "Add a changeset only when the diff touches a published package's",
+      "`files` entries (or its `package.json`) — same rule as",
+      "`scripts/changeset-check.ts`. Packaged agent skills under",
+      "`packages/svelte/skills/` *do* ship and may warrant a patch.",
+      "",
+      "This check **blocks** merging until the unwarranted changeset is removed.",
+      "",
+    ].join("\n");
+  }
   const shown = decision.touched.slice(0, LISTING_CAP).map((f) => `- \`${f}\``);
   const rest = decision.touched.length - LISTING_CAP;
   if (rest > 0) {
@@ -87,8 +117,9 @@ export function renderComment(decision: Decision): string {
     "bun changeset",
     "```",
     "",
-    "This check does **not block** merging — internal-only or",
-    "not-worth-announcing changes can ignore it.",
+    "This check does **not block** merging for a missing changeset — internal-only",
+    "or not-worth-announcing package changes can ignore it. A changeset on a",
+    "docs/examples-only PR *does* block (verdict `unwarranted`).",
     "",
   ].join("\n");
 }
@@ -109,10 +140,14 @@ export function decideChangesetComment(
   changedFiles: string[],
   packages: PublishedPackage[],
 ): Decision {
-  if (changedFiles.some((path) => isChangesetFile(path))) {
-    return { verdict: "changeset-present", touched: [] };
-  }
+  const hasChangeset = changedFiles.some((path) => isChangesetFile(path));
   const touched = changedFiles.filter((path) => packages.some((pkg) => isShippedPath(path, pkg)));
+  if (hasChangeset) {
+    if (touched.length > 0) {
+      return { verdict: "changeset-present", touched: [] };
+    }
+    return { verdict: "unwarranted", touched: [] };
+  }
   if (touched.length > 0) {
     return { verdict: "missing", touched };
   }
