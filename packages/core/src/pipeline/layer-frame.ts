@@ -86,6 +86,13 @@ type StatLayerFrameInput = {
    * post-stat row is synthesized (filled with NO_ROW).
    */
   readonly lineage: Uint32Array | "none";
+  /**
+   * When true, resolve color/fill through after_stat computed columns
+   * (`colorColumns`). Default false: field lookup only — matches pre-#1077
+   * adapters that ignored after_stat color on stats outside STAT_COLOR_COLUMNS
+   * (boxplot, summary, smooth, ecdf, …).
+   */
+  readonly afterStatColor?: boolean;
   readonly extras?: StatLayerFrameExtras;
 };
 
@@ -126,10 +133,17 @@ export function statLayerFrame(input: StatLayerFrameInput): LayerFrame {
     columns = {},
     columnOf,
     lineage,
+    afterStatColor = false,
     extras,
   } = input;
   const { yNumeric, yValues } = resolveY(binding, y, columns);
   const rowIndex = lineage === "none" ? Uint32Array.from({ length: n }, () => NO_ROW) : lineage;
+  const colorFill = afterStatColor
+    ? colorColumns(binding, columnOf, columns)
+    : {
+        colorValues: columnOf(binding.color.field),
+        fillValues: columnOf(binding.fill.field),
+      };
 
   return {
     binding,
@@ -143,7 +157,7 @@ export function statLayerFrame(input: StatLayerFrameInput): LayerFrame {
     inputGroups,
     inputSourceRows: null,
     rowIndex,
-    ...colorColumns(binding, columnOf, columns),
+    ...colorFill,
     ...styleColumns(binding, columnOf, columns),
     labelValues: columnOf(binding.labelField),
     ...emptyFrameExtras(),

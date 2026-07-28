@@ -111,6 +111,7 @@ export function buildCountFrame(
     columns: { count: result.count },
     columnOf: columnOf(result, displayX),
     lineage: "none",
+    afterStatColor: true,
     extras: {
       bin:
         binned === null

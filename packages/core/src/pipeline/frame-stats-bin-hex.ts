@@ -60,6 +60,7 @@ export function buildBinHexFrame(
     columns,
     columnOf: columnOf(result, null),
     lineage: "none",
+    afterStatColor: true,
     extras: {
       hexWidth: result.width,
       hexHeight: result.height,

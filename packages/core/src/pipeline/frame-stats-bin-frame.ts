@@ -44,6 +44,7 @@ export function packBinLayerFrame(
     columns,
     columnOf: columnOf(result, null),
     lineage: "none",
+    afterStatColor: true,
     extras: {
       // Lineage replays the stat's own cut instead of re-deriving from edges (#905).
       binCut: result.cut,

@@ -62,6 +62,7 @@ export function buildBin2dFrame(
     columns,
     columnOf: columnOf(result, null),
     lineage: "none",
+    afterStatColor: true,
     extras: {
       xmin: result.xmin,
       xmax: result.xmax,

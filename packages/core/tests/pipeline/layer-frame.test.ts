@@ -153,15 +153,16 @@ describe("statLayerFrame (#1077)", () => {
     expect(Array.from(frame.yNumeric!)).toEqual([10, 20]);
   });
 
-  it("spreads style and after_stat color columns from computed series", () => {
+  it("spreads after_stat color only when afterStatColor is opted in", () => {
     const count = new Float64Array([1, 3, 5]);
     const b = binding({
       colorStat: "count",
       sizeStat: "count",
     });
-    const carried = (_field: string | null) => ["a", "b", "c"] as const;
+    // Real makeColumnOf returns null when field is null.
+    const columnOf = (field: string | null) => (field === null ? null : (["a", "b", "c"] as const));
 
-    const frame = statLayerFrame({
+    const ignored = statLayerFrame({
       binding: b,
       table,
       n: 3,
@@ -170,12 +171,28 @@ describe("statLayerFrame (#1077)", () => {
       groups: [0, 0, 0],
       inputGroups: [0],
       columns: { count },
-      columnOf: carried,
+      columnOf,
       lineage: "none",
     });
+    // Default: field lookup only — color.field is null so colorValues stay null
+    // even though color.statColumn is set (boxplot/summary/ecdf parity).
+    expect(ignored.colorValues).toBeNull();
+    expect(Array.from(ignored.sizeValues as Float64Array)).toEqual([1, 3, 5]);
 
-    expect(Array.from(frame.colorValues as number[])).toEqual([1, 3, 5]);
-    expect(Array.from(frame.sizeValues as Float64Array)).toEqual([1, 3, 5]);
+    const applied = statLayerFrame({
+      binding: b,
+      table,
+      n: 3,
+      x: { numeric: new Float64Array([0, 1, 2]) },
+      y: { column: "count", fallback: count },
+      groups: [0, 0, 0],
+      inputGroups: [0],
+      columns: { count },
+      columnOf,
+      lineage: "none",
+      afterStatColor: true,
+    });
+    expect(Array.from(applied.colorValues as number[])).toEqual([1, 3, 5]);
   });
 
   it("uses explicit lineage row indices when provided", () => {

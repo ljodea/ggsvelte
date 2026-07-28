@@ -80,5 +80,6 @@ export function buildDensity2dFrame(
     columns: computed,
     columnOf: columnOf(result, null),
     lineage: "none",
+    afterStatColor: true,
   });
 }

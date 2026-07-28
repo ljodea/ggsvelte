@@ -58,6 +58,7 @@ export function buildDensityFrame(
     columns,
     columnOf: columnOf(result, null),
     lineage: "none",
+    afterStatColor: true,
     extras: {
       // Density renders as an area from the shared transformed-origin baseline.
       ymin: Float64Array.from({ length: outN }, () =>
