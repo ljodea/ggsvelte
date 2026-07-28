@@ -202,6 +202,47 @@ export type PresentationInspectionFocus = {
   }[];
 };
 
+/**
+ * Minimal seed facts for presentation projection (#1080).
+ * Inspection owns the full CandidateFacts; consumers only need kind + primitive.
+ */
+export type PresentationSeedFacts = {
+  readonly kind: string;
+  readonly batchIndex: number;
+  readonly primitiveIndex: number;
+} | null;
+
+/**
+ * One owner for the plot-engine → semantic-projection focus shape (#1080).
+ * Projects live inspection + seed into PresentationInspectionFocus so wiring
+ * files do not re-assemble the same fields.
+ */
+export function presentationFocusFromInspection(
+  inspection: {
+    readonly focus: {
+      readonly sourceKeys: readonly PropertyKey[];
+      readonly key: PropertyKey | null;
+    };
+  } | null,
+  seed: PresentationSeedFacts,
+): PresentationInspectionFocus | null {
+  if (inspection === null) return null;
+  return {
+    sourceKeys: inspection.focus.sourceKeys,
+    key: inspection.focus.key,
+    kind: seed?.kind ?? null,
+    primitives:
+      seed === null
+        ? []
+        : Object.freeze([
+            {
+              batchIndex: seed.batchIndex,
+              primitiveIndex: seed.primitiveIndex,
+            },
+          ]),
+  };
+}
+
 export type MergePresentationFocusOptions = {
   /**
    * When true, empty-emphasis rect inspection contributes focus keys so

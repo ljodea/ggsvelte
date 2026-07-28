@@ -26,6 +26,40 @@ import {
   type InspectCb,
 } from "./inspection-state.harness.js";
 
+describe("createInspectionState presentationFocus (#1080)", () => {
+  it("owns the presentation focus projection so plot-engine does not re-assemble it", () => {
+    const model = modelFor(continuousSpec());
+    const { state, destroy } = mountInspectionController({ model: () => model });
+
+    expect(state.presentationFocus).toBeNull();
+
+    const { candidate } = candidateHit(model);
+    state.setInspection(candidate, "pointer", "transient", "xy");
+    flushSync();
+
+    const focus = state.presentationFocus;
+    expect(focus).not.toBeNull();
+    expect(focus!.sourceKeys).toEqual(state.inspection!.focus.sourceKeys);
+    expect(focus!.key).toBe(state.inspection!.focus.key);
+    expect(focus!.kind).toBe(candidate.kind);
+    expect(focus!.primitives).toEqual([
+      { batchIndex: candidate.batchIndex, primitiveIndex: candidate.primitiveIndex },
+    ]);
+
+    // Pin flips state; presentation fields from seed + focus stay stable.
+    state.toggleInspectionPin("pointer");
+    flushSync();
+    expect(state.inspection?.state).toBe("pinned");
+    expect(state.presentationFocus).toEqual(focus);
+
+    // Pinned null-clear is ignored; dismiss ends the session.
+    state.dismissInspection("close", "pointer");
+    flushSync();
+    expect(state.presentationFocus).toBeNull();
+    destroy();
+  });
+});
+
 describe("createInspectionState setInspection", () => {
   it("applies a transient snapshot and gates re-emits by fingerprint", () => {
     const model = modelFor(continuousSpec());

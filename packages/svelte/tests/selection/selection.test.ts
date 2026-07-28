@@ -7,6 +7,7 @@ import {
   iterateCandidates,
   mergePresentationFocusKeys,
   nextPointSelectionKeys,
+  presentationFocusFromInspection,
   rowIndexesForCandidate,
   sameOrderedPropertyKeys,
   uniqueKeysFromRowIndexes,
@@ -246,6 +247,58 @@ describe("buildPointSelectionEvent", () => {
     expect(event.phase).toBe("clear");
     expect(event.keys).toEqual([]);
     expect(Object.isFrozen(event.keys)).toBe(true);
+  });
+});
+
+describe("presentationFocusFromInspection (#1080)", () => {
+  it("returns null when inspection is null", () => {
+    expect(
+      presentationFocusFromInspection(null, {
+        kind: "points",
+        batchIndex: 0,
+        primitiveIndex: 1,
+      }),
+    ).toBeNull();
+  });
+
+  it("projects focus keys and seed kind/primitives into PresentationInspectionFocus", () => {
+    const focus = presentationFocusFromInspection(
+      {
+        focus: { sourceKeys: ["a", "b"], key: "a" },
+      },
+      { kind: "rects", batchIndex: 2, primitiveIndex: 4 },
+    );
+    expect(focus).toEqual({
+      sourceKeys: ["a", "b"],
+      key: "a",
+      kind: "rects",
+      primitives: [{ batchIndex: 2, primitiveIndex: 4 }],
+    });
+    expect(Object.isFrozen(focus!.primitives)).toBe(true);
+  });
+
+  it("uses null kind and empty primitives when seed is absent", () => {
+    expect(
+      presentationFocusFromInspection({ focus: { sourceKeys: ["k"], key: null } }, null),
+    ).toEqual({
+      sourceKeys: ["k"],
+      key: null,
+      kind: null,
+      primitives: [],
+    });
+  });
+
+  it("keeps the same projection across pin state (seed stable, focus keys stable)", () => {
+    const seed = { kind: "points", batchIndex: 0, primitiveIndex: 0 };
+    const transient = presentationFocusFromInspection(
+      { focus: { sourceKeys: ["row-1"], key: "row-1" } },
+      seed,
+    );
+    const pinned = presentationFocusFromInspection(
+      { focus: { sourceKeys: ["row-1"], key: "row-1" } },
+      seed,
+    );
+    expect(transient).toEqual(pinned);
   });
 });
 

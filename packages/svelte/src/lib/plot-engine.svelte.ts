@@ -567,25 +567,8 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     intervals: () => intervalState.effectiveIntervals,
     emphasisKeys: () => legendFocusState.effectiveEmphasisKeys,
     muteSiblingsOnInspect: () => interactionConfig.inspect?.muteSiblings === true,
-    inspectionFocus: () => {
-      const current = inspectionState.inspection;
-      const seed = inspectionState.inspectionSeed;
-      if (current === null) return null;
-      return {
-        sourceKeys: current.focus.sourceKeys,
-        key: current.focus.key,
-        kind: seed?.kind ?? null,
-        primitives:
-          seed === null
-            ? []
-            : Object.freeze([
-                {
-                  batchIndex: seed.batchIndex,
-                  primitiveIndex: seed.primitiveIndex,
-                },
-              ]),
-      };
-    },
+    // Inspection owns the projection (#1080); wiring no longer re-assembles it.
+    inspectionFocus: () => inspectionState.presentationFocus,
   });
   // ------------------------------------------------- plot chrome
   // All host bindings earlier-declared. Pure construction-time deriveds —
@@ -676,9 +659,10 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       return semanticCandidateProjection.emphasizedAnchors;
     },
     get hoverChrome() {
-      // Read inspection $state so chrome updates with seed (plain let).
-      if (inspectionState.inspection === null) return "ring";
-      return presentationChromeForKind(inspectionState.inspectionSeed?.kind);
+      // presentationFocus carries seed kind; null inspection → default ring.
+      const focus = inspectionState.presentationFocus;
+      if (focus === null) return "ring";
+      return presentationChromeForKind(focus.kind);
     },
     get interactionMasks() {
       return semanticCandidateProjection.interactionMasks;
