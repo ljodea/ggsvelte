@@ -1,4 +1,5 @@
 import {
+  MONTH_DAY_REFERENCE_YEAR,
   parseTemporalColumn,
   type PositionScaleSpec,
   type TemporalDecision,
@@ -80,6 +81,7 @@ export function positionColumn(
       ? table.numeric(field, conversion.sourceParser, conversion.options)
       : table.transformed(field, conversion.sourceParser, conversion.options, transform)
           .transformed;
+  if (conversion.requestedKind === "monthDay") return mapToMonthDayMs(base);
   if (conversion.requestedKind !== "time") return base;
   return mapToTimeOfDayMs(table.column(field), base);
 }
@@ -137,6 +139,29 @@ function cellToTimeOfDayMs(value: CellValue): number {
   return Number.NaN;
 }
 
+/**
+ * Map an instant to month-day scale space: the same month and day, in the
+ * reference year. Idempotent, so a value that already arrived there — a stat's
+ * binned median, say — passes through untouched.
+ */
+function toMonthDayMs(epochMs: number): number {
+  if (!Number.isFinite(epochMs)) return Number.NaN;
+  const d = new Date(epochMs);
+  return Date.UTC(MONTH_DAY_REFERENCE_YEAR, d.getUTCMonth(), d.getUTCDate());
+}
+
+/**
+ * The `md` parser already lands strings in the reference year, but `Date` cells
+ * short-circuit parsing and keep their own year, and stats hand back raw
+ * numbers. Projecting every route through one function is what keeps marks and
+ * the values summarizing them in the same space.
+ */
+function mapToMonthDayMs(base: Float64Array): Float64Array {
+  const out = new Float64Array(base.length);
+  for (let index = 0; index < base.length; index++) out[index] = toMonthDayMs(base[index]!);
+  return out;
+}
+
 function mapToTimeOfDayMs(values: readonly CellValue[], base: Float64Array): Float64Array {
   const out = new Float64Array(values.length);
   for (let index = 0; index < values.length; index++) {
@@ -175,7 +200,8 @@ export function positionValuesToNumeric(
     !conversion.forcedNonTemporal &&
     (conversion.parser !== "auto" ||
       parsed.decision.status === "temporal" ||
-      conversion.requestedKind === "time");
+      conversion.requestedKind === "time" ||
+      conversion.requestedKind === "monthDay");
   let numeric = conversion.forcedNonTemporal
     ? cellsToQuantitative(values)
     : temporal
@@ -199,6 +225,10 @@ export function positionValuesToNumeric(
   // scale_*_time: portable numbers are seconds since midnight (#831).
   if (conversion.requestedKind === "time") {
     numeric = mapToTimeOfDayMs(values, numeric);
+  }
+  // monthDay: portable numbers are instants, projected onto the reference year.
+  if (conversion.requestedKind === "monthDay") {
+    numeric = mapToMonthDayMs(numeric);
   }
   return { values: numeric, decision: parsed.decision };
 }
@@ -242,9 +272,13 @@ export function positionConversionContext(
   const forcedNonTemporal =
     (config.type === "linear" || config.type === "log" || config.type === "binned") &&
     !requestedTime;
+  // A month-day axis reads month-day values, so `md` is its natural parser
+  // rather than something the author has to remember to name. `auto` would
+  // read "04-05" as a category and never reach the temporal path at all.
+  const parser = config.parse ?? (config.temporalKind === "monthDay" ? "md" : "auto");
   return {
-    parser: config.parse ?? "auto",
-    sourceParser: config.parse ?? "auto",
+    parser,
+    sourceParser: parser,
     options: {
       ...(config.timezone !== undefined && { timezone: config.timezone }),
       ...(config.disambiguation !== undefined && {

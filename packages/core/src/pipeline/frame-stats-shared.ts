@@ -74,6 +74,11 @@ export function shouldAggregateOnSemanticTemporalX(
   // time-of-day (#831): scale space is ms-of-day via positionColumn /
   // positionValuesToNumeric, not raw parseTemporal epoch semantics (and not
   // portable seconds). Aggregate on source cells, then convert for xNumeric.
+  //
+  // monthDay deliberately does NOT join this arm. Its parser (`md`) collapses
+  // the year during parsing, so the semantic value is already scale space —
+  // aggregating on it is what groups two years' worth of the same calendar day
+  // together. Excluding it here would key them apart and lose the collapse.
   if (conversion.requestedKind === "time") return false;
   const geom = binding.layer.geom;
   const barDiscretizes =
