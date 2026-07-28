@@ -2573,6 +2573,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("AblineParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -2968,6 +2974,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("PointParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3035,6 +3047,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("LineParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3064,6 +3082,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("StepParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3119,6 +3143,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("PathParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3144,6 +3174,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("ColParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3174,6 +3210,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("BarParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3204,6 +3246,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("BarParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3236,6 +3284,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("LineParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3268,6 +3322,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("SmoothParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3300,6 +3360,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("QuantileParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3328,6 +3394,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("QqParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3357,6 +3429,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("QqLineParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3388,6 +3466,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("ContourParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3421,6 +3505,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("ViolinParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3456,6 +3546,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("BoxplotParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3490,6 +3586,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("PointParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3521,6 +3623,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("DotplotParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3553,6 +3661,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("DensityParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3585,6 +3699,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("Density2dParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3619,6 +3739,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("Density2dParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3669,6 +3795,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("ErrorbarParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3696,6 +3828,12 @@ export const SpecDeclarations = {
       aes: Type.Optional(Type.Ref("Aes")),
       data: Type.Optional(Type.Ref("DataRef")),
       params: Type.Optional(Type.Ref("LinerangeParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3723,6 +3861,12 @@ export const SpecDeclarations = {
       aes: Type.Optional(Type.Ref("Aes")),
       data: Type.Optional(Type.Ref("DataRef")),
       params: Type.Optional(Type.Ref("PointrangeParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3750,6 +3894,12 @@ export const SpecDeclarations = {
       aes: Type.Optional(Type.Ref("Aes")),
       data: Type.Optional(Type.Ref("DataRef")),
       params: Type.Optional(Type.Ref("CrossbarParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3777,6 +3927,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("RectParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3806,6 +3962,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("TileParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3837,6 +3999,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("Bin2dParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3866,6 +4034,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("RasterParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3897,6 +4071,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("HexParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3941,6 +4121,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("AreaParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3968,6 +4154,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("RibbonParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -3995,6 +4187,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("RuleParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4024,6 +4222,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("HlineParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4053,6 +4257,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("VlineParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4085,6 +4295,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("PointParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4116,6 +4332,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("TextParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4148,6 +4370,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("LabelParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4175,6 +4403,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("SegmentParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4208,6 +4442,12 @@ export const SpecDeclarations = {
       params: Type.Ref("FunctionParams", {
         description: "Function parameters (fun is required).",
       }),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4237,6 +4477,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("CurveParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4266,6 +4512,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("PolygonParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4295,6 +4547,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Ref("MapParams"),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4327,6 +4585,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("SfParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4405,6 +4669,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("SfTextParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4502,6 +4772,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("SfLabelParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4542,6 +4818,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("BlankParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4571,6 +4853,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("RugParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -4600,6 +4888,12 @@ export const SpecDeclarations = {
         }),
       ),
       params: Type.Optional(Type.Ref("SpokeParams")),
+      inspect: Type.Optional(
+        Type.Literal(false, {
+          description:
+            "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree.",
+        }),
+      ),
     },
     {
       additionalProperties: false,

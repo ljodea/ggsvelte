@@ -122,10 +122,14 @@ export function buildCandidateStoreIndexes(
     return id;
   };
 
+  const uninspectable = options.uninspectableLayers;
+
   for (let batchIndex = 0; batchIndex < scene.batches.length; batchIndex++) {
     const batch = scene.batches[batchIndex]!;
     const panel = scene.panels[batch.panelIndex];
     if (panel === undefined) continue;
+    // Layer opted out of inspection (#1065) — paint it, never target it.
+    if (uninspectable?.has(batch.layerIndex) === true) continue;
     for (let primitiveIndex = 0; primitiveIndex < primitiveCount(batch); primitiveIndex++) {
       if (!isCandidatePrimitive(batch, primitiveIndex)) continue;
       const candidateIndex = batchList.length;

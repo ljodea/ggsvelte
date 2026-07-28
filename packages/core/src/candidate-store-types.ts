@@ -48,6 +48,18 @@ export interface CandidateStoreOptions {
   readonly flip?: boolean;
   /** Pointer hit slop around points and strokes in plot pixels (default 3). */
   readonly hitTolerance?: number;
+  /**
+   * Layer indexes the author marked `inspect: false`. Their marks never become
+   * candidates, so they cannot be hit-tested, hovered, or reached by keyboard.
+   *
+   * Filtering here rather than in each query is deliberate: an area mark
+   * reports distance 0 everywhere it is painted, so a full-panel band outranks
+   * every point and stroke beneath it in `nearest`. Dropping the marks at the
+   * single enumeration point covers hitTest, nearest, grouping and traversal
+   * together, and leaves rect hit math alone for the layers that want it
+   * (bars, tiles, heatmaps).
+   */
+  readonly uninspectableLayers?: ReadonlySet<number>;
   readonly datum?: (facts: CandidateBuildFacts) => CandidateDatum | undefined;
 }
 export interface CandidateFacts extends CandidateBuildFacts {

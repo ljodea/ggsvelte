@@ -66,6 +66,7 @@ export function toLayerInput(descriptor: MarkLayerDescriptorLike): LayerInput {
       positionParams: descriptor.positionParams,
     }),
     ...(descriptor.render !== undefined && { render: descriptor.render }),
+    ...(descriptor.inspect === false && { inspect: false as const }),
     ...(descriptor.aes !== undefined && { aes: descriptor.aes }),
     ...(descriptor.data !== undefined && { data: layerDataRef(descriptor.data) }),
     ...(descriptor.params !== undefined && { params: descriptor.params }),
