@@ -43,7 +43,8 @@ export const LIVE_STEP_INDEXES: readonly number[] = [];
 
 /** Nominal size; the SVG scales to its container via viewBox. */
 export const LESSON_CHART_WIDTH = 660;
-export const LESSON_CHART_HEIGHT = 400;
+/** ~2.5:1 width:height — nearer the reference than the old 400px default. */
+export const LESSON_CHART_HEIGHT = 264;
 
 export interface LessonChartEntry {
   /** -1 is the first render, before any step. */

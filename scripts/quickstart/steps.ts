@@ -13,14 +13,28 @@ export const QUICKSTART_PAGE_FILENAME = "src/routes/+page.svelte";
 /** Bloom days are projected onto this non-leap year so a date axis can draw them. */
 export const SAKURA_REFERENCE_YEAR = 2001;
 
-/** Loess neighborhood fraction: large enough that the millennium reads flat. */
-export const SAKURA_LOESS_SPAN = 0.4;
+/** Bin width (years) for the running-median step line. */
+export const SAKURA_BINWIDTH = 25;
 
 /** Median bloom day 1600–1850, drawn as the pre-industrial baseline. */
 export const SAKURA_BASELINE = "2001-04-15";
 
+/** Y-axis tick positions: three dates, matching the reference chart. */
+export const SAKURA_Y_BREAKS = ["2001-04-05", "2001-04-15", "2001-04-25"] as const;
+
+/** Y-axis title: the quantity (a date), with earlier up. */
+export const SAKURA_Y_LAB = "Bloom date (earlier ↑)";
+
+/** Plot domain top (earlier / higher on the reversed date axis). */
 const Y_TOP = "2001-03-18";
+/** Plot domain bottom (later / lower on the reversed date axis). */
 const Y_BOTTOM = "2001-05-10";
+/**
+ * Epoch-band top — later than {@link Y_TOP} so the panel keeps headroom above
+ * the bands for epoch names (#1067). Bands claim climate periods, not the
+ * full vertical extent of the record.
+ */
+const BAND_TOP = "2001-03-28";
 
 // --- the two lesson-only tables -------------------------------------------
 // Both are small enough to read at a glance, and both are drawn by layers that
@@ -28,11 +42,13 @@ const Y_BOTTOM = "2001-05-10";
 
 // `year` is the band's first year, so the plot's `key="year"` resolves on
 // these rows too — every table the chart draws from speaks the same identity.
+// Bounds follow the climate periods on the reference chart, not the first and
+// last observation years: MWP starts after 812, and a gap separates MWP from LIA.
 export const SAKURA_EPOCHS = [
-  { epoch: "Medieval warm period", year: 812, until: 1300 },
-  { epoch: "Little Ice Age", year: 1300, until: 1850 },
+  { epoch: "Medieval warm period", year: 950, until: 1250 },
+  { epoch: "Little Ice Age", year: 1400, until: 1850 },
   { epoch: "Industrial era", year: 1850, until: 2026 },
-].map((band) => ({ ...band, top: Y_TOP, bottom: Y_BOTTOM }));
+].map((band) => ({ ...band, top: BAND_TOP, bottom: Y_BOTTOM }));
 
 /**
  * Where the bands meet. Drawn as hairlines so the epochs survive forced-colors
@@ -122,8 +138,8 @@ export interface SakuraStep {
   readonly source: SakuraSourceDelta;
 }
 
-const EPOCHS_CONST = `  // Full panel height, so the bands read as background, not as data.
-  const span = { top: "${Y_TOP}", bottom: "${Y_BOTTOM}" };
+const EPOCHS_CONST = `  // Bands stop short of the panel top so epoch names can sit in the headroom.
+  const span = { top: "${BAND_TOP}", bottom: "${Y_BOTTOM}" };
   const epochs = [
 ${SAKURA_EPOCHS.map(
   (e) => `    { epoch: "${e.epoch}", year: ${e.year}, until: ${e.until}, ...span },`,
@@ -150,10 +166,11 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     explanation: "",
     fragment: `<GeomPoint alpha={0.5} size={1.6}
   aes={{ color: { value: "#777777" } }} />
-<GeomSmooth method="loess" span={0.4} se={false} linewidth={1.8}
+<GeomLine stat="summary_bin" fun="median" binwidth={${SAKURA_BINWIDTH}}
+  curve="step-hv" linewidth={1.8}
   aes={{ color: { value: "#262626" } }} />`,
     chapterTitle: "Statistics and positions",
-    href: "/guide/statistics-positions#statistical-summaries",
+    href: "/guide/statistics-positions#binned-y-summaries-summary-bin",
     spec: {
       layers: {
         points: {
@@ -162,25 +179,32 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           params: { alpha: 0.5, size: 1.6 },
         },
         trend: {
-          geom: "smooth",
+          geom: "line",
+          stat: "summary_bin",
           aes: { color: { value: "#262626" } },
-          params: { method: "loess", span: SAKURA_LOESS_SPAN, se: false, linewidth: 1.8 },
+          params: {
+            fun: "median",
+            binwidth: SAKURA_BINWIDTH,
+            curve: "step-hv",
+            linewidth: 1.8,
+          },
         },
       },
       order: ["points", "trend"],
     },
     source: {
-      components: ["GeomSmooth"],
+      components: ["GeomLine"],
       children: {
         points: `  <GeomPoint
     alpha={0.5}
     size={1.6}
     aes={{ color: { value: "#777777" } }}
   />`,
-        trend: `  <GeomSmooth
-    method="loess"
-    span={${SAKURA_LOESS_SPAN}}
-    se={false}
+        trend: `  <GeomLine
+    stat="summary_bin"
+    fun="median"
+    binwidth={${SAKURA_BINWIDTH}}
+    curve="step-hv"
     linewidth={1.8}
     aes={{ color: { value: "#262626" } }}
   />`,
@@ -195,7 +219,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     explanation: "",
     fragment: `<ScaleYDate
   reverse
-  dateBreaks="10 days"
+  breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
   dateLabels="%b %d"
   domain={["${Y_BOTTOM}", "${Y_TOP}"]}
 />
@@ -208,7 +232,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           type: "time",
           temporalKind: "date",
           reverse: true,
-          dateBreaks: "10 days",
+          breaks: [...SAKURA_Y_BREAKS],
           dateLabels: "%b %d",
           domain: [Y_BOTTOM, Y_TOP],
         },
@@ -216,19 +240,19 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
         // formatter groups thousands, which renders 1000 CE as "1,000".
         x: { type: "linear", domain: [800, 2030], labels: "d" },
       },
-      labs: { x: "Year", y: "Peak bloom" },
+      labs: { x: "Year", y: SAKURA_Y_LAB },
     },
     source: {
       components: ["ScaleYDate", "ScaleXContinuous"],
       grammar: {
         scaleY: `  <ScaleYDate
     reverse
-    dateBreaks="10 days"
+    breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
     dateLabels="%b %d"
     domain={["${Y_BOTTOM}", "${Y_TOP}"]}
   />`,
         scaleX: `  <ScaleXContinuous labels="d" domain={[800, 2030]} />`,
-        labs: `  <Labs x="Year" y="Peak bloom" />`,
+        labs: `  <Labs x="Year" y="${SAKURA_Y_LAB}" />`,
       },
     },
   },
@@ -418,7 +442,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   subtitle="Bloom now arrives about a week earlier than it did for a millennium"
   caption="838 observations. Data: Yasuyuki Aono (2008, 2010)."
   x="Year"
-  y="Peak bloom"
+  y="${SAKURA_Y_LAB}"
   fill="Climate epoch"
 />`,
     chapterTitle: "Themes and color",
@@ -430,7 +454,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
         subtitle: "Bloom now arrives about a week earlier than it did for a millennium",
         caption: "838 observations. Data: Yasuyuki Aono (2008, 2010).",
         x: "Year",
-        y: "Peak bloom",
+        y: SAKURA_Y_LAB,
         fill: "Climate epoch",
       },
     },
@@ -440,7 +464,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
         theme: `  <ThemeTufte />`,
         labs: `  <Labs
     x="Year"
-    y="Peak bloom"
+    y="${SAKURA_Y_LAB}"
     title="Kyoto cherry blossom, 812–2026"
     subtitle="Bloom now arrives about a week earlier than it did for a millennium"
     caption="838 observations. Data: Yasuyuki Aono (2008, 2010)."

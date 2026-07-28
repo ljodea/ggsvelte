@@ -52,6 +52,58 @@ describe("stat summary_bin (#817)", () => {
     expect(batch.pathOffsets.length).toBe(2);
   });
 
+  it("median summary_bin over a reversed date y yields finite step vertices", () => {
+    // Kyoto lesson contract (#1066): bloom days are ISO dates on a reversed
+    // date scale. positionColumn only special-cases temporalKind "time", so
+    // date y must still produce finite binned medians.
+    const bloom = {
+      year: [800, 810, 820, 900, 910, 920, 1000, 1010, 1020],
+      day: [
+        "2001-04-20",
+        "2001-04-18",
+        "2001-04-22",
+        "2001-04-15",
+        "2001-04-14",
+        "2001-04-16",
+        "2001-04-10",
+        "2001-04-12",
+        "2001-04-11",
+      ],
+    };
+    const model = runPipeline(
+      gg(bloom, aes({ x: "year", y: "day" }))
+        .geomLine({
+          stat: "summary_bin",
+          fun: "median",
+          binwidth: 50,
+          curve: "step-hv",
+        })
+        .scaleYDate({
+          reverse: true,
+          breaks: ["2001-04-05", "2001-04-15", "2001-04-25"],
+          dateLabels: "%b %d",
+          domain: ["2001-05-10", "2001-03-18"],
+        })
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PathsBatch;
+    expect(batch.kind).toBe("paths");
+    expect(batch.curve).toBe("step-hv");
+    const n = batch.positions.length / 2;
+    expect(n).toBeGreaterThanOrEqual(2);
+    for (let i = 0; i < batch.positions.length; i++) {
+      expect(Number.isFinite(batch.positions[i]!)).toBe(true);
+    }
+    // Earlier median (later century) sits higher on the reversed date axis.
+    // Bins: ~800–850, ~900–950, ~1000–1050 → y medians ~Apr 20, Apr 15, Apr 11.
+    const y0 = batch.positions[1]!;
+    const yLast = batch.positions[batch.positions.length - 1]!;
+    expect(yLast).toBeLessThan(y0);
+    const labels = model.scene.panels[0]?.axisY?.map((tick) => tick.label) ?? [];
+    expect(labels).toEqual(["Apr 05", "Apr 15", "Apr 25"]);
+  });
+
   it("default bins emits advisory", () => {
     const model = runPipeline(
       gg(data, aes({ x: "x", y: "y" }))

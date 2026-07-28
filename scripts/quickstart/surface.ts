@@ -6,7 +6,7 @@
  */
 
 import { QUICKSTART_PAGE_SVELTE } from "./fold";
-import { SAKURA_LOESS_SPAN, SAKURA_STEPS } from "./steps";
+import { SAKURA_BINWIDTH, SAKURA_STEPS } from "./steps";
 
 /**
  * Section headings of the HUMAN getting-started page, in page order.
@@ -54,7 +54,12 @@ import { kyotoSakura } from "@ggsvelte/svelte/data";
 
 const spec = gg(kyotoSakura, aes({ x: "year", y: "bloomRefDate" }))
   .geomPoint()
-  .geomSmooth({ method: "loess", span: ${SAKURA_LOESS_SPAN} })
+  .geomLine({
+    stat: "summary_bin",
+    fun: "median",
+    binwidth: ${SAKURA_BINWIDTH},
+    curve: "step-hv",
+  })
   .spec();`;
 
 /**
@@ -74,12 +79,16 @@ export const QUICKSTART_PORTABLE_SPEC_FRAGMENT = `{
   "aes": { "x": { "field": "year" }, "y": { "field": "bloomRefDate" } },
   "layers": [
     { "geom": "point", "params": { "alpha": 0.5 } },
-    { "geom": "smooth", "params": { "method": "loess", "span": ${SAKURA_LOESS_SPAN} } }
+    {
+      "geom": "line",
+      "stat": "summary_bin",
+      "params": { "fun": "median", "binwidth": ${SAKURA_BINWIDTH}, "curve": "step-hv" }
+    }
   ]
 }`;
 
 export const QUICKSTART_HEADLESS_FRAGMENT = `import { renderToSVGString } from "@ggsvelte/core";
 
-const svg = renderToSVGString(spec, { width: 900, height: 480 });`;
+const svg = renderToSVGString(spec, { width: 900, height: 360 });`;
 
 export const QUICKSTART_CLI_FRAGMENT = "ggsvelte-render spec.json > chart.svg 2> diagnostics.jsonl";

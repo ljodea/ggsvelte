@@ -7,7 +7,7 @@ export interface LessonChartEntry {
 }
 
 export const LESSON_CHART_WIDTH = 660;
-export const LESSON_CHART_HEIGHT = 400;
+export const LESSON_CHART_HEIGHT = 264;
 
 export const LESSON_CHARTS: readonly LessonChartEntry[] = [
   { step: -1, filename: "first-render.svg" },
