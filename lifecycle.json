@@ -604,6 +604,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GEOM_REFERENCE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GGBuilder": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -720,6 +724,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GeomParamDoc": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GeomPathOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -753,6 +761,10 @@
           "lifecycle": "experimental"
         },
         "GeomRectOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomReferenceEntry": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -1640,6 +1652,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "SHARED_LAYER_PROPS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "STAT_COLUMNS": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1729,6 +1745,10 @@
           "lifecycle": "experimental"
         },
         "ShapeScaleSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SharedLayerPropDoc": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2088,6 +2108,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "componentNameForGeom": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "configuredColorScaleType": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2169,6 +2193,10 @@
           "lifecycle": "experimental"
         },
         "fromEpochSeconds": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "geomReferenceList": {
           "kind": "value",
           "lifecycle": "experimental"
         },

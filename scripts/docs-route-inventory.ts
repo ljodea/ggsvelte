@@ -6,7 +6,8 @@ import {
   isInteractionExposition,
 } from "../apps/docs/src/lib/catalog/interaction-exposition.ts";
 import { GUIDE_CATALOG, type GuideCatalogEntry } from "../apps/docs/src/lib/catalog/guide.ts";
-import type { DocsRouteMetadata } from "../apps/docs/src/lib/route-types.ts";
+import type { DocsRouteMetadata, RouteHeading } from "../apps/docs/src/lib/route-types.ts";
+import { geomReferenceList } from "../packages/spec/src/geom-reference.ts";
 import { CLI_REFERENCE_OPTIONS } from "./cli-docs.ts";
 
 /** Script-side name for the shared route metadata contract (`DocsRouteMetadata`). */
@@ -85,13 +86,29 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
   {
     path: "/reference",
     title: "Reference — ggsvelte",
-    description: "Interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
+    description: "Geom, interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
     canonicalPath: "/reference",
     kind: "page",
     index: true,
     sitemap: true,
     shell: "docs",
     navigation: { section: "Reference", label: "Reference overview", order: 50 },
+  },
+  {
+    path: "/reference/geoms",
+    title: "Geom reference — ggsvelte",
+    description:
+      "Schema-derived API reference for every Geom* component: defaults, allowed stats and positions, and params.",
+    canonicalPath: "/reference/geoms",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: { section: "Reference", label: "Geom reference", order: 51 },
+    headings: [
+      { id: "all-geoms", title: "All geoms", level: 2 },
+      { id: "shared-layer-props", title: "Shared layer props", level: 2 },
+    ],
   },
   {
     path: "/reference/interactions",
@@ -103,7 +120,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Interaction reference", order: 51 },
+    navigation: { section: "Reference", label: "Interaction reference", order: 52 },
   },
   {
     path: "/reference/cli",
@@ -115,7 +132,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "CLI reference", order: 52 },
+    navigation: { section: "Reference", label: "CLI reference", order: 53 },
     headings: [
       { id: "input-and-output", title: "Input and output", level: 2 },
       { id: "options", title: "Options", level: 2 },
@@ -129,6 +146,53 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     ],
   },
 ];
+
+/** Same matching rule as apps/docs reference/geoms/[name] page load. */
+function geomHasRelatedExamples(geom: string): boolean {
+  const compact = geom.replaceAll("_", "");
+  const dashed = geom.replaceAll("_", "-");
+  return EXAMPLES.some(
+    (entry) =>
+      entry.category === geom ||
+      entry.category === compact ||
+      entry.tags.includes(geom) ||
+      entry.tags.includes(dashed),
+  );
+}
+
+/** One indexable page per KNOWN_GEOMS entry, derived from SpecDeclarations. */
+function geomDetailRoutes(): DocsRouteRecord[] {
+  return geomReferenceList().map((entry) => {
+    const headings: RouteHeading[] = [{ id: "defaults", title: "Defaults", level: 2 }];
+    // Order matches apps/docs/src/routes/reference/geoms/[name]/+page.svelte.
+    if (entry.aliasOf !== undefined) {
+      headings.push({ id: "alias", title: "Alias", level: 2 });
+    }
+    headings.push(
+      { id: "svelte", title: "Svelte component", level: 2 },
+      { id: "json", title: "JSON layer", level: 2 },
+      { id: "params", title: "Params", level: 2 },
+      { id: "allowed-stats", title: "Allowed stats", level: 2 },
+      { id: "allowed-positions", title: "Allowed positions", level: 2 },
+    );
+    if (geomHasRelatedExamples(entry.name)) {
+      headings.push({ id: "examples", title: "Examples", level: 2 });
+    }
+    return {
+      path: `/reference/geoms/${entry.slug}`,
+      title: `${entry.component} — ggsvelte`,
+      // Prefix with component so indexable descriptions stay unique when layer
+      // summaries share phrasing across aliases or related marks.
+      description: `${entry.component}: ${entry.summary}`,
+      canonicalPath: `/reference/geoms/${entry.slug}`,
+      kind: "page" as const,
+      index: true,
+      sitemap: true,
+      shell: "docs" as const,
+      headings,
+    };
+  });
+}
 
 const ENDPOINT_ROUTES: readonly DocsRouteRecord[] = [
   ["/schema/v0.json", "PortableSpec JSON Schema", "Machine-readable ggsvelte PortableSpec schema."],
@@ -269,6 +333,7 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
 
   return validateRouteInventory([
     ...TOP_LEVEL_ROUTES,
+    ...geomDetailRoutes(),
     ...guides,
     ...examples,
     ...interactionExpositions,

@@ -72,7 +72,7 @@ export const DOCS_ROUTES = [
   {
     path: "/reference",
     title: "Reference — ggsvelte",
-    description: "Interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
+    description: "Geom, interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
     canonicalPath: "/reference",
     kind: "page",
     index: true,
@@ -83,6 +83,34 @@ export const DOCS_ROUTES = [
       label: "Reference overview",
       order: 50,
     },
+  },
+  {
+    path: "/reference/geoms",
+    title: "Geom reference — ggsvelte",
+    description:
+      "Schema-derived API reference for every Geom* component: defaults, allowed stats and positions, and params.",
+    canonicalPath: "/reference/geoms",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Reference",
+      label: "Geom reference",
+      order: 51,
+    },
+    headings: [
+      {
+        id: "all-geoms",
+        title: "All geoms",
+        level: 2,
+      },
+      {
+        id: "shared-layer-props",
+        title: "Shared layer props",
+        level: 2,
+      },
+    ],
   },
   {
     path: "/reference/interactions",
@@ -97,7 +125,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Interaction reference",
-      order: 51,
+      order: 52,
     },
   },
   {
@@ -113,7 +141,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "CLI reference",
-      order: 52,
+      order: 53,
     },
     headings: [
       {
@@ -164,6 +192,2363 @@ export const DOCS_ROUTES = [
       {
         id: "troubleshooting",
         title: "Troubleshooting",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/point",
+    title: "GeomPoint — ggsvelte",
+    description:
+      "GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+    canonicalPath: "/reference/geoms/point",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/line",
+    title: "GeomLine — ggsvelte",
+    description:
+      "GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+    canonicalPath: "/reference/geoms/line",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/path",
+    title: "GeomPath — ggsvelte",
+    description:
+      "GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+    canonicalPath: "/reference/geoms/path",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/col",
+    title: "GeomCol — ggsvelte",
+    description:
+      "GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+    canonicalPath: "/reference/geoms/col",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/bar",
+    title: "GeomBar — ggsvelte",
+    description:
+      "GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+    canonicalPath: "/reference/geoms/bar",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/histogram",
+    title: "GeomHistogram — ggsvelte",
+    description:
+      "GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+    canonicalPath: "/reference/geoms/histogram",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/freqpoly",
+    title: "GeomFreqpoly — ggsvelte",
+    description:
+      "GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+    canonicalPath: "/reference/geoms/freqpoly",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/area",
+    title: "GeomArea — ggsvelte",
+    description:
+      "GeomArea: Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts. With stat align, series with different x samples share a common grid for stack/fill.",
+    canonicalPath: "/reference/geoms/area",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/rule",
+    title: "GeomRule — ggsvelte",
+    description:
+      "GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+    canonicalPath: "/reference/geoms/rule",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/hline",
+    title: "GeomHline — ggsvelte",
+    description:
+      "GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+    canonicalPath: "/reference/geoms/hline",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/vline",
+    title: "GeomVline — ggsvelte",
+    description:
+      "GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+    canonicalPath: "/reference/geoms/vline",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/text",
+    title: "GeomText — ggsvelte",
+    description:
+      "GeomText: Text geometry: one label per data row at (x, y). No collision detection — labels draw exactly where placed. Requires x, y, and label channels.",
+    canonicalPath: "/reference/geoms/text",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/label",
+    title: "GeomLabel — ggsvelte",
+    description:
+      "GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+    canonicalPath: "/reference/geoms/label",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/smooth",
+    title: "GeomSmooth — ggsvelte",
+    description:
+      "GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+    canonicalPath: "/reference/geoms/smooth",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/quantile",
+    title: "GeomQuantile — ggsvelte",
+    description:
+      "GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+    canonicalPath: "/reference/geoms/quantile",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/boxplot",
+    title: "GeomBoxplot — ggsvelte",
+    description:
+      "GeomBoxplot: Box-and-whisker geometry: one box per x category (per group) summarizing the y distribution — hinges at the quartiles, whiskers to the furthest points within coef × IQR, outliers drawn individually.",
+    canonicalPath: "/reference/geoms/boxplot",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/density",
+    title: "GeomDensity — ggsvelte",
+    description:
+      "GeomDensity: Density geometry: a smooth kernel density estimate of a continuous x variable, drawn as a filled area — a smoothed histogram alternative. One curve per group. Do NOT map aes.y — the density stat computes it.",
+    canonicalPath: "/reference/geoms/density",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/errorbar",
+    title: "GeomErrorbar — ggsvelte",
+    description:
+      "GeomErrorbar: Errorbar geometry: a vertical range with caps at ymin and ymax, one per data row (identity stat) or per x group (summary stat).",
+    canonicalPath: "/reference/geoms/errorbar",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/linerange",
+    title: "GeomLinerange — ggsvelte",
+    description:
+      "GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+    canonicalPath: "/reference/geoms/linerange",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/pointrange",
+    title: "GeomPointrange — ggsvelte",
+    description:
+      "GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+    canonicalPath: "/reference/geoms/pointrange",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/crossbar",
+    title: "GeomCrossbar — ggsvelte",
+    description:
+      "GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+    canonicalPath: "/reference/geoms/crossbar",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/rect",
+    title: "GeomRect — ggsvelte",
+    description:
+      "GeomRect: Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands.",
+    canonicalPath: "/reference/geoms/rect",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/tile",
+    title: "GeomTile — ggsvelte",
+    description:
+      "GeomTile: Tile geometry: center-sized cells at (x, y) with optional width/height. Use for heatmaps and gridded categorical cells; supports stroke outlines.",
+    canonicalPath: "/reference/geoms/tile",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/raster",
+    title: "GeomRaster — ggsvelte",
+    description:
+      "GeomRaster: Raster geometry: equal-cell grid at (x, y) with fill; optimized dense heatmaps without per-cell strokes. Irregular spacing warns and suggests geom tile.",
+    canonicalPath: "/reference/geoms/raster",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/ribbon",
+    title: "GeomRibbon — ggsvelte",
+    description:
+      "GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+    canonicalPath: "/reference/geoms/ribbon",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/segment",
+    title: "GeomSegment — ggsvelte",
+    description:
+      "GeomSegment: Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel.",
+    canonicalPath: "/reference/geoms/segment",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/count",
+    title: "GeomCount — ggsvelte",
+    description:
+      "GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+    canonicalPath: "/reference/geoms/count",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/violin",
+    title: "GeomViolin — ggsvelte",
+    description:
+      "GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+    canonicalPath: "/reference/geoms/violin",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/function",
+    title: "GeomFunction — ggsvelte",
+    description:
+      "GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+    canonicalPath: "/reference/geoms/function",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/polygon",
+    title: "GeomPolygon — ggsvelte",
+    description:
+      "GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+    canonicalPath: "/reference/geoms/polygon",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/hex",
+    title: "GeomHex — ggsvelte",
+    description:
+      "GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+    canonicalPath: "/reference/geoms/hex",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/bin_2d",
+    title: "GeomBin2d — ggsvelte",
+    description:
+      "GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+    canonicalPath: "/reference/geoms/bin_2d",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/abline",
+    title: "GeomAbline — ggsvelte",
+    description:
+      "GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+    canonicalPath: "/reference/geoms/abline",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/curve",
+    title: "GeomCurve — ggsvelte",
+    description:
+      "GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+    canonicalPath: "/reference/geoms/curve",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/contour",
+    title: "GeomContour — ggsvelte",
+    description:
+      "GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+    canonicalPath: "/reference/geoms/contour",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/density_2d",
+    title: "GeomDensity2d — ggsvelte",
+    description:
+      "GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+    canonicalPath: "/reference/geoms/density_2d",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/density_2d_filled",
+    title: "GeomDensity2dFilled — ggsvelte",
+    description:
+      "GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+    canonicalPath: "/reference/geoms/density_2d_filled",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/dotplot",
+    title: "GeomDotplot — ggsvelte",
+    description:
+      "GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+    canonicalPath: "/reference/geoms/dotplot",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/map",
+    title: "GeomMap — ggsvelte",
+    description:
+      "GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+    canonicalPath: "/reference/geoms/map",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/sf",
+    title: "GeomSf — ggsvelte",
+    description:
+      "GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+    canonicalPath: "/reference/geoms/sf",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/sf_text",
+    title: "GeomSfText — ggsvelte",
+    description:
+      "GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+    canonicalPath: "/reference/geoms/sf_text",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/sf_label",
+    title: "GeomSfLabel — ggsvelte",
+    description:
+      "GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+    canonicalPath: "/reference/geoms/sf_label",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/blank",
+    title: "GeomBlank — ggsvelte",
+    description:
+      "GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+    canonicalPath: "/reference/geoms/blank",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/jitter",
+    title: "GeomJitter — ggsvelte",
+    description:
+      "GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+    canonicalPath: "/reference/geoms/jitter",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/spoke",
+    title: "GeomSpoke — ggsvelte",
+    description:
+      "GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+    canonicalPath: "/reference/geoms/spoke",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/rug",
+    title: "GeomRug — ggsvelte",
+    description:
+      "GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+    canonicalPath: "/reference/geoms/rug",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/step",
+    title: "GeomStep — ggsvelte",
+    description:
+      "GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+    canonicalPath: "/reference/geoms/step",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/qq",
+    title: "GeomQq — ggsvelte",
+    description:
+      "GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+    canonicalPath: "/reference/geoms/qq",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/geoms/qq_line",
+    title: "GeomQqLine — ggsvelte",
+    description:
+      "GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+    canonicalPath: "/reference/geoms/qq_line",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON layer",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "allowed-stats",
+        title: "Allowed stats",
+        level: 2,
+      },
+      {
+        id: "allowed-positions",
+        title: "Allowed positions",
         level: 2,
       },
     ],
@@ -300,6 +2685,11 @@ export const DOCS_ROUTES = [
       {
         id: "compose-layers",
         title: "Compose layers",
+        level: 2,
+      },
+      {
+        id: "look-up-a-geom",
+        title: "Look up a geom",
         level: 2,
       },
     ],
@@ -2296,8 +4686,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-858",
-        title: "experimental (858)",
+        id: "experimental-865",
+        title: "experimental (865)",
         level: 3,
       },
       {
@@ -3695,6 +6085,10 @@ export const GUIDE_NAVIGATION = [
       {
         path: "/reference",
         label: "Reference overview",
+      },
+      {
+        path: "/reference/geoms",
+        label: "Geom reference",
       },
       {
         path: "/reference/interactions",

@@ -1478,7 +1478,12 @@ export const SpecDeclarations = {
             "Evaluation domain [min, max] (min < max). When omitted, uses continuous aes.x extent or peer-layer x domain.",
         }),
       ),
-      args: Type.Optional(Type.Ref("FunctionArgs")),
+      args: Type.Optional(
+        Type.Ref("FunctionArgs", {
+          description:
+            "Optional named arguments for the registry function (e.g. mean and sd for dnorm). Keys and values must be portable JSON.",
+        }),
+      ),
       alpha: Type.Optional(
         Type.Number({
           minimum: 0,
@@ -1851,8 +1856,18 @@ export const SpecDeclarations = {
             'STAT SUMMARY ONLY: center summary of y per x group. Default "mean" (mean_se when funMin/funMax omitted).',
         }),
       ),
-      funMin: Type.Optional(Type.Ref("SummaryFun")),
-      funMax: Type.Optional(Type.Ref("SummaryFun")),
+      funMin: Type.Optional(
+        Type.Ref("SummaryFun", {
+          description:
+            "STAT SUMMARY ONLY: summary function for the lower bound (ymin). Overrides the mean_se default.",
+        }),
+      ),
+      funMax: Type.Optional(
+        Type.Ref("SummaryFun", {
+          description:
+            "STAT SUMMARY ONLY: summary function for the upper bound (ymax). Overrides the mean_se default.",
+        }),
+      ),
     },
     {
       additionalProperties: false,
@@ -1895,8 +1910,18 @@ export const SpecDeclarations = {
           description: 'STAT SUMMARY ONLY: center summary. Default "mean".',
         }),
       ),
-      funMin: Type.Optional(Type.Ref("SummaryFun")),
-      funMax: Type.Optional(Type.Ref("SummaryFun")),
+      funMin: Type.Optional(
+        Type.Ref("SummaryFun", {
+          description:
+            "STAT SUMMARY ONLY: summary function for the lower bound (ymin). Overrides the mean_se default.",
+        }),
+      ),
+      funMax: Type.Optional(
+        Type.Ref("SummaryFun", {
+          description:
+            "STAT SUMMARY ONLY: summary function for the upper bound (ymax). Overrides the mean_se default.",
+        }),
+      ),
     },
     {
       additionalProperties: false,

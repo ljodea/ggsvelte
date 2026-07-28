@@ -1378,7 +1378,8 @@
           "description": "Evaluation domain [min, max] (min < max). When omitted, uses continuous aes.x extent or peer-layer x domain."
         },
         "args": {
-          "$ref": "#/$defs/FunctionArgs"
+          "$ref": "#/$defs/FunctionArgs",
+          "description": "Optional named arguments for the registry function (e.g. mean and sd for dnorm). Keys and values must be portable JSON."
         },
         "alpha": {
           "type": "number",
@@ -1793,10 +1794,12 @@
           "description": "STAT SUMMARY ONLY: center summary of y per x group. Default \"mean\" (mean_se when funMin/funMax omitted)."
         },
         "funMin": {
-          "$ref": "#/$defs/SummaryFun"
+          "$ref": "#/$defs/SummaryFun",
+          "description": "STAT SUMMARY ONLY: summary function for the lower bound (ymin). Overrides the mean_se default."
         },
         "funMax": {
-          "$ref": "#/$defs/SummaryFun"
+          "$ref": "#/$defs/SummaryFun",
+          "description": "STAT SUMMARY ONLY: summary function for the upper bound (ymax). Overrides the mean_se default."
         }
       },
       "additionalProperties": false,
@@ -1845,10 +1848,12 @@
           "description": "STAT SUMMARY ONLY: center summary. Default \"mean\"."
         },
         "funMin": {
-          "$ref": "#/$defs/SummaryFun"
+          "$ref": "#/$defs/SummaryFun",
+          "description": "STAT SUMMARY ONLY: summary function for the lower bound (ymin). Overrides the mean_se default."
         },
         "funMax": {
-          "$ref": "#/$defs/SummaryFun"
+          "$ref": "#/$defs/SummaryFun",
+          "description": "STAT SUMMARY ONLY: summary function for the upper bound (ymax). Overrides the mean_se default."
         }
       },
       "additionalProperties": false,

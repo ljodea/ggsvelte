@@ -278,6 +278,15 @@ export { SCALE_CAPABILITIES, STYLE_AESTHETIC_GEOMS } from "./capabilities.js";
 export type { ScaleCapability, StyleAesthetic } from "./capabilities.js";
 /** @lifecycle experimental */
 export { GEOM_PARAM_KEYS } from "./geom-params.js";
+/** @lifecycle experimental */
+export {
+  GEOM_REFERENCE,
+  SHARED_LAYER_PROPS,
+  componentNameForGeom,
+  geomReferenceList,
+} from "./geom-reference.js";
+/** @lifecycle experimental */
+export type { GeomParamDoc, GeomReferenceEntry, SharedLayerPropDoc } from "./geom-reference.js";
 
 // Temporal parsing, inference, and authoring conversions
 export {

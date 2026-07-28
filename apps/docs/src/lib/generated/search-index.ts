@@ -61,10 +61,40 @@ export const DOCS_SEARCH_INDEX = [
     id: "page:reference",
     kind: "page",
     title: "Reference",
-    summary: "Interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
+    summary: "Geom, interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
     href: "/reference",
     keywords: ["Reference"],
     exact: ["Reference"],
+  },
+  {
+    id: "page:reference-geoms",
+    kind: "page",
+    title: "Geom reference",
+    summary:
+      "Schema-derived API reference for every Geom* component: defaults, allowed stats and positions, and params.",
+    href: "/reference/geoms",
+    keywords: ["Reference"],
+    exact: ["Geom reference"],
+  },
+  {
+    id: "heading:reference-geoms:all-geoms",
+    kind: "heading",
+    title: "All geoms",
+    summary:
+      "All geoms in Geom reference. Schema-derived API reference for every Geom* component: defaults, allowed stats and positions, and params.",
+    href: "/reference/geoms#all-geoms",
+    keywords: ["Geom reference", "Reference"],
+    exact: ["All geoms"],
+  },
+  {
+    id: "heading:reference-geoms:shared-layer-props",
+    kind: "heading",
+    title: "Shared layer props",
+    summary:
+      "Shared layer props in Geom reference. Schema-derived API reference for every Geom* component: defaults, allowed stats and positions, and params.",
+    href: "/reference/geoms#shared-layer-props",
+    keywords: ["Geom reference", "Reference"],
+    exact: ["Shared layer props"],
   },
   {
     id: "page:reference-interactions",
@@ -125,6 +155,3936 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/cli#troubleshooting",
     keywords: ["Command-line reference", "Reference"],
     exact: ["Troubleshooting"],
+  },
+  {
+    id: "page:reference-geoms-point",
+    kind: "page",
+    title: "GeomPoint",
+    summary:
+      "GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+    href: "/reference/geoms/point",
+    keywords: [],
+    exact: ["GeomPoint"],
+  },
+  {
+    id: "heading:reference-geoms-point:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+    href: "/reference/geoms/point#defaults",
+    keywords: ["GeomPoint", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-point:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+    href: "/reference/geoms/point#svelte",
+    keywords: ["GeomPoint", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-point:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+    href: "/reference/geoms/point#json",
+    keywords: ["GeomPoint", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-point:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+    href: "/reference/geoms/point#params",
+    keywords: ["GeomPoint", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-point:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+    href: "/reference/geoms/point#allowed-stats",
+    keywords: ["GeomPoint", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-point:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+    href: "/reference/geoms/point#allowed-positions",
+    keywords: ["GeomPoint", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-point:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+    href: "/reference/geoms/point#examples",
+    keywords: ["GeomPoint", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-line",
+    kind: "page",
+    title: "GeomLine",
+    summary:
+      "GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/line",
+    keywords: [],
+    exact: ["GeomLine"],
+  },
+  {
+    id: "heading:reference-geoms-line:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/line#defaults",
+    keywords: ["GeomLine", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-line:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/line#svelte",
+    keywords: ["GeomLine", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-line:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/line#json",
+    keywords: ["GeomLine", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-line:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/line#params",
+    keywords: ["GeomLine", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-line:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/line#allowed-stats",
+    keywords: ["GeomLine", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-line:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/line#allowed-positions",
+    keywords: ["GeomLine", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-line:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/line#examples",
+    keywords: ["GeomLine", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-path",
+    kind: "page",
+    title: "GeomPath",
+    summary:
+      "GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/path",
+    keywords: [],
+    exact: ["GeomPath"],
+  },
+  {
+    id: "heading:reference-geoms-path:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/path#defaults",
+    keywords: ["GeomPath", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-path:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/path#svelte",
+    keywords: ["GeomPath", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-path:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/path#json",
+    keywords: ["GeomPath", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-path:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/path#params",
+    keywords: ["GeomPath", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-path:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/path#allowed-stats",
+    keywords: ["GeomPath", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-path:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/path#allowed-positions",
+    keywords: ["GeomPath", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-path:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/path#examples",
+    keywords: ["GeomPath", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-col",
+    kind: "page",
+    title: "GeomCol",
+    summary:
+      "GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+    href: "/reference/geoms/col",
+    keywords: [],
+    exact: ["GeomCol"],
+  },
+  {
+    id: "heading:reference-geoms-col:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+    href: "/reference/geoms/col#defaults",
+    keywords: ["GeomCol", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-col:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+    href: "/reference/geoms/col#svelte",
+    keywords: ["GeomCol", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-col:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+    href: "/reference/geoms/col#json",
+    keywords: ["GeomCol", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-col:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+    href: "/reference/geoms/col#params",
+    keywords: ["GeomCol", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-col:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+    href: "/reference/geoms/col#allowed-stats",
+    keywords: ["GeomCol", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-col:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+    href: "/reference/geoms/col#allowed-positions",
+    keywords: ["GeomCol", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-col:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+    href: "/reference/geoms/col#examples",
+    keywords: ["GeomCol", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-bar",
+    kind: "page",
+    title: "GeomBar",
+    summary:
+      "GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+    href: "/reference/geoms/bar",
+    keywords: [],
+    exact: ["GeomBar"],
+  },
+  {
+    id: "heading:reference-geoms-bar:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+    href: "/reference/geoms/bar#defaults",
+    keywords: ["GeomBar", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-bar:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+    href: "/reference/geoms/bar#svelte",
+    keywords: ["GeomBar", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-bar:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+    href: "/reference/geoms/bar#json",
+    keywords: ["GeomBar", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-bar:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+    href: "/reference/geoms/bar#params",
+    keywords: ["GeomBar", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-bar:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+    href: "/reference/geoms/bar#allowed-stats",
+    keywords: ["GeomBar", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-bar:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+    href: "/reference/geoms/bar#allowed-positions",
+    keywords: ["GeomBar", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-bar:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+    href: "/reference/geoms/bar#examples",
+    keywords: ["GeomBar", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-histogram",
+    kind: "page",
+    title: "GeomHistogram",
+    summary:
+      "GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+    href: "/reference/geoms/histogram",
+    keywords: [],
+    exact: ["GeomHistogram"],
+  },
+  {
+    id: "heading:reference-geoms-histogram:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+    href: "/reference/geoms/histogram#defaults",
+    keywords: ["GeomHistogram", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-histogram:alias",
+    kind: "heading",
+    title: "Alias",
+    summary:
+      "Alias in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+    href: "/reference/geoms/histogram#alias",
+    keywords: ["GeomHistogram", "documentation"],
+    exact: ["Alias"],
+  },
+  {
+    id: "heading:reference-geoms-histogram:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+    href: "/reference/geoms/histogram#svelte",
+    keywords: ["GeomHistogram", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-histogram:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+    href: "/reference/geoms/histogram#json",
+    keywords: ["GeomHistogram", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-histogram:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+    href: "/reference/geoms/histogram#params",
+    keywords: ["GeomHistogram", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-histogram:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+    href: "/reference/geoms/histogram#allowed-stats",
+    keywords: ["GeomHistogram", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-histogram:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+    href: "/reference/geoms/histogram#allowed-positions",
+    keywords: ["GeomHistogram", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-histogram:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+    href: "/reference/geoms/histogram#examples",
+    keywords: ["GeomHistogram", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-freqpoly",
+    kind: "page",
+    title: "GeomFreqpoly",
+    summary:
+      "GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+    href: "/reference/geoms/freqpoly",
+    keywords: [],
+    exact: ["GeomFreqpoly"],
+  },
+  {
+    id: "heading:reference-geoms-freqpoly:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+    href: "/reference/geoms/freqpoly#defaults",
+    keywords: ["GeomFreqpoly", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-freqpoly:alias",
+    kind: "heading",
+    title: "Alias",
+    summary:
+      "Alias in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+    href: "/reference/geoms/freqpoly#alias",
+    keywords: ["GeomFreqpoly", "documentation"],
+    exact: ["Alias"],
+  },
+  {
+    id: "heading:reference-geoms-freqpoly:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+    href: "/reference/geoms/freqpoly#svelte",
+    keywords: ["GeomFreqpoly", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-freqpoly:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+    href: "/reference/geoms/freqpoly#json",
+    keywords: ["GeomFreqpoly", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-freqpoly:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+    href: "/reference/geoms/freqpoly#params",
+    keywords: ["GeomFreqpoly", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-freqpoly:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+    href: "/reference/geoms/freqpoly#allowed-stats",
+    keywords: ["GeomFreqpoly", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-freqpoly:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+    href: "/reference/geoms/freqpoly#allowed-positions",
+    keywords: ["GeomFreqpoly", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-freqpoly:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+    href: "/reference/geoms/freqpoly#examples",
+    keywords: ["GeomFreqpoly", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-area",
+    kind: "page",
+    title: "GeomArea",
+    summary:
+      "GeomArea: Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts. With stat align, series with different x samples share a common grid for stack/fill.",
+    href: "/reference/geoms/area",
+    keywords: [],
+    exact: ["GeomArea"],
+  },
+  {
+    id: "heading:reference-geoms-area:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomArea. GeomArea: Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts. With stat align, series with different x samples share a common grid for stack/fill.",
+    href: "/reference/geoms/area#defaults",
+    keywords: ["GeomArea", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-area:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomArea. GeomArea: Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts. With stat align, series with different x samples share a common grid for stack/fill.",
+    href: "/reference/geoms/area#svelte",
+    keywords: ["GeomArea", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-area:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomArea. GeomArea: Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts. With stat align, series with different x samples share a common grid for stack/fill.",
+    href: "/reference/geoms/area#json",
+    keywords: ["GeomArea", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-area:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomArea. GeomArea: Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts. With stat align, series with different x samples share a common grid for stack/fill.",
+    href: "/reference/geoms/area#params",
+    keywords: ["GeomArea", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-area:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomArea. GeomArea: Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts. With stat align, series with different x samples share a common grid for stack/fill.",
+    href: "/reference/geoms/area#allowed-stats",
+    keywords: ["GeomArea", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-area:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomArea. GeomArea: Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts. With stat align, series with different x samples share a common grid for stack/fill.",
+    href: "/reference/geoms/area#allowed-positions",
+    keywords: ["GeomArea", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-area:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomArea. GeomArea: Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts. With stat align, series with different x samples share a common grid for stack/fill.",
+    href: "/reference/geoms/area#examples",
+    keywords: ["GeomArea", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-rule",
+    kind: "page",
+    title: "GeomRule",
+    summary:
+      "GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+    href: "/reference/geoms/rule",
+    keywords: [],
+    exact: ["GeomRule"],
+  },
+  {
+    id: "heading:reference-geoms-rule:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+    href: "/reference/geoms/rule#defaults",
+    keywords: ["GeomRule", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-rule:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+    href: "/reference/geoms/rule#svelte",
+    keywords: ["GeomRule", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-rule:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+    href: "/reference/geoms/rule#json",
+    keywords: ["GeomRule", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-rule:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+    href: "/reference/geoms/rule#params",
+    keywords: ["GeomRule", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-rule:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+    href: "/reference/geoms/rule#allowed-stats",
+    keywords: ["GeomRule", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-rule:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+    href: "/reference/geoms/rule#allowed-positions",
+    keywords: ["GeomRule", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-rule:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+    href: "/reference/geoms/rule#examples",
+    keywords: ["GeomRule", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-hline",
+    kind: "page",
+    title: "GeomHline",
+    summary:
+      "GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/hline",
+    keywords: [],
+    exact: ["GeomHline"],
+  },
+  {
+    id: "heading:reference-geoms-hline:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/hline#defaults",
+    keywords: ["GeomHline", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-hline:alias",
+    kind: "heading",
+    title: "Alias",
+    summary:
+      "Alias in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/hline#alias",
+    keywords: ["GeomHline", "documentation"],
+    exact: ["Alias"],
+  },
+  {
+    id: "heading:reference-geoms-hline:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/hline#svelte",
+    keywords: ["GeomHline", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-hline:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/hline#json",
+    keywords: ["GeomHline", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-hline:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/hline#params",
+    keywords: ["GeomHline", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-hline:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/hline#allowed-stats",
+    keywords: ["GeomHline", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-hline:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/hline#allowed-positions",
+    keywords: ["GeomHline", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-hline:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/hline#examples",
+    keywords: ["GeomHline", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-vline",
+    kind: "page",
+    title: "GeomVline",
+    summary:
+      "GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/vline",
+    keywords: [],
+    exact: ["GeomVline"],
+  },
+  {
+    id: "heading:reference-geoms-vline:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/vline#defaults",
+    keywords: ["GeomVline", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-vline:alias",
+    kind: "heading",
+    title: "Alias",
+    summary:
+      "Alias in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/vline#alias",
+    keywords: ["GeomVline", "documentation"],
+    exact: ["Alias"],
+  },
+  {
+    id: "heading:reference-geoms-vline:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/vline#svelte",
+    keywords: ["GeomVline", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-vline:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/vline#json",
+    keywords: ["GeomVline", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-vline:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/vline#params",
+    keywords: ["GeomVline", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-vline:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/vline#allowed-stats",
+    keywords: ["GeomVline", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-vline:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/vline#allowed-positions",
+    keywords: ["GeomVline", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-vline:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/vline#examples",
+    keywords: ["GeomVline", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-text",
+    kind: "page",
+    title: "GeomText",
+    summary:
+      "GeomText: Text geometry: one label per data row at (x, y). No collision detection — labels draw exactly where placed. Requires x, y, and label channels.",
+    href: "/reference/geoms/text",
+    keywords: [],
+    exact: ["GeomText"],
+  },
+  {
+    id: "heading:reference-geoms-text:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomText. GeomText: Text geometry: one label per data row at (x, y). No collision detection — labels draw exactly where placed. Requires x, y, and label channels.",
+    href: "/reference/geoms/text#defaults",
+    keywords: ["GeomText", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-text:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomText. GeomText: Text geometry: one label per data row at (x, y). No collision detection — labels draw exactly where placed. Requires x, y, and label channels.",
+    href: "/reference/geoms/text#svelte",
+    keywords: ["GeomText", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-text:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomText. GeomText: Text geometry: one label per data row at (x, y). No collision detection — labels draw exactly where placed. Requires x, y, and label channels.",
+    href: "/reference/geoms/text#json",
+    keywords: ["GeomText", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-text:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomText. GeomText: Text geometry: one label per data row at (x, y). No collision detection — labels draw exactly where placed. Requires x, y, and label channels.",
+    href: "/reference/geoms/text#params",
+    keywords: ["GeomText", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-text:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomText. GeomText: Text geometry: one label per data row at (x, y). No collision detection — labels draw exactly where placed. Requires x, y, and label channels.",
+    href: "/reference/geoms/text#allowed-stats",
+    keywords: ["GeomText", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-text:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomText. GeomText: Text geometry: one label per data row at (x, y). No collision detection — labels draw exactly where placed. Requires x, y, and label channels.",
+    href: "/reference/geoms/text#allowed-positions",
+    keywords: ["GeomText", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-text:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomText. GeomText: Text geometry: one label per data row at (x, y). No collision detection — labels draw exactly where placed. Requires x, y, and label channels.",
+    href: "/reference/geoms/text#examples",
+    keywords: ["GeomText", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-label",
+    kind: "page",
+    title: "GeomLabel",
+    summary:
+      "GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+    href: "/reference/geoms/label",
+    keywords: [],
+    exact: ["GeomLabel"],
+  },
+  {
+    id: "heading:reference-geoms-label:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+    href: "/reference/geoms/label#defaults",
+    keywords: ["GeomLabel", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-label:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+    href: "/reference/geoms/label#svelte",
+    keywords: ["GeomLabel", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-label:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+    href: "/reference/geoms/label#json",
+    keywords: ["GeomLabel", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-label:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+    href: "/reference/geoms/label#params",
+    keywords: ["GeomLabel", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-label:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+    href: "/reference/geoms/label#allowed-stats",
+    keywords: ["GeomLabel", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-label:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+    href: "/reference/geoms/label#allowed-positions",
+    keywords: ["GeomLabel", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-label:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+    href: "/reference/geoms/label#examples",
+    keywords: ["GeomLabel", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-smooth",
+    kind: "page",
+    title: "GeomSmooth",
+    summary:
+      "GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+    href: "/reference/geoms/smooth",
+    keywords: [],
+    exact: ["GeomSmooth"],
+  },
+  {
+    id: "heading:reference-geoms-smooth:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+    href: "/reference/geoms/smooth#defaults",
+    keywords: ["GeomSmooth", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-smooth:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+    href: "/reference/geoms/smooth#svelte",
+    keywords: ["GeomSmooth", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-smooth:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+    href: "/reference/geoms/smooth#json",
+    keywords: ["GeomSmooth", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-smooth:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+    href: "/reference/geoms/smooth#params",
+    keywords: ["GeomSmooth", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-smooth:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+    href: "/reference/geoms/smooth#allowed-stats",
+    keywords: ["GeomSmooth", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-smooth:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+    href: "/reference/geoms/smooth#allowed-positions",
+    keywords: ["GeomSmooth", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-smooth:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+    href: "/reference/geoms/smooth#examples",
+    keywords: ["GeomSmooth", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-quantile",
+    kind: "page",
+    title: "GeomQuantile",
+    summary:
+      "GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+    href: "/reference/geoms/quantile",
+    keywords: [],
+    exact: ["GeomQuantile"],
+  },
+  {
+    id: "heading:reference-geoms-quantile:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+    href: "/reference/geoms/quantile#defaults",
+    keywords: ["GeomQuantile", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-quantile:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+    href: "/reference/geoms/quantile#svelte",
+    keywords: ["GeomQuantile", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-quantile:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+    href: "/reference/geoms/quantile#json",
+    keywords: ["GeomQuantile", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-quantile:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+    href: "/reference/geoms/quantile#params",
+    keywords: ["GeomQuantile", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-quantile:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+    href: "/reference/geoms/quantile#allowed-stats",
+    keywords: ["GeomQuantile", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-quantile:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+    href: "/reference/geoms/quantile#allowed-positions",
+    keywords: ["GeomQuantile", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-quantile:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+    href: "/reference/geoms/quantile#examples",
+    keywords: ["GeomQuantile", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-boxplot",
+    kind: "page",
+    title: "GeomBoxplot",
+    summary:
+      "GeomBoxplot: Box-and-whisker geometry: one box per x category (per group) summarizing the y distribution — hinges at the quartiles, whiskers to the furthest points within coef × IQR, outliers drawn individually.",
+    href: "/reference/geoms/boxplot",
+    keywords: [],
+    exact: ["GeomBoxplot"],
+  },
+  {
+    id: "heading:reference-geoms-boxplot:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomBoxplot. GeomBoxplot: Box-and-whisker geometry: one box per x category (per group) summarizing the y distribution — hinges at the quartiles, whiskers to the furthest points within coef × IQR, outliers drawn individually.",
+    href: "/reference/geoms/boxplot#defaults",
+    keywords: ["GeomBoxplot", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-boxplot:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomBoxplot. GeomBoxplot: Box-and-whisker geometry: one box per x category (per group) summarizing the y distribution — hinges at the quartiles, whiskers to the furthest points within coef × IQR, outliers drawn individually.",
+    href: "/reference/geoms/boxplot#svelte",
+    keywords: ["GeomBoxplot", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-boxplot:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomBoxplot. GeomBoxplot: Box-and-whisker geometry: one box per x category (per group) summarizing the y distribution — hinges at the quartiles, whiskers to the furthest points within coef × IQR, outliers drawn individually.",
+    href: "/reference/geoms/boxplot#json",
+    keywords: ["GeomBoxplot", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-boxplot:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomBoxplot. GeomBoxplot: Box-and-whisker geometry: one box per x category (per group) summarizing the y distribution — hinges at the quartiles, whiskers to the furthest points within coef × IQR, outliers drawn individually.",
+    href: "/reference/geoms/boxplot#params",
+    keywords: ["GeomBoxplot", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-boxplot:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomBoxplot. GeomBoxplot: Box-and-whisker geometry: one box per x category (per group) summarizing the y distribution — hinges at the quartiles, whiskers to the furthest points within coef × IQR, outliers drawn individually.",
+    href: "/reference/geoms/boxplot#allowed-stats",
+    keywords: ["GeomBoxplot", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-boxplot:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomBoxplot. GeomBoxplot: Box-and-whisker geometry: one box per x category (per group) summarizing the y distribution — hinges at the quartiles, whiskers to the furthest points within coef × IQR, outliers drawn individually.",
+    href: "/reference/geoms/boxplot#allowed-positions",
+    keywords: ["GeomBoxplot", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-boxplot:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomBoxplot. GeomBoxplot: Box-and-whisker geometry: one box per x category (per group) summarizing the y distribution — hinges at the quartiles, whiskers to the furthest points within coef × IQR, outliers drawn individually.",
+    href: "/reference/geoms/boxplot#examples",
+    keywords: ["GeomBoxplot", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-density",
+    kind: "page",
+    title: "GeomDensity",
+    summary:
+      "GeomDensity: Density geometry: a smooth kernel density estimate of a continuous x variable, drawn as a filled area — a smoothed histogram alternative. One curve per group. Do NOT map aes.y — the density stat computes it.",
+    href: "/reference/geoms/density",
+    keywords: [],
+    exact: ["GeomDensity"],
+  },
+  {
+    id: "heading:reference-geoms-density:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomDensity. GeomDensity: Density geometry: a smooth kernel density estimate of a continuous x variable, drawn as a filled area — a smoothed histogram alternative. One curve per group. Do NOT map aes.y — the density stat computes it.",
+    href: "/reference/geoms/density#defaults",
+    keywords: ["GeomDensity", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-density:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomDensity. GeomDensity: Density geometry: a smooth kernel density estimate of a continuous x variable, drawn as a filled area — a smoothed histogram alternative. One curve per group. Do NOT map aes.y — the density stat computes it.",
+    href: "/reference/geoms/density#svelte",
+    keywords: ["GeomDensity", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-density:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomDensity. GeomDensity: Density geometry: a smooth kernel density estimate of a continuous x variable, drawn as a filled area — a smoothed histogram alternative. One curve per group. Do NOT map aes.y — the density stat computes it.",
+    href: "/reference/geoms/density#json",
+    keywords: ["GeomDensity", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-density:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomDensity. GeomDensity: Density geometry: a smooth kernel density estimate of a continuous x variable, drawn as a filled area — a smoothed histogram alternative. One curve per group. Do NOT map aes.y — the density stat computes it.",
+    href: "/reference/geoms/density#params",
+    keywords: ["GeomDensity", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-density:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomDensity. GeomDensity: Density geometry: a smooth kernel density estimate of a continuous x variable, drawn as a filled area — a smoothed histogram alternative. One curve per group. Do NOT map aes.y — the density stat computes it.",
+    href: "/reference/geoms/density#allowed-stats",
+    keywords: ["GeomDensity", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-density:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomDensity. GeomDensity: Density geometry: a smooth kernel density estimate of a continuous x variable, drawn as a filled area — a smoothed histogram alternative. One curve per group. Do NOT map aes.y — the density stat computes it.",
+    href: "/reference/geoms/density#allowed-positions",
+    keywords: ["GeomDensity", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-density:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomDensity. GeomDensity: Density geometry: a smooth kernel density estimate of a continuous x variable, drawn as a filled area — a smoothed histogram alternative. One curve per group. Do NOT map aes.y — the density stat computes it.",
+    href: "/reference/geoms/density#examples",
+    keywords: ["GeomDensity", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-errorbar",
+    kind: "page",
+    title: "GeomErrorbar",
+    summary:
+      "GeomErrorbar: Errorbar geometry: a vertical range with caps at ymin and ymax, one per data row (identity stat) or per x group (summary stat).",
+    href: "/reference/geoms/errorbar",
+    keywords: [],
+    exact: ["GeomErrorbar"],
+  },
+  {
+    id: "heading:reference-geoms-errorbar:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomErrorbar. GeomErrorbar: Errorbar geometry: a vertical range with caps at ymin and ymax, one per data row (identity stat) or per x group (summary stat).",
+    href: "/reference/geoms/errorbar#defaults",
+    keywords: ["GeomErrorbar", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-errorbar:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomErrorbar. GeomErrorbar: Errorbar geometry: a vertical range with caps at ymin and ymax, one per data row (identity stat) or per x group (summary stat).",
+    href: "/reference/geoms/errorbar#svelte",
+    keywords: ["GeomErrorbar", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-errorbar:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomErrorbar. GeomErrorbar: Errorbar geometry: a vertical range with caps at ymin and ymax, one per data row (identity stat) or per x group (summary stat).",
+    href: "/reference/geoms/errorbar#json",
+    keywords: ["GeomErrorbar", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-errorbar:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomErrorbar. GeomErrorbar: Errorbar geometry: a vertical range with caps at ymin and ymax, one per data row (identity stat) or per x group (summary stat).",
+    href: "/reference/geoms/errorbar#params",
+    keywords: ["GeomErrorbar", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-errorbar:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomErrorbar. GeomErrorbar: Errorbar geometry: a vertical range with caps at ymin and ymax, one per data row (identity stat) or per x group (summary stat).",
+    href: "/reference/geoms/errorbar#allowed-stats",
+    keywords: ["GeomErrorbar", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-errorbar:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomErrorbar. GeomErrorbar: Errorbar geometry: a vertical range with caps at ymin and ymax, one per data row (identity stat) or per x group (summary stat).",
+    href: "/reference/geoms/errorbar#allowed-positions",
+    keywords: ["GeomErrorbar", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-errorbar:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomErrorbar. GeomErrorbar: Errorbar geometry: a vertical range with caps at ymin and ymax, one per data row (identity stat) or per x group (summary stat).",
+    href: "/reference/geoms/errorbar#examples",
+    keywords: ["GeomErrorbar", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-linerange",
+    kind: "page",
+    title: "GeomLinerange",
+    summary:
+      "GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+    href: "/reference/geoms/linerange",
+    keywords: [],
+    exact: ["GeomLinerange"],
+  },
+  {
+    id: "heading:reference-geoms-linerange:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+    href: "/reference/geoms/linerange#defaults",
+    keywords: ["GeomLinerange", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-linerange:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+    href: "/reference/geoms/linerange#svelte",
+    keywords: ["GeomLinerange", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-linerange:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+    href: "/reference/geoms/linerange#json",
+    keywords: ["GeomLinerange", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-linerange:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+    href: "/reference/geoms/linerange#params",
+    keywords: ["GeomLinerange", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-linerange:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+    href: "/reference/geoms/linerange#allowed-stats",
+    keywords: ["GeomLinerange", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-linerange:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+    href: "/reference/geoms/linerange#allowed-positions",
+    keywords: ["GeomLinerange", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "page:reference-geoms-pointrange",
+    kind: "page",
+    title: "GeomPointrange",
+    summary:
+      "GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+    href: "/reference/geoms/pointrange",
+    keywords: [],
+    exact: ["GeomPointrange"],
+  },
+  {
+    id: "heading:reference-geoms-pointrange:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+    href: "/reference/geoms/pointrange#defaults",
+    keywords: ["GeomPointrange", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-pointrange:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+    href: "/reference/geoms/pointrange#svelte",
+    keywords: ["GeomPointrange", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-pointrange:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+    href: "/reference/geoms/pointrange#json",
+    keywords: ["GeomPointrange", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-pointrange:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+    href: "/reference/geoms/pointrange#params",
+    keywords: ["GeomPointrange", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-pointrange:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+    href: "/reference/geoms/pointrange#allowed-stats",
+    keywords: ["GeomPointrange", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-pointrange:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+    href: "/reference/geoms/pointrange#allowed-positions",
+    keywords: ["GeomPointrange", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "page:reference-geoms-crossbar",
+    kind: "page",
+    title: "GeomCrossbar",
+    summary:
+      "GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+    href: "/reference/geoms/crossbar",
+    keywords: [],
+    exact: ["GeomCrossbar"],
+  },
+  {
+    id: "heading:reference-geoms-crossbar:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+    href: "/reference/geoms/crossbar#defaults",
+    keywords: ["GeomCrossbar", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-crossbar:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+    href: "/reference/geoms/crossbar#svelte",
+    keywords: ["GeomCrossbar", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-crossbar:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+    href: "/reference/geoms/crossbar#json",
+    keywords: ["GeomCrossbar", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-crossbar:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+    href: "/reference/geoms/crossbar#params",
+    keywords: ["GeomCrossbar", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-crossbar:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+    href: "/reference/geoms/crossbar#allowed-stats",
+    keywords: ["GeomCrossbar", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-crossbar:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+    href: "/reference/geoms/crossbar#allowed-positions",
+    keywords: ["GeomCrossbar", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "page:reference-geoms-rect",
+    kind: "page",
+    title: "GeomRect",
+    summary:
+      "GeomRect: Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands.",
+    href: "/reference/geoms/rect",
+    keywords: [],
+    exact: ["GeomRect"],
+  },
+  {
+    id: "heading:reference-geoms-rect:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomRect. GeomRect: Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands.",
+    href: "/reference/geoms/rect#defaults",
+    keywords: ["GeomRect", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-rect:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomRect. GeomRect: Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands.",
+    href: "/reference/geoms/rect#svelte",
+    keywords: ["GeomRect", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-rect:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomRect. GeomRect: Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands.",
+    href: "/reference/geoms/rect#json",
+    keywords: ["GeomRect", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-rect:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomRect. GeomRect: Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands.",
+    href: "/reference/geoms/rect#params",
+    keywords: ["GeomRect", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-rect:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomRect. GeomRect: Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands.",
+    href: "/reference/geoms/rect#allowed-stats",
+    keywords: ["GeomRect", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-rect:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomRect. GeomRect: Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands.",
+    href: "/reference/geoms/rect#allowed-positions",
+    keywords: ["GeomRect", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-rect:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomRect. GeomRect: Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands.",
+    href: "/reference/geoms/rect#examples",
+    keywords: ["GeomRect", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-tile",
+    kind: "page",
+    title: "GeomTile",
+    summary:
+      "GeomTile: Tile geometry: center-sized cells at (x, y) with optional width/height. Use for heatmaps and gridded categorical cells; supports stroke outlines.",
+    href: "/reference/geoms/tile",
+    keywords: [],
+    exact: ["GeomTile"],
+  },
+  {
+    id: "heading:reference-geoms-tile:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomTile. GeomTile: Tile geometry: center-sized cells at (x, y) with optional width/height. Use for heatmaps and gridded categorical cells; supports stroke outlines.",
+    href: "/reference/geoms/tile#defaults",
+    keywords: ["GeomTile", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-tile:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomTile. GeomTile: Tile geometry: center-sized cells at (x, y) with optional width/height. Use for heatmaps and gridded categorical cells; supports stroke outlines.",
+    href: "/reference/geoms/tile#svelte",
+    keywords: ["GeomTile", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-tile:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomTile. GeomTile: Tile geometry: center-sized cells at (x, y) with optional width/height. Use for heatmaps and gridded categorical cells; supports stroke outlines.",
+    href: "/reference/geoms/tile#json",
+    keywords: ["GeomTile", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-tile:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomTile. GeomTile: Tile geometry: center-sized cells at (x, y) with optional width/height. Use for heatmaps and gridded categorical cells; supports stroke outlines.",
+    href: "/reference/geoms/tile#params",
+    keywords: ["GeomTile", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-tile:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomTile. GeomTile: Tile geometry: center-sized cells at (x, y) with optional width/height. Use for heatmaps and gridded categorical cells; supports stroke outlines.",
+    href: "/reference/geoms/tile#allowed-stats",
+    keywords: ["GeomTile", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-tile:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomTile. GeomTile: Tile geometry: center-sized cells at (x, y) with optional width/height. Use for heatmaps and gridded categorical cells; supports stroke outlines.",
+    href: "/reference/geoms/tile#allowed-positions",
+    keywords: ["GeomTile", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-tile:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomTile. GeomTile: Tile geometry: center-sized cells at (x, y) with optional width/height. Use for heatmaps and gridded categorical cells; supports stroke outlines.",
+    href: "/reference/geoms/tile#examples",
+    keywords: ["GeomTile", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-raster",
+    kind: "page",
+    title: "GeomRaster",
+    summary:
+      "GeomRaster: Raster geometry: equal-cell grid at (x, y) with fill; optimized dense heatmaps without per-cell strokes. Irregular spacing warns and suggests geom tile.",
+    href: "/reference/geoms/raster",
+    keywords: [],
+    exact: ["GeomRaster"],
+  },
+  {
+    id: "heading:reference-geoms-raster:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomRaster. GeomRaster: Raster geometry: equal-cell grid at (x, y) with fill; optimized dense heatmaps without per-cell strokes. Irregular spacing warns and suggests geom tile.",
+    href: "/reference/geoms/raster#defaults",
+    keywords: ["GeomRaster", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-raster:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomRaster. GeomRaster: Raster geometry: equal-cell grid at (x, y) with fill; optimized dense heatmaps without per-cell strokes. Irregular spacing warns and suggests geom tile.",
+    href: "/reference/geoms/raster#svelte",
+    keywords: ["GeomRaster", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-raster:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomRaster. GeomRaster: Raster geometry: equal-cell grid at (x, y) with fill; optimized dense heatmaps without per-cell strokes. Irregular spacing warns and suggests geom tile.",
+    href: "/reference/geoms/raster#json",
+    keywords: ["GeomRaster", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-raster:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomRaster. GeomRaster: Raster geometry: equal-cell grid at (x, y) with fill; optimized dense heatmaps without per-cell strokes. Irregular spacing warns and suggests geom tile.",
+    href: "/reference/geoms/raster#params",
+    keywords: ["GeomRaster", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-raster:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomRaster. GeomRaster: Raster geometry: equal-cell grid at (x, y) with fill; optimized dense heatmaps without per-cell strokes. Irregular spacing warns and suggests geom tile.",
+    href: "/reference/geoms/raster#allowed-stats",
+    keywords: ["GeomRaster", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-raster:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomRaster. GeomRaster: Raster geometry: equal-cell grid at (x, y) with fill; optimized dense heatmaps without per-cell strokes. Irregular spacing warns and suggests geom tile.",
+    href: "/reference/geoms/raster#allowed-positions",
+    keywords: ["GeomRaster", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-raster:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomRaster. GeomRaster: Raster geometry: equal-cell grid at (x, y) with fill; optimized dense heatmaps without per-cell strokes. Irregular spacing warns and suggests geom tile.",
+    href: "/reference/geoms/raster#examples",
+    keywords: ["GeomRaster", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-ribbon",
+    kind: "page",
+    title: "GeomRibbon",
+    summary:
+      "GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+    href: "/reference/geoms/ribbon",
+    keywords: [],
+    exact: ["GeomRibbon"],
+  },
+  {
+    id: "heading:reference-geoms-ribbon:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+    href: "/reference/geoms/ribbon#defaults",
+    keywords: ["GeomRibbon", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-ribbon:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+    href: "/reference/geoms/ribbon#svelte",
+    keywords: ["GeomRibbon", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-ribbon:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+    href: "/reference/geoms/ribbon#json",
+    keywords: ["GeomRibbon", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-ribbon:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+    href: "/reference/geoms/ribbon#params",
+    keywords: ["GeomRibbon", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-ribbon:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+    href: "/reference/geoms/ribbon#allowed-stats",
+    keywords: ["GeomRibbon", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-ribbon:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+    href: "/reference/geoms/ribbon#allowed-positions",
+    keywords: ["GeomRibbon", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-ribbon:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+    href: "/reference/geoms/ribbon#examples",
+    keywords: ["GeomRibbon", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-segment",
+    kind: "page",
+    title: "GeomSegment",
+    summary:
+      "GeomSegment: Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel.",
+    href: "/reference/geoms/segment",
+    keywords: [],
+    exact: ["GeomSegment"],
+  },
+  {
+    id: "heading:reference-geoms-segment:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomSegment. GeomSegment: Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel.",
+    href: "/reference/geoms/segment#defaults",
+    keywords: ["GeomSegment", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-segment:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomSegment. GeomSegment: Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel.",
+    href: "/reference/geoms/segment#svelte",
+    keywords: ["GeomSegment", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-segment:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomSegment. GeomSegment: Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel.",
+    href: "/reference/geoms/segment#json",
+    keywords: ["GeomSegment", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-segment:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomSegment. GeomSegment: Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel.",
+    href: "/reference/geoms/segment#params",
+    keywords: ["GeomSegment", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-segment:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomSegment. GeomSegment: Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel.",
+    href: "/reference/geoms/segment#allowed-stats",
+    keywords: ["GeomSegment", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-segment:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomSegment. GeomSegment: Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel.",
+    href: "/reference/geoms/segment#allowed-positions",
+    keywords: ["GeomSegment", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-segment:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomSegment. GeomSegment: Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel.",
+    href: "/reference/geoms/segment#examples",
+    keywords: ["GeomSegment", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-count",
+    kind: "page",
+    title: "GeomCount",
+    summary:
+      "GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+    href: "/reference/geoms/count",
+    keywords: [],
+    exact: ["GeomCount"],
+  },
+  {
+    id: "heading:reference-geoms-count:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+    href: "/reference/geoms/count#defaults",
+    keywords: ["GeomCount", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-count:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+    href: "/reference/geoms/count#svelte",
+    keywords: ["GeomCount", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-count:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+    href: "/reference/geoms/count#json",
+    keywords: ["GeomCount", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-count:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+    href: "/reference/geoms/count#params",
+    keywords: ["GeomCount", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-count:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+    href: "/reference/geoms/count#allowed-stats",
+    keywords: ["GeomCount", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-count:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+    href: "/reference/geoms/count#allowed-positions",
+    keywords: ["GeomCount", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-count:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+    href: "/reference/geoms/count#examples",
+    keywords: ["GeomCount", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-violin",
+    kind: "page",
+    title: "GeomViolin",
+    summary:
+      "GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+    href: "/reference/geoms/violin",
+    keywords: [],
+    exact: ["GeomViolin"],
+  },
+  {
+    id: "heading:reference-geoms-violin:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+    href: "/reference/geoms/violin#defaults",
+    keywords: ["GeomViolin", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-violin:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+    href: "/reference/geoms/violin#svelte",
+    keywords: ["GeomViolin", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-violin:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+    href: "/reference/geoms/violin#json",
+    keywords: ["GeomViolin", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-violin:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+    href: "/reference/geoms/violin#params",
+    keywords: ["GeomViolin", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-violin:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+    href: "/reference/geoms/violin#allowed-stats",
+    keywords: ["GeomViolin", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-violin:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+    href: "/reference/geoms/violin#allowed-positions",
+    keywords: ["GeomViolin", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-violin:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+    href: "/reference/geoms/violin#examples",
+    keywords: ["GeomViolin", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-function",
+    kind: "page",
+    title: "GeomFunction",
+    summary:
+      "GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+    href: "/reference/geoms/function",
+    keywords: [],
+    exact: ["GeomFunction"],
+  },
+  {
+    id: "heading:reference-geoms-function:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+    href: "/reference/geoms/function#defaults",
+    keywords: ["GeomFunction", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-function:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+    href: "/reference/geoms/function#svelte",
+    keywords: ["GeomFunction", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-function:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+    href: "/reference/geoms/function#json",
+    keywords: ["GeomFunction", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-function:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+    href: "/reference/geoms/function#params",
+    keywords: ["GeomFunction", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-function:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+    href: "/reference/geoms/function#allowed-stats",
+    keywords: ["GeomFunction", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-function:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+    href: "/reference/geoms/function#allowed-positions",
+    keywords: ["GeomFunction", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-function:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+    href: "/reference/geoms/function#examples",
+    keywords: ["GeomFunction", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-polygon",
+    kind: "page",
+    title: "GeomPolygon",
+    summary:
+      "GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+    href: "/reference/geoms/polygon",
+    keywords: [],
+    exact: ["GeomPolygon"],
+  },
+  {
+    id: "heading:reference-geoms-polygon:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+    href: "/reference/geoms/polygon#defaults",
+    keywords: ["GeomPolygon", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-polygon:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+    href: "/reference/geoms/polygon#svelte",
+    keywords: ["GeomPolygon", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-polygon:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+    href: "/reference/geoms/polygon#json",
+    keywords: ["GeomPolygon", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-polygon:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+    href: "/reference/geoms/polygon#params",
+    keywords: ["GeomPolygon", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-polygon:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+    href: "/reference/geoms/polygon#allowed-stats",
+    keywords: ["GeomPolygon", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-polygon:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+    href: "/reference/geoms/polygon#allowed-positions",
+    keywords: ["GeomPolygon", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-polygon:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+    href: "/reference/geoms/polygon#examples",
+    keywords: ["GeomPolygon", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-hex",
+    kind: "page",
+    title: "GeomHex",
+    summary:
+      "GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+    href: "/reference/geoms/hex",
+    keywords: [],
+    exact: ["GeomHex"],
+  },
+  {
+    id: "heading:reference-geoms-hex:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+    href: "/reference/geoms/hex#defaults",
+    keywords: ["GeomHex", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-hex:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+    href: "/reference/geoms/hex#svelte",
+    keywords: ["GeomHex", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-hex:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+    href: "/reference/geoms/hex#json",
+    keywords: ["GeomHex", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-hex:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+    href: "/reference/geoms/hex#params",
+    keywords: ["GeomHex", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-hex:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+    href: "/reference/geoms/hex#allowed-stats",
+    keywords: ["GeomHex", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-hex:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+    href: "/reference/geoms/hex#allowed-positions",
+    keywords: ["GeomHex", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-hex:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+    href: "/reference/geoms/hex#examples",
+    keywords: ["GeomHex", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-bin_2d",
+    kind: "page",
+    title: "GeomBin2d",
+    summary:
+      "GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+    href: "/reference/geoms/bin_2d",
+    keywords: [],
+    exact: ["GeomBin2d"],
+  },
+  {
+    id: "heading:reference-geoms-bin_2d:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+    href: "/reference/geoms/bin_2d#defaults",
+    keywords: ["GeomBin2d", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-bin_2d:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+    href: "/reference/geoms/bin_2d#svelte",
+    keywords: ["GeomBin2d", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-bin_2d:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+    href: "/reference/geoms/bin_2d#json",
+    keywords: ["GeomBin2d", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-bin_2d:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+    href: "/reference/geoms/bin_2d#params",
+    keywords: ["GeomBin2d", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-bin_2d:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+    href: "/reference/geoms/bin_2d#allowed-stats",
+    keywords: ["GeomBin2d", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-bin_2d:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+    href: "/reference/geoms/bin_2d#allowed-positions",
+    keywords: ["GeomBin2d", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-bin_2d:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+    href: "/reference/geoms/bin_2d#examples",
+    keywords: ["GeomBin2d", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-abline",
+    kind: "page",
+    title: "GeomAbline",
+    summary:
+      "GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+    href: "/reference/geoms/abline",
+    keywords: [],
+    exact: ["GeomAbline"],
+  },
+  {
+    id: "heading:reference-geoms-abline:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+    href: "/reference/geoms/abline#defaults",
+    keywords: ["GeomAbline", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-abline:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+    href: "/reference/geoms/abline#svelte",
+    keywords: ["GeomAbline", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-abline:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+    href: "/reference/geoms/abline#json",
+    keywords: ["GeomAbline", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-abline:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+    href: "/reference/geoms/abline#params",
+    keywords: ["GeomAbline", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-abline:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+    href: "/reference/geoms/abline#allowed-stats",
+    keywords: ["GeomAbline", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-abline:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+    href: "/reference/geoms/abline#allowed-positions",
+    keywords: ["GeomAbline", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-abline:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+    href: "/reference/geoms/abline#examples",
+    keywords: ["GeomAbline", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-curve",
+    kind: "page",
+    title: "GeomCurve",
+    summary:
+      "GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+    href: "/reference/geoms/curve",
+    keywords: [],
+    exact: ["GeomCurve"],
+  },
+  {
+    id: "heading:reference-geoms-curve:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+    href: "/reference/geoms/curve#defaults",
+    keywords: ["GeomCurve", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-curve:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+    href: "/reference/geoms/curve#svelte",
+    keywords: ["GeomCurve", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-curve:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+    href: "/reference/geoms/curve#json",
+    keywords: ["GeomCurve", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-curve:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+    href: "/reference/geoms/curve#params",
+    keywords: ["GeomCurve", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-curve:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+    href: "/reference/geoms/curve#allowed-stats",
+    keywords: ["GeomCurve", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-curve:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+    href: "/reference/geoms/curve#allowed-positions",
+    keywords: ["GeomCurve", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-curve:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+    href: "/reference/geoms/curve#examples",
+    keywords: ["GeomCurve", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-contour",
+    kind: "page",
+    title: "GeomContour",
+    summary:
+      "GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+    href: "/reference/geoms/contour",
+    keywords: [],
+    exact: ["GeomContour"],
+  },
+  {
+    id: "heading:reference-geoms-contour:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+    href: "/reference/geoms/contour#defaults",
+    keywords: ["GeomContour", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-contour:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+    href: "/reference/geoms/contour#svelte",
+    keywords: ["GeomContour", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-contour:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+    href: "/reference/geoms/contour#json",
+    keywords: ["GeomContour", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-contour:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+    href: "/reference/geoms/contour#params",
+    keywords: ["GeomContour", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-contour:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+    href: "/reference/geoms/contour#allowed-stats",
+    keywords: ["GeomContour", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-contour:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+    href: "/reference/geoms/contour#allowed-positions",
+    keywords: ["GeomContour", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-contour:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+    href: "/reference/geoms/contour#examples",
+    keywords: ["GeomContour", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-density_2d",
+    kind: "page",
+    title: "GeomDensity2d",
+    summary:
+      "GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+    href: "/reference/geoms/density_2d",
+    keywords: [],
+    exact: ["GeomDensity2d"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+    href: "/reference/geoms/density_2d#defaults",
+    keywords: ["GeomDensity2d", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+    href: "/reference/geoms/density_2d#svelte",
+    keywords: ["GeomDensity2d", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+    href: "/reference/geoms/density_2d#json",
+    keywords: ["GeomDensity2d", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+    href: "/reference/geoms/density_2d#params",
+    keywords: ["GeomDensity2d", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+    href: "/reference/geoms/density_2d#allowed-stats",
+    keywords: ["GeomDensity2d", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+    href: "/reference/geoms/density_2d#allowed-positions",
+    keywords: ["GeomDensity2d", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+    href: "/reference/geoms/density_2d#examples",
+    keywords: ["GeomDensity2d", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-density_2d_filled",
+    kind: "page",
+    title: "GeomDensity2dFilled",
+    summary:
+      "GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+    href: "/reference/geoms/density_2d_filled",
+    keywords: [],
+    exact: ["GeomDensity2dFilled"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d_filled:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+    href: "/reference/geoms/density_2d_filled#defaults",
+    keywords: ["GeomDensity2dFilled", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d_filled:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+    href: "/reference/geoms/density_2d_filled#svelte",
+    keywords: ["GeomDensity2dFilled", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d_filled:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+    href: "/reference/geoms/density_2d_filled#json",
+    keywords: ["GeomDensity2dFilled", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d_filled:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+    href: "/reference/geoms/density_2d_filled#params",
+    keywords: ["GeomDensity2dFilled", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d_filled:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+    href: "/reference/geoms/density_2d_filled#allowed-stats",
+    keywords: ["GeomDensity2dFilled", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d_filled:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+    href: "/reference/geoms/density_2d_filled#allowed-positions",
+    keywords: ["GeomDensity2dFilled", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d_filled:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+    href: "/reference/geoms/density_2d_filled#examples",
+    keywords: ["GeomDensity2dFilled", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-dotplot",
+    kind: "page",
+    title: "GeomDotplot",
+    summary:
+      "GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+    href: "/reference/geoms/dotplot",
+    keywords: [],
+    exact: ["GeomDotplot"],
+  },
+  {
+    id: "heading:reference-geoms-dotplot:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+    href: "/reference/geoms/dotplot#defaults",
+    keywords: ["GeomDotplot", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-dotplot:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+    href: "/reference/geoms/dotplot#svelte",
+    keywords: ["GeomDotplot", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-dotplot:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+    href: "/reference/geoms/dotplot#json",
+    keywords: ["GeomDotplot", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-dotplot:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+    href: "/reference/geoms/dotplot#params",
+    keywords: ["GeomDotplot", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-dotplot:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+    href: "/reference/geoms/dotplot#allowed-stats",
+    keywords: ["GeomDotplot", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-dotplot:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+    href: "/reference/geoms/dotplot#allowed-positions",
+    keywords: ["GeomDotplot", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-dotplot:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+    href: "/reference/geoms/dotplot#examples",
+    keywords: ["GeomDotplot", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-map",
+    kind: "page",
+    title: "GeomMap",
+    summary:
+      "GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+    href: "/reference/geoms/map",
+    keywords: [],
+    exact: ["GeomMap"],
+  },
+  {
+    id: "heading:reference-geoms-map:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+    href: "/reference/geoms/map#defaults",
+    keywords: ["GeomMap", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-map:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+    href: "/reference/geoms/map#svelte",
+    keywords: ["GeomMap", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-map:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+    href: "/reference/geoms/map#json",
+    keywords: ["GeomMap", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-map:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+    href: "/reference/geoms/map#params",
+    keywords: ["GeomMap", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-map:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+    href: "/reference/geoms/map#allowed-stats",
+    keywords: ["GeomMap", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-map:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+    href: "/reference/geoms/map#allowed-positions",
+    keywords: ["GeomMap", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-map:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+    href: "/reference/geoms/map#examples",
+    keywords: ["GeomMap", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-sf",
+    kind: "page",
+    title: "GeomSf",
+    summary:
+      "GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+    href: "/reference/geoms/sf",
+    keywords: [],
+    exact: ["GeomSf"],
+  },
+  {
+    id: "heading:reference-geoms-sf:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+    href: "/reference/geoms/sf#defaults",
+    keywords: ["GeomSf", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-sf:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+    href: "/reference/geoms/sf#svelte",
+    keywords: ["GeomSf", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-sf:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+    href: "/reference/geoms/sf#json",
+    keywords: ["GeomSf", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-sf:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+    href: "/reference/geoms/sf#params",
+    keywords: ["GeomSf", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-sf:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+    href: "/reference/geoms/sf#allowed-stats",
+    keywords: ["GeomSf", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-sf:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+    href: "/reference/geoms/sf#allowed-positions",
+    keywords: ["GeomSf", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-sf:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+    href: "/reference/geoms/sf#examples",
+    keywords: ["GeomSf", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-sf_text",
+    kind: "page",
+    title: "GeomSfText",
+    summary:
+      "GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+    href: "/reference/geoms/sf_text",
+    keywords: [],
+    exact: ["GeomSfText"],
+  },
+  {
+    id: "heading:reference-geoms-sf_text:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+    href: "/reference/geoms/sf_text#defaults",
+    keywords: ["GeomSfText", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-sf_text:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+    href: "/reference/geoms/sf_text#svelte",
+    keywords: ["GeomSfText", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-sf_text:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+    href: "/reference/geoms/sf_text#json",
+    keywords: ["GeomSfText", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-sf_text:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+    href: "/reference/geoms/sf_text#params",
+    keywords: ["GeomSfText", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-sf_text:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+    href: "/reference/geoms/sf_text#allowed-stats",
+    keywords: ["GeomSfText", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-sf_text:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+    href: "/reference/geoms/sf_text#allowed-positions",
+    keywords: ["GeomSfText", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-sf_text:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+    href: "/reference/geoms/sf_text#examples",
+    keywords: ["GeomSfText", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-sf_label",
+    kind: "page",
+    title: "GeomSfLabel",
+    summary:
+      "GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+    href: "/reference/geoms/sf_label",
+    keywords: [],
+    exact: ["GeomSfLabel"],
+  },
+  {
+    id: "heading:reference-geoms-sf_label:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+    href: "/reference/geoms/sf_label#defaults",
+    keywords: ["GeomSfLabel", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-sf_label:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+    href: "/reference/geoms/sf_label#svelte",
+    keywords: ["GeomSfLabel", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-sf_label:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+    href: "/reference/geoms/sf_label#json",
+    keywords: ["GeomSfLabel", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-sf_label:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+    href: "/reference/geoms/sf_label#params",
+    keywords: ["GeomSfLabel", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-sf_label:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+    href: "/reference/geoms/sf_label#allowed-stats",
+    keywords: ["GeomSfLabel", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-sf_label:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+    href: "/reference/geoms/sf_label#allowed-positions",
+    keywords: ["GeomSfLabel", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-sf_label:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+    href: "/reference/geoms/sf_label#examples",
+    keywords: ["GeomSfLabel", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-blank",
+    kind: "page",
+    title: "GeomBlank",
+    summary:
+      "GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+    href: "/reference/geoms/blank",
+    keywords: [],
+    exact: ["GeomBlank"],
+  },
+  {
+    id: "heading:reference-geoms-blank:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+    href: "/reference/geoms/blank#defaults",
+    keywords: ["GeomBlank", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-blank:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+    href: "/reference/geoms/blank#svelte",
+    keywords: ["GeomBlank", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-blank:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+    href: "/reference/geoms/blank#json",
+    keywords: ["GeomBlank", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-blank:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+    href: "/reference/geoms/blank#params",
+    keywords: ["GeomBlank", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-blank:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+    href: "/reference/geoms/blank#allowed-stats",
+    keywords: ["GeomBlank", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-blank:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+    href: "/reference/geoms/blank#allowed-positions",
+    keywords: ["GeomBlank", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-blank:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+    href: "/reference/geoms/blank#examples",
+    keywords: ["GeomBlank", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-jitter",
+    kind: "page",
+    title: "GeomJitter",
+    summary:
+      "GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+    href: "/reference/geoms/jitter",
+    keywords: [],
+    exact: ["GeomJitter"],
+  },
+  {
+    id: "heading:reference-geoms-jitter:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+    href: "/reference/geoms/jitter#defaults",
+    keywords: ["GeomJitter", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-jitter:alias",
+    kind: "heading",
+    title: "Alias",
+    summary:
+      "Alias in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+    href: "/reference/geoms/jitter#alias",
+    keywords: ["GeomJitter", "documentation"],
+    exact: ["Alias"],
+  },
+  {
+    id: "heading:reference-geoms-jitter:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+    href: "/reference/geoms/jitter#svelte",
+    keywords: ["GeomJitter", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-jitter:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+    href: "/reference/geoms/jitter#json",
+    keywords: ["GeomJitter", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-jitter:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+    href: "/reference/geoms/jitter#params",
+    keywords: ["GeomJitter", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-jitter:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+    href: "/reference/geoms/jitter#allowed-stats",
+    keywords: ["GeomJitter", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-jitter:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+    href: "/reference/geoms/jitter#allowed-positions",
+    keywords: ["GeomJitter", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-jitter:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+    href: "/reference/geoms/jitter#examples",
+    keywords: ["GeomJitter", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-spoke",
+    kind: "page",
+    title: "GeomSpoke",
+    summary:
+      "GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+    href: "/reference/geoms/spoke",
+    keywords: [],
+    exact: ["GeomSpoke"],
+  },
+  {
+    id: "heading:reference-geoms-spoke:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+    href: "/reference/geoms/spoke#defaults",
+    keywords: ["GeomSpoke", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-spoke:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+    href: "/reference/geoms/spoke#svelte",
+    keywords: ["GeomSpoke", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-spoke:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+    href: "/reference/geoms/spoke#json",
+    keywords: ["GeomSpoke", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-spoke:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+    href: "/reference/geoms/spoke#params",
+    keywords: ["GeomSpoke", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-spoke:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+    href: "/reference/geoms/spoke#allowed-stats",
+    keywords: ["GeomSpoke", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-spoke:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+    href: "/reference/geoms/spoke#allowed-positions",
+    keywords: ["GeomSpoke", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-spoke:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+    href: "/reference/geoms/spoke#examples",
+    keywords: ["GeomSpoke", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-rug",
+    kind: "page",
+    title: "GeomRug",
+    summary:
+      "GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+    href: "/reference/geoms/rug",
+    keywords: [],
+    exact: ["GeomRug"],
+  },
+  {
+    id: "heading:reference-geoms-rug:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+    href: "/reference/geoms/rug#defaults",
+    keywords: ["GeomRug", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-rug:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+    href: "/reference/geoms/rug#svelte",
+    keywords: ["GeomRug", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-rug:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+    href: "/reference/geoms/rug#json",
+    keywords: ["GeomRug", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-rug:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+    href: "/reference/geoms/rug#params",
+    keywords: ["GeomRug", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-rug:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+    href: "/reference/geoms/rug#allowed-stats",
+    keywords: ["GeomRug", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-rug:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+    href: "/reference/geoms/rug#allowed-positions",
+    keywords: ["GeomRug", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-rug:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+    href: "/reference/geoms/rug#examples",
+    keywords: ["GeomRug", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-step",
+    kind: "page",
+    title: "GeomStep",
+    summary:
+      "GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+    href: "/reference/geoms/step",
+    keywords: [],
+    exact: ["GeomStep"],
+  },
+  {
+    id: "heading:reference-geoms-step:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+    href: "/reference/geoms/step#defaults",
+    keywords: ["GeomStep", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-step:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+    href: "/reference/geoms/step#svelte",
+    keywords: ["GeomStep", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-step:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+    href: "/reference/geoms/step#json",
+    keywords: ["GeomStep", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-step:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+    href: "/reference/geoms/step#params",
+    keywords: ["GeomStep", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-step:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+    href: "/reference/geoms/step#allowed-stats",
+    keywords: ["GeomStep", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-step:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+    href: "/reference/geoms/step#allowed-positions",
+    keywords: ["GeomStep", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-step:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+    href: "/reference/geoms/step#examples",
+    keywords: ["GeomStep", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-qq",
+    kind: "page",
+    title: "GeomQq",
+    summary:
+      "GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+    href: "/reference/geoms/qq",
+    keywords: [],
+    exact: ["GeomQq"],
+  },
+  {
+    id: "heading:reference-geoms-qq:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+    href: "/reference/geoms/qq#defaults",
+    keywords: ["GeomQq", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-qq:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+    href: "/reference/geoms/qq#svelte",
+    keywords: ["GeomQq", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-qq:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+    href: "/reference/geoms/qq#json",
+    keywords: ["GeomQq", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-qq:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+    href: "/reference/geoms/qq#params",
+    keywords: ["GeomQq", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-qq:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+    href: "/reference/geoms/qq#allowed-stats",
+    keywords: ["GeomQq", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-qq:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+    href: "/reference/geoms/qq#allowed-positions",
+    keywords: ["GeomQq", "documentation"],
+    exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-qq:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+    href: "/reference/geoms/qq#examples",
+    keywords: ["GeomQq", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-geoms-qq_line",
+    kind: "page",
+    title: "GeomQqLine",
+    summary:
+      "GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+    href: "/reference/geoms/qq_line",
+    keywords: [],
+    exact: ["GeomQqLine"],
+  },
+  {
+    id: "heading:reference-geoms-qq_line:defaults",
+    kind: "heading",
+    title: "Defaults",
+    summary:
+      "Defaults in GeomQqLine. GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+    href: "/reference/geoms/qq_line#defaults",
+    keywords: ["GeomQqLine", "documentation"],
+    exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-qq_line:svelte",
+    kind: "heading",
+    title: "Svelte component",
+    summary:
+      "Svelte component in GeomQqLine. GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+    href: "/reference/geoms/qq_line#svelte",
+    keywords: ["GeomQqLine", "documentation"],
+    exact: ["Svelte component"],
+  },
+  {
+    id: "heading:reference-geoms-qq_line:json",
+    kind: "heading",
+    title: "JSON layer",
+    summary:
+      "JSON layer in GeomQqLine. GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+    href: "/reference/geoms/qq_line#json",
+    keywords: ["GeomQqLine", "documentation"],
+    exact: ["JSON layer"],
+  },
+  {
+    id: "heading:reference-geoms-qq_line:params",
+    kind: "heading",
+    title: "Params",
+    summary:
+      "Params in GeomQqLine. GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+    href: "/reference/geoms/qq_line#params",
+    keywords: ["GeomQqLine", "documentation"],
+    exact: ["Params"],
+  },
+  {
+    id: "heading:reference-geoms-qq_line:allowed-stats",
+    kind: "heading",
+    title: "Allowed stats",
+    summary:
+      "Allowed stats in GeomQqLine. GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+    href: "/reference/geoms/qq_line#allowed-stats",
+    keywords: ["GeomQqLine", "documentation"],
+    exact: ["Allowed stats"],
+  },
+  {
+    id: "heading:reference-geoms-qq_line:allowed-positions",
+    kind: "heading",
+    title: "Allowed positions",
+    summary:
+      "Allowed positions in GeomQqLine. GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+    href: "/reference/geoms/qq_line#allowed-positions",
+    keywords: ["GeomQqLine", "documentation"],
+    exact: ["Allowed positions"],
   },
   {
     id: "page:guide-getting-started",
@@ -322,6 +4282,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/layers-marks#compose-layers",
     keywords: ["Layers and marks", "Core grammar"],
     exact: ["Compose layers"],
+  },
+  {
+    id: "heading:guide-layers-marks:look-up-a-geom",
+    kind: "heading",
+    title: "Look up a geom",
+    summary:
+      "Look up a geom in Layers and marks. Compose marks in paint order while sharing or overriding plot mappings.",
+    href: "/guide/layers-marks#look-up-a-geom",
+    keywords: ["Layers and marks", "Core grammar"],
+    exact: ["Look up a geom"],
   },
   {
     id: "page:guide-statistics-positions",
@@ -3861,14 +7831,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-858",
+    id: "heading:guide-lifecycle:experimental-865",
     kind: "heading",
-    title: "experimental (858)",
+    title: "experimental (865)",
     summary:
-      "experimental (858) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-858",
+      "experimental (865) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-865",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (858)"],
+    exact: ["experimental (865)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -7129,6 +11099,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["GEOM_PARAM_KEYS"],
   },
   {
+    id: "api:ggsvelte-spec:GEOM_REFERENCE",
+    kind: "api",
+    title: "GEOM_REFERENCE",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["GEOM_REFERENCE"],
+  },
+  {
     id: "api:ggsvelte-spec:GGBuilder",
     kind: "api",
     title: "GGBuilder",
@@ -7390,6 +11369,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["GeomName"],
   },
   {
+    id: "api:ggsvelte-spec:GeomParamDoc",
+    kind: "api",
+    title: "GeomParamDoc",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["GeomParamDoc"],
+  },
+  {
     id: "api:ggsvelte-spec:GeomPathOptions",
     kind: "api",
     title: "GeomPathOptions",
@@ -7469,6 +11457,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
     exact: ["GeomRectOptions"],
+  },
+  {
+    id: "api:ggsvelte-spec:GeomReferenceEntry",
+    kind: "api",
+    title: "GeomReferenceEntry",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["GeomReferenceEntry"],
   },
   {
     id: "api:ggsvelte-spec:GeomRugOptions",
@@ -9460,6 +13457,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["SEQUENTIAL_SCHEME_NAMES"],
   },
   {
+    id: "api:ggsvelte-spec:SHARED_LAYER_PROPS",
+    kind: "api",
+    title: "SHARED_LAYER_PROPS",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["SHARED_LAYER_PROPS"],
+  },
+  {
     id: "api:ggsvelte-spec:STAT_COLUMNS",
     kind: "api",
     title: "STAT_COLUMNS",
@@ -9665,6 +13671,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
     exact: ["ShapeScaleSpec"],
+  },
+  {
+    id: "api:ggsvelte-spec:SharedLayerPropDoc",
+    kind: "api",
+    title: "SharedLayerPropDoc",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["SharedLayerPropDoc"],
   },
   {
     id: "api:ggsvelte-spec:SizeAreaScaleOptions",
@@ -10468,6 +14483,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["canonicalTemporalParserKey"],
   },
   {
+    id: "api:ggsvelte-spec:componentNameForGeom",
+    kind: "api",
+    title: "componentNameForGeom",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["componentNameForGeom"],
+  },
+  {
     id: "api:ggsvelte-spec:configuredColorScaleType",
     kind: "api",
     title: "configuredColorScaleType",
@@ -10655,6 +14679,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
     exact: ["fromEpochSeconds"],
+  },
+  {
+    id: "api:ggsvelte-spec:geomReferenceList",
+    kind: "api",
+    title: "geomReferenceList",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["geomReferenceList"],
   },
   {
     id: "api:ggsvelte-spec:gg",

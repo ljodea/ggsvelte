@@ -194,6 +194,19 @@ mappings.
 Layers inherit plot mappings unless a layer supplies its own mapping or data.
 [Multi-series line](/examples/line/multi-series) uses the same pattern with a
 stable discrete color scale. [Examples](/examples) for every mark on real data.
+
+## Look up a geom
+
+The full Svelte and JSON API for every mark lives in the
+[geom reference](/reference/geoms): defaults, allowed stats and positions, and
+every param with its schema description. That catalog is generated from the
+PortableSpec TypeBox schema (the same source as \`schema/v0.json\`), so it cannot
+drift from validation.
+
+Open a specific component, for example [GeomPoint](/reference/geoms/point) or
+[GeomLine](/reference/geoms/line). Shared layer props (\`data\`, \`aes\`, \`stat\`,
+\`position\`, \`positionParams\`, \`render\`, \`inspect\`) are documented once on the
+[index](/reference/geoms#shared-layer-props).
 `;
 
 export const STATISTICS_POSITIONS_MD = `# Statistics and positions
