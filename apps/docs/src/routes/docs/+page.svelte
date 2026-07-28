@@ -1,7 +1,11 @@
 <script lang="ts">
   import { base } from "$app/paths";
 
-  import { GUIDE_CATALOG } from "$lib/catalog/guide";
+  import {
+    GUIDE_CATALOG,
+    guideNavBlocks,
+    guideSectionDomId,
+  } from "$lib/catalog/guide";
   import { GUIDE_NAVIGATION } from "$lib/routes";
 
   const descriptionByPath = new Map<string, string>([
@@ -31,34 +35,45 @@
     ],
   ]);
 
-  // Distinct from sidebar `guide-*` ids so both can sit on this page.
-  function landingSectionId(section: string): string {
-    return `docs-landing-${section
-      .trim()
-      .toLowerCase()
-      .replaceAll(/[^a-z0-9]+/g, "-")
-      .replaceAll(/^-+|-+$/g, "")}`;
-  }
-
   // Overview is this page — do not list it again under the chapter map.
   const chapters = GUIDE_NAVIGATION.map((group) => ({
     section: group.section,
     entries: group.entries.filter((entry) => entry.path !== "/docs"),
   })).filter((group) => group.entries.length > 0);
+
+  // Decorative labels (Start, Core grammar, …) are dropped; only Reference stays.
+  const blocks = guideNavBlocks(chapters);
 </script>
 
 <article class="docs-landing" aria-labelledby="docs-heading">
   <h1 id="docs-heading">Documentation</h1>
 
   <nav class="docs-chapters" aria-label="Documentation guides">
-    {#each chapters as group (group.section)}
-      <section
-        class="chapter-group"
-        aria-labelledby={landingSectionId(group.section)}
-      >
-        <h2 id={landingSectionId(group.section)}>{group.section}</h2>
-        <ul>
-          {#each group.entries as entry (entry.path)}
+    {#each blocks as block (block.kind === "section" ? block.section : block.key)}
+      {#if block.kind === "section"}
+        <section
+          class="chapter-group"
+          aria-labelledby={guideSectionDomId(`docs-landing-${block.section}`)}
+        >
+          <h2 id={guideSectionDomId(`docs-landing-${block.section}`)}>
+            {block.section}
+          </h2>
+          <ul>
+            {#each block.entries as entry (entry.path)}
+              <li>
+                <a href={`${base}${entry.path}`}>
+                  <strong>{entry.label}</strong>
+                  {#if descriptionByPath.get(entry.path)}
+                    <span>{descriptionByPath.get(entry.path)}</span>
+                  {/if}
+                </a>
+              </li>
+            {/each}
+          </ul>
+        </section>
+      {:else}
+        <ul class="chapter-flat">
+          {#each block.entries as entry (entry.path)}
             <li>
               <a href={`${base}${entry.path}`}>
                 <strong>{entry.label}</strong>
@@ -69,7 +84,7 @@
             </li>
           {/each}
         </ul>
-      </section>
+      {/if}
     {/each}
   </nav>
 
@@ -133,7 +148,10 @@
     color: inherit;
   }
 
-  .chapter-group + .chapter-group {
+  .chapter-group + .chapter-group,
+  .chapter-flat + .chapter-group,
+  .chapter-group + .chapter-flat,
+  .chapter-flat + .chapter-flat {
     margin-top: 1.75rem;
   }
 
