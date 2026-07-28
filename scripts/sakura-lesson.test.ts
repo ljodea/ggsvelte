@@ -259,7 +259,7 @@ describe("gate G1 — the reversed temporal y-axis", () => {
   });
 });
 
-describe("gate G5 — annotations that do not fight the chart", () => {
+describe("gate G8 — annotations that do not fight the chart", () => {
   const finishedSpec = () => foldSakura(SAKURA_STEPS.length, rows).spec;
 
   it("names the bands where the reader is looking, with no legend", () => {

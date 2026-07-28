@@ -66,7 +66,7 @@ export const SAKURA_EPOCH_EDGES = SAKURA_EPOCHS.slice(1).map((band) => ({ year: 
  * the names arrived — no observation is displaced and the axis makes no new
  * claim. Derived from SAKURA_EPOCHS so a name can never drift off its band.
  */
-export const SAKURA_EPOCH_NAMES = SAKURA_EPOCHS.map((band) => ({
+const SAKURA_EPOCH_NAMES = SAKURA_EPOCHS.map((band) => ({
   epoch: band.epoch,
   midYear: Math.round((band.year + band.until) / 2),
   nameDate: EPOCH_NAME_DATE,
