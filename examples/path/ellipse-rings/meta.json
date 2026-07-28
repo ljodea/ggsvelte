@@ -1,5 +1,6 @@
 {
-  "title": "Ellipse confidence rings",
+  "title": "Three penguins, three ellipses",
+  "description": "A 95% bivariate normal ring around each species in bill and flipper length. The rings overlap where the birds do, and a few fall outside their own.",
   "tags": ["path", "ellipse", "stat", "confidence", "group", "point", "theme"],
   "docsSection": "Points & scatter"
 }

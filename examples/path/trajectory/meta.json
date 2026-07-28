@@ -1,5 +1,6 @@
 {
-  "title": "Path trajectory (data order)",
-  "tags": ["path", "line", "trajectory", "figure-eight", "data-order"],
+  "title": "Napoleon's march, drawn in march order",
+  "description": "Minard's strength counts against longitude. The retreat covers the same ground as the advance, so only a path drawn in row order tells the two legs apart.",
+  "tags": ["path", "line", "trajectory", "data-order"],
   "docsSection": "Lines & time"
 }

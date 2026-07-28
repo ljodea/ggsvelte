@@ -1,12 +1,13 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { stepCorners } from "./data.js";
+import { retreatCold } from "./data.js";
 
 export default defineExample(
-  // stat connect expands successive points into real path vertices (hv elbows).
-  // Geom curve step is stroke-only; connect materializes corners in the batch.
-  gg(stepCorners, aes({ x: "x", y: "y" }))
+  // stat connect turns each pair of successive points into real path vertices.
+  // "hv" goes horizontal first, then vertical: the last reading is carried
+  // west until the next one is taken, instead of guessing a gradual slide.
+  gg(retreatCold, aes({ x: "long", y: "temp" }))
     .geomPath({
       stat: "connect",
       connection: "hv",
@@ -14,12 +15,13 @@ export default defineExample(
       alpha: 0.95,
     })
     .geomPoint({ size: 3.5, alpha: 0.85 })
+    .scales({ x: { reverse: true } })
     .theme("classic")
     .labs({
-      title: "stat connect: hv path joins",
-      subtitle: "Three data points expand to horizontal-then-vertical elbows",
-      x: "x",
-      y: "y",
+      title: "The cold Minard drew under the retreat",
+      subtitle: "Nine readings between Moscow and Wilna, each carried west until the next",
+      x: "Longitude east",
+      y: "Degrees Réaumur",
     })
     .spec(),
 );

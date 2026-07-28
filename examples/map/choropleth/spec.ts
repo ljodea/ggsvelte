@@ -1,18 +1,25 @@
-import { aes, gg } from "@ggsvelte/spec";
+import { aes, gg, scaleFillContinuous } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { fortifiedMap, regionRates } from "./data.js";
+import { neighbourhoodDeaths, pumpNeighbourhoods } from "./data.js";
 
 export default defineExample(
-  // Fortified map join (ggplot2 geom_map): value rows keyed by region fill
-  // closed map polygons from long/lat coordinates.
-  gg(regionRates, aes({ map_id: "region", fill: "rate" }))
-    .geomMap({ map: { values: fortifiedMap }, linewidth: 1.2, alpha: 0.95 })
+  // geom_map joins value rows to a fortified map on map_id, so the table
+  // carries the numbers and the map carries only the shapes.
+  gg(neighbourhoodDeaths, aes({ map_id: "pump", fill: "deaths" }))
+    .geomMap({
+      map: { values: pumpNeighbourhoods },
+      mapId: "pump",
+      linewidth: 1.2,
+      alpha: 0.95,
+    })
+    .scales(scaleFillContinuous({ scheme: "viridis" }))
+    .coordFixed()
     .theme("classic")
     .labs({
-      title: "Regional rates (toy map)",
-      subtitle: "Fortified long/lat polygons joined on region (geom_map)",
-      fill: "Rate",
+      title: "359 of 578 deaths were nearest the Broad Street pump",
+      subtitle: "The 1854 Soho outbreak counted into the area closest to each public pump",
+      fill: "Deaths",
     })
     .spec(),
 );

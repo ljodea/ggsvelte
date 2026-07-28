@@ -1,25 +1,34 @@
 <script lang="ts">
   import {
-    CoordFixed,
     GeomPath,
     GeomPoint,
     GGPlot,
     Labs,
+    ScaleColorManual,
     ThemeClassic,
   } from "@ggsvelte/svelte";
 
-  import { figureEight } from "./data.js";
+  import { napoleonsArmy } from "./data.js";
 </script>
 
-<GGPlot data={figureEight} aes={{ x: "x", y: "y" }} width={640} height={400}>
+<GGPlot
+  data={napoleonsArmy}
+  aes={{ x: "long", y: "survivors", group: "leg", color: "direction" }}
+  width={640}
+  height={400}
+>
   <ThemeClassic />
-  <CoordFixed />
-  <Labs
-    title="Figure-eight path in data order"
-    subtitle="geom_path keeps row order; geom_line would sort by x"
-    x="x"
-    y="y"
+  <ScaleColorManual
+    domain={["Advance", "Retreat"]}
+    values={["#b45309", "#1f2937"]}
   />
-  <GeomPath linewidth={2} alpha={0.95} />
-  <GeomPoint size={2.2} alpha={0.55} />
+  <Labs
+    title="Napoleon's army marches east and dies coming back"
+    subtitle="Minard's 1812 strength counts, drawn in march order: out to Moscow, then home"
+    x="Longitude east"
+    y="Men still with the column"
+    color=""
+  />
+  <GeomPath linewidth={2} />
+  <GeomPoint size={2.2} alpha={0.7} />
 </GGPlot>

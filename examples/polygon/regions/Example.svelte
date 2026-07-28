@@ -1,29 +1,37 @@
 <script lang="ts">
   import {
+    CoordFixed,
+    GeomPoint,
     GeomPolygon,
     GGPlot,
+    GuideNone,
     Labs,
-    ScaleFillManual,
     ThemeClassic,
   } from "@ggsvelte/svelte";
 
-  import { regions } from "./data.js";
+  import { pumpNeighbourhoods, waterPumps } from "./data.js";
 </script>
 
 <GGPlot
-  data={regions}
-  aes={{ x: "x", y: "y", group: "region", fill: "region" }}
+  data={pumpNeighbourhoods}
+  aes={{ x: "x", y: "y", group: "pump", fill: "pump" }}
   width={640}
   height={400}
 >
   <ThemeClassic />
-  <ScaleFillManual domain={["West", "East"]} values={["#4c78a8", "#f58518"]} />
+  <CoordFixed />
+  <GuideNone channel="fill" />
   <Labs
-    title="Two regions as polygons"
-    subtitle="Vertices connect in data order; the path closes implicitly"
-    x="x"
-    y="y"
-    fill=""
+    title="Which pump was nearest"
+    subtitle="Soho split into the thirteen areas closest to each public pump, 1854"
+    x="Map east"
+    y="Map north"
   />
-  <GeomPolygon alpha={0.85} linewidth={1.5} />
+  <GeomPolygon alpha={0.55} linewidth={1.2} />
+  <GeomPoint
+    data={waterPumps}
+    aes={{ x: "x", y: "y", color: { value: "#111827" } }}
+    size={3.6}
+    shape="cross"
+  />
 </GGPlot>
