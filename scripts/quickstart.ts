@@ -44,7 +44,6 @@ export type { SakuraRow, SakuraFold, FoldSakuraOptions } from "./quickstart/fold
 
 export {
   GETTING_STARTED_PAGE_HEADINGS,
-  quickstartTitle,
   quickstartAriaLabel,
   QUICKSTART_BUILDER_FRAGMENT,
   QUICKSTART_PORTABLE_SPEC_FRAGMENT,

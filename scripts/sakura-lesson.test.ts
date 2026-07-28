@@ -21,7 +21,6 @@ import {
   foldSakura,
   QUICKSTART_PAGE_SVELTE,
   quickstartAriaLabel,
-  quickstartTitle,
   SAKURA_BASELINE,
   SAKURA_RECORDS,
   SAKURA_BINWIDTH,
@@ -94,13 +93,13 @@ describe("the sakura lesson folds to renderable specs", () => {
     }
   });
 
-  it("exposes title and aria-label from the folded starting page", () => {
-    // consumer-compat also asserts these against a packed app; keep a direct
-    // unit guard so the extractors stay covered without that harness.
-    expect(quickstartTitle()).toBe("<title>Kyoto cherry blossom</title>");
+  it("exposes aria-label from the folded starting page", () => {
+    // consumer-compat also asserts this against a packed app; keep a direct
+    // unit guard so the extractor stays covered without that harness.
     expect(quickstartAriaLabel()).toBe(
       "Kyoto peak bloom, 812 to 2026: about a week earlier since 1850",
     );
+    expect(QUICKSTART_PAGE_SVELTE).not.toContain("<svelte:head>");
   });
 
   it("drops record callouts when annotations are disabled", () => {

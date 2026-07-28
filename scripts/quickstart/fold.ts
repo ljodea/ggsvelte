@@ -132,8 +132,6 @@ export function foldSakura(
 ${script}
 </script>
 
-<svelte:head><title>Kyoto cherry blossom</title></svelte:head>
-
 <GGPlot
 ${[...attrs.values()].join("\n")}
 >
