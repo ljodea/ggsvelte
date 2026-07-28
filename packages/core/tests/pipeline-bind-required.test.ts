@@ -37,6 +37,12 @@ const NO_XY_REQUIRED: readonly NormalizedGeomName[] = [
   "qq_line",
 ];
 
+/**
+ * Catalog-walk set: NO_XY_REQUIRED plus rule (annotation form needs no mapped
+ * channel; vertical/horizontal still require an axis — covered separately).
+ */
+const UNCONSTRAINED_ON_NULL_FIELDS: ReadonlySet<string> = new Set([...NO_XY_REQUIRED, "rule"]);
+
 function base(geom: NormalizedGeomName, overrides: Record<string, unknown> = {}) {
   return {
     geom,
@@ -71,149 +77,157 @@ function expectMissingChannel(run: () => void, channel: string): void {
 
 describe("assertRequiredChannels (#1042)", () => {
   it("requires x and y for point when y is not stat-computed", () => {
-    expectMissingChannel(() => assertRequiredChannels(base("point", { yField: "y" })), "x");
-    expectMissingChannel(() => assertRequiredChannels(base("point", { xField: "x" })), "y");
-    expect(() => assertRequiredChannels(base("point", { xField: "x", yField: "y" }))).not.toThrow();
+    expectMissingChannel(() => {
+      assertRequiredChannels(base("point", { yField: "y" }));
+    }, "x");
+    expectMissingChannel(() => {
+      assertRequiredChannels(base("point", { xField: "x" }));
+    }, "y");
+    expect(() => {
+      assertRequiredChannels(base("point", { xField: "x", yField: "y" }));
+    }).not.toThrow();
   });
 
   it("skips y when yStatColumn is set (e.g. ecdf)", () => {
-    expect(() =>
-      assertRequiredChannels(base("point", { xField: "x", yStatColumn: "ecdf" })),
-    ).not.toThrow();
+    expect(() => {
+      assertRequiredChannels(base("point", { xField: "x", yStatColumn: "ecdf" }));
+    }).not.toThrow();
   });
 
   it("requires only x for bar", () => {
-    expectMissingChannel(() => assertRequiredChannels(base("bar")), "x");
-    expect(() => assertRequiredChannels(base("bar", { xField: "g" }))).not.toThrow();
+    expectMissingChannel(() => {
+      assertRequiredChannels(base("bar"));
+    }, "x");
+    expect(() => {
+      assertRequiredChannels(base("bar", { xField: "g" }));
+    }).not.toThrow();
   });
 
   it("requires x and y for contour", () => {
-    expectMissingChannel(() => assertRequiredChannels(base("contour", { yField: "y" })), "x");
-    expectMissingChannel(() => assertRequiredChannels(base("contour", { xField: "x" })), "y");
+    expectMissingChannel(() => {
+      assertRequiredChannels(base("contour", { yField: "y" }));
+    }, "x");
+    expectMissingChannel(() => {
+      assertRequiredChannels(base("contour", { xField: "x" }));
+    }, "y");
   });
 
   it("requires ymin/ymax for errorbar identity form", () => {
-    expectMissingChannel(
-      () => assertRequiredChannels(base("errorbar", { xField: "x", ymaxField: "hi" })),
-      "ymin",
-    );
+    expectMissingChannel(() => {
+      assertRequiredChannels(base("errorbar", { xField: "x", ymaxField: "hi" }));
+    }, "ymin");
   });
 
   it("requires y (not ymin/ymax) for errorbar under summary stats", () => {
-    expectMissingChannel(
-      () => assertRequiredChannels(base("errorbar", { stat: "summary", xField: "x" })),
-      "y",
-    );
-    expect(() =>
-      assertRequiredChannels(base("errorbar", { stat: "summary", xField: "x", yField: "y" })),
-    ).not.toThrow();
+    expectMissingChannel(() => {
+      assertRequiredChannels(base("errorbar", { stat: "summary", xField: "x" }));
+    }, "y");
+    expect(() => {
+      assertRequiredChannels(base("errorbar", { stat: "summary", xField: "x", yField: "y" }));
+    }).not.toThrow();
   });
 
   it("requires edge channels for rect", () => {
-    expectMissingChannel(
-      () =>
-        assertRequiredChannels(
-          base("rect", {
-            xmaxField: "x1",
-            yminField: "y0",
-            ymaxField: "y1",
-          }),
-        ),
-      "xmin",
-    );
+    expectMissingChannel(() => {
+      assertRequiredChannels(
+        base("rect", {
+          xmaxField: "x1",
+          yminField: "y0",
+          ymaxField: "y1",
+        }),
+      );
+    }, "xmin");
   });
 
   it("requires ribbon channels by orientation", () => {
-    expectMissingChannel(
-      () =>
-        assertRequiredChannels(
-          base("ribbon", {
-            ribbonOrientation: "x",
-            yminField: "lo",
-            ymaxField: "hi",
-          }),
-        ),
-      "x",
-    );
-    expectMissingChannel(
-      () =>
-        assertRequiredChannels(
-          base("ribbon", {
-            ribbonOrientation: "y",
-            xminField: "lo",
-            xmaxField: "hi",
-          }),
-        ),
-      "y",
-    );
+    expectMissingChannel(() => {
+      assertRequiredChannels(
+        base("ribbon", {
+          ribbonOrientation: "x",
+          yminField: "lo",
+          ymaxField: "hi",
+        }),
+      );
+    }, "x");
+    expectMissingChannel(() => {
+      assertRequiredChannels(
+        base("ribbon", {
+          ribbonOrientation: "y",
+          xminField: "lo",
+          xmaxField: "hi",
+        }),
+      );
+    }, "y");
   });
 
   it("requires the active axis for data-driven rule forms", () => {
-    expectMissingChannel(() => assertRequiredChannels(base("rule", { ruleForm: "vertical" })), "x");
-    expectMissingChannel(
-      () => assertRequiredChannels(base("rule", { ruleForm: "horizontal" })),
-      "y",
-    );
-    expect(() => assertRequiredChannels(base("rule", { ruleForm: "annotation" }))).not.toThrow();
+    expectMissingChannel(() => {
+      assertRequiredChannels(base("rule", { ruleForm: "vertical" }));
+    }, "x");
+    expectMissingChannel(() => {
+      assertRequiredChannels(base("rule", { ruleForm: "horizontal" }));
+    }, "y");
+    expect(() => {
+      assertRequiredChannels(base("rule", { ruleForm: "annotation" }));
+    }).not.toThrow();
   });
 
   it("requires x/y/xend/yend for segment and curve", () => {
     for (const geom of ["segment", "curve"] as const) {
-      expectMissingChannel(
-        () =>
-          assertRequiredChannels(
-            base(geom, {
-              yField: "y",
-              xendField: "x2",
-              yendField: "y2",
-            }),
-          ),
-        "x",
-      );
+      expectMissingChannel(() => {
+        assertRequiredChannels(
+          base(geom, {
+            yField: "y",
+            xendField: "x2",
+            yendField: "y2",
+          }),
+        );
+      }, "x");
     }
   });
 
   it("requires angle and radius for spoke when params omit them", () => {
-    expectMissingChannel(
-      () =>
-        assertRequiredChannels(
-          base("spoke", {
-            xField: "x",
-            yField: "y",
-            radiusField: "r",
-          }),
-        ),
-      "angle",
-    );
-    expect(() =>
+    expectMissingChannel(() => {
+      assertRequiredChannels(
+        base("spoke", {
+          xField: "x",
+          yField: "y",
+          radiusField: "r",
+        }),
+      );
+    }, "angle");
+    expect(() => {
       assertRequiredChannels(
         base("spoke", {
           xField: "x",
           yField: "y",
           layerParams: { angle: 0, radius: 1 },
         }),
-      ),
-    ).not.toThrow();
+      );
+    }).not.toThrow();
   });
 
   it("requires rug channels from sides", () => {
-    expectMissingChannel(() => assertRequiredChannels(base("rug", { rugSides: "b" })), "x");
-    expectMissingChannel(() => assertRequiredChannels(base("rug", { rugSides: "l" })), "y");
-    expect(() => assertRequiredChannels(base("rug", { rugSides: "b", xField: "x" }))).not.toThrow();
+    expectMissingChannel(() => {
+      assertRequiredChannels(base("rug", { rugSides: "b" }));
+    }, "x");
+    expectMissingChannel(() => {
+      assertRequiredChannels(base("rug", { rugSides: "l" }));
+    }, "y");
+    expect(() => {
+      assertRequiredChannels(base("rug", { rugSides: "b", xField: "x" }));
+    }).not.toThrow();
   });
 
   it("pins the nine geoms that intentionally require no x/y channels", () => {
     for (const geom of NO_XY_REQUIRED) {
-      expect(() => assertRequiredChannels(base(geom))).not.toThrow();
+      expect(() => {
+        assertRequiredChannels(base(geom));
+      }).not.toThrow();
     }
   });
 
   it("every normalized geom either requires a channel or is listed as unconstrained", () => {
-    const unconstrained = new Set<string>(NO_XY_REQUIRED);
-    // Rule annotation form needs no mapped channel (intercepts are params).
-    // Vertical/horizontal rule still require an axis — covered above.
-    unconstrained.add("rule");
-
     for (const geom of normalizedGeoms) {
       try {
         assertRequiredChannels(
@@ -221,8 +235,7 @@ describe("assertRequiredChannels (#1042)", () => {
             // Give rule a form that does not force a channel so the fall-through
             // check still sees annotation-style rule as unconstrained.
             ruleForm: geom === "rule" ? "annotation" : null,
-            // Rug with no sides that need axes would be empty; use sides that
-            // need none by testing the unconstrained list only via throw/no-throw.
+            // Rug with sides that need x so throw/no-throw still classifies it.
             rugSides: geom === "rug" ? "b" : undefined,
           }),
         );
@@ -231,11 +244,11 @@ describe("assertRequiredChannels (#1042)", () => {
           // rug with side b needs x — should have thrown.
           expect.unreachable("rug with sides b should require x");
         }
-        expect(unconstrained.has(geom)).toBe(true);
+        expect(UNCONSTRAINED_ON_NULL_FIELDS.has(geom)).toBe(true);
       } catch (e) {
         expect(e).toBeInstanceOf(PipelineError);
         expect((e as PipelineError).code).toBe("missing-channel");
-        expect(unconstrained.has(geom)).toBe(false);
+        expect(UNCONSTRAINED_ON_NULL_FIELDS.has(geom)).toBe(false);
       }
     }
   });
