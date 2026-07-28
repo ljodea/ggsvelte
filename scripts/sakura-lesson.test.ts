@@ -320,19 +320,12 @@ describe("gate G6 — finished chart panel aspect, not outer SVG aspect", () => 
 });
 
 /** Layer lookup by inline data values — not by geom (finished fold has two rules). */
-function layerWithValues(
-  layers: readonly { data?: { values?: unknown } | unknown }[],
-  values: unknown,
-): number {
+function layerWithValues(layers: readonly { data?: unknown }[], values: unknown): number {
   return layers.findIndex((layer) => {
     const data = layer.data;
-    return (
-      data !== undefined &&
-      typeof data === "object" &&
-      data !== null &&
-      "values" in data &&
-      data.values === values
-    );
+    if (data === undefined || typeof data !== "object" || data === null) return false;
+    if (!("values" in data)) return false;
+    return data.values === values;
   });
 }
 
