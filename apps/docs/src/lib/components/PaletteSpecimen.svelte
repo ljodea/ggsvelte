@@ -47,27 +47,14 @@
       });
     };
 
-    if (!shellMatches) {
-      load();
-      return () => {
-        cancelled = true;
-      };
-    }
-
+    // Near-viewport only. Do not $effect-load every off-screen specimen when
+    // reverse/paper toggles — that freezes the page. Live specimens already
+    // upgrade via props; others load on scroll.
     const stop = observeNearViewport(el, load, { rootMargin: "480px 0px" });
     return () => {
       cancelled = true;
       stop();
     };
-  });
-
-  // When the user flips reverse/paper after mount, upgrade immediately.
-  $effect(() => {
-    if (!shellMatches && Live === null && host !== null) {
-      void import("./PaletteSpecimenLive.svelte").then((mod) => {
-        Live = mod.default;
-      });
-    }
   });
 </script>
 
