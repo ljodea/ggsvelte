@@ -1,5 +1,6 @@
 {
-  "title": "Ordered small multiples with side strips",
+  "title": "Counting yeast under a microscope",
+  "description": "Gosset's 1907 haemacytometer counts, 400 squares per sample, in ordered small multiples with the strip labels down the side.",
   "tags": ["facet", "order", "labels", "strip", "wrap", "col"],
   "docsSection": "Facets"
 }

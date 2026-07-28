@@ -18,8 +18,9 @@ export default defineExample(
     .scaleFillManual({ domain: ["Astronomy", "Map"], values: ["#e8f0fb", "#f8e8f0"] })
     .theme("classic")
     .labs({
-      title: "geom_label — text with a readable background box",
-      subtitle: "Van Langren estimates with filled label boxes",
+      title: "Every name on the first statistical graph, boxed",
+      subtitle:
+        "Van Langren, 1644: a background box keeps each name readable over the rule beneath",
       x: "Estimated Toledo–Rome longitude (°)",
       y: "Ordered by estimate",
       color: "Derived from",

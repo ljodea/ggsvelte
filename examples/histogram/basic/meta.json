@@ -1,5 +1,6 @@
 {
-  "title": "Histogram",
+  "title": "Michelson measures the speed of light, 1879",
+  "description": "A hundred runs in km/s less 299,000. The modern value sits well off the centre of the distribution, which is the interesting part.",
   "tags": ["histogram", "bins", "stat", "rule", "annotation", "theme"],
   "docsSection": "Distributions"
 }

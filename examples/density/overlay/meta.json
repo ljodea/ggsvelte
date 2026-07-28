@@ -1,5 +1,6 @@
 {
-  "title": "Overlaid density estimates",
+  "title": "Heights of Galton's 934 adult children",
+  "description": "Two overlapping distributions that share most of their range and separate at the means, which is the cleanest small case for overlaid densities.",
   "tags": ["density", "kde", "fill", "alpha", "theme", "palette"],
   "docsSection": "Distributions"
 }

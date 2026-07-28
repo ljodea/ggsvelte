@@ -1,5 +1,6 @@
 {
-  "title": "Columns with one multi-word category outlier",
+  "title": "One long label among short ones",
+  "description": "A layout specimen: short categories with a single four-word outlier at a normal desktop width, where the axis should wrap rather than rotate everything.",
   "tags": ["col", "band", "labels", "i18n", "vr"],
   "docsSection": "Bars & columns",
   "vrHeight": 320

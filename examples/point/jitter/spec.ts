@@ -8,8 +8,8 @@ export default defineExample(
     .geomPoint({ position: "jitter", positionParams: { width: 0.22, height: 0 }, alpha: 0.75 })
     .theme("clean")
     .labs({
-      title: "Wages across 70 trades, 1910",
-      subtitle: "Jitter separates trades that share a wage class",
+      title: "The same wages, jittered by position",
+      subtitle: "Pearson's 70 trades again, spread by position_jitter rather than the geom sugar",
       x: "Wage class",
       y: "Weekly wage (shillings)",
     })

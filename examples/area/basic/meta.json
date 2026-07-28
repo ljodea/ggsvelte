@@ -1,5 +1,6 @@
 {
-  "title": "Area chart",
+  "title": "Halley's life table, 1693",
+  "description": "Survivors from a cohort of a thousand born in Breslau, drawn as the filled area the first life table implies.",
   "tags": ["area", "line", "layers", "theme"],
   "docsSection": "Areas"
 }

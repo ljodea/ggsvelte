@@ -1,5 +1,6 @@
 {
-  "title": "Ribbon paint",
+  "title": "A ribbon with gradient fill, stroke and glow",
+  "description": "The paint options a ribbon can carry, on a precomputed interval: a portable gradient across the band, a stroked edge and a glow beneath.",
   "tags": ["ribbon", "interval", "gradient", "glow", "paint"],
   "docsSection": "Areas"
 }

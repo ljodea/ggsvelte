@@ -1,5 +1,6 @@
 {
-  "title": "Data-driven rules (rug)",
+  "title": "The first statistical graph was a rug",
+  "description": "Van Langren's 1644 longitude estimates, one rule per determination, which is the form his own chart took.",
   "tags": ["rule", "distribution", "rug"],
   "docsSection": "Annotations & rules"
 }

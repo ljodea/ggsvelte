@@ -1,5 +1,6 @@
 {
-  "title": "Log-scale scatter with inspection",
+  "title": "Cholera, crowding and water in London, 1849",
+  "description": "Farr's 38 districts: death rate against population density on a log x scale, coloured by which company supplied the water.",
   "tags": ["point", "scales", "log", "inspect", "theme", "palette"],
   "docsSection": "Points & scatter"
 }

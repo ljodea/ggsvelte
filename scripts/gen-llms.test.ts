@@ -422,8 +422,10 @@ describe("llms surfaces", () => {
     const linked = EXAMPLES.find((example) => example.id === "interaction/linked-views");
     expect(inspection?.title).toBe("Inspect and pin data");
     expect(inspection?.tags).toContain("inspect");
-    // Page subtitles are deleted (empty), not rewritten.
-    expect(inspection?.description).toBe("");
+    // #1010: every shipped example carries a written gallery description. The
+    // rule this replaces was "deleted, not rewritten" — which was right about
+    // AI slop and wrong as a permanent state.
+    expect(inspection?.description.length).toBeGreaterThan(0);
     expect(selection?.title).toBe("Interval selection and zoom");
     expect(selection?.tags).toContain("select");
     expect(linked?.title).toBe("Link plots, controls, and a table");

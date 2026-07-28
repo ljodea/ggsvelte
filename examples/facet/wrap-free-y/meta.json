@@ -1,5 +1,6 @@
 {
-  "title": "Free y scales per panel",
+  "title": "London's bills of mortality, 1629 to 1710",
+  "description": "Arbuthnot's christenings and burials with each panel on its own y scale, so a series that spans a different range still shows its shape.",
   "tags": ["facet", "free-scales", "line", "wrap"],
   "docsSection": "Facets"
 }

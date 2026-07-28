@@ -1,5 +1,6 @@
 {
-  "title": "Errorbars (mean ± se) over raw data",
+  "title": "The data the t-test was invented on",
+  "description": "Extra hours of sleep in eleven patients under each of four treatments, with mean and standard error. Student's worked example from 1908.",
   "tags": ["errorbar", "summary", "mean-se", "jitter"],
   "docsSection": "Statistical summaries"
 }

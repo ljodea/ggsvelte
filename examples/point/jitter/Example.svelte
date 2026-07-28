@@ -12,8 +12,8 @@
 >
   <ThemeClean />
   <Labs
-    title="Wages across 70 trades, 1910"
-    subtitle="Jitter separates trades that share a wage class"
+    title="The same wages, jittered by position"
+    subtitle="Pearson's 70 trades again, spread by position_jitter rather than the geom sugar"
     x="Wage class"
     y="Weekly wage (shillings)"
   />

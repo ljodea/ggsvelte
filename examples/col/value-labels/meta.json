@@ -1,5 +1,6 @@
 {
-  "title": "Column chart with value labels",
+  "title": "The Salk vaccine field trial, 1954",
+  "description": "Paralytic polio per 100,000 children in the randomised arm, with the rate printed on each column because that number is the result.",
   "tags": ["col", "text", "labels", "annotation", "theme"],
   "docsSection": "Bars & columns"
 }

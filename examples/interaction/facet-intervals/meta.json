@@ -1,5 +1,6 @@
 {
-  "title": "Coordinate intervals across facets",
+  "title": "One interval, applied in every panel",
+  "description": "333 Palmer penguins split by island, with a coordinate interval selection that holds across all the facets at once.",
   "tags": ["interaction", "facet", "select", "interval", "brush", "keyboard"],
   "docsSection": "Interaction",
   "vrHeight": 760,

@@ -1,5 +1,6 @@
 {
-  "title": "Canvas scatter (2,500 points)",
+  "title": "Two and a half thousand points on canvas",
+  "description": "Above the automatic threshold ggsvelte renders marks to canvas instead of SVG, which is what keeps a scatter this size interactive.",
   "tags": ["point", "canvas", "performance", "theme"],
   "docsSection": "Points & scatter"
 }

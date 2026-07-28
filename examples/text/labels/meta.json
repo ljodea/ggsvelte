@@ -1,5 +1,6 @@
 {
-  "title": "Text labels on a scatter",
+  "title": "Every name on the first statistical graph",
+  "description": "Van Langren, 1644: the labels are the data, because he named the astronomer behind every estimate including the ones that were wrong.",
   "tags": ["text", "point", "labels"],
   "docsSection": "Labels & text"
 }

@@ -9,10 +9,6 @@
  *
  * Galton, "Regression Towards Mediocrity in Hereditary Stature" (1886), via
  * HistData::GaltonFamilies (see NOTICE); 934 rows.
- *
- * At 934 rows this example exceeds the 500-row inline ceiling the playground
- * codec enforces, so it renders normally but has no share link. A kernel
- * density needs the whole sample to be honest, so the trade is deliberate.
  */
 export const galtonChildren = [
   { gender: "Sons", height: 73.2 },

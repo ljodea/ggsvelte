@@ -1,5 +1,6 @@
 {
-  "title": "Fixed aspect ratio",
+  "title": "Equal units stay circular",
+  "description": "A unit circle drawn under coord_fixed, which pins one pixel to one data unit on both axes so a circle cannot arrive as an ellipse.",
   "tags": ["point", "coordinates", "fixed-aspect", "responsive"],
   "docsSection": "Scatter plots"
 }

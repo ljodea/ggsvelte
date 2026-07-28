@@ -1,5 +1,6 @@
 {
   "title": "Link plots, controls, and a table",
+  "description": "Five Palmer penguins per species, so every row a selection touches is visible in the table beside the chart.",
   "tags": ["interaction", "controller", "linked-views", "select", "emphasis", "table", "svelte"],
   "docsSection": "Interaction",
   "vrHeight": 1140,
