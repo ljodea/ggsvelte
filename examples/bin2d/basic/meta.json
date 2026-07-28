@@ -1,5 +1,6 @@
 {
-  "title": "2D bin heatmap",
+  "title": "Old Faithful's two eruption modes",
+  "description": "Eruption length against the wait that follows, counted into rectangular cells: the Yellowstone geyser has a short mode and a long one, and little in between.",
   "tags": ["bin2d", "heatmap", "density"],
   "docsSection": "Distributions"
 }

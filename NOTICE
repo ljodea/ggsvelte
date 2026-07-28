@@ -74,6 +74,23 @@ Individual datasets carrying additional provenance, credited where used:
   - Langren — reconstruction by Michael Friendly
   - Cholera — transcription by Nicholas Verlander
 
+Three teaching tables under examples/*/*/data.ts are transcribed instead from
+the `datasets` package that ships with R (https://www.r-project.org/), which
+is distributed under the GPL. As with HistData, the credit owed is to the
+people who made the measurements:
+
+  - `faithful` (examples/bin2d/basic) — eruption and waiting times for the
+    Old Faithful geyser, sourced by R from W. Härdle, "Smoothing Techniques
+    with Implementation in S" (Springer, 1991). Azzalini and Bowman, Applied
+    Statistics 39 (1990), 357–365, published a fuller version of the record.
+  - `quakes` (examples/hex/basic) — 1,000 seismic events near Fiji, one of
+    the Harvard PRIM-H project data sets, obtained by that project from
+    Dr John Woodhouse of the Harvard Department of Geophysics.
+  - `volcano` (examples/contour/basic) — topography of Maunga Whau,
+    Auckland, digitized from a topographic map by Ross Ihaka. R's own note
+    that these heights should not be regarded as accurate is repeated in the
+    example's data.ts header.
+
 The Palmer Archipelago penguin measurements under examples/interaction/*/data.ts
 come from the palmerpenguins R package (https://allisonhorst.github.io/palmerpenguins/)
 by Allison Horst, Alison Hill and Kristen Gorman, released under CC0 1.0

@@ -1,5 +1,6 @@
 {
-  "title": "Hexagonal bin heatmap",
+  "title": "Fiji earthquakes in hexagons",
+  "description": "A thousand seismic events binned by where they struck: the counts pick out the plate junction and the Tonga trench running south towards New Zealand.",
   "tags": ["hex", "heatmap", "density"],
   "docsSection": "Distributions"
 }

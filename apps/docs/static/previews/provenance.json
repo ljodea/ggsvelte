@@ -33,8 +33,8 @@
     },
     "bin2d/basic": {
       "filename": "bin2d-basic-light.png",
-      "sourceSha256": "2e096b03ccccec900e41e3bfe1cf3cd1314c55821efc8a5e226044aa9a91b5f4",
-      "pngSha256": "b0a1115a204dce5d5582cde656e2fa4fc8d395c49032c32d262aed476423121c"
+      "sourceSha256": "179400121cbc741161d469a3037dd699468e71d5168ce8b5f7b9c28b0453acc2",
+      "pngSha256": "d6491b61ad9a23201f1fb8429609cc08b7759b78902007f02701df86ed5690ce"
     },
     "blank/axes-only": {
       "filename": "blank-axes-only-light.png",
@@ -93,8 +93,8 @@
     },
     "contour/basic": {
       "filename": "contour-basic-light.png",
-      "sourceSha256": "c3ad5344a9b480570985135bbfcb63960c90cceda57682b2d33ab4e3da78fac7",
-      "pngSha256": "0ede793a6fadca7aeb2e1fc705a6853fff041ecf4685aa538d1dd1c261adc183"
+      "sourceSha256": "50c8f706c336af5fc25b78525e69b64ab2a12533af94e17a1a49c8a67bfa511d",
+      "pngSha256": "9ce425408df626fea78cf9225d1f6175239313dc75a15593ee7ff5a65cbe084c"
     },
     "curve/connectors": {
       "filename": "curve-connectors-light.png",
@@ -103,13 +103,13 @@
     },
     "density/kde-2d": {
       "filename": "density-kde-2d-light.png",
-      "sourceSha256": "9781dad38fcc155b18877a941ba51ef2b2a12d74cea27c0303bde9ad44845178",
-      "pngSha256": "2484e5beaf043405416d669d1d9b601df11b62ec7c78cfdcd7eb98b5da404800"
+      "sourceSha256": "4fe630a0529c5483731db53944d49b5cb427c7c1d176dc18a06f3f6b03c6470e",
+      "pngSha256": "fb1d1050441b80fde22db01e73784519448c1a6c1127ef6663199b39a9ade1c4"
     },
     "density/kde-2d-filled": {
       "filename": "density-kde-2d-filled-light.png",
-      "sourceSha256": "848c22ada82c99367cc24988508d42a1304f4121a5dc2c349be57a55bf239bc0",
-      "pngSha256": "bc55ffc8fb6dcf9992bfeb3a01efa3565bba78ab8c3ca89881e36b2d754dc3ae"
+      "sourceSha256": "a18f740d60189c73c807d0113c93ea93cddbf914ce4b76e03e626f0a4c8b3bf3",
+      "pngSha256": "6c70a39eba5e15ab992ca7f984318dd480dd3ab8aa3ad898bdb53618838f897e"
     },
     "density/overlay": {
       "filename": "density-overlay-light.png",
@@ -153,8 +153,8 @@
     },
     "hex/basic": {
       "filename": "hex-basic-light.png",
-      "sourceSha256": "a9fb882b805da1a661942ee64641ac85e4de9508a4d9459ab48e482d8862a49e",
-      "pngSha256": "e6514f5698e4a33726342f36653b1397e3e0a4d19a1961344dc26e97a01190b0"
+      "sourceSha256": "60ffe0d2af98667daad65156e70613147ead4344349dbd74bc585a3383d10176",
+      "pngSha256": "f3bf156f60f58bf9013299e84f3fb674d7793596a9accc54df42d741549ba704"
     },
     "histogram/basic": {
       "filename": "histogram-basic-light.png",

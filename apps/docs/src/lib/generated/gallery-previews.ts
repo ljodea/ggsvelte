@@ -48,7 +48,7 @@ export const GALLERY_PREVIEWS = [
     id: "bin2d/basic",
     filename: "bin2d-basic-light.png",
     path: "/previews/bin2d-basic-light.png",
-    sha256: "b0a1115a204dce5d5582cde656e2fa4fc8d395c49032c32d262aed476423121c",
+    sha256: "d6491b61ad9a23201f1fb8429609cc08b7759b78902007f02701df86ed5690ce",
   },
   {
     id: "blank/axes-only",
@@ -120,7 +120,7 @@ export const GALLERY_PREVIEWS = [
     id: "contour/basic",
     filename: "contour-basic-light.png",
     path: "/previews/contour-basic-light.png",
-    sha256: "0ede793a6fadca7aeb2e1fc705a6853fff041ecf4685aa538d1dd1c261adc183",
+    sha256: "9ce425408df626fea78cf9225d1f6175239313dc75a15593ee7ff5a65cbe084c",
   },
   {
     id: "curve/connectors",
@@ -132,13 +132,13 @@ export const GALLERY_PREVIEWS = [
     id: "density/kde-2d",
     filename: "density-kde-2d-light.png",
     path: "/previews/density-kde-2d-light.png",
-    sha256: "2484e5beaf043405416d669d1d9b601df11b62ec7c78cfdcd7eb98b5da404800",
+    sha256: "fb1d1050441b80fde22db01e73784519448c1a6c1127ef6663199b39a9ade1c4",
   },
   {
     id: "density/kde-2d-filled",
     filename: "density-kde-2d-filled-light.png",
     path: "/previews/density-kde-2d-filled-light.png",
-    sha256: "bc55ffc8fb6dcf9992bfeb3a01efa3565bba78ab8c3ca89881e36b2d754dc3ae",
+    sha256: "6c70a39eba5e15ab992ca7f984318dd480dd3ab8aa3ad898bdb53618838f897e",
   },
   {
     id: "density/overlay",
@@ -192,7 +192,7 @@ export const GALLERY_PREVIEWS = [
     id: "hex/basic",
     filename: "hex-basic-light.png",
     path: "/previews/hex-basic-light.png",
-    sha256: "e6514f5698e4a33726342f36653b1397e3e0a4d19a1961344dc26e97a01190b0",
+    sha256: "f3bf156f60f58bf9013299e84f3fb674d7793596a9accc54df42d741549ba704",
   },
   {
     id: "histogram/basic",

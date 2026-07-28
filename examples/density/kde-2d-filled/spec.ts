@@ -1,19 +1,34 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { twinClouds } from "./data.js";
+import { choleraDeaths, waterPumps } from "./data.js";
 
 export default defineExample(
-  // Closed KDE isoline rings filled by density level (geom_density_2d_filled).
-  gg(twinClouds, aes({ x: "x", y: "y" }))
-    .geomPoint({ alpha: 0.45, size: 2.0 })
-    .geomDensity2dFilled({ bins: 5, n: 40, alpha: 0.55 })
+  gg(choleraDeaths, aes({ x: "x", y: "y" }))
+    .geomDensity2dFilled({ bins: 6, n: 48, alpha: 0.8 })
+    .geomPoint({
+      alpha: 0.6,
+      size: 1.4,
+      aes: aes({ color: { value: "#f8fafc" } }),
+    })
+    .geomPoint({
+      data: waterPumps,
+      aes: aes({ x: "x", y: "y", color: { value: "#b91c1c" } }),
+      size: 4,
+      shape: "cross",
+    })
+    .scales({
+      x: { breaks: [8, 10, 12, 14, 16, 18] },
+      y: { breaks: [6, 8, 10, 12, 14, 16, 18] },
+    })
+    .coordFixed()
     .theme("classic")
     .labs({
-      title: "2D density filled bands",
-      subtitle: "Closed KDE rings; fill defaults to after_stat(level)",
-      x: "x",
-      y: "y",
+      title: "The same deaths as filled bands",
+      subtitle: "Closed density rings shaded by level; red crosses are the Soho pumps",
+      x: "Map east",
+      y: "Map north",
+      fill: "Deaths per unit area",
     })
     .spec(),
 );

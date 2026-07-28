@@ -1,21 +1,28 @@
 <script lang="ts">
-  import { GeomContour, GGPlot, Labs, ThemeClassic } from "@ggsvelte/svelte";
+  import {
+    CoordFixed,
+    GeomContour,
+    GGPlot,
+    Labs,
+    ThemeClassic,
+  } from "@ggsvelte/svelte";
 
-  import { peakGrid } from "./data.js";
+  import { maungaWhau } from "./data.js";
 </script>
 
 <GGPlot
-  data={peakGrid}
-  aes={{ x: "x", y: "y", z: "z" }}
+  data={maungaWhau}
+  aes={{ x: "east", y: "north", z: "height" }}
   width={640}
   height={400}
 >
   <ThemeClassic />
+  <CoordFixed />
   <Labs
-    title="Contour isolines"
-    subtitle="Marching-squares levels of a radial peak (ggplot2 geom_contour)"
-    x="x"
-    y="y"
+    title="Maunga Whau, height by height"
+    subtitle="Ten levels between 94 m and 191 m, each drawn as a line of equal height"
+    x="Metres east"
+    y="Metres north"
   />
-  <GeomContour bins={8} linewidth={1.2} />
+  <GeomContour bins={10} linewidth={1} />
 </GGPlot>
