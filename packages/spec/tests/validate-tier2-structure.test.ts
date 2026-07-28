@@ -35,6 +35,71 @@ describe("tier 2 — structural grammar checks (opt-in, data-free)", () => {
     expect(errors[0]?.path).toBe("/layers/0/aes/label");
   });
 
+  // #1078: REQUIRED_CHANNELS drifted — six geoms were unlisted and required nothing.
+  it("label requires x, y, and label (same contract as text)", () => {
+    const spec = {
+      aes: { x: { field: "city" }, y: { field: "temp" } },
+      layers: [{ geom: "label" }],
+    };
+    const errors = errorsOf(spec);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]?.code).toBe("missing-required-channel");
+    expect(errors[0]?.path).toBe("/layers/0/aes/label");
+  });
+
+  it("hex and bin_2d require continuous x and y", () => {
+    expect(codesOf({ layers: [{ geom: "hex" }] })).toEqual([
+      "missing-required-channel",
+      "missing-required-channel",
+    ]);
+    expect(codesOf({ layers: [{ geom: "bin_2d" }] })).toEqual([
+      "missing-required-channel",
+      "missing-required-channel",
+    ]);
+    // x/y present → tier-2 accepts (no data profile needed for channel presence)
+    expect(
+      validate(
+        {
+          aes: { x: { field: "a" }, y: { field: "b" } },
+          layers: [{ geom: "hex" }, { geom: "bin_2d" }],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+  });
+
+  it("qq and qq_line require the sample channel", () => {
+    const qq = errorsOf({ layers: [{ geom: "qq" }] });
+    expect(
+      qq.some((e) => e.code === "missing-required-channel" && e.path === "/layers/0/aes/sample"),
+    ).toBe(true);
+    const line = errorsOf({ layers: [{ geom: "qq_line" }] });
+    expect(
+      line.some((e) => e.code === "missing-required-channel" && e.path === "/layers/0/aes/sample"),
+    ).toBe(true);
+    expect(
+      validate(
+        {
+          aes: { sample: { field: "value" } },
+          layers: [{ geom: "qq" }, { geom: "qq_line" }],
+        },
+        {},
+      ).ok,
+    ).toBe(true);
+  });
+
+  it("abline is annotation-only: no required aes channels", () => {
+    // Listed in REQUIRED_CHANNELS as [] so the table is total over GeomName;
+    // params carry slope/intercept (not aes). Missing params is not a channel error.
+    const withParams = validate(
+      { layers: [{ geom: "abline", params: { slope: 1, intercept: 0 } }] },
+      {},
+    );
+    expect(withParams.ok).toBe(true);
+    const bare = validate({ layers: [{ geom: "abline" }] }, {});
+    expect(bare.ok).toBe(true);
+  });
+
   it("bar with mapped y is rejected with a col suggestion", () => {
     const errors = errorsOf({
       aes: { x: { field: "city" }, y: { field: "temp" } },

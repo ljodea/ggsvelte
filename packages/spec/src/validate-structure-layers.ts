@@ -5,7 +5,7 @@
  * Barrel: validate-structure.ts.
  */
 import type { SpecError } from "./errors.js";
-import type { Aes, ChannelName } from "./schema.js";
+import type { Aes, ChannelName, GeomName } from "./schema.js";
 import { GEOM_DEFAULTS } from "./schema.js";
 import { STYLE_AESTHETIC_GEOMS, type StyleAesthetic } from "./capabilities.js";
 import { effectiveChannel } from "./validate-data.js";
@@ -17,8 +17,12 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
-/** Channels every geom needs mapped (after plot-aes inheritance). */
-const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
+/**
+ * Channels every geom needs mapped (after plot-aes inheritance).
+ * Total over GeomName — a missing geom is a type error, not a silent `?? []`
+ * (#1078). Empty lists are deliberate (form-checked elsewhere or annotation-only).
+ */
+const REQUIRED_CHANNELS: Record<GeomName, readonly ChannelName[]> = {
   point: ["x", "y"],
   count: ["x", "y"],
   jitter: ["x", "y"],
@@ -34,6 +38,7 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   hline: [], // form-checked like rule (yintercept / aes.y)
   vline: [], // form-checked like rule (xintercept / aes.x)
   text: ["x", "y", "label"],
+  label: ["x", "y", "label"], // same contract as text (#1078)
   sf_text: ["label"], // x/y come from stat_sf_coordinates (#809 phase 2)
   sf_label: ["label"],
   sf: [], // geometry column, not aes
@@ -59,6 +64,11 @@ const REQUIRED_CHANNELS: Record<string, ChannelName[]> = {
   quantile: ["x", "y"],
   density_2d: ["x", "y"],
   density_2d_filled: ["x", "y"],
+  hex: ["x", "y"],
+  bin_2d: ["x", "y"],
+  abline: [], // annotation-only: slope/intercept in params
+  qq: ["sample"],
+  qq_line: ["sample"],
   dotplot: ["x"],
   map: ["map_id"],
   blank: [], // trains whatever is mapped; nothing required
@@ -471,7 +481,7 @@ export function layerStructuralErrors(
 
   errors.push(...paintStructuralErrors(layer, layerPath, plotAes));
 
-  for (const channel of REQUIRED_CHANNELS[geom] ?? []) {
+  for (const channel of REQUIRED_CHANNELS[geom as GeomName]) {
     if (
       (geom === "bar" ||
         geom === "histogram" ||
