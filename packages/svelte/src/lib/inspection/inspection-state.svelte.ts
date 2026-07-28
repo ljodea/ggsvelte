@@ -35,6 +35,10 @@ import type {
 import { inspectionLiveText as inspectionLiveTextFor } from "../assembly/labels.js";
 import { plotTooltipDomId } from "../assembly/layout.js";
 import {
+  presentationFocusFromInspection,
+  type PresentationInspectionFocus,
+} from "../selection/selection.js";
+import {
   resolveInspectionCompleteness,
   resolveInspectionMode,
   resolveSetInspectionAction,
@@ -105,6 +109,11 @@ export type InspectionState = {
   readonly inspectionPanel: InspectionPanelBounds | null;
   /** Seed candidate for presentation chrome (kind); not emitted on public events. */
   readonly inspectionSeed: CandidateFacts | null;
+  /**
+   * Presentation focus for semantic masks / mute-siblings (#1080).
+   * Owned here so plot-engine does not re-assemble focus + seed fields.
+   */
+  readonly presentationFocus: PresentationInspectionFocus | null;
   setInspection(
     candidate: CandidateFacts | null,
     source: InteractionSource,
@@ -200,6 +209,10 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     if (viewportPanel === null) return null;
     return { id: viewportPanel.id, ...panelBoundsFrom(viewportPanel.bounds) };
   });
+
+  // Single owner for the presentation-focus shape (#1080). Survives pin toggle
+  // when seed + focus keys are stable; consumers stop rebuilding the projection.
+  const presentationFocus = $derived(presentationFocusFromInspection(inspection, inspectionSeed));
 
   // Coordinator closes over keyAt — handler-only invocation (deferred).
   const inspectionCoordinator = createInspectionCoordinator<Record<string, CellValue>, PropertyKey>(
@@ -564,6 +577,9 @@ export function createInspectionState(deps: InspectionStateDeps): InspectionStat
     /** Internal seed for presentation chrome (kind); not part of the public inspection event. */
     get inspectionSeed() {
       return inspectionSeed;
+    },
+    get presentationFocus() {
+      return presentationFocus;
     },
     setInspection,
     toggleInspectionPin,
