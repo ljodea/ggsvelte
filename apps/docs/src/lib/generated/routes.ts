@@ -237,6 +237,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -278,6 +283,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -323,6 +333,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -364,6 +379,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -409,6 +429,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -425,6 +450,11 @@ export const DOCS_ROUTES = [
       {
         id: "defaults",
         title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
         level: 2,
       },
       {
@@ -453,8 +483,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "alias",
-        title: "Alias",
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -476,6 +506,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
         id: "svelte",
         title: "Svelte component",
         level: 2,
@@ -501,8 +536,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "alias",
-        title: "Alias",
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -548,6 +583,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -591,6 +631,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -607,6 +652,11 @@ export const DOCS_ROUTES = [
       {
         id: "defaults",
         title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
         level: 2,
       },
       {
@@ -635,8 +685,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "alias",
-        title: "Alias",
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -658,6 +708,11 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
         id: "svelte",
         title: "Svelte component",
         level: 2,
@@ -683,8 +738,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "alias",
-        title: "Alias",
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -730,6 +785,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -771,6 +831,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -816,6 +881,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -857,6 +927,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -902,6 +977,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -945,6 +1025,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -986,6 +1071,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -1160,6 +1250,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -1201,6 +1296,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -1246,6 +1346,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -1287,6 +1392,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -1332,6 +1442,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -1373,6 +1488,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -1418,6 +1538,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -1459,6 +1584,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -1504,6 +1634,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -1545,6 +1680,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -1590,6 +1730,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -1631,6 +1776,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -1676,6 +1826,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -1717,6 +1872,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -1762,6 +1922,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -1803,6 +1968,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -1848,6 +2018,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -1889,6 +2064,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -1934,6 +2114,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -1975,6 +2160,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -2020,6 +2210,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -2063,6 +2258,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -2079,6 +2279,11 @@ export const DOCS_ROUTES = [
       {
         id: "defaults",
         title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
         level: 2,
       },
       {
@@ -2107,8 +2312,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "alias",
-        title: "Alias",
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -2154,6 +2359,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -2195,6 +2405,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],
@@ -2240,6 +2455,11 @@ export const DOCS_ROUTES = [
         title: "Allowed positions",
         level: 2,
       },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
     ],
   },
   {
@@ -2281,6 +2501,11 @@ export const DOCS_ROUTES = [
       {
         id: "allowed-positions",
         title: "Allowed positions",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
         level: 2,
       },
     ],

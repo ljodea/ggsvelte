@@ -227,6 +227,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-point:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+    href: "/reference/geoms/point#examples",
+    keywords: ["GeomPoint", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-line",
     kind: "page",
     title: "GeomLine",
@@ -295,6 +305,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/line#allowed-positions",
     keywords: ["GeomLine", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-line:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/line#examples",
+    keywords: ["GeomLine", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-path",
@@ -367,6 +387,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-path:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+    href: "/reference/geoms/path#examples",
+    keywords: ["GeomPath", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-col",
     kind: "page",
     title: "GeomCol",
@@ -435,6 +465,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/col#allowed-positions",
     keywords: ["GeomCol", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-col:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+    href: "/reference/geoms/col#examples",
+    keywords: ["GeomCol", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-bar",
@@ -507,6 +547,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-bar:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+    href: "/reference/geoms/bar#examples",
+    keywords: ["GeomBar", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-histogram",
     kind: "page",
     title: "GeomHistogram",
@@ -525,6 +575,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/histogram#defaults",
     keywords: ["GeomHistogram", "documentation"],
     exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-histogram:alias",
+    kind: "heading",
+    title: "Alias",
+    summary:
+      "Alias in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+    href: "/reference/geoms/histogram#alias",
+    keywords: ["GeomHistogram", "documentation"],
+    exact: ["Alias"],
   },
   {
     id: "heading:reference-geoms-histogram:svelte",
@@ -577,14 +637,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
-    id: "heading:reference-geoms-histogram:alias",
+    id: "heading:reference-geoms-histogram:examples",
     kind: "heading",
-    title: "Alias",
+    title: "Examples",
     summary:
-      "Alias in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
-    href: "/reference/geoms/histogram#alias",
+      "Examples in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+    href: "/reference/geoms/histogram#examples",
     keywords: ["GeomHistogram", "documentation"],
-    exact: ["Alias"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-freqpoly",
@@ -605,6 +665,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/freqpoly#defaults",
     keywords: ["GeomFreqpoly", "documentation"],
     exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-freqpoly:alias",
+    kind: "heading",
+    title: "Alias",
+    summary:
+      "Alias in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+    href: "/reference/geoms/freqpoly#alias",
+    keywords: ["GeomFreqpoly", "documentation"],
+    exact: ["Alias"],
   },
   {
     id: "heading:reference-geoms-freqpoly:svelte",
@@ -657,14 +727,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
-    id: "heading:reference-geoms-freqpoly:alias",
+    id: "heading:reference-geoms-freqpoly:examples",
     kind: "heading",
-    title: "Alias",
+    title: "Examples",
     summary:
-      "Alias in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
-    href: "/reference/geoms/freqpoly#alias",
+      "Examples in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+    href: "/reference/geoms/freqpoly#examples",
     keywords: ["GeomFreqpoly", "documentation"],
-    exact: ["Alias"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-area",
@@ -737,6 +807,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-area:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomArea. GeomArea: Area geometry: a filled region from the y baseline (zero) to the y value, connected in x order per group. Use for stacked composition-over-time charts. With stat align, series with different x samples share a common grid for stack/fill.",
+    href: "/reference/geoms/area#examples",
+    keywords: ["GeomArea", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-rule",
     kind: "page",
     title: "GeomRule",
@@ -807,6 +887,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-rule:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+    href: "/reference/geoms/rule#examples",
+    keywords: ["GeomRule", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-hline",
     kind: "page",
     title: "GeomHline",
@@ -825,6 +915,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/hline#defaults",
     keywords: ["GeomHline", "documentation"],
     exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-hline:alias",
+    kind: "heading",
+    title: "Alias",
+    summary:
+      "Alias in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/hline#alias",
+    keywords: ["GeomHline", "documentation"],
+    exact: ["Alias"],
   },
   {
     id: "heading:reference-geoms-hline:svelte",
@@ -877,14 +977,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
-    id: "heading:reference-geoms-hline:alias",
+    id: "heading:reference-geoms-hline:examples",
     kind: "heading",
-    title: "Alias",
+    title: "Examples",
     summary:
-      "Alias in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
-    href: "/reference/geoms/hline#alias",
+      "Examples in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/hline#examples",
     keywords: ["GeomHline", "documentation"],
-    exact: ["Alias"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-vline",
@@ -905,6 +1005,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/vline#defaults",
     keywords: ["GeomVline", "documentation"],
     exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-vline:alias",
+    kind: "heading",
+    title: "Alias",
+    summary:
+      "Alias in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/vline#alias",
+    keywords: ["GeomVline", "documentation"],
+    exact: ["Alias"],
   },
   {
     id: "heading:reference-geoms-vline:svelte",
@@ -957,14 +1067,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
-    id: "heading:reference-geoms-vline:alias",
+    id: "heading:reference-geoms-vline:examples",
     kind: "heading",
-    title: "Alias",
+    title: "Examples",
     summary:
-      "Alias in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
-    href: "/reference/geoms/vline#alias",
+      "Examples in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+    href: "/reference/geoms/vline#examples",
     keywords: ["GeomVline", "documentation"],
-    exact: ["Alias"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-text",
@@ -1037,6 +1147,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-text:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomText. GeomText: Text geometry: one label per data row at (x, y). No collision detection — labels draw exactly where placed. Requires x, y, and label channels.",
+    href: "/reference/geoms/text#examples",
+    keywords: ["GeomText", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-label",
     kind: "page",
     title: "GeomLabel",
@@ -1105,6 +1225,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/label#allowed-positions",
     keywords: ["GeomLabel", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-label:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+    href: "/reference/geoms/label#examples",
+    keywords: ["GeomLabel", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-smooth",
@@ -1177,6 +1307,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-smooth:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+    href: "/reference/geoms/smooth#examples",
+    keywords: ["GeomSmooth", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-quantile",
     kind: "page",
     title: "GeomQuantile",
@@ -1245,6 +1385,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/quantile#allowed-positions",
     keywords: ["GeomQuantile", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-quantile:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+    href: "/reference/geoms/quantile#examples",
+    keywords: ["GeomQuantile", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-boxplot",
@@ -1317,6 +1467,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-boxplot:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomBoxplot. GeomBoxplot: Box-and-whisker geometry: one box per x category (per group) summarizing the y distribution — hinges at the quartiles, whiskers to the furthest points within coef × IQR, outliers drawn individually.",
+    href: "/reference/geoms/boxplot#examples",
+    keywords: ["GeomBoxplot", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-density",
     kind: "page",
     title: "GeomDensity",
@@ -1387,6 +1547,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-density:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomDensity. GeomDensity: Density geometry: a smooth kernel density estimate of a continuous x variable, drawn as a filled area — a smoothed histogram alternative. One curve per group. Do NOT map aes.y — the density stat computes it.",
+    href: "/reference/geoms/density#examples",
+    keywords: ["GeomDensity", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-errorbar",
     kind: "page",
     title: "GeomErrorbar",
@@ -1455,6 +1625,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/errorbar#allowed-positions",
     keywords: ["GeomErrorbar", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-errorbar:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomErrorbar. GeomErrorbar: Errorbar geometry: a vertical range with caps at ymin and ymax, one per data row (identity stat) or per x group (summary stat).",
+    href: "/reference/geoms/errorbar#examples",
+    keywords: ["GeomErrorbar", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-linerange",
@@ -1737,6 +1917,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-rect:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomRect. GeomRect: Rectangle geometry: one rectangle per data row from mapped xmin/xmax/ymin/ymax edges. Use for arbitrary shaded regions and time bands.",
+    href: "/reference/geoms/rect#examples",
+    keywords: ["GeomRect", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-tile",
     kind: "page",
     title: "GeomTile",
@@ -1805,6 +1995,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/tile#allowed-positions",
     keywords: ["GeomTile", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-tile:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomTile. GeomTile: Tile geometry: center-sized cells at (x, y) with optional width/height. Use for heatmaps and gridded categorical cells; supports stroke outlines.",
+    href: "/reference/geoms/tile#examples",
+    keywords: ["GeomTile", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-raster",
@@ -1877,6 +2077,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-raster:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomRaster. GeomRaster: Raster geometry: equal-cell grid at (x, y) with fill; optimized dense heatmaps without per-cell strokes. Irregular spacing warns and suggests geom tile.",
+    href: "/reference/geoms/raster#examples",
+    keywords: ["GeomRaster", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-ribbon",
     kind: "page",
     title: "GeomRibbon",
@@ -1945,6 +2155,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/ribbon#allowed-positions",
     keywords: ["GeomRibbon", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-ribbon:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+    href: "/reference/geoms/ribbon#examples",
+    keywords: ["GeomRibbon", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-segment",
@@ -2017,6 +2237,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-segment:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomSegment. GeomSegment: Segment geometry: one finite line per data row from (x, y) to (xend, yend). Unlike rule, endpoints are data-mapped and do not span the panel.",
+    href: "/reference/geoms/segment#examples",
+    keywords: ["GeomSegment", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-count",
     kind: "page",
     title: "GeomCount",
@@ -2085,6 +2315,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/count#allowed-positions",
     keywords: ["GeomCount", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-count:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+    href: "/reference/geoms/count#examples",
+    keywords: ["GeomCount", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-violin",
@@ -2157,6 +2397,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-violin:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+    href: "/reference/geoms/violin#examples",
+    keywords: ["GeomViolin", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-function",
     kind: "page",
     title: "GeomFunction",
@@ -2225,6 +2475,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/function#allowed-positions",
     keywords: ["GeomFunction", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-function:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+    href: "/reference/geoms/function#examples",
+    keywords: ["GeomFunction", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-polygon",
@@ -2297,6 +2557,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-polygon:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+    href: "/reference/geoms/polygon#examples",
+    keywords: ["GeomPolygon", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-hex",
     kind: "page",
     title: "GeomHex",
@@ -2365,6 +2635,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/hex#allowed-positions",
     keywords: ["GeomHex", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-hex:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+    href: "/reference/geoms/hex#examples",
+    keywords: ["GeomHex", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-bin_2d",
@@ -2437,6 +2717,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-bin_2d:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+    href: "/reference/geoms/bin_2d#examples",
+    keywords: ["GeomBin2d", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-abline",
     kind: "page",
     title: "GeomAbline",
@@ -2505,6 +2795,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/abline#allowed-positions",
     keywords: ["GeomAbline", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-abline:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+    href: "/reference/geoms/abline#examples",
+    keywords: ["GeomAbline", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-curve",
@@ -2577,6 +2877,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-curve:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+    href: "/reference/geoms/curve#examples",
+    keywords: ["GeomCurve", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-contour",
     kind: "page",
     title: "GeomContour",
@@ -2645,6 +2955,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/contour#allowed-positions",
     keywords: ["GeomContour", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-contour:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+    href: "/reference/geoms/contour#examples",
+    keywords: ["GeomContour", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-density_2d",
@@ -2717,6 +3037,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-density_2d:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+    href: "/reference/geoms/density_2d#examples",
+    keywords: ["GeomDensity2d", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-density_2d_filled",
     kind: "page",
     title: "GeomDensity2dFilled",
@@ -2785,6 +3115,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/density_2d_filled#allowed-positions",
     keywords: ["GeomDensity2dFilled", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-density_2d_filled:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+    href: "/reference/geoms/density_2d_filled#examples",
+    keywords: ["GeomDensity2dFilled", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-dotplot",
@@ -2857,6 +3197,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-dotplot:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+    href: "/reference/geoms/dotplot#examples",
+    keywords: ["GeomDotplot", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-map",
     kind: "page",
     title: "GeomMap",
@@ -2925,6 +3275,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/map#allowed-positions",
     keywords: ["GeomMap", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-map:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+    href: "/reference/geoms/map#examples",
+    keywords: ["GeomMap", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-sf",
@@ -2997,6 +3357,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-sf:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+    href: "/reference/geoms/sf#examples",
+    keywords: ["GeomSf", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-sf_text",
     kind: "page",
     title: "GeomSfText",
@@ -3065,6 +3435,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/sf_text#allowed-positions",
     keywords: ["GeomSfText", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-sf_text:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+    href: "/reference/geoms/sf_text#examples",
+    keywords: ["GeomSfText", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-sf_label",
@@ -3137,6 +3517,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-sf_label:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+    href: "/reference/geoms/sf_label#examples",
+    keywords: ["GeomSfLabel", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-blank",
     kind: "page",
     title: "GeomBlank",
@@ -3207,6 +3597,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-blank:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+    href: "/reference/geoms/blank#examples",
+    keywords: ["GeomBlank", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-jitter",
     kind: "page",
     title: "GeomJitter",
@@ -3225,6 +3625,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/jitter#defaults",
     keywords: ["GeomJitter", "documentation"],
     exact: ["Defaults"],
+  },
+  {
+    id: "heading:reference-geoms-jitter:alias",
+    kind: "heading",
+    title: "Alias",
+    summary:
+      "Alias in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+    href: "/reference/geoms/jitter#alias",
+    keywords: ["GeomJitter", "documentation"],
+    exact: ["Alias"],
   },
   {
     id: "heading:reference-geoms-jitter:svelte",
@@ -3277,14 +3687,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
-    id: "heading:reference-geoms-jitter:alias",
+    id: "heading:reference-geoms-jitter:examples",
     kind: "heading",
-    title: "Alias",
+    title: "Examples",
     summary:
-      "Alias in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
-    href: "/reference/geoms/jitter#alias",
+      "Examples in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+    href: "/reference/geoms/jitter#examples",
     keywords: ["GeomJitter", "documentation"],
-    exact: ["Alias"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-spoke",
@@ -3357,6 +3767,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-spoke:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+    href: "/reference/geoms/spoke#examples",
+    keywords: ["GeomSpoke", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-rug",
     kind: "page",
     title: "GeomRug",
@@ -3425,6 +3845,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/rug#allowed-positions",
     keywords: ["GeomRug", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-rug:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+    href: "/reference/geoms/rug#examples",
+    keywords: ["GeomRug", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-step",
@@ -3497,6 +3927,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "heading:reference-geoms-step:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+    href: "/reference/geoms/step#examples",
+    keywords: ["GeomStep", "documentation"],
+    exact: ["Examples"],
+  },
+  {
     id: "page:reference-geoms-qq",
     kind: "page",
     title: "GeomQq",
@@ -3565,6 +4005,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/geoms/qq#allowed-positions",
     keywords: ["GeomQq", "documentation"],
     exact: ["Allowed positions"],
+  },
+  {
+    id: "heading:reference-geoms-qq:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      "Examples in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+    href: "/reference/geoms/qq#examples",
+    keywords: ["GeomQq", "documentation"],
+    exact: ["Examples"],
   },
   {
     id: "page:reference-geoms-qq_line",

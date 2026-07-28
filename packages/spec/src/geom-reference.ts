@@ -158,13 +158,19 @@ function resolveDeclaration(name: string, seen: Set<string> = new Set()): TSchem
   return schema;
 }
 
+function refName(node: Record<string, unknown>): string | undefined {
+  const ref = node["$ref"];
+  return typeof ref === "string" ? ref : undefined;
+}
+
 function descriptionOf(node: unknown, depth = 0): string {
   if (!isRecord(node) || depth > 8) return "";
   const d = node["description"];
   if (typeof d === "string" && d.trim() !== "") return d;
   // Type.Ref("Foo") without an inline description — fall back to the target type.
-  if (typeof node["$ref"] === "string") {
-    return descriptionOf(resolveDeclaration(node["$ref"] as string), depth + 1);
+  const ref = refName(node);
+  if (ref !== undefined) {
+    return descriptionOf(resolveDeclaration(ref), depth + 1);
   }
   return "";
 }
@@ -175,8 +181,9 @@ function descriptionOf(node: unknown, depth = 0): string {
  */
 function collectStringConsts(node: unknown, depth = 0): string[] {
   if (!isRecord(node) || depth > 12) return [];
-  if (typeof node["$ref"] === "string") {
-    return collectStringConsts(resolveDeclaration(node["$ref"] as string), depth + 1);
+  const ref = refName(node);
+  if (ref !== undefined) {
+    return collectStringConsts(resolveDeclaration(ref), depth + 1);
   }
   if (typeof node["const"] === "string") {
     return [node["const"]];
@@ -202,8 +209,9 @@ function collectStringConsts(node: unknown, depth = 0): string[] {
 
 function typeSummaryOf(node: unknown, depth = 0): string {
   if (!isRecord(node) || depth > 8) return "unknown";
-  if (typeof node["$ref"] === "string") {
-    return node["$ref"] as string;
+  const ref = refName(node);
+  if (ref !== undefined) {
+    return ref;
   }
   if (typeof node["const"] === "string" || typeof node["const"] === "number") {
     return JSON.stringify(node["const"]);
@@ -314,21 +322,26 @@ function buildEntry(geom: GeomName): GeomReferenceEntry {
 
   const paramsType = paramsTypeNameForLayer(layer, geom, key);
   const defaults = GEOM_DEFAULTS[geom];
-  const aliasTarget = geom in GEOM_ALIASES ? GEOM_ALIASES[geom as AliasGeomName] : undefined;
-
-  return Object.freeze({
+  const base = {
     name: geom,
     slug: geom,
     component: componentNameForGeom(geom),
     summary,
     defaultStat: defaults.stat,
     defaultPosition: defaults.position,
-    allowedStats: Object.freeze([...allowedStats]) as readonly StatName[],
-    allowedPositions: Object.freeze([...allowedPositions]) as readonly PositionName[],
+    allowedStats: Object.freeze(allowedStats),
+    allowedPositions: Object.freeze(allowedPositions),
     paramsType,
     params: paramsDocsForType(paramsType),
-    ...(aliasTarget !== undefined ? { aliasOf: aliasTarget } : {}),
-  });
+  } satisfies Omit<GeomReferenceEntry, "aliasOf">;
+
+  if (Object.hasOwn(GEOM_ALIASES, geom)) {
+    return Object.freeze({
+      ...base,
+      aliasOf: GEOM_ALIASES[geom as AliasGeomName],
+    });
+  }
+  return Object.freeze(base);
 }
 
 function buildGeomReference(): Readonly<Record<GeomName, GeomReferenceEntry>> {

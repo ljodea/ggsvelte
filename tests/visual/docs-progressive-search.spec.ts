@@ -146,7 +146,8 @@ test("Docs landing and sidebar expose the full path without duplicate Reference"
     "Release",
   ]);
   // Overview + guides minus deleted pre-0.1 page.
-  await expect(sidebar.getByRole("link")).toHaveCount(25);
+  // Overview + every navigable guide/reference chapter (includes Geom reference).
+  await expect(sidebar.getByRole("link")).toHaveCount(26);
   await expect(sidebar.getByRole("link", { name: "Dates without preprocessing" })).toBeVisible();
   await expectNoDocumentOverflow(page);
 
