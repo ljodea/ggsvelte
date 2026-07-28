@@ -7,7 +7,7 @@ import {
 
 import type { ColumnTable } from "../table.js";
 
-import type { PositionConversionContext } from "./temporal-position.js";
+import { kindReducesFullValue, type PositionConversionContext } from "./temporal-position.js";
 import { assertTemporalConfiguration, temporalPreflightDocs } from "./temporal-preflight-shared.js";
 import type {
   Advisory,
@@ -180,8 +180,7 @@ export function preflightTemporalFields(input: {
         // time-of-day keeps the clock, monthDay keeps the month and day. A
         // field parsing as date or datetime is what each expects to be handed,
         // so it is not a mismatch. Every other disagreement still fails.
-        const reducesFullValue =
-          conversion.requestedKind === "time" || conversion.requestedKind === "monthDay";
+        const reducesFullValue = kindReducesFullValue(conversion);
         const kindMismatch =
           decision.kind !== null &&
           conversion.requestedKind !== undefined &&

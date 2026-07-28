@@ -10,31 +10,28 @@ import type { GuidesSpec, Labs, LayerSpec, Scales, ThemeName } from "@ggsvelte/s
 
 export const QUICKSTART_PAGE_FILENAME = "src/routes/+page.svelte";
 
-/** Bloom days are projected onto this non-leap year so a date axis can draw them. */
-export const SAKURA_REFERENCE_YEAR = 2001;
-
 /** Bin width (years) for the running-median step line. */
 export const SAKURA_BINWIDTH = 25;
 
 /** Median bloom day 1600–1850, drawn as the pre-industrial baseline. */
-export const SAKURA_BASELINE = "2001-04-15";
+export const SAKURA_BASELINE = "04-15";
 
-/** Y-axis tick positions: three dates, matching the reference chart. */
-export const SAKURA_Y_BREAKS = ["2001-04-05", "2001-04-15", "2001-04-25"] as const;
+/** Y-axis tick positions: three month-days, matching the reference chart. */
+export const SAKURA_Y_BREAKS = ["04-05", "04-15", "04-25"] as const;
 
 /** Y-axis title: the quantity (a date), with earlier up. */
 export const SAKURA_Y_LAB = "Bloom date (earlier ↑)";
 
 /** Plot domain top (earlier / higher on the reversed date axis). */
-const Y_TOP = "2001-03-18";
+const Y_TOP = "03-18";
 /** Plot domain bottom (later / lower on the reversed date axis). */
-const Y_BOTTOM = "2001-05-10";
+const Y_BOTTOM = "05-10";
 /**
  * Epoch-band top — later than {@link Y_TOP} so the panel keeps headroom above
  * the bands for epoch names (#1067). Bands claim climate periods, not the
  * full vertical extent of the record.
  */
-const BAND_TOP = "2001-03-28";
+const BAND_TOP = "03-28";
 
 // --- the two lesson-only tables -------------------------------------------
 // Both are small enough to read at a glance, and both are drawn by layers that
@@ -61,24 +58,24 @@ export const SAKURA_EPOCH_EDGES = SAKURA_EPOCHS.slice(1).map((band) => ({ year: 
 export const SAKURA_RECORDS = [
   {
     year: 1323,
-    bloomRefDate: "2001-05-04",
+    bloomDate: "05-04",
     label: "1323 — latest on record",
     labelYear: 1150,
-    labelDate: "2001-05-08",
+    labelDate: "05-08",
   },
   {
     year: 1409,
-    bloomRefDate: "2001-03-27",
+    bloomDate: "03-27",
     label: "1409 — earliest for six centuries",
     labelYear: 1480,
-    labelDate: "2001-03-24",
+    labelDate: "03-24",
   },
   {
     year: 2023,
-    bloomRefDate: "2001-03-25",
+    bloomDate: "03-25",
     label: "2023 — earliest in 1,200 years",
     labelYear: 1790,
-    labelDate: "2001-03-19",
+    labelDate: "03-19",
   },
 ];
 
@@ -103,7 +100,7 @@ export interface SakuraSourceDelta {
   /** `<GGPlot>` attributes, keyed by attribute name; a repeat replaces it. */
   readonly attrs?: Readonly<Record<string, string>>;
   /**
-   * Declaration-only grammar children (`<ScaleYDate>`, `<Labs>`,
+   * Declaration-only grammar children (`<ScaleYMonthDay>`, `<Labs>`,
    * `<GuideLegend>`, `<ThemeTufte>`, …), keyed by the grammar piece they
    * carry; a repeat replaces it.
    *
@@ -151,7 +148,7 @@ ${SAKURA_EPOCHS.map(
 const RECORDS_CONST = `  const records = [
 ${SAKURA_RECORDS.map(
   (r) =>
-    `    {\n      year: ${r.year}, bloomRefDate: "${r.bloomRefDate}",\n      labelYear: ${r.labelYear}, labelDate: "${r.labelDate}",\n      label: "${r.label}",\n    },`,
+    `    {\n      year: ${r.year}, bloomDate: "${r.bloomDate}",\n      labelYear: ${r.labelYear}, labelDate: "${r.labelDate}",\n      label: "${r.label}",\n    },`,
 ).join("\n")}
   ];`;
 
@@ -219,10 +216,10 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     title: "Put earlier bloom on top",
     outcome: "",
     explanation: "",
-    fragment: `<ScaleYDate
+    fragment: `<ScaleYMonthDay
   reverse
   breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
-  dateLabels="%b %d"
+  dateLabels="%b %e"
   domain={["${Y_BOTTOM}", "${Y_TOP}"]}
 />
 <ScaleXContinuous labels="d" domain={[800, 2030]} />`,
@@ -232,10 +229,10 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       scales: {
         y: {
           type: "time",
-          temporalKind: "date",
+          temporalKind: "monthDay",
           reverse: true,
           breaks: [...SAKURA_Y_BREAKS],
-          dateLabels: "%b %d",
+          dateLabels: "%b %e",
           domain: [Y_BOTTOM, Y_TOP],
         },
         // `labels: "d"` because a year is not a quantity: the default numeric
@@ -245,12 +242,12 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       labs: { x: "Year", y: SAKURA_Y_LAB },
     },
     source: {
-      components: ["ScaleYDate", "ScaleXContinuous"],
+      components: ["ScaleYMonthDay", "ScaleXContinuous"],
       grammar: {
-        scaleY: `  <ScaleYDate
+        scaleY: `  <ScaleYMonthDay
     reverse
     breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
-    dateLabels="%b %d"
+    dateLabels="%b %e"
     domain={["${Y_BOTTOM}", "${Y_TOP}"]}
   />`,
         scaleX: `  <ScaleXContinuous labels="d" domain={[800, 2030]} />`,
@@ -366,7 +363,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   aes={{ color: { value: "#9aa0a6" }, linetype: { value: "dashed" } }} />
 <GeomSegment data={records}
   aes={{ x: "labelYear", y: "labelDate", xend: "year",
-         yend: "bloomRefDate", color: { value: "#b3452f" } }} linewidth={0.7} />
+         yend: "bloomDate", color: { value: "#b3452f" } }} linewidth={0.7} />
 <GeomText data={records}
   aes={{ x: "labelYear", y: "labelDate", label: "label",
          color: { value: "#b3452f" } }} size={11} />`,
@@ -386,7 +383,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
             x: { field: "labelYear" },
             y: { field: "labelDate" },
             xend: { field: "year" },
-            yend: { field: "bloomRefDate" },
+            yend: { field: "bloomDate" },
             color: { value: "#b3452f" },
           },
           params: { linewidth: 0.7, alpha: 0.9 },
@@ -421,7 +418,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       x: "labelYear",
       y: "labelDate",
       xend: "year",
-      yend: "bloomRefDate",
+      yend: "bloomDate",
       color: { value: "#b3452f" },
     }}
     linewidth={0.7}
