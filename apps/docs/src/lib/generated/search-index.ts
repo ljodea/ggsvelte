@@ -4969,18 +4969,19 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:line:function",
     kind: "example",
-    title: "Normal PDF with geom_function",
-    summary: "Normal PDF with geom_function (Lines & rules)",
+    title: "Quetelet's soldiers and the error curve",
+    summary:
+      "The chest measurements Quetelet used to claim human variation follows the astronomers' error curve, with that curve drawn over them.",
     href: "/examples/line/function",
     keywords: [
-      "Normal PDF with geom_function",
+      "Quetelet's soldiers and the error curve",
       "Lines & rules",
       "function",
       "dnorm",
       "overlay",
       "line",
     ],
-    exact: ["Normal PDF with geom_function"],
+    exact: ["Quetelet's soldiers and the error curve"],
   },
   {
     id: "example:line:multi-series",
@@ -5095,18 +5096,19 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:point:abline-identity",
     kind: "example",
-    title: "Abline identity reference",
-    summary: "Abline identity reference (Points & scatter)",
+    title: "Two sleeping drugs against y = x",
+    summary:
+      "Extra hours of sleep under each of two hypnotics, patient by patient. The identity line is the claim being tested, and almost every patient sits above it.",
     href: "/examples/point/abline-identity",
     keywords: [
-      "Abline identity reference",
+      "Two sleeping drugs against y = x",
       "Points & scatter",
       "point",
       "abline",
       "annotation",
       "reference",
     ],
-    exact: ["Abline identity reference"],
+    exact: ["Two sleeping drugs against y = x"],
   },
   {
     id: "example:point:canvas-scatter",
@@ -5127,11 +5129,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:point:count",
     kind: "example",
-    title: "Overplotting counts",
-    summary: "Overplotting counts (Points & scatter)",
+    title: "928 heights, 102 places to put them",
+    summary:
+      "Galton recorded parents and children to the nearest inch, so most of his table hides under a few hundred dots. Sizing each mark by its count puts it back.",
     href: "/examples/point/count",
     keywords: [
-      "Overplotting counts",
+      "928 heights, 102 places to put them",
       "Points & scatter",
       "point",
       "count",
@@ -5139,7 +5142,7 @@ export const DOCS_SEARCH_INDEX = [
       "overplot",
       "stat",
     ],
-    exact: ["Overplotting counts"],
+    exact: ["928 heights, 102 places to put them"],
   },
   {
     id: "example:point:fixed-aspect",
@@ -5246,11 +5249,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:point:quantile-lines",
     kind: "example",
-    title: "Quantile regression lines",
-    summary: "Quantile regression lines (Points & scatter)",
+    title: "Earthquake strength by depth",
+    summary:
+      "A thousand events off Fiji with the quartiles of magnitude fitted through them. Quantile lines describe the spread, not just where the middle sits.",
     href: "/examples/point/quantile-lines",
     keywords: [
-      "Quantile regression lines",
+      "Earthquake strength by depth",
       "Points & scatter",
       "point",
       "quantile",
@@ -5259,7 +5263,7 @@ export const DOCS_SEARCH_INDEX = [
       "regression",
       "theme",
     ],
-    exact: ["Quantile regression lines"],
+    exact: ["Earthquake strength by depth"],
   },
   {
     id: "example:point:scatter-color",
@@ -5282,11 +5286,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:point:stat-manual-mean",
     kind: "example",
-    title: "stat manual mean centroids",
-    summary: "stat manual mean centroids (Points & scatter)",
+    title: "Michelson's five runs and their means",
+    summary:
+      "A hundred speed-of-light measurements in the five blocks he ran them in, with each block collapsed to a single point by its mean.",
     href: "/examples/point/stat-manual-mean",
     keywords: [
-      "stat manual mean centroids",
+      "Michelson's five runs and their means",
       "Points & scatter",
       "point",
       "manual",
@@ -5295,16 +5300,17 @@ export const DOCS_SEARCH_INDEX = [
       "group",
       "theme",
     ],
-    exact: ["stat manual mean centroids"],
+    exact: ["Michelson's five runs and their means"],
   },
   {
     id: "example:point:stat-unique",
     kind: "example",
-    title: "stat unique overplotting",
-    summary: "stat unique overplotting (Points & scatter)",
+    title: "779 rows of war, 321 marks",
+    summary:
+      "Richardson recorded one row per pair of belligerents, so a large war repeats itself. Keeping the first row per position draws each quarrel once.",
     href: "/examples/point/stat-unique",
     keywords: [
-      "stat unique overplotting",
+      "779 rows of war, 321 marks",
       "Points & scatter",
       "point",
       "unique",
@@ -5313,7 +5319,7 @@ export const DOCS_SEARCH_INDEX = [
       "dedupe",
       "theme",
     ],
-    exact: ["stat unique overplotting"],
+    exact: ["779 rows of war, 321 marks"],
   },
   {
     id: "example:point:steps-binned",

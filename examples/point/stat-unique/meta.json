@@ -1,5 +1,6 @@
 {
-  "title": "stat unique overplotting",
+  "title": "779 rows of war, 321 marks",
+  "description": "Richardson recorded one row per pair of belligerents, so a large war repeats itself. Keeping the first row per position draws each quarrel once.",
   "tags": ["point", "unique", "stat", "overplotting", "dedupe", "theme"],
   "docsSection": "Points & scatter"
 }

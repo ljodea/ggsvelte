@@ -1,24 +1,21 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { overplottedGrid } from "./data.js";
+import { deadlyQuarrels } from "./data.js";
 
 export default defineExample(
-  // Three rows share each (x, y, series) aesthetic key. stat unique keeps the
-  // first occurrence only — same geom, fewer marks (ggplot2 stat_unique).
-  gg(overplottedGrid, aes({ x: "x", y: "y", color: "series" }))
-    .geomPoint({ stat: "unique", size: 3.5, alpha: 0.9 })
-    .scaleColorManual({
-      domain: ["A", "B"],
-      values: ["#1b9e77", "#d95f02"],
-    })
+  // stat unique keeps the first row per aesthetic combination. Richardson
+  // coded one row per pair of belligerents, so a big war arrives as dozens of
+  // rows with the same year and the same death toll: 779 rows, 321 marks.
+  gg(deadlyQuarrels, aes({ x: "year", y: "magnitude" }))
+    .geomPoint({ stat: "unique", size: 3, alpha: 0.8 })
     .theme("classic")
     .labs({
-      title: "stat unique: first-wins aesthetic dedupe",
-      subtitle: "Each (x, y, series) triple is repeated thrice; unique draws it once",
-      x: "x",
-      y: "y",
-      color: "Series",
+      title: "779 rows of war, 321 marks",
+      subtitle:
+        "Richardson counted belligerent pairs, so one war repeats: 44 rows share (1914, 7.2)",
+      x: "Year the quarrel began",
+      y: "Magnitude (log10 killed)",
     })
     .spec(),
 );

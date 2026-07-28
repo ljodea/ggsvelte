@@ -1,19 +1,21 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { fanningScatter } from "./data.js";
+import { fijiQuakes } from "./data.js";
 
 export default defineExample(
-  // Linear RQ lines at the default 0.25 / 0.5 / 0.75 quantiles of y | x.
-  gg(fanningScatter, aes({ x: "x", y: "y" }))
-    .geomPoint({ alpha: 0.55, size: 2.5 })
+  // Linear RQ fits at the default 0.25 / 0.5 / 0.75 quantiles of y given x.
+  // A mean would say one thing about magnitude at depth; the quartiles say
+  // how the whole spread narrows, which is the interesting part.
+  gg(fijiQuakes, aes({ x: "depth", y: "mag" }))
+    .geomPoint({ alpha: 0.3, size: 2 })
     .geomQuantile({ linewidth: 1.4 })
     .theme("classic")
     .labs({
-      title: "Quantile regression lines",
-      subtitle: "Linear y ~ x at τ = 0.25, 0.5, 0.75 (ggplot2 geom_quantile)",
-      x: "x",
-      y: "y",
+      title: "How strong an earthquake gets, by how deep it is",
+      subtitle: "Lower quartile, median and upper quartile of magnitude through the crust off Fiji",
+      x: "Depth (km)",
+      y: "Richter magnitude",
     })
     .spec(),
 );

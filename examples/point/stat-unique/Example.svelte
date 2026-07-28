@@ -1,29 +1,21 @@
 <script lang="ts">
-  import {
-    GeomPoint,
-    GGPlot,
-    Labs,
-    ScaleColorManual,
-    ThemeClassic,
-  } from "@ggsvelte/svelte";
+  import { GeomPoint, GGPlot, Labs, ThemeClassic } from "@ggsvelte/svelte";
 
-  import { overplottedGrid } from "./data.js";
+  import { deadlyQuarrels } from "./data.js";
 </script>
 
 <GGPlot
-  data={overplottedGrid}
-  aes={{ x: "x", y: "y", color: "series" }}
+  data={deadlyQuarrels}
+  aes={{ x: "year", y: "magnitude" }}
   width={640}
   height={400}
 >
   <ThemeClassic />
-  <ScaleColorManual domain={["A", "B"]} values={["#1b9e77", "#d95f02"]} />
   <Labs
-    title="stat unique: first-wins aesthetic dedupe"
-    subtitle="Each (x, y, series) triple is repeated thrice; unique draws it once"
-    x="x"
-    y="y"
-    color="Series"
+    title="779 rows of war, 321 marks"
+    subtitle="Richardson counted belligerent pairs, so one war repeats: 44 rows share (1914, 7.2)"
+    x="Year the quarrel began"
+    y="Magnitude (log10 killed)"
   />
-  <GeomPoint stat="unique" size={3.5} alpha={0.9} />
+  <GeomPoint stat="unique" size={3} alpha={0.8} />
 </GGPlot>

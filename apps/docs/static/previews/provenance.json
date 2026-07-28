@@ -213,8 +213,8 @@
     },
     "line/function": {
       "filename": "line-function-light.png",
-      "sourceSha256": "476d3658027ddc820a489a2f183b57ac8bea3f65dd66de5f3ea33d48574c40a7",
-      "pngSha256": "5dd1feed84dc2483b802d010aac11d8e033d4b5390f9167ddacf9e9b81fd6246"
+      "sourceSha256": "78ff5ce2a33e3782b94258a381166a76dd8a87da04f6cd7a025bd73dfeaf8081",
+      "pngSha256": "3e89faae0d81f28ffd2f50040ab1a3fcd1de0307c0651d5fb2191159c0715c45"
     },
     "line/multi-series": {
       "filename": "line-multi-series-light.png",
@@ -248,8 +248,8 @@
     },
     "point/abline-identity": {
       "filename": "point-abline-identity-light.png",
-      "sourceSha256": "7f3928592090b123c4c0472ce813d57d47d7df926e6b6bdc8538c0c470a25754",
-      "pngSha256": "88347d12347639f9758ac38be3244faf3b7cf476432858cc7e11691e9ef0fa8f"
+      "sourceSha256": "b8c72166fe8c2e9f2a8c2e24f334e64c2335fb3b808038f970a61953da5404d6",
+      "pngSha256": "e5ea0046af48541329137172b451ade9d7e13fdee082bae009903919bb2a2fe3"
     },
     "point/canvas-scatter": {
       "filename": "point-canvas-scatter-light.png",
@@ -258,8 +258,8 @@
     },
     "point/count": {
       "filename": "point-count-light.png",
-      "sourceSha256": "cead36fcb8cc956e617f79756ff36262bf34aec94e79389825598c402e6c0a61",
-      "pngSha256": "87033b2c117c563f4b73373439be9f7953298338a233786955f47e853555f9c0"
+      "sourceSha256": "c0993d6eac67040271811ed005b7d04942c5c5e86e53b428d5385157d2b055a9",
+      "pngSha256": "830bf8a87d78123bc7ae8c8e267e2c2a7b321a9516353b773d9c8dc9445bdb9d"
     },
     "point/fixed-aspect": {
       "filename": "point-fixed-aspect-light.png",
@@ -293,8 +293,8 @@
     },
     "point/quantile-lines": {
       "filename": "point-quantile-lines-light.png",
-      "sourceSha256": "89b07a3d4cf47b54d166203f2eb071fdb33f3fec31606dba2bf2805846df9726",
-      "pngSha256": "3e231b64b2cccd11a5a2c4c7748e1461074f0e01f1173bcd968d8d21a6f5e305"
+      "sourceSha256": "e81db4a111aa98c036c2b99ad3833442d41bbf01b148088e848f2757cb2a7f18",
+      "pngSha256": "ec69509af042bf0acc531d76990eb8a1eb56bbea22f4077d7d1755731121d8bc"
     },
     "point/scatter-color": {
       "filename": "point-scatter-color-light.png",
@@ -303,13 +303,13 @@
     },
     "point/stat-manual-mean": {
       "filename": "point-stat-manual-mean-light.png",
-      "sourceSha256": "52b9a9eccedaf85b1ee2468827e716ef9cfc1888314bda453cd1e429970e521f",
-      "pngSha256": "7795cd797aa8457d6ea63b2364ff8e43f0ca871250b0f13d09ecada951b5b142"
+      "sourceSha256": "b83b2c6b1bbe30340def6f60ed0f43d0cf6ddb1f8f856d7db5438dc4312ab9a8",
+      "pngSha256": "8b130f7b7b14b7134f230721e87aecd81000215f1a8f0390c621dace5fad1117"
     },
     "point/stat-unique": {
       "filename": "point-stat-unique-light.png",
-      "sourceSha256": "b89b32026eb42a40b5f7fac934f9e8088fe615eddbdba19bbe5ee81697f40d51",
-      "pngSha256": "0f22d2ac20a70d65c59e33fe5486c1a5856cb55e8fc105c24952ce7784091102"
+      "sourceSha256": "e25c451cf9d609c251d06c39c62d721850902d9441a69162b28be33ff9808bbc",
+      "pngSha256": "6715c47e40b2ff0e68ff2412afec22d36a5a31cb2e8ff070d4d1987798b56ae2"
     },
     "point/steps-binned": {
       "filename": "point-steps-binned-light.png",

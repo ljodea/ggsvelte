@@ -1,20 +1,21 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { overplotSample } from "./data.js";
+import { galtonHeights } from "./data.js";
 
 export default defineExample(
-  // ggplot2 geom_count: point size encodes how many rows share each (x, y).
-  gg(overplotSample, aes({ x: "x", y: "y", color: "species" }))
-    .geomCount({ alpha: 0.75 })
+  // geom_count sizes each mark by how many rows share its (x, y). Galton
+  // rounded to the inch, so 928 measurements land on 102 distinct pairs and a
+  // plain scatter would show a tenth of the table.
+  gg(galtonHeights, aes({ x: "parent", y: "child" }))
+    .geomCount({ alpha: 0.7 })
     .theme("classic")
     .labs({
-      title: "Overplotting counts",
-      subtitle: "geom_count — size is after_stat n at unique (x, y)",
-      x: "x",
-      y: "y",
-      color: "Species",
-      size: "n",
+      title: "928 heights, 102 places to put them",
+      subtitle: "Galton rounded to the inch; each mark is sized by how many families landed on it",
+      x: "Mid-parent height (inches)",
+      y: "Child height (inches)",
+      size: "Children",
     })
     .spec(),
 );

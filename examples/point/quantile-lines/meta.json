@@ -1,5 +1,6 @@
 {
-  "title": "Quantile regression lines",
+  "title": "Earthquake strength by depth",
+  "description": "A thousand events off Fiji with the quartiles of magnitude fitted through them. Quantile lines describe the spread, not just where the middle sits.",
   "tags": ["point", "quantile", "stat", "line", "regression", "theme"],
   "docsSection": "Points & scatter"
 }

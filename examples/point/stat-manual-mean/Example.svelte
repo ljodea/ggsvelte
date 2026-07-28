@@ -3,28 +3,28 @@
     GeomPoint,
     GGPlot,
     Labs,
-    ScaleColorManual,
+    ScaleColorDiscrete,
     ThemeClassic,
   } from "@ggsvelte/svelte";
 
-  import { groupScatter } from "./data.js";
+  import { michelsonRuns } from "./data.js";
 </script>
 
 <GGPlot
-  data={groupScatter}
-  aes={{ x: "x", y: "y", color: "series" }}
+  data={michelsonRuns}
+  aes={{ x: "order", y: "velocity", color: "run" }}
   width={640}
   height={400}
 >
   <ThemeClassic />
-  <ScaleColorManual domain={["A", "B"]} values={["#1b9e77", "#d95f02"]} />
+  <ScaleColorDiscrete scheme="tableau10" />
   <Labs
-    title="stat manual: per-group mean centroids"
-    subtitle="Faint points are identity; large points are fun=mean per series"
-    x="x"
-    y="y"
-    color="Series"
+    title="Michelson's five runs, and where each settled"
+    subtitle="Twenty measurements per run in faint marks; the solid mark is that run's mean"
+    x="Measurement, 1 to 100"
+    y="Speed of light, km/s less 299,000"
+    color="Run"
   />
-  <GeomPoint size={2.5} alpha={0.35} />
-  <GeomPoint stat="manual" fun="mean" size={5} alpha={0.95} />
+  <GeomPoint size={2.4} alpha={0.35} />
+  <GeomPoint stat="manual" fun="mean" size={6} alpha={0.95} />
 </GGPlot>
