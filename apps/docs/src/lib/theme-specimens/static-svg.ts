@@ -150,6 +150,10 @@ function buildThemeSpec(input: ThemeStaticSvgInput) {
           y: "Estimate rank",
         })
         .spec();
+    default: {
+      const exhaustive: never = kind;
+      throw new Error(`unhandled theme specimen kind: ${String(exhaustive)}`);
+    }
   }
 }
 
