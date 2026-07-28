@@ -154,8 +154,6 @@ export interface SakuraStep {
   readonly explanation: string;
   /** The delta the reader types, as it appears above the chart. */
   readonly fragment: string;
-  readonly chapterTitle: string;
-  readonly href: string;
   readonly spec: SakuraSpecDelta;
   readonly source: SakuraSourceDelta;
 }
@@ -195,8 +193,6 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
 <GeomLine stat="summary_bin" fun="median" binwidth={${SAKURA_BINWIDTH}}
   curve="step-hv" linewidth={1.8}
   aes={{ color: { value: "#262626" } }} />`,
-    chapterTitle: "Statistics and positions",
-    href: "/guide/statistics-positions#binned-y-summaries-summary-bin",
     spec: {
       layers: {
         points: {
@@ -253,8 +249,6 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   domain={["${DOMAIN_BOTTOM}", "${DOMAIN_TOP}"]}
 />
 <ScaleXContinuous labels="d" domain={[800, 2030]} />`,
-    chapterTitle: "Scales and guides",
-    href: "/guide/scales-guides#date-and-time-axes",
     spec: {
       theme: "tufte",
       scales: {
@@ -313,8 +307,6 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   values={[${EPOCH_VALUES}]}
 />
 <GuideNone channel="fill" />`,
-    chapterTitle: "Getting started",
-    href: "/guide/getting-started#add-geometry-layers",
     spec: {
       layers: {
         epochs: {
@@ -414,8 +406,6 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
 <GeomText data={records}
   aes={{ x: "labelYear", y: "labelDate", label: "label",
          color: { value: "#b3452f" } }} size={11} anchor="end" dx={-4} />`,
-    chapterTitle: "Getting started",
-    href: "/guide/getting-started#start-with-a-basic-plot",
     spec: {
       layers: {
         baseline: {
@@ -506,8 +496,6 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
 />
 key="year"
 inspect={{ mode: "exact", pin: true }}`,
-    chapterTitle: "Interactions",
-    href: "/guide/interactions#inspection",
     spec: {
       labs: {
         title: "Kyoto cherry blossom, 812–2026",
