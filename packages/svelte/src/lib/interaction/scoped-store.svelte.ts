@@ -15,7 +15,7 @@ import { nextLocalIntervalRecords } from "../interval/consumption.js";
  * Successful write result. Wrapped so a committed `null` (e.g. cleared zoom)
  * is not confused with a no-op rejection.
  */
-export type ScopedStoreWrite<T> = { readonly value: T };
+type ScopedStoreWrite<T> = { readonly value: T };
 
 export interface ScopedStore<T> {
   readonly value: T;

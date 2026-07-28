@@ -77,7 +77,7 @@ function prepareAxisContains(
  * Hot paths — cross-panel consumption, panel recompute, lineage counts —
  * must call this once per domains object, then test each candidate.
  */
-export function prepareCandidateInInterval(
+function prepareCandidateInInterval(
   domains: ReadonlyIntervalDomains,
 ): (candidate: Pick<IntervalConsumptionCandidate<PropertyKey>, "xValue" | "yValue">) => boolean {
   const xContains = domains.x === undefined ? undefined : prepareAxisContains(domains.x);
