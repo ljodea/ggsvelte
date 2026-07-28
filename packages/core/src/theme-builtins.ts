@@ -183,10 +183,20 @@ export function themed(
     : foundation.ink === "currentColor"
       ? "#1f2328"
       : foundation.ink;
-  // Gridless themes (tufte, void) chose no panel structure. Do not invent a
-  // panelBorder keyline for their tooltips — text on paper (#1069). Themes that
-  // still draw a grid keep a hairline from that grid color.
-  const tooltipBorder = foundation.grid === "none" ? "transparent" : foundation.grid;
+  // Flat tooltip chrome only when the theme also draws no frame (#1069).
+  // Tufte/void: grid none, no panel border, no axis lines → transparent keyline.
+  // few/classic: grid none but framed (panel border or axis lines) → keep
+  // panelBorder so boxed themes do not lose their tooltip outline + pin hint.
+  const flatTooltipChrome =
+    foundation.grid === "none" &&
+    !foundation.showPanelBorder &&
+    !foundation.axisLineX &&
+    !foundation.axisLineY;
+  const tooltipBorder = flatTooltipChrome
+    ? "transparent"
+    : foundation.grid === "none"
+      ? foundation.panelBorder
+      : foundation.grid;
   return Object.freeze({
     ...foundation,
     letterboxFill: letterboxFill ?? foundation.paper,
