@@ -141,6 +141,34 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/reference/positions",
+    title: "Position reference — ggsvelte",
+    description:
+      "Schema-derived API reference for every position adjustment: positionParams and compatible geoms.",
+    canonicalPath: "/reference/positions",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Reference",
+      label: "Position reference",
+      order: 53,
+    },
+    headings: [
+      {
+        id: "all-positions",
+        title: "All positions",
+        level: 2,
+      },
+      {
+        id: "how-to-set",
+        title: "How to set a position",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/reference/interactions",
     title: "Search interactions — ggsvelte",
     description:
@@ -3616,6 +3644,229 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/reference/positions/identity",
+    title: "position identity — ggsvelte",
+    description:
+      'position "identity": Leave mark coordinates unchanged. Default for most geoms: each mark keeps its post-stat (x, y).',
+    canonicalPath: "/reference/positions/identity",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "positionParams",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/positions/stack",
+    title: "position stack — ggsvelte",
+    description:
+      'position "stack": Stack groups at each x slot so heights accumulate (positive up, negative down). Default for bar, col, histogram, and area; trains the scale on stacked totals.',
+    canonicalPath: "/reference/positions/stack",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "positionParams",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/positions/fill",
+    title: "position fill — ggsvelte",
+    description:
+      'position "fill": Stack groups then rescale each x slot to proportions (positive and negative runs separately). Same geom set as stack; y domain becomes proportions.',
+    canonicalPath: "/reference/positions/fill",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "positionParams",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/positions/dodge",
+    title: "position dodge — ggsvelte",
+    description:
+      'position "dodge": Place groups side by side within each x band instead of overlapping. Default for boxplot and violin; used when comparing categories at the same x.',
+    canonicalPath: "/reference/positions/dodge",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "positionParams",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/positions/jitter",
+    title: "position jitter — ggsvelte",
+    description:
+      'position "jitter": Add seeded random offsets so overplotted points separate. Configure with positionParams width/height/seed (always seeded for reproducibility).',
+    canonicalPath: "/reference/positions/jitter",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "positionParams",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/positions/nudge",
+    title: "position nudge — ggsvelte",
+    description:
+      'position "nudge": Apply a fixed offset (positionParams.x / y) per mark — useful for labels beside points. Offsets are data units or band-step fractions.',
+    canonicalPath: "/reference/positions/nudge",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "positionParams",
+        level: 2,
+      },
+      {
+        id: "default-for",
+        title: "Default for geoms",
+        level: 2,
+      },
+      {
+        id: "compatible-geoms",
+        title: "Compatible geoms",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/guide/getting-started",
     title: "Getting started — ggsvelte",
     description: "Install @ggsvelte/svelte and render one chart from a Svelte file.",
@@ -5748,8 +5999,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-868",
-        title: "experimental (868)",
+        id: "experimental-872",
+        title: "experimental (872)",
         level: 3,
       },
       {
@@ -7155,6 +7406,10 @@ export const GUIDE_NAVIGATION = [
       {
         path: "/reference/stats",
         label: "Stat reference",
+      },
+      {
+        path: "/reference/positions",
+        label: "Position reference",
       },
       {
         path: "/reference/interactions",

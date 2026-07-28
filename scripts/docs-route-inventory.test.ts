@@ -40,6 +40,8 @@ describe("docs route inventory", () => {
     expect(paths.has("/reference/geoms/bin_2d")).toBe(true);
     expect(paths.has("/reference/stats")).toBe(true);
     expect(paths.has("/reference/stats/count")).toBe(true);
+    expect(paths.has("/reference/positions")).toBe(true);
+    expect(paths.has("/reference/positions/stack")).toBe(true);
     expect(paths.has("/reference/interactions")).toBe(true);
     expect(paths.has("/reference/cli")).toBe(true);
     expect(paths.has("/__perf/r3-interaction")).toBe(true);
@@ -120,6 +122,26 @@ describe("docs route inventory", () => {
     expect(details.every((entry) => entry.navigation === undefined)).toBe(true);
     expect(inventory.find((entry) => entry.path === "/reference/stats/count")?.title).toBe(
       "stat count — ggsvelte",
+    );
+  });
+
+  it("publishes the position reference inside the one Reference hierarchy", () => {
+    const inventory = createDocsRouteInventory();
+    const index = inventory.find((entry) => entry.path === "/reference/positions");
+    expect(index).toMatchObject({
+      title: "Position reference — ggsvelte",
+      canonicalPath: "/reference/positions",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "docs",
+      navigation: { section: "Reference", label: "Position reference", order: 53 },
+    });
+    const details = inventory.filter((entry) => entry.path.startsWith("/reference/positions/"));
+    expect(details.length).toBe(6);
+    expect(details.every((entry) => entry.navigation === undefined)).toBe(true);
+    expect(inventory.find((entry) => entry.path === "/reference/positions/stack")?.title).toBe(
+      "position stack — ggsvelte",
     );
   });
 

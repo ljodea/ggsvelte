@@ -28,6 +28,8 @@ describe("packed Pages link checks", () => {
     "reference/geoms/line.html",
     "reference/stats.html",
     "reference/stats/count.html",
+    "reference/positions.html",
+    "reference/positions/stack.html",
     "examples/interaction/tooltip.html",
     "interactions/brush-zoom.html",
     "interactions/linked-views.html",
@@ -106,6 +108,8 @@ describe("packed Pages link checks", () => {
     expect(requiredPages).toContain("reference/geoms/line.html");
     expect(requiredPages).toContain("reference/stats.html");
     expect(requiredPages).toContain("reference/stats/count.html");
+    expect(requiredPages).toContain("reference/positions.html");
+    expect(requiredPages).toContain("reference/positions/stack.html");
     expect(requiredPages).toContain("guide/interaction-reference.html");
     expect(requiredPages).toContain("robots.txt");
     expect(requiredPages).toContain("sitemap.xml");

@@ -27,6 +27,10 @@
       "Every statistical transform: after_stat columns and compatible geoms.",
     ],
     [
+      "/reference/positions",
+      "Every position adjustment: stack, dodge, jitter params, and geoms.",
+    ],
+    [
       "/reference/cli",
       "Render, validate, and export charts from the terminal.",
     ],

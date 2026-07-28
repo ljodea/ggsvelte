@@ -291,6 +291,10 @@ export type { GeomParamDoc, GeomReferenceEntry, SharedLayerPropDoc } from "./geo
 export { STAT_REFERENCE, statReferenceList } from "./stat-reference.js";
 /** @lifecycle experimental */
 export type { StatReferenceEntry } from "./stat-reference.js";
+/** @lifecycle experimental */
+export { POSITION_REFERENCE, positionReferenceList } from "./position-reference.js";
+/** @lifecycle experimental */
+export type { PositionParamDoc, PositionReferenceEntry } from "./position-reference.js";
 
 // Temporal parsing, inference, and authoring conversions
 export {
