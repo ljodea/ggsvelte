@@ -41,7 +41,7 @@ test("getting started presents the complete file, then the agent surface", async
     "Start with a basic plot",
     "Add geometry layers",
     "The finished file",
-    "Built for agents",
+    "Agent JSON spec",
   ];
   let previous = -1;
   for (const heading of order) {

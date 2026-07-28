@@ -1,7 +1,7 @@
 /**
  * Docs / agent surface derived from the sakura lesson.
  *
- * Page headings, title/aria extractors, and the "Built for agents" fragments.
+ * Page headings, aria extractors, and the agent-surface fragments.
  * Not part of the human walkthrough fold — see GettingStartedGuide and llms.
  */
 
@@ -23,19 +23,10 @@ export const GETTING_STARTED_PAGE_HEADINGS = [
   { id: "start-with-a-basic-plot", title: "Start with a basic plot", level: 2 },
   { id: "add-geometry-layers", title: "Add geometry layers", level: 2 },
   ...SAKURA_STEPS.map((step) => ({ id: step.id, title: step.title, level: 3 as const })),
-  { id: "the-chart", title: "The chart", level: 2 },
   { id: "the-finished-file", title: "The finished file", level: 2 },
-  { id: "built-for-agents", title: "Built for agents", level: 2 },
-  { id: "the-rest-of-the-grammar", title: "The rest of the grammar", level: 2 },
+  { id: "agent-json-spec", title: "Agent JSON spec", level: 2 },
   { id: "where-next", title: "Where next", level: 2 },
 ] as const satisfies readonly { id: string; title: string; level: 2 | 3 }[];
-
-/** The `<title>` the quickstart page sets, read from the file itself. */
-export function quickstartTitle(): string {
-  const match = /<title>([^<]+)<\/title>/.exec(QUICKSTART_PAGE_SVELTE);
-  if (match === null) throw new Error("quickstart page has no <title>");
-  return `<title>${match[1]!}</title>`;
-}
 
 /** The chart's accessible name, read from the file itself. */
 export function quickstartAriaLabel(): string {

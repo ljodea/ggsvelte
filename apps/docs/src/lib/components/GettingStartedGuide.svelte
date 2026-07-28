@@ -13,8 +13,6 @@
 
   import {
     foldSakura,
-    QUICKSTART_CLI_FRAGMENT,
-    QUICKSTART_HEADLESS_FRAGMENT,
     QUICKSTART_PAGE_SVELTE,
     QUICKSTART_PORTABLE_SPEC_FRAGMENT,
     SAKURA_FINISHED_SVELTE,
@@ -80,10 +78,10 @@
   const recordNames = SAKURA_RECORDS.map((record) => record.label).join("; ");
 
   /**
-   * Every step chart ships as SVG the library rendered at build time
-   * (scripts/gen-lesson-charts.ts): each one illustrates a single delta. The
-   * finished chart is the live 838-point plot — loaded when near the viewport
-   * so mobile chrome stays tappable (#972).
+   * Intermediate step charts ship as SVG the library rendered at build time
+   * (scripts/gen-lesson-charts.ts). The final "Finish it" step is the live
+   * 838-point plot — loaded when near the viewport so mobile chrome stays
+   * tappable (#972).
    */
   const chartSrc = (step: number): string =>
     `${base}/lesson/${step < 0 ? "first-render.svg" : `step-${String(step + 1)}.svg`}`;
@@ -180,6 +178,7 @@
 
   <div class="lesson-steps">
     {#each SAKURA_STEPS as step, index (step.id)}
+      {@const isFinish = index === SAKURA_STEPS.length - 1}
       <section class="progressive-step" aria-labelledby={step.id}>
         <div class="step-copy">
           <h3 id={step.id}>{step.title}</h3>
@@ -197,38 +196,39 @@
           {/if}
           <a href={`${base}${step.href}`}>Read {step.chapterTitle}</a>
         </div>
-        <div class="lesson-output">
-          <img
-            class="lesson-chart"
-            src={chartSrc(index)}
-            width={LESSON_CHART_WIDTH}
-            height={LESSON_CHART_HEIGHT}
-            alt={`Kyoto cherry blossom after step ${index + 1}: ${step.title}`}
-          />
-        </div>
+        {#if isFinish}
+          <div class="finished-chart lesson-output" bind:this={finishedChart}>
+            {#if LivePlot && finished}
+              <LivePlot
+                spec={finished.spec}
+                key={finished.key}
+                inspect={finished.inspect}
+                height={liveHeight}
+                ariaLabel={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
+              />
+            {:else}
+              <img
+                class="lesson-chart"
+                src={chartSrc(index)}
+                width={LESSON_CHART_WIDTH}
+                height={LESSON_CHART_HEIGHT}
+                alt={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
+              />
+            {/if}
+          </div>
+        {:else}
+          <div class="lesson-output">
+            <img
+              class="lesson-chart"
+              src={chartSrc(index)}
+              width={LESSON_CHART_WIDTH}
+              height={LESSON_CHART_HEIGHT}
+              alt={`Kyoto cherry blossom after step ${index + 1}: ${step.title}`}
+            />
+          </div>
+        {/if}
       </section>
     {/each}
-  </div>
-
-  <h2 id="the-chart">The chart</h2>
-  <div class="finished-chart lesson-output" bind:this={finishedChart}>
-    {#if LivePlot && finished}
-      <LivePlot
-        spec={finished.spec}
-        key={finished.key}
-        inspect={finished.inspect}
-        height={liveHeight}
-        ariaLabel={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
-      />
-    {:else}
-      <img
-        class="lesson-chart"
-        src={chartSrc(SAKURA_STEPS.length - 1)}
-        width={LESSON_CHART_WIDTH}
-        height={LESSON_CHART_HEIGHT}
-        alt={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
-      />
-    {/if}
   </div>
 
   <h2 id="the-finished-file">The finished file</h2>
@@ -239,72 +239,13 @@
     code={SAKURA_FINISHED_SVELTE}
   />
 
-  <h2 id="built-for-agents">Built for agents</h2>
-  <p>
-    The chart above is also a JSON document. Every ggsvelte plot normalizes to a
-    PortableSpec: no functions, no closures, nothing that has to be executed to
-    be understood. That is the surface an agent writes to.
-  </p>
-  <p>
-    Data has three forms. Inline <code>values</code> for tables small enough to
-    read; <code>columns</code> under a named <code>datasets</code> entry for
-    anything large or reused; <code>{`{ "name": ... }`}</code> to point a layer
-    at one. The 838 Kyoto rows are served whole at
-    <a href={`${base}/kyoto-sakura.json`}>/kyoto-sakura.json</a>.
-  </p>
+  <h2 id="agent-json-spec">Agent JSON spec</h2>
   <CopyCode
     class="lesson-source"
     language="json"
     accessibleLabel="Copy Spec (JSON) fragment"
     code={QUICKSTART_PORTABLE_SPEC_FRAGMENT}
   />
-  <p>
-    <code>validate(spec)</code> is the correction loop, and it was built for
-    this audience: every error carries a stable <code>code</code>, a JSON
-    <code>path</code>
-    into the spec, and a <code>fix</code> naming the change to make. An agent
-    emits, validates, applies the fix, and re-emits without a human in the loop.
-    The
-    <a href={`${base}/guide/errors`}>errors reference</a> is the full catalog.
-  </p>
-  <p>
-    Rendering never needs a browser. <code>renderToSVGString</code> is pure, and
-    the installed <code>ggsvelte-render</code> CLI writes SVG to stdout with JSON
-    Lines diagnostics on stderr.
-  </p>
-  <CopyCode
-    class="lesson-source"
-    language="typescript"
-    accessibleLabel="Copy headless fragment"
-    code={QUICKSTART_HEADLESS_FRAGMENT}
-  />
-  <CopyCode
-    class="lesson-source"
-    language="bash"
-    accessibleLabel="Copy CLI fragment"
-    code={QUICKSTART_CLI_FRAGMENT}
-  />
-  <p>
-    Agents working in this codebase should read
-    <a href={`${base}/llms.txt`}>/llms.txt</a> first: it is the same grammar, written
-    for a reader that emits specs instead of typing them.
-  </p>
-
-  <h2 id="the-rest-of-the-grammar">The rest of the grammar</h2>
-  <ul>
-    <li>
-      <a href={`${base}/themes`}>Chart themes</a> and
-      <a href={`${base}/palettes`}>palettes</a> — paper/ink chrome and data color.
-    </li>
-    <li>
-      <a href={`${base}/guide/facets-coordinates`}>Facets and coordinates</a> — small
-      multiples, flipped and fixed-aspect coordinates.
-    </li>
-    <li>
-      <a href={`${base}/guide/statistics-positions`}>Statistics and positions</a
-      > — bins, summaries, jitter, stacking and dodging.
-    </li>
-  </ul>
 
   <h2 id="where-next">Where next</h2>
   <ul>

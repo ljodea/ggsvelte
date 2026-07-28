@@ -4,7 +4,7 @@ import { basename, dirname, join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
 import { COMPLETE_SVELTE_SNIPPETS } from "./guide-code-contract.js";
-import { quickstartAriaLabel, quickstartTitle } from "./quickstart.js";
+import { quickstartAriaLabel } from "./quickstart.js";
 import { loadSupportMatrix, type PackageManager } from "./support-matrix.js";
 
 interface CommandStep {
@@ -359,9 +359,8 @@ export function writeConsumerFixture(
 import { existsSync, readFileSync } from "node:fs";
 
 const html = readFileSync("build/index.html", "utf8");
-// Derived from the quickstart file itself: a hand-written copy of the title
-// or the accessible name silently drifts the moment the page changes.
-assert.ok(html.includes(${JSON.stringify(quickstartTitle())}), "prerendered title");
+// Derived from the quickstart file itself: a hand-written copy of the
+// accessible name silently drifts the moment the page changes.
 assert.ok(html.includes(${JSON.stringify(`aria-label="${quickstartAriaLabel()}"`)}), "accessible name");
 assert.match(html, /class="gg-plot-root[^"]*gg-container-width"/);
 assert.match(html, /data-gg-ready="false"/);

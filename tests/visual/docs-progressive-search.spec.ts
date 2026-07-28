@@ -27,26 +27,25 @@ test("Getting Started renders the packed file and the built-up chart", async ({ 
 test("each step shows its own delta and the finished chart is live", async ({ page }) => {
   await page.goto("/guide/getting-started?theme=light");
   const steps = page.locator(".progressive-step");
-  await expect(steps).toHaveCount(6);
+  await expect(steps).toHaveCount(5);
   await expect(steps.getByRole("heading", { level: 3 })).toHaveText([
     "Separate the signal from the noise",
     "Put earlier bloom on top",
     "Add epoch bands",
     "Annotate record years",
     "Finish it",
-    "Inspect and pin",
   ]);
 
-  // Every step chart is a build-time render; the page carries exactly one
-  // live plot, the finished chart, where inspection is worth demonstrating.
-  // Live GGPlot hydrates only when near the viewport (#972); fold is slow.
-  await expect(steps.locator("img.lesson-chart")).toHaveCount(6);
+  // Intermediate steps are build-time SVGs; Finish it is the one live plot
+  // (hydrate near-viewport, #972). Before that scroll, every step is an img.
+  await expect(steps.locator("img.lesson-chart")).toHaveCount(5);
   await expect(steps.locator(".gg-plot-root")).toHaveCount(0);
   const finishedChart = page.locator(".finished-chart");
   await finishedChart.scrollIntoViewIfNeeded();
   const finished = finishedChart.locator(".gg-plot-root");
   await expect(finished).toHaveAttribute("data-gg-ready", "true", { timeout: 45_000 });
   await expect(page.locator(".gg-plot-root")).toHaveCount(1);
+  await expect(steps.locator("img.lesson-chart")).toHaveCount(4);
   await expectNoDocumentOverflow(page);
 });
 
@@ -155,11 +154,10 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
   await expect(page.locator(".lesson-source--file code").first()).toContainText(
     'import { kyotoSakura } from "@ggsvelte/svelte/data"',
   );
-  // Every step chart is a build-time render, so the whole lesson is readable
-  // with no JavaScript at all — the finished chart stays a static SVG until
-  // hydrate near-viewport (#972); only inspect interaction needs JS.
+  // Every chart is a build-time SVG without JS: first render + five steps
+  // (Finish it keeps its static fallback until hydrate near-viewport, #972).
   await expect(page.locator(".lesson-block .lesson-output")).toBeVisible();
-  await expect(page.locator("img.lesson-chart")).toHaveCount(8);
+  await expect(page.locator("img.lesson-chart")).toHaveCount(6);
   await expect(
     page.getByRole("heading", { level: 3, name: "Separate the signal from the noise" }),
   ).toBeVisible();
