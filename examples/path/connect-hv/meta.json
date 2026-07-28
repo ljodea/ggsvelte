@@ -1,5 +1,6 @@
 {
-  "title": "Connect hv path joins",
+  "title": "Minard's retreat thermometer",
+  "description": "Nine temperature readings taken along the road back from Moscow, joined by horizontal-then-vertical elbows so each reading holds until the next one was taken.",
   "tags": ["path", "connect", "stat", "step", "hv", "trajectory"],
   "docsSection": "Lines & time"
 }

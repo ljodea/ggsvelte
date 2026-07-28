@@ -1,28 +1,111 @@
 /**
- * Toy fortified map + regional rates for geom_map (#808).
- * Three triangular "regions" in long/lat with a simple value table.
+ * Snow's Soho map as a fortified map plus a value table: the same thirteen
+ * pump neighbourhoods as examples/polygon/regions, and the number of the 578
+ * cholera deaths that fall inside each one. Broad Street holds 359 of them.
+ *
+ * Polygons transcribed from HistData::Snow.polygons, deaths from
+ * HistData::Snow.deaths, pump names from HistData::Snow.pumps (see NOTICE).
+ * The counts are computed here by point-in-polygon over the digitized
+ * coordinates - Snow did the same sum by walking the streets - and every one
+ * of the 578 deaths falls inside exactly one neighbourhood, so the counts add
+ * back to 578.
  */
-export const fortifiedMap: {
-  long: number;
-  lat: number;
-  region: string;
-}[] = [
-  // West
-  { long: 0, lat: 0, region: "West" },
-  { long: 1, lat: 0, region: "West" },
-  { long: 0.5, lat: 1.2, region: "West" },
-  // East
-  { long: 1.2, lat: 0, region: "East" },
-  { long: 2.2, lat: 0, region: "East" },
-  { long: 1.7, lat: 1.1, region: "East" },
-  // North
-  { long: 0.4, lat: 1.3, region: "North" },
-  { long: 1.8, lat: 1.3, region: "North" },
-  { long: 1.1, lat: 2.2, region: "North" },
+export const pumpNeighbourhoods: { x: number; y: number; pump: string }[] = [
+  { x: 3.39, y: 16.3215, pump: "Oxford Market" },
+  { x: 10.2964, y: 16.4222, pump: "Oxford Market" },
+  { x: 9.6784, y: 18.725, pump: "Oxford Market" },
+  { x: 3.39, y: 18.725, pump: "Oxford Market" },
+  { x: 3.39, y: 16.3215, pump: "Oxford Market" },
+  { x: 10.2964, y: 16.4222, pump: "Castle St E" },
+  { x: 11.1944, y: 15.8529, pump: "Castle St E" },
+  { x: 12.5423, y: 18.725, pump: "Castle St E" },
+  { x: 9.6784, y: 18.725, pump: "Castle St E" },
+  { x: 10.2964, y: 16.4222, pump: "Castle St E" },
+  { x: 11.1944, y: 15.8529, pump: "Oxford St #1" },
+  { x: 11.7915, y: 14.7293, pump: "Oxford St #1" },
+  { x: 15.0521, y: 14.2651, pump: "Oxford St #1" },
+  { x: 13.8184, y: 18.725, pump: "Oxford St #1" },
+  { x: 12.5423, y: 18.725, pump: "Oxford St #1" },
+  { x: 11.1944, y: 15.8529, pump: "Oxford St #1" },
+  { x: 15.0521, y: 14.2651, pump: "Oxford St #2" },
+  { x: 16.5561, y: 13.6943, pump: "Oxford St #2" },
+  { x: 16.8419, y: 13.7463, pump: "Oxford St #2" },
+  { x: 19.912, y: 15.2808, pump: "Oxford St #2" },
+  { x: 19.912, y: 18.725, pump: "Oxford St #2" },
+  { x: 13.8184, y: 18.725, pump: "Oxford St #2" },
+  { x: 15.0521, y: 14.2651, pump: "Oxford St #2" },
+  { x: 3.39, y: 13.4046, pump: "Gt Marlborough" },
+  { x: 11.211, y: 14.0212, pump: "Gt Marlborough" },
+  { x: 11.7915, y: 14.7293, pump: "Gt Marlborough" },
+  { x: 11.1944, y: 15.8529, pump: "Gt Marlborough" },
+  { x: 10.2964, y: 16.4222, pump: "Gt Marlborough" },
+  { x: 3.39, y: 16.3215, pump: "Gt Marlborough" },
+  { x: 3.39, y: 13.4046, pump: "Gt Marlborough" },
+  { x: 3.39, y: 8.8295, pump: "Crown Chapel" },
+  { x: 6.1687, y: 8.8785, pump: "Crown Chapel" },
+  { x: 10.1599, y: 10.2251, pump: "Crown Chapel" },
+  { x: 11.211, y: 14.0212, pump: "Crown Chapel" },
+  { x: 3.39, y: 13.4046, pump: "Crown Chapel" },
+  { x: 3.39, y: 8.8295, pump: "Crown Chapel" },
+  { x: 10.1599, y: 10.2251, pump: "Broad St" },
+  { x: 11.7536, y: 9.5168, pump: "Broad St" },
+  { x: 14.2894, y: 10.1561, pump: "Broad St" },
+  { x: 16.5561, y: 13.6943, pump: "Broad St" },
+  { x: 15.0521, y: 14.2651, pump: "Broad St" },
+  { x: 11.7915, y: 14.7293, pump: "Broad St" },
+  { x: 11.211, y: 14.0212, pump: "Broad St" },
+  { x: 10.1599, y: 10.2251, pump: "Broad St" },
+  { x: 12.4968, y: 4.3614, pump: "Warwick" },
+  { x: 12.6461, y: 4.6964, pump: "Warwick" },
+  { x: 11.7536, y: 9.5168, pump: "Warwick" },
+  { x: 10.1599, y: 10.2251, pump: "Warwick" },
+  { x: 6.1687, y: 8.8785, pump: "Warwick" },
+  { x: 12.4968, y: 4.3614, pump: "Warwick" },
+  { x: 12.6461, y: 4.6964, pump: "Briddle St" },
+  { x: 15.5964, y: 7.2132, pump: "Briddle St" },
+  { x: 14.2894, y: 10.1561, pump: "Briddle St" },
+  { x: 11.7536, y: 9.5168, pump: "Briddle St" },
+  { x: 12.6461, y: 4.6964, pump: "Briddle St" },
+  { x: 15.5964, y: 7.2132, pump: "So Soho" },
+  { x: 18.1732, y: 6.9499, pump: "So Soho" },
+  { x: 16.8419, y: 13.7463, pump: "So Soho" },
+  { x: 16.5561, y: 13.6943, pump: "So Soho" },
+  { x: 14.2894, y: 10.1561, pump: "So Soho" },
+  { x: 15.5964, y: 7.2132, pump: "So Soho" },
+  { x: 18.1732, y: 6.9499, pump: "Dean St" },
+  { x: 19.912, y: 5.8715, pump: "Dean St" },
+  { x: 19.912, y: 15.2808, pump: "Dean St" },
+  { x: 16.8419, y: 13.7463, pump: "Dean St" },
+  { x: 18.1732, y: 6.9499, pump: "Dean St" },
+  { x: 12.6461, y: 4.6964, pump: "Coventry St" },
+  { x: 12.4968, y: 4.3614, pump: "Coventry St" },
+  { x: 12.4881, y: 3.235, pump: "Coventry St" },
+  { x: 19.912, y: 3.235, pump: "Coventry St" },
+  { x: 19.912, y: 5.8715, pump: "Coventry St" },
+  { x: 18.1732, y: 6.9499, pump: "Coventry St" },
+  { x: 15.5964, y: 7.2132, pump: "Coventry St" },
+  { x: 12.6461, y: 4.6964, pump: "Coventry St" },
+  { x: 3.39, y: 3.235, pump: "Vigo St" },
+  { x: 12.4881, y: 3.235, pump: "Vigo St" },
+  { x: 12.4968, y: 4.3614, pump: "Vigo St" },
+  { x: 6.1687, y: 8.8785, pump: "Vigo St" },
+  { x: 3.39, y: 8.8295, pump: "Vigo St" },
+  { x: 3.39, y: 3.235, pump: "Vigo St" },
 ];
 
-export const regionRates: { region: string; rate: number }[] = [
-  { region: "West", rate: 12 },
-  { region: "East", rate: 28 },
-  { region: "North", rate: 19 },
+/** Deaths inside each pump's neighbourhood; 578 in total. */
+export const neighbourhoodDeaths: { pump: string; deaths: number }[] = [
+  { pump: "Oxford Market", deaths: 0 },
+  { pump: "Castle St E", deaths: 1 },
+  { pump: "Oxford St #1", deaths: 12 },
+  { pump: "Oxford St #2", deaths: 24 },
+  { pump: "Gt Marlborough", deaths: 6 },
+  { pump: "Crown Chapel", deaths: 61 },
+  { pump: "Broad St", deaths: 359 },
+  { pump: "Warwick", deaths: 16 },
+  { pump: "Briddle St", deaths: 27 },
+  { pump: "So Soho", deaths: 64 },
+  { pump: "Dean St", deaths: 2 },
+  { pump: "Coventry St", deaths: 2 },
+  { pump: "Vigo St", deaths: 4 },
 ];

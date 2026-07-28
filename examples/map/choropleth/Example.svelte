@@ -1,20 +1,34 @@
 <script lang="ts">
-  import { GeomMap, GGPlot, Labs, ThemeClassic } from "@ggsvelte/svelte";
+  import {
+    CoordFixed,
+    GeomMap,
+    GGPlot,
+    Labs,
+    ScaleFillContinuous,
+    ThemeClassic,
+  } from "@ggsvelte/svelte";
 
-  import { fortifiedMap, regionRates } from "./data.js";
+  import { neighbourhoodDeaths, pumpNeighbourhoods } from "./data.js";
 </script>
 
 <GGPlot
-  data={regionRates}
-  aes={{ map_id: "region", fill: "rate" }}
+  data={neighbourhoodDeaths}
+  aes={{ map_id: "pump", fill: "deaths" }}
   width={640}
   height={400}
 >
   <ThemeClassic />
+  <CoordFixed />
+  <ScaleFillContinuous scheme="viridis" />
   <Labs
-    title="Regional rates (toy map)"
-    subtitle="Fortified long/lat polygons joined on region (geom_map)"
-    fill="Rate"
+    title="359 of 578 deaths were nearest the Broad Street pump"
+    subtitle="The 1854 Soho outbreak counted into the area closest to each public pump"
+    fill="Deaths"
   />
-  <GeomMap map={{ values: fortifiedMap }} linewidth={1.2} alpha={0.95} />
+  <GeomMap
+    map={{ values: pumpNeighbourhoods }}
+    mapId="pump"
+    linewidth={1.2}
+    alpha={0.95}
+  />
 </GGPlot>

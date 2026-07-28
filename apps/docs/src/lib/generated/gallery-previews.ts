@@ -282,25 +282,25 @@ export const GALLERY_PREVIEWS = [
     id: "map/choropleth",
     filename: "map-choropleth-light.png",
     path: "/previews/map-choropleth-light.png",
-    sha256: "e30da20b2d785e37d11a646975a11efdb979415cd6ffd5d8ee16d97860a812d8",
+    sha256: "8280bf9853ff1573f8adc2feec4172bc8abaec59f0da5b87c0d512838136090f",
   },
   {
     id: "path/connect-hv",
     filename: "path-connect-hv-light.png",
     path: "/previews/path-connect-hv-light.png",
-    sha256: "957ba761ba22e2ecfbd69194872b6471f8a52b97887ea152b633b78da9a3f0a0",
+    sha256: "db6ff01ccdbcce21564e38931a984523844ca9d6bf0e36a66df275fbff5edf5f",
   },
   {
     id: "path/ellipse-rings",
     filename: "path-ellipse-rings-light.png",
     path: "/previews/path-ellipse-rings-light.png",
-    sha256: "d6b2b537e1c4669d03da7ebe18a48fdabd94e06d8e408aa012e9e00cdba81e9c",
+    sha256: "9575badd5780ac1406b46addaf3dd620f7d34a25b4c0e81206a55f9486c0a7a1",
   },
   {
     id: "path/trajectory",
     filename: "path-trajectory-light.png",
     path: "/previews/path-trajectory-light.png",
-    sha256: "2ec864cf245cbb1b253a89680e6002a2879c70954c3e4903aee4d2218648a4b8",
+    sha256: "bd5c8fd624610a7efab349ff0a4f696e68c455cc28d946b48fd050927aa75f2a",
   },
   {
     id: "point/abline-identity",
@@ -402,7 +402,7 @@ export const GALLERY_PREVIEWS = [
     id: "polygon/regions",
     filename: "polygon-regions-light.png",
     path: "/previews/polygon-regions-light.png",
-    sha256: "79216d10146fd23ddac6fa368be3dd4c87c1ffa5681ee6dbb2b5e1157316c156",
+    sha256: "22309f5b233f1f90ddd12142b971da755741a61a33484d0b6edaa91fd36dd195",
   },
   {
     id: "qq/normal",

@@ -1,21 +1,26 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { figureEight } from "./data.js";
+import { napoleonsArmy } from "./data.js";
 
 export default defineExample(
-  // geom_path connects in data (row) order within each group — no x-sort.
-  // This figure-eight revisits x; sorting by x would scramble the loops.
-  gg(figureEight, aes({ x: "x", y: "y" }))
-    .geomPath({ linewidth: 2, alpha: 0.95 })
-    .geomPoint({ size: 2.2, alpha: 0.55 })
-    .coordFixed()
+  // geom_path connects in data (row) order within each group. The retreat
+  // walks back over the longitudes of the advance, so sorting by x - which is
+  // what geom_line does - would splice the two legs into nonsense.
+  gg(napoleonsArmy, aes({ x: "long", y: "survivors", group: "leg", color: "direction" }))
+    .geomPath({ linewidth: 2 })
+    .geomPoint({ size: 2.2, alpha: 0.7 })
+    .scaleColorManual({
+      domain: ["Advance", "Retreat"],
+      values: ["#b45309", "#1f2937"],
+    })
     .theme("classic")
     .labs({
-      title: "Figure-eight path in data order",
-      subtitle: "geom_path keeps row order; geom_line would sort by x",
-      x: "x",
-      y: "y",
+      title: "Napoleon's army marches east and dies coming back",
+      subtitle: "Minard's 1812 strength counts, drawn in march order: out to Moscow, then home",
+      x: "Longitude east",
+      y: "Men still with the column",
+      color: "",
     })
     .spec(),
 );

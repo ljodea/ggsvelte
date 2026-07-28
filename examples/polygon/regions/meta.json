@@ -1,5 +1,6 @@
 {
-  "title": "Two regions as polygons",
+  "title": "Which pump was nearest",
+  "description": "The thirteen areas of Soho closest to each public pump in 1854, each drawn as one closed ring of vertices in winding order.",
   "tags": ["polygon", "fill", "group", "choropleth"],
   "docsSection": "Rectangles & grids"
 }

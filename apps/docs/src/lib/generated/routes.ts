@@ -2954,8 +2954,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/map/choropleth",
-    title: "Map choropleth — ggsvelte gallery",
-    description: "Map choropleth",
+    title: "Snow's outbreak by nearest pump — ggsvelte gallery",
+    description:
+      "The same thirteen Soho neighbourhoods, shaded by the cholera deaths inside each. One region holds 359 of the 578, and it is the one around Broad Street.",
     canonicalPath: "/examples/map/choropleth",
     kind: "page",
     index: true,
@@ -2964,8 +2965,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/path/connect-hv",
-    title: "Connect hv path joins — ggsvelte gallery",
-    description: "Connect hv path joins",
+    title: "Minard's retreat thermometer — ggsvelte gallery",
+    description:
+      "Nine temperature readings taken along the road back from Moscow, joined by horizontal-then-vertical elbows so each reading holds until the next one was taken.",
     canonicalPath: "/examples/path/connect-hv",
     kind: "page",
     index: true,
@@ -2974,8 +2976,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/path/ellipse-rings",
-    title: "Ellipse confidence rings — ggsvelte gallery",
-    description: "Ellipse confidence rings",
+    title: "Three penguins, three ellipses — ggsvelte gallery",
+    description:
+      "A 95% bivariate normal ring around each species in bill and flipper length. The rings overlap where the birds do, and a few fall outside their own.",
     canonicalPath: "/examples/path/ellipse-rings",
     kind: "page",
     index: true,
@@ -2984,8 +2987,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/path/trajectory",
-    title: "Path trajectory (data order) — ggsvelte gallery",
-    description: "Path trajectory (data order)",
+    title: "Napoleon's march, drawn in march order — ggsvelte gallery",
+    description:
+      "Minard's strength counts against longitude. The retreat covers the same ground as the advance, so only a path drawn in row order tells the two legs apart.",
     canonicalPath: "/examples/path/trajectory",
     kind: "page",
     index: true,
@@ -3154,8 +3158,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/polygon/regions",
-    title: "Two regions as polygons — ggsvelte gallery",
-    description: "Two regions as polygons",
+    title: "Which pump was nearest — ggsvelte gallery",
+    description:
+      "The thirteen areas of Soho closest to each public pump in 1854, each drawn as one closed ring of vertices in winding order.",
     canonicalPath: "/examples/polygon/regions",
     kind: "page",
     index: true,
