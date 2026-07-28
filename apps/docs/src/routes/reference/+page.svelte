@@ -6,12 +6,19 @@
   <header>
     <h1 id="reference-heading">Reference</h1>
     <p>
-      Public contracts for interactions, CLI, diagnostics, lifecycle, and
+      Public contracts for geoms, interactions, CLI, diagnostics, lifecycle, and
       schema.
     </p>
   </header>
 
   <nav aria-label="Reference sections">
+    <a href={`${base}/reference/geoms`}>
+      <strong>Geom reference</strong>
+      <span
+        >Every Geom* component: defaults, stats, positions, and params from the
+        schema.</span
+      >
+    </a>
     <a href={`${base}/reference/interactions`}>
       <strong>Interaction reference</strong>
       <span>Capabilities, events, diagnostics, accessibility defaults.</span>

@@ -23,6 +23,9 @@ describe("packed Pages link checks", () => {
     "interactions.html",
     "reference/interactions.html",
     "reference/cli.html",
+    "reference/geoms.html",
+    "reference/geoms/point.html",
+    "reference/geoms/line.html",
     "examples/interaction/tooltip.html",
     "interactions/brush-zoom.html",
     "interactions/linked-views.html",
@@ -96,6 +99,9 @@ describe("packed Pages link checks", () => {
     expect(requiredPages).toContain("interactions.html");
     expect(requiredPages).toContain("reference/interactions.html");
     expect(requiredPages).toContain("reference/cli.html");
+    expect(requiredPages).toContain("reference/geoms.html");
+    expect(requiredPages).toContain("reference/geoms/point.html");
+    expect(requiredPages).toContain("reference/geoms/line.html");
     expect(requiredPages).toContain("guide/interaction-reference.html");
     expect(requiredPages).toContain("robots.txt");
     expect(requiredPages).toContain("sitemap.xml");

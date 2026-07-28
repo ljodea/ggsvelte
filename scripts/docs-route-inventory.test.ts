@@ -35,6 +35,9 @@ describe("docs route inventory", () => {
     expect(paths.has("/playground")).toBe(false);
     expect(paths.has("/themes")).toBe(true);
     expect(paths.has("/palettes")).toBe(true);
+    expect(paths.has("/reference/geoms")).toBe(true);
+    expect(paths.has("/reference/geoms/point")).toBe(true);
+    expect(paths.has("/reference/geoms/bin_2d")).toBe(true);
     expect(paths.has("/reference/interactions")).toBe(true);
     expect(paths.has("/reference/cli")).toBe(true);
     expect(paths.has("/__perf/r3-interaction")).toBe(true);
@@ -78,6 +81,26 @@ describe("docs route inventory", () => {
     expect(byPath.has("/guide")).toBe(false);
   });
 
+  it("publishes the geom reference inside the one Reference hierarchy", () => {
+    const inventory = createDocsRouteInventory();
+    const index = inventory.find((entry) => entry.path === "/reference/geoms");
+    expect(index).toMatchObject({
+      title: "Geom reference — ggsvelte",
+      canonicalPath: "/reference/geoms",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "docs",
+      navigation: { section: "Reference", label: "Geom reference", order: 51 },
+    });
+    const details = inventory.filter((entry) => entry.path.startsWith("/reference/geoms/"));
+    expect(details.length).toBe(49);
+    expect(details.every((entry) => entry.navigation === undefined)).toBe(true);
+    expect(inventory.find((entry) => entry.path === "/reference/geoms/point")?.title).toBe(
+      "GeomPoint — ggsvelte",
+    );
+  });
+
   it("publishes the CLI reference inside the one Reference hierarchy", () => {
     const cliRoute = createDocsRouteInventory().find((entry) => entry.path === "/reference/cli");
     expect(cliRoute).toMatchObject({
@@ -87,7 +110,7 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "CLI reference", order: 52 },
+      navigation: { section: "Reference", label: "CLI reference", order: 53 },
     });
     expect(cliRoute?.headings?.filter((heading) => heading.level === 3)).toEqual(
       CLI_REFERENCE_OPTIONS.map((option) => ({

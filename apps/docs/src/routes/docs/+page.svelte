@@ -17,7 +17,11 @@
     ...GUIDE_CATALOG.map(
       (entry) => [`/guide/${entry.slug}`, entry.description] as const,
     ),
-    ["/reference", "API surfaces, interaction props, and the CLI."],
+    ["/reference", "API surfaces, geoms, interaction props, and the CLI."],
+    [
+      "/reference/geoms",
+      "Every Geom* component: defaults, stats, positions, and params.",
+    ],
     [
       "/reference/cli",
       "Render, validate, and export charts from the terminal.",
