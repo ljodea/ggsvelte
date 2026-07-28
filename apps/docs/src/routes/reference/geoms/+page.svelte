@@ -7,6 +7,8 @@
     type GeomReferenceEntry,
   } from "@ggsvelte/spec";
 
+  import { thumbnailPathForGeom } from "$lib/geom-thumbnails";
+
   let query = $state("");
   const all = geomReferenceList();
   const normalizedQuery = $derived(query.trim().toLocaleLowerCase());
@@ -31,6 +33,11 @@
       .join(" ")
       .toLocaleLowerCase();
     return haystack.includes(q);
+  }
+
+  function thumbSrc(entry: GeomReferenceEntry): string | undefined {
+    const path = thumbnailPathForGeom(entry.name);
+    return path === undefined ? undefined : `${base}${path}`;
   }
 </script>
 
@@ -68,17 +75,32 @@
   {:else}
     <ul class="results">
       {#each results as entry (entry.name)}
+        {@const thumb = thumbSrc(entry)}
         <li>
           <a href={`${base}/reference/geoms/${entry.slug}`}>
-            <strong><code>{entry.component}</code></strong>
-            <span class="meta">
-              <code>{entry.name}</code>
-              · {entry.defaultStat} + {entry.defaultPosition}
-              {#if entry.aliasOf !== undefined}
-                · alias of <code>{entry.aliasOf}</code>
-              {/if}
+            {#if thumb !== undefined}
+              <span class="thumb" aria-hidden="true">
+                <img
+                  src={thumb}
+                  alt=""
+                  width="96"
+                  height="96"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+            {/if}
+            <span class="body">
+              <strong><code>{entry.component}</code></strong>
+              <span class="meta">
+                <code>{entry.name}</code>
+                · {entry.defaultStat} + {entry.defaultPosition}
+                {#if entry.aliasOf !== undefined}
+                  · alias of <code>{entry.aliasOf}</code>
+                {/if}
+              </span>
+              <span class="summary">{entry.summary}</span>
             </span>
-            <span class="summary">{entry.summary}</span>
           </a>
         </li>
       {/each}
@@ -172,7 +194,9 @@
 
   .results a {
     display: grid;
-    gap: 0.25rem;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: 0.9rem 1rem;
+    align-items: start;
     padding: 0.9rem 0;
     color: var(--ink);
     text-decoration: none;
@@ -180,6 +204,31 @@
 
   .results a:hover strong {
     text-decoration: underline;
+  }
+
+  .thumb {
+    display: block;
+    width: 5.5rem;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 0.45rem;
+    background: color-mix(in srgb, var(--ink) 3%, transparent);
+  }
+
+  .thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* Crop title/legend chrome; bias into the panel so the mark is central. */
+    object-fit: cover;
+    object-position: center 58%;
+  }
+
+  .body {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
   }
 
   .meta {
@@ -191,6 +240,17 @@
     max-width: 44rem;
     color: var(--muted);
     font-size: 0.92rem;
+  }
+
+  @media (max-width: 36rem) {
+    .results a {
+      grid-template-columns: 4.25rem minmax(0, 1fr);
+      gap: 0.75rem;
+    }
+
+    .thumb {
+      width: 4.25rem;
+    }
   }
 
   .shared-props {
