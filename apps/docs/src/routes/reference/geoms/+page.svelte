@@ -1,7 +1,6 @@
 <script lang="ts">
   import { base } from "$app/paths";
   import {
-    GEOM_REFERENCE,
     SHARED_LAYER_PROPS,
     geomReferenceList,
     type GeomReferenceEntry,
@@ -42,23 +41,14 @@
 </script>
 
 <main class="geom-reference" aria-labelledby="reference-heading">
-  <p class="eyebrow">
-    Schema-derived · {Object.keys(GEOM_REFERENCE).length} geoms
-  </p>
   <h1 id="reference-heading">Geoms</h1>
-  <p class="intro">
-    Every <code>&lt;Geom*&gt;</code> component and its JSON layer form,
-    generated from the PortableSpec TypeBox schema so props stay in step with
-    <a href={`${base}/schema/v0.json`}>schema/v0.json</a>. Layer params appear
-    as direct Svelte props; shared layer props are listed once below.
-  </p>
 
-  <label for="geom-search">Search geoms, components, stats, or params</label>
+  <label for="geom-search">Search</label>
   <input
     id="geom-search"
     type="search"
     bind:value={query}
-    placeholder="Try point, GeomLine, summary_bin, or linewidth"
+    placeholder="bar, point, line…"
     autocomplete="off"
   />
 
@@ -69,9 +59,7 @@
 
   <h2 id="all-geoms">All geoms</h2>
   {#if results.length === 0}
-    <p class="empty">
-      No match. Try a geom name, component, stat, or param key.
-    </p>
+    <p class="empty">No match.</p>
   {:else}
     <ul class="results">
       {#each results as entry (entry.name)}
@@ -137,19 +125,6 @@
 
   h2 {
     margin: 2.5rem 0 0.75rem;
-  }
-
-  .intro {
-    max-width: 44rem;
-  }
-
-  .eyebrow {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.76rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
   }
 
   label {

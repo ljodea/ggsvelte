@@ -1,10 +1,6 @@
 <script lang="ts">
   import { base } from "$app/paths";
-  import {
-    STAT_REFERENCE,
-    statReferenceList,
-    type StatReferenceEntry,
-  } from "@ggsvelte/spec";
+  import { statReferenceList, type StatReferenceEntry } from "@ggsvelte/spec";
 
   let query = $state("");
   const all = statReferenceList();
@@ -30,24 +26,14 @@
 </script>
 
 <main class="stat-reference" aria-labelledby="reference-heading">
-  <p class="eyebrow">
-    Schema-derived · {Object.keys(STAT_REFERENCE).length} stats
-  </p>
   <h1 id="reference-heading">Stats</h1>
-  <p class="intro">
-    Statistical transforms applied before drawing. Set
-    <code>stat</code> on a <code>&lt;Geom*&gt;</code> shell or JSON layer —
-    there is no separate Stat component. Generated from
-    <code>KNOWN_STATS</code>, <code>STAT_COLUMNS</code>, and which geoms allow
-    each value in the PortableSpec schema.
-  </p>
 
-  <label for="stat-search">Search stats, columns, or geoms</label>
+  <label for="stat-search">Search</label>
   <input
     id="stat-search"
     type="search"
     bind:value={query}
-    placeholder="Try count, density, bin, or smooth"
+    placeholder="count, bin, density…"
     autocomplete="off"
   />
 
@@ -58,7 +44,7 @@
 
   <h2 id="all-stats">All stats</h2>
   {#if results.length === 0}
-    <p class="empty">No match. Try a stat name, after_stat column, or geom.</p>
+    <p class="empty">No match.</p>
   {:else}
     <ul class="results">
       {#each results as entry (entry.name)}
@@ -112,19 +98,6 @@
 
   h2 {
     margin: 2.5rem 0 0.75rem;
-  }
-
-  .intro {
-    max-width: 44rem;
-  }
-
-  .eyebrow {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.76rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
   }
 
   label {
