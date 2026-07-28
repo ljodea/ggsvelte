@@ -40,7 +40,7 @@ export function optionsTypeForGeom(geom: string): string {
 }
 
 export function renderBuilderGeomsSource(geoms: readonly GeomName[] = KNOWN_GEOMS): string {
-  const optionTypes = [...geoms].map(optionsTypeForGeom).toSorted();
+  const optionTypes = [...geoms].map((geom) => optionsTypeForGeom(geom)).toSorted();
   const typeImports = optionTypes.map((t) => `  ${t},`).join("\n");
 
   const methods = geoms
