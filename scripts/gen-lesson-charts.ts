@@ -17,7 +17,8 @@
 import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { renderToSVGString } from "@ggsvelte/core";
+import { renderToSVGString, runPipeline } from "@ggsvelte/core";
+import type { PortableSpec } from "@ggsvelte/spec";
 
 import { kyotoSakura } from "../packages/svelte/src/lib/data/index.js";
 import {
@@ -41,16 +42,130 @@ const PROJECTION = join(ROOT, "apps", "docs", "src", "lib", "generated", "lesson
  */
 export const LIVE_STEP_INDEXES: readonly number[] = [];
 
-/** Nominal size; the SVG scales to its container via viewBox. */
+/**
+ * Target width:height of the *data panel*, not the outer SVG. Title, subtitle,
+ * legend, caption and axis titles are fixed-pixel chrome; outer height must
+ * leave room for them or the panel flattens to ~5:1 (the #1066 follow-up).
+ */
+export const SAKURA_PANEL_ASPECT = 2.5;
+
+/** Nominal plot width for static lesson SVGs; the SVG scales via viewBox. */
 export const LESSON_CHART_WIDTH = 660;
-/** ~2.5:1 width:height — nearer the reference than the old 400px default. */
-export const LESSON_CHART_HEIGHT = 264;
+
+/** Probe heights tall enough that chrome still fits while we measure panels. */
+const CHROME_PROBE_HEIGHT = 600;
+
+/** Container widths used to build the live-height lookup (includes legend-wrap). */
+export const SAKURA_HEIGHT_PROBE_WIDTHS = [360, 480, 560, 660, 800, 1000] as const;
 
 export interface LessonChartEntry {
   /** -1 is the first render, before any step. */
   step: number;
   filename: string;
 }
+
+export interface SakuraSizeRow {
+  readonly width: number;
+  /** Outer plot height that yields {@link SAKURA_PANEL_ASPECT} for the finished fold. */
+  readonly height: number;
+  readonly panelWidth: number;
+  readonly panelHeight: number;
+}
+
+function finishedSpec(): PortableSpec {
+  const rows = kyotoSakura.map((row) => ({ ...row }));
+  return foldSakura(SAKURA_STEPS.length, rows).spec;
+}
+
+/**
+ * Measure fixed chrome around the data panel for the finished sakura fold at
+ * `width`, then return the outer height that makes panel aspect
+ * {@link SAKURA_PANEL_ASPECT}.
+ */
+export function measureSakuraFinishedSize(width: number): SakuraSizeRow {
+  const model = runPipeline(finishedSpec(), { width, height: CHROME_PROBE_HEIGHT });
+  const panel = model.scene.panels[0];
+  if (panel === undefined) {
+    throw new Error(`measureSakuraFinishedSize(${String(width)}): no panel`);
+  }
+  const chromeTop = panel.y;
+  const chromeBottom = CHROME_PROBE_HEIGHT - panel.y - panel.height;
+  const chromeSide = width - panel.width;
+  const panelWidth = Math.max(width - chromeSide, 1);
+  const panelHeight = panelWidth / SAKURA_PANEL_ASPECT;
+  const height = Math.round(chromeTop + panelHeight + chromeBottom);
+  // Re-probe at the chosen outer height so the exported row matches render.
+  const check = runPipeline(finishedSpec(), { width, height });
+  const checked = check.scene.panels[0];
+  if (checked === undefined) {
+    throw new Error(`measureSakuraFinishedSize(${String(width)}): re-probe has no panel`);
+  }
+  return {
+    width,
+    height,
+    panelWidth: checked.width,
+    panelHeight: checked.height,
+  };
+}
+
+/** Lookup table: container width → outer height for the live finished chart. */
+export function buildSakuraFinishedSizeTable(
+  widths: readonly number[] = SAKURA_HEIGHT_PROBE_WIDTHS,
+): readonly SakuraSizeRow[] {
+  return widths.map((width) => measureSakuraFinishedSize(width));
+}
+
+/**
+ * Interpolate outer height for an arbitrary container width from the measured
+ * table. Build-time chrome (not browser measurement) — avoids a second fold
+ * on mobile (#972).
+ */
+export function sakuraFinishedHeight(
+  containerWidth: number,
+  table: readonly SakuraSizeRow[],
+): number {
+  if (table.length === 0) throw new Error("sakuraFinishedHeight: empty size table");
+  const first = table.at(0);
+  if (first === undefined) throw new Error("sakuraFinishedHeight: empty size table");
+  if (containerWidth <= first.width) return first.height;
+  const last = table.at(-1);
+  if (last === undefined) throw new Error("sakuraFinishedHeight: empty size table");
+  if (containerWidth >= last.width) {
+    // Extrapolate past the last probe with the same panel aspect implied by
+    // the last two points when possible.
+    if (table.length < 2) return last.height;
+    const prev = table.at(-2);
+    if (prev === undefined) return last.height;
+    const slope = (last.height - prev.height) / (last.width - prev.width);
+    return Math.round(last.height + slope * (containerWidth - last.width));
+  }
+  for (let i = 1; i < table.length; i += 1) {
+    const a = table.at(i - 1);
+    const b = table.at(i);
+    if (a === undefined || b === undefined) break;
+    if (containerWidth <= b.width) {
+      const t = (containerWidth - a.width) / (b.width - a.width);
+      return Math.round(a.height + t * (b.height - a.height));
+    }
+  }
+  return last.height;
+}
+
+const SIZE_TABLE = buildSakuraFinishedSizeTable();
+const LESSON_SIZE =
+  SIZE_TABLE.find((row) => row.width === LESSON_CHART_WIDTH) ??
+  SIZE_TABLE.at(0) ??
+  (() => {
+    throw new Error("SAKURA size table is empty");
+  })();
+
+/**
+ * Outer height for static lesson SVGs. Chosen so the *finished* fold's data
+ * panel is ~{@link SAKURA_PANEL_ASPECT}:1 after title/subtitle/legend/caption.
+ * Early steps have less chrome, so their panels are taller at the same outer
+ * size (accepted: the progressive lesson is not the reference figure).
+ */
+export const LESSON_CHART_HEIGHT = LESSON_SIZE.height;
 
 export function lessonChartFilename(step: number): string {
   return step < 0 ? "first-render.svg" : `step-${String(step + 1)}.svg`;
@@ -90,8 +205,53 @@ export interface LessonChartEntry {
   filename: string;
 }
 
+export interface SakuraSizeRow {
+  readonly width: number;
+  readonly height: number;
+  readonly panelWidth: number;
+  readonly panelHeight: number;
+}
+
+/** Target width:height of the data panel (not the outer SVG). */
+export const SAKURA_PANEL_ASPECT = ${String(SAKURA_PANEL_ASPECT)};
+
 export const LESSON_CHART_WIDTH = ${String(LESSON_CHART_WIDTH)};
+/** Outer height so the finished fold's panel is ~SAKURA_PANEL_ASPECT:1 after chrome. */
 export const LESSON_CHART_HEIGHT = ${String(LESSON_CHART_HEIGHT)};
+
+/**
+ * Measured outer heights for the finished sakura fold at common container
+ * widths (includes legend wrap). Used by the live plot; do not invent chrome
+ * constants by hand.
+ */
+export const SAKURA_FINISHED_SIZE_TABLE: readonly SakuraSizeRow[] = ${JSON.stringify(SIZE_TABLE)};
+
+/** Interpolate outer height for an arbitrary container width from the table. */
+export function sakuraFinishedHeight(containerWidth: number): number {
+  const table = SAKURA_FINISHED_SIZE_TABLE;
+  const first = table.at(0);
+  if (first === undefined) throw new Error("sakuraFinishedHeight: empty size table");
+  if (containerWidth <= first.width) return first.height;
+  const last = table.at(-1);
+  if (last === undefined) throw new Error("sakuraFinishedHeight: empty size table");
+  if (containerWidth >= last.width) {
+    if (table.length < 2) return last.height;
+    const prev = table.at(-2);
+    if (prev === undefined) return last.height;
+    const slope = (last.height - prev.height) / (last.width - prev.width);
+    return Math.round(last.height + slope * (containerWidth - last.width));
+  }
+  for (let i = 1; i < table.length; i += 1) {
+    const a = table.at(i - 1);
+    const b = table.at(i);
+    if (a === undefined || b === undefined) break;
+    if (containerWidth <= b.width) {
+      const t = (containerWidth - a.width) / (b.width - a.width);
+      return Math.round(a.height + t * (b.height - a.height));
+    }
+  }
+  return last.height;
+}
 
 export const LESSON_CHARTS: readonly LessonChartEntry[] = ${JSON.stringify(entries)};
 

@@ -6,8 +6,60 @@ export interface LessonChartEntry {
   filename: string;
 }
 
+export interface SakuraSizeRow {
+  readonly width: number;
+  readonly height: number;
+  readonly panelWidth: number;
+  readonly panelHeight: number;
+}
+
+/** Target width:height of the data panel (not the outer SVG). */
+export const SAKURA_PANEL_ASPECT = 2.5;
+
 export const LESSON_CHART_WIDTH = 660;
-export const LESSON_CHART_HEIGHT = 264;
+/** Outer height so the finished fold's panel is ~SAKURA_PANEL_ASPECT:1 after chrome. */
+export const LESSON_CHART_HEIGHT = 398;
+
+/**
+ * Measured outer heights for the finished sakura fold at common container
+ * widths (includes legend wrap). Used by the live plot; do not invent chrome
+ * constants by hand.
+ */
+export const SAKURA_FINISHED_SIZE_TABLE: readonly SakuraSizeRow[] = [
+  { width: 360, height: 302, panelWidth: 284, panelHeight: 114 },
+  { width: 480, height: 326, panelWidth: 404, panelHeight: 162 },
+  { width: 560, height: 358, panelWidth: 484, panelHeight: 194 },
+  { width: 660, height: 398, panelWidth: 584, panelHeight: 234 },
+  { width: 800, height: 454, panelWidth: 724, panelHeight: 290 },
+  { width: 1000, height: 534, panelWidth: 924, panelHeight: 370 },
+];
+
+/** Interpolate outer height for an arbitrary container width from the table. */
+export function sakuraFinishedHeight(containerWidth: number): number {
+  const table = SAKURA_FINISHED_SIZE_TABLE;
+  const first = table.at(0);
+  if (first === undefined) throw new Error("sakuraFinishedHeight: empty size table");
+  if (containerWidth <= first.width) return first.height;
+  const last = table.at(-1);
+  if (last === undefined) throw new Error("sakuraFinishedHeight: empty size table");
+  if (containerWidth >= last.width) {
+    if (table.length < 2) return last.height;
+    const prev = table.at(-2);
+    if (prev === undefined) return last.height;
+    const slope = (last.height - prev.height) / (last.width - prev.width);
+    return Math.round(last.height + slope * (containerWidth - last.width));
+  }
+  for (let i = 1; i < table.length; i += 1) {
+    const a = table.at(i - 1);
+    const b = table.at(i);
+    if (a === undefined || b === undefined) break;
+    if (containerWidth <= b.width) {
+      const t = (containerWidth - a.width) / (b.width - a.width);
+      return Math.round(a.height + t * (b.height - a.height));
+    }
+  }
+  return last.height;
+}
 
 export const LESSON_CHARTS: readonly LessonChartEntry[] = [
   { step: -1, filename: "first-render.svg" },
