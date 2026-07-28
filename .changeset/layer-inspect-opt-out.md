@@ -18,4 +18,4 @@ It travels with the spec, so a JSON round trip and a headless render agree with
 the browser. Rect hit maths is unchanged, so layers that want an area tooltip —
 bars, tiles, heatmaps — keep one.
 
-Migration: none. Omitting the field keeps today's behaviour.
+Migration: none — additive
