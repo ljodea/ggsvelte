@@ -27,6 +27,7 @@ import type {
   ResolvedInteractionConfig,
 } from "../interaction/interaction.js";
 import { createInteractionReducer } from "../interaction/reducer.js";
+import { resolveTarget } from "../interaction/target.js";
 import { resolveChooseToolAction, resolveEffectiveTool } from "../interaction/capability.js";
 import {
   resolveSurfaceBlurAction,
@@ -47,7 +48,6 @@ import {
   advanceTouchInspectMoved,
   isAreaAwaitingSecond,
   isAreaBrushing,
-  POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
   resolveCaptureClickAction,
   resolveLostPointerCaptureAction,
   resolvePointerDownAction,
@@ -458,13 +458,19 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
         touchInspectStart = null;
         touchInspectMoved = false;
         // mode/maxDistance/state from pure inspect snapshot — no re-gate.
-        // Panel-scoped nearest so faceted taps cannot seed another facet (#787).
-        const match = deps.model()?.viewport.panelAtOrOnly(endPoint)?.nearest(endPoint, {
-          mode: action.mode,
-          maxDistance: action.maxDistance,
-        });
-        if (match !== null && match !== undefined) {
-          deps.inspection().setInspection(match, "touch", action.state, match.mode);
+        // Resolved target owns panel-scoped nearest + tap distance policy (#1080 / #787).
+        const model = deps.model();
+        const target =
+          model === null
+            ? null
+            : resolveTarget({
+                model,
+                point: endPoint,
+                intent: "tap",
+                inspect: { mode: action.mode, maxDistance: action.maxDistance },
+              });
+        if (target !== null) {
+          deps.inspection().setInspection(target.match, "touch", action.state, target.mode);
           suppressClickUntil = performance.now() + TOUCH_INSPECT_CLICK_SUPPRESS_MS;
         }
         break;
@@ -588,13 +594,19 @@ export function createSurfaceState(deps: SurfaceStateDeps): SurfaceState {
         break;
       case "toggle-point": {
         const point = plotPoint(event);
-        // Panel-scoped nearest so faceted point-select cannot toggle another facet (#787).
-        const match = deps.model()?.viewport.panelAtOrOnly(point)?.nearest(point, {
-          mode: "xy",
-          maxDistance: POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
-        });
-        if (match === null || match === undefined) break;
-        deps.togglePointKeys(deps.candidateSemanticKeys(match), "pointer");
+        // Resolved target owns panel-scoped nearest + point-select radius (#1080 / #787).
+        const model = deps.model();
+        const target =
+          model === null
+            ? null
+            : resolveTarget({
+                model,
+                point,
+                intent: "point-select",
+                inspect: null,
+              });
+        if (target === null) break;
+        deps.togglePointKeys(deps.candidateSemanticKeys(target.match), "pointer");
         break;
       }
       case "toggle-pin":

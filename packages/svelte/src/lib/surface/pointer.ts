@@ -224,9 +224,11 @@ export const TOUCH_INSPECT_CLICK_SUPPRESS_MS = 500;
 
 /**
  * Nearest-candidate radius (plot px) for capture-surface point-tool click.
- * Host `onCaptureClick` toggle-point nearest lookup uses this radius.
+ * Owned by `interaction/target` (#1080); re-exported here for existing
+ * surface-pointer unit tests and callers that import the constant from
+ * the pointer decision-table module.
  */
-export const POINT_SELECT_NEAREST_MAX_DISTANCE_PX = 24;
+export { POINT_SELECT_NEAREST_MAX_DISTANCE_PX } from "../interaction/target.js";
 
 /**
  * Sticky OR of touch-inspect drag past threshold in plotPoint coordinates.
