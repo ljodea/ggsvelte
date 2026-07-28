@@ -154,7 +154,7 @@ export function createLegendFocusState(deps: LegendFocusStateDeps): LegendFocusS
       legendFocusEnabled: deps.legendFocusEnabled(),
       previewKeys: legendPreview?.keys ?? null,
       // Shared: baseKeys are controller-backed. Local: baseKeys fill localKeys.
-      controllerKeys: deps.interaction() !== undefined ? baseKeys : null,
+      controllerKeys: deps.interaction() === undefined ? null : baseKeys,
       localKeys: baseKeys,
     });
   });

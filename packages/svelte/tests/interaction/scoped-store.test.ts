@@ -28,9 +28,15 @@ const defaultScope: PlotInteractionScope = {
 
 type KeyStore = ScopedStore<readonly PropertyKey[]>;
 
+type MaybeController = ReturnType<typeof createPlotInteraction> | undefined;
+/** Chart-local mode: no shared interaction controller. */
+const noController = (): MaybeController => {
+  /* intentionally empty — returns undefined */
+};
+
 function mountKeyStore(
   options: {
-    controller?: () => ReturnType<typeof createPlotInteraction> | undefined;
+    controller?: () => MaybeController;
     scope?: () => PlotInteractionScope;
     initial?: readonly PropertyKey[];
   } = {},
@@ -38,7 +44,7 @@ function mountKeyStore(
   const { value: store, destroy } = withFlushedEffectRoot(() =>
     createScopedStore<readonly PropertyKey[]>({
       initial: options.initial ?? [],
-      controller: options.controller ?? (() => undefined),
+      controller: options.controller ?? noController,
       scope: options.scope ?? (() => defaultScope),
       read: (controller, scope) => controller.selected(scope),
       write: (controller, next, scope, source) => {
@@ -116,9 +122,7 @@ describe("createScopedStore controller mode", () => {
 
 describe("createScopedStore mid-life controller arrival", () => {
   it("switches from local to controller-backed reads when controller appears", () => {
-    const controllerBox = reactiveBox<ReturnType<typeof createPlotInteraction> | undefined>(
-      undefined,
-    );
+    const controllerBox = reactiveBox<MaybeController>(noController());
     const { store, destroy } = mountKeyStore({
       controller: () => controllerBox.value,
     });
@@ -166,7 +170,7 @@ describe("createIntervalScopedStore", () => {
   it("upserts, removes, and clears in local mode", () => {
     const { value: store, destroy } = withFlushedEffectRoot(() =>
       createIntervalScopedStore({
-        controller: () => undefined,
+        controller: noController,
         scope: () => defaultScope,
       }),
     );

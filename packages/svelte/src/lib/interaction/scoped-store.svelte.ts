@@ -75,7 +75,8 @@ export type CreateScopedStoreInput<T> = {
 export function createScopedStore<T>(input: CreateScopedStoreInput<T>): ScopedStore<T> {
   let local = $state.raw(input.initial);
   const same = input.same ?? ((a: T, b: T) => Object.is(a, b));
-  const empty = input.empty !== undefined ? input.empty : input.initial;
+  // `empty` may be null (zoom); hasOwn keeps null distinct from "not provided".
+  const empty = Object.hasOwn(input, "empty") ? (input.empty as T) : input.initial;
 
   const value: T = $derived.by(() => {
     const controller = input.controller();

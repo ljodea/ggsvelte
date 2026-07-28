@@ -396,7 +396,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
       if (candidate === null || candidate.panelId !== targetPanelId) continue;
       const sourceRows = [
         ...model.lineage.keys(candidate.lineage),
-        ...(candidate.rowIndex !== null ? [candidate.rowIndex] : []),
+        ...(candidate.rowIndex === null ? [] : [candidate.rowIndex]),
       ];
       candidates.push({
         panelId: candidate.panelId,
