@@ -55,6 +55,20 @@ describe("precise plot bounds adapters", () => {
     },
   );
 
+  it("forwards temporalKind on time scales so monthDay drafts can omit the year", () => {
+    const input = boundsEditorInputForScale({
+      axis: "y",
+      action: "zoom",
+      scale: continuousEdit("time", "identity", [Date.UTC(2000, 3, 1), Date.UTC(2000, 4, 10)]),
+      temporalKind: "monthDay",
+    });
+    expect(input).toMatchObject({
+      scale: "time",
+      temporalKind: "monthDay",
+      bounds: [Date.UTC(2000, 3, 1), Date.UTC(2000, 4, 10)],
+    });
+  });
+
   it("builds inclusive categorical inputs from band domains", () => {
     const input = boundsEditorInputForScale({
       axis: "y",

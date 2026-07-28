@@ -1,4 +1,5 @@
 import type { PositionTransformName } from "@ggsvelte/core";
+import { parseTemporal, type TemporalScaleKind } from "@ggsvelte/spec";
 
 export type BoundsAxis = "x" | "y";
 export type BoundsAction = "select" | "zoom";
@@ -31,6 +32,11 @@ interface TimeBoundsEditorInput extends BoundsEditorInputBase {
   readonly scale: "time";
   /** UTC epoch milliseconds. */
   readonly bounds: readonly [number, number];
+  /**
+   * Position scale temporal intent. When `"monthDay"`, drafts format and parse
+   * as `MM-DD` so the leap reference year stays an implementation detail.
+   */
+  readonly temporalKind?: TemporalScaleKind | null;
 }
 
 interface BandBoundsEditorInput extends BoundsEditorInputBase {
@@ -92,11 +98,17 @@ function categoryIndex(input: BandBoundsEditorInput, value: BoundsCategoryValue)
   return input.categories.findIndex((category) => sameCategory(category.value, value));
 }
 
+function formatTimeBound(ms: number, temporalKind: TemporalScaleKind | null | undefined): string {
+  // monthDay values live in a fixed leap reference year; authors write MM-DD.
+  if (temporalKind === "monthDay") return new Date(ms).toISOString().slice(5, 10);
+  return new Date(ms).toISOString();
+}
+
 export function formatBoundsDraft(input: BoundsEditorInput): BoundsDraft {
   if (input.scale === "time") {
     return {
-      lower: new Date(input.bounds[0]).toISOString(),
-      upper: new Date(input.bounds[1]).toISOString(),
+      lower: formatTimeBound(input.bounds[0], input.temporalKind),
+      upper: formatTimeBound(input.bounds[1], input.temporalKind),
     };
   }
   if (input.scale === "band") {
@@ -135,7 +147,24 @@ function parseNumber(draft: string, label: string): number | string {
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/u;
 const ISO_DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})$/u;
 
-function parseTime(draft: string, label: string): number | string {
+function parseMonthDay(draft: string, label: string): number | string {
+  const trimmed = draft.trim();
+  if (trimmed === "") return `${label} is required.`;
+  // Same surface as the md parser / monthDay domain authoring: MM-DD,
+  // --MM-DD, or a full date whose year is discarded into the reference year.
+  const parsed = parseTemporal(trimmed, "md");
+  if (!parsed.ok) {
+    return `${label} must be a month-day (MM-DD).`;
+  }
+  return parsed.epochMs;
+}
+
+function parseTime(
+  draft: string,
+  label: string,
+  temporalKind: TemporalScaleKind | null | undefined,
+): number | string {
+  if (temporalKind === "monthDay") return parseMonthDay(draft, label);
   const trimmed = draft.trim();
   if (!ISO_DATE.test(trimmed) && !ISO_DATE_TIME.test(trimmed)) {
     return `${label} must be an ISO 8601 date or date-time with a timezone.`;
@@ -186,11 +215,11 @@ export function validateBoundsDraft(
 
   const lower =
     input.scale === "time"
-      ? parseTime(lowerDraft, "Lower bound")
+      ? parseTime(lowerDraft, "Lower bound", input.temporalKind)
       : parseNumber(lowerDraft, "Lower bound");
   const upper =
     input.scale === "time"
-      ? parseTime(upperDraft, "Upper bound")
+      ? parseTime(upperDraft, "Upper bound", input.temporalKind)
       : parseNumber(upperDraft, "Upper bound");
   const errors: { lower?: string; upper?: string } = {};
   if (typeof lower === "string") errors.lower = lower;

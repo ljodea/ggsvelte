@@ -30,6 +30,47 @@ describe("precise bounds drafts", () => {
     ).toEqual({ lower: "2025-01-02T00:00:00.000Z", upper: "2025-01-03T12:30:00.000Z" });
   });
 
+  it("formats monthDay bounds as MM-DD without the reference year", () => {
+    // temporalKind: "monthDay" resolves into year 2000 so values share one
+    // position — that year is an implementation detail, never typed by authors.
+    expect(
+      formatBoundsDraft(
+        input({
+          scale: "time",
+          temporalKind: "monthDay",
+          bounds: [Date.UTC(2000, 3, 1), Date.UTC(2000, 4, 10)],
+        }),
+      ),
+    ).toEqual({ lower: "04-01", upper: "05-10" });
+  });
+
+  it("accepts MM-DD drafts on a monthDay time scale and emits reference-year epochs", () => {
+    const monthDay = input({
+      axis: "y",
+      action: "zoom",
+      scale: "time",
+      temporalKind: "monthDay",
+      bounds: [Date.UTC(2000, 2, 18), Date.UTC(2000, 4, 10)],
+    });
+    expect(validateBoundsDraft(monthDay, "04-01", "05-10")).toEqual({
+      ok: true,
+      event: {
+        source: "precise-bounds",
+        inputSource: "keyboard",
+        action: "zoom",
+        axis: "y",
+        scale: "time",
+        bounds: [Date.UTC(2000, 3, 1), Date.UTC(2000, 4, 10)],
+        reversed: false,
+      },
+    });
+    // Slash form is accepted by the md parser; refuse free-text month names.
+    const invalid = validateBoundsDraft(monthDay, "April 1", "05-10");
+    expect(invalid.ok).toBe(false);
+    if (invalid.ok) throw new Error("expected invalid month-day bound");
+    expect(invalid.errors.lower).toMatch(/month-day|MM-DD/i);
+  });
+
   it("keeps reversed linear domains semantic and ascending", () => {
     const result = validateBoundsDraft(input({ reversed: true }), "3", "7");
     expect(result).toEqual({
