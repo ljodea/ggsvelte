@@ -2597,8 +2597,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/blank/axes-only",
-    title: "geom_blank axes only — ggsvelte gallery",
-    description: "geom_blank axes only",
+    title: "The frame before the chart — ggsvelte gallery",
+    description:
+      "Two corner rows fix the axes of Halley's life table and draw nothing, which is how a panel keeps another chart's scale or holds its shape before the data arrives.",
     canonicalPath: "/examples/blank/axes-only",
     kind: "page",
     index: true,
@@ -2607,8 +2608,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/blank/domain-expand",
-    title: "geom_blank domain expansion — ggsvelte gallery",
-    description: "geom_blank domain expansion",
+    title: "Opening the axis down to water — ggsvelte gallery",
+    description:
+      "Cavendish's twenty-nine readings cover one unit, so on their own they say nothing about the claim they were made for. A blank row at water's density fixes that.",
     canonicalPath: "/examples/blank/domain-expand",
     kind: "page",
     index: true,
@@ -3041,8 +3043,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/gradient-continuous",
-    title: "Two-stop gradient colour scale — ggsvelte gallery",
-    description: "Two-stop gradient colour scale",
+    title: "One register, forty-three years deep — ggsvelte gallery",
+    description:
+      "Monthly counts from the Paris register of 1812 to 1854, folded onto a single year. A two-stop colour ramp is what pulls the decades back apart.",
     canonicalPath: "/examples/point/gradient-continuous",
     kind: "page",
     index: true,
@@ -3051,8 +3054,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/hue-discrete",
-    title: "Hue discrete colour scale — ggsvelte gallery",
-    description: "Hue discrete colour scale",
+    title: "How the Armada was loaded — ggsvelte gallery",
+    description:
+      "Ten squadrons of 1588 by ships and men aboard. Ten unordered categories are exactly what an even walk around the colour wheel is for.",
     canonicalPath: "/examples/point/hue-discrete",
     kind: "page",
     index: true,
@@ -3071,8 +3075,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/layer-data-bands",
-    title: "Per-layer data (bands + callout) — ggsvelte gallery",
-    description: "Per-layer data (bands + callout)",
+    title: "What the wars did to the national debt — ggsvelte gallery",
+    description:
+      "Playfair's debt series with two war periods behind it and one note on top, each layer carrying its own table because only one of the three is a measurement.",
     canonicalPath: "/examples/point/layer-data-bands",
     kind: "page",
     index: true,
@@ -3134,8 +3139,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/steps-binned",
-    title: "Stepped binned colour scale — ggsvelte gallery",
-    description: "Stepped binned colour scale",
+    title: "Cholera against height above the Thames — ggsvelte gallery",
+    description:
+      "Farr's 38 London districts of 1849, coloured in bands by their poor rate. A stepped ramp reads as brackets, which is how a rate like this gets argued about.",
     canonicalPath: "/examples/point/steps-binned",
     kind: "page",
     index: true,
@@ -3144,8 +3150,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/style-scales",
-    title: "Complete style scales — ggsvelte gallery",
-    description: "Complete style scales",
+    title: "Minard's march on five style channels — ggsvelte gallery",
+    description:
+      "Line width, mark size and fade all carry the army's strength, the way Minard drew it; line type and shape carry the direction of march.",
     canonicalPath: "/examples/point/style-scales",
     kind: "page",
     index: true,
@@ -3154,8 +3161,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/void-chrome",
-    title: "Void theme — marks without cartesian chrome — ggsvelte gallery",
-    description: "Void theme — marks without cartesian chrome",
+    title: "British exports as a sparkline — ggsvelte gallery",
+    description:
+      "Bowley's export series with theme_void: no axes, ticks, grid or panel border, just the shape of the run.",
     canonicalPath: "/examples/point/void-chrome",
     kind: "page",
     index: true,

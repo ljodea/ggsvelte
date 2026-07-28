@@ -1,43 +1,44 @@
 <script lang="ts">
   import {
-    GeomPoint,
+    GeomLine,
     GeomRect,
     GeomText,
     GGPlot,
     Labs,
+    ThemeClassic,
   } from "@ggsvelte/svelte";
 
-  import { bands, callouts, observations } from "./data.js";
+  import { callouts, nationalDebt, warYears } from "./data.js";
 </script>
 
 <GGPlot width={640} height={400}>
+  <ThemeClassic />
   <Labs
-    title="Per-layer data: observations, bands, and a callout"
-    x="x"
-    y="y"
-    color="Group"
-    fill="Region"
+    title="What the wars did to the national debt"
+    subtitle="Playfair's series, 1770 to 1824, with the war years drawn behind it"
+    x="Year"
+    y="Debt (£ millions)"
+    fill=""
   />
   <GeomRect
-    data={bands}
+    data={warYears}
     aes={{
       xmin: "xmin",
       xmax: "xmax",
       ymin: "ymin",
       ymax: "ymax",
-      fill: "region",
+      fill: "war",
     }}
-    alpha={0.2}
+    alpha={0.18}
   />
-  <GeomPoint
-    data={observations}
-    aes={{ x: "x", y: "y", color: "group" }}
-    size={2.5}
-    alpha={0.85}
+  <GeomLine
+    data={nationalDebt}
+    aes={{ x: "year", y: "debt" }}
+    linewidth={1.8}
   />
   <GeomText
     data={callouts}
-    aes={{ x: "x", y: "y", label: "label" }}
+    aes={{ x: "year", y: "debt", label: "label" }}
     size={12}
   />
 </GGPlot>

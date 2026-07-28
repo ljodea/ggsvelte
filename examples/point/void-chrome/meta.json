@@ -1,5 +1,6 @@
 {
-  "title": "Void theme — marks without cartesian chrome",
+  "title": "British exports as a sparkline",
+  "description": "Bowley's export series with theme_void: no axes, ticks, grid or panel border, just the shape of the run.",
   "tags": ["point", "theme", "void", "chrome-free"],
   "docsSection": "Points & scatter"
 }

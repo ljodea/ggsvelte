@@ -38,13 +38,13 @@
     },
     "blank/axes-only": {
       "filename": "blank-axes-only-light.png",
-      "sourceSha256": "078d4dc764ff3b0cffd25d09ba1909eca67bfcb8c263cef7466b5dcf4d81b27e",
-      "pngSha256": "2939452e748b0d9b660dbfdb98ca2fbb0cb23e87eee08042e976ae8967c516cd"
+      "sourceSha256": "e1ed7904c6195d30d56abb4ed5aa77234c018f19f931dcfc0fb67d418cda6f18",
+      "pngSha256": "f48e4129f5bf14895ee3506d039666eff0398f71d44c5791f4ab28241c9c739f"
     },
     "blank/domain-expand": {
       "filename": "blank-domain-expand-light.png",
-      "sourceSha256": "b031554cb937e30e32cfb5358f980fb0046bda0e35033287c6d98f0a4288f90d",
-      "pngSha256": "44155b76550fca59d37e31acd3ab437d7d68868f505bd362386d62b195385d7d"
+      "sourceSha256": "fdb221a804667605fa86796b69ec1ebfca83eadc4bc383be3ebde5aac6d21ca2",
+      "pngSha256": "acb2257d046af636e6152ce797842df04c5bb058963ea39dbf1173d2379a2ced"
     },
     "boxplot/by-category": {
       "filename": "boxplot-by-category-light.png",
@@ -268,13 +268,13 @@
     },
     "point/gradient-continuous": {
       "filename": "point-gradient-continuous-light.png",
-      "sourceSha256": "f08cdd07126938cc4ed8e789c090c279bdbd134cdb5cb332bacaec80ae9d99c5",
-      "pngSha256": "52029b5a4a501f00b305ac5f26b69eeb75ded068a91dc1d35a7c7a45481e102a"
+      "sourceSha256": "83ab07fdef9cdb42f47592dc18231faa7686216d5fc2d832e51060d21b439644",
+      "pngSha256": "0e6f2b815d73aae127dc05c7944f35d324cd3dacc4e12d67345f81e0ef0b41d1"
     },
     "point/hue-discrete": {
       "filename": "point-hue-discrete-light.png",
-      "sourceSha256": "987b07974a48ecaadb907aec5ecc4aea3a50af95800a36adabeb5e030b4cb55d",
-      "pngSha256": "0a438791fffccced034955c736fba5ae0a4bdcc7987880cf3e1042b39e536f32"
+      "sourceSha256": "764bc27b63ec6137e534c8ebc092649b6a5508aba2dd7d038b7391d94707d568",
+      "pngSha256": "8673f811fb6621b012f4bc47ba917cd4aafecb2209ed7f4751c12b811e1cacfe"
     },
     "point/jitter": {
       "filename": "point-jitter-light.png",
@@ -283,8 +283,8 @@
     },
     "point/layer-data-bands": {
       "filename": "point-layer-data-bands-light.png",
-      "sourceSha256": "aca8c7b6ba11476f8c20971db6fb90d1c72b2ae6487efbb608528484ddcd3107",
-      "pngSha256": "a2acf73b0ea0ce725cae64a45c2dcebd274b1be6917426c37d5532a602cf34ee"
+      "sourceSha256": "9f68a5bc40995a7ee2804b70cab1d5de93569897ba23445eb38677bc2156a765",
+      "pngSha256": "086e355ed5fd2e06e161f2527261ee6cd2f267feb143e51b5bebfd8e688639ae"
     },
     "point/log-scale": {
       "filename": "point-log-scale-light.png",
@@ -313,18 +313,18 @@
     },
     "point/steps-binned": {
       "filename": "point-steps-binned-light.png",
-      "sourceSha256": "bc1c283de8f80a022316b04d4828a9657b20aef863a909295c2e5ced52289e9f",
-      "pngSha256": "3097ea59517b54c748254fe129f95f52dffab95ecfcfc4338435574f5e9315a0"
+      "sourceSha256": "61524085932957371ac7533f0ba3a6fd746adaaca38fe919d8ad271d2437e771",
+      "pngSha256": "399360293a783d412c10d377ce302dca5f1d70df6d67cc30dcf69f6aa5a9a251"
     },
     "point/style-scales": {
       "filename": "point-style-scales-light.png",
-      "sourceSha256": "81d4be7d9dca5cc1c45558da6a0b3ca303d810443f407648bbf831bedc4cde9f",
-      "pngSha256": "3f52ea658edff9c430cede998f7fb33f900de36c3e17dfbbc22f0328cab6a0e7"
+      "sourceSha256": "0c6339c8216dcdde1ef7cd9879f4806f9ee2660d3b6e6d861fee36e0cd821488",
+      "pngSha256": "7634bb3fedc89f48ab1ebdfad730ff34a98095c69848df862c3789ecc3b4d687"
     },
     "point/void-chrome": {
       "filename": "point-void-chrome-light.png",
-      "sourceSha256": "3629ec64109b22c2f3b03b62668d6cc55c334683e45ff8c9362c2a9db7feb2f8",
-      "pngSha256": "6ea9c8f342288fc5f2069fd6fdd5da6445713d4c3bb6f5bbe29b38ed26d9b9f2"
+      "sourceSha256": "73089f6e326eb33f53180a9b386b9e2bf0cb7d5cfe5bdc877e537bbf0c4406c1",
+      "pngSha256": "41dccddd67cbd3ed2b924a5ef8d41274cea5a0d5757f9dadeb22550707db8cc9"
     },
     "polygon/regions": {
       "filename": "polygon-regions-light.png",

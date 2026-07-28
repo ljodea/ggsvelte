@@ -4459,20 +4459,29 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:blank:axes-only",
     kind: "example",
-    title: "geom_blank axes only",
-    summary: "geom_blank axes only (Annotations & rules)",
+    title: "The frame before the chart",
+    summary:
+      "Two corner rows fix the axes of Halley's life table and draw nothing, which is how a panel keeps another chart's scale or holds its shape before the data arrives.",
     href: "/examples/blank/axes-only",
-    keywords: ["geom_blank axes only", "Annotations & rules", "blank", "scales", "domain", "theme"],
-    exact: ["geom_blank axes only"],
+    keywords: [
+      "The frame before the chart",
+      "Annotations & rules",
+      "blank",
+      "scales",
+      "domain",
+      "theme",
+    ],
+    exact: ["The frame before the chart"],
   },
   {
     id: "example:blank:domain-expand",
     kind: "example",
-    title: "geom_blank domain expansion",
-    summary: "geom_blank domain expansion (Annotations & rules)",
+    title: "Opening the axis down to water",
+    summary:
+      "Cavendish's twenty-nine readings cover one unit, so on their own they say nothing about the claim they were made for. A blank row at water's density fixes that.",
     href: "/examples/blank/domain-expand",
     keywords: [
-      "geom_blank domain expansion",
+      "Opening the axis down to water",
       "Annotations & rules",
       "blank",
       "point",
@@ -4480,7 +4489,7 @@ export const DOCS_SEARCH_INDEX = [
       "domain",
       "theme",
     ],
-    exact: ["geom_blank domain expansion"],
+    exact: ["Opening the axis down to water"],
   },
   {
     id: "example:boxplot:by-category",
@@ -5163,11 +5172,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:point:gradient-continuous",
     kind: "example",
-    title: "Two-stop gradient colour scale",
-    summary: "Two-stop gradient colour scale (Points & scatter)",
+    title: "One register, forty-three years deep",
+    summary:
+      "Monthly counts from the Paris register of 1812 to 1854, folded onto a single year. A two-stop colour ramp is what pulls the decades back apart.",
     href: "/examples/point/gradient-continuous",
     keywords: [
-      "Two-stop gradient colour scale",
+      "One register, forty-three years deep",
       "Points & scatter",
       "point",
       "color",
@@ -5175,16 +5185,17 @@ export const DOCS_SEARCH_INDEX = [
       "sequential",
       "scale",
     ],
-    exact: ["Two-stop gradient colour scale"],
+    exact: ["One register, forty-three years deep"],
   },
   {
     id: "example:point:hue-discrete",
     kind: "example",
-    title: "Hue discrete colour scale",
-    summary: "Hue discrete colour scale (Points & scatter)",
+    title: "How the Armada was loaded",
+    summary:
+      "Ten squadrons of 1588 by ships and men aboard. Ten unordered categories are exactly what an even walk around the colour wheel is for.",
     href: "/examples/point/hue-discrete",
     keywords: [
-      "Hue discrete colour scale",
+      "How the Armada was loaded",
       "Points & scatter",
       "point",
       "color",
@@ -5192,7 +5203,7 @@ export const DOCS_SEARCH_INDEX = [
       "discrete",
       "scale",
     ],
-    exact: ["Hue discrete colour scale"],
+    exact: ["How the Armada was loaded"],
   },
   {
     id: "example:point:jitter",
@@ -5214,11 +5225,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:point:layer-data-bands",
     kind: "example",
-    title: "Per-layer data (bands + callout)",
-    summary: "Per-layer data (bands + callout) (Scatter plots)",
+    title: "What the wars did to the national debt",
+    summary:
+      "Playfair's debt series with two war periods behind it and one note on top, each layer carrying its own table because only one of the three is a measurement.",
     href: "/examples/point/layer-data-bands",
     keywords: [
-      "Per-layer data (bands + callout)",
+      "What the wars did to the national debt",
       "Scatter plots",
       "point",
       "rect",
@@ -5226,7 +5238,7 @@ export const DOCS_SEARCH_INDEX = [
       "layer-data",
       "multi-table",
     ],
-    exact: ["Per-layer data (bands + callout)"],
+    exact: ["What the wars did to the national debt"],
   },
   {
     id: "example:point:log-scale",
@@ -5324,11 +5336,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:point:steps-binned",
     kind: "example",
-    title: "Stepped binned colour scale",
-    summary: "Stepped binned colour scale (Points & scatter)",
+    title: "Cholera against height above the Thames",
+    summary:
+      "Farr's 38 London districts of 1849, coloured in bands by their poor rate. A stepped ramp reads as brackets, which is how a rate like this gets argued about.",
     href: "/examples/point/steps-binned",
     keywords: [
-      "Stepped binned colour scale",
+      "Cholera against height above the Thames",
       "Points & scatter",
       "point",
       "color",
@@ -5336,16 +5349,17 @@ export const DOCS_SEARCH_INDEX = [
       "binned",
       "scale",
     ],
-    exact: ["Stepped binned colour scale"],
+    exact: ["Cholera against height above the Thames"],
   },
   {
     id: "example:point:style-scales",
     kind: "example",
-    title: "Complete style scales",
-    summary: "Complete style scales (Scales & guides)",
+    title: "Minard's march on five style channels",
+    summary:
+      "Line width, mark size and fade all carry the army's strength, the way Minard drew it; line type and shape carry the direction of march.",
     href: "/examples/point/style-scales",
     keywords: [
-      "Complete style scales",
+      "Minard's march on five style channels",
       "Scales & guides",
       "point",
       "line",
@@ -5356,23 +5370,24 @@ export const DOCS_SEARCH_INDEX = [
       "linetype",
       "scales",
     ],
-    exact: ["Complete style scales"],
+    exact: ["Minard's march on five style channels"],
   },
   {
     id: "example:point:void-chrome",
     kind: "example",
-    title: "Void theme — marks without cartesian chrome",
-    summary: "Void theme — marks without cartesian chrome (Points & scatter)",
+    title: "British exports as a sparkline",
+    summary:
+      "Bowley's export series with theme_void: no axes, ticks, grid or panel border, just the shape of the run.",
     href: "/examples/point/void-chrome",
     keywords: [
-      "Void theme — marks without cartesian chrome",
+      "British exports as a sparkline",
       "Points & scatter",
       "point",
       "theme",
       "void",
       "chrome-free",
     ],
-    exact: ["Void theme — marks without cartesian chrome"],
+    exact: ["British exports as a sparkline"],
   },
   {
     id: "example:polygon:regions",

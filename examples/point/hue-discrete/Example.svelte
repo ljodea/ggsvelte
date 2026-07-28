@@ -7,21 +7,23 @@
     ThemeMinimal,
   } from "@ggsvelte/svelte";
 
-  import { hueGroups } from "./data.js";
+  import { armadaSquadrons } from "./data.js";
 </script>
 
 <GGPlot
-  data={hueGroups}
-  aes={{ x: "x", y: "y", color: "group" }}
+  data={armadaSquadrons}
+  aes={{ x: "ships", y: "men", color: "squadron" }}
   width={640}
   height={400}
 >
   <ThemeMinimal />
   <ScaleColorHue />
   <Labs
-    title="scale_color_hue"
-    subtitle="Even-hue discrete colour (ggplot2-shaped default discrete path)"
-    color="group"
+    title="How the Armada was loaded"
+    subtitle="Ten squadrons, ships against men aboard; the galleys carried theirs in four hulls"
+    x="Ships"
+    y="Soldiers and sailors"
+    color="Squadron"
   />
-  <GeomPoint size={4} />
+  <GeomPoint size={5} />
 </GGPlot>

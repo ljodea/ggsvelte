@@ -1,5 +1,6 @@
 {
-  "title": "Per-layer data (bands + callout)",
+  "title": "What the wars did to the national debt",
+  "description": "Playfair's debt series with two war periods behind it and one note on top, each layer carrying its own table because only one of the three is a measurement.",
   "tags": ["point", "rect", "text", "layer-data", "multi-table"],
   "docsSection": "Scatter plots"
 }

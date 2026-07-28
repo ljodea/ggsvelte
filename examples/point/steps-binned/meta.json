@@ -1,5 +1,6 @@
 {
-  "title": "Stepped binned colour scale",
+  "title": "Cholera against height above the Thames",
+  "description": "Farr's 38 London districts of 1849, coloured in bands by their poor rate. A stepped ramp reads as brackets, which is how a rate like this gets argued about.",
   "tags": ["point", "color", "steps", "binned", "scale"],
   "docsSection": "Points & scatter"
 }

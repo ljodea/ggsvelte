@@ -1,46 +1,49 @@
 <script lang="ts">
   import {
-    GeomLine,
+    GeomPath,
     GeomPoint,
     GGPlot,
     Labs,
     ScaleAlphaContinuous,
+    ScaleColorDiscrete,
     ScaleLinetypeDiscrete,
     ScaleLinewidthContinuous,
     ScaleShapeDiscrete,
     ScaleSizeContinuous,
   } from "@ggsvelte/svelte";
 
-  import { data } from "./data.js";
+  import { marchRoute } from "./data.js";
 </script>
 
 <GGPlot
-  {data}
-  aes={{ x: "x", y: "y" }}
-  width="container"
-  height={760}
-  key="id"
-  legendFocus
+  data={marchRoute}
+  aes={{ x: "long", y: "lat", color: "direction" }}
+  width={640}
+  height={400}
 >
-  <ScaleSizeContinuous range={[3, 10]} />
-  <ScaleAlphaContinuous range={[0.35, 1]} />
-  <ScaleLinewidthContinuous range={[1, 5]} />
+  <ScaleSizeContinuous range={[2, 9]} />
+  <ScaleAlphaContinuous range={[0.4, 1]} />
+  <ScaleLinewidthContinuous range={[1, 9]} />
   <ScaleShapeDiscrete range={["circle", "triangle"]} />
   <ScaleLinetypeDiscrete range={["solid", "dashed"]} />
+  <ScaleColorDiscrete scheme="tableau10" />
   <Labs
-    title="Complete mapped style scales"
-    subtitle="Five data-driven style channels"
-    x="Observation"
-    y="Value"
-    size="Magnitude"
-    alpha="Confidence"
-    linewidth="Weight"
-    shape="Region"
-    linetype="Region"
+    title="Minard's march on five style channels"
+    subtitle="Width, size and fade all carry strength; line type and shape carry direction"
+    x="Longitude east"
+    y="Latitude north"
+    size="Men left"
+    alpha="Men left"
+    linewidth="Men left"
+    shape="Direction"
+    linetype="Direction"
+    color="Direction"
   />
-  <GeomLine
-    aes={{ group: "group", linewidth: "weight", linetype: "group" }}
-    alpha={0.7}
+  <GeomPath
+    aes={{ group: "leg", linewidth: "survivors", linetype: "direction" }}
+    alpha={0.85}
   />
-  <GeomPoint aes={{ size: "magnitude", alpha: "confidence", shape: "group" }} />
+  <GeomPoint
+    aes={{ size: "survivors", alpha: "survivors", shape: "direction" }}
+  />
 </GGPlot>

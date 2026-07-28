@@ -1,20 +1,21 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { plannedRange } from "./data.js";
+import { earthDensity, waterDensity } from "./data.js";
 
 export default defineExample(
-  // geom_blank trains scales from x_plan/y_plan without drawing those rows.
-  // Points stay clustered; axes open to the full planned range (ggplot2 geom_blank).
-  gg(plannedRange, aes({ x: "x", y: "y" }))
+  // geom_blank trains the scales from its own rows and draws nothing. Here it
+  // carries the density of water, so the axis reaches the number Cavendish's
+  // result is quoted against without a mark pretending to be a measurement.
+  gg(earthDensity, aes({ x: "trial", y: "density" }))
     .geomPoint({ size: 3.5, alpha: 0.9 })
-    .geomBlank({ aes: aes({ x: "x_plan", y: "y_plan" }) })
+    .geomBlank({ data: waterDensity, aes: aes({ x: "trial", y: "density" }) })
     .theme("classic")
     .labs({
-      title: "Expand scales without extra marks",
-      subtitle: "geom_blank maps x_plan / y_plan for domain training only",
-      x: "x (observed)",
-      y: "y (observed)",
+      title: "Five and a half times the density of water",
+      subtitle: "A blank row at water's own density opens the axis down to 1",
+      x: "Determination",
+      y: "Density of the earth, water = 1",
     })
     .spec(),
 );

@@ -1,16 +1,30 @@
 <script lang="ts">
-  import { GeomBlank, GGPlot, Labs, ThemeClassic } from "@ggsvelte/svelte";
+  import {
+    GeomBlank,
+    GGPlot,
+    Labs,
+    ScaleXContinuous,
+    ScaleYContinuous,
+    ThemeClassic,
+  } from "@ggsvelte/svelte";
 
-  import { rangeEndpoints } from "./data.js";
+  import { halleyFrame } from "./data.js";
 </script>
 
-<GGPlot data={rangeEndpoints} aes={{ x: "x", y: "y" }} width={640} height={400}>
+<GGPlot
+  data={halleyFrame}
+  aes={{ x: "age", y: "survivors" }}
+  width={640}
+  height={400}
+>
   <ThemeClassic />
+  <ScaleXContinuous breaks={[1, 10, 20, 30, 40, 50, 60, 70, 80]} nice={false} />
+  <ScaleYContinuous breaks={[0, 200, 400, 600, 800, 1000]} />
   <Labs
-    title="Axes trained with no marks"
-    subtitle="geom_blank alone — useful when co-layering later or pinning domains"
-    x="x"
-    y="y"
+    title="The frame before the chart"
+    subtitle="Two corner rows pin the axes of Halley's life table; nothing is drawn on them"
+    x="Age"
+    y="Surviving"
   />
   <GeomBlank />
 </GGPlot>

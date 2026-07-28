@@ -7,17 +7,22 @@
     ThemeClassic,
   } from "@ggsvelte/svelte";
 
-  import { plannedRange } from "./data.js";
+  import { earthDensity, waterDensity } from "./data.js";
 </script>
 
-<GGPlot data={plannedRange} aes={{ x: "x", y: "y" }} width={640} height={400}>
+<GGPlot
+  data={earthDensity}
+  aes={{ x: "trial", y: "density" }}
+  width={640}
+  height={400}
+>
   <ThemeClassic />
   <Labs
-    title="Expand scales without extra marks"
-    subtitle="geom_blank maps x_plan / y_plan for domain training only"
-    x="x (observed)"
-    y="y (observed)"
+    title="Five and a half times the density of water"
+    subtitle="A blank row at water's own density opens the axis down to 1"
+    x="Determination"
+    y="Density of the earth, water = 1"
   />
   <GeomPoint size={3.5} alpha={0.9} />
-  <GeomBlank aes={{ x: "x_plan", y: "y_plan" }} />
+  <GeomBlank data={waterDensity} aes={{ x: "trial", y: "density" }} />
 </GGPlot>
