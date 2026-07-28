@@ -7,28 +7,34 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import {
+  STYLE_ORDINAL_SCALE_HELPERS,
+  builderScaleHelperNames,
+  scaleCapabilityCamelHelpers,
+} from "@ggsvelte/spec";
+
+import {
   BUILDER_SCALES_PATH,
   builderScaleHelpers,
-  ledgerCamelHelpers,
   renderBuilderScalesSource,
-  STYLE_ORDINAL_BUILDER_HELPERS,
 } from "./gen-builder-scales.ts";
 
 const repoRoot = join(import.meta.dir, "..");
 
 describe("builder scale helper set", () => {
-  it("includes every ledger camelCase helper", () => {
-    const ledger = new Set(ledgerCamelHelpers());
+  it("includes every ledger camelCase helper from the package inventory", () => {
+    const ledger = new Set(scaleCapabilityCamelHelpers());
     const builder = new Set(builderScaleHelpers());
     for (const h of ledger) {
       expect(builder.has(h), `missing builder helper ${h}`).toBe(true);
     }
     expect(ledger.size).toBeGreaterThan(90);
+    // Generator delegates to the package export.
+    expect(builderScaleHelpers()).toEqual([...builderScaleHelperNames()]);
   });
 
-  it("includes style ordinal aliases", () => {
+  it("includes style ordinal aliases from STYLE_ORDINAL_SCALE_HELPERS", () => {
     const builder = new Set(builderScaleHelpers());
-    for (const h of STYLE_ORDINAL_BUILDER_HELPERS) {
+    for (const h of STYLE_ORDINAL_SCALE_HELPERS) {
       expect(builder.has(h), h).toBe(true);
     }
   });
@@ -48,9 +54,7 @@ describe("builder scale helper set", () => {
 describe("builder-scales.ts staleness", () => {
   it("committed file matches render (regenerate with bun run builder:scales:gen)", async () => {
     const { builderScalesArtifact } = await import("./gen-builder-scales.ts");
-    // check() throws ArtifactError when STALE/MISSING
     await builderScalesArtifact(repoRoot).check();
-    // Sanity: file exists and is non-empty
     const current = readFileSync(join(repoRoot, BUILDER_SCALES_PATH), "utf8");
     expect(current.length).toBeGreaterThan(500);
   });

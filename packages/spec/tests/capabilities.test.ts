@@ -12,7 +12,12 @@
  */
 import { describe, expect, it } from "bun:test";
 
-import { SCALE_CAPABILITIES } from "../src/capabilities.ts";
+import {
+  SCALE_CAPABILITIES,
+  STYLE_ORDINAL_SCALE_HELPERS,
+  builderScaleHelperNames,
+  scaleCapabilityCamelHelpers,
+} from "../src/capabilities.ts";
 import * as spec from "../src/index.ts";
 import { normalize } from "../src/normalize.ts";
 import type { Scales } from "../src/schema.ts";
@@ -96,4 +101,32 @@ describe("every claimed helper normalizes to its declared family", () => {
       });
     }
   }
+});
+
+describe("capability helper inventory (#1081 PR B)", () => {
+  it("scaleCapabilityCamelHelpers lists every non-Colour camel ledger name", () => {
+    const fromApi = new Set(scaleCapabilityCamelHelpers());
+    const fromLedger = new Set<string>();
+    for (const cap of SCALE_CAPABILITIES) {
+      for (const h of cap.helpers) {
+        if (h.includes("_") || h.includes("Colour")) continue;
+        fromLedger.add(h);
+      }
+    }
+    expect(fromApi).toEqual(fromLedger);
+  });
+
+  it("STYLE_ORDINAL_SCALE_HELPERS are real exports and included in builderScaleHelperNames", () => {
+    expect(STYLE_ORDINAL_SCALE_HELPERS).toHaveLength(4);
+    for (const name of STYLE_ORDINAL_SCALE_HELPERS) {
+      expect(typeof registry[name], name).toBe("function");
+    }
+    const builder = new Set(builderScaleHelperNames());
+    for (const name of STYLE_ORDINAL_SCALE_HELPERS) {
+      expect(builder.has(name), name).toBe(true);
+    }
+    for (const name of scaleCapabilityCamelHelpers()) {
+      expect(builder.has(name), name).toBe(true);
+    }
+  });
 });

@@ -1,11 +1,9 @@
 /**
  * gen-builder-scales — generates packages/spec/src/builder-scales.ts from
- * SCALE_CAPABILITIES (#1081 PR A).
+ * SCALE_CAPABILITIES (#1081).
  *
- * Every camelCase non-Colour helper on the ledger becomes a thin GGBuilder
- * method: `return this.scales(helper(...args))`. Style-channel ggplot2
- * ordinal aliases (Size/Alpha/Linewidth/Shape) are included even when only
- * the snake_case twin is listed on the ledger.
+ * Helper names come from `builderScaleHelperNames()` in @ggsvelte/spec so the
+ * ledger (plus style ordinal aliases) is the single source of truth.
  *
  * Usage:
  *   bun scripts/gen-builder-scales.ts           # (re)write builder-scales.ts
@@ -13,41 +11,15 @@
  */
 import { join } from "node:path";
 
-import { SCALE_CAPABILITIES } from "@ggsvelte/spec";
+import { builderScaleHelperNames } from "@ggsvelte/spec";
 
 import { defineArtifact, formatGeneratedSource } from "./artifact.ts";
 
 export const BUILDER_SCALES_PATH = "packages/spec/src/builder-scales.ts";
 
-/**
- * ggplot2-style ordinal aliases kept on the builder (binding-identical to the
- * corresponding discrete helper). Component shells re-export these names too
- * (#830/#832); the capability ledger lists only snake_case for some of them.
- */
-export const STYLE_ORDINAL_BUILDER_HELPERS = [
-  "scaleSizeOrdinal",
-  "scaleAlphaOrdinal",
-  "scaleLinewidthOrdinal",
-  "scaleShapeOrdinal",
-] as const;
-
-/** CamelCase non-Colour helpers from SCALE_CAPABILITIES, sorted. */
-export function ledgerCamelHelpers(): string[] {
-  const out = new Set<string>();
-  for (const cap of SCALE_CAPABILITIES) {
-    for (const h of cap.helpers) {
-      if (h.includes("_")) continue;
-      if (h.includes("Colour")) continue;
-      out.add(h);
-    }
-  }
-  return [...out].toSorted();
-}
-
 /** Full set of helper names the builder mixin must wrap. */
 export function builderScaleHelpers(): string[] {
-  const out = new Set([...ledgerCamelHelpers(), ...STYLE_ORDINAL_BUILDER_HELPERS]);
-  return [...out].toSorted();
+  return [...builderScaleHelperNames()];
 }
 
 export function renderBuilderScalesSource(helpers: readonly string[]): string {
@@ -66,7 +38,7 @@ export function renderBuilderScalesSource(helpers: readonly string[]): string {
  * Regenerate: bun run builder:scales:gen
  *
  * Fluent builder scale sugar methods (thin wrappers over scale-helpers).
- * Source of truth: SCALE_CAPABILITIES camelCase helpers + style ordinal aliases.
+ * Source of truth: builderScaleHelperNames() from SCALE_CAPABILITIES.
  * Core builder: builder-core.ts. Public GGBuilder: builder.ts.
  */
 import type { GGBuilder } from "./builder.js";

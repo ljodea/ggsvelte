@@ -1680,6 +1680,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "STYLE_ORDINAL_SCALE_HELPERS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "ScaleCapability": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2120,6 +2124,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "builderScaleHelperNames": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "canonicalMultiScaleChannel": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2385,6 +2393,10 @@
           "lifecycle": "experimental"
         },
         "scaleAlphaOrdinal": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleCapabilityCamelHelpers": {
           "kind": "value",
           "lifecycle": "experimental"
         },

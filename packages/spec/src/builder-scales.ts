@@ -3,7 +3,7 @@
  * Regenerate: bun run builder:scales:gen
  *
  * Fluent builder scale sugar methods (thin wrappers over scale-helpers).
- * Source of truth: SCALE_CAPABILITIES camelCase helpers + style ordinal aliases.
+ * Source of truth: builderScaleHelperNames() from SCALE_CAPABILITIES.
  * Core builder: builder-core.ts. Public GGBuilder: builder.ts.
  */
 import type { GGBuilder } from "./builder.js";
