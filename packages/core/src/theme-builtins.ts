@@ -183,6 +183,10 @@ export function themed(
     : foundation.ink === "currentColor"
       ? "#1f2328"
       : foundation.ink;
+  // Gridless themes (tufte, void) chose no panel structure. Do not invent a
+  // panelBorder keyline for their tooltips — text on paper (#1069). Themes that
+  // still draw a grid keep a hairline from that grid color.
+  const tooltipBorder = foundation.grid === "none" ? "transparent" : foundation.grid;
   return Object.freeze({
     ...foundation,
     letterboxFill: letterboxFill ?? foundation.paper,
@@ -194,7 +198,7 @@ export function themed(
     selectionStroke: foundation.accent,
     tooltipPaper,
     tooltipInk,
-    tooltipBorder: foundation.grid === "none" ? foundation.panelBorder : foundation.grid,
+    tooltipBorder,
     toolActive: foundation.ink,
   });
 }

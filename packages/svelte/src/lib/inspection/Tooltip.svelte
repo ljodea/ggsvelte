@@ -11,6 +11,7 @@
     tooltipFieldLabel,
     type TooltipFieldLabs,
   } from "./display-members.js";
+  import { shouldShowTooltipPinHint } from "./tooltip-chrome.js";
 
   const {
     inspection,
@@ -25,6 +26,13 @@
     docked = false,
     labs = null,
     fontSizePx = 12.5,
+    /** Whether inspect pinning is enabled (drives instructional footers). */
+    pin = true,
+    /**
+     * Resolved theme tooltip keyline. Flat (gridless) themes pass
+     * `"transparent"` so default content stays silent (#1069).
+     */
+    tooltipBorder = "#b8b8b8",
   }: {
     inspection: PlotInspectionChange<Record<string, CellValue>, PropertyKey>;
     width: number;
@@ -45,7 +53,13 @@
      * than a hard-coded 16px scale (#753 residual).
      */
     fontSizePx?: number;
+    pin?: boolean;
+    tooltipBorder?: string;
   } = $props();
+
+  const showPinHint = $derived(
+    shouldShowTooltipPinHint({ pin, tooltipBorder }),
+  );
 
   const anchor = $derived(inspection.focus.anchor);
   const OFFSET = 10;
@@ -156,11 +170,11 @@
         </dl>
       {/each}
     </div>
-    {#if inspection.state === "transient" && displayMembers.length > 8}
+    {#if showPinHint && inspection.state === "transient" && displayMembers.length > 8}
       <p class="gg-tooltip-more">
         +{displayMembers.length - 8} more · pin to inspect all
       </p>
-    {:else if inspection.state === "transient"}
+    {:else if showPinHint && inspection.state === "transient"}
       <p class="gg-tooltip-hint">Click to pin</p>
     {/if}
   {/if}

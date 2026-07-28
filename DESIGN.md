@@ -149,18 +149,18 @@ Interaction is an editorial extension of the active chart theme. These roles are
 available on every resolved `ThemeTokens` object and through matching `--gg-*` custom
 properties:
 
-| Role               | Meaning                             | Built-in relationship   |
-| ------------------ | ----------------------------------- | ----------------------- |
-| `interactionInk`   | Controls and overlay ink            | theme ink               |
-| `interactionMuted` | De-emphasized mark opacity          | `0.36`                  |
-| `focusRing`        | Keyboard focus and active-mark halo | theme accent            |
-| `crosshair`        | Crosshair guides                    | axis text               |
-| `selectionFill`    | Selected interval interior          | accent at 18% opacity   |
-| `selectionStroke`  | Selection and zoom outline          | theme accent            |
-| `tooltipPaper`     | Opaque tooltip surface              | paper, then panel       |
-| `tooltipInk`       | Tooltip foreground                  | theme ink               |
-| `tooltipBorder`    | Tooltip hairline keyline            | grid, then panel border |
-| `toolActive`       | Active tool text and underline      | theme ink               |
+| Role               | Meaning                             | Built-in relationship                                                      |
+| ------------------ | ----------------------------------- | -------------------------------------------------------------------------- |
+| `interactionInk`   | Controls and overlay ink            | theme ink                                                                  |
+| `interactionMuted` | De-emphasized mark opacity          | `0.36`                                                                     |
+| `focusRing`        | Keyboard focus and active-mark halo | theme accent                                                               |
+| `crosshair`        | Crosshair guides                    | axis text                                                                  |
+| `selectionFill`    | Selected interval interior          | accent at 18% opacity                                                      |
+| `selectionStroke`  | Selection and zoom outline          | theme accent                                                               |
+| `tooltipPaper`     | Opaque tooltip surface              | paper, then panel                                                          |
+| `tooltipInk`       | Tooltip foreground                  | theme ink                                                                  |
+| `tooltipBorder`    | Tooltip hairline keyline            | grid color; `transparent` when grid is `none` (flat chrome for tufte/void) |
+| `toolActive`       | Active tool text and underline      | theme ink                                                                  |
 
 `interactionMuted` is a **number** (mark alpha). Host pages that restyle the
 tool rail / status chrome should override **`--gg-toolActive`** and
@@ -188,7 +188,9 @@ universal black, white, or blue because each theme must remain internally cohere
 - Use HTML tooltips with theme paper/ink, a hairline border, 2–3px radius, compact
   field/value alignment, selectable text, and an instructional footer separated by
   whitespace. Add only a restrained 1–3px elevation when the active theme needs surface
-  separation.
+  separation. Gridless themes (`grid: "none"`, e.g. tufte/void) derive a transparent
+  keyline so the tooltip is text on paper, and omit the pin affordance — pinning still
+  works; the theme just does not advertise it (#1069).
 
 ## Layout and responsive composition
 

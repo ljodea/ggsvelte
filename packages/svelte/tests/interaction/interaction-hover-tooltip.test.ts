@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { RenderModel } from "@ggsvelte/core";
 import GGPlot from "../../src/lib/GGPlot.svelte";
+import { withGrammarAsSpec } from "../helpers/ggplot-input.js";
 import { render } from "../helpers/render.js";
 import { until } from "../helpers/until.js";
 import { requireModel, rows, size } from "./interaction-harness.js";
@@ -356,5 +357,80 @@ describe("hover + tooltip (overlays, never a pipeline re-run)", () => {
       });
     });
     expect(container.querySelector(".gg-tooltip")).not.toBeNull();
+  });
+
+  // #1069 — ThemeTufte is gridless: flat tooltip chrome (no keyline invent, no
+  // "Click to pin" affordance). Default themes keep the instructional footer.
+  // Theme is children/spec-only after #704 — fold via withGrammarAsSpec.
+  it("tufte tooltips stay silent; default themes keep the pin affordance (#1069)", async () => {
+    let tufteModel: RenderModel | null = null;
+    const tuftePlot = render(
+      GGPlot,
+      withGrammarAsSpec({
+        data: rows,
+        aes: { x: "x", y: "y" },
+        layers: [{ geom: "point", params: { size: 5 } }],
+        theme: "tufte",
+        inspect: true,
+        onrender: (m: RenderModel) => {
+          tufteModel = m;
+        },
+        ...size,
+      }),
+    );
+    expect(tufteModel!.scene.theme.tooltipBorder).toBe("transparent");
+    const tufteCandidate = tufteModel!.candidates.candidate(0)!;
+    pointerMoveAt(
+      tuftePlot.container.querySelector(".gg-capture")!,
+      tufteCandidate.x,
+      tufteCandidate.y,
+    );
+    await until(() => tuftePlot.container.querySelector(".gg-tooltip") !== null);
+    const tufteTooltip = tuftePlot.container.querySelector(".gg-tooltip")!;
+    expect(tufteTooltip.querySelector(".gg-tooltip-hint")).toBeNull();
+    expect(tufteTooltip.textContent).not.toContain("Click to pin");
+
+    let defaultModel: RenderModel | null = null;
+    const defaultPlot = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point", params: { size: 5 } }],
+      inspect: true,
+      onrender: (m: RenderModel) => {
+        defaultModel = m;
+      },
+      ...size,
+    });
+    expect(defaultModel!.scene.theme.tooltipBorder).not.toBe("transparent");
+    const defaultCandidate = defaultModel!.candidates.candidate(0)!;
+    pointerMoveAt(
+      defaultPlot.container.querySelector(".gg-capture")!,
+      defaultCandidate.x,
+      defaultCandidate.y,
+    );
+    await until(() => defaultPlot.container.querySelector(".gg-tooltip") !== null);
+    const defaultTooltip = defaultPlot.container.querySelector(".gg-tooltip")!;
+    expect(defaultTooltip.querySelector(".gg-tooltip-hint")).not.toBeNull();
+    expect(defaultTooltip.textContent).toContain("Click to pin");
+  });
+
+  it("omits pin affordance when inspect.pin is false (#1069)", async () => {
+    let model: RenderModel | null = null;
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point", params: { size: 5 } }],
+      inspect: { pin: false },
+      onrender: (m: RenderModel) => {
+        model = m;
+      },
+      ...size,
+    });
+    const candidate = model!.candidates.candidate(0)!;
+    pointerMoveAt(container.querySelector(".gg-capture")!, candidate.x, candidate.y);
+    await until(() => container.querySelector(".gg-tooltip") !== null);
+    const tooltip = container.querySelector(".gg-tooltip")!;
+    expect(tooltip.querySelector(".gg-tooltip-hint")).toBeNull();
+    expect(tooltip.textContent).not.toContain("Click to pin");
   });
 });

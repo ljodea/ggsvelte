@@ -287,6 +287,8 @@
           })}
           labs={engine.assembled?.labs ?? null}
           fontSizePx={currentModel.scene.theme.fontSize}
+          pin={engine.interactionConfig.inspect?.pin ?? true}
+          tooltipBorder={currentModel.scene.theme.tooltipBorder}
           onenter={() => (engine.tooltipHovered = true)}
           onleave={() => {
             engine.tooltipHovered = false;

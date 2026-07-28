@@ -254,4 +254,23 @@ describe("theme registry", () => {
     expect(BUILTIN_THEMES.default.selectionFill).toContain("rgba(");
     expect(BUILTIN_THEMES.dark.selectionFill).toContain("rgba(");
   });
+
+  // #1069 — gridless themes must not invent a panelBorder keyline for tooltips.
+  // A minimal-ink chart (tufte/void) should surface data as text on paper, not
+  // a boxed interaction panel.
+  it("gridless themes derive a flat tooltip keyline (transparent, not panelBorder)", () => {
+    expect(BUILTIN_THEMES.tufte.grid).toBe("none");
+    expect(BUILTIN_THEMES.tufte.tooltipBorder).toBe("transparent");
+    expect(BUILTIN_THEMES.tufte.tooltipBorder).not.toBe(BUILTIN_THEMES.tufte.panelBorder);
+    expect(BUILTIN_THEMES.void.grid).toBe("none");
+    expect(BUILTIN_THEMES.void.tooltipBorder).toBe("transparent");
+
+    // Themes that still draw a grid keep a visible hairline from the grid color.
+    expect(BUILTIN_THEMES.default.tooltipBorder).toBe(BUILTIN_THEMES.default.grid);
+    expect(BUILTIN_THEMES.default.tooltipBorder).not.toBe("transparent");
+    expect(BUILTIN_THEMES.light.tooltipBorder).toBe(BUILTIN_THEMES.light.grid);
+
+    // Object overrides still win over the derivation.
+    expect(resolveTheme({ name: "tufte", tooltipBorder: "#aabbcc" }).tooltipBorder).toBe("#aabbcc");
+  });
 });
