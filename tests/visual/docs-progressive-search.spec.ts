@@ -64,8 +64,8 @@ test("the finished chart answers keyboard inspection", async ({ page }) => {
 /*
  * The library sets `forced-color-adjust: none` on `.gg-plot`, so nothing in a
  * chart adapts on its own. The epoch bands are the one mark carried by fill
- * alone, so under a requested palette they drop and the names in the note
- * under the chart do the work instead. Asserted through `emulateMedia`:
+ * alone, so under a requested palette they drop and the names drawn above
+ * them do the work instead. Asserted through `emulateMedia`:
  * `forcedColors` is not a Playwright test option, so `test.use` would be
  * dropped by the runner and this would silently measure a normal page
  * (issue #718 — see playwright.config.ts).
@@ -87,10 +87,13 @@ test("the finished chart drops its band fills and names the epochs in forced col
     .evaluateAll((rects) => rects.map((rect) => getComputedStyle(rect).fill));
   expect(fills.length).toBeGreaterThan(0);
   expect(new Set(fills)).toEqual(new Set(["none"]));
-  // Epoch names live on the bottom legend (and the plot aria-label), not a caption.
-  await expect(finished.locator(".gg-legend")).toContainText("Medieval warm period");
-  await expect(finished.locator(".gg-legend")).toContainText("Little Ice Age");
-  await expect(finished.locator(".gg-legend")).toContainText("Industrial era");
+  // Epoch names are drawn in the panel, above the bands they name. That is
+  // what carries the epochs once the fills drop; there is no legend to read.
+  await expect(finished.locator(".gg-legend")).toHaveCount(0);
+  const marks = finished.locator(".gg-marks");
+  await expect(marks).toContainText("Medieval warm period");
+  await expect(marks).toContainText("Little Ice Age");
+  await expect(marks).toContainText("Industrial era");
 });
 
 test("Docs landing and sidebar expose the full path without duplicate Reference", async ({

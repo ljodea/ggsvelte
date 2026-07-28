@@ -18,7 +18,7 @@ export const SAKURA_PANEL_ASPECT = 2.5;
 
 export const LESSON_CHART_WIDTH = 660;
 /** Outer height so the finished fold's panel is ~SAKURA_PANEL_ASPECT:1 after chrome. */
-export const LESSON_CHART_HEIGHT = 398;
+export const LESSON_CHART_HEIGHT = 338;
 
 /**
  * Measured outer heights for the finished sakura fold at common container
@@ -26,12 +26,12 @@ export const LESSON_CHART_HEIGHT = 398;
  * constants by hand.
  */
 export const SAKURA_FINISHED_SIZE_TABLE: readonly SakuraSizeRow[] = [
-  { width: 360, height: 302, panelWidth: 284, panelHeight: 114 },
-  { width: 480, height: 326, panelWidth: 404, panelHeight: 162 },
-  { width: 560, height: 358, panelWidth: 484, panelHeight: 194 },
-  { width: 660, height: 398, panelWidth: 584, panelHeight: 234 },
-  { width: 800, height: 454, panelWidth: 724, panelHeight: 290 },
-  { width: 1000, height: 534, panelWidth: 924, panelHeight: 370 },
+  { width: 360, height: 218, panelWidth: 284, panelHeight: 114 },
+  { width: 480, height: 266, panelWidth: 404, panelHeight: 162 },
+  { width: 560, height: 298, panelWidth: 484, panelHeight: 194 },
+  { width: 660, height: 338, panelWidth: 584, panelHeight: 234 },
+  { width: 800, height: 394, panelWidth: 724, panelHeight: 290 },
+  { width: 1000, height: 474, panelWidth: 924, panelHeight: 370 },
 ];
 
 /** Interpolate outer height for an arbitrary container width from the table. */

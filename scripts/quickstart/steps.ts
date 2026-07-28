@@ -32,6 +32,8 @@ const Y_BOTTOM = "05-10";
  * full vertical extent of the record.
  */
 const BAND_TOP = "03-28";
+/** Epoch names sit between {@link Y_TOP} and {@link BAND_TOP}, above every band. */
+const EPOCH_NAME_DATE = "03-20";
 
 // --- the two lesson-only tables -------------------------------------------
 // Both are small enough to read at a glance, and both are drawn by layers that
@@ -55,27 +57,56 @@ export const SAKURA_EPOCHS = [
  */
 export const SAKURA_EPOCH_EDGES = SAKURA_EPOCHS.slice(1).map((band) => ({ year: band.year }));
 
+/**
+ * Where each epoch name sits: centred over its own band, in the empty strip
+ * between the panel top and {@link BAND_TOP}.
+ *
+ * The strip costs nothing. The earliest bloom in the whole record is 25 March
+ * and the domain starts on 18 March, so those days were already empty before
+ * the names arrived — no observation is displaced and the axis makes no new
+ * claim. Derived from SAKURA_EPOCHS so a name can never drift off its band.
+ */
+const SAKURA_EPOCH_NAMES = SAKURA_EPOCHS.map((band) => ({
+  epoch: band.epoch,
+  midYear: Math.round((band.year + band.until) / 2),
+  nameDate: EPOCH_NAME_DATE,
+}));
+
+/**
+ * The three records the chart calls out.
+ *
+ * Each label states the date as well as the claim: a callout that says a year
+ * was a record without saying what the record was makes the reader hunt for
+ * the value the annotation exists to deliver. Middle dot, not em dash — the
+ * label is two facts side by side, not an aside.
+ *
+ * `labelYear`/`labelDate` are hand-placed, and each sits on the opposite side
+ * of its point from the leader's travel, so no leader crosses its own text.
+ * They have to be hand-placed because there is no text repel (#727 gap B), so
+ * these are positions computed against a layout nobody can see. Moving the
+ * domain or the panel size can invalidate them.
+ */
 export const SAKURA_RECORDS = [
   {
     year: 1323,
     bloomDate: "05-04",
-    label: "1323 — latest on record",
-    labelYear: 1150,
+    label: "1323 · May 4, latest on record",
+    labelYear: 1250,
     labelDate: "05-08",
   },
   {
     year: 1409,
     bloomDate: "03-27",
-    label: "1409 — earliest for six centuries",
-    labelYear: 1480,
+    label: "1409 · March 27, earliest for six centuries",
+    labelYear: 1310,
     labelDate: "03-24",
   },
   {
     year: 2023,
     bloomDate: "03-25",
-    label: "2023 — earliest in 1,200 years",
-    labelYear: 1790,
-    labelDate: "03-19",
+    label: "2023 · March 25, earliest in 1,200 years",
+    labelYear: 2010,
+    labelDate: "03-24",
   },
 ];
 
@@ -149,6 +180,12 @@ const RECORDS_CONST = `  const records = [
 ${SAKURA_RECORDS.map(
   (r) =>
     `    {\n      year: ${r.year}, bloomDate: "${r.bloomDate}",\n      labelYear: ${r.labelYear}, labelDate: "${r.labelDate}",\n      label: "${r.label}",\n    },`,
+).join("\n")}
+  ];`;
+
+const EPOCH_NAMES_CONST = `  const epochNames = [
+${SAKURA_EPOCH_NAMES.map(
+  (n) => `    { epoch: "${n.epoch}", midYear: ${n.midYear}, nameDate: "${n.nameDate}" },`,
 ).join("\n")}
   ];`;
 
@@ -275,11 +312,14 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
 />
 <GeomRule data={epochEdges} aes={{ y: null, color: { value: "#c8ccd0" } }}
   linewidth={0.5} inspect={false} />
+<GeomText data={epochNames}
+  aes={{ x: "midYear", y: "nameDate", label: "epoch",
+         color: { value: "#6b7075" } }} size={11} inspect={false} />
 <ScaleFillManual
   domain={[${EPOCH_DOMAIN}]}
   values={[${EPOCH_VALUES}]}
 />
-<GuideLegend channel="fill" position="bottom" direction="horizontal" />`,
+<GuideNone channel="fill" />`,
     chapterTitle: "Getting started",
     href: "/guide/getting-started#add-geometry-layers",
     spec: {
@@ -306,8 +346,23 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           params: { linewidth: 0.5 },
           inspect: false,
         },
+        // Names the bands where the reader is already looking, instead of
+        // sending them to a colour key at the foot of the plot.
+        epochNames: {
+          geom: "text",
+          data: { values: SAKURA_EPOCH_NAMES },
+          aes: {
+            x: { field: "midYear" },
+            y: { field: "nameDate" },
+            label: { field: "epoch" },
+            color: { value: "#6b7075" },
+          },
+          params: { size: 11 },
+          // Decoration, like the bands they name (#1068).
+          inspect: false,
+        },
       },
-      order: ["epochs", "epochEdges", "points", "trend"],
+      order: ["epochs", "epochEdges", "epochNames", "points", "trend"],
       scales: {
         fill: {
           type: "manual",
@@ -315,19 +370,20 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           range: ["#f5edc4", "#dce8f2", "#f3dcda"],
         },
       },
-      guides: {
-        fill: { type: "legend", position: "bottom", direction: "horizontal" },
-      },
+      // A mapped fill draws a legend by default, so the names above the bands
+      // would be repeated in a key at the foot of the plot. Turning it off is
+      // the point of drawing them there.
+      guides: { fill: { type: "none" } },
     },
     source: {
-      components: ["GeomRect", "GeomRule", "ScaleFillManual", "GuideLegend"],
-      consts: [EPOCHS_CONST, EPOCH_EDGES_CONST],
+      components: ["GeomRect", "GeomRule", "GeomText", "ScaleFillManual", "GuideNone"],
+      consts: [EPOCHS_CONST, EPOCH_EDGES_CONST, EPOCH_NAMES_CONST],
       grammar: {
         scaleFill: `  <ScaleFillManual
     domain={[${EPOCH_DOMAIN}]}
     values={[${EPOCH_VALUES}]}
   />`,
-        guides: `  <GuideLegend channel="fill" position="bottom" direction="horizontal" />`,
+        guides: `  <GuideNone channel="fill" />`,
       },
       children: {
         epochEdges: `  <GeomRule
@@ -350,8 +406,19 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     alpha={0.55}
     inspect={false}
   />`,
+        epochNames: `  <GeomText
+    data={epochNames}
+    aes={{
+      x: "midYear",
+      y: "nameDate",
+      label: "epoch",
+      color: { value: "#6b7075" },
+    }}
+    size={11}
+    inspect={false}
+  />`,
       },
-      childOrder: ["epochs", "epochEdges", "points", "trend"],
+      childOrder: ["epochs", "epochEdges", "epochNames", "points", "trend"],
     },
   },
   {
@@ -359,22 +426,25 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     title: "Annotate record years",
     outcome: "",
     explanation: "",
-    fragment: `<GeomRule yintercept="${SAKURA_BASELINE}" linewidth={0.75} alpha={0.7}
-  aes={{ color: { value: "#9aa0a6" }, linetype: { value: "dashed" } }} />
+    fragment: `<GeomRule yintercept="${SAKURA_BASELINE}" linewidth={1}
+  aes={{ color: { value: "#6b7075" }, linetype: { value: "dashed" } }} />
 <GeomSegment data={records}
   aes={{ x: "labelYear", y: "labelDate", xend: "year",
          yend: "bloomDate", color: { value: "#b3452f" } }} linewidth={0.7} />
 <GeomText data={records}
   aes={{ x: "labelYear", y: "labelDate", label: "label",
-         color: { value: "#b3452f" } }} size={11} />`,
+         color: { value: "#b3452f" } }} size={11} anchor="end" dx={-4} />`,
     chapterTitle: "Getting started",
     href: "/guide/getting-started#start-with-a-basic-plot",
     spec: {
       layers: {
         baseline: {
           geom: "rule",
-          aes: { color: { value: "#9aa0a6" }, linetype: { value: "dashed" } },
-          params: { yintercept: SAKURA_BASELINE, linewidth: 0.75, alpha: 0.7 },
+          // A reference line nobody can see refers to nothing. Darker and
+          // full strength; the caption says what it marks, because there is no
+          // room inside the panel to say it there (#727).
+          aes: { color: { value: "#6b7075" }, linetype: { value: "dashed" } },
+          params: { yintercept: SAKURA_BASELINE, linewidth: 1 },
         },
         leaders: {
           geom: "segment",
@@ -397,10 +467,22 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
             label: { field: "label" },
             color: { value: "#b3452f" },
           },
-          params: { size: 11 },
+          // Every label sits left of its point, so anchoring at the end puts
+          // the text and the leader on opposite sides of the same coordinate
+          // and no leader can run back through its own words.
+          params: { size: 11, anchor: "end", dx: -4 },
         },
       },
-      order: ["epochs", "epochEdges", "points", "baseline", "trend", "leaders", "callouts"],
+      order: [
+        "epochs",
+        "epochEdges",
+        "epochNames",
+        "points",
+        "baseline",
+        "trend",
+        "leaders",
+        "callouts",
+      ],
     },
     source: {
       components: ["GeomSegment", "GeomText"],
@@ -408,9 +490,8 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       children: {
         baseline: `  <GeomRule
     yintercept="${SAKURA_BASELINE}"
-    linewidth={0.75}
-    alpha={0.7}
-    aes={{ color: { value: "#9aa0a6" }, linetype: { value: "dashed" } }}
+    linewidth={1}
+    aes={{ color: { value: "#6b7075" }, linetype: { value: "dashed" } }}
   />`,
         leaders: `  <GeomSegment
     data={records}
@@ -433,9 +514,20 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       color: { value: "#b3452f" },
     }}
     size={11}
+    anchor="end"
+    dx={-4}
   />`,
       },
-      childOrder: ["epochs", "epochEdges", "points", "baseline", "trend", "leaders", "callouts"],
+      childOrder: [
+        "epochs",
+        "epochEdges",
+        "epochNames",
+        "points",
+        "baseline",
+        "trend",
+        "leaders",
+        "callouts",
+      ],
     },
   },
   {
@@ -447,10 +539,9 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
 <Labs
   title="Kyoto cherry blossom, 812–2026"
   subtitle="Bloom now arrives about a week earlier than it did for a millennium"
-  caption="838 observations. Data: Yasuyuki Aono (2008, 2010)."
+  caption="838 observations. Dashed rule: the 1600–1850 median, 15 April. Data: Yasuyuki Aono (2008, 2010)."
   x="Year"
   y="${SAKURA_Y_LAB}"
-  fill="Climate epoch"
 />`,
     chapterTitle: "Scales and guides",
     href: "/guide/scales-guides#categorical-color",
@@ -459,10 +550,14 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       labs: {
         title: "Kyoto cherry blossom, 812–2026",
         subtitle: "Bloom now arrives about a week earlier than it did for a millennium",
-        caption: "838 observations. Data: Yasuyuki Aono (2008, 2010).",
+        // The caption names what the dashed rule marks. The reference chart
+        // sets that in the right margin; there is no room for it inside the
+        // panel, because bloom dates are dense across mid-April in every
+        // century — text there would sit on data (#727 gap C).
+        caption:
+          "838 observations. Dashed rule: the 1600–1850 median, 15 April. Data: Yasuyuki Aono (2008, 2010).",
         x: "Year",
         y: SAKURA_Y_LAB,
-        fill: "Climate epoch",
       },
     },
     source: {
@@ -474,8 +569,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     y="${SAKURA_Y_LAB}"
     title="Kyoto cherry blossom, 812–2026"
     subtitle="Bloom now arrives about a week earlier than it did for a millennium"
-    caption="838 observations. Data: Yasuyuki Aono (2008, 2010)."
-    fill="Climate epoch"
+    caption="838 observations. Dashed rule: the 1600–1850 median, 15 April. Data: Yasuyuki Aono (2008, 2010)."
   />`,
       },
     },
