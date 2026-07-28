@@ -7,16 +7,16 @@
     ThemeClassic,
   } from "@ggsvelte/svelte";
 
-  import { heights } from "./data.js";
+  import { michelson } from "./data.js";
 </script>
 
-<GGPlot data={heights} aes={{ sample: "height" }} width={640} height={400}>
+<GGPlot data={michelson} aes={{ sample: "velocity" }} width={640} height={400}>
   <ThemeClassic />
   <Labs
-    title="geom_qq + geom_qq_line"
-    subtitle="Sample quantiles vs theoretical normal; line through quartile match"
-    x="Theoretical"
-    y="Sample"
+    title="Were Michelson's errors normal?"
+    subtitle="His 100 runs against the normal they would follow if only chance moved them"
+    x="Normal quantile"
+    y="Speed of light, km/s less 299,000"
   />
   <GeomQq size={2.5} alpha={0.85} />
   <GeomQqLine linewidth={1.2} alpha={0.7} />

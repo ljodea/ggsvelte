@@ -8,18 +8,23 @@
     ThemeClassic,
   } from "@ggsvelte/svelte";
 
-  import { binnedScatter } from "./data.js";
+  import { galtonHeights } from "./data.js";
 </script>
 
-<GGPlot data={binnedScatter} aes={{ x: "x", y: "y" }} width={640} height={400}>
+<GGPlot
+  data={galtonHeights}
+  aes={{ x: "parent", y: "child" }}
+  width={640}
+  height={400}
+>
   <ThemeClassic />
   <Labs
-    title="stat summary_bin: mean ± se by x bin"
-    subtitle="Continuous x binned at width 1; empty bins omitted"
-    x="x"
-    y="y"
+    title="Galton's children regress towards the middle"
+    subtitle="Mean child height ± one standard error in each one-inch class of mid-parent height"
+    x="Mid-parent height (inches)"
+    y="Child height (inches)"
   />
-  <GeomPoint alpha={0.4} size={2.4} />
+  <GeomPoint alpha={0.15} size={2.4} />
   <GeomErrorbar
     stat="summary_bin"
     binwidth={1}
