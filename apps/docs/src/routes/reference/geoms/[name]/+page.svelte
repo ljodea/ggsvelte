@@ -1,50 +1,33 @@
 <script lang="ts">
   import { base } from "$app/paths";
 
+  import ReferenceLede from "$lib/components/ReferenceLede.svelte";
+  import {
+    buildGeomJsonSnippet,
+    buildGeomSvelteSnippet,
+  } from "$lib/reference-snippets";
+
   import type { PageProps } from "./$types";
 
   const { data }: PageProps = $props();
   const entry = $derived(data.entry);
 
   const svelteSnippet = $derived(
-    buildSvelteSnippet(entry.component, entry.params),
+    buildGeomSvelteSnippet(
+      entry.component,
+      entry.name,
+      entry.defaultStat,
+      entry.params,
+    ),
   );
   const jsonSnippet = $derived(
-    buildJsonSnippet(entry.name, entry.defaultStat, entry.params),
+    buildGeomJsonSnippet(entry.name, entry.defaultStat, entry.params),
   );
-
-  function buildSvelteSnippet(
-    component: string,
-    params: readonly { name: string; required: boolean }[],
-  ): string {
-    const required = params.filter((p) => p.required).map((p) => p.name);
-    if (required.length === 0) {
-      return `import { GGPlot, ${component} } from "@ggsvelte/svelte";\n\n<GGPlot data={rows} aes={{ x: "x", y: "y" }}>\n  <${component} />\n</GGPlot>`;
-    }
-    const props =
-      "\n" + required.map((p) => `  ${p}={/* … */}`).join("\n") + "\n";
-    return `import { GGPlot, ${component} } from "@ggsvelte/svelte";\n\n<GGPlot data={rows} aes={{ x: "x", y: "y" }}>\n  <${component}${props}/>\n</GGPlot>`;
-  }
-
-  function buildJsonSnippet(
-    geom: string,
-    defaultStat: string,
-    params: readonly { name: string; required: boolean }[],
-  ): string {
-    const required = params.filter((p) => p.required).map((p) => p.name);
-    const paramsObj =
-      required.length === 0
-        ? ""
-        : `,\n  "params": { ${required
-            .map((p) => `"${p}": /* … */`)
-            .join(", ")} }`;
-    return `{\n  "geom": "${geom}"${defaultStat === "identity" ? "" : `,\n  "stat": "${defaultStat}"`}${paramsObj}\n}`;
-  }
 </script>
 
 <article class="geom-detail prose" aria-labelledby="geom-heading">
   <h1 id="geom-heading"><code>{entry.component}</code></h1>
-  <p class="lede">{entry.summary}</p>
+  <ReferenceLede text={entry.summary} />
 
   <h2 id="defaults">Defaults</h2>
   <dl class="defaults">
@@ -158,12 +141,6 @@
 
   h1 {
     margin: 0 0 0.5rem;
-  }
-
-  .lede {
-    max-width: 44rem;
-    margin: 0 0 1.5rem;
-    font-size: 1.05rem;
   }
 
   .defaults {
