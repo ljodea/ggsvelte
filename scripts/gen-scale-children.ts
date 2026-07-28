@@ -13,7 +13,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
-import { SCALE_CAPABILITIES } from "@ggsvelte/spec";
+import { SCALE_CAPABILITIES, scaleCapabilityCamelHelpers } from "@ggsvelte/spec";
 
 import { defineArtifact, defineArtifactGroup } from "./artifact.ts";
 
@@ -563,15 +563,8 @@ export function shellRelPath(component: string): string {
 
 /** CamelCase helpers across all families, excluding Colour spellings. */
 export function expectedCamelHelpers(): Set<string> {
-  const out = new Set<string>();
-  for (const cap of SCALE_CAPABILITIES) {
-    for (const h of cap.helpers) {
-      if (h.includes("_")) continue;
-      if (h.includes("Colour")) continue;
-      out.add(h);
-    }
-  }
-  return out;
+  // Single source: packages/spec capabilities ledger (#1081 PR B).
+  return new Set(scaleCapabilityCamelHelpers());
 }
 
 /** Colour-spelled camelCase helpers → component alias names. */

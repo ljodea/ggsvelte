@@ -274,7 +274,13 @@ export {
   HUE_PALETTE_10,
   hslToHex,
 } from "./hue-grey-palettes.js";
-export { SCALE_CAPABILITIES, STYLE_AESTHETIC_GEOMS } from "./capabilities.js";
+export {
+  SCALE_CAPABILITIES,
+  STYLE_AESTHETIC_GEOMS,
+  STYLE_ORDINAL_SCALE_HELPERS,
+  scaleCapabilityCamelHelpers,
+  builderScaleHelperNames,
+} from "./capabilities.js";
 export type { ScaleCapability, StyleAesthetic } from "./capabilities.js";
 /** @lifecycle experimental */
 export { GEOM_PARAM_KEYS } from "./geom-params.js";
