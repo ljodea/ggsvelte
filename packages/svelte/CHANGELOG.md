@@ -1,5 +1,214 @@
 # @ggsvelte/svelte
 
+## 0.15.0
+
+### Minor Changes
+
+- d4c969b: <!-- markdownlint-disable MD041 -->
+
+  feat(inspect): let a layer opt out of inspection
+
+  An area mark reports distance 0 everywhere it is painted, so a full-panel
+  background band outranks every point and stroke beneath it: the tooltip binds to
+  the band and the reader can never reach the data. Set `inspect={false}` on that
+  layer (or `"inspect": false` in the spec) and its marks never become tooltip,
+  hover, or keyboard-traversal candidates.
+
+  It travels with the spec, so a JSON round trip and a headless render agree with
+  the browser. Rect hit maths is unchanged, so layers that want an area tooltip —
+  bars, tiles, heatmaps — keep one.
+
+  Migration: none — additive
+
+- 6c44565: <!-- markdownlint-disable MD041 -->
+
+  feat(spec): month-day scale surface — the `md` parser and `temporalKind: "monthDay"`
+
+  Plotting observations from many years against the calendar day they fell on
+  had no representation. Authors faked it by projecting every value onto an
+  invented reference year and carrying that year in their data — which is how
+  the Kyoto cherry-blossom lesson ended up shipping a `bloomRefDate` column
+  whose only job was to be thrown away by the axis.
+
+  `temporalKind: "monthDay"` says it directly: the year collapses inside the
+  scale, so the same calendar day from any year shares one position.
+
+  ```svelte
+  <ScaleYMonthDay
+    reverse
+    domain={["05-10", "03-18"]}
+    breaks={["04-05", "04-15"]}
+  />
+  ```
+
+  Values, `domain`, and `breaks` all drop the year. They resolve through a new
+  `md` parser, which takes `MM-DD`, the ISO recurring form `--MM-DD`, or a full
+  date whose year it discards. It joins the partial-date family beside `ym`,
+  `my`, and `yq`, and — like them — is never chosen by automatic inference.
+
+  **Month and day survive; day-of-year does not.** Those differ for every leap
+  year, which is exactly the bug the reference-year trick used to introduce.
+
+  This ships the authoring surface: helpers, builder methods, generated
+  components, schema, and validation. Rendering follows.
+
+  Colour scales keep `date | datetime`. Month-day is a position idea and
+  nothing asked for it there.
+
+  Internally `TemporalScaleKind` is a new type, deliberately not a widening of
+  `TemporalKind`. `TemporalKind` is also what parsing a value _returns_, and no
+  value parses to `monthDay` — it is a projection applied afterwards. Splitting
+  them keeps `decision.kind === conversion.requestedKind` comparisons honest at
+  compile time.
+
+  Migration: none — additive
+
+### Patch Changes
+
+- 97f3e2c: <!-- markdownlint-disable MD041 -->
+
+  fix(theme): flat tooltip chrome for gridless themes
+
+  Gridless themes (tufte, void) derive a transparent tooltip keyline and omit the
+  default "Click to pin" affordance so minimal-ink charts keep flat interaction
+  chrome (#1069). Pinning still works; only the instructional footer is silent.
+  Themes that draw a grid keep the hairline border and pin hint. Inspect configs
+  with `pin: false` also omit the affordance.
+
+  Migration: none — additive visual for gridless themes only
+
+- cd09bd8: <!-- markdownlint-disable MD041 -->
+
+  feat(spec): export schema-derived `GEOM_REFERENCE` for every geom
+
+  `GEOM_REFERENCE` / `geomReferenceList()` walk SpecDeclarations and publish
+  each geom's summary, defaults, allowed stats and positions, and param docs.
+  The docs site uses this for `/reference/geoms` so Svelte props stay in step
+  with `schema/v0.json`. Also documents five previously undescribed params
+  (`pointrange`/`crossbar` `funMin`/`funMax`, `function.args`).
+
+  Migration: none — additive
+
+- 6c44565: <!-- markdownlint-disable MD041 -->
+
+  fix(data): correct the 2026 Kyoto bloom date and refresh the provenance
+
+  The 2026 row said 30 March (day 89). Peak bloom was 29 March (day 88). We
+  took the series from the George Mason mirror, which was committed four days
+  before Genki Katata published the authoritative 2026 entry; Our World in
+  Data carries 29 March too. Every other year checks out — all 827 shared
+  years match Aono's own `KyotoFullFlower7.xls`, and 2016–2025 match Katata's
+  continuation.
+
+  The provenance also needed refreshing. Aono's site closed on 2025-03-31 and
+  he has since died, so the notice now points at NOAA NCEI, which holds his
+  file, and at Katata (CIGS), who continues the series after it ends in 2015.
+  The header claimed direct observation "up to 1888"; upstream says the
+  modern full-bloom record starts in the 1880s. It now also states that the
+  dates are proleptic Gregorian throughout, so nobody goes looking for a
+  calendar seam at 1582.
+
+  The committed lesson chart SVGs move by one point.
+
+- 8871d55: <!-- markdownlint-disable MD041 -->
+
+  docs(quickstart): name the epochs above the bands, and fix the callouts
+
+  The chart sent readers to a colour key at the foot of the plot to learn what
+  three coloured bands meant, under the title "Climate epoch" — a phrase that
+  editorialises where the data was doing fine on its own. The names now sit
+  above the bands they name, and the legend is gone.
+
+  They go in the strip between the panel top and the bands, which was already
+  empty: the earliest bloom in 1,200 years is 25 March and the domain starts on
+  18 March. No observation is displaced and the axis makes no new claim.
+
+  The baseline rule was `#9aa0a6` at alpha 0.7 and effectively invisible, marking
+  something nothing named. It is darker and full strength, and the caption says
+  what it is. The reference chart puts that label in the right margin; mid-April
+  is dense in every century, so there is nowhere inside the panel to say it
+  without printing text over data.
+
+  Callouts now state the record as well as the claim — "1323 · May 4, latest on
+  record" rather than "1323 — latest on record" — with a middle dot, and every
+  label sits left of the point it names with an end anchor, so no leader runs
+  back through its own words. Verified by measuring rendered geometry at 640,
+  900 and 1200px, not by eye.
+
+  Migration: none — additive
+
+- 40c3376: <!-- markdownlint-disable MD041 -->
+
+  fix(data): drop `bloomRefDate` from the Kyoto teaching dataset
+
+  The column projected each observation's day-of-year onto the year 2001 so a
+  date axis could draw it. Two things were wrong with that. It shipped a
+  fabricated year inside published data — no other copy of Aono's record has
+  anything like it — and it preserved day-of-year rather than month-day, so
+  **204 of 838 rows disagreed with `bloomDate` by a day**. Year 812 bloomed on
+  1 April and the column said 2 April.
+
+  `temporalKind: "monthDay"` removes the need for it. The year now collapses
+  inside the scale, where it is a private implementation detail.
+
+  This is a bundled teaching/demo dataset, not a product API contract. Anyone
+  still mapping `y: "bloomRefDate"` should map `y: "bloomDate"` and give the
+  axis a month-day scale:
+
+  ```svelte
+  <GGPlot data={kyotoSakura} aes={{ x: "year", y: "bloomDate" }}>
+    <ScaleYMonthDay reverse domain={["05-10", "03-18"]} />
+  </GGPlot>
+  ```
+
+  `bloomDate` (the real observation) and `bloomDoy` are unchanged. Anyone who
+  needs the old projection can compute it, but the month-day scale is the
+  correct answer and does not have the leap-year fault.
+
+  The getting-started lesson migrates with it, so the spec it teaches now
+  contains no year outside the `year` column itself.
+
+  Guide: <https://ggsvelte.sh/guide/scales-guides#date-and-time-axes>
+
+- cd3ee72: <!-- markdownlint-disable MD041 -->
+
+  feat(spec): export schema-derived `POSITION_REFERENCE` for every position
+
+  `POSITION_REFERENCE` / `positionReferenceList()` publish each position
+  adjustment's summary, `positionParams` (from the PositionParams schema for
+  jitter/nudge), and compatible geoms. The docs site uses this for
+  `/reference/positions`.
+
+  Migration: none — additive
+
+- e969b35: <!-- markdownlint-disable MD041 -->
+
+  feat(spec): export schema-derived `STAT_REFERENCE` for every stat
+
+  `STAT_REFERENCE` / `statReferenceList()` publish each statistical transform's
+  summary, after_stat columns (`STAT_COLUMNS`), and compatible geoms (inverted
+  from `GEOM_REFERENCE`). The docs site uses this for `/reference/stats`.
+
+  Migration: none — additive
+
+- Updated dependencies [97f3e2c]
+- Updated dependencies [06fc8e9]
+- Updated dependencies [8541dc6]
+- Updated dependencies [3e9d5fa]
+- Updated dependencies [95f2c1d]
+- Updated dependencies [cd09bd8]
+- Updated dependencies [40c3376]
+- Updated dependencies [d4c969b]
+- Updated dependencies [b80a3b1]
+- Updated dependencies [2e0811b]
+- Updated dependencies [6c44565]
+- Updated dependencies [cd3ee72]
+- Updated dependencies [e39ea45]
+- Updated dependencies [e969b35]
+- Updated dependencies [cc0b0cd]
+  - @ggsvelte/core@0.15.0
+  - @ggsvelte/spec@0.15.0
+
 ## 0.14.1
 
 ### Patch Changes

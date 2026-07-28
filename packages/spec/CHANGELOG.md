@@ -1,5 +1,184 @@
 # @ggsvelte/spec
 
+## 0.15.0
+
+### Minor Changes
+
+- 8541dc6: <!-- markdownlint-disable MD041 -->
+
+  feat(spec): generate builder scale mixins from SCALE_CAPABILITIES (#1081)
+
+  `builder-scales.ts` is now produced by `bun run builder:scales:gen` so every
+  camelCase ledger helper (plus size/alpha/linewidth/shape ordinal aliases) is a
+  `GGBuilder` method. Adds the 24 palette constructors that were free-helper-only
+  (`scaleColorBrewer`, gradients, steps, hue/grey, ordinal, fill twins).
+
+  Migration: none — additive
+
+- 3e9d5fa: <!-- markdownlint-disable MD041 -->
+
+  feat(spec): export scale helper inventory from SCALE_CAPABILITIES (#1081)
+
+  Public inventory helpers for the capability ledger: `scaleCapabilityCamelHelpers`,
+  `STYLE_ORDINAL_SCALE_HELPERS`, and `builderScaleHelperNames`. Generator scripts
+  (`builder:scales`, `scale:children`) now share this package surface so helper
+  name sets are not re-derived by hand.
+
+  Migration: none — additive
+
+- cd09bd8: <!-- markdownlint-disable MD041 -->
+
+  feat(spec): export schema-derived `GEOM_REFERENCE` for every geom
+
+  `GEOM_REFERENCE` / `geomReferenceList()` walk SpecDeclarations and publish
+  each geom's summary, defaults, allowed stats and positions, and param docs.
+  The docs site uses this for `/reference/geoms` so Svelte props stay in step
+  with `schema/v0.json`. Also documents five previously undescribed params
+  (`pointrange`/`crossbar` `funMin`/`funMax`, `function.args`).
+
+  Migration: none — additive
+
+- d4c969b: <!-- markdownlint-disable MD041 -->
+
+  feat(inspect): let a layer opt out of inspection
+
+  An area mark reports distance 0 everywhere it is painted, so a full-panel
+  background band outranks every point and stroke beneath it: the tooltip binds to
+  the band and the reader can never reach the data. Set `inspect={false}` on that
+  layer (or `"inspect": false` in the spec) and its marks never become tooltip,
+  hover, or keyboard-traversal candidates.
+
+  It travels with the spec, so a JSON round trip and a headless render agree with
+  the browser. Rect hit maths is unchanged, so layers that want an area tooltip —
+  bars, tiles, heatmaps — keep one.
+
+  Migration: none — additive
+
+- b80a3b1: <!-- markdownlint-disable MD041 -->
+
+  feat(core): month-day axes read "Apr 1", and refuse labels they cannot fill
+
+  A month-day axis carried its values correctly but formatted them through the
+  datetime path, so ticks read `2000-04-01 00:00:00 UTC` — the reference year
+  exposed in the one place a reader was guaranteed to look. Axis ticks, the
+  crosshair, and the tooltip header now read `Apr 1`.
+
+  `fullLabel` is fixed too. It is not the visible tick, which is exactly why the
+  leak was quiet, and it reaches the guide plan.
+
+  The automatic interval ladder drops week and year for this kind. A year tick on
+  a one-year axis is the same tick twice, and a week tick implies a weekday that
+  belongs to the reference year rather than to the data. Day, month, and quarter
+  remain; an authored `dateBreaks` is still honoured as given.
+
+  `dateLabels` now rejects tokens a month-day axis cannot fill honestly. The rule
+  is that a token is legal if and only if the month and the day determine it, so
+  `%m %b %B %d %e %q` are accepted and year, clock, zone, and weekday tokens are
+  refused with a message naming the offending token. `%a` is refused for the same
+  reason as `%Y`: 1 April fell on a different weekday in 812 than in 2001, so
+  printing one would invent a fact.
+
+  Migration: none — additive
+
+- 6c44565: <!-- markdownlint-disable MD041 -->
+
+  feat(spec): month-day scale surface — the `md` parser and `temporalKind: "monthDay"`
+
+  Plotting observations from many years against the calendar day they fell on
+  had no representation. Authors faked it by projecting every value onto an
+  invented reference year and carrying that year in their data — which is how
+  the Kyoto cherry-blossom lesson ended up shipping a `bloomRefDate` column
+  whose only job was to be thrown away by the axis.
+
+  `temporalKind: "monthDay"` says it directly: the year collapses inside the
+  scale, so the same calendar day from any year shares one position.
+
+  ```svelte
+  <ScaleYMonthDay
+    reverse
+    domain={["05-10", "03-18"]}
+    breaks={["04-05", "04-15"]}
+  />
+  ```
+
+  Values, `domain`, and `breaks` all drop the year. They resolve through a new
+  `md` parser, which takes `MM-DD`, the ISO recurring form `--MM-DD`, or a full
+  date whose year it discards. It joins the partial-date family beside `ym`,
+  `my`, and `yq`, and — like them — is never chosen by automatic inference.
+
+  **Month and day survive; day-of-year does not.** Those differ for every leap
+  year, which is exactly the bug the reference-year trick used to introduce.
+
+  This ships the authoring surface: helpers, builder methods, generated
+  components, schema, and validation. Rendering follows.
+
+  Colour scales keep `date | datetime`. Month-day is a position idea and
+  nothing asked for it there.
+
+  Internally `TemporalScaleKind` is a new type, deliberately not a widening of
+  `TemporalKind`. `TemporalKind` is also what parsing a value _returns_, and no
+  value parses to `monthDay` — it is a projection applied afterwards. Splitting
+  them keeps `decision.kind === conversion.requestedKind` comparisons honest at
+  compile time.
+
+  Migration: none — additive
+
+- cd3ee72: <!-- markdownlint-disable MD041 -->
+
+  feat(spec): export schema-derived `POSITION_REFERENCE` for every position
+
+  `POSITION_REFERENCE` / `positionReferenceList()` publish each position
+  adjustment's summary, `positionParams` (from the PositionParams schema for
+  jitter/nudge), and compatible geoms. The docs site uses this for
+  `/reference/positions`.
+
+  Migration: none — additive
+
+- e969b35: <!-- markdownlint-disable MD041 -->
+
+  feat(spec): export schema-derived `STAT_REFERENCE` for every stat
+
+  `STAT_REFERENCE` / `statReferenceList()` publish each statistical transform's
+  summary, after_stat columns (`STAT_COLUMNS`), and compatible geoms (inverted
+  from `GEOM_REFERENCE`). The docs site uses this for `/reference/stats`.
+
+  Migration: none — additive
+
+### Patch Changes
+
+- 06fc8e9: <!-- markdownlint-disable MD041 -->
+
+  fix(spec): require channels for label, hex, bin_2d, qq, and qq_line
+
+  Tier-2 validation listed only 43 of 49 geoms in `REQUIRED_CHANNELS`, so
+  `label` (unlike `text`) accepted a missing `label` channel, and `hex`,
+  `bin_2d`, `qq`, and `qq_line` required nothing. The table is now total over
+  `GeomName`; `AES_CHANNEL_KEYS` is derived from `CHANNELS` so path mapping
+  cannot lag the catalog.
+
+  Migration: specs that omit required channels for those geoms will start
+  failing `validate(spec, {})` with `missing-required-channel` — map the
+  channels (or fix the geom). Annotation-only `abline` is unchanged.
+
+- 95f2c1d: <!-- markdownlint-disable MD041 -->
+
+  refactor(spec): generate builder geom mixins from KNOWN_GEOMS (#1081)
+
+  `builder-geoms.ts` is produced by `bun run builder:geoms:gen` so every catalog
+  geom is a `GGBuilder` method. `geomJitter` keeps its special width/height/seed
+  assembly. Composition is `WithBuilderScales(WithBuilderGeoms(GGBuilderCore))`.
+
+  Migration: none — additive tooling / internal layout; public methods unchanged.
+
+- e39ea45: <!-- markdownlint-disable MD041 -->
+
+  docs(reference): clean geom prose and minimal code samples
+
+  Schema layer descriptions no longer cite ggplot2 or GitHub issue numbers on
+  user-facing geom and param docs. Reference pages use minimal required-only
+  snippets, a single breadcrumb trail (Reference → Geoms/Stats/Positions → name),
+  and short section labels.
+
 ## 0.14.1
 
 ## 0.14.0
