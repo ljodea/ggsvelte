@@ -112,8 +112,9 @@ test("Docs landing and sidebar expose the full path without duplicate Reference"
   await expect(index.getByRole("link", { name: /Getting started/ })).toBeVisible();
   await expect(index.getByRole("link", { name: /Data and mappings/ })).toHaveCount(0);
   await expect(index.getByRole("link", { name: /Dates without preprocessing/ })).toBeVisible();
-  await expect(index.getByRole("link", { name: /^Interactions$/ })).toBeVisible();
-  await expect(index.getByRole("link", { name: /^Production$/ })).toBeVisible();
+  // Accessible name includes the description span after the title.
+  await expect(index.getByRole("link", { name: /^Interactions\b/ })).toBeVisible();
+  await expect(index.getByRole("link", { name: /^Production\b/ })).toBeVisible();
   await expect(index.getByRole("link", { name: /Errors reference/ })).toBeVisible();
   await expect(index.getByRole("link", { name: /Upgrade guide/ })).toBeVisible();
   await expect(index.getByRole("link", { name: /Migrating pre-0.1/ })).toHaveCount(0);
