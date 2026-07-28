@@ -1,6 +1,8 @@
 /**
  * Characterization tests for the finalize phase (layout → geometry → scene →
- * contracts → domains → candidates → RenderModel). Observable contracts only.
+ * contracts → domains → candidates → RenderModel) via runPipeline. Observable
+ * contracts only. Direct finalize(PipelineRunState) coverage lives in
+ * pipeline-finalize.test.ts (#1075).
  */
 import { describe, expect, it } from "bun:test";
 
@@ -10,7 +12,7 @@ import { runPipeline } from "../src/pipeline.ts";
 
 const size = { width: 640, height: 400 };
 
-describe("finalizePipelineRun via runPipeline", () => {
+describe("finalize via runPipeline", () => {
   it("emits layer-major batch order for multi-layer paint", () => {
     const model = runPipeline(
       gg(

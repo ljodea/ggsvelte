@@ -14,7 +14,7 @@ import { allocatePipelineRunId } from "./run-id.js";
 import { setupPipelineRun } from "./setup-run.js";
 import { preparePanels } from "./prepare-panels.js";
 import { trainPipelineScales } from "./train-pipeline-scales.js";
-import { finalizePipelineRun } from "./finalize-run.js";
+import { finalize } from "./finalize.js";
 
 export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions): RenderModel {
   const runId = allocatePipelineRunId();
@@ -73,7 +73,7 @@ export function runPipeline(spec: SpecInput | PortableSpec, options: RunOptions)
   perfMark("ggsvelte:scales:end");
   perfMeasure("ggsvelte:scales", "ggsvelte:scales:start", "ggsvelte:scales:end");
 
-  const model = finalizePipelineRun({
+  const model = finalize({
     runId,
     normalized,
     options: runOptions,

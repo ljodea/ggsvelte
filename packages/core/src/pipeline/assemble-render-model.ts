@@ -248,7 +248,7 @@ export function assembleRenderModel(input: AssembleRenderModelInput): RenderMode
     // Training rich diagnostics are emitted with structured facts at train time
     // (#628). Prepare-time transform/OOB entries are one-per-field and share an
     // axis path — do not collapse them here. Free-panel training dedupe lives
-    // on the training channel before merge (finalize-model-assemble).
+    // on the training channel before merge (finalize).
     scaleDiagnostics: [...input.scaleDiagnostics, ...guidePlanDiagnostics(input)],
     scaleDecisions: input.scaleDecisions.map((decision) => ({
       ...decision,
