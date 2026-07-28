@@ -1,15 +1,31 @@
 /**
  * Within-mark paint: pipeline resolution + SVG determinism + fallback mode (#591).
+ * Segment/rule/spoke packing + SVG: #1112.
  */
 import { describe, expect, it } from "bun:test";
 import { aes, fillPaintLinear, gg, glow, strokePaintLinear } from "@ggsvelte/spec";
 
 import { runPipeline } from "../src/pipeline.ts";
 import { renderToSVGString } from "../src/render-svg.ts";
-import type { PathsBatch } from "../src/scene.ts";
+import type { PathsBatch, SegmentsBatch } from "../src/scene.ts";
 import { paintResourceId } from "../src/mark-paint.ts";
 
 const size = { width: 320, height: 200 };
+
+const segmentStrokePaint = strokePaintLinear({
+  x1: 0,
+  y1: 0,
+  x2: 1,
+  y2: 0,
+  space: "panel",
+  stops: [
+    { offset: 0, color: "#111111" },
+    { offset: 1, color: "#eeeeee" },
+  ],
+  fallback: "#111111",
+});
+
+const segmentGlow = glow({ color: "#00aaff", radius: 6, opacity: 0.4 });
 
 function ribbonWithPaint() {
   return gg(
@@ -45,6 +61,28 @@ function ribbonWithPaint() {
       glow: glow({ color: "#00aaff", radius: 6, opacity: 0.4 }),
     })
     .spec();
+}
+
+function segmentFamilySpecs() {
+  return {
+    segment: gg(
+      { x: [0], y: [0], xend: [1], yend: [1] },
+      aes({ x: "x", y: "y", xend: "xend", yend: "yend" }),
+    )
+      .geomSegment({ strokePaint: segmentStrokePaint, glow: segmentGlow })
+      .spec(),
+    rule: gg({ x: [0, 1], y: [0, 1] }, aes({ x: "x", y: "y" }))
+      .geomRule({ yintercept: 0.5, strokePaint: segmentStrokePaint, glow: segmentGlow })
+      .spec(),
+    spoke: gg({ x: [0], y: [0] }, aes({ x: "x", y: "y" }))
+      .geomSpoke({
+        angle: 0,
+        radius: 1,
+        strokePaint: segmentStrokePaint,
+        glow: segmentGlow,
+      })
+      .spec(),
+  } as const;
 }
 
 describe("mark paint pipeline", () => {
@@ -144,4 +182,47 @@ describe("mark paint SVG", () => {
     expect(svg).toContain('clip-path="url(#gg-clip-0)"');
     expect(svg).toContain("gg-paint-l0");
   });
+});
+
+describe("mark paint on segment family (#1112)", () => {
+  for (const geom of ["segment", "rule", "spoke"] as const) {
+    it(`${geom} attaches resolved strokePaint and glow with stable ids`, () => {
+      const model = runPipeline(segmentFamilySpecs()[geom], size);
+      const batch = model.scene.batches.find((b): b is SegmentsBatch => b.kind === "segments");
+      expect(batch).toBeDefined();
+      expect(batch!.strokePaint).toMatchObject({
+        kind: "linear",
+        fallback: "#111111",
+        id: paintResourceId(0, "stroke"),
+      });
+      expect(batch!.glow).toMatchObject({
+        color: "#00aaff",
+        radius: 6,
+        id: paintResourceId(0, "glow"),
+      });
+      // Solid fallback lands when stroke is otherwise theme-default/null.
+      expect(batch!.stroke).toBe("#111111");
+    });
+
+    it(`${geom} SVG emits gradient stroke and glow filter`, () => {
+      const svg = renderToSVGString(segmentFamilySpecs()[geom], size);
+      expect(svg).toContain('id="gg-paint-l0-p0-stroke"');
+      expect(svg).toContain('id="gg-paint-l0-p0-glow"');
+      expect(svg).toContain("linearGradient");
+      expect(svg).toContain("feGaussianBlur");
+      expect(svg).toContain('stroke="url(#gg-paint-l0-p0-stroke)"');
+      expect(svg).toContain('filter="url(#gg-paint-l0-p0-glow)"');
+    });
+
+    it(`${geom} fallback paint mode uses solid stroke and omits glow`, () => {
+      const fallback = renderToSVGString(segmentFamilySpecs()[geom], {
+        ...size,
+        paintMode: "fallback",
+      });
+      expect(fallback).not.toContain("linearGradient");
+      expect(fallback).not.toContain("feGaussianBlur");
+      expect(fallback).not.toContain('filter="url(#gg-paint-l0-p0-glow)"');
+      expect(fallback).toContain('stroke="#111111"');
+    });
+  }
 });

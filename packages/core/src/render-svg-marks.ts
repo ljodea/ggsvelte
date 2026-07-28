@@ -256,14 +256,19 @@ function renderRects(batch: RectsBatch, theme: ThemeTokens): string {
   return parts.join("");
 }
 
-function renderSegments(batch: SegmentsBatch, theme: ThemeTokens): string {
+function renderSegments(
+  batch: SegmentsBatch,
+  theme: ThemeTokens,
+  mode: PaintRenderMode = "full",
+): string {
   const parts: string[] = [
-    `<g class="gg-batch gg-segments" data-layer="${batch.layerIndex}"${alphaAttr(batch.alpha)}>`,
+    `<g class="gg-batch gg-segments" data-layer="${batch.layerIndex}"${alphaAttr(batch.alpha)}${glowAttr(batch.glow, mode)}>`,
   ];
   const n = batch.segments.length / 4;
   const themeInk = themeVar("ink", theme);
   for (let j = 0; j < n; j++) {
-    const stroke = batch.strokes?.[j] ?? batch.stroke ?? themeInk;
+    const solid = batch.strokes?.[j] ?? batch.stroke ?? themeInk;
+    const stroke = paintStroke(solid, batch.strokePaint, mode);
     const linewidth = batch.linewidths?.[j] ?? batch.linewidth;
     const alpha = batch.alphas?.[j];
     const linecap = batch.linecap === undefined ? "" : ` stroke-linecap="${batch.linecap}"`;
@@ -352,7 +357,7 @@ export function renderBatch(
     case "rects":
       return renderRects(batch, theme);
     case "segments":
-      return renderSegments(batch, theme);
+      return renderSegments(batch, theme, mode);
     case "glyphs":
       return renderGlyphs(batch, theme);
     default: {
