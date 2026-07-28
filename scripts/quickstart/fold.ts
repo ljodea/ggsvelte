@@ -27,14 +27,29 @@ export interface SakuraFold {
 const BASE_LAYERS: Record<string, LayerSpec> = { points: { geom: "point" } };
 const BASE_ORDER = ["points"];
 const BASE_CHILDREN: Record<string, string> = { points: "  <GeomPoint />" };
-/** Readable defaults so the first chart does not ship camelCase axis titles or grouped year ticks. */
-const BASE_SCALES: Scales = { x: { type: "linear", labels: "d" } };
+/**
+ * Readable defaults so the first chart does not ship camelCase axis titles or
+ * grouped year ticks. `bloomDate` is a full ISO date per year; month-day y
+ * collapses the year so the scatter is bloom timing, not a year-vs-year
+ * diagonal. Reverse matches the "earlier ↑" lab from the first render.
+ */
+const BASE_SCALES: Scales = {
+  x: { type: "linear", labels: "d" },
+  y: { type: "time", temporalKind: "monthDay", reverse: true },
+};
 const BASE_LABS: Labs = { x: "Year", y: SAKURA_Y_LAB };
 const BASE_GRAMMAR: Record<string, string> = {
+  scaleY: `  <ScaleYMonthDay reverse />`,
   scaleX: `  <ScaleXContinuous labels="d" />`,
   labs: `  <Labs x="Year" y="${SAKURA_Y_LAB}" />`,
 };
-const BASE_COMPONENTS = ["GeomPoint", "GGPlot", "Labs", "ScaleXContinuous"] as const;
+const BASE_COMPONENTS = [
+  "GeomPoint",
+  "GGPlot",
+  "Labs",
+  "ScaleXContinuous",
+  "ScaleYMonthDay",
+] as const;
 
 /**
  * Emission order for the grammar children, outermost concern first: how the

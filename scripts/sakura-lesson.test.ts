@@ -55,12 +55,18 @@ describe("the sakura lesson folds to renderable specs", () => {
     const start = foldSakura(0, rows);
     expect(start.spec.layers).toEqual([{ geom: "point" }]);
     // Year ticks use labels: "d" from the first render so 1000 CE is not "1,000".
-    expect(start.spec.scales).toEqual({ x: { type: "linear", labels: "d" } });
+    // bloomDate is a full ISO calendar date per year; without month-day y the
+    // auto scale draws year-vs-year (a diagonal) instead of bloom timing.
+    expect(start.spec.scales).toEqual({
+      x: { type: "linear", labels: "d" },
+      y: { type: "time", temporalKind: "monthDay", reverse: true },
+    });
     expect(start.spec.labs).toEqual({ x: "Year", y: SAKURA_Y_LAB });
     expect(start.spec.theme).toBeUndefined();
     expect(start.key).toBeUndefined();
     expect(start.source).toBe(QUICKSTART_PAGE_SVELTE);
     expect(start.source).toContain('<ScaleXContinuous labels="d" />');
+    expect(start.source).toContain("<ScaleYMonthDay reverse />");
     expect(start.source).toContain(`<Labs x="Year" y="${SAKURA_Y_LAB}" />`);
     const model = runPipeline(start.spec, { width: 900, height: 480 });
     expect(model.scene.batches[0]!.kind).toBe("points");
@@ -69,6 +75,11 @@ describe("the sakura lesson folds to renderable specs", () => {
       .map((tick) => tick.label);
     expect(yearLabels).toContain("1000");
     expect(yearLabels).not.toContain("1,000");
+    // Y must read as bloom season, not as CE years (the pre-fix diagonal).
+    const bloomLabels = model.scene.axes.y?.ticks
+      .filter((tick) => tick.showLabel === true)
+      .map((tick) => tick.label);
+    expect(bloomLabels?.some((label) => /1000|1200|1400|1600|1800|2000/.test(label))).toBe(false);
   });
 
   it("validates and renders at every step", () => {
@@ -277,6 +288,68 @@ describe("gate G8 — annotations that do not fight the chart", () => {
       .map((row) => row.epoch)
       .filter(Boolean);
     expect(names).toEqual(["Medieval warm period", "Little Ice Age", "Industrial era"]);
+  });
+
+  it("sits epoch names above the band rects, which still cover every observation", () => {
+    // Labels live in a domain strip above the pale fills — not painted on the
+    // fill. Band top stays earlier than the earliest bloom so every point is
+    // still inside a climate band; domain expands above the band for names.
+    type EpochRow = { top: string; bottom: string; epoch: string };
+    type NameRow = { nameDate: string; epoch: string };
+    const folded = finishedSpec() as {
+      layers: { geom: string; data?: { values?: unknown[] } }[];
+      scales?: { y?: { domain?: string[] } };
+    };
+    const epochs = folded.layers.find((layer) => layer.geom === "rect")?.data?.values as
+      | EpochRow[]
+      | undefined;
+    const nameRows = folded.layers
+      .filter((layer) => layer.geom === "text")
+      .flatMap((layer) => (layer.data?.values ?? []) as NameRow[])
+      .filter((row) => typeof row.nameDate === "string");
+    expect(epochs?.length).toBe(3);
+    expect(nameRows.length).toBe(3);
+
+    const bandTop = epochs![0]!.top;
+    const nameDate = nameRows[0]!.nameDate;
+    // On a reverse month-day axis, earlier (smaller MM-DD) is higher. Names
+    // must be earlier than the band top so they sit above the rect.
+    expect(nameDate < bandTop, `${nameDate} should be earlier than band top ${bandTop}`).toBe(true);
+    for (const band of epochs!) {
+      expect(band.top).toBe(bandTop);
+    }
+
+    // Earliest observation in the series is 25 March — band top must stay at
+    // or earlier than that so the rect still encompasses every point.
+    const earliestBloom = rows
+      .map((row) => {
+        const bloomDate = row["bloomDate"];
+        return typeof bloomDate === "string" ? bloomDate.slice(-5) : "";
+      })
+      .filter((md) => md !== "")
+      .toSorted()[0]!;
+    expect(bandTop <= earliestBloom).toBe(true);
+
+    // domain is [later bottom, earlier top] in the fold; top must clear names.
+    const domain = folded.scales?.y?.domain;
+    expect(domain).toBeDefined();
+    const domainTop = domain![1]!;
+    expect(domainTop <= nameDate, `domain top ${domainTop} must clear name ${nameDate}`).toBe(true);
+
+    // Rendered: epoch name screen-y is above (strictly smaller than) band rect top.
+    const svg = renderToSVGString(finishedSpec(), { width: 900, height: 480 });
+    const labelY = Number(
+      svg.match(/<text[^>]*\by="([\d.]+)"[^>]*>Medieval warm period<\/text>/)?.[1],
+    );
+    expect(Number.isFinite(labelY), "epoch name text has a y").toBe(true);
+    const bandTops = ["#f5edc4", "#dce8f2", "#f3dcda"].map((fill) => {
+      const tag = svg.match(new RegExp(`<rect[^>]*fill="${fill}"[^>]*>`))?.[0] ?? "";
+      return Number(tag.match(/\by="([\d.]+)"/)?.[1]);
+    });
+    expect(bandTops.every((top) => Number.isFinite(top))).toBe(true);
+    for (const top of bandTops) {
+      expect(labelY, `label y ${String(labelY)} vs band top ${String(top)}`).toBeLessThan(top);
+    }
   });
 
   it("states the record as well as the claim, with a middle dot", () => {
@@ -519,9 +592,9 @@ describe("gate G7 — epoch bands never capture inspection (#1068)", () => {
 });
 
 describe("gate G9 — epoch bands encompass every observation", () => {
-  it("sets band top at the panel top so early blooms sit inside the fill", () => {
-    // Earliest bloom in the record is 25 March; the domain top is 18 March.
-    // Bands that stop at 28 March leave those points hanging above the rects.
+  it("sets band top early enough that every bloom sits inside the fill", () => {
+    // Earliest bloom in the record is 25 March. Band top stays at 18 March so
+    // those points sit inside the rect; domain top is earlier still (name strip).
     for (const band of SAKURA_EPOCHS) {
       expect(band.top).toBe("03-18");
       expect(band.bottom).toBe("05-10");
