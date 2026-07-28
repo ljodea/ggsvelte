@@ -12,7 +12,7 @@ import {
 import type { Domain } from "../../src/layout/layout-types.ts";
 import { MetricsTableMeasurer } from "../../src/layout/measure.ts";
 import { FONT_METRICS } from "../../src/layout/font-metrics.ts";
-import { layoutDomain } from "../../src/pipeline/layout-domain.ts";
+import { layoutDomain } from "../../src/pipeline/layout-helpers.ts";
 import { trainBand } from "../../src/scales/train.ts";
 
 const measurer = new MetricsTableMeasurer(FONT_METRICS);

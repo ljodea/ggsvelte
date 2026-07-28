@@ -7,8 +7,7 @@ import type { PipelineWarning } from "./types.js";
 
 export function pushContinuousTrainingWarnings(
   axis: "x" | "y",
-  _type: "linear" | "time",
-  training: { empty: boolean; nonPositive: number },
+  training: { empty: boolean },
   warnings: PipelineWarning[],
 ): void {
   if (training.empty) {

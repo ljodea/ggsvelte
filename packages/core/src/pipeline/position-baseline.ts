@@ -1,6 +1,6 @@
 /**
  * Shared zero baseline for zero-baseline geoms (bar, col, area, histogram,
- * density) — one helper so no baseline independently reimplements the
+ * density) — one constant so no baseline independently reimplements the
  * transform-space origin rule.
  *
  * Identity and sqrt: forward(0) = 0, so the transformed-space baseline is 0.
@@ -9,8 +9,4 @@
  * inverse 1) without ever evaluating log10(0). All three transforms therefore
  * share the same literal transformed-space baseline: 0.
  */
-import type { ScaleTransform } from "../scales/transform.js";
-
-export function transformedZeroBaseline(_transform: ScaleTransform): number {
-  return 0;
-}
+export const TRANSFORMED_ZERO_BASELINE = 0;

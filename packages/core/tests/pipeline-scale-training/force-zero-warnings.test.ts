@@ -52,7 +52,7 @@ describe("maybeForceZeroForBars / pushContinuousTrainingWarnings", () => {
     const { pushContinuousTrainingWarnings } =
       await import("../../src/pipeline/scale-axis-train-continuous-warn.ts");
     const warnings: { code: string; message: string }[] = [];
-    pushContinuousTrainingWarnings("x", "linear", { empty: true, nonPositive: 2 }, warnings);
+    pushContinuousTrainingWarnings("x", { empty: true }, warnings);
     expect(warnings.map((w) => w.code)).toEqual(["empty-domain"]);
   });
 });
