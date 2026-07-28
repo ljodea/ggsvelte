@@ -2,6 +2,9 @@
   import { base } from "$app/paths";
   import { componentNameForGeom } from "@ggsvelte/spec";
 
+  import ReferenceLede from "$lib/components/ReferenceLede.svelte";
+  import { plotAesLiteral } from "$lib/reference-snippets";
+
   import type { PageProps } from "./$types";
 
   const { data }: PageProps = $props();
@@ -13,18 +16,23 @@
   const primaryComponent = $derived(
     primaryGeom === undefined ? "GeomBar" : componentNameForGeom(primaryGeom),
   );
+  const geomName = $derived(primaryGeom ?? "bar");
+  const plotAes = $derived(plotAesLiteral(geomName, entry.name));
+  const plotOpen = $derived(
+    plotAes === "" ? "<GGPlot data={rows}>" : `<GGPlot data={rows} ${plotAes}>`,
+  );
 
   const svelteSnippet = $derived(
-    `import { GGPlot, ${primaryComponent} } from "@ggsvelte/svelte";\n\n<GGPlot data={rows} aes={{ x: "x", y: "y" }}>\n  <${primaryComponent} stat="${entry.name}" />\n</GGPlot>`,
+    `import { GGPlot, ${primaryComponent} } from "@ggsvelte/svelte";\n\n${plotOpen}\n  <${primaryComponent} stat="${entry.name}" />\n</GGPlot>`,
   );
   const jsonSnippet = $derived(
-    `{\n  "geom": "${primaryGeom ?? "bar"}",\n  "stat": "${entry.name}"\n}`,
+    `{\n  "geom": "${geomName}",\n  "stat": "${entry.name}"\n}`,
   );
 </script>
 
 <article class="stat-detail prose" aria-labelledby="stat-heading">
   <h1 id="stat-heading"><code>stat: "{entry.name}"</code></h1>
-  <p class="lede">{entry.summary}</p>
+  <ReferenceLede text={entry.summary} />
 
   <h2 id="usage">Usage</h2>
   <pre class="snippet"><code>{svelteSnippet}</code></pre>
@@ -107,12 +115,6 @@
 
   h1 {
     margin: 0 0 0.5rem;
-  }
-
-  .lede {
-    max-width: 44rem;
-    margin: 0 0 1.5rem;
-    font-size: 1.05rem;
   }
 
   .snippet {

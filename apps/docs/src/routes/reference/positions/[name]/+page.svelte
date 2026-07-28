@@ -1,6 +1,13 @@
 <script lang="ts">
   import { base } from "$app/paths";
-  import { componentNameForGeom } from "@ggsvelte/spec";
+  import {
+    componentNameForGeom,
+    GEOM_DEFAULTS,
+    type GeomName,
+  } from "@ggsvelte/spec";
+
+  import ReferenceLede from "$lib/components/ReferenceLede.svelte";
+  import { plotAesLiteral } from "$lib/reference-snippets";
 
   import type { PageProps } from "./$types";
 
@@ -13,20 +20,28 @@
   const primaryComponent = $derived(
     primaryGeom === undefined ? "GeomBar" : componentNameForGeom(primaryGeom),
   );
+  const geomName = $derived(primaryGeom ?? "bar");
+  const defaultStat = $derived(
+    GEOM_DEFAULTS[geomName as GeomName]?.stat ?? "identity",
+  );
+  const plotAes = $derived(plotAesLiteral(geomName, defaultStat));
+  const plotOpen = $derived(
+    plotAes === "" ? "<GGPlot data={rows}>" : `<GGPlot data={rows} ${plotAes}>`,
+  );
 
   // Minimal: position name only. Optional positionParams live in the table below.
   const svelteSnippet = $derived(
-    `import { GGPlot, ${primaryComponent} } from "@ggsvelte/svelte";\n\n<GGPlot data={rows} aes={{ x: "x", y: "y" }}>\n  <${primaryComponent} position="${entry.name}" />\n</GGPlot>`,
+    `import { GGPlot, ${primaryComponent} } from "@ggsvelte/svelte";\n\n${plotOpen}\n  <${primaryComponent} position="${entry.name}" />\n</GGPlot>`,
   );
 
   const jsonSnippet = $derived(
-    `{\n  "geom": "${primaryGeom ?? "bar"}",\n  "position": "${entry.name}"\n}`,
+    `{\n  "geom": "${geomName}",\n  "position": "${entry.name}"\n}`,
   );
 </script>
 
 <article class="position-detail prose" aria-labelledby="position-heading">
   <h1 id="position-heading"><code>position: "{entry.name}"</code></h1>
-  <p class="lede">{entry.summary}</p>
+  <ReferenceLede text={entry.summary} />
 
   <h2 id="usage">Usage</h2>
   <pre class="snippet"><code>{svelteSnippet}</code></pre>
@@ -116,12 +131,6 @@
 
   h1 {
     margin: 0 0 0.5rem;
-  }
-
-  .lede {
-    max-width: 44rem;
-    margin: 0 0 1.5rem;
-    font-size: 1.05rem;
   }
 
   .snippet {
