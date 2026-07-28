@@ -1,13 +1,13 @@
 /**
  * The getting-started lesson, as data.
  *
- * One chart is built across seven renders: a plain scatter of 838 Kyoto
- * cherry-blossom observations, then six steps that each add one grammar
- * element. Every step declares two deltas — the PortableSpec the live chart
- * renders from, and the Svelte source the reader copies — and `foldSakura`
- * accumulates both. The page never re-derives either, so the chart on screen,
- * the fragment beside it, and the finished file at the end cannot drift
- * (asserted in scripts/sakura-lesson.test.ts).
+ * One chart is built across progressive renders: a plain scatter of 838 Kyoto
+ * cherry-blossom observations, then steps that each add one grammar element.
+ * Every step declares two deltas — the PortableSpec the live chart renders
+ * from, and the Svelte source the reader copies — and `foldSakura` accumulates
+ * both. The page never re-derives either, so the chart on screen, the fragment
+ * beside it, and the finished file at the end cannot drift (asserted in
+ * scripts/sakura-lesson.test.ts).
  *
  * Shared byte-for-byte by the docs site, the llms surfaces, and the packed
  * consumer-compat fixture app.
@@ -29,7 +29,6 @@ export {
   SAKURA_Y_BREAKS,
   SAKURA_Y_LAB,
   SAKURA_EPOCHS,
-  SAKURA_EPOCH_EDGES,
   SAKURA_RECORDS,
   SAKURA_STEPS,
 } from "./quickstart/steps";

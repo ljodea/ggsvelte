@@ -80,10 +80,10 @@
   const recordNames = SAKURA_RECORDS.map((record) => record.label).join("; ");
 
   /**
-   * Every step chart ships as SVG the library rendered at build time
-   * (scripts/gen-lesson-charts.ts): each one illustrates a single delta. The
-   * finished chart is the live 838-point plot — loaded when near the viewport
-   * so mobile chrome stays tappable (#972).
+   * Intermediate step charts ship as SVG the library rendered at build time
+   * (scripts/gen-lesson-charts.ts). The final "Finish it" step is the live
+   * 838-point plot — loaded when near the viewport so mobile chrome stays
+   * tappable (#972).
    */
   const chartSrc = (step: number): string =>
     `${base}/lesson/${step < 0 ? "first-render.svg" : `step-${String(step + 1)}.svg`}`;
@@ -180,6 +180,7 @@
 
   <div class="lesson-steps">
     {#each SAKURA_STEPS as step, index (step.id)}
+      {@const isFinish = index === SAKURA_STEPS.length - 1}
       <section class="progressive-step" aria-labelledby={step.id}>
         <div class="step-copy">
           <h3 id={step.id}>{step.title}</h3>
@@ -197,38 +198,39 @@
           {/if}
           <a href={`${base}${step.href}`}>Read {step.chapterTitle}</a>
         </div>
-        <div class="lesson-output">
-          <img
-            class="lesson-chart"
-            src={chartSrc(index)}
-            width={LESSON_CHART_WIDTH}
-            height={LESSON_CHART_HEIGHT}
-            alt={`Kyoto cherry blossom after step ${index + 1}: ${step.title}`}
-          />
-        </div>
+        {#if isFinish}
+          <div class="finished-chart lesson-output" bind:this={finishedChart}>
+            {#if LivePlot && finished}
+              <LivePlot
+                spec={finished.spec}
+                key={finished.key}
+                inspect={finished.inspect}
+                height={liveHeight}
+                ariaLabel={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
+              />
+            {:else}
+              <img
+                class="lesson-chart"
+                src={chartSrc(index)}
+                width={LESSON_CHART_WIDTH}
+                height={LESSON_CHART_HEIGHT}
+                alt={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
+              />
+            {/if}
+          </div>
+        {:else}
+          <div class="lesson-output">
+            <img
+              class="lesson-chart"
+              src={chartSrc(index)}
+              width={LESSON_CHART_WIDTH}
+              height={LESSON_CHART_HEIGHT}
+              alt={`Kyoto cherry blossom after step ${index + 1}: ${step.title}`}
+            />
+          </div>
+        {/if}
       </section>
     {/each}
-  </div>
-
-  <h2 id="the-chart">The chart</h2>
-  <div class="finished-chart lesson-output" bind:this={finishedChart}>
-    {#if LivePlot && finished}
-      <LivePlot
-        spec={finished.spec}
-        key={finished.key}
-        inspect={finished.inspect}
-        height={liveHeight}
-        ariaLabel={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
-      />
-    {:else}
-      <img
-        class="lesson-chart"
-        src={chartSrc(SAKURA_STEPS.length - 1)}
-        width={LESSON_CHART_WIDTH}
-        height={LESSON_CHART_HEIGHT}
-        alt={`Kyoto cherry blossom, finished. Called out: ${recordNames}.`}
-      />
-    {/if}
   </div>
 
   <h2 id="the-finished-file">The finished file</h2>

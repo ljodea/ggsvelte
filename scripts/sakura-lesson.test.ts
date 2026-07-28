@@ -25,7 +25,6 @@ import {
   SAKURA_BASELINE,
   SAKURA_RECORDS,
   SAKURA_BINWIDTH,
-  SAKURA_EPOCH_EDGES,
   SAKURA_EPOCHS,
   SAKURA_FINISHED_SVELTE,
   SAKURA_STEPS,
@@ -88,7 +87,8 @@ describe("the sakura lesson folds to renderable specs", () => {
       const spec = foldSakura(count, rows).spec as { layers: unknown[] };
       return spec.layers.length;
     });
-    expect(layerCounts).toEqual([1, 2, 2, 5, 8, 8, 8]);
+    // base → signal → scales/theme → epochs (no edge rules) → annotate → finish
+    expect(layerCounts).toEqual([1, 2, 2, 4, 7, 7]);
     for (let i = 1; i < layerCounts.length; i += 1) {
       expect(layerCounts[i]!).toBeGreaterThanOrEqual(layerCounts[i - 1]!);
     }
@@ -108,8 +108,8 @@ describe("the sakura lesson folds to renderable specs", () => {
     // collide with the data. Bands, trend, baseline, and points stay.
     const full = foldSakura(SAKURA_STEPS.length, rows);
     const narrow = foldSakura(SAKURA_STEPS.length, rows, { annotations: false });
-    expect((full.spec.layers as unknown[]).length).toBe(8);
-    expect((narrow.spec.layers as unknown[]).length).toBe(6);
+    expect((full.spec.layers as unknown[]).length).toBe(7);
+    expect((narrow.spec.layers as unknown[]).length).toBe(5);
     const kinds = (narrow.spec.layers as { geom: string }[]).map((layer) => layer.geom);
     expect(kinds).not.toContain("segment");
     // The epoch names stay: they are spread one per band rather than clustered
@@ -171,10 +171,10 @@ describe("the sakura lesson folds to renderable specs", () => {
       [2, "GuideNone", '"fill":{"type":"none"}'],
       [2, 'label: "epoch"', '"label":{"field":"epoch"}'],
       [2, "ScaleFillManual", '"type":"manual"'],
+      [1, "<ThemeTufte />", '"theme":"tufte"'],
       [3, SAKURA_BASELINE, `"yintercept":"${SAKURA_BASELINE}"`],
       [3, '"#b3452f"', '"value":"#b3452f"'],
-      [4, "<ThemeTufte />", '"theme":"tufte"'],
-      [5, 'key="year"', ""],
+      [4, 'key="year"', ""],
     ];
     for (const [index, inFragment, inSpec] of pairs) {
       const step = SAKURA_STEPS[index]!;
@@ -415,27 +415,22 @@ describe("gate G7 — epoch bands never capture inspection (#1068)", () => {
   const size = { width: 900, height: 480 } as const;
   const epochStep = SAKURA_STEPS[2]!;
 
-  it("opts epochs and epochEdges out of inspection in the step delta", () => {
+  it("opts epochs out of inspection in the step delta", () => {
     expect(epochStep.id).toBe("add-epoch-bands");
-    const layers = epochStep.spec.layers as
-      | {
-          epochs?: { inspect?: false };
-          epochEdges?: { inspect?: false };
-        }
-      | undefined;
+    const layers = epochStep.spec.layers as { epochs?: { inspect?: false } } | undefined;
     expect(layers?.epochs?.inspect).toBe(false);
-    expect(layers?.epochEdges?.inspect).toBe(false);
   });
 
-  it("folds inspect: false onto both decorative layers from the step that introduces them", () => {
+  it("folds inspect: false onto the decorative epoch layers from the step that introduces them", () => {
     // foldSakura(3) = first three steps; step 2 is add-epoch-bands.
     const folded = foldSakura(3, rows);
     const epochs = folded.spec.layers[layerWithValues(folded.spec.layers, SAKURA_EPOCHS)];
-    const edges = folded.spec.layers[layerWithValues(folded.spec.layers, SAKURA_EPOCH_EDGES)];
     expect(epochs?.geom).toBe("rect");
-    expect(edges?.geom).toBe("rule");
     expect(epochs?.inspect).toBe(false);
-    expect(edges?.inspect).toBe(false);
+    const names = folded.spec.layers.find(
+      (layer) => layer.geom === "text" && layer.inspect === false,
+    );
+    expect(names).toBeDefined();
   });
 
   it("prints inspect={false} in the fragment and the folded source the reader copies", () => {
@@ -444,9 +439,10 @@ describe("gate G7 — epoch bands never capture inspection (#1068)", () => {
     expect(epochStep.fragment).toContain("inspect={false}");
     const folded = foldSakura(3, rows);
     expect(folded.source).toContain("inspect={false}");
-    // Both decorative children, not a single accidental match.
     expect(folded.source).toMatch(/<GeomRect[\s\S]*?inspect=\{false\}/);
-    expect(folded.source).toMatch(/<GeomRule[\s\S]*?inspect=\{false\}/);
+    expect(folded.source).toMatch(/<GeomText[\s\S]*?inspect=\{false\}/);
+    // Decorative epoch edge rules were removed — they only fought gridlines.
+    expect(folded.source).not.toContain("epochEdges");
   });
 
   for (const annotations of [true, false] as const) {
@@ -460,19 +456,13 @@ describe("gate G7 — epoch bands never capture inspection (#1068)", () => {
       const layers = folded.spec.layers;
 
       const epochIndex = layerWithValues(layers, SAKURA_EPOCHS);
-      const edgeIndex = layerWithValues(layers, SAKURA_EPOCH_EDGES);
       expect(epochIndex, "epochs layer present").toBeGreaterThanOrEqual(0);
-      expect(edgeIndex, "epochEdges layer present").toBeGreaterThanOrEqual(0);
-      // Disambiguate by data, not geom: the finished fold has two rule layers
-      // (epochEdges + baseline).
       expect(layers[epochIndex]!.geom).toBe("rect");
-      expect(layers[edgeIndex]!.geom).toBe("rule");
 
       for (let id = 0; id < model.candidates.size; id += 1) {
         const candidate = model.candidates.candidate(id);
         if (candidate === null) continue;
         expect(candidate.layerIndex).not.toBe(epochIndex);
-        expect(candidate.layerIndex).not.toBe(edgeIndex);
       }
     });
 
@@ -485,8 +475,8 @@ describe("gate G7 — epoch bands never capture inspection (#1068)", () => {
       expect(pointIndex).toBeGreaterThanOrEqual(0);
 
       // A late-record observation: on-mark probe must return the bloom point
-      // (year + date), not a band or edge. Off-mark exact returns null after
-      // opt-out — do not expect a substitute point at panel center.
+      // (year + date), not a band. Off-mark exact returns null after opt-out —
+      // do not expect a substitute point at panel center.
       let probe: { x: number; y: number; year: number; date: string } | null = null;
       for (let id = 0; id < model.candidates.size; id += 1) {
         const candidate = model.candidates.candidate(id);
@@ -527,4 +517,15 @@ describe("gate G7 — epoch bands never capture inspection (#1068)", () => {
       }
     });
   }
+});
+
+describe("gate G9 — epoch bands encompass every observation", () => {
+  it("sets band top at the panel top so early blooms sit inside the fill", () => {
+    // Earliest bloom in the record is 25 March; the domain top is 18 March.
+    // Bands that stop at 28 March leave those points hanging above the rects.
+    for (const band of SAKURA_EPOCHS) {
+      expect(band.top).toBe("03-18");
+      expect(band.bottom).toBe("05-10");
+    }
+  });
 });

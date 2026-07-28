@@ -6206,26 +6206,6 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Finish it"],
   },
   {
-    id: "heading:guide-getting-started:inspect-and-pin",
-    kind: "heading",
-    title: "Inspect and pin",
-    summary:
-      "Inspect and pin in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
-    href: "/guide/getting-started#inspect-and-pin",
-    keywords: ["Getting started", "Start"],
-    exact: ["Inspect and pin"],
-  },
-  {
-    id: "heading:guide-getting-started:the-chart",
-    kind: "heading",
-    title: "The chart",
-    summary:
-      "The chart in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
-    href: "/guide/getting-started#the-chart",
-    keywords: ["Getting started", "Start"],
-    exact: ["The chart"],
-  },
-  {
     id: "heading:guide-getting-started:the-finished-file",
     kind: "heading",
     title: "The finished file",

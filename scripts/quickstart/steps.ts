@@ -1,8 +1,8 @@
 /**
  * Getting-started lesson data and step model.
  *
- * Epoch bands, record annotations, step types, and the seven SAKURA_STEPS
- * deltas (PortableSpec + Svelte source templates). Pure data — the fold that
+ * Epoch bands, record annotations, step types, and the SAKURA_STEPS deltas
+ * (PortableSpec + Svelte source templates). Pure data — the fold that
  * accumulates steps lives in `./fold.ts`.
  */
 
@@ -27,12 +27,12 @@ const Y_TOP = "03-18";
 /** Plot domain bottom (later / lower on the reversed date axis). */
 const Y_BOTTOM = "05-10";
 /**
- * Epoch-band top — later than {@link Y_TOP} so the panel keeps headroom above
- * the bands for epoch names (#1067). Bands claim climate periods, not the
- * full vertical extent of the record.
+ * Epoch bands span the full vertical domain so every observation sits inside
+ * its climate period — matching the reference chart. Epoch names sit near the
+ * top of each band on the pale fill.
  */
-const BAND_TOP = "03-28";
-/** Epoch names sit between {@link Y_TOP} and {@link BAND_TOP}, above every band. */
+const BAND_TOP = Y_TOP;
+/** Epoch names sit just below the panel top, inside every band. */
 const EPOCH_NAME_DATE = "03-20";
 
 // --- the two lesson-only tables -------------------------------------------
@@ -50,21 +50,8 @@ export const SAKURA_EPOCHS = [
 ].map((band) => ({ ...band, top: BAND_TOP, bottom: Y_BOTTOM }));
 
 /**
- * Starts of the second and third bands. Drawn as hairlines so the epochs
- * survive forced-colors mode, where translucent fills are unreliable. The
- * 1300 edge is the LIA left wall (MWP ends 1250, so a gap sits to its left);
- * only 1850 is a true band join.
- */
-export const SAKURA_EPOCH_EDGES = SAKURA_EPOCHS.slice(1).map((band) => ({ year: band.year }));
-
-/**
- * Where each epoch name sits: centred over its own band, in the empty strip
- * between the panel top and {@link BAND_TOP}.
- *
- * The strip costs nothing. The earliest bloom in the whole record is 25 March
- * and the domain starts on 18 March, so those days were already empty before
- * the names arrived — no observation is displaced and the axis makes no new
- * claim. Derived from SAKURA_EPOCHS so a name can never drift off its band.
+ * Where each epoch name sits: centred over its own band, near the top of the
+ * pale fill. Derived from SAKURA_EPOCHS so a name can never drift off its band.
  */
 const SAKURA_EPOCH_NAMES = SAKURA_EPOCHS.map((band) => ({
   epoch: band.epoch,
@@ -168,7 +155,7 @@ export interface SakuraStep {
   readonly source: SakuraSourceDelta;
 }
 
-const EPOCHS_CONST = `  // Bands stop short of the panel top so epoch names can sit in the headroom.
+const EPOCHS_CONST = `  // Bands span the full y-domain so every observation sits inside its epoch.
   const span = { top: "${BAND_TOP}", bottom: "${Y_BOTTOM}" };
   const epochs = [
 ${SAKURA_EPOCHS.map(
@@ -188,8 +175,6 @@ ${SAKURA_EPOCH_NAMES.map(
   (n) => `    { epoch: "${n.epoch}", midYear: ${n.midYear}, nameDate: "${n.nameDate}" },`,
 ).join("\n")}
   ];`;
-
-const EPOCH_EDGES_CONST = `  const epochEdges = [${SAKURA_EPOCH_EDGES.map((e) => `{ year: ${e.year} }`).join(", ")}];`;
 
 const EPOCH_DOMAIN = SAKURA_EPOCHS.map((e) => `"${e.epoch}"`).join(", ");
 const EPOCH_VALUES = '"#f5edc4", "#dce8f2", "#f3dcda"';
@@ -253,7 +238,10 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     title: "Put earlier bloom on top",
     outcome: "",
     explanation: "",
-    fragment: `<ScaleYMonthDay
+    // Theme early: gridless Tufte chrome before epoch bands land, so band
+    // edges never fight default gridlines.
+    fragment: `<ThemeTufte />
+<ScaleYMonthDay
   reverse
   breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
   dateLabels="%b %e"
@@ -263,6 +251,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     chapterTitle: "Scales and guides",
     href: "/guide/scales-guides#date-and-time-axes",
     spec: {
+      theme: "tufte",
       scales: {
         y: {
           type: "time",
@@ -279,8 +268,9 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       labs: { x: "Year", y: SAKURA_Y_LAB },
     },
     source: {
-      components: ["ScaleYMonthDay", "ScaleXContinuous"],
+      components: ["ThemeTufte", "ScaleYMonthDay", "ScaleXContinuous"],
       grammar: {
+        theme: `  <ThemeTufte />`,
         scaleY: `  <ScaleYMonthDay
     reverse
     breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
@@ -310,8 +300,6 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   alpha={0.55}
   inspect={false}
 />
-<GeomRule data={epochEdges} aes={{ y: null, color: { value: "#c8ccd0" } }}
-  linewidth={0.5} inspect={false} />
 <GeomText data={epochNames}
   aes={{ x: "midYear", y: "nameDate", label: "epoch",
          color: { value: "#6b7075" } }} size={11} inspect={false} />
@@ -339,13 +327,6 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           params: { alpha: 0.55 },
           inspect: false,
         },
-        epochEdges: {
-          geom: "rule",
-          data: { values: SAKURA_EPOCH_EDGES },
-          aes: { y: null, color: { value: "#c8ccd0" } },
-          params: { linewidth: 0.5 },
-          inspect: false,
-        },
         // Names the bands where the reader is already looking, instead of
         // sending them to a colour key at the foot of the plot.
         epochNames: {
@@ -358,11 +339,11 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
             color: { value: "#6b7075" },
           },
           params: { size: 11 },
-          // Decoration, like the bands they name (#1068).
+          // Decorations, like the bands they name (#1068).
           inspect: false,
         },
       },
-      order: ["epochs", "epochEdges", "epochNames", "points", "trend"],
+      order: ["epochs", "epochNames", "points", "trend"],
       scales: {
         fill: {
           type: "manual",
@@ -376,8 +357,8 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       guides: { fill: { type: "none" } },
     },
     source: {
-      components: ["GeomRect", "GeomRule", "GeomText", "ScaleFillManual", "GuideNone"],
-      consts: [EPOCHS_CONST, EPOCH_EDGES_CONST, EPOCH_NAMES_CONST],
+      components: ["GeomRect", "GeomText", "ScaleFillManual", "GuideNone"],
+      consts: [EPOCHS_CONST, EPOCH_NAMES_CONST],
       grammar: {
         scaleFill: `  <ScaleFillManual
     domain={[${EPOCH_DOMAIN}]}
@@ -386,12 +367,6 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
         guides: `  <GuideNone channel="fill" />`,
       },
       children: {
-        epochEdges: `  <GeomRule
-    data={epochEdges}
-    aes={{ y: null, color: { value: "#c8ccd0" } }}
-    linewidth={0.5}
-    inspect={false}
-  />`,
         epochs: `  <GeomRect
     data={epochs}
     aes={{
@@ -418,7 +393,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     inspect={false}
   />`,
       },
-      childOrder: ["epochs", "epochEdges", "epochNames", "points", "trend"],
+      childOrder: ["epochs", "epochNames", "points", "trend"],
     },
   },
   {
@@ -473,19 +448,10 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           params: { size: 11, anchor: "end", dx: -4 },
         },
       },
-      order: [
-        "epochs",
-        "epochEdges",
-        "epochNames",
-        "points",
-        "baseline",
-        "trend",
-        "leaders",
-        "callouts",
-      ],
+      order: ["epochs", "epochNames", "points", "baseline", "trend", "leaders", "callouts"],
     },
     source: {
-      components: ["GeomSegment", "GeomText"],
+      components: ["GeomRule", "GeomSegment", "GeomText"],
       consts: [RECORDS_CONST],
       children: {
         baseline: `  <GeomRule
@@ -518,16 +484,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     dx={-4}
   />`,
       },
-      childOrder: [
-        "epochs",
-        "epochEdges",
-        "epochNames",
-        "points",
-        "baseline",
-        "trend",
-        "leaders",
-        "callouts",
-      ],
+      childOrder: ["epochs", "epochNames", "points", "baseline", "trend", "leaders", "callouts"],
     },
   },
   {
@@ -535,18 +492,18 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     title: "Finish it",
     outcome: "",
     explanation: "",
-    fragment: `<ThemeTufte />
-<Labs
+    fragment: `<Labs
   title="Kyoto cherry blossom, 812–2026"
   subtitle="Bloom now arrives about a week earlier than it did for a millennium"
   caption="838 observations. Dashed rule: the 1600–1850 median, 15 April. Data: Yasuyuki Aono (2008, 2010)."
   x="Year"
   y="${SAKURA_Y_LAB}"
-/>`,
-    chapterTitle: "Scales and guides",
-    href: "/guide/scales-guides#categorical-color",
+/>
+key="year"
+inspect={{ mode: "exact", pin: true }}`,
+    chapterTitle: "Interactions",
+    href: "/guide/interactions#inspection",
     spec: {
-      theme: "tufte",
       labs: {
         title: "Kyoto cherry blossom, 812–2026",
         subtitle: "Bloom now arrives about a week earlier than it did for a millennium",
@@ -561,9 +518,11 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       },
     },
     source: {
-      components: ["ThemeTufte"],
+      attrs: {
+        key: `  key="year"`,
+        inspect: `  inspect={{ mode: "exact", pin: true }}`,
+      },
       grammar: {
-        theme: `  <ThemeTufte />`,
         labs: `  <Labs
     x="Year"
     y="${SAKURA_Y_LAB}"
@@ -571,23 +530,6 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     subtitle="Bloom now arrives about a week earlier than it did for a millennium"
     caption="838 observations. Dashed rule: the 1600–1850 median, 15 April. Data: Yasuyuki Aono (2008, 2010)."
   />`,
-      },
-    },
-  },
-  {
-    id: "inspect-and-pin",
-    title: "Inspect and pin",
-    outcome: "",
-    explanation: "",
-    fragment: `key="year"
-inspect={{ mode: "exact", pin: true }}`,
-    chapterTitle: "Interactions",
-    href: "/guide/interactions#inspection",
-    spec: {},
-    source: {
-      attrs: {
-        key: `  key="year"`,
-        inspect: `  inspect={{ mode: "exact", pin: true }}`,
       },
     },
   },

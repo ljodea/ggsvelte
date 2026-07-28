@@ -41,7 +41,7 @@ function renderedHeadingIds(): string[] {
 describe("getting-started page navigation", () => {
   it("offers only headings the component renders, in page order", () => {
     const stepIds = GETTING_STARTED_PAGE_HEADINGS.filter((h) => h.level === 3).map((h) => h.id);
-    expect(stepIds.length).toBeGreaterThanOrEqual(6);
+    expect(stepIds.length).toBeGreaterThanOrEqual(5);
 
     const expected = GETTING_STARTED_PAGE_HEADINGS.map((heading) =>
       stepIds.includes(heading.id) ? "(steps)" : heading.id,
@@ -63,6 +63,8 @@ describe("getting-started page navigation", () => {
   it("keeps the deleted sections deleted", () => {
     for (const gone of [
       "you-have-a-chart",
+      "the-chart",
+      "inspect-and-pin",
       "choose-another-surface-only-when-you-need-it",
       "headless-and-server-rendering",
       "validating-specs",

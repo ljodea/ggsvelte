@@ -3922,16 +3922,6 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "inspect-and-pin",
-        title: "Inspect and pin",
-        level: 3,
-      },
-      {
-        id: "the-chart",
-        title: "The chart",
-        level: 2,
-      },
-      {
         id: "the-finished-file",
         title: "The finished file",
         level: 2,

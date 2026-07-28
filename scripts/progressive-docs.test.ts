@@ -38,7 +38,7 @@ describe("progressive Docs journey", () => {
     // rather than by restating step titles that the lesson is free to reword.
     const inventory = createDocsRouteInventory();
     const pages = guidePages(lifecycle as unknown as LifecycleDoc);
-    expect(SAKURA_STEPS.length).toBeGreaterThanOrEqual(6);
+    expect(SAKURA_STEPS.length).toBeGreaterThanOrEqual(5);
 
     for (const step of SAKURA_STEPS) {
       const [path, anchor] = step.href.split("#") as [string, string];

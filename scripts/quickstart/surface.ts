@@ -23,7 +23,6 @@ export const GETTING_STARTED_PAGE_HEADINGS = [
   { id: "start-with-a-basic-plot", title: "Start with a basic plot", level: 2 },
   { id: "add-geometry-layers", title: "Add geometry layers", level: 2 },
   ...SAKURA_STEPS.map((step) => ({ id: step.id, title: step.title, level: 3 as const })),
-  { id: "the-chart", title: "The chart", level: 2 },
   { id: "the-finished-file", title: "The finished file", level: 2 },
   { id: "built-for-agents", title: "Built for agents", level: 2 },
   { id: "the-rest-of-the-grammar", title: "The rest of the grammar", level: 2 },
