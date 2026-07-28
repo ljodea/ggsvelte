@@ -4,7 +4,6 @@ import { DOCS_ROUTES } from "../apps/docs/src/lib/generated/routes.ts";
 import lifecycle from "../lifecycle.json";
 import { createDocsRouteInventory } from "./docs-route-inventory.ts";
 import { GETTING_STARTED_MD, guidePages, type LifecycleDoc } from "./gen-llms.ts";
-import { extractMarkdownHeadings } from "./llms-markdown.ts";
 import {
   QUICKSTART_BUILDER_FRAGMENT,
   QUICKSTART_CLI_FRAGMENT,
@@ -29,33 +28,6 @@ describe("progressive Docs journey", () => {
     );
     expect(page?.markdown).toContain("# Getting started");
     expect(page?.markdown).toContain("/reference/geoms");
-  });
-
-  it("lands a real chapter behind every lesson deep link", () => {
-    // The lesson teaches by accretion, so each step hands the reader off to
-    // the chapter that owns the element it just added. Those links are checked
-    // structurally — chapter exists, is navigable, and really has the anchor —
-    // rather than by restating step titles that the lesson is free to reword.
-    const inventory = createDocsRouteInventory();
-    const pages = guidePages(lifecycle as unknown as LifecycleDoc);
-    expect(SAKURA_STEPS.length).toBeGreaterThanOrEqual(5);
-
-    for (const step of SAKURA_STEPS) {
-      const [path, anchor] = step.href.split("#") as [string, string];
-      const route = inventory.find((entry) => entry.path === path);
-      expect(route, `no route for ${step.href}`).toBeDefined();
-      expect(route?.navigation?.label, `${path} is not navigable`).toBeTruthy();
-      expect(route?.navigation?.label).toBe(step.chapterTitle);
-
-      if (path === "/guide/getting-started") {
-        // Human walkthrough is a Svelte component, not catalog markdown.
-        continue;
-      }
-      const page = pages.find((entry) => `/guide/${entry.slug}` === path);
-      expect(page, `no guide page for ${path}`).toBeDefined();
-      const anchors = extractMarkdownHeadings(page!.markdown).map((heading) => heading.id);
-      expect(anchors, `${path} has no #${anchor}`).toContain(anchor);
-    }
   });
 
   it("publishes the consolidated interaction and production chapters", () => {

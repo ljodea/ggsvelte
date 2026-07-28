@@ -96,7 +96,6 @@
           {#if step.explanation !== ""}
             <p>{step.explanation}</p>
           {/if}
-          <a href={`${base}${step.href}`}>Read {step.chapterTitle}</a>
         </div>
         {#if isFinish}
           <LessonFinishedChart placeholderSrc={chartSrc(index)} />

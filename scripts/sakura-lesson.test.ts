@@ -231,13 +231,6 @@ describe("the sakura lesson folds to renderable specs", () => {
       expect(child, "spec-level render hint spelled as a prop").not.toContain("render=");
     }
   });
-
-  it("keeps every step's chapter link resolvable", () => {
-    for (const step of SAKURA_STEPS) {
-      expect(step.href).toMatch(/^\/guide\/[a-z-]+#[a-z-]+$/);
-      expect(step.chapterTitle.length).toBeGreaterThan(3);
-    }
-  });
 });
 
 describe("gate G1 — the reversed temporal y-axis", () => {
