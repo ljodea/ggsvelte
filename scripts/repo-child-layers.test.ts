@@ -27,10 +27,7 @@ import { deprecatedGrammarPropPattern } from "../packages/svelte/src/lib/layers/
 import { guidePages, type LifecycleDoc } from "./gen-llms.ts";
 import { codeBlocks } from "./guide-code-contract.ts";
 import { foldSakura, QUICKSTART_PAGE_FILENAME, SAKURA_STEPS } from "./quickstart.ts";
-import {
-  heroThemePaletteSnippet,
-  SEQUENTIAL_RASTER_SNIPPET,
-} from "../apps/docs/src/lib/theme-specimens/snippets.ts";
+import { SEQUENTIAL_RASTER_SNIPPET } from "../apps/docs/src/lib/theme-specimens/snippets.ts";
 
 const ROOT = join(import.meta.dir, "..");
 
@@ -77,16 +74,15 @@ describe("the repo's own charts use child layers, not deprecated grammar props",
     });
   }
 
-  // Whole files the themes page offers for copying, assembled as strings so
+  // Whole files the palettes page offers for copying, assembled as strings so
   // the Svelte compiler never sees their literal </script> tags — which also
   // puts them out of reach of the .svelte walk above.
   const SNIPPETS: readonly (readonly [string, string])[] = [
-    ["heroThemePaletteSnippet", heroThemePaletteSnippet("tufte", "observable10")],
     ["SEQUENTIAL_RASTER_SNIPPET", SEQUENTIAL_RASTER_SNIPPET],
   ];
 
   for (const [name, source] of SNIPPETS) {
-    it(`the ${name} the themes page offers for copying needs no migration`, () => {
+    it(`the ${name} the docs offer for copying needs no migration`, () => {
       const result = migratePlotProps(source);
       expect({
         rewritable: result.changes.map((c) => c.prop),

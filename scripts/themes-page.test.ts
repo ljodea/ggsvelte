@@ -11,11 +11,7 @@ import {
   RASTER_Z_DOMAIN,
   THEME_SPECIMENS,
 } from "../apps/docs/src/lib/theme-specimens/catalog.ts";
-import { heroThemePaletteSnippet } from "../apps/docs/src/lib/theme-specimens/snippets.ts";
-import {
-  formatMonthBreaksLiteral,
-  TEMPERATURES_CHART,
-} from "../apps/docs/src/lib/theme-specimens/temperatures-chart.ts";
+import { TEMPERATURES_CHART } from "../apps/docs/src/lib/theme-specimens/temperatures-chart.ts";
 
 describe("themes catalog", () => {
   it("projects every public theme and categorical palette without docs-owned colors", () => {
@@ -335,14 +331,8 @@ describe("themes catalog", () => {
   });
 });
 
-describe("hero temperatures chart and copy snippet stay aligned (#990)", () => {
-  it("generates a snippet with the same key and month breaks the component renders", () => {
-    const snippet = heroThemePaletteSnippet("tufte", "observable10");
-    expect(snippet).toContain(`key="${TEMPERATURES_CHART.key}"`);
-    expect(snippet).toContain(
-      `x: { breaks: ${formatMonthBreaksLiteral(TEMPERATURES_CHART.monthBreaks)} }`,
-    );
-    // Shared config is what TemperaturesSpecimen spreads into Scale/GGPlot.
+describe("hero temperatures chart config", () => {
+  it("keeps key and month breaks stable for TemperaturesSpecimen", () => {
     expect(TEMPERATURES_CHART.key).toBe("id");
     expect([...TEMPERATURES_CHART.monthBreaks]).toEqual([...MONTH_BREAKS]);
   });

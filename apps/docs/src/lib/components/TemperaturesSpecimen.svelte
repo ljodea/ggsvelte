@@ -4,7 +4,8 @@
     GeomPoint,
     GGPlot,
     Labs,
-    Scale,
+    ScaleColorDiscrete,
+    ScaleXContinuous,
     Theme,
   } from "@ggsvelte/svelte";
   import type { ThemeName } from "@ggsvelte/spec";
@@ -40,12 +41,8 @@
   {ariaLabel}
 >
   <Theme name={theme} />
-  <Scale
-    value={{
-      x: { breaks: [...chart.monthBreaks] },
-      color: { type: "ordinal", scheme },
-    }}
-  />
+  <ScaleXContinuous breaks={[...chart.monthBreaks]} />
+  <ScaleColorDiscrete {scheme} />
   <Labs
     title={chart.labs.title}
     x={chart.labs.x}

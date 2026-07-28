@@ -3,13 +3,11 @@
   import { onMount } from "svelte";
 
   import { CATEGORICAL_PALETTES, THEME_OPTIONS } from "$lib/catalog/themes";
-  import CopyCode from "$lib/components/CopyCode.svelte";
   import {
     readDocsAppearance,
     watchDocsAppearance,
     type DocsAppearance,
   } from "$lib/docs-appearance";
-  import { heroThemePaletteSnippet } from "$lib/theme-specimens/snippets";
 
   type SchemeName = (typeof CATEGORICAL_PALETTES)[number]["name"];
 
@@ -31,8 +29,6 @@
   const resolvedTheme = $derived<ThemeName>(
     followDocs ? siteAppearance : explicitTheme,
   );
-
-  const code = $derived(heroThemePaletteSnippet(resolvedTheme, scheme));
 
   const statusText = $derived(
     followDocs
@@ -62,14 +58,6 @@
 </script>
 
 <section class="theme-lab" aria-label="Chart theme and palette lab">
-  <p class="eyebrow">Live</p>
-  <h2>Try theme and palette</h2>
-  <p class="lede">
-    <code>theme</code> styles paper, grid, axes, and type.
-    <code>scales.color.scheme</code> colors series. Docs light/dark only applies when
-    Follow docs appearance is on.
-  </p>
-
   <div class="plot-panel">
     {#if LiveTemps !== null}
       <LiveTemps
@@ -108,14 +96,6 @@
   </div>
 
   <p class="resolved" role="status">{statusText}</p>
-
-  <div class="code-footer">
-    <CopyCode
-      {code}
-      language="svelte"
-      accessibleLabel="Copy selected theme and palette code"
-    />
-  </div>
 </section>
 
 <style>
@@ -126,38 +106,9 @@
     padding-block: clamp(1.5rem, 4vw, 2.5rem) clamp(2.5rem, 6vw, 4rem);
   }
 
-  .eyebrow {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.72rem;
-    font-weight: 650;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  h2 {
-    margin: 0;
-    font-size: clamp(1.5rem, 3vw, 2rem);
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-  }
-
-  .lede {
-    margin: 0;
-    max-width: 40rem;
-    color: var(--muted);
-    font-size: 0.98rem;
-    line-height: 1.45;
-  }
-
-  .lede code {
-    font-size: 0.9em;
-  }
-
   .plot-panel {
     width: min(100%, 52rem);
     min-width: 0;
-    margin-top: 0.5rem;
   }
 
   .plot-panel :global(svg) {
@@ -219,10 +170,5 @@
     color: var(--muted);
     font-size: 0.82rem;
     font-family: var(--code-font);
-  }
-
-  .code-footer {
-    width: min(100%, 52rem);
-    min-width: 0;
   }
 </style>
