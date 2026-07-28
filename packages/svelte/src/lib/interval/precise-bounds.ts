@@ -4,6 +4,7 @@ import {
   type AxisEditModel,
   type PositionTransformName,
 } from "@ggsvelte/core";
+import type { TemporalScaleKind } from "@ggsvelte/spec";
 
 import type {
   BoundsAction,
@@ -20,6 +21,8 @@ export interface BoundsEditorInputForScaleOptions {
   readonly scale: AxisEditModel;
   readonly bounds?: readonly [number, number] | readonly [BoundsCategoryValue, BoundsCategoryValue];
   readonly reversed?: boolean;
+  /** From the axis guide plan; monthDay drafts format/parse as MM-DD. */
+  readonly temporalKind?: TemporalScaleKind | null;
 }
 
 export function boundsEditorInputForScale(
@@ -75,6 +78,7 @@ export function boundsEditorInputForScale(
       scale: "time",
       bounds,
       reversed: options.reversed ?? scale.reversed,
+      ...(options.temporalKind !== undefined && { temporalKind: options.temporalKind }),
     };
   }
   return {

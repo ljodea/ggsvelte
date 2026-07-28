@@ -11,6 +11,24 @@ function write(input: HTMLInputElement, value: string): void {
 }
 
 describe("<BoundsEditor>", () => {
+  it("shows monthDay bounds as MM-DD and a month-day hint", async () => {
+    const { container } = render(BoundsEditor, {
+      input: {
+        axis: "y",
+        action: "select",
+        scale: "time",
+        temporalKind: "monthDay",
+        bounds: [Date.UTC(2000, 3, 1), Date.UTC(2000, 4, 10)],
+      },
+      onapply: vi.fn(),
+    });
+    await tick();
+    const [lower, upper] = [...container.querySelectorAll("input")];
+    expect(lower.value).toBe("04-01");
+    expect(upper.value).toBe("05-10");
+    expect(container.querySelector(".gg-bounds-hint")?.textContent).toMatch(/MM-DD/);
+  });
+
   it("is an inline labelled fieldset with 44px controls", async () => {
     const { container } = render(BoundsEditor, {
       input: {

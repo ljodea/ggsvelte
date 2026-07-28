@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 
 import type { RenderModel } from "@ggsvelte/core";
 import { encodeKey } from "@ggsvelte/core";
-import { aes, gg } from "@ggsvelte/spec";
+import { aes, gg, scaleYMonthDay } from "@ggsvelte/spec";
 
 import { reactiveBox } from "../helpers/reactive-box.svelte.js";
 import {
@@ -27,6 +27,49 @@ import {
 } from "./interval-state.harness.js";
 
 describe("createIntervalState bounds editor select path", () => {
+  it("threads monthDay temporalKind so drafts can omit the reference year", () => {
+    // Full dates (any year) are the common monthDay input; the scale collapses
+    // the year. Bare "MM-DD" needs an explicit md parser and is a different path.
+    const model = modelFor(
+      gg(
+        [
+          { year: 812, bloom: "0812-04-01" },
+          { year: 2026, bloom: "2026-03-29" },
+        ],
+        aes({ x: "year", y: "bloom" }),
+      )
+        .geomPoint()
+        .scales(scaleYMonthDay())
+        .spec(),
+    );
+    const trigger = document.createElement("button");
+    const { state, destroy } = mountIntervalController({
+      model: () => model,
+      selectConfig: persistentSelect,
+    });
+
+    state.finishBrushSelect(
+      brushEvent(model, {
+        domain: {
+          x: [800, 2100],
+          y: [Date.UTC(2000, 2, 29), Date.UTC(2000, 3, 1)],
+        },
+        keys: ["0", "1"],
+      }),
+      "pointer",
+    );
+    flushSync();
+    state.openBoundsEditor("select", "y", trigger);
+    flushSync();
+
+    expect(state.boundsEditorInput).toMatchObject({
+      scale: "time",
+      temporalKind: "monthDay",
+    });
+
+    destroy();
+  });
+
   it("band precise-bounds emit typed domain endpoints from encoded identities", () => {
     // semanticAxis stores encodeKey tokens; eventDomain must decode them back
     // to typed rawDomain values for the public IntervalSelection.domain payload.

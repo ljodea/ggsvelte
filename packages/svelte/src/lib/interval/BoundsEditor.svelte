@@ -37,7 +37,9 @@
   const fieldsetLabel = $derived(`Edit ${axisName} ${actionName} bounds`);
   const hint = $derived(
     input.scale === "time"
-      ? "Enter an ISO 8601 date, or a date-time with Z or an explicit offset."
+      ? input.temporalKind === "monthDay"
+        ? "Enter a month-day as MM-DD (for example 04-01)."
+        : "Enter an ISO 8601 date, or a date-time with Z or an explicit offset."
       : input.scale === "band"
         ? "Endpoints include both selected categories."
         : input.transform === "log10"

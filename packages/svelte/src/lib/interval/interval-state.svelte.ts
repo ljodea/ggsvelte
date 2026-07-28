@@ -269,6 +269,12 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   const boundsEditorInput = $derived.by((): BoundsEditorInput | null => {
     if (boundsEditor === null || deps.model() === null) return null;
     const model = deps.model()!;
+    // Axis guide plans carry temporalKind (including monthDay); the trained
+    // continuous scale does not. Use the first matching axis plan so the
+    // bounds editor can format drafts without the reference year.
+    const temporalKind =
+      model.guidePlans.find((plan) => plan.type === "axis" && plan.aesthetic === boundsEditor.axis)
+        ?.temporalKind ?? null;
     if (boundsEditor.action === "zoom") {
       const viewportPanel = model.viewport.panels[0];
       if (viewportPanel === undefined) return null;
@@ -280,6 +286,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
         action: "zoom",
         scale,
         bounds,
+        temporalKind,
       });
     }
     const record = currentIntervalRecord;
@@ -297,6 +304,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
       axis: boundsEditor.axis,
       action: "select",
       scale,
+      temporalKind,
       ...(bounds !== undefined && { bounds }),
     });
   });
