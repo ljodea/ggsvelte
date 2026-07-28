@@ -36,6 +36,13 @@ export interface GeomProps {
   positionParams?: PositionParams;
   /** Rendering backend hint ("svg" | "canvas" | "auto"). */
   render?: RenderBackend;
+  /**
+   * `false` excludes this layer from inspection (#1065): its marks never
+   * become tooltip, hover, or keyboard candidates. For background bands and
+   * other decoration, which otherwise capture the pointer everywhere they are
+   * painted.
+   */
+  inspect?: false;
 }
 
 /**
@@ -68,6 +75,9 @@ export function createGeomLayer(geom: GeomName, getProps: () => GeomProps): void
     },
     get render() {
       return getProps().render;
+    },
+    get inspect() {
+      return getProps().inspect;
     },
     get params() {
       const props = getProps() as Record<string, unknown>;

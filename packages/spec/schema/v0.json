@@ -2465,6 +2465,11 @@
         },
         "params": {
           "$ref": "#/$defs/AblineParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -2866,6 +2871,11 @@
         },
         "params": {
           "$ref": "#/$defs/PointParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -2944,6 +2954,11 @@
         },
         "params": {
           "$ref": "#/$defs/LineParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -2982,6 +2997,11 @@
         },
         "params": {
           "$ref": "#/$defs/StepParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3045,6 +3065,11 @@
         },
         "params": {
           "$ref": "#/$defs/PathParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3079,6 +3104,11 @@
         },
         "params": {
           "$ref": "#/$defs/ColParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3123,6 +3153,11 @@
         },
         "params": {
           "$ref": "#/$defs/BarParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3159,6 +3194,11 @@
         },
         "params": {
           "$ref": "#/$defs/BarParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3197,6 +3237,11 @@
         },
         "params": {
           "$ref": "#/$defs/LineParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3235,6 +3280,11 @@
         },
         "params": {
           "$ref": "#/$defs/SmoothParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3273,6 +3323,11 @@
         },
         "params": {
           "$ref": "#/$defs/QuantileParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3311,6 +3366,11 @@
         },
         "params": {
           "$ref": "#/$defs/QqParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3349,6 +3409,11 @@
         },
         "params": {
           "$ref": "#/$defs/QqLineParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3387,6 +3452,11 @@
         },
         "params": {
           "$ref": "#/$defs/ContourParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3433,6 +3503,11 @@
         },
         "params": {
           "$ref": "#/$defs/ViolinParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3479,6 +3554,11 @@
         },
         "params": {
           "$ref": "#/$defs/BoxplotParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3532,6 +3612,11 @@
         },
         "params": {
           "$ref": "#/$defs/PointParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3570,6 +3655,11 @@
         },
         "params": {
           "$ref": "#/$defs/DotplotParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3608,6 +3698,11 @@
         },
         "params": {
           "$ref": "#/$defs/DensityParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3646,6 +3741,11 @@
         },
         "params": {
           "$ref": "#/$defs/Density2dParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3684,6 +3784,11 @@
         },
         "params": {
           "$ref": "#/$defs/Density2dParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3742,6 +3847,11 @@
         },
         "params": {
           "$ref": "#/$defs/ErrorbarParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3787,6 +3897,11 @@
         },
         "params": {
           "$ref": "#/$defs/LinerangeParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3832,6 +3947,11 @@
         },
         "params": {
           "$ref": "#/$defs/PointrangeParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3877,6 +3997,11 @@
         },
         "params": {
           "$ref": "#/$defs/CrossbarParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3913,6 +4038,11 @@
         },
         "params": {
           "$ref": "#/$defs/RectParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3951,6 +4081,11 @@
         },
         "params": {
           "$ref": "#/$defs/TileParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -3989,6 +4124,11 @@
         },
         "params": {
           "$ref": "#/$defs/Bin2dParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4027,6 +4167,11 @@
         },
         "params": {
           "$ref": "#/$defs/RasterParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4065,6 +4210,11 @@
         },
         "params": {
           "$ref": "#/$defs/HexParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4116,6 +4266,11 @@
         },
         "params": {
           "$ref": "#/$defs/AreaParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4152,6 +4307,11 @@
         },
         "params": {
           "$ref": "#/$defs/RibbonParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4188,6 +4348,11 @@
         },
         "params": {
           "$ref": "#/$defs/RuleParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4226,6 +4391,11 @@
         },
         "params": {
           "$ref": "#/$defs/HlineParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4264,6 +4434,11 @@
         },
         "params": {
           "$ref": "#/$defs/VlineParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4305,6 +4480,11 @@
         },
         "params": {
           "$ref": "#/$defs/PointParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4352,6 +4532,11 @@
         },
         "params": {
           "$ref": "#/$defs/TextParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4401,6 +4586,11 @@
         },
         "params": {
           "$ref": "#/$defs/LabelParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4437,6 +4627,11 @@
         },
         "params": {
           "$ref": "#/$defs/SegmentParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4477,6 +4672,11 @@
         "params": {
           "$ref": "#/$defs/FunctionParams",
           "description": "Function parameters (fun is required)."
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4515,6 +4715,11 @@
         },
         "params": {
           "$ref": "#/$defs/CurveParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4553,6 +4758,11 @@
         },
         "params": {
           "$ref": "#/$defs/PolygonParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4592,6 +4802,11 @@
         },
         "params": {
           "$ref": "#/$defs/MapParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4630,6 +4845,11 @@
         },
         "params": {
           "$ref": "#/$defs/SfParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4716,6 +4936,11 @@
         },
         "params": {
           "$ref": "#/$defs/SfTextParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4817,6 +5042,11 @@
         },
         "params": {
           "$ref": "#/$defs/SfLabelParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4861,6 +5091,11 @@
         },
         "params": {
           "$ref": "#/$defs/BlankParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4899,6 +5134,11 @@
         },
         "params": {
           "$ref": "#/$defs/RugParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,
@@ -4937,6 +5177,11 @@
         },
         "params": {
           "$ref": "#/$defs/SpokeParams"
+        },
+        "inspect": {
+          "type": "boolean",
+          "const": false,
+          "description": "Set false to exclude this layer from inspection: its marks never become tooltip, hover, or keyboard-traversal candidates. For decorative layers (background bands, reference shading) whose marks would otherwise capture the pointer — an area mark contains the pointer everywhere it is painted, so it outranks every point and stroke beneath it. Portable: it travels with the spec, so headless renders and re-imported JSON agree."
         }
       },
       "additionalProperties": false,

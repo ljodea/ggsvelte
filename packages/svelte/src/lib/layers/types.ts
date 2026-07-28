@@ -38,6 +38,8 @@ export interface MarkLayerDescriptor {
   readonly position?: PositionName | undefined;
   readonly positionParams?: PositionParams | undefined;
   readonly render?: RenderBackend | undefined;
+  /** `false` keeps a decorative layer out of inspection (#1065). */
+  readonly inspect?: false | undefined;
   readonly params?: Record<string, unknown> | undefined;
 }
 

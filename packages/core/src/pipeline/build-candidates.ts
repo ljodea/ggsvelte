@@ -92,6 +92,18 @@ function createRawCandidateDatumResolver(
   };
 }
 
+/**
+ * Layers the author marked `inspect: false` (#1065). Both candidate strategies
+ * pass this through, so the opt-out holds whichever one a spec takes.
+ */
+function uninspectableLayers(bindings: readonly LayerBinding[]): ReadonlySet<number> {
+  const opted = new Set<number>();
+  for (const [index, binding] of bindings.entries()) {
+    if (binding.layer.inspect === false) opted.add(index);
+  }
+  return opted;
+}
+
 // ---------------------------------------------------------------------------
 // Source-backed strategy
 // ---------------------------------------------------------------------------
@@ -118,6 +130,7 @@ function buildSourceBackedCandidates(input: {
   return buildCandidateStore(scene, {
     epoch: runId,
     flip,
+    uninspectableLayers: uninspectableLayers(bindings),
     datum: createRawCandidateDatumResolver(bindings, sources, color, fill, lineage),
   });
 }
@@ -156,6 +169,7 @@ function buildIdentityIndexedCandidates(input: {
   return buildCandidateStore(scene, {
     epoch: runId,
     flip,
+    uninspectableLayers: uninspectableLayers(bindings),
     datum: createIdentityCandidateDatumResolver({
       scene,
       bindings,

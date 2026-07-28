@@ -71,104 +71,114 @@ describe("schema/v0.json artifact", () => {
     for (const ref of refs) expect(ref).toContain("#/$defs/");
   });
 
-  it("compiles under ajv 2020-12 and matches TypeBox verdicts", () => {
-    const ajv = new Ajv2020({ strict: false });
-    const validateAjv = ajv.compile(JSON.parse(committed) as object);
-    const fixtures: [unknown, boolean][] = [
-      [{ layers: [{ geom: "point" }] }, true],
-      [
-        {
-          data: { columns: { x: [1, "a", null] } },
-          aes: { x: { field: "x" }, y: { value: 2, scale: true } },
-          layers: [
-            { geom: "point", params: { alpha: 0.2, shape: "triangle" } },
-            { geom: "line", aes: { color: null }, params: { curve: "step" } },
-          ],
-          labs: { title: "T" },
-          width: 100,
-        },
-        true,
-      ],
-      [{ layers: [] }, false],
-      [{ layers: [{ geom: "bar" }] }, true],
-      [{ layers: [{ geom: "boxplot" }] }, true],
-      [{ layers: [{ geom: "violin" }] }, true],
-      [{ layers: [{ geom: "violin", params: { scale: "width", trim: true, n: 64 } }] }, true],
-      [{ layers: [{ geom: "violin", params: { scale: "volume" } }] }, false],
-      [{ layers: [{ geom: "violin", position: "stack" }] }, false],
-      [{ layers: [{ geom: "bar", stat: "identity" }] }, false],
-      [{ layers: [{ geom: "bar", stat: "bin", params: { binwidth: 0.5, boundary: 0 } }] }, true],
-      [{ layers: [{ geom: "histogram", params: { bins: 20, closed: "left" } }] }, true],
-      [{ layers: [{ geom: "histogram", stat: "count" }] }, false],
-      [{ layers: [{ geom: "col", stat: "count" }] }, false],
-      [{ layers: [{ geom: "col", params: { bins: 10 } }] }, false],
-      [{ layers: [{ geom: "smooth", params: { method: "loess", span: 0.5, se: true } }] }, true],
-      [{ layers: [{ geom: "smooth", params: { method: "gam" } }] }, false],
-      [{ layers: [{ geom: "smooth", params: { span: 1.5 } }] }, false],
-      [{ layers: [{ geom: "boxplot", params: { coef: 3, outlierSize: 2 } }] }, true],
-      [{ layers: [{ geom: "boxplot", position: "stack" }] }, false],
-      [{ layers: [{ geom: "density", params: { adjust: 0.5, n: 256, cut: 3 } }] }, true],
-      [{ layers: [{ geom: "density", params: { bw: 0 } }] }, false],
-      [{ layers: [{ geom: "errorbar", stat: "summary", params: { fun: "median" } }] }, true],
-      [{ layers: [{ geom: "errorbar", params: { fun: "min" } }] }, false],
-      [
-        {
-          aes: { x: { field: "a" }, ymin: { field: "lo" }, ymax: { field: "hi" } },
-          layers: [{ geom: "errorbar" }],
-        },
-        true,
-      ],
-      [
-        {
-          layers: [{ geom: "point", position: "jitter", positionParams: { width: 0.2, seed: 7 } }],
-        },
-        true,
-      ],
-      [{ layers: [{ geom: "point", position: "jitter", positionParams: { seed: -1 } }] }, false],
-      [{ layers: [{ geom: "point", position: "stack" }] }, false],
-      [{ layers: [{ geom: "text", position: "nudge", positionParams: { y: -0.5 } }] }, true],
-      [{ layers: [{ geom: "line", position: "nudge" }] }, false],
-      [{ layers: [{ geom: "rule", params: { yintercept: 3 } }] }, true],
-      [{ layers: [{ geom: "text", params: { anchor: "left" } }] }, false],
-      [{ scales: { y: { type: "log", zero: false } }, layers: [{ geom: "point" }] }, true],
-      [
-        {
-          scales: { x: { type: "time", dateLabels: "literal %Y %% %m" } },
-          layers: [{ geom: "point" }],
-        },
-        true,
-      ],
-      [
-        {
-          scales: { x: { type: "time", dateLabels: "%Q" } },
-          layers: [{ geom: "point" }],
-        },
-        false,
-      ],
-      [
-        {
-          scales: { x: { type: "time", dateLabels: "trailing %" } },
-          layers: [{ geom: "point" }],
-        },
-        false,
-      ],
-      [{ scales: { y: { type: "exp" } }, layers: [{ geom: "point" }] }, false],
-      [{ scales: { color: { range: ["#abc", "#123456"] } }, layers: [{ geom: "point" }] }, true],
-      [{ scales: { color: { range: ["tomato"] } }, layers: [{ geom: "point" }] }, false],
-      [{ theme: "dark", layers: [{ geom: "point" }] }, true],
-      [{ theme: "darkk", layers: [{ geom: "point" }] }, false],
-      [{ theme: { name: "dark", accent: "#f00" }, layers: [{ geom: "point" }] }, true],
-      [{ legend: { order: "sorted" }, layers: [{ geom: "point" }] }, true],
-      [{ legend: { order: "reverse" }, layers: [{ geom: "point" }] }, false],
-      [{ aes: { x: "bare-string" }, layers: [{ geom: "point" }] }, false],
-      [{ layers: [{ geom: "point", params: { alpha: 2 } }] }, false],
-      [{ layers: [{ geom: "line", params: { size: 1 } }] }, false],
-      [{ extra: 1, layers: [{ geom: "point" }] }, false],
-      [{ data: { name: 7 }, layers: [{ geom: "point" }] }, false],
-    ];
-    for (const [fixture, expected] of fixtures) {
-      expect(validateAjv(fixture)).toBe(expected);
-      expect(Value.Check(PlotSpecSchema, fixture)).toBe(expected);
-    }
-  });
+  // AJV compile of the full PlotSpec is multi-second on cold CI runners; the
+  // default 5s bun timeout flakes when schema growth (e.g. a field on every
+  // layer) pushes compile just over the limit. Cap generously — the suite still
+  // fails loudly on real regressions.
+  it(
+    "compiles under ajv 2020-12 and matches TypeBox verdicts",
+    () => {
+      const ajv = new Ajv2020({ strict: false });
+      const validateAjv = ajv.compile(JSON.parse(committed) as object);
+      const fixtures: [unknown, boolean][] = [
+        [{ layers: [{ geom: "point" }] }, true],
+        [
+          {
+            data: { columns: { x: [1, "a", null] } },
+            aes: { x: { field: "x" }, y: { value: 2, scale: true } },
+            layers: [
+              { geom: "point", params: { alpha: 0.2, shape: "triangle" } },
+              { geom: "line", aes: { color: null }, params: { curve: "step" } },
+            ],
+            labs: { title: "T" },
+            width: 100,
+          },
+          true,
+        ],
+        [{ layers: [] }, false],
+        [{ layers: [{ geom: "bar" }] }, true],
+        [{ layers: [{ geom: "boxplot" }] }, true],
+        [{ layers: [{ geom: "violin" }] }, true],
+        [{ layers: [{ geom: "violin", params: { scale: "width", trim: true, n: 64 } }] }, true],
+        [{ layers: [{ geom: "violin", params: { scale: "volume" } }] }, false],
+        [{ layers: [{ geom: "violin", position: "stack" }] }, false],
+        [{ layers: [{ geom: "bar", stat: "identity" }] }, false],
+        [{ layers: [{ geom: "bar", stat: "bin", params: { binwidth: 0.5, boundary: 0 } }] }, true],
+        [{ layers: [{ geom: "histogram", params: { bins: 20, closed: "left" } }] }, true],
+        [{ layers: [{ geom: "histogram", stat: "count" }] }, false],
+        [{ layers: [{ geom: "col", stat: "count" }] }, false],
+        [{ layers: [{ geom: "col", params: { bins: 10 } }] }, false],
+        [{ layers: [{ geom: "smooth", params: { method: "loess", span: 0.5, se: true } }] }, true],
+        [{ layers: [{ geom: "smooth", params: { method: "gam" } }] }, false],
+        [{ layers: [{ geom: "smooth", params: { span: 1.5 } }] }, false],
+        [{ layers: [{ geom: "boxplot", params: { coef: 3, outlierSize: 2 } }] }, true],
+        [{ layers: [{ geom: "boxplot", position: "stack" }] }, false],
+        [{ layers: [{ geom: "density", params: { adjust: 0.5, n: 256, cut: 3 } }] }, true],
+        [{ layers: [{ geom: "density", params: { bw: 0 } }] }, false],
+        [{ layers: [{ geom: "errorbar", stat: "summary", params: { fun: "median" } }] }, true],
+        [{ layers: [{ geom: "errorbar", params: { fun: "min" } }] }, false],
+        [
+          {
+            aes: { x: { field: "a" }, ymin: { field: "lo" }, ymax: { field: "hi" } },
+            layers: [{ geom: "errorbar" }],
+          },
+          true,
+        ],
+        [
+          {
+            layers: [
+              { geom: "point", position: "jitter", positionParams: { width: 0.2, seed: 7 } },
+            ],
+          },
+          true,
+        ],
+        [{ layers: [{ geom: "point", position: "jitter", positionParams: { seed: -1 } }] }, false],
+        [{ layers: [{ geom: "point", position: "stack" }] }, false],
+        [{ layers: [{ geom: "text", position: "nudge", positionParams: { y: -0.5 } }] }, true],
+        [{ layers: [{ geom: "line", position: "nudge" }] }, false],
+        [{ layers: [{ geom: "rule", params: { yintercept: 3 } }] }, true],
+        [{ layers: [{ geom: "text", params: { anchor: "left" } }] }, false],
+        [{ scales: { y: { type: "log", zero: false } }, layers: [{ geom: "point" }] }, true],
+        [
+          {
+            scales: { x: { type: "time", dateLabels: "literal %Y %% %m" } },
+            layers: [{ geom: "point" }],
+          },
+          true,
+        ],
+        [
+          {
+            scales: { x: { type: "time", dateLabels: "%Q" } },
+            layers: [{ geom: "point" }],
+          },
+          false,
+        ],
+        [
+          {
+            scales: { x: { type: "time", dateLabels: "trailing %" } },
+            layers: [{ geom: "point" }],
+          },
+          false,
+        ],
+        [{ scales: { y: { type: "exp" } }, layers: [{ geom: "point" }] }, false],
+        [{ scales: { color: { range: ["#abc", "#123456"] } }, layers: [{ geom: "point" }] }, true],
+        [{ scales: { color: { range: ["tomato"] } }, layers: [{ geom: "point" }] }, false],
+        [{ theme: "dark", layers: [{ geom: "point" }] }, true],
+        [{ theme: "darkk", layers: [{ geom: "point" }] }, false],
+        [{ theme: { name: "dark", accent: "#f00" }, layers: [{ geom: "point" }] }, true],
+        [{ legend: { order: "sorted" }, layers: [{ geom: "point" }] }, true],
+        [{ legend: { order: "reverse" }, layers: [{ geom: "point" }] }, false],
+        [{ aes: { x: "bare-string" }, layers: [{ geom: "point" }] }, false],
+        [{ layers: [{ geom: "point", params: { alpha: 2 } }] }, false],
+        [{ layers: [{ geom: "line", params: { size: 1 } }] }, false],
+        [{ extra: 1, layers: [{ geom: "point" }] }, false],
+        [{ data: { name: 7 }, layers: [{ geom: "point" }] }, false],
+      ];
+      for (const [fixture, expected] of fixtures) {
+        expect(validateAjv(fixture)).toBe(expected);
+        expect(Value.Check(PlotSpecSchema, fixture)).toBe(expected);
+      }
+    },
+    { timeout: 30_000 },
+  );
 });
