@@ -14,21 +14,21 @@ import {
 } from "./quickstart.ts";
 
 describe("progressive Docs journey", () => {
-  it("lands the data-and-mappings chapter before the first lesson deep link", () => {
+  it("lands the getting-started chapter as the grammar entry point", () => {
     expect(
-      createDocsRouteInventory().find((route) => route.path === "/guide/data-mappings"),
+      createDocsRouteInventory().find((route) => route.path === "/guide/getting-started"),
     ).toMatchObject({
-      canonicalPath: "/guide/data-mappings",
+      canonicalPath: "/guide/getting-started",
       shell: "docs",
       index: true,
       sitemap: true,
-      navigation: { section: "Core grammar", label: "Data and mappings", order: 10 },
+      navigation: { section: "Start", label: "Getting started", order: 1 },
     });
     const page = guidePages(lifecycle as unknown as LifecycleDoc).find(
-      (entry) => entry.slug === "data-mappings",
+      (entry) => entry.slug === "getting-started",
     );
-    expect(page?.markdown).toContain("# Data and mappings");
-    expect(page?.markdown).toContain("/examples/point/scatter-color");
+    expect(page?.markdown).toContain("# Getting started");
+    expect(page?.markdown).toContain("/reference/geoms");
   });
 
   it("lands a real chapter behind every lesson deep link", () => {
@@ -47,6 +47,10 @@ describe("progressive Docs journey", () => {
       expect(route?.navigation?.label, `${path} is not navigable`).toBeTruthy();
       expect(route?.navigation?.label).toBe(step.chapterTitle);
 
+      if (path === "/guide/getting-started") {
+        // Human walkthrough is a Svelte component, not catalog markdown.
+        continue;
+      }
       const page = pages.find((entry) => `/guide/${entry.slug}` === path);
       expect(page, `no guide page for ${path}`).toBeDefined();
       const anchors = extractMarkdownHeadings(page!.markdown).map((heading) => heading.id);
@@ -54,14 +58,10 @@ describe("progressive Docs journey", () => {
     }
   });
 
-  it("publishes the remaining interaction and production chapters as navigable evidence paths", () => {
+  it("publishes the consolidated interaction and production chapters", () => {
     const expected = [
-      ["/guide/selection-zoom", "Interaction", 22, "/interactions/brush-zoom"],
-      ["/guide/linked-views", "Interaction", 23, "/interactions/linked-views"],
-      ["/guide/accessibility", "Interaction", 24, "/examples/interaction/tooltip"],
-      ["/guide/responsive-charts", "Production", 30, "/guide/errors#quickstart-troubleshooting"],
-      ["/guide/rendering-performance", "Production", 31, "/examples/point/canvas-scatter"],
-      ["/guide/server-rendering-export", "Production", 32, "/reference/cli"],
+      ["/guide/interactions", "Interaction", 20, "/interactions/linked-views"],
+      ["/guide/production", "Production", 30, "/reference/cli"],
     ] as const;
     const inventory = createDocsRouteInventory();
     const pages = guidePages(lifecycle as unknown as LifecycleDoc);
@@ -70,6 +70,10 @@ describe("progressive Docs journey", () => {
       expect(route?.navigation).toMatchObject({ section, order });
       const page = pages.find((entry) => `/guide/${entry.slug}` === path);
       expect(page?.markdown).toContain(evidence);
+    }
+    const production = pages.find((entry) => entry.slug === "production");
+    for (const needle of PRODUCTION_EVIDENCE) {
+      expect(production?.markdown).toContain(needle);
     }
   });
 
@@ -108,3 +112,10 @@ describe("progressive Docs journey", () => {
     expect(GETTING_STARTED_MD).toContain("/guide/getting-started");
   });
 });
+
+const PRODUCTION_EVIDENCE = [
+  "/guide/errors#quickstart-troubleshooting",
+  "/examples/point/canvas-scatter",
+  "/reference/cli",
+  "support-matrix.json",
+] as const;

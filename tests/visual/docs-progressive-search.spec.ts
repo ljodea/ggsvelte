@@ -98,40 +98,23 @@ test("Docs landing and sidebar expose the full path without duplicate Reference"
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/docs?theme=light");
-  const tasks = page.getByRole("navigation", { name: "Documentation tasks" });
-  await expect(tasks.getByRole("link", { name: /Getting started/ })).toHaveAttribute(
-    "href",
-    /\/guide\/getting-started$/,
-  );
-  await expect(tasks.getByRole("link", { name: /Scales, themes, color/ })).toHaveAttribute(
-    "href",
-    /\/guide\/scales-guides$/,
-  );
-  await expect(tasks.getByRole("link", { name: /^Interaction/ })).toHaveAttribute(
-    "href",
-    /\/guide\/inspect-pin$/,
-  );
-  await expect(tasks.getByRole("link", { name: /Layout and export/ })).toHaveAttribute(
-    "href",
-    /\/guide\/responsive-charts$/,
-  );
-  // Diagnostics is deliberately absent from the landing tasks; it stays in
-  // the chapter map, sidebar, and search.
-  await expect(tasks.getByRole("link", { name: /Diagnostics/ })).toHaveCount(0);
 
-  // Full chapter index on the landing page (not just the four task hubs).
-  const index = page.getByRole("navigation", { name: "All documentation guides" });
-  await expect(index.getByRole("heading", { level: 3 })).toHaveText([
+  // Single chapter index — no separate "Start here" task list.
+  const index = page.getByRole("navigation", { name: "Documentation guides" });
+  await expect(index.getByRole("heading", { level: 2 })).toHaveText([
+    "Start",
     "Core grammar",
     "Interaction",
     "Production",
     "Reference",
     "Release",
   ]);
-  // Getting started lives in Start here only — not repeated under All guides.
-  await expect(index.getByRole("link", { name: /Getting started/ })).toHaveCount(0);
-  await expect(index.getByRole("link", { name: /Data and mappings/ })).toBeVisible();
+  await expect(index.getByRole("link", { name: /Getting started/ })).toBeVisible();
+  await expect(index.getByRole("link", { name: /Data and mappings/ })).toHaveCount(0);
   await expect(index.getByRole("link", { name: /Dates without preprocessing/ })).toBeVisible();
+  // Accessible name includes the description span after the title.
+  await expect(index.getByRole("link", { name: /^Interactions\b/ })).toBeVisible();
+  await expect(index.getByRole("link", { name: /^Production\b/ })).toBeVisible();
   await expect(index.getByRole("link", { name: /Errors reference/ })).toBeVisible();
   await expect(index.getByRole("link", { name: /Upgrade guide/ })).toBeVisible();
   await expect(index.getByRole("link", { name: /Migrating pre-0.1/ })).toHaveCount(0);
@@ -145,9 +128,8 @@ test("Docs landing and sidebar expose the full path without duplicate Reference"
     "Reference",
     "Release",
   ]);
-  // Overview + guides minus deleted pre-0.1 page.
-  // Overview + every navigable guide/reference chapter (includes Geom reference).
-  await expect(sidebar.getByRole("link")).toHaveCount(28);
+  // Overview + consolidated guide/reference chapters.
+  await expect(sidebar.getByRole("link")).toHaveCount(18);
   await expect(sidebar.getByRole("link", { name: "Dates without preprocessing" })).toBeVisible();
   await expectNoDocumentOverflow(page);
 
@@ -170,7 +152,7 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto("/docs?theme=light");
-  await expect(page.getByRole("navigation", { name: "Documentation tasks" })).toContainText(
+  await expect(page.getByRole("navigation", { name: "Documentation guides" })).toContainText(
     "Getting started",
   );
   await page.goto("/guide/getting-started?theme=light");
@@ -207,14 +189,14 @@ for (const chapter of [
   },
   {
     group: "interaction",
-    path: "/guide/inspect-pin",
-    heading: "Inspect and pin",
-    evidence: "/examples/interaction/tooltip",
+    path: "/guide/interactions",
+    heading: "Interactions",
+    evidence: "/interactions/linked-views",
   },
   {
     group: "production",
-    path: "/guide/server-rendering-export",
-    heading: "Server rendering and export",
+    path: "/guide/production",
+    heading: "Production",
     evidence: "/reference/cli",
   },
   {
@@ -292,7 +274,7 @@ test("search Enter follows the active focused result", async ({ page }) => {
   const input = page.getByRole("combobox", { name: "Search docs" });
   await input.fill("tooltip");
   await input.press("Enter");
-  await expect(page).toHaveURL(/\/guide\/inspect-pin$/);
+  await expect(page).toHaveURL(/\/guide\/interactions#inspection$/);
 });
 
 test("global search preserves forced colors, reduced motion, and a clean console", async ({

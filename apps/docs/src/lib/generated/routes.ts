@@ -3954,60 +3954,6 @@ export const DOCS_ROUTES = [
     ],
   },
   {
-    path: "/guide/data-mappings",
-    title: "Data and mappings — ggsvelte",
-    description: "Map row fields to visual channels without mutating source data.",
-    canonicalPath: "/guide/data-mappings",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "docs",
-    navigation: {
-      section: "Core grammar",
-      label: "Data and mappings",
-      order: 10,
-    },
-    headings: [
-      {
-        id: "map-fields-to-position",
-        title: "Map fields to position",
-        level: 2,
-      },
-      {
-        id: "keep-data-local",
-        title: "Keep data local",
-        level: 2,
-      },
-    ],
-  },
-  {
-    path: "/guide/layers-marks",
-    title: "Layers and marks — ggsvelte",
-    description: "Compose marks in paint order while sharing or overriding plot mappings.",
-    canonicalPath: "/guide/layers-marks",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "docs",
-    navigation: {
-      section: "Core grammar",
-      label: "Layers and marks",
-      order: 11,
-    },
-    headings: [
-      {
-        id: "compose-layers",
-        title: "Compose layers",
-        level: 2,
-      },
-      {
-        id: "look-up-a-geom",
-        title: "Look up a geom",
-        level: 2,
-      },
-    ],
-  },
-  {
     path: "/guide/statistics-positions",
     title: "Statistics and positions — ggsvelte",
     description:
@@ -4235,33 +4181,6 @@ export const DOCS_ROUTES = [
     ],
   },
   {
-    path: "/guide/themes-color",
-    title: "Themes and color — ggsvelte",
-    description: "Chart theme vs data color scales; independent of site appearance.",
-    canonicalPath: "/guide/themes-color",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "docs",
-    navigation: {
-      section: "Core grammar",
-      label: "Themes and color",
-      order: 16,
-    },
-    headings: [
-      {
-        id: "choose-a-chart-theme",
-        title: "Choose a chart theme",
-        level: 2,
-      },
-      {
-        id: "preserve-color-meaning",
-        title: "Preserve color meaning",
-        level: 2,
-      },
-    ],
-  },
-  {
     path: "/guide/temporal-scales",
     title: "Dates without preprocessing — ggsvelte",
     description: "Value-driven date inference, strict parsers, overrides, and diagnostics.",
@@ -4305,7 +4224,7 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/guide/interactions",
-    title: "Interaction overview — ggsvelte",
+    title: "Interactions — ggsvelte",
     description: "Inspection, selection, zoom, keyboard behavior, identity, and event contracts.",
     canonicalPath: "/guide/interactions",
     kind: "page",
@@ -4314,7 +4233,7 @@ export const DOCS_ROUTES = [
     shell: "docs",
     navigation: {
       section: "Interaction",
-      label: "Interaction overview",
+      label: "Interactions",
       order: 20,
     },
     headings: [
@@ -4396,229 +4315,42 @@ export const DOCS_ROUTES = [
     ],
   },
   {
-    path: "/guide/inspect-pin",
-    title: "Inspect and pin — ggsvelte",
-    description: "Add chart-local tooltip, crosshair, keyboard traversal, and durable pinning.",
-    canonicalPath: "/guide/inspect-pin",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "docs",
-    navigation: {
-      section: "Interaction",
-      label: "Inspect and pin",
-      order: 21,
-    },
-    headings: [
-      {
-        id: "inspect-and-pin-2",
-        title: "Inspect and pin",
-        level: 2,
-      },
-      {
-        id: "keep-ownership-honest",
-        title: "Keep ownership honest",
-        level: 2,
-      },
-    ],
-  },
-  {
-    path: "/guide/selection-zoom",
-    title: "Selection and zoom — ggsvelte",
-    description: "Choose explicit point, interval, and brush-zoom tools with semantic results.",
-    canonicalPath: "/guide/selection-zoom",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "docs",
-    navigation: {
-      section: "Interaction",
-      label: "Selection and zoom",
-      order: 22,
-    },
-    headings: [
-      {
-        id: "select-points",
-        title: "Select points",
-        level: 2,
-      },
-      {
-        id: "select-an-area-and-zoom",
-        title: "Select an area and zoom",
-        level: 2,
-      },
-    ],
-  },
-  {
-    path: "/guide/linked-views",
-    title: "Linked views — ggsvelte",
+    path: "/guide/production",
+    title: "Production — ggsvelte",
     description:
-      "Share semantic selection, emphasis, intervals, and domains across application surfaces.",
-    canonicalPath: "/guide/linked-views",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "docs",
-    navigation: {
-      section: "Interaction",
-      label: "Linked views",
-      order: 23,
-    },
-    headings: [
-      {
-        id: "create-a-shared-controller",
-        title: "Create a shared controller",
-        level: 2,
-      },
-      {
-        id: "keep-local-state-local",
-        title: "Keep local state local",
-        level: 2,
-      },
-    ],
-  },
-  {
-    path: "/guide/accessibility",
-    title: "Accessibility — ggsvelte",
-    description:
-      "Name charts and preserve keyboard, touch, focus, announcement, and data-detail paths.",
-    canonicalPath: "/guide/accessibility",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "docs",
-    navigation: {
-      section: "Interaction",
-      label: "Accessibility",
-      order: 24,
-    },
-    headings: [
-      {
-        id: "name-the-chart",
-        title: "Name the chart",
-        level: 2,
-      },
-      {
-        id: "keyboard-and-touch",
-        title: "Keyboard and touch",
-        level: 2,
-      },
-      {
-        id: "dense-charts",
-        title: "Dense charts",
-        level: 2,
-      },
-    ],
-  },
-  {
-    path: "/guide/responsive-charts",
-    title: "Responsive charts — ggsvelte",
-    description:
-      "Size charts from their container with deterministic server and collapsed-width behavior.",
-    canonicalPath: "/guide/responsive-charts",
+      "Responsive sizing, SVG/canvas rendering, SSR and export, and tested runtime support.",
+    canonicalPath: "/guide/production",
     kind: "page",
     index: true,
     sitemap: true,
     shell: "docs",
     navigation: {
       section: "Production",
-      label: "Responsive charts",
+      label: "Production",
       order: 30,
     },
     headings: [
       {
-        id: "container-width",
-        title: "Container width",
+        id: "responsive-sizing",
+        title: "Responsive sizing",
         level: 2,
       },
       {
-        id: "server-fallback-and-hydration",
-        title: "Server fallback and hydration",
+        id: "rendering",
+        title: "Rendering",
+        level: 2,
+      },
+      {
+        id: "server-and-export",
+        title: "Server and export",
+        level: 2,
+      },
+      {
+        id: "compatibility",
+        title: "Compatibility",
         level: 2,
       },
     ],
-  },
-  {
-    path: "/guide/rendering-performance",
-    title: "Rendering and performance — ggsvelte",
-    description:
-      "Choose SVG, canvas, and automatic strata while retaining semantic selection and chart chrome.",
-    canonicalPath: "/guide/rendering-performance",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "docs",
-    navigation: {
-      section: "Production",
-      label: "Rendering and performance",
-      order: 31,
-    },
-    headings: [
-      {
-        id: "svg-canvas-and-auto",
-        title: "SVG, canvas, and auto",
-        level: 2,
-      },
-      {
-        id: "canvas-and-interaction",
-        title: "Canvas and interaction",
-        level: 2,
-      },
-      {
-        id: "measure-before-overriding",
-        title: "Measure before overriding",
-        level: 2,
-      },
-    ],
-  },
-  {
-    path: "/guide/server-rendering-export",
-    title: "Server rendering and export — ggsvelte",
-    description:
-      "Render deterministic SVG through Svelte SSR, the pure core API, or the installed CLI.",
-    canonicalPath: "/guide/server-rendering-export",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "docs",
-    navigation: {
-      section: "Production",
-      label: "Server rendering and export",
-      order: 32,
-    },
-    headings: [
-      {
-        id: "server-rendering",
-        title: "Server rendering",
-        level: 2,
-      },
-      {
-        id: "pure-svg-export",
-        title: "Pure SVG export",
-        level: 2,
-      },
-      {
-        id: "command-line-export",
-        title: "Command-line export",
-        level: 2,
-      },
-    ],
-  },
-  {
-    path: "/guide/compatibility",
-    title: "Compatibility — ggsvelte",
-    description: "Tested Node, Svelte, browser, and OS versions.",
-    canonicalPath: "/guide/compatibility",
-    kind: "page",
-    index: true,
-    sitemap: true,
-    shell: "docs",
-    navigation: {
-      section: "Production",
-      label: "Compatibility",
-      order: 40,
-    },
-    headings: [],
   },
   {
     path: "/guide/interaction-reference",
@@ -7317,14 +7049,6 @@ export const GUIDE_NAVIGATION = [
     section: "Core grammar",
     entries: [
       {
-        path: "/guide/data-mappings",
-        label: "Data and mappings",
-      },
-      {
-        path: "/guide/layers-marks",
-        label: "Layers and marks",
-      },
-      {
         path: "/guide/statistics-positions",
         label: "Statistics and positions",
       },
@@ -7340,10 +7064,6 @@ export const GUIDE_NAVIGATION = [
         path: "/guide/facets-coordinates",
         label: "Facets and coordinates",
       },
-      {
-        path: "/guide/themes-color",
-        label: "Themes and color",
-      },
     ],
   },
   {
@@ -7351,23 +7071,7 @@ export const GUIDE_NAVIGATION = [
     entries: [
       {
         path: "/guide/interactions",
-        label: "Interaction overview",
-      },
-      {
-        path: "/guide/inspect-pin",
-        label: "Inspect and pin",
-      },
-      {
-        path: "/guide/selection-zoom",
-        label: "Selection and zoom",
-      },
-      {
-        path: "/guide/linked-views",
-        label: "Linked views",
-      },
-      {
-        path: "/guide/accessibility",
-        label: "Accessibility",
+        label: "Interactions",
       },
     ],
   },
@@ -7375,20 +7079,8 @@ export const GUIDE_NAVIGATION = [
     section: "Production",
     entries: [
       {
-        path: "/guide/responsive-charts",
-        label: "Responsive charts",
-      },
-      {
-        path: "/guide/rendering-performance",
-        label: "Rendering and performance",
-      },
-      {
-        path: "/guide/server-rendering-export",
-        label: "Server rendering and export",
-      },
-      {
-        path: "/guide/compatibility",
-        label: "Compatibility",
+        path: "/guide/production",
+        label: "Production",
       },
     ],
   },

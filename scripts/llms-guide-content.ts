@@ -148,65 +148,14 @@ as JSON under the same name on the docs site):
 
 ## Grammar vocabulary
 
-- [Data and mappings](/guide/data-mappings) — channels, constants, per-layer data
-- [Layers and marks](/guide/layers-marks) — every geom and its parameters
+- [Geoms](/reference/geoms) — every mark, defaults, stats, positions, and params
 - [Statistics and positions](/guide/statistics-positions) — stats, jitter, stacking
 - [Scales and guides](/guide/scales-guides) — continuous, discrete, manual, temporal
 - [Facets and coordinates](/guide/facets-coordinates) — small multiples, flip, fixed aspect
-- [Themes and color](/guide/themes-color) — named themes, palettes, roles
+- [Chart themes](/themes) and [palettes](/palettes) — paper/ink chrome and data color
 - [Interactions](/guide/interactions) — inspect, pin, selection, zoom, linked views
-- [Server rendering and export](/guide/server-rendering-export) — SSR, SVG, PNG
-- [Compatibility](/guide/compatibility) — ggplot2 parity and known gaps
+- [Production](/guide/production) — sizing, SVG/canvas, SSR, export, support matrix
 - [Lifecycle](/guide/lifecycle) — what is stable and what is not
-`;
-
-export const DATA_MAPPINGS_MD = `# Data and mappings
-
-\`aes\` names which field feeds each visual channel. Source rows are not mutated.
-
-## Map fields to position
-
-\`\`\`svelte fragment
-aes={{ x: "weight", y: "economy" }}
-\`\`\`
-
-[Scatter with color](/examples/point/scatter-color) adds a discrete color channel
-on the same positions.
-
-## Keep data local
-
-Inline rows, named datasets, and PortableSpec data all validate and normalize
-before render. Prefer local data over remote fetch in published examples.
-`;
-
-export const LAYERS_MARKS_MD = `# Layers and marks
-
-Layers paint in source order. Add a mark without replacing plot data or
-mappings.
-
-## Compose layers
-
-\`\`\`svelte fragment
-<GeomLine />
-<GeomPoint />
-\`\`\`
-
-Layers inherit plot mappings unless a layer supplies its own mapping or data.
-[Multi-series line](/examples/line/multi-series) uses the same pattern with a
-stable discrete color scale. [Examples](/examples) for every mark on real data.
-
-## Look up a geom
-
-The full Svelte and JSON API for every mark lives in the
-[Geoms](/reference/geoms): defaults, allowed stats and positions, and
-every param with its schema description. That catalog is generated from the
-PortableSpec TypeBox schema (the same source as \`schema/v0.json\`), so it cannot
-drift from validation.
-
-Open a specific component, for example [GeomPoint](/reference/geoms/point) or
-[GeomLine](/reference/geoms/line). Shared layer props (\`data\`, \`aes\`, \`stat\`,
-\`position\`, \`positionParams\`, \`render\`, \`inspect\`) are documented once on the
-[index](/reference/geoms#shared-layer-props).
 `;
 
 export const STATISTICS_POSITIONS_MD = `# Statistics and positions
@@ -1150,182 +1099,34 @@ cross log10/sqrt boundaries fail with \`coord-transform-domain\` and exact
 recovery guidance.
 `;
 
-export const THEMES_COLOR_MD = `# Themes and color
+export const PRODUCTION_MD = `# Production
 
-Theme: paper, ink, grid, type, interaction roles. Scales: data color. Site
-appearance is independent unless follow mode is explicit.
-
-## Choose a chart theme
-
-Registered theme name; mappings unchanged:
-
-\`\`\`svelte fragment
-<GGPlot data={rows} aes={{ x: "year", y: "value" }}>
-  <ThemeEconomist />
-  <GeomLine />
-</GGPlot>
-\`\`\`
-
-Eighteen registered theme names (sixteen distinct looks) on
-[Chart themes](/themes); categorical palettes and sequential ramps on
-[Color palettes](/palettes). \`theme: "bw"\` /
-\`<ThemeBw />\` is a white-panel print theme (grey grid + rectangular border).
-\`theme: "linedraw"\` / \`<ThemeLinedraw />\` is monochrome line-art chrome
-(black hairline grid and panel border). \`theme: "void"\` / \`<ThemeVoid />\`
-suppresses axes, grid, and panel chrome (marks and legends remain) for maps,
-logos, and free-form composition (ggplot2 \`theme_void\`). UK
-\`theme: "grey"\` / \`<ThemeGrey />\` and US \`theme: "gray"\` / \`<ThemeGray />\`
-are first-class aliases of the ggplot2 grey-panel look (\`ThemeGgplot2\` /
-\`theme: "ggplot2"\`), matching ggplot2 \`theme_grey\` / \`theme_gray\`.
-\`theme: "test"\` / \`<ThemeTest />\` is a pinned high-contrast snapshot theme
-for package tests and VR (ggplot2 \`theme_test\` role; not an alias of product
-themes). Exhaustion: [palette-exhausted](/guide/errors#palette-exhausted).
-
-## Preserve color meaning
-
-Explicit range beats named scheme beats edition default. Changing theme must
-not reassign categorical colors or reverse a sequential ramp.
-`;
-
-export const INSPECT_PIN_MD = `# Inspect and pin
-
-Chart-local: semantic crosshair, HTML tooltip, keyboard traversal, optional pin.
-
-## Inspect and pin
-
-\`\`\`svelte fragment
-<GGPlot
-  key="id"
-  inspect={{ mode: "exact", pin: true }}
-/>
-\`\`\`
-
-Pointer, touch, and keyboard report the same semantic datum. Enter/Space pins;
-Escape dismisses. [Inspection example](/examples/interaction/tooltip).
-
-## Keep ownership honest
-
-Tooltip, crosshair, active tool, and pin stay private to one chart. Share a
-controller only for selection, emphasis, intervals, or zoom domains that other
-UI also needs.
-`;
-
-export const SELECTION_ZOOM_MD = `# Selection and zoom
-
-Selection: semantic identities. Zoom: visible domains. Separate tools so
-gestures do not fight inspection or page scroll.
-
-## Select points
-
-Stable keys; events carry semantic identities, not renderer indices.
-
-\`\`\`svelte fragment
-<GGPlot key="id" select={{ type: "point", multiple: true }} />
-\`\`\`
-
-## Select an area and zoom
-
-Interval selection and brush zoom are separate tools with domain bounds, clear
-paths, and keyboard-editable bounds.
-[Selection and zoom](/interactions/brush-zoom).
-`;
-
-export const LINKED_VIEWS_MD = `# Linked views
-
-Share selection, emphasis, intervals, or domains across plots, controls, or
-tables via \`createPlotInteraction\`.
-
-## Create a shared controller
-
-\`\`\`svelte fragment
-const interaction = createPlotInteraction<string>();
-const scope = { keys: "record-id", x: "weight", y: "economy" } as const;
-\`\`\`
-
-Same controller + scope on every consumer. Passive plots render without re-emitting.
-[Linked views](/interactions/linked-views): two plots, buttons, table.
-
-## Keep local state local
-
-Inspection, tooltip, crosshair, active tool, and interval drafts stay chart-local.
-Share committed semantic state, not pixels or UI mode.
-`;
-
-export const ACCESSIBILITY_MD = `# Accessibility
-
-Accessible name, keyboard/touch paths, visible focus, live announcements, and
-a data-detail alternative when marks are dense.
-
-## Name the chart
-
-\`\`\`svelte fragment
-<GGPlot ariaLabel="Fuel economy decreases as vehicle weight increases" />
-\`\`\`
-
-Subject or takeaway — not generic image alt, not a substitute for a caption.
-
-## Keyboard and touch
-
-Focus the chart; arrows/brackets traverse. Enter/Space pins or commits the
-active tool; Escape dismisses. Touch pins rather than relying on hover.
-[Inspection example](/examples/interaction/tooltip): pinned content in labelled DOM.
-
-## Dense charts
-
-Canvas marks keep SVG axes/legends and the accessible description/table path.
-Forced colors keeps controls and focus when system colors replace chart paint.
-`;
-
-export const RESPONSIVE_CHARTS_MD = `# Responsive charts
+## Responsive sizing
 
 Omit width: GGPlot observes its container. Positive-width block, no chart CSS.
-Omitted height: 400px default.
+Omitted height: 400px default. Collapsed parent, hidden tab, or zero-width track
+→ not-ready until ResizeObserver reports positive width. Do not paper over that
+with a fake fixed width. [Troubleshooting](/guide/errors#quickstart-troubleshooting).
 
-## Container width
+SSR uses an 832×400 deterministic fallback and stays not-ready in HTML until
+hydration measures the real container. Reserve layout space to avoid CLS.
 
-Collapsed parent, hidden tab, or zero-width track → not-ready until
-ResizeObserver reports positive width. Do not paper over that with a fake fixed
-width. [Troubleshooting](/guide/errors#quickstart-troubleshooting).
-
-## Server fallback and hydration
-
-SSR: 832×400 deterministic fallback, not-ready in HTML, measure after hydration.
-Reserve layout space to avoid CLS.
-`;
-
-export const RENDERING_PERFORMANCE_MD = `# Rendering and performance
+## Rendering
 
 Renderer follows mark density and interaction needs. Axes, legends, labels, and
 a11y chrome stay semantic regardless of SVG vs canvas.
-
-## SVG, canvas, and auto
 
 SVG: DOM marks. Canvas: dense strata. Auto: switches above the published
 threshold and emits \`canvas-auto\`. [2.5k-point scatter](/examples/point/canvas-scatter):
 canvas marks, SVG axes/legend.
 
-## Canvas and interaction
-
 Inspection and selection use the model-owned candidate store, not DOM hit tests.
 Stable keys keep identity across SVG/canvas; renderer indices never appear in
-public callbacks.
+public callbacks. Measure with repo fixtures before forcing canvas globally.
 
-## Measure before overriding
-
-Use repo performance fixtures and advisories. Do not pick canvas from screenshot
-timing alone, or force global canvas that drops useful SVG detail.
-`;
-
-export const SERVER_RENDERING_EXPORT_MD = `# Server rendering and export
+## Server and export
 
 Three paths, one PortableSpec: Svelte SSR, pure \`renderToSVGString\`, CLI.
-
-## Server rendering
-
-Same deterministic layout fallback as the responsive component. Measurement and
-interaction attach after hydration.
-
-## Pure SVG export
 
 \`\`\`ts fragment
 import { renderToSVGString } from "@ggsvelte/core";
@@ -1333,15 +1134,27 @@ import { renderToSVGString } from "@ggsvelte/core";
 const svg = renderToSVGString(spec, { width: 640, height: 400 });
 \`\`\`
 
-No DOM. Complete SVG string.
-
-## Command-line export
-
 \`\`\`sh fragment
 ggsvelte-render spec.json > chart.svg
 \`\`\`
 
 SVG on stdout; JSON Lines diagnostics on stderr. [CLI reference](/reference/cli).
+
+## Compatibility
+
+Every release is tested as an installed package: clean install, strict
+type-check, client build, server render, pure Node render, and the
+\`ggsvelte-render\` CLI.
+
+- Node.js \`${supportMatrix.node.range}\` (${supportMatrix.node.tested.join(" and ")} in CI; ${supportMatrix.node.canary} nightly)
+- Svelte \`${supportMatrix.svelte.range}\` (tested floor ${supportMatrix.svelte.minimum}, current ${supportMatrix.svelte.current})
+- npm ${supportMatrix.packageManagers.npm}, pnpm ${supportMatrix.packageManagers.pnpm}, Bun ${supportMatrix.packageManagers.bun}
+- Chromium, Firefox, and WebKit (Playwright ${supportMatrix.browsers.playwright})
+- Ubuntu and Windows in CI; macOS nightly
+
+Exact machine-checked rows live in
+[support-matrix.json](https://github.com/ljodea/ggsvelte/blob/main/support-matrix.json).
+Bun is the contributor toolchain only; consumers can use any installer above.
 `;
 
 export const TEMPORAL_SCALES_MD = `# Dates without preprocessing
@@ -1450,23 +1263,6 @@ The checked capability ledger records the temporal family as
 Builder and Svelte authoring may contain runtime Dates; they canonicalize to ISO
 before validation. The standalone \`ymd\`, \`mdy\`, \`dmy\`, related order and
 timestamp helpers, exact-format parser, and epoch helpers return authoring Dates.
-`;
-
-export const COMPATIBILITY_MD = `# Compatibility
-
-Every release is tested as an installed package: clean install, strict
-type-check, client build, server render, pure Node render, and the
-\`ggsvelte-render\` CLI.
-
-- Node.js \`${supportMatrix.node.range}\` (${supportMatrix.node.tested.join(" and ")} in CI; ${supportMatrix.node.canary} nightly)
-- Svelte \`${supportMatrix.svelte.range}\` (tested floor ${supportMatrix.svelte.minimum}, current ${supportMatrix.svelte.current})
-- npm ${supportMatrix.packageManagers.npm}, pnpm ${supportMatrix.packageManagers.pnpm}, Bun ${supportMatrix.packageManagers.bun}
-- Chromium, Firefox, and WebKit (Playwright ${supportMatrix.browsers.playwright})
-- Ubuntu and Windows in CI; macOS nightly
-
-Exact machine-checked rows live in
-[support-matrix.json](https://github.com/ljodea/ggsvelte/blob/main/support-matrix.json).
-Bun is the contributor toolchain only; consumers can use any installer above.
 `;
 
 export const INTERACTIONS_MD = `# Interactions
@@ -1744,12 +1540,14 @@ should not re-emit the origin chart's event.
 
 ## Keyboard and accessibility defaults
 
+Name charts with \`ariaLabel\` (subject or takeaway — not generic image alt).
 Focus the plot, then use arrow keys or brackets to traverse data. Enter or
 Space pins inspection, activates point selection, or sets the two corners of
 an area, depending on the active tool. Escape dismisses the current
 interaction. Keyboard inspection updates a polite live region with a concise
 axis, count, and pin summary; complete pinned content remains ordinary labelled
-and navigable DOM.
+and navigable DOM. Canvas marks keep SVG axes/legends and the accessible
+description path.
 
 ## Identity and diagnostics
 

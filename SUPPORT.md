@@ -17,6 +17,6 @@ answer.
 
 Supported runtime, Svelte, installer, browser, and operating-system boundaries
 are published in the
-[compatibility guide](https://ggsvelte.sh/guide/compatibility).
+[production guide](https://ggsvelte.sh/guide/production).
 Questions outside those tested boundaries are welcome, but may be answered by
 another community member or require a reproduction on a supported setup.

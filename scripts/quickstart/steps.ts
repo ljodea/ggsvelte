@@ -280,8 +280,8 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   values={[${EPOCH_VALUES}]}
 />
 <GuideLegend channel="fill" position="bottom" direction="horizontal" />`,
-    chapterTitle: "Layers and marks",
-    href: "/guide/layers-marks#compose-layers",
+    chapterTitle: "Getting started",
+    href: "/guide/getting-started#add-geometry-layers",
     spec: {
       layers: {
         epochs: {
@@ -367,8 +367,8 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
 <GeomText data={records}
   aes={{ x: "labelYear", y: "labelDate", label: "label",
          color: { value: "#b3452f" } }} size={11} />`,
-    chapterTitle: "Data and mappings",
-    href: "/guide/data-mappings#keep-data-local",
+    chapterTitle: "Getting started",
+    href: "/guide/getting-started#start-with-a-basic-plot",
     spec: {
       layers: {
         baseline: {
@@ -452,8 +452,8 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   y="${SAKURA_Y_LAB}"
   fill="Climate epoch"
 />`,
-    chapterTitle: "Themes and color",
-    href: "/guide/themes-color#choose-a-chart-theme",
+    chapterTitle: "Scales and guides",
+    href: "/guide/scales-guides#categorical-color",
     spec: {
       theme: "tufte",
       labs: {
@@ -487,8 +487,8 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     explanation: "",
     fragment: `key="year"
 inspect={{ mode: "exact", pin: true }}`,
-    chapterTitle: "Inspect and pin",
-    href: "/guide/inspect-pin#inspect-and-pin",
+    chapterTitle: "Interactions",
+    href: "/guide/interactions#inspection",
     spec: {},
     source: {
       attrs: {

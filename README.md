@@ -472,7 +472,7 @@ Plot theme tokens are independent of site light/dark.
 - [Example gallery](https://ggsvelte.sh/examples)
 - [Themes and palettes](https://ggsvelte.sh/themes)
 - [Interactions and events](https://ggsvelte.sh/reference/interactions)
-- [Compatibility](https://ggsvelte.sh/guide/compatibility)
+- [Production](https://ggsvelte.sh/guide/production)
 - [Upgrading](https://ggsvelte.sh/guide/upgrading)
 
 ## Release status

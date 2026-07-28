@@ -293,8 +293,8 @@
   <h2 id="the-rest-of-the-grammar">The rest of the grammar</h2>
   <ul>
     <li>
-      <a href={`${base}/guide/themes-color`}>Color scales</a> — categorical schemes,
-      sequential ramps, manual palettes.
+      <a href={`${base}/themes`}>Chart themes</a> and
+      <a href={`${base}/palettes`}>palettes</a> — paper/ink chrome and data color.
     </li>
     <li>
       <a href={`${base}/guide/facets-coordinates`}>Facets and coordinates</a> — small
@@ -309,8 +309,8 @@
   <h2 id="where-next">Where next</h2>
   <ul>
     <li><a href={`${base}/examples`}>Examples</a></li>
-    <li><a href={`${base}/guide/interactions`}>Interaction</a></li>
-    <li><a href={`${base}/guide/compatibility`}>Compatibility</a></li>
+    <li><a href={`${base}/guide/interactions`}>Interactions</a></li>
+    <li><a href={`${base}/guide/production`}>Production</a></li>
   </ul>
 </article>
 
