@@ -20,6 +20,8 @@ export const requiredPages = [
   "reference/geoms/line.html",
   "reference/stats.html",
   "reference/stats/count.html",
+  "reference/positions.html",
+  "reference/positions/stack.html",
   "examples/interaction/tooltip.html",
   "interactions/brush-zoom.html",
   "interactions/linked-views.html",

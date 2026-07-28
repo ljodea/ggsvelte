@@ -219,6 +219,10 @@ The full list of statistical transforms lives in the
 each value. Open a specific stat, for example [count](/reference/stats/count)
 or [smooth](/reference/stats/smooth).
 
+Position adjustments are listed in the
+[position reference](/reference/positions): stack, fill, dodge, jitter, nudge,
+and identity, with \`positionParams\` for jitter and nudge.
+
 ## Statistical summaries
 
 \`\`\`svelte fragment

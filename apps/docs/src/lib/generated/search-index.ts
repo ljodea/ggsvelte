@@ -127,6 +127,36 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["How to set a stat"],
   },
   {
+    id: "page:reference-positions",
+    kind: "page",
+    title: "Position reference",
+    summary:
+      "Schema-derived API reference for every position adjustment: positionParams and compatible geoms.",
+    href: "/reference/positions",
+    keywords: ["Reference"],
+    exact: ["Position reference"],
+  },
+  {
+    id: "heading:reference-positions:all-positions",
+    kind: "heading",
+    title: "All positions",
+    summary:
+      "All positions in Position reference. Schema-derived API reference for every position adjustment: positionParams and compatible geoms.",
+    href: "/reference/positions#all-positions",
+    keywords: ["Position reference", "Reference"],
+    exact: ["All positions"],
+  },
+  {
+    id: "heading:reference-positions:how-to-set",
+    kind: "heading",
+    title: "How to set a position",
+    summary:
+      "How to set a position in Position reference. Schema-derived API reference for every position adjustment: positionParams and compatible geoms.",
+    href: "/reference/positions#how-to-set",
+    keywords: ["Position reference", "Reference"],
+    exact: ["How to set a position"],
+  },
+  {
     id: "page:reference-interactions",
     kind: "page",
     title: "Search interactions",
@@ -5737,6 +5767,356 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Compatible geoms"],
   },
   {
+    id: "page:reference-positions-identity",
+    kind: "page",
+    title: "position identity",
+    summary:
+      'position "identity": Leave mark coordinates unchanged. Default for most geoms: each mark keeps its post-stat (x, y).',
+    href: "/reference/positions/identity",
+    keywords: [],
+    exact: ["position identity"],
+  },
+  {
+    id: "heading:reference-positions-identity:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in position identity. position "identity": Leave mark coordinates unchanged. Default for most geoms: each mark keeps its post-stat (x, y).',
+    href: "/reference/positions/identity#usage",
+    keywords: ["position identity", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-positions-identity:params",
+    kind: "heading",
+    title: "positionParams",
+    summary:
+      'positionParams in position identity. position "identity": Leave mark coordinates unchanged. Default for most geoms: each mark keeps its post-stat (x, y).',
+    href: "/reference/positions/identity#params",
+    keywords: ["position identity", "documentation"],
+    exact: ["positionParams"],
+  },
+  {
+    id: "heading:reference-positions-identity:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in position identity. position "identity": Leave mark coordinates unchanged. Default for most geoms: each mark keeps its post-stat (x, y).',
+    href: "/reference/positions/identity#default-for",
+    keywords: ["position identity", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-positions-identity:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in position identity. position "identity": Leave mark coordinates unchanged. Default for most geoms: each mark keeps its post-stat (x, y).',
+    href: "/reference/positions/identity#compatible-geoms",
+    keywords: ["position identity", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-positions-identity:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in position identity. position "identity": Leave mark coordinates unchanged. Default for most geoms: each mark keeps its post-stat (x, y).',
+    href: "/reference/positions/identity#examples",
+    keywords: ["position identity", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-positions-stack",
+    kind: "page",
+    title: "position stack",
+    summary:
+      'position "stack": Stack groups at each x slot so heights accumulate (positive up, negative down). Default for bar, col, histogram, and area; trains the scale on stacked totals.',
+    href: "/reference/positions/stack",
+    keywords: [],
+    exact: ["position stack"],
+  },
+  {
+    id: "heading:reference-positions-stack:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in position stack. position "stack": Stack groups at each x slot so heights accumulate (positive up, negative down). Default for bar, col, histogram, and area; trains the scale on stacked totals.',
+    href: "/reference/positions/stack#usage",
+    keywords: ["position stack", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-positions-stack:params",
+    kind: "heading",
+    title: "positionParams",
+    summary:
+      'positionParams in position stack. position "stack": Stack groups at each x slot so heights accumulate (positive up, negative down). Default for bar, col, histogram, and area; trains the scale on stacked totals.',
+    href: "/reference/positions/stack#params",
+    keywords: ["position stack", "documentation"],
+    exact: ["positionParams"],
+  },
+  {
+    id: "heading:reference-positions-stack:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in position stack. position "stack": Stack groups at each x slot so heights accumulate (positive up, negative down). Default for bar, col, histogram, and area; trains the scale on stacked totals.',
+    href: "/reference/positions/stack#default-for",
+    keywords: ["position stack", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-positions-stack:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in position stack. position "stack": Stack groups at each x slot so heights accumulate (positive up, negative down). Default for bar, col, histogram, and area; trains the scale on stacked totals.',
+    href: "/reference/positions/stack#compatible-geoms",
+    keywords: ["position stack", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-positions-stack:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in position stack. position "stack": Stack groups at each x slot so heights accumulate (positive up, negative down). Default for bar, col, histogram, and area; trains the scale on stacked totals.',
+    href: "/reference/positions/stack#examples",
+    keywords: ["position stack", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-positions-fill",
+    kind: "page",
+    title: "position fill",
+    summary:
+      'position "fill": Stack groups then rescale each x slot to proportions (positive and negative runs separately). Same geom set as stack; y domain becomes proportions.',
+    href: "/reference/positions/fill",
+    keywords: [],
+    exact: ["position fill"],
+  },
+  {
+    id: "heading:reference-positions-fill:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in position fill. position "fill": Stack groups then rescale each x slot to proportions (positive and negative runs separately). Same geom set as stack; y domain becomes proportions.',
+    href: "/reference/positions/fill#usage",
+    keywords: ["position fill", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-positions-fill:params",
+    kind: "heading",
+    title: "positionParams",
+    summary:
+      'positionParams in position fill. position "fill": Stack groups then rescale each x slot to proportions (positive and negative runs separately). Same geom set as stack; y domain becomes proportions.',
+    href: "/reference/positions/fill#params",
+    keywords: ["position fill", "documentation"],
+    exact: ["positionParams"],
+  },
+  {
+    id: "heading:reference-positions-fill:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in position fill. position "fill": Stack groups then rescale each x slot to proportions (positive and negative runs separately). Same geom set as stack; y domain becomes proportions.',
+    href: "/reference/positions/fill#default-for",
+    keywords: ["position fill", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-positions-fill:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in position fill. position "fill": Stack groups then rescale each x slot to proportions (positive and negative runs separately). Same geom set as stack; y domain becomes proportions.',
+    href: "/reference/positions/fill#compatible-geoms",
+    keywords: ["position fill", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-positions-fill:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in position fill. position "fill": Stack groups then rescale each x slot to proportions (positive and negative runs separately). Same geom set as stack; y domain becomes proportions.',
+    href: "/reference/positions/fill#examples",
+    keywords: ["position fill", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-positions-dodge",
+    kind: "page",
+    title: "position dodge",
+    summary:
+      'position "dodge": Place groups side by side within each x band instead of overlapping. Default for boxplot and violin; used when comparing categories at the same x.',
+    href: "/reference/positions/dodge",
+    keywords: [],
+    exact: ["position dodge"],
+  },
+  {
+    id: "heading:reference-positions-dodge:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in position dodge. position "dodge": Place groups side by side within each x band instead of overlapping. Default for boxplot and violin; used when comparing categories at the same x.',
+    href: "/reference/positions/dodge#usage",
+    keywords: ["position dodge", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-positions-dodge:params",
+    kind: "heading",
+    title: "positionParams",
+    summary:
+      'positionParams in position dodge. position "dodge": Place groups side by side within each x band instead of overlapping. Default for boxplot and violin; used when comparing categories at the same x.',
+    href: "/reference/positions/dodge#params",
+    keywords: ["position dodge", "documentation"],
+    exact: ["positionParams"],
+  },
+  {
+    id: "heading:reference-positions-dodge:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in position dodge. position "dodge": Place groups side by side within each x band instead of overlapping. Default for boxplot and violin; used when comparing categories at the same x.',
+    href: "/reference/positions/dodge#default-for",
+    keywords: ["position dodge", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-positions-dodge:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in position dodge. position "dodge": Place groups side by side within each x band instead of overlapping. Default for boxplot and violin; used when comparing categories at the same x.',
+    href: "/reference/positions/dodge#compatible-geoms",
+    keywords: ["position dodge", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-positions-dodge:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in position dodge. position "dodge": Place groups side by side within each x band instead of overlapping. Default for boxplot and violin; used when comparing categories at the same x.',
+    href: "/reference/positions/dodge#examples",
+    keywords: ["position dodge", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-positions-jitter",
+    kind: "page",
+    title: "position jitter",
+    summary:
+      'position "jitter": Add seeded random offsets so overplotted points separate. Configure with positionParams width/height/seed (always seeded for reproducibility).',
+    href: "/reference/positions/jitter",
+    keywords: [],
+    exact: ["position jitter"],
+  },
+  {
+    id: "heading:reference-positions-jitter:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in position jitter. position "jitter": Add seeded random offsets so overplotted points separate. Configure with positionParams width/height/seed (always seeded for reproducibility).',
+    href: "/reference/positions/jitter#usage",
+    keywords: ["position jitter", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-positions-jitter:params",
+    kind: "heading",
+    title: "positionParams",
+    summary:
+      'positionParams in position jitter. position "jitter": Add seeded random offsets so overplotted points separate. Configure with positionParams width/height/seed (always seeded for reproducibility).',
+    href: "/reference/positions/jitter#params",
+    keywords: ["position jitter", "documentation"],
+    exact: ["positionParams"],
+  },
+  {
+    id: "heading:reference-positions-jitter:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in position jitter. position "jitter": Add seeded random offsets so overplotted points separate. Configure with positionParams width/height/seed (always seeded for reproducibility).',
+    href: "/reference/positions/jitter#default-for",
+    keywords: ["position jitter", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-positions-jitter:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in position jitter. position "jitter": Add seeded random offsets so overplotted points separate. Configure with positionParams width/height/seed (always seeded for reproducibility).',
+    href: "/reference/positions/jitter#compatible-geoms",
+    keywords: ["position jitter", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-positions-jitter:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in position jitter. position "jitter": Add seeded random offsets so overplotted points separate. Configure with positionParams width/height/seed (always seeded for reproducibility).',
+    href: "/reference/positions/jitter#examples",
+    keywords: ["position jitter", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-positions-nudge",
+    kind: "page",
+    title: "position nudge",
+    summary:
+      'position "nudge": Apply a fixed offset (positionParams.x / y) per mark — useful for labels beside points. Offsets are data units or band-step fractions.',
+    href: "/reference/positions/nudge",
+    keywords: [],
+    exact: ["position nudge"],
+  },
+  {
+    id: "heading:reference-positions-nudge:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in position nudge. position "nudge": Apply a fixed offset (positionParams.x / y) per mark — useful for labels beside points. Offsets are data units or band-step fractions.',
+    href: "/reference/positions/nudge#usage",
+    keywords: ["position nudge", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-positions-nudge:params",
+    kind: "heading",
+    title: "positionParams",
+    summary:
+      'positionParams in position nudge. position "nudge": Apply a fixed offset (positionParams.x / y) per mark — useful for labels beside points. Offsets are data units or band-step fractions.',
+    href: "/reference/positions/nudge#params",
+    keywords: ["position nudge", "documentation"],
+    exact: ["positionParams"],
+  },
+  {
+    id: "heading:reference-positions-nudge:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in position nudge. position "nudge": Apply a fixed offset (positionParams.x / y) per mark — useful for labels beside points. Offsets are data units or band-step fractions.',
+    href: "/reference/positions/nudge#default-for",
+    keywords: ["position nudge", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-positions-nudge:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in position nudge. position "nudge": Apply a fixed offset (positionParams.x / y) per mark — useful for labels beside points. Offsets are data units or band-step fractions.',
+    href: "/reference/positions/nudge#compatible-geoms",
+    keywords: ["position nudge", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
     id: "page:guide-getting-started",
     kind: "page",
     title: "Getting started",
@@ -9481,14 +9861,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-868",
+    id: "heading:guide-lifecycle:experimental-872",
     kind: "heading",
-    title: "experimental (868)",
+    title: "experimental (872)",
     summary:
-      "experimental (868) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-868",
+      "experimental (872) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-872",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (868)"],
+    exact: ["experimental (872)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -14018,6 +14398,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["POINT_SHAPE_NAMES"],
   },
   {
+    id: "api:ggsvelte-spec:POSITION_REFERENCE",
+    kind: "api",
+    title: "POSITION_REFERENCE",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["POSITION_REFERENCE"],
+  },
+  {
     id: "api:ggsvelte-spec:PaintSpace",
     kind: "api",
     title: "PaintSpace",
@@ -14252,6 +14641,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["PositionName"],
   },
   {
+    id: "api:ggsvelte-spec:PositionParamDoc",
+    kind: "api",
+    title: "PositionParamDoc",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["PositionParamDoc"],
+  },
+  {
     id: "api:ggsvelte-spec:PositionParams",
     kind: "api",
     title: "PositionParams",
@@ -14259,6 +14657,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
     exact: ["PositionParams"],
+  },
+  {
+    id: "api:ggsvelte-spec:PositionReferenceEntry",
+    kind: "api",
+    title: "PositionReferenceEntry",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["PositionReferenceEntry"],
   },
   {
     id: "api:ggsvelte-spec:PositionScaleSpec",
@@ -16644,6 +17051,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
     exact: ["portabilityIssues"],
+  },
+  {
+    id: "api:ggsvelte-spec:positionReferenceList",
+    kind: "api",
+    title: "positionReferenceList",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["positionReferenceList"],
   },
   {
     id: "api:ggsvelte-spec:scaleAlpha",

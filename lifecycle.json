@@ -1168,6 +1168,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "POSITION_REFERENCE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "PaintSpace": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1272,7 +1276,15 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "PositionParamDoc": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "PositionParams": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PositionReferenceEntry": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2333,6 +2345,10 @@
           "lifecycle": "experimental"
         },
         "portabilityIssues": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "positionReferenceList": {
           "kind": "value",
           "lifecycle": "experimental"
         },

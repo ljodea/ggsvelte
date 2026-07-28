@@ -8,6 +8,7 @@ import {
 import { GUIDE_CATALOG, type GuideCatalogEntry } from "../apps/docs/src/lib/catalog/guide.ts";
 import type { DocsRouteMetadata, RouteHeading } from "../apps/docs/src/lib/route-types.ts";
 import { geomReferenceList } from "../packages/spec/src/geom-reference.ts";
+import { positionReferenceList } from "../packages/spec/src/position-reference.ts";
 import { statReferenceList } from "../packages/spec/src/stat-reference.ts";
 import { CLI_REFERENCE_OPTIONS } from "./cli-docs.ts";
 
@@ -128,6 +129,22 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     ],
   },
   {
+    path: "/reference/positions",
+    title: "Position reference — ggsvelte",
+    description:
+      "Schema-derived API reference for every position adjustment: positionParams and compatible geoms.",
+    canonicalPath: "/reference/positions",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: { section: "Reference", label: "Position reference", order: 53 },
+    headings: [
+      { id: "all-positions", title: "All positions", level: 2 },
+      { id: "how-to-set", title: "How to set a position", level: 2 },
+    ],
+  },
+  {
     path: "/reference/interactions",
     title: "Search interactions — ggsvelte",
     description:
@@ -137,7 +154,6 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    // order 53 reserved for /reference/positions (next follow-up)
     navigation: { section: "Reference", label: "Interaction reference", order: 54 },
   },
   {
@@ -244,6 +260,43 @@ function statDetailRoutes(): DocsRouteRecord[] {
       title: `stat ${entry.name} — ggsvelte`,
       description: `stat "${entry.name}": ${entry.summary}`,
       canonicalPath: `/reference/stats/${entry.slug}`,
+      kind: "page" as const,
+      index: true,
+      sitemap: true,
+      shell: "docs" as const,
+      headings,
+    };
+  });
+}
+
+/** Same matching rule as apps/docs reference/positions/[name] page load. */
+function positionHasRelatedExamples(position: string): boolean {
+  return EXAMPLES.some(
+    (entry) =>
+      entry.tags.includes(position) ||
+      entry.tags.includes(`position-${position}`) ||
+      entry.tags.includes(`position_${position}`) ||
+      entry.id.includes(position),
+  );
+}
+
+/** One indexable page per KNOWN_POSITIONS entry. */
+function positionDetailRoutes(): DocsRouteRecord[] {
+  return positionReferenceList().map((entry) => {
+    const headings: RouteHeading[] = [
+      { id: "usage", title: "Usage", level: 2 },
+      { id: "params", title: "positionParams", level: 2 },
+      { id: "default-for", title: "Default for geoms", level: 2 },
+      { id: "compatible-geoms", title: "Compatible geoms", level: 2 },
+    ];
+    if (positionHasRelatedExamples(entry.name)) {
+      headings.push({ id: "examples", title: "Examples", level: 2 });
+    }
+    return {
+      path: `/reference/positions/${entry.slug}`,
+      title: `position ${entry.name} — ggsvelte`,
+      description: `position "${entry.name}": ${entry.summary}`,
+      canonicalPath: `/reference/positions/${entry.slug}`,
       kind: "page" as const,
       index: true,
       sitemap: true,
@@ -394,6 +447,7 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
     ...TOP_LEVEL_ROUTES,
     ...geomDetailRoutes(),
     ...statDetailRoutes(),
+    ...positionDetailRoutes(),
     ...guides,
     ...examples,
     ...interactionExpositions,

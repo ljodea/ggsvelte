@@ -25,6 +25,13 @@
         >Every statistical transform: after_stat columns and compatible geoms.</span
       >
     </a>
+    <a href={`${base}/reference/positions`}>
+      <strong>Position reference</strong>
+      <span
+        >Every position adjustment: stack, dodge, jitter params, and compatible
+        geoms.</span
+      >
+    </a>
     <a href={`${base}/reference/interactions`}>
       <strong>Interaction reference</strong>
       <span>Capabilities, events, diagnostics, accessibility defaults.</span>

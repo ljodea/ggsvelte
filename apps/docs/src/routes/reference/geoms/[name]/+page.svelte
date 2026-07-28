@@ -148,7 +148,9 @@
   <ul class="token-list">
     {#each entry.allowedPositions as position (position)}
       <li>
-        <code>{position}</code>
+        <a href={`${base}/reference/positions/${position}`}
+          ><code>{position}</code></a
+        >
         {#if position === entry.defaultPosition}
           <span class="badge">default</span>
         {/if}
