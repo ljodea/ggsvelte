@@ -95,8 +95,10 @@ describe("finalize(PipelineRunState)", () => {
     const model = finalize(run);
     expect(model.runId).toBe(run.runId);
     // sourceRegistry is how model.row() resolves global source-row indices (#589)
-    expect(model.row(0)).not.toBeNull();
-    expect(model.row(0)).toEqual(expect.objectContaining({ x: 1, y: 10 }));
+    const row = model.row(0);
+    expect(row).not.toBeNull();
+    expect(row?.x).toBe(1);
+    expect(row?.y).toBe(10);
     expect(run.prepared.sourceRegistry).toBeTruthy();
   });
 
