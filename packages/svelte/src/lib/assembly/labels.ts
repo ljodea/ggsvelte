@@ -89,6 +89,9 @@ export function inspectionLiveText(
   const state = value.state === "pinned" ? ", pinned" : "";
   if (value.mode !== "x" && value.mode !== "y")
     return `${datumLabel(model, value.focus.row)}; ${countLabel(count)}${state}`;
+  // Stat focus (no source row) formats x/y with axis formatters; identity keeps
+  // precise cell values (#1113).
+  const focusFormatters = value.focus.row === null ? axisFormatters : null;
   const seen = new Set<string>();
   const focused = value.focus.fields
     .filter((field) => {
@@ -99,7 +102,7 @@ export function inspectionLiveText(
     .map((field) => {
       const display = formatTooltipCell(field.value, {
         channel: field.channel,
-        axisFormatters,
+        axisFormatters: focusFormatters,
       });
       return `${field.field} ${display}`;
     })

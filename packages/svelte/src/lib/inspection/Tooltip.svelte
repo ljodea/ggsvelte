@@ -179,7 +179,7 @@
             <dd>
               {formatTooltipCell(field.value, {
                 channel: field.channel,
-                axisFormatters,
+                axisFormatters: member.row === null ? axisFormatters : null,
               })}
             </dd>
           {/each}

@@ -55,7 +55,8 @@ describe("formatTooltipCell", () => {
   it("routes position channels through axis formatters when provided (#1113)", () => {
     // Stat-derived candidates store temporal positions as epoch ms. Default
     // cell formatting would print the raw number; axis formatters already know
-    // the scale (same path as the axis header).
+    // the scale (same path as the axis header). Callers pass formatters only
+    // for members with no source row so identity points keep precision.
     const epoch = Date.UTC(2000, 4, 1);
     const axisFormatters = {
       x: (value: CellValue) =>
@@ -67,6 +68,8 @@ describe("formatTooltipCell", () => {
     expect(formatTooltipCell(12.3456, { channel: "y", axisFormatters })).toBe("y:12.3456");
     // Non-position channels keep the plain cell path even with formatters present.
     expect(formatTooltipCell(epoch, { channel: "color", axisFormatters })).toBe(String(epoch));
+    // Without formatters (identity path), numbers keep full cell precision.
+    expect(formatTooltipCell(23.7, { channel: "x" })).toBe("23.7");
   });
 });
 

@@ -26,13 +26,14 @@ export type FormatTooltipCellOptions = {
  *
  * Position channels (`x`/`y`) route through `axisFormatters` when provided —
  * the same path as the axis header — so stat-frame temporal values print as
- * dates rather than raw epoch milliseconds (#1113). Non-position channels and
- * callers without formatters keep the plain cell path.
+ * dates rather than raw epoch milliseconds (#1113). Callers should pass
+ * formatters only for members with no source row (`row === null`); identity
+ * rows keep the plain cell path so linear points keep full precision.
  */
 export function formatTooltipCell(value: CellValue, options?: FormatTooltipCellOptions): string {
   const channel = options?.channel;
   const formatters = options?.axisFormatters;
-  if (formatters != null && (channel === "x" || channel === "y")) {
+  if (formatters !== null && formatters !== undefined && (channel === "x" || channel === "y")) {
     return formatters[channel](value);
   }
   if (value === null) return "–";
@@ -181,13 +182,18 @@ export function collapseIdenticalDisplayMembers<Row, Key>(
 ): NonEmptyReadonlyArray<PlotDatum<Row, Key>> {
   if (members.length === 0) return [focus];
 
+  // Stat members (no source row) use axis formatters for position display;
+  // identity members keep precise cell formatting (#1113).
+  const formattersFor = (member: PlotDatum<Row, Key>): TooltipAxisFormatters | null =>
+    member.row === null ? axisFormatters : null;
+
   const chosen = new Map<string, PlotDatum<Row, Key>>();
   const order: string[] = [];
   let focusInMembers = false;
 
   for (const member of members) {
     if (member === focus) focusInMembers = true;
-    const token = tooltipDisplayPayloadToken(member.fields, axisFormatters);
+    const token = tooltipDisplayPayloadToken(member.fields, formattersFor(member));
     const existing = chosen.get(token);
     if (existing === undefined) {
       chosen.set(token, member);
@@ -198,7 +204,7 @@ export function collapseIdenticalDisplayMembers<Row, Key>(
     if (member === focus) chosen.set(token, member);
   }
 
-  const focusToken = tooltipDisplayPayloadToken(focus.fields, axisFormatters);
+  const focusToken = tooltipDisplayPayloadToken(focus.fields, formattersFor(focus));
   if (chosen.has(focusToken)) {
     // Same display as a retained member — always surface focus for styling.
     chosen.set(focusToken, focus);
