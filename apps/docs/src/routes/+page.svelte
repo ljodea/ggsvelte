@@ -52,7 +52,16 @@
     {#if HeroPlot !== null}
       <HeroPlot />
     {:else}
-      {@html data.heroStaticSvg}
+      <!--
+        theme.js sets data-theme before paint. Mirror contrastChartTheme():
+        dark chart on the light site, light chart on dark — no theme flash.
+      -->
+      <div class="hero-static hero-static--light-site">
+        {@html data.heroStaticSvgLightSite}
+      </div>
+      <div class="hero-static hero-static--dark-site">
+        {@html data.heroStaticSvgDarkSite}
+      </div>
     {/if}
   </div>
 
@@ -199,6 +208,18 @@
     display: block;
     max-width: 100%;
     height: auto;
+  }
+
+  .hero-static--dark-site {
+    display: none;
+  }
+
+  :global(:root[data-theme="dark"]) .hero-static--light-site {
+    display: none;
+  }
+
+  :global(:root[data-theme="dark"]) .hero-static--dark-site {
+    display: block;
   }
 
   .cta-row {
