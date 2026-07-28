@@ -29,6 +29,18 @@ export const DOCS_STATIC_PLOT_WIDTH_PX = 832;
 
 const cache = new Map<string, string>();
 
+/**
+ * Headless SVG uses fixed ids (`gg-clip-0`, `gg-ramp-fill`). Multiple shells on
+ * one page collide (url(#id) is document-scoped). Namespace each shell so
+ * clip/ramp references stay local to that SVG.
+ */
+function namespaceSvgIds(svg: string, key: string): string {
+  const prefix = `s${key.replaceAll(/[^a-zA-Z0-9_-]/g, "_")}`;
+  return svg
+    .replaceAll(/id="(gg-[^"]+)"/g, `id="${prefix}-$1"`)
+    .replaceAll(/url\(#(gg-[^)]+)\)/g, `url(#${prefix}-$1)`);
+}
+
 export type ThemeStaticSvgInput = {
   readonly name: ThemeName;
   readonly kind: ThemeSpecimenKind;
@@ -100,7 +112,11 @@ function buildThemeSpec(input: ThemeStaticSvgInput) {
       return gg(longRunSeries, aes({ x: "year", y: "value" }))
         .geomLine({ linewidth: 1.5 })
         .theme(name)
-        .labs({ title: "British exports, 1855–1899", x: "Year", y: "£ millions" })
+        .labs({
+          title: "British exports, 1855–1899",
+          x: "Year",
+          y: "£ millions",
+        })
         .spec();
     case "penguins-scatter":
       return gg(penguins, aes({ x: "flipper", y: "mass", color: "species" }))
@@ -163,7 +179,7 @@ export function themeSpecimenStaticSvg(input: ThemeStaticSvgInput): string {
   const key = `${input.name}:${input.kind}:${input.scheme}:${String(width)}x${String(height)}`;
   const hit = cache.get(key);
   if (hit !== undefined) return hit;
-  const svg = renderToSVGString(buildThemeSpec(input), { width, height });
+  const svg = namespaceSvgIds(renderToSVGString(buildThemeSpec(input), { width, height }), key);
   cache.set(key, svg);
   return svg;
 }
@@ -208,7 +224,7 @@ export function paletteSpecimenStaticSvg(input: {
       y: "Tons",
     })
     .spec();
-  const svg = renderToSVGString(spec, { width, height });
+  const svg = namespaceSvgIds(renderToSVGString(spec, { width, height }), key);
   cache.set(key, svg);
   return svg;
 }
@@ -216,7 +232,7 @@ export function paletteSpecimenStaticSvg(input: {
 // Keep MONTH_BREAKS referenced so static temps stay aligned with live chart.
 void MONTH_BREAKS;
 
-/** Homepage Guerry hero — static shell before HomeHeroPlot hydrates. */
+/** Sequential Macdonell raster — static shell before SequentialColorLabLive hydrates. */
 export function sequentialRasterStaticSvg(input: {
   readonly label: string;
   readonly scale: import("@ggsvelte/spec").ColorScaleSpec;
@@ -239,7 +255,7 @@ export function sequentialRasterStaticSvg(input: {
       fill: "Men",
     })
     .spec();
-  const svg = renderToSVGString(spec, { width, height });
+  const svg = namespaceSvgIds(renderToSVGString(spec, { width, height }), key);
   cache.set(key, svg);
   return svg;
 }
@@ -270,7 +286,7 @@ export function homeHeroStaticSvgFromData(
       color: "Region",
     })
     .spec();
-  const svg = renderToSVGString(spec, { width, height });
+  const svg = namespaceSvgIds(renderToSVGString(spec, { width, height }), key);
   cache.set(key, svg);
   return svg;
 }

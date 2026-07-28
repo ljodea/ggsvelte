@@ -56,7 +56,11 @@
       };
     }
 
-    return observeNearViewport(el, load, { rootMargin: "480px 0px" });
+    const stop = observeNearViewport(el, load, { rootMargin: "480px 0px" });
+    return () => {
+      cancelled = true;
+      stop();
+    };
   });
 </script>
 

@@ -1,6 +1,7 @@
 import type { ColorScaleSpec } from "@ggsvelte/spec";
 
 import { CATEGORICAL_PALETTES } from "$lib/catalog/themes";
+import { RASTER_Z_DOMAIN } from "$lib/theme-specimens/catalog";
 import {
   paletteSpecimenStaticSvg,
   sequentialRasterStaticSvg,
@@ -27,7 +28,7 @@ const SEQUENTIAL_EXAMPLES: readonly {
     scale: {
       type: "sequential",
       scheme: "viridis",
-      domain: [15, 40],
+      domain: [...RASTER_Z_DOMAIN],
     },
   },
 ];
