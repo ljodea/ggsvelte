@@ -1,7 +1,6 @@
 <script lang="ts">
   import { base } from "$app/paths";
   import {
-    POSITION_REFERENCE,
     positionReferenceList,
     type PositionReferenceEntry,
   } from "@ggsvelte/spec";
@@ -30,25 +29,14 @@
 </script>
 
 <main class="position-reference" aria-labelledby="reference-heading">
-  <p class="eyebrow">
-    Schema-derived · {Object.keys(POSITION_REFERENCE).length} positions
-  </p>
   <h1 id="reference-heading">Positions</h1>
-  <p class="intro">
-    Position adjustments control how marks share coordinate space after the stat
-    runs. Set <code>position</code> on a <code>&lt;Geom*&gt;</code> shell or
-    JSON layer — there is no separate Position component. Jitter and nudge take
-    <code>positionParams</code>
-    from the PortableSpec
-    <code>PositionParams</code> schema.
-  </p>
 
-  <label for="position-search">Search positions, params, or geoms</label>
+  <label for="position-search">Search</label>
   <input
     id="position-search"
     type="search"
     bind:value={query}
-    placeholder="Try stack, dodge, jitter, or seed"
+    placeholder="stack, dodge, jitter…"
     autocomplete="off"
   />
 
@@ -59,7 +47,7 @@
 
   <h2 id="all-positions">All positions</h2>
   {#if results.length === 0}
-    <p class="empty">No match. Try a position name, param, or geom.</p>
+    <p class="empty">No match.</p>
   {:else}
     <ul class="results">
       {#each results as entry (entry.name)}
@@ -113,19 +101,6 @@
 
   h2 {
     margin: 2.5rem 0 0.75rem;
-  }
-
-  .intro {
-    max-width: 44rem;
-  }
-
-  .eyebrow {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.76rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
   }
 
   label {
