@@ -90,7 +90,9 @@ test("themes compares all built-in chart themes as full-width interactive portra
     "Test",
   ]);
 
+  // Specimens mount live plots only near the viewport (#1037) — scroll each in.
   for (const specimen of await specimens.all()) {
+    await specimen.scrollIntoViewIfNeeded();
     await expect(specimen.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
     // No per-specimen CopyCode after the redesign.
     await expect(specimen.getByRole("button", { name: /^Copy / })).toHaveCount(0);
@@ -188,7 +190,8 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   await expect(swatches.last()).toHaveAttribute("aria-label", "10: #9498a0");
   await expect(swatches.first().locator("code")).toHaveCount(0);
 
-  // Col chart uses fill (not the old 5-point scatter).
+  // Col chart uses fill (not the old 5-point scatter). Live plot mounts near viewport (#1037).
+  await observable.scrollIntoViewIfNeeded();
   await expect(observable.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
   const firstMark = observable.locator(".gg-plot-root [fill='#4269d0']").first();
   await expect(firstMark).toBeVisible();
@@ -252,31 +255,40 @@ test("sequential color compares direction, custom stops, and a pinned domain on 
   await expect(region.locator(".copy-code code")).toContainText("GeomRaster");
 });
 
-for (const width of [375, 768, 1024, 1280, 1600]) {
-  test(`themes has no horizontal overflow at ${String(width)}px`, async ({ page }) => {
-    await page.setViewportSize({ width, height: 900 });
-    await page.goto("/themes?theme=light");
-    // Wait for the themes specimen list so layout is past first paint/fonts;
-    // a one-shot scrollWidth check races chart/font settling on CI.
-    await expect(page.getByRole("list", { name: "Built-in chart themes" })).toBeVisible();
-    await page.waitForFunction(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
-      undefined,
-      { timeout: 10_000 },
-    );
-  });
+// One navigation per page, then resize — five separate gotos re-hydrated every
+// theme/palette portrait (~38s each on CI). Shared load keeps the five-width
+// contract without reloading the heavy page (#1037).
+const OVERFLOW_WIDTHS = [375, 768, 1024, 1280, 1600] as const;
 
-  test(`palettes has no horizontal overflow at ${String(width)}px`, async ({ page }) => {
+test("themes has no horizontal overflow at all five widths", async ({ page }) => {
+  await page.goto("/themes?theme=light");
+  // Wait for the themes specimen list so layout is past first paint/fonts;
+  // a one-shot scrollWidth check races chart/font settling on CI.
+  await expect(page.getByRole("list", { name: "Built-in chart themes" })).toBeVisible();
+
+  for (const width of OVERFLOW_WIDTHS) {
     await page.setViewportSize({ width, height: 900 });
-    await page.goto("/palettes?theme=light");
-    await expect(page.getByRole("list", { name: "Categorical palettes" })).toBeVisible();
     await page.waitForFunction(
       () => document.documentElement.scrollWidth <= window.innerWidth,
       undefined,
       { timeout: 10_000 },
     );
-  });
-}
+  }
+});
+
+test("palettes has no horizontal overflow at all five widths", async ({ page }) => {
+  await page.goto("/palettes?theme=light");
+  await expect(page.getByRole("list", { name: "Categorical palettes" })).toBeVisible();
+
+  for (const width of OVERFLOW_WIDTHS) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.waitForFunction(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+      undefined,
+      { timeout: 10_000 },
+    );
+  }
+});
 
 test("themes controls remain legible in forced colors with reduced motion", async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });

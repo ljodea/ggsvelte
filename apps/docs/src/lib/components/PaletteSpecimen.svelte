@@ -8,7 +8,9 @@
     Theme,
   } from "@ggsvelte/svelte";
   import type { CATEGORICAL_SCHEME_NAMES, ThemeName } from "@ggsvelte/spec";
+  import { onMount } from "svelte";
 
+  import { observeNearViewport } from "$lib/near-viewport";
   import { languages } from "$lib/theme-specimens/data";
 
   type CategoricalSchemeName = (typeof CATEGORICAL_SCHEME_NAMES)[number];
@@ -30,9 +32,22 @@
   } = $props();
 
   const displayColors = $derived(reverse ? colors.toReversed() : colors);
+  const plotHeight = 340;
+
+  /** Mount the live plot only near the viewport (#1037). */
+  let root = $state<HTMLElement | undefined>();
+  let active = $state(false);
+
+  onMount(() => {
+    const el = root;
+    if (el === undefined) return;
+    return observeNearViewport(el, () => {
+      active = true;
+    });
+  });
 </script>
 
-<article class="specimen">
+<article class="specimen" bind:this={root}>
   <header>
     <div>
       <h3>{label}</h3>
@@ -52,24 +67,32 @@
     {/each}
   </ul>
 
-  <div class="plot-panel">
-    <GGPlot
-      data={languages}
-      aes={{ x: "language", y: "respondents", fill: "language" }}
-      inspect={{ mode: "exact" }}
-      height={340}
-      ariaLabel={`${label} palette on ${paperTheme} paper`}
-    >
-      <Theme name={paperTheme} />
-      <Scale value={{ fill: { type: "ordinal", scheme: name, reverse } }} />
-      <Guides value={{ fill: { type: "none" } }} />
-      <Labs
-        title="Spanish Armada squadron tonnage, 1588"
-        x="Squadron"
-        y="Tons"
-      />
-      <GeomCol width={0.75} />
-    </GGPlot>
+  <div class="plot-panel" style:min-height="{plotHeight}px">
+    {#if active}
+      <GGPlot
+        data={languages}
+        aes={{ x: "language", y: "respondents", fill: "language" }}
+        inspect={{ mode: "exact" }}
+        height={plotHeight}
+        ariaLabel={`${label} palette on ${paperTheme} paper`}
+      >
+        <Theme name={paperTheme} />
+        <Scale value={{ fill: { type: "ordinal", scheme: name, reverse } }} />
+        <Guides value={{ fill: { type: "none" } }} />
+        <Labs
+          title="Spanish Armada squadron tonnage, 1588"
+          x="Squadron"
+          y="Tons"
+        />
+        <GeomCol width={0.75} />
+      </GGPlot>
+    {:else}
+      <div
+        class="plot-placeholder"
+        style:height="{plotHeight}px"
+        aria-hidden="true"
+      ></div>
+    {/if}
   </div>
 </article>
 
@@ -123,5 +146,11 @@
   .plot-panel {
     width: min(100%, 52rem);
     min-width: 0;
+  }
+
+  .plot-placeholder {
+    width: 100%;
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--line) 55%, transparent);
   }
 </style>

@@ -14,8 +14,10 @@
     Theme,
   } from "@ggsvelte/svelte";
   import type { ThemeName } from "@ggsvelte/spec";
+  import { onMount } from "svelte";
 
   import TemperaturesSpecimen from "$lib/components/TemperaturesSpecimen.svelte";
+  import { observeNearViewport } from "$lib/near-viewport";
   import type {
     SchemeName,
     ThemeSpecimenKind,
@@ -49,182 +51,202 @@
 
   const plotHeight = 380;
   const colorScale = $derived({ type: "ordinal" as const, scheme });
+
+  /** Mount the live plot only near the viewport (#1037). */
+  let root = $state<HTMLElement | undefined>();
+  let active = $state(false);
+
+  onMount(() => {
+    const el = root;
+    if (el === undefined) return;
+    return observeNearViewport(el, () => {
+      active = true;
+    });
+  });
 </script>
 
-<article class="specimen">
+<article class="specimen" bind:this={root}>
   <header>
     <h3>{label}</h3>
     <p class="caption">{caption}</p>
   </header>
 
-  <div class="plot-panel">
-    {#if kind === "temps-line"}
-      <TemperaturesSpecimen
-        theme={name}
-        {scheme}
-        height={plotHeight}
-        {legendFocus}
-        ariaLabel={`${label} theme Playfair multi-series`}
-      />
-    {:else if kind === "ridership-line"}
-      <GGPlot
-        data={ridership}
-        aes={{ x: "month", y: "riders", color: "mode" }}
-        key="id"
-        inspect={{ mode: "x" }}
-        {legendFocus}
-        height={plotHeight}
-        ariaLabel={`${label} theme Playfair wheat and wages`}
-      >
-        <Theme {name} />
-        <Scale value={{ color: colorScale }} />
-        <Labs
-          title="Playfair wheat price & weekly wage"
-          x="Year"
-          y="Shillings"
-          color="Series"
+  <div class="plot-panel" style:min-height="{plotHeight}px">
+    {#if active}
+      {#if kind === "temps-line"}
+        <TemperaturesSpecimen
+          theme={name}
+          {scheme}
+          height={plotHeight}
+          {legendFocus}
+          ariaLabel={`${label} theme Playfair multi-series`}
         />
-        <GeomLine linewidth={2} />
-        <GeomPoint size={2.8} />
-      </GGPlot>
-    {:else if kind === "attendees-dodge"}
-      <GGPlot
-        data={attendees}
-        aes={{ x: "track", fill: "level", weight: "deaths" }}
-        key="id"
-        inspect={{ mode: "xy" }}
-        {legendFocus}
-        height={plotHeight}
-        ariaLabel={`${label} theme Edgeworth dodged bars`}
-      >
-        <Theme {name} />
-        <Scale value={{ fill: colorScale }} />
-        <Labs
-          title="Edgeworth county deaths, 1876–82"
-          x="Year"
-          y="Deaths per million"
-          fill="County"
-        />
-        <GeomBar position="dodge" />
-      </GGPlot>
-    {:else if kind === "generation-area"}
-      <GGPlot
-        data={generation}
-        aes={{ x: "year", y: "twh", fill: "source" }}
-        key="id"
-        inspect={{ mode: "x" }}
-        {legendFocus}
-        height={plotHeight}
-        ariaLabel={`${label} theme Nightingale stacked area`}
-      >
-        <Theme {name} />
-        <Scale
-          value={{
-            x: { nice: false },
-            fill: colorScale,
-          }}
-        />
-        <Labs
-          title="Crimean deaths by cause, 1854–56"
-          x="Year"
-          y="Deaths per 1,000 per year"
-          fill="Cause"
-        />
-        <GeomArea alpha={0.9} />
-      </GGPlot>
-    {:else if kind === "long-run-line"}
-      <GGPlot
-        data={longRunSeries}
-        aes={{ x: "year", y: "value" }}
-        inspect={{ mode: "x" }}
-        height={plotHeight}
-        ariaLabel={`${label} theme Bowley exports`}
-      >
-        <Theme {name} />
-        <Labs title="British exports, 1855–1899" x="Year" y="£ millions" />
-        <GeomLine linewidth={1.5} />
-      </GGPlot>
-    {:else if kind === "penguins-scatter"}
-      <GGPlot
-        data={penguins}
-        aes={{ x: "flipper", y: "mass", color: "species" }}
-        key="id"
-        inspect={{ mode: "xy" }}
-        {legendFocus}
-        height={plotHeight}
-        ariaLabel={`${label} theme penguin scatter`}
-      >
-        <Theme {name} />
-        <Scale value={{ color: colorScale }} />
-        <Labs
-          title="Penguin flipper length and body mass"
-          x="Flipper length (mm)"
-          y="Body mass (g)"
-          color="Species"
-        />
-        <GeomPoint size={3.5} alpha={0.9} />
-      </GGPlot>
-    {:else if kind === "countries-scatter"}
-      <GGPlot
-        data={countries}
-        aes={{ x: "gdp", y: "lifeExp", color: "region" }}
-        key="country"
-        inspect={{ mode: "xy" }}
-        {legendFocus}
-        height={plotHeight}
-        ariaLabel={`${label} theme cholera density scatter`}
-      >
-        <Theme {name} />
-        <Scale
-          value={{
-            ...scaleXLog10({ labels: "~s" }),
-            color: colorScale,
-          }}
-        />
-        <Labs
-          title="Cholera death rate vs density, 1849"
-          x="People per acre (log scale)"
-          y="Death rate per 10,000"
-          color="Water supply"
-        />
-        <GeomPoint size={3.5} />
-        <GeomSmooth method="lm" se={false} />
-      </GGPlot>
-    {:else if kind === "revenue-cols"}
-      <GGPlot
-        data={revenue}
-        aes={{ x: "quarter", y: "amount" }}
-        inspect={{ mode: "xy" }}
-        height={plotHeight}
-        ariaLabel={`${label} theme Salk trial columns`}
-      >
-        <Theme {name} />
-        <Labs
-          title="Salk trial paralytic polio rates"
-          x="Group"
-          y="Cases per 100,000"
-        />
-        <GeomCol width={0.7} />
-        <GeomText aes={{ label: "label" }} dy={-8} size={11} />
-      </GGPlot>
+      {:else if kind === "ridership-line"}
+        <GGPlot
+          data={ridership}
+          aes={{ x: "month", y: "riders", color: "mode" }}
+          key="id"
+          inspect={{ mode: "x" }}
+          {legendFocus}
+          height={plotHeight}
+          ariaLabel={`${label} theme Playfair wheat and wages`}
+        >
+          <Theme {name} />
+          <Scale value={{ color: colorScale }} />
+          <Labs
+            title="Playfair wheat price & weekly wage"
+            x="Year"
+            y="Shillings"
+            color="Series"
+          />
+          <GeomLine linewidth={2} />
+          <GeomPoint size={2.8} />
+        </GGPlot>
+      {:else if kind === "attendees-dodge"}
+        <GGPlot
+          data={attendees}
+          aes={{ x: "track", fill: "level", weight: "deaths" }}
+          key="id"
+          inspect={{ mode: "xy" }}
+          {legendFocus}
+          height={plotHeight}
+          ariaLabel={`${label} theme Edgeworth dodged bars`}
+        >
+          <Theme {name} />
+          <Scale value={{ fill: colorScale }} />
+          <Labs
+            title="Edgeworth county deaths, 1876–82"
+            x="Year"
+            y="Deaths per million"
+            fill="County"
+          />
+          <GeomBar position="dodge" />
+        </GGPlot>
+      {:else if kind === "generation-area"}
+        <GGPlot
+          data={generation}
+          aes={{ x: "year", y: "twh", fill: "source" }}
+          key="id"
+          inspect={{ mode: "x" }}
+          {legendFocus}
+          height={plotHeight}
+          ariaLabel={`${label} theme Nightingale stacked area`}
+        >
+          <Theme {name} />
+          <Scale
+            value={{
+              x: { nice: false },
+              fill: colorScale,
+            }}
+          />
+          <Labs
+            title="Crimean deaths by cause, 1854–56"
+            x="Year"
+            y="Deaths per 1,000 per year"
+            fill="Cause"
+          />
+          <GeomArea alpha={0.9} />
+        </GGPlot>
+      {:else if kind === "long-run-line"}
+        <GGPlot
+          data={longRunSeries}
+          aes={{ x: "year", y: "value" }}
+          inspect={{ mode: "x" }}
+          height={plotHeight}
+          ariaLabel={`${label} theme Bowley exports`}
+        >
+          <Theme {name} />
+          <Labs title="British exports, 1855–1899" x="Year" y="£ millions" />
+          <GeomLine linewidth={1.5} />
+        </GGPlot>
+      {:else if kind === "penguins-scatter"}
+        <GGPlot
+          data={penguins}
+          aes={{ x: "flipper", y: "mass", color: "species" }}
+          key="id"
+          inspect={{ mode: "xy" }}
+          {legendFocus}
+          height={plotHeight}
+          ariaLabel={`${label} theme penguin scatter`}
+        >
+          <Theme {name} />
+          <Scale value={{ color: colorScale }} />
+          <Labs
+            title="Penguin flipper length and body mass"
+            x="Flipper length (mm)"
+            y="Body mass (g)"
+            color="Species"
+          />
+          <GeomPoint size={3.5} alpha={0.9} />
+        </GGPlot>
+      {:else if kind === "countries-scatter"}
+        <GGPlot
+          data={countries}
+          aes={{ x: "gdp", y: "lifeExp", color: "region" }}
+          key="country"
+          inspect={{ mode: "xy" }}
+          {legendFocus}
+          height={plotHeight}
+          ariaLabel={`${label} theme cholera density scatter`}
+        >
+          <Theme {name} />
+          <Scale
+            value={{
+              ...scaleXLog10({ labels: "~s" }),
+              color: colorScale,
+            }}
+          />
+          <Labs
+            title="Cholera death rate vs density, 1849"
+            x="People per acre (log scale)"
+            y="Death rate per 10,000"
+            color="Water supply"
+          />
+          <GeomPoint size={3.5} />
+          <GeomSmooth method="lm" se={false} />
+        </GGPlot>
+      {:else if kind === "revenue-cols"}
+        <GGPlot
+          data={revenue}
+          aes={{ x: "quarter", y: "amount" }}
+          inspect={{ mode: "xy" }}
+          height={plotHeight}
+          ariaLabel={`${label} theme Salk trial columns`}
+        >
+          <Theme {name} />
+          <Labs
+            title="Salk trial paralytic polio rates"
+            x="Group"
+            y="Cases per 100,000"
+          />
+          <GeomCol width={0.7} />
+          <GeomText aes={{ label: "label" }} dy={-8} size={11} />
+        </GGPlot>
+      {:else}
+        <GGPlot
+          data={cities}
+          aes={{ x: "rent", y: "livability" }}
+          inspect={{ mode: "xy" }}
+          height={plotHeight}
+          ariaLabel={`${label} theme Langren longitude labels`}
+        >
+          <Theme {name} />
+          <Scale value={{ x: { labels: ".1f" } }} />
+          <Labs
+            title="Van Langren longitude estimates, 1644"
+            x="Toledo–Rome longitude (°)"
+            y="Estimate rank"
+          />
+          <GeomPoint size={3} />
+          <GeomText aes={{ label: "city" }} dy={-9} size={10} />
+        </GGPlot>
+      {/if}
     {:else}
-      <GGPlot
-        data={cities}
-        aes={{ x: "rent", y: "livability" }}
-        inspect={{ mode: "xy" }}
-        height={plotHeight}
-        ariaLabel={`${label} theme Langren longitude labels`}
-      >
-        <Theme {name} />
-        <Scale value={{ x: { labels: ".1f" } }} />
-        <Labs
-          title="Van Langren longitude estimates, 1644"
-          x="Toledo–Rome longitude (°)"
-          y="Estimate rank"
-        />
-        <GeomPoint size={3} />
-        <GeomText aes={{ label: "city" }} dy={-9} size={10} />
-      </GGPlot>
+      <div
+        class="plot-placeholder"
+        style:height="{plotHeight}px"
+        aria-hidden="true"
+      ></div>
     {/if}
   </div>
 </article>
@@ -257,5 +279,11 @@
   .plot-panel {
     width: min(100%, 52rem);
     min-width: 0;
+  }
+
+  .plot-placeholder {
+    width: 100%;
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--line) 55%, transparent);
   }
 </style>
