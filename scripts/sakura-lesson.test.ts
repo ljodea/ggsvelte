@@ -150,7 +150,7 @@ describe("the sakura lesson folds to renderable specs", () => {
       [1, "reverse", '"reverse":true'],
       [1, "ScaleYDate", '"dateLabels":"%b %d"'],
       [1, "ScaleXContinuous", '"labels":"d"'],
-      [1, SAKURA_Y_BREAKS[0]!, `"breaks":${JSON.stringify([...SAKURA_Y_BREAKS])}`],
+      [1, SAKURA_Y_BREAKS[0], `"breaks":${JSON.stringify([...SAKURA_Y_BREAKS])}`],
       [2, "x: null", '"x":null'],
       [2, 'fill: "epoch"', '"fill":{"field":"epoch"}'],
       [2, "GuideLegend", '"position":"bottom"'],

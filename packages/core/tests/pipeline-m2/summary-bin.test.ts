@@ -97,8 +97,11 @@ describe("stat summary_bin (#817)", () => {
     }
     // Earlier median (later century) sits higher on the reversed date axis.
     // Bins: ~800–850, ~900–950, ~1000–1050 → y medians ~Apr 20, Apr 15, Apr 11.
-    const y0 = batch.positions[1]!;
-    const yLast = batch.positions[batch.positions.length - 1]!;
+    const y0 = batch.positions.at(1);
+    const yLast = batch.positions.at(-1);
+    if (y0 === undefined || yLast === undefined) {
+      throw new Error("expected path vertices for summary_bin median trend");
+    }
     expect(yLast).toBeLessThan(y0);
     const labels = model.scene.panels[0]?.axisY?.map((tick) => tick.label) ?? [];
     expect(labels).toEqual(["Apr 05", "Apr 15", "Apr 25"]);
