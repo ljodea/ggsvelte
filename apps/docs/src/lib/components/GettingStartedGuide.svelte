@@ -24,6 +24,7 @@
   import {
     LESSON_CHART_HEIGHT,
     LESSON_CHART_WIDTH,
+    sakuraFinishedHeight,
   } from "$lib/generated/lesson-charts";
 
   import CopyCode from "./CopyCode.svelte";
@@ -38,20 +39,17 @@
   const NARROW_CHART = 560;
 
   /**
-   * Target width:height for the finished chart. Default plot height is 400
-   * against a container-width plot (~1.6:1); the reference is nearer 2.5:1.
-   */
-  const CHART_ASPECT = 2.5;
-
-  /**
    * Assume narrow until the finished-chart container is measured. Starting at
    * `false` forced a wide fold on first paint, then a second 838-point fold
    * when ResizeObserver fired — on mobile that double work blocked chrome for
    * ~17s before "Open site menu" was tappable (#972). Desktop still flips once
    * (narrow → wide) when the container is actually wide enough for callouts.
+   *
+   * First paint uses the narrow probe height from the generated size table so
+   * we do not reserve a desktop-tall plot before ResizeObserver fires.
    */
   let narrowChart = $state(true);
-  /** Measured container width; drives live plot height at CHART_ASPECT. */
+  /** Measured container width; drives live plot height via build-time chrome table. */
   let chartWidth = $state(0);
   let finishedChart = $state<HTMLElement>();
   /** Live plot component — dynamically imported when near the viewport (#972). */
@@ -70,11 +68,13 @@
       : foldSakura(SAKURA_STEPS.length, rows, { annotations: !narrowChart }),
   );
 
-  /** Live plot height from measured width; falls back to the static lesson size. */
+  /**
+   * Outer plot height from the build-time size table (pipeline-measured chrome
+   * so the *data panel* stays ~2.5:1). Never invent chrome constants here —
+   * regenerating lesson charts refreshes the table.
+   */
   const liveHeight = $derived(
-    chartWidth > 0
-      ? Math.max(Math.round(chartWidth / CHART_ASPECT), 160)
-      : LESSON_CHART_HEIGHT,
+    sakuraFinishedHeight(chartWidth > 0 ? chartWidth : NARROW_CHART),
   );
 
   const recordNames = SAKURA_RECORDS.map((record) => record.label).join("; ");
@@ -352,10 +352,11 @@
 
   /*
    * The finished chart gains a tooltip and a pinned-value rail on hydration.
-   * Height tracks the ~2.5:1 live plot; reserve a little extra for chrome.
+   * Floor matches the narrow probe height (~280–320px), not the desktop one —
+   * over-reserving leaves empty space under a phone chart.
    */
   .finished-chart {
-    min-height: 22rem;
+    min-height: 18rem;
   }
 
   .lesson-label {

@@ -13,6 +13,11 @@ import { describe, expect, it } from "bun:test";
 
 import { kyotoSakura } from "../packages/svelte/src/lib/data/index.ts";
 import {
+  measureSakuraFinishedSize,
+  SAKURA_HEIGHT_PROBE_WIDTHS,
+  SAKURA_PANEL_ASPECT,
+} from "./gen-lesson-charts.ts";
+import {
   foldSakura,
   QUICKSTART_PAGE_SVELTE,
   quickstartAriaLabel,
@@ -274,7 +279,7 @@ describe("gate G5 — climate epoch bands claim periods, not the record", () => 
   it("starts after the first observation and leaves a gap between MWP and LIA", () => {
     expect(SAKURA_EPOCHS.map((band) => [band.year, band.until])).toEqual([
       [950, 1250],
-      [1400, 1850],
+      [1300, 1850],
       [1850, 2026],
     ]);
     // First band does not start at the first observation year.
@@ -288,7 +293,25 @@ describe("gate G5 — climate epoch bands claim periods, not the record", () => 
     const epochs = folded.spec.layers.find((layer) => layer.geom === "rect");
     expect(epochs?.data).toEqual({ values: SAKURA_EPOCHS });
     expect(folded.source).toContain("year: 950, until: 1250");
-    expect(folded.source).toContain("year: 1400, until: 1850");
-    expect(folded.source).not.toContain("year: 812, until: 1300");
+    expect(folded.source).toContain("year: 1300, until: 1850");
+    // Bands claim climate periods, not the extent of the record.
+    expect(folded.source).not.toContain("year: 812");
+  });
+});
+
+describe("gate G6 — finished chart panel aspect, not outer SVG aspect", () => {
+  it("keeps the data panel near 2.5:1 after title/subtitle/legend/caption chrome", () => {
+    // Outer height targets the panel: PR #1073 set outer 2.5:1 and crushed the
+    // panel to ~5.8:1. Assert the panel at several widths, including a narrow
+    // one where the legend wraps.
+    for (const width of SAKURA_HEIGHT_PROBE_WIDTHS) {
+      const size = measureSakuraFinishedSize(width);
+      const aspect = size.panelWidth / size.panelHeight;
+      expect(
+        aspect,
+        `width ${String(width)}: panel ${String(size.panelWidth)}×${String(size.panelHeight)}`,
+      ).toBeGreaterThanOrEqual(SAKURA_PANEL_ASPECT - 0.2);
+      expect(aspect).toBeLessThanOrEqual(SAKURA_PANEL_ASPECT + 0.2);
+    }
   });
 });

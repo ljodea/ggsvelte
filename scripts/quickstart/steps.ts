@@ -46,13 +46,15 @@ const BAND_TOP = "2001-03-28";
 // last observation years: MWP starts after 812, and a gap separates MWP from LIA.
 export const SAKURA_EPOCHS = [
   { epoch: "Medieval warm period", year: 950, until: 1250 },
-  { epoch: "Little Ice Age", year: 1400, until: 1850 },
+  { epoch: "Little Ice Age", year: 1300, until: 1850 },
   { epoch: "Industrial era", year: 1850, until: 2026 },
 ].map((band) => ({ ...band, top: BAND_TOP, bottom: Y_BOTTOM }));
 
 /**
- * Where the bands meet. Drawn as hairlines so the epochs survive forced-colors
- * mode, where translucent fills are unreliable.
+ * Starts of the second and third bands. Drawn as hairlines so the epochs
+ * survive forced-colors mode, where translucent fills are unreliable. The
+ * 1300 edge is the LIA left wall (MWP ends 1250, so a gap sits to its left);
+ * only 1850 is a true band join.
  */
 export const SAKURA_EPOCH_EDGES = SAKURA_EPOCHS.slice(1).map((band) => ({ year: band.year }));
 
