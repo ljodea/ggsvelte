@@ -321,7 +321,13 @@ describe("gate G8 — annotations that do not fight the chart", () => {
 
     // Earliest observation in the series is 25 March — band top must stay at
     // or earlier than that so the rect still encompasses every point.
-    const earliestBloom = rows.map((row) => String(row["bloomDate"]).slice(-5)).toSorted()[0]!;
+    const earliestBloom = rows
+      .map((row) => {
+        const bloomDate = row["bloomDate"];
+        return typeof bloomDate === "string" ? bloomDate.slice(-5) : "";
+      })
+      .filter((md) => md !== "")
+      .toSorted()[0]!;
     expect(bandTop <= earliestBloom).toBe(true);
 
     // domain is [later bottom, earlier top] in the fold; top must clear names.
