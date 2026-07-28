@@ -133,7 +133,20 @@ function isShippedPath(path: string, pkg: PublishedPackage): boolean {
   // Colocated test files live under src/ but are not part of the consumer
   // surface a changelog entry describes.
   if (/\.(test|spec)\.[jt]sx?$/.test(path)) return false;
-  return pkg.shipped.some((dir) => path.startsWith(`${pkg.dir}/${dir}/`));
+  if (pkg.shipped.some((dir) => path.startsWith(`${pkg.dir}/${dir}/`))) return true;
+  // Packages that publish compiled dist (not source) still change consumers
+  // via src/. dist/ is usually gitignored, so git diffs never list it —
+  // map src/ → shipped surface when files lists dist but not src.
+  // (@ggsvelte/svelte: files=["dist","bin","skills"]; build = svelte-package
+  // -i src/lib -o dist.)
+  if (
+    pkg.shipped.includes("dist") &&
+    !pkg.shipped.includes("src") &&
+    path.startsWith(`${pkg.dir}/src/`)
+  ) {
+    return true;
+  }
+  return false;
 }
 
 export function decideChangesetComment(

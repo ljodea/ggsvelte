@@ -83,6 +83,27 @@ describe("decideChangesetComment", () => {
     expect(decision.verdict).toBe("changeset-present");
   });
 
+  // Regression: Devin review on #1132 — @ggsvelte/svelte publishes compiled
+  // dist/ (gitignored), so files is [dist, bin, skills] with no src. Without
+  // mapping src → shipped surface, real svelte fixes + changesets got
+  // unwarranted and the new gate blocked them.
+  it("treats svelte src as shipped when package only lists dist (compiled)", () => {
+    const decision = decideChangesetComment(
+      [".changeset/interval-bounds-editor.md", "packages/svelte/src/lib/interval/bounds-editor.ts"],
+      PACKAGES,
+    );
+    expect(decision.verdict).toBe("changeset-present");
+  });
+
+  it("reports missing for svelte src-only edits without a changeset", () => {
+    const decision = decideChangesetComment(
+      ["packages/svelte/src/lib/interval/bounds-editor.ts"],
+      PACKAGES,
+    );
+    expect(decision.verdict).toBe("missing");
+    expect(decision.touched).toEqual(["packages/svelte/src/lib/interval/bounds-editor.ts"]);
+  });
+
   it("stays quiet for changes outside shipped package surfaces", () => {
     const decision = decideChangesetComment(
       [

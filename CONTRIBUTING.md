@@ -478,9 +478,12 @@ PR gets one opened rather than a silent skip. The three-way decision
 
 Add a `.changeset/*.md` **only** when the PR changes an npm-published package
 surface — the same paths `scripts/changeset-check.ts` treats as shipped
-(`package.json` or that package’s `files` entries under `packages/{core,spec,svelte}`).
-Spec, core, and svelte version in **fixed lockstep**, so one real (or spurious)
-changeset advances all three package versions.
+(`package.json`, that package’s npm `files` entries under
+`packages/{core,spec,svelte}`, and — for packages that publish compiled
+`dist` without listing `src` — the package’s `src/` tree that builds into
+`dist`, e.g. `packages/svelte/src/**`). Spec, core, and svelte version in
+**fixed lockstep**, so one real (or spurious) changeset advances all three
+package versions.
 
 **Do not** add a changeset for docs site, examples, scripts, tests, CI, or
 guide content alone (`apps/docs/**`, `examples/**`, `scripts/quickstart/**`,
