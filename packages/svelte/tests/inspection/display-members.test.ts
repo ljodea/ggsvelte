@@ -51,6 +51,23 @@ describe("formatTooltipCell", () => {
   it("does not throw on invalid Date (live-text tokens)", () => {
     expect(formatTooltipCell(new Date(Number.NaN))).toBe("–");
   });
+
+  it("routes position channels through axis formatters when provided (#1113)", () => {
+    // Stat-derived candidates store temporal positions as epoch ms. Default
+    // cell formatting would print the raw number; axis formatters already know
+    // the scale (same path as the axis header).
+    const epoch = Date.UTC(2000, 4, 1);
+    const axisFormatters = {
+      x: (value: CellValue) =>
+        value === null ? "–" : new Date(Number(value)).toISOString().slice(0, 10),
+      y: (value: CellValue) => (value === null ? "–" : `y:${String(value)}`),
+    };
+    expect(formatTooltipCell(epoch)).toBe(String(epoch));
+    expect(formatTooltipCell(epoch, { channel: "x", axisFormatters })).toBe("2000-05-01");
+    expect(formatTooltipCell(12.3456, { channel: "y", axisFormatters })).toBe("y:12.3456");
+    // Non-position channels keep the plain cell path even with formatters present.
+    expect(formatTooltipCell(epoch, { channel: "color", axisFormatters })).toBe(String(epoch));
+  });
 });
 
 describe("tooltipFieldLabel (#752)", () => {

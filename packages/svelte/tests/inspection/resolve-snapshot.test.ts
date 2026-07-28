@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { runPipeline } from "@ggsvelte/core";
 import { aes, gg } from "@ggsvelte/spec";
 
+import { formatTooltipCell } from "../../src/lib/inspection/display-members.js";
 // Barrel path characterization: production + tests historically import via resolver.js
 import { resolveInspection } from "../../src/lib/inspection/resolver.js";
 
@@ -177,5 +178,51 @@ describe("inspection snapshot resolve", () => {
       globalThis.Set = RealSet;
       model.dispose();
     }
+  });
+
+  it("formats stat-layer temporal position fields with axis formatters (#1113)", () => {
+    // Binned median over a date axis has no source row — candidate.xValue is
+    // epoch ms. The axis header already formats it; default field rows must too.
+    const data = [
+      { date: "2000-05-01", y: 10 },
+      { date: "2000-05-15", y: 20 },
+      { date: "2000-06-01", y: 30 },
+      { date: "2000-06-15", y: 40 },
+    ];
+    const model = runPipeline(
+      gg(data, aes({ x: "date", y: "y" }))
+        .geomLine({ stat: "summary_bin", fun: "median", bins: 4 })
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    expect(seed.rowIndex).toBeNull();
+    expect(typeof seed.xValue).toBe("number");
+    expect(seed.xValue).toBeGreaterThan(1e11); // epoch ms, not a calendar year
+
+    const inspection = resolveInspection({
+      model,
+      seed,
+      mode: "exact",
+      state: "transient",
+      source: "pointer",
+      keyOf: () => null,
+    });
+    expect(inspection.focus.row).toBeNull();
+    const xField = inspection.focus.fields.find((field) => field.channel === "x");
+    expect(xField).toBeDefined();
+    expect(xField!.value).toBe(seed.xValue);
+
+    // Plain cell path still dumps the epoch — the bug before the formatter route.
+    expect(formatTooltipCell(xField!.value)).toBe(String(seed.xValue));
+    // With axis formatters (Tooltip / live-text path), match the axis header.
+    const formatted = formatTooltipCell(xField!.value, {
+      channel: "x",
+      axisFormatters: model.axisFormatters,
+    });
+    expect(formatted).toBe(model.axisFormatters.x(seed.xValue));
+    expect(formatted).not.toBe(String(seed.xValue));
+    expect(formatted).toMatch(/2000/);
+    model.dispose();
   });
 });

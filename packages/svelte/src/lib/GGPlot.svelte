@@ -289,6 +289,7 @@
           fontSizePx={currentModel.scene.theme.fontSize}
           pin={engine.interactionConfig.inspect?.pin ?? true}
           tooltipBorder={currentModel.scene.theme.tooltipBorder}
+          axisFormatters={currentModel.axisFormatters}
           onenter={() => (engine.tooltipHovered = true)}
           onleave={() => {
             engine.tooltipHovered = false;
