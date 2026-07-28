@@ -6,7 +6,7 @@
  * full-width immediately; near-viewport dynamic import upgrades to interactive.
  */
 import { renderToSVGString } from "@ggsvelte/core";
-import { aes, gg, scaleXLog10, type ThemeName } from "@ggsvelte/spec";
+import { aes, gg, scaleXLog10, type AuthoringRows, type ThemeName } from "@ggsvelte/spec";
 
 import { MONTH_BREAKS, type SchemeName, type ThemeSpecimenKind } from "./catalog.js";
 import {
@@ -254,7 +254,7 @@ export function homeHeroStaticSvgFromData(
   const key = `home-hero:${theme}:${String(width)}x${String(height)}:${String(rows.length)}`;
   const hit = cache.get(key);
   if (hit !== undefined) return hit;
-  const spec = gg([...rows], aes({ x: "literacy", y: "crimePersons", color: "region" }))
+  const spec = gg(rows as AuthoringRows, aes({ x: "literacy", y: "crimePersons", color: "region" }))
     .geomPoint({ size: 4, alpha: 0.85 })
     .scales({ color: { type: "ordinal", scheme: "tableau10" } })
     .theme(theme)

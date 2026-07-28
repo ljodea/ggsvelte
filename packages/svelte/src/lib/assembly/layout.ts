@@ -12,7 +12,7 @@ const DOCKED_TOOLTIP_MAX_WIDTH_PX = 480;
  * typical laptop does not paint a skinny chart and then jump wider after
  * ResizeObserver. Not a phone-first size; phones are not the design target.
  */
-export const DEFAULT_PLOT_WIDTH_PX = 832;
+const DEFAULT_PLOT_WIDTH_PX = 832;
 const DEFAULT_PLOT_HEIGHT_PX = 400;
 
 export type ResolvePlotSizeInput = {

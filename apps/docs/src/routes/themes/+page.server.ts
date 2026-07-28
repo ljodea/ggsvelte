@@ -1,8 +1,5 @@
 import { THEME_SPECIMENS } from "$lib/theme-specimens/catalog";
-import {
-  temperaturesStaticSvg,
-  themeSpecimenStaticSvg,
-} from "$lib/theme-specimens/static-svg";
+import { temperaturesStaticSvg, themeSpecimenStaticSvg } from "$lib/theme-specimens/static-svg";
 
 /** Precompute static chart shells at prerender so the client never imports core to paint them. */
 export function load() {

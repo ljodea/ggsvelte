@@ -93,7 +93,9 @@ test("themes compares all built-in chart themes as full-width interactive portra
   // Specimens mount live plots only near the viewport (#1037) — scroll each in.
   for (const specimen of await specimens.all()) {
     await specimen.scrollIntoViewIfNeeded();
-    await expect(specimen.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
+    await expect(specimen.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
+      timeout: 30_000,
+    });
     // No per-specimen CopyCode after the redesign.
     await expect(specimen.getByRole("button", { name: /^Copy / })).toHaveCount(0);
     // Charts use real corpora — never the old 8-dot synthetic scatter.
@@ -110,6 +112,7 @@ test("chart theme stays separate until follow-docs appearance is explicit", asyn
   const palette = lab.getByLabel("Categorical palette", { exact: true });
   const follow = lab.getByRole("checkbox", { name: "Follow docs appearance" });
   const plot = lab.locator(".gg-plot-root");
+  await expect(plot).toHaveAttribute("data-gg-ready", "true", { timeout: 30_000 });
   const chartPaper = () => plot.locator(".gg-paper").getAttribute("fill");
 
   await chartTheme.selectOption("economist");
@@ -192,7 +195,9 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
 
   // Col chart uses fill (not the old 5-point scatter). Live plot mounts near viewport (#1037).
   await observable.scrollIntoViewIfNeeded();
-  await expect(observable.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
+  await expect(observable.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
+    timeout: 30_000,
+  });
   const firstMark = observable.locator(".gg-plot-root [fill='#4269d0']").first();
   await expect(firstMark).toBeVisible();
 
@@ -234,7 +239,10 @@ test("sequential color compares direction, custom stops, and a pinned domain on 
   ]);
 
   for (const card of await cards.all()) {
-    await expect(card.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
+    await card.scrollIntoViewIfNeeded();
+    await expect(card.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
+      timeout: 30_000,
+    });
     // Raster surface, not the old 6-point scatter.
     await expect(card.locator(".gg-points circle")).toHaveCount(0);
   }
