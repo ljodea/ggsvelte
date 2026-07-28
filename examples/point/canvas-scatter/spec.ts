@@ -12,6 +12,8 @@ export default defineExample(
     .theme("dark")
     .labs({
       title: `${CANVAS_SCATTER_MARKS.toLocaleString("en-US")} points on a canvas stratum`,
+      subtitle:
+        "Above the automatic threshold the marks go to canvas instead of SVG; the cloud is seeded, because the subject here is the render path",
       x: "x",
       y: "y",
       color: "Cluster",
