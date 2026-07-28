@@ -6,11 +6,7 @@
  * under pipeline/panel-layout*.ts; this module is the stable public seam
  * (#1076). ADR-0003 two-pass layout is unchanged.
  */
-export {
-  layoutPanels,
-  computePanelLayout,
-  type PanelLayoutInput,
-} from "../pipeline/panel-layout.js";
+export { layoutPanels, type PanelLayoutInput } from "../pipeline/panel-layout.js";
 export type {
   FacetScaleFreedom,
   PanelLayout,

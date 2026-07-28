@@ -272,6 +272,3 @@ export function layoutPanels(input: PanelLayoutInput): PanelLayoutResult {
     degraded,
   );
 }
-
-/** @deprecated Prefer {@link layoutPanels}. */
-export const computePanelLayout = layoutPanels;
