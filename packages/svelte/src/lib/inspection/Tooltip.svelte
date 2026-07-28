@@ -170,9 +170,15 @@
         </dl>
       {/each}
     </div>
-    {#if showPinHint && inspection.state === "transient" && displayMembers.length > 8}
+    {#if inspection.state === "transient" && displayMembers.length > 8}
+      <!-- Overflow is a data-completeness signal; keep it even when the pin
+           affordance is silent for flat chrome (#1069 / Devin). -->
       <p class="gg-tooltip-more">
-        +{displayMembers.length - 8} more · pin to inspect all
+        {#if showPinHint}
+          +{displayMembers.length - 8} more · pin to inspect all
+        {:else}
+          +{displayMembers.length - 8} more
+        {/if}
       </p>
     {:else if showPinHint && inspection.state === "transient"}
       <p class="gg-tooltip-hint">Click to pin</p>
