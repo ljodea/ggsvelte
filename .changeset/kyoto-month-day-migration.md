@@ -1,11 +1,11 @@
 ---
-"@ggsvelte/svelte": major
+"@ggsvelte/svelte": patch
 "@ggsvelte/core": patch
 ---
 
 <!-- markdownlint-disable MD041 -->
 
-feat(data)!: drop `bloomRefDate` from `kyotoSakura`
+fix(data): drop `bloomRefDate` from the Kyoto teaching dataset
 
 The column projected each observation's day-of-year onto the year 2001 so a
 date axis could draw it. Two things were wrong with that. It shipped a
@@ -17,8 +17,9 @@ anything like it — and it preserved day-of-year rather than month-day, so
 `temporalKind: "monthDay"` removes the need for it. The year now collapses
 inside the scale, where it is a private implementation detail.
 
-**Migration.** Map `y: "bloomRefDate"` to `y: "bloomDate"` and give the axis a
-month-day scale:
+This is a bundled teaching/demo dataset, not a product API contract. Anyone
+still mapping `y: "bloomRefDate"` should map `y: "bloomDate"` and give the
+axis a month-day scale:
 
 ```svelte
 <GGPlot data={kyotoSakura} aes={{ x: "year", y: "bloomDate" }}>
@@ -33,4 +34,4 @@ correct answer and does not have the leap-year fault.
 The getting-started lesson migrates with it, so the spec it teaches now
 contains no year outside the `year` column itself.
 
-Migration: <https://ggsvelte.sh/guide/scales-guides#date-and-time-axes>
+Guide: <https://ggsvelte.sh/guide/scales-guides#date-and-time-axes>
