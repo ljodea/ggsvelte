@@ -68,14 +68,7 @@
 
   <div class="plot-panel" bind:this={host} style:min-height="{plotHeight}px">
     {#if Live !== null}
-      <Live
-        {name}
-        {label}
-        {kind}
-        {scheme}
-        {legendFocus}
-        height={plotHeight}
-      />
+      <Live {name} {label} {kind} {scheme} {legendFocus} height={plotHeight} />
     {:else}
       {@html staticSvg}
     {/if}
