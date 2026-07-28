@@ -18,6 +18,7 @@ import type { CandidateFacts, RenderModel } from "@ggsvelte/core";
 
 import type { InteractionAction, InteractionFrameToken } from "../interaction/reducer.js";
 import type { InteractionSource } from "../interaction/interaction.js";
+import { resolveTarget } from "../interaction/target.js";
 import {
   buildQueuedInspectFrame,
   resolveQueuedInspectFrameAction,
@@ -89,13 +90,18 @@ export function createPointerInspectQueue(deps: PointerInspectQueueDeps): Pointe
 
   function schedule(input: SchedulePointerInspectInput): void {
     const model = deps.model();
-    // Panel-scoped nearest so faceted hover cannot seed another facet (#787).
+    // Resolved target owns panel-scoped nearest + hover distance policy (#1080 / #787).
     // panelAtOrOnly keeps single-panel axis-margin hover working.
-    const match =
-      model?.viewport.panelAtOrOnly(input.point)?.nearest(input.point, {
-        mode: input.mode,
-        maxDistance: input.maxDistance,
-      }) ?? null;
+    const target =
+      model === null
+        ? null
+        : resolveTarget({
+            model,
+            point: input.point,
+            intent: "hover",
+            inspect: { mode: input.mode, maxDistance: input.maxDistance },
+          });
+    const match = target?.match ?? null;
     const frame = buildQueuedInspectFrame({
       match,
       source: input.source,

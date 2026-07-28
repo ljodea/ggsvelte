@@ -8,6 +8,7 @@
 import type { CandidateFacts, CandidateMatch } from "@ggsvelte/core";
 
 import type { InteractionSource } from "../interaction/interaction.js";
+import type { InteractionCandidateRef } from "../interaction/reducer.js";
 
 /** Host inspection lifecycle state used across pure inspection tables. */
 export type InspectionHostState = "none" | "transient" | "pinned";
@@ -141,11 +142,5 @@ export function resolveQueuedInspectFrameAction(
   return { type: "apply-pending" };
 }
 
-/** Reducer inspect payload candidate (matches InteractionCandidateRef shape). */
-type InspectionCandidateRef = {
-  readonly epoch: number;
-  readonly id: number;
-  readonly panelId: string | null;
-  readonly x: number;
-  readonly y: number;
-};
+/** Reducer inspect payload candidate — same type as InteractionCandidateRef (#1080). */
+type InspectionCandidateRef = InteractionCandidateRef;
