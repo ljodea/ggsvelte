@@ -474,6 +474,24 @@ PR gets one opened rather than a silent skip. The three-way decision
 (skip / open the PR / render, push, open the PR) lives in
 `scripts/vr-approve-decision.ts` and is unit-tested.
 
+## Changesets (when to add one)
+
+Add a `.changeset/*.md` **only** when the PR changes an npm-published package
+surface — the same paths `scripts/changeset-check.ts` treats as shipped
+(`package.json`, that package’s npm `files` entries under
+`packages/{core,spec,svelte}`, and — for packages that publish compiled
+`dist` without listing `src` — the package’s `src/` tree that builds into
+`dist`, e.g. `packages/svelte/src/**`). Spec, core, and svelte version in
+**fixed lockstep**, so one real (or spurious) changeset advances all three
+package versions.
+
+**Do not** add a changeset for docs site, examples, scripts, tests, CI, or
+guide content alone (`apps/docs/**`, `examples/**`, `scripts/quickstart/**`,
+lesson SVGs, gallery previews, VR baselines, …). Those PRs must not bump
+packages. The Changeset check workflow fails with verdict `unwarranted` if they
+do. Packaged agent skills under `packages/svelte/skills/` _do_ ship and may
+warrant a patch. Missing changesets on package code stay advisory only.
+
 ## Lifecycle policy (Hadley lesson 13)
 
 Every public export of `@ggsvelte/spec`, `@ggsvelte/core` (both entries), and

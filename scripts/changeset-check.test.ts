@@ -21,12 +21,40 @@ const PACKAGES = [
 ];
 
 describe("decideChangesetComment", () => {
-  it("reports changeset-present when the PR adds a changeset file", () => {
+  it("reports changeset-present when the PR adds a changeset and shipped code", () => {
     const decision = decideChangesetComment(
       [".changeset/my-change.md", "packages/core/src/scales.ts"],
       PACKAGES,
     );
     expect(decision.verdict).toBe("changeset-present");
+  });
+
+  it("reports unwarranted when a changeset lands without shipped package paths", () => {
+    // Regression: #1116 quickstart-only + kyoto-annotation-polish changeset.
+    const decision = decideChangesetComment(
+      [
+        ".changeset/kyoto-annotation-polish.md",
+        "apps/docs/src/lib/generated/lesson-charts.ts",
+        "scripts/quickstart/steps.ts",
+        "tests/visual/docs-progressive-search.spec.ts",
+      ],
+      PACKAGES,
+    );
+    expect(decision.verdict).toBe("unwarranted");
+    expect(decision.touched).toEqual([]);
+  });
+
+  it("reports unwarranted for examples-only changesets (canvas-scatter VR budget)", () => {
+    const decision = decideChangesetComment(
+      [
+        ".changeset/926-canvas-scatter-vr-budget.md",
+        "examples/point/canvas-scatter/Example.svelte",
+        "examples/point/canvas-scatter/data.ts",
+        "examples/manifest.ts",
+      ],
+      PACKAGES,
+    );
+    expect(decision.verdict).toBe("unwarranted");
   });
 
   it("reports missing when shipped package code changes without a changeset", () => {
@@ -45,6 +73,35 @@ describe("decideChangesetComment", () => {
     const decision = decideChangesetComment(["packages/svelte/package.json"], PACKAGES);
     expect(decision.verdict).toBe("missing");
     expect(decision.touched).toEqual(["packages/svelte/package.json"]);
+  });
+
+  it("treats packaged agent skills as shipped (changeset ok)", () => {
+    const decision = decideChangesetComment(
+      [".changeset/skill-rewrite.md", "packages/svelte/skills/ggsvelte/SKILL.md"],
+      PACKAGES,
+    );
+    expect(decision.verdict).toBe("changeset-present");
+  });
+
+  // Regression: Devin review on #1132 — @ggsvelte/svelte publishes compiled
+  // dist/ (gitignored), so files is [dist, bin, skills] with no src. Without
+  // mapping src → shipped surface, real svelte fixes + changesets got
+  // unwarranted and the new gate blocked them.
+  it("treats svelte src as shipped when package only lists dist (compiled)", () => {
+    const decision = decideChangesetComment(
+      [".changeset/interval-bounds-editor.md", "packages/svelte/src/lib/interval/bounds-editor.ts"],
+      PACKAGES,
+    );
+    expect(decision.verdict).toBe("changeset-present");
+  });
+
+  it("reports missing for svelte src-only edits without a changeset", () => {
+    const decision = decideChangesetComment(
+      ["packages/svelte/src/lib/interval/bounds-editor.ts"],
+      PACKAGES,
+    );
+    expect(decision.verdict).toBe("missing");
+    expect(decision.touched).toEqual(["packages/svelte/src/lib/interval/bounds-editor.ts"]);
   });
 
   it("stays quiet for changes outside shipped package surfaces", () => {
@@ -78,6 +135,14 @@ describe("decideChangesetComment", () => {
     );
     expect(decision.verdict).toBe("missing");
   });
+
+  it("unwarranted ignores .changeset/README.md alone", () => {
+    const decision = decideChangesetComment(
+      [".changeset/README.md", "apps/docs/src/routes/+page.svelte"],
+      PACKAGES,
+    );
+    expect(decision.verdict).toBe("not-needed");
+  });
 });
 
 describe("changeset-check workflow wiring", () => {
@@ -100,9 +165,16 @@ describe("changeset-check workflow wiring", () => {
     );
   });
 
-  it("stays non-blocking and syncs one sticky comment via the shared marker", () => {
-    expect(workflow).not.toContain("exit 1");
+  it("syncs sticky comments for missing and unwarranted; fails only on unwarranted", () => {
     expect(workflow).toContain(COMMENT_MARKER);
+    // Comment both advisory-missing and blocking-unwarranted.
+    expect(workflow).toContain('"${VERDICT}" = "missing"');
+    expect(workflow).toContain('"${VERDICT}" = "unwarranted"');
+    // Hard fail only for the docs/examples false-positive path.
+    expect(workflow).toContain("steps.decide.outputs.verdict == 'unwarranted'");
+    expect(workflow).toContain("exit 1");
+    // Missing remains advisory — the fail step is gated on unwarranted only.
+    expect(workflow).not.toContain("steps.decide.outputs.verdict == 'missing'");
   });
 });
 
@@ -127,6 +199,29 @@ describe("emit CLI", () => {
     expect(result.exitCode).toBe(0);
     expect(readFileSync(outputFile, "utf8")).toContain("verdict=missing");
     expect(readFileSync(bodyFile, "utf8")).toContain("packages/core/src/scales.ts");
+  });
+
+  it("emits unwarranted for docs-only + changeset without failing the emit process", () => {
+    // Fail happens in the workflow after the sticky comment syncs.
+    const dir = mkdtempSync(join(tmpdir(), "changeset-check-unw-"));
+    const outputFile = join(dir, "github-output");
+    const bodyFile = join(dir, "comment.md");
+    writeFileSync(outputFile, "");
+    const result = Bun.spawnSync({
+      cmd: [
+        "bun",
+        join(root, "scripts/changeset-check.ts"),
+        "emit",
+        "--stdin",
+        "--body-out",
+        bodyFile,
+      ],
+      stdin: Buffer.from(".changeset/docs-only.md\napps/docs/src/routes/+page.svelte\n"),
+      env: { ...process.env, GITHUB_OUTPUT: outputFile },
+    });
+    expect(result.exitCode).toBe(0);
+    expect(readFileSync(outputFile, "utf8")).toContain("verdict=unwarranted");
+    expect(readFileSync(bodyFile, "utf8")).toContain("Changeset not allowed");
   });
 });
 
@@ -158,7 +253,7 @@ describe("renderComment", () => {
     expect(body).toContain("4 more");
   });
 
-  it("acknowledges a changeset once one is added", () => {
+  it("acknowledges a changeset once one is added with shipped code", () => {
     const body = renderComment({ verdict: "changeset-present", touched: [] });
     expect(body).toContain(COMMENT_MARKER);
     expect(body).toContain("Changeset detected");
@@ -168,5 +263,13 @@ describe("renderComment", () => {
     const body = renderComment({ verdict: "not-needed", touched: [] });
     expect(body).toContain(COMMENT_MARKER);
     expect(body).toContain("No changeset needed");
+  });
+
+  it("explains and blocks an unwarranted docs/examples changeset", () => {
+    const body = renderComment({ verdict: "unwarranted", touched: [] });
+    expect(body).toContain(COMMENT_MARKER);
+    expect(body).toContain("Changeset not allowed");
+    expect(body).toContain("delete the `.changeset/*.md`");
+    expect(body).toContain("blocks");
   });
 });
