@@ -153,7 +153,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Interaction reference",
-      order: 53,
+      order: 54,
     },
   },
   {
@@ -169,7 +169,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "CLI reference",
-      order: 54,
+      order: 55,
     },
     headings: [
       {
@@ -4570,7 +4570,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Errors reference",
-      order: 53,
+      order: 56,
     },
     headings: [
       {
@@ -5607,7 +5607,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Advisories",
-      order: 54,
+      order: 57,
     },
     headings: [
       {
@@ -5729,7 +5729,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Lifecycle & editions",
-      order: 55,
+      order: 58,
     },
     headings: [
       {
@@ -7161,12 +7161,12 @@ export const GUIDE_NAVIGATION = [
         label: "Interaction reference",
       },
       {
-        path: "/guide/errors",
-        label: "Errors reference",
-      },
-      {
         path: "/reference/cli",
         label: "CLI reference",
+      },
+      {
+        path: "/guide/errors",
+        label: "Errors reference",
       },
       {
         path: "/guide/advisories",

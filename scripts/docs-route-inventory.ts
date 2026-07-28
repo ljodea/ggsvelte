@@ -137,7 +137,8 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Interaction reference", order: 53 },
+    // order 53 reserved for /reference/positions (next follow-up)
+    navigation: { section: "Reference", label: "Interaction reference", order: 54 },
   },
   {
     path: "/reference/cli",
@@ -149,7 +150,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "CLI reference", order: 54 },
+    navigation: { section: "Reference", label: "CLI reference", order: 55 },
     headings: [
       { id: "input-and-output", title: "Input and output", level: 2 },
       { id: "options", title: "Options", level: 2 },

@@ -132,7 +132,7 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "CLI reference", order: 54 },
+      navigation: { section: "Reference", label: "CLI reference", order: 55 },
     });
     expect(cliRoute?.headings?.filter((heading) => heading.level === 3)).toEqual(
       CLI_REFERENCE_OPTIONS.map((option) => ({
