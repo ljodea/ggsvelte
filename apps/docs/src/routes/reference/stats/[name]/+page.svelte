@@ -103,7 +103,7 @@
     ·
     <a href={`${base}/reference/geoms`}>Geoms</a>
     ·
-    <a href={`${base}/guide/layers-marks`}>Layers and marks guide</a>
+    <a href={`${base}/guide/statistics-positions`}>Statistics and positions</a>
   </p>
 </article>
 

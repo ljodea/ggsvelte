@@ -40,20 +40,6 @@ export const GUIDE_CATALOG = [
     navigationOrder: 1,
   },
   {
-    slug: "data-mappings",
-    title: "Data and mappings",
-    description: "Map row fields to visual channels without mutating source data.",
-    section: "Core grammar",
-    navigationOrder: 10,
-  },
-  {
-    slug: "layers-marks",
-    title: "Layers and marks",
-    description: "Compose marks in paint order while sharing or overriding plot mappings.",
-    section: "Core grammar",
-    navigationOrder: 11,
-  },
-  {
     slug: "statistics-positions",
     title: "Statistics and positions",
     description:
@@ -76,13 +62,6 @@ export const GUIDE_CATALOG = [
     navigationOrder: 15,
   },
   {
-    slug: "themes-color",
-    title: "Themes and color",
-    description: "Chart theme vs data color scales; independent of site appearance.",
-    section: "Core grammar",
-    navigationOrder: 16,
-  },
-  {
     slug: "temporal-scales",
     title: "Dates without preprocessing",
     description: "Value-driven date inference, strict parsers, overrides, and diagnostics.",
@@ -91,71 +70,18 @@ export const GUIDE_CATALOG = [
   },
   {
     slug: "interactions",
-    title: "Interaction overview",
+    title: "Interactions",
     description: "Inspection, selection, zoom, keyboard behavior, identity, and event contracts.",
     section: "Interaction",
     navigationOrder: 20,
   },
   {
-    slug: "inspect-pin",
-    title: "Inspect and pin",
-    description: "Add chart-local tooltip, crosshair, keyboard traversal, and durable pinning.",
-    section: "Interaction",
-    navigationOrder: 21,
-  },
-  {
-    slug: "selection-zoom",
-    title: "Selection and zoom",
-    description: "Choose explicit point, interval, and brush-zoom tools with semantic results.",
-    section: "Interaction",
-    navigationOrder: 22,
-  },
-  {
-    slug: "linked-views",
-    title: "Linked views",
+    slug: "production",
+    title: "Production",
     description:
-      "Share semantic selection, emphasis, intervals, and domains across application surfaces.",
-    section: "Interaction",
-    navigationOrder: 23,
-  },
-  {
-    slug: "accessibility",
-    title: "Accessibility",
-    description:
-      "Name charts and preserve keyboard, touch, focus, announcement, and data-detail paths.",
-    section: "Interaction",
-    navigationOrder: 24,
-  },
-  {
-    slug: "responsive-charts",
-    title: "Responsive charts",
-    description:
-      "Size charts from their container with deterministic server and collapsed-width behavior.",
+      "Responsive sizing, SVG/canvas rendering, SSR and export, and tested runtime support.",
     section: "Production",
     navigationOrder: 30,
-  },
-  {
-    slug: "rendering-performance",
-    title: "Rendering and performance",
-    description:
-      "Choose SVG, canvas, and automatic strata while retaining semantic selection and chart chrome.",
-    section: "Production",
-    navigationOrder: 31,
-  },
-  {
-    slug: "server-rendering-export",
-    title: "Server rendering and export",
-    description:
-      "Render deterministic SVG through Svelte SSR, the pure core API, or the installed CLI.",
-    section: "Production",
-    navigationOrder: 32,
-  },
-  {
-    slug: "compatibility",
-    title: "Compatibility",
-    description: "Tested Node, Svelte, browser, and OS versions.",
-    section: "Production",
-    navigationOrder: 40,
   },
   {
     slug: "interaction-reference",

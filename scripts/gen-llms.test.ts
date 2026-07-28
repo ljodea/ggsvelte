@@ -24,7 +24,7 @@ import {
   buildLlmsFull,
   buildLlmsIndex,
   GETTING_STARTED_MD,
-  COMPATIBILITY_MD,
+  PRODUCTION_MD,
   STATISTICS_POSITIONS_MD,
   INTERACTIONS_MD,
   INTERACTION_REFERENCE_MD,
@@ -216,14 +216,14 @@ describe("guide sections cover their catalogs", () => {
   });
 
   it("documents the machine-checked packed-consumer support contract", () => {
-    expect(COMPATIBILITY_MD).toContain(`Node.js \`${supportMatrix.node.range}\``);
-    expect(COMPATIBILITY_MD).toContain(`Svelte \`${supportMatrix.svelte.range}\``);
-    expect(COMPATIBILITY_MD).toContain(`current ${supportMatrix.svelte.current}`);
-    expect(COMPATIBILITY_MD).toContain(`npm ${supportMatrix.packageManagers.npm}`);
-    expect(COMPATIBILITY_MD).toContain(`pnpm ${supportMatrix.packageManagers.pnpm}`);
-    expect(COMPATIBILITY_MD).toContain(`Bun ${supportMatrix.packageManagers.bun}`);
-    expect(COMPATIBILITY_MD).toContain(`Playwright ${supportMatrix.browsers.playwright}`);
-    expect(COMPATIBILITY_MD).toContain("support-matrix.json");
+    expect(PRODUCTION_MD).toContain(`Node.js \`${supportMatrix.node.range}\``);
+    expect(PRODUCTION_MD).toContain(`Svelte \`${supportMatrix.svelte.range}\``);
+    expect(PRODUCTION_MD).toContain(`current ${supportMatrix.svelte.current}`);
+    expect(PRODUCTION_MD).toContain(`npm ${supportMatrix.packageManagers.npm}`);
+    expect(PRODUCTION_MD).toContain(`pnpm ${supportMatrix.packageManagers.pnpm}`);
+    expect(PRODUCTION_MD).toContain(`Bun ${supportMatrix.packageManagers.bun}`);
+    expect(PRODUCTION_MD).toContain(`Playwright ${supportMatrix.browsers.playwright}`);
+    expect(PRODUCTION_MD).toContain("support-matrix.json");
   });
 
   it("documents the complete interaction capability and event contracts", () => {
@@ -413,7 +413,10 @@ describe("llms surfaces", () => {
     expect(pages.map((page) => page.slug)).toContain("interaction-reference");
     expect(pages.map((page) => page.slug)).not.toContain("migrating-pre-0-1");
     expect(pages.map((page) => page.slug)).toContain("upgrading");
-    expect(pages.map((page) => page.slug)).toContain("compatibility");
+    expect(pages.map((page) => page.slug)).toContain("production");
+    expect(pages.map((page) => page.slug)).not.toContain("compatibility");
+    expect(pages.map((page) => page.slug)).not.toContain("themes-color");
+    expect(pages.map((page) => page.slug)).not.toContain("data-mappings");
   });
 
   it("keeps first-party interaction examples focused on the current API", () => {
@@ -483,25 +486,15 @@ describe("public export surface (split-safe)", () => {
   it("exposes exactly the documented runtime export set from gen-llms", async () => {
     const mod = await import("./gen-llms.ts");
     const expected = [
-      "ACCESSIBILITY_MD",
-      "COMPATIBILITY_MD",
-      "DATA_MAPPINGS_MD",
       "FACETS_COORDINATES_MD",
       "GETTING_STARTED_MD",
-      "INSPECT_PIN_MD",
       "INTERACTIONS_MD",
       "INTERACTION_REFERENCE_INDEX",
       "INTERACTION_REFERENCE_MD",
-      "LAYERS_MARKS_MD",
-      "LINKED_VIEWS_MD",
-      "RENDERING_PERFORMANCE_MD",
-      "RESPONSIVE_CHARTS_MD",
+      "PRODUCTION_MD",
       "SCALES_GUIDES_MD",
-      "SELECTION_ZOOM_MD",
-      "SERVER_RENDERING_EXPORT_MD",
       "STATISTICS_POSITIONS_MD",
       "TEMPORAL_SCALES_MD",
-      "THEMES_COLOR_MD",
       "UPGRADING_MD",
       "buildAdvisoriesMd",
       "buildDiagnosticDocs",

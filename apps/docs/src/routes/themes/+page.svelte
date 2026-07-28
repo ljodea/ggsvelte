@@ -19,8 +19,8 @@
       unless you wire them yourself.
     </p>
     <p class="guide-link">
-      Token-level theme and scale reference:
-      <a href={`${base}/guide/themes-color`}>Themes and color guide</a>.
+      Scale and color channel reference:
+      <a href={`${base}/guide/scales-guides`}>Scales and guides</a>.
     </p>
   </header>
 
@@ -57,8 +57,8 @@
         — categorical schemes and sequential ramps
       </li>
       <li>
-        <a href={`${base}/guide/themes-color`}>Themes and color guide</a>
-        — prop model and color rules
+        <a href={`${base}/guide/scales-guides`}>Scales and guides</a>
+        — position, color, and legend channels
       </li>
       <li>
         <a href={`${base}/examples/line/multi-series`}>Multi-series line</a>,

@@ -13,17 +13,17 @@ export const DOCS_TASKS = [
   {
     label: "Scales, themes, color",
     description: "Axes, legends, chart themes, and categorical or sequential color.",
-    hrefs: ["/guide/scales-guides", "/guide/themes-color"],
+    hrefs: ["/guide/scales-guides"],
   },
   {
     label: "Interaction",
     description: "Inspect, pin, select, zoom, and linked semantic state.",
-    hrefs: ["/guide/inspect-pin"],
+    hrefs: ["/guide/interactions"],
   },
   {
     label: "Layout and export",
     description: "Container sizing, SVG/canvas rendering, SSR, and headless SVG.",
-    hrefs: ["/guide/responsive-charts", "/guide/server-rendering-export"],
+    hrefs: ["/guide/production"],
   },
   {
     label: "Diagnostics",

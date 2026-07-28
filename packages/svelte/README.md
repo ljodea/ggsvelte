@@ -73,7 +73,7 @@ guide](https://ggsvelte.sh/guide/upgrading), never half-migrated.
 - [Getting started](https://ggsvelte.sh/guide/getting-started)
 - [Example gallery](https://ggsvelte.sh/examples)
 - [Interactions and events](https://ggsvelte.sh/reference/interactions)
-- [Compatibility](https://ggsvelte.sh/guide/compatibility)
+- [Production](https://ggsvelte.sh/guide/production)
 - [Upgrading](https://ggsvelte.sh/guide/upgrading)
 - [Repository](https://github.com/ljodea/ggsvelte)
 

@@ -1,2 +1,13 @@
 /ggsvelte https://ggsvelte.sh/ 301
 /ggsvelte/* https://ggsvelte.sh/:splat 301
+/guide/data-mappings /guide/getting-started 301
+/guide/layers-marks /guide/getting-started 301
+/guide/themes-color /themes 301
+/guide/inspect-pin /guide/interactions 301
+/guide/selection-zoom /guide/interactions 301
+/guide/linked-views /guide/interactions 301
+/guide/accessibility /guide/interactions 301
+/guide/responsive-charts /guide/production 301
+/guide/rendering-performance /guide/production 301
+/guide/server-rendering-export /guide/production 301
+/guide/compatibility /guide/production 301

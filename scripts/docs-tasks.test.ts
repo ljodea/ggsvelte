@@ -9,9 +9,9 @@ import { GUIDE_NAVIGATION } from "../apps/docs/src/lib/generated/routes.ts";
 // overload for that. The assertion is a runtime deep-equal either way.
 const expected: [string, readonly string[]][] = [
   ["Getting started", ["/guide/getting-started"]],
-  ["Scales, themes, color", ["/guide/scales-guides", "/guide/themes-color"]],
-  ["Interaction", ["/guide/inspect-pin"]],
-  ["Layout and export", ["/guide/responsive-charts", "/guide/server-rendering-export"]],
+  ["Scales, themes, color", ["/guide/scales-guides"]],
+  ["Interaction", ["/guide/interactions"]],
+  ["Layout and export", ["/guide/production"]],
   ["Diagnostics", ["/guide/errors"]],
 ];
 
@@ -32,16 +32,14 @@ describe("Docs entry points", () => {
   });
 
   it("keeps progressive tasks as a short subset of the full guide map", () => {
-    // The landing page still exposes DOCS_TASKS as "Start here", but the
-    // chapter index must list far more than those four hubs.
+    // Search still surfaces DOCS_TASKS as common destinations; the landing
+    // page chapter index lists every navigable guide.
     const taskDestinations = new Set(DOCS_TASKS.flatMap((task) => [...task.hrefs]));
     const chapterPaths = GUIDE_NAVIGATION.flatMap((group) =>
       group.entries.map((entry) => entry.path),
     ).filter((path) => path !== "/docs");
-    expect(chapterPaths.length).toBeGreaterThan(taskDestinations.size * 2);
+    expect(chapterPaths.length).toBeGreaterThan(taskDestinations.size);
     for (const href of taskDestinations) {
-      // Diagnostics (/guide/errors) and every progressive hub must resolve
-      // somewhere in the published navigation tree.
       expect(chapterPaths.some((path) => path === href)).toBe(true);
     }
   });

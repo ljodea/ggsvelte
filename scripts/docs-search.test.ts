@@ -8,9 +8,9 @@ const winners = [
   ["GGPlot", "/guide/lifecycle#ggsvelte-svelte"],
   ["--max-marks", "/reference/cli#max-marks"],
   ["date axis", "/guide/scales-guides#date-and-time-axes"],
-  ["tooltip", "/guide/inspect-pin"],
-  ["server render", "/guide/server-rendering-export"],
-  ["canvas selection", "/guide/rendering-performance#canvas-and-interaction"],
+  ["tooltip", "/guide/interactions#inspection"],
+  ["server render", "/guide/production#server-and-export"],
+  ["canvas selection", "/guide/production#rendering"],
 ] as const;
 
 describe("Docs search ranking", () => {

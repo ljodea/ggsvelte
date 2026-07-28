@@ -19,8 +19,8 @@
       <a href={`${base}/themes`}>Themes</a>.
     </p>
     <p class="guide-link">
-      Token-level scale reference:
-      <a href={`${base}/guide/themes-color`}>Themes and color guide</a>.
+      Scale and color channel reference:
+      <a href={`${base}/guide/scales-guides`}>Scales and guides</a>.
     </p>
   </header>
 
@@ -35,8 +35,8 @@
         — paper, grids, axes, and type
       </li>
       <li>
-        <a href={`${base}/guide/themes-color`}>Themes and color guide</a>
-        — prop model and color rules
+        <a href={`${base}/guide/scales-guides`}>Scales and guides</a>
+        — position, color, and legend channels
       </li>
       <li>
         <a href={`${base}/examples/bar/dodged`}>Dodged bars</a>,

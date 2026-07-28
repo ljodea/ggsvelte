@@ -129,7 +129,7 @@
   <p class="back">
     <a href={`${base}/reference/geoms`}>← All geoms</a>
     ·
-    <a href={`${base}/guide/layers-marks`}>Layers and marks guide</a>
+    <a href={`${base}/guide/getting-started`}>Getting started</a>
   </p>
 </article>
 

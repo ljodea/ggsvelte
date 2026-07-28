@@ -18,9 +18,9 @@ export type { DocsSearchEntry } from "../apps/docs/src/lib/search-types.ts";
 
 const SEARCH_EXACT_ALIASES: Readonly<Record<string, readonly string[]>> = {
   "/guide/scales-guides#date-and-time-axes": ["date axis"],
-  "/guide/inspect-pin": ["tooltip"],
-  "/guide/server-rendering-export": ["server render"],
-  "/guide/rendering-performance#canvas-and-interaction": ["canvas selection"],
+  "/guide/interactions#inspection": ["tooltip"],
+  "/guide/production#server-and-export": ["server render"],
+  "/guide/production#rendering": ["canvas selection"],
 };
 
 const OUTPUT_PATH = join(
