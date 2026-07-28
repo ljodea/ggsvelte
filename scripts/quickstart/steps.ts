@@ -22,18 +22,23 @@ export const SAKURA_Y_BREAKS = ["04-05", "04-15", "04-25"] as const;
 /** Y-axis title: the quantity (a date), with earlier up. */
 export const SAKURA_Y_LAB = "Bloom date (earlier ↑)";
 
-/** Plot domain top (earlier / higher on the reversed date axis). */
-const Y_TOP = "03-18";
-/** Plot domain bottom (later / lower on the reversed date axis). */
-const Y_BOTTOM = "05-10";
 /**
- * Epoch bands span the full vertical domain so every observation sits inside
- * its climate period — matching the reference chart. Epoch names sit near the
- * top of each band on the pale fill.
+ * Plot domain top (earlier / higher on the reversed date axis). Leaves a
+ * strip above the epoch bands so names sit above the pale fills, matching
+ * the reference chart — not painted on the fill.
  */
-const BAND_TOP = Y_TOP;
-/** Epoch names sit just below the panel top, inside every band. */
-const EPOCH_NAME_DATE = "03-20";
+const DOMAIN_TOP = "03-10";
+/** Plot domain bottom (later / lower on the reversed date axis). */
+const DOMAIN_BOTTOM = "05-10";
+/**
+ * Epoch bands cover every observation (earliest bloom is 25 March) without
+ * filling the name strip above. Do not shrink this later than the earliest
+ * data point — the rect must still encompass all points.
+ */
+const BAND_TOP = "03-18";
+const BAND_BOTTOM = DOMAIN_BOTTOM;
+/** Epoch names sit in the domain strip above the band top (earlier than BAND_TOP). */
+const EPOCH_NAME_DATE = "03-14";
 
 // --- the two lesson-only tables -------------------------------------------
 // Both are small enough to read at a glance, and both are drawn by layers that
@@ -47,7 +52,7 @@ export const SAKURA_EPOCHS = [
   { epoch: "Medieval warm period", year: 950, until: 1250 },
   { epoch: "Little Ice Age", year: 1300, until: 1850 },
   { epoch: "Industrial era", year: 1850, until: 2026 },
-].map((band) => ({ ...band, top: BAND_TOP, bottom: Y_BOTTOM }));
+].map((band) => ({ ...band, top: BAND_TOP, bottom: BAND_BOTTOM }));
 
 /**
  * Where each epoch name sits: centred over its own band, near the top of the
@@ -155,8 +160,8 @@ export interface SakuraStep {
   readonly source: SakuraSourceDelta;
 }
 
-const EPOCHS_CONST = `  // Bands span the full y-domain so every observation sits inside its epoch.
-  const span = { top: "${BAND_TOP}", bottom: "${Y_BOTTOM}" };
+const EPOCHS_CONST = `  // Bands cover every observation; a strip above holds the epoch names.
+  const span = { top: "${BAND_TOP}", bottom: "${BAND_BOTTOM}" };
   const epochs = [
 ${SAKURA_EPOCHS.map(
   (e) => `    { epoch: "${e.epoch}", year: ${e.year}, until: ${e.until}, ...span },`,
@@ -245,7 +250,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   reverse
   breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
   dateLabels="%b %e"
-  domain={["${Y_BOTTOM}", "${Y_TOP}"]}
+  domain={["${DOMAIN_BOTTOM}", "${DOMAIN_TOP}"]}
 />
 <ScaleXContinuous labels="d" domain={[800, 2030]} />`,
     chapterTitle: "Scales and guides",
@@ -259,7 +264,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           reverse: true,
           breaks: [...SAKURA_Y_BREAKS],
           dateLabels: "%b %e",
-          domain: [Y_BOTTOM, Y_TOP],
+          domain: [DOMAIN_BOTTOM, DOMAIN_TOP],
         },
         // `labels: "d"` because a year is not a quantity: the default numeric
         // formatter groups thousands, which renders 1000 CE as "1,000".
@@ -275,7 +280,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     reverse
     breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
     dateLabels="%b %e"
-    domain={["${Y_BOTTOM}", "${Y_TOP}"]}
+    domain={["${DOMAIN_BOTTOM}", "${DOMAIN_TOP}"]}
   />`,
         scaleX: `  <ScaleXContinuous labels="d" domain={[800, 2030]} />`,
         labs: `  <Labs x="Year" y="${SAKURA_Y_LAB}" />`,
