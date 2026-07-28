@@ -2,7 +2,7 @@
  * Resolved-target ownership (#1080): one nearest path, one distance policy,
  * panel-scoped so faceted probes cannot seed a neighbouring facet (#787).
  */
-import { describe, expect, it, expectTypeOf } from "vitest";
+import { describe, expect, it } from "vitest";
 import { runPipeline, type RenderModel } from "@ggsvelte/core";
 import { aes, gg } from "@ggsvelte/spec";
 
@@ -12,7 +12,6 @@ import {
   resolveTarget,
   targetSearch,
   toInteractionCandidateRef,
-  type ResolvedTarget,
   type TargetIntent,
 } from "../../src/lib/interaction/target.js";
 
@@ -84,9 +83,13 @@ describe("resolveTarget panel scoping (#787)", () => {
   for (const intent of intents) {
     it(`${intent}: never resolves a mark from a neighbouring facet`, () => {
       const model = facetedStackedModel();
-      const panelA = model.scene.panels[0]!;
-      const candB = model.candidates.candidate(1)!;
-      expect(candB.panelId).toBe(model.scene.panels[1]!.id);
+      const panelA = model.scene.panels[0];
+      const panelB = model.scene.panels[1];
+      const candB = model.candidates.candidate(1);
+      if (panelA === undefined || panelB === undefined || candB === null) {
+        throw new Error("expected two faceted panels and candidate B");
+      }
+      expect(candB.panelId).toBe(panelB.id);
 
       // Probe at panel A's mid-y and candidate B's screen-x — unscoped
       // mode "x" nearest would leak B; panel-scoped must refuse.
@@ -189,19 +192,19 @@ describe("toInteractionCandidateRef", () => {
   });
 
   it("is structurally assignable to InteractionCandidateRef (type test)", () => {
-    // Compile-time only: if ResolvedTarget projection drifts from the reducer
-    // payload shape, this fails tsc / vitest typecheck.
-    const sample: ResolvedTarget = {
-      epoch: 1,
-      candidateId: 2,
-      panelId: "p",
-      point: { x: 3, y: 4 },
-      mode: "xy",
-      distance: 0,
-      match: null as unknown as ResolvedTarget["match"],
-      panel: { id: "p", x: 0, y: 0, width: 1, height: 1 },
-    };
-    const ref = toInteractionCandidateRef(sample);
-    expectTypeOf(ref).toMatchTypeOf<InteractionCandidateRef>();
+    // Compile-time only: if the projection drifts from the reducer payload
+    // shape, assigning to InteractionCandidateRef fails typecheck.
+    const model = singlePanelDistanceModel();
+    const cand = model.candidates.candidate(0);
+    if (cand === null) throw new Error("expected candidate");
+    const target = resolveTarget({
+      model,
+      point: { x: cand.x, y: cand.y },
+      intent: "point-select",
+      inspect: null,
+    });
+    if (target === null) throw new Error("expected resolved target");
+    const ref: InteractionCandidateRef = toInteractionCandidateRef(target);
+    expect(ref.id).toBe(cand.id);
   });
 });
