@@ -1,5 +1,6 @@
 {
   "title": "Interval selection and zoom",
+  "description": "333 Palmer penguins: brush a rectangle to select, or zoom into the crowded middle where the species overlap.",
   "tags": ["interaction", "select", "interval", "brush", "zoom", "events"],
   "docsSection": "Interaction",
   "vrHeight": 640,

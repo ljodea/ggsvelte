@@ -1,5 +1,6 @@
 {
-  "title": "Labels with background boxes",
+  "title": "Every name on the first statistical graph, boxed",
+  "description": "Van Langren's 1644 estimates of the Toledo to Rome longitude, each labelled with the astronomer who made it, on a background box that survives the rule beneath.",
   "tags": ["label", "text", "point"],
   "docsSection": "Labels & text"
 }

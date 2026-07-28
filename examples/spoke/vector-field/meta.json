@@ -1,5 +1,6 @@
 {
-  "title": "Spoke vector field",
+  "title": "Which way the water runs off Maunga Whau",
+  "description": "The downhill direction and steepness of an Auckland volcano at 140 points: a direction and a size at every place, which is what geom_spoke draws.",
   "tags": ["spoke", "vector", "angle", "radius", "segment", "theme"],
   "docsSection": "Lines & rules"
 }

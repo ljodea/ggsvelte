@@ -1,5 +1,6 @@
 {
-  "title": "Violin plots of Michelson's runs",
+  "title": "Michelson's five runs as violins",
+  "description": "The same hundred measurements with a mirrored kernel density per run, so the shape of each block of twenty is visible rather than summarised.",
   "tags": ["violin", "density", "distribution", "boxplot"],
   "docsSection": "Boxes & distributions"
 }

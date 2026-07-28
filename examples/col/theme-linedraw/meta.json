@@ -1,5 +1,6 @@
 {
-  "title": "Column chart (theme_linedraw)",
+  "title": "The same chests under theme_linedraw",
+  "description": "Quetelet's chest measurements again, so the black grid and border of theme_linedraw can be compared against the default and classic chrome.",
   "tags": ["col", "bars", "theme", "linedraw"],
   "docsSection": "Bars & columns"
 }

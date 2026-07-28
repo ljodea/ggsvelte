@@ -1,5 +1,6 @@
 {
-  "title": "Focus and link discrete legend groups",
+  "title": "Focus a legend group without changing the data",
+  "description": "Three of Playfair's commodity series. Focusing a group dims the others rather than dropping them, so the scales never move under you.",
   "tags": [
     "interaction",
     "legend",

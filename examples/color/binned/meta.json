@@ -1,5 +1,6 @@
 {
-  "title": "Binned color (colorsteps)",
+  "title": "How many beans can you see at once?",
+  "description": "Jevons threw beans into a box 1,027 times and guessed the count without pausing. He was never wrong up to four, and increasingly wrong above it.",
   "tags": ["point", "color", "binned", "colorsteps", "legend"],
   "docsSection": "Color & legends"
 }

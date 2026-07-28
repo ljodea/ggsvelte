@@ -1,5 +1,6 @@
 {
-  "title": "geom_jitter sugar",
+  "title": "Wages across 70 trades, 1910",
+  "description": "Pearson's study of drink and wages. The trades share a handful of wage classes, so jitter is what separates them into readable marks.",
   "tags": ["jitter", "point", "position", "overplotting", "theme"],
   "docsSection": "Points & scatter"
 }

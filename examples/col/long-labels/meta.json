@@ -1,5 +1,6 @@
 {
-  "title": "Columns with long i18n category labels",
+  "title": "Long category labels at a narrow width",
+  "description": "A layout specimen: Spanish multi-word names and a long German compound at about 480px, where the band axis has to wrap and rotate to fit.",
   "tags": ["col", "band", "labels", "i18n", "vr"],
   "docsSection": "Bars & columns",
   "vrHeight": 420

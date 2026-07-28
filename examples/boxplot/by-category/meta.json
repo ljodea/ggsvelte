@@ -1,5 +1,6 @@
 {
-  "title": "Boxplot by category",
+  "title": "Michelson's five runs, 1879",
+  "description": "Twenty speed-of-light measurements per run. The boxes show that the runs disagree with each other more than the readings within any one of them.",
   "tags": ["boxplot", "stat", "summary", "outliers", "theme"],
   "docsSection": "Distributions"
 }

@@ -1,5 +1,6 @@
 {
-  "title": "Dodged bar chart",
+  "title": "Deaths in six English counties, 1876 to 1882",
+  "description": "The two-way table Edgeworth used to develop the analysis of variance, drawn as side-by-side bars decades before Fisher named the method.",
   "tags": ["bar", "count", "dodge", "fill", "legend", "weight", "theme", "palette"],
   "docsSection": "Bars & columns"
 }

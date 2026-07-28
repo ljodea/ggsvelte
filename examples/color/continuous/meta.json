@@ -1,5 +1,6 @@
 {
-  "title": "Continuous color (ramp legend)",
+  "title": "Eleven maps of the Great Lakes, 1688 to 1818",
+  "description": "Thirty-nine identifiable points read off each old map against their true positions, with map year on a continuous colour ramp.",
   "tags": ["point", "color", "sequential", "viridis", "legend", "coord-fixed"],
   "docsSection": "Color & legends"
 }

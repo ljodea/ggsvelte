@@ -1,5 +1,6 @@
 {
-  "title": "Categorical heatmap (geom tile)",
+  "title": "Cholera in England and Wales, 1849",
+  "description": "Every day of the epidemic from Farr's weekly returns, laid out as a calendar of tiles so the summer peak reads as a block.",
   "tags": ["tile", "heatmap", "categorical", "calendar"],
   "docsSection": "Rectangles & grids"
 }

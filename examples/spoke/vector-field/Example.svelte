@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    CoordFixed,
     GeomPoint,
     GeomSpoke,
     GGPlot,
@@ -7,22 +8,23 @@
     ThemeClassic,
   } from "@ggsvelte/svelte";
 
-  import { vectorField } from "./data.js";
+  import { maungaWhauSlope } from "./data.js";
 </script>
 
 <GGPlot
-  data={vectorField}
-  aes={{ x: "x", y: "y", angle: "angle", radius: "radius" }}
+  data={maungaWhauSlope}
+  aes={{ x: "east", y: "north", angle: "angle", radius: "fall" }}
   width={640}
   height={400}
 >
   <ThemeClassic />
+  <CoordFixed />
   <Labs
-    title="Spoke vector field"
-    subtitle="geom_spoke: origin + angle (radians) + radius → segment"
-    x="x"
-    y="y"
+    title="Which way the water runs off Maunga Whau"
+    subtitle="Downhill direction at 140 points, arrow length by how steep the ground is"
+    x="Metres east"
+    y="Metres north"
   />
   <GeomSpoke linewidth={1.6} lineend="round" alpha={0.9} />
-  <GeomPoint size={2} alpha={0.55} />
+  <GeomPoint size={2} alpha={0.7} />
 </GGPlot>

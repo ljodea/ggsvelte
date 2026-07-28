@@ -1,24 +1,172 @@
 /**
- * Synthetic 5×5 wind-like vector field for geom_spoke (#810).
- * Angle in radians (0 = +x); radius is magnitude in data units.
- * Not a historical source table.
+ * Which way water runs off Maunga Whau. At 140 points across the Auckland
+ * volcano, the direction of steepest descent and how steep it is - the two
+ * numbers a contour map leaves you to work out for yourself.
+ *
+ * Computed here from R's `datasets::volcano` (see NOTICE), the 10 m survey
+ * grid also used by examples/contour/basic. `bearing` is the downhill
+ * direction in degrees anticlockwise from east, taken from central differences
+ * of height in each direction; `fall` is the gradient - metres down per metre
+ * along - scaled so the steepest arrow on the hill is 90 m long in panel
+ * units, since a gradient has no length of its own. `east` and `north` are
+ * metres from the south-west corner of the survey.
+ *
+ * The rows carry degrees because degrees are readable; geom_spoke wants
+ * radians, so `angle` is derived once below.
+ *
+ * R's own note applies: these heights should not be regarded as accurate.
  */
-export const vectorField: {
-  x: number;
-  y: number;
-  angle: number;
-  radius: number;
-}[] = [];
+const READINGS: { east: number; north: number; bearing: number; fall: number }[] = [
+  { east: 30, north: 30, bearing: -180, fall: 10.4 },
+  { east: 30, north: 90, bearing: -180, fall: 5.2 },
+  { east: 30, north: 150, bearing: -153.4, fall: 11.7 },
+  { east: 30, north: 210, bearing: -158.2, fall: 28.1 },
+  { east: 30, north: 270, bearing: -180, fall: 46.9 },
+  { east: 30, north: 330, bearing: -166, fall: 64.5 },
+  { east: 30, north: 390, bearing: 161.6, fall: 65.9 },
+  { east: 30, north: 450, bearing: 143.1, fall: 26.1 },
+  { east: 30, north: 510, bearing: -180, fall: 5.2 },
+  { east: 30, north: 570, bearing: 135, fall: 7.4 },
+  { east: 90, north: 30, bearing: -153.4, fall: 11.7 },
+  { east: 90, north: 90, bearing: -161.6, fall: 16.5 },
+  { east: 90, north: 150, bearing: -156, fall: 51.3 },
+  { east: 90, north: 210, bearing: -160.3, fall: 77.5 },
+  { east: 90, north: 270, bearing: -170, fall: 90 },
+  { east: 90, north: 330, bearing: -180, fall: 62.6 },
+  { east: 90, north: 390, bearing: 153.4, fall: 35 },
+  { east: 90, north: 450, bearing: 123.7, fall: 56.4 },
+  { east: 90, north: 510, bearing: 146.3, fall: 18.8 },
+  { east: 90, north: 570, bearing: 90, fall: 10.4 },
+  { east: 150, north: 30, bearing: -153.4, fall: 23.3 },
+  { east: 150, north: 90, bearing: -149, fall: 30.4 },
+  { east: 150, north: 150, bearing: -118.6, fall: 65.3 },
+  { east: 150, north: 210, bearing: -135, fall: 44.2 },
+  { east: 150, north: 270, bearing: -173.7, fall: 47.2 },
+  { east: 150, north: 330, bearing: -170.5, fall: 31.7 },
+  { east: 150, north: 390, bearing: 131.2, fall: 55.4 },
+  { east: 150, north: 450, bearing: 138.4, fall: 62.8 },
+  { east: 150, north: 510, bearing: 122, fall: 49.2 },
+  { east: 150, north: 570, bearing: 90, fall: 10.4 },
+  { east: 210, north: 30, bearing: -104, fall: 21.5 },
+  { east: 210, north: 90, bearing: -149, fall: 30.4 },
+  { east: 210, north: 150, bearing: -130.6, fall: 48.1 },
+  { east: 210, north: 210, bearing: -113.2, fall: 39.7 },
+  { east: 210, north: 270, bearing: 23.2, fall: 39.7 },
+  { east: 210, north: 330, bearing: -3.8, fall: 78.4 },
+  { east: 210, north: 390, bearing: -11.3, fall: 53.2 },
+  { east: 210, north: 450, bearing: 131.2, fall: 55.4 },
+  { east: 210, north: 510, bearing: 110.6, fall: 44.5 },
+  { east: 210, north: 570, bearing: 123.7, fall: 37.6 },
+  { east: 270, north: 30, bearing: -49.4, fall: 48.1 },
+  { east: 270, north: 90, bearing: -59, fall: 30.4 },
+  { east: 270, north: 150, bearing: -66.8, fall: 39.7 },
+  { east: 270, north: 210, bearing: -45, fall: 7.4 },
+  { east: 270, north: 270, bearing: 69.4, fall: 44.5 },
+  { east: 270, north: 330, bearing: 7.1, fall: 42 },
+  { east: 270, north: 390, bearing: -84.3, fall: 52.4 },
+  { east: 270, north: 450, bearing: 45, fall: 7.4 },
+  { east: 270, north: 510, bearing: 84.8, fall: 57.6 },
+  { east: 270, north: 570, bearing: 95.2, fall: 57.6 },
+  { east: 330, north: 30, bearing: -45, fall: 22.1 },
+  { east: 330, north: 90, bearing: -49.4, fall: 48.1 },
+  { east: 330, north: 150, bearing: -36.9, fall: 26.1 },
+  { east: 330, north: 210, bearing: -68.2, fall: 56.2 },
+  { east: 330, north: 270, bearing: 128.7, fall: 33.4 },
+  { east: 330, north: 330, bearing: -174.3, fall: 52.4 },
+  { east: 330, north: 390, bearing: -18.4, fall: 16.5 },
+  { east: 330, north: 450, bearing: 32, fall: 49.2 },
+  { east: 330, north: 510, bearing: 61.4, fall: 65.3 },
+  { east: 330, north: 570, bearing: 66.8, fall: 39.7 },
+  { east: 390, north: 30, bearing: -71.6, fall: 16.5 },
+  { east: 390, north: 90, bearing: -90, fall: 20.9 },
+  { east: 390, north: 150, bearing: -90, fall: 46.9 },
+  { east: 390, north: 210, bearing: -74.1, fall: 38 },
+  { east: 390, north: 270, bearing: 11.3, fall: 26.6 },
+  { east: 390, north: 330, bearing: 59, fall: 30.4 },
+  { east: 390, north: 390, bearing: 54.5, fall: 44.8 },
+  { east: 390, north: 450, bearing: 8.1, fall: 36.9 },
+  { east: 390, north: 510, bearing: 60.3, fall: 42 },
+  { east: 390, north: 570, bearing: 90, fall: 5.2 },
+  { east: 450, north: 30, bearing: -116.6, fall: 23.3 },
+  { east: 450, north: 90, bearing: -101.3, fall: 26.6 },
+  { east: 450, north: 150, bearing: -101.3, fall: 26.6 },
+  { east: 450, north: 210, bearing: -114, fall: 51.3 },
+  { east: 450, north: 270, bearing: 123.7, fall: 18.8 },
+  { east: 450, north: 330, bearing: 101.3, fall: 26.6 },
+  { east: 450, north: 390, bearing: 76, fall: 21.5 },
+  { east: 450, north: 450, bearing: 45, fall: 14.7 },
+  { east: 450, north: 510, bearing: 76, fall: 21.5 },
+  { east: 450, north: 570, bearing: 56.3, fall: 18.8 },
+  { east: 510, north: 30, bearing: -45, fall: 14.7 },
+  { east: 510, north: 90, bearing: -90, fall: 26.1 },
+  { east: 510, north: 150, bearing: -99.5, fall: 31.7 },
+  { east: 510, north: 210, bearing: -9.5, fall: 31.7 },
+  { east: 510, north: 270, bearing: 18.4, fall: 33 },
+  { east: 510, north: 330, bearing: 59, fall: 30.4 },
+  { east: 510, north: 390, bearing: 111.8, fall: 28.1 },
+  { east: 510, north: 450, bearing: 53.1, fall: 26.1 },
+  { east: 510, north: 510, bearing: 53.1, fall: 26.1 },
+  { east: 510, north: 570, bearing: 63.4, fall: 11.7 },
+  { east: 570, north: 30, bearing: -63.4, fall: 11.7 },
+  { east: 570, north: 90, bearing: -101.3, fall: 53.2 },
+  { east: 570, north: 150, bearing: -116.6, fall: 23.3 },
+  { east: 570, north: 210, bearing: -0, fall: 5.2 },
+  { east: 570, north: 270, bearing: 71.6, fall: 16.5 },
+  { east: 570, north: 330, bearing: -0, fall: 10.4 },
+  { east: 570, north: 390, bearing: -180, fall: 0 },
+  { east: 570, north: 450, bearing: 95.2, fall: 57.6 },
+  { east: 570, north: 510, bearing: 71.6, fall: 16.5 },
+  { east: 570, north: 570, bearing: 45, fall: 7.4 },
+  { east: 630, north: 30, bearing: -116.6, fall: 11.7 },
+  { east: 630, north: 90, bearing: -90, fall: 41.7 },
+  { east: 630, north: 150, bearing: -90, fall: 26.1 },
+  { east: 630, north: 210, bearing: -180, fall: 0 },
+  { east: 630, north: 270, bearing: 71.6, fall: 33 },
+  { east: 630, north: 330, bearing: 33.7, fall: 18.8 },
+  { east: 630, north: 390, bearing: 9.5, fall: 31.7 },
+  { east: 630, north: 450, bearing: 33.7, fall: 37.6 },
+  { east: 630, north: 510, bearing: 63.4, fall: 11.7 },
+  { east: 630, north: 570, bearing: 45, fall: 7.4 },
+  { east: 690, north: 30, bearing: -33.7, fall: 18.8 },
+  { east: 690, north: 90, bearing: -33.7, fall: 18.8 },
+  { east: 690, north: 150, bearing: -14, fall: 43 },
+  { east: 690, north: 210, bearing: 26.6, fall: 35 },
+  { east: 690, north: 270, bearing: 53.1, fall: 26.1 },
+  { east: 690, north: 330, bearing: 45, fall: 22.1 },
+  { east: 690, north: 390, bearing: 31, fall: 30.4 },
+  { east: 690, north: 450, bearing: 50.2, fall: 40.7 },
+  { east: 690, north: 510, bearing: -0, fall: 5.2 },
+  { east: 690, north: 570, bearing: 26.6, fall: 11.7 },
+  { east: 750, north: 30, bearing: -18.4, fall: 16.5 },
+  { east: 750, north: 90, bearing: -45, fall: 14.7 },
+  { east: 750, north: 150, bearing: 9.5, fall: 31.7 },
+  { east: 750, north: 210, bearing: -28.6, fall: 65.3 },
+  { east: 750, north: 270, bearing: 14, fall: 21.5 },
+  { east: 750, north: 330, bearing: 33.7, fall: 18.8 },
+  { east: 750, north: 390, bearing: 49.4, fall: 48.1 },
+  { east: 750, north: 450, bearing: -180, fall: 0 },
+  { east: 750, north: 510, bearing: -180, fall: 0 },
+  { east: 750, north: 570, bearing: -180, fall: 0 },
+  { east: 810, north: 30, bearing: -26.6, fall: 11.7 },
+  { east: 810, north: 90, bearing: -0, fall: 5.2 },
+  { east: 810, north: 150, bearing: -26.6, fall: 11.7 },
+  { east: 810, north: 210, bearing: -45, fall: 7.4 },
+  { east: 810, north: 270, bearing: -26.6, fall: 11.7 },
+  { east: 810, north: 330, bearing: 63.4, fall: 35 },
+  { east: 810, north: 390, bearing: 45, fall: 7.4 },
+  { east: 810, north: 450, bearing: -180, fall: 0 },
+  { east: 810, north: 510, bearing: -0, fall: 5.2 },
+  { east: 810, north: 570, bearing: -0, fall: 5.2 },
+];
 
-for (let ix = 0; ix < 5; ix++) {
-  for (let iy = 0; iy < 5; iy++) {
-    const x = ix;
-    const y = iy;
-    // Gentle swirl: angle rotates with position; radius grows from center.
-    const cx = x - 2;
-    const cy = y - 2;
-    const angle = Math.atan2(cy, cx) + Math.PI / 2;
-    const radius = 0.25 + 0.12 * Math.hypot(cx, cy);
-    vectorField.push({ x, y, angle, radius });
-  }
-}
+export const maungaWhauSlope: {
+  east: number;
+  north: number;
+  angle: number;
+  fall: number;
+}[] = READINGS.map(({ east, north, bearing, fall }) => ({
+  east,
+  north,
+  angle: (bearing * Math.PI) / 180,
+  fall,
+}));

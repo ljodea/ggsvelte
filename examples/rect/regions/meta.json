@@ -1,5 +1,6 @@
 {
-  "title": "Shaded time bands (geom rect)",
+  "title": "The price of wheat under twelve reigns",
+  "description": "Playfair's wheat series with each monarch's reign drawn as a shaded band behind it, the way Playfair drew them himself.",
   "tags": ["rect", "regions", "bands", "layers"],
   "docsSection": "Rectangles & grids"
 }

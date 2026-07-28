@@ -1,5 +1,6 @@
 {
   "title": "Inspect and pin data",
+  "description": "Palmer penguin measurements with a crosshair that reads every series at one x, and a pin so the reading stays while you look elsewhere.",
   "tags": ["interaction", "inspect", "tooltip", "crosshair", "keyboard", "pin"],
   "docsSection": "Interaction",
   "vrHeight": 740,

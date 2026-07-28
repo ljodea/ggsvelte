@@ -40,7 +40,8 @@ export default defineExample(
       linewidth: 1.5,
     })
     .labs({
-      title: "Ribbon with portable gradient fill, stroke, and glow",
+      title: "What a ribbon can be painted with",
+      subtitle: "One interval band carrying a gradient fill, a gradient stroke and a glow",
       x: "x",
       y: "value",
       caption: "Within-mark paint (not a data scale); solid fallbacks remain for a11y.",

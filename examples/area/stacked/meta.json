@@ -1,5 +1,6 @@
 {
-  "title": "Stacked area chart",
+  "title": "Deaths in the Crimea, 1854 to 1856",
+  "description": "Nightingale's monthly army deaths split by cause. Disease dwarfs combat until the Sanitary Commission arrives, then collapses.",
   "tags": ["area", "stack", "fill", "legend", "theme", "palette"],
   "docsSection": "Areas"
 }

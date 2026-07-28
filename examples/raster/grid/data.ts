@@ -5,11 +5,11 @@
  * real measurements, drawing samples of four from these very rows.
  *
  * Transcribed from HistData::Macdonell (see NOTICE). geom_raster needs a
- * complete regular grid, and the full table is 22 x 42 = 924 cells, over the
- * 500-row ceiling for a shareable playground link. This is the largest complete
- * sub-rectangle at or under 500 cells: heights 4.880 to 6.047 ft against finger
- * lengths 10.0 to 13.2 cm, 15 x 33 = 495 cells holding 2,981 of the 3,000 men.
- * The 19 men outside that window are cropped, not aggregated into the edges.
+ * complete regular grid, and the full table is 22 x 42 = 924 cells with gaps at
+ * the corners. This is the largest complete sub-rectangle: heights 4.880 to
+ * 6.047 ft against finger lengths 10.0 to 13.2 cm, 15 x 33 = 495 cells holding
+ * 2,981 of the 3,000 men. The 19 men outside that window are cropped, not
+ * aggregated into the edges.
  */
 export const criminalStature: { finger: number; height: number; men: number }[] = [
   { finger: 10, height: 4.88, men: 1 },

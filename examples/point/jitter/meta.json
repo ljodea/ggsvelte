@@ -1,5 +1,6 @@
 {
-  "title": "Jittered scatter",
+  "title": "The same wages, jittered by position",
+  "description": "Pearson's drink and wages study again, with the jitter applied through the position rather than the geom sugar.",
   "tags": ["point", "jitter", "position", "overplotting", "theme"],
   "docsSection": "Points & scatter"
 }

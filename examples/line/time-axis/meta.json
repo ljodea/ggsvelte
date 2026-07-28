@@ -1,5 +1,6 @@
 {
-  "title": "Raw-year time-axis line chart",
+  "title": "British and Irish exports, 1855 to 1899",
+  "description": "Bowley's export series with the years left as raw four-digit strings, so the calendar meaning is inferred rather than declared.",
   "tags": ["line", "time", "scales", "inference", "theme"],
   "docsSection": "Lines & time"
 }

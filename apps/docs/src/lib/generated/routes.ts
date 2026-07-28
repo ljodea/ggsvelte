@@ -2526,8 +2526,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/area/basic",
-    title: "Area chart — ggsvelte gallery",
-    description: "Area chart",
+    title: "Halley's life table, 1693 — ggsvelte gallery",
+    description:
+      "Survivors from a cohort of a thousand born in Breslau, drawn as the filled area the first life table implies.",
     canonicalPath: "/examples/area/basic",
     kind: "page",
     index: true,
@@ -2536,8 +2537,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/area/stacked",
-    title: "Stacked area chart — ggsvelte gallery",
-    description: "Stacked area chart",
+    title: "Deaths in the Crimea, 1854 to 1856 — ggsvelte gallery",
+    description:
+      "Nightingale's monthly army deaths split by cause. Disease dwarfs combat until the Sanitary Commission arrives, then collapses.",
     canonicalPath: "/examples/area/stacked",
     kind: "page",
     index: true,
@@ -2546,8 +2548,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/bar/dodged",
-    title: "Dodged bar chart — ggsvelte gallery",
-    description: "Dodged bar chart",
+    title: "Deaths in six English counties, 1876 to 1882 — ggsvelte gallery",
+    description:
+      "The two-way table Edgeworth used to develop the analysis of variance, drawn as side-by-side bars decades before Fisher named the method.",
     canonicalPath: "/examples/bar/dodged",
     kind: "page",
     index: true,
@@ -2556,8 +2559,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/bar/horizontal",
-    title: "Horizontal bar chart (coord flip) — ggsvelte gallery",
-    description: "Horizontal bar chart (coord flip)",
+    title: "Armada tonnage by squadron, 1588 — ggsvelte gallery",
+    description:
+      "The Spanish fleet's tonnage from the muster before it sailed, flipped so the category labels read across and the order runs bottom-up.",
     canonicalPath: "/examples/bar/horizontal",
     kind: "page",
     index: true,
@@ -2566,8 +2570,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/bar/proportions",
-    title: "Proportional bar chart — ggsvelte gallery",
-    description: "Proportional bar chart",
+    title: "Who sailed with the Armada, 1588 — ggsvelte gallery",
+    description:
+      "Soldiers against sailors in each squadron as a share of the men aboard. They outnumber the sailors everywhere except the galleys and the light pataches.",
     canonicalPath: "/examples/bar/proportions",
     kind: "page",
     index: true,
@@ -2576,8 +2581,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/bar/stacked",
-    title: "Stacked bar chart — ggsvelte gallery",
-    description: "Stacked bar chart",
+    title: "The Trial of the Pyx, 1848 — ggsvelte gallery",
+    description:
+      "Ten thousand gold sovereigns drawn from the Royal Mint and weighed, each bag stacked by how far its coins deviated from the standard.",
     canonicalPath: "/examples/bar/stacked",
     kind: "page",
     index: true,
@@ -2619,8 +2625,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/boxplot/by-category",
-    title: "Boxplot by category — ggsvelte gallery",
-    description: "Boxplot by category",
+    title: "Michelson's five runs, 1879 — ggsvelte gallery",
+    description:
+      "Twenty speed-of-light measurements per run. The boxes show that the runs disagree with each other more than the readings within any one of them.",
     canonicalPath: "/examples/boxplot/by-category",
     kind: "page",
     index: true,
@@ -2629,8 +2636,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/boxplot/violin",
-    title: "Violin plots of Michelson's runs — ggsvelte gallery",
-    description: "Violin plots of Michelson's runs",
+    title: "Michelson's five runs as violins — ggsvelte gallery",
+    description:
+      "The same hundred measurements with a mirrored kernel density per run, so the shape of each block of twenty is visible rather than summarised.",
     canonicalPath: "/examples/boxplot/violin",
     kind: "page",
     index: true,
@@ -2639,8 +2647,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/col/basic",
-    title: "Column chart — ggsvelte gallery",
-    description: "Column chart",
+    title: "Chests of 5,738 Scottish soldiers — ggsvelte gallery",
+    description:
+      "The measurements Quetelet used to argue that human variation follows the astronomers' error curve, and so the data behind the average man.",
     canonicalPath: "/examples/col/basic",
     kind: "page",
     index: true,
@@ -2649,8 +2658,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/col/long-labels",
-    title: "Columns with long i18n category labels — ggsvelte gallery",
-    description: "Columns with long i18n category labels",
+    title: "Long category labels at a narrow width — ggsvelte gallery",
+    description:
+      "A layout specimen: Spanish multi-word names and a long German compound at about 480px, where the band axis has to wrap and rotate to fit.",
     canonicalPath: "/examples/col/long-labels",
     kind: "page",
     index: true,
@@ -2659,8 +2669,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/col/mixed-outlier-labels",
-    title: "Columns with one multi-word category outlier — ggsvelte gallery",
-    description: "Columns with one multi-word category outlier",
+    title: "One long label among short ones — ggsvelte gallery",
+    description:
+      "A layout specimen: short categories with a single four-word outlier at a normal desktop width, where the axis should wrap rather than rotate everything.",
     canonicalPath: "/examples/col/mixed-outlier-labels",
     kind: "page",
     index: true,
@@ -2669,8 +2680,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/col/theme-linedraw",
-    title: "Column chart (theme_linedraw) — ggsvelte gallery",
-    description: "Column chart (theme_linedraw)",
+    title: "The same chests under theme_linedraw — ggsvelte gallery",
+    description:
+      "Quetelet's chest measurements again, so the black grid and border of theme_linedraw can be compared against the default and classic chrome.",
     canonicalPath: "/examples/col/theme-linedraw",
     kind: "page",
     index: true,
@@ -2679,8 +2691,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/col/value-labels",
-    title: "Column chart with value labels — ggsvelte gallery",
-    description: "Column chart with value labels",
+    title: "The Salk vaccine field trial, 1954 — ggsvelte gallery",
+    description:
+      "Paralytic polio per 100,000 children in the randomised arm, with the rate printed on each column because that number is the result.",
     canonicalPath: "/examples/col/value-labels",
     kind: "page",
     index: true,
@@ -2689,8 +2702,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/color/binned",
-    title: "Binned color (colorsteps) — ggsvelte gallery",
-    description: "Binned color (colorsteps)",
+    title: "How many beans can you see at once? — ggsvelte gallery",
+    description:
+      "Jevons threw beans into a box 1,027 times and guessed the count without pausing. He was never wrong up to four, and increasingly wrong above it.",
     canonicalPath: "/examples/color/binned",
     kind: "page",
     index: true,
@@ -2699,8 +2713,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/color/continuous",
-    title: "Continuous color (ramp legend) — ggsvelte gallery",
-    description: "Continuous color (ramp legend)",
+    title: "Eleven maps of the Great Lakes, 1688 to 1818 — ggsvelte gallery",
+    description:
+      "Thirty-nine identifiable points read off each old map against their true positions, with map year on a continuous colour ramp.",
     canonicalPath: "/examples/color/continuous",
     kind: "page",
     index: true,
@@ -2720,8 +2735,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/curve/connectors",
-    title: "Curve connectors — ggsvelte gallery",
-    description: "Curve connectors",
+    title: "Darwin's maize, curved — ggsvelte gallery",
+    description:
+      "Fifteen pairs of seedlings, one cross-fertilised and one self-fertilised, joined by a curve running from the self-fertilised height to the crossed one.",
     canonicalPath: "/examples/curve/connectors",
     kind: "page",
     index: true,
@@ -2752,8 +2768,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/density/overlay",
-    title: "Overlaid density estimates — ggsvelte gallery",
-    description: "Overlaid density estimates",
+    title: "Heights of Galton's 934 adult children — ggsvelte gallery",
+    description:
+      "Two overlapping distributions that share most of their range and separate at the means, which is the cleanest small case for overlaid densities.",
     canonicalPath: "/examples/density/overlay",
     kind: "page",
     index: true,
@@ -2773,8 +2790,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/errorbar/mean-se",
-    title: "Errorbars (mean ± se) over raw data — ggsvelte gallery",
-    description: "Errorbars (mean ± se) over raw data",
+    title: "The data the t-test was invented on — ggsvelte gallery",
+    description:
+      "Extra hours of sleep in eleven patients under each of four treatments, with mean and standard error. Student's worked example from 1908.",
     canonicalPath: "/examples/errorbar/mean-se",
     kind: "page",
     index: true,
@@ -2794,8 +2812,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/facet/ordered-side-strips",
-    title: "Ordered small multiples with side strips — ggsvelte gallery",
-    description: "Ordered small multiples with side strips",
+    title: "Counting yeast under a microscope — ggsvelte gallery",
+    description:
+      "Gosset's 1907 haemacytometer counts, 400 squares per sample, in ordered small multiples with the strip labels down the side.",
     canonicalPath: "/examples/facet/ordered-side-strips",
     kind: "page",
     index: true,
@@ -2804,8 +2823,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/facet/wrap",
-    title: "Faceted histograms (facet wrap) — ggsvelte gallery",
-    description: "Faceted histograms (facet wrap)",
+    title: "4,892 English children, measured by Pearson and Lee — ggsvelte gallery",
+    description:
+      "The 1903 family-height study split into one panel per parent's height, so the shift from panel to panel is the inheritance.",
     canonicalPath: "/examples/facet/wrap",
     kind: "page",
     index: true,
@@ -2814,8 +2834,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/facet/wrap-free-y",
-    title: "Free y scales per panel — ggsvelte gallery",
-    description: "Free y scales per panel",
+    title: "London's bills of mortality, 1629 to 1710 — ggsvelte gallery",
+    description:
+      "Arbuthnot's christenings and burials with each panel on its own y scale, so a series that spans a different range still shows its shape.",
     canonicalPath: "/examples/facet/wrap-free-y",
     kind: "page",
     index: true,
@@ -2824,8 +2845,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/freqpoly/basic",
-    title: "Frequency polygon — ggsvelte gallery",
-    description: "Frequency polygon",
+    title: "Michelson's speed of light as a frequency polygon — ggsvelte gallery",
+    description:
+      "The same hundred runs as the histogram, joined through the bin centres instead of drawn as bars.",
     canonicalPath: "/examples/freqpoly/basic",
     kind: "page",
     index: true,
@@ -2845,8 +2867,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/histogram/basic",
-    title: "Histogram — ggsvelte gallery",
-    description: "Histogram",
+    title: "Michelson measures the speed of light, 1879 — ggsvelte gallery",
+    description:
+      "A hundred runs in km/s less 299,000. The modern value sits well off the centre of the distribution, which is the interesting part.",
     canonicalPath: "/examples/histogram/basic",
     kind: "page",
     index: true,
@@ -2855,8 +2878,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/hline/threshold",
-    title: "geom_hline threshold — ggsvelte gallery",
-    description: "geom_hline threshold",
+    title: "Cavendish's readings against the modern value — ggsvelte gallery",
+    description:
+      "Twenty-nine torsion-balance determinations of the earth's density with a horizontal rule at the modern value of 5.517.",
     canonicalPath: "/examples/hline/threshold",
     kind: "page",
     index: true,
@@ -2865,8 +2889,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/interaction/legend-filter",
-    title: "Filter with a stable-color legend — ggsvelte gallery",
-    description: "Filter with a stable-color legend",
+    title: "Playfair's fiscal three, 1770 to 1824 — ggsvelte gallery",
+    description:
+      "Debt, revenue and expenditure. Filter any series from the legend and the ones that come back keep the colour they had.",
     canonicalPath: "/examples/interaction/legend-filter",
     kind: "page",
     index: true,
@@ -2875,8 +2900,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/interaction/legend-focus",
-    title: "Focus and link discrete legend groups — ggsvelte gallery",
-    description: "Focus and link discrete legend groups",
+    title: "Focus a legend group without changing the data — ggsvelte gallery",
+    description:
+      "Three of Playfair's commodity series. Focusing a group dims the others rather than dropping them, so the scales never move under you.",
     canonicalPath: "/examples/interaction/legend-focus",
     kind: "page",
     index: true,
@@ -2886,7 +2912,8 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/interaction/tooltip",
     title: "Inspect and pin data — ggsvelte gallery",
-    description: "Inspect and pin data",
+    description:
+      "Palmer penguin measurements with a crosshair that reads every series at one x, and a pin so the reading stays while you look elsewhere.",
     canonicalPath: "/examples/interaction/tooltip",
     kind: "page",
     index: true,
@@ -2895,8 +2922,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/jitter/basic",
-    title: "geom_jitter sugar — ggsvelte gallery",
-    description: "geom_jitter sugar",
+    title: "Wages across 70 trades, 1910 — ggsvelte gallery",
+    description:
+      "Pearson's study of drink and wages. The trades share a handful of wage classes, so jitter is what separates them into readable marks.",
     canonicalPath: "/examples/jitter/basic",
     kind: "page",
     index: true,
@@ -2905,8 +2933,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/label/basic",
-    title: "Labels with background boxes — ggsvelte gallery",
-    description: "Labels with background boxes",
+    title: "Every name on the first statistical graph, boxed — ggsvelte gallery",
+    description:
+      "Van Langren's 1644 estimates of the Toledo to Rome longitude, each labelled with the astronomer who made it, on a background box that survives the rule beneath.",
     canonicalPath: "/examples/label/basic",
     kind: "page",
     index: true,
@@ -2937,8 +2966,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/line/multi-series",
-    title: "Multi-series line chart — ggsvelte gallery",
-    description: "Multi-series line chart",
+    title: "Playfair's wheat and wages, 1565 to 1821 — ggsvelte gallery",
+    description:
+      "Two series in shillings on one panel: the price of a quarter of wheat swings, and the weekly wage of a good mechanic only climbs.",
     canonicalPath: "/examples/line/multi-series",
     kind: "page",
     index: true,
@@ -2947,8 +2977,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/line/time-axis",
-    title: "Raw-year time-axis line chart — ggsvelte gallery",
-    description: "Raw-year time-axis line chart",
+    title: "British and Irish exports, 1855 to 1899 — ggsvelte gallery",
+    description:
+      "Bowley's export series with the years left as raw four-digit strings, so the calendar meaning is inferred rather than declared.",
     canonicalPath: "/examples/line/time-axis",
     kind: "page",
     index: true,
@@ -3012,8 +3043,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/canvas-scatter",
-    title: "Canvas scatter (2,500 points) — ggsvelte gallery",
-    description: "Canvas scatter (2,500 points)",
+    title: "Two and a half thousand points on canvas — ggsvelte gallery",
+    description:
+      "Above the automatic threshold ggsvelte renders marks to canvas instead of SVG, which is what keeps a scatter this size interactive.",
     canonicalPath: "/examples/point/canvas-scatter",
     kind: "page",
     index: true,
@@ -3033,8 +3065,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/fixed-aspect",
-    title: "Fixed aspect ratio — ggsvelte gallery",
-    description: "Fixed aspect ratio",
+    title: "Equal units stay circular — ggsvelte gallery",
+    description:
+      "A unit circle drawn under coord_fixed, which pins one pixel to one data unit on both axes so a circle cannot arrive as an ellipse.",
     canonicalPath: "/examples/point/fixed-aspect",
     kind: "page",
     index: true,
@@ -3065,8 +3098,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/jitter",
-    title: "Jittered scatter — ggsvelte gallery",
-    description: "Jittered scatter",
+    title: "The same wages, jittered by position — ggsvelte gallery",
+    description:
+      "Pearson's drink and wages study again, with the jitter applied through the position rather than the geom sugar.",
     canonicalPath: "/examples/point/jitter",
     kind: "page",
     index: true,
@@ -3086,8 +3120,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/log-scale",
-    title: "Log-scale scatter with inspection — ggsvelte gallery",
-    description: "Log-scale scatter with inspection",
+    title: "Cholera, crowding and water in London, 1849 — ggsvelte gallery",
+    description:
+      "Farr's 38 districts: death rate against population density on a log x scale, coloured by which company supplied the water.",
     canonicalPath: "/examples/point/log-scale",
     kind: "page",
     index: true,
@@ -3107,8 +3142,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/scatter-color",
-    title: "Scatter plot with color mapping — ggsvelte gallery",
-    description: "Scatter plot with color mapping",
+    title: "Literacy and crime in France, 1833 — ggsvelte gallery",
+    description:
+      "Guerry's 86 departments, coloured by region. His uncomfortable finding was that more literate departments did not have less crime.",
     canonicalPath: "/examples/point/scatter-color",
     kind: "page",
     index: true,
@@ -3194,8 +3230,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/raster/grid",
-    title: "Regular density grid (geom raster) — ggsvelte gallery",
-    description: "Regular density grid (geom raster)",
+    title: "Three thousand criminals, measured — ggsvelte gallery",
+    description:
+      "Macdonell's 1902 table of stature against left middle finger length as a complete regular grid, which is what geom_raster needs to work.",
     canonicalPath: "/examples/raster/grid",
     kind: "page",
     index: true,
@@ -3204,8 +3241,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/rect/regions",
-    title: "Shaded time bands (geom rect) — ggsvelte gallery",
-    description: "Shaded time bands (geom rect)",
+    title: "The price of wheat under twelve reigns — ggsvelte gallery",
+    description:
+      "Playfair's wheat series with each monarch's reign drawn as a shaded band behind it, the way Playfair drew them himself.",
     canonicalPath: "/examples/rect/regions",
     kind: "page",
     index: true,
@@ -3214,8 +3252,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/ribbon/bounds",
-    title: "Ribbon interval — ggsvelte gallery",
-    description: "Ribbon interval",
+    title: "Halley's Breslau burials, 1687 to 1691 — ggsvelte gallery",
+    description:
+      "Five years of burial records by age, with the band showing the observed year-to-year range at each age around the mean.",
     canonicalPath: "/examples/ribbon/bounds",
     kind: "page",
     index: true,
@@ -3224,8 +3263,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/ribbon/paint",
-    title: "Ribbon paint — ggsvelte gallery",
-    description: "Ribbon paint",
+    title: "A ribbon with gradient fill, stroke and glow — ggsvelte gallery",
+    description:
+      "The paint options a ribbon can carry, on a precomputed interval: a portable gradient across the band, a stroked edge and a glow beneath.",
     canonicalPath: "/examples/ribbon/paint",
     kind: "page",
     index: true,
@@ -3234,8 +3274,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/rule/annotation",
-    title: "Reference-line annotations — ggsvelte gallery",
-    description: "Reference-line annotations",
+    title: "Two rules on Cavendish's determinations — ggsvelte gallery",
+    description:
+      "The twenty-nine readings with reference rules marking the modern value and the run at which he refitted the balance.",
     canonicalPath: "/examples/rule/annotation",
     kind: "page",
     index: true,
@@ -3244,8 +3285,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/rule/data-driven",
-    title: "Data-driven rules (rug) — ggsvelte gallery",
-    description: "Data-driven rules (rug)",
+    title: "The first statistical graph was a rug — ggsvelte gallery",
+    description:
+      "Van Langren's 1644 longitude estimates, one rule per determination, which is the form his own chart took.",
     canonicalPath: "/examples/rule/data-driven",
     kind: "page",
     index: true,
@@ -3254,8 +3296,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/segment/annotations",
-    title: "Segment annotations — ggsvelte gallery",
-    description: "Segment annotations",
+    title: "Darwin's maize, 1876 — ggsvelte gallery",
+    description:
+      "Fifteen pairs grown side by side, each drawn as a segment from the self-fertilised height to the cross-fertilised one, so the direction is the result.",
     canonicalPath: "/examples/segment/annotations",
     kind: "page",
     index: true,
@@ -3319,8 +3362,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/smooth/loess-scatter",
-    title: "Loess smooth with confidence ribbon — ggsvelte gallery",
-    description: "Loess smooth with confidence ribbon",
+    title: "The first scatterplot, redrawn — ggsvelte gallery",
+    description:
+      "Herschel plotted gamma Virginis in 1833 and fitted the curve through it by hand. A loess smooth with a confidence band does the same job.",
     canonicalPath: "/examples/smooth/loess-scatter",
     kind: "page",
     index: true,
@@ -3329,8 +3373,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/spoke/vector-field",
-    title: "Spoke vector field — ggsvelte gallery",
-    description: "Spoke vector field",
+    title: "Which way the water runs off Maunga Whau — ggsvelte gallery",
+    description:
+      "The downhill direction and steepness of an Auckland volcano at 140 points: a direction and a size at every place, which is what geom_spoke draws.",
     canonicalPath: "/examples/spoke/vector-field",
     kind: "page",
     index: true,
@@ -3350,8 +3395,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/text/labels",
-    title: "Text labels on a scatter — ggsvelte gallery",
-    description: "Text labels on a scatter",
+    title: "Every name on the first statistical graph — ggsvelte gallery",
+    description:
+      "Van Langren, 1644: the labels are the data, because he named the astronomer behind every estimate including the ones that were wrong.",
     canonicalPath: "/examples/text/labels",
     kind: "page",
     index: true,
@@ -3360,8 +3406,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/tile/heatmap",
-    title: "Categorical heatmap (geom tile) — ggsvelte gallery",
-    description: "Categorical heatmap (geom tile)",
+    title: "Cholera in England and Wales, 1849 — ggsvelte gallery",
+    description:
+      "Every day of the epidemic from Farr's weekly returns, laid out as a calendar of tiles so the summer peak reads as a block.",
     canonicalPath: "/examples/tile/heatmap",
     kind: "page",
     index: true,
@@ -3370,8 +3417,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/vline/cutoff",
-    title: "geom_vline cutoff — ggsvelte gallery",
-    description: "geom_vline cutoff",
+    title: "Where Cavendish refitted the balance — ggsvelte gallery",
+    description:
+      "The twenty-nine determinations in the order he reported them, with a vertical rule at the run where he fitted a stiffer wire.",
     canonicalPath: "/examples/vline/cutoff",
     kind: "page",
     index: true,
@@ -3381,7 +3429,8 @@ export const DOCS_ROUTES = [
   {
     path: "/interactions/brush-zoom",
     title: "Interval selection and zoom — ggsvelte interactions",
-    description: "Interval selection and zoom",
+    description:
+      "333 Palmer penguins: brush a rectangle to select, or zoom into the crowded middle where the species overlap.",
     canonicalPath: "/interactions/brush-zoom",
     kind: "page",
     index: true,
@@ -3390,8 +3439,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/interactions/facet-intervals",
-    title: "Coordinate intervals across facets — ggsvelte interactions",
-    description: "Coordinate intervals across facets",
+    title: "One interval, applied in every panel — ggsvelte interactions",
+    description:
+      "333 Palmer penguins split by island, with a coordinate interval selection that holds across all the facets at once.",
     canonicalPath: "/interactions/facet-intervals",
     kind: "page",
     index: true,
@@ -3401,7 +3451,8 @@ export const DOCS_ROUTES = [
   {
     path: "/interactions/linked-views",
     title: "Link plots, controls, and a table — ggsvelte interactions",
-    description: "Link plots, controls, and a table",
+    description:
+      "Five Palmer penguins per species, so every row a selection touches is visible in the table beside the chart.",
     canonicalPath: "/interactions/linked-views",
     kind: "page",
     index: true,
@@ -3411,7 +3462,8 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/interaction/brush-zoom",
     title: "Interval selection and zoom — ggsvelte interactions",
-    description: "Interval selection and zoom",
+    description:
+      "333 Palmer penguins: brush a rectangle to select, or zoom into the crowded middle where the species overlap.",
     canonicalPath: "/interactions/brush-zoom",
     kind: "alias",
     index: false,
@@ -3420,8 +3472,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/interaction/facet-intervals",
-    title: "Coordinate intervals across facets — ggsvelte interactions",
-    description: "Coordinate intervals across facets",
+    title: "One interval, applied in every panel — ggsvelte interactions",
+    description:
+      "333 Palmer penguins split by island, with a coordinate interval selection that holds across all the facets at once.",
     canonicalPath: "/interactions/facet-intervals",
     kind: "alias",
     index: false,
@@ -3431,7 +3484,8 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/interaction/linked-views",
     title: "Link plots, controls, and a table — ggsvelte interactions",
-    description: "Link plots, controls, and a table",
+    description:
+      "Five Palmer penguins per species, so every row a selection touches is visible in the table beside the chart.",
     canonicalPath: "/interactions/linked-views",
     kind: "alias",
     index: false,
@@ -3441,7 +3495,8 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/interactions/inspection",
     title: "Inspect and pin data — ggsvelte gallery",
-    description: "Inspect and pin data",
+    description:
+      "Palmer penguin measurements with a crosshair that reads every series at one x, and a pin so the reading stays while you look elsewhere.",
     canonicalPath: "/examples/interaction/tooltip",
     kind: "alias",
     index: false,
@@ -3451,7 +3506,8 @@ export const DOCS_ROUTES = [
   {
     path: "/examples/interactions/interval-selection",
     title: "Interval selection and zoom — ggsvelte interactions",
-    description: "Interval selection and zoom",
+    description:
+      "333 Palmer penguins: brush a rectangle to select, or zoom into the crowded middle where the species overlap.",
     canonicalPath: "/interactions/brush-zoom",
     kind: "alias",
     index: false,

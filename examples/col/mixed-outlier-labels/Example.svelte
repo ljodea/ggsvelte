@@ -14,6 +14,11 @@
   width={640}
   height={320}
 >
-  <Labs title="Filing types (mixed label lengths)" x="Category" y="Count" />
+  <Labs
+    title="One long label among short ones"
+    subtitle="At a normal panel width the axis should wrap the outlier, not rotate every label"
+    x="Category"
+    y="Count"
+  />
   <GeomCol />
 </GGPlot>

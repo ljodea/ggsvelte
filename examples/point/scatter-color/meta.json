@@ -1,5 +1,6 @@
 {
-  "title": "Scatter plot with color mapping",
+  "title": "Literacy and crime in France, 1833",
+  "description": "Guerry's 86 departments, coloured by region. His uncomfortable finding was that more literate departments did not have less crime.",
   "tags": ["point", "color", "legend", "scatter", "theme", "palette"],
   "docsSection": "Points & scatter"
 }

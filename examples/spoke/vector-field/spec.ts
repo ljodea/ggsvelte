@@ -1,20 +1,22 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { vectorField } from "./data.js";
+import { maungaWhauSlope } from "./data.js";
 
 export default defineExample(
-  // geom_spoke: one segment per row from (x,y) in direction angle (radians)
-  // with length radius. Tips train domains; paint reuses segment strokes.
-  gg(vectorField, aes({ x: "x", y: "y", angle: "angle", radius: "radius" }))
+  // geom_spoke draws one segment per row from (x, y) along angle for radius.
+  // It is the geom for a field: a direction and a size at every place, which
+  // is what a slope, a wind or a current is.
+  gg(maungaWhauSlope, aes({ x: "east", y: "north", angle: "angle", radius: "fall" }))
     .geomSpoke({ linewidth: 1.6, lineend: "round", alpha: 0.9 })
-    .geomPoint({ size: 2, alpha: 0.55 })
+    .geomPoint({ size: 2, alpha: 0.7 })
+    .coordFixed()
     .theme("classic")
     .labs({
-      title: "Spoke vector field",
-      subtitle: "geom_spoke: origin + angle (radians) + radius → segment",
-      x: "x",
-      y: "y",
+      title: "Which way the water runs off Maunga Whau",
+      subtitle: "Downhill direction at 140 points, arrow length by how steep the ground is",
+      x: "Metres east",
+      y: "Metres north",
     })
     .spec(),
 );

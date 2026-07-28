@@ -1,5 +1,6 @@
 {
-  "title": "Regular density grid (geom raster)",
+  "title": "Three thousand criminals, measured",
+  "description": "Macdonell's 1902 table of stature against left middle finger length as a complete regular grid, which is what geom_raster needs to work.",
   "tags": ["raster", "grid", "heatmap"],
   "docsSection": "Rectangles & grids"
 }
