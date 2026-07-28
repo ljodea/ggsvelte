@@ -14,6 +14,11 @@
   width={480}
   height={420}
 >
-  <Labs title="Filing types (long category labels)" x="Category" y="Count" />
+  <Labs
+    title="Long category labels at a narrow width"
+    subtitle="The band axis has to wrap and rotate to fit these names at 480px"
+    x="Category"
+    y="Count"
+  />
   <GeomCol />
 </GGPlot>
