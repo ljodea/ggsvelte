@@ -1,11 +1,11 @@
 /**
  * Interval-selection + bounds-editor controller extracted from GGPlot for S5.
  *
- * Owns the five $state fields (committedInterval, committedIntervalRecord,
- * localCommittedIntervals, boundsEditor, boundsReturnFocus), construction-time
- * deriveds (effectiveIntervals, effectiveIntervalKeys, currentInterval* family,
- * boundsEditorInput), both effects (interval-reconcile + bounds-cancel), private
- * helpers, and the public clear/commit/bounds methods.
+ * Owns committedInterval / committedIntervalRecord / boundsEditor /
+ * boundsReturnFocus, the interval ScopedStore (local vs controller records),
+ * construction-time deriveds (effectiveIntervals, effectiveIntervalKeys,
+ * currentInterval* family, boundsEditorInput), both effects (interval-reconcile
+ * + bounds-cancel), private helpers, and the public clear/commit/bounds methods.
  *
  * Construction-time deriveds may legitimately read model / effectiveZoomDomains
  * (factory sits after the runtime). Armed later-declared / handler-only deps
@@ -38,6 +38,7 @@ import type {
   ResolvedInteractionConfig,
   SemanticIntervalAxis,
 } from "../interaction/interaction.js";
+import { createIntervalScopedStore } from "../interaction/scoped-store.svelte.js";
 import type { BoundsEditorInput, PreciseBoundsApplyEvent } from "./bounds-editor.js";
 import { frozenZoomDomains, type ContinuousZoomDomains } from "../scene/geometry.js";
 import {
@@ -47,10 +48,10 @@ import {
 } from "./interval.js";
 import {
   consumeIntervalKeys,
-  nextLocalIntervalRecords,
-  prepareCandidateInInterval,
+  recomputePanelIntervalProjection,
   sameIntervalRecord,
   type IntervalConsumptionCandidate,
+  type RecomputePanelIntervalProjectionInput,
 } from "./consumption.js";
 import { boundsEditorInputForScale, semanticAxisFromBounds } from "./precise-bounds.js";
 
@@ -164,7 +165,10 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   // Semantic snapshot of the record backing `committedInterval`, so external
   // same-panel replacements are detected by content, not just presence.
   let committedIntervalRecord = $state<PlotInteractionInterval<PropertyKey> | null>(null);
-  let localCommittedIntervals = $state<PlotInteractionInterval<PropertyKey>[]>([]);
+  const committedIntervals = createIntervalScopedStore({
+    controller: deps.interaction,
+    scope: deps.resolvedInteractionScope,
+  });
   let boundsEditor = $state<{
     action: "select" | "zoom";
     axis: "x" | "y";
@@ -173,14 +177,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   } | null>(null);
   let boundsReturnFocus = $state<HTMLElement | null>(null);
 
-  const effectiveIntervals = $derived.by(() => {
-    // Equivalent dependency to the host `controllerRevision` derived —
-    // read interaction revision directly (no extra dep).
-    void (deps.interaction()?.revision ?? 0);
-    return (
-      deps.interaction()?.intervals(deps.resolvedInteractionScope()) ?? localCommittedIntervals
-    );
-  });
+  const effectiveIntervals = $derived(committedIntervals.value);
 
   const effectiveIntervalKeys: readonly PropertyKey[] = $derived.by(() => {
     const model = deps.model();
@@ -325,14 +322,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   function clearIntervalSelection(source: InteractionSource): void {
     const current = committedInterval;
     if (current === null && effectiveIntervals.length === 0) return;
-    if (deps.interaction() === undefined) {
-      localCommittedIntervals = [];
-    } else {
-      deps.interaction()!.clearIntervals({
-        scope: deps.resolvedInteractionScope(),
-        source,
-      });
-    }
+    committedIntervals.clear(source);
     const event = clearIntervalSelectionEvent(
       current ?? {
         mode: deps.selectConfig()?.mode ?? "xy",
@@ -349,16 +339,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   function clearCurrentPanelInterval(source: InteractionSource): void {
     const intervalPanelId = committedInterval?.panelId ?? currentIntervalRecord?.panelId;
     if (intervalPanelId === null || intervalPanelId === undefined) return;
-    if (deps.interaction() === undefined) {
-      localCommittedIntervals = localCommittedIntervals.filter(
-        (interval) => interval.panelId !== intervalPanelId,
-      );
-    } else {
-      deps.interaction()!.clearInterval(intervalPanelId, {
-        scope: deps.resolvedInteractionScope(),
-        source,
-      });
-    }
+    committedIntervals.remove(intervalPanelId, source);
     const event = clearIntervalSelectionEvent(
       committedInterval ?? {
         mode: deps.selectConfig()?.mode ?? "xy",
@@ -397,8 +378,9 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
 
   /**
    * One full-store pass for precise-bounds apply: semantic keys + lineage row
-   * count for the target panel/domains. Was two walks (consumption bag then
-   * intervalLineageCount) with intermediate rowIndexesForCandidate arrays.
+   * count for the target panel/domains. Projects the live CandidateStore into
+   * the pure consumption port (always with sourceRows so lineageCount tracks
+   * unique rows — the live path never omits them).
    */
   function recomputePanelIntervalSelection(
     targetPanelId: string,
@@ -406,18 +388,29 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
   ): { readonly keys: readonly PropertyKey[]; readonly lineageCount: number } {
     const model = deps.model();
     if (model === null) return { keys: Object.freeze([]), lineageCount: 0 };
-    const inInterval = prepareCandidateInInterval(domains);
-    const keys = new Set<PropertyKey>();
-    const rows = new Set<number>();
+    type ProjectionCandidate =
+      RecomputePanelIntervalProjectionInput<PropertyKey>["candidates"][number];
+    const candidates: ProjectionCandidate[] = [];
     for (let id = 0; id < model.candidates.size; id++) {
       const candidate = model.candidates.candidate(id);
-      if (candidate === null || candidate.panelId !== targetPanelId || !inInterval(candidate))
-        continue;
-      for (const key of deps.candidateSemanticKeys(candidate)) keys.add(key);
-      for (const rowIndex of model.lineage.keys(candidate.lineage)) rows.add(rowIndex);
-      if (candidate.rowIndex !== null) rows.add(candidate.rowIndex);
+      if (candidate === null || candidate.panelId !== targetPanelId) continue;
+      const sourceRows = [
+        ...model.lineage.keys(candidate.lineage),
+        ...(candidate.rowIndex !== null ? [candidate.rowIndex] : []),
+      ];
+      candidates.push({
+        panelId: candidate.panelId,
+        xValue: candidate.xValue,
+        yValue: candidate.yValue,
+        keys: deps.candidateSemanticKeys(candidate),
+        sourceRows,
+      });
     }
-    return { keys: Object.freeze([...keys]), lineageCount: rows.size };
+    return recomputePanelIntervalProjection({
+      panelId: targetPanelId,
+      domains,
+      candidates,
+    });
   }
 
   /** Private — no remaining external consumer (codex P2-7). */
@@ -442,14 +435,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
       keys: Object.freeze([...event.keys]),
     });
     committedIntervalRecord = record;
-    if (deps.interaction() === undefined) {
-      localCommittedIntervals = [...nextLocalIntervalRecords(localCommittedIntervals, record)];
-    } else {
-      deps.interaction()!.setInterval(record, {
-        scope: deps.resolvedInteractionScope(),
-        source,
-      });
-    }
+    committedIntervals.upsert(record, source);
   }
 
   function finishBrushSelect(eventValue: IntervalSelection, source: InteractionSource): void {
@@ -534,14 +520,7 @@ export function createIntervalState(deps: IntervalStateDeps): IntervalState {
     const persistent = deps.selectConfig()?.persistent === true;
     if (persistent) {
       committedIntervalRecord = next;
-      if (deps.interaction() === undefined) {
-        localCommittedIntervals = [...nextLocalIntervalRecords(localCommittedIntervals, next)];
-      } else {
-        deps.interaction()!.setInterval(next, {
-          scope: deps.resolvedInteractionScope(),
-          source: event.inputSource,
-        });
-      }
+      committedIntervals.upsert(next, event.inputSource);
     }
     const viewportPanel = model.viewport.panel(targetPanelId);
     if (viewportPanel === null) return;

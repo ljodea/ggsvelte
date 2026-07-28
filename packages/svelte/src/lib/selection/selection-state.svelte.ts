@@ -18,6 +18,7 @@ import type {
   PlotSelection,
   ResolvedInteractionConfig,
 } from "../interaction/interaction.js";
+import { createScopedStore } from "../interaction/scoped-store.svelte.js";
 import { selectionAnnouncement } from "../assembly/labels.js";
 import {
   buildPointSelectionEvent,
@@ -59,40 +60,35 @@ export type SelectionState = {
  * `effectiveSelectedKeys` derived over interaction and scope.
  */
 export function createSelectionState(deps: SelectionStateDeps): SelectionState {
-  let localSelectedKeys = $state<PropertyKey[]>([]);
-
-  const effectiveSelectedKeys: readonly PropertyKey[] = $derived.by(() => {
-    // Equivalent dependency to the former host `controllerRevision` derived —
-    // read interaction revision directly (S3–S5 pattern).
-    void (deps.interaction()?.revision ?? 0);
-    return deps.interaction()?.selected(deps.resolvedInteractionScope()) ?? localSelectedKeys;
+  const selectedKeys = createScopedStore<readonly PropertyKey[]>({
+    initial: [],
+    controller: deps.interaction,
+    scope: deps.resolvedInteractionScope,
+    read: (controller, scope) => controller.selected(scope),
+    write: (controller, next, scope, source) => {
+      const transition = controller.setSelection(next, { scope, source });
+      if (transition === null) return null;
+      return {
+        value:
+          transition.snapshot.selections.find((selection) => selection.scope === scope.keys)
+            ?.keys ?? [],
+      };
+    },
+    clearShared: (controller, scope, source) =>
+      controller.clearSelection({ scope, source }) !== null,
+    same: sameOrderedPropertyKeys,
   });
 
   /** Private — only clear/toggle call this; no external caller (P2-7). */
   function commitPointSelection(keys: readonly PropertyKey[], source: InteractionSource): void {
-    let committed: readonly PropertyKey[];
-    const interaction = deps.interaction();
-    if (interaction === undefined) {
-      const next = [...new Set(keys)];
-      if (sameOrderedPropertyKeys(next, localSelectedKeys)) return;
-      localSelectedKeys = next;
-      committed = localSelectedKeys;
-    } else {
-      const transition = interaction.setSelection(keys, {
-        scope: deps.resolvedInteractionScope(),
-        source,
-      });
-      if (transition === null) return;
-      committed =
-        transition.snapshot.selections.find(
-          (selection) => selection.scope === deps.resolvedInteractionScope().keys,
-        )?.keys ?? [];
-    }
-    emitSelection(buildPointSelectionEvent(committed, source));
+    // Dedup for local storage; controller canonicalizes independently.
+    const committed = selectedKeys.set([...new Set(keys)], source);
+    if (committed === null) return;
+    emitSelection(buildPointSelectionEvent(committed.value, source));
   }
 
   function clearPointSelection(source: InteractionSource): void {
-    if (effectiveSelectedKeys.length === 0) return;
+    if (selectedKeys.value.length === 0) return;
     commitPointSelection([], source);
   }
 
@@ -106,7 +102,7 @@ export function createSelectionState(deps: SelectionStateDeps): SelectionState {
   function togglePointKeys(keys: readonly PropertyKey[], source: InteractionSource): void {
     if (keys.length === 0) return;
     const next = nextPointSelectionKeys(
-      effectiveSelectedKeys,
+      selectedKeys.value,
       keys,
       deps.selectConfig()?.multiple ?? false,
     );
@@ -115,7 +111,7 @@ export function createSelectionState(deps: SelectionStateDeps): SelectionState {
 
   return {
     get effectiveSelectedKeys() {
-      return effectiveSelectedKeys;
+      return selectedKeys.value;
     },
     clearPointSelection,
     togglePointKeys,
