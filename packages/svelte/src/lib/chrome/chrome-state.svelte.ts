@@ -19,10 +19,11 @@ import {
 } from "../interaction/interaction.js";
 import {
   bandChannelsForZoom,
+  canPublishPointSelection as canPublishPointSelectionFromSelect,
   capabilityStatusText,
-  filterAvailableTools,
   isEmptyPlotScene,
   legendFocusDiscreteOnlyDiagnostics,
+  resolveFilteredAvailableTools,
   shouldShowToolRail,
   zoomScaleDiagnosticsFromChannels,
   zoomSupportsChannel,
@@ -100,10 +101,16 @@ export function createPlotChromeState(deps: PlotChromeStateDeps): PlotChromeStat
   });
 
   const availableTools = $derived(
-    filterAvailableTools(deps.configuredAvailableTools(), zoomHasSupportedChannel),
+    resolveFilteredAvailableTools(
+      deps.configuredAvailableTools(),
+      deps.zoomConfig(),
+      deps.model()?.scales ?? null,
+    ),
   );
 
-  const canPublishPointSelection = $derived(deps.selectConfig()?.type === "point");
+  const canPublishPointSelection = $derived(
+    canPublishPointSelectionFromSelect(deps.selectConfig()),
+  );
 
   // Shared by tool-rail visibility and ToolRail recovery props (avoid dual calc).
   const hasPointSelection = $derived(
