@@ -61,7 +61,9 @@ export function temporalOptions(input: TemporalAxisPlanInput) {
     kind: input.kind,
     locale: input.config.locale ?? "en-US",
     timezone:
-      input.kind === "date" || input.kind === "time" ? "UTC" : (input.config.timezone ?? "UTC"),
+      input.kind === "date" || input.kind === "time" || input.kind === "monthDay"
+        ? "UTC"
+        : (input.config.timezone ?? "UTC"),
     weekStart: input.config.weekStart ?? "monday",
     ...(input.config.disambiguation !== undefined && {
       disambiguation: input.config.disambiguation,
@@ -206,7 +208,15 @@ export function automaticCandidate(input: TemporalAxisPlanInput): TemporalCandid
         ? AUTOMATIC_INTERVALS.filter((candidate) =>
             ["millisecond", "second", "minute", "hour"].includes(candidate.unit),
           )
-        : AUTOMATIC_INTERVALS;
+        : // A yearless axis holds one year, so a year tick is the same tick
+          // twice. A week tick is worse than useless: it implies a weekday, and
+          // the weekday belongs to the reference year rather than to the data.
+          // Below a day there is nothing left to resolve.
+          input.kind === "monthDay"
+          ? AUTOMATIC_INTERVALS.filter((candidate) =>
+              ["day", "month", "quarter"].includes(candidate.unit),
+            )
+          : AUTOMATIC_INTERVALS;
   const span = Math.max(1, input.domain[1] - input.domain[0]);
   const previousApprox =
     input.previousInterval === undefined || input.previousInterval === null

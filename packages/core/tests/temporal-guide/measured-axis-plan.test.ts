@@ -230,3 +230,52 @@ describe("measured temporal axis GuidePlan", () => {
     expect(minor.every((tick) => !major.has(tick.value))).toBe(true);
   });
 });
+
+describe("month-day axis plan", () => {
+  const REF = 2000;
+  const planBloom = (config = {}, extentPx = 420) =>
+    planTemporalAxis({
+      aesthetic: "y",
+      panelIndex: 0,
+      // The Kyoto bloom window: mid-March to mid-May, one year wide.
+      domain: [Date.UTC(REF, 2, 18), Date.UTC(REF, 4, 10)],
+      kind: "monthDay",
+      orient: "vertical",
+      extentPx,
+      reverse: true,
+      measurer,
+      fontSize: 11,
+      marginCapPx: 160,
+      config,
+    });
+
+  it("labels every tick with a month and a day, never a year", () => {
+    const plan = planBloom();
+    const majors = plan.ticks.filter((tick) => tick.kind === "major");
+    expect(majors.length).toBeGreaterThanOrEqual(2);
+    for (const tick of majors) {
+      // A month name alone ("Apr") is a legitimate pick at a coarse interval;
+      // what must never appear is a year.
+      expect(tick.label).toMatch(/^[A-Z][a-z]{2}( \d{1,2})?$/);
+      expect(tick.label).not.toContain(String(REF));
+    }
+  });
+
+  it("never picks an interval a yearless axis cannot mean", () => {
+    // A year tick would be the same tick twice over, and a week tick implies a
+    // weekday — which belongs to the reference year, not to the data.
+    for (const extentPx of [200, 420, 900]) {
+      const { interval } = planBloom({}, extentPx);
+      expect(interval, String(extentPx)).not.toContain("year");
+      expect(interval, String(extentPx)).not.toContain("week");
+    }
+  });
+
+  it("honours an authored interval and keeps its labels year-free", () => {
+    const plan = planBloom({ dateBreaks: "10 days" });
+    expect(plan.interval).toContain("day");
+    for (const tick of plan.ticks.filter((candidate) => candidate.kind === "major")) {
+      expect(tick.label).not.toContain(String(REF));
+    }
+  });
+});
