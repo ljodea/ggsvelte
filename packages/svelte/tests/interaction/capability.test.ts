@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   bandChannelsForZoom,
+  canPublishPointSelection,
   capabilityStatusText,
   filterAvailableTools,
   legendFocusDiscreteOnlyDiagnostics,
   resolveChooseToolAction,
   resolveEffectiveTool,
+  resolveFilteredAvailableTools,
   isEmptyPlotScene,
   shouldShowInertSelectionOverlay,
   shouldShowToolRail,
@@ -70,6 +72,33 @@ describe("filterAvailableTools", () => {
   it("leaves non-zoom tools untouched when zoom is unsupported", () => {
     expect(filterAvailableTools(["inspect", "point"], false)).toEqual(["inspect", "point"]);
     expect(filterAvailableTools(["zoom-area"], false)).toEqual([]);
+  });
+});
+
+describe("resolveFilteredAvailableTools", () => {
+  const all = ["inspect", "point", "select-area", "zoom-area"] as const;
+
+  it("keeps zoom-area when zoom or scales are unavailable (pre-model path)", () => {
+    expect(resolveFilteredAvailableTools(all, null, continuous)).toEqual([...all]);
+    expect(resolveFilteredAvailableTools(all, { mode: "xy" }, null)).toEqual([...all]);
+  });
+
+  it("drops zoom-area when every requested channel is band", () => {
+    expect(resolveFilteredAvailableTools(all, { mode: "xy" }, bandBoth)).toEqual([
+      "inspect",
+      "point",
+      "select-area",
+    ]);
+    expect(resolveFilteredAvailableTools(all, { mode: "xy" }, continuous)).toEqual([...all]);
+  });
+});
+
+describe("canPublishPointSelection", () => {
+  it("is true only for point select configs", () => {
+    expect(canPublishPointSelection({ type: "point" })).toBe(true);
+    expect(canPublishPointSelection({ type: "interval" })).toBe(false);
+    expect(canPublishPointSelection(null)).toBe(false);
+    expect(canPublishPointSelection(undefined)).toBe(false);
   });
 });
 

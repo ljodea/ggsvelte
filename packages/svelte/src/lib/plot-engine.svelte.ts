@@ -16,6 +16,19 @@
  * the runtime cycles (surface ↔ inspection ↔ interval ↔ selection). This
  * module preserves the pre-S11 top-to-bottom declaration order from GGPlot.
  *
+ * Residual late bindings (definite-assignment / late hooks only where the
+ * cycle is real):
+ * - surfaceState! — inspection needs the surface reducer; surface needs
+ *   inspection handlers
+ * - semanticCandidateProjection! — interval consumptionCandidates close over
+ *   the projection built after legend focus
+ * - legendFocusState.installHostDerivedEffects() — host $derived entry lists
+ *   require this factory's compute* methods (#627)
+ *
+ * Surface tool enablement (`availableTools`, point-select) is host-derived
+ * before surface construction so chrome is not a surface construction-time
+ * dep (#1082). Chrome recomputes the same pure formulas for UI consumers.
+ *
  * Cross-module transition side effects (e.g. inspection dismiss → brush/tool)
  * are applied via `applyInspectionDismissSideEffects` at the surface call site
  * (#627). Leaf modules register their own effects at construction; the engine
@@ -42,6 +55,10 @@ import {
 } from "./diagnostics/composition.js";
 import type { PlotDiagnostic } from "./diagnostics/deprecation.js";
 import type { LayerRegistry } from "./geoms/registry.svelte.js";
+import {
+  canPublishPointSelection,
+  resolveFilteredAvailableTools,
+} from "./interaction/capability.js";
 import {
   normalizeInteractionConfig,
   type InteractionDiagnostic,
@@ -489,17 +506,25 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
 
   // ------------------------------------------------- surface
   // Inspection + interval + selection already constructed — no sibling TDZ
-  // getters for those. Chrome availableTools / pointSelect still late.
-  let chromeState!: ReturnType<typeof createPlotChromeState>;
+  // getters for those. Tool enablement is host-derived (same pure formulas as
+  // chrome) so surface does not close over later chromeState (#1082).
+  const surfaceAvailableTools = $derived(
+    resolveFilteredAvailableTools(
+      interactionConfig.availableTools,
+      interactionConfig.zoom,
+      runtime.model?.scales ?? null,
+    ),
+  );
+  const surfacePointSelectEnabled = $derived(canPublishPointSelection(interactionConfig.select));
   surfaceState = createSurfaceState({
     model: () => runtime.model,
     root: host.root,
     toolProp: () => host.props.tool,
     initialTool: () => interactionConfig.initialTool,
-    availableTools: () => chromeState.availableTools,
+    availableTools: () => surfaceAvailableTools,
     inspectConfig: () => interactionConfig.inspect,
     selectConfig: () => interactionConfig.select,
-    pointSelectEnabled: () => chromeState.canPublishPointSelection,
+    pointSelectEnabled: () => surfacePointSelectEnabled,
     ontoolchange: () => host.props.ontoolchange,
     surfaceInteractive: () => surfaceInteractive,
     candidateSemanticKeys: (candidate) => candidateSemanticKeys(candidate),
@@ -564,8 +589,10 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   });
   // ------------------------------------------------- plot chrome
   // All host bindings earlier-declared. Pure construction-time deriveds —
-  // no $state/handlers/effects.
-  chromeState = createPlotChromeState({
+  // no $state/handlers/effects. No longer a surface construction-time dep
+  // (#1082); availableTools / canPublishPointSelection stay chrome-owned for
+  // UI, recomputed with the same pure helpers as surfaceAvailableTools above.
+  const chromeState = createPlotChromeState({
     model: () => runtime.model,
     zoomConfig: () => interactionConfig.zoom,
     selectConfig: () => interactionConfig.select,

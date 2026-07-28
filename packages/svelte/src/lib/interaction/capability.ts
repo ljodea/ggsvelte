@@ -18,6 +18,29 @@ export function filterAvailableTools(
 }
 
 /**
+ * Filter configured tools using live zoom mode + model scales.
+ * When zoom or scales are not yet available, zoom-area is kept (same as
+ * chrome's pre-model construction path). Shared by plot-engine surface
+ * enablement and chrome-state so the two cannot drift (#1082).
+ */
+export function resolveFilteredAvailableTools(
+  tools: readonly InteractionTool[],
+  zoom: { readonly mode: ZoomAreaMode } | null,
+  scales: ScaleTypeRef | null,
+): InteractionTool[] {
+  const zoomHasSupportedChannel =
+    zoom === null || scales === null || zoomSupportsChannel(zoom.mode, scales);
+  return filterAvailableTools(tools, zoomHasSupportedChannel);
+}
+
+/** True when select config publishes point selection. */
+export function canPublishPointSelection(
+  select: { readonly type: string } | null | undefined,
+): boolean {
+  return select?.type === "point";
+}
+
+/**
  * Resolve the tool the host should sync into the reducer.
  * Priority: requested if available → first available → `"inspect"`.
  *

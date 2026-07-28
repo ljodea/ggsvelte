@@ -207,3 +207,100 @@ describe("createPlotEngine chart lifecycle", () => {
     destroy();
   });
 });
+
+/**
+ * Construction-order contract (#1082).
+ *
+ * The engine wires sibling controllers with deferred thunks; three residual
+ * cycles still need declaration order (surface ↔ inspection, interval ↔
+ * projection, legend late host deriveds). These tests pin that a full
+ * interaction graph constructs without TDZ / early-read failures, and that
+ * surface tool enablement stays aligned with chrome without surface closing
+ * over a later-declared chrome controller.
+ */
+describe("createPlotEngine construction-order contract (#1082)", () => {
+  const fullInteractionProps = {
+    data: rows,
+    aes: { x: "x", y: "y", color: "cls" },
+    layers: [{ geom: "point" as const }],
+    width: 480,
+    height: 320,
+    // Unique per row so point select does not emit INTERACTION_DUPLICATE_KEY.
+    key: "x",
+    inspect: true,
+    select: "point" as const,
+    zoom: true,
+    legendFocus: true,
+    legendFilter: true,
+  } satisfies EnginePlotProps;
+
+  it("constructs the full controller graph without TDZ throws (before first flush)", () => {
+    // If any factory reads a later binding at construction time, createPlotEngine
+    // throws ReferenceError (or surfaces undefined behind !) before return.
+    const { value: engine, destroy } = withEffectRoot(() =>
+      createPlotEngine(engineHost({ props: fullInteractionProps })),
+    );
+
+    expect(() => {
+      void engine.zoomState.effectiveSpec;
+      void engine.legendFilterState.filters;
+      void engine.runtime.model;
+      void engine.selectionState.effectiveSelectedKeys;
+      void engine.inspectionState.inspection;
+      void engine.intervalState.effectiveIntervals;
+      void engine.surfaceState.activeTool;
+      void engine.legendFocusState.effectiveEmphasisKeys;
+      void engine.chromeState.availableTools;
+      void engine.chromeState.canPublishPointSelection;
+      void engine.announcer;
+    }).not.toThrow();
+
+    destroy();
+  });
+
+  it("keeps surface activeTool inside chrome availableTools when select/zoom toggle", () => {
+    // select is "point" | false — boolean true is not a valid SelectInput.
+    const select = reactiveBox<"point" | false>("point");
+    const zoom = reactiveBox(true);
+    const { value: engine, destroy } = withFlushedEffectRoot(() =>
+      createPlotEngine(
+        engineHost({
+          props: {
+            data: rows,
+            aes: { x: "x", y: "y", color: "cls" },
+            layers: [{ geom: "point" }],
+            width: 480,
+            height: 320,
+            key: "x",
+            inspect: true,
+            get select() {
+              return select.value;
+            },
+            get zoom() {
+              return zoom.value;
+            },
+          },
+        }),
+      ),
+    );
+
+    expect(engine.chromeState.canPublishPointSelection).toBe(true);
+    expect(engine.chromeState.availableTools).toEqual(
+      expect.arrayContaining(["inspect", "point", "zoom-area"]),
+    );
+    expect(engine.chromeState.availableTools).toContain(engine.surfaceState.activeTool);
+
+    select.set(false);
+    flushSync();
+    expect(engine.chromeState.canPublishPointSelection).toBe(false);
+    expect(engine.chromeState.availableTools).not.toContain("point");
+    expect(engine.chromeState.availableTools).toContain(engine.surfaceState.activeTool);
+
+    zoom.set(false);
+    flushSync();
+    expect(engine.chromeState.availableTools).toEqual(["inspect"]);
+    expect(engine.surfaceState.activeTool).toBe("inspect");
+
+    destroy();
+  });
+});

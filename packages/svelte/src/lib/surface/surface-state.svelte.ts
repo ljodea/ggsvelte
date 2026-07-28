@@ -83,8 +83,9 @@ export type SurfaceStateDeps = {
   inspectConfig: () => ResolvedInteractionConfig["inspect"];
   selectConfig: () => ResolvedInteractionConfig["select"];
   /**
-   * Host's `canPublishPointSelection` derived (declared after this factory —
-   * handler-only). Single source of truth with ToolRail/chrome consumers.
+   * Host point-select enablement (`select?.type === "point"`). Host-derived
+   * before this factory so surface does not close over later chromeState
+   * (#1082). Same formula as chrome `canPublishPointSelection`.
    */
   pointSelectEnabled: () => boolean;
   ontoolchange: () => ((tool: InteractionTool) => void) | undefined;
