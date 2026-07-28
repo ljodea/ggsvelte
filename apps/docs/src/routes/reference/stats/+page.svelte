@@ -33,7 +33,7 @@
   <p class="eyebrow">
     Schema-derived · {Object.keys(STAT_REFERENCE).length} stats
   </p>
-  <h1 id="reference-heading">Stat reference</h1>
+  <h1 id="reference-heading">Stats</h1>
   <p class="intro">
     Statistical transforms applied before drawing. Set
     <code>stat</code> on a <code>&lt;Geom*&gt;</code> shell or JSON layer —
@@ -88,8 +88,8 @@
   <p>
     On any geom shell, pass the <code>stat</code> prop. Only values listed on
     that geom's
-    <a href={`${base}/reference/geoms`}>geom reference</a> page validate. Omit it
-    to use the geom default.
+    <a href={`${base}/reference/geoms`}>Geoms</a> page validate. Omit it to use the
+    geom default.
   </p>
   <pre class="snippet"><code
       >{`import { GGPlot, GeomBar } from "@ggsvelte/svelte";

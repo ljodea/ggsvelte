@@ -1,6 +1,5 @@
 <script lang="ts">
   import { base } from "$app/paths";
-  import { SHARED_LAYER_PROPS } from "@ggsvelte/spec";
 
   import type { PageProps } from "./$types";
 
@@ -8,41 +7,35 @@
   const entry = $derived(data.entry);
 
   const svelteSnippet = $derived(
-    buildSvelteSnippet(
-      entry.component,
-      entry.params.map((p) => p.name),
-    ),
+    buildSvelteSnippet(entry.component, entry.params),
   );
   const jsonSnippet = $derived(
-    buildJsonSnippet(
-      entry.name,
-      entry.defaultStat,
-      entry.params.map((p) => p.name),
-    ),
+    buildJsonSnippet(entry.name, entry.defaultStat, entry.params),
   );
 
   function buildSvelteSnippet(
     component: string,
-    paramNames: readonly string[],
+    params: readonly { name: string; required: boolean }[],
   ): string {
-    const sampleParams = paramNames.slice(0, 2);
+    const required = params.filter((p) => p.required).map((p) => p.name);
+    if (required.length === 0) {
+      return `import { GGPlot, ${component} } from "@ggsvelte/svelte";\n\n<GGPlot data={rows} aes={{ x: "x", y: "y" }}>\n  <${component} />\n</GGPlot>`;
+    }
     const props =
-      sampleParams.length === 0
-        ? ""
-        : "\n" + sampleParams.map((p) => `  ${p}={/* … */}`).join("\n") + "\n";
-    return `import { GGPlot, ${component} } from "@ggsvelte/svelte";\n\n<GGPlot data={rows} aes={{ x: "x", y: "y" }}>\n  <${component}${props === "" ? " " : props}/>\n</GGPlot>`;
+      "\n" + required.map((p) => `  ${p}={/* … */}`).join("\n") + "\n";
+    return `import { GGPlot, ${component} } from "@ggsvelte/svelte";\n\n<GGPlot data={rows} aes={{ x: "x", y: "y" }}>\n  <${component}${props}/>\n</GGPlot>`;
   }
 
   function buildJsonSnippet(
     geom: string,
     defaultStat: string,
-    paramNames: readonly string[],
+    params: readonly { name: string; required: boolean }[],
   ): string {
+    const required = params.filter((p) => p.required).map((p) => p.name);
     const paramsObj =
-      paramNames.length === 0
+      required.length === 0
         ? ""
-        : `,\n  "params": { ${paramNames
-            .slice(0, 2)
+        : `,\n  "params": { ${required
             .map((p) => `"${p}": /* … */`)
             .join(", ")} }`;
     return `{\n  "geom": "${geom}"${defaultStat === "identity" ? "" : `,\n  "stat": "${defaultStat}"`}${paramsObj}\n}`;
@@ -50,12 +43,6 @@
 </script>
 
 <article class="geom-detail prose" aria-labelledby="geom-heading">
-  <p class="crumb">
-    <a href={`${base}/reference/geoms`}>Geom reference</a>
-    <span aria-hidden="true">/</span>
-    <code>{entry.name}</code>
-  </p>
-
   <h1 id="geom-heading"><code>{entry.component}</code></h1>
   <p class="lede">{entry.summary}</p>
 
@@ -86,28 +73,15 @@
       <a href={`${base}/reference/geoms/${entry.aliasOf}`}
         ><code>{entry.aliasOf}</code></a
       >
-      (with the default stat/position of this alias). Prefer the canonical geom in
-      new code; the alias remains for ggplot2 familiarity.
+      (with this alias's default stat and position). Prefer the canonical geom in
+      new code.
     </p>
   {/if}
 
   <h2 id="svelte">Svelte component</h2>
-  <p>
-    Import <code>{entry.component}</code> from <code>@ggsvelte/svelte</code>.
-    Constant style params are <strong>direct props</strong> (not a nested
-    <code>params</code> object). Plus the
-    <a href={`${base}/reference/geoms#shared-layer-props`}>shared layer props</a
-    >
-    (<code>{SHARED_LAYER_PROPS.map((p) => p.name).join(", ")}</code>).
-  </p>
   <pre class="snippet"><code>{svelteSnippet}</code></pre>
 
   <h2 id="json">JSON layer</h2>
-  <p>
-    PortableSpec form: <code>geom</code> plus optional
-    <code>stat</code>, <code>position</code>, <code>params</code>,
-    <code>aes</code>, and <code>data</code>.
-  </p>
   <pre class="snippet"><code>{jsonSnippet}</code></pre>
 
   <h2 id="params">Params</h2>
@@ -180,15 +154,6 @@
   .geom-detail {
     max-width: 52rem;
     margin: 2rem 0 4rem;
-  }
-
-  .crumb {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin: 0 0 0.75rem;
-    color: var(--muted);
-    font-size: 0.9rem;
   }
 
   h1 {

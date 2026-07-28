@@ -198,7 +198,7 @@ stable discrete color scale. [Examples](/examples) for every mark on real data.
 ## Look up a geom
 
 The full Svelte and JSON API for every mark lives in the
-[geom reference](/reference/geoms): defaults, allowed stats and positions, and
+[Geoms](/reference/geoms): defaults, allowed stats and positions, and
 every param with its schema description. That catalog is generated from the
 PortableSpec TypeBox schema (the same source as \`schema/v0.json\`), so it cannot
 drift from validation.

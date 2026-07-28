@@ -89,13 +89,13 @@ describe("docs route inventory", () => {
     const inventory = createDocsRouteInventory();
     const index = inventory.find((entry) => entry.path === "/reference/geoms");
     expect(index).toMatchObject({
-      title: "Geom reference — ggsvelte",
+      title: "Geoms — ggsvelte",
       canonicalPath: "/reference/geoms",
       kind: "page",
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "Geom reference", order: 51 },
+      navigation: { section: "Reference", label: "Geoms", order: 51 },
     });
     const details = inventory.filter((entry) => entry.path.startsWith("/reference/geoms/"));
     expect(details.length).toBe(49);
@@ -109,13 +109,13 @@ describe("docs route inventory", () => {
     const inventory = createDocsRouteInventory();
     const index = inventory.find((entry) => entry.path === "/reference/stats");
     expect(index).toMatchObject({
-      title: "Stat reference — ggsvelte",
+      title: "Stats — ggsvelte",
       canonicalPath: "/reference/stats",
       kind: "page",
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "Stat reference", order: 52 },
+      navigation: { section: "Reference", label: "Stats", order: 52 },
     });
     const details = inventory.filter((entry) => entry.path.startsWith("/reference/stats/"));
     expect(details.length).toBe(28);
@@ -129,13 +129,13 @@ describe("docs route inventory", () => {
     const inventory = createDocsRouteInventory();
     const index = inventory.find((entry) => entry.path === "/reference/positions");
     expect(index).toMatchObject({
-      title: "Position reference — ggsvelte",
+      title: "Positions — ggsvelte",
       canonicalPath: "/reference/positions",
       kind: "page",
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "Position reference", order: 53 },
+      navigation: { section: "Reference", label: "Positions", order: 53 },
     });
     const details = inventory.filter((entry) => entry.path.startsWith("/reference/positions/"));
     expect(details.length).toBe(6);

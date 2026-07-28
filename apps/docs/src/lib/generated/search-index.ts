@@ -69,21 +69,21 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "page:reference-geoms",
     kind: "page",
-    title: "Geom reference",
+    title: "Geoms",
     summary:
       "Schema-derived API reference for every Geom* component: defaults, allowed stats and positions, and params.",
     href: "/reference/geoms",
     keywords: ["Reference"],
-    exact: ["Geom reference"],
+    exact: ["Geoms"],
   },
   {
     id: "heading:reference-geoms:all-geoms",
     kind: "heading",
     title: "All geoms",
     summary:
-      "All geoms in Geom reference. Schema-derived API reference for every Geom* component: defaults, allowed stats and positions, and params.",
+      "All geoms in Geoms. Schema-derived API reference for every Geom* component: defaults, allowed stats and positions, and params.",
     href: "/reference/geoms#all-geoms",
-    keywords: ["Geom reference", "Reference"],
+    keywords: ["Geoms", "Reference"],
     exact: ["All geoms"],
   },
   {
@@ -91,29 +91,29 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Shared layer props",
     summary:
-      "Shared layer props in Geom reference. Schema-derived API reference for every Geom* component: defaults, allowed stats and positions, and params.",
+      "Shared layer props in Geoms. Schema-derived API reference for every Geom* component: defaults, allowed stats and positions, and params.",
     href: "/reference/geoms#shared-layer-props",
-    keywords: ["Geom reference", "Reference"],
+    keywords: ["Geoms", "Reference"],
     exact: ["Shared layer props"],
   },
   {
     id: "page:reference-stats",
     kind: "page",
-    title: "Stat reference",
+    title: "Stats",
     summary:
       "Schema-derived API reference for every statistical transform: after_stat columns and compatible geoms.",
     href: "/reference/stats",
     keywords: ["Reference"],
-    exact: ["Stat reference"],
+    exact: ["Stats"],
   },
   {
     id: "heading:reference-stats:all-stats",
     kind: "heading",
     title: "All stats",
     summary:
-      "All stats in Stat reference. Schema-derived API reference for every statistical transform: after_stat columns and compatible geoms.",
+      "All stats in Stats. Schema-derived API reference for every statistical transform: after_stat columns and compatible geoms.",
     href: "/reference/stats#all-stats",
-    keywords: ["Stat reference", "Reference"],
+    keywords: ["Stats", "Reference"],
     exact: ["All stats"],
   },
   {
@@ -121,29 +121,29 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "How to set a stat",
     summary:
-      "How to set a stat in Stat reference. Schema-derived API reference for every statistical transform: after_stat columns and compatible geoms.",
+      "How to set a stat in Stats. Schema-derived API reference for every statistical transform: after_stat columns and compatible geoms.",
     href: "/reference/stats#how-to-set",
-    keywords: ["Stat reference", "Reference"],
+    keywords: ["Stats", "Reference"],
     exact: ["How to set a stat"],
   },
   {
     id: "page:reference-positions",
     kind: "page",
-    title: "Position reference",
+    title: "Positions",
     summary:
       "Schema-derived API reference for every position adjustment: positionParams and compatible geoms.",
     href: "/reference/positions",
     keywords: ["Reference"],
-    exact: ["Position reference"],
+    exact: ["Positions"],
   },
   {
     id: "heading:reference-positions:all-positions",
     kind: "heading",
     title: "All positions",
     summary:
-      "All positions in Position reference. Schema-derived API reference for every position adjustment: positionParams and compatible geoms.",
+      "All positions in Positions. Schema-derived API reference for every position adjustment: positionParams and compatible geoms.",
     href: "/reference/positions#all-positions",
-    keywords: ["Position reference", "Reference"],
+    keywords: ["Positions", "Reference"],
     exact: ["All positions"],
   },
   {
@@ -151,9 +151,9 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "How to set a position",
     summary:
-      "How to set a position in Position reference. Schema-derived API reference for every position adjustment: positionParams and compatible geoms.",
+      "How to set a position in Positions. Schema-derived API reference for every position adjustment: positionParams and compatible geoms.",
     href: "/reference/positions#how-to-set",
-    keywords: ["Position reference", "Reference"],
+    keywords: ["Positions", "Reference"],
     exact: ["How to set a position"],
   },
   {
@@ -221,7 +221,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomPoint",
     summary:
-      "GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+      "GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, and correlation views.",
     href: "/reference/geoms/point",
     keywords: [],
     exact: ["GeomPoint"],
@@ -231,7 +231,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+      "Defaults in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, and correlation views.",
     href: "/reference/geoms/point#defaults",
     keywords: ["GeomPoint", "documentation"],
     exact: ["Defaults"],
@@ -241,7 +241,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+      "Svelte component in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, and correlation views.",
     href: "/reference/geoms/point#svelte",
     keywords: ["GeomPoint", "documentation"],
     exact: ["Svelte component"],
@@ -251,7 +251,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+      "JSON layer in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, and correlation views.",
     href: "/reference/geoms/point#json",
     keywords: ["GeomPoint", "documentation"],
     exact: ["JSON layer"],
@@ -261,7 +261,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+      "Params in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, and correlation views.",
     href: "/reference/geoms/point#params",
     keywords: ["GeomPoint", "documentation"],
     exact: ["Params"],
@@ -271,7 +271,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+      "Allowed stats in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, and correlation views.",
     href: "/reference/geoms/point#allowed-stats",
     keywords: ["GeomPoint", "documentation"],
     exact: ["Allowed stats"],
@@ -281,7 +281,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+      "Allowed positions in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, and correlation views.",
     href: "/reference/geoms/point#allowed-positions",
     keywords: ["GeomPoint", "documentation"],
     exact: ["Allowed positions"],
@@ -291,7 +291,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+      "Examples in GeomPoint. GeomPoint: Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, and correlation views.",
     href: "/reference/geoms/point#examples",
     keywords: ["GeomPoint", "documentation"],
     exact: ["Examples"],
@@ -301,7 +301,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomLine",
     summary:
-      "GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+      "GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, and line charts. With stat ecdf, pair with step curves; with stat bin (freqpoly alias), y is computed from counts/density; with stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/line",
     keywords: [],
     exact: ["GeomLine"],
@@ -311,7 +311,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+      "Defaults in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, and line charts. With stat ecdf, pair with step curves; with stat bin (freqpoly alias), y is computed from counts/density; with stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/line#defaults",
     keywords: ["GeomLine", "documentation"],
     exact: ["Defaults"],
@@ -321,7 +321,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+      "Svelte component in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, and line charts. With stat ecdf, pair with step curves; with stat bin (freqpoly alias), y is computed from counts/density; with stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/line#svelte",
     keywords: ["GeomLine", "documentation"],
     exact: ["Svelte component"],
@@ -331,7 +331,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+      "JSON layer in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, and line charts. With stat ecdf, pair with step curves; with stat bin (freqpoly alias), y is computed from counts/density; with stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/line#json",
     keywords: ["GeomLine", "documentation"],
     exact: ["JSON layer"],
@@ -341,7 +341,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+      "Params in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, and line charts. With stat ecdf, pair with step curves; with stat bin (freqpoly alias), y is computed from counts/density; with stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/line#params",
     keywords: ["GeomLine", "documentation"],
     exact: ["Params"],
@@ -351,7 +351,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+      "Allowed stats in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, and line charts. With stat ecdf, pair with step curves; with stat bin (freqpoly alias), y is computed from counts/density; with stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/line#allowed-stats",
     keywords: ["GeomLine", "documentation"],
     exact: ["Allowed stats"],
@@ -361,7 +361,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+      "Allowed positions in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, and line charts. With stat ecdf, pair with step curves; with stat bin (freqpoly alias), y is computed from counts/density; with stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/line#allowed-positions",
     keywords: ["GeomLine", "documentation"],
     exact: ["Allowed positions"],
@@ -371,7 +371,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+      "Examples in GeomLine. GeomLine: Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, and line charts. With stat ecdf, pair with step curves; with stat bin (freqpoly alias), y is computed from counts/density; with stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/line#examples",
     keywords: ["GeomLine", "documentation"],
     exact: ["Examples"],
@@ -381,7 +381,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomPath",
     summary:
-      "GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+      "GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots, and ellipse rings (stat ellipse). With stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/path",
     keywords: [],
     exact: ["GeomPath"],
@@ -391,7 +391,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+      "Defaults in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots, and ellipse rings (stat ellipse). With stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/path#defaults",
     keywords: ["GeomPath", "documentation"],
     exact: ["Defaults"],
@@ -401,7 +401,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+      "Svelte component in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots, and ellipse rings (stat ellipse). With stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/path#svelte",
     keywords: ["GeomPath", "documentation"],
     exact: ["Svelte component"],
@@ -411,7 +411,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+      "JSON layer in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots, and ellipse rings (stat ellipse). With stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/path#json",
     keywords: ["GeomPath", "documentation"],
     exact: ["JSON layer"],
@@ -421,7 +421,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+      "Params in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots, and ellipse rings (stat ellipse). With stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/path#params",
     keywords: ["GeomPath", "documentation"],
     exact: ["Params"],
@@ -431,7 +431,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+      "Allowed stats in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots, and ellipse rings (stat ellipse). With stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/path#allowed-stats",
     keywords: ["GeomPath", "documentation"],
     exact: ["Allowed stats"],
@@ -441,7 +441,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+      "Allowed positions in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots, and ellipse rings (stat ellipse). With stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/path#allowed-positions",
     keywords: ["GeomPath", "documentation"],
     exact: ["Allowed positions"],
@@ -451,7 +451,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+      "Examples in GeomPath. GeomPath: Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots, and ellipse rings (stat ellipse). With stat connect, successive points expand into connection vertices.",
     href: "/reference/geoms/path#examples",
     keywords: ["GeomPath", "documentation"],
     exact: ["Examples"],
@@ -461,7 +461,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomCol",
     summary:
-      "GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+      "GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights — prefer over GeomBar, which counts or bins.",
     href: "/reference/geoms/col",
     keywords: [],
     exact: ["GeomCol"],
@@ -471,7 +471,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+      "Defaults in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights — prefer over GeomBar, which counts or bins.",
     href: "/reference/geoms/col#defaults",
     keywords: ["GeomCol", "documentation"],
     exact: ["Defaults"],
@@ -481,7 +481,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+      "Svelte component in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights — prefer over GeomBar, which counts or bins.",
     href: "/reference/geoms/col#svelte",
     keywords: ["GeomCol", "documentation"],
     exact: ["Svelte component"],
@@ -491,7 +491,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+      "JSON layer in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights — prefer over GeomBar, which counts or bins.",
     href: "/reference/geoms/col#json",
     keywords: ["GeomCol", "documentation"],
     exact: ["JSON layer"],
@@ -501,7 +501,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+      "Params in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights — prefer over GeomBar, which counts or bins.",
     href: "/reference/geoms/col#params",
     keywords: ["GeomCol", "documentation"],
     exact: ["Params"],
@@ -511,7 +511,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+      "Allowed stats in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights — prefer over GeomBar, which counts or bins.",
     href: "/reference/geoms/col#allowed-stats",
     keywords: ["GeomCol", "documentation"],
     exact: ["Allowed stats"],
@@ -521,7 +521,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+      "Allowed positions in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights — prefer over GeomBar, which counts or bins.",
     href: "/reference/geoms/col#allowed-positions",
     keywords: ["GeomCol", "documentation"],
     exact: ["Allowed positions"],
@@ -531,7 +531,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+      "Examples in GeomCol. GeomCol: Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights — prefer over GeomBar, which counts or bins.",
     href: "/reference/geoms/col#examples",
     keywords: ["GeomCol", "documentation"],
     exact: ["Examples"],
@@ -541,7 +541,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomBar",
     summary:
-      "GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+      "GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do not map aes.y — the stat computes it. Prefer GeomCol when bar heights are already in the data.",
     href: "/reference/geoms/bar",
     keywords: [],
     exact: ["GeomBar"],
@@ -551,7 +551,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+      "Defaults in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do not map aes.y — the stat computes it. Prefer GeomCol when bar heights are already in the data.",
     href: "/reference/geoms/bar#defaults",
     keywords: ["GeomBar", "documentation"],
     exact: ["Defaults"],
@@ -561,7 +561,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+      "Svelte component in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do not map aes.y — the stat computes it. Prefer GeomCol when bar heights are already in the data.",
     href: "/reference/geoms/bar#svelte",
     keywords: ["GeomBar", "documentation"],
     exact: ["Svelte component"],
@@ -571,7 +571,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+      "JSON layer in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do not map aes.y — the stat computes it. Prefer GeomCol when bar heights are already in the data.",
     href: "/reference/geoms/bar#json",
     keywords: ["GeomBar", "documentation"],
     exact: ["JSON layer"],
@@ -581,7 +581,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+      "Params in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do not map aes.y — the stat computes it. Prefer GeomCol when bar heights are already in the data.",
     href: "/reference/geoms/bar#params",
     keywords: ["GeomBar", "documentation"],
     exact: ["Params"],
@@ -591,7 +591,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+      "Allowed stats in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do not map aes.y — the stat computes it. Prefer GeomCol when bar heights are already in the data.",
     href: "/reference/geoms/bar#allowed-stats",
     keywords: ["GeomBar", "documentation"],
     exact: ["Allowed stats"],
@@ -601,7 +601,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+      "Allowed positions in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do not map aes.y — the stat computes it. Prefer GeomCol when bar heights are already in the data.",
     href: "/reference/geoms/bar#allowed-positions",
     keywords: ["GeomBar", "documentation"],
     exact: ["Allowed positions"],
@@ -611,7 +611,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+      "Examples in GeomBar. GeomBar: Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do not map aes.y — the stat computes it. Prefer GeomCol when bar heights are already in the data.",
     href: "/reference/geoms/bar#examples",
     keywords: ["GeomBar", "documentation"],
     exact: ["Examples"],
@@ -621,7 +621,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomHistogram",
     summary:
-      "GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+      "GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
     href: "/reference/geoms/histogram",
     keywords: [],
     exact: ["GeomHistogram"],
@@ -631,7 +631,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+      "Defaults in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
     href: "/reference/geoms/histogram#defaults",
     keywords: ["GeomHistogram", "documentation"],
     exact: ["Defaults"],
@@ -641,7 +641,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Alias",
     summary:
-      "Alias in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+      "Alias in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
     href: "/reference/geoms/histogram#alias",
     keywords: ["GeomHistogram", "documentation"],
     exact: ["Alias"],
@@ -651,7 +651,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+      "Svelte component in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
     href: "/reference/geoms/histogram#svelte",
     keywords: ["GeomHistogram", "documentation"],
     exact: ["Svelte component"],
@@ -661,7 +661,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+      "JSON layer in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
     href: "/reference/geoms/histogram#json",
     keywords: ["GeomHistogram", "documentation"],
     exact: ["JSON layer"],
@@ -671,7 +671,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+      "Params in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
     href: "/reference/geoms/histogram#params",
     keywords: ["GeomHistogram", "documentation"],
     exact: ["Params"],
@@ -681,7 +681,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+      "Allowed stats in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
     href: "/reference/geoms/histogram#allowed-stats",
     keywords: ["GeomHistogram", "documentation"],
     exact: ["Allowed stats"],
@@ -691,7 +691,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+      "Allowed positions in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
     href: "/reference/geoms/histogram#allowed-positions",
     keywords: ["GeomHistogram", "documentation"],
     exact: ["Allowed positions"],
@@ -701,7 +701,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+      "Examples in GeomHistogram. GeomHistogram: Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
     href: "/reference/geoms/histogram#examples",
     keywords: ["GeomHistogram", "documentation"],
     exact: ["Examples"],
@@ -711,7 +711,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomFreqpoly",
     summary:
-      "GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+      "GeomFreqpoly: Frequency polygon: continuous x binned like a histogram, drawn as a line through bin centers. Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
     href: "/reference/geoms/freqpoly",
     keywords: [],
     exact: ["GeomFreqpoly"],
@@ -721,7 +721,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+      "Defaults in GeomFreqpoly. GeomFreqpoly: Frequency polygon: continuous x binned like a histogram, drawn as a line through bin centers. Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
     href: "/reference/geoms/freqpoly#defaults",
     keywords: ["GeomFreqpoly", "documentation"],
     exact: ["Defaults"],
@@ -731,7 +731,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Alias",
     summary:
-      "Alias in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+      "Alias in GeomFreqpoly. GeomFreqpoly: Frequency polygon: continuous x binned like a histogram, drawn as a line through bin centers. Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
     href: "/reference/geoms/freqpoly#alias",
     keywords: ["GeomFreqpoly", "documentation"],
     exact: ["Alias"],
@@ -741,7 +741,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+      "Svelte component in GeomFreqpoly. GeomFreqpoly: Frequency polygon: continuous x binned like a histogram, drawn as a line through bin centers. Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
     href: "/reference/geoms/freqpoly#svelte",
     keywords: ["GeomFreqpoly", "documentation"],
     exact: ["Svelte component"],
@@ -751,7 +751,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+      "JSON layer in GeomFreqpoly. GeomFreqpoly: Frequency polygon: continuous x binned like a histogram, drawn as a line through bin centers. Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
     href: "/reference/geoms/freqpoly#json",
     keywords: ["GeomFreqpoly", "documentation"],
     exact: ["JSON layer"],
@@ -761,7 +761,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+      "Params in GeomFreqpoly. GeomFreqpoly: Frequency polygon: continuous x binned like a histogram, drawn as a line through bin centers. Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
     href: "/reference/geoms/freqpoly#params",
     keywords: ["GeomFreqpoly", "documentation"],
     exact: ["Params"],
@@ -771,7 +771,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+      "Allowed stats in GeomFreqpoly. GeomFreqpoly: Frequency polygon: continuous x binned like a histogram, drawn as a line through bin centers. Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
     href: "/reference/geoms/freqpoly#allowed-stats",
     keywords: ["GeomFreqpoly", "documentation"],
     exact: ["Allowed stats"],
@@ -781,7 +781,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+      "Allowed positions in GeomFreqpoly. GeomFreqpoly: Frequency polygon: continuous x binned like a histogram, drawn as a line through bin centers. Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
     href: "/reference/geoms/freqpoly#allowed-positions",
     keywords: ["GeomFreqpoly", "documentation"],
     exact: ["Allowed positions"],
@@ -791,7 +791,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomFreqpoly. GeomFreqpoly: Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+      "Examples in GeomFreqpoly. GeomFreqpoly: Frequency polygon: continuous x binned like a histogram, drawn as a line through bin centers. Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
     href: "/reference/geoms/freqpoly#examples",
     keywords: ["GeomFreqpoly", "documentation"],
     exact: ["Examples"],
@@ -881,7 +881,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomRule",
     summary:
-      "GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+      "GeomRule: Rule geometry: reference lines spanning the panel. Two forms: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly one of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
     href: "/reference/geoms/rule",
     keywords: [],
     exact: ["GeomRule"],
@@ -891,7 +891,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+      "Defaults in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. Two forms: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly one of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
     href: "/reference/geoms/rule#defaults",
     keywords: ["GeomRule", "documentation"],
     exact: ["Defaults"],
@@ -901,7 +901,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+      "Svelte component in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. Two forms: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly one of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
     href: "/reference/geoms/rule#svelte",
     keywords: ["GeomRule", "documentation"],
     exact: ["Svelte component"],
@@ -911,7 +911,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+      "JSON layer in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. Two forms: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly one of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
     href: "/reference/geoms/rule#json",
     keywords: ["GeomRule", "documentation"],
     exact: ["JSON layer"],
@@ -921,7 +921,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+      "Params in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. Two forms: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly one of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
     href: "/reference/geoms/rule#params",
     keywords: ["GeomRule", "documentation"],
     exact: ["Params"],
@@ -931,7 +931,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+      "Allowed stats in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. Two forms: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly one of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
     href: "/reference/geoms/rule#allowed-stats",
     keywords: ["GeomRule", "documentation"],
     exact: ["Allowed stats"],
@@ -941,7 +941,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+      "Allowed positions in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. Two forms: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly one of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
     href: "/reference/geoms/rule#allowed-positions",
     keywords: ["GeomRule", "documentation"],
     exact: ["Allowed positions"],
@@ -951,7 +951,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+      "Examples in GeomRule. GeomRule: Rule geometry: reference lines spanning the panel. Two forms: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly one of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
     href: "/reference/geoms/rule#examples",
     keywords: ["GeomRule", "documentation"],
     exact: ["Examples"],
@@ -961,7 +961,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomHline",
     summary:
-      "GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+      "GeomHline: Horizontal reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/hline",
     keywords: [],
     exact: ["GeomHline"],
@@ -971,7 +971,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+      "Defaults in GeomHline. GeomHline: Horizontal reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/hline#defaults",
     keywords: ["GeomHline", "documentation"],
     exact: ["Defaults"],
@@ -981,7 +981,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Alias",
     summary:
-      "Alias in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+      "Alias in GeomHline. GeomHline: Horizontal reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/hline#alias",
     keywords: ["GeomHline", "documentation"],
     exact: ["Alias"],
@@ -991,7 +991,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+      "Svelte component in GeomHline. GeomHline: Horizontal reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/hline#svelte",
     keywords: ["GeomHline", "documentation"],
     exact: ["Svelte component"],
@@ -1001,7 +1001,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+      "JSON layer in GeomHline. GeomHline: Horizontal reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/hline#json",
     keywords: ["GeomHline", "documentation"],
     exact: ["JSON layer"],
@@ -1011,7 +1011,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+      "Params in GeomHline. GeomHline: Horizontal reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/hline#params",
     keywords: ["GeomHline", "documentation"],
     exact: ["Params"],
@@ -1021,7 +1021,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+      "Allowed stats in GeomHline. GeomHline: Horizontal reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/hline#allowed-stats",
     keywords: ["GeomHline", "documentation"],
     exact: ["Allowed stats"],
@@ -1031,7 +1031,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+      "Allowed positions in GeomHline. GeomHline: Horizontal reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/hline#allowed-positions",
     keywords: ["GeomHline", "documentation"],
     exact: ["Allowed positions"],
@@ -1041,7 +1041,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomHline. GeomHline: Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+      "Examples in GeomHline. GeomHline: Horizontal reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/hline#examples",
     keywords: ["GeomHline", "documentation"],
     exact: ["Examples"],
@@ -1051,7 +1051,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomVline",
     summary:
-      "GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+      "GeomVline: Vertical reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/vline",
     keywords: [],
     exact: ["GeomVline"],
@@ -1061,7 +1061,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+      "Defaults in GeomVline. GeomVline: Vertical reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/vline#defaults",
     keywords: ["GeomVline", "documentation"],
     exact: ["Defaults"],
@@ -1071,7 +1071,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Alias",
     summary:
-      "Alias in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+      "Alias in GeomVline. GeomVline: Vertical reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/vline#alias",
     keywords: ["GeomVline", "documentation"],
     exact: ["Alias"],
@@ -1081,7 +1081,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+      "Svelte component in GeomVline. GeomVline: Vertical reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/vline#svelte",
     keywords: ["GeomVline", "documentation"],
     exact: ["Svelte component"],
@@ -1091,7 +1091,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+      "JSON layer in GeomVline. GeomVline: Vertical reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/vline#json",
     keywords: ["GeomVline", "documentation"],
     exact: ["JSON layer"],
@@ -1101,7 +1101,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+      "Params in GeomVline. GeomVline: Vertical reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/vline#params",
     keywords: ["GeomVline", "documentation"],
     exact: ["Params"],
@@ -1111,7 +1111,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+      "Allowed stats in GeomVline. GeomVline: Vertical reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/vline#allowed-stats",
     keywords: ["GeomVline", "documentation"],
     exact: ["Allowed stats"],
@@ -1121,7 +1121,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+      "Allowed positions in GeomVline. GeomVline: Vertical reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/vline#allowed-positions",
     keywords: ["GeomVline", "documentation"],
     exact: ["Allowed positions"],
@@ -1131,7 +1131,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomVline. GeomVline: Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+      "Examples in GeomVline. GeomVline: Vertical reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
     href: "/reference/geoms/vline#examples",
     keywords: ["GeomVline", "documentation"],
     exact: ["Examples"],
@@ -1221,7 +1221,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomLabel",
     summary:
-      "GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+      "GeomLabel: Label geometry: text with a rounded rectangular background box. Requires x, y, and label channels. No collision detection.",
     href: "/reference/geoms/label",
     keywords: [],
     exact: ["GeomLabel"],
@@ -1231,7 +1231,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+      "Defaults in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box. Requires x, y, and label channels. No collision detection.",
     href: "/reference/geoms/label#defaults",
     keywords: ["GeomLabel", "documentation"],
     exact: ["Defaults"],
@@ -1241,7 +1241,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+      "Svelte component in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box. Requires x, y, and label channels. No collision detection.",
     href: "/reference/geoms/label#svelte",
     keywords: ["GeomLabel", "documentation"],
     exact: ["Svelte component"],
@@ -1251,7 +1251,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+      "JSON layer in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box. Requires x, y, and label channels. No collision detection.",
     href: "/reference/geoms/label#json",
     keywords: ["GeomLabel", "documentation"],
     exact: ["JSON layer"],
@@ -1261,7 +1261,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+      "Params in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box. Requires x, y, and label channels. No collision detection.",
     href: "/reference/geoms/label#params",
     keywords: ["GeomLabel", "documentation"],
     exact: ["Params"],
@@ -1271,7 +1271,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+      "Allowed stats in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box. Requires x, y, and label channels. No collision detection.",
     href: "/reference/geoms/label#allowed-stats",
     keywords: ["GeomLabel", "documentation"],
     exact: ["Allowed stats"],
@@ -1281,7 +1281,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+      "Allowed positions in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box. Requires x, y, and label channels. No collision detection.",
     href: "/reference/geoms/label#allowed-positions",
     keywords: ["GeomLabel", "documentation"],
     exact: ["Allowed positions"],
@@ -1291,7 +1291,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+      "Examples in GeomLabel. GeomLabel: Label geometry: text with a rounded rectangular background box. Requires x, y, and label channels. No collision detection.",
     href: "/reference/geoms/label#examples",
     keywords: ["GeomLabel", "documentation"],
     exact: ["Examples"],
@@ -1301,7 +1301,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomSmooth",
     summary:
-      "GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+      "GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends.",
     href: "/reference/geoms/smooth",
     keywords: [],
     exact: ["GeomSmooth"],
@@ -1311,7 +1311,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+      "Defaults in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends.",
     href: "/reference/geoms/smooth#defaults",
     keywords: ["GeomSmooth", "documentation"],
     exact: ["Defaults"],
@@ -1321,7 +1321,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+      "Svelte component in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends.",
     href: "/reference/geoms/smooth#svelte",
     keywords: ["GeomSmooth", "documentation"],
     exact: ["Svelte component"],
@@ -1331,7 +1331,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+      "JSON layer in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends.",
     href: "/reference/geoms/smooth#json",
     keywords: ["GeomSmooth", "documentation"],
     exact: ["JSON layer"],
@@ -1341,7 +1341,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+      "Params in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends.",
     href: "/reference/geoms/smooth#params",
     keywords: ["GeomSmooth", "documentation"],
     exact: ["Params"],
@@ -1351,7 +1351,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+      "Allowed stats in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends.",
     href: "/reference/geoms/smooth#allowed-stats",
     keywords: ["GeomSmooth", "documentation"],
     exact: ["Allowed stats"],
@@ -1361,7 +1361,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+      "Allowed positions in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends.",
     href: "/reference/geoms/smooth#allowed-positions",
     keywords: ["GeomSmooth", "documentation"],
     exact: ["Allowed positions"],
@@ -1371,7 +1371,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+      "Examples in GeomSmooth. GeomSmooth: Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends.",
     href: "/reference/geoms/smooth#examples",
     keywords: ["GeomSmooth", "documentation"],
     exact: ["Examples"],
@@ -1381,7 +1381,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomQuantile",
     summary:
-      "GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+      "GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group.",
     href: "/reference/geoms/quantile",
     keywords: [],
     exact: ["GeomQuantile"],
@@ -1391,7 +1391,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+      "Defaults in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group.",
     href: "/reference/geoms/quantile#defaults",
     keywords: ["GeomQuantile", "documentation"],
     exact: ["Defaults"],
@@ -1401,7 +1401,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+      "Svelte component in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group.",
     href: "/reference/geoms/quantile#svelte",
     keywords: ["GeomQuantile", "documentation"],
     exact: ["Svelte component"],
@@ -1411,7 +1411,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+      "JSON layer in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group.",
     href: "/reference/geoms/quantile#json",
     keywords: ["GeomQuantile", "documentation"],
     exact: ["JSON layer"],
@@ -1421,7 +1421,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+      "Params in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group.",
     href: "/reference/geoms/quantile#params",
     keywords: ["GeomQuantile", "documentation"],
     exact: ["Params"],
@@ -1431,7 +1431,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+      "Allowed stats in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group.",
     href: "/reference/geoms/quantile#allowed-stats",
     keywords: ["GeomQuantile", "documentation"],
     exact: ["Allowed stats"],
@@ -1441,7 +1441,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+      "Allowed positions in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group.",
     href: "/reference/geoms/quantile#allowed-positions",
     keywords: ["GeomQuantile", "documentation"],
     exact: ["Allowed positions"],
@@ -1451,7 +1451,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+      "Examples in GeomQuantile. GeomQuantile: Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group.",
     href: "/reference/geoms/quantile#examples",
     keywords: ["GeomQuantile", "documentation"],
     exact: ["Examples"],
@@ -1701,7 +1701,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomLinerange",
     summary:
-      "GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+      "GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps.",
     href: "/reference/geoms/linerange",
     keywords: [],
     exact: ["GeomLinerange"],
@@ -1711,7 +1711,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+      "Defaults in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps.",
     href: "/reference/geoms/linerange#defaults",
     keywords: ["GeomLinerange", "documentation"],
     exact: ["Defaults"],
@@ -1721,7 +1721,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+      "Svelte component in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps.",
     href: "/reference/geoms/linerange#svelte",
     keywords: ["GeomLinerange", "documentation"],
     exact: ["Svelte component"],
@@ -1731,7 +1731,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+      "JSON layer in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps.",
     href: "/reference/geoms/linerange#json",
     keywords: ["GeomLinerange", "documentation"],
     exact: ["JSON layer"],
@@ -1741,7 +1741,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+      "Params in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps.",
     href: "/reference/geoms/linerange#params",
     keywords: ["GeomLinerange", "documentation"],
     exact: ["Params"],
@@ -1751,7 +1751,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+      "Allowed stats in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps.",
     href: "/reference/geoms/linerange#allowed-stats",
     keywords: ["GeomLinerange", "documentation"],
     exact: ["Allowed stats"],
@@ -1761,7 +1761,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+      "Allowed positions in GeomLinerange. GeomLinerange: Linerange geometry: a vertical stem from ymin to ymax without end caps.",
     href: "/reference/geoms/linerange#allowed-positions",
     keywords: ["GeomLinerange", "documentation"],
     exact: ["Allowed positions"],
@@ -1771,7 +1771,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomPointrange",
     summary:
-      "GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+      "GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y).",
     href: "/reference/geoms/pointrange",
     keywords: [],
     exact: ["GeomPointrange"],
@@ -1781,7 +1781,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+      "Defaults in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y).",
     href: "/reference/geoms/pointrange#defaults",
     keywords: ["GeomPointrange", "documentation"],
     exact: ["Defaults"],
@@ -1791,7 +1791,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+      "Svelte component in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y).",
     href: "/reference/geoms/pointrange#svelte",
     keywords: ["GeomPointrange", "documentation"],
     exact: ["Svelte component"],
@@ -1801,7 +1801,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+      "JSON layer in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y).",
     href: "/reference/geoms/pointrange#json",
     keywords: ["GeomPointrange", "documentation"],
     exact: ["JSON layer"],
@@ -1811,7 +1811,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+      "Params in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y).",
     href: "/reference/geoms/pointrange#params",
     keywords: ["GeomPointrange", "documentation"],
     exact: ["Params"],
@@ -1821,7 +1821,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+      "Allowed stats in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y).",
     href: "/reference/geoms/pointrange#allowed-stats",
     keywords: ["GeomPointrange", "documentation"],
     exact: ["Allowed stats"],
@@ -1831,7 +1831,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+      "Allowed positions in GeomPointrange. GeomPointrange: Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y).",
     href: "/reference/geoms/pointrange#allowed-positions",
     keywords: ["GeomPointrange", "documentation"],
     exact: ["Allowed positions"],
@@ -1841,7 +1841,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomCrossbar",
     summary:
-      "GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+      "GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y.",
     href: "/reference/geoms/crossbar",
     keywords: [],
     exact: ["GeomCrossbar"],
@@ -1851,7 +1851,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+      "Defaults in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y.",
     href: "/reference/geoms/crossbar#defaults",
     keywords: ["GeomCrossbar", "documentation"],
     exact: ["Defaults"],
@@ -1861,7 +1861,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+      "Svelte component in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y.",
     href: "/reference/geoms/crossbar#svelte",
     keywords: ["GeomCrossbar", "documentation"],
     exact: ["Svelte component"],
@@ -1871,7 +1871,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+      "JSON layer in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y.",
     href: "/reference/geoms/crossbar#json",
     keywords: ["GeomCrossbar", "documentation"],
     exact: ["JSON layer"],
@@ -1881,7 +1881,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+      "Params in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y.",
     href: "/reference/geoms/crossbar#params",
     keywords: ["GeomCrossbar", "documentation"],
     exact: ["Params"],
@@ -1891,7 +1891,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+      "Allowed stats in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y.",
     href: "/reference/geoms/crossbar#allowed-stats",
     keywords: ["GeomCrossbar", "documentation"],
     exact: ["Allowed stats"],
@@ -1901,7 +1901,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+      "Allowed positions in GeomCrossbar. GeomCrossbar: Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y.",
     href: "/reference/geoms/crossbar#allowed-positions",
     keywords: ["GeomCrossbar", "documentation"],
     exact: ["Allowed positions"],
@@ -2151,7 +2151,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomRibbon",
     summary:
-      "GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+      "GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate. Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
     href: "/reference/geoms/ribbon",
     keywords: [],
     exact: ["GeomRibbon"],
@@ -2161,7 +2161,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+      "Defaults in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate. Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
     href: "/reference/geoms/ribbon#defaults",
     keywords: ["GeomRibbon", "documentation"],
     exact: ["Defaults"],
@@ -2171,7 +2171,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+      "Svelte component in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate. Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
     href: "/reference/geoms/ribbon#svelte",
     keywords: ["GeomRibbon", "documentation"],
     exact: ["Svelte component"],
@@ -2181,7 +2181,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+      "JSON layer in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate. Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
     href: "/reference/geoms/ribbon#json",
     keywords: ["GeomRibbon", "documentation"],
     exact: ["JSON layer"],
@@ -2191,7 +2191,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+      "Params in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate. Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
     href: "/reference/geoms/ribbon#params",
     keywords: ["GeomRibbon", "documentation"],
     exact: ["Params"],
@@ -2201,7 +2201,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+      "Allowed stats in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate. Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
     href: "/reference/geoms/ribbon#allowed-stats",
     keywords: ["GeomRibbon", "documentation"],
     exact: ["Allowed stats"],
@@ -2211,7 +2211,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+      "Allowed positions in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate. Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
     href: "/reference/geoms/ribbon#allowed-positions",
     keywords: ["GeomRibbon", "documentation"],
     exact: ["Allowed positions"],
@@ -2221,7 +2221,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+      "Examples in GeomRibbon. GeomRibbon: Ribbon geometry: a filled interval between two varying boundaries along a running coordinate. Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
     href: "/reference/geoms/ribbon#examples",
     keywords: ["GeomRibbon", "documentation"],
     exact: ["Examples"],
@@ -2311,7 +2311,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomCount",
     summary:
-      "GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+      "GeomCount: Count geometry: point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
     href: "/reference/geoms/count",
     keywords: [],
     exact: ["GeomCount"],
@@ -2321,7 +2321,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+      "Defaults in GeomCount. GeomCount: Count geometry: point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
     href: "/reference/geoms/count#defaults",
     keywords: ["GeomCount", "documentation"],
     exact: ["Defaults"],
@@ -2331,7 +2331,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+      "Svelte component in GeomCount. GeomCount: Count geometry: point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
     href: "/reference/geoms/count#svelte",
     keywords: ["GeomCount", "documentation"],
     exact: ["Svelte component"],
@@ -2341,7 +2341,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+      "JSON layer in GeomCount. GeomCount: Count geometry: point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
     href: "/reference/geoms/count#json",
     keywords: ["GeomCount", "documentation"],
     exact: ["JSON layer"],
@@ -2351,7 +2351,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+      "Params in GeomCount. GeomCount: Count geometry: point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
     href: "/reference/geoms/count#params",
     keywords: ["GeomCount", "documentation"],
     exact: ["Params"],
@@ -2361,7 +2361,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+      "Allowed stats in GeomCount. GeomCount: Count geometry: point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
     href: "/reference/geoms/count#allowed-stats",
     keywords: ["GeomCount", "documentation"],
     exact: ["Allowed stats"],
@@ -2371,7 +2371,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+      "Allowed positions in GeomCount. GeomCount: Count geometry: point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
     href: "/reference/geoms/count#allowed-positions",
     keywords: ["GeomCount", "documentation"],
     exact: ["Allowed positions"],
@@ -2381,7 +2381,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomCount. GeomCount: Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+      "Examples in GeomCount. GeomCount: Count geometry: point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
     href: "/reference/geoms/count#examples",
     keywords: ["GeomCount", "documentation"],
     exact: ["Examples"],
@@ -2391,7 +2391,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomViolin",
     summary:
-      "GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+      "GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (stat ydensity). One polygon per x×group. Default position dodge.",
     href: "/reference/geoms/violin",
     keywords: [],
     exact: ["GeomViolin"],
@@ -2401,7 +2401,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+      "Defaults in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (stat ydensity). One polygon per x×group. Default position dodge.",
     href: "/reference/geoms/violin#defaults",
     keywords: ["GeomViolin", "documentation"],
     exact: ["Defaults"],
@@ -2411,7 +2411,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+      "Svelte component in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (stat ydensity). One polygon per x×group. Default position dodge.",
     href: "/reference/geoms/violin#svelte",
     keywords: ["GeomViolin", "documentation"],
     exact: ["Svelte component"],
@@ -2421,7 +2421,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+      "JSON layer in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (stat ydensity). One polygon per x×group. Default position dodge.",
     href: "/reference/geoms/violin#json",
     keywords: ["GeomViolin", "documentation"],
     exact: ["JSON layer"],
@@ -2431,7 +2431,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+      "Params in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (stat ydensity). One polygon per x×group. Default position dodge.",
     href: "/reference/geoms/violin#params",
     keywords: ["GeomViolin", "documentation"],
     exact: ["Params"],
@@ -2441,7 +2441,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+      "Allowed stats in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (stat ydensity). One polygon per x×group. Default position dodge.",
     href: "/reference/geoms/violin#allowed-stats",
     keywords: ["GeomViolin", "documentation"],
     exact: ["Allowed stats"],
@@ -2451,7 +2451,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+      "Allowed positions in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (stat ydensity). One polygon per x×group. Default position dodge.",
     href: "/reference/geoms/violin#allowed-positions",
     keywords: ["GeomViolin", "documentation"],
     exact: ["Allowed positions"],
@@ -2461,7 +2461,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+      "Examples in GeomViolin. GeomViolin: Violin geometry: mirrored kernel density of continuous y at each discrete x (stat ydensity). One polygon per x×group. Default position dodge.",
     href: "/reference/geoms/violin#examples",
     keywords: ["GeomViolin", "documentation"],
     exact: ["Examples"],
@@ -2471,7 +2471,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomFunction",
     summary:
-      "GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+      "GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path. Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
     href: "/reference/geoms/function",
     keywords: [],
     exact: ["GeomFunction"],
@@ -2481,7 +2481,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+      "Defaults in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path. Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
     href: "/reference/geoms/function#defaults",
     keywords: ["GeomFunction", "documentation"],
     exact: ["Defaults"],
@@ -2491,7 +2491,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+      "Svelte component in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path. Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
     href: "/reference/geoms/function#svelte",
     keywords: ["GeomFunction", "documentation"],
     exact: ["Svelte component"],
@@ -2501,7 +2501,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+      "JSON layer in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path. Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
     href: "/reference/geoms/function#json",
     keywords: ["GeomFunction", "documentation"],
     exact: ["JSON layer"],
@@ -2511,7 +2511,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+      "Params in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path. Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
     href: "/reference/geoms/function#params",
     keywords: ["GeomFunction", "documentation"],
     exact: ["Params"],
@@ -2521,7 +2521,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+      "Allowed stats in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path. Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
     href: "/reference/geoms/function#allowed-stats",
     keywords: ["GeomFunction", "documentation"],
     exact: ["Allowed stats"],
@@ -2531,7 +2531,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+      "Allowed positions in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path. Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
     href: "/reference/geoms/function#allowed-positions",
     keywords: ["GeomFunction", "documentation"],
     exact: ["Allowed positions"],
@@ -2541,7 +2541,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+      "Examples in GeomFunction. GeomFunction: Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path. Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
     href: "/reference/geoms/function#examples",
     keywords: ["GeomFunction", "documentation"],
     exact: ["Examples"],
@@ -2551,7 +2551,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomPolygon",
     summary:
-      "GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+      "GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group. Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
     href: "/reference/geoms/polygon",
     keywords: [],
     exact: ["GeomPolygon"],
@@ -2561,7 +2561,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+      "Defaults in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group. Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
     href: "/reference/geoms/polygon#defaults",
     keywords: ["GeomPolygon", "documentation"],
     exact: ["Defaults"],
@@ -2571,7 +2571,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+      "Svelte component in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group. Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
     href: "/reference/geoms/polygon#svelte",
     keywords: ["GeomPolygon", "documentation"],
     exact: ["Svelte component"],
@@ -2581,7 +2581,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+      "JSON layer in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group. Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
     href: "/reference/geoms/polygon#json",
     keywords: ["GeomPolygon", "documentation"],
     exact: ["JSON layer"],
@@ -2591,7 +2591,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+      "Params in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group. Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
     href: "/reference/geoms/polygon#params",
     keywords: ["GeomPolygon", "documentation"],
     exact: ["Params"],
@@ -2601,7 +2601,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+      "Allowed stats in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group. Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
     href: "/reference/geoms/polygon#allowed-stats",
     keywords: ["GeomPolygon", "documentation"],
     exact: ["Allowed stats"],
@@ -2611,7 +2611,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+      "Allowed positions in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group. Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
     href: "/reference/geoms/polygon#allowed-positions",
     keywords: ["GeomPolygon", "documentation"],
     exact: ["Allowed positions"],
@@ -2621,7 +2621,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+      "Examples in GeomPolygon. GeomPolygon: Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group. Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
     href: "/reference/geoms/polygon#examples",
     keywords: ["GeomPolygon", "documentation"],
     exact: ["Examples"],
@@ -2631,7 +2631,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomHex",
     summary:
-      "GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+      "GeomHex: Hexagonal bin heatmap: partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
     href: "/reference/geoms/hex",
     keywords: [],
     exact: ["GeomHex"],
@@ -2641,7 +2641,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+      "Defaults in GeomHex. GeomHex: Hexagonal bin heatmap: partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
     href: "/reference/geoms/hex#defaults",
     keywords: ["GeomHex", "documentation"],
     exact: ["Defaults"],
@@ -2651,7 +2651,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+      "Svelte component in GeomHex. GeomHex: Hexagonal bin heatmap: partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
     href: "/reference/geoms/hex#svelte",
     keywords: ["GeomHex", "documentation"],
     exact: ["Svelte component"],
@@ -2661,7 +2661,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+      "JSON layer in GeomHex. GeomHex: Hexagonal bin heatmap: partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
     href: "/reference/geoms/hex#json",
     keywords: ["GeomHex", "documentation"],
     exact: ["JSON layer"],
@@ -2671,7 +2671,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+      "Params in GeomHex. GeomHex: Hexagonal bin heatmap: partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
     href: "/reference/geoms/hex#params",
     keywords: ["GeomHex", "documentation"],
     exact: ["Params"],
@@ -2681,7 +2681,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+      "Allowed stats in GeomHex. GeomHex: Hexagonal bin heatmap: partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
     href: "/reference/geoms/hex#allowed-stats",
     keywords: ["GeomHex", "documentation"],
     exact: ["Allowed stats"],
@@ -2691,7 +2691,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+      "Allowed positions in GeomHex. GeomHex: Hexagonal bin heatmap: partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
     href: "/reference/geoms/hex#allowed-positions",
     keywords: ["GeomHex", "documentation"],
     exact: ["Allowed positions"],
@@ -2701,7 +2701,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomHex. GeomHex: Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+      "Examples in GeomHex. GeomHex: Hexagonal bin heatmap: partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
     href: "/reference/geoms/hex#examples",
     keywords: ["GeomHex", "documentation"],
     exact: ["Examples"],
@@ -2711,7 +2711,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomBin2d",
     summary:
-      "GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+      "GeomBin2d: 2D rectangular bin heatmap: partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
     href: "/reference/geoms/bin_2d",
     keywords: [],
     exact: ["GeomBin2d"],
@@ -2721,7 +2721,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+      "Defaults in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap: partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
     href: "/reference/geoms/bin_2d#defaults",
     keywords: ["GeomBin2d", "documentation"],
     exact: ["Defaults"],
@@ -2731,7 +2731,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+      "Svelte component in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap: partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
     href: "/reference/geoms/bin_2d#svelte",
     keywords: ["GeomBin2d", "documentation"],
     exact: ["Svelte component"],
@@ -2741,7 +2741,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+      "JSON layer in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap: partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
     href: "/reference/geoms/bin_2d#json",
     keywords: ["GeomBin2d", "documentation"],
     exact: ["JSON layer"],
@@ -2751,7 +2751,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+      "Params in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap: partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
     href: "/reference/geoms/bin_2d#params",
     keywords: ["GeomBin2d", "documentation"],
     exact: ["Params"],
@@ -2761,7 +2761,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+      "Allowed stats in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap: partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
     href: "/reference/geoms/bin_2d#allowed-stats",
     keywords: ["GeomBin2d", "documentation"],
     exact: ["Allowed stats"],
@@ -2771,7 +2771,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+      "Allowed positions in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap: partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
     href: "/reference/geoms/bin_2d#allowed-positions",
     keywords: ["GeomBin2d", "documentation"],
     exact: ["Allowed positions"],
@@ -2781,7 +2781,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+      "Examples in GeomBin2d. GeomBin2d: 2D rectangular bin heatmap: partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
     href: "/reference/geoms/bin_2d#examples",
     keywords: ["GeomBin2d", "documentation"],
     exact: ["Examples"],
@@ -2791,7 +2791,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomAbline",
     summary:
-      "GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+      "GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel. Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
     href: "/reference/geoms/abline",
     keywords: [],
     exact: ["GeomAbline"],
@@ -2801,7 +2801,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+      "Defaults in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel. Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
     href: "/reference/geoms/abline#defaults",
     keywords: ["GeomAbline", "documentation"],
     exact: ["Defaults"],
@@ -2811,7 +2811,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+      "Svelte component in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel. Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
     href: "/reference/geoms/abline#svelte",
     keywords: ["GeomAbline", "documentation"],
     exact: ["Svelte component"],
@@ -2821,7 +2821,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+      "JSON layer in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel. Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
     href: "/reference/geoms/abline#json",
     keywords: ["GeomAbline", "documentation"],
     exact: ["JSON layer"],
@@ -2831,7 +2831,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+      "Params in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel. Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
     href: "/reference/geoms/abline#params",
     keywords: ["GeomAbline", "documentation"],
     exact: ["Params"],
@@ -2841,7 +2841,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+      "Allowed stats in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel. Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
     href: "/reference/geoms/abline#allowed-stats",
     keywords: ["GeomAbline", "documentation"],
     exact: ["Allowed stats"],
@@ -2851,7 +2851,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+      "Allowed positions in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel. Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
     href: "/reference/geoms/abline#allowed-positions",
     keywords: ["GeomAbline", "documentation"],
     exact: ["Allowed positions"],
@@ -2861,7 +2861,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+      "Examples in GeomAbline. GeomAbline: Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel. Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
     href: "/reference/geoms/abline#examples",
     keywords: ["GeomAbline", "documentation"],
     exact: ["Examples"],
@@ -2871,7 +2871,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomCurve",
     summary:
-      "GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+      "GeomCurve: Curve geometry: one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
     href: "/reference/geoms/curve",
     keywords: [],
     exact: ["GeomCurve"],
@@ -2881,7 +2881,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+      "Defaults in GeomCurve. GeomCurve: Curve geometry: one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
     href: "/reference/geoms/curve#defaults",
     keywords: ["GeomCurve", "documentation"],
     exact: ["Defaults"],
@@ -2891,7 +2891,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+      "Svelte component in GeomCurve. GeomCurve: Curve geometry: one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
     href: "/reference/geoms/curve#svelte",
     keywords: ["GeomCurve", "documentation"],
     exact: ["Svelte component"],
@@ -2901,7 +2901,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+      "JSON layer in GeomCurve. GeomCurve: Curve geometry: one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
     href: "/reference/geoms/curve#json",
     keywords: ["GeomCurve", "documentation"],
     exact: ["JSON layer"],
@@ -2911,7 +2911,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+      "Params in GeomCurve. GeomCurve: Curve geometry: one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
     href: "/reference/geoms/curve#params",
     keywords: ["GeomCurve", "documentation"],
     exact: ["Params"],
@@ -2921,7 +2921,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+      "Allowed stats in GeomCurve. GeomCurve: Curve geometry: one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
     href: "/reference/geoms/curve#allowed-stats",
     keywords: ["GeomCurve", "documentation"],
     exact: ["Allowed stats"],
@@ -2931,7 +2931,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+      "Allowed positions in GeomCurve. GeomCurve: Curve geometry: one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
     href: "/reference/geoms/curve#allowed-positions",
     keywords: ["GeomCurve", "documentation"],
     exact: ["Allowed positions"],
@@ -2941,7 +2941,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomCurve. GeomCurve: Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+      "Examples in GeomCurve. GeomCurve: Curve geometry: one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
     href: "/reference/geoms/curve#examples",
     keywords: ["GeomCurve", "documentation"],
     exact: ["Examples"],
@@ -2951,7 +2951,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomContour",
     summary:
-      "GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+      "GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid. v1 draws open path polylines only (not filled bands).",
     href: "/reference/geoms/contour",
     keywords: [],
     exact: ["GeomContour"],
@@ -2961,7 +2961,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+      "Defaults in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid. v1 draws open path polylines only (not filled bands).",
     href: "/reference/geoms/contour#defaults",
     keywords: ["GeomContour", "documentation"],
     exact: ["Defaults"],
@@ -2971,7 +2971,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+      "Svelte component in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid. v1 draws open path polylines only (not filled bands).",
     href: "/reference/geoms/contour#svelte",
     keywords: ["GeomContour", "documentation"],
     exact: ["Svelte component"],
@@ -2981,7 +2981,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+      "JSON layer in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid. v1 draws open path polylines only (not filled bands).",
     href: "/reference/geoms/contour#json",
     keywords: ["GeomContour", "documentation"],
     exact: ["JSON layer"],
@@ -2991,7 +2991,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+      "Params in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid. v1 draws open path polylines only (not filled bands).",
     href: "/reference/geoms/contour#params",
     keywords: ["GeomContour", "documentation"],
     exact: ["Params"],
@@ -3001,7 +3001,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+      "Allowed stats in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid. v1 draws open path polylines only (not filled bands).",
     href: "/reference/geoms/contour#allowed-stats",
     keywords: ["GeomContour", "documentation"],
     exact: ["Allowed stats"],
@@ -3011,7 +3011,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+      "Allowed positions in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid. v1 draws open path polylines only (not filled bands).",
     href: "/reference/geoms/contour#allowed-positions",
     keywords: ["GeomContour", "documentation"],
     exact: ["Allowed positions"],
@@ -3021,7 +3021,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+      "Examples in GeomContour. GeomContour: Contour geometry: isolines of a continuous z surface over a regular x×y grid. v1 draws open path polylines only (not filled bands).",
     href: "/reference/geoms/contour#examples",
     keywords: ["GeomContour", "documentation"],
     exact: ["Examples"],
@@ -3031,7 +3031,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomDensity2d",
     summary:
-      "GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+      "GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y. Open path contours.",
     href: "/reference/geoms/density_2d",
     keywords: [],
     exact: ["GeomDensity2d"],
@@ -3041,7 +3041,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+      "Defaults in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y. Open path contours.",
     href: "/reference/geoms/density_2d#defaults",
     keywords: ["GeomDensity2d", "documentation"],
     exact: ["Defaults"],
@@ -3051,7 +3051,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+      "Svelte component in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y. Open path contours.",
     href: "/reference/geoms/density_2d#svelte",
     keywords: ["GeomDensity2d", "documentation"],
     exact: ["Svelte component"],
@@ -3061,7 +3061,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+      "JSON layer in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y. Open path contours.",
     href: "/reference/geoms/density_2d#json",
     keywords: ["GeomDensity2d", "documentation"],
     exact: ["JSON layer"],
@@ -3071,7 +3071,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+      "Params in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y. Open path contours.",
     href: "/reference/geoms/density_2d#params",
     keywords: ["GeomDensity2d", "documentation"],
     exact: ["Params"],
@@ -3081,7 +3081,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+      "Allowed stats in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y. Open path contours.",
     href: "/reference/geoms/density_2d#allowed-stats",
     keywords: ["GeomDensity2d", "documentation"],
     exact: ["Allowed stats"],
@@ -3091,7 +3091,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+      "Allowed positions in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y. Open path contours.",
     href: "/reference/geoms/density_2d#allowed-positions",
     keywords: ["GeomDensity2d", "documentation"],
     exact: ["Allowed positions"],
@@ -3101,7 +3101,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+      "Examples in GeomDensity2d. GeomDensity2d: 2D density geometry: bivariate KDE isolines over continuous x and y. Open path contours.",
     href: "/reference/geoms/density_2d#examples",
     keywords: ["GeomDensity2d", "documentation"],
     exact: ["Examples"],
@@ -3111,7 +3111,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomDensity2dFilled",
     summary:
-      "GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+      "GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level. Open rings dropped. Defaults fill to after_stat(level).",
     href: "/reference/geoms/density_2d_filled",
     keywords: [],
     exact: ["GeomDensity2dFilled"],
@@ -3121,7 +3121,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+      "Defaults in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level. Open rings dropped. Defaults fill to after_stat(level).",
     href: "/reference/geoms/density_2d_filled#defaults",
     keywords: ["GeomDensity2dFilled", "documentation"],
     exact: ["Defaults"],
@@ -3131,7 +3131,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+      "Svelte component in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level. Open rings dropped. Defaults fill to after_stat(level).",
     href: "/reference/geoms/density_2d_filled#svelte",
     keywords: ["GeomDensity2dFilled", "documentation"],
     exact: ["Svelte component"],
@@ -3141,7 +3141,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+      "JSON layer in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level. Open rings dropped. Defaults fill to after_stat(level).",
     href: "/reference/geoms/density_2d_filled#json",
     keywords: ["GeomDensity2dFilled", "documentation"],
     exact: ["JSON layer"],
@@ -3151,7 +3151,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+      "Params in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level. Open rings dropped. Defaults fill to after_stat(level).",
     href: "/reference/geoms/density_2d_filled#params",
     keywords: ["GeomDensity2dFilled", "documentation"],
     exact: ["Params"],
@@ -3161,7 +3161,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+      "Allowed stats in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level. Open rings dropped. Defaults fill to after_stat(level).",
     href: "/reference/geoms/density_2d_filled#allowed-stats",
     keywords: ["GeomDensity2dFilled", "documentation"],
     exact: ["Allowed stats"],
@@ -3171,7 +3171,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+      "Allowed positions in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level. Open rings dropped. Defaults fill to after_stat(level).",
     href: "/reference/geoms/density_2d_filled#allowed-positions",
     keywords: ["GeomDensity2dFilled", "documentation"],
     exact: ["Allowed positions"],
@@ -3181,7 +3181,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+      "Examples in GeomDensity2dFilled. GeomDensity2dFilled: 2D density filled bands: bivariate KDE closed isoline rings filled by density level. Open rings dropped. Defaults fill to after_stat(level).",
     href: "/reference/geoms/density_2d_filled#examples",
     keywords: ["GeomDensity2dFilled", "documentation"],
     exact: ["Examples"],
@@ -3191,7 +3191,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomDotplot",
     summary:
-      "GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+      "GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (histodot subset). Do not map aes.y — the bindot stat computes stack positions.",
     href: "/reference/geoms/dotplot",
     keywords: [],
     exact: ["GeomDotplot"],
@@ -3201,7 +3201,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+      "Defaults in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (histodot subset). Do not map aes.y — the bindot stat computes stack positions.",
     href: "/reference/geoms/dotplot#defaults",
     keywords: ["GeomDotplot", "documentation"],
     exact: ["Defaults"],
@@ -3211,7 +3211,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+      "Svelte component in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (histodot subset). Do not map aes.y — the bindot stat computes stack positions.",
     href: "/reference/geoms/dotplot#svelte",
     keywords: ["GeomDotplot", "documentation"],
     exact: ["Svelte component"],
@@ -3221,7 +3221,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+      "JSON layer in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (histodot subset). Do not map aes.y — the bindot stat computes stack positions.",
     href: "/reference/geoms/dotplot#json",
     keywords: ["GeomDotplot", "documentation"],
     exact: ["JSON layer"],
@@ -3231,7 +3231,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+      "Params in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (histodot subset). Do not map aes.y — the bindot stat computes stack positions.",
     href: "/reference/geoms/dotplot#params",
     keywords: ["GeomDotplot", "documentation"],
     exact: ["Params"],
@@ -3241,7 +3241,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+      "Allowed stats in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (histodot subset). Do not map aes.y — the bindot stat computes stack positions.",
     href: "/reference/geoms/dotplot#allowed-stats",
     keywords: ["GeomDotplot", "documentation"],
     exact: ["Allowed stats"],
@@ -3251,7 +3251,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+      "Allowed positions in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (histodot subset). Do not map aes.y — the bindot stat computes stack positions.",
     href: "/reference/geoms/dotplot#allowed-positions",
     keywords: ["GeomDotplot", "documentation"],
     exact: ["Allowed positions"],
@@ -3261,7 +3261,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+      "Examples in GeomDotplot. GeomDotplot: Dotplot geometry: stacked dots along a continuous x axis (histodot subset). Do not map aes.y — the bindot stat computes stack positions.",
     href: "/reference/geoms/dotplot#examples",
     keywords: ["GeomDotplot", "documentation"],
     exact: ["Examples"],
@@ -3271,7 +3271,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomMap",
     summary:
-      "GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+      "GeomMap: Map geometry: join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region.",
     href: "/reference/geoms/map",
     keywords: [],
     exact: ["GeomMap"],
@@ -3281,7 +3281,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+      "Defaults in GeomMap. GeomMap: Map geometry: join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region.",
     href: "/reference/geoms/map#defaults",
     keywords: ["GeomMap", "documentation"],
     exact: ["Defaults"],
@@ -3291,7 +3291,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+      "Svelte component in GeomMap. GeomMap: Map geometry: join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region.",
     href: "/reference/geoms/map#svelte",
     keywords: ["GeomMap", "documentation"],
     exact: ["Svelte component"],
@@ -3301,7 +3301,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+      "JSON layer in GeomMap. GeomMap: Map geometry: join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region.",
     href: "/reference/geoms/map#json",
     keywords: ["GeomMap", "documentation"],
     exact: ["JSON layer"],
@@ -3311,7 +3311,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+      "Params in GeomMap. GeomMap: Map geometry: join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region.",
     href: "/reference/geoms/map#params",
     keywords: ["GeomMap", "documentation"],
     exact: ["Params"],
@@ -3321,7 +3321,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+      "Allowed stats in GeomMap. GeomMap: Map geometry: join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region.",
     href: "/reference/geoms/map#allowed-stats",
     keywords: ["GeomMap", "documentation"],
     exact: ["Allowed stats"],
@@ -3331,7 +3331,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+      "Allowed positions in GeomMap. GeomMap: Map geometry: join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region.",
     href: "/reference/geoms/map#allowed-positions",
     keywords: ["GeomMap", "documentation"],
     exact: ["Allowed positions"],
@@ -3341,7 +3341,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomMap. GeomMap: Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+      "Examples in GeomMap. GeomMap: Map geometry: join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region.",
     href: "/reference/geoms/map#examples",
     keywords: ["GeomMap", "documentation"],
     exact: ["Examples"],
@@ -3351,7 +3351,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomSf",
     summary:
-      "GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+      "GeomSf: Simple-features geometry: already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
     href: "/reference/geoms/sf",
     keywords: [],
     exact: ["GeomSf"],
@@ -3361,7 +3361,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+      "Defaults in GeomSf. GeomSf: Simple-features geometry: already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
     href: "/reference/geoms/sf#defaults",
     keywords: ["GeomSf", "documentation"],
     exact: ["Defaults"],
@@ -3371,7 +3371,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+      "Svelte component in GeomSf. GeomSf: Simple-features geometry: already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
     href: "/reference/geoms/sf#svelte",
     keywords: ["GeomSf", "documentation"],
     exact: ["Svelte component"],
@@ -3381,7 +3381,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+      "JSON layer in GeomSf. GeomSf: Simple-features geometry: already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
     href: "/reference/geoms/sf#json",
     keywords: ["GeomSf", "documentation"],
     exact: ["JSON layer"],
@@ -3391,7 +3391,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+      "Params in GeomSf. GeomSf: Simple-features geometry: already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
     href: "/reference/geoms/sf#params",
     keywords: ["GeomSf", "documentation"],
     exact: ["Params"],
@@ -3401,7 +3401,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+      "Allowed stats in GeomSf. GeomSf: Simple-features geometry: already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
     href: "/reference/geoms/sf#allowed-stats",
     keywords: ["GeomSf", "documentation"],
     exact: ["Allowed stats"],
@@ -3411,7 +3411,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+      "Allowed positions in GeomSf. GeomSf: Simple-features geometry: already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
     href: "/reference/geoms/sf#allowed-positions",
     keywords: ["GeomSf", "documentation"],
     exact: ["Allowed positions"],
@@ -3421,7 +3421,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomSf. GeomSf: Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+      "Examples in GeomSf. GeomSf: Simple-features geometry: already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
     href: "/reference/geoms/sf#examples",
     keywords: ["GeomSf", "documentation"],
     exact: ["Examples"],
@@ -3431,7 +3431,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomSfText",
     summary:
-      "GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+      "GeomSfText: Simple-features text labels: places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
     href: "/reference/geoms/sf_text",
     keywords: [],
     exact: ["GeomSfText"],
@@ -3441,7 +3441,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+      "Defaults in GeomSfText. GeomSfText: Simple-features text labels: places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
     href: "/reference/geoms/sf_text#defaults",
     keywords: ["GeomSfText", "documentation"],
     exact: ["Defaults"],
@@ -3451,7 +3451,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+      "Svelte component in GeomSfText. GeomSfText: Simple-features text labels: places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
     href: "/reference/geoms/sf_text#svelte",
     keywords: ["GeomSfText", "documentation"],
     exact: ["Svelte component"],
@@ -3461,7 +3461,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+      "JSON layer in GeomSfText. GeomSfText: Simple-features text labels: places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
     href: "/reference/geoms/sf_text#json",
     keywords: ["GeomSfText", "documentation"],
     exact: ["JSON layer"],
@@ -3471,7 +3471,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+      "Params in GeomSfText. GeomSfText: Simple-features text labels: places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
     href: "/reference/geoms/sf_text#params",
     keywords: ["GeomSfText", "documentation"],
     exact: ["Params"],
@@ -3481,7 +3481,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+      "Allowed stats in GeomSfText. GeomSfText: Simple-features text labels: places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
     href: "/reference/geoms/sf_text#allowed-stats",
     keywords: ["GeomSfText", "documentation"],
     exact: ["Allowed stats"],
@@ -3491,7 +3491,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+      "Allowed positions in GeomSfText. GeomSfText: Simple-features text labels: places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
     href: "/reference/geoms/sf_text#allowed-positions",
     keywords: ["GeomSfText", "documentation"],
     exact: ["Allowed positions"],
@@ -3501,7 +3501,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomSfText. GeomSfText: Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+      "Examples in GeomSfText. GeomSfText: Simple-features text labels: places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
     href: "/reference/geoms/sf_text#examples",
     keywords: ["GeomSfText", "documentation"],
     exact: ["Examples"],
@@ -3511,7 +3511,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomSfLabel",
     summary:
-      "GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+      "GeomSfLabel: Simple-features labels with background boxes: places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
     href: "/reference/geoms/sf_label",
     keywords: [],
     exact: ["GeomSfLabel"],
@@ -3521,7 +3521,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+      "Defaults in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes: places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
     href: "/reference/geoms/sf_label#defaults",
     keywords: ["GeomSfLabel", "documentation"],
     exact: ["Defaults"],
@@ -3531,7 +3531,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+      "Svelte component in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes: places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
     href: "/reference/geoms/sf_label#svelte",
     keywords: ["GeomSfLabel", "documentation"],
     exact: ["Svelte component"],
@@ -3541,7 +3541,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+      "JSON layer in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes: places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
     href: "/reference/geoms/sf_label#json",
     keywords: ["GeomSfLabel", "documentation"],
     exact: ["JSON layer"],
@@ -3551,7 +3551,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+      "Params in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes: places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
     href: "/reference/geoms/sf_label#params",
     keywords: ["GeomSfLabel", "documentation"],
     exact: ["Params"],
@@ -3561,7 +3561,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+      "Allowed stats in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes: places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
     href: "/reference/geoms/sf_label#allowed-stats",
     keywords: ["GeomSfLabel", "documentation"],
     exact: ["Allowed stats"],
@@ -3571,7 +3571,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+      "Allowed positions in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes: places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
     href: "/reference/geoms/sf_label#allowed-positions",
     keywords: ["GeomSfLabel", "documentation"],
     exact: ["Allowed positions"],
@@ -3581,7 +3581,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+      "Examples in GeomSfLabel. GeomSfLabel: Simple-features labels with background boxes: places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
     href: "/reference/geoms/sf_label#examples",
     keywords: ["GeomSfLabel", "documentation"],
     exact: ["Examples"],
@@ -3591,7 +3591,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomBlank",
     summary:
-      "GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+      "GeomBlank: Blank geometry: contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
     href: "/reference/geoms/blank",
     keywords: [],
     exact: ["GeomBlank"],
@@ -3601,7 +3601,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+      "Defaults in GeomBlank. GeomBlank: Blank geometry: contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
     href: "/reference/geoms/blank#defaults",
     keywords: ["GeomBlank", "documentation"],
     exact: ["Defaults"],
@@ -3611,7 +3611,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+      "Svelte component in GeomBlank. GeomBlank: Blank geometry: contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
     href: "/reference/geoms/blank#svelte",
     keywords: ["GeomBlank", "documentation"],
     exact: ["Svelte component"],
@@ -3621,7 +3621,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+      "JSON layer in GeomBlank. GeomBlank: Blank geometry: contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
     href: "/reference/geoms/blank#json",
     keywords: ["GeomBlank", "documentation"],
     exact: ["JSON layer"],
@@ -3631,7 +3631,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+      "Params in GeomBlank. GeomBlank: Blank geometry: contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
     href: "/reference/geoms/blank#params",
     keywords: ["GeomBlank", "documentation"],
     exact: ["Params"],
@@ -3641,7 +3641,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+      "Allowed stats in GeomBlank. GeomBlank: Blank geometry: contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
     href: "/reference/geoms/blank#allowed-stats",
     keywords: ["GeomBlank", "documentation"],
     exact: ["Allowed stats"],
@@ -3651,7 +3651,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+      "Allowed positions in GeomBlank. GeomBlank: Blank geometry: contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
     href: "/reference/geoms/blank#allowed-positions",
     keywords: ["GeomBlank", "documentation"],
     exact: ["Allowed positions"],
@@ -3661,7 +3661,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomBlank. GeomBlank: Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+      "Examples in GeomBlank. GeomBlank: Blank geometry: contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
     href: "/reference/geoms/blank#examples",
     keywords: ["GeomBlank", "documentation"],
     exact: ["Examples"],
@@ -3671,7 +3671,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomJitter",
     summary:
-      "GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+      "GeomJitter: Jittered point alias. Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
     href: "/reference/geoms/jitter",
     keywords: [],
     exact: ["GeomJitter"],
@@ -3681,7 +3681,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+      "Defaults in GeomJitter. GeomJitter: Jittered point alias. Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
     href: "/reference/geoms/jitter#defaults",
     keywords: ["GeomJitter", "documentation"],
     exact: ["Defaults"],
@@ -3691,7 +3691,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Alias",
     summary:
-      "Alias in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+      "Alias in GeomJitter. GeomJitter: Jittered point alias. Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
     href: "/reference/geoms/jitter#alias",
     keywords: ["GeomJitter", "documentation"],
     exact: ["Alias"],
@@ -3701,7 +3701,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+      "Svelte component in GeomJitter. GeomJitter: Jittered point alias. Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
     href: "/reference/geoms/jitter#svelte",
     keywords: ["GeomJitter", "documentation"],
     exact: ["Svelte component"],
@@ -3711,7 +3711,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+      "JSON layer in GeomJitter. GeomJitter: Jittered point alias. Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
     href: "/reference/geoms/jitter#json",
     keywords: ["GeomJitter", "documentation"],
     exact: ["JSON layer"],
@@ -3721,7 +3721,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+      "Params in GeomJitter. GeomJitter: Jittered point alias. Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
     href: "/reference/geoms/jitter#params",
     keywords: ["GeomJitter", "documentation"],
     exact: ["Params"],
@@ -3731,7 +3731,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+      "Allowed stats in GeomJitter. GeomJitter: Jittered point alias. Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
     href: "/reference/geoms/jitter#allowed-stats",
     keywords: ["GeomJitter", "documentation"],
     exact: ["Allowed stats"],
@@ -3741,7 +3741,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+      "Allowed positions in GeomJitter. GeomJitter: Jittered point alias. Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
     href: "/reference/geoms/jitter#allowed-positions",
     keywords: ["GeomJitter", "documentation"],
     exact: ["Allowed positions"],
@@ -3751,7 +3751,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomJitter. GeomJitter: Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+      "Examples in GeomJitter. GeomJitter: Jittered point alias. Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
     href: "/reference/geoms/jitter#examples",
     keywords: ["GeomJitter", "documentation"],
     exact: ["Examples"],
@@ -3761,7 +3761,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomSpoke",
     summary:
-      "GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+      "GeomSpoke: Spoke geometry: one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
     href: "/reference/geoms/spoke",
     keywords: [],
     exact: ["GeomSpoke"],
@@ -3771,7 +3771,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+      "Defaults in GeomSpoke. GeomSpoke: Spoke geometry: one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
     href: "/reference/geoms/spoke#defaults",
     keywords: ["GeomSpoke", "documentation"],
     exact: ["Defaults"],
@@ -3781,7 +3781,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+      "Svelte component in GeomSpoke. GeomSpoke: Spoke geometry: one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
     href: "/reference/geoms/spoke#svelte",
     keywords: ["GeomSpoke", "documentation"],
     exact: ["Svelte component"],
@@ -3791,7 +3791,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+      "JSON layer in GeomSpoke. GeomSpoke: Spoke geometry: one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
     href: "/reference/geoms/spoke#json",
     keywords: ["GeomSpoke", "documentation"],
     exact: ["JSON layer"],
@@ -3801,7 +3801,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+      "Params in GeomSpoke. GeomSpoke: Spoke geometry: one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
     href: "/reference/geoms/spoke#params",
     keywords: ["GeomSpoke", "documentation"],
     exact: ["Params"],
@@ -3811,7 +3811,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+      "Allowed stats in GeomSpoke. GeomSpoke: Spoke geometry: one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
     href: "/reference/geoms/spoke#allowed-stats",
     keywords: ["GeomSpoke", "documentation"],
     exact: ["Allowed stats"],
@@ -3821,7 +3821,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+      "Allowed positions in GeomSpoke. GeomSpoke: Spoke geometry: one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
     href: "/reference/geoms/spoke#allowed-positions",
     keywords: ["GeomSpoke", "documentation"],
     exact: ["Allowed positions"],
@@ -3831,7 +3831,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomSpoke. GeomSpoke: Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+      "Examples in GeomSpoke. GeomSpoke: Spoke geometry: one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
     href: "/reference/geoms/spoke#examples",
     keywords: ["GeomSpoke", "documentation"],
     exact: ["Examples"],
@@ -3841,7 +3841,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomRug",
     summary:
-      "GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+      "GeomRug: Rug geometry: short ticks along panel edges for each observation. Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
     href: "/reference/geoms/rug",
     keywords: [],
     exact: ["GeomRug"],
@@ -3851,7 +3851,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+      "Defaults in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation. Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
     href: "/reference/geoms/rug#defaults",
     keywords: ["GeomRug", "documentation"],
     exact: ["Defaults"],
@@ -3861,7 +3861,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+      "Svelte component in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation. Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
     href: "/reference/geoms/rug#svelte",
     keywords: ["GeomRug", "documentation"],
     exact: ["Svelte component"],
@@ -3871,7 +3871,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+      "JSON layer in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation. Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
     href: "/reference/geoms/rug#json",
     keywords: ["GeomRug", "documentation"],
     exact: ["JSON layer"],
@@ -3881,7 +3881,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+      "Params in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation. Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
     href: "/reference/geoms/rug#params",
     keywords: ["GeomRug", "documentation"],
     exact: ["Params"],
@@ -3891,7 +3891,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+      "Allowed stats in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation. Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
     href: "/reference/geoms/rug#allowed-stats",
     keywords: ["GeomRug", "documentation"],
     exact: ["Allowed stats"],
@@ -3901,7 +3901,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+      "Allowed positions in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation. Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
     href: "/reference/geoms/rug#allowed-positions",
     keywords: ["GeomRug", "documentation"],
     exact: ["Allowed positions"],
@@ -3911,7 +3911,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+      "Examples in GeomRug. GeomRug: Rug geometry: short ticks along panel edges for each observation. Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
     href: "/reference/geoms/rug#examples",
     keywords: ["GeomRug", "documentation"],
     exact: ["Examples"],
@@ -3921,7 +3921,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomStep",
     summary:
-      "GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+      "GeomStep: Step-line geometry: connect points with hv/vh/mid stairs. Same channels as line; ordered by x within groups.",
     href: "/reference/geoms/step",
     keywords: [],
     exact: ["GeomStep"],
@@ -3931,7 +3931,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+      "Defaults in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs. Same channels as line; ordered by x within groups.",
     href: "/reference/geoms/step#defaults",
     keywords: ["GeomStep", "documentation"],
     exact: ["Defaults"],
@@ -3941,7 +3941,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+      "Svelte component in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs. Same channels as line; ordered by x within groups.",
     href: "/reference/geoms/step#svelte",
     keywords: ["GeomStep", "documentation"],
     exact: ["Svelte component"],
@@ -3951,7 +3951,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+      "JSON layer in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs. Same channels as line; ordered by x within groups.",
     href: "/reference/geoms/step#json",
     keywords: ["GeomStep", "documentation"],
     exact: ["JSON layer"],
@@ -3961,7 +3961,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+      "Params in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs. Same channels as line; ordered by x within groups.",
     href: "/reference/geoms/step#params",
     keywords: ["GeomStep", "documentation"],
     exact: ["Params"],
@@ -3971,7 +3971,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+      "Allowed stats in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs. Same channels as line; ordered by x within groups.",
     href: "/reference/geoms/step#allowed-stats",
     keywords: ["GeomStep", "documentation"],
     exact: ["Allowed stats"],
@@ -3981,7 +3981,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+      "Allowed positions in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs. Same channels as line; ordered by x within groups.",
     href: "/reference/geoms/step#allowed-positions",
     keywords: ["GeomStep", "documentation"],
     exact: ["Allowed positions"],
@@ -3991,7 +3991,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+      "Examples in GeomStep. GeomStep: Step-line geometry: connect points with hv/vh/mid stairs. Same channels as line; ordered by x within groups.",
     href: "/reference/geoms/step#examples",
     keywords: ["GeomStep", "documentation"],
     exact: ["Examples"],
@@ -4001,7 +4001,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomQq",
     summary:
-      "GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+      "GeomQq: Q–Q scatter: sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
     href: "/reference/geoms/qq",
     keywords: [],
     exact: ["GeomQq"],
@@ -4011,7 +4011,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+      "Defaults in GeomQq. GeomQq: Q–Q scatter: sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
     href: "/reference/geoms/qq#defaults",
     keywords: ["GeomQq", "documentation"],
     exact: ["Defaults"],
@@ -4021,7 +4021,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+      "Svelte component in GeomQq. GeomQq: Q–Q scatter: sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
     href: "/reference/geoms/qq#svelte",
     keywords: ["GeomQq", "documentation"],
     exact: ["Svelte component"],
@@ -4031,7 +4031,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+      "JSON layer in GeomQq. GeomQq: Q–Q scatter: sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
     href: "/reference/geoms/qq#json",
     keywords: ["GeomQq", "documentation"],
     exact: ["JSON layer"],
@@ -4041,7 +4041,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+      "Params in GeomQq. GeomQq: Q–Q scatter: sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
     href: "/reference/geoms/qq#params",
     keywords: ["GeomQq", "documentation"],
     exact: ["Params"],
@@ -4051,7 +4051,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+      "Allowed stats in GeomQq. GeomQq: Q–Q scatter: sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
     href: "/reference/geoms/qq#allowed-stats",
     keywords: ["GeomQq", "documentation"],
     exact: ["Allowed stats"],
@@ -4061,7 +4061,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+      "Allowed positions in GeomQq. GeomQq: Q–Q scatter: sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
     href: "/reference/geoms/qq#allowed-positions",
     keywords: ["GeomQq", "documentation"],
     exact: ["Allowed positions"],
@@ -4071,7 +4071,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Examples",
     summary:
-      "Examples in GeomQq. GeomQq: Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+      "Examples in GeomQq. GeomQq: Q–Q scatter: sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
     href: "/reference/geoms/qq#examples",
     keywords: ["GeomQq", "documentation"],
     exact: ["Examples"],
@@ -4081,7 +4081,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "page",
     title: "GeomQqLine",
     summary:
-      "GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+      "GeomQqLine: Q–Q reference line: line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
     href: "/reference/geoms/qq_line",
     keywords: [],
     exact: ["GeomQqLine"],
@@ -4091,7 +4091,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Defaults",
     summary:
-      "Defaults in GeomQqLine. GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+      "Defaults in GeomQqLine. GeomQqLine: Q–Q reference line: line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
     href: "/reference/geoms/qq_line#defaults",
     keywords: ["GeomQqLine", "documentation"],
     exact: ["Defaults"],
@@ -4101,7 +4101,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Svelte component",
     summary:
-      "Svelte component in GeomQqLine. GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+      "Svelte component in GeomQqLine. GeomQqLine: Q–Q reference line: line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
     href: "/reference/geoms/qq_line#svelte",
     keywords: ["GeomQqLine", "documentation"],
     exact: ["Svelte component"],
@@ -4111,7 +4111,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "JSON layer",
     summary:
-      "JSON layer in GeomQqLine. GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+      "JSON layer in GeomQqLine. GeomQqLine: Q–Q reference line: line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
     href: "/reference/geoms/qq_line#json",
     keywords: ["GeomQqLine", "documentation"],
     exact: ["JSON layer"],
@@ -4121,7 +4121,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Params",
     summary:
-      "Params in GeomQqLine. GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+      "Params in GeomQqLine. GeomQqLine: Q–Q reference line: line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
     href: "/reference/geoms/qq_line#params",
     keywords: ["GeomQqLine", "documentation"],
     exact: ["Params"],
@@ -4131,7 +4131,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed stats",
     summary:
-      "Allowed stats in GeomQqLine. GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+      "Allowed stats in GeomQqLine. GeomQqLine: Q–Q reference line: line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
     href: "/reference/geoms/qq_line#allowed-stats",
     keywords: ["GeomQqLine", "documentation"],
     exact: ["Allowed stats"],
@@ -4141,7 +4141,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "heading",
     title: "Allowed positions",
     summary:
-      "Allowed positions in GeomQqLine. GeomQqLine: Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+      "Allowed positions in GeomQqLine. GeomQqLine: Q–Q reference line: line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
     href: "/reference/geoms/qq_line#allowed-positions",
     keywords: ["GeomQqLine", "documentation"],
     exact: ["Allowed positions"],

@@ -23,22 +23,10 @@
 </script>
 
 <article class="stat-detail prose" aria-labelledby="stat-heading">
-  <p class="crumb">
-    <a href={`${base}/reference/stats`}>Stat reference</a>
-    <span aria-hidden="true">/</span>
-    <code>{entry.name}</code>
-  </p>
-
   <h1 id="stat-heading"><code>stat: "{entry.name}"</code></h1>
   <p class="lede">{entry.summary}</p>
 
   <h2 id="usage">Usage</h2>
-  <p>
-    Stats are not components. Pass <code>stat="{entry.name}"</code> on a
-    compatible <code>&lt;Geom*&gt;</code>, or set
-    <code>"stat": "{entry.name}"</code> on a JSON layer. Only geoms that list this
-    value in their allowed stats accept it.
-  </p>
   <pre class="snippet"><code>{svelteSnippet}</code></pre>
   <pre class="snippet"><code>{jsonSnippet}</code></pre>
 
@@ -105,7 +93,7 @@
   <p class="back">
     <a href={`${base}/reference/stats`}>← All stats</a>
     ·
-    <a href={`${base}/reference/geoms`}>Geom reference</a>
+    <a href={`${base}/reference/geoms`}>Geoms</a>
     ·
     <a href={`${base}/guide/layers-marks`}>Layers and marks guide</a>
   </p>
@@ -115,15 +103,6 @@
   .stat-detail {
     max-width: 52rem;
     margin: 2rem 0 4rem;
-  }
-
-  .crumb {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin: 0 0 0.75rem;
-    color: var(--muted);
-    font-size: 0.9rem;
   }
 
   h1 {

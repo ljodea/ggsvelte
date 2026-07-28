@@ -38,7 +38,7 @@
   <p class="eyebrow">
     Schema-derived · {Object.keys(GEOM_REFERENCE).length} geoms
   </p>
-  <h1 id="reference-heading">Geom reference</h1>
+  <h1 id="reference-heading">Geoms</h1>
   <p class="intro">
     Every <code>&lt;Geom*&gt;</code> component and its JSON layer form,
     generated from the PortableSpec TypeBox schema so props stay in step with

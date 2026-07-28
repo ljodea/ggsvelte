@@ -13,20 +13,20 @@
 
   <nav aria-label="Reference sections">
     <a href={`${base}/reference/geoms`}>
-      <strong>Geom reference</strong>
+      <strong>Geoms</strong>
       <span
         >Every Geom* component: defaults, stats, positions, and params from the
         schema.</span
       >
     </a>
     <a href={`${base}/reference/stats`}>
-      <strong>Stat reference</strong>
+      <strong>Stats</strong>
       <span
         >Every statistical transform: after_stat columns and compatible geoms.</span
       >
     </a>
     <a href={`${base}/reference/positions`}>
-      <strong>Position reference</strong>
+      <strong>Positions</strong>
       <span
         >Every position adjustment: stack, dodge, jitter params, and compatible
         geoms.</span

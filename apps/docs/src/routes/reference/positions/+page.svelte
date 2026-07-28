@@ -33,7 +33,7 @@
   <p class="eyebrow">
     Schema-derived · {Object.keys(POSITION_REFERENCE).length} positions
   </p>
-  <h1 id="reference-heading">Position reference</h1>
+  <h1 id="reference-heading">Positions</h1>
   <p class="intro">
     Position adjustments control how marks share coordinate space after the stat
     runs. Set <code>position</code> on a <code>&lt;Geom*&gt;</code> shell or
@@ -89,8 +89,8 @@
   <p>
     Pass the <code>position</code> prop on a geom shell. Only values listed on
     that geom's
-    <a href={`${base}/reference/geoms`}>geom reference</a> page validate. Omit it
-    to use the geom default.
+    <a href={`${base}/reference/geoms`}>Geoms</a> page validate. Omit it to use the
+    geom default.
   </p>
   <pre class="snippet"><code
       >{`import { GGPlot, GeomBar } from "@ggsvelte/svelte";
