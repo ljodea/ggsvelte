@@ -27,7 +27,7 @@ import {
   defineArtifactGroup,
   formatGeneratedSource,
 } from "./artifact.ts";
-import { foldSakura, SAKURA_STEPS } from "./quickstart.js";
+import { foldSakura, SAKURA_EPOCHS, SAKURA_STEPS } from "./quickstart.js";
 
 const ROOT = resolve(import.meta.dir, "..");
 const OUTPUT_DIR = join(ROOT, "apps", "docs", "static", "lesson");
@@ -43,9 +43,10 @@ const PROJECTION = join(ROOT, "apps", "docs", "src", "lib", "generated", "lesson
 export const LIVE_STEP_INDEXES: readonly number[] = [];
 
 /**
- * Target width:height of the *data panel*, not the outer SVG. Title, subtitle,
- * legend, caption and axis titles are fixed-pixel chrome; outer height must
- * leave room for them or the panel flattens to ~5:1 (the #1066 follow-up).
+ * Target width:height of the *data panel*, not the outer SVG. Axis titles (and
+ * any other fixed-pixel chrome) still consume height; outer height must leave
+ * room for them or the panel flattens. The finished lesson chart has no
+ * title/subtitle/caption so the panel keeps more of the outer box.
  */
 export const SAKURA_PANEL_ASPECT = 2.5;
 
@@ -161,9 +162,10 @@ const LESSON_SIZE =
 
 /**
  * Outer height for static lesson SVGs. Chosen so the *finished* fold's data
- * panel is ~{@link SAKURA_PANEL_ASPECT}:1 after title/subtitle/legend/caption.
- * Early steps have less chrome, so their panels are taller at the same outer
- * size (accepted: the progressive lesson is not the reference figure).
+ * panel is ~{@link SAKURA_PANEL_ASPECT}:1 after axis chrome (no title/subtitle
+ * /caption on the finished lesson chart). Early steps have less chrome, so
+ * their panels are taller at the same outer size (accepted: the progressive
+ * lesson is not the reference figure).
  */
 export const LESSON_CHART_HEIGHT = LESSON_SIZE.height;
 
@@ -180,6 +182,23 @@ export function staticLessonSteps(): number[] {
   return steps;
 }
 
+/**
+ * GeomText has no fontStyle yet. Stamp italic on epoch-name glyphs in the
+ * static lesson SVGs so they match the live chart's CSS workaround.
+ */
+export function italicizeEpochNames(svg: string): string {
+  let out = svg;
+  for (const band of SAKURA_EPOCHS) {
+    const escaped = band.epoch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    out = out.replace(
+      new RegExp(`(<text\\b[^>]*?)(\\s*>${escaped}</text>)`, "g"),
+      (_match, open: string, close: string) =>
+        open.includes("font-style") ? `${open}${close}` : `${open} font-style="italic"${close}`,
+    );
+  }
+  return out;
+}
+
 export function renderLessonChart(step: number): string {
   const rows = kyotoSakura.map((row) => ({ ...row }));
   // Rendered at the width the step gives them, which is wide enough for the
@@ -187,10 +206,11 @@ export function renderLessonChart(step: number): string {
   const { spec } = foldSakura(step + 1, rows);
   // renderToSVGString already emits xmlns and viewBox, which is what makes the
   // output valid as a standalone image.
-  return `${renderToSVGString(spec, {
+  const svg = renderToSVGString(spec, {
     width: LESSON_CHART_WIDTH,
     height: LESSON_CHART_HEIGHT,
-  })}\n`;
+  });
+  return `${italicizeEpochNames(svg)}\n`;
 }
 
 function projection(entries: readonly LessonChartEntry[]): Promise<string> {

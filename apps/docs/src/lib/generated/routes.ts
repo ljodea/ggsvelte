@@ -3892,13 +3892,13 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "add-geometry-layers",
-        title: "Add geometry layers",
+        id: "add-layers",
+        title: "Add layers",
         level: 2,
       },
       {
         id: "separate-signal-from-noise",
-        title: "Separate the signal from the noise",
+        title: "Pick a minimal theme and add a rolling median line",
         level: 3,
       },
       {

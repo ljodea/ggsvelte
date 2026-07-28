@@ -37,12 +37,7 @@ test("getting started presents the complete file, then the agent surface", async
 
   // The reader gets a complete, runnable file before anything is decomposed,
   // and the agent surface comes after the chart is finished — not before it.
-  const order = [
-    "Start with a basic plot",
-    "Add geometry layers",
-    "The finished file",
-    "Agent JSON spec",
-  ];
+  const order = ["Start with a basic plot", "Add layers", "The finished file", "Agent JSON spec"];
   let previous = -1;
   for (const heading of order) {
     const at = text.indexOf(heading);
@@ -101,7 +96,9 @@ test("guide code copy falls back to selecting text when clipboard access is deni
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
-      value: { writeText: () => Promise.reject(new DOMException("Denied", "NotAllowedError")) },
+      value: {
+        writeText: () => Promise.reject(new DOMException("Denied", "NotAllowedError")),
+      },
     });
   });
   await page.goto("/guide/errors#unknown-field");
@@ -149,7 +146,9 @@ test("mobile header and docs navigation are explicit, reachable controls", async
   await page.keyboard.press("Escape");
   await expect(siteMenu).toBeFocused();
 
-  const chapterMenu = page.getByRole("button", { name: "Open docs navigation" });
+  const chapterMenu = page.getByRole("button", {
+    name: "Open docs navigation",
+  });
   await expect(chapterMenu).toBeVisible();
   await expect(page.getByRole("link", { name: "Skip to docs navigation" })).toHaveAttribute(
     "href",

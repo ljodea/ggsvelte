@@ -185,15 +185,19 @@ const EPOCH_VALUES = '"#f5edc4", "#dce8f2", "#f3dcda"';
 export const SAKURA_STEPS: readonly SakuraStep[] = [
   {
     id: "separate-signal-from-noise",
-    title: "Separate the signal from the noise",
+    title: "Pick a minimal theme and add a rolling median line",
     outcome: "",
     explanation: "",
-    fragment: `<GeomPoint alpha={0.5} size={1.6}
+    // Theme early: gridless Tufte chrome with the trend step, so band edges
+    // later never fight default gridlines.
+    fragment: `<ThemeTufte />
+<GeomPoint alpha={0.5} size={1.6}
   aes={{ color: { value: "#777777" } }} />
 <GeomLine stat="summary_bin" fun="median" binwidth={${SAKURA_BINWIDTH}}
   curve="step-hv" linewidth={1.8}
   aes={{ color: { value: "#262626" } }} />`,
     spec: {
+      theme: "tufte",
       layers: {
         points: {
           geom: "point",
@@ -215,7 +219,10 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       order: ["points", "trend"],
     },
     source: {
-      components: ["GeomLine"],
+      components: ["GeomLine", "ThemeTufte"],
+      grammar: {
+        theme: `  <ThemeTufte />`,
+      },
       children: {
         points: `  <GeomPoint
     alpha={0.5}
@@ -239,18 +246,15 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     title: "Put earlier bloom on top",
     outcome: "",
     explanation: "",
-    // Theme early: gridless Tufte chrome before epoch bands land, so band
-    // edges never fight default gridlines.
-    fragment: `<ThemeTufte />
-<ScaleYMonthDay
+    // X scale (labels + domain) already lives on the first render so year ticks
+    // stay stable. This step only upgrades the reversed month-day y scale.
+    fragment: `<ScaleYMonthDay
   reverse
   breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
   dateLabels="%b %e"
   domain={["${DOMAIN_BOTTOM}", "${DOMAIN_TOP}"]}
-/>
-<ScaleXContinuous labels="d" domain={[800, 2030]} />`,
+/>`,
     spec: {
-      theme: "tufte",
       scales: {
         y: {
           type: "time",
@@ -260,23 +264,18 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
           dateLabels: "%b %e",
           domain: [DOMAIN_BOTTOM, DOMAIN_TOP],
         },
-        // `labels: "d"` because a year is not a quantity: the default numeric
-        // formatter groups thousands, which renders 1000 CE as "1,000".
-        x: { type: "linear", domain: [800, 2030], labels: "d" },
       },
       labs: { x: "Year", y: SAKURA_Y_LAB },
     },
     source: {
-      components: ["ThemeTufte", "ScaleYMonthDay", "ScaleXContinuous"],
+      components: ["ScaleYMonthDay"],
       grammar: {
-        theme: `  <ThemeTufte />`,
         scaleY: `  <ScaleYMonthDay
     reverse
     breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
     dateLabels="%b %e"
     domain={["${DOMAIN_BOTTOM}", "${DOMAIN_TOP}"]}
   />`,
-        scaleX: `  <ScaleXContinuous labels="d" domain={[800, 2030]} />`,
         labs: `  <Labs x="Year" y="${SAKURA_Y_LAB}" />`,
       },
     },
@@ -487,42 +486,15 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     title: "Finish it",
     outcome: "",
     explanation: "",
-    fragment: `<Labs
-  title="Kyoto cherry blossom, 812–2026"
-  subtitle="Bloom now arrives about a week earlier than it did for a millennium"
-  caption="838 observations. Dashed rule: the 1600–1850 median, 15 April. Data: Yasuyuki Aono (2008, 2010)."
-  x="Year"
-  y="${SAKURA_Y_LAB}"
-/>
-key="year"
+    // No title/subtitle/caption: chrome would squash the data panel. Citation
+    // and the dashed-rule note live as a page footnote instead.
+    fragment: `key="year"
 inspect={{ mode: "exact", pin: true }}`,
-    spec: {
-      labs: {
-        title: "Kyoto cherry blossom, 812–2026",
-        subtitle: "Bloom now arrives about a week earlier than it did for a millennium",
-        // The caption names what the dashed rule marks. The reference chart
-        // sets that in the right margin; there is no room for it inside the
-        // panel, because bloom dates are dense across mid-April in every
-        // century — text there would sit on data (#727 gap C).
-        caption:
-          "838 observations. Dashed rule: the 1600–1850 median, 15 April. Data: Yasuyuki Aono (2008, 2010).",
-        x: "Year",
-        y: SAKURA_Y_LAB,
-      },
-    },
+    spec: {},
     source: {
       attrs: {
         key: `  key="year"`,
         inspect: `  inspect={{ mode: "exact", pin: true }}`,
-      },
-      grammar: {
-        labs: `  <Labs
-    x="Year"
-    y="${SAKURA_Y_LAB}"
-    title="Kyoto cherry blossom, 812–2026"
-    subtitle="Bloom now arrives about a week earlier than it did for a millennium"
-    caption="838 observations. Dashed rule: the 1600–1850 median, 15 April. Data: Yasuyuki Aono (2008, 2010)."
-  />`,
       },
     },
   },
