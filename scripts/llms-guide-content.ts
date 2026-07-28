@@ -137,7 +137,7 @@ ${QUICKSTART_BUILDER_FRAGMENT}
 as JSON under the same name on the docs site):
 
 - \`kyotoSakura\` — 838 peak cherry-blossom dates for Kyoto, 812-2026 CE
-  (\`year\`, \`bloomDate\`, \`bloomDoy\`, \`bloomRefDate\`). Time series. Data
+  (\`year\`, \`bloomDate\`, \`bloomDoy\`). Time series. Data
   copyright Yasuyuki Aono; cite \`KYOTO_SAKURA_CITATION\`.
 - \`palmerPenguins\` — 333 complete Palmer Archipelago penguin measurements
   (\`species\`, \`island\`, bill/flipper/mass, \`sex\`, \`year\`, stable \`id\`).

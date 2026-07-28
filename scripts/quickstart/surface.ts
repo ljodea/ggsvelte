@@ -52,7 +52,7 @@ export function quickstartAriaLabel(): string {
 export const QUICKSTART_BUILDER_FRAGMENT = `import { aes, gg } from "@ggsvelte/svelte";
 import { kyotoSakura } from "@ggsvelte/svelte/data";
 
-const spec = gg(kyotoSakura, aes({ x: "year", y: "bloomRefDate" }))
+const spec = gg(kyotoSakura, aes({ x: "year", y: "bloomDate" }))
   .geomPoint()
   .geomLine({
     stat: "summary_bin",
@@ -72,11 +72,11 @@ export const QUICKSTART_PORTABLE_SPEC_FRAGMENT = `{
     "kyotoSakura": {
       "columns": {
         "year": [812, 815, 831, 851, 853],
-        "bloomRefDate": ["2001-04-01", "2001-04-14", "2001-04-05", "2001-04-17", "2001-04-13"]
+        "bloomDate": ["0812-04-01", "0815-04-15", "0831-04-06", "0851-04-18", "0853-04-14"]
       }
     }
   },
-  "aes": { "x": { "field": "year" }, "y": { "field": "bloomRefDate" } },
+  "aes": { "x": { "field": "year" }, "y": { "field": "bloomDate" } },
   "layers": [
     { "geom": "point", "params": { "alpha": 0.5 } },
     {

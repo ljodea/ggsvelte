@@ -49,6 +49,20 @@ const DISCRETE_POSITION_CONVERSION: PositionConversionContext = Object.freeze({
   forcedNonTemporal: false,
 });
 
+/**
+ * Does the requested kind take a slice of a fuller value and discard the rest?
+ *
+ * `time` keeps the clock, `monthDay` keeps the month and day. Either way a
+ * field or annotation parsing as `date` or `datetime` is exactly what the axis
+ * expects to be handed, so the kinds differing is not a contradiction. Every
+ * gate that compares a parse result against a requested kind needs this, and
+ * they must agree — a spec the pipeline accepts and `validate()` rejects (or
+ * the reverse) is worse than either verdict alone.
+ */
+export function kindReducesFullValue(conversion: PositionConversionContext): boolean {
+  return conversion.requestedKind === "time" || conversion.requestedKind === "monthDay";
+}
+
 export function xConversionOf(binding: {
   xConversion?: PositionConversionContext | undefined;
 }): PositionConversionContext {

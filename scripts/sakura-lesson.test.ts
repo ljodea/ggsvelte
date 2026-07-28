@@ -154,7 +154,7 @@ describe("the sakura lesson folds to renderable specs", () => {
       [0, 'curve="step-hv"', '"curve":"step-hv"'],
       [0, "alpha={0.5}", '"alpha":0.5'],
       [1, "reverse", '"reverse":true'],
-      [1, "ScaleYDate", '"dateLabels":"%b %d"'],
+      [1, "ScaleYMonthDay", '"dateLabels":"%b %e"'],
       [1, "ScaleXContinuous", '"labels":"d"'],
       [1, SAKURA_Y_BREAKS[0], `"breaks":${JSON.stringify([...SAKURA_Y_BREAKS])}`],
       [2, "x: null", '"x":null'],
@@ -223,13 +223,13 @@ describe("gate G1 — the reversed temporal y-axis", () => {
 
   it("formats bloom days as dates, not numbers", () => {
     const ticks = yTicks(reversed.spec);
-    expect(ticks.map((tick) => tick.label)).toEqual(["Apr 05", "Apr 15", "Apr 25"]);
+    expect(ticks.map((tick) => tick.label)).toEqual(["Apr 5", "Apr 15", "Apr 25"]);
   });
 
   it("puts earlier bloom above later bloom", () => {
     const ticks = yTicks(reversed.spec);
     // SVG y grows downward: earlier date => smaller y => higher on screen.
-    expect(ticks[0]!.label).toBe("Apr 05");
+    expect(ticks[0]!.label).toBe("Apr 5");
     expect(ticks[2]!.label).toBe("Apr 25");
     expect(ticks[0]!.pos).toBeLessThan(ticks[2]!.pos);
     for (let i = 1; i < ticks.length; i += 1) {
@@ -241,7 +241,7 @@ describe("gate G1 — the reversed temporal y-axis", () => {
     const spec = structuredClone(reversed.spec) as { scales: { y: { reverse?: boolean } } };
     delete spec.scales.y.reverse;
     const ticks = yTicks(spec);
-    expect(ticks[0]!.label).toBe("Apr 05");
+    expect(ticks[0]!.label).toBe("Apr 5");
     expect(ticks[2]!.label).toBe("Apr 25");
     expect(ticks[0]!.pos).toBeGreaterThan(ticks[2]!.pos);
   });

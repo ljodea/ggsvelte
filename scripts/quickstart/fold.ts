@@ -78,7 +78,7 @@ export function foldSakura(
   const consts: string[] = [];
   const attrs = new Map<string, string>([
     ["data", "  data={kyotoSakura}"],
-    ["aes", `  aes={{ x: "year", y: "bloomRefDate" }}`],
+    ["aes", `  aes={{ x: "year", y: "bloomDate" }}`],
   ]);
   const children: Record<string, string> = { ...BASE_CHILDREN };
   const grammar: Record<string, string> = { ...BASE_GRAMMAR };
@@ -107,7 +107,7 @@ export function foldSakura(
 
   const spec: PortableSpec = {
     data: { values: [...rows] },
-    aes: { x: { field: "year" }, y: { field: "bloomRefDate" } },
+    aes: { x: { field: "year" }, y: { field: "bloomDate" } },
     layers: drawn.map((name) => layers[name]!),
     ...(Object.keys(scales).length > 0 && { scales }),
     ...(guides !== undefined && { guides }),

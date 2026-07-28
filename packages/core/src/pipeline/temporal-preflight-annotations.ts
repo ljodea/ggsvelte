@@ -3,7 +3,7 @@ import { parseTemporalColumn } from "@ggsvelte/spec";
 
 import type { CellValue } from "../table.js";
 
-import type { PositionConversionContext } from "./temporal-position.js";
+import { kindReducesFullValue, type PositionConversionContext } from "./temporal-position.js";
 import { temporalPreflightDocs } from "./temporal-preflight-shared.js";
 import type { LayerBinding, PipelineWarning, ScaleDiagnostic } from "./types.js";
 import { PipelineError } from "./types.js";
@@ -61,7 +61,8 @@ export function preflightTemporalAnnotations(input: {
       if (
         decision.kind !== null &&
         conversion.requestedKind !== undefined &&
-        decision.kind !== conversion.requestedKind
+        decision.kind !== conversion.requestedKind &&
+        !(kindReducesFullValue(conversion) && decision.kind !== "time")
       ) {
         throw new PipelineError(
           "temporal-parse-failed",

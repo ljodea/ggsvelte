@@ -24,8 +24,6 @@ import {
 const STATIC = new URL("../apps/docs/static/", import.meta.url).pathname;
 const NOTICE = readFileSync(new URL("../NOTICE", import.meta.url).pathname, "utf8");
 
-const isLeap = (year: number): boolean => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-
 /** Median day-of-year over an inclusive year range. */
 function medianDoy(from: number, to: number): number {
   const values = kyotoSakura
@@ -63,12 +61,10 @@ describe("kyotoSakura dataset", () => {
       expect(row.bloomDate.startsWith(String(row.year).padStart(4, "0"))).toBe(true);
       expect(row.bloomDoy).toBeGreaterThanOrEqual(60);
       expect(row.bloomDoy).toBeLessThanOrEqual(160);
-      expect(row.bloomRefDate.startsWith("2001-")).toBe(true);
-      // The reference-year projection is the same calendar day as the real
-      // observation whenever the observation year is not a leap year.
-      if (!isLeap(row.year)) {
-        expect(row.bloomRefDate.slice(5)).toBe(row.bloomDate.slice(5));
-      }
+      // No reference-year projection: the month-day scale collapses the year,
+      // so the dataset carries only what was observed. The column that used to
+      // live here disagreed with `bloomDate` on every leap year.
+      expect(row).not.toHaveProperty("bloomRefDate");
     }
   });
 
