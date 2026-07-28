@@ -144,6 +144,7 @@ describe("classifyChangedPaths", () => {
       "apps/docs/src/lib/catalog/guide.ts",
       "apps/docs/src/lib/guide.ts",
       "apps/docs/src/lib/components/GettingStartedGuide.svelte",
+      "apps/docs/src/lib/components/LessonFinishedChart.svelte",
       "apps/docs/src/lib/catalog/docs-tasks.ts",
       // Sibling generated inventory modules are content-only (#784 lesson-charts).
       "apps/docs/src/lib/generated/lesson-charts.ts",
@@ -232,6 +233,7 @@ describe("planJobs", () => {
       "scripts/llms-guide-content.ts",
       "apps/docs/src/lib/catalog/guide.ts",
       "apps/docs/src/lib/components/GettingStartedGuide.svelte",
+      "apps/docs/src/lib/components/LessonFinishedChart.svelte",
     ]) {
       const plan = planJobs(classifyChangedPaths([path]));
       expect(plan.unit, path).toBe(true);

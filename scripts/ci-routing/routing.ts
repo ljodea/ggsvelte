@@ -72,6 +72,7 @@ export const DOCS_CONTENT_ONLY_PATHS: readonly string[] = [
   "apps/docs/src/lib/catalog/themes.ts",
   "apps/docs/src/lib/guide.ts",
   "apps/docs/src/lib/components/GettingStartedGuide.svelte",
+  "apps/docs/src/lib/components/LessonFinishedChart.svelte",
   "apps/docs/src/lib/generated/search-index.ts",
   "apps/docs/src/lib/generated/routes.ts",
   "apps/docs/src/lib/generated/gallery-previews.ts",
