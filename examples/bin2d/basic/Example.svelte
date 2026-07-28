@@ -7,18 +7,23 @@
     ThemeMinimal,
   } from "@ggsvelte/svelte";
 
-  import { cloud } from "./data.js";
+  import { oldFaithful } from "./data.js";
 </script>
 
-<GGPlot data={cloud} aes={{ x: "x", y: "y" }} width={640} height={400}>
+<GGPlot
+  data={oldFaithful}
+  aes={{ x: "duration", y: "waiting" }}
+  width={640}
+  height={400}
+>
   <ThemeMinimal />
   <ScaleFillContinuous scheme="viridis" />
   <Labs
-    title="geom_bin2d — rectangular 2D bins"
-    subtitle="400 points in two overlapping clouds; fill = after_stat count"
-    x="x"
-    y="y"
-    fill="count"
+    title="Old Faithful erupts two ways"
+    subtitle="272 eruptions counted into a grid of cells: short then soon, or long then late"
+    x="Eruption length (minutes)"
+    y="Wait for the next eruption (minutes)"
+    fill="Eruptions"
   />
-  <GeomBin2d bins={24} />
+  <GeomBin2d bins={16} />
 </GGPlot>

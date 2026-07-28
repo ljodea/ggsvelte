@@ -1,19 +1,19 @@
 import { aes, gg, scaleFillContinuous } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { cloud } from "./data.js";
+import { oldFaithful } from "./data.js";
 
 export default defineExample(
-  gg(cloud, aes({ x: "x", y: "y" }))
-    .geomBin2d({ bins: 24 })
+  gg(oldFaithful, aes({ x: "duration", y: "waiting" }))
+    .geomBin2d({ bins: 16 })
     .scales(scaleFillContinuous({ scheme: "viridis" }))
     .theme("minimal")
     .labs({
-      title: "geom_bin2d — rectangular 2D bins",
-      subtitle: "400 points in two overlapping clouds; fill = after_stat count",
-      x: "x",
-      y: "y",
-      fill: "count",
+      title: "Old Faithful erupts two ways",
+      subtitle: "272 eruptions counted into a grid of cells: short then soon, or long then late",
+      x: "Eruption length (minutes)",
+      y: "Wait for the next eruption (minutes)",
+      fill: "Eruptions",
     })
     .spec(),
 );

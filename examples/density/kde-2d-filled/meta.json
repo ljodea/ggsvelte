@@ -1,5 +1,6 @@
 {
-  "title": "2D density filled bands",
+  "title": "Cholera deaths as filled density bands",
+  "description": "The same 1854 Soho map, with the density drawn as closed bands rather than lines: the darkest band covers the streets fed by the Broad Street pump.",
   "tags": ["density", "density_2d_filled", "kde", "fill", "stat", "contour"],
   "docsSection": "Statistical summaries"
 }

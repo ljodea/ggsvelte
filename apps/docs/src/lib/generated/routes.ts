@@ -2586,8 +2586,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/bin2d/basic",
-    title: "2D bin heatmap — ggsvelte gallery",
-    description: "2D bin heatmap",
+    title: "Old Faithful's two eruption modes — ggsvelte gallery",
+    description:
+      "Eruption length against the wait that follows, counted into rectangular cells: the Yellowstone geyser has a short mode and a long one, and little in between.",
     canonicalPath: "/examples/bin2d/basic",
     kind: "page",
     index: true,
@@ -2706,8 +2707,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/contour/basic",
-    title: "Contour isolines — ggsvelte gallery",
-    description: "Contour isolines",
+    title: "Maunga Whau in contour lines — ggsvelte gallery",
+    description:
+      "Heights across an Auckland volcano, drawn the way a topographic map draws them: rings of equal height, closing on the crater.",
     canonicalPath: "/examples/contour/basic",
     kind: "page",
     index: true,
@@ -2726,8 +2728,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/density/kde-2d",
-    title: "2D density isolines — ggsvelte gallery",
-    description: "2D density isolines",
+    title: "Snow's cholera deaths, contoured — ggsvelte gallery",
+    description:
+      "A kernel density over the 578 deaths of the 1854 Soho outbreak. The isolines close around Broad Street, where Snow said the pump was.",
     canonicalPath: "/examples/density/kde-2d",
     kind: "page",
     index: true,
@@ -2736,8 +2739,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/density/kde-2d-filled",
-    title: "2D density filled bands — ggsvelte gallery",
-    description: "2D density filled bands",
+    title: "Cholera deaths as filled density bands — ggsvelte gallery",
+    description:
+      "The same 1854 Soho map, with the density drawn as closed bands rather than lines: the darkest band covers the streets fed by the Broad Street pump.",
     canonicalPath: "/examples/density/kde-2d-filled",
     kind: "page",
     index: true,
@@ -2826,8 +2830,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/hex/basic",
-    title: "Hexagonal bin heatmap — ggsvelte gallery",
-    description: "Hexagonal bin heatmap",
+    title: "Fiji earthquakes in hexagons — ggsvelte gallery",
+    description:
+      "A thousand seismic events binned by where they struck: the counts pick out the plate junction and the Tonga trench running south towards New Zealand.",
     canonicalPath: "/examples/hex/basic",
     kind: "page",
     index: true,

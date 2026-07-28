@@ -4449,11 +4449,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:bin2d:basic",
     kind: "example",
-    title: "2D bin heatmap",
-    summary: "2D bin heatmap (Distributions)",
+    title: "Old Faithful's two eruption modes",
+    summary:
+      "Eruption length against the wait that follows, counted into rectangular cells: the Yellowstone geyser has a short mode and a long one, and little in between.",
     href: "/examples/bin2d/basic",
-    keywords: ["2D bin heatmap", "Distributions", "bin2d", "heatmap", "density"],
-    exact: ["2D bin heatmap"],
+    keywords: ["Old Faithful's two eruption modes", "Distributions", "bin2d", "heatmap", "density"],
+    exact: ["Old Faithful's two eruption modes"],
   },
   {
     id: "example:blank:axes-only",
@@ -4628,11 +4629,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:contour:basic",
     kind: "example",
-    title: "Contour isolines",
-    summary: "Contour isolines (Surfaces & grids)",
+    title: "Maunga Whau in contour lines",
+    summary:
+      "Heights across an Auckland volcano, drawn the way a topographic map draws them: rings of equal height, closing on the crater.",
     href: "/examples/contour/basic",
     keywords: [
-      "Contour isolines",
+      "Maunga Whau in contour lines",
       "Surfaces & grids",
       "contour",
       "stat",
@@ -4641,7 +4643,7 @@ export const DOCS_SEARCH_INDEX = [
       "surface",
       "theme",
     ],
-    exact: ["Contour isolines"],
+    exact: ["Maunga Whau in contour lines"],
   },
   {
     id: "example:curve:connectors",
@@ -4655,11 +4657,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:density:kde-2d",
     kind: "example",
-    title: "2D density isolines",
-    summary: "2D density isolines (Distributions)",
+    title: "Snow's cholera deaths, contoured",
+    summary:
+      "A kernel density over the 578 deaths of the 1854 Soho outbreak. The isolines close around Broad Street, where Snow said the pump was.",
     href: "/examples/density/kde-2d",
     keywords: [
-      "2D density isolines",
+      "Snow's cholera deaths, contoured",
       "Distributions",
       "density",
       "density_2d",
@@ -4669,16 +4672,17 @@ export const DOCS_SEARCH_INDEX = [
       "point",
       "theme",
     ],
-    exact: ["2D density isolines"],
+    exact: ["Snow's cholera deaths, contoured"],
   },
   {
     id: "example:density:kde-2d-filled",
     kind: "example",
-    title: "2D density filled bands",
-    summary: "2D density filled bands (Statistical summaries)",
+    title: "Cholera deaths as filled density bands",
+    summary:
+      "The same 1854 Soho map, with the density drawn as closed bands rather than lines: the darkest band covers the streets fed by the Broad Street pump.",
     href: "/examples/density/kde-2d-filled",
     keywords: [
-      "2D density filled bands",
+      "Cholera deaths as filled density bands",
       "Statistical summaries",
       "density",
       "density_2d_filled",
@@ -4687,7 +4691,7 @@ export const DOCS_SEARCH_INDEX = [
       "stat",
       "contour",
     ],
-    exact: ["2D density filled bands"],
+    exact: ["Cholera deaths as filled density bands"],
   },
   {
     id: "example:density:overlay",
@@ -4826,11 +4830,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:hex:basic",
     kind: "example",
-    title: "Hexagonal bin heatmap",
-    summary: "Hexagonal bin heatmap (Distributions)",
+    title: "Fiji earthquakes in hexagons",
+    summary:
+      "A thousand seismic events binned by where they struck: the counts pick out the plate junction and the Tonga trench running south towards New Zealand.",
     href: "/examples/hex/basic",
-    keywords: ["Hexagonal bin heatmap", "Distributions", "hex", "heatmap", "density"],
-    exact: ["Hexagonal bin heatmap"],
+    keywords: ["Fiji earthquakes in hexagons", "Distributions", "hex", "heatmap", "density"],
+    exact: ["Fiji earthquakes in hexagons"],
   },
   {
     id: "example:histogram:basic",
