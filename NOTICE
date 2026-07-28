@@ -29,18 +29,25 @@ apps/docs/static/kyoto-sakura.json contain peak-bloom dates for Kyoto,
 Japan, 812–2026 CE.
 
   Data copyright holder: Yasuyuki Aono (Osaka Prefecture University).
-  Source: http://atmenv.envi.osakafu-u.ac.jp/aono/kyophenotemp4/
+  Original source: http://atmenv.envi.osakafu-u.ac.jp/aono/kyophenotemp4/
+  (closed 2025-03-31; Aono's file KyotoFullFlower7.xls, covering 801–2015,
+  is archived at https://www.ncei.noaa.gov/pub/data/paleo/historical/
+  phenology/japan/LatestVersion/)
   - 9th–14th centuries acquired and analyzed by Aono and Saito (2010),
     International Journal of Biometeorology 54, 211–219.
   - 15th–21st centuries acquired and analyzed by Aono and Kazui (2008),
     International Journal of Climatology 28, 905–914.
   - Modern observations are made by a local newspaper in Arashiyama, Kyoto.
+  - The series is continued after Aono's death by Genki Katata (Canon
+    Institute for Global Studies), https://cigs.canon/katata_date/, which
+    is the source for the years following Aono's own file.
 
 The series was retrieved via the cleaned mirror published for the George
 Mason University peak-bloom-prediction competition
 (https://github.com/GMU-CherryBlossomCompetition/peak-bloom-prediction,
-data/kyoto.csv), whose repository content is CC BY-NC-SA 4.0; the Kyoto
-observations themselves carry Aono's copyright notice above. ggsvelte
+data/kyoto.csv), whose repository content is CC BY-NC-SA 4.0, with the most
+recent years checked against Katata's table; the Kyoto observations
+themselves carry Aono's copyright notice above. ggsvelte
 redistributes the observation dates — factual measurements, reproduced
 without the mirror's editorial content — with the attribution required by
 the source. Anyone publishing charts made from this data should cite Aono
