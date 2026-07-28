@@ -4,15 +4,15 @@
 import { statSum } from "../stats/sum.js";
 import type { ColumnTable, CellValue } from "../table.js";
 
-import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import { makeColumnOf, styleColumns } from "./frame-stats-shared.js";
+import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
+import { makeColumnOf } from "./frame-stats-shared.js";
+import { statLayerFrame } from "./layer-frame.js";
 import {
   positionColumn,
   positionDiscreteness,
   positionValuesToNumeric,
 } from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
-import { NO_ROW } from "./types.js";
 
 function positionCells(
   binding: LayerBinding,
@@ -67,25 +67,17 @@ export function buildSumFrame(
   const xNumeric = positionValuesToNumeric(result.x, binding.xConversion).values;
   const yNumeric = positionValuesToNumeric(result.y, binding.yConversion).values;
   const columns: Record<string, Float64Array> = { n: result.n, prop: result.prop };
-  const col = columnOf(result, result.x);
-  const outN = result.x.length;
 
-  return {
+  return statLayerFrame({
     binding,
     table,
-    n: outN,
-    xValues: result.x,
-    xNumeric,
-    yValues: result.y,
-    yNumeric,
+    n: result.x.length,
+    x: { values: result.x, numeric: xNumeric },
+    y: { values: result.y, numeric: yNumeric },
     groups: result.groups,
     inputGroups: groups,
-    inputSourceRows: null,
-    rowIndex: Uint32Array.from({ length: outN }, () => NO_ROW),
-    colorValues: col(binding.color.field),
-    fillValues: col(binding.fill.field),
-    ...styleColumns(binding, col, columns),
-    labelValues: col(binding.labelField),
-    ...emptyFrameExtras(),
-  };
+    columns,
+    columnOf: columnOf(result, result.x),
+    lineage: "none",
+  });
 }

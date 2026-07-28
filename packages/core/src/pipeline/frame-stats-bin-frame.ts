@@ -3,11 +3,9 @@
  */
 import type { ColumnTable } from "../table.js";
 
-import { emptyFrameExtras } from "./frame-helpers.js";
-import { colorColumns, styleColumns, type makeColumnOf } from "./frame-stats-shared.js";
-import { forwardMeasureOnce } from "./stat-measure-transform.js";
+import { type makeColumnOf } from "./frame-stats-shared.js";
+import { statLayerFrame } from "./layer-frame.js";
 import type { LayerBinding, LayerFrame } from "./types.js";
-import { NO_ROW } from "./types.js";
 
 type BinResult = {
   x: Float64Array;
@@ -35,29 +33,23 @@ export function packBinLayerFrame(
     ncount: result.ncount,
     ndensity: result.ndensity,
   };
-  const col = columnOf(result, null);
-  return {
+  return statLayerFrame({
     binding,
     table,
     n: result.x.length,
-    xValues: null,
-    xNumeric: result.x,
-    yValues: null,
-    yNumeric: forwardMeasureOnce(
-      columns[binding.yStatColumn ?? "count"] ?? result.count,
-      binding.yTransform,
-    ),
+    x: { numeric: result.x },
+    y: { column: "count", fallback: result.count },
     groups: result.groups,
     inputGroups,
-    inputSourceRows: null,
-    rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
-    ...colorColumns(binding, col, columns),
-    ...styleColumns(binding, col, columns),
-    labelValues: col(binding.labelField),
-    ...emptyFrameExtras(),
-    // Lineage replays the stat's own cut instead of re-deriving from edges (#905).
-    binCut: result.cut,
-    xmin: result.xmin,
-    xmax: result.xmax,
-  };
+    columns,
+    columnOf: columnOf(result, null),
+    lineage: "none",
+    afterStatColor: true,
+    extras: {
+      // Lineage replays the stat's own cut instead of re-deriving from edges (#905).
+      binCut: result.cut,
+      xmin: result.xmin,
+      xmax: result.xmax,
+    },
+  });
 }

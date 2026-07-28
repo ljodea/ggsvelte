@@ -4,12 +4,11 @@
 import { statEcdf } from "../stats/ecdf.js";
 import type { ColumnTable } from "../table.js";
 
-import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import { makeColumnOf, styleColumns } from "./frame-stats-shared.js";
-import { forwardMeasureOnce } from "./stat-measure-transform.js";
+import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
+import { makeColumnOf } from "./frame-stats-shared.js";
+import { statLayerFrame } from "./layer-frame.js";
 import { positionColumn } from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
-import { NO_ROW } from "./types.js";
 
 export function buildEcdfFrame(
   binding: LayerBinding,
@@ -29,28 +28,16 @@ export function buildEcdfFrame(
   });
   removedStatWarning(result.dropped, index, "missing or non-finite x", warnings);
   const columns: Record<string, Float64Array> = { ecdf: result.ecdf };
-  const yNumeric = forwardMeasureOnce(
-    columns[binding.yStatColumn ?? "ecdf"] ?? result.ecdf,
-    binding.yTransform,
-  );
-  const col = columnOf(result, null);
-  const outN = result.x.length;
-  return {
+  return statLayerFrame({
     binding,
     table,
-    n: outN,
-    xValues: null,
-    xNumeric: result.x,
-    yValues: null,
-    yNumeric,
+    n: result.x.length,
+    x: { numeric: result.x },
+    y: { column: "ecdf", fallback: result.ecdf },
     groups: result.groups,
     inputGroups: groups,
-    inputSourceRows: null,
-    rowIndex: Uint32Array.from({ length: outN }, () => NO_ROW),
-    colorValues: col(binding.color.field),
-    fillValues: col(binding.fill.field),
-    ...styleColumns(binding, col, columns),
-    labelValues: col(binding.labelField),
-    ...emptyFrameExtras(),
-  };
+    columns,
+    columnOf: columnOf(result, null),
+    lineage: "none",
+  });
 }

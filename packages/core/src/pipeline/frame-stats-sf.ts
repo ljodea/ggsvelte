@@ -4,6 +4,8 @@
  * ringIndex for even-odd holes. Already-projected coordinates only (no CRS /
  * coord_sf). Geometry lives as a JSON string in a data column (CellValue
  * cannot hold nested objects).
+ *
+ * Not yet on statLayerFrame (#1077): geometry expansion is a different shape.
  */
 import { ColumnTable, type CellValue } from "../table.js";
 

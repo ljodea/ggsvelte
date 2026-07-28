@@ -1,5 +1,8 @@
 /**
  * Function stat → LayerFrame (path/line from evaluated y = f(x) grid).
+ *
+ * Not yet on statLayerFrame (#1077): no carried aesthetics, empty inputGroups,
+ * and both axes are independently measure-forwarded.
  */
 import { statFunction } from "../stats/function.js";
 import type { ColumnTable } from "../table.js";

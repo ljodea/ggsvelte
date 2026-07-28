@@ -7,6 +7,8 @@
  *
  * Fortified map table + byKey index are memoized per LayerBinding for the run
  * so faceted panels do not rebuild the map join (#910).
+ *
+ * Not yet on statLayerFrame (#1077): join expansion is a different shape.
  */
 import type { DataRef, PortableSpec } from "@ggsvelte/spec";
 

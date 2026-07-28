@@ -5,9 +5,9 @@ import type { ColumnTable } from "../table.js";
 
 import { statBindot } from "../stats/bindot.js";
 
-import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import { makeColumnOf, styleColumns } from "./frame-stats-shared.js";
-import { forwardMeasureOnce } from "./stat-measure-transform.js";
+import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
+import { makeColumnOf } from "./frame-stats-shared.js";
+import { statLayerFrame } from "./layer-frame.js";
 import { positionColumn } from "./temporal-position.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
 
@@ -44,11 +44,6 @@ export function buildBindotFrame(
     count: result.count,
   };
   const col = columnOf(result, null);
-  const outN = result.x.length;
-  const yNumeric = forwardMeasureOnce(
-    columns[binding.yStatColumn ?? "stackpos"] ?? result.stackpos,
-    binding.yTransform,
-  );
 
   // Per-observation aesthetics from source rows (not group-constant only).
   const colorField = binding.color.field;
@@ -58,24 +53,22 @@ export function buildBindotFrame(
   const fillValues =
     fillField === null ? null : result.sourceRows.map((row) => table.column(fillField)[row]!);
 
-  return {
+  return statLayerFrame({
     binding,
     table,
-    n: outN,
-    xValues: null,
-    xNumeric: result.x,
-    yValues: null,
-    yNumeric,
+    n: result.x.length,
+    x: { numeric: result.x },
+    y: { column: "stackpos", fallback: result.stackpos },
     groups: result.groups,
     inputGroups: groups,
-    inputSourceRows: null,
-    rowIndex: Uint32Array.from(result.sourceRows),
-    colorValues: colorField === null ? col(null) : colorValues,
-    fillValues: fillField === null ? col(null) : fillValues,
-    ...styleColumns(binding, col, columns),
-    labelValues: col(binding.labelField),
-    ...emptyFrameExtras(),
-    xmin: result.xmin,
-    xmax: result.xmax,
-  };
+    columns,
+    columnOf: col,
+    lineage: Uint32Array.from(result.sourceRows),
+    extras: {
+      colorValues: colorField === null ? col(null) : colorValues,
+      fillValues: fillField === null ? col(null) : fillValues,
+      xmin: result.xmin,
+      xmax: result.xmax,
+    },
+  });
 }

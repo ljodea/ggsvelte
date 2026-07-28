@@ -1,6 +1,8 @@
 /**
  * stat_sf_coordinates (#809 phase 2 + multi-part labels phase 5):
  * one (x,y) per geometry part from portable GeoJSON (Multi* expands).
+ *
+ * Not yet on statLayerFrame (#1077): geometry expand is a different shape.
  */
 import { ColumnTable, type CellValue } from "../table.js";
 

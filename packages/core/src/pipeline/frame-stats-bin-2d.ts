@@ -5,11 +5,11 @@ import type { ColumnTable } from "../table.js";
 
 import { statBin2d } from "../stats/bin-2d.js";
 
-import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import { colorColumns, makeColumnOf, styleColumns } from "./frame-stats-shared.js";
+import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
+import { makeColumnOf } from "./frame-stats-shared.js";
+import { statLayerFrame } from "./layer-frame.js";
 import { positionColumn } from "./temporal-position.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
-import { NO_ROW } from "./types.js";
 
 export function buildBin2dFrame(
   binding: LayerBinding,
@@ -50,28 +50,24 @@ export function buildBin2dFrame(
     ncount: result.ncount,
     ndensity: result.ndensity,
   };
-  const col = columnOf(result, null);
 
-  return {
+  return statLayerFrame({
     binding,
     table,
     n: result.x.length,
-    xValues: null,
-    xNumeric: result.x,
-    yValues: null,
-    yNumeric: result.y,
+    x: { numeric: result.x },
+    y: { numeric: result.y },
     groups: result.groups,
     inputGroups: groups,
-    inputSourceRows: null,
-    rowIndex: Uint32Array.from({ length: result.x.length }, () => NO_ROW),
-    // after_stat color/fill (default fill = count; #799 / #953).
-    ...colorColumns(binding, col, columns),
-    ...styleColumns(binding, col, columns),
-    labelValues: col(binding.labelField),
-    ...emptyFrameExtras(),
-    xmin: result.xmin,
-    xmax: result.xmax,
-    ymin: result.ymin,
-    ymax: result.ymax,
-  };
+    columns,
+    columnOf: columnOf(result, null),
+    lineage: "none",
+    afterStatColor: true,
+    extras: {
+      xmin: result.xmin,
+      xmax: result.xmax,
+      ymin: result.ymin,
+      ymax: result.ymax,
+    },
+  });
 }

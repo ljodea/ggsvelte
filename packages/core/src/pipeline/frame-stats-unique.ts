@@ -3,6 +3,8 @@
  * aesthetic fields (#813). Builds a full identity frame, then slices every
  * post-stat column to the kept panel-local rows so segment/rect/ribbon
  * extras stay aligned with frame-identity.ts.
+ *
+ * Not yet on statLayerFrame (#1077): slices an identity frame, not a stat pack.
  */
 import type { CellValue, ColumnTable } from "../table.js";
 

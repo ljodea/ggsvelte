@@ -6,11 +6,11 @@ import type { ViolinParams } from "@ggsvelte/spec";
 import { statYDensity } from "../stats/ydensity.js";
 import type { ColumnTable } from "../table.js";
 
-import { carriedColumns, emptyFrameExtras, removedStatWarning } from "./frame-helpers.js";
-import { makeColumnOf, styleColumns } from "./frame-stats-shared.js";
+import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
+import { makeColumnOf } from "./frame-stats-shared.js";
+import { statLayerFrame } from "./layer-frame.js";
 import { positionColumn } from "./temporal-position.js";
 import type { LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
-import { NO_ROW } from "./types.js";
 
 export function buildYDensityFrame(
   binding: LayerBinding,
@@ -42,34 +42,28 @@ export function buildYDensityFrame(
       message: `Layer ${index} (ydensity): ${result.droppedGroups} group(s) with fewer than two data points have been dropped.`,
     });
   }
-  const col = columnOf(result, result.x);
-  const outN = result.y.length;
-  return {
+  return statLayerFrame({
     binding,
     table,
-    n: outN,
-    xValues: result.x,
-    xNumeric: null,
-    yValues: null,
-    yNumeric: result.y,
+    n: result.y.length,
+    x: { values: result.x, numeric: null },
+    y: { numeric: result.y },
     groups: result.groups,
     inputGroups: groups,
-    inputSourceRows: null,
-    rowIndex: Uint32Array.from({ length: outN }, () => NO_ROW),
-    colorValues: col(binding.color.field),
-    fillValues: col(binding.fill.field),
-    ...styleColumns(binding, col, {
+    columns: {
       density: result.density,
       scaled: result.scaled,
       count: result.count,
       violinwidth: result.violinwidth,
-    }),
-    labelValues: col(binding.labelField),
-    ...emptyFrameExtras(),
-    // ymin stashes violinwidth (unitless 0–1 × scale factor) for geometry-violin.
-    xmin: null,
-    xmax: null,
-    ymin: result.violinwidth,
-    ymax: result.violinwidth,
-  };
+    },
+    columnOf: columnOf(result, result.x),
+    lineage: "none",
+    extras: {
+      // ymin stashes violinwidth (unitless 0–1 × scale factor) for geometry-violin.
+      xmin: null,
+      xmax: null,
+      ymin: result.violinwidth,
+      ymax: result.violinwidth,
+    },
+  });
 }
