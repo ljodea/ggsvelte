@@ -20,17 +20,17 @@
 /**
  * Spanish Armada squadron tonnage, 1588 (Medina Sidonia muster).
  * HistData::Armada (see NOTICE); zero-ton squadrons omitted for the palette bars.
- * Field names match the palette specimen (`language` / `respondents`).
+ * English squadron labels match examples/bar/horizontal (HistData Fleet is abbreviated).
  */
-export const languages: { language: string; respondents: number }[] = [
-  { language: "Pataches", respondents: 1221 },
-  { language: "Biscay", respondents: 6567 },
-  { language: "Guipúzcoa", respondents: 6991 },
-  { language: "Levant", respondents: 7705 },
-  { language: "Portugal", respondents: 7737 },
-  { language: "Castile", respondents: 8714 },
-  { language: "Andalusia", respondents: 8762 },
-  { language: "Hulks", respondents: 10271 },
+export const armadaTonnage: { squadron: string; tons: number }[] = [
+  { squadron: "Pataches", tons: 1221 },
+  { squadron: "Biscay", tons: 6567 },
+  { squadron: "Guipúzcoa", tons: 6991 },
+  { squadron: "Levant", tons: 7705 },
+  { squadron: "Portugal", tons: 7737 },
+  { squadron: "Castile", tons: 8714 },
+  { squadron: "Andalusia", tons: 8762 },
+  { squadron: "Hulks", tons: 10271 },
 ];
 
 /**

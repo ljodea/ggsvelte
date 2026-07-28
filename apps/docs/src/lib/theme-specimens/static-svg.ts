@@ -15,7 +15,7 @@ import {
   countries,
   generation,
   grid,
-  languages,
+  armadaTonnage,
   longRunSeries,
   penguins,
   revenue,
@@ -211,7 +211,7 @@ export function paletteSpecimenStaticSvg(input: {
   const key = `palette:${input.scheme}:${String(input.reverse)}:${input.paperTheme}:${String(width)}x${String(height)}`;
   const hit = cache.get(key);
   if (hit !== undefined) return hit;
-  const spec = gg(languages, aes({ x: "language", y: "respondents", fill: "language" }))
+  const spec = gg(armadaTonnage, aes({ x: "squadron", y: "tons", fill: "squadron" }))
     .geomCol({ width: 0.75 })
     .scales({
       fill: { type: "ordinal", scheme: input.scheme, reverse: input.reverse },

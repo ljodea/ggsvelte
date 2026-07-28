@@ -9,7 +9,7 @@
   } from "@ggsvelte/svelte";
   import type { CATEGORICAL_SCHEME_NAMES, ThemeName } from "@ggsvelte/spec";
 
-  import { languages } from "$lib/theme-specimens/data";
+  import { armadaTonnage } from "$lib/theme-specimens/data";
 
   type CategoricalSchemeName = (typeof CATEGORICAL_SCHEME_NAMES)[number];
 
@@ -29,8 +29,8 @@
 </script>
 
 <GGPlot
-  data={languages}
-  aes={{ x: "language", y: "respondents", fill: "language" }}
+  data={armadaTonnage}
+  aes={{ x: "squadron", y: "tons", fill: "squadron" }}
   inspect={{ mode: "exact" }}
   {height}
   ariaLabel={`${label} palette on ${paperTheme} paper`}
