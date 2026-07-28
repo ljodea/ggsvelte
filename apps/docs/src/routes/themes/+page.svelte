@@ -13,15 +13,6 @@
   <header class="themes-intro">
     <p class="eyebrow">Themes</p>
     <h1>Chart themes</h1>
-    <p>
-      Chart themes style paper, grids, axes, and type. Data color lives on
-      <a href={`${base}/palettes`}>palettes</a>. Site light/dark is separate
-      unless you wire them yourself.
-    </p>
-    <p class="guide-link">
-      Scale and color channel reference:
-      <a href={`${base}/guide/scales-guides`}>Scales and guides</a>.
-    </p>
   </header>
 
   <ChartThemeLab initialStaticSvg={data.labStaticSvg} />
@@ -89,30 +80,10 @@
   }
 
   .themes-intro h1 {
-    margin: 0.25rem 0 0.75rem;
+    margin: 0.25rem 0 0;
     font-size: clamp(2.25rem, 5vw, 3.5rem);
     line-height: 0.95;
     letter-spacing: -0.03em;
-  }
-
-  .themes-intro > p:not(.eyebrow, .guide-link) {
-    margin: 0;
-    color: var(--muted);
-    font-size: 1.02rem;
-  }
-
-  .themes-intro a {
-    color: var(--ink);
-  }
-
-  .guide-link {
-    margin: 0.85rem 0 0;
-    color: var(--muted);
-    font-size: 0.92rem;
-  }
-
-  .guide-link a {
-    color: var(--ink);
   }
 
   .eyebrow {
