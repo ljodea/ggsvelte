@@ -6216,24 +6216,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["The finished file"],
   },
   {
-    id: "heading:guide-getting-started:built-for-agents",
+    id: "heading:guide-getting-started:agent-json-spec",
     kind: "heading",
-    title: "Built for agents",
+    title: "Agent JSON spec",
     summary:
-      "Built for agents in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
-    href: "/guide/getting-started#built-for-agents",
+      "Agent JSON spec in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
+    href: "/guide/getting-started#agent-json-spec",
     keywords: ["Getting started", "Start"],
-    exact: ["Built for agents"],
-  },
-  {
-    id: "heading:guide-getting-started:the-rest-of-the-grammar",
-    kind: "heading",
-    title: "The rest of the grammar",
-    summary:
-      "The rest of the grammar in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
-    href: "/guide/getting-started#the-rest-of-the-grammar",
-    keywords: ["Getting started", "Start"],
-    exact: ["The rest of the grammar"],
+    exact: ["Agent JSON spec"],
   },
   {
     id: "heading:guide-getting-started:where-next",

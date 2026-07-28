@@ -24,8 +24,7 @@ export const GETTING_STARTED_PAGE_HEADINGS = [
   { id: "add-geometry-layers", title: "Add geometry layers", level: 2 },
   ...SAKURA_STEPS.map((step) => ({ id: step.id, title: step.title, level: 3 as const })),
   { id: "the-finished-file", title: "The finished file", level: 2 },
-  { id: "built-for-agents", title: "Built for agents", level: 2 },
-  { id: "the-rest-of-the-grammar", title: "The rest of the grammar", level: 2 },
+  { id: "agent-json-spec", title: "Agent JSON spec", level: 2 },
   { id: "where-next", title: "Where next", level: 2 },
 ] as const satisfies readonly { id: string; title: string; level: 2 | 3 }[];
 

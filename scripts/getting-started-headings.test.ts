@@ -65,6 +65,8 @@ describe("getting-started page navigation", () => {
       "you-have-a-chart",
       "the-chart",
       "inspect-and-pin",
+      "built-for-agents",
+      "the-rest-of-the-grammar",
       "choose-another-surface-only-when-you-need-it",
       "headless-and-server-rendering",
       "validating-specs",

@@ -3927,13 +3927,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "built-for-agents",
-        title: "Built for agents",
-        level: 2,
-      },
-      {
-        id: "the-rest-of-the-grammar",
-        title: "The rest of the grammar",
+        id: "agent-json-spec",
+        title: "Agent JSON spec",
         level: 2,
       },
       {
