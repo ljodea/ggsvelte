@@ -120,6 +120,19 @@ describe("GEOM_REFERENCE", () => {
     expect(missing, `params missing descriptions: ${missing.join(", ")}`).toEqual([]);
   });
 
+  it("user-facing summaries and param descriptions omit ggplot2 and issue numbers", () => {
+    const dirty = /ggplot2|#\d{3,5}\b/i;
+    const hits: string[] = [];
+    for (const geom of KNOWN_GEOMS) {
+      const entry = GEOM_REFERENCE[geom];
+      if (dirty.test(entry.summary)) hits.push(`${geom} summary`);
+      for (const param of entry.params) {
+        if (dirty.test(param.description)) hits.push(`${geom}.${param.name}`);
+      }
+    }
+    expect(hits, `dirty prose: ${hits.join(", ")}`).toEqual([]);
+  });
+
   it("SHARED_LAYER_PROPS documents the props common to every Geom* shell", () => {
     const names = SHARED_LAYER_PROPS.map((p) => p.name);
     expect(names).toEqual([

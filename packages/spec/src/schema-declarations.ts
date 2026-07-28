@@ -49,7 +49,7 @@ const sizeUnitField = {
   sizeUnit: Type.Optional(
     Type.Union([Type.Literal("area"), Type.Literal("radius"), Type.Literal("area_zero")], {
       description:
-        'Size encoding unit (size aesthetic only). "area" (default) interpolates by area between range endpoints; "radius" maps linearly to radius; "area_zero" maps value proportionally to area with zero→zero (ggplot2 scale_size_area / scale_size_binned_area).',
+        'Size encoding unit (size aesthetic only). "area" (default) interpolates by area between range endpoints; "radius" maps linearly to radius; "area_zero" maps value proportionally to area with zero→zero.',
     }),
   ),
 };
@@ -331,7 +331,7 @@ export const SpecDeclarations = {
     {
       stat: Type.String({
         description:
-          "Name of a stat-generated column computed after the layer's stat runs (e.g. \"count\" for the count stat). ggplot2's after_stat().",
+          'Name of a stat-generated column computed after the layer\'s stat runs (e.g. "count" for the count stat). after_stat.',
       }),
     },
     {
@@ -413,7 +413,7 @@ export const SpecDeclarations = {
       sample: Type.Optional(
         Type.Ref("ChannelValue", {
           description:
-            "Sample distribution channel for Q–Q plots (ggplot2 aes.sample). The qq / qq_line stats read this column; x/y become theoretical and sample quantiles after the stat. Never participates in grouping.",
+            "Sample distribution channel for Q–Q plots. The qq / qq_line stats read this column; x/y become theoretical and sample quantiles after the stat. Never participates in grouping.",
         }),
       ),
       ymin: Type.Optional(
@@ -467,13 +467,13 @@ export const SpecDeclarations = {
       z: Type.Optional(
         Type.Ref("ChannelValue", {
           description:
-            "Surface height for geom contour / stat contour (quantitative grid values over continuous x×y; #801).",
+            "Surface height for geom contour / stat contour (quantitative grid values over continuous x×y;).",
         }),
       ),
       map_id: Type.Optional(
         Type.Ref("ChannelValue", {
           description:
-            "Region join key for geom_map (value-table column matched to the map data id column; #808).",
+            "Region join key for geom_map (value-table column matched to the map data id column;).",
         }),
       ),
       angle: Type.Optional(
@@ -632,7 +632,7 @@ export const SpecDeclarations = {
         Type.Integer({
           minimum: 1,
           description:
-            "STAT SUMMARY_BIN ONLY (#817): number of bins (integer ≥ 1). Default 30 — advisory. Overridden by binwidth.",
+            "STAT SUMMARY_BIN ONLY: number of bins (integer ≥ 1). Default 30 — advisory. Overridden by binwidth.",
         }),
       ),
       binwidth: Type.Optional(
@@ -673,7 +673,7 @@ export const SpecDeclarations = {
           ],
           {
             description:
-              'SUMMARY_BIN center fun (mean/median/sum; #817) or MANUAL named transform (first|last|mean|median|min|max|sum; #814). Required when stat is "manual".',
+              'SUMMARY_BIN center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
           },
         ),
       ),
@@ -691,7 +691,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Styling parameters for the point geom, plus summary_bin (#817) and/or manual (#814) controls.",
+        "Styling parameters for the point geom, plus summary_bin and/or manual controls.",
     },
   ),
 
@@ -727,7 +727,7 @@ export const SpecDeclarations = {
       pad: Type.Optional(
         Type.Boolean({
           description:
-            "With stat ecdf: when true (default), prepend (xmin, 0) so step stairs start at zero. Finite-clamped (ggplot2 uses ±Inf).",
+            "With stat ecdf: when true (default), prepend (xmin, 0) so step stairs start at zero. Finite-clamped.",
         }),
       ),
       n: Type.Optional(
@@ -755,7 +755,7 @@ export const SpecDeclarations = {
           ],
           {
             description:
-              'STAT CONNECT ONLY (#816): how successive points join — "hv" (default), "vh", "mid", or "linear". Ignored for other stats.',
+              'STAT CONNECT ONLY: how successive points join — "hv" (default), "vh", "mid", or "linear". Ignored for other stats.',
           },
         ),
       ),
@@ -804,7 +804,7 @@ export const SpecDeclarations = {
           ],
           {
             description:
-              'SUMMARY_BIN center fun (mean/median/sum; #817) or MANUAL named transform (first|last|mean|median|min|max|sum; #814). Required when stat is "manual".',
+              'SUMMARY_BIN center fun (mean/median/sum;) or MANUAL named transform (first|last|mean|median|min|max|sum;). Required when stat is "manual".',
           },
         ),
       ),
@@ -833,7 +833,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin (#817), manual (#814), or ecdf pad/n (#811) controls.",
+        "Styling parameters for the line geom, plus optional stat-bin (freqpoly), summary_bin, manual, or ecdf pad/n controls.",
     },
   ),
 
@@ -856,7 +856,7 @@ export const SpecDeclarations = {
       direction: Type.Optional(
         Type.Union([Type.Literal("hv"), Type.Literal("vh"), Type.Literal("mid")], {
           description:
-            'Step corner placement (ggplot2 geom_step): "hv" horizontal then vertical (default), "vh" vertical then horizontal, "mid" change at the midpoint between x positions.',
+            'Step corner placement: "hv" horizontal then vertical (default), "vh" vertical then horizontal, "mid" change at the midpoint between x positions.',
         }),
       ),
       strokePaint: Type.Optional(
@@ -873,7 +873,7 @@ export const SpecDeclarations = {
     },
     {
       additionalProperties: false,
-      description: "Styling parameters for the step geom (ggplot2 geom_step).",
+      description: "Styling parameters for the step geom.",
     },
   ),
 
@@ -916,7 +916,7 @@ export const SpecDeclarations = {
           ],
           {
             description:
-              'STAT CONNECT ONLY (#816): how successive points join — "hv" (default), "vh", "mid", or "linear". Ignored for other stats.',
+              'STAT CONNECT ONLY: how successive points join — "hv" (default), "vh", "mid", or "linear". Ignored for other stats.',
           },
         ),
       ),
@@ -933,7 +933,7 @@ export const SpecDeclarations = {
           ],
           {
             description:
-              'STAT MANUAL ONLY (#814): portable named transform (first|last|mean|median|min|max|sum). Required when stat is "manual".',
+              'STAT MANUAL ONLY: portable named transform (first|last|mean|median|min|max|sum). Required when stat is "manual".',
           },
         ),
       ),
@@ -1059,7 +1059,7 @@ export const SpecDeclarations = {
       closed: Type.Optional(
         Type.Union([Type.Literal("right"), Type.Literal("left")], {
           description:
-            'STAT BIN ONLY: which edge of each bin is inclusive: "right" (default, matches ggplot2) or "left".',
+            'STAT BIN ONLY: which edge of each bin is inclusive: "right" (default, matches) or "left".',
         }),
       ),
       fillPaint: Type.Optional(
@@ -1204,7 +1204,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Parameters for the quantile geom (linear y~x quantile regression lines; #805). method rqss is intentionally omitted in v1.",
+        "Parameters for the quantile geom (linear y~x quantile regression lines;). method rqss is intentionally omitted in v1.",
     },
   ),
   QqParams: Type.Object(
@@ -1298,7 +1298,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Parameters for geom_contour isolines (#801). v1: regular grid only; contour_filled deferred.",
+        "Parameters for geom_contour isolines. v1: regular grid only; contour_filled deferred.",
     },
   ),
 
@@ -1388,7 +1388,7 @@ export const SpecDeclarations = {
           exclusiveMinimum: 0,
           maximum: 1,
           description:
-            "Box width as a fraction of the band step. Must be greater than 0 and at most 1. Default 0.75 (ggplot2). When omitted, width is also capped at 15% of the panel so few categories do not read as slabs.",
+            "Box width as a fraction of the band step. Must be greater than 0 and at most 1. Default 0.75. When omitted, width is also capped at 15% of the panel so few categories do not read as slabs.",
         }),
       ),
       coef: Type.Optional(
@@ -1599,7 +1599,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Parameters for geom_dotplot (histodot binning + stacked dots; #803). method=dotdensity and binaxis=y are not in v1.",
+        "Parameters for geom_dotplot (histodot binning + stacked dots;). method=dotdensity and binaxis=y are not in v1.",
     },
   ),
 
@@ -1723,7 +1723,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Parameters for geom_density_2d / geom_density_2d_filled (bivariate KDE; #802). contour_var density only.",
+        "Parameters for geom_density_2d / geom_density_2d_filled (bivariate KDE;). contour_var density only.",
     },
   ),
 
@@ -1766,7 +1766,7 @@ export const SpecDeclarations = {
       fun: Type.Optional(
         Type.Union([Type.Literal("mean"), Type.Literal("median"), Type.Literal("sum")], {
           description:
-            'STAT SUMMARY ONLY: the center summary of y per x group: "mean" (default), "median", or "sum". With "mean" and no funMin/funMax, the bounds default to mean ± standard error (ggplot2\'s mean_se).',
+            'STAT SUMMARY ONLY: the center summary of y per x group: "mean" (default), "median", or "sum". With "mean" and no funMin/funMax, the bounds default to mean ± standard error.',
         }),
       ),
       funMin: Type.Optional(
@@ -1785,7 +1785,7 @@ export const SpecDeclarations = {
         Type.Integer({
           minimum: 1,
           description:
-            "STAT SUMMARY_BIN ONLY (#817): number of bins (integer ≥ 1). Default 30 — advisory. Overridden by binwidth.",
+            "STAT SUMMARY_BIN ONLY: number of bins (integer ≥ 1). Default 30 — advisory. Overridden by binwidth.",
         }),
       ),
       binwidth: Type.Optional(
@@ -1817,7 +1817,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Parameters for the errorbar geom: styling plus summary / summary_bin functions and summary_bin binning controls (#817).",
+        "Parameters for the errorbar geom: styling plus summary / summary_bin functions and summary_bin binning controls.",
     },
   ),
 
@@ -1889,7 +1889,7 @@ export const SpecDeclarations = {
         Type.Number({
           exclusiveMinimum: 0,
           description:
-            "Multiplier for the mid-line linewidth relative to params.linewidth / aes.linewidth. Default 2.5 (ggplot2 geom_crossbar).",
+            "Multiplier for the mid-line linewidth relative to params.linewidth / aes.linewidth. Default 2.5.",
         }),
       ),
       linewidth: Type.Optional(
@@ -1973,8 +1973,7 @@ export const SpecDeclarations = {
       bins: Type.Optional(
         Type.Number({
           exclusiveMinimum: 0,
-          description:
-            "Number of bins on each axis (ggplot2 bins). Default 30. Applies equally to x and y in v1.",
+          description: "Number of bins on each axis. Default 30. Applies equally to x and y in v1.",
         }),
       ),
       binwidth: Type.Optional(
@@ -1986,8 +1985,7 @@ export const SpecDeclarations = {
       ),
       drop: Type.Optional(
         Type.Boolean({
-          description:
-            "When true (default), omit zero-count bins from the output (ggplot2 drop=TRUE).",
+          description: "When true (default), omit zero-count bins from the output.",
         }),
       ),
       alpha: Type.Optional(
@@ -2107,8 +2105,7 @@ export const SpecDeclarations = {
       bins: Type.Optional(
         Type.Number({
           exclusiveMinimum: 0,
-          description:
-            "Approximate number of hex bins across the x range (ggplot2 bins). Default 30.",
+          description: "Approximate number of hex bins across the x range. Default 30.",
         }),
       ),
       drop: Type.Optional(
@@ -2157,7 +2154,7 @@ export const SpecDeclarations = {
         Type.Integer({
           minimum: 0,
           description:
-            "JITTER ONLY: RNG seed (a non-negative integer). Default 42. ggsvelte jitter is ALWAYS seeded so renders are reproducible (deliberate divergence from ggplot2's random jitter).",
+            "JITTER ONLY: RNG seed (a non-negative integer). Default 42. ggsvelte jitter is ALWAYS seeded so renders are reproducible (deliberate divergence from random jitter).",
         }),
       ),
       x: Type.Optional(
@@ -2371,7 +2368,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Parameters for the hline alias (ggplot2 geom_hline). Annotation form sets yintercept; data-driven form maps aes.y. Canonicalized by normalize() to a rule layer.",
+        "Parameters for the hline alias. Annotation form sets yintercept; data-driven form maps aes.y. Canonicalized by normalize to a rule layer.",
     },
   ),
 
@@ -2411,7 +2408,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Parameters for the vline alias (ggplot2 geom_vline). Annotation form sets xintercept; data-driven form maps aes.x. Canonicalized by normalize() to a rule layer.",
+        "Parameters for the vline alias. Annotation form sets xintercept; data-driven form maps aes.x. Canonicalized by normalize to a rule layer.",
     },
   ),
 
@@ -2469,7 +2466,7 @@ export const SpecDeclarations = {
           exclusiveMinimum: 0,
           maximum: 1,
           description:
-            'Tick length as a fraction of the panel size along the tick axis (panel-fraction npc analogue of ggplot2 unit(0.03, "npc")). Default 0.03.',
+            'Tick length as a fraction of the panel size along the tick axis (panel-fraction npc analogue of unit(0.03, "npc")). Default 0.03.',
         }),
       ),
       alpha: Type.Optional(
@@ -2582,7 +2579,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("abline", {
         description:
-          "Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel (ggplot2 geom_abline). Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
+          "Abline geometry: one infinite reference line y = intercept + slope · x, clipped to the panel. Annotation form: fixed slope/intercept in params; does not inherit plot aes.",
       }),
       stat: Type.Optional(
         Type.Literal("identity", { description: "Abline layers use fixed params as-is." }),
@@ -2608,7 +2605,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "A slope/intercept reference-line layer (ggplot2 geom_abline). Annotation-only: set params.slope and params.intercept.",
+        "A slope/intercept reference-line layer. Annotation-only: set params.slope and params.intercept.",
     },
   ),
 
@@ -2617,13 +2614,13 @@ export const SpecDeclarations = {
       curvature: Type.Optional(
         Type.Number({
           description:
-            "Amount of bend away from the straight chord. 0 is a straight line; ggplot2 default 0.5. Positive bows to the right of the start→end direction when angle is 90.",
+            "Amount of bend away from the straight chord. 0 is a straight line; default 0.5. Positive bows to the right of the start→end direction when angle is 90.",
         }),
       ),
       angle: Type.Optional(
         Type.Number({
           description:
-            "Control-point direction relative to the chord, in degrees. ggplot2 default 90 (perpendicular).",
+            "Control-point direction relative to the chord, in degrees. default 90 (perpendicular).",
         }),
       ),
       ncp: Type.Optional(
@@ -2631,7 +2628,7 @@ export const SpecDeclarations = {
           minimum: 1,
           maximum: 50,
           description:
-            "Smoothness density knob (ggplot2 ncp). Maps to tessellation sample count = max(8, ncp×8); not multi-control xspline. Default 5.",
+            "Smoothness density knob. Maps to tessellation sample count = max(8, ncp×8); not multi-control xspline. Default 5.",
         }),
       ),
       alpha: Type.Optional(
@@ -2758,7 +2755,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Parameters for geom_map (#808): fortified map DataRef plus optional join column and polygon styling.",
+        "Parameters for geom_map: fortified map DataRef plus optional join column and polygon styling.",
     },
   ),
 
@@ -2768,7 +2765,7 @@ export const SpecDeclarations = {
         Type.String({
           minLength: 1,
           description:
-            'Name of the data column holding GeoJSON Geometry JSON strings. Default "geometry". Already-projected coordinates only (#809 phase 1).',
+            'Name of the data column holding GeoJSON Geometry JSON strings. Default "geometry". Already-projected coordinates only.',
         }),
       ),
       alpha: Type.Optional(
@@ -2809,7 +2806,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Parameters for geom_sf (#809): portable GeoJSON Geometry column plus styling. Interior rings are even-odd holes; GeometryCollection expands. Use coord_sf for fixed-aspect maps (CRS reproject deferred).",
+        "Parameters for geom_sf: portable GeoJSON Geometry column plus styling. Interior rings are even-odd holes; GeometryCollection expands. Use coord_sf for fixed-aspect maps (CRS reproject deferred).",
     },
   ),
 
@@ -2888,20 +2885,19 @@ export const SpecDeclarations = {
       padding: Type.Optional(
         Type.Number({
           exclusiveMinimum: 0,
-          description:
-            "Uniform box padding around the text in px (ggplot2 label.padding). Default 3.",
+          description: "Uniform box padding around the text in px. Default 3.",
         }),
       ),
       radius: Type.Optional(
         Type.Number({
           minimum: 0,
-          description: "Corner radius of the background box in px (ggplot2 label.r). Default 3.",
+          description: "Corner radius of the background box in px. Default 3.",
         }),
       ),
       linewidth: Type.Optional(
         Type.Number({
           minimum: 0,
-          description: "Box outline stroke width in px (ggplot2 label.size analogue). Default 0.5.",
+          description: "Box outline stroke width in px. Default 0.5.",
         }),
       ),
     },
@@ -2937,7 +2933,7 @@ export const SpecDeclarations = {
       }),
       Type.Literal("unique", {
         description:
-          "Drop duplicate rows on the combination of mapped aesthetic fields before drawing; first occurrence wins (ggplot2's stat_unique). Panel-local.",
+          "Drop duplicate rows on the combination of mapped aesthetic fields before drawing; first occurrence wins. Panel-local.",
       }),
     ],
     {
@@ -2952,7 +2948,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("point", {
         description:
-          "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, correlation views. With summary_bin (#817) or manual (#814).",
+          "Point geometry: one mark per data row. Use for scatter plots, dot plots, bubbles, and correlation views.",
       }),
       stat: Type.Optional(
         Type.Union(
@@ -2961,25 +2957,22 @@ export const SpecDeclarations = {
               description: "Draw each data row as-is (default).",
             }),
             Type.Literal("unique", {
-              description:
-                "Drop duplicate rows on mapped aesthetics before drawing; first wins (#813).",
+              description: "Drop duplicate rows on mapped aesthetics before drawing; first wins.",
             }),
             Type.Literal("summary_bin", {
-              description:
-                "Bin continuous x and summarize y per (group × bin); default mean ± se (#817).",
+              description: "Bin continuous x and summarize y per (group × bin); default mean ± se.",
             }),
             Type.Literal("manual", {
               description:
-                "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814).",
+                "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum;).",
             }),
             Type.Literal("sum", {
-              description:
-                'Aggregate coincident (x, y); size defaults to {stat:"n"} (geom_count / #795).',
+              description: 'Aggregate coincident (x, y); size defaults to {stat:"n"} (geom_count).',
             }),
           ],
           {
             description:
-              'Point stat: "identity" (default), "unique", "summary_bin" (#817), "manual" (#814), or "sum" (#795).',
+              'Point stat: "identity" (default), "unique", "summary_bin", "manual", or "sum".',
           },
         ),
       ),
@@ -3017,7 +3010,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("line", {
         description:
-          "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, line charts, and ECDFs (stat ecdf + curve step-hv; #811). With stat bin (freqpoly alias), y is computed from counts/density. With stat connect, successive points expand into named connection vertices (#816).",
+          "Line geometry: connects points in x order, one line per group (groups derive from discrete aesthetics such as color, or from aes.group). Use for time series, trends, and line charts. With stat ecdf, pair with step curves; with stat bin (freqpoly alias), y is computed from counts/density; with stat connect, successive points expand into connection vertices.",
       }),
       stat: Type.Optional(
         Type.Union(
@@ -3026,8 +3019,7 @@ export const SpecDeclarations = {
               description: "Draw each data row as-is (default — map aes.y).",
             }),
             Type.Literal("unique", {
-              description:
-                "Drop duplicate rows on mapped aesthetics before drawing (first wins; #813).",
+              description: "Drop duplicate rows on mapped aesthetics before drawing (first wins;).",
             }),
             Type.Literal("bin", {
               description:
@@ -3035,28 +3027,28 @@ export const SpecDeclarations = {
             }),
             Type.Literal("align", {
               description:
-                "Interpolate each group onto the union of finite x values so continuous-x stack/fill aligns (#815). Outside a group's x range y is 0.",
+                "Interpolate each group onto the union of finite x values so continuous-x stack/fill aligns. Outside a group's x range y is 0.",
             }),
             Type.Literal("connect", {
               description:
-                "Expand successive points into connection vertices (params.connection: hv|vh|mid|linear; #816). Expands in x order; geometry does not re-sort after connect.",
+                "Expand successive points into connection vertices (params.connection: hv|vh|mid|linear;). Expands in x order; geometry does not re-sort after connect.",
             }),
             Type.Literal("summary_bin", {
               description:
-                "Bin continuous x and summarize y per (group × bin); default mean ± se; connect centers in x order (#817).",
+                "Bin continuous x and summarize y per (group × bin); default mean ± se; connect centers in x order.",
             }),
             Type.Literal("manual", {
               description:
-                "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814).",
+                "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum;).",
             }),
             Type.Literal("ecdf", {
               description:
-                'Empirical CDF of x; y defaults to {"stat": "ecdf"} — do NOT map aes.y to a field. Prefer params.curve "step-hv" for ECDF stairs (#811).',
+                'Empirical CDF of x; y defaults to {"stat": "ecdf"} — do NOT map aes.y to a field. Prefer params.curve "step-hv" for ECDF stairs.',
             }),
           ],
           {
             description:
-              'Line stat: "identity" (default), "unique", "bin", "align", "connect", "summary_bin" (#817), "manual" (#814), or "ecdf" (#811).',
+              'Line stat: "identity" (default), "unique", "bin", "align", "connect", "summary_bin", "manual", or "ecdf".',
           },
         ),
       ),
@@ -3090,7 +3082,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("step", {
         description:
-          "Step-line geometry: connect points with hv/vh/mid stairs (ggplot2 geom_step). Same channels as line; ordered by x within groups.",
+          "Step-line geometry: connect points with hv/vh/mid stairs. Same channels as line; ordered by x within groups.",
       }),
       stat: Type.Optional(
         Type.Literal("identity", { description: "Step layers draw the data as-is." }),
@@ -3117,7 +3109,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "A step-line layer (ggplot2 geom_step). Requires x and y. params.direction is hv (default), vh, or mid.",
+        "A step-line layer. Requires x and y. params.direction is hv (default), vh, or mid.",
     },
   ),
 
@@ -3125,7 +3117,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("path", {
         description:
-          "Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots (ggplot2 geom_path), and ellipse rings (stat ellipse). With stat connect, successive points expand into named connection vertices (#816).",
+          "Path geometry: connects points in data (row) order within each group — unlike line, which sorts by x. Use for trajectories, loops, connected scatterplots, and ellipse rings (stat ellipse). With stat connect, successive points expand into connection vertices.",
       }),
       stat: Type.Optional(
         Type.Union(
@@ -3134,25 +3126,24 @@ export const SpecDeclarations = {
               description: "Draw each data row as-is (default).",
             }),
             Type.Literal("unique", {
-              description:
-                "Drop duplicate rows on mapped aesthetics before drawing (first wins; #813).",
+              description: "Drop duplicate rows on mapped aesthetics before drawing (first wins;).",
             }),
             Type.Literal("connect", {
               description:
-                "Expand successive points into connection vertices (params.connection: hv|vh|mid|linear; default hv; #816). ggplot2 stat_connect default geom is path.",
+                "Expand successive points into connection vertices (params.connection: hv|vh|mid|linear; default hv;). stat_connect default geom is path.",
             }),
             Type.Literal("manual", {
               description:
-                "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum; #814).",
+                "Portable named per-group transform (params.fun required: first|last|mean|median|min|max|sum;).",
             }),
             Type.Literal("ellipse", {
               description:
-                "Bivariate normal confidence ellipse per group (ggplot2 stat_ellipse, type norm). Emits perimeter samples suitable for path; requires quantitative x and y (#812).",
+                "Bivariate normal confidence ellipse per group. Emits perimeter samples suitable for path; requires quantitative x and y.",
             }),
           ],
           {
             description:
-              'Path stat: "identity" (default), "unique", "connect", "manual" (#814), or "ellipse" (#812).',
+              'Path stat: "identity" (default), "unique", "connect", "manual", or "ellipse".',
           },
         ),
       ),
@@ -3186,7 +3177,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("col", {
         description:
-          "Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights (ggplot2's geom_col).",
+          "Column geometry: one rectangle per data row, from the y baseline (zero) to the row's y value. Use when the data already contains the bar heights — prefer over GeomBar, which counts or bins.",
       }),
       stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(Type.Ref("StackablePosition")),
@@ -3217,7 +3208,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("bar", {
         description:
-          "Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do NOT map aes.y — the stat computes it (ggplot2's geom_bar / geom_histogram).",
+          "Bar geometry with counting or binning: one rectangle per distinct x value (stat count, discrete x) or per bin (stat bin, continuous x). Do not map aes.y — the stat computes it. Prefer GeomCol when bar heights are already in the data.",
       }),
       stat: Type.Optional(
         Type.Union([Type.Literal("count"), Type.Literal("bin")], {
@@ -3253,7 +3244,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("histogram", {
         description:
-          "Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
+          "Histogram geometry: a continuous x variable divided into bins, one bar per bin whose height is the count of rows (or the sum of aes.weight). Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a bar layer with stat bin.",
       }),
       stat: Type.Optional(
         Type.Literal("bin", {
@@ -3289,7 +3280,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("freqpoly", {
         description:
-          "Frequency polygon (ggplot2 geom_freqpoly): continuous x binned like a histogram, drawn as a line through bin centers. Do NOT map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
+          "Frequency polygon: continuous x binned like a histogram, drawn as a line through bin centers. Do not map aes.y — the bin stat computes it. Canonicalized by normalize() to a line layer with stat bin.",
       }),
       stat: Type.Optional(
         Type.Literal("bin", {
@@ -3327,7 +3318,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("smooth", {
         description:
-          "Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends (ggplot2's geom_smooth).",
+          "Smooth geometry: a fitted trend line (with an optional confidence ribbon) over an x/y scatter, one fit per group. Use to reveal trends.",
       }),
       stat: Type.Optional(
         Type.Literal("smooth", {
@@ -3365,7 +3356,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("quantile", {
         description:
-          "Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group (ggplot2 geom_quantile / #805).",
+          "Quantile geometry: linear quantile regression lines (y ~ x) at one or more conditional quantiles of y, one line per quantile per group.",
       }),
       stat: Type.Optional(
         Type.Literal("quantile", {
@@ -3402,7 +3393,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("qq", {
         description:
-          "Q–Q scatter (ggplot2 geom_qq / stat_qq): sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
+          "Q–Q scatter: sample quantiles vs theoretical normal quantiles. Requires aes.sample.",
       }),
       stat: Type.Optional(
         Type.Literal("qq", { description: "Q–Q quantile pairing (default for this geom)." }),
@@ -3435,7 +3426,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("qq_line", {
         description:
-          "Q–Q reference line (ggplot2 geom_qq_line / stat_qq_line): line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
+          "Q–Q reference line: line through sample/theoretical quartile match, spanning the theoretical range of the Q–Q cloud. Requires aes.sample.",
       }),
       stat: Type.Optional(
         Type.Literal("qq_line", {
@@ -3471,7 +3462,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("contour", {
         description:
-          "Contour geometry: isolines of a continuous z surface over a regular x×y grid (ggplot2 geom_contour; #801). v1 draws open path polylines only (not filled bands).",
+          "Contour geometry: isolines of a continuous z surface over a regular x×y grid. v1 draws open path polylines only (not filled bands).",
       }),
       stat: Type.Optional(
         Type.Literal("contour", {
@@ -3509,7 +3500,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("violin", {
         description:
-          "Violin geometry: mirrored kernel density of continuous y at each discrete x (ggplot2 geom_violin / stat_ydensity). One polygon per x×group. Default position dodge.",
+          "Violin geometry: mirrored kernel density of continuous y at each discrete x (stat ydensity). One polygon per x×group. Default position dodge.",
       }),
       stat: Type.Optional(
         Type.Literal("ydensity", {
@@ -3588,7 +3579,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("count", {
         description:
-          "Count geometry (ggplot2 geom_count): point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
+          "Count geometry: point marks at unique (x, y) with size scaled by after_stat n (stat sum). Use for overplotting density on discrete or rounded coordinates.",
       }),
       stat: Type.Optional(
         Type.Literal("sum", {
@@ -3628,7 +3619,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("dotplot", {
         description:
-          "Dotplot geometry: stacked dots along a continuous x axis (ggplot2 geom_dotplot, histodot subset). Do NOT map aes.y — the bindot stat computes stack positions.",
+          "Dotplot geometry: stacked dots along a continuous x axis (histodot subset). Do not map aes.y — the bindot stat computes stack positions.",
       }),
       stat: Type.Optional(
         Type.Literal("bindot", {
@@ -3704,7 +3695,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("density_2d", {
         description:
-          "2D density geometry: bivariate KDE isolines over continuous x and y (ggplot2 geom_density_2d; #802). Open path contours.",
+          "2D density geometry: bivariate KDE isolines over continuous x and y. Open path contours.",
       }),
       stat: Type.Optional(
         Type.Literal("density_2d", {
@@ -3742,7 +3733,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("density_2d_filled", {
         description:
-          "2D density filled bands: bivariate KDE closed isoline rings filled by density level (ggplot2 geom_density_2d_filled; #802 phase 2). Open rings dropped. Defaults fill to after_stat(level).",
+          "2D density filled bands: bivariate KDE closed isoline rings filled by density level. Open rings dropped. Defaults fill to after_stat(level).",
       }),
       stat: Type.Optional(
         Type.Literal("density_2d_filled", {
@@ -3795,16 +3786,15 @@ export const SpecDeclarations = {
             }),
             Type.Literal("summary", {
               description:
-                "Compute y/ymin/ymax per x group from aes.y; default mean ± standard error (ggplot2 mean_se).",
+                "Compute y/ymin/ymax per x group from aes.y; default mean ± standard error.",
             }),
             Type.Literal("summary_bin", {
-              description:
-                "Bin continuous x and summarize y per (group × bin); default mean ± se (#817).",
+              description: "Bin continuous x and summarize y per (group × bin); default mean ± se.",
             }),
           ],
           {
             description:
-              'The errorbar\'s stat: "identity" (default), "unique", "summary" (per x group), or "summary_bin" (per bin; #817).',
+              'The errorbar\'s stat: "identity" (default), "unique", "summary" (per x group), or "summary_bin" (per bin;).',
           },
         ),
       ),
@@ -3837,8 +3827,7 @@ export const SpecDeclarations = {
   LinerangeLayer: Type.Object(
     {
       geom: Type.Literal("linerange", {
-        description:
-          "Linerange geometry: a vertical stem from ymin to ymax without end caps (ggplot2 geom_linerange).",
+        description: "Linerange geometry: a vertical stem from ymin to ymax without end caps.",
       }),
       stat: Type.Optional(
         Type.Union([Type.Literal("identity"), Type.Literal("summary")], {
@@ -3870,8 +3859,7 @@ export const SpecDeclarations = {
   PointrangeLayer: Type.Object(
     {
       geom: Type.Literal("pointrange", {
-        description:
-          "Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y) (ggplot2 geom_pointrange).",
+        description: "Pointrange geometry: vertical stem from ymin to ymax plus a point at (x, y).",
       }),
       stat: Type.Optional(
         Type.Union([Type.Literal("identity"), Type.Literal("summary")], {
@@ -3904,7 +3892,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("crossbar", {
         description:
-          "Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y (ggplot2 geom_crossbar).",
+          "Crossbar geometry: a vertical interval box from ymin to ymax with a mid horizontal line at y.",
       }),
       stat: Type.Optional(
         Type.Union([Type.Literal("identity"), Type.Literal("summary")], {
@@ -4005,7 +3993,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("bin_2d", {
         description:
-          "2D rectangular bin heatmap (ggplot2 geom_bin2d / stat_bin_2d): partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
+          "2D rectangular bin heatmap: partitions continuous x×y into a grid and maps fill to bin count by default. Empty bins are dropped unless params.drop is false.",
       }),
       stat: Type.Optional(
         Type.Literal("bin_2d", {
@@ -4077,7 +4065,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("hex", {
         description:
-          "Hexagonal bin heatmap (ggplot2 geom_hex / stat_bin_hex): partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
+          "Hexagonal bin heatmap: partitions continuous x×y into a hexagonal lattice and maps fill to bin count by default.",
       }),
       stat: Type.Optional(
         Type.Literal("bin_hex", {
@@ -4127,7 +4115,7 @@ export const SpecDeclarations = {
             }),
             Type.Literal("align", {
               description:
-                "Interpolate each group onto the union of finite x values so continuous-x stack/fill aligns (#815). Outside a group's x range y is 0.",
+                "Interpolate each group onto the union of finite x values so continuous-x stack/fill aligns. Outside a group's x range y is 0.",
             }),
           ],
           {
@@ -4164,7 +4152,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("ribbon", {
         description:
-          "Ribbon geometry: a filled interval between two varying boundaries along a running coordinate (ggplot2's geom_ribbon). Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
+          "Ribbon geometry: a filled interval between two varying boundaries along a running coordinate. Map x+ymin+ymax (x orientation) or y+xmin+xmax (y orientation). Not a zero-baseline area.",
       }),
       stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
@@ -4197,7 +4185,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("rule", {
         description:
-          "Rule geometry: reference lines spanning the panel. TWO HONEST FORMS: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly ONE of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
+          "Rule geometry: reference lines spanning the panel. Two forms: (1) annotation — set params.xintercept and/or params.yintercept to fixed data values and map neither aes.x nor aes.y; (2) data-driven — map exactly one of aes.x (vertical rules) or aes.y (horizontal rules) to a field. Never mix the forms in one layer.",
       }),
       stat: Type.Optional(Type.Ref("IdentityOrUniqueStat")),
       position: Type.Optional(
@@ -4222,7 +4210,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "A reference-line layer (ggplot2's geom_vline/geom_hline, unified). Annotation form: fixed intercepts in params. Data-driven form: map aes.x OR aes.y.",
+        "A reference-line layer. Annotation form: fixed intercepts in params. Data-driven form: map aes.x OR aes.y.",
     },
   ),
 
@@ -4230,7 +4218,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("hline", {
         description:
-          "Horizontal reference-line alias (ggplot2's geom_hline). Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
+          "Horizontal reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.yintercept. Data-driven form: map aes.y (inherited plot x is dropped so the one-axis rule contract holds).",
       }),
       stat: Type.Optional(
         Type.Literal("identity", { description: "Hline layers draw the given positions as-is." }),
@@ -4265,7 +4253,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("vline", {
         description:
-          "Vertical reference-line alias (ggplot2's geom_vline). Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
+          "Vertical reference-line alias. Canonicalized by normalize() to a rule layer. Annotation form: set params.xintercept. Data-driven form: map aes.x (inherited plot y is dropped so the one-axis rule contract holds).",
       }),
       stat: Type.Optional(
         Type.Literal("identity", { description: "Vline layers draw the given positions as-is." }),
@@ -4300,7 +4288,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("jitter", {
         description:
-          "Jittered point alias (ggplot2's geom_jitter). Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
+          "Jittered point alias. Canonicalized by normalize() to a point layer with position jitter. Configure jitter amount via positionParams.width/height/seed.",
       }),
       stat: Type.Optional(
         Type.Literal("identity", { description: "Jitter layers draw the data as-is." }),
@@ -4374,7 +4362,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("label", {
         description:
-          "Label geometry: text with a rounded rectangular background box (ggplot2 geom_label). Requires x, y, and label channels. No collision detection.",
+          "Label geometry: text with a rounded rectangular background box. Requires x, y, and label channels. No collision detection.",
       }),
       stat: Type.Optional(
         Type.Literal("identity", { description: "Label layers draw the data as-is." }),
@@ -4437,8 +4425,7 @@ export const SpecDeclarations = {
     },
     {
       additionalProperties: false,
-      description:
-        "A finite segment layer (ggplot2's geom_segment). Requires x, y, xend, and yend channels.",
+      description: "A finite segment layer. Requires x, y, xend, and yend channels.",
     },
   ),
 
@@ -4446,7 +4433,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("function", {
         description:
-          "Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path (ggplot2 geom_function / stat_function). Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
+          "Function geometry: evaluate a named portable function y = f(x) on a grid and draw a path. Requires params.fun; domain from params.xlim, mapped x, or peer layers.",
       }),
       stat: Type.Optional(
         Type.Literal("function", {
@@ -4477,7 +4464,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "An analytic function layer (ggplot2's geom_function). y is computed as { stat: y }; do not map data y. Portable fun names only (no JS closures).",
+        "An analytic function layer. y is computed as { stat: y }; do not map data y. Portable fun names only (no JS closures).",
     },
   ),
 
@@ -4485,7 +4472,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("curve", {
         description:
-          "Curve geometry (ggplot2 geom_curve): one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
+          "Curve geometry: one curved connector per row from (x, y) to (xend, yend). Tessellated as a quadratic Bezier (curvature/angle/ncp). Requires field-mapped x, y, xend, and yend.",
       }),
       stat: Type.Optional(
         Type.Literal("identity", { description: "Curve layers draw the data as-is." }),
@@ -4520,7 +4507,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("polygon", {
         description:
-          "Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group (ggplot2's geom_polygon). Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
+          "Polygon geometry: closed filled paths from (x, y) vertices in data/row order within each group. Groups form separate polygons. No x-sort (unlike line/area). Holes/subgroup omitted in v1.",
       }),
       stat: Type.Optional(
         Type.Literal("identity", { description: "Polygon layers draw the data as-is." }),
@@ -4547,7 +4534,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "A closed polygon layer (ggplot2's geom_polygon). Requires x and y channels; vertices connect in data order per group and close implicitly.",
+        "A closed polygon layer. Requires x and y channels; vertices connect in data order per group and close implicitly.",
     },
   ),
 
@@ -4555,7 +4542,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("map", {
         description:
-          "Map geometry (ggplot2 geom_map): join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region (#808).",
+          "Map geometry: join fortified region borders to value rows via aes.map_id and params.map. Renders closed filled paths per region.",
       }),
       stat: Type.Optional(
         Type.Literal("identity", { description: "Map layers expand joins then draw as-is." }),
@@ -4590,12 +4577,11 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("sf", {
         description:
-          "Simple-features geometry (ggplot2 geom_sf; #809): already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
+          "Simple-features geometry: already-projected GeoJSON Geometry JSON strings in a data column. Point/line/polygon families (incl. GeometryCollection of one family) with even-odd holes; use coord_sf for fixed-aspect (CRS reproject deferred).",
       }),
       stat: Type.Optional(
         Type.Literal("sf", {
-          description:
-            "Geometry expand (ggplot2 stat_sf; #809): portable GeoJSON → drawable point/line/polygon parts.",
+          description: "Geometry expand: portable GeoJSON → drawable point/line/polygon parts.",
         }),
       ),
       position: Type.Optional(
@@ -4666,7 +4652,7 @@ export const SpecDeclarations = {
     },
     {
       additionalProperties: false,
-      description: "Parameters for geom_sf_text (#809 phase 2): geometry column plus text styling.",
+      description: "Parameters for geom_sf_text: geometry column plus text styling.",
     },
   ),
 
@@ -4674,7 +4660,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("sf_text", {
         description:
-          "Simple-features text labels (ggplot2 geom_sf_text; #809): places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
+          "Simple-features text labels: places aes.label at representative geometry points (Multi* → one label per part; stat_sf_coordinates).",
       }),
       stat: Type.Optional(
         Type.Literal("sf_coordinates", {
@@ -4769,7 +4755,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "Parameters for geom_sf_label (#809 phase 3): geometry column, text styling, and label box chrome.",
+        "Parameters for geom_sf_label: geometry column, text styling, and label box chrome.",
     },
   ),
 
@@ -4777,7 +4763,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("sf_label", {
         description:
-          "Simple-features labels with background boxes (ggplot2 geom_sf_label; #809): places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
+          "Simple-features labels with background boxes: places aes.label at representative geometry points with a measured rounded rect (Multi* → one label per part). color=ink+box stroke; fill=box background.",
       }),
       stat: Type.Optional(
         Type.Literal("sf_coordinates", {
@@ -4824,7 +4810,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("blank", {
         description:
-          "Blank geometry (ggplot2's geom_blank): contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
+          "Blank geometry: contributes mapped aesthetics to scale training and layout without drawing marks or hit targets. No channels are required; whatever is mapped trains its scale.",
       }),
       stat: Type.Optional(
         Type.Literal("identity", {
@@ -4853,7 +4839,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "An empty layer that trains scales from mapped aesthetics without emitting geometry (ggplot2's geom_blank).",
+        "An empty layer that trains scales from mapped aesthetics without emitting geometry.",
     },
   ),
 
@@ -4861,7 +4847,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("rug", {
         description:
-          "Rug geometry: short ticks along panel edges for each observation (ggplot2 geom_rug). Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
+          "Rug geometry: short ticks along panel edges for each observation. Map aes.x for bottom/top sides and/or aes.y for left/right sides.",
       }),
       stat: Type.Optional(
         Type.Literal("identity", { description: "Rug layers draw the data as-is." }),
@@ -4896,7 +4882,7 @@ export const SpecDeclarations = {
     {
       geom: Type.Literal("spoke", {
         description:
-          "Spoke geometry (ggplot2 geom_spoke): one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
+          "Spoke geometry: one finite segment per row from (x, y) in direction angle (radians) with length radius. Endpoints are derived as xend = x + radius·cos(angle), yend = y + radius·sin(angle) in data space, then transformed like x/y. Requires continuous x and y.",
       }),
       stat: Type.Optional(
         Type.Literal("identity", { description: "Spoke layers draw the data as-is." }),
@@ -5295,13 +5281,13 @@ export const SpecDeclarations = {
         naValue: Type.Optional(
           Type.String({
             pattern: "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
-            description: "Color for null/missing values. Default #999999.",
+            description: "Color for null/missing values. Default9.",
           }),
         ),
         unknownValue: Type.Optional(
           Type.String({
             pattern: "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
-            description: "Color for invalid, out-of-domain, or unmapped values. Default #999999.",
+            description: "Color for invalid, out-of-domain, or unmapped values. Default9.",
           }),
         ),
         onExhaust: Type.Optional(
@@ -5874,19 +5860,19 @@ export const SpecDeclarations = {
       wrap: Type.Optional(
         Type.Ref("FacetFieldRef", {
           description:
-            "Facet WRAP form: partition rows by this data field's distinct values, one panel per value, wrapped into a grid ncol wide (ggplot2's facet_wrap). Mutually exclusive with rows/cols. Optional levels/labels control order and strip text.",
+            "Facet WRAP form: partition rows by this data field's distinct values, one panel per value, wrapped into a grid ncol wide. Mutually exclusive with rows/cols. Optional levels/labels control order and strip text.",
         }),
       ),
       rows: Type.Optional(
         Type.Ref("FacetFieldRef", {
           description:
-            "Facet GRID form: the field whose distinct values become grid rows (ggplot2's facet_grid rows). Combine with cols; mutually exclusive with wrap. Optional levels/labels control order and strip text.",
+            "Facet GRID form: the field whose distinct values become grid rows. Combine with cols; mutually exclusive with wrap. Optional levels/labels control order and strip text.",
         }),
       ),
       cols: Type.Optional(
         Type.Ref("FacetFieldRef", {
           description:
-            "Facet GRID form: the field whose distinct values become grid columns (ggplot2's facet_grid cols). Combine with rows; mutually exclusive with wrap. Optional levels/labels control order and strip text.",
+            "Facet GRID form: the field whose distinct values become grid columns. Combine with rows; mutually exclusive with wrap. Optional levels/labels control order and strip text.",
         }),
       ),
       ncol: Type.Optional(
@@ -5953,7 +5939,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        'The plot\'s Cartesian coordinate system. {"type": "flip"} turns any vertical composition into its horizontal counterpart (ggplot2\'s coord_flip).',
+        'The plot\'s Cartesian coordinate system. {"type": "flip"} turns any vertical composition into its horizontal counterpart.',
     },
   ),
 
@@ -6002,7 +5988,7 @@ export const SpecDeclarations = {
     {
       type: Type.Literal("sf", {
         description:
-          "Simple-features coordinates for already-projected map data (ggplot2 coord_sf; #809). Fixed-aspect layout; no CRS transform in v1.",
+          "Simple-features coordinates for already-projected map data. Fixed-aspect layout; no CRS transform in v1.",
       }),
       ratio: Type.Optional(
         Type.Number({
@@ -6099,7 +6085,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        "A complete ggsvelte plot specification: data + aesthetic mapping + one or more layers, in ggplot2's layered grammar. Strictly JSON (PortableSpec).",
+        "A complete ggsvelte plot specification: data + aesthetic mapping + one or more layers, in layered grammar. Strictly JSON (PortableSpec).",
     },
   ),
 };

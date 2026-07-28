@@ -98,7 +98,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
   },
   {
     path: "/reference/geoms",
-    title: "Geom reference — ggsvelte",
+    title: "Geoms — ggsvelte",
     description:
       "Schema-derived API reference for every Geom* component: defaults, allowed stats and positions, and params.",
     canonicalPath: "/reference/geoms",
@@ -106,7 +106,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Geom reference", order: 51 },
+    navigation: { section: "Reference", label: "Geoms", order: 51 },
     headings: [
       { id: "all-geoms", title: "All geoms", level: 2 },
       { id: "shared-layer-props", title: "Shared layer props", level: 2 },
@@ -114,7 +114,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
   },
   {
     path: "/reference/stats",
-    title: "Stat reference — ggsvelte",
+    title: "Stats — ggsvelte",
     description:
       "Schema-derived API reference for every statistical transform: after_stat columns and compatible geoms.",
     canonicalPath: "/reference/stats",
@@ -122,7 +122,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Stat reference", order: 52 },
+    navigation: { section: "Reference", label: "Stats", order: 52 },
     headings: [
       { id: "all-stats", title: "All stats", level: 2 },
       { id: "how-to-set", title: "How to set a stat", level: 2 },
@@ -130,7 +130,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
   },
   {
     path: "/reference/positions",
-    title: "Position reference — ggsvelte",
+    title: "Positions — ggsvelte",
     description:
       "Schema-derived API reference for every position adjustment: positionParams and compatible geoms.",
     canonicalPath: "/reference/positions",
@@ -138,7 +138,7 @@ const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Position reference", order: 53 },
+    navigation: { section: "Reference", label: "Positions", order: 53 },
     headings: [
       { id: "all-positions", title: "All positions", level: 2 },
       { id: "how-to-set", title: "How to set a position", level: 2 },

@@ -9,6 +9,8 @@
   import OnThisPage from "./OnThisPage.svelte";
   import PrevNext from "./PrevNext.svelte";
 
+  type Crumb = { label: string; href?: string };
+
   const {
     route,
     path,
@@ -29,6 +31,64 @@
     route.navigation?.label ?? route.title.replace(" — ggsvelte", ""),
   );
   const reference = $derived(primaryNavigationOwner(route) === "reference");
+  const crumbs = $derived(buildCrumbs(path, displayTitle, reference));
+
+  function buildCrumbs(
+    currentPath: string,
+    title: string,
+    isReference: boolean,
+  ): readonly Crumb[] {
+    const root: Crumb = {
+      label: isReference ? "Reference" : "Docs",
+      href: isReference ? "/reference" : "/docs",
+    };
+
+    if (!isReference) {
+      return [root, { label: title }];
+    }
+
+    // /reference → just "Reference"
+    if (currentPath === "/reference" || currentPath === "/reference/") {
+      return [{ label: "Reference" }];
+    }
+
+    const segments = currentPath.replaceAll(/^\/+|\/+$/g, "").split("/");
+    // ["reference", "geoms"] or ["reference", "geoms", "col"]
+    if (segments[0] !== "reference" || segments.length < 2) {
+      return [root, { label: title }];
+    }
+
+    const section = segments[1] ?? "";
+    const sectionLabel = referenceSectionLabel(section);
+    if (sectionLabel === undefined) {
+      return [root, { label: title }];
+    }
+
+    const sectionHref = `/reference/${section}`;
+    if (segments.length === 2) {
+      return [root, { label: sectionLabel }];
+    }
+
+    // Detail page: Reference / Geoms / GeomCol (title already component name)
+    return [root, { label: sectionLabel, href: sectionHref }, { label: title }];
+  }
+
+  function referenceSectionLabel(section: string): string | undefined {
+    switch (section) {
+      case "geoms":
+        return "Geoms";
+      case "stats":
+        return "Stats";
+      case "positions":
+        return "Positions";
+      case "interactions":
+        return "Interactions";
+      case "cli":
+        return "CLI";
+      default:
+        return undefined;
+    }
+  }
 
   function openChapters(): void {
     chapterDialog?.showModal();
@@ -68,7 +128,7 @@
   </aside>
 
   <div class="docs-article">
-    <Breadcrumbs title={displayTitle} {reference} />
+    <Breadcrumbs {crumbs} />
     {@render children()}
     <PrevNext {previous} {next} />
   </div>

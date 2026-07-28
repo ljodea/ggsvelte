@@ -14,49 +14,21 @@
     primaryGeom === undefined ? "GeomBar" : componentNameForGeom(primaryGeom),
   );
 
-  const paramPropLines = $derived(
-    entry.params.length === 0
-      ? ""
-      : "\n" +
-          entry.params
-            .slice(0, 2)
-            .map((p) => `  ${p.name}={/* … */}`)
-            .join("\n") +
-          "\n",
-  );
-
+  // Minimal: position name only. Optional positionParams live in the table below.
   const svelteSnippet = $derived(
-    entry.params.length === 0
-      ? `import { GGPlot, ${primaryComponent} } from "@ggsvelte/svelte";\n\n<GGPlot data={rows} aes={{ x: "x", y: "y" }}>\n  <${primaryComponent} position="${entry.name}" />\n</GGPlot>`
-      : `import { GGPlot, ${primaryComponent} } from "@ggsvelte/svelte";\n\n<GGPlot data={rows} aes={{ x: "x", y: "y" }}>\n  <${primaryComponent}\n    position="${entry.name}"\n    positionParams={{${paramPropLines === "" ? "" : " /* see params */ "}}}\n  />\n</GGPlot>`,
+    `import { GGPlot, ${primaryComponent} } from "@ggsvelte/svelte";\n\n<GGPlot data={rows} aes={{ x: "x", y: "y" }}>\n  <${primaryComponent} position="${entry.name}" />\n</GGPlot>`,
   );
 
   const jsonSnippet = $derived(
-    entry.params.length === 0
-      ? `{\n  "geom": "${primaryGeom ?? "bar"}",\n  "position": "${entry.name}"\n}`
-      : `{\n  "geom": "${primaryGeom ?? "point"}",\n  "position": "${entry.name}",\n  "positionParams": { ${entry.params
-          .slice(0, 2)
-          .map((p) => `"${p.name}": /* … */`)
-          .join(", ")} }\n}`,
+    `{\n  "geom": "${primaryGeom ?? "bar"}",\n  "position": "${entry.name}"\n}`,
   );
 </script>
 
 <article class="position-detail prose" aria-labelledby="position-heading">
-  <p class="crumb">
-    <a href={`${base}/reference/positions`}>Position reference</a>
-    <span aria-hidden="true">/</span>
-    <code>{entry.name}</code>
-  </p>
-
   <h1 id="position-heading"><code>position: "{entry.name}"</code></h1>
   <p class="lede">{entry.summary}</p>
 
   <h2 id="usage">Usage</h2>
-  <p>
-    Positions are not components. Pass <code>position="{entry.name}"</code> on a
-    compatible <code>&lt;Geom*&gt;</code>, or set
-    <code>"position": "{entry.name}"</code> on a JSON layer.
-  </p>
   <pre class="snippet"><code>{svelteSnippet}</code></pre>
   <pre class="snippet"><code>{jsonSnippet}</code></pre>
 
@@ -130,9 +102,9 @@
   <p class="back">
     <a href={`${base}/reference/positions`}>← All positions</a>
     ·
-    <a href={`${base}/reference/geoms`}>Geom reference</a>
+    <a href={`${base}/reference/geoms`}>Geoms</a>
     ·
-    <a href={`${base}/reference/stats`}>Stat reference</a>
+    <a href={`${base}/reference/stats`}>Stats</a>
   </p>
 </article>
 
@@ -140,15 +112,6 @@
   .position-detail {
     max-width: 52rem;
     margin: 2rem 0 4rem;
-  }
-
-  .crumb {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin: 0 0 0.75rem;
-    color: var(--muted);
-    font-size: 0.9rem;
   }
 
   h1 {
