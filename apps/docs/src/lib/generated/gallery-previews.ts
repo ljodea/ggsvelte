@@ -150,7 +150,7 @@ export const GALLERY_PREVIEWS = [
     id: "dotplot/histodot",
     filename: "dotplot-histodot-light.png",
     path: "/previews/dotplot-histodot-light.png",
-    sha256: "6d45f51f3e3f4aac7a30d7924075751119c086186187993a071dbbb7fcaea198",
+    sha256: "3aa3a2568cc731a7dac621eb97532b3d6467f1961d8a3bd4651a796ccc82e737",
   },
   {
     id: "errorbar/mean-se",
@@ -162,7 +162,7 @@ export const GALLERY_PREVIEWS = [
     id: "errorbar/summary-bin",
     filename: "errorbar-summary-bin-light.png",
     path: "/previews/errorbar-summary-bin-light.png",
-    sha256: "06e4a1e517a4630def95e947a30a5e118d2f0d86c3de74323833c04c0af5aec2",
+    sha256: "5b42aafc01a6ee2460e690971cf7fb06d5731e578a6326357833c2b9f4bbe900",
   },
   {
     id: "facet/ordered-side-strips",
@@ -258,7 +258,7 @@ export const GALLERY_PREVIEWS = [
     id: "line/ecdf",
     filename: "line-ecdf-light.png",
     path: "/previews/line-ecdf-light.png",
-    sha256: "50ddc15712530f71fda35c44b4cb11db0ca2ee47fddce5004960322ee18401c3",
+    sha256: "fb023b735911c42fbf5cd3e72c142a3abc099f5230a6a22dae0d83a478579ef6",
   },
   {
     id: "line/function",
@@ -408,7 +408,7 @@ export const GALLERY_PREVIEWS = [
     id: "qq/normal",
     filename: "qq-normal-light.png",
     path: "/previews/qq-normal-light.png",
-    sha256: "d839230f6ef08ed5a775e8b88047ecb2734488b40ef8f1187ef4bb1ef3ab6a91",
+    sha256: "3bdf55618522be1a46ac573400e94aa367c003a03131cceb87ffdd69a7774c26",
   },
   {
     id: "raster/grid",
@@ -498,7 +498,7 @@ export const GALLERY_PREVIEWS = [
     id: "step/ecdf",
     filename: "step-ecdf-light.png",
     path: "/previews/step-ecdf-light.png",
-    sha256: "1d4f06f678045fc0ce0c7b6c81591fc2b47e38a922733dd2728e65cf70e311c8",
+    sha256: "95b755aae2d1066799fd4b6939d97f8743a6c17a1c17463681dabdef2560c905",
   },
   {
     id: "text/labels",

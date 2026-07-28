@@ -1,5 +1,6 @@
 {
-  "title": "Empirical CDF",
+  "title": "Richardson's deadly quarrels",
+  "description": "The empirical distribution of 779 conflicts by magnitude, the log10 of the death toll. The median quarrel killed about ten thousand people.",
   "tags": ["line", "ecdf", "stat", "step"],
   "docsSection": "Lines & time"
 }

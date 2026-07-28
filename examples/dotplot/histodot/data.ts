@@ -1,25 +1,42 @@
 /**
- * Compact continuous sample so histodot stacks are readable. Fixed decimals.
+ * Henry Cavendish's 1798 determination of the density of the earth - the
+ * experiment that first "weighed the world". Twenty-nine measurements from his
+ * torsion balance, expressed relative to the density of water.
+ *
+ * Transcribed from HistData::Cavendish (see NOTICE); 29 determinations, in the
+ * order Cavendish reported them. He changed the apparatus after the sixth,
+ * fitting a stiffer wire to the balance. The third observation is recorded as
+ * 4.88 but Cavendish analysed it as 5.88; it is left as recorded, which is why
+ * one dot sits alone below the rest. The modern value is 5.517.
  */
-export const samples: { value: number }[] = [
-  { value: 1.1 },
-  { value: 1.2 },
-  { value: 1.15 },
-  { value: 1.3 },
-  { value: 2.0 },
-  { value: 2.1 },
-  { value: 2.05 },
-  { value: 3.0 },
-  { value: 3.1 },
-  { value: 3.05 },
-  { value: 3.2 },
-  { value: 3.15 },
-  { value: 4.0 },
-  { value: 4.1 },
-  { value: 5.0 },
-  { value: 5.05 },
-  { value: 5.1 },
-  { value: 5.2 },
-  { value: 5.15 },
-  { value: 5.25 },
+export const earthDensity: { density: number }[] = [
+  { density: 5.5 },
+  { density: 5.61 },
+  { density: 4.88 },
+  { density: 5.07 },
+  { density: 5.26 },
+  { density: 5.55 },
+  { density: 5.36 },
+  { density: 5.29 },
+  { density: 5.58 },
+  { density: 5.65 },
+  { density: 5.57 },
+  { density: 5.53 },
+  { density: 5.62 },
+  { density: 5.29 },
+  { density: 5.44 },
+  { density: 5.34 },
+  { density: 5.79 },
+  { density: 5.1 },
+  { density: 5.27 },
+  { density: 5.39 },
+  { density: 5.42 },
+  { density: 5.47 },
+  { density: 5.63 },
+  { density: 5.34 },
+  { density: 5.46 },
+  { density: 5.3 },
+  { density: 5.75 },
+  { density: 5.68 },
+  { density: 5.85 },
 ];

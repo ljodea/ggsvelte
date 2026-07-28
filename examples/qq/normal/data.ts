@@ -1,15 +1,112 @@
-import { mulberry32 } from "../../rng.js";
-
-/** Sample from a slightly right-skewed distribution for a Q–Q demo. */
-export const heights: { height: number }[] = (() => {
-  const rows: { height: number }[] = [];
-  const rnd = mulberry32(7);
-  for (let i = 0; i < 80; i++) {
-    // Box–Muller + slight skew
-    const u1 = Math.max(1e-9, rnd());
-    const u2 = rnd();
-    const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-    rows.push({ height: 170 + z * 8 + Math.max(0, z) * 1.5 });
-  }
-  return rows;
-})();
+/**
+ * Albert Michelson's 1879 speed-of-light measurements, all 100 of them, in
+ * km/s less 299,000 (so 710 means 299,710 km/s). Michelson ran them in five
+ * blocks of twenty at the US Naval Academy; the spread between runs is the
+ * measurement error a Q-Q plot is there to interrogate.
+ *
+ * Michelson (1882), via HistData::Michelson (see NOTICE); 100 observations.
+ * The modern value on his distance scale is 734.5; all but five of his hundred
+ * runs came out above it.
+ */
+export const michelson = [
+  { velocity: 850 },
+  { velocity: 740 },
+  { velocity: 900 },
+  { velocity: 1070 },
+  { velocity: 930 },
+  { velocity: 850 },
+  { velocity: 950 },
+  { velocity: 980 },
+  { velocity: 980 },
+  { velocity: 880 },
+  { velocity: 1000 },
+  { velocity: 980 },
+  { velocity: 930 },
+  { velocity: 650 },
+  { velocity: 760 },
+  { velocity: 810 },
+  { velocity: 1000 },
+  { velocity: 1000 },
+  { velocity: 960 },
+  { velocity: 960 },
+  { velocity: 960 },
+  { velocity: 940 },
+  { velocity: 960 },
+  { velocity: 940 },
+  { velocity: 880 },
+  { velocity: 800 },
+  { velocity: 850 },
+  { velocity: 880 },
+  { velocity: 900 },
+  { velocity: 840 },
+  { velocity: 830 },
+  { velocity: 790 },
+  { velocity: 810 },
+  { velocity: 880 },
+  { velocity: 880 },
+  { velocity: 830 },
+  { velocity: 800 },
+  { velocity: 790 },
+  { velocity: 760 },
+  { velocity: 800 },
+  { velocity: 880 },
+  { velocity: 880 },
+  { velocity: 880 },
+  { velocity: 860 },
+  { velocity: 720 },
+  { velocity: 720 },
+  { velocity: 620 },
+  { velocity: 860 },
+  { velocity: 970 },
+  { velocity: 950 },
+  { velocity: 880 },
+  { velocity: 910 },
+  { velocity: 850 },
+  { velocity: 870 },
+  { velocity: 840 },
+  { velocity: 840 },
+  { velocity: 850 },
+  { velocity: 840 },
+  { velocity: 840 },
+  { velocity: 840 },
+  { velocity: 890 },
+  { velocity: 810 },
+  { velocity: 810 },
+  { velocity: 820 },
+  { velocity: 800 },
+  { velocity: 770 },
+  { velocity: 760 },
+  { velocity: 740 },
+  { velocity: 750 },
+  { velocity: 760 },
+  { velocity: 910 },
+  { velocity: 920 },
+  { velocity: 890 },
+  { velocity: 860 },
+  { velocity: 880 },
+  { velocity: 720 },
+  { velocity: 840 },
+  { velocity: 850 },
+  { velocity: 850 },
+  { velocity: 780 },
+  { velocity: 890 },
+  { velocity: 840 },
+  { velocity: 780 },
+  { velocity: 810 },
+  { velocity: 760 },
+  { velocity: 810 },
+  { velocity: 790 },
+  { velocity: 810 },
+  { velocity: 820 },
+  { velocity: 850 },
+  { velocity: 870 },
+  { velocity: 870 },
+  { velocity: 810 },
+  { velocity: 740 },
+  { velocity: 810 },
+  { velocity: 940 },
+  { velocity: 950 },
+  { velocity: 800 },
+  { velocity: 810 },
+  { velocity: 870 },
+] as const;

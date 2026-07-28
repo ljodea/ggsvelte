@@ -1,5 +1,6 @@
 {
-  "title": "Normal Q–Q plot",
+  "title": "Michelson's errors against the normal",
+  "description": "A hundred speed-of-light runs plotted against the normal quantiles they would sit on if only chance moved them, with the quartile line for reference.",
   "tags": ["qq", "diagnostics", "distribution"],
   "docsSection": "Distributions"
 }

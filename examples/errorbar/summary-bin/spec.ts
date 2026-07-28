@@ -1,13 +1,13 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { binnedScatter } from "./data.js";
+import { galtonHeights } from "./data.js";
 
 export default defineExample(
-  // Continuous x: summary_bin collapses each non-empty bin to mean ± se.
-  // Raw points stay identity; line + errorbar share the same bin grid.
-  gg(binnedScatter, aes({ x: "x", y: "y" }))
-    .geomPoint({ alpha: 0.4, size: 2.4 })
+  // summary_bin collapses each non-empty bin of x to mean ± se; the errorbar
+  // and the line share one bin grid, so they mark the same eleven means.
+  gg(galtonHeights, aes({ x: "parent", y: "child" }))
+    .geomPoint({ alpha: 0.15, size: 2.4 })
     .geomErrorbar({
       stat: "summary_bin",
       binwidth: 1,
@@ -23,10 +23,11 @@ export default defineExample(
     })
     .theme("classic")
     .labs({
-      title: "stat summary_bin: mean ± se by x bin",
-      subtitle: "Continuous x binned at width 1; empty bins omitted",
-      x: "x",
-      y: "y",
+      title: "Galton's children regress towards the middle",
+      subtitle:
+        "Mean child height ± one standard error in each one-inch class of mid-parent height",
+      x: "Mid-parent height (inches)",
+      y: "Child height (inches)",
     })
     .spec(),
 );

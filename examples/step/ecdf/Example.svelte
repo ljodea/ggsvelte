@@ -7,17 +7,22 @@
     ThemeClassic,
   } from "@ggsvelte/svelte";
 
-  import { ecdfSample } from "./data.js";
+  import { maizeDifferences } from "./data.js";
 </script>
 
-<GGPlot data={ecdfSample} aes={{ x: "x", y: "y" }} width={640} height={400}>
+<GGPlot
+  data={maizeDifferences}
+  aes={{ x: "difference", y: "share" }}
+  width={640}
+  height={400}
+>
   <ThemeClassic />
   <Labs
-    title="Empirical CDF as a step line"
-    subtitle="geom_step direction hv — horizontal, then vertical"
-    x="x"
-    y="F̂(x)"
+    title="Darwin's fifteen pairs of maize"
+    subtitle="How much taller the cross-fertilised plant grew; two pairs went the other way"
+    x="Cross-fertilised height less self-fertilised (inches)"
+    y="Share of pairs at or below"
   />
   <GeomStep direction="hv" linewidth={1.8} />
-  <GeomPoint size={2.2} alpha={0.85} />
+  <GeomPoint size={2.6} alpha={0.85} />
 </GGPlot>

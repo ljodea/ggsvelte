@@ -2760,8 +2760,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/dotplot/histodot",
-    title: "Dotplot histodot — ggsvelte gallery",
-    description: "Dotplot histodot",
+    title: "Cavendish weighs the world — ggsvelte gallery",
+    description:
+      "Twenty-nine torsion-balance runs from 1798, one dot each, stacked where they fall. At this sample size a dotplot shows every measurement and still gives the shape.",
     canonicalPath: "/examples/dotplot/histodot",
     kind: "page",
     index: true,
@@ -2780,8 +2781,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/errorbar/summary-bin",
-    title: "Binned mean ± se (summary_bin) — ggsvelte gallery",
-    description: "Binned mean ± se (summary_bin)",
+    title: "Galton's regression to the middle — ggsvelte gallery",
+    description:
+      "Mean child height with a standard error in each class of mid-parent height. The means rise with the parents but not as fast, which is the observation that named regression.",
     canonicalPath: "/examples/errorbar/summary-bin",
     kind: "page",
     index: true,
@@ -2911,8 +2913,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/line/ecdf",
-    title: "Empirical CDF — ggsvelte gallery",
-    description: "Empirical CDF",
+    title: "Richardson's deadly quarrels — ggsvelte gallery",
+    description:
+      "The empirical distribution of 779 conflicts by magnitude, the log10 of the death toll. The median quarrel killed about ten thousand people.",
     canonicalPath: "/examples/line/ecdf",
     kind: "page",
     index: true,
@@ -3161,8 +3164,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/qq/normal",
-    title: "Normal Q–Q plot — ggsvelte gallery",
-    description: "Normal Q–Q plot",
+    title: "Michelson's errors against the normal — ggsvelte gallery",
+    description:
+      "A hundred speed-of-light runs plotted against the normal quantiles they would sit on if only chance moved them, with the quartile line for reference.",
     canonicalPath: "/examples/qq/normal",
     kind: "page",
     index: true,
@@ -3311,8 +3315,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/step/ecdf",
-    title: "Step ECDF — ggsvelte gallery",
-    description: "Step ECDF",
+    title: "Darwin's maize, pair by pair — ggsvelte gallery",
+    description:
+      "Fifteen paired height differences from Darwin's 1876 fertilisation trial, drawn as stairs from precomputed coordinates. Where the line crosses zero is his result.",
     canonicalPath: "/examples/step/ecdf",
     kind: "page",
     index: true,

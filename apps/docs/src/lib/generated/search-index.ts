@@ -4714,11 +4714,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:dotplot:histodot",
     kind: "example",
-    title: "Dotplot histodot",
-    summary: "Dotplot histodot (Distributions)",
+    title: "Cavendish weighs the world",
+    summary:
+      "Twenty-nine torsion-balance runs from 1798, one dot each, stacked where they fall. At this sample size a dotplot shows every measurement and still gives the shape.",
     href: "/examples/dotplot/histodot",
     keywords: [
-      "Dotplot histodot",
+      "Cavendish weighs the world",
       "Distributions",
       "dotplot",
       "bindot",
@@ -4728,7 +4729,7 @@ export const DOCS_SEARCH_INDEX = [
       "stack",
       "theme",
     ],
-    exact: ["Dotplot histodot"],
+    exact: ["Cavendish weighs the world"],
   },
   {
     id: "example:errorbar:mean-se",
@@ -4749,11 +4750,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:errorbar:summary-bin",
     kind: "example",
-    title: "Binned mean ± se (summary_bin)",
-    summary: "Binned mean ± se (summary_bin) (Statistical summaries)",
+    title: "Galton's regression to the middle",
+    summary:
+      "Mean child height with a standard error in each class of mid-parent height. The means rise with the parents but not as fast, which is the observation that named regression.",
     href: "/examples/errorbar/summary-bin",
     keywords: [
-      "Binned mean ± se (summary_bin)",
+      "Galton's regression to the middle",
       "Statistical summaries",
       "errorbar",
       "summary_bin",
@@ -4762,7 +4764,7 @@ export const DOCS_SEARCH_INDEX = [
       "line",
       "stat",
     ],
-    exact: ["Binned mean ± se (summary_bin)"],
+    exact: ["Galton's regression to the middle"],
   },
   {
     id: "example:facet:ordered-side-strips",
@@ -4957,11 +4959,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:line:ecdf",
     kind: "example",
-    title: "Empirical CDF",
-    summary: "Empirical CDF (Lines & time)",
+    title: "Richardson's deadly quarrels",
+    summary:
+      "The empirical distribution of 779 conflicts by magnitude, the log10 of the death toll. The median quarrel killed about ten thousand people.",
     href: "/examples/line/ecdf",
-    keywords: ["Empirical CDF", "Lines & time", "line", "ecdf", "stat", "step"],
-    exact: ["Empirical CDF"],
+    keywords: ["Richardson's deadly quarrels", "Lines & time", "line", "ecdf", "stat", "step"],
+    exact: ["Richardson's deadly quarrels"],
   },
   {
     id: "example:line:function",
@@ -5373,11 +5376,18 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:qq:normal",
     kind: "example",
-    title: "Normal Q–Q plot",
-    summary: "Normal Q–Q plot (Distributions)",
+    title: "Michelson's errors against the normal",
+    summary:
+      "A hundred speed-of-light runs plotted against the normal quantiles they would sit on if only chance moved them, with the quartile line for reference.",
     href: "/examples/qq/normal",
-    keywords: ["Normal Q–Q plot", "Distributions", "qq", "diagnostics", "distribution"],
-    exact: ["Normal Q–Q plot"],
+    keywords: [
+      "Michelson's errors against the normal",
+      "Distributions",
+      "qq",
+      "diagnostics",
+      "distribution",
+    ],
+    exact: ["Michelson's errors against the normal"],
   },
   {
     id: "example:raster:grid",
@@ -5594,11 +5604,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "example:step:ecdf",
     kind: "example",
-    title: "Step ECDF",
-    summary: "Step ECDF (Lines & time)",
+    title: "Darwin's maize, pair by pair",
+    summary:
+      "Fifteen paired height differences from Darwin's 1876 fertilisation trial, drawn as stairs from precomputed coordinates. Where the line crosses zero is his result.",
     href: "/examples/step/ecdf",
-    keywords: ["Step ECDF", "Lines & time", "step", "ecdf", "line", "geom"],
-    exact: ["Step ECDF"],
+    keywords: ["Darwin's maize, pair by pair", "Lines & time", "step", "ecdf", "line", "geom"],
+    exact: ["Darwin's maize, pair by pair"],
   },
   {
     id: "example:text:labels",

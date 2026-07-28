@@ -1,5 +1,6 @@
 {
-  "title": "Binned mean ± se (summary_bin)",
+  "title": "Galton's regression to the middle",
+  "description": "Mean child height with a standard error in each class of mid-parent height. The means rise with the parents but not as fast, which is the observation that named regression.",
   "tags": ["errorbar", "summary_bin", "bin", "mean-se", "line", "stat"],
   "docsSection": "Statistical summaries"
 }

@@ -118,8 +118,8 @@
     },
     "dotplot/histodot": {
       "filename": "dotplot-histodot-light.png",
-      "sourceSha256": "1e6a0f5e94f41d8884d5e289138efa9f35ea9fd7ddc6868db5bf82edb19608ae",
-      "pngSha256": "6d45f51f3e3f4aac7a30d7924075751119c086186187993a071dbbb7fcaea198"
+      "sourceSha256": "a4a3a44359e8db682e5745abf877464eef154638b5424047181a236d70690f10",
+      "pngSha256": "3aa3a2568cc731a7dac621eb97532b3d6467f1961d8a3bd4651a796ccc82e737"
     },
     "errorbar/mean-se": {
       "filename": "errorbar-mean-se-light.png",
@@ -128,8 +128,8 @@
     },
     "errorbar/summary-bin": {
       "filename": "errorbar-summary-bin-light.png",
-      "sourceSha256": "ef4a65fb0ae765067b180c99fa1bbf2acaed237443cdea63b2b927304a684d9a",
-      "pngSha256": "06e4a1e517a4630def95e947a30a5e118d2f0d86c3de74323833c04c0af5aec2"
+      "sourceSha256": "4815c9573884ad2e7c0e10f5ad9185fef528aa1468ab4ee42f7f230f5621f680",
+      "pngSha256": "5b42aafc01a6ee2460e690971cf7fb06d5731e578a6326357833c2b9f4bbe900"
     },
     "facet/ordered-side-strips": {
       "filename": "facet-ordered-side-strips-light.png",
@@ -208,8 +208,8 @@
     },
     "line/ecdf": {
       "filename": "line-ecdf-light.png",
-      "sourceSha256": "d471551633c7bf1f3b844babb7bf362456f0b77c36f5accdfc726db1a36a9b29",
-      "pngSha256": "50ddc15712530f71fda35c44b4cb11db0ca2ee47fddce5004960322ee18401c3"
+      "sourceSha256": "790abf15215d3a7e12ccca1f6f723a987061640b6513154889ed78375cee3763",
+      "pngSha256": "fb023b735911c42fbf5cd3e72c142a3abc099f5230a6a22dae0d83a478579ef6"
     },
     "line/function": {
       "filename": "line-function-light.png",
@@ -333,8 +333,8 @@
     },
     "qq/normal": {
       "filename": "qq-normal-light.png",
-      "sourceSha256": "c34d77e7d4c00e633f6d3704410f175841271e8c79b683092c16823e90038a21",
-      "pngSha256": "d839230f6ef08ed5a775e8b88047ecb2734488b40ef8f1187ef4bb1ef3ab6a91"
+      "sourceSha256": "99903e458a96a339b3c2888c4ebe733a2e79d097f1fbbcbd4123b388574151c2",
+      "pngSha256": "3bdf55618522be1a46ac573400e94aa367c003a03131cceb87ffdd69a7774c26"
     },
     "raster/grid": {
       "filename": "raster-grid-light.png",
@@ -408,8 +408,8 @@
     },
     "step/ecdf": {
       "filename": "step-ecdf-light.png",
-      "sourceSha256": "eb6f8a1f9bc4e486cccd9866f76f33fd282ba878f0eb850343aaf737cebe833d",
-      "pngSha256": "1d4f06f678045fc0ce0c7b6c81591fc2b47e38a922733dd2728e65cf70e311c8"
+      "sourceSha256": "ebc5cc53562ed6c2c6c4f98463fc73bee92509d36b44b290bb7f8ef9a2581745",
+      "pngSha256": "95b755aae2d1066799fd4b6939d97f8743a6c17a1c17463681dabdef2560c905"
     },
     "text/labels": {
       "filename": "text-labels-light.png",

@@ -1,5 +1,6 @@
 {
-  "title": "Dotplot histodot",
+  "title": "Cavendish weighs the world",
+  "description": "Twenty-nine torsion-balance runs from 1798, one dot each, stacked where they fall. At this sample size a dotplot shows every measurement and still gives the shape.",
   "tags": ["dotplot", "bindot", "stat", "bin", "point", "stack", "theme"],
   "docsSection": "Distributions"
 }

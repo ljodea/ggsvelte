@@ -1,20 +1,20 @@
 import { aes, gg } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { ecdfSample } from "./data.js";
+import { maizeDifferences } from "./data.js";
 
 export default defineExample(
-  // ggplot2 geom_step with direction "hv" (default): horizontal then vertical —
-  // the standard stairs for an empirical distribution function.
-  gg(ecdfSample, aes({ x: "x", y: "y" }))
+  // The same stairs as line/ecdf, but from precomputed (x, F̂) rows: geom_step
+  // with direction hv holds each value until the next observation arrives.
+  gg(maizeDifferences, aes({ x: "difference", y: "share" }))
     .geomStep({ direction: "hv", linewidth: 1.8 })
-    .geomPoint({ size: 2.2, alpha: 0.85 })
+    .geomPoint({ size: 2.6, alpha: 0.85 })
     .theme("classic")
     .labs({
-      title: "Empirical CDF as a step line",
-      subtitle: "geom_step direction hv — horizontal, then vertical",
-      x: "x",
-      y: "F̂(x)",
+      title: "Darwin's fifteen pairs of maize",
+      subtitle: "How much taller the cross-fertilised plant grew; two pairs went the other way",
+      x: "Cross-fertilised height less self-fertilised (inches)",
+      y: "Share of pairs at or below",
     })
     .spec(),
 );
