@@ -84,7 +84,7 @@ export const GALLERY_PREVIEWS = [
     id: "col/long-labels",
     filename: "col-long-labels-light.png",
     path: "/previews/col-long-labels-light.png",
-    sha256: "8cb06e010e1bff2bea2a7c1b737ed9f92cddc5e4f4c157270c097d7f50eeb8e9",
+    sha256: "cdf7629065b9166caec01bbbb37e37ebd5c9a41527438fe8c3c7e6324e5ce923",
   },
   {
     id: "col/mixed-outlier-labels",
@@ -312,7 +312,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/canvas-scatter",
     filename: "point-canvas-scatter-light.png",
     path: "/previews/point-canvas-scatter-light.png",
-    sha256: "737b17a43f1cc32e903793f0bab0d359da6446e642c993bcc952da4b97ba6263",
+    sha256: "5e13cf1dfa01ac8e2241a3d210e3bf0fdab31da195d26ecfe11e6c73ba35b526",
   },
   {
     id: "point/count",

@@ -7,8 +7,7 @@ export default defineExample(
   gg(filings, aes({ x: "category", y: "count" }))
     .geomCol()
     .labs({
-      title: "Long category labels at a narrow width",
-      subtitle: "The band axis has to wrap and rotate to fit these names at 480px",
+      title: "Filing types (long category labels)",
       x: "Category",
       y: "Count",
     })

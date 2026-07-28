@@ -63,8 +63,8 @@
     },
     "col/long-labels": {
       "filename": "col-long-labels-light.png",
-      "sourceSha256": "78e58ad3de60537a6aa58a1b6a3a3cedd4720444bc33032b62e05ac74bc24456",
-      "pngSha256": "8cb06e010e1bff2bea2a7c1b737ed9f92cddc5e4f4c157270c097d7f50eeb8e9"
+      "sourceSha256": "896becb017355598ee0b04c73cd54deba68d6126d7a8e61a6d0b70fe06923a3f",
+      "pngSha256": "cdf7629065b9166caec01bbbb37e37ebd5c9a41527438fe8c3c7e6324e5ce923"
     },
     "col/mixed-outlier-labels": {
       "filename": "col-mixed-outlier-labels-light.png",
@@ -253,8 +253,8 @@
     },
     "point/canvas-scatter": {
       "filename": "point-canvas-scatter-light.png",
-      "sourceSha256": "64eb1c851a636bae33dedd9147601b17165b349ddd4f98a7f764248bf0f58244",
-      "pngSha256": "737b17a43f1cc32e903793f0bab0d359da6446e642c993bcc952da4b97ba6263"
+      "sourceSha256": "7a12d4b624b4c6c533370823a458e92c224caf1f0838f73996b7c1df40f89bf8",
+      "pngSha256": "5e13cf1dfa01ac8e2241a3d210e3bf0fdab31da195d26ecfe11e6c73ba35b526"
     },
     "point/count": {
       "filename": "point-count-light.png",
