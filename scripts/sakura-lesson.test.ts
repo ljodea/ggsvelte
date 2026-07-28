@@ -23,6 +23,7 @@ import {
   quickstartAriaLabel,
   quickstartTitle,
   SAKURA_BASELINE,
+  SAKURA_RECORDS,
   SAKURA_BINWIDTH,
   SAKURA_EPOCH_EDGES,
   SAKURA_EPOCHS,
@@ -87,7 +88,7 @@ describe("the sakura lesson folds to renderable specs", () => {
       const spec = foldSakura(count, rows).spec as { layers: unknown[] };
       return spec.layers.length;
     });
-    expect(layerCounts).toEqual([1, 2, 2, 4, 7, 7, 7]);
+    expect(layerCounts).toEqual([1, 2, 2, 5, 8, 8, 8]);
     for (let i = 1; i < layerCounts.length; i += 1) {
       expect(layerCounts[i]!).toBeGreaterThanOrEqual(layerCounts[i - 1]!);
     }
@@ -107,11 +108,19 @@ describe("the sakura lesson folds to renderable specs", () => {
     // collide with the data. Bands, trend, baseline, and points stay.
     const full = foldSakura(SAKURA_STEPS.length, rows);
     const narrow = foldSakura(SAKURA_STEPS.length, rows, { annotations: false });
-    expect((full.spec.layers as unknown[]).length).toBe(7);
-    expect((narrow.spec.layers as unknown[]).length).toBe(5);
+    expect((full.spec.layers as unknown[]).length).toBe(8);
+    expect((narrow.spec.layers as unknown[]).length).toBe(6);
     const kinds = (narrow.spec.layers as { geom: string }[]).map((layer) => layer.geom);
     expect(kinds).not.toContain("segment");
-    expect(kinds).not.toContain("text");
+    // The epoch names stay: they are spread one per band rather than clustered
+    // around three points, and they are the only thing naming the bands now
+    // that the legend is gone. Measured down to a 560px container without
+    // collision, which is the width this option kicks in at.
+    const labels = (narrow.spec.layers as { geom: string; data?: { values?: unknown[] } }[]).filter(
+      (layer) => layer.geom === "text",
+    );
+    expect(labels).toHaveLength(1);
+    expect(labels[0]!.data?.values).toHaveLength(3);
     expect(kinds).toContain("point");
     expect(kinds).toContain("line");
     expect(kinds).toContain("rect");
@@ -159,7 +168,8 @@ describe("the sakura lesson folds to renderable specs", () => {
       [1, SAKURA_Y_BREAKS[0], `"breaks":${JSON.stringify([...SAKURA_Y_BREAKS])}`],
       [2, "x: null", '"x":null'],
       [2, 'fill: "epoch"', '"fill":{"field":"epoch"}'],
-      [2, "GuideLegend", '"position":"bottom"'],
+      [2, "GuideNone", '"fill":{"type":"none"}'],
+      [2, 'label: "epoch"', '"label":{"field":"epoch"}'],
       [2, "ScaleFillManual", '"type":"manual"'],
       [3, SAKURA_BASELINE, `"yintercept":"${SAKURA_BASELINE}"`],
       [3, '"#b3452f"', '"value":"#b3452f"'],
@@ -186,6 +196,8 @@ describe("the sakura lesson folds to renderable specs", () => {
       "aes",
       "alpha",
       "size",
+      "anchor",
+      "dx",
       "linewidth",
       "stat",
       "fun",
@@ -244,6 +256,70 @@ describe("gate G1 — the reversed temporal y-axis", () => {
     expect(ticks[0]!.label).toBe("Apr 5");
     expect(ticks[2]!.label).toBe("Apr 25");
     expect(ticks[0]!.pos).toBeGreaterThan(ticks[2]!.pos);
+  });
+});
+
+describe("gate G5 — annotations that do not fight the chart", () => {
+  const finishedSpec = () => foldSakura(SAKURA_STEPS.length, rows).spec;
+
+  it("names the bands where the reader is looking, with no legend", () => {
+    const spec = finishedSpec() as {
+      guides?: { fill?: { type: string } };
+      labs?: { fill?: string };
+    };
+    expect(spec.guides?.fill?.type).toBe("none");
+    expect(spec.labs?.fill).toBeUndefined();
+
+    const names = (
+      finishedSpec() as { layers: { geom: string; data?: { values?: unknown[] } }[] }
+    ).layers
+      .filter((layer) => layer.geom === "text")
+      .flatMap((layer) => (layer.data?.values ?? []) as { epoch?: string }[])
+      .map((row) => row.epoch)
+      .filter(Boolean);
+    expect(names).toEqual(["Medieval warm period", "Little Ice Age", "Industrial era"]);
+  });
+
+  it("states the record as well as the claim, with a middle dot", () => {
+    for (const record of SAKURA_RECORDS) {
+      expect(record.label, record.label).toContain(" · ");
+      expect(record.label, record.label).not.toContain("—");
+      // A callout asserting significance without the value makes the reader
+      // hunt for the number the annotation exists to deliver.
+      expect(record.label, record.label).toMatch(/\b(March|April|May) \d{1,2}\b/);
+    }
+  });
+
+  it("keeps every leader on the far side of its own label", () => {
+    // There is no text repel (#727 gap B), so these positions are hand-computed
+    // against a layout nobody can see — the exact condition that let leaders
+    // cross their text before. Anchoring at the end only works while every
+    // label stays left of the point it names; this is what pins that.
+    for (const record of SAKURA_RECORDS) {
+      expect(record.labelYear, record.label).toBeLessThan(record.year);
+    }
+    const callouts = (
+      finishedSpec() as { layers: { geom: string; params?: Record<string, unknown> }[] }
+    ).layers
+      .filter((layer) => layer.geom === "text")
+      .map((layer) => layer.params?.["anchor"]);
+    expect(callouts).toContain("end");
+  });
+
+  it("draws a baseline strong enough to read, and says what it marks", () => {
+    const spec = finishedSpec() as {
+      layers: { geom: string; params?: Record<string, unknown> }[];
+      labs?: { caption?: string };
+    };
+    const rule = spec.layers.find(
+      (layer) => layer.geom === "rule" && "yintercept" in (layer.params ?? {}),
+    );
+    expect(rule?.params?.["yintercept"]).toBe(SAKURA_BASELINE);
+    expect(rule?.params?.["alpha"]).toBeUndefined();
+    expect(rule?.params?.["linewidth"]).toBeGreaterThanOrEqual(1);
+    // The reference chart labels this in the margin. Mid-April is dense in
+    // every century, so there is nowhere inside the panel to say it (#727).
+    expect(spec.labs?.caption).toContain("median");
   });
 });
 
