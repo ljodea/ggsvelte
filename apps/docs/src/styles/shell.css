@@ -241,7 +241,10 @@
   min-width: 0;
 }
 
-.docs-sidebar section + section {
+.docs-sidebar section + section,
+.docs-sidebar ul + section,
+.docs-sidebar section + ul,
+.docs-sidebar ul + ul {
   margin-top: 1.75rem;
 }
 

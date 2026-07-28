@@ -102,16 +102,14 @@ test("Docs landing and sidebar expose the full path without duplicate Reference"
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/docs?theme=light");
 
-  // Single chapter index — no separate "Start here" task list.
+  // Flat chapter index — only Reference keeps a section heading.
   const index = page.getByRole("navigation", { name: "Documentation guides" });
-  await expect(index.getByRole("heading", { level: 2 })).toHaveText([
-    "Start",
-    "Core grammar",
-    "Interaction",
-    "Production",
-    "Reference",
-    "Release",
-  ]);
+  await expect(index.getByRole("heading", { level: 2 })).toHaveText(["Reference"]);
+  await expect(index.getByRole("heading", { name: "Start" })).toHaveCount(0);
+  await expect(index.getByRole("heading", { name: "Core grammar" })).toHaveCount(0);
+  await expect(index.getByRole("heading", { name: "Interaction" })).toHaveCount(0);
+  await expect(index.getByRole("heading", { name: "Production" })).toHaveCount(0);
+  await expect(index.getByRole("heading", { name: "Release" })).toHaveCount(0);
   await expect(index.getByRole("link", { name: /Getting started/ })).toBeVisible();
   await expect(index.getByRole("link", { name: /Data and mappings/ })).toHaveCount(0);
   await expect(index.getByRole("link", { name: /Dates without preprocessing/ })).toBeVisible();
@@ -123,14 +121,9 @@ test("Docs landing and sidebar expose the full path without duplicate Reference"
   await expect(index.getByRole("link", { name: /Migrating pre-0.1/ })).toHaveCount(0);
 
   const sidebar = page.getByRole("navigation", { name: "Guide chapters" });
-  await expect(sidebar.getByRole("heading", { level: 2 })).toHaveText([
-    "Start",
-    "Core grammar",
-    "Interaction",
-    "Production",
-    "Reference",
-    "Release",
-  ]);
+  await expect(sidebar.getByRole("heading", { level: 2 })).toHaveText(["Reference"]);
+  await expect(sidebar.getByRole("heading", { name: "Start" })).toHaveCount(0);
+  await expect(sidebar.getByRole("heading", { name: "Core grammar" })).toHaveCount(0);
   // Overview + consolidated guide/reference chapters.
   await expect(sidebar.getByRole("link")).toHaveCount(18);
   await expect(sidebar.getByRole("link", { name: "Dates without preprocessing" })).toBeVisible();

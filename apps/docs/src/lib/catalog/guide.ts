@@ -17,6 +17,45 @@ export function guideSectionDomId(section: string): string {
     .replaceAll(/^-+|-+$/g, "")}`;
 }
 
+/**
+ * Catalog sections still order routes, but most labels are decorative chrome.
+ * Only "Reference" keeps a visible heading on the docs index and sidebar.
+ */
+export const GUIDE_VISIBLE_SECTION_HEADINGS = new Set<string>(["Reference"]);
+
+export type GuideNavEntry = { path: string; label: string };
+
+export type GuideNavBlock =
+  | { kind: "flat"; key: string; entries: readonly GuideNavEntry[] }
+  | { kind: "section"; section: string; entries: readonly GuideNavEntry[] };
+
+/** Collapse decorative section labels into flat lists; keep Reference headed. */
+export function guideNavBlocks(
+  groups: readonly { section: string; entries: readonly GuideNavEntry[] }[],
+): GuideNavBlock[] {
+  const blocks: GuideNavBlock[] = [];
+  let flat: GuideNavEntry[] = [];
+  let flatIndex = 0;
+
+  const flushFlat = (): void => {
+    if (flat.length === 0) return;
+    blocks.push({ kind: "flat", key: `flat-${String(flatIndex)}`, entries: flat });
+    flatIndex += 1;
+    flat = [];
+  };
+
+  for (const group of groups) {
+    if (GUIDE_VISIBLE_SECTION_HEADINGS.has(group.section)) {
+      flushFlat();
+      blocks.push({ kind: "section", section: group.section, entries: group.entries });
+      continue;
+    }
+    flat.push(...group.entries);
+  }
+  flushFlat();
+  return blocks;
+}
+
 interface GuideCatalogEntryBase {
   slug: string;
   title: string;
