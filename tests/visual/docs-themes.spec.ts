@@ -193,6 +193,14 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   const firstMark = observable.locator(".gg-plot-root [fill='#4269d0']").first();
   await expect(firstMark).toBeVisible();
 
+  // Exact inspect: tooltip on the bar, no full-panel crosshair guides.
+  const capture = observable.locator(".gg-capture");
+  await capture.focus();
+  await capture.press("ArrowRight");
+  const tooltip = observable.locator(".gg-tooltip");
+  await expect(tooltip).toBeVisible();
+  await expect(observable.locator(".gg-crosshair")).toHaveCount(0);
+
   await region.getByRole("checkbox", { name: "Reverse" }).check();
   await expect(swatches.first()).toHaveAttribute("aria-label", "1: #9498a0");
   await expect(swatches.last()).toHaveAttribute("aria-label", "10: #4269d0");

@@ -56,7 +56,7 @@
     <GGPlot
       data={languages}
       aes={{ x: "language", y: "respondents", fill: "language" }}
-      inspect={{ mode: "xy" }}
+      inspect={{ mode: "exact" }}
       height={340}
       ariaLabel={`${label} palette on ${paperTheme} paper`}
     >
