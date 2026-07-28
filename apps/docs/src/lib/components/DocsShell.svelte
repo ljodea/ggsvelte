@@ -52,7 +52,7 @@
       return [{ label: "Reference" }];
     }
 
-    const segments = currentPath.replace(/^\/+|\/+$/g, "").split("/");
+    const segments = currentPath.replaceAll(/^\/+|\/+$/g, "").split("/");
     // ["reference", "geoms"] or ["reference", "geoms", "col"]
     if (segments[0] !== "reference" || segments.length < 2) {
       return [root, { label: title }];
