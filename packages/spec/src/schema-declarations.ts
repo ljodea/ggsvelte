@@ -5039,10 +5039,18 @@ export const SpecDeclarations = {
           }),
         ),
         temporalKind: Type.Optional(
-          Type.Union([Type.Literal("date"), Type.Literal("datetime"), Type.Literal("time")], {
-            description:
-              'Temporal precision intent. "date" uses calendar dates; "datetime" uses instants; "time" is time-of-day (portable numbers are seconds since midnight). Supplying this option requests a time scale.',
-          }),
+          Type.Union(
+            [
+              Type.Literal("date"),
+              Type.Literal("datetime"),
+              Type.Literal("time"),
+              Type.Literal("monthDay"),
+            ],
+            {
+              description:
+                'Temporal precision intent. "date" uses calendar dates; "datetime" uses instants; "time" is time-of-day (portable numbers are seconds since midnight); "monthDay" collapses the year, so the same calendar day from any year shares one position — values parse with the "md" parser and resolve into a fixed leap reference year, and year, clock, weekday and zone label tokens are rejected. A month-day window cannot cross the year boundary. Supplying this option requests a time scale.',
+            },
+          ),
         ),
         parse: Type.Optional(
           Type.Ref("TemporalParserSpec", {

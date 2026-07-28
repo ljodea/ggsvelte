@@ -39,6 +39,58 @@ describe("strict temporal parsing", () => {
     expect(parseTemporal("2024-03-10T24:00:00Z", "iso")).toMatchObject({ ok: false });
   });
 
+  describe("md — month-day without a year", () => {
+    // The reference year is 2000 because it is a leap year: Feb 29 has to be
+    // representable, and partsToEpoch rejects it in any other year.
+    const REFERENCE_YEAR = 2000;
+
+    it("resolves a bare month-day into the reference year", () => {
+      expect(parseTemporal("04-05", "md")).toMatchObject({
+        ok: true,
+        kind: "date",
+        precision: "date",
+        epochMs: Date.UTC(REFERENCE_YEAR, 3, 5),
+      });
+    });
+
+    it("accepts the ISO recurring-date spelling and slash separators", () => {
+      for (const value of ["--04-05", "04/05", "4-5"] as const) {
+        expect(parseTemporal(value, "md")).toMatchObject({
+          ok: true,
+          epochMs: Date.UTC(REFERENCE_YEAR, 3, 5),
+        });
+      }
+    });
+
+    it("takes the month and day from a full date and discards the year", () => {
+      // The whole point of the kind: two observations 1189 years apart that
+      // fell on the same calendar day must land on the same instant. The old
+      // reference-year column projected day-of-year instead, so 0812-04-01
+      // (a leap year) came out as 2 April.
+      const ancient = parseTemporal("0812-04-01", "md");
+      const modern = parseTemporal("2001-04-01", "md");
+      expect(ancient).toMatchObject({ ok: true, epochMs: Date.UTC(REFERENCE_YEAR, 3, 1) });
+      expect(modern).toMatchObject({ ok: true, epochMs: Date.UTC(REFERENCE_YEAR, 3, 1) });
+    });
+
+    it("keeps 29 February, which is why the reference year is a leap year", () => {
+      expect(parseTemporal("02-29", "md")).toMatchObject({
+        ok: true,
+        epochMs: Date.UTC(REFERENCE_YEAR, 1, 29),
+      });
+      expect(parseTemporal("1812-02-29", "md")).toMatchObject({
+        ok: true,
+        epochMs: Date.UTC(REFERENCE_YEAR, 1, 29),
+      });
+    });
+
+    it("rejects calendar overflow and anything carrying a time", () => {
+      for (const value of ["13-01", "02-30", "00-10", "04-00", "04-05T12:00", "2024"] as const) {
+        expect(parseTemporal(value, "md")).toMatchObject({ ok: false });
+      }
+    });
+  });
+
   it("supports period, ordered-date, timestamp, exact-format, and epoch parsers", () => {
     expect(parseTemporal("2024", "year")).toMatchObject({ ok: true, precision: "year" });
     expect(parseTemporal("2024-07", "ym")).toMatchObject({ ok: true, precision: "month" });

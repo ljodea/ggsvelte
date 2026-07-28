@@ -1,7 +1,7 @@
 /**
  * Panel layout chrome: labs, axis titles (coord flip), formatters, legends.
  */
-import type { PortableSpec, TemporalKind } from "@ggsvelte/spec";
+import type { PortableSpec, TemporalScaleKind } from "@ggsvelte/spec";
 
 import { humanizeFieldTitle } from "../humanize-field.js";
 import { FONT_METRICS } from "../layout/font-metrics.js";
@@ -64,8 +64,8 @@ export interface PanelLayoutChromeInput {
   scalesConfig: NonNullable<PortableSpec["scales"]>;
   xScale: PositionScale;
   yScale: PositionScale;
-  xTemporalKind: TemporalKind | null;
-  yTemporalKind: TemporalKind | null;
+  xTemporalKind: TemporalScaleKind | null;
+  yTemporalKind: TemporalScaleKind | null;
   legendInputs: readonly LegendInput[];
   legendOrder: LegendOrder;
   theme: ThemeTokens;
@@ -195,8 +195,8 @@ function resolvePanelLayoutDisplay(input: {
   scalesConfig: NonNullable<PortableSpec["scales"]>;
   xScale: PositionScale;
   yScale: PositionScale;
-  xTemporalKind: TemporalKind | null;
-  yTemporalKind: TemporalKind | null;
+  xTemporalKind: TemporalScaleKind | null;
+  yTemporalKind: TemporalScaleKind | null;
   xTitle: string;
   yTitle: string;
   warnings: PipelineWarning[];

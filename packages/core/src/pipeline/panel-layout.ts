@@ -6,7 +6,7 @@
  * Owns placement, chrome, and the resolved axis guides for the run so scene
  * assembly does not re-resolve them (ADR-0003 two-pass layout stands).
  */
-import type { PortableSpec, TemporalKind } from "@ggsvelte/spec";
+import type { PortableSpec, TemporalScaleKind } from "@ggsvelte/spec";
 
 import { planBasicAxis } from "../layout/basic-axis.js";
 import {
@@ -50,8 +50,8 @@ export interface PanelLayoutInput {
   scalesConfig: NonNullable<PortableSpec["scales"]>;
   xScale: PositionScale;
   yScale: PositionScale;
-  xTemporalKind: TemporalKind | null;
-  yTemporalKind: TemporalKind | null;
+  xTemporalKind: TemporalScaleKind | null;
+  yTemporalKind: TemporalScaleKind | null;
   legendInputs: readonly LegendInput[];
   legendOrder: LegendOrder;
   theme: ThemeTokens;

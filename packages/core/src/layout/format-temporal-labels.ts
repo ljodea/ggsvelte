@@ -1,13 +1,13 @@
 /**
  * Strict `dateLabels` grammar and span-uniform temporal tick label sequences.
  */
-import type { TemporalInterval, TemporalKind } from "@ggsvelte/spec";
+import type { TemporalInterval, TemporalScaleKind } from "@ggsvelte/spec";
 import { temporalLabelConfigurationError } from "@ggsvelte/spec";
 
 import { MONTHS_LONG, MONTHS_SHORT, pad2, pad3 } from "./format-time.js";
 
 export interface TemporalLabelFormatOptions {
-  kind: TemporalKind;
+  kind: TemporalScaleKind;
   locale?: string;
   timezone?: string;
 }

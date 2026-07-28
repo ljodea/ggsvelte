@@ -14,6 +14,7 @@ export const TEMPORAL_PARSER_NAMES = [
   "ym",
   "my",
   "yq",
+  "md",
   "ymd",
   "ydm",
   "mdy",
@@ -76,6 +77,25 @@ export type TemporalParserSpec = Static<typeof TemporalParserSpecSchema>;
  *   numbers are **seconds since midnight**, mapped to epoch ms on 1970-01-01Z)
  */
 export type TemporalKind = "date" | "datetime" | "time";
+
+/**
+ * What a position scale asks a temporal axis to mean.
+ *
+ * Wider than {@link TemporalKind} by `"monthDay"`, and deliberately a separate
+ * type: `TemporalKind` is also the *result* of parsing a value, and no value
+ * ever parses to `"monthDay"` — it is a projection a scale applies afterwards.
+ * Keeping them apart lets the compiler hold that line.
+ */
+export type TemporalScaleKind = TemporalKind | "monthDay";
+
+/**
+ * Year that month-day values resolve into (`md` parser, `monthDay` scales).
+ *
+ * A leap year, so 29 February is representable — `validateParts` rejects it
+ * anywhere else. Callers should treat this as opaque: it exists so month-days
+ * from different years share one instant, and it is never shown to a reader.
+ */
+export const MONTH_DAY_REFERENCE_YEAR = 2000;
 export type TemporalPrecision =
   | "year"
   | "quarter"

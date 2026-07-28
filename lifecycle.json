@@ -1096,6 +1096,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "MONTH_DAY_REFERENCE_YEAR": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "ManualColorScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -1992,6 +1996,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "TemporalScaleKind": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "TemporalScaleOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -2868,6 +2876,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleXMonthDay": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleXReverse": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2901,6 +2913,10 @@
           "lifecycle": "experimental"
         },
         "scaleYLog10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYMonthDay": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3420,6 +3436,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_x_month_day": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_x_reverse": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3453,6 +3473,10 @@
           "lifecycle": "experimental"
         },
         "scale_y_log10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_month_day": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -6197,6 +6221,10 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ScaleXMonthDay": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ScaleXReverse": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -6230,6 +6258,10 @@
           "lifecycle": "stable-intent"
         },
         "ScaleYLog10": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ScaleYMonthDay": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -7077,6 +7109,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scaleXMonthDay": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scaleXReverse": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -7110,6 +7146,10 @@
           "lifecycle": "experimental"
         },
         "scaleYLog10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleYMonthDay": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -7433,6 +7473,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "scale_x_month_day": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "scale_x_reverse": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -7466,6 +7510,10 @@
           "lifecycle": "experimental"
         },
         "scale_y_log10": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scale_y_month_day": {
           "kind": "value",
           "lifecycle": "experimental"
         },

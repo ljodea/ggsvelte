@@ -3,6 +3,7 @@
  * Color/fill helpers: scale-color-helpers.ts. Facade re-exports: scale-helpers.ts.
  */
 
+import type { TemporalScaleKind } from "./temporal-parse-core.js";
 import type { PositionScaleSpec, Scales } from "./schema.js";
 
 export type TemporalScaleOptions = Omit<PositionScaleSpec, "type" | "temporalKind">;
@@ -49,7 +50,7 @@ export type DiscretePositionScaleOptions = Omit<
 
 function temporalScale(
   axis: "x" | "y",
-  temporalKind: "date" | "datetime" | "time",
+  temporalKind: TemporalScaleKind,
   options: TemporalScaleOptions = {},
 ): Scales {
   return { [axis]: { type: "time", temporalKind, ...options } };
@@ -102,6 +103,21 @@ export function scaleYTime(options: TemporalScaleOptions = {}): Scales {
   return temporalScale("y", "time", options);
 }
 
+/**
+ * Month-day position scale: the year collapses, so the same calendar day from
+ * any year shares one position. Values, `domain`, and `breaks` are all written
+ * without a year (`"04-05"`), and no year reaches a label. See TemporalKind
+ * `"monthDay"`. A window cannot cross the year boundary.
+ */
+export function scaleXMonthDay(options: TemporalScaleOptions = {}): Scales {
+  return temporalScale("x", "monthDay", options);
+}
+
+/** Month-day position scale; see {@link scaleXMonthDay}. */
+export function scaleYMonthDay(options: TemporalScaleOptions = {}): Scales {
+  return temporalScale("y", "monthDay", options);
+}
+
 export function scaleXDiscrete(options: DiscretePositionScaleOptions = {}): Scales {
   return discreteScale("x", options);
 }
@@ -116,6 +132,8 @@ export const scale_x_time = scaleXTime;
 export const scale_y_date = scaleYDate;
 export const scale_y_datetime = scaleYDatetime;
 export const scale_y_time = scaleYTime;
+export const scale_x_month_day = scaleXMonthDay;
+export const scale_y_month_day = scaleYMonthDay;
 export const scale_x_discrete = scaleXDiscrete;
 export const scale_y_discrete = scaleYDiscrete;
 

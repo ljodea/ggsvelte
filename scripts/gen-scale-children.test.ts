@@ -62,8 +62,8 @@ describe("SHELL_MANIFEST completeness", () => {
     expect(actual).toEqual(expected);
   });
 
-  it("cardinality: 98 component files + 28 aliases", () => {
-    expect(SHELL_MANIFEST).toHaveLength(98);
+  it("cardinality: 100 component files + 28 aliases", () => {
+    expect(SHELL_MANIFEST).toHaveLength(100);
     // 18 Colour + Size/Linewidth/Alpha/Shape Ordinal (#830/#832)
     expect(manifestAliases().size).toBe(28);
     // Cross-check family buckets against the verified ledger.
@@ -73,7 +73,7 @@ describe("SHELL_MANIFEST completeness", () => {
     }
     expect(byFamily.get("position-continuous")).toBe(8);
     expect(byFamily.get("position-binned")).toBe(2);
-    expect(byFamily.get("position-temporal")).toBe(6);
+    expect(byFamily.get("position-temporal")).toBe(8);
     expect(byFamily.get("position-discrete")).toBe(2);
     expect(byFamily.get("color-fill")).toBe(48);
     expect(byFamily.get("numeric-style")).toBe(24);
@@ -168,7 +168,7 @@ describe("index region rewrite", () => {
     expect(region.startsWith(REGION_START)).toBe(true);
     expect(region.endsWith(REGION_END)).toBe(true);
     const exportCount = (region.match(/^export \{ default as /gm) ?? []).length;
-    expect(exportCount).toBe(98 + 28);
+    expect(exportCount).toBe(100 + 28);
     expect(region).toContain(
       'export { default as ScaleColourContinuous } from "./scale/ScaleColorContinuous.svelte";',
     );

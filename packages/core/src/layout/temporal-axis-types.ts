@@ -1,7 +1,7 @@
 /**
  * Temporal axis guide planning input and evaluation types.
  */
-import type { PositionScaleSpec, TemporalInterval, TemporalKind } from "@ggsvelte/spec";
+import type { PositionScaleSpec, TemporalInterval, TemporalScaleKind } from "@ggsvelte/spec";
 
 import type { CellValue } from "../table.js";
 import type { AxisGuideTick } from "./guide-plan-types.js";
@@ -11,7 +11,7 @@ export interface TemporalAxisPlanInput {
   aesthetic: "x" | "y";
   panelIndex: number;
   domain: readonly [number, number];
-  kind: TemporalKind;
+  kind: TemporalScaleKind;
   orient: "horizontal" | "vertical";
   extentPx: number;
   reverse: boolean;

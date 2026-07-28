@@ -2,7 +2,7 @@
  * Layout/scene assembly helpers used by runPipeline: domain projection,
  * tick formatters, margin max, and warning/advisory dedupe.
  */
-import type { PositionScaleSpec, TemporalKind } from "@ggsvelte/spec";
+import type { PositionScaleSpec, TemporalScaleKind } from "@ggsvelte/spec";
 
 import type {
   BandLayoutDomainContext,
@@ -86,7 +86,7 @@ export function makeAxisFormatter(
   scale: PositionScale,
   config: PositionScaleSpec | undefined,
   warnings: PipelineWarning[],
-  resolvedTemporalKind?: TemporalKind | null,
+  resolvedTemporalKind?: TemporalScaleKind | null,
 ): TickFormatter | undefined {
   if (config?.breaks !== undefined && config.dateBreaks !== undefined) {
     warnings.push({
