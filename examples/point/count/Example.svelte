@@ -1,23 +1,22 @@
 <script lang="ts">
   import { GeomCount, GGPlot, Labs, ThemeClassic } from "@ggsvelte/svelte";
 
-  import { overplotSample } from "./data.js";
+  import { galtonHeights } from "./data.js";
 </script>
 
 <GGPlot
-  data={overplotSample}
-  aes={{ x: "x", y: "y", color: "species" }}
+  data={galtonHeights}
+  aes={{ x: "parent", y: "child" }}
   width={640}
   height={400}
 >
   <ThemeClassic />
   <Labs
-    title="Overplotting counts"
-    subtitle="geom_count — size is after_stat n at unique (x, y)"
-    x="x"
-    y="y"
-    color="Species"
-    size="n"
+    title="928 heights, 102 places to put them"
+    subtitle="Galton rounded to the inch; each mark is sized by how many families landed on it"
+    x="Mid-parent height (inches)"
+    y="Child height (inches)"
+    size="Children"
   />
-  <GeomCount alpha={0.75} />
+  <GeomCount alpha={0.7} />
 </GGPlot>

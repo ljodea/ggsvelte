@@ -7,17 +7,22 @@
     ThemeMinimal,
   } from "@ggsvelte/svelte";
 
-  import { ablineScatter } from "./data.js";
+  import { soporifics } from "./data.js";
 </script>
 
-<GGPlot data={ablineScatter} aes={{ x: "x", y: "y" }} width={640} height={400}>
+<GGPlot
+  data={soporifics}
+  aes={{ x: "hyoscyamine", y: "hyoscine" }}
+  width={640}
+  height={400}
+>
   <ThemeMinimal />
   <Labs
-    title="geom_abline"
-    subtitle="Identity reference y = x clipped to the panel"
-    x="x"
-    y="y"
+    title="One drug beat the other for ten of eleven patients"
+    subtitle="Cushny and Peebles, 1905: points above the line slept longer on hyoscine"
+    x="Extra sleep on L-hyoscyamine (hours)"
+    y="Extra sleep on L-hyoscine (hours)"
   />
-  <GeomPoint size={3.5} />
   <GeomAbline slope={1} intercept={0} linewidth={1.2} />
+  <GeomPoint size={3.5} />
 </GGPlot>

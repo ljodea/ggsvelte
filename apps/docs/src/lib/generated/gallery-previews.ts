@@ -264,7 +264,7 @@ export const GALLERY_PREVIEWS = [
     id: "line/function",
     filename: "line-function-light.png",
     path: "/previews/line-function-light.png",
-    sha256: "5dd1feed84dc2483b802d010aac11d8e033d4b5390f9167ddacf9e9b81fd6246",
+    sha256: "3e89faae0d81f28ffd2f50040ab1a3fcd1de0307c0651d5fb2191159c0715c45",
   },
   {
     id: "line/multi-series",
@@ -306,7 +306,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/abline-identity",
     filename: "point-abline-identity-light.png",
     path: "/previews/point-abline-identity-light.png",
-    sha256: "88347d12347639f9758ac38be3244faf3b7cf476432858cc7e11691e9ef0fa8f",
+    sha256: "e5ea0046af48541329137172b451ade9d7e13fdee082bae009903919bb2a2fe3",
   },
   {
     id: "point/canvas-scatter",
@@ -318,7 +318,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/count",
     filename: "point-count-light.png",
     path: "/previews/point-count-light.png",
-    sha256: "87033b2c117c563f4b73373439be9f7953298338a233786955f47e853555f9c0",
+    sha256: "830bf8a87d78123bc7ae8c8e267e2c2a7b321a9516353b773d9c8dc9445bdb9d",
   },
   {
     id: "point/fixed-aspect",
@@ -360,7 +360,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/quantile-lines",
     filename: "point-quantile-lines-light.png",
     path: "/previews/point-quantile-lines-light.png",
-    sha256: "3e231b64b2cccd11a5a2c4c7748e1461074f0e01f1173bcd968d8d21a6f5e305",
+    sha256: "ec69509af042bf0acc531d76990eb8a1eb56bbea22f4077d7d1755731121d8bc",
   },
   {
     id: "point/scatter-color",
@@ -372,13 +372,13 @@ export const GALLERY_PREVIEWS = [
     id: "point/stat-manual-mean",
     filename: "point-stat-manual-mean-light.png",
     path: "/previews/point-stat-manual-mean-light.png",
-    sha256: "7795cd797aa8457d6ea63b2364ff8e43f0ca871250b0f13d09ecada951b5b142",
+    sha256: "8b130f7b7b14b7134f230721e87aecd81000215f1a8f0390c621dace5fad1117",
   },
   {
     id: "point/stat-unique",
     filename: "point-stat-unique-light.png",
     path: "/previews/point-stat-unique-light.png",
-    sha256: "0f22d2ac20a70d65c59e33fe5486c1a5856cb55e8fc105c24952ce7784091102",
+    sha256: "56b56e397b70d19d41431f44e2d3676a942fdef55ecf880f1cd88711bb20212a",
   },
   {
     id: "point/steps-binned",

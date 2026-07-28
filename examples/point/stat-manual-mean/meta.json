@@ -1,5 +1,6 @@
 {
-  "title": "stat manual mean centroids",
+  "title": "Michelson's five runs and their means",
+  "description": "A hundred speed-of-light measurements in the five blocks he ran them in, with each block collapsed to a single point by its mean.",
   "tags": ["point", "manual", "stat", "mean", "group", "theme"],
   "docsSection": "Points & scatter"
 }

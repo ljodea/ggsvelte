@@ -2924,8 +2924,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/line/function",
-    title: "Normal PDF with geom_function — ggsvelte gallery",
-    description: "Normal PDF with geom_function",
+    title: "Quetelet's soldiers and the error curve — ggsvelte gallery",
+    description:
+      "The chest measurements Quetelet used to claim human variation follows the astronomers' error curve, with that curve drawn over them.",
     canonicalPath: "/examples/line/function",
     kind: "page",
     index: true,
@@ -2998,8 +2999,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/abline-identity",
-    title: "Abline identity reference — ggsvelte gallery",
-    description: "Abline identity reference",
+    title: "Two sleeping drugs against y = x — ggsvelte gallery",
+    description:
+      "Extra hours of sleep under each of two hypnotics, patient by patient. The identity line is the claim being tested, and almost every patient sits above it.",
     canonicalPath: "/examples/point/abline-identity",
     kind: "page",
     index: true,
@@ -3018,8 +3020,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/count",
-    title: "Overplotting counts — ggsvelte gallery",
-    description: "Overplotting counts",
+    title: "928 heights, 102 places to put them — ggsvelte gallery",
+    description:
+      "Galton recorded parents and children to the nearest inch, so most of his table hides under a few hundred dots. Sizing each mark by its count puts it back.",
     canonicalPath: "/examples/point/count",
     kind: "page",
     index: true,
@@ -3088,8 +3091,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/quantile-lines",
-    title: "Quantile regression lines — ggsvelte gallery",
-    description: "Quantile regression lines",
+    title: "Earthquake strength by depth — ggsvelte gallery",
+    description:
+      "A thousand events off Fiji with the quartiles of magnitude fitted through them. Quantile lines describe the spread, not just where the middle sits.",
     canonicalPath: "/examples/point/quantile-lines",
     kind: "page",
     index: true,
@@ -3108,8 +3112,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/stat-manual-mean",
-    title: "stat manual mean centroids — ggsvelte gallery",
-    description: "stat manual mean centroids",
+    title: "Michelson's five runs and their means — ggsvelte gallery",
+    description:
+      "A hundred speed-of-light measurements in the five blocks he ran them in, with each block collapsed to a single point by its mean.",
     canonicalPath: "/examples/point/stat-manual-mean",
     kind: "page",
     index: true,
@@ -3118,8 +3123,9 @@ export const DOCS_ROUTES = [
   },
   {
     path: "/examples/point/stat-unique",
-    title: "stat unique overplotting — ggsvelte gallery",
-    description: "stat unique overplotting",
+    title: "779 rows of war, 321 marks — ggsvelte gallery",
+    description:
+      "Richardson recorded one row per pair of belligerents, so a large war repeats itself - 28 of the Second World War's pairs read the same year and death toll. Keeping the first row per position draws each once.",
     canonicalPath: "/examples/point/stat-unique",
     kind: "page",
     index: true,
