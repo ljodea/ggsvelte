@@ -45,7 +45,7 @@
             .slice(0, 2)
             .map((p) => `"${p}": /* … */`)
             .join(", ")} }`;
-    return `{\n  "geom": "${geom}"${defaultStat !== "identity" ? `,\n  "stat": "${defaultStat}"` : ""}${paramsObj}\n}`;
+    return `{\n  "geom": "${geom}"${defaultStat === "identity" ? "" : `,\n  "stat": "${defaultStat}"`}${paramsObj}\n}`;
   }
 </script>
 

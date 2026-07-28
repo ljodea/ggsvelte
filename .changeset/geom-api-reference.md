@@ -14,4 +14,4 @@ The docs site uses this for `/reference/geoms` so Svelte props stay in step
 with `schema/v0.json`. Also documents five previously undescribed params
 (`pointrange`/`crossbar` `funMin`/`funMax`, `function.args`).
 
-Migration: none — additive public export
+Migration: none — additive
