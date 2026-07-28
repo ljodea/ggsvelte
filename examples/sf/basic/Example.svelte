@@ -1,15 +1,24 @@
 <script lang="ts">
-  import { GeomSf, GGPlot, Labs, ThemeClassic } from "@ggsvelte/svelte";
+  import {
+    CoordFixed,
+    GeomSf,
+    GGPlot,
+    Labs,
+    ScaleFillContinuous,
+    ThemeClassic,
+  } from "@ggsvelte/svelte";
 
-  import { triangles } from "./data.js";
+  import { heightRings } from "./data.js";
 </script>
 
-<GGPlot data={triangles} aes={{ fill: "rate" }} width={640} height={400}>
+<GGPlot data={heightRings} aes={{ fill: "height" }} width={640} height={400}>
   <ThemeClassic />
+  <CoordFixed />
+  <ScaleFillContinuous scheme="viridis" />
   <Labs
-    title="geom_sf polygons"
-    subtitle="Portable GeoJSON Geometry strings (already projected; #809)"
-    fill="rate"
+    title="Maunga Whau as three simple features"
+    subtitle="The ground above 130, 140 and 150 metres, one GeoJSON polygon per row"
+    fill="Metres"
   />
-  <GeomSf alpha={0.9} linewidth={0.8} />
+  <GeomSf alpha={0.55} linewidth={0.9} />
 </GGPlot>

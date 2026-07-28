@@ -1,5 +1,6 @@
 {
-  "title": "Simple features polygons",
+  "title": "Maunga Whau as simple features",
+  "description": "Three closed height rings of an Auckland volcano, each carried as one GeoJSON polygon in a geometry column rather than a table of vertices.",
   "tags": ["sf", "geojson", "polygon", "fill", "map", "geom"],
   "docsSection": "Maps & spatial"
 }

@@ -1,20 +1,22 @@
 <script lang="ts">
-  import { GeomSf, GGPlot, Labs, ThemeClassic } from "@ggsvelte/svelte";
+  import {
+    CoordFixed,
+    GeomSf,
+    GGPlot,
+    Labs,
+    ThemeClassic,
+  } from "@ggsvelte/svelte";
 
-  import { collectionRegions } from "./data.js";
+  import { aboveOneEighty } from "./data.js";
 </script>
 
-<GGPlot
-  data={collectionRegions}
-  aes={{ fill: "rate" }}
-  width={640}
-  height={400}
->
+<GGPlot data={aboveOneEighty} aes={{ fill: "ground" }} width={640} height={400}>
   <ThemeClassic />
+  <CoordFixed />
   <Labs
-    title="GeometryCollection expand"
-    subtitle="One GC cell → two polygon parts (#809 phase 6)"
-    fill="rate"
+    title="One feature, two pieces of ground"
+    subtitle="Everything on Maunga Whau above 180 m: the summit ridge and a rise east of it"
+    fill=""
   />
-  <GeomSf alpha={0.9} linewidth={0.8} />
+  <GeomSf alpha={0.85} linewidth={0.9} />
 </GGPlot>

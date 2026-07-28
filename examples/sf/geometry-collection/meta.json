@@ -1,5 +1,6 @@
 {
-  "title": "GeometryCollection expand",
+  "title": "One feature, two pieces of ground",
+  "description": "Everything above 180 metres on Maunga Whau: the summit ridge and a separate rise, carried in one GeometryCollection and expanded into two closed parts.",
   "tags": ["sf", "geojson", "geometrycollection", "polygon", "fill", "map", "geom"],
   "docsSection": "Maps & spatial"
 }

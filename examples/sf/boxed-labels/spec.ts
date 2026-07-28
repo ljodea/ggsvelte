@@ -1,18 +1,21 @@
-import { aes, gg } from "@ggsvelte/spec";
+import { aes, gg, guideNone } from "@ggsvelte/spec";
 
 import { defineExample } from "../../define.js";
-import { boxedRegions } from "./data.js";
+import { pumpNeighbourhoods } from "./data.js";
 
 export default defineExample(
-  // geom_sf_label: boxed labels at exterior-ring centroids.
-  gg(boxedRegions, aes({ fill: "rate", label: "region" }))
-    .geomSf({ alpha: 0.45, linewidth: 0.8 })
-    .geomSfLabel({ padding: 3, radius: 2, size: 13 })
+  // Same map and same representative points as sf/labels, but geom_sf_label
+  // measures each string and sets it on a padded box, so the name survives a
+  // busy fill instead of dissolving into it.
+  gg(pumpNeighbourhoods, aes({ fill: "pump", label: "pump" }))
+    .geomSf({ alpha: 0.75, linewidth: 0.8 })
+    .geomSfLabel({ padding: 3, radius: 2, size: 11 })
+    .guides({ fill: guideNone() })
+    .coordFixed()
     .theme("classic")
     .labs({
-      title: "geom_sf_label boxed labels",
-      subtitle: "Measured paper-backed boxes at representative SF points (#809)",
-      fill: "rate",
+      title: "The same names, on paper",
+      subtitle: "geom_sf_label backs each pump's name with a measured box",
     })
     .spec(),
 );
