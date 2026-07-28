@@ -6,7 +6,13 @@
 
 const NARROW_TOOLS_MAX_WIDTH_PX = 560;
 const DOCKED_TOOLTIP_MAX_WIDTH_PX = 480;
-const DEFAULT_PLOT_WIDTH_PX = 640;
+/**
+ * Pre-measure fallback for container-width plots (SSR and collapsed hosts).
+ * 52rem at the common 16px root — matches docs `.plot-panel` max width so a
+ * typical laptop does not paint a skinny chart and then jump wider after
+ * ResizeObserver. Not a phone-first size; phones are not the design target.
+ */
+const DEFAULT_PLOT_WIDTH_PX = 832;
 const DEFAULT_PLOT_HEIGHT_PX = 400;
 
 export type ResolvePlotSizeInput = {
@@ -35,9 +41,9 @@ export function isContainerWidthProp(
 
 /**
  * Resolved plot pixel size for the pipeline and root style.
- * Container mode: measured container width, then assembled, then 640.
- * Fixed mode: the numeric width prop (assembled fallback is unused once fixed).
- * Height: height prop, then assembled, then 400.
+ * Container mode: measured container width, then assembled, then
+ * DEFAULT_PLOT_WIDTH_PX (832). Fixed mode: the numeric width prop (assembled
+ * fallback is unused once fixed). Height: height prop, then assembled, then 400.
  */
 export function resolvePlotSize(input: ResolvePlotSizeInput): {
   readonly width: number;

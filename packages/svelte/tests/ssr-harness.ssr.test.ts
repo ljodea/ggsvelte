@@ -34,7 +34,7 @@ describe("SSR release fixture", () => {
     const fixture = renderSsrFixture(QuickstartSsrFixture, {});
 
     expect(fixture.body).toContain('data-gg-ready="false"');
-    expect(fixture.body).toContain('width="640" height="400"');
+    expect(fixture.body).toContain('width="832" height="400"');
     expect(fixture.body).toContain(
       'aria-label="Fuel economy decreases as vehicle weight increases"',
     );

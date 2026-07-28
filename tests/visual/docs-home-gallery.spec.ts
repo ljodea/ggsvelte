@@ -17,7 +17,8 @@ test("homepage first viewport leads with a live chart and two actions", async ({
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "A layered grammar of graphics implemented for agents",
   );
-  await expect(page.locator(".home-hero .gg-plot-root")).toBeVisible();
+  // Hero starts as a static SVG shell, then upgrades to interactive GGPlot.
+  await expect(page.locator(".home-hero .gg-plot-root")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole("link", { name: "Getting started" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Examples" }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Copy install" })).toBeVisible();
@@ -83,11 +84,14 @@ test("homepage preserves SSR chart output and hydrates its keyboard interaction"
   request,
 }) => {
   const response = await request.get("/");
-  expect(await response.text()).toContain('data-gg-ready="false"');
+  const html = await response.text();
+  // SSR ships a full-width static SVG shell (not a live GGPlot); live mounts after import.
+  expect(html).toContain("Literacy and crime in France, 1833");
+  expect(html).toContain('width="832"');
 
   await page.goto("/");
   const plot = page.locator(".home-hero .gg-plot-root");
-  await expect(plot).toHaveAttribute("data-gg-ready", "true");
+  await expect(plot).toHaveAttribute("data-gg-ready", "true", { timeout: 30_000 });
   const capture = page.locator(".home-hero .gg-capture");
   await capture.focus();
   await capture.press("ArrowRight");
@@ -104,7 +108,7 @@ test("homepage hero tooltip names a single department without axis crosshair noi
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=light");
   const plot = page.locator(".home-hero .gg-plot-root");
-  await expect(plot).toHaveAttribute("data-gg-ready", "true");
+  await expect(plot).toHaveAttribute("data-gg-ready", "true", { timeout: 30_000 });
 
   const hero = page.locator(".home-hero");
   // Axis titles use real units (not the old mistaken "rank" labels).
@@ -142,6 +146,10 @@ test("homepage hero tooltip names a single department without axis crosshair noi
 test("homepage grammar steps change real chart structure in place", async ({ page }) => {
   await page.goto("/");
   const output = page.locator(".grammar-output");
+  // GrammarDemo is dynamic-imported; wait for the live plot before asserting structure.
+  await expect(output.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
+    timeout: 30_000,
+  });
   // The demo opens on the last step: layers, legend, and inspection all live.
   await expect(output.locator(".gg-points")).toHaveCount(1);
   await expect(output.locator(".gg-legend")).toHaveCount(1);
@@ -164,7 +172,9 @@ test("homepage grammar inspect is exact: point tooltip, no path x-crosshair", as
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=dark");
   const output = page.locator(".grammar-output");
-  await expect(output.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true");
+  await expect(output.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
+    timeout: 30_000,
+  });
   // Step 4 (Interaction) is the default open step.
   await expect(output.locator(".gg-capture")).toBeVisible();
 

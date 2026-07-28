@@ -1,6 +1,22 @@
 <script lang="ts">
-  import { CATEGORICAL_PALETTES } from "$lib/catalog/themes";
   import PaletteSpecimen from "$lib/components/PaletteSpecimen.svelte";
+  import type { CATEGORICAL_SCHEME_NAMES, ThemeName } from "@ggsvelte/spec";
+
+  type CategoricalSchemeName = (typeof CATEGORICAL_SCHEME_NAMES)[number];
+
+  const {
+    specimens,
+  }: {
+    specimens: readonly {
+      name: CategoricalSchemeName;
+      label: string;
+      colors: readonly string[];
+      capacity: number;
+      reverse: boolean;
+      paperTheme: ThemeName;
+      staticSvg: string;
+    }[];
+  } = $props();
 
   let reverse = $state(false);
   let paperTheme = $state<"light" | "dark">("light");
@@ -28,7 +44,7 @@
   </header>
 
   <ol aria-label="Categorical palettes">
-    {#each CATEGORICAL_PALETTES as palette (palette.name)}
+    {#each specimens as palette (palette.name)}
       <li>
         <PaletteSpecimen
           name={palette.name}
@@ -37,6 +53,7 @@
           capacity={palette.capacity}
           {reverse}
           {paperTheme}
+          staticSvg={palette.staticSvg}
         />
       </li>
     {/each}
@@ -64,8 +81,7 @@
     align-items: end;
     justify-content: space-between;
     gap: 1rem 2rem;
-    min-width: 0;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
   }
 
   h2 {
@@ -78,22 +94,21 @@
   .controls {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem 1.25rem;
+    gap: 0.85rem 1.25rem;
     align-items: end;
   }
 
   .select-control {
     display: grid;
     gap: 0.35rem;
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     font-weight: 650;
   }
 
   select {
-    min-width: 9rem;
     min-height: 44px;
-    padding: 0.6rem;
-    border: 1px solid var(--line-strong, var(--line));
+    padding: 0.5rem 2rem 0.5rem 0.65rem;
+    border: 1px solid var(--line);
     border-radius: 2px;
     background: var(--paper);
     color: var(--ink);
@@ -102,28 +117,18 @@
 
   .check-control {
     display: flex;
-    gap: 0.6rem;
+    gap: 0.55rem;
     align-items: center;
     min-height: 44px;
-    font-size: 0.86rem;
+    font-size: 0.9rem;
     font-weight: 600;
-  }
-
-  .check-control input {
-    width: 1.15rem;
-    height: 1.15rem;
   }
 
   ol {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: clamp(2.5rem, 5vw, 4rem);
+    gap: clamp(2rem, 4vw, 3rem);
     margin: 0;
     padding: 0;
     list-style: none;
-  }
-
-  ol > li {
-    min-width: 0;
   }
 </style>

@@ -163,7 +163,7 @@ can intentionally exist in more than one source with a different consequence.
 - **Collapsed or zero-width container:** the responsive plot remains
   \`data-gg-ready="false"\` until ResizeObserver reports a positive width.
   Give the parent a real grid/flex track width; no fixed chart width is needed.
-- **SSR and hydration:** omitted width server-renders at 640 × 400, stays
+- **SSR and hydration:** omitted width server-renders at 832 × 400, stays
   not-ready on the server, then measures its real container after hydration.
 - **Unexpected height:** omitted height is 400px unless the spec supplies one.
 - **TypeScript or linked-package mismatch:** install one compatible

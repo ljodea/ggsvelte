@@ -64,17 +64,23 @@ export function createPlotRuntime(deps: PlotRuntimeDeps): PlotRuntime {
     if (!isContainerWidthProp(deps.widthProp()) || deps.root() === null) return () => {};
     const el = deps.root()!;
     let frame = 0;
+    const commitWidth = (nextWidth: number): void => {
+      // Commit readiness and the measured model width in one reactive turn so
+      // data-gg-ready does not flip true on a stale pre-measure fallback.
+      containerHasPositiveWidth = nextWidth > 0;
+      if (nextWidth > 0) containerWidth = nextWidth;
+    };
+    // Synchronous first measure: do not wait a frame (or a late RO delivery)
+    // when the host already has a laid-out width.
+    const initial = Math.round(el.getBoundingClientRect().width);
+    if (initial > 0) commitWidth(initial);
     const observer = new ResizeObserver((entries) => {
       // Debounce resize storms through rAF; the pipeline's run-id gate
       // guarantees only the newest result commits regardless.
       const nextWidth = Math.round(entries[0]?.contentRect.width ?? 0);
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        // Commit readiness and the measured model width in one reactive turn.
-        // Otherwise data-gg-ready can become true for the stale 640px SSR
-        // fallback one frame before the responsive model is available.
-        containerHasPositiveWidth = nextWidth > 0;
-        if (nextWidth > 0) containerWidth = nextWidth;
+        commitWidth(nextWidth);
       });
     });
     observer.observe(el);

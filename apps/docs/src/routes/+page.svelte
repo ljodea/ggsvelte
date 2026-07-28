@@ -1,27 +1,40 @@
 <script lang="ts">
   import { base } from "$app/paths";
-  import type { PlotInspectionChange } from "@ggsvelte/svelte";
-  import { GeomPoint, GGPlot, Labs, Scale, Theme } from "@ggsvelte/svelte";
+  import { onMount } from "svelte";
 
-  import { guerry } from "$examples/point/scatter-color/data";
   import CodeTabs from "$lib/CodeTabs.svelte";
   import { FEATURED_EXAMPLES, galleryCatalog } from "$lib/catalog/gallery";
   import CopyCode from "$lib/components/CopyCode.svelte";
-  import GrammarDemo from "$lib/components/GrammarDemo.svelte";
   import UiButton from "$lib/components/UiButton.svelte";
-  import { contrastChartTheme } from "$lib/docs-appearance-state.svelte";
   import { EXAMPLES } from "$lib/examples";
   import { HOME_CODE_PATH_TABS } from "$lib/home-code-path";
 
-  type GuerryRow = (typeof guerry)[number];
+  import type { PageProps } from "./$types";
+
+  const { data }: PageProps = $props();
 
   const install = "bun add @ggsvelte/svelte";
   const entries = galleryCatalog(EXAMPLES);
   const featured = FEATURED_EXAMPLES.map((item) =>
     entries.find((entry) => entry.id === item.id)!,
   );
-  const heroTheme = $derived(contrastChartTheme());
   const tabs = HOME_CODE_PATH_TABS;
+
+  let HeroPlot = $state<
+    typeof import("$lib/components/HomeHeroPlot.svelte").default | null
+  >(null);
+  let GrammarDemo = $state<
+    typeof import("$lib/components/GrammarDemo.svelte").default | null
+  >(null);
+
+  onMount(() => {
+    void import("$lib/components/HomeHeroPlot.svelte").then((mod) => {
+      HeroPlot = mod.default;
+    });
+    void import("$lib/components/GrammarDemo.svelte").then((mod) => {
+      GrammarDemo = mod.default;
+    });
+  });
 </script>
 
 <section class="home-hero" aria-labelledby="home-heading">
@@ -36,54 +49,20 @@
   </div>
 
   <div class="hero-plot">
-    <!--
-      Exact point inspection (not mode "x"): no vertical axis guide, one
-      department at a time. Custom content names the department (identity
-      column not on a mapped channel). Default tooltips use labs titles
-      for mapped channels (#752).
-    -->
-    {#snippet heroTooltip(
-      inspection: PlotInspectionChange<Record<string, unknown>, PropertyKey>,
-    )}
-      {@const row = inspection.focus.row as GuerryRow | null}
-      {#if row}
-        <div class="hero-tooltip">
-          <div class="hero-tooltip-title">{row.department}</div>
-          <dl>
-            <dt>literacy</dt>
-            <dd>{row.literacy}%</dd>
-            <dt>pop. per crime</dt>
-            <dd>{row.crimePersons}</dd>
-            <dt>region</dt>
-            <dd>{row.region}</dd>
-          </dl>
-        </div>
-      {/if}
-    {/snippet}
-    <GGPlot
-      data={guerry}
-      aes={{ x: "literacy", y: "crimePersons", color: "region" }}
-      inspect={{
-        mode: "exact",
-        pin: true,
-        maxDistance: 24,
-        content: heroTooltip,
-      }}
-      width="container"
-      height={400}
-      ariaLabel="Literacy percentage against population per crime against persons for 85 French departments, coloured by region"
-    >
-      <Theme name={heroTheme} />
-      <Scale value={{ color: { type: "ordinal", scheme: "tableau10" } }} />
-      <Labs
-        title="Literacy and crime in France, 1833"
-        subtitle="85 French departments — higher y means fewer crimes per head"
-        x="Literate conscripts (%)"
-        y="Population per crime against persons"
-        color="Region"
-      />
-      <GeomPoint size={4} alpha={0.85} />
-    </GGPlot>
+    {#if HeroPlot !== null}
+      <HeroPlot />
+    {:else}
+      <!--
+        theme.js sets data-theme before paint. Mirror contrastChartTheme():
+        dark chart on the light site, light chart on dark — no theme flash.
+      -->
+      <div class="hero-static hero-static--light-site">
+        {@html data.heroStaticSvgLightSite}
+      </div>
+      <div class="hero-static hero-static--dark-site">
+        {@html data.heroStaticSvgDarkSite}
+      </div>
+    {/if}
   </div>
 
   <div class="hero-actions">
@@ -122,7 +101,9 @@
   </ol>
 </section>
 
-<GrammarDemo />
+{#if GrammarDemo !== null}
+  <GrammarDemo />
+{/if}
 
 <section class="code-path" aria-labelledby="code-path-heading">
   <div>
@@ -223,26 +204,22 @@
     min-width: 0;
   }
 
-  .hero-tooltip-title {
-    margin-bottom: 0.35rem;
-    font-weight: 650;
+  .hero-plot :global(svg) {
+    display: block;
+    max-width: 100%;
+    height: auto;
   }
 
-  .hero-tooltip dl {
-    margin: 0;
-    display: grid;
-    grid-template-columns: auto auto;
-    gap: 0 0.75rem;
+  .hero-static--dark-site {
+    display: none;
   }
 
-  .hero-tooltip dt {
-    font-weight: 600;
+  :global(:root[data-theme="dark"]) .hero-static--light-site {
+    display: none;
   }
 
-  .hero-tooltip dd {
-    margin: 0;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
+  :global(:root[data-theme="dark"]) .hero-static--dark-site {
+    display: block;
   }
 
   .cta-row {

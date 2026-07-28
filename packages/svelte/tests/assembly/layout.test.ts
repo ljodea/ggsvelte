@@ -28,7 +28,7 @@ describe("isContainerWidthProp", () => {
 });
 
 describe("resolvePlotSize", () => {
-  it("uses container measure then assembled then 640 in container mode", () => {
+  it("uses container measure then assembled then DEFAULT_PLOT_WIDTH_PX in container mode", () => {
     expect(
       resolvePlotSize({
         width: "container",
@@ -55,7 +55,7 @@ describe("resolvePlotSize", () => {
         assembledWidth: undefined,
         assembledHeight: undefined,
       }),
-    ).toEqual({ width: 640, height: 400 });
+    ).toEqual({ width: 832, height: 400 });
   });
 
   it("uses the fixed width prop without assembled fallback", () => {

@@ -51,7 +51,7 @@ export const CLI_OPTIONS = [
     anchor: "width",
     flag: "--width",
     value: "N",
-    description: "Plot width in px (default: spec.width, then 640)",
+    description: "Plot width in px (default: spec.width, then 832)",
     kind: "number",
     target: "width",
   },
@@ -291,7 +291,7 @@ export async function runCLI(
 
   const specRecord =
     typeof spec === "object" && spec !== null ? (spec as Record<string, unknown>) : {};
-  const width = args.width ?? (typeof specRecord["width"] === "number" ? specRecord["width"] : 640);
+  const width = args.width ?? (typeof specRecord["width"] === "number" ? specRecord["width"] : 832);
   const height =
     args.height ?? (typeof specRecord["height"] === "number" ? specRecord["height"] : 400);
 

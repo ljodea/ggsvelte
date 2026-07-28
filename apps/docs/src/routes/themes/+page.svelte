@@ -3,7 +3,10 @@
 
   import ChartThemeLab from "$lib/components/ChartThemeLab.svelte";
   import ThemeSpecimen from "$lib/components/ThemeSpecimen.svelte";
-  import { THEME_SPECIMENS } from "$lib/theme-specimens/catalog";
+
+  import type { PageProps } from "./$types";
+
+  const { data }: PageProps = $props();
 </script>
 
 <main class="themes-page">
@@ -21,7 +24,7 @@
     </p>
   </header>
 
-  <ChartThemeLab />
+  <ChartThemeLab initialStaticSvg={data.labStaticSvg} />
 
   <section class="theme-collection" aria-labelledby="built-in-themes-heading">
     <header class="section-heading">
@@ -29,7 +32,7 @@
       <h2 id="built-in-themes-heading">Chart themes</h2>
     </header>
     <ol aria-label="Built-in chart themes">
-      {#each THEME_SPECIMENS as specimen (specimen.name)}
+      {#each data.themeSpecimens as specimen, index (specimen.name)}
         <li>
           <ThemeSpecimen
             name={specimen.name}
@@ -38,6 +41,8 @@
             kind={specimen.kind}
             scheme={specimen.scheme}
             legendFocus={specimen.legendFocus}
+            staticSvg={specimen.staticSvg}
+            eager={index === 0}
           />
         </li>
       {/each}
@@ -137,15 +142,10 @@
 
   ol {
     display: grid;
-    grid-template-columns: 1fr;
     gap: clamp(2.5rem, 5vw, 4rem);
     margin: 0;
     padding: 0;
     list-style: none;
-  }
-
-  ol > li {
-    min-width: 0;
   }
 
   .learning-path {
@@ -158,11 +158,7 @@
     padding: 0;
     list-style: none;
     display: grid;
-    gap: 0.55rem;
-    max-width: 42rem;
-    color: var(--muted);
-    font-size: 0.95rem;
-    line-height: 1.45;
+    gap: 0.65rem;
   }
 
   .learning-path a {
