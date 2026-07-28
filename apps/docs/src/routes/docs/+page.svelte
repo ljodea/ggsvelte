@@ -23,6 +23,10 @@
       "Every Geom* component: defaults, stats, positions, and params.",
     ],
     [
+      "/reference/stats",
+      "Every statistical transform: after_stat columns and compatible geoms.",
+    ],
+    [
       "/reference/cli",
       "Render, validate, and export charts from the terminal.",
     ],

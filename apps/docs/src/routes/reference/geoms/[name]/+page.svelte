@@ -136,7 +136,7 @@
   <ul class="token-list">
     {#each entry.allowedStats as stat (stat)}
       <li>
-        <code>{stat}</code>
+        <a href={`${base}/reference/stats/${stat}`}><code>{stat}</code></a>
         {#if stat === entry.defaultStat}
           <span class="badge">default</span>
         {/if}

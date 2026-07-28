@@ -287,6 +287,10 @@ export {
 } from "./geom-reference.js";
 /** @lifecycle experimental */
 export type { GeomParamDoc, GeomReferenceEntry, SharedLayerPropDoc } from "./geom-reference.js";
+/** @lifecycle experimental */
+export { STAT_REFERENCE, statReferenceList } from "./stat-reference.js";
+/** @lifecycle experimental */
+export type { StatReferenceEntry } from "./stat-reference.js";
 
 // Temporal parsing, inference, and authoring conversions
 export {

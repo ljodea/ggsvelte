@@ -97,6 +97,36 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Shared layer props"],
   },
   {
+    id: "page:reference-stats",
+    kind: "page",
+    title: "Stat reference",
+    summary:
+      "Schema-derived API reference for every statistical transform: after_stat columns and compatible geoms.",
+    href: "/reference/stats",
+    keywords: ["Reference"],
+    exact: ["Stat reference"],
+  },
+  {
+    id: "heading:reference-stats:all-stats",
+    kind: "heading",
+    title: "All stats",
+    summary:
+      "All stats in Stat reference. Schema-derived API reference for every statistical transform: after_stat columns and compatible geoms.",
+    href: "/reference/stats#all-stats",
+    keywords: ["Stat reference", "Reference"],
+    exact: ["All stats"],
+  },
+  {
+    id: "heading:reference-stats:how-to-set",
+    kind: "heading",
+    title: "How to set a stat",
+    summary:
+      "How to set a stat in Stat reference. Schema-derived API reference for every statistical transform: after_stat columns and compatible geoms.",
+    href: "/reference/stats#how-to-set",
+    keywords: ["Stat reference", "Reference"],
+    exact: ["How to set a stat"],
+  },
+  {
     id: "page:reference-interactions",
     kind: "page",
     title: "Search interactions",
@@ -4087,6 +4117,1626 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Allowed positions"],
   },
   {
+    id: "page:reference-stats-identity",
+    kind: "page",
+    title: "stat identity",
+    summary:
+      'stat "identity": Pass rows through unchanged. Default for most geoms: each mapped row becomes one mark with no aggregation.',
+    href: "/reference/stats/identity",
+    keywords: [],
+    exact: ["stat identity"],
+  },
+  {
+    id: "heading:reference-stats-identity:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat identity. stat "identity": Pass rows through unchanged. Default for most geoms: each mapped row becomes one mark with no aggregation.',
+    href: "/reference/stats/identity#usage",
+    keywords: ["stat identity", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-identity:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat identity. stat "identity": Pass rows through unchanged. Default for most geoms: each mapped row becomes one mark with no aggregation.',
+    href: "/reference/stats/identity#generated-columns",
+    keywords: ["stat identity", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-identity:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat identity. stat "identity": Pass rows through unchanged. Default for most geoms: each mapped row becomes one mark with no aggregation.',
+    href: "/reference/stats/identity#default-for",
+    keywords: ["stat identity", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-identity:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat identity. stat "identity": Pass rows through unchanged. Default for most geoms: each mapped row becomes one mark with no aggregation.',
+    href: "/reference/stats/identity#compatible-geoms",
+    keywords: ["stat identity", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-identity:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat identity. stat "identity": Pass rows through unchanged. Default for most geoms: each mapped row becomes one mark with no aggregation.',
+    href: "/reference/stats/identity#examples",
+    keywords: ["stat identity", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-unique",
+    kind: "page",
+    title: "stat unique",
+    summary:
+      'stat "unique": Keep one row per distinct mapped (x, y) pair (and group). Use when duplicate coordinates would overplot; default for none.',
+    href: "/reference/stats/unique",
+    keywords: [],
+    exact: ["stat unique"],
+  },
+  {
+    id: "heading:reference-stats-unique:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat unique. stat "unique": Keep one row per distinct mapped (x, y) pair (and group). Use when duplicate coordinates would overplot; default for none.',
+    href: "/reference/stats/unique#usage",
+    keywords: ["stat unique", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-unique:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat unique. stat "unique": Keep one row per distinct mapped (x, y) pair (and group). Use when duplicate coordinates would overplot; default for none.',
+    href: "/reference/stats/unique#generated-columns",
+    keywords: ["stat unique", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-unique:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat unique. stat "unique": Keep one row per distinct mapped (x, y) pair (and group). Use when duplicate coordinates would overplot; default for none.',
+    href: "/reference/stats/unique#default-for",
+    keywords: ["stat unique", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-unique:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat unique. stat "unique": Keep one row per distinct mapped (x, y) pair (and group). Use when duplicate coordinates would overplot; default for none.',
+    href: "/reference/stats/unique#compatible-geoms",
+    keywords: ["stat unique", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-unique:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat unique. stat "unique": Keep one row per distinct mapped (x, y) pair (and group). Use when duplicate coordinates would overplot; default for none.',
+    href: "/reference/stats/unique#examples",
+    keywords: ["stat unique", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-manual",
+    kind: "page",
+    title: "stat manual",
+    summary:
+      'stat "manual": Author-supplied after_stat values via params — skip automatic transforms when you already computed summaries.',
+    href: "/reference/stats/manual",
+    keywords: [],
+    exact: ["stat manual"],
+  },
+  {
+    id: "heading:reference-stats-manual:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat manual. stat "manual": Author-supplied after_stat values via params — skip automatic transforms when you already computed summaries.',
+    href: "/reference/stats/manual#usage",
+    keywords: ["stat manual", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-manual:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat manual. stat "manual": Author-supplied after_stat values via params — skip automatic transforms when you already computed summaries.',
+    href: "/reference/stats/manual#generated-columns",
+    keywords: ["stat manual", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-manual:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat manual. stat "manual": Author-supplied after_stat values via params — skip automatic transforms when you already computed summaries.',
+    href: "/reference/stats/manual#default-for",
+    keywords: ["stat manual", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-manual:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat manual. stat "manual": Author-supplied after_stat values via params — skip automatic transforms when you already computed summaries.',
+    href: "/reference/stats/manual#compatible-geoms",
+    keywords: ["stat manual", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-manual:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat manual. stat "manual": Author-supplied after_stat values via params — skip automatic transforms when you already computed summaries.',
+    href: "/reference/stats/manual#examples",
+    keywords: ["stat manual", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-connect",
+    kind: "page",
+    title: "stat connect",
+    summary:
+      'stat "connect": Expand successive points into connection vertices (linear, hv, vh, mid) for stepped or path-style joins between observations.',
+    href: "/reference/stats/connect",
+    keywords: [],
+    exact: ["stat connect"],
+  },
+  {
+    id: "heading:reference-stats-connect:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat connect. stat "connect": Expand successive points into connection vertices (linear, hv, vh, mid) for stepped or path-style joins between observations.',
+    href: "/reference/stats/connect#usage",
+    keywords: ["stat connect", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-connect:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat connect. stat "connect": Expand successive points into connection vertices (linear, hv, vh, mid) for stepped or path-style joins between observations.',
+    href: "/reference/stats/connect#generated-columns",
+    keywords: ["stat connect", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-connect:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat connect. stat "connect": Expand successive points into connection vertices (linear, hv, vh, mid) for stepped or path-style joins between observations.',
+    href: "/reference/stats/connect#default-for",
+    keywords: ["stat connect", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-connect:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat connect. stat "connect": Expand successive points into connection vertices (linear, hv, vh, mid) for stepped or path-style joins between observations.',
+    href: "/reference/stats/connect#compatible-geoms",
+    keywords: ["stat connect", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-connect:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat connect. stat "connect": Expand successive points into connection vertices (linear, hv, vh, mid) for stepped or path-style joins between observations.',
+    href: "/reference/stats/connect#examples",
+    keywords: ["stat connect", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-count",
+    kind: "page",
+    title: "stat count",
+    summary:
+      'stat "count": Count rows (or sum weights) per distinct x within each group. Default for geom_bar; publishes after_stat count.',
+    href: "/reference/stats/count",
+    keywords: [],
+    exact: ["stat count"],
+  },
+  {
+    id: "heading:reference-stats-count:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat count. stat "count": Count rows (or sum weights) per distinct x within each group. Default for geom_bar; publishes after_stat count.',
+    href: "/reference/stats/count#usage",
+    keywords: ["stat count", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-count:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat count. stat "count": Count rows (or sum weights) per distinct x within each group. Default for geom_bar; publishes after_stat count.',
+    href: "/reference/stats/count#generated-columns",
+    keywords: ["stat count", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-count:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat count. stat "count": Count rows (or sum weights) per distinct x within each group. Default for geom_bar; publishes after_stat count.',
+    href: "/reference/stats/count#default-for",
+    keywords: ["stat count", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-count:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat count. stat "count": Count rows (or sum weights) per distinct x within each group. Default for geom_bar; publishes after_stat count.',
+    href: "/reference/stats/count#compatible-geoms",
+    keywords: ["stat count", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-count:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat count. stat "count": Count rows (or sum weights) per distinct x within each group. Default for geom_bar; publishes after_stat count.',
+    href: "/reference/stats/count#examples",
+    keywords: ["stat count", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-bin",
+    kind: "page",
+    title: "stat bin",
+    summary:
+      'stat "bin": Bin continuous x into histogram breaks. Publishes count, density, ncount, and ndensity; default for histogram and freqpoly.',
+    href: "/reference/stats/bin",
+    keywords: [],
+    exact: ["stat bin"],
+  },
+  {
+    id: "heading:reference-stats-bin:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat bin. stat "bin": Bin continuous x into histogram breaks. Publishes count, density, ncount, and ndensity; default for histogram and freqpoly.',
+    href: "/reference/stats/bin#usage",
+    keywords: ["stat bin", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-bin:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat bin. stat "bin": Bin continuous x into histogram breaks. Publishes count, density, ncount, and ndensity; default for histogram and freqpoly.',
+    href: "/reference/stats/bin#generated-columns",
+    keywords: ["stat bin", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-bin:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat bin. stat "bin": Bin continuous x into histogram breaks. Publishes count, density, ncount, and ndensity; default for histogram and freqpoly.',
+    href: "/reference/stats/bin#default-for",
+    keywords: ["stat bin", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-bin:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat bin. stat "bin": Bin continuous x into histogram breaks. Publishes count, density, ncount, and ndensity; default for histogram and freqpoly.',
+    href: "/reference/stats/bin#compatible-geoms",
+    keywords: ["stat bin", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-bin:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat bin. stat "bin": Bin continuous x into histogram breaks. Publishes count, density, ncount, and ndensity; default for histogram and freqpoly.',
+    href: "/reference/stats/bin#examples",
+    keywords: ["stat bin", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-bin_hex",
+    kind: "page",
+    title: "stat bin_hex",
+    summary:
+      'stat "bin_hex": Hexagonal 2D binning over continuous x and y. Publishes count/density columns for geom_hex heatmaps.',
+    href: "/reference/stats/bin_hex",
+    keywords: [],
+    exact: ["stat bin_hex"],
+  },
+  {
+    id: "heading:reference-stats-bin_hex:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat bin_hex. stat "bin_hex": Hexagonal 2D binning over continuous x and y. Publishes count/density columns for geom_hex heatmaps.',
+    href: "/reference/stats/bin_hex#usage",
+    keywords: ["stat bin_hex", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-bin_hex:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat bin_hex. stat "bin_hex": Hexagonal 2D binning over continuous x and y. Publishes count/density columns for geom_hex heatmaps.',
+    href: "/reference/stats/bin_hex#generated-columns",
+    keywords: ["stat bin_hex", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-bin_hex:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat bin_hex. stat "bin_hex": Hexagonal 2D binning over continuous x and y. Publishes count/density columns for geom_hex heatmaps.',
+    href: "/reference/stats/bin_hex#default-for",
+    keywords: ["stat bin_hex", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-bin_hex:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat bin_hex. stat "bin_hex": Hexagonal 2D binning over continuous x and y. Publishes count/density columns for geom_hex heatmaps.',
+    href: "/reference/stats/bin_hex#compatible-geoms",
+    keywords: ["stat bin_hex", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "page:reference-stats-bin_2d",
+    kind: "page",
+    title: "stat bin_2d",
+    summary:
+      'stat "bin_2d": Rectangular 2D binning over continuous x and y. Publishes count/density and bin edges for geom_bin_2d tiles.',
+    href: "/reference/stats/bin_2d",
+    keywords: [],
+    exact: ["stat bin_2d"],
+  },
+  {
+    id: "heading:reference-stats-bin_2d:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat bin_2d. stat "bin_2d": Rectangular 2D binning over continuous x and y. Publishes count/density and bin edges for geom_bin_2d tiles.',
+    href: "/reference/stats/bin_2d#usage",
+    keywords: ["stat bin_2d", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-bin_2d:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat bin_2d. stat "bin_2d": Rectangular 2D binning over continuous x and y. Publishes count/density and bin edges for geom_bin_2d tiles.',
+    href: "/reference/stats/bin_2d#generated-columns",
+    keywords: ["stat bin_2d", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-bin_2d:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat bin_2d. stat "bin_2d": Rectangular 2D binning over continuous x and y. Publishes count/density and bin edges for geom_bin_2d tiles.',
+    href: "/reference/stats/bin_2d#default-for",
+    keywords: ["stat bin_2d", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-bin_2d:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat bin_2d. stat "bin_2d": Rectangular 2D binning over continuous x and y. Publishes count/density and bin edges for geom_bin_2d tiles.',
+    href: "/reference/stats/bin_2d#compatible-geoms",
+    keywords: ["stat bin_2d", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-bin_2d:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat bin_2d. stat "bin_2d": Rectangular 2D binning over continuous x and y. Publishes count/density and bin edges for geom_bin_2d tiles.',
+    href: "/reference/stats/bin_2d#examples",
+    keywords: ["stat bin_2d", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-smooth",
+    kind: "page",
+    title: "stat smooth",
+    summary:
+      'stat "smooth": Fit a smoother (lm or loess) and evaluate along x. Publishes y, ymin, ymax, and se; default for geom_smooth.',
+    href: "/reference/stats/smooth",
+    keywords: [],
+    exact: ["stat smooth"],
+  },
+  {
+    id: "heading:reference-stats-smooth:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat smooth. stat "smooth": Fit a smoother (lm or loess) and evaluate along x. Publishes y, ymin, ymax, and se; default for geom_smooth.',
+    href: "/reference/stats/smooth#usage",
+    keywords: ["stat smooth", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-smooth:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat smooth. stat "smooth": Fit a smoother (lm or loess) and evaluate along x. Publishes y, ymin, ymax, and se; default for geom_smooth.',
+    href: "/reference/stats/smooth#generated-columns",
+    keywords: ["stat smooth", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-smooth:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat smooth. stat "smooth": Fit a smoother (lm or loess) and evaluate along x. Publishes y, ymin, ymax, and se; default for geom_smooth.',
+    href: "/reference/stats/smooth#default-for",
+    keywords: ["stat smooth", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-smooth:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat smooth. stat "smooth": Fit a smoother (lm or loess) and evaluate along x. Publishes y, ymin, ymax, and se; default for geom_smooth.',
+    href: "/reference/stats/smooth#compatible-geoms",
+    keywords: ["stat smooth", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-smooth:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat smooth. stat "smooth": Fit a smoother (lm or loess) and evaluate along x. Publishes y, ymin, ymax, and se; default for geom_smooth.',
+    href: "/reference/stats/smooth#examples",
+    keywords: ["stat smooth", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-quantile",
+    kind: "page",
+    title: "stat quantile",
+    summary:
+      'stat "quantile": Estimate conditional quantiles of y given x. Publishes y at each requested probability; default for geom_quantile.',
+    href: "/reference/stats/quantile",
+    keywords: [],
+    exact: ["stat quantile"],
+  },
+  {
+    id: "heading:reference-stats-quantile:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat quantile. stat "quantile": Estimate conditional quantiles of y given x. Publishes y at each requested probability; default for geom_quantile.',
+    href: "/reference/stats/quantile#usage",
+    keywords: ["stat quantile", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-quantile:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat quantile. stat "quantile": Estimate conditional quantiles of y given x. Publishes y at each requested probability; default for geom_quantile.',
+    href: "/reference/stats/quantile#generated-columns",
+    keywords: ["stat quantile", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-quantile:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat quantile. stat "quantile": Estimate conditional quantiles of y given x. Publishes y at each requested probability; default for geom_quantile.',
+    href: "/reference/stats/quantile#default-for",
+    keywords: ["stat quantile", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-quantile:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat quantile. stat "quantile": Estimate conditional quantiles of y given x. Publishes y at each requested probability; default for geom_quantile.',
+    href: "/reference/stats/quantile#compatible-geoms",
+    keywords: ["stat quantile", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-quantile:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat quantile. stat "quantile": Estimate conditional quantiles of y given x. Publishes y at each requested probability; default for geom_quantile.',
+    href: "/reference/stats/quantile#examples",
+    keywords: ["stat quantile", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-boxplot",
+    kind: "page",
+    title: "stat boxplot",
+    summary:
+      'stat "boxplot": Five-number summary per group (hinges and whiskers). Publishes ymin, lower, middle, upper, ymax; default for geom_boxplot.',
+    href: "/reference/stats/boxplot",
+    keywords: [],
+    exact: ["stat boxplot"],
+  },
+  {
+    id: "heading:reference-stats-boxplot:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat boxplot. stat "boxplot": Five-number summary per group (hinges and whiskers). Publishes ymin, lower, middle, upper, ymax; default for geom_boxplot.',
+    href: "/reference/stats/boxplot#usage",
+    keywords: ["stat boxplot", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-boxplot:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat boxplot. stat "boxplot": Five-number summary per group (hinges and whiskers). Publishes ymin, lower, middle, upper, ymax; default for geom_boxplot.',
+    href: "/reference/stats/boxplot#generated-columns",
+    keywords: ["stat boxplot", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-boxplot:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat boxplot. stat "boxplot": Five-number summary per group (hinges and whiskers). Publishes ymin, lower, middle, upper, ymax; default for geom_boxplot.',
+    href: "/reference/stats/boxplot#default-for",
+    keywords: ["stat boxplot", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-boxplot:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat boxplot. stat "boxplot": Five-number summary per group (hinges and whiskers). Publishes ymin, lower, middle, upper, ymax; default for geom_boxplot.',
+    href: "/reference/stats/boxplot#compatible-geoms",
+    keywords: ["stat boxplot", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-boxplot:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat boxplot. stat "boxplot": Five-number summary per group (hinges and whiskers). Publishes ymin, lower, middle, upper, ymax; default for geom_boxplot.',
+    href: "/reference/stats/boxplot#examples",
+    keywords: ["stat boxplot", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-density",
+    kind: "page",
+    title: "stat density",
+    summary:
+      'stat "density": 1D Gaussian kernel density estimate along x. Publishes density, count, scaled, and ndensity; default for geom_density.',
+    href: "/reference/stats/density",
+    keywords: [],
+    exact: ["stat density"],
+  },
+  {
+    id: "heading:reference-stats-density:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat density. stat "density": 1D Gaussian kernel density estimate along x. Publishes density, count, scaled, and ndensity; default for geom_density.',
+    href: "/reference/stats/density#usage",
+    keywords: ["stat density", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-density:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat density. stat "density": 1D Gaussian kernel density estimate along x. Publishes density, count, scaled, and ndensity; default for geom_density.',
+    href: "/reference/stats/density#generated-columns",
+    keywords: ["stat density", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-density:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat density. stat "density": 1D Gaussian kernel density estimate along x. Publishes density, count, scaled, and ndensity; default for geom_density.',
+    href: "/reference/stats/density#default-for",
+    keywords: ["stat density", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-density:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat density. stat "density": 1D Gaussian kernel density estimate along x. Publishes density, count, scaled, and ndensity; default for geom_density.',
+    href: "/reference/stats/density#compatible-geoms",
+    keywords: ["stat density", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-density:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat density. stat "density": 1D Gaussian kernel density estimate along x. Publishes density, count, scaled, and ndensity; default for geom_density.',
+    href: "/reference/stats/density#examples",
+    keywords: ["stat density", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-summary",
+    kind: "page",
+    title: "stat summary",
+    summary:
+      'stat "summary": Collapse each discrete-x group to one summary (default mean ± se). Publishes y, ymin, ymax for error-style geoms.',
+    href: "/reference/stats/summary",
+    keywords: [],
+    exact: ["stat summary"],
+  },
+  {
+    id: "heading:reference-stats-summary:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat summary. stat "summary": Collapse each discrete-x group to one summary (default mean ± se). Publishes y, ymin, ymax for error-style geoms.',
+    href: "/reference/stats/summary#usage",
+    keywords: ["stat summary", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-summary:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat summary. stat "summary": Collapse each discrete-x group to one summary (default mean ± se). Publishes y, ymin, ymax for error-style geoms.',
+    href: "/reference/stats/summary#generated-columns",
+    keywords: ["stat summary", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-summary:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat summary. stat "summary": Collapse each discrete-x group to one summary (default mean ± se). Publishes y, ymin, ymax for error-style geoms.',
+    href: "/reference/stats/summary#default-for",
+    keywords: ["stat summary", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-summary:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat summary. stat "summary": Collapse each discrete-x group to one summary (default mean ± se). Publishes y, ymin, ymax for error-style geoms.',
+    href: "/reference/stats/summary#compatible-geoms",
+    keywords: ["stat summary", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-summary:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat summary. stat "summary": Collapse each discrete-x group to one summary (default mean ± se). Publishes y, ymin, ymax for error-style geoms.',
+    href: "/reference/stats/summary#examples",
+    keywords: ["stat summary", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-sum",
+    kind: "page",
+    title: "stat sum",
+    summary:
+      'stat "sum": Count overlapping points at each (x, y) cell for geom_count. Publishes n and prop (not y).',
+    href: "/reference/stats/sum",
+    keywords: [],
+    exact: ["stat sum"],
+  },
+  {
+    id: "heading:reference-stats-sum:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat sum. stat "sum": Count overlapping points at each (x, y) cell for geom_count. Publishes n and prop (not y).',
+    href: "/reference/stats/sum#usage",
+    keywords: ["stat sum", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-sum:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat sum. stat "sum": Count overlapping points at each (x, y) cell for geom_count. Publishes n and prop (not y).',
+    href: "/reference/stats/sum#generated-columns",
+    keywords: ["stat sum", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-sum:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat sum. stat "sum": Count overlapping points at each (x, y) cell for geom_count. Publishes n and prop (not y).',
+    href: "/reference/stats/sum#default-for",
+    keywords: ["stat sum", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-sum:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat sum. stat "sum": Count overlapping points at each (x, y) cell for geom_count. Publishes n and prop (not y).',
+    href: "/reference/stats/sum#compatible-geoms",
+    keywords: ["stat sum", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "page:reference-stats-ydensity",
+    kind: "page",
+    title: "stat ydensity",
+    summary:
+      'stat "ydensity": Kernel density along y for violin shapes. Publishes density, count, scaled, violinwidth, and y; default for geom_violin.',
+    href: "/reference/stats/ydensity",
+    keywords: [],
+    exact: ["stat ydensity"],
+  },
+  {
+    id: "heading:reference-stats-ydensity:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat ydensity. stat "ydensity": Kernel density along y for violin shapes. Publishes density, count, scaled, violinwidth, and y; default for geom_violin.',
+    href: "/reference/stats/ydensity#usage",
+    keywords: ["stat ydensity", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-ydensity:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat ydensity. stat "ydensity": Kernel density along y for violin shapes. Publishes density, count, scaled, violinwidth, and y; default for geom_violin.',
+    href: "/reference/stats/ydensity#generated-columns",
+    keywords: ["stat ydensity", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-ydensity:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat ydensity. stat "ydensity": Kernel density along y for violin shapes. Publishes density, count, scaled, violinwidth, and y; default for geom_violin.',
+    href: "/reference/stats/ydensity#default-for",
+    keywords: ["stat ydensity", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-ydensity:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat ydensity. stat "ydensity": Kernel density along y for violin shapes. Publishes density, count, scaled, violinwidth, and y; default for geom_violin.',
+    href: "/reference/stats/ydensity#compatible-geoms",
+    keywords: ["stat ydensity", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "page:reference-stats-function",
+    kind: "page",
+    title: "stat function",
+    summary:
+      'stat "function": Evaluate a pure function on an x grid. Publishes y; default for geom_function when no data rows drive the mark.',
+    href: "/reference/stats/function",
+    keywords: [],
+    exact: ["stat function"],
+  },
+  {
+    id: "heading:reference-stats-function:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat function. stat "function": Evaluate a pure function on an x grid. Publishes y; default for geom_function when no data rows drive the mark.',
+    href: "/reference/stats/function#usage",
+    keywords: ["stat function", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-function:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat function. stat "function": Evaluate a pure function on an x grid. Publishes y; default for geom_function when no data rows drive the mark.',
+    href: "/reference/stats/function#generated-columns",
+    keywords: ["stat function", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-function:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat function. stat "function": Evaluate a pure function on an x grid. Publishes y; default for geom_function when no data rows drive the mark.',
+    href: "/reference/stats/function#default-for",
+    keywords: ["stat function", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-function:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat function. stat "function": Evaluate a pure function on an x grid. Publishes y; default for geom_function when no data rows drive the mark.',
+    href: "/reference/stats/function#compatible-geoms",
+    keywords: ["stat function", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-function:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat function. stat "function": Evaluate a pure function on an x grid. Publishes y; default for geom_function when no data rows drive the mark.',
+    href: "/reference/stats/function#examples",
+    keywords: ["stat function", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-ecdf",
+    kind: "page",
+    title: "stat ecdf",
+    summary:
+      'stat "ecdf": Empirical cumulative distribution F̂(x). Publishes ecdf; pair with step or path geoms for CDF plots.',
+    href: "/reference/stats/ecdf",
+    keywords: [],
+    exact: ["stat ecdf"],
+  },
+  {
+    id: "heading:reference-stats-ecdf:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat ecdf. stat "ecdf": Empirical cumulative distribution F̂(x). Publishes ecdf; pair with step or path geoms for CDF plots.',
+    href: "/reference/stats/ecdf#usage",
+    keywords: ["stat ecdf", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-ecdf:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat ecdf. stat "ecdf": Empirical cumulative distribution F̂(x). Publishes ecdf; pair with step or path geoms for CDF plots.',
+    href: "/reference/stats/ecdf#generated-columns",
+    keywords: ["stat ecdf", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-ecdf:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat ecdf. stat "ecdf": Empirical cumulative distribution F̂(x). Publishes ecdf; pair with step or path geoms for CDF plots.',
+    href: "/reference/stats/ecdf#default-for",
+    keywords: ["stat ecdf", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-ecdf:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat ecdf. stat "ecdf": Empirical cumulative distribution F̂(x). Publishes ecdf; pair with step or path geoms for CDF plots.',
+    href: "/reference/stats/ecdf#compatible-geoms",
+    keywords: ["stat ecdf", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-ecdf:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat ecdf. stat "ecdf": Empirical cumulative distribution F̂(x). Publishes ecdf; pair with step or path geoms for CDF plots.',
+    href: "/reference/stats/ecdf#examples",
+    keywords: ["stat ecdf", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-summary_bin",
+    kind: "page",
+    title: "stat summary_bin",
+    summary:
+      'stat "summary_bin": Bin continuous x, then summarize y in each bin (mean ± se by default). Publishes y, ymin, ymax for binned summaries.',
+    href: "/reference/stats/summary_bin",
+    keywords: [],
+    exact: ["stat summary_bin"],
+  },
+  {
+    id: "heading:reference-stats-summary_bin:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat summary_bin. stat "summary_bin": Bin continuous x, then summarize y in each bin (mean ± se by default). Publishes y, ymin, ymax for binned summaries.',
+    href: "/reference/stats/summary_bin#usage",
+    keywords: ["stat summary_bin", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-summary_bin:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat summary_bin. stat "summary_bin": Bin continuous x, then summarize y in each bin (mean ± se by default). Publishes y, ymin, ymax for binned summaries.',
+    href: "/reference/stats/summary_bin#generated-columns",
+    keywords: ["stat summary_bin", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-summary_bin:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat summary_bin. stat "summary_bin": Bin continuous x, then summarize y in each bin (mean ± se by default). Publishes y, ymin, ymax for binned summaries.',
+    href: "/reference/stats/summary_bin#default-for",
+    keywords: ["stat summary_bin", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-summary_bin:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat summary_bin. stat "summary_bin": Bin continuous x, then summarize y in each bin (mean ± se by default). Publishes y, ymin, ymax for binned summaries.',
+    href: "/reference/stats/summary_bin#compatible-geoms",
+    keywords: ["stat summary_bin", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-summary_bin:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat summary_bin. stat "summary_bin": Bin continuous x, then summarize y in each bin (mean ± se by default). Publishes y, ymin, ymax for binned summaries.',
+    href: "/reference/stats/summary_bin#examples",
+    keywords: ["stat summary_bin", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-contour",
+    kind: "page",
+    title: "stat contour",
+    summary:
+      'stat "contour": Marching-squares isolines over a regular x×y×z grid. Publishes level; default for geom_contour.',
+    href: "/reference/stats/contour",
+    keywords: [],
+    exact: ["stat contour"],
+  },
+  {
+    id: "heading:reference-stats-contour:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat contour. stat "contour": Marching-squares isolines over a regular x×y×z grid. Publishes level; default for geom_contour.',
+    href: "/reference/stats/contour#usage",
+    keywords: ["stat contour", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-contour:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat contour. stat "contour": Marching-squares isolines over a regular x×y×z grid. Publishes level; default for geom_contour.',
+    href: "/reference/stats/contour#generated-columns",
+    keywords: ["stat contour", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-contour:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat contour. stat "contour": Marching-squares isolines over a regular x×y×z grid. Publishes level; default for geom_contour.',
+    href: "/reference/stats/contour#default-for",
+    keywords: ["stat contour", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-contour:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat contour. stat "contour": Marching-squares isolines over a regular x×y×z grid. Publishes level; default for geom_contour.',
+    href: "/reference/stats/contour#compatible-geoms",
+    keywords: ["stat contour", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-contour:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat contour. stat "contour": Marching-squares isolines over a regular x×y×z grid. Publishes level; default for geom_contour.',
+    href: "/reference/stats/contour#examples",
+    keywords: ["stat contour", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-align",
+    kind: "page",
+    title: "stat align",
+    summary:
+      'stat "align": Interpolate series onto a shared x grid so continuous-x stacks and overlays line up (stack-friendly zeros outside range).',
+    href: "/reference/stats/align",
+    keywords: [],
+    exact: ["stat align"],
+  },
+  {
+    id: "heading:reference-stats-align:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat align. stat "align": Interpolate series onto a shared x grid so continuous-x stacks and overlays line up (stack-friendly zeros outside range).',
+    href: "/reference/stats/align#usage",
+    keywords: ["stat align", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-align:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat align. stat "align": Interpolate series onto a shared x grid so continuous-x stacks and overlays line up (stack-friendly zeros outside range).',
+    href: "/reference/stats/align#generated-columns",
+    keywords: ["stat align", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-align:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat align. stat "align": Interpolate series onto a shared x grid so continuous-x stacks and overlays line up (stack-friendly zeros outside range).',
+    href: "/reference/stats/align#default-for",
+    keywords: ["stat align", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-align:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat align. stat "align": Interpolate series onto a shared x grid so continuous-x stacks and overlays line up (stack-friendly zeros outside range).',
+    href: "/reference/stats/align#compatible-geoms",
+    keywords: ["stat align", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "page:reference-stats-density_2d",
+    kind: "page",
+    title: "stat density_2d",
+    summary:
+      'stat "density_2d": Bivariate KDE with isolines. Publishes level and density; default for geom_density_2d.',
+    href: "/reference/stats/density_2d",
+    keywords: [],
+    exact: ["stat density_2d"],
+  },
+  {
+    id: "heading:reference-stats-density_2d:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat density_2d. stat "density_2d": Bivariate KDE with isolines. Publishes level and density; default for geom_density_2d.',
+    href: "/reference/stats/density_2d#usage",
+    keywords: ["stat density_2d", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-density_2d:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat density_2d. stat "density_2d": Bivariate KDE with isolines. Publishes level and density; default for geom_density_2d.',
+    href: "/reference/stats/density_2d#generated-columns",
+    keywords: ["stat density_2d", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-density_2d:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat density_2d. stat "density_2d": Bivariate KDE with isolines. Publishes level and density; default for geom_density_2d.',
+    href: "/reference/stats/density_2d#default-for",
+    keywords: ["stat density_2d", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-density_2d:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat density_2d. stat "density_2d": Bivariate KDE with isolines. Publishes level and density; default for geom_density_2d.',
+    href: "/reference/stats/density_2d#compatible-geoms",
+    keywords: ["stat density_2d", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-density_2d:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat density_2d. stat "density_2d": Bivariate KDE with isolines. Publishes level and density; default for geom_density_2d.',
+    href: "/reference/stats/density_2d#examples",
+    keywords: ["stat density_2d", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-density_2d_filled",
+    kind: "page",
+    title: "stat density_2d_filled",
+    summary:
+      'stat "density_2d_filled": Bivariate KDE with closed density rings for filled contours. Publishes level and density; default for geom_density_2d_filled.',
+    href: "/reference/stats/density_2d_filled",
+    keywords: [],
+    exact: ["stat density_2d_filled"],
+  },
+  {
+    id: "heading:reference-stats-density_2d_filled:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat density_2d_filled. stat "density_2d_filled": Bivariate KDE with closed density rings for filled contours. Publishes level and density; default for geom_density_2d_filled.',
+    href: "/reference/stats/density_2d_filled#usage",
+    keywords: ["stat density_2d_filled", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-density_2d_filled:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat density_2d_filled. stat "density_2d_filled": Bivariate KDE with closed density rings for filled contours. Publishes level and density; default for geom_density_2d_filled.',
+    href: "/reference/stats/density_2d_filled#generated-columns",
+    keywords: ["stat density_2d_filled", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-density_2d_filled:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat density_2d_filled. stat "density_2d_filled": Bivariate KDE with closed density rings for filled contours. Publishes level and density; default for geom_density_2d_filled.',
+    href: "/reference/stats/density_2d_filled#default-for",
+    keywords: ["stat density_2d_filled", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-density_2d_filled:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat density_2d_filled. stat "density_2d_filled": Bivariate KDE with closed density rings for filled contours. Publishes level and density; default for geom_density_2d_filled.',
+    href: "/reference/stats/density_2d_filled#compatible-geoms",
+    keywords: ["stat density_2d_filled", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-density_2d_filled:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat density_2d_filled. stat "density_2d_filled": Bivariate KDE with closed density rings for filled contours. Publishes level and density; default for geom_density_2d_filled.',
+    href: "/reference/stats/density_2d_filled#examples",
+    keywords: ["stat density_2d_filled", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-bindot",
+    kind: "page",
+    title: "stat bindot",
+    summary:
+      'stat "bindot": Histodot binning for geom_dotplot: one stack position per observation. Publishes stackpos (and bin occupancy).',
+    href: "/reference/stats/bindot",
+    keywords: [],
+    exact: ["stat bindot"],
+  },
+  {
+    id: "heading:reference-stats-bindot:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat bindot. stat "bindot": Histodot binning for geom_dotplot: one stack position per observation. Publishes stackpos (and bin occupancy).',
+    href: "/reference/stats/bindot#usage",
+    keywords: ["stat bindot", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-bindot:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat bindot. stat "bindot": Histodot binning for geom_dotplot: one stack position per observation. Publishes stackpos (and bin occupancy).',
+    href: "/reference/stats/bindot#generated-columns",
+    keywords: ["stat bindot", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-bindot:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat bindot. stat "bindot": Histodot binning for geom_dotplot: one stack position per observation. Publishes stackpos (and bin occupancy).',
+    href: "/reference/stats/bindot#default-for",
+    keywords: ["stat bindot", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-bindot:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat bindot. stat "bindot": Histodot binning for geom_dotplot: one stack position per observation. Publishes stackpos (and bin occupancy).',
+    href: "/reference/stats/bindot#compatible-geoms",
+    keywords: ["stat bindot", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-bindot:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat bindot. stat "bindot": Histodot binning for geom_dotplot: one stack position per observation. Publishes stackpos (and bin occupancy).',
+    href: "/reference/stats/bindot#examples",
+    keywords: ["stat bindot", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-ellipse",
+    kind: "page",
+    title: "stat ellipse",
+    summary:
+      'stat "ellipse": Confidence ellipse over bivariate points (level and type from params). Passes geometry suited to path/polygon-style marks.',
+    href: "/reference/stats/ellipse",
+    keywords: [],
+    exact: ["stat ellipse"],
+  },
+  {
+    id: "heading:reference-stats-ellipse:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat ellipse. stat "ellipse": Confidence ellipse over bivariate points (level and type from params). Passes geometry suited to path/polygon-style marks.',
+    href: "/reference/stats/ellipse#usage",
+    keywords: ["stat ellipse", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-ellipse:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat ellipse. stat "ellipse": Confidence ellipse over bivariate points (level and type from params). Passes geometry suited to path/polygon-style marks.',
+    href: "/reference/stats/ellipse#generated-columns",
+    keywords: ["stat ellipse", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-ellipse:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat ellipse. stat "ellipse": Confidence ellipse over bivariate points (level and type from params). Passes geometry suited to path/polygon-style marks.',
+    href: "/reference/stats/ellipse#default-for",
+    keywords: ["stat ellipse", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-ellipse:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat ellipse. stat "ellipse": Confidence ellipse over bivariate points (level and type from params). Passes geometry suited to path/polygon-style marks.',
+    href: "/reference/stats/ellipse#compatible-geoms",
+    keywords: ["stat ellipse", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-ellipse:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat ellipse. stat "ellipse": Confidence ellipse over bivariate points (level and type from params). Passes geometry suited to path/polygon-style marks.',
+    href: "/reference/stats/ellipse#examples",
+    keywords: ["stat ellipse", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-sf",
+    kind: "page",
+    title: "stat sf",
+    summary:
+      'stat "sf": Simple-features geometry expansion for geom_sf: multiparts and holes become drawable rings without after_stat columns.',
+    href: "/reference/stats/sf",
+    keywords: [],
+    exact: ["stat sf"],
+  },
+  {
+    id: "heading:reference-stats-sf:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat sf. stat "sf": Simple-features geometry expansion for geom_sf: multiparts and holes become drawable rings without after_stat columns.',
+    href: "/reference/stats/sf#usage",
+    keywords: ["stat sf", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-sf:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat sf. stat "sf": Simple-features geometry expansion for geom_sf: multiparts and holes become drawable rings without after_stat columns.',
+    href: "/reference/stats/sf#generated-columns",
+    keywords: ["stat sf", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-sf:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat sf. stat "sf": Simple-features geometry expansion for geom_sf: multiparts and holes become drawable rings without after_stat columns.',
+    href: "/reference/stats/sf#default-for",
+    keywords: ["stat sf", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-sf:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat sf. stat "sf": Simple-features geometry expansion for geom_sf: multiparts and holes become drawable rings without after_stat columns.',
+    href: "/reference/stats/sf#compatible-geoms",
+    keywords: ["stat sf", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-sf:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat sf. stat "sf": Simple-features geometry expansion for geom_sf: multiparts and holes become drawable rings without after_stat columns.',
+    href: "/reference/stats/sf#examples",
+    keywords: ["stat sf", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-sf_coordinates",
+    kind: "page",
+    title: "stat sf_coordinates",
+    summary:
+      'stat "sf_coordinates": Label anchors from SF geometries for geom_sf_text and geom_sf_label (one point per feature or part).',
+    href: "/reference/stats/sf_coordinates",
+    keywords: [],
+    exact: ["stat sf_coordinates"],
+  },
+  {
+    id: "heading:reference-stats-sf_coordinates:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat sf_coordinates. stat "sf_coordinates": Label anchors from SF geometries for geom_sf_text and geom_sf_label (one point per feature or part).',
+    href: "/reference/stats/sf_coordinates#usage",
+    keywords: ["stat sf_coordinates", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-sf_coordinates:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat sf_coordinates. stat "sf_coordinates": Label anchors from SF geometries for geom_sf_text and geom_sf_label (one point per feature or part).',
+    href: "/reference/stats/sf_coordinates#generated-columns",
+    keywords: ["stat sf_coordinates", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-sf_coordinates:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat sf_coordinates. stat "sf_coordinates": Label anchors from SF geometries for geom_sf_text and geom_sf_label (one point per feature or part).',
+    href: "/reference/stats/sf_coordinates#default-for",
+    keywords: ["stat sf_coordinates", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-sf_coordinates:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat sf_coordinates. stat "sf_coordinates": Label anchors from SF geometries for geom_sf_text and geom_sf_label (one point per feature or part).',
+    href: "/reference/stats/sf_coordinates#compatible-geoms",
+    keywords: ["stat sf_coordinates", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "page:reference-stats-qq",
+    kind: "page",
+    title: "stat qq",
+    summary:
+      'stat "qq": Sample vs theoretical quantiles for Q–Q plots. Publishes sample and theoretical; default for geom_qq.',
+    href: "/reference/stats/qq",
+    keywords: [],
+    exact: ["stat qq"],
+  },
+  {
+    id: "heading:reference-stats-qq:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat qq. stat "qq": Sample vs theoretical quantiles for Q–Q plots. Publishes sample and theoretical; default for geom_qq.',
+    href: "/reference/stats/qq#usage",
+    keywords: ["stat qq", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-qq:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat qq. stat "qq": Sample vs theoretical quantiles for Q–Q plots. Publishes sample and theoretical; default for geom_qq.',
+    href: "/reference/stats/qq#generated-columns",
+    keywords: ["stat qq", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-qq:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat qq. stat "qq": Sample vs theoretical quantiles for Q–Q plots. Publishes sample and theoretical; default for geom_qq.',
+    href: "/reference/stats/qq#default-for",
+    keywords: ["stat qq", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-qq:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat qq. stat "qq": Sample vs theoretical quantiles for Q–Q plots. Publishes sample and theoretical; default for geom_qq.',
+    href: "/reference/stats/qq#compatible-geoms",
+    keywords: ["stat qq", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
+    id: "heading:reference-stats-qq:examples",
+    kind: "heading",
+    title: "Examples",
+    summary:
+      'Examples in stat qq. stat "qq": Sample vs theoretical quantiles for Q–Q plots. Publishes sample and theoretical; default for geom_qq.',
+    href: "/reference/stats/qq#examples",
+    keywords: ["stat qq", "documentation"],
+    exact: ["Examples"],
+  },
+  {
+    id: "page:reference-stats-qq_line",
+    kind: "page",
+    title: "stat qq_line",
+    summary:
+      'stat "qq_line": Reference line through Q–Q sample/theoretical quantiles. Publishes sample and theoretical; default for geom_qq_line.',
+    href: "/reference/stats/qq_line",
+    keywords: [],
+    exact: ["stat qq_line"],
+  },
+  {
+    id: "heading:reference-stats-qq_line:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      'Usage in stat qq_line. stat "qq_line": Reference line through Q–Q sample/theoretical quantiles. Publishes sample and theoretical; default for geom_qq_line.',
+    href: "/reference/stats/qq_line#usage",
+    keywords: ["stat qq_line", "documentation"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-stats-qq_line:generated-columns",
+    kind: "heading",
+    title: "Generated columns (after_stat)",
+    summary:
+      'Generated columns (after_stat) in stat qq_line. stat "qq_line": Reference line through Q–Q sample/theoretical quantiles. Publishes sample and theoretical; default for geom_qq_line.',
+    href: "/reference/stats/qq_line#generated-columns",
+    keywords: ["stat qq_line", "documentation"],
+    exact: ["Generated columns (after_stat)"],
+  },
+  {
+    id: "heading:reference-stats-qq_line:default-for",
+    kind: "heading",
+    title: "Default for geoms",
+    summary:
+      'Default for geoms in stat qq_line. stat "qq_line": Reference line through Q–Q sample/theoretical quantiles. Publishes sample and theoretical; default for geom_qq_line.',
+    href: "/reference/stats/qq_line#default-for",
+    keywords: ["stat qq_line", "documentation"],
+    exact: ["Default for geoms"],
+  },
+  {
+    id: "heading:reference-stats-qq_line:compatible-geoms",
+    kind: "heading",
+    title: "Compatible geoms",
+    summary:
+      'Compatible geoms in stat qq_line. stat "qq_line": Reference line through Q–Q sample/theoretical quantiles. Publishes sample and theoretical; default for geom_qq_line.',
+    href: "/reference/stats/qq_line#compatible-geoms",
+    keywords: ["stat qq_line", "documentation"],
+    exact: ["Compatible geoms"],
+  },
+  {
     id: "page:guide-getting-started",
     kind: "page",
     title: "Getting started",
@@ -7831,14 +9481,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/spec"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-865",
+    id: "heading:guide-lifecycle:experimental-868",
     kind: "heading",
-    title: "experimental (865)",
+    title: "experimental (868)",
     summary:
-      "experimental (865) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-865",
+      "experimental (868) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-868",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (865)"],
+    exact: ["experimental (868)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-8",
@@ -13475,6 +15125,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["STAT_COLUMNS"],
   },
   {
+    id: "api:ggsvelte-spec:STAT_REFERENCE",
+    kind: "api",
+    title: "STAT_REFERENCE",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["STAT_REFERENCE"],
+  },
+  {
     id: "api:ggsvelte-spec:STYLE_AESTHETIC_GEOMS",
     kind: "api",
     title: "STYLE_AESTHETIC_GEOMS",
@@ -13851,6 +15510,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
     exact: ["StatName"],
+  },
+  {
+    id: "api:ggsvelte-spec:StatReferenceEntry",
+    kind: "api",
+    title: "StatReferenceEntry",
+    summary: "@ggsvelte/spec · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "type", "experimental"],
+    exact: ["StatReferenceEntry"],
   },
   {
     id: "api:ggsvelte-spec:StepLayer",
@@ -17469,6 +19137,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-spec",
     keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
     exact: ["schemaArtifactJSON"],
+  },
+  {
+    id: "api:ggsvelte-spec:statReferenceList",
+    kind: "api",
+    title: "statReferenceList",
+    summary: "@ggsvelte/spec · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-spec",
+    keywords: ["@ggsvelte/spec", ".", "value", "experimental"],
+    exact: ["statReferenceList"],
   },
   {
     id: "api:ggsvelte-spec:strokePaintLinear",

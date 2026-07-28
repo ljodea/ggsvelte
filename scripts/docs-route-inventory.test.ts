@@ -38,6 +38,8 @@ describe("docs route inventory", () => {
     expect(paths.has("/reference/geoms")).toBe(true);
     expect(paths.has("/reference/geoms/point")).toBe(true);
     expect(paths.has("/reference/geoms/bin_2d")).toBe(true);
+    expect(paths.has("/reference/stats")).toBe(true);
+    expect(paths.has("/reference/stats/count")).toBe(true);
     expect(paths.has("/reference/interactions")).toBe(true);
     expect(paths.has("/reference/cli")).toBe(true);
     expect(paths.has("/__perf/r3-interaction")).toBe(true);
@@ -101,6 +103,26 @@ describe("docs route inventory", () => {
     );
   });
 
+  it("publishes the stat reference inside the one Reference hierarchy", () => {
+    const inventory = createDocsRouteInventory();
+    const index = inventory.find((entry) => entry.path === "/reference/stats");
+    expect(index).toMatchObject({
+      title: "Stat reference — ggsvelte",
+      canonicalPath: "/reference/stats",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "docs",
+      navigation: { section: "Reference", label: "Stat reference", order: 52 },
+    });
+    const details = inventory.filter((entry) => entry.path.startsWith("/reference/stats/"));
+    expect(details.length).toBe(28);
+    expect(details.every((entry) => entry.navigation === undefined)).toBe(true);
+    expect(inventory.find((entry) => entry.path === "/reference/stats/count")?.title).toBe(
+      "stat count — ggsvelte",
+    );
+  });
+
   it("publishes the CLI reference inside the one Reference hierarchy", () => {
     const cliRoute = createDocsRouteInventory().find((entry) => entry.path === "/reference/cli");
     expect(cliRoute).toMatchObject({
@@ -110,7 +132,7 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "CLI reference", order: 53 },
+      navigation: { section: "Reference", label: "CLI reference", order: 54 },
     });
     expect(cliRoute?.headings?.filter((heading) => heading.level === 3)).toEqual(
       CLI_REFERENCE_OPTIONS.map((option) => ({
