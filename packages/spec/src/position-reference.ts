@@ -6,8 +6,6 @@
  * JSON layer, and optional `positionParams` for jitter/nudge. Used by
  * `/reference/positions`.
  */
-import type { TSchema } from "typebox";
-
 import {
   GEOM_DEFAULTS,
   KNOWN_GEOMS,
@@ -99,15 +97,15 @@ function typeSummaryOf(node: unknown): string {
 
 function positionParamsDocs(keys: readonly string[]): readonly PositionParamDoc[] {
   if (keys.length === 0) return Object.freeze([]);
-  const schema = SpecDeclarations.PositionParams as TSchema & {
+  const schema = SpecDeclarations.PositionParams as unknown as {
     properties?: Record<string, unknown>;
-    required?: string[];
+    required?: readonly string[];
   };
   const props = schema.properties;
   if (props === undefined) {
     throw new Error("POSITION_REFERENCE: PositionParams has no properties");
   }
-  const required = new Set(Array.isArray(schema.required) ? schema.required : []);
+  const required = new Set(schema.required ?? []);
   const docs: PositionParamDoc[] = [];
   for (const name of keys) {
     const propSchema = props[name];
