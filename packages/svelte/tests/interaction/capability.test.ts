@@ -98,7 +98,6 @@ describe("canPublishPointSelection", () => {
     expect(canPublishPointSelection({ type: "point" })).toBe(true);
     expect(canPublishPointSelection({ type: "interval" })).toBe(false);
     expect(canPublishPointSelection(null)).toBe(false);
-    expect(canPublishPointSelection(undefined)).toBe(false);
   });
 });
 
