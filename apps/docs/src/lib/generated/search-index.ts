@@ -5307,7 +5307,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "779 rows of war, 321 marks",
     summary:
-      "Richardson recorded one row per pair of belligerents, so a large war repeats itself. Keeping the first row per position draws each quarrel once.",
+      "Richardson recorded one row per pair of belligerents, so a large war repeats itself - 28 of the Second World War's pairs read the same year and death toll. Keeping the first row per position draws each once.",
     href: "/examples/point/stat-unique",
     keywords: [
       "779 rows of war, 321 marks",

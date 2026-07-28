@@ -4,10 +4,11 @@
  * and its magnitude - the base-10 logarithm of the number killed.
  *
  * Richardson took the pair, not the war, as his unit, so a large war arrives
- * as many rows carrying the same year and the same death toll: the First World
- * War alone is 44 of them, all at (1914, 7.2). Of the 779 rows only 321 are
- * distinct in these two columns, so 458 marks would be drawn exactly on top of
- * a mark already there.
+ * as many rows carrying the same year and the same death toll. The Second
+ * World War contributes the biggest single pile-up: 28 of its pairs began in
+ * 1941 and all read magnitude 7.3. Of the 779 rows only 321 are distinct in
+ * these two columns, so 458 marks would be drawn exactly on top of a mark that
+ * is already there.
  *
  * Transcribed from HistData::Quarrels (see NOTICE), itself the ICPSR study
  * 5407 file.

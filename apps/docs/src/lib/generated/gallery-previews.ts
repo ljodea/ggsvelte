@@ -378,7 +378,7 @@ export const GALLERY_PREVIEWS = [
     id: "point/stat-unique",
     filename: "point-stat-unique-light.png",
     path: "/previews/point-stat-unique-light.png",
-    sha256: "6715c47e40b2ff0e68ff2412afec22d36a5a31cb2e8ff070d4d1987798b56ae2",
+    sha256: "56b56e397b70d19d41431f44e2d3676a942fdef55ecf880f1cd88711bb20212a",
   },
   {
     id: "point/steps-binned",

@@ -308,8 +308,8 @@
     },
     "point/stat-unique": {
       "filename": "point-stat-unique-light.png",
-      "sourceSha256": "e25c451cf9d609c251d06c39c62d721850902d9441a69162b28be33ff9808bbc",
-      "pngSha256": "6715c47e40b2ff0e68ff2412afec22d36a5a31cb2e8ff070d4d1987798b56ae2"
+      "sourceSha256": "38ab7e7fc464321512c3e4c3b42725e0ec1cb0b8276041987b39ac6887ac768d",
+      "pngSha256": "56b56e397b70d19d41431f44e2d3676a942fdef55ecf880f1cd88711bb20212a"
     },
     "point/steps-binned": {
       "filename": "point-steps-binned-light.png",
