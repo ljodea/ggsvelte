@@ -50,6 +50,18 @@
       <strong>Interaction reference</strong>
       <span>Capabilities, events, diagnostics, accessibility defaults.</span>
     </a>
+    <a href={`${base}/reference/themes`}>
+      <strong>Themes</strong>
+      <span
+        >Theme* components, role tokens, CSS variables, and interaction chrome.</span
+      >
+    </a>
+    <a href={`${base}/reference/palettes`}>
+      <strong>Palettes</strong>
+      <span
+        >Named schemes as scale inputs: categorical and sequential catalogs.</span
+      >
+    </a>
     <a href={`${base}/reference/cli`}>
       <strong>CLI reference</strong>
       <span>Flags, streams, diagnostics, exit classes.</span>

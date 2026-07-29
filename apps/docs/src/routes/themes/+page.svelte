@@ -13,6 +13,11 @@
   <header class="themes-intro">
     <p class="eyebrow">Themes</p>
     <h1>Chart themes</h1>
+    <p class="lede">
+      Live portraits of paper, grids, axes, and type. Props, role tokens, and
+      CSS variables:
+      <a href={`${base}/reference/themes`}>Themes reference</a>.
+    </p>
   </header>
 
   <ChartThemeLab initialStaticSrc={data.labStaticSrc} />
@@ -42,6 +47,10 @@
   <nav class="learning-path" aria-label="Next steps">
     <p class="eyebrow">Next</p>
     <ul>
+      <li>
+        <a href={`${base}/reference/themes`}>Themes reference</a>
+        — components, role tokens, CSS variables
+      </li>
       <li>
         <a href={`${base}/palettes`}>Palettes</a>
         — categorical schemes and sequential ramps
@@ -83,6 +92,17 @@
     font-size: clamp(2.25rem, 5vw, 3.5rem);
     line-height: 0.95;
     letter-spacing: -0.03em;
+  }
+
+  .themes-intro .lede {
+    max-width: 42rem;
+    margin: 0.85rem 0 0;
+    color: var(--muted);
+    font-size: 1.02rem;
+  }
+
+  .themes-intro .lede a {
+    color: var(--ink);
   }
 
   .eyebrow {

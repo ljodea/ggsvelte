@@ -19,7 +19,9 @@
       <a href={`${base}/themes`}>Themes</a>.
     </p>
     <p class="guide-link">
-      How to set a palette on a plot:
+      Scheme names as scale inputs:
+      <a href={`${base}/reference/palettes`}>Palettes reference</a>. How to set
+      a palette on a plot:
       <a href={`${base}/reference/scales`}>Scale reference</a>
       (e.g.
       <a href={`${base}/reference/scales/color_discrete`}>ScaleColorDiscrete</a
@@ -37,6 +39,10 @@
   <nav class="learning-path" aria-label="Next steps">
     <p class="eyebrow">Next</p>
     <ul>
+      <li>
+        <a href={`${base}/reference/palettes`}>Palettes reference</a>
+        — scheme → ScaleColor* / ScaleFill* mapping
+      </li>
       <li>
         <a href={`${base}/themes`}>Themes</a>
         — paper, grids, axes, and type

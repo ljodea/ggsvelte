@@ -22,6 +22,8 @@ describe("packed Pages link checks", () => {
     "palettes.html",
     "interactions.html",
     "reference/interactions.html",
+    "reference/themes.html",
+    "reference/palettes.html",
     "reference/cli.html",
     "reference/geoms.html",
     "reference/geoms/point.html",
@@ -108,6 +110,8 @@ describe("packed Pages link checks", () => {
     expect(requiredPages).toContain("palettes.html");
     expect(requiredPages).toContain("interactions.html");
     expect(requiredPages).toContain("reference/interactions.html");
+    expect(requiredPages).toContain("reference/themes.html");
+    expect(requiredPages).toContain("reference/palettes.html");
     expect(requiredPages).toContain("reference/cli.html");
     expect(requiredPages).toContain("reference/geoms.html");
     expect(requiredPages).toContain("reference/geoms/point.html");

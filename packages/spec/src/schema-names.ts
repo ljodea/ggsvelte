@@ -27,6 +27,11 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "flexoki",
   "tableau10",
   "colorblind",
+  // ggthemes ports (#1159): Stata schemes
+  "stata",
+  "stata_s1color",
+  "stata_s1rcolor",
+  "stata_mono",
   /** ggthemes scale_colour/fill_economist — Economist blues/greens (fill order). */
   "economist",
   /** ggthemes scale_colour/fill_solarized — Solarized accents, blue first. */
@@ -205,6 +210,10 @@ export const THEME_NAMES = [
   "tufte",
   "linedraw",
   "void",
+  // ggthemes theme ports (#1158): Stata family
+  "stata",
+  "stata_s1color",
+  "stata_mono",
   // ggthemes theme_solarized: light (default) and dark (light = FALSE) variants.
   "solarized",
   "solarizeddark",

@@ -155,6 +155,7 @@ as JSON under the same name on the docs site):
 - [Scales and guides](/guide/scales-guides) — continuous, discrete, manual, temporal
 - [Facets and coordinates](/guide/facets-coordinates) — small multiples, flip, fixed aspect
 - [Chart themes](/themes) and [palettes](/palettes) — paper/ink chrome and data color
+- [Themes reference](/reference/themes) and [palettes reference](/reference/palettes) — props, tokens, scheme → scale helpers
 - [Interactions](/guide/interactions) — inspect, pin, selection, zoom, linked views
 - [Production](/guide/production) — sizing, SVG/canvas, SSR, export, support matrix
 - [Lifecycle](/guide/lifecycle) — what is stable and what is not

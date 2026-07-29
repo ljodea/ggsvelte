@@ -134,22 +134,22 @@ export const GUIDE_CATALOG = [
     description:
       "Understand validation, render, interaction, and CLI diagnostics and recover safely.",
     section: "Reference",
-    // After /reference/* pages (50–55); leave 53 for positions reference.
-    navigationOrder: 56,
+    // After /reference/* pages (50–58: overview through CLI, themes, palettes).
+    navigationOrder: 59,
   },
   {
     slug: "advisories",
     title: "Advisories",
     description: "Spec-lint advisories and the pipeline's disclosed heuristics.",
     section: "Reference",
-    navigationOrder: 57,
+    navigationOrder: 60,
   },
   {
     slug: "lifecycle",
     title: "Lifecycle & editions",
     description: "API stability tags per export, and the defaults-edition mechanism.",
     section: "Reference",
-    navigationOrder: 58,
+    navigationOrder: 61,
   },
   {
     slug: "upgrading",

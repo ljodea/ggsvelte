@@ -4283,6 +4283,22 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "STATA_MONO_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "STATA_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "STATA_S1COLOR_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "STATA_S1RCOLOR_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "STRIP_BAND": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -6728,6 +6744,18 @@
         "ThemeSpec": {
           "kind": "type",
           "lifecycle": "experimental"
+        },
+        "ThemeStata": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeStatamono": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeStatas1color": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
         },
         "ThemeTest": {
           "kind": "value",

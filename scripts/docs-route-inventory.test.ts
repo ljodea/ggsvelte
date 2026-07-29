@@ -48,6 +48,8 @@ describe("docs route inventory", () => {
     expect(paths.has("/reference/guides")).toBe(true);
     expect(paths.has("/reference/guides/legend")).toBe(true);
     expect(paths.has("/reference/interactions")).toBe(true);
+    expect(paths.has("/reference/themes")).toBe(true);
+    expect(paths.has("/reference/palettes")).toBe(true);
     expect(paths.has("/reference/cli")).toBe(true);
     expect(paths.has("/__perf/r3-interaction")).toBe(true);
     expect(paths.has("/sitemap.xml")).toBe(true);
@@ -231,6 +233,28 @@ describe("docs route inventory", () => {
     expect(ids("/reference/scales/colour_continuous")).toContain("alias");
   });
 
+  it("publishes themes and palettes reference inside the one Reference hierarchy", () => {
+    const inventory = createDocsRouteInventory();
+    expect(inventory.find((entry) => entry.path === "/reference/themes")).toMatchObject({
+      title: "Themes — ggsvelte",
+      canonicalPath: "/reference/themes",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "docs",
+      navigation: { section: "Reference", label: "Themes", order: 57 },
+    });
+    expect(inventory.find((entry) => entry.path === "/reference/palettes")).toMatchObject({
+      title: "Palettes — ggsvelte",
+      canonicalPath: "/reference/palettes",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "docs",
+      navigation: { section: "Reference", label: "Palettes", order: 58 },
+    });
+  });
+
   it("publishes the CLI reference inside the one Reference hierarchy", () => {
     const cliRoute = createDocsRouteInventory().find((entry) => entry.path === "/reference/cli");
     expect(cliRoute).toMatchObject({
@@ -240,7 +264,7 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "CLI reference", order: 57 },
+      navigation: { section: "Reference", label: "CLI reference", order: 59 },
     });
     expect(cliRoute?.headings?.filter((heading) => heading.level === 3)).toEqual(
       CLI_REFERENCE_OPTIONS.map((option) => ({
