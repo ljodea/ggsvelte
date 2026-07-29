@@ -45,6 +45,11 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "wsj_red_green",
   "wsj_black_green",
   "wsj_dem_rep",
+  // ggthemes ports (#1159): LibreOffice Calc + Excel 97 + current Office
+  "calc",
+  "excel",
+  "excel_fill",
+  "excel_new",
   // ColorBrewer qualitative (#825)
   "Set1",
   "Set2",
@@ -156,6 +161,9 @@ export const THEME_NAMES = [
   "solarized_2dark",
   /** ggthemes theme_wsj (Wall Street Journal). */
   "wsj",
+  "calc",
+  "excel",
+  "excel_new",
   "grey",
   "gray",
   // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters

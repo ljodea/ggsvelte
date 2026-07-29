@@ -31,6 +31,9 @@ const THEME_LABELS = {
   solarized_2: "Solarized 2",
   solarized_2dark: "Solarized 2 Dark",
   wsj: "WSJ",
+  calc: "Calc",
+  excel: "Excel",
+  excel_new: "Excel New",
   test: "Test",
 } as const satisfies Record<ThemeOptionName, string>;
 
@@ -53,6 +56,10 @@ const PALETTE_LABELS = {
   wsj_red_green: "WSJ Red/Green",
   wsj_black_green: "WSJ Black/Green",
   wsj_dem_rep: "WSJ Dem/Rep",
+  calc: "Calc",
+  excel: "Excel",
+  excel_fill: "Excel Fill",
+  excel_new: "Excel New",
   hue: "Hue",
   grey: "Grey",
   gray: "Gray",
@@ -88,6 +95,9 @@ const THEME_DEMO_SCHEMES = {
   solarized_2: "tableau10",
   solarized_2dark: "tableau10",
   wsj: "wsj",
+  calc: "calc",
+  excel: "excel",
+  excel_new: "excel_new",
   test: "colorblind",
 } as const satisfies Record<ThemeOptionName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
 

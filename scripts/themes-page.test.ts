@@ -38,6 +38,9 @@ describe("themes catalog", () => {
       { name: "solarized_2", scheme: "tableau10" },
       { name: "solarized_2dark", scheme: "tableau10" },
       { name: "wsj", scheme: "wsj" },
+      { name: "calc", scheme: "calc" },
+      { name: "excel", scheme: "excel" },
+      { name: "excel_new", scheme: "excel_new" },
       { name: "test", scheme: "colorblind" },
     ]);
     expect(THEME_OPTIONS.map((theme) => theme.name)).not.toContain("grey");
@@ -260,6 +263,43 @@ describe("themes catalog", () => {
         label: "WSJ Dem/Rep",
         capacity: 3,
         colors: ["#006a8e", "#b1283a", "#a8a6a7"],
+      },
+      {
+        name: "calc",
+        label: "Calc",
+        capacity: 12,
+        colors: [
+          "#004586",
+          "#ff420e",
+          "#ffd320",
+          "#579d1c",
+          "#7e0021",
+          "#83caff",
+          "#314004",
+          "#aecf00",
+          "#4b1f6f",
+          "#ff950e",
+          "#c5000b",
+          "#0084d1",
+        ],
+      },
+      {
+        name: "excel",
+        label: "Excel",
+        capacity: 7,
+        colors: ["#FF00FF", "#FFFF00", "#00FFFF", "#800080", "#800000", "#008080", "#0000FF"],
+      },
+      {
+        name: "excel_fill",
+        label: "Excel Fill",
+        capacity: 7,
+        colors: ["#993366", "#FFFFCC", "#CCFFFF", "#660066", "#FF8080", "#0066CC", "#CCCCFF"],
+      },
+      {
+        name: "excel_new",
+        label: "Excel New",
+        capacity: 6,
+        colors: ["#4472C4", "#ED7D31", "#A5A5A5", "#FFC000", "#5B9BD5", "#70AD47"],
       },
       {
         name: "Set1",

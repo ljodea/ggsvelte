@@ -21,6 +21,7 @@ export { ScaleConfigError } from "./scale-error.js";
 // importing from ./scales/train.js (same ES binding for identity === checks).
 export {
   CANVA_PALETTE,
+  CALC_PALETTE,
   CATEGORICAL_PALETTE_10,
   CATEGORICAL_SCHEMES,
   COLORBLIND_PALETTE,
@@ -29,6 +30,9 @@ export {
   FEW_LIGHT_PALETTE,
   FEW_PALETTE,
   FIVETHIRTYEIGHT_PALETTE,
+  EXCEL_FILL_PALETTE,
+  EXCEL_NEW_PALETTE,
+  EXCEL_PALETTE,
   FLEXOKI_PALETTE,
   IPSUM_PALETTE,
   PTOL_PALETTE,

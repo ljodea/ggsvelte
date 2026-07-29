@@ -631,6 +631,90 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     ticksX: true,
     gridX: false,
   }),
+  // ggthemes theme_calc: LibreOffice Calc defaults — white panel with a
+  // gray70 (#b3b3b3) border, gray70 y-major grid only (major.x and minor
+  // blank), no axis lines, black text, title rel(1.3) of base 10. Accent is
+  // the first Calc chart color.
+  calc: themed({
+    ink: "#000000",
+    paper: "#ffffff",
+    panel: "#ffffff",
+    accent: "#004586",
+    grid: "#b3b3b3",
+    axisText: "#000000",
+    tickColor: "#b3b3b3",
+    panelBorder: "#b3b3b3",
+    fontSize: 10,
+    axisTextSize: 10,
+    fontWeight: 400,
+    titleSize: 13,
+    subtitleSize: 10,
+    axisTitleSize: 10,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.5,
+    panelBorderWidth: 0.5,
+    ticksX: true,
+    ticksY: true,
+    gridX: false,
+    showPanelBorder: true,
+  }),
+  // ggthemes theme_excel (horizontal = TRUE): the Excel 97 "classic ugly"
+  // look — #c0c0c0 gray panel, black major y-grid (minor and major.x blank),
+  // black panel border. Chrome follows this port's theme_bw lineage
+  // (#333/#4d4d4d, as in bw). Accent is the first Excel 97 line color
+  // (magenta — the palette is faithfully ironic).
+  excel: themed({
+    ink: "#333333",
+    paper: "#ffffff",
+    panel: "#c0c0c0",
+    accent: "#FF00FF",
+    grid: "#000000",
+    axisText: "#4d4d4d",
+    tickColor: "#333333",
+    panelBorder: "#000000",
+    fontSize: 12,
+    axisTextSize: 9.6,
+    fontWeight: 400,
+    titleSize: 14.4,
+    subtitleSize: 12,
+    axisTitleSize: 12,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.5,
+    panelBorderWidth: 0.5,
+    ticksX: true,
+    ticksY: true,
+    gridX: false,
+    showPanelBorder: true,
+  }),
+  // ggthemes theme_excel_new: current Excel defaults — dark-gray (#595959)
+  // text, hairline #bfbfbf y-major grid (0.75 pt → CSS ~0.25), no ticks, no
+  // panel border, plain centered 14px title on white. R blanks the axis
+  // titles; not expressible here (flattened, as with wsj). Accent is the
+  // default Office theme's first accent.
+  excel_new: themed({
+    ink: "#595959",
+    paper: "#ffffff",
+    panel: "#ffffff",
+    accent: "#4472C4",
+    grid: "#bfbfbf",
+    axisText: "#595959",
+    tickColor: "#bfbfbf",
+    panelBorder: "#bfbfbf",
+    fontSize: 9,
+    axisTextSize: 9,
+    fontWeight: 400,
+    titleSize: 14,
+    titleWeight: 400,
+    subtitleSize: 9,
+    axisTitleSize: 9,
+    gridWidth: 0.25,
+    ticksX: false,
+    ticksY: false,
+    gridX: false,
+    showPanelBorder: false,
+  }),
   // theme_test (#823): pinned high-contrast chrome for package tests / VR.
   // Explicit literals — not an alias of light/classic — so product sweeps
   // cannot retarget snapshot chrome. Stability over brand aesthetics.

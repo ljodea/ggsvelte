@@ -135,6 +135,24 @@ export const THEME_STATIC_SHELLS = [
     sha256: "da764fda164a3b8b694b9a04f84ab89370fbd247b304871d73505f172311f316",
   },
   {
+    id: "theme-calc",
+    filename: "theme-calc.svg",
+    path: "/theme-shells/theme-calc.svg",
+    sha256: "7ece2d69f6f492fd19fb3e4955c703474088ec92714bf74087b44233d9abd5c2",
+  },
+  {
+    id: "theme-excel",
+    filename: "theme-excel.svg",
+    path: "/theme-shells/theme-excel.svg",
+    sha256: "c0f51bbf8d3cb66381a5aa144f8bb5c1867dedbe01c8618052d81f1133d4c9ac",
+  },
+  {
+    id: "theme-excel_new",
+    filename: "theme-excel_new.svg",
+    path: "/theme-shells/theme-excel_new.svg",
+    sha256: "9748be9ab56e2a3b5ed44a9a43dffd44c00529f980b18889de19667808b2f01d",
+  },
+  {
     id: "theme-test",
     filename: "theme-test.svg",
     path: "/theme-shells/theme-test.svg",
@@ -253,6 +271,30 @@ export const THEME_STATIC_SHELLS = [
     filename: "palette-wsj_dem_rep.svg",
     path: "/theme-shells/palette-wsj_dem_rep.svg",
     sha256: "07ff5b479852fe265fb4693606fc4e30500c153ca121819731e8d15c4b21eb23",
+  },
+  {
+    id: "palette-calc",
+    filename: "palette-calc.svg",
+    path: "/theme-shells/palette-calc.svg",
+    sha256: "5f82492bdf4e39d4a446d8df570bb8cb63e6f78a7b0f2e61f89f93ff629a9eb0",
+  },
+  {
+    id: "palette-excel",
+    filename: "palette-excel.svg",
+    path: "/theme-shells/palette-excel.svg",
+    sha256: "58c908a330ee8e796e7563fae460e77f0366201d37a83ee29a18901a0e5c68e1",
+  },
+  {
+    id: "palette-excel_fill",
+    filename: "palette-excel_fill.svg",
+    path: "/theme-shells/palette-excel_fill.svg",
+    sha256: "e50885f9cd89d0c4c6eb89289b320ccc9c33cc21868ee11fde488478dcc62adb",
+  },
+  {
+    id: "palette-excel_new",
+    filename: "palette-excel_new.svg",
+    path: "/theme-shells/palette-excel_new.svg",
+    sha256: "40a5005e84c9e78400a6d678654285c17f89e589d47ce12a543adba61bc1ef83",
   },
   {
     id: "palette-Set1",

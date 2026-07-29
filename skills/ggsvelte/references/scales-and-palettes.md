@@ -159,7 +159,7 @@ byte-identity-preserving: `value` is not routed through any helper.
 
 ## Palettes
 
-### Categorical schemes (27)
+### Categorical schemes (31)
 
 | Scheme               | Description                                                        |
 | -------------------- | ------------------------------------------------------------------ |
@@ -181,6 +181,10 @@ byte-identity-preserving: `value` is not routed through any helper.
 | wsj_red_green        | ggthemes WSJ green/red good–bad pair                               |
 | wsj_black_green      | ggthemes WSJ black-to-green sentiment scale                        |
 | wsj_dem_rep          | ggthemes WSJ Democrat/Republican/Undecided                         |
+| calc                 | ggthemes LibreOffice Calc 12 chart colors                          |
+| excel                | ggthemes Excel 97 line/point palette (`scale_colour_excel`)        |
+| excel_fill           | ggthemes Excel 97 area palette (`scale_fill_excel`)                |
+| excel_new            | ggthemes current-Office accents ("Office Theme" default)           |
 | Set1                 | ColorBrewer qualitative, saturated primaries                       |
 | Set2                 | ColorBrewer qualitative, muted pastels                             |
 | Set3                 | ColorBrewer qualitative, light 12-class                            |

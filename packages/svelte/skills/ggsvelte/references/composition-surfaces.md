@@ -37,6 +37,9 @@ optional `"name"` base plus role overrides, e.g.
 | economist_white         | Economist Graphic Detail: white panel, gray grid, light-gray paper         |
 | solarized_2             | Solarized grey-style variant: base2 panel, base3 grid, no frame            |
 | solarized_2dark         | solarized_2 on dark base tones                                             |
+| calc                    | LibreOffice Calc: white panel, gray70 border and y-grid                    |
+| excel                   | Excel 97: gray panel, black y-grid and border (the classic ugly look)      |
+| excel_new               | current Excel: gray text, hairline y-grid, no ticks or border              |
 | wsj                     | Wall Street Journal: brown paper, dotted black y-grid, x line + ticks      |
 | grey (alias of ggplot2) | UK theme_grey                                                              |
 | gray (alias of ggplot2) | US theme_gray                                                              |
@@ -46,7 +49,7 @@ Svelte: one named shell per product theme — `ThemeDefault`, `ThemeLight`,
 `ThemeHrbr`, `ThemeFew`, `ThemeClean`, `ThemeFivethirtyeight`,
 `ThemeEconomist`, `ThemeTufte`, `ThemeLinedraw`, `ThemeVoid`, `ThemeSolarized`,
 `ThemeSolarizeddark`, `ThemeEconomistwhite`, `ThemeSolarized2`, `ThemeSolarized2dark`,
-`ThemeWsj`, `ThemeGrey`, `ThemeGray`. Escape hatch `<Theme name={dynamicName} />` for
+`ThemeWsj`, `ThemeCalc`, `ThemeExcel`, `ThemeExcelnew`, `ThemeGrey`, `ThemeGray`. Escape hatch `<Theme name={dynamicName} />` for
 reactive names.
 Every shell and `<Theme>` also accepts role-override props (`ink`, `paper`,
 `accent`, `grid`, `panel`, `axisText`, `axisLine`, `tickColor`,
