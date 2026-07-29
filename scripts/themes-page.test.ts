@@ -50,7 +50,7 @@ describe("themes catalog", () => {
     expect(THEME_OPTIONS.map((theme) => theme.name)).not.toContain("grey");
     expect(THEME_OPTIONS.map((theme) => theme.name)).not.toContain("gray");
 
-    const byName = Object.fromEntries(CATEGORICAL_PALETTES.map((p) => [p.name, p]));
+    const byName = new Map(CATEGORICAL_PALETTES.map((p) => [p.name, p]));
     for (const name of [
       "observable10",
       "calc",
@@ -61,14 +61,14 @@ describe("themes catalog", () => {
       "gdocs",
       "grey",
     ] as const) {
-      expect(byName[name], name).toBeDefined();
+      expect(byName.get(name), name).toBeDefined();
     }
-    expect(byName.calc.capacity).toBe(12);
-    expect(byName.excel.capacity).toBe(7);
-    expect(byName.excel_fill.capacity).toBe(7);
-    expect(byName.excel_new.capacity).toBe(6);
-    expect(byName.calc.colors[0]).toBe("#004586");
-    expect(byName.excel.colors[0]).toBe("#FF00FF");
+    expect(byName.get("calc")!.capacity).toBe(12);
+    expect(byName.get("excel")!.capacity).toBe(7);
+    expect(byName.get("excel_fill")!.capacity).toBe(7);
+    expect(byName.get("excel_new")!.capacity).toBe(6);
+    expect(byName.get("calc")!.colors[0]).toBe("#004586");
+    expect(byName.get("excel")!.colors[0]).toBe("#FF00FF");
     // Registry size is owned by schema-names; keep a lower bound so shrinks fail.
     expect(CATEGORICAL_PALETTES.length).toBeGreaterThanOrEqual(45);
     expect(CATEGORICAL_PALETTES.map((palette) => palette.name)).not.toContain("gray");
