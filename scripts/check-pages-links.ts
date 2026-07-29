@@ -14,6 +14,8 @@ export const requiredPages = [
   "palettes.html",
   "interactions.html",
   "reference/interactions.html",
+  "reference/themes.html",
+  "reference/palettes.html",
   "reference/cli.html",
   "reference/geoms.html",
   "reference/geoms/point.html",
