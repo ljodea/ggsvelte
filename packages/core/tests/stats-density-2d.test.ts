@@ -3,12 +3,98 @@
  */
 import { describe, expect, it } from "bun:test";
 
-import { bandwidthNRD, statDensity2d } from "../src/stats/density-2d.ts";
+import { bandwidthNRD, productKdeGrid, statDensity2d } from "../src/stats/density-2d.ts";
 
 describe("bandwidthNRD", () => {
   it("returns positive bandwidth for a spread sample", () => {
     const x = Float64Array.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
     expect(bandwidthNRD(x)).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * Direct-product KDE (unsorted scan) — independent reference for the public
+ * productKdeGrid surface. Same ±8σ window and invN scaling as production.
+ */
+function naiveProductKdeGrid(
+  xs: Float64Array,
+  ys: Float64Array,
+  gx: Float64Array,
+  gy: Float64Array,
+  hx: number,
+  hy: number,
+): number[][] {
+  const invSqrt2pi = 1 / Math.sqrt(2 * Math.PI);
+  const dnorm = (u: number) => invSqrt2pi * Math.exp(-0.5 * u * u);
+  const nx = xs.length;
+  const wx = 8 * hx;
+  const wy = 8 * hy;
+  const invN = 1 / (nx * hx * hy);
+  const z: number[][] = Array.from({ length: gy.length }, () =>
+    Array.from({ length: gx.length }, () => 0),
+  );
+  for (let j = 0; j < gy.length; j++) {
+    const yj = gy[j]!;
+    for (let i = 0; i < gx.length; i++) {
+      const xi = gx[i]!;
+      let s = 0;
+      for (let k = 0; k < nx; k++) {
+        const dx = xi - xs[k]!;
+        if (Math.abs(dx) > wx) continue;
+        const dy = yj - ys[k]!;
+        if (Math.abs(dy) > wy) continue;
+        s += dnorm(dx / hx) * dnorm(dy / hy);
+      }
+      z[j]![i] = s * invN;
+    }
+  }
+  return z;
+}
+
+describe("productKdeGrid", () => {
+  it("matches the direct-product reference surface on a small cloud", () => {
+    // Irregular x spacing so sorted-window order differs from input order.
+    const xs = Float64Array.from([0.4, -1.2, 2.1, 0.0, 1.5, -0.3, 0.8, -1.8, 1.1, 0.2]);
+    const ys = Float64Array.from([0.1, 0.9, -0.4, 1.2, 0.0, -0.8, 0.5, 0.3, -1.0, 0.7]);
+    const gx = Float64Array.from([-2, -1, 0, 1, 2]);
+    const gy = Float64Array.from([-1.5, -0.5, 0.5, 1.5]);
+    const hx = 0.4;
+    const hy = 0.35;
+    const got = productKdeGrid(xs, ys, gx, gy, hx, hy);
+    const want = naiveProductKdeGrid(xs, ys, gx, gy, hx, hy);
+    expect(got.length).toBe(want.length);
+    for (let j = 0; j < want.length; j++) {
+      expect(got[j]!.length).toBe(want[j]!.length);
+      for (let i = 0; i < want[j]!.length; i++) {
+        // Sum order may differ after the x-sort; stay well under isoline sensitivity.
+        expect(Math.abs(got[j]![i]! - want[j]![i]!)).toBeLessThan(1e-12);
+      }
+    }
+  });
+
+  it("visits fewer point-cell pairs than a full G²·n scan when bandwidth is local", () => {
+    // Wide scatter, tight bandwidth: sliding window must skip far x cells.
+    const n = 200;
+    const xs = new Float64Array(n);
+    const ys = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      xs[i] = (i / (n - 1)) * 20 - 10;
+      ys[i] = Math.sin(i) * 2;
+    }
+    const G = 40;
+    const gx = new Float64Array(G);
+    const gy = new Float64Array(G);
+    for (let i = 0; i < G; i++) {
+      gx[i] = (i / (G - 1)) * 20 - 10;
+      gy[i] = (i / (G - 1)) * 6 - 3;
+    }
+    const hx = 0.15;
+    const hy = 0.15;
+    const full = G * G * n;
+    const { examinations } = productKdeGrid(xs, ys, gx, gy, hx, hy, { countExaminations: true });
+    // Local bandwidth should examine far fewer than the naive full product.
+    expect(examinations).toBeLessThan(full * 0.25);
+    expect(examinations).toBeGreaterThan(0);
   });
 });
 
