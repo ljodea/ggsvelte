@@ -153,7 +153,7 @@ Two rules worth keeping in working memory:
   `type:"log"` canonicalizes to linear+log10. Scale transforms run before
   stats and positions; coord transforms run after stats.
 - color/fill families: `ordinal`, `sequential`, `binned`, `manual`,
-  `identity`. 55 named schemes — 35 categorical (`observable10`, `tableau10`,
+  `identity`. 74 named schemes — 54 categorical (`observable10`, `tableau10`,
   `colorblind`, `Set1`…) and 20 sequential/diverging (`viridis`, `magma`,
   `Blues`, `RdBu`…). Size/linewidth/alpha and shape/linetype have their own
   scale families.
@@ -167,10 +167,10 @@ Two rules worth keeping in working memory:
   year-quarters infer time automatically. Ambiguous ordered dates need
   `"parse": "dmy"` or `"mdy"`; force `{"type": "band"}` for year-like
   identifiers; never preprocess dates into indexes.
-- Themes: 26 names (`default`, `light`, `dark`, `minimal`, `ggplot2`,
+- Themes: 31 names (`default`, `light`, `dark`, `minimal`, `ggplot2`,
   `classic`, `bw`, `hrbr`, `few`, `clean`, `fivethirtyeight`, `economist`,
   `tufte`, `linedraw`, `void`, `stata`, `stata_s1color`, `stata_mono`, `solarized`, `solarizeddark`, `economist_white`,
-  `solarized_2`, `solarized_2dark`, `wsj`, `gdocs`, `hc`, `hcdark`, `pander`, plus `grey`/`gray` aliasing `ggplot2`) as
+  `solarized_2`, `solarized_2dark`, `wsj`, `gdocs`, `hc`, `hcdark`, `pander`, `excel_new`, `excel`, `calc`, plus `grey`/`gray` aliasing `ggplot2`) as
   `<ThemeTufte/>`-style children or `"theme": "tufte"` in JSON.
 
 Full option surfaces — every scale option, the `Scale*` component matrix, all

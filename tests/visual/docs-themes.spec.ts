@@ -51,7 +51,7 @@ test("themes compares all built-in chart themes as full-width interactive portra
   const list = page.getByRole("list", { name: "Built-in chart themes" });
   const specimens = list.getByRole("listitem");
   // Non-alias product themes (grey/gray alias ggplot2; not separate portraits).
-  await expect(specimens).toHaveCount(29);
+  await expect(specimens).toHaveCount(32);
   await expect(specimens.getByRole("heading", { level: 3 })).toHaveText([
     "Default",
     "Light",
@@ -81,6 +81,9 @@ test("themes compares all built-in chart themes as full-width interactive portra
     "Highcharts",
     "Highcharts Dark",
     "Pander",
+    "Calc",
+    "Excel",
+    "Excel New",
     "Test",
   ]);
 
@@ -147,7 +150,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
   // Unique ramps only — scheme "gray" is a US-spelling alias of "grey", not a twin card.
-  await expect(cards).toHaveCount(48);
+  await expect(cards).toHaveCount(52);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Observable 10",
     "Ipsum",
@@ -189,6 +192,10 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Highcharts",
     "Highcharts Dark",
     "Pander",
+    "Calc",
+    "Excel",
+    "Excel Fill",
+    "Excel New",
     "Set1",
     "Set2",
     "Set3",
@@ -235,6 +242,10 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "10 colors",
     "11 colors",
     "8 colors",
+    "12 colors",
+    "7 colors",
+    "7 colors",
+    "6 colors",
     "9 colors",
     "8 colors",
     "12 colors",

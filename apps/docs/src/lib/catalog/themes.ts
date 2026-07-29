@@ -54,6 +54,9 @@ const THEME_LABELS = {
   hc: "Highcharts",
   hcdark: "Highcharts Dark",
   pander: "Pander",
+  calc: "Calc",
+  excel: "Excel",
+  excel_new: "Excel New",
   test: "Test",
 } as const satisfies Record<ThemeOptionName, string>;
 
@@ -98,6 +101,10 @@ const PALETTE_LABELS = {
   hc: "Highcharts",
   hc_dark: "Highcharts Dark",
   pander: "Pander",
+  calc: "Calc",
+  excel: "Excel",
+  excel_fill: "Excel Fill",
+  excel_new: "Excel New",
   hue: "Hue",
   // Also scheme "gray" (US spelling) — same ramp; filtered via DISPLAY_ALIASES.
   grey: "Grey",
@@ -140,6 +147,9 @@ const THEME_DEMO_SCHEMES = {
   hc: "hc",
   hcdark: "hc_dark",
   pander: "pander",
+  calc: "calc",
+  excel: "excel",
+  excel_new: "excel_new",
   test: "colorblind",
 } as const satisfies Record<ThemeOptionName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
 

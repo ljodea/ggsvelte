@@ -203,6 +203,10 @@ byte-identity-preserving: `value` is not routed through any helper.
 | hc                        | ggthemes Highcharts default 10 colors                              |
 | hc_dark                   | ggthemes Highcharts darkunica 11 colors                            |
 | pander                    | ggthemes pander colorblind/printer-friendly 8 (Okabe-Ito order)    |
+| calc                      | ggthemes LibreOffice Calc 12 chart colors                          |
+| excel                     | ggthemes Excel 97 line/point palette (`scale_colour_excel`)        |
+| excel_fill                | ggthemes Excel 97 area palette (`scale_fill_excel`)                |
+| excel_new                 | ggthemes current-Office accents ("Office Theme" default)           |
 | Set1                      | ColorBrewer qualitative, saturated primaries                       |
 | Set2                      | ColorBrewer qualitative, muted pastels                             |
 | Set3                      | ColorBrewer qualitative, light 12-class                            |

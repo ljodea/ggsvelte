@@ -55,6 +55,10 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - ggthemes few_dark (Dark): `#265DAB #DF5C24 #059748 #E5126F #9D722A #7B3A96 #C7B42E #CB2027`
 - ggthemes fivethirtyeight: `#008FD5 #FF2700 #77AB43`
 - ggthemes ptol (full capacity): `#332288 #6699CC #88CCEE #44AA99 #117733 #999933 #DDCC77 #661100 #CC6677 #AA4466 #882255 #AA4499`
+- ggthemes calc: `#004586 #ff420e #ffd320 #579d1c #7e0021 #83caff #314004 #aecf00 #4b1f6f #ff950e #c5000b #0084d1`
+- ggthemes excel (line): `#FF00FF #FFFF00 #00FFFF #800080 #800000 #008080 #0000FF`
+- ggthemes excel_fill (area): `#993366 #FFFFCC #CCFFFF #660066 #FF8080 #0066CC #CCCCFF`
+- ggthemes excel_new (Office Theme): `#4472C4 #ED7D31 #A5A5A5 #FFC000 #5B9BD5 #70AD47`
 - ggthemes canva (Fresh and bright): `#f98866 #ff420e #80bd9e #89da59`
 - ggthemes wsj (colors6): `#c72e29 #016392 #be9c2e #098154 #fb832d #000000`
 - ggthemes wsj_rgby: `#d3ba68 #d5695d #5d8ca8 #65a479`
