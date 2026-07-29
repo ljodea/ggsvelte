@@ -55,17 +55,18 @@ describe("the sakura lesson folds to renderable specs", () => {
     const start = foldSakura(0, rows);
     expect(start.spec.layers).toEqual([{ geom: "point" }]);
     // Year ticks use labels: "d" from the first render so 1000 CE is not "1,000".
+    // Domain is fixed on the first render so ticks stay stable as steps add chrome.
     // bloomDate is a full ISO calendar date per year; without month-day y the
     // auto scale draws year-vs-year (a diagonal) instead of bloom timing.
     expect(start.spec.scales).toEqual({
-      x: { type: "linear", labels: "d" },
+      x: { type: "linear", labels: "d", domain: [800, 2030] },
       y: { type: "time", temporalKind: "monthDay", reverse: true },
     });
     expect(start.spec.labs).toEqual({ x: "Year", y: SAKURA_Y_LAB });
     expect(start.spec.theme).toBeUndefined();
     expect(start.key).toBeUndefined();
     expect(start.source).toBe(QUICKSTART_PAGE_SVELTE);
-    expect(start.source).toContain('<ScaleXContinuous labels="d" />');
+    expect(start.source).toContain('<ScaleXContinuous labels="d" domain={[800, 2030]} />');
     expect(start.source).toContain("<ScaleYMonthDay reverse />");
     expect(start.source).toContain(`<Labs x="Year" y="${SAKURA_Y_LAB}" />`);
     const model = runPipeline(start.spec, { width: 900, height: 480 });
@@ -172,16 +173,15 @@ describe("the sakura lesson folds to renderable specs", () => {
       [0, `binwidth={${SAKURA_BINWIDTH}}`, `"binwidth":${SAKURA_BINWIDTH}`],
       [0, 'curve="step-hv"', '"curve":"step-hv"'],
       [0, "alpha={0.5}", '"alpha":0.5'],
+      [0, "<ThemeTufte />", '"theme":"tufte"'],
       [1, "reverse", '"reverse":true'],
       [1, "ScaleYMonthDay", '"dateLabels":"%b %e"'],
-      [1, "ScaleXContinuous", '"labels":"d"'],
       [1, SAKURA_Y_BREAKS[0], `"breaks":${JSON.stringify([...SAKURA_Y_BREAKS])}`],
       [2, "x: null", '"x":null'],
       [2, 'fill: "epoch"', '"fill":{"field":"epoch"}'],
       [2, "GuideNone", '"fill":{"type":"none"}'],
       [2, 'label: "epoch"', '"label":{"field":"epoch"}'],
       [2, "ScaleFillManual", '"type":"manual"'],
-      [1, "<ThemeTufte />", '"theme":"tufte"'],
       [3, SAKURA_BASELINE, `"yintercept":"${SAKURA_BASELINE}"`],
       [3, '"#b3452f"', '"value":"#b3452f"'],
       [4, 'key="year"', ""],
@@ -371,10 +371,10 @@ describe("gate G8 — annotations that do not fight the chart", () => {
     expect(callouts).toContain("end");
   });
 
-  it("draws a baseline strong enough to read, and says what it marks", () => {
+  it("draws a baseline strong enough to read without caption chrome", () => {
     const spec = finishedSpec() as {
       layers: { geom: string; params?: Record<string, unknown> }[];
-      labs?: { caption?: string };
+      labs?: { caption?: string; title?: string; subtitle?: string };
     };
     const rule = spec.layers.find(
       (layer) => layer.geom === "rule" && "yintercept" in (layer.params ?? {}),
@@ -382,9 +382,11 @@ describe("gate G8 — annotations that do not fight the chart", () => {
     expect(rule?.params?.["yintercept"]).toBe(SAKURA_BASELINE);
     expect(rule?.params?.["alpha"]).toBeUndefined();
     expect(rule?.params?.["linewidth"]).toBeGreaterThanOrEqual(1);
-    // The reference chart labels this in the margin. Mid-April is dense in
-    // every century, so there is nowhere inside the panel to say it (#727).
-    expect(spec.labs?.caption).toContain("median");
+    // Caption/title/subtitle would squash the data panel; citation lives on
+    // the page footnote instead (GettingStartedGuide).
+    expect(spec.labs?.caption).toBeUndefined();
+    expect(spec.labs?.title).toBeUndefined();
+    expect(spec.labs?.subtitle).toBeUndefined();
   });
 });
 
@@ -444,10 +446,10 @@ describe("gate G5 — climate epoch bands claim periods, not the record", () => 
 });
 
 describe("gate G6 — finished chart panel aspect, not outer SVG aspect", () => {
-  it("keeps the data panel near 2.5:1 after title/subtitle/legend/caption chrome", () => {
+  it("keeps the data panel near 2.5:1 after axis chrome (no title/caption)", () => {
     // Outer height targets the panel: PR #1073 set outer 2.5:1 and crushed the
-    // panel to ~5.8:1. Assert the panel at several widths, including a narrow
-    // one where the legend wraps.
+    // panel to ~5.8:1. Assert the panel at several widths. Finished lesson has
+    // no title/subtitle/caption so chrome is axis titles only.
     for (const width of SAKURA_HEIGHT_PROBE_WIDTHS) {
       const size = measureSakuraFinishedSize(width);
       const aspect = size.panelWidth / size.panelHeight;

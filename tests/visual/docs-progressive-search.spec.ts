@@ -29,7 +29,7 @@ test("each step shows its own delta and the finished chart is live", async ({ pa
   const steps = page.locator(".progressive-step");
   await expect(steps).toHaveCount(5);
   await expect(steps.getByRole("heading", { level: 3 })).toHaveText([
-    "Separate the signal from the noise",
+    "Pick a minimal theme and add a rolling median line",
     "Put earlier bloom on top",
     "Add epoch bands",
     "Annotate record years",
@@ -43,7 +43,9 @@ test("each step shows its own delta and the finished chart is live", async ({ pa
   const finishedChart = page.locator(".finished-chart");
   await finishedChart.scrollIntoViewIfNeeded();
   const finished = finishedChart.locator(".gg-plot-root");
-  await expect(finished).toHaveAttribute("data-gg-ready", "true", { timeout: 45_000 });
+  await expect(finished).toHaveAttribute("data-gg-ready", "true", {
+    timeout: 45_000,
+  });
   await expect(page.locator(".gg-plot-root")).toHaveCount(1);
   await expect(steps.locator("img.lesson-chart")).toHaveCount(4);
   await expectNoDocumentOverflow(page);
@@ -159,7 +161,10 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
   await expect(page.locator(".lesson-block .lesson-output")).toBeVisible();
   await expect(page.locator("img.lesson-chart")).toHaveCount(6);
   await expect(
-    page.getByRole("heading", { level: 3, name: "Separate the signal from the noise" }),
+    page.getByRole("heading", {
+      level: 3,
+      name: "Pick a minimal theme and add a rolling median line",
+    }),
   ).toBeVisible();
   await context.close();
 });

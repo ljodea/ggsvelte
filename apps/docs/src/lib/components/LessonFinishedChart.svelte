@@ -5,6 +5,10 @@
    * Owns the 838-point fold lifecycle: measure the host, drop callouts when
    * narrow, and load GGPlot only when near the viewport so mobile chrome stays
    * tappable (#972). Intermediate step charts stay static SVGs in the guide.
+   *
+   * Tooltips show only the bloom date as "Apr 21, 1519" — not year + axis-lab
+   * pairs. Epoch names are italic via CSS on the epochNames glyph layer until
+   * GeomText gains a real fontStyle param (tracked as a follow-up issue).
    */
   import { onMount } from "svelte";
 
@@ -19,6 +23,7 @@
     sakuraFinishedHeight,
   } from "$lib/generated/lesson-charts";
   import { observeNearViewport } from "$lib/near-viewport";
+  import type { PlotInspectionChange } from "@ggsvelte/svelte";
   import { kyotoSakura } from "@ggsvelte/svelte/data";
 
   const {
@@ -79,6 +84,42 @@
   const recordNames = SAKURA_RECORDS.map((record) => record.label).join("; ");
   const ariaLabel = `Kyoto cherry blossom, finished. Called out: ${recordNames}.`;
 
+  /** "Apr 21, 1519" — same month style as the axis, with the year attached. */
+  function formatBloomTooltip(
+    bloomDate: unknown,
+    year: unknown,
+  ): string | null {
+    if (typeof bloomDate !== "string" || bloomDate.length === 0) return null;
+    const match = /(?:(\d{1,4})-)?(\d{2})-(\d{2})$/.exec(bloomDate);
+    if (match === null) return null;
+    const monthNum = Number(match[2]);
+    const day = Number(match[3]);
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ] as const;
+    const mon = months[monthNum - 1];
+    if (mon === undefined || !Number.isFinite(day)) return null;
+    const yearPart =
+      match[1] !== undefined && match[1] !== ""
+        ? Number(match[1])
+        : typeof year === "number"
+          ? year
+          : null;
+    if (yearPart === null || !Number.isFinite(yearPart)) return null;
+    return `${mon} ${day}, ${yearPart}`;
+  }
+
   onMount(() => {
     const target = host;
     if (target === undefined) return;
@@ -121,12 +162,29 @@
   });
 </script>
 
+{#snippet sakuraTooltip(
+  inspection: PlotInspectionChange<Record<string, unknown>, PropertyKey>,
+)}
+  {@const row = inspection.focus.row as {
+    bloomDate?: unknown;
+    year?: unknown;
+  } | null}
+  {@const label = formatBloomTooltip(row?.bloomDate, row?.year)}
+  {#if label !== null}
+    <div class="sakura-tooltip">{label}</div>
+  {/if}
+{/snippet}
+
 <div class="finished-chart lesson-output" bind:this={host}>
   {#if LivePlot && finished}
     <LivePlot
       spec={finished.spec}
       key={finished.key}
-      inspect={finished.inspect}
+      inspect={{
+        mode: "exact",
+        pin: true,
+        content: sakuraTooltip,
+      }}
       height={liveHeight}
       {ariaLabel}
     />
@@ -162,6 +220,18 @@
     display: block;
     width: 100%;
     height: auto;
+  }
+
+  .sakura-tooltip {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * Epoch names (layer 1) italic until GeomText supports fontStyle. Layer
+   * index is stable in foldSakura: epochs=0, epochNames=1, …
+   */
+  .finished-chart :global(.gg-glyphs[data-layer="1"] text) {
+    font-style: italic;
   }
 
   /*

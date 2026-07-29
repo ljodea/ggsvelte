@@ -6146,24 +6146,24 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Start with a basic plot"],
   },
   {
-    id: "heading:guide-getting-started:add-geometry-layers",
+    id: "heading:guide-getting-started:add-layers",
     kind: "heading",
-    title: "Add geometry layers",
+    title: "Add layers",
     summary:
-      "Add geometry layers in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
-    href: "/guide/getting-started#add-geometry-layers",
+      "Add layers in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
+    href: "/guide/getting-started#add-layers",
     keywords: ["Getting started", "Start"],
-    exact: ["Add geometry layers"],
+    exact: ["Add layers"],
   },
   {
     id: "heading:guide-getting-started:separate-signal-from-noise",
     kind: "heading",
-    title: "Separate the signal from the noise",
+    title: "Pick a minimal theme and add a rolling median line",
     summary:
-      "Separate the signal from the noise in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
+      "Pick a minimal theme and add a rolling median line in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#separate-signal-from-noise",
     keywords: ["Getting started", "Start"],
-    exact: ["Separate the signal from the noise"],
+    exact: ["Pick a minimal theme and add a rolling median line"],
   },
   {
     id: "heading:guide-getting-started:put-earlier-bloom-on-top",

@@ -32,15 +32,17 @@ const BASE_CHILDREN: Record<string, string> = { points: "  <GeomPoint />" };
  * grouped year ticks. `bloomDate` is a full ISO date per year; month-day y
  * collapses the year so the scatter is bloom timing, not a year-vs-year
  * diagonal. Reverse matches the "earlier ↑" lab from the first render.
+ * X domain is fixed from the first render so year ticks stay stable as steps
+ * add chrome (labels: "d" so 1000 CE is not "1,000").
  */
 const BASE_SCALES: Scales = {
-  x: { type: "linear", labels: "d" },
+  x: { type: "linear", labels: "d", domain: [800, 2030] },
   y: { type: "time", temporalKind: "monthDay", reverse: true },
 };
 const BASE_LABS: Labs = { x: "Year", y: SAKURA_Y_LAB };
 const BASE_GRAMMAR: Record<string, string> = {
   scaleY: `  <ScaleYMonthDay reverse />`,
-  scaleX: `  <ScaleXContinuous labels="d" />`,
+  scaleX: `  <ScaleXContinuous labels="d" domain={[800, 2030]} />`,
   labs: `  <Labs x="Year" y="${SAKURA_Y_LAB}" />`,
 };
 const BASE_COMPONENTS = [

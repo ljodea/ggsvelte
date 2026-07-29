@@ -63,11 +63,18 @@ describe("lesson step charts", () => {
 
   it("is rendered wide enough to place its callouts", () => {
     // The step gives the chart the whole column, which is above the ladder's
-    // threshold — so the record callouts are drawn rather than moved to the
-    // caption. Anything narrower would render the axis text at half size.
+    // threshold — so the record callouts are drawn. Anything narrower would
+    // render the axis text at half size.
     expect(LESSON_CHART_WIDTH).toBeGreaterThan(560);
     const annotated = readFileSync(join(DIR, lessonChartFilename(3)), "utf8");
     expect(annotated).toContain("latest on record");
     expect(annotated).toContain("gg-marks");
+  });
+
+  it("italicizes epoch names on static SVGs (GeomText has no fontStyle yet)", () => {
+    const withEpochs = readFileSync(join(DIR, lessonChartFilename(2)), "utf8");
+    expect(withEpochs).toMatch(/font-style="italic"[^>]*>Medieval warm period</);
+    expect(withEpochs).toMatch(/font-style="italic"[^>]*>Little Ice Age</);
+    expect(withEpochs).toMatch(/font-style="italic"[^>]*>Industrial era</);
   });
 });

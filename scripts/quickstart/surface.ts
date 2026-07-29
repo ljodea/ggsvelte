@@ -21,7 +21,7 @@ import { SAKURA_BINWIDTH, SAKURA_STEPS } from "./steps";
 export const GETTING_STARTED_PAGE_HEADINGS = [
   { id: "install", title: "Install", level: 2 },
   { id: "start-with-a-basic-plot", title: "Start with a basic plot", level: 2 },
-  { id: "add-geometry-layers", title: "Add geometry layers", level: 2 },
+  { id: "add-layers", title: "Add layers", level: 2 },
   ...SAKURA_STEPS.map((step) => ({ id: step.id, title: step.title, level: 3 as const })),
   { id: "the-finished-file", title: "The finished file", level: 2 },
   { id: "agent-json-spec", title: "Agent JSON spec", level: 2 },
@@ -54,19 +54,12 @@ const spec = gg(kyotoSakura, aes({ x: "year", y: "bloomDate" }))
   .spec();`;
 
 /**
- * The reference form: large or reused data goes in `datasets` by name, in
- * columns form. Inline `values` is for data small enough to read.
+ * Named dataset reference — same convention as the homepage agent JSON.
+ * Hosts resolve `kyotoSakura` from `@ggsvelte/svelte/data` (or a file of the
+ * same name). Do not paste a partial inline sample as if it were the series.
  */
 export const QUICKSTART_PORTABLE_SPEC_FRAGMENT = `{
   "data": { "name": "kyotoSakura" },
-  "datasets": {
-    "kyotoSakura": {
-      "columns": {
-        "year": [812, 815, 831, 851, 853],
-        "bloomDate": ["0812-04-01", "0815-04-15", "0831-04-06", "0851-04-18", "0853-04-14"]
-      }
-    }
-  },
   "aes": { "x": { "field": "year" }, "y": { "field": "bloomDate" } },
   "layers": [
     { "geom": "point", "params": { "alpha": 0.5 } },

@@ -1,6 +1,6 @@
 <script lang="ts">
   /**
-   * Getting started: install, a basic plot, then geometry layers on real data.
+   * Getting started: install, a basic plot, then layers on real data.
    *
    * Every chart on this page renders from `foldSakura(n)` in scripts/quickstart
    * — the same fold that produces the fragments above them and the finished
@@ -22,6 +22,7 @@
     LESSON_CHART_HEIGHT,
     LESSON_CHART_WIDTH,
   } from "$lib/generated/lesson-charts";
+  import { KYOTO_SAKURA_CITATION } from "@ggsvelte/svelte/data";
 
   import CopyCode from "./CopyCode.svelte";
   import LessonFinishedChart from "./LessonFinishedChart.svelte";
@@ -48,12 +49,6 @@
   />
 
   <h2 id="start-with-a-basic-plot">Start with a basic plot</h2>
-  <p>
-    Data ships with the package as
-    <code>@ggsvelte/svelte/data</code>
-    (<code>kyotoSakura</code>: 838 peak-bloom observations). Drop this into a
-    route or component:
-  </p>
   <div class="lesson-block">
     <section class="lesson-code">
       <div class="lesson-label">Svelte</div>
@@ -76,7 +71,7 @@
     </section>
   </div>
 
-  <h2 id="add-geometry-layers">Add geometry layers</h2>
+  <h2 id="add-layers">Add layers</h2>
 
   <div class="lesson-steps">
     {#each SAKURA_STEPS as step, index (step.id)}
@@ -136,6 +131,13 @@
     <li><a href={`${base}/guide/interactions`}>Interactions</a></li>
     <li><a href={`${base}/guide/production`}>Production</a></li>
   </ul>
+
+  <footer class="lesson-footnote">
+    <p>
+      Dashed rule on the finished chart: the 1600–1850 median bloom day, 15
+      April. {KYOTO_SAKURA_CITATION}
+    </p>
+  </footer>
 </article>
 
 <style>
@@ -203,6 +205,19 @@
 
   .getting-started-guide :global(.lesson-source .code-body pre) {
     white-space: pre;
+  }
+
+  .lesson-footnote {
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+
+  .lesson-footnote p {
+    margin: 0;
   }
 
   /*

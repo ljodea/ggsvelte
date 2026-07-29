@@ -190,6 +190,7 @@ describe("guide sections cover their catalogs", () => {
       "one change at a time",
       "Choose another surface",
       "Separate the signal",
+      "Pick a minimal theme",
     ]) {
       expect(GETTING_STARTED_MD).not.toContain(humanNarrative);
     }
