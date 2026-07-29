@@ -15,13 +15,15 @@
  *    for every geom, stat, position, theme, and color scheme the spec knows.
  *    Adding one upstream turns the skill red until it is documented; this is
  *    the pre-changesets lock-step guard.
- * 4. SKILL.md lead-line counts — the summary prose in "Scales, palettes,
- *    themes" states totals that agents see without opening references/. Format
- *    (keep this shape so the parser stays stable across port PRs):
+ * 4. SKILL.md lead-line inventory — the summary prose in "Scales, palettes,
+ *    themes" states totals (and for themes, the **full product name list**)
+ *    that agents see without opening references/. Format:
  *      `N named schemes — M categorical (…examples…) and K sequential…`
- *      `Themes: T names (…examples…; grey/gray alias note)`
+ *      `Themes: T names (`name`, `name`, … plus `grey`/`gray` alias note)`
  *    N = COLOR_SCHEME_NAMES.length, M = CATEGORICAL_SCHEME_NAMES.length,
  *    K = SEQUENTIAL_SCHEME_NAMES.length, T = THEME_NAMES without `test`.
+ *    Theme lead line must name every product theme (comprehensive — not a
+ *    representative subset). Full looks/shells live in references/themes.md.
  *    Reference section headers `### Categorical schemes (M)` and
  *    `### Sequential schemes (K)` must match the same M/K.
  *
@@ -135,7 +137,7 @@ describe("reference inventories are complete", () => {
     { file: "geoms-and-stats.md", label: "stats", names: KNOWN_STATS },
     { file: "geoms-and-stats.md", label: "positions", names: KNOWN_POSITIONS },
     {
-      file: "composition-surfaces.md",
+      file: "themes.md",
       label: "themes",
       // `test` is the internal snapshot theme — deliberately undocumented.
       names: THEME_NAMES.filter((name) => name !== "test"),
@@ -169,12 +171,14 @@ const PRODUCT_THEME_NAMES = THEME_NAMES.filter((name) => name !== "test");
 
 /**
  * Lead-line inventory in SKILL.md. Table rows in references/ are already
- * locked by the inventory suite above; this guards the short counts agents
- * see when they only load SKILL.md (#1210).
+ * locked by the inventory suite above; this guards the counts (and the
+ * comprehensive theme name list) agents see when they only load SKILL.md
+ * (#1210).
  */
-describe("SKILL.md lead-line scheme/theme counts match registries", () => {
+describe("SKILL.md lead-line scheme/theme inventory matches registries", () => {
   const skillMd = readFileSync(join(SKILL_DIR, "SKILL.md"), "utf8");
   const scalesRef = readFileSync(join(SKILL_DIR, "references", "scales-and-palettes.md"), "utf8");
+  const themesRef = readFileSync(join(SKILL_DIR, "references", "themes.md"), "utf8");
 
   it("states named scheme totals that match COLOR/CATEGORICAL/SEQUENTIAL registries", () => {
     const match = skillMd.match(
@@ -208,6 +212,12 @@ describe("SKILL.md lead-line scheme/theme counts match registries", () => {
     expect(Number(seq![1])).toBe(SEQUENTIAL_SCHEME_NAMES.length);
   });
 
+  it("themes.md product-theme heading carries the product theme total", () => {
+    const match = themesRef.match(/## Product themes \((\d+)\)/);
+    expect(match).not.toBeNull();
+    expect(Number(match![1])).toBe(PRODUCT_THEME_NAMES.length);
+  });
+
   it("lead-line example scheme names are real registry members", () => {
     // Pull the two parenthetical example lists from the scheme lead line.
     const match = skillMd.match(
@@ -221,13 +231,14 @@ describe("SKILL.md lead-line scheme/theme counts match registries", () => {
     expect(unknown).toEqual([]);
   });
 
-  it("lead-line example theme names are real product themes or documented aliases", () => {
-    const match = skillMd.match(/Themes:\s*\d+ names \(([^)]*)\)/);
+  it("SKILL.md theme lead lists every product theme name (comprehensive)", () => {
+    // Themes: T names (`a`, `b`, … plus `grey`/`gray` aliasing `ggplot2`)
+    // Allow multi-line parentheticals: stop at the first `) as` that closes
+    // the lead (the alias note uses `grey`/`gray` without a bare `)`).
+    const match = skillMd.match(/Themes:\s*\d+ names \(([\s\S]*?)\) as/);
     expect(match).not.toBeNull();
-    const known = new Set<string>(PRODUCT_THEME_NAMES);
-    const examples = [...match![1]!.matchAll(/`([^`]+)`/g)].map((m) => m[1]!);
-    expect(examples.length).toBeGreaterThan(0);
-    const unknown = examples.filter((name) => !known.has(name));
-    expect(unknown).toEqual([]);
+    const listed = new Set([...match![1]!.matchAll(/`([^`]+)`/g)].map((m) => m[1]!));
+    const missing = PRODUCT_THEME_NAMES.filter((name) => !listed.has(name));
+    expect(missing).toEqual([]);
   });
 });
