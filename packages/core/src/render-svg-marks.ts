@@ -3,6 +3,7 @@
  * Public: countMarks, pathData. Internal: renderBatch.
  */
 import { renderPrimitiveCount } from "./candidate-geometry.js";
+import { type ResolvedGlow, type ResolvedGradientPaint } from "./mark-paint.js";
 import {
   linetypeDash,
   markLinetype,
@@ -10,9 +11,7 @@ import {
   pointShapePathD,
   resolvePathMark,
   resolvePointMark,
-  type ResolvedGlow,
-  type ResolvedGradientPaint,
-} from "./mark-paint.js";
+} from "./mark-style.js";
 import type {
   GlyphsBatch,
   PathsBatch,

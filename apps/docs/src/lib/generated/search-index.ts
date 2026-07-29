@@ -20040,6 +20040,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Domain"],
   },
   {
+    id: "api:ggsvelte-core:ECONOMIST_PALETTE",
+    kind: "api",
+    title: "ECONOMIST_PALETTE",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["ECONOMIST_PALETTE"],
+  },
+  {
     id: "api:ggsvelte-core:EDITION_DEFAULTS",
     kind: "api",
     title: "EDITION_DEFAULTS",

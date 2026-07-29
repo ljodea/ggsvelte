@@ -9,16 +9,20 @@ import type { CellValue } from "@ggsvelte/core";
 
 import { INTERACTION_DIAGNOSTIC_CATALOG } from "../../src/lib/interaction/interaction.js";
 import {
-  candidateSemanticKeysFromCache,
-  createCandidateKeysProjectionCache,
-  createSourceIdentityTracker,
   dataContentOrderToken,
   dataIdentityEpochToken,
+} from "../../src/lib/runtime/semantic-data-identity.js";
+import {
+  candidateSemanticKeysFromCache,
+  createCandidateKeysProjectionCache,
+} from "../../src/lib/runtime/semantic-keys-projection.js";
+import {
   resolveSemanticKeys,
   resolveSemanticKeysForPlot,
   type SemanticKeyCandidate,
   type SemanticKeyModelView,
-} from "../../src/lib/runtime/semantic-keys.js";
+} from "../../src/lib/runtime/semantic-keys-resolve.js";
+import { createSourceIdentityTracker } from "../../src/lib/runtime/semantic-source-identity.js";
 
 function modelView(options: {
   candidates?: SemanticKeyCandidate[];

@@ -491,8 +491,9 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     tickLength: 3.67,
     gridWidth: 0.5,
     panelBorderWidth: 0.5,
-    axisLineX: true,
-    axisLineY: true,
+    // theme_bw lineage: frame is the panel border only (axisLineX/Y stay false).
+    axisLineX: false,
+    axisLineY: false,
     ticksX: true,
     ticksY: true,
     showPanelBorder: true,
@@ -521,8 +522,9 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     tickLength: 3.67,
     gridWidth: 0.5,
     panelBorderWidth: 0.5,
-    axisLineX: true,
-    axisLineY: true,
+    // theme_bw lineage: frame is the panel border only (axisLineX/Y stay false).
+    axisLineX: false,
+    axisLineY: false,
     ticksX: true,
     ticksY: true,
     showPanelBorder: true,

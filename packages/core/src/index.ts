@@ -82,6 +82,7 @@ export {
   CATEGORICAL_SCHEMES,
   CATEGORICAL_PALETTE_10,
   COLORBLIND_PALETTE,
+  ECONOMIST_PALETTE,
   finiteExtent,
   FLEXOKI_PALETTE,
   IPSUM_PALETTE,
@@ -329,24 +330,21 @@ export {
 /** @lifecycle stable-intent */
 export type { RenderSVGOptions } from "./render-svg.js";
 
-// Within-mark paint (#591) — resource ids, resolved paint, and shared mark style
+// Renderer-neutral mark style (shapes, dash, stroke-null) for SVG/canvas/Svelte
 export {
   areaOutlineActive,
   linetypeDash,
   markLinetype,
-  paintResourceId,
   pointShapeGeometry,
   pointShapePathD,
   resolvePathMark,
   resolvePointMark,
-} from "./mark-paint.js";
-export type {
-  PointShapeGeometry,
-  ResolvedGlow,
-  ResolvedGradientPaint,
-  ResolvedPathMark,
-  ResolvedPointMark,
-} from "./mark-paint.js";
+} from "./mark-style.js";
+export type { PointShapeGeometry, ResolvedPathMark, ResolvedPointMark } from "./mark-style.js";
+
+// Within-mark paint (#591) — resource ids and resolved gradient/glow
+export { paintResourceId } from "./mark-paint.js";
+export type { ResolvedGlow, ResolvedGradientPaint } from "./mark-paint.js";
 
 // CLI implementation (the `ggsvelte-render` bin on the ggsvelte package wraps this)
 export { runCLI } from "./cli.js";

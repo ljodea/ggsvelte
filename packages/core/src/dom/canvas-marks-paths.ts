@@ -2,15 +2,8 @@
 /**
  * Canvas path (and path-subset) drawers.
  */
-import {
-  areaOutlineActive,
-  canvasGradientStyle,
-  linetypeDash,
-  markLinetype,
-  resolvePathMark,
-  subpathBounds,
-  type ResolvedGradientPaint,
-} from "../mark-paint.js";
+import { canvasGradientStyle, subpathBounds, type ResolvedGradientPaint } from "../mark-paint.js";
+import { areaOutlineActive, linetypeDash, markLinetype, resolvePathMark } from "../mark-style.js";
 import type { PathsBatch, RectsBatch, SegmentsBatch } from "../scene.js";
 import type { Linetype } from "../scales/style.js";
 import type { ThemeTokens } from "../theme.js";

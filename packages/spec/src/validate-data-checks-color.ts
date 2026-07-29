@@ -3,7 +3,7 @@
  * Prefers per-use evidenceForUse over the last-wins union so multi-table same-name
  * fields keep independent types (#609 / #844).
  * Shared temporal memoization: validate-data-checks-temporal.ts.
- * Position: validate-data-checks-position.ts. Style: validate-data-checks-style.ts.
+ * Position: validate-data-checks-position.ts. Style: validate-data-checks-style.ts (finite + numeric).
  * Orchestrator: validate-data-checks.ts.
  */
 import type { SpecError } from "./errors.js";

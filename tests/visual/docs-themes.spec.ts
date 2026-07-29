@@ -128,13 +128,14 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
-  await expect(cards).toHaveCount(15);
+  await expect(cards).toHaveCount(16);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Observable 10",
     "Ipsum",
     "Flexoki",
     "Tableau 10",
     "Colorblind",
+    "Economist",
     "Solarized",
     "Set1",
     "Set2",
@@ -152,6 +153,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "8 colors",
     "10 colors",
     "8 colors",
+    "9 colors",
     "8 colors",
     "9 colors",
     "8 colors",

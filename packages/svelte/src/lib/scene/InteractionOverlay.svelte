@@ -10,7 +10,12 @@
     PresentationAnchor,
     PresentationChrome,
   } from "../selection/selection.js";
-  import { normalizedRect } from "./geometry.js";
+  import {
+    gappedCrosshairSegments,
+    HOVER_CROSSHAIR_GAP_RADIUS,
+    HOVER_RING_RADIUS,
+    normalizedRect,
+  } from "./geometry.js";
   type Panel = {
     readonly x: number;
     readonly y: number;
@@ -57,6 +62,32 @@
     areaAwaitingSecond?: boolean;
     committedInterval?: IntervalSelection | null;
   } = $props();
+
+  // Gap guides at the hover ring so they never bisect the focused mark.
+  // Rect chrome keeps continuous guides (`gapRadius = 0`).
+  const crosshairGap = $derived(
+    hoverChrome === "ring" ? HOVER_CROSSHAIR_GAP_RADIUS : 0,
+  );
+  const verticalCrosshair = $derived(
+    inspection !== null && inspectionPanel !== null
+      ? gappedCrosshairSegments(
+          "vertical",
+          inspection.focus.anchor,
+          inspectionPanel,
+          crosshairGap,
+        )
+      : [],
+  );
+  const horizontalCrosshair = $derived(
+    inspection !== null && inspectionPanel !== null
+      ? gappedCrosshairSegments(
+          "horizontal",
+          inspection.focus.anchor,
+          inspectionPanel,
+          crosshairGap,
+        )
+      : [],
+  );
 </script>
 
 <svg
@@ -69,13 +100,15 @@
   {#if interactive && inspection !== null}
     {#if inspection.mode === "xy" || (inspection.mode === "x" && !coordFlipped) || (inspection.mode === "y" && coordFlipped)}
       {#if inspectionPanel}
-        <line
-          class="gg-crosshair"
-          x1={inspection.focus.anchor.x}
-          x2={inspection.focus.anchor.x}
-          y1={inspectionPanel.y}
-          y2={inspectionPanel.y + inspectionPanel.height}
-        />
+        {#each verticalCrosshair as segment, i (`v-${i}`)}
+          <line
+            class="gg-crosshair"
+            x1={segment.x1}
+            x2={segment.x2}
+            y1={segment.y1}
+            y2={segment.y2}
+          />
+        {/each}
         {#if "axisLabel" in inspection}
           <text
             class={`gg-crosshair-axis-label gg-crosshair-axis-label-${inspection.mode}`}
@@ -88,13 +121,15 @@
     {/if}
     {#if inspection.mode === "xy" || (inspection.mode === "y" && !coordFlipped) || (inspection.mode === "x" && coordFlipped)}
       {#if inspectionPanel}
-        <line
-          class="gg-crosshair"
-          x1={inspectionPanel.x}
-          x2={inspectionPanel.x + inspectionPanel.width}
-          y1={inspection.focus.anchor.y}
-          y2={inspection.focus.anchor.y}
-        />
+        {#each horizontalCrosshair as segment, i (`h-${i}`)}
+          <line
+            class="gg-crosshair"
+            x1={segment.x1}
+            x2={segment.x2}
+            y1={segment.y1}
+            y2={segment.y2}
+          />
+        {/each}
         {#if "axisLabel" in inspection}
           <text
             class={`gg-crosshair-axis-label gg-crosshair-axis-label-${inspection.mode}`}
@@ -109,7 +144,7 @@
         class="gg-hover-ring"
         cx={inspection.focus.anchor.x}
         cy={inspection.focus.anchor.y}
-        r="6"
+        r={HOVER_RING_RADIUS}
         fill="none"
       />
     {/if}

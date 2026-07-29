@@ -1,6 +1,6 @@
 /**
  * Position scale authoring helpers (x/y continuous, binned, temporal, discrete).
- * Color/fill helpers: scale-color-helpers.ts. Facade re-exports: scale-helpers.ts.
+ * Color/fill helpers: scale-color-helpers.ts (+ viridis/stops/hue-grey siblings). Facade re-exports: scale-helpers.ts.
  */
 
 import type { TemporalScaleKind } from "./temporal-parse-core.js";

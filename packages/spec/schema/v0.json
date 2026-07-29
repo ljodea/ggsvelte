@@ -6035,6 +6035,10 @@
                 },
                 {
                   "type": "string",
+                  "const": "economist"
+                },
+                {
+                  "type": "string",
                   "const": "solarized"
                 },
                 {

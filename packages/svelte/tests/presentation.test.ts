@@ -143,6 +143,54 @@ describe("DESIGN.md interaction presentation", () => {
     expect(container.querySelector(".gg-crosshair")?.getAttribute("stroke-dasharray")).toBeNull();
   });
 
+  it("gaps xy crosshairs at the hover ring so they do not bisect the focus", async () => {
+    const { container } = render(GGPlot, {
+      data: rows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+      inspect: { mode: "xy" },
+      width: 480,
+      height: 320,
+    });
+    const capture = container.querySelector<HTMLElement>(".gg-capture")!;
+    capture.focus();
+    capture.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+    await expect.poll(() => container.querySelector(".gg-hover-ring")).not.toBeNull();
+    const ring = container.querySelector<SVGCircleElement>(".gg-hover-ring")!;
+    const cx = Number(ring.getAttribute("cx"));
+    const cy = Number(ring.getAttribute("cy"));
+    const r = Number(ring.getAttribute("r"));
+    const lines = [...container.querySelectorAll<SVGLineElement>(".gg-crosshair")];
+    // Two axes × two segments when focus is interior.
+    expect(lines.length).toBeGreaterThanOrEqual(4);
+    for (const line of lines) {
+      const x1 = Number(line.getAttribute("x1"));
+      const y1 = Number(line.getAttribute("y1"));
+      const x2 = Number(line.getAttribute("x2"));
+      const y2 = Number(line.getAttribute("y2"));
+      // No segment endpoint may land inside the hover ring; the guide hole
+      // must clear the focused mark under the halo.
+      for (const [x, y] of [
+        [x1, y1],
+        [x2, y2],
+      ] as const) {
+        const dist = Math.hypot(x - cx, y - cy);
+        expect(dist).toBeGreaterThanOrEqual(r);
+      }
+      // Segment must not cross the focus point itself.
+      const vertical = x1 === x2;
+      if (vertical) {
+        const lo = Math.min(y1, y2);
+        const hi = Math.max(y1, y2);
+        expect(cy < lo || cy > hi || Math.abs(x1 - cx) > 0.5).toBe(true);
+      } else {
+        const lo = Math.min(x1, x2);
+        const hi = Math.max(x1, x2);
+        expect(cx < lo || cx > hi || Math.abs(y1 - cy) > 0.5).toBe(true);
+      }
+    }
+  });
+
   it("keeps extracted tool rail and overlay positioned as plot-root siblings", async () => {
     const narrow = render(GGPlot, {
       data: rows,

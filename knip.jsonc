@@ -15,6 +15,9 @@
     "packages/spec/src/scale-helpers.ts": ["duplicates"],
     "packages/spec/src/scale-position-helpers.ts": ["duplicates"],
     "packages/spec/src/scale-color-helpers.ts": ["duplicates"],
+    "packages/spec/src/scale-color-viridis.ts": ["duplicates"],
+    "packages/spec/src/scale-color-stops.ts": ["duplicates"],
+    "packages/spec/src/scale-color-hue-grey.ts": ["duplicates"],
     "packages/spec/src/scale-style-helpers.ts": ["duplicates"],
     "packages/spec/src/scale-multi-helpers.ts": ["duplicates"],
     "packages/spec/src/coord-helpers.ts": ["duplicates"],
@@ -75,8 +78,8 @@
       "entry": ["src/routes/**/+*.ts", "src/lib/**/*.ts", "tests/**/*.test.ts"],
       "project": ["src/**/*.ts", "tests/**/*.ts", "*.{js,ts}"],
       // Imported only from .svelte files / the $examples alias, which knip
-      // does not trace. phosphor-svelte / bits-ui are deep-imported only from .svelte.
-      "ignoreDependencies": ["@ggsvelte/examples", "phosphor-svelte", "bits-ui"],
+      // does not trace. bits-ui is deep-imported only from .svelte.
+      "ignoreDependencies": ["@ggsvelte/examples", "bits-ui"],
     },
   },
 }

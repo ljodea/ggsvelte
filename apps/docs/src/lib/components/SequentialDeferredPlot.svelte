@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { base } from "$app/paths";
   import { onMount } from "svelte";
   import type { ColorScaleSpec } from "@ggsvelte/spec";
 
@@ -7,12 +8,12 @@
   const {
     label,
     scale,
-    staticSvg,
+    staticSrc,
     height = 360,
   }: {
     label: string;
     scale: ColorScaleSpec;
-    staticSvg: string;
+    staticSrc: string;
     height?: number;
   } = $props();
 
@@ -46,7 +47,15 @@
   {#if Live !== null}
     <Live {label} {scale} {height} />
   {:else}
-    {@html staticSvg}
+    <img
+      class="static-shell"
+      src={`${base}${staticSrc}`}
+      alt=""
+      width="832"
+      {height}
+      decoding="async"
+      loading="lazy"
+    />
   {/if}
 </div>
 
@@ -56,7 +65,8 @@
     min-width: 0;
   }
 
-  .plot-panel :global(svg) {
+  .plot-panel :global(svg),
+  .static-shell {
     display: block;
     max-width: 100%;
     height: auto;

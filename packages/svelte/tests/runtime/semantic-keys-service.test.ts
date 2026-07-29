@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { RenderModel } from "@ggsvelte/core";
 
-import { createSourceIdentityTracker } from "../../src/lib/runtime/semantic-keys.js";
+import { createSourceIdentityTracker } from "../../src/lib/runtime/semantic-source-identity.js";
 import { createSemanticKeyService } from "../../src/lib/runtime/semantic-keys.svelte.js";
 import { withEffectRoot, withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
 import { buildPointModel } from "../helpers/point-model.js";

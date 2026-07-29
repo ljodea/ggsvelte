@@ -79,6 +79,24 @@ export const COLORBLIND_PALETTE: readonly string[] = [
 ];
 
 /**
+ * ggthemes economist_pal(fill = TRUE) at full capacity (n = 9 selection):
+ * blue-gray, dark blue, blue, light blue, dark green, light green, dark red,
+ * pink, gray. ggthemes re-selects per n; this port flattens to the fixed
+ * full-capacity order (prefix subsets approximate the smaller-n picks).
+ */
+export const ECONOMIST_PALETTE: readonly string[] = [
+  "#6794a7",
+  "#014d64",
+  "#01a2d9",
+  "#7ad2f6",
+  "#00887d",
+  "#76c0c1",
+  "#7c260b",
+  "#ee8f71",
+  "#adadad",
+];
+
+/**
  * ggthemes solarized_pal(accent = "blue") at full capacity: the eight
  * Solarized accents with the default blue first, then the remaining accents
  * in source order (ggthemes' max-L*a*b-distance pick is order-degenerate at
@@ -105,6 +123,7 @@ export const CATEGORICAL_SCHEMES = {
   flexoki: FLEXOKI_PALETTE,
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
+  economist: ECONOMIST_PALETTE,
   solarized: SOLARIZED_PALETTE,
   ...COLORBREWER_QUALITATIVE,
   hue: HUE_PALETTE_10,
