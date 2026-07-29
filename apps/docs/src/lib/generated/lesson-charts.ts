@@ -67,7 +67,6 @@ export const LESSON_CHARTS: readonly LessonChartEntry[] = [
   { step: 1, filename: "step-2.svg" },
   { step: 2, filename: "step-3.svg" },
   { step: 3, filename: "step-4.svg" },
-  { step: 4, filename: "step-5.svg" },
 ];
 
 /** Step indexes rendered live in the browser (interaction is the point). */

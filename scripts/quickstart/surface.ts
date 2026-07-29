@@ -5,7 +5,9 @@
  * Not part of the human walkthrough fold — see GettingStartedGuide and llms.
  */
 
-import { QUICKSTART_PAGE_SVELTE } from "./fold";
+import type { PortableSpec } from "@ggsvelte/spec";
+
+import { foldSakura, QUICKSTART_PAGE_SVELTE } from "./fold";
 import { SAKURA_BINWIDTH, SAKURA_STEPS } from "./steps";
 
 /**
@@ -54,22 +56,32 @@ const spec = gg(kyotoSakura, aes({ x: "year", y: "bloomDate" }))
   .spec();`;
 
 /**
- * Named dataset reference — same convention as the homepage agent JSON.
- * Hosts resolve `kyotoSakura` from `@ggsvelte/svelte/data` (or a file of the
- * same name). Do not paste a partial inline sample as if it were the series.
+ * Finished lesson chart as PortableSpec JSON for agents.
+ *
+ * Derived from `foldSakura(SAKURA_STEPS.length)` so layers, scales, theme, and
+ * guides cannot drift from the finished Svelte file or the live chart. Plot
+ * data is a named ref (`kyotoSakura`) — hosts resolve it from
+ * `@ggsvelte/svelte/data`. Small annotation tables (epochs, records) stay as
+ * inline `values` because they are chart decoration, not the 838-row series.
+ * `key` / `inspect` are GGPlot host props, not PortableSpec fields.
  */
-export const QUICKSTART_PORTABLE_SPEC_FRAGMENT = `{
-  "data": { "name": "kyotoSakura" },
-  "aes": { "x": { "field": "year" }, "y": { "field": "bloomDate" } },
-  "layers": [
-    { "geom": "point", "params": { "alpha": 0.5 } },
-    {
-      "geom": "line",
-      "stat": "summary_bin",
-      "params": { "fun": "median", "binwidth": ${SAKURA_BINWIDTH}, "curve": "step-hv" }
-    }
-  ]
-}`;
+export function finishedPortableSpecNamed(): PortableSpec {
+  const { spec } = foldSakura(SAKURA_STEPS.length);
+  return {
+    ...spec,
+    data: { name: "kyotoSakura" },
+  };
+}
+
+/**
+ * Pretty-printed finished PortableSpec. Same object as
+ * {@link finishedPortableSpecNamed} — string form for copy blocks / llms.
+ */
+export const QUICKSTART_PORTABLE_SPEC_FRAGMENT = `${JSON.stringify(
+  finishedPortableSpecNamed(),
+  null,
+  2,
+)}\n`;
 
 export const QUICKSTART_HEADLESS_FRAGMENT = `import { renderToSVGString } from "@ggsvelte/core";
 

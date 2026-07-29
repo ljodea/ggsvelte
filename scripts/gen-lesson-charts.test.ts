@@ -21,7 +21,7 @@ const DIR = new URL("../apps/docs/static/lesson", import.meta.url).pathname;
 
 describe("lesson step charts", () => {
   it("covers the first render and every step", () => {
-    expect(staticLessonSteps()).toEqual([-1, 0, 1, 2, 3, 4]);
+    expect(staticLessonSteps()).toEqual([-1, 0, 1, 2, 3]);
     expect(LESSON_CHARTS.map((entry) => entry.filename)).toEqual(
       staticLessonSteps().map((step) => lessonChartFilename(step)),
     );

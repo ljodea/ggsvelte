@@ -188,9 +188,16 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     title: "Pick a minimal theme and add a rolling median line",
     outcome: "",
     explanation: "",
-    // Theme early: gridless Tufte chrome with the trend step, so band edges
-    // later never fight default gridlines.
+    // Theme + trend + y-tick polish in one step. Reverse already ships on the
+    // first render (base fold); this only sets readable Apr day breaks, date
+    // labels, and a domain strip for later epoch names — not a second reverse.
     fragment: `<ThemeTufte />
+<ScaleYMonthDay
+  reverse
+  breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
+  dateLabels="%b %e"
+  domain={["${DOMAIN_BOTTOM}", "${DOMAIN_TOP}"]}
+/>
 <GeomPoint alpha={0.5} size={1.6}
   aes={{ color: { value: "#777777" } }} />
 <GeomLine stat="summary_bin" fun="median" binwidth={${SAKURA_BINWIDTH}}
@@ -198,6 +205,17 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   aes={{ color: { value: "#262626" } }} />`,
     spec: {
       theme: "tufte",
+      scales: {
+        y: {
+          type: "time",
+          temporalKind: "monthDay",
+          reverse: true,
+          breaks: [...SAKURA_Y_BREAKS],
+          dateLabels: "%b %e",
+          domain: [DOMAIN_BOTTOM, DOMAIN_TOP],
+        },
+      },
+      labs: { x: "Year", y: SAKURA_Y_LAB },
       layers: {
         points: {
           geom: "point",
@@ -222,6 +240,13 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
       components: ["GeomLine", "ThemeTufte"],
       grammar: {
         theme: `  <ThemeTufte />`,
+        scaleY: `  <ScaleYMonthDay
+    reverse
+    breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
+    dateLabels="%b %e"
+    domain={["${DOMAIN_BOTTOM}", "${DOMAIN_TOP}"]}
+  />`,
+        labs: `  <Labs x="Year" y="${SAKURA_Y_LAB}" />`,
       },
       children: {
         points: `  <GeomPoint
@@ -239,45 +264,6 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   />`,
       },
       childOrder: ["points", "trend"],
-    },
-  },
-  {
-    id: "put-earlier-bloom-on-top",
-    title: "Put earlier bloom on top",
-    outcome: "",
-    explanation: "",
-    // X scale (labels + domain) already lives on the first render so year ticks
-    // stay stable. This step only upgrades the reversed month-day y scale.
-    fragment: `<ScaleYMonthDay
-  reverse
-  breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
-  dateLabels="%b %e"
-  domain={["${DOMAIN_BOTTOM}", "${DOMAIN_TOP}"]}
-/>`,
-    spec: {
-      scales: {
-        y: {
-          type: "time",
-          temporalKind: "monthDay",
-          reverse: true,
-          breaks: [...SAKURA_Y_BREAKS],
-          dateLabels: "%b %e",
-          domain: [DOMAIN_BOTTOM, DOMAIN_TOP],
-        },
-      },
-      labs: { x: "Year", y: SAKURA_Y_LAB },
-    },
-    source: {
-      components: ["ScaleYMonthDay"],
-      grammar: {
-        scaleY: `  <ScaleYMonthDay
-    reverse
-    breaks={[${SAKURA_Y_BREAKS.map((d) => `"${d}"`).join(", ")}]}
-    dateLabels="%b %e"
-    domain={["${DOMAIN_BOTTOM}", "${DOMAIN_TOP}"]}
-  />`,
-        labs: `  <Labs x="Year" y="${SAKURA_Y_LAB}" />`,
-      },
     },
   },
   {

@@ -18,8 +18,10 @@ import {
   SAKURA_PANEL_ASPECT,
 } from "./gen-lesson-charts.ts";
 import {
+  finishedPortableSpecNamed,
   foldSakura,
   QUICKSTART_PAGE_SVELTE,
+  QUICKSTART_PORTABLE_SPEC_FRAGMENT,
   quickstartAriaLabel,
   SAKURA_BASELINE,
   SAKURA_RECORDS,
@@ -98,8 +100,8 @@ describe("the sakura lesson folds to renderable specs", () => {
       const spec = foldSakura(count, rows).spec as { layers: unknown[] };
       return spec.layers.length;
     });
-    // base → signal → scales/theme → epochs (no edge rules) → annotate → finish
-    expect(layerCounts).toEqual([1, 2, 2, 4, 7, 7]);
+    // base → theme+trend+y-ticks → epochs → annotate → finish
+    expect(layerCounts).toEqual([1, 2, 4, 7, 7]);
     for (let i = 1; i < layerCounts.length; i += 1) {
       expect(layerCounts[i]!).toBeGreaterThanOrEqual(layerCounts[i - 1]!);
     }
@@ -161,6 +163,39 @@ describe("the sakura lesson folds to renderable specs", () => {
     // And nothing is silently dropped: every layer named in the final order is
     // drawn in the file.
     expect(lastChild.size).toBe((finished.spec.layers as unknown[]).length);
+    // Callout leaders are still part of the finished wide chart — source must
+    // not claim layers the fold dropped (or omit layers the fold still draws).
+    const geoms = (finished.spec.layers as { geom: string }[]).map((layer) => layer.geom);
+    expect(geoms).toContain("segment");
+    expect(SAKURA_FINISHED_SVELTE).toContain("<GeomSegment");
+    expect(geoms).toEqual(["rect", "text", "point", "rule", "line", "segment", "text"]);
+  });
+
+  it("publishes agent JSON that is the finished fold with named plot data only", () => {
+    // No hand-authored stub: the JSON copy block must match foldSakura except
+    // plot data is { name: "kyotoSakura" } (never a partial inline sample of
+    // the 838-row series). Annotation tables (epochs, records) stay as values.
+    const named = finishedPortableSpecNamed();
+    expect(named.data).toEqual({ name: "kyotoSakura" });
+    expect(named).not.toHaveProperty("datasets");
+    // No bogus inline sample of the series — named ref only at plot level.
+    expect(JSON.stringify(named.data)).not.toMatch(/812|"bloomDate"/);
+    const parsed = JSON.parse(QUICKSTART_PORTABLE_SPEC_FRAGMENT) as typeof named;
+    expect(parsed).toEqual(named);
+
+    const { data: _plotData, ...finishedWithoutData } = finished.spec;
+    const { data: namedData, ...namedWithoutData } = named;
+    expect(namedData).toEqual({ name: "kyotoSakura" });
+    expect(namedWithoutData).toEqual(finishedWithoutData);
+    // Agent JSON must carry every finished layer geom — not a point+line fiction.
+    const geoms = (named.layers as { geom: string }[]).map((layer) => layer.geom);
+    expect(geoms).toEqual(["rect", "text", "point", "rule", "line", "segment", "text"]);
+    expect(named.theme).toBe("tufte");
+    expect(named.scales?.y).toMatchObject({
+      temporalKind: "monthDay",
+      reverse: true,
+      dateLabels: "%b %e",
+    });
   });
 
   it("prints fragments that carry the values the chart is rendered with", () => {
@@ -174,17 +209,16 @@ describe("the sakura lesson folds to renderable specs", () => {
       [0, 'curve="step-hv"', '"curve":"step-hv"'],
       [0, "alpha={0.5}", '"alpha":0.5'],
       [0, "<ThemeTufte />", '"theme":"tufte"'],
-      [1, "reverse", '"reverse":true'],
-      [1, "ScaleYMonthDay", '"dateLabels":"%b %e"'],
-      [1, SAKURA_Y_BREAKS[0], `"breaks":${JSON.stringify([...SAKURA_Y_BREAKS])}`],
-      [2, "x: null", '"x":null'],
-      [2, 'fill: "epoch"', '"fill":{"field":"epoch"}'],
-      [2, "GuideNone", '"fill":{"type":"none"}'],
-      [2, 'label: "epoch"', '"label":{"field":"epoch"}'],
-      [2, "ScaleFillManual", '"type":"manual"'],
-      [3, SAKURA_BASELINE, `"yintercept":"${SAKURA_BASELINE}"`],
-      [3, '"#b3452f"', '"value":"#b3452f"'],
-      [4, 'key="year"', ""],
+      [0, "ScaleYMonthDay", '"dateLabels":"%b %e"'],
+      [0, SAKURA_Y_BREAKS[0], `"breaks":${JSON.stringify([...SAKURA_Y_BREAKS])}`],
+      [1, "x: null", '"x":null'],
+      [1, 'fill: "epoch"', '"fill":{"field":"epoch"}'],
+      [1, "GuideNone", '"fill":{"type":"none"}'],
+      [1, 'label: "epoch"', '"label":{"field":"epoch"}'],
+      [1, "ScaleFillManual", '"type":"manual"'],
+      [2, SAKURA_BASELINE, `"yintercept":"${SAKURA_BASELINE}"`],
+      [2, '"#b3452f"', '"value":"#b3452f"'],
+      [3, 'key="year"', ""],
     ];
     for (const [index, inFragment, inSpec] of pairs) {
       const step = SAKURA_STEPS[index]!;
@@ -234,7 +268,8 @@ describe("the sakura lesson folds to renderable specs", () => {
 });
 
 describe("gate G1 — the reversed temporal y-axis", () => {
-  const reversed = foldSakura(2, rows);
+  // After the merged theme/median/y-tick step (count 1), y has Apr day breaks.
+  const reversed = foldSakura(1, rows);
 
   it("formats bloom days as dates, not numbers", () => {
     const ticks = yTicks(reversed.spec);
@@ -392,8 +427,8 @@ describe("gate G8 — annotations that do not fight the chart", () => {
 
 describe("gate G4 — the binned-median step trend", () => {
   it("draws a step path of bin medians, not a loess or the raw points", () => {
-    // foldSakura(2): trend + reversed date axis (the finished reading order).
-    const model = runPipeline(foldSakura(2, rows).spec, { width: 900, height: 360 });
+    // foldSakura(1): theme + trend + y-tick polish (finished reading order for signal).
+    const model = runPipeline(foldSakura(1, rows).spec, { width: 900, height: 360 });
     const trend = model.scene.batches.find((batch) => batch.kind === "paths");
     expect(trend).toBeDefined();
     expect(trend!.curve).toBe("step-hv");
@@ -405,7 +440,7 @@ describe("gate G4 — the binned-median step trend", () => {
   });
 
   it("reads as one signal: flat for a millennium, then early", () => {
-    const model = runPipeline(foldSakura(2, rows).spec, { width: 900, height: 360 });
+    const model = runPipeline(foldSakura(1, rows).spec, { width: 900, height: 360 });
     const trend = model.scene.batches.find((batch) => batch.kind === "paths");
     expect(trend).toBeDefined();
     // Screen y grows downward; reverse date scale puts earlier bloom higher
@@ -435,7 +470,7 @@ describe("gate G5 — climate epoch bands claim periods, not the record", () => 
   });
 
   it("folds those bounds into the rect layer and the source const", () => {
-    const folded = foldSakura(3, rows);
+    const folded = foldSakura(2, rows);
     const epochs = folded.spec.layers.find((layer) => layer.geom === "rect");
     expect(epochs?.data).toEqual({ values: SAKURA_EPOCHS });
     expect(folded.source).toContain("year: 950, until: 1250");
@@ -480,7 +515,7 @@ function layerWithValues(layers: readonly { data?: unknown }[], values: unknown)
  */
 describe("gate G7 — epoch bands never capture inspection (#1068)", () => {
   const size = { width: 900, height: 480 } as const;
-  const epochStep = SAKURA_STEPS[2]!;
+  const epochStep = SAKURA_STEPS[1]!;
 
   it("opts epochs out of inspection in the step delta", () => {
     expect(epochStep.id).toBe("add-epoch-bands");
@@ -489,8 +524,8 @@ describe("gate G7 — epoch bands never capture inspection (#1068)", () => {
   });
 
   it("folds inspect: false onto the decorative epoch layers from the step that introduces them", () => {
-    // foldSakura(3) = first three steps; step 2 is add-epoch-bands.
-    const folded = foldSakura(3, rows);
+    // foldSakura(2) = first two steps; step 1 is add-epoch-bands.
+    const folded = foldSakura(2, rows);
     const epochs = folded.spec.layers[layerWithValues(folded.spec.layers, SAKURA_EPOCHS)];
     expect(epochs?.geom).toBe("rect");
     expect(epochs?.inspect).toBe(false);
@@ -504,7 +539,7 @@ describe("gate G7 — epoch bands never capture inspection (#1068)", () => {
     // Force the source/fragment red first; the component-prop whitelist is
     // widened only after this assertion would otherwise fail for the right reason.
     expect(epochStep.fragment).toContain("inspect={false}");
-    const folded = foldSakura(3, rows);
+    const folded = foldSakura(2, rows);
     expect(folded.source).toContain("inspect={false}");
     expect(folded.source).toMatch(/<GeomRect[\s\S]*?inspect=\{false\}/);
     expect(folded.source).toMatch(/<GeomText[\s\S]*?inspect=\{false\}/);
