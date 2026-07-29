@@ -31,7 +31,7 @@ const HOME_CODE_PATH_SVELTE = `<script lang="ts">
   height={400}
 >
   <GeomPoint alpha={0.72} />
-  <GeomSmooth method="loess" span={0.75} se={false} />
+  <GeomSmooth method="loess" span={0.75} degree={1} se={false} />
 </GGPlot>
 `;
 
@@ -46,7 +46,7 @@ const HOME_CODE_PATH_BUILDER = `<script lang="ts">
     aes({ x: "flipperLengthMm", y: "bodyMassG", color: "species" }),
   )
     .geomPoint({ alpha: 0.72 })
-    .geomSmooth({ method: "loess", span: 0.75, se: false })
+    .geomSmooth({ method: "loess", span: 0.75, degree: 1, se: false })
     .spec();
 </script>
 
@@ -95,6 +95,7 @@ const HOME_CODE_PATH_SPEC_JSON = `{
         "params": {
           "method": "loess",
           "span": 0.75,
+          "degree": 1,
           "se": false
         }
       }

@@ -59,7 +59,8 @@
       <Theme name={chartTheme} />
       <GeomPoint alpha={0.72} />
       {#if active >= 2}
-        <GeomSmooth method="loess" span={0.75} se={false} />
+        <!-- degree 1: local-linear loess stays cheap when remounting on 333 rows. -->
+        <GeomSmooth method="loess" span={0.75} degree={1} se={false} />
       {/if}
     </GGPlot>
   </div>
