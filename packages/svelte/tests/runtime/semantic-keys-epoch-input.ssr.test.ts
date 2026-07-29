@@ -6,9 +6,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildDataIdentityEpochInput,
-  createSourceIdentityTracker,
   dataIdentityEpochToken,
-} from "../../src/lib/runtime/semantic-keys.js";
+} from "../../src/lib/runtime/semantic-data-identity.js";
+import { createSourceIdentityTracker } from "../../src/lib/runtime/semantic-source-identity.js";
 
 describe("buildDataIdentityEpochInput", () => {
   it("uses registry markLayers when the layers prop is absent (not union layers)", () => {
