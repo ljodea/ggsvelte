@@ -19,8 +19,8 @@ export const SAKURA_BASELINE = "04-15";
 /** Y-axis tick positions: three month-days, matching the reference chart. */
 export const SAKURA_Y_BREAKS = ["04-05", "04-15", "04-25"] as const;
 
-/** Y-axis title: the quantity (a date), with earlier up. */
-export const SAKURA_Y_LAB = "Bloom date (earlier ↑)";
+/** Y-axis title: the quantity (a date). Reverse scale puts earlier blooms higher. */
+export const SAKURA_Y_LAB = "Bloom date";
 
 /**
  * Plot domain top (earlier / higher on the reversed date axis). Leaves a
