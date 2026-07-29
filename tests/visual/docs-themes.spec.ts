@@ -136,7 +136,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
-  await expect(cards).toHaveCount(30);
+  await expect(cards).toHaveCount(31);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Observable 10",
     "Ipsum",
@@ -156,6 +156,10 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "WSJ Red/Green",
     "WSJ Black/Green",
     "WSJ Dem/Rep",
+    "Google Docs",
+    "Highcharts",
+    "Highcharts Dark",
+    "Pander",
     "Set1",
     "Set2",
     "Set3",
