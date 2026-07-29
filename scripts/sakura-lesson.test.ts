@@ -22,7 +22,6 @@ import {
   foldSakura,
   QUICKSTART_PAGE_SVELTE,
   QUICKSTART_PORTABLE_SPEC_FRAGMENT,
-  quickstartAriaLabel,
   SAKURA_BASELINE,
   SAKURA_RECORDS,
   SAKURA_BINWIDTH,
@@ -107,12 +106,9 @@ describe("the sakura lesson folds to renderable specs", () => {
     }
   });
 
-  it("exposes aria-label from the folded starting page", () => {
-    // consumer-compat also asserts this against a packed app; keep a direct
-    // unit guard so the extractor stays covered without that harness.
-    expect(quickstartAriaLabel()).toBe(
-      "Kyoto peak bloom, 812 to 2026: about a week earlier since 1850",
-    );
+  it("keeps the basic plot free of production polish props", () => {
+    // ariaLabel is production polish — not what a new reader should copy first.
+    expect(QUICKSTART_PAGE_SVELTE).not.toContain("ariaLabel");
     expect(QUICKSTART_PAGE_SVELTE).not.toContain("<svelte:head>");
   });
 

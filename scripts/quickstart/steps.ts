@@ -268,7 +268,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   },
   {
     id: "add-epoch-bands",
-    title: "Add epoch bands",
+    title: "Add epochs",
     outcome: "",
     explanation: "",
     // inspect: false — bands are labelled decoration (#1068). A full-panel
@@ -469,7 +469,7 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
   },
   {
     id: "finish-it",
-    title: "Finish it",
+    title: "Make it interactive",
     outcome: "",
     explanation: "",
     // No title/subtitle/caption: chrome would squash the data panel. Citation

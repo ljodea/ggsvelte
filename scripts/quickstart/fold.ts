@@ -9,8 +9,6 @@ import type { GuidesSpec, Labs, LayerSpec, PortableSpec, Scales, ThemeName } fro
 
 import { SAKURA_STEPS, SAKURA_Y_LAB } from "./steps";
 
-const ARIA_LABEL = "Kyoto peak bloom, 812 to 2026: about a week earlier since 1850";
-
 /** A row of the plot-level dataset (the shape kyotoSakura rows have). */
 export type SakuraRow = Record<string, string | number>;
 
@@ -132,7 +130,9 @@ export function foldSakura(
     ...(theme !== undefined && { theme }),
   };
 
-  attrs.set("ariaLabel", `  ariaLabel="${ARIA_LABEL}"`);
+  // No ariaLabel in the lesson sources: the basic plot is for learning the
+  // grammar, and an accessible name is a production polish step — not the
+  // first thing a new reader should copy. Hosts still get a generated label.
   const imported = [...components].toSorted((a, b) => a.localeCompare(b));
   // Wrap the component import once it stops fitting on one readable line.
   const imports =

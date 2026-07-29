@@ -6168,12 +6168,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "heading:guide-getting-started:add-epoch-bands",
     kind: "heading",
-    title: "Add epoch bands",
+    title: "Add epochs",
     summary:
-      "Add epoch bands in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
+      "Add epochs in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#add-epoch-bands",
     keywords: ["Getting started", "Start"],
-    exact: ["Add epoch bands"],
+    exact: ["Add epochs"],
   },
   {
     id: "heading:guide-getting-started:annotate-record-years",
@@ -6188,12 +6188,12 @@ export const DOCS_SEARCH_INDEX = [
   {
     id: "heading:guide-getting-started:finish-it",
     kind: "heading",
-    title: "Finish it",
+    title: "Make it interactive",
     summary:
-      "Finish it in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
+      "Make it interactive in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
     href: "/guide/getting-started#finish-it",
     keywords: ["Getting started", "Start"],
-    exact: ["Finish it"],
+    exact: ["Make it interactive"],
   },
   {
     id: "heading:guide-getting-started:the-finished-file",
