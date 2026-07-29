@@ -25,12 +25,6 @@ export interface ConsumeIntervalKeysInput<Key extends PropertyKey> {
   readonly candidates: readonly IntervalConsumptionCandidate<Key>[];
 }
 
-export interface RecomputePanelIntervalKeysInput<Key extends PropertyKey> {
-  readonly panelId: string;
-  readonly domains: ReadonlyIntervalDomains;
-  readonly candidates: readonly IntervalConsumptionCandidate<Key>[];
-}
-
 /**
  * Candidate bag for a single-pass panel recompute: consumption fields plus
  * optional source-row indexes (lineage ∪ rowIndex) for lineageCount.
@@ -85,13 +79,6 @@ function prepareCandidateInInterval(
   return (candidate) =>
     (xContains === undefined || xContains(candidate.xValue)) &&
     (yContains === undefined || yContains(candidate.yValue));
-}
-
-export function candidateInInterval(
-  candidate: Pick<IntervalConsumptionCandidate<PropertyKey>, "xValue" | "yValue">,
-  domains: ReadonlyIntervalDomains,
-): boolean {
-  return prepareCandidateInInterval(domains)(candidate);
 }
 
 function uniqueKeys<Key extends PropertyKey>(candidates: Iterable<readonly Key[]>): readonly Key[] {
@@ -237,11 +224,4 @@ export function recomputePanelIntervalProjection<Key extends PropertyKey>(
     keys: Object.freeze([...keys]),
     lineageCount: trackRows ? rows.size : 0,
   };
-}
-
-/** Recompute one panel's committed keys after an exact bounds edit. */
-export function recomputePanelIntervalKeys<Key extends PropertyKey>(
-  input: RecomputePanelIntervalKeysInput<Key>,
-): readonly Key[] {
-  return recomputePanelIntervalProjection(input).keys;
 }

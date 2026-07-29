@@ -78,12 +78,70 @@ export const COLORBLIND_PALETTE: readonly string[] = [
   "#CC79A7",
 ];
 
-/**
- * ggthemes gdocs_pal() — Google Docs chart colors: the six brand hues in
- * four decreasing strengths. Copied verbatim from the upstream YAML,
- * including its duplicated "teal 2" entry (#ff994d); the doc comment
- * upstream claims 20 colors but the table holds 24.
- */
+export const ECONOMIST_PALETTE: readonly string[] = [
+  "#6794a7",
+  "#014d64",
+  "#01a2d9",
+  "#7ad2f6",
+  "#00887d",
+  "#76c0c1",
+  "#7c260b",
+  "#ee8f71",
+  "#adadad",
+];
+
+export const FEW_PALETTE: readonly string[] = [
+  "#5DA5DA",
+  "#FAA43A",
+  "#60BD68",
+  "#F17CB0",
+  "#B2912F",
+  "#B276B2",
+  "#DECF3F",
+  "#F15854",
+];
+
+export const FEW_LIGHT_PALETTE: readonly string[] = [
+  "#88BDE6",
+  "#FBB258",
+  "#90CD97",
+  "#F6AAC9",
+  "#BFA554",
+  "#BC99C7",
+  "#EDDD46",
+  "#F07E6E",
+];
+
+export const FEW_DARK_PALETTE: readonly string[] = [
+  "#265DAB",
+  "#DF5C24",
+  "#059748",
+  "#E5126F",
+  "#9D722A",
+  "#7B3A96",
+  "#C7B42E",
+  "#CB2027",
+];
+
+export const FIVETHIRTYEIGHT_PALETTE: readonly string[] = ["#008FD5", "#FF2700", "#77AB43"];
+
+export const PTOL_PALETTE: readonly string[] = [
+  "#332288",
+  "#6699CC",
+  "#88CCEE",
+  "#44AA99",
+  "#117733",
+  "#999933",
+  "#DDCC77",
+  "#661100",
+  "#CC6677",
+  "#AA4466",
+  "#882255",
+  "#AA4499",
+];
+
+export const CANVA_PALETTE: readonly string[] = ["#f98866", "#ff420e", "#80bd9e", "#89da59"];
+
 export const GDOCS_PALETTE: readonly string[] = [
   "#4285f4",
   "#ea4335",
@@ -111,7 +169,6 @@ export const GDOCS_PALETTE: readonly string[] = [
   "#edf8f9",
 ];
 
-/** ggthemes hc_pal("default") — Highcharts default 10 colors. */
 export const HC_PALETTE: readonly string[] = [
   "#7cb5ec",
   "#434348",
@@ -125,7 +182,6 @@ export const HC_PALETTE: readonly string[] = [
   "#91e8e1",
 ];
 
-/** ggthemes hc_pal("darkunica") — Highcharts dark-unica 11 colors (verbatim, with its trailing repeats). */
 export const HC_DARK_PALETTE: readonly string[] = [
   "#2b908f",
   "#90ee7e",
@@ -140,11 +196,6 @@ export const HC_DARK_PALETTE: readonly string[] = [
   "#aaeeee",
 ];
 
-/**
- * ggthemes palette_pander() — the pander package's colorblind- and
- * printer-friendly eight (borrowed from jfly.iam.u-tokyo.ac.jp/color):
- * the Okabe-Ito hues in pander's order, with #999999 in place of black.
- */
 export const PANDER_PALETTE: readonly string[] = [
   "#56B4E9",
   "#009E73",
@@ -163,6 +214,13 @@ export const CATEGORICAL_SCHEMES = {
   flexoki: FLEXOKI_PALETTE,
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
+  economist: ECONOMIST_PALETTE,
+  few: FEW_PALETTE,
+  few_light: FEW_LIGHT_PALETTE,
+  few_dark: FEW_DARK_PALETTE,
+  fivethirtyeight: FIVETHIRTYEIGHT_PALETTE,
+  ptol: PTOL_PALETTE,
+  canva: CANVA_PALETTE,
   gdocs: GDOCS_PALETTE,
   hc: HC_PALETTE,
   hc_dark: HC_DARK_PALETTE,

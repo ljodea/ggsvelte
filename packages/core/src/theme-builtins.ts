@@ -464,6 +464,74 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     showPanelBorder: false,
     tickLength: 0,
   }),
+  // ggthemes theme_economist_white (gray_bg = TRUE): the Graphic Detail blog
+  // variant of theme_economist — white panel on a light-gray (#ebebeb) plot
+  // background with a dark-gray (#c9c9c9) major grid. R builds it as
+  // theme_economist() + surface overrides, so this port keeps the economist
+  // chrome (ink, ticks, sizes) and swaps exactly the three surfaces.
+  economist_white: themed({
+    ink: "#014d64",
+    paper: "#ebebeb",
+    panel: "#ffffff",
+    accent: "#ed111a",
+    grid: "#c9c9c9",
+    axisText: "#014d64",
+    tickColor: "#6794a7",
+    tickWidth: 0.5,
+    tickLength: 4,
+    gridWidth: 0.5,
+    ticksX: true,
+  }),
+  // ggthemes theme_solarized_2 (light = TRUE): the theme_grey-flavored
+  // Solarized variant — base2 panel (#eee8d5) with base3 grid (#fdf6e3),
+  // base1 chrome/text, transparent plot background. In ggthemes the axis
+  // line colour reads a misspelled rebase key ("reabase01") and resolves to
+  // NA, so no axis line is drawn; panel.border is blank, so no frame either.
+  // Single-ink model: R's darker title step (rebase0) flattens into ink
+  // (rebase01), as with the other ports.
+  solarized_2: themed({
+    ink: "#93a1a1",
+    paper: "none",
+    panel: "#eee8d5",
+    accent: "#268bd2",
+    grid: "#fdf6e3",
+    axisText: "#93a1a1",
+    tickColor: "#93a1a1",
+    fontSize: 12,
+    axisTextSize: 12,
+    fontWeight: 400,
+    titleSize: 14.4,
+    subtitleSize: 12,
+    axisTitleSize: 12,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.5,
+    ticksX: true,
+    ticksY: true,
+  }),
+  // ggthemes theme_solarized_2 (light = FALSE): same geometry on the dark
+  // rebase — base02 panel (#073642), base03 grid (#002b36), base01 chrome.
+  // Accents are shared across light/dark by Solarized's design.
+  solarized_2dark: themed({
+    ink: "#586e75",
+    paper: "none",
+    panel: "#073642",
+    accent: "#268bd2",
+    grid: "#002b36",
+    axisText: "#586e75",
+    tickColor: "#586e75",
+    fontSize: 12,
+    axisTextSize: 12,
+    fontWeight: 400,
+    titleSize: 14.4,
+    subtitleSize: 12,
+    axisTitleSize: 12,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.5,
+    ticksX: true,
+    ticksY: true,
+  }),
   // ggthemes theme_gdocs: Google Docs chart defaults — white panel, #cccccc
   // major grid both directions (minor blank), black x-only axis line, no
   // ticks, #757575 text, plain 20px left-aligned title. Accent is Google

@@ -287,7 +287,7 @@ describe("CandidateStore — hit-test-geometry", () => {
       datum: ({ primitiveIndex }) => ({
         xValue: primitiveIndex,
         yValue: primitiveIndex < 3 ? 0 : 50,
-        // Force exact geometry so pathRange/samePath are on the refine path.
+        // Force exact geometry so pathRange is on the refine path.
         autoMode: "exact",
       }),
     });

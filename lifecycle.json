@@ -3647,15 +3647,15 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CANVA_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "CATEGORICAL_PALETTE_10": {
           "kind": "value",
           "lifecycle": "experimental"
         },
         "CATEGORICAL_SCHEMES": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "CIVIDIS_RAMP_10": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3827,6 +3827,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ECONOMIST_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "EDITION_DEFAULTS": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3841,6 +3845,22 @@
         },
         "EditionDefaults": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FEW_DARK_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "FEW_LIGHT_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "FEW_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "FIVETHIRTYEIGHT_PALETTE": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "FLEXOKI_PALETTE": {
@@ -3903,10 +3923,6 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "INFERNO_RAMP_10": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "IPSUM_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3951,10 +3967,6 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "LegendValueMembership": {
-          "kind": "type",
-          "lifecycle": "experimental"
-        },
         "LetterboxRect": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3969,10 +3981,6 @@
         },
         "Linetype": {
           "kind": "type",
-          "lifecycle": "experimental"
-        },
-        "MAGMA_RAMP_10": {
-          "kind": "value",
           "lifecycle": "experimental"
         },
         "MAX_BINNED_BREAKS": {
@@ -4027,11 +4035,11 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "PLASMA_RAMP_10": {
+        "POSITION_TRANSFORM_NAMES": {
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "POSITION_TRANSFORM_NAMES": {
+        "PTOL_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4151,14 +4159,6 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "RuntimeRow": {
-          "kind": "type",
-          "lifecycle": "experimental"
-        },
-        "RuntimeRowFilter": {
-          "kind": "type",
-          "lifecycle": "experimental"
-        },
         "RuntimeRowFilterClause": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4175,15 +4175,7 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "SEQUENTIAL_SCHEME_RAMPS": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "STRIP_BAND": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "ScaleConfigError": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4327,10 +4319,6 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "TURBO_RAMP_10": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "TemporalAxisPlanInput": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4403,10 +4391,6 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "bandKey": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "batchMarkCount": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4444,10 +4428,6 @@
           "lifecycle": "experimental"
         },
         "cellsToNumeric": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "compileRuntimeRowFilter": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4499,10 +4479,6 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "finiteExtent": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "fnv1a": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4539,19 +4515,11 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "isSequentialSchemeName": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "layout": {
           "kind": "value",
           "lifecycle": "experimental"
         },
         "layoutPass": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "legendValueEqual": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4580,10 +4548,6 @@
           "lifecycle": "experimental"
         },
         "markLinetype": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "niceLinearDomain": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4655,10 +4619,6 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "resolveLegendFocusKeys": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "resolvePathMark": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4676,10 +4636,6 @@
           "lifecycle": "experimental"
         },
         "runPipeline": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "runtimeFilterValueEqual": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4735,23 +4691,7 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "trainBand": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "trainColor": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "trainContinuous": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "trainDiscrete": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "trainLinear": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -6465,6 +6405,10 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ThemeEconomistwhite": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ThemeFew": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -6518,6 +6462,14 @@
           "lifecycle": "experimental"
         },
         "ThemePander": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeSolarized2": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeSolarized2dark": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -6730,10 +6682,6 @@
           "lifecycle": "experimental"
         },
         "isCompositionDiagnostic": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "isDeprecationDiagnostic": {
           "kind": "value",
           "lifecycle": "experimental"
         },

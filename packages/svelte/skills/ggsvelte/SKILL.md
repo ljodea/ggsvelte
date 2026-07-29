@@ -167,9 +167,10 @@ Two rules worth keeping in working memory:
   year-quarters infer time automatically. Ambiguous ordered dates need
   `"parse": "dmy"` or `"mdy"`; force `{"type": "band"}` for year-like
   identifiers; never preprocess dates into indexes.
-- Themes: 21 names (`default`, `light`, `dark`, `minimal`, `ggplot2`,
+- Themes: 24 names (`default`, `light`, `dark`, `minimal`, `ggplot2`,
   `classic`, `bw`, `hrbr`, `few`, `clean`, `fivethirtyeight`, `economist`,
-  `tufte`, `linedraw`, `void`, `gdocs`, `hc`, `hcdark`, `pander`, plus
+  `tufte`, `linedraw`, `void`, `economist_white`, `solarized_2`,
+  `solarized_2dark`, `gdocs`, `hc`, `hcdark`, `pander`, plus
   `grey`/`gray` aliasing `ggplot2`) as
   `<ThemeTufte/>`-style children or `"theme": "tufte"` in JSON.
 

@@ -22,10 +22,6 @@ export function presentationChromeForKind(kind: string | null | undefined): Pres
   return kind === "rects" ? "none" : "ring";
 }
 
-export type CandidateRowRef = {
-  readonly rowIndex: number | null;
-};
-
 /**
  * Ordered equality for PropertyKey sequences (length + Object.is per index).
  * Distinct Symbols never equal. Does not dedupe — callers normalize first.
@@ -53,20 +49,6 @@ export function buildPointSelectionEvent(
     keys: Object.freeze([...keys]),
     source,
   });
-}
-
-/**
- * Union lineage row indexes with the candidate's own rowIndex when set.
- * Lineage order is preserved; the candidate row is appended only if absent.
- */
-export function rowIndexesForCandidate(
-  candidate: CandidateRowRef,
-  lineageRowIndexes: Iterable<number>,
-): number[] {
-  const rows = [...lineageRowIndexes];
-  if (candidate.rowIndex !== null && !rows.includes(candidate.rowIndex))
-    rows.push(candidate.rowIndex);
-  return rows;
 }
 
 /**

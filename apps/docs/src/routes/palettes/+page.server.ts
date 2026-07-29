@@ -1,22 +1,26 @@
 import type { ColorScaleSpec } from "@ggsvelte/spec";
 
 import { CATEGORICAL_PALETTES } from "$lib/catalog/themes";
+import { THEME_STATIC_SHELL_BY_ID } from "$lib/generated/theme-static-shells";
 import { RASTER_Z_DOMAIN } from "$lib/theme-specimens/catalog";
-import {
-  paletteSpecimenStaticSvg,
-  sequentialRasterStaticSvg,
-} from "$lib/theme-specimens/static-svg";
 
 const SEQUENTIAL_EXAMPLES: readonly {
+  id: string;
   label: string;
   scale: ColorScaleSpec;
 }[] = [
-  { label: "Viridis", scale: { type: "sequential", scheme: "viridis" } },
   {
+    id: "viridis",
+    label: "Viridis",
+    scale: { type: "sequential", scheme: "viridis" },
+  },
+  {
+    id: "viridis-reversed",
     label: "Reversed",
     scale: { type: "sequential", scheme: "viridis", reverse: true },
   },
   {
+    id: "custom-range",
     label: "Custom range",
     scale: {
       type: "sequential",
@@ -24,6 +28,7 @@ const SEQUENTIAL_EXAMPLES: readonly {
     },
   },
   {
+    id: "pinned-domain",
     label: "Pinned domain",
     scale: {
       type: "sequential",
@@ -33,7 +38,13 @@ const SEQUENTIAL_EXAMPLES: readonly {
   },
 ];
 
-/** Precompute static chart shells at prerender so the client never imports core to paint them. */
+function shellPath(id: string): string {
+  const path = THEME_STATIC_SHELL_BY_ID[id];
+  if (path === undefined) throw new Error(`Missing static shell ${id}`);
+  return path;
+}
+
+/** Paths only — SVG bodies under /theme-shells/ (see gen-theme-static-shells). */
 export function load() {
   return {
     paletteSpecimens: CATEGORICAL_PALETTES.map((palette) => ({
@@ -43,21 +54,12 @@ export function load() {
       capacity: palette.capacity,
       reverse: false,
       paperTheme: "light" as const,
-      staticSvg: paletteSpecimenStaticSvg({
-        scheme: palette.name,
-        reverse: false,
-        paperTheme: "light",
-        height: 340,
-      }),
+      staticSrc: shellPath(`palette-${palette.name}`),
     })),
     sequentialExamples: SEQUENTIAL_EXAMPLES.map((example) => ({
       label: example.label,
       scale: example.scale,
-      staticSvg: sequentialRasterStaticSvg({
-        label: example.label,
-        scale: example.scale,
-        height: 360,
-      }),
+      staticSrc: shellPath(`sequential-${example.id}`),
     })),
   };
 }

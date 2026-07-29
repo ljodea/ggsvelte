@@ -12,8 +12,22 @@
     "gridLines": 12,
     "gridStroke": "rgb(204, 204, 204)",
     "gridWidth": "0.4",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "light": {
     "width": 1440,
@@ -28,8 +42,22 @@
     "gridLines": 12,
     "gridStroke": "rgb(222, 222, 222)",
     "gridWidth": "0.25",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "dark": {
     "width": 1440,
@@ -44,8 +72,22 @@
     "gridLines": 12,
     "gridStroke": "rgb(59, 63, 70)",
     "gridWidth": "0.4",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "minimal": {
     "width": 1440,
@@ -60,8 +102,22 @@
     "gridLines": 12,
     "gridStroke": "rgb(235, 235, 235)",
     "gridWidth": "0.5",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "ggplot2": {
     "width": 1440,
@@ -76,8 +132,22 @@
     "gridLines": 12,
     "gridStroke": "rgb(255, 255, 255)",
     "gridWidth": "0.5",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "classic": {
     "width": 1440,
@@ -92,8 +162,22 @@
     "gridLines": 0,
     "gridStroke": null,
     "gridWidth": "0",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "bw": {
     "width": 1440,
@@ -108,8 +192,22 @@
     "gridLines": 12,
     "gridStroke": "rgb(229, 229, 229)",
     "gridWidth": "0.5",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "hrbr": {
     "width": 1440,
@@ -124,8 +222,22 @@
     "gridLines": 12,
     "gridStroke": "rgb(204, 204, 204)",
     "gridWidth": "0.4",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "few": {
     "width": 1440,
@@ -140,8 +252,22 @@
     "gridLines": 0,
     "gridStroke": null,
     "gridWidth": "0",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "clean": {
     "width": 1440,
@@ -156,8 +282,22 @@
     "gridLines": 6,
     "gridStroke": "rgb(179, 179, 179)",
     "gridWidth": "0.4",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "fivethirtyeight": {
     "width": 1440,
@@ -172,8 +312,22 @@
     "gridLines": 12,
     "gridStroke": "rgb(255, 255, 255)",
     "gridWidth": "0.5",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "economist": {
     "width": 1440,
@@ -188,8 +342,22 @@
     "gridLines": 12,
     "gridStroke": "rgb(255, 255, 255)",
     "gridWidth": "0.5",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "tufte": {
     "width": 1440,
@@ -204,8 +372,22 @@
     "gridLines": 0,
     "gridStroke": null,
     "gridWidth": "0",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "linedraw": {
     "width": 1440,
@@ -220,8 +402,22 @@
     "gridLines": 12,
     "gridStroke": "rgb(0, 0, 0)",
     "gridWidth": "0.3",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "void": {
     "width": 1440,
@@ -239,6 +435,96 @@
     "xLabels": [],
     "yLabels": []
   },
+  "economist_white": {
+    "width": 1440,
+    "height": 960,
+    "fontFamily": "\"Roboto Condensed\", \"Arial Narrow\", Arial, sans-serif",
+    "fontSize": "11.5px",
+    "fontWeight": "300",
+    "fontReady": true,
+    "axisLines": 0,
+    "panelBorders": 0,
+    "tickLines": 6,
+    "gridLines": 12,
+    "gridStroke": "rgb(201, 201, 201)",
+    "gridWidth": "0.5",
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
+  },
+  "solarized_2": {
+    "width": 1440,
+    "height": 960,
+    "fontFamily": "\"Roboto Condensed\", \"Arial Narrow\", Arial, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "fontReady": true,
+    "axisLines": 0,
+    "panelBorders": 0,
+    "tickLines": 12,
+    "gridLines": 12,
+    "gridStroke": "rgb(253, 246, 227)",
+    "gridWidth": "0.5",
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
+  },
+  "solarized_2dark": {
+    "width": 1440,
+    "height": 960,
+    "fontFamily": "\"Roboto Condensed\", \"Arial Narrow\", Arial, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "fontReady": true,
+    "axisLines": 0,
+    "panelBorders": 0,
+    "tickLines": 12,
+    "gridLines": 12,
+    "gridStroke": "rgb(0, 43, 54)",
+    "gridWidth": "0.5",
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
+  },
   "gdocs": {
     "width": 1440,
     "height": 960,
@@ -252,8 +538,22 @@
     "gridLines": 12,
     "gridStroke": "rgb(204, 204, 204)",
     "gridWidth": "0.5",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "hc": {
     "width": 1440,
@@ -268,8 +568,22 @@
     "gridLines": 6,
     "gridStroke": "rgb(216, 216, 216)",
     "gridWidth": "0.5",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "hcdark": {
     "width": 1440,
@@ -284,8 +598,22 @@
     "gridLines": 6,
     "gridStroke": "rgb(112, 112, 115)",
     "gridWidth": "0.5",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "pander": {
     "width": 1440,
@@ -300,8 +628,22 @@
     "gridLines": 12,
     "gridStroke": "rgb(190, 190, 190)",
     "gridWidth": "0.25",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   },
   "test": {
     "width": 1440,
@@ -316,7 +658,21 @@
     "gridLines": 12,
     "gridStroke": "rgb(204, 204, 204)",
     "gridWidth": "0.5",
-    "xLabels": ["1", "2", "3", "4", "5", "6"],
-    "yLabels": ["0", "2", "4", "6", "8", "10"]
+    "xLabels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "yLabels": [
+      "0",
+      "2",
+      "4",
+      "6",
+      "8",
+      "10"
+    ]
   }
 }

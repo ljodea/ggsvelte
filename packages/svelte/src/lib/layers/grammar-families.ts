@@ -1,10 +1,11 @@
 /**
  * Single source of truth for the seven grammar families (#785 / #659).
  *
- * Prop names, components, composition rules, doc anchors, deprecation windows,
- * codemod forms, and suggestion copy live here. Consumers look up; they do not
- * restate. `plot-props.ts` JSDoc keeps since/URL for the deprecation-wiring
- * guard and is ratcheted against this table.
+ * Prop names, components, composition rules, doc anchors, and codemod forms
+ * live here. Consumers look up; they do not restate. `plot-props.ts` JSDoc
+ * keeps since/URL for the deprecation-wiring guard and is ratcheted against
+ * this table. Deprecation emit windows and suggestion copy left with the
+ * 0.13.0 grammar-prop removal — props are gone, codemod + composition remain.
  */
 import type { GrammarLayerKind } from "./types.js";
 
@@ -29,9 +30,6 @@ export type GrammarFamilyMeta = {
   readonly composition: GrammarComposition;
   /** Heading anchor on /guide/upgrading (without `#`). */
   readonly docAnchor: string;
-  readonly since: string;
-  readonly removeIn: string;
-  readonly suggestions: readonly string[];
   readonly builderMethod: GrammarBuilderMethod;
   /** DUPLICATE_MERGE_KEY message helpers (merge-by-key only). */
   readonly mergeKeyNoun?: string;
@@ -55,14 +53,7 @@ export const GRAMMAR_FAMILIES: GrammarFamilies = {
     codemodForm: "value",
     composition: "merge-by-channel",
     docAnchor: "compose-scales-as-child-layers",
-    since: "0.11.0",
-    removeIn: "0.13.0",
     builderMethod: "scales",
-    suggestions: [
-      'Replace scales={scaleColorDiscrete({scheme:"colorblind"})} with <ScaleColorDiscrete scheme="colorblind" />',
-      "Prefer named shells (<ScaleXContinuous/>, <ScaleSizeContinuous/>, <ScaleShapeDiscrete/>, …) for every family",
-      "Use <Scale value={…} /> as the escape hatch for raw/computed scale fragments",
-    ],
   },
   theme: {
     kind: "theme",
@@ -71,13 +62,7 @@ export const GRAMMAR_FAMILIES: GrammarFamilies = {
     codemodForm: "theme",
     composition: "replace",
     docAnchor: "compose-the-theme-as-a-child-layer",
-    since: "0.11.0",
-    removeIn: "0.13.0",
     builderMethod: "theme",
-    suggestions: [
-      'Replace theme="dark" with <ThemeDark /> (or <Theme name="dark" />)',
-      'Role overrides stay as props on the child: <ThemeDark ink="#eee" />',
-    ],
   },
   coord: {
     kind: "coord",
@@ -86,13 +71,7 @@ export const GRAMMAR_FAMILIES: GrammarFamilies = {
     codemodForm: "value",
     composition: "replace",
     docAnchor: "compose-coord-as-a-child-layer",
-    since: "0.11.0",
-    removeIn: "0.13.0",
     builderMethod: "coord",
-    suggestions: [
-      'Replace coord="flip" with <CoordFlip />',
-      "Use <CoordFixed ratio={…} />, <CoordTransform />, or <Coord value={…} /> for other systems",
-    ],
   },
   facet: {
     kind: "facet",
@@ -101,13 +80,7 @@ export const GRAMMAR_FAMILIES: GrammarFamilies = {
     codemodForm: "spread",
     composition: "replace",
     docAnchor: "compose-facet-as-a-child-layer",
-    since: "0.11.0",
-    removeIn: "0.13.0",
     builderMethod: "facet",
-    suggestions: [
-      'Replace facet={{wrap:"g"}} with <FacetWrap field="g" />',
-      'Use <FacetGrid rows="a" cols="b" /> for a grid, or <Facet wrap={…} /> for the full FacetInput surface',
-    ],
   },
   labs: {
     kind: "labs",
@@ -116,15 +89,9 @@ export const GRAMMAR_FAMILIES: GrammarFamilies = {
     codemodForm: "spread",
     composition: "merge-by-key",
     docAnchor: "compose-labs-as-a-child-layer",
-    since: "0.11.0",
-    removeIn: "0.13.0",
     builderMethod: "labs",
     mergeKeyNoun: "label",
     mergeKeyChild: "<Labs>",
-    suggestions: [
-      'Replace labs={{title:"Sales"}} with <Labs title="Sales" />',
-      'Per-aesthetic titles stay named props on the child: <Labs x="Quarter" color="Region" />',
-    ],
   },
   guides: {
     kind: "guides",
@@ -133,16 +100,9 @@ export const GRAMMAR_FAMILIES: GrammarFamilies = {
     codemodForm: "value",
     composition: "merge-by-key",
     docAnchor: "compose-guides-as-child-layers",
-    since: "0.11.0",
-    removeIn: "0.13.0",
     builderMethod: "guides",
     mergeKeyNoun: "channel",
     mergeKeyChild: "<Guide*>",
-    suggestions: [
-      'Replace guides={{color:guideLegend({position:"bottom"})}} with <GuideLegend channel="color" position="bottom" />',
-      'The aesthetic is the channel prop: <GuideAxis channel="x"/>, <GuideNone channel="size"/>, …',
-      "Use <Guides value={…} /> as the escape hatch for raw/computed guide bags",
-    ],
   },
   legend: {
     kind: "legend",
@@ -151,28 +111,11 @@ export const GRAMMAR_FAMILIES: GrammarFamilies = {
     codemodForm: "spread",
     composition: "merge-by-key",
     docAnchor: "compose-legend-as-a-child-layer",
-    since: "0.11.0",
-    removeIn: "0.13.0",
     builderMethod: "legend",
     mergeKeyNoun: "option",
     mergeKeyChild: "<Legend>",
-    suggestions: [
-      'Replace legend={{order:"sorted"}} with <Legend order="sorted" />',
-      "<Legend order> is the plot-wide entry-sort enum; <GuideLegend order={2}/> is a per-aesthetic placement rank",
-    ],
   },
 };
-
-/** Deprecation advisory emission order (preserves pre-#785 ladder). */
-export const DEPRECATION_EMIT_ORDER: readonly GrammarLayerKind[] = [
-  "theme",
-  "scale",
-  "coord",
-  "facet",
-  "guides",
-  "legend",
-  "labs",
-] as const;
 
 /**
  * GGPlotProps / codemod RULES order (declaration order in plot-props.ts).
@@ -204,14 +147,6 @@ export const REPLACE_EMIT_ORDER = [
 
 export type MergeByKeyKind = (typeof MERGE_KEY_EMIT_ORDER)[number];
 export type ReplaceKind = (typeof REPLACE_EMIT_ORDER)[number];
-
-export function grammarFamilyByProp(propName: string): GrammarFamilyMeta | undefined {
-  for (const kind of DEPRECATION_EMIT_ORDER) {
-    const family = GRAMMAR_FAMILIES[kind];
-    if (family.propName === propName) return family;
-  }
-  return undefined;
-}
 
 /** Deprecated GGPlot prop names in GGPlotProps order. */
 export const GRAMMAR_PROP_NAMES: readonly string[] = GGPLOT_PROP_ORDER.map(
@@ -257,47 +192,4 @@ export function grammarCodemodRules(): Readonly<
     };
   }
   return rules;
-}
-
-export type GrammarPropReaders = {
-  readonly theme: () => unknown;
-  readonly scales: () => unknown;
-  readonly coord: () => unknown;
-  readonly facet: () => unknown;
-  readonly guides: () => unknown;
-  readonly legend: () => unknown;
-  readonly labs: () => unknown;
-};
-
-/**
- * Build deprecation diagnostic inputs for every defined grammar prop,
- * in {@link DEPRECATION_EMIT_ORDER}.
- */
-export function grammarDeprecationInputs(readers: GrammarPropReaders): ReadonlyArray<{
-  readonly prop: string;
-  readonly since: string;
-  readonly removeIn: string;
-  readonly suggestions: readonly string[];
-  readonly anchor: string;
-}> {
-  const out: Array<{
-    readonly prop: string;
-    readonly since: string;
-    readonly removeIn: string;
-    readonly suggestions: readonly string[];
-    readonly anchor: string;
-  }> = [];
-  for (const kind of DEPRECATION_EMIT_ORDER) {
-    const family = GRAMMAR_FAMILIES[kind];
-    const reader = readers[family.propName as keyof GrammarPropReaders];
-    if (reader() === undefined) continue;
-    out.push({
-      prop: family.propName,
-      since: family.since,
-      removeIn: family.removeIn,
-      suggestions: family.suggestions,
-      anchor: family.docAnchor,
-    });
-  }
-  return out;
 }

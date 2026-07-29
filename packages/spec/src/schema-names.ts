@@ -27,6 +27,16 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "flexoki",
   "tableau10",
   "colorblind",
+  /** ggthemes scale_colour/fill_economist — Economist blues/greens (fill order). */
+  "economist",
+  // ggthemes ports (#1159): Few "Show Me the Numbers" variants + FiveThirtyEight
+  "few",
+  "few_light",
+  "few_dark",
+  "fivethirtyeight",
+  // ggthemes ports (#1159): Paul Tol + Canva default
+  "ptol",
+  "canva",
   // ggthemes ports (#1159): Google Docs + Highcharts + pander
   "gdocs",
   "hc",
@@ -135,6 +145,9 @@ export const THEME_NAMES = [
   "linedraw",
   "void",
   // ggthemes theme ports (#1158)
+  "economist_white",
+  "solarized_2",
+  "solarized_2dark",
   "gdocs",
   "hc",
   "hcdark",

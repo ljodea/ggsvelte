@@ -89,6 +89,8 @@ export const DOCS_CONTENT_ONLY_PATHS: readonly string[] = [
  */
 export const DOCS_CONTENT_SCRIPT_PATTERNS: readonly string[] = [
   "scripts/gen-llms.ts",
+  "scripts/llms-diagnostic-docs.ts",
+  "scripts/llms-lifecycle-docs.ts",
   "scripts/gen-llms.test.ts",
   "scripts/llms-markdown.ts",
   "scripts/llms-guide-content.ts",
@@ -120,6 +122,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "apps/docs/**",
     // Docs app imports `$scripts/gen-llms` and ships lifecycle-driven guide content.
     "scripts/gen-llms.ts",
+    "scripts/llms-diagnostic-docs.ts",
+    "scripts/llms-lifecycle-docs.ts",
     "scripts/gen-llms.test.ts",
     "scripts/llms-markdown.ts",
     "scripts/highlight-code.ts",
@@ -144,6 +148,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     // Shared inventory imported by gen-docs-routes / check-docs-metadata /
     // deployment-artifact (Codex P2: inventory-only PRs were scripts-lane only).
     "scripts/docs-route-inventory.ts",
+    "scripts/docs-route-inventory-pages.ts",
+    "scripts/docs-route-inventory-reference.ts",
     "scripts/docs-route-inventory.test.ts",
     "scripts/check-docs-metadata.ts",
     "scripts/check-docs-metadata.test.ts",
@@ -152,6 +158,9 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     // #784: build/check run gen-lesson-charts --check; build runs docs-csp after vite.
     "scripts/gen-lesson-charts.ts",
     "scripts/gen-lesson-charts.test.ts",
+    // Themes/palettes shell externalization (HTML shrink).
+    "scripts/gen-theme-static-shells.ts",
+    "scripts/docs-html-shell-external.test.ts",
     "scripts/docs-csp.ts",
     "scripts/docs-csp.test.ts",
     // Deployment generators and smoke contracts change the published artifact.
@@ -210,6 +219,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
   // Packed-consumer harness (not the whole scripts/ tree — matrix is expensive).
   consumer_tools: [
     "scripts/consumer-compat.ts",
+    "scripts/consumer-compat-plan.ts",
+    "scripts/consumer-compat-fixture.ts",
     "scripts/consumer-compat.test.ts",
     // Packed fixture snippets live here; consumer-compat imports them.
     "scripts/guide-code-contract.ts",
