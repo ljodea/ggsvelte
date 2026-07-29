@@ -89,6 +89,8 @@ export const DOCS_CONTENT_ONLY_PATHS: readonly string[] = [
  */
 export const DOCS_CONTENT_SCRIPT_PATTERNS: readonly string[] = [
   "scripts/gen-llms.ts",
+  "scripts/llms-diagnostic-docs.ts",
+  "scripts/llms-lifecycle-docs.ts",
   "scripts/gen-llms.test.ts",
   "scripts/llms-markdown.ts",
   "scripts/llms-guide-content.ts",
@@ -120,6 +122,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "apps/docs/**",
     // Docs app imports `$scripts/gen-llms` and ships lifecycle-driven guide content.
     "scripts/gen-llms.ts",
+    "scripts/llms-diagnostic-docs.ts",
+    "scripts/llms-lifecycle-docs.ts",
     "scripts/gen-llms.test.ts",
     "scripts/llms-markdown.ts",
     "scripts/highlight-code.ts",
@@ -144,6 +148,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     // Shared inventory imported by gen-docs-routes / check-docs-metadata /
     // deployment-artifact (Codex P2: inventory-only PRs were scripts-lane only).
     "scripts/docs-route-inventory.ts",
+    "scripts/docs-route-inventory-pages.ts",
+    "scripts/docs-route-inventory-reference.ts",
     "scripts/docs-route-inventory.test.ts",
     "scripts/check-docs-metadata.ts",
     "scripts/check-docs-metadata.test.ts",

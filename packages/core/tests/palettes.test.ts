@@ -5,6 +5,7 @@ import { aes, gg, SpecValidationError, type PortableSpec } from "@ggsvelte/spec"
 import { runPipeline } from "../src/pipeline.ts";
 import { renderToSVGString } from "../src/render-svg.ts";
 import {
+  CANVA_PALETTE,
   CATEGORICAL_PALETTE_10,
   CATEGORICAL_SCHEMES,
   COLORBLIND_PALETTE,
@@ -15,10 +16,12 @@ import {
   FIVETHIRTYEIGHT_PALETTE,
   FLEXOKI_PALETTE,
   IPSUM_PALETTE,
+  PTOL_PALETTE,
   SOLARIZED_PALETTE,
   TABLEAU10_PALETTE,
 } from "../src/scales/train.ts";
 import {
+  CANVA_PALETTE as CANVA_DIRECT,
   CATEGORICAL_PALETTE_10 as PALETTE_DIRECT,
   CATEGORICAL_SCHEMES as SCHEMES_DIRECT,
   COLORBLIND_PALETTE as COLORBLIND_DIRECT,
@@ -29,6 +32,7 @@ import {
   FIVETHIRTYEIGHT_PALETTE as FIVETHIRTYEIGHT_DIRECT,
   FLEXOKI_PALETTE as FLEXOKI_DIRECT,
   IPSUM_PALETTE as IPSUM_DIRECT,
+  PTOL_PALETTE as PTOL_DIRECT,
   SOLARIZED_PALETTE as SOLARIZED_DIRECT,
   TABLEAU10_PALETTE as TABLEAU10_DIRECT,
 } from "../src/scales/categorical-palettes.ts";
@@ -44,6 +48,8 @@ const PALETTES = {
   few_light: FEW_LIGHT_PALETTE,
   few_dark: FEW_DARK_PALETTE,
   fivethirtyeight: FIVETHIRTYEIGHT_PALETTE,
+  ptol: PTOL_PALETTE,
+  canva: CANVA_PALETTE,
 } as const;
 
 describe("train.ts palette re-export identity", () => {
@@ -51,6 +57,7 @@ describe("train.ts palette re-export identity", () => {
     expect(CATEGORICAL_PALETTE_10).toBe(PALETTE_DIRECT);
     expect(CATEGORICAL_SCHEMES).toBe(SCHEMES_DIRECT);
     expect(CATEGORICAL_SCHEMES.observable10).toBe(CATEGORICAL_PALETTE_10);
+    expect(CANVA_PALETTE).toBe(CANVA_DIRECT);
     expect(COLORBLIND_PALETTE).toBe(COLORBLIND_DIRECT);
     expect(ECONOMIST_PALETTE).toBe(ECONOMIST_DIRECT);
     expect(FEW_DARK_PALETTE).toBe(FEW_DARK_DIRECT);
@@ -59,6 +66,7 @@ describe("train.ts palette re-export identity", () => {
     expect(FIVETHIRTYEIGHT_PALETTE).toBe(FIVETHIRTYEIGHT_DIRECT);
     expect(FLEXOKI_PALETTE).toBe(FLEXOKI_DIRECT);
     expect(IPSUM_PALETTE).toBe(IPSUM_DIRECT);
+    expect(PTOL_PALETTE).toBe(PTOL_DIRECT);
     expect(SOLARIZED_PALETTE).toBe(SOLARIZED_DIRECT);
     expect(TABLEAU10_PALETTE).toBe(TABLEAU10_DIRECT);
   });

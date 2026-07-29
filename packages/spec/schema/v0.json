@@ -6059,6 +6059,14 @@
                 },
                 {
                   "type": "string",
+                  "const": "ptol"
+                },
+                {
+                  "type": "string",
+                  "const": "canva"
+                },
+                {
+                  "type": "string",
                   "const": "Set1"
                 },
                 {

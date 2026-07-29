@@ -131,7 +131,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
-  await expect(cards).toHaveCount(20);
+  await expect(cards).toHaveCount(22);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Observable 10",
     "Ipsum",
@@ -144,6 +144,8 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Few Light",
     "Few Dark",
     "FiveThirtyEight",
+    "Paul Tol",
+    "Canva",
     "Set1",
     "Set2",
     "Set3",
@@ -166,6 +168,8 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "8 colors",
     "8 colors",
     "3 colors",
+    "12 colors",
+    "4 colors",
     "9 colors",
     "8 colors",
     "12 colors",

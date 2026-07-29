@@ -125,6 +125,8 @@ describe("classifyChangedPaths", () => {
   test("llms module siblings stay on the docs lane (pages) without forcing VR", () => {
     for (const file of [
       "scripts/gen-llms.ts",
+      "scripts/llms-diagnostic-docs.ts",
+      "scripts/llms-lifecycle-docs.ts",
       "scripts/llms-markdown.ts",
       "scripts/llms-guide-content.ts",
     ]) {
@@ -249,6 +251,8 @@ describe("planJobs", () => {
   test("docs generators schedule pages (and journeys) without VR unless render-relevant", () => {
     for (const path of [
       "scripts/gen-llms.ts",
+      "scripts/llms-diagnostic-docs.ts",
+      "scripts/llms-lifecycle-docs.ts",
       "scripts/docs-seo.ts",
       "scripts/gen-docs-search.ts",
       "scripts/cli-docs.ts",
@@ -569,6 +573,8 @@ describe("planJobs", () => {
     for (const path of [
       "scripts/gen-docs-routes.ts",
       "scripts/docs-route-inventory.ts",
+      "scripts/docs-route-inventory-pages.ts",
+      "scripts/docs-route-inventory-reference.ts",
       "scripts/check-docs-metadata.ts",
       "scripts/check-pages-links.ts",
       // #784: package.json build/check invoke gen-lesson-charts; build invokes docs-csp.
@@ -611,6 +617,8 @@ describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
       expect(inputs, execution).toContain("apps/docs/**");
       expect(inputs, execution).toContain("scripts/gen-docs-routes.ts");
       expect(inputs, execution).toContain("scripts/docs-route-inventory.ts");
+      expect(inputs, execution).toContain("scripts/docs-route-inventory-pages.ts");
+      expect(inputs, execution).toContain("scripts/docs-route-inventory-reference.ts");
       expect(inputs, execution).not.toContain("scripts/gen-playground-seeds.ts");
       expect(inputs, execution).toContain("scripts/check-docs-metadata.ts");
       expect(inputs, execution).toContain("scripts/check-pages-links.ts");
@@ -618,6 +626,8 @@ describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
       expect(inputs, execution).toContain("scripts/gen-theme-static-shells.ts");
       expect(inputs, execution).toContain("scripts/docs-csp.ts");
       expect(inputs, execution).toContain("scripts/gen-llms.ts");
+      expect(inputs, execution).toContain("scripts/llms-diagnostic-docs.ts");
+      expect(inputs, execution).toContain("scripts/llms-lifecycle-docs.ts");
       expect(inputs, execution).toContain("scripts/docs-seo.ts");
       expect(inputs, execution).toContain("scripts/quickstart.ts");
       expect(inputs, execution).toContain("scripts/guide-code-contract.ts");
@@ -1137,6 +1147,8 @@ describe("component_journeys content inputs cover llms modules", () => {
     const inputs = JOB_CONTENT_INPUTS.component_journeys;
     for (const file of [
       "scripts/gen-llms.ts",
+      "scripts/llms-diagnostic-docs.ts",
+      "scripts/llms-lifecycle-docs.ts",
       "scripts/llms-markdown.ts",
       "scripts/highlight-code.ts",
       "scripts/highlight-code.test.ts",

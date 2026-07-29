@@ -9566,14 +9566,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-282",
+    id: "heading:guide-lifecycle:experimental-284",
     kind: "heading",
-    title: "experimental (282)",
+    title: "experimental (284)",
     summary:
-      "experimental (282) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-282",
+      "experimental (284) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-284",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (282)"],
+    exact: ["experimental (284)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -19635,6 +19635,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["CANVAS_AUTO_THRESHOLD"],
   },
   {
+    id: "api:ggsvelte-core:CANVA_PALETTE",
+    kind: "api",
+    title: "CANVA_PALETTE",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["CANVA_PALETTE"],
+  },
+  {
     id: "api:ggsvelte-core:CATEGORICAL_PALETTE_10",
     kind: "api",
     title: "CATEGORICAL_PALETTE_10",
@@ -20470,6 +20479,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["POSITION_TRANSFORM_NAMES"],
+  },
+  {
+    id: "api:ggsvelte-core:PTOL_PALETTE",
+    kind: "api",
+    title: "PTOL_PALETTE",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["PTOL_PALETTE"],
   },
   {
     id: "api:ggsvelte-core:PaletteExhaustedError",

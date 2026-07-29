@@ -20,6 +20,7 @@ export { ScaleConfigError } from "./scale-error.js";
 // Stable public path: re-export palettes so index/editions/tests keep
 // importing from ./scales/train.js (same ES binding for identity === checks).
 export {
+  CANVA_PALETTE,
   CATEGORICAL_PALETTE_10,
   CATEGORICAL_SCHEMES,
   COLORBLIND_PALETTE,
@@ -30,6 +31,7 @@ export {
   FIVETHIRTYEIGHT_PALETTE,
   FLEXOKI_PALETTE,
   IPSUM_PALETTE,
+  PTOL_PALETTE,
   SOLARIZED_PALETTE,
   TABLEAU10_PALETTE,
 } from "./categorical-palettes.js";

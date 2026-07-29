@@ -3647,6 +3647,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CANVA_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "CATEGORICAL_PALETTE_10": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4016,6 +4020,10 @@
           "lifecycle": "experimental"
         },
         "POSITION_TRANSFORM_NAMES": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "PTOL_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
         },
