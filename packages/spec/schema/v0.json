@@ -6288,6 +6288,126 @@
                 {
                   "type": "string",
                   "const": "PuOr"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_blue_green"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_blue_light"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_orange_light"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_blue"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_orange"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_green"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_red"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_purple"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_brown"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_gray"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_gray_warm"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_blue_teal"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_orange_gold"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_green_gold"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seq_red_gold"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_orange_blue"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_red_green"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_green_blue"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_red_blue"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_red_black"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_gold_purple"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_red_green_gold"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_sunset_sunrise"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_orange_blue_white"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_red_green_white"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_green_blue_white"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_red_blue_white"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_red_black_white"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_orange_blue_light"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_div_temperature"
                 }
               ],
               "description": "Named color scheme: categorical \"observable10\" (default), \"ipsum\", \"flexoki\", \"tableau10\", \"colorblind\", \"hue\", \"grey\", \"gray\", and ColorBrewer qualitative (Set1/Set2/…); or sequential family \"viridis\" (default), \"magma\", \"plasma\", \"inferno\", \"cividis\", \"turbo\", plus ColorBrewer sequential/diverging (Blues, RdYlBu, …). Sequential-family names may also be used with ordinal scales (discrete sampling). When type is omitted, the named scheme selects its ordinal or sequential scale family."
