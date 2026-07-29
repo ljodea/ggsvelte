@@ -135,6 +135,23 @@ describe("lineageRowIndexesFromCandidates", () => {
   it("returns empty set when there are no candidates", () => {
     expect([...lineageRowIndexesFromCandidates([], () => [1])]).toEqual([]);
   });
+
+  it("calls lineageKeys once per unique lineage id (#1140)", () => {
+    const lineage = new Map<number, number[]>([
+      [1, Array.from({ length: 40 }, (_, i) => i)],
+      [2, [100, 101]],
+    ]);
+    const calls: number[] = [];
+    const rows = lineageRowIndexesFromCandidates(
+      [{ lineage: 1 }, { lineage: 1 }, { lineage: 1 }, { lineage: 2 }, { lineage: 1 }],
+      (id) => {
+        calls.push(id);
+        return lineage.get(id) ?? [];
+      },
+    );
+    expect(calls).toEqual([1, 2]);
+    expect([...rows]).toEqual([...Array.from({ length: 40 }, (_, i) => i), 100, 101]);
+  });
 });
 
 describe("intervalSelectionFromRows", () => {

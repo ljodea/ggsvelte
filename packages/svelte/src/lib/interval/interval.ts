@@ -108,14 +108,20 @@ export type LineageCandidate = {
 /**
  * Collect source row indexes covered by interval candidates via lineage.
  * Order is insertion order (first candidate, then lineage key order).
+ * Each lineage id is expanded once (#1140) — shared smooth/aggregate
+ * memberships must not re-walk L rows per coincident mark.
  */
 export function lineageRowIndexesFromCandidates(
   candidates: Iterable<LineageCandidate>,
   lineageKeys: (lineageId: number) => Iterable<number>,
 ): Set<number> {
   const sourceRows = new Set<number>();
+  const seenLineages = new Set<number>();
   for (const candidate of candidates) {
-    for (const rowIndex of lineageKeys(candidate.lineage)) sourceRows.add(rowIndex);
+    const lineageId = candidate.lineage;
+    if (seenLineages.has(lineageId)) continue;
+    seenLineages.add(lineageId);
+    for (const rowIndex of lineageKeys(lineageId)) sourceRows.add(rowIndex);
   }
   return sourceRows;
 }

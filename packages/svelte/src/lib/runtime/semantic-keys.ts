@@ -323,12 +323,25 @@ export function resolveSemanticKeys(input: ResolveSemanticKeysInput): ResolveSem
       actual: "synthetic rule has no source rows",
     });
 
+  // Expand each lineage id once. Smooth / aggregate eval-grid marks share one
+  // membership array across C marks (#1140) — re-spreading was O(C·L).
+  // Map value: true when the lineage has no source rows (empty-lineage diag).
+  const lineageEmpty = new Map<number, boolean>();
   for (let id = 0; id < model.candidateCount; id++) {
     const candidate = model.candidate(id);
     if (candidate === null) continue;
     if (candidate.rowIndex !== null) sourceRows.add(candidate.rowIndex);
-    const lineageRows = [...model.lineageKeys(candidate.lineage)];
-    if (candidate.rowIndex === null && lineageRows.length === 0)
+    const lineageId = candidate.lineage;
+    let empty = lineageEmpty.get(lineageId);
+    if (empty === undefined) {
+      empty = true;
+      for (const rowIndex of model.lineageKeys(lineageId)) {
+        empty = false;
+        sourceRows.add(rowIndex);
+      }
+      lineageEmpty.set(lineageId, empty);
+    }
+    if (candidate.rowIndex === null && empty)
       diagnostics.push({
         ...INTERACTION_DIAGNOSTIC_CATALOG.INTERACTION_MISSING_LINEAGE,
         actual: {
@@ -336,7 +349,6 @@ export function resolveSemanticKeys(input: ResolveSemanticKeysInput): ResolveSem
           candidateId: candidate.id,
         },
       });
-    for (const rowIndex of lineageRows) sourceRows.add(rowIndex);
   }
 
   for (const rowIndex of sourceRows) {

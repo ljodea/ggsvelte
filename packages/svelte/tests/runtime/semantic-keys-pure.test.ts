@@ -522,6 +522,74 @@ describe("resolveSemanticKeys", () => {
     expect(priorKeys.get("dataB:0")).toBe("b");
     expect(priorKeys.get("dataA:0")).toBe("a");
   });
+
+  it("expands each lineage id once when many candidates share membership (#1140)", () => {
+    // Smooth eval-grid marks share one lineage of all finite-y source rows.
+    const sharedRows = Array.from({ length: 50 }, (_, i) => i);
+    const lineageCalls: number[] = [];
+    const base = modelView({
+      candidates: Array.from({ length: 8 }, (_, id) => ({
+        id,
+        rowIndex: null as number | null,
+        layerIndex: 0,
+        lineage: 7,
+      })),
+      rows: sharedRows.map((i) => ({ id: `k${String(i)}` })),
+      lineage: new Map([[7, sharedRows]]),
+    });
+    const model: SemanticKeyModelView = {
+      ...base,
+      lineageKeys(lineageId: number) {
+        lineageCalls.push(lineageId);
+        return base.lineageKeys(lineageId);
+      },
+    };
+    const result = resolveSemanticKeys({
+      model,
+      datumKey: "id",
+      priorKeys: new Map(),
+      rowIdentity: (rowIndex) => `r:${rowIndex}`,
+    });
+    expect(lineageCalls).toEqual([7]);
+    expect(result.keys.size).toBe(50);
+    expect(result.keys.get(0)).toBe("k0");
+    expect(result.keys.get(49)).toBe("k49");
+    expect(result.diagnostics).toEqual([]);
+  });
+
+  it("still emits missing-lineage once per empty-lineage candidate after dedupe", () => {
+    const lineageCalls: number[] = [];
+    const base = modelView({
+      candidates: [
+        { id: 0, rowIndex: null, layerIndex: 1, lineage: 0 },
+        { id: 1, rowIndex: null, layerIndex: 1, lineage: 0 },
+      ],
+      rows: [],
+      lineage: new Map([[0, []]]),
+    });
+    const model: SemanticKeyModelView = {
+      ...base,
+      lineageKeys(lineageId: number) {
+        lineageCalls.push(lineageId);
+        return base.lineageKeys(lineageId);
+      },
+    };
+    const result = resolveSemanticKeys({
+      model,
+      datumKey: "id",
+      priorKeys: new Map(),
+      rowIdentity: (rowIndex) => `r:${rowIndex}`,
+    });
+    expect(lineageCalls).toEqual([0]);
+    expect(result.diagnostics.map((d) => d.code)).toEqual([
+      "INTERACTION_MISSING_LINEAGE",
+      "INTERACTION_MISSING_LINEAGE",
+    ]);
+    expect(result.diagnostics.map((d) => d.actual)).toEqual([
+      { layerIndex: 1, candidateId: 0 },
+      { layerIndex: 1, candidateId: 1 },
+    ]);
+  });
 });
 
 // ---------------------------------------------------------------------------
