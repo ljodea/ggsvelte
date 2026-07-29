@@ -124,16 +124,16 @@
   </div>
 {/if}
 {#if clearLegendX !== null}
-  <!-- clearLegendX gates visibility (pressed legend scale). Placement is above
-       the scene (absolute, no layout reservation) so charts below never jump.
-       Prefer right of the scene when there is room; top-of-scene above chrome
-       is the stable fallback that stays hittable and outside title/legend. -->
+  <!-- clearLegendX gates visibility (pressed legend scale). Top-right of the
+       scene keeps the control off the tool-rail strip and out of the bottom
+       row that used to shove charts below. Stays inside the scene so capture
+       and hit-testing still reach it (z-index above chrome). -->
   <button
     type="button"
     class="gg-legend-clear"
     aria-label="Clear legend focus"
-    style:left={`${Math.max(4, Math.min(clearLegendX, sceneWidth - 52))}px`}
-    style:top="-48px"
+    style:left={`${Math.max(4, sceneWidth - 52)}px`}
+    style:top="4px"
     onpointerdown={(event) => onClearPointerDown(event.pointerType)}
     onpointercancel={() => onClearPointerCancel()}
     onclick={(event) => onClearClick(event)}>Clear</button
@@ -147,7 +147,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    /* 44×44 touch target (WCAG 2.5.5); sits above the scene, not below it. */
+    /* 44×44 touch target (WCAG 2.5.5); top-right of the scene, not below it. */
     min-width: 44px;
     min-height: 44px;
     margin: 0;

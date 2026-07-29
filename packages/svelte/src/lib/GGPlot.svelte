@@ -363,8 +363,8 @@
     margin-top: 52px;
   }
 
-  /* Clear sits above the scene (absolute, top: -48px) — no margin, so charts
-     below never jump when focus commits. Filters still need a bottom row. */
+  /* Clear sits top-right inside the scene (absolute) — no layout margin.
+     Filters still need a bottom row when present. */
   .gg-with-legend-filters {
     margin-bottom: 58px;
   }

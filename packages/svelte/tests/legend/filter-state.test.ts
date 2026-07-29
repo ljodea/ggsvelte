@@ -505,9 +505,9 @@ describe("LegendFilters component layout and pointer source", () => {
 
     const clear = view.container.querySelector<HTMLElement>(".gg-legend-clear")!;
     expect(clear).not.toBeNull();
-    // Above the scene — not below sceneHeight.
-    expect(clear.style.top).toBe("-48px");
-    expect(Number.parseFloat(clear.style.top)).toBeLessThan(0);
+    // Top-right of the scene (width 360) — not below sceneHeight.
+    expect(clear.style.left).toBe("308px");
+    expect(clear.style.top).toBe("4px");
   });
 
   it("narrow container keeps existing max-width and overflow behavior", async () => {

@@ -60,7 +60,7 @@ describe("LegendTargets", () => {
     expect(container.querySelector(".gg-legend-clear")).toBeNull();
   });
 
-  it("shows clear control above the scene (no below-chart layout shift)", () => {
+  it("shows clear control at top-right of the scene (no below-chart layout shift)", () => {
     const { container } = render(LegendTargets, {
       entries,
       sceneWidth: 400,
@@ -71,10 +71,9 @@ describe("LegendTargets", () => {
     });
     const clear = container.querySelector<HTMLButtonElement>(".gg-legend-clear");
     expect(clear).not.toBeNull();
-    // Anchored to the legend x, above the scene — never sceneHeight+N below.
-    expect(clear?.style.left).toBe("100px");
-    expect(clear?.style.top).toBe("-48px");
-    expect(Number.parseFloat(clear?.style.top ?? "")).toBeLessThan(0);
+    // Top-right of the scene — never sceneHeight+N below.
+    expect(clear?.style.left).toBe("348px");
+    expect(clear?.style.top).toBe("4px");
   });
 
   it("honors kebab-case tooltip background/foreground aliases on clear control", () => {
@@ -115,7 +114,7 @@ describe("LegendTargets", () => {
     expect(getComputedStyle(clear).color).toBe("rgb(38, 38, 38)");
   });
 
-  it("clamps clear left into [4, sceneWidth-52]", () => {
+  it("anchors clear left at max(4, sceneWidth-52) regardless of legend x", () => {
     const low = render(LegendTargets, {
       entries,
       sceneWidth: 400,
@@ -124,17 +123,17 @@ describe("LegendTargets", () => {
       ...noopHandlers,
     });
     const lowClear = low.container.querySelector<HTMLButtonElement>(".gg-legend-clear");
-    expect(lowClear?.style.left).toBe("4px");
+    expect(lowClear?.style.left).toBe("348px");
 
-    const high = render(LegendTargets, {
+    const narrow = render(LegendTargets, {
       entries,
-      sceneWidth: 400,
+      sceneWidth: 40,
       sceneHeight: 200,
       clearLegendX: 500,
       ...noopHandlers,
     });
-    const highClear = high.container.querySelector<HTMLButtonElement>(".gg-legend-clear");
-    expect(highClear?.style.left).toBe("348px");
+    const narrowClear = narrow.container.querySelector<HTMLButtonElement>(".gg-legend-clear");
+    expect(narrowClear?.style.left).toBe("4px");
   });
 
   it("applies min target width of 24 when legend width is smaller", () => {
