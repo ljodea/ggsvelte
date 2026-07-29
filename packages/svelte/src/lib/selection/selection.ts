@@ -29,12 +29,17 @@ export type CandidateAnchorKeys = {
 export const EMPHASIS_RING_DENSITY_LIMIT = 48;
 
 /**
- * Point marks get dashed emphasis/selection rings. Every other batch kind
+ * Point marks get dashed emphasis/selection rings. Every other known batch kind
  * (rects, paths, segments, glyphs) is mute-only — continuous geometry must not
  * look like it has hollow point markers at every vertex.
+ *
+ * Missing kind (`null` / omitted) keeps ring chrome so hover/crosshair gapping
+ * still works when the inspection seed is not yet attached (non-reactive seed
+ * assignment races). Explicit non-point kinds always mute.
  */
-export function presentationChromeForKind(kind: string | null | undefined): PresentationChrome {
-  return kind === "points" ? "ring" : "none";
+export function presentationChromeForKind(kind?: string | null): PresentationChrome {
+  if (kind == null || kind === "points") return "ring";
+  return "none";
 }
 
 /**

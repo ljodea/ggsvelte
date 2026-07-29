@@ -95,6 +95,8 @@ and Windows.
 <GGPlot
   data={crimeanMortality}
   aes={{ x: "month", y: "deaths", fill: "cause" }}
+  key={(row) => `${row.month}:${row.cause}`}
+  legendFocus
   width={640}
   height={400}
 >
@@ -180,6 +182,7 @@ and Windows.
   data={londonCholera}
   aes={{ x: "density", y: "deathRate", color: "water" }}
   key="district"
+  legendFocus
   inspect={{ mode: "xy", pin: true }}
   width="container"
   height={400}
