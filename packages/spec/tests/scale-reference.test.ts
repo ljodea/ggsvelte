@@ -34,7 +34,9 @@ describe("SCALE_REFERENCE", () => {
   it("covers every public Scale* helper exactly once", () => {
     const helpers = allScaleHelpers();
     expect(scaleReferenceList()).toHaveLength(helpers.length);
-    expect(knownScaleSlugs().toSorted()).toEqual(helpers.map(slugForScaleHelper).toSorted());
+    expect(knownScaleSlugs().toSorted()).toEqual(
+      helpers.map((h) => slugForScaleHelper(h)).toSorted(),
+    );
     for (const helper of helpers) {
       const slug = slugForScaleHelper(helper);
       expect(SCALE_REFERENCE[slug]?.helper, slug).toBe(helper);
