@@ -649,7 +649,9 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     const seed = inspectionState.inspectionSeed;
     const model = runtime.model;
     if (seed === null || model === null || seed.kind !== "glyphs") return null;
-    return glyphExtentsFromBatch(model.scene.batches[seed.batchIndex], seed.primitiveIndex);
+    const batch = model.scene.batches[seed.batchIndex];
+    if (batch === undefined || batch.kind !== "glyphs") return null;
+    return glyphExtentsFromBatch(batch, seed.primitiveIndex);
   }
 
   // After host entry deriveds exist (irreducible late data for legend focus).

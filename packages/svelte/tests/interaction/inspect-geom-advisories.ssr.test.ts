@@ -63,10 +63,11 @@ describe("inspectAxisOnBarColDiagnostics", () => {
   });
 
   it("prefers the labels warning over the plain bar/col advisory", () => {
+    // Collector walks geoms in layer order and emits col then bar advisories.
     const list = inspectAxisOnBarColDiagnostics("xy", ["col", "bar", "text"]);
-    expect(list.map((d) => d.code).toSorted()).toEqual([
-      "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+    expect(list.map((d) => d.code)).toEqual([
       "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+      "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
     ]);
   });
 

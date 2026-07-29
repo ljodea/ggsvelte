@@ -83,9 +83,9 @@ export type GlyphHoverBox = {
 export function glyphHoverBox(
   anchor: { readonly x: number; readonly y: number },
   extents: {
-    readonly width?: number;
-    readonly height?: number;
-    readonly textAnchor?: "start" | "middle" | "end";
+    readonly width?: number | undefined;
+    readonly height?: number | undefined;
+    readonly textAnchor?: "start" | "middle" | "end" | undefined;
   } = {},
 ): GlyphHoverBox {
   const width =
@@ -111,9 +111,9 @@ export function crosshairGapForBox(width: number, height: number): number {
 /** Minimal batch surface for glyph highlight extents (Scene GeometryBatch). */
 export type GlyphExtentBatch = {
   readonly kind: string;
-  readonly boxWidths?: ArrayLike<number>;
-  readonly boxHeights?: ArrayLike<number>;
-  readonly anchor?: "start" | "middle" | "end";
+  readonly boxWidths?: ArrayLike<number> | undefined;
+  readonly boxHeights?: ArrayLike<number> | undefined;
+  readonly anchor?: "start" | "middle" | "end" | undefined;
 };
 
 /**

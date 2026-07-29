@@ -64,9 +64,9 @@
     inspectionPanel?: Panel | null;
     coordFlipped?: boolean;
     hoverChrome?: PresentationChrome;
-    hoverBoxWidth?: number;
-    hoverBoxHeight?: number;
-    hoverBoxAnchor?: "start" | "middle" | "end";
+    hoverBoxWidth?: number | undefined;
+    hoverBoxHeight?: number | undefined;
+    hoverBoxAnchor?: "start" | "middle" | "end" | undefined;
     selectedAnchors?: readonly PresentationAnchor[];
     emphasizedAnchors?: readonly PresentationAnchor[];
     brushRect?: BrushRect | null;
