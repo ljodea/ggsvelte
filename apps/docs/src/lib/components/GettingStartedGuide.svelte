@@ -29,8 +29,8 @@
 
   /**
    * Intermediate step charts ship as SVG the library rendered at build time
-   * (scripts/gen-lesson-charts.ts). The final "Finish it" step is the live
-   * 838-point plot in LessonFinishedChart.
+   * (scripts/gen-lesson-charts.ts). The final "Make it interactive" step is the
+   * live 838-point plot in LessonFinishedChart.
    */
   const chartSrc = (step: number): string =>
     `${base}/lesson/${step < 0 ? "first-render.svg" : `step-${String(step + 1)}.svg`}`;

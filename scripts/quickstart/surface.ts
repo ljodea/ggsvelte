@@ -1,13 +1,13 @@
 /**
  * Docs / agent surface derived from the sakura lesson.
  *
- * Page headings, aria extractors, and the agent-surface fragments.
+ * Page headings and the agent-surface fragments.
  * Not part of the human walkthrough fold — see GettingStartedGuide and llms.
  */
 
 import type { PortableSpec } from "@ggsvelte/spec";
 
-import { foldSakura, QUICKSTART_PAGE_SVELTE } from "./fold";
+import { foldSakura } from "./fold";
 import { SAKURA_BINWIDTH, SAKURA_STEPS } from "./steps";
 
 /**
@@ -29,13 +29,6 @@ export const GETTING_STARTED_PAGE_HEADINGS = [
   { id: "agent-json-spec", title: "Agent JSON spec", level: 2 },
   { id: "where-next", title: "Where next", level: 2 },
 ] as const satisfies readonly { id: string; title: string; level: 2 | 3 }[];
-
-/** The chart's accessible name, read from the file itself. */
-export function quickstartAriaLabel(): string {
-  const match = /ariaLabel="([^"]+)"/.exec(QUICKSTART_PAGE_SVELTE);
-  if (match === null) throw new Error("quickstart page has no ariaLabel");
-  return match[1]!;
-}
 
 // --- the agent surface -----------------------------------------------------
 // These live on /llms.txt and in the "Built for agents" section, not in the

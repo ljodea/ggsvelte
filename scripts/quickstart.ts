@@ -15,7 +15,7 @@
  * Implementation is split for maintainability:
  * - `scripts/quickstart/steps.ts` — lesson constants, types, SAKURA_STEPS
  * - `scripts/quickstart/fold.ts` — foldSakura accumulation
- * - `scripts/quickstart/surface.ts` — page headings, title/aria, agent fragments
+ * - `scripts/quickstart/surface.ts` — page headings, agent fragments
  *
  * Consumers keep importing from this module (`$scripts/quickstart`,
  * `./quickstart.ts`). Do not add `scripts/quickstart/index.ts` (extensionless
@@ -44,7 +44,6 @@ export type { SakuraRow, SakuraFold, FoldSakuraOptions } from "./quickstart/fold
 
 export {
   GETTING_STARTED_PAGE_HEADINGS,
-  quickstartAriaLabel,
   finishedPortableSpecNamed,
   QUICKSTART_BUILDER_FRAGMENT,
   QUICKSTART_PORTABLE_SPEC_FRAGMENT,

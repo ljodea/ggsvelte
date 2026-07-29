@@ -50,7 +50,8 @@ test("getting started presents the complete file, then the agent surface", async
   await expect(firstFile).toContainText("GGPlot");
   await expect(firstFile).toContainText("ScaleXContinuous");
   await expect(firstFile).toContainText('from "@ggsvelte/svelte/data"');
-  await expect(firstFile).toContainText("ariaLabel=");
+  // ariaLabel is production polish — not on the basic-plot starter file.
+  await expect(firstFile).not.toContainText("ariaLabel=");
   // Width follows the container and height defaults; neither belongs in the
   // file a reader copies.
   await expect(firstFile).not.toContainText("width=");

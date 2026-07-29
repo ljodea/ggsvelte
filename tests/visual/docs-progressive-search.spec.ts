@@ -30,13 +30,13 @@ test("each step shows its own delta and the finished chart is live", async ({ pa
   await expect(steps).toHaveCount(4);
   await expect(steps.getByRole("heading", { level: 3 })).toHaveText([
     "Pick a minimal theme and add a rolling median line",
-    "Add epoch bands",
+    "Add epochs",
     "Annotate record years",
-    "Finish it",
+    "Make it interactive",
   ]);
 
-  // Intermediate steps are build-time SVGs; Finish it is the one live plot
-  // (hydrate near-viewport, #972). Before that scroll, every step is an img.
+  // Intermediate steps are build-time SVGs; Make it interactive is the one live
+  // plot (hydrate near-viewport, #972). Before that scroll, every step is an img.
   await expect(steps.locator("img.lesson-chart")).toHaveCount(4);
   await expect(steps.locator(".gg-plot-root")).toHaveCount(0);
   const finishedChart = page.locator(".finished-chart");
@@ -156,7 +156,7 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
     'import { kyotoSakura } from "@ggsvelte/svelte/data"',
   );
   // Every chart is a build-time SVG without JS: first render + four steps
-  // (Finish it keeps its static fallback until hydrate near-viewport, #972).
+  // (Make it interactive keeps its static fallback until hydrate near-viewport, #972).
   await expect(page.locator(".lesson-block .lesson-output")).toBeVisible();
   await expect(page.locator("img.lesson-chart")).toHaveCount(5);
   await expect(

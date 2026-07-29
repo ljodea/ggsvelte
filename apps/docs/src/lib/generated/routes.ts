@@ -3903,7 +3903,7 @@ export const DOCS_ROUTES = [
       },
       {
         id: "add-epoch-bands",
-        title: "Add epoch bands",
+        title: "Add epochs",
         level: 3,
       },
       {
@@ -3913,7 +3913,7 @@ export const DOCS_ROUTES = [
       },
       {
         id: "finish-it",
-        title: "Finish it",
+        title: "Make it interactive",
         level: 3,
       },
       {

@@ -165,7 +165,8 @@ describe("guide sections cover their catalogs", () => {
     expect(QUICKSTART_PAGE_SVELTE).toContain("Labs");
     expect(QUICKSTART_PAGE_SVELTE).toContain('import { kyotoSakura } from "@ggsvelte/svelte/data"');
     expect(QUICKSTART_PAGE_SVELTE).toContain('aes={{ x: "year", y: "bloomDate" }}');
-    expect(QUICKSTART_PAGE_SVELTE).toMatch(/ariaLabel="[^"]{20,}"/);
+    // ariaLabel is production polish; the basic plot stays bare.
+    expect(QUICKSTART_PAGE_SVELTE).not.toMatch(/ariaLabel=/);
     expect(QUICKSTART_PAGE_SVELTE).not.toMatch(/\bwidth=/);
     expect(QUICKSTART_PAGE_SVELTE).not.toMatch(/\bheight=/);
   });
