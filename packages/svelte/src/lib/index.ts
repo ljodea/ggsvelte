@@ -556,11 +556,13 @@ export type {
 /** @lifecycle stable-intent */
 export { default as Legend } from "./legend/Legend.svelte";
 
-// Deprecation + composition diagnostics (sibling unions to InteractionDiagnostic)
+// Deprecation + composition diagnostics (sibling unions to InteractionDiagnostic).
+// Grammar-prop emission left in 0.13.0 (#704); catalog + builder remain for
+// PlotDiagnostic union typing, upgrade-guide anchors, and codemod consumers.
+// Discriminate with `d.code === "DEPRECATED_PLOT_PROP"` if needed.
 export {
   DEPRECATION_DIAGNOSTIC_CATALOG,
   deprecatedPropDiagnostic,
-  isDeprecationDiagnostic,
 } from "./diagnostics/deprecation.js";
 export type {
   DeprecationDiagnostic,

@@ -78,7 +78,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-economist",
     filename: "theme-economist.svg",
     path: "/theme-shells/theme-economist.svg",
-    sha256: "06078590a37b8b697c4a0ce8c283e839e5e21dae7b67fb60136a13c70e5be6f2",
+    sha256: "23f0be6b01ed86f38b95e6d020b7542b74dcc6cbc2764a3c80f7fc4e482ad37f",
   },
   {
     id: "theme-tufte",
@@ -139,6 +139,12 @@ export const THEME_STATIC_SHELLS = [
     filename: "palette-colorblind.svg",
     path: "/theme-shells/palette-colorblind.svg",
     sha256: "bc5da80dd99a61095b0e5c0b577d29813d8a005bc52078dbca325b030cbb6177",
+  },
+  {
+    id: "palette-economist",
+    filename: "palette-economist.svg",
+    path: "/theme-shells/palette-economist.svg",
+    sha256: "4f070e0b2034b38ec2c30054b55489241ee8c7634b249512a20dd665de8c5113",
   },
   {
     id: "palette-Set1",

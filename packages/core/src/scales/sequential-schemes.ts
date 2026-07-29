@@ -10,7 +10,7 @@
  */
 import { VIRIDIS_RAMP_10 } from "./viridis-ramp.js";
 
-export const MAGMA_RAMP_10: readonly string[] = [
+const MAGMA_RAMP_10: readonly string[] = [
   "#000004",
   "#1b0c41",
   "#4a0c6b",
@@ -23,7 +23,7 @@ export const MAGMA_RAMP_10: readonly string[] = [
   "#fcfdbf",
 ];
 
-export const PLASMA_RAMP_10: readonly string[] = [
+const PLASMA_RAMP_10: readonly string[] = [
   "#0d0887",
   "#46039f",
   "#7201a8",
@@ -36,7 +36,7 @@ export const PLASMA_RAMP_10: readonly string[] = [
   "#f0f921",
 ];
 
-export const INFERNO_RAMP_10: readonly string[] = [
+const INFERNO_RAMP_10: readonly string[] = [
   "#000004",
   "#1b0c41",
   "#4a0c6b",
@@ -49,7 +49,7 @@ export const INFERNO_RAMP_10: readonly string[] = [
   "#fcffa4",
 ];
 
-export const CIVIDIS_RAMP_10: readonly string[] = [
+const CIVIDIS_RAMP_10: readonly string[] = [
   "#00224e",
   "#123570",
   "#3b496c",
@@ -63,7 +63,7 @@ export const CIVIDIS_RAMP_10: readonly string[] = [
 ];
 
 /** Google turbo (Apache-2.0) — see repo NOTICE. */
-export const TURBO_RAMP_10: readonly string[] = [
+const TURBO_RAMP_10: readonly string[] = [
   "#30123b",
   "#4662d7",
   "#36aaf9",
@@ -78,9 +78,10 @@ export const TURBO_RAMP_10: readonly string[] = [
 
 /**
  * Registry keyed by portable scheme name. `viridis` is the same array
- * reference as {@link VIRIDIS_RAMP_10}.
+ * reference as {@link VIRIDIS_RAMP_10}. Public consumers resolve via
+ * {@link sequentialSchemeRamp}; named tables stay module-private.
  */
-export const SEQUENTIAL_SCHEME_RAMPS = {
+const SEQUENTIAL_SCHEME_RAMPS = {
   viridis: VIRIDIS_RAMP_10,
   magma: MAGMA_RAMP_10,
   plasma: PLASMA_RAMP_10,
@@ -91,10 +92,11 @@ export const SEQUENTIAL_SCHEME_RAMPS = {
 
 type SequentialSchemeName = keyof typeof SEQUENTIAL_SCHEME_RAMPS;
 
-export function isSequentialSchemeName(name: string): name is SequentialSchemeName {
+function isSequentialSchemeName(name: string): name is SequentialSchemeName {
   return Object.hasOwn(SEQUENTIAL_SCHEME_RAMPS, name);
 }
 
+/** Resolve a portable scheme name to its 10-stop ramp, or undefined. */
 export function sequentialSchemeRamp(name: string | undefined): readonly string[] | undefined {
   if (name === undefined) return undefined;
   return isSequentialSchemeName(name) ? SEQUENTIAL_SCHEME_RAMPS[name] : undefined;

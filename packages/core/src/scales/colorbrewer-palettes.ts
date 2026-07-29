@@ -16,7 +16,7 @@ const CB_SET1 = [
   "#f781bf",
   "#999999",
 ] as const;
-export const CB_SET2 = [
+const CB_SET2 = [
   "#66c2a5",
   "#fc8d62",
   "#8da0cb",
@@ -76,7 +76,7 @@ const CB_ACCENT = [
 ] as const;
 
 /** Sequential 9-class */
-export const CB_BLUES = [
+const CB_BLUES = [
   "#f7fbff",
   "#deebf7",
   "#c6dbef",
