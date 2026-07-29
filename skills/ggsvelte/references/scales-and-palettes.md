@@ -159,7 +159,7 @@ byte-identity-preserving: `value` is not routed through any helper.
 
 ## Palettes
 
-### Categorical schemes (54)
+### Categorical schemes (53)
 
 | Scheme                    | Description                                                        |
 | ------------------------- | ------------------------------------------------------------------ |
