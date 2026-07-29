@@ -91,8 +91,8 @@ export function componentNameForScaleHelper(helper: string): string {
 export function slugForScaleHelper(helper: string): string {
   const stem = helper.startsWith("scale") ? helper.slice(5) : helper;
   return stem
-    .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
-    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
+    .replaceAll(/([a-z0-9])([A-Z])/g, "$1_$2")
+    .replaceAll(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
     .toLowerCase();
 }
 
@@ -141,22 +141,22 @@ function typeSummaryOf(node: unknown, depth = 0): string {
 }
 
 function propertiesOf(declName: keyof typeof SpecDeclarations): Record<string, unknown> {
-  const schema = SpecDeclarations[declName] as unknown;
+  const schema: unknown = SpecDeclarations[declName];
   if (!isRecord(schema)) {
-    throw new Error(`SCALE_REFERENCE: SpecDeclarations.${String(declName)} is not an object`);
+    throw new Error(`SCALE_REFERENCE: SpecDeclarations.${declName} is not an object`);
   }
   // Intersect schemas put properties on allOf[0].properties
   const direct = schema["properties"];
-  if (isRecord(direct)) return direct as Record<string, unknown>;
+  if (isRecord(direct)) return direct;
   const allOf = schema["allOf"];
   if (Array.isArray(allOf)) {
     for (const branch of allOf) {
       if (isRecord(branch) && isRecord(branch["properties"])) {
-        return branch["properties"] as Record<string, unknown>;
+        return branch["properties"];
       }
     }
   }
-  throw new Error(`SCALE_REFERENCE: SpecDeclarations.${String(declName)} has no properties`);
+  throw new Error(`SCALE_REFERENCE: SpecDeclarations.${declName} has no properties`);
 }
 
 /** Fallback prose when a schema node has no description (shared style fields). */
@@ -187,13 +187,13 @@ function paramDocsFromSchema(
   for (const name of keys) {
     const prop = props[name];
     if (prop === undefined) {
-      throw new Error(`SCALE_REFERENCE: ${String(declName)} missing property "${name}"`);
+      throw new Error(`SCALE_REFERENCE: ${declName} missing property "${name}"`);
     }
     const fromSchema = descriptionOf(prop).trim();
     const description =
-      fromSchema !== ""
-        ? fromSchema
-        : (PARAM_DESCRIPTION_FALLBACKS[name] ?? `Authoring option \`${name}\` for this scale.`);
+      fromSchema === ""
+        ? (PARAM_DESCRIPTION_FALLBACKS[name] ?? `Authoring option \`${name}\` for this scale.`)
+        : fromSchema;
     docs.push({
       name,
       description,
@@ -971,7 +971,7 @@ function classifyHelper(helper: string, family: ScaleFamily): HelperMeta {
     throw new Error(`SCALE_REFERENCE: unhandled finite-style helper "${helper}"`);
   }
 
-  throw new Error(`SCALE_REFERENCE: unknown family ${family} for helper "${helper}"`);
+  throw new Error(`SCALE_REFERENCE: unknown family ${String(family)} for helper "${helper}"`);
 }
 
 // ---------------------------------------------------------------------------
@@ -1036,29 +1036,32 @@ function buildEntry(helper: string): ScaleReferenceEntry {
       ? classifyHelper(helper, family)
       : classifyHelper(aliasOfHelper, familyForHelper(aliasOfHelper));
 
-  const base: ScaleReferenceEntry = Object.freeze({
+  const aesthetics: readonly ScaleAesthetic[] = Object.freeze([aes]);
+  const alsoExportedAs: readonly string[] =
+    aliasOfHelper === undefined ? buildAlsoExportedAs(helper) : Object.freeze([]);
+  const summary =
+    aliasOfHelper === undefined
+      ? meta.summary
+      : helper.includes("Colour")
+        ? `${meta.summary} British Colour spelling — same binding as ${componentNameForScaleHelper(aliasOfHelper)}.`
+        : `${meta.summary} ggplot2 *Ordinal alias — same binding as ${componentNameForScaleHelper(aliasOfHelper)}.`;
+
+  return Object.freeze({
     helper,
     slug: slugForScaleHelper(helper),
     component: componentNameForScaleHelper(helper),
     family,
-    aesthetics: Object.freeze([aes]) as readonly ScaleAesthetic[],
+    aesthetics,
     scaleType: meta.scaleType,
     ...(meta.transform === undefined ? {} : { transform: meta.transform }),
     ...(meta.temporalKind === undefined ? {} : { temporalKind: meta.temporalKind }),
-    summary:
-      aliasOfHelper === undefined
-        ? meta.summary
-        : helper.includes("Colour")
-          ? `${meta.summary} British Colour spelling — same binding as ${componentNameForScaleHelper(aliasOfHelper)}.`
-          : `${meta.summary} ggplot2 *Ordinal alias — same binding as ${componentNameForScaleHelper(aliasOfHelper)}.`,
+    summary,
     optionsType: meta.optionsType,
     params: Object.freeze([...meta.params]),
     guide: meta.guide,
     ...(aliasOfHelper === undefined ? {} : { aliasOf: slugForScaleHelper(aliasOfHelper) }),
-    alsoExportedAs:
-      aliasOfHelper === undefined ? buildAlsoExportedAs(helper) : Object.freeze([] as string[]),
+    alsoExportedAs,
   });
-  return base;
 }
 
 /** Primary Scale* helpers (no Colour / Ordinal-only aliases). */
