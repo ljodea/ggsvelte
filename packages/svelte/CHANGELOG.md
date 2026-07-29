@@ -1,5 +1,67 @@
 # @ggsvelte/svelte
 
+## 0.15.2
+
+### Patch Changes
+
+- 3fe70c3: <!-- markdownlint-disable MD041 -->
+
+  perf(svelte): cache candidate semantic keys by lineage membership
+
+  Interval, selection, and mask projection walk every candidate. Marks that
+  share a lineage (smooth eval grids) now expand membership once and reuse
+  the key bag. Single-candidate paths stay O(L) on first hit.
+
+  Migration: none — internal speedup only
+
+- d4f148f: <!-- markdownlint-disable MD041 -->
+
+  fix(svelte): gap inspection crosshairs at the hover ring
+
+  Continuous x/y/xy guides no longer paint through the focused mark and
+  its hover ring. Each guide splits into segments that stop short of the
+  ring; rect hover chrome still draws continuous guides.
+
+  Migration: none — inspection chrome only
+
+- c5f265e: <!-- markdownlint-disable MD041 -->
+
+  fix(svelte): place legend Clear at top-right of the scene, not below
+
+  When legend focus commits, the Clear control no longer sits under the
+  plot with a bottom margin that shoved every chart below. It is absolute
+  at the top-right of the scene so SVG size stays fixed and layout does
+  not jump (and the tool-rail strip above the plot stays free).
+
+  Migration: none — chrome placement only
+
+- aeac77b: <!-- markdownlint-disable MD041 -->
+
+  perf(svelte): expand legend lineages once per lineage id
+
+  buildLegendEntryKeyIndex shared membership Sets across candidates with the
+  same lineage id (smooth eval grids). Lineage is no longer re-walked once
+  per mark. Candidate-local rowIndex still attaches without mutating the
+  shared bag.
+
+  Migration: none — internal speedup only
+
+- b08d256: <!-- markdownlint-disable MD041 -->
+
+  perf(core): O(log B) style bin lookup for binned size/shape/group
+
+  Binned style scales and style-driven grouping used linear findIndex over
+  break edges on every mapped row. styleBinIndex binary-searches the same
+  left-closed contract (B ≤ 64). Color binned scales already did this.
+
+  Migration: none — internal speedup only
+
+- Updated dependencies [3fe70c3]
+- Updated dependencies [aeac77b]
+- Updated dependencies [b08d256]
+  - @ggsvelte/core@0.15.2
+  - @ggsvelte/spec@0.15.2
+
 ## 0.15.1
 
 ### Patch Changes

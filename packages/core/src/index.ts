@@ -20,14 +20,8 @@ export {
 export type { CellValue, Columns, Discreteness, FieldType, Rows } from "./table.js";
 
 // Runtime data-changing filters (interactive legends and linked views)
-export {
-  compileRuntimeRowFilter,
-  compileRuntimeRowIndexFilter,
-  runtimeFilterValueEqual,
-} from "./runtime-filter.js";
+export { compileRuntimeRowIndexFilter } from "./runtime-filter.js";
 export type {
-  RuntimeRow,
-  RuntimeRowFilter,
   RuntimeRowIndexFilter,
   RuntimeRowFilterClause,
   RuntimeRowFilterMode,
@@ -82,7 +76,12 @@ export {
   CATEGORICAL_SCHEMES,
   CATEGORICAL_PALETTE_10,
   COLORBLIND_PALETTE,
+  ECONOMIST_PALETTE,
+  FEW_DARK_PALETTE,
+  FEW_LIGHT_PALETTE,
+  FEW_PALETTE,
   finiteExtent,
+  FIVETHIRTYEIGHT_PALETTE,
   FLEXOKI_PALETTE,
   IPSUM_PALETTE,
   niceLinearDomain,
@@ -109,16 +108,7 @@ export type {
   PositionScale,
 } from "./scales/train.js";
 export { rampColor, trainSequential, VIRIDIS_RAMP_10 } from "./scales/color.js";
-export {
-  CIVIDIS_RAMP_10,
-  INFERNO_RAMP_10,
-  MAGMA_RAMP_10,
-  PLASMA_RAMP_10,
-  SEQUENTIAL_SCHEME_RAMPS,
-  TURBO_RAMP_10,
-  isSequentialSchemeName,
-  sequentialSchemeRamp,
-} from "./scales/sequential-schemes.js";
+export { sequentialSchemeRamp } from "./scales/sequential-schemes.js";
 export { sampleSequentialPalette } from "./scales/train-color.js";
 export type { SequentialColorScale, SequentialConfig } from "./scales/color.js";
 
@@ -277,16 +267,10 @@ export type {
   CanonicalAxisToken,
   TraversalDirection,
 } from "./candidate-store.js";
-export {
-  buildInteractionMasks,
-  buildPrimitiveInteractionMasks,
-  legendValueEqual,
-  resolveLegendFocusKeys,
-} from "./interaction-mask.js";
+export { buildInteractionMasks, buildPrimitiveInteractionMasks } from "./interaction-mask.js";
 export type {
   BatchInteractionMask,
   FocusedPrimitive,
-  LegendValueMembership,
   SemanticCandidateKeys,
 } from "./interaction-mask.js";
 export { PANEL_SPACING, STRIP_BAND } from "./scene.js";
@@ -333,24 +317,21 @@ export {
 /** @lifecycle stable-intent */
 export type { RenderSVGOptions } from "./render-svg.js";
 
-// Within-mark paint (#591) — resource ids, resolved paint, and shared mark style
+// Renderer-neutral mark style (shapes, dash, stroke-null) for SVG/canvas/Svelte
 export {
   areaOutlineActive,
   linetypeDash,
   markLinetype,
-  paintResourceId,
   pointShapeGeometry,
   pointShapePathD,
   resolvePathMark,
   resolvePointMark,
-} from "./mark-paint.js";
-export type {
-  PointShapeGeometry,
-  ResolvedGlow,
-  ResolvedGradientPaint,
-  ResolvedPathMark,
-  ResolvedPointMark,
-} from "./mark-paint.js";
+} from "./mark-style.js";
+export type { PointShapeGeometry, ResolvedPathMark, ResolvedPointMark } from "./mark-style.js";
+
+// Within-mark paint (#591) — resource ids and resolved gradient/glow
+export { paintResourceId } from "./mark-paint.js";
+export type { ResolvedGlow, ResolvedGradientPaint } from "./mark-paint.js";
 
 // CLI implementation (the `ggsvelte-render` bin on the ggsvelte package wraps this)
 export { runCLI } from "./cli.js";

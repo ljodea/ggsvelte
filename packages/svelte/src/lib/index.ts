@@ -221,6 +221,12 @@ export { default as ThemeLinedraw } from "./theme/ThemeLinedraw.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeVoid } from "./theme/ThemeVoid.svelte";
 /** @lifecycle stable-intent */
+export { default as ThemeEconomistwhite } from "./theme/ThemeEconomistwhite.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeSolarized2 } from "./theme/ThemeSolarized2.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeSolarized2dark } from "./theme/ThemeSolarized2dark.svelte";
+/** @lifecycle stable-intent */
 export { default as ThemeWsj } from "./theme/ThemeWsj.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeGrey } from "./theme/ThemeGrey.svelte";
@@ -558,11 +564,13 @@ export type {
 /** @lifecycle stable-intent */
 export { default as Legend } from "./legend/Legend.svelte";
 
-// Deprecation + composition diagnostics (sibling unions to InteractionDiagnostic)
+// Deprecation + composition diagnostics (sibling unions to InteractionDiagnostic).
+// Grammar-prop emission left in 0.13.0 (#704); catalog + builder remain for
+// PlotDiagnostic union typing, upgrade-guide anchors, and codemod consumers.
+// Discriminate with `d.code === "DEPRECATED_PLOT_PROP"` if needed.
 export {
   DEPRECATION_DIAGNOSTIC_CATALOG,
   deprecatedPropDiagnostic,
-  isDeprecationDiagnostic,
 } from "./diagnostics/deprecation.js";
 export type {
   DeprecationDiagnostic,

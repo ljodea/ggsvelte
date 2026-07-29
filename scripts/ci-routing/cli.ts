@@ -1,10 +1,12 @@
 /**
- * CLI for path routing and content-hash helpers.
+ * CLI dispatcher for path routing, gates, and content-hash helpers.
  * Invoked only via `scripts/ci-routing.ts` (`import.meta.main` lives there).
+ *
+ * Command modules:
+ * - ./detect-changes-cli — detect-changes production adapter
+ * - ./content-hash-cli — hash-inputs / write / validate success markers
+ * - ./cli-io — shared flagValue / writeGithubOutput
  */
-import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
-
 import {
   classifyChangedPaths,
   evaluateGate,
@@ -17,20 +19,14 @@ import {
 } from "./routing";
 import { evaluateCiGate } from "./ci-gate";
 import { evaluateVrGate } from "./vr-gate";
+import { shouldBypassContentCache } from "./content-hash";
+import { flagValue, writeGithubOutput } from "./cli-io";
+import { runDetectChangesCli } from "./detect-changes-cli";
 import {
-  CACHEABLE_EXECUTIONS,
-  CONTENT_HASH_SCHEMA,
-  collectGitHeadInputDigests,
-  contentHashCacheKey,
-  parseSuccessMarker,
-  serializeSuccessMarker,
-  shouldBypassContentCache,
-  successMarkerPath,
-  validateSuccessMarker,
-  type CacheableExecution,
-  type ExecutionShard,
-} from "./content-hash";
-import { runDetectChanges, type DetectChangesInput, type DetectChangesIo } from "./detect-changes";
+  runHashInputsCli,
+  runValidateSuccessMarkerCli,
+  runWriteSuccessMarkerCli,
+} from "./content-hash-cli";
 
 export async function runCiRoutingCli(argv: string[]): Promise<void> {
   const args = argv.slice(2);
@@ -61,10 +57,7 @@ export async function runCiRoutingCli(argv: string[]): Promise<void> {
     const plan = planJobs(changes, { forceAll });
     const bypassContentCache = shouldBypassContentCache(changes, { forceAll });
     const body = formatGithubOutputs(plan, { bypassContentCache });
-    const outPath = process.env["GITHUB_OUTPUT"];
-    if (typeof outPath === "string" && outPath.length > 0) {
-      appendFileSync(outPath, body);
-    }
+    writeGithubOutput(body);
     process.stdout.write(body);
     return;
   }
@@ -149,104 +142,6 @@ function printHelp(): void {
 }
 
 /**
- * Production I/O for `detect-changes` — mirrors the former ci.yml bash:
- * swallow gh/git fetch/diff failures; exact-key GITHUB_OUTPUT write.
- */
-function createDetectChangesIo(): DetectChangesIo {
-  return {
-    commandExists(name: string): boolean {
-      const r = spawnSync("bash", ["-c", `command -v ${JSON.stringify(name)}`], {
-        encoding: "utf8",
-      });
-      return r.status === 0;
-    },
-    findLastSuccessfulMainHead(repo: string, headSha: string): string | undefined {
-      // Issue #244 cumulative main range. See lastSuccessfulMainHeadJq — gh api
-      // has no jq --arg; the former bash form was a silent no-op under `|| true`.
-      const r = spawnSync(
-        "gh",
-        [
-          "api",
-          `repos/${repo}/actions/workflows/ci.yml/runs?branch=main&status=completed&per_page=20`,
-          "--jq",
-          lastSuccessfulMainHeadJq(headSha),
-        ],
-        { encoding: "utf8", maxBuffer: 10 * 1024 * 1024 },
-      );
-      if (r.status !== 0) return undefined;
-      const sha = (r.stdout ?? "").trim();
-      return sha.length > 0 ? sha : undefined;
-    },
-    gitFetchDepth1(sha: string): void {
-      spawnSync("git", ["fetch", "--no-tags", "--depth=1", "origin", sha], {
-        encoding: "utf8",
-        stdio: "ignore",
-      });
-    },
-    gitCommitExists(sha: string): boolean {
-      const r = spawnSync("git", ["cat-file", "-e", `${sha}^{commit}`], {
-        encoding: "utf8",
-        stdio: "ignore",
-      });
-      return r.status === 0;
-    },
-    gitDiffNameStatus(base: string, head: string): string[] | "error" {
-      // Large renames can exceed Node's default 1 MiB maxBuffer; treat overflow
-      // as error → force-all rather than silent checks-only.
-      const r = spawnSync("git", ["diff", "--name-status", `${base}...${head}`], {
-        encoding: "utf8",
-        maxBuffer: 50 * 1024 * 1024,
-      });
-      if (r.error || r.status !== 0) return "error";
-      const text = r.stdout ?? "";
-      return text
-        .split(/\r?\n/)
-        .map((l) => l.trimEnd())
-        .filter((l) => l.length > 0);
-    },
-    writeGithubOutput(body: string): void {
-      writeGithubOutput(body);
-      process.stdout.write(body);
-    },
-    log(msg: string): void {
-      process.stdout.write(`${msg}\n`);
-    },
-  };
-}
-
-/** jq program for last successful main CI head, excluding the current head. */
-export function lastSuccessfulMainHeadJq(headSha: string): string {
-  const headLit = JSON.stringify(headSha);
-  return `[.workflow_runs[] | select(.conclusion == "success" and .head_sha != ${headLit}) | .head_sha][0] // empty`;
-}
-
-function runDetectChangesCli(): void {
-  const env = process.env;
-  const input: DetectChangesInput = {
-    eventName: env["EVENT_NAME"] ?? "",
-    githubRef: env["GITHUB_REF"] ?? "",
-    baseSha: env["BASE_SHA"] ?? "",
-    headSha: env["HEAD_SHA"] ?? "",
-    prLabels: env["PR_LABELS"] ?? "",
-    repo: env["REPO"] ?? "",
-  };
-  if (input.eventName.length === 0) {
-    throw new Error("detect-changes requires EVENT_NAME");
-  }
-  if (input.headSha.length === 0) {
-    throw new Error("detect-changes requires HEAD_SHA");
-  }
-  if (input.repo.length === 0) {
-    throw new Error("detect-changes requires REPO");
-  }
-  const outPath = env["GITHUB_OUTPUT"];
-  if (typeof outPath !== "string" || outPath.length === 0) {
-    throw new Error("detect-changes requires GITHUB_OUTPUT (job outputs path)");
-  }
-  runDetectChanges(input, createDetectChangesIo());
-}
-
-/**
  * `ci-gate` job driver. The workflow's bash guard on `DETECT_RESULT` runs
  * before this command (see ci.yml's `ci-gate` job) — by the time this is
  * invoked, detect-changes is known to have succeeded.
@@ -316,166 +211,6 @@ function runVrGateCli(): void {
   process.stdout.write(`vr-gate ok: ${verdict.reason}\n`);
 }
 
-function parseCacheableExecution(raw: string | undefined): CacheableExecution {
-  if (raw === undefined || raw.length === 0) {
-    throw new Error("--execution <name> is required");
-  }
-  if (!(CACHEABLE_EXECUTIONS as readonly string[]).includes(raw)) {
-    throw new Error(
-      `unknown execution "${raw}"; expected one of: ${CACHEABLE_EXECUTIONS.join(", ")}`,
-    );
-  }
-  return raw as CacheableExecution;
-}
-
-/**
- * `--shard <index>/<total>` (1-based), matching the vitest / playwright CLI
- * spelling the component jobs already pass through. Absent means unsharded.
- * Fail-closed: a malformed value must not silently degrade to unsharded, or a
- * typo in a matrix leg would make every leg share one marker.
- */
-function parseShardFlag(args: string[]): ExecutionShard | undefined {
-  const raw = flagValue(args, "--shard");
-  if (raw === undefined) return undefined;
-  const match = /^(\d+)\/(\d+)$/.exec(raw);
-  if (match === null) {
-    throw new Error(`--shard must look like <index>/<total> (1-based); got "${raw}"`);
-  }
-  const index = Number(match[1]);
-  const total = Number(match[2]);
-  if (total < 1 || index < 1 || index > total) {
-    throw new Error(`--shard index must be within 1..total; got "${raw}"`);
-  }
-  return { index, total };
-}
-
-async function runHashInputsCli(args: string[]): Promise<void> {
-  const execution = parseCacheableExecution(flagValue(args, "--execution"));
-  const os = flagValue(args, "--os") ?? process.env["RUNNER_OS"] ?? "unknown";
-  const containerTag = flagValue(args, "--container-tag");
-  const shard = parseShardFlag(args);
-  const matrixNode = flagValue(args, "--matrix-node");
-  const matrixPm = flagValue(args, "--matrix-pm");
-  const matrixPmVersion = flagValue(args, "--matrix-pm-version");
-  const matrixSvelte = flagValue(args, "--matrix-svelte");
-  const runtimeNodeVersion = flagValue(args, "--runtime-node-version");
-  const runtimePmVersion = flagValue(args, "--runtime-pm-version");
-
-  const { hash, paths } = await collectGitHeadInputDigests(execution);
-  const matrix =
-    matrixNode !== undefined &&
-    matrixPm !== undefined &&
-    matrixPmVersion !== undefined &&
-    matrixSvelte !== undefined
-      ? {
-          node: matrixNode,
-          packageManager: matrixPm,
-          packageManagerVersion: matrixPmVersion,
-          svelte: matrixSvelte,
-        }
-      : undefined;
-
-  const runtime =
-    runtimeNodeVersion !== undefined &&
-    runtimeNodeVersion.length > 0 &&
-    runtimePmVersion !== undefined &&
-    runtimePmVersion.length > 0
-      ? { nodeVersion: runtimeNodeVersion, packageManagerVersion: runtimePmVersion }
-      : undefined;
-
-  if (execution === "consumer" && (matrix === undefined || runtime === undefined)) {
-    throw new Error(
-      "hash-inputs consumer requires --matrix-* and --runtime-node-version / --runtime-pm-version",
-    );
-  }
-
-  // Absent flags are omitted rather than passed as explicit `undefined`:
-  // contentHashCacheKey's optional dimensions are omit-or-provide by contract
-  // (exactOptionalPropertyTypes), and each one it sees adds a key segment.
-  const cacheKey = contentHashCacheKey({
-    execution,
-    hash,
-    os,
-    ...(containerTag === undefined ? {} : { containerTag }),
-    ...(shard === undefined ? {} : { shard }),
-    ...(matrix === undefined ? {} : { matrix }),
-    ...(runtime === undefined ? {} : { runtime }),
-  });
-  const marker = successMarkerPath(execution, shard);
-  const body = [
-    `hash=${hash}`,
-    `cache_key=${cacheKey}`,
-    `marker_path=${marker}`,
-    `path_count=${paths.length}`,
-    `execution=${execution}`,
-  ].join("\n");
-
-  const outPath = process.env["GITHUB_OUTPUT"];
-  if (typeof outPath === "string" && outPath.length > 0) {
-    appendFileSync(outPath, `${body}\n`);
-  }
-  process.stdout.write(`${body}\n`);
-}
-
-function runWriteSuccessMarkerCli(args: string[]): void {
-  const execution = parseCacheableExecution(flagValue(args, "--execution"));
-  const hash = flagValue(args, "--hash");
-  if (hash === undefined || hash.length === 0) {
-    throw new Error("write-success-marker requires --hash <hex>");
-  }
-  const shard = parseShardFlag(args);
-  const path = successMarkerPath(execution, shard);
-  const dir = path.slice(0, path.lastIndexOf("/"));
-  mkdirSync(dir, { recursive: true });
-  writeFileSync(
-    path,
-    serializeSuccessMarker({
-      schema: CONTENT_HASH_SCHEMA,
-      execution,
-      hash,
-      ...(shard === undefined ? {} : { shard }),
-    }),
-    "utf8",
-  );
-  process.stdout.write(`${path}\n`);
-}
-
-async function runValidateSuccessMarkerCli(args: string[]): Promise<void> {
-  const execution = parseCacheableExecution(flagValue(args, "--execution"));
-  const hash = flagValue(args, "--hash");
-  if (hash === undefined || hash.length === 0) {
-    throw new Error("validate-success-marker requires --hash <hex>");
-  }
-  const shard = parseShardFlag(args);
-  const path = successMarkerPath(execution, shard);
-  const file = Bun.file(path);
-  if (!(await file.exists())) {
-    process.stdout.write("hit=false\n");
-    writeGithubOutput("hit=false\n");
-    return;
-  }
-  const body = await file.text();
-  const marker = parseSuccessMarker(body);
-  const ok = validateSuccessMarker(marker, {
-    execution,
-    hash,
-    ...(shard === undefined ? {} : { shard }),
-  });
-  const line = `hit=${ok ? "true" : "false"}\n`;
-  process.stdout.write(line);
-  writeGithubOutput(line);
-  if (!ok) {
-    process.exitCode = 0; // miss is not a failure — caller runs full job
-  }
-}
-
-function writeGithubOutput(body: string): void {
-  const outPath = process.env["GITHUB_OUTPUT"];
-  if (typeof outPath === "string" && outPath.length > 0) {
-    appendFileSync(outPath, body);
-  }
-}
-
 async function resolvePlanArgs(args: string[]): Promise<{ files: string[]; forceAll: boolean }> {
   const forceAll = args.includes("--force-all");
   const files = await resolveFiles(args.filter((a) => a !== "--force-all"));
@@ -519,12 +254,6 @@ async function resolveFiles(args: string[]): Promise<string[]> {
 
   // Default: empty list (caller should pass --force-all when appropriate).
   return [];
-}
-
-function flagValue(args: string[], flag: string): string | undefined {
-  const i = args.indexOf(flag);
-  if (i < 0) return undefined;
-  return args[i + 1];
 }
 
 function readArg(path: string): Promise<string> {

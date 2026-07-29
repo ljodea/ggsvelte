@@ -1,7 +1,8 @@
 import { error } from "@sveltejs/kit";
 
+import { previewPathFor } from "$lib/catalog/gallery";
 import { EXAMPLE_ALIASES, resolveExampleId } from "$lib/example-aliases";
-import { EXAMPLES, loadExample } from "$lib/examples";
+import { EXAMPLES, loadExampleSources } from "$lib/examples";
 
 import type { EntryGenerator, PageLoad } from "./$types";
 
@@ -24,5 +25,11 @@ export const load: PageLoad = async ({ params }) => {
   if (entry === undefined) {
     error(404, `No example "${requestedId}" — see /examples for the gallery.`);
   }
-  return { entry, ...(await loadExample(id)) };
+  // Sources only — live Example.svelte mounts client-side after the PNG paints
+  // (see ExampleLiveFrame). Avoids blocking page load on the chart stack.
+  return {
+    entry,
+    previewPath: previewPathFor(id),
+    ...(await loadExampleSources(id)),
+  };
 };

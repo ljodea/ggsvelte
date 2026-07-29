@@ -6,8 +6,8 @@
  * stop each carrying their own `panelAtOrOnly().nearest()` and maxDistance.
  *
  * Does not own hit geometry (core) or the inspect pin lifecycle. Semantic
- * keys stay on the host (`candidateSemanticKeys`) — this module returns the
- * match; projection to InteractionCandidateRef is a pure field map.
+ * keys stay on the host (`candidateSemanticKeys`). Reducer inspect payloads
+ * are built from CandidateMatch / CandidateFacts in inspection/frame.ts.
  */
 
 import type {
@@ -19,7 +19,6 @@ import type {
 
 import { panelBoundsFrom, type PanelBounds } from "../scene/geometry.js";
 import type { PlotPoint } from "../surface/area-brush.js";
-import type { InteractionCandidateRef } from "./reducer.js";
 
 /**
  * Why we are resolving. Selects the distance policy so callers stop each
@@ -133,16 +132,5 @@ export function resolveTarget(input: ResolveTargetInput): ResolvedTarget | null 
     distance: match.distance,
     match,
     panel: { id: panel.id, ...panelBoundsFrom(panel.bounds) },
-  };
-}
-
-/** Project ResolvedTarget into the reducer inspect payload shape. */
-export function toInteractionCandidateRef(target: ResolvedTarget): InteractionCandidateRef {
-  return {
-    epoch: target.epoch,
-    id: target.candidateId,
-    panelId: target.panelId,
-    x: target.point.x,
-    y: target.point.y,
   };
 }

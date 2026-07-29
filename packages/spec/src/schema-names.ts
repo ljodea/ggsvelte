@@ -27,6 +27,13 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "flexoki",
   "tableau10",
   "colorblind",
+  /** ggthemes scale_colour/fill_economist — Economist blues/greens (fill order). */
+  "economist",
+  // ggthemes ports (#1159): Few "Show Me the Numbers" variants + FiveThirtyEight
+  "few",
+  "few_light",
+  "few_dark",
+  "fivethirtyeight",
   /** ggthemes wsj_pal — scale_colour/fill_wsj palette variants. */
   "wsj",
   "wsj_rgby",
@@ -135,6 +142,10 @@ export const THEME_NAMES = [
   "tufte",
   "linedraw",
   "void",
+  // ggthemes theme ports (#1158)
+  "economist_white",
+  "solarized_2",
+  "solarized_2dark",
   /** ggthemes theme_wsj (Wall Street Journal). */
   "wsj",
   "grey",

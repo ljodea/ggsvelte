@@ -31,25 +31,44 @@ const specsById = indexExampleModulesById(specs, "spec.ts");
 const specSourcesById = indexExampleModulesById(specSources, "spec.ts");
 const svelteSourcesById = indexExampleModulesById(svelteSources, "Example.svelte");
 
-export interface LoadedExample {
-  component: Component;
+export interface ExampleSources {
   spec: PortableSpec;
   specSource: string;
   svelteSource: string;
 }
 
-/** Load one example's live component, canonical spec, and raw sources. */
-export async function loadExample(id: string): Promise<LoadedExample> {
-  const [component, spec, specSource, svelteSource] = await Promise.all([
-    requireExampleModule(componentsById, id, "Example.svelte")(),
+export interface LoadedExample extends ExampleSources {
+  component: Component;
+}
+
+/**
+ * Load code-tab sources only (no Example.svelte / chart stack).
+ * Use on example pages that paint a PNG first and upgrade client-side.
+ */
+export async function loadExampleSources(id: string): Promise<ExampleSources> {
+  const [spec, specSource, svelteSource] = await Promise.all([
     requireExampleModule(specsById, id, "spec.ts")(),
     requireExampleModule(specSourcesById, id, "spec.ts")(),
     requireExampleModule(svelteSourcesById, id, "Example.svelte")(),
   ]);
   return {
-    component: component.default,
     spec: spec.default,
     specSource,
     svelteSource,
   };
+}
+
+/** Dynamically import one example's live Svelte chart component. */
+export async function loadExampleComponent(id: string): Promise<Component> {
+  const component = await requireExampleModule(componentsById, id, "Example.svelte")();
+  return component.default;
+}
+
+/** Load one example's live component, canonical spec, and raw sources. */
+export async function loadExample(id: string): Promise<LoadedExample> {
+  const [component, sources] = await Promise.all([
+    loadExampleComponent(id),
+    loadExampleSources(id),
+  ]);
+  return { component, ...sources };
 }

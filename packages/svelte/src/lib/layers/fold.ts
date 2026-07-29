@@ -48,12 +48,3 @@ export function foldPlotLayer(builder: GgBuilder, layer: PlotLayerLike): GgBuild
     }
   }
 }
-
-/** Fold plot layers in registration order (children win over earlier siblings). */
-export function foldPlotLayers(builder: GgBuilder, layers: readonly PlotLayerLike[]): GgBuilder {
-  let next = builder;
-  for (const layer of layers) {
-    next = foldPlotLayer(next, layer);
-  }
-  return next;
-}

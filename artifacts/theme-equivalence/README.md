@@ -2,7 +2,7 @@
 
 This board compares R and ggsvelte renders using the same data, explicit domains, explicit breaks, explicit colors, 720×480 logical viewport, and 1440×960 output. R uses Cairo at 192 dpi. ggsvelte uses Chromium at device scale factor 2 with its bundled Roboto Condensed faces loaded and verified through `document.fonts.check()`.
 
-Open [index.html](./index.html) for all 17 registered ggsvelte themes and the three side-by-side structural references. Raw structural measurements are in [r-metrics.json](./r-metrics.json) and [ggsvelte-metrics.json](./ggsvelte-metrics.json).
+Open [index.html](./index.html) for all 20 registered ggsvelte themes and the three side-by-side structural references. Raw structural measurements are in [r-metrics.json](./r-metrics.json) and [ggsvelte-metrics.json](./ggsvelte-metrics.json).
 
 ## Structural parity
 
@@ -31,6 +31,10 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - hrbrthemes Flexoki Light: `#D14D41 #DA702C #D0A215 #879A39 #3AA99F #4385BE #8B7EC8 #CE5D97`
 - ggthemes Tableau 10: `#4E79A7 #F28E2B #E15759 #76B7B2 #59A14F #EDC948 #B07AA1 #FF9DA7 #9C755F #BAB0AC`
 - ggthemes colorblind: `#000000 #E69F00 #56B4E9 #009E73 #F0E442 #0072B2 #D55E00 #CC79A7`
+- ggthemes few (Medium): `#5DA5DA #FAA43A #60BD68 #F17CB0 #B2912F #B276B2 #DECF3F #F15854`
+- ggthemes few_light (Light): `#88BDE6 #FBB258 #90CD97 #F6AAC9 #BFA554 #BC99C7 #EDDD46 #F07E6E`
+- ggthemes few_dark (Dark): `#265DAB #DF5C24 #059748 #E5126F #9D722A #7B3A96 #C7B42E #CB2027`
+- ggthemes fivethirtyeight: `#008FD5 #FF2700 #77AB43`
 - ggthemes wsj (colors6): `#c72e29 #016392 #be9c2e #098154 #fb832d #000000`
 - ggthemes wsj_rgby: `#d3ba68 #d5695d #5d8ca8 #65a479`
 - ggthemes wsj_red_green: `#088158 #ba2f2a`
@@ -44,7 +48,7 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - hrbrthemes palettes: `/Users/liamodea/Code/hrbrthemes/R/color.r` and `R/flexoki.R`
 - ggthemes Few: `/Users/liamodea/Code/ggthemes/R/few.R`
 - ggthemes WSJ theme: `/Users/liamodea/Code/ggthemes/R/wsj.R`
-- ggthemes palettes: `/Users/liamodea/Code/ggthemes/data-raw/theme-data/tableau.yml`, `colorblind.yml`, and `wsj.yml`
+- ggthemes palettes: `/Users/liamodea/Code/ggthemes/data-raw/theme-data/tableau.yml`, `colorblind.yml`, `few.yml`, `fivethirtyeight.yml`, and `wsj.yml`
 
 Reproduce everything with:
 

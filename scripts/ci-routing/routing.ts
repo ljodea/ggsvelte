@@ -152,6 +152,9 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     // #784: build/check run gen-lesson-charts --check; build runs docs-csp after vite.
     "scripts/gen-lesson-charts.ts",
     "scripts/gen-lesson-charts.test.ts",
+    // Themes/palettes shell externalization (HTML shrink).
+    "scripts/gen-theme-static-shells.ts",
+    "scripts/docs-html-shell-external.test.ts",
     "scripts/docs-csp.ts",
     "scripts/docs-csp.test.ts",
     // Deployment generators and smoke contracts change the published artifact.
@@ -210,6 +213,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
   // Packed-consumer harness (not the whole scripts/ tree — matrix is expensive).
   consumer_tools: [
     "scripts/consumer-compat.ts",
+    "scripts/consumer-compat-plan.ts",
+    "scripts/consumer-compat-fixture.ts",
     "scripts/consumer-compat.test.ts",
     // Packed fixture snippets live here; consumer-compat imports them.
     "scripts/guide-code-contract.ts",

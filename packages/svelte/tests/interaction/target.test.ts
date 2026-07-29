@@ -6,12 +6,10 @@ import { describe, expect, it } from "vitest";
 import { runPipeline, type RenderModel } from "@ggsvelte/core";
 import { aes, gg } from "@ggsvelte/spec";
 
-import type { InteractionCandidateRef } from "../../src/lib/interaction/reducer.js";
 import {
   POINT_SELECT_NEAREST_MAX_DISTANCE_PX,
   resolveTarget,
   targetSearch,
-  toInteractionCandidateRef,
   type TargetIntent,
 } from "../../src/lib/interaction/target.js";
 
@@ -167,44 +165,5 @@ describe("resolveTarget distance policy outcomes", () => {
         inspect: { mode: "xy", maxDistance: 24 },
       })?.candidateId,
     ).toBe(near.id);
-  });
-});
-
-describe("toInteractionCandidateRef", () => {
-  it("projects ResolvedTarget into InteractionCandidateRef without drift", () => {
-    const model = singlePanelDistanceModel();
-    const cand = model.candidates.candidate(0)!;
-    const target = resolveTarget({
-      model,
-      point: { x: cand.x, y: cand.y },
-      intent: "point-select",
-      inspect: null,
-    });
-    expect(target).not.toBeNull();
-    const ref = toInteractionCandidateRef(target!);
-    expect(ref).toEqual({
-      epoch: cand.epoch,
-      id: cand.id,
-      panelId: cand.panelId,
-      x: cand.x,
-      y: cand.y,
-    });
-  });
-
-  it("is structurally assignable to InteractionCandidateRef (type test)", () => {
-    // Compile-time only: if the projection drifts from the reducer payload
-    // shape, assigning to InteractionCandidateRef fails typecheck.
-    const model = singlePanelDistanceModel();
-    const cand = model.candidates.candidate(0);
-    if (cand === null) throw new Error("expected candidate");
-    const target = resolveTarget({
-      model,
-      point: { x: cand.x, y: cand.y },
-      intent: "point-select",
-      inspect: null,
-    });
-    if (target === null) throw new Error("expected resolved target");
-    const ref: InteractionCandidateRef = toInteractionCandidateRef(target);
-    expect(ref.id).toBe(cand.id);
   });
 });

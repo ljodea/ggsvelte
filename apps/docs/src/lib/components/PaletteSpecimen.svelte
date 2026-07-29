@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { base } from "$app/paths";
   import { onMount } from "svelte";
   import type { CATEGORICAL_SCHEME_NAMES, ThemeName } from "@ggsvelte/spec";
 
@@ -13,7 +14,7 @@
     capacity,
     reverse,
     paperTheme,
-    staticSvg,
+    staticSrc,
   }: {
     name: CategoricalSchemeName;
     label: string;
@@ -21,8 +22,8 @@
     capacity: number;
     reverse: boolean;
     paperTheme: ThemeName;
-    /** Prerendered shell for reverse=false + paperTheme=light. */
-    staticSvg: string;
+    /** Path under /theme-shells/ for reverse=false + paperTheme=light. */
+    staticSrc: string;
   } = $props();
 
   const plotHeight = 340;
@@ -82,7 +83,15 @@
     {#if Live !== null}
       <Live {name} {label} {reverse} {paperTheme} height={plotHeight} />
     {:else if shellMatches}
-      {@html staticSvg}
+      <img
+        class="static-shell"
+        src={`${base}${staticSrc}`}
+        alt=""
+        width="832"
+        height={plotHeight}
+        decoding="async"
+        loading="lazy"
+      />
     {:else}
       <div class="plot-shell" style:height={`${String(plotHeight)}px`}></div>
     {/if}
@@ -134,6 +143,13 @@
     display: block;
     height: 1.5rem;
     background: var(--swatch);
+  }
+
+  .plot-panel :global(svg),
+  .static-shell {
+    display: block;
+    max-width: 100%;
+    height: auto;
   }
 
   .plot-panel {

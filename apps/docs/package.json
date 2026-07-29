@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "bun ../../scripts/gen-docs-routes.ts --check && bun ../../scripts/gen-docs-search.ts --check && bun ../../scripts/gen-lesson-charts.ts --check && bun ../../scripts/gen-gallery-previews.ts --check && svelte-kit sync && vite build && bun ../../scripts/check-docs-metadata.ts && bun ../../scripts/docs-csp.ts",
+    "build": "bun ../../scripts/gen-docs-routes.ts --check && bun ../../scripts/gen-docs-search.ts --check && bun ../../scripts/gen-lesson-charts.ts --check && bun ../../scripts/gen-gallery-previews.ts --check && bun ../../scripts/gen-theme-static-shells.ts --check && svelte-kit sync && vite build && bun ../../scripts/check-docs-metadata.ts && bun ../../scripts/docs-csp.ts",
     "preview": "vite preview",
-    "check": "bun ../../scripts/gen-docs-routes.ts --check && bun ../../scripts/gen-docs-search.ts --check && bun ../../scripts/gen-lesson-charts.ts --check && bun ../../scripts/gen-gallery-previews.ts --check && svelte-kit sync && svelte-check --fail-on-warnings",
+    "check": "bun ../../scripts/gen-docs-routes.ts --check && bun ../../scripts/gen-docs-search.ts --check && bun ../../scripts/gen-lesson-charts.ts --check && bun ../../scripts/gen-gallery-previews.ts --check && bun ../../scripts/gen-theme-static-shells.ts --check && svelte-kit sync && svelte-check --fail-on-warnings",
     "test": "svelte-kit sync && vitest run"
   },
   "dependencies": {
@@ -17,7 +17,6 @@
     "@ggsvelte/spec": "workspace:*",
     "@ggsvelte/svelte": "workspace:*",
     "bits-ui": "^2.18.1",
-    "phosphor-svelte": "^3.1.0",
     "svelte-highlight": "^7.16.0"
   },
   "devDependencies": {

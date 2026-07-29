@@ -210,8 +210,9 @@ test("homepage grammar inspect draws xy crosshair and supports legend focus", as
   // path under auto mode "x" instead of a point.
   await expect(tooltip.getByText("species")).toBeVisible();
   await expect(tooltip.getByText("-")).toHaveCount(0);
-  // mode "xy": full numeric crosshair — one line per continuous axis.
-  await expect(output.locator(".gg-crosshair")).toHaveCount(2);
+  // mode "xy": full numeric crosshair — each axis is gapped at the hover ring
+  // (two segments per axis when the focus is interior).
+  await expect(output.locator(".gg-crosshair")).toHaveCount(4);
 
   // legendFocus: discrete color entries are keyboard-reachable targets.
   const legendTarget = output.locator("[data-gg-legend-target]").first();

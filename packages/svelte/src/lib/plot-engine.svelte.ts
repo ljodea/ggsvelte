@@ -90,9 +90,9 @@ import type { PlotRuntime } from "./runtime/runtime.svelte.js";
 import { createSemanticCandidateProjection } from "./runtime/semantic-candidate-projection.svelte.js";
 import {
   buildDataIdentityEpochInput,
-  createSourceIdentityTracker,
   dataIdentityEpochToken,
-} from "./runtime/semantic-keys.js";
+} from "./runtime/semantic-data-identity.js";
+import { createSourceIdentityTracker } from "./runtime/semantic-source-identity.js";
 import {
   createSemanticKeyService,
   type SemanticKeyService,

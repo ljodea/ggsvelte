@@ -424,13 +424,15 @@ describe("R0 release wiring", () => {
     // Implementation lives under scripts/ci-routing/; the root file re-exports.
     const routing = read("scripts/ci-routing.ts");
     const contentHash = read("scripts/ci-routing/content-hash.ts");
+    const contentHashTypes = read("scripts/ci-routing/content-hash-types.ts");
+    const contentHashInputs = read("scripts/ci-routing/content-hash-inputs.ts");
     const pathRouting = read("scripts/ci-routing/routing.ts");
     expect(routing).toContain("CONTENT_HASH_SCHEMA");
     expect(routing).toContain("JOB_CONTENT_INPUTS");
-    expect(contentHash).toContain("CONTENT_HASH_SCHEMA");
-    expect(contentHash).toContain("JOB_CONTENT_INPUTS");
+    expect(contentHashTypes).toContain("CONTENT_HASH_SCHEMA");
+    expect(contentHashInputs).toContain("JOB_CONTENT_INPUTS");
+    expect(contentHashInputs).toContain(".github/actions/**");
     expect(contentHash).toContain("CI_DISABLE_CONTENT_HASH");
-    expect(contentHash).toContain(".github/actions/**");
     expect(pathRouting).toContain("ci_actions");
     expect(pathRouting).toContain("bypass_content_cache");
     expect(read("CONTRIBUTING.md")).toContain("content-hash");
