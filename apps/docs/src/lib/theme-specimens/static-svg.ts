@@ -195,7 +195,7 @@ export function temperaturesStaticSvg(input: {
     kind: "temps-line",
     scheme: input.scheme,
     height: input.height ?? 400,
-    ...(input.width !== undefined ? { width: input.width } : {}),
+    ...(input.width === undefined ? {} : { width: input.width }),
   });
 }
 

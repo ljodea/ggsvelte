@@ -139,7 +139,7 @@ export const THEME_STATIC_SHELL_BY_ID: Readonly<Record<string, string>> =
   Object.fromEntries(THEME_STATIC_SHELLS.map((s) => [s.id, s.path]));
 `;
   // Match pre-commit oxfmt so --check stays byte-stable.
-  return formatGeneratedSource(PROJECTION, raw);
+  return await formatGeneratedSource(PROJECTION, raw);
 }
 
 async function check(files: readonly ShellFile[]): Promise<void> {
