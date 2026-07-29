@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { base } from "$app/paths";
   import { onMount } from "svelte";
   import type { ThemeName } from "@ggsvelte/spec";
 
@@ -15,7 +16,7 @@
     kind,
     scheme,
     legendFocus,
-    staticSvg,
+    staticSrc,
     eager = false,
   }: {
     name: ThemeName;
@@ -24,8 +25,8 @@
     kind: ThemeSpecimenKind;
     scheme: SchemeName;
     legendFocus: boolean;
-    /** Prerendered SVG shell (no client core import). */
-    staticSvg: string;
+    /** Path under /theme-shells/ (no inlined SVG in HTML). */
+    staticSrc: string;
     /** When true, upgrade to interactive immediately on mount (above-fold). */
     eager?: boolean;
   } = $props();
@@ -74,7 +75,15 @@
     {#if Live !== null}
       <Live {name} {label} {kind} {scheme} {legendFocus} height={plotHeight} />
     {:else}
-      {@html staticSvg}
+      <img
+        class="static-shell"
+        src={`${base}${staticSrc}`}
+        alt=""
+        width="832"
+        height={plotHeight}
+        decoding="async"
+        loading={eager ? "eager" : "lazy"}
+      />
     {/if}
   </div>
 </article>
@@ -109,7 +118,8 @@
     min-width: 0;
   }
 
-  .plot-panel :global(svg) {
+  .plot-panel :global(svg),
+  .static-shell {
     display: block;
     max-width: 100%;
     height: auto;

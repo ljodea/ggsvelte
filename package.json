@@ -27,6 +27,8 @@
     "gallery:previews:gen": "bun scripts/gen-gallery-previews.ts",
     "gallery:previews:check": "bun scripts/gen-gallery-previews.ts --check",
     "gallery:previews:capture": "bun scripts/capture-gallery-lights.ts",
+    "theme:shells:gen": "bun scripts/gen-theme-static-shells.ts",
+    "theme:shells:check": "bun scripts/gen-theme-static-shells.ts --check",
     "check:docs-metadata": "bun scripts/check-docs-metadata.ts",
     "lint": "bun node_modules/.bin/oxlint .",
     "lint:md": "bun node_modules/.bin/markdownlint-cli2",

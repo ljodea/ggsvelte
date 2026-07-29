@@ -152,6 +152,9 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     // #784: build/check run gen-lesson-charts --check; build runs docs-csp after vite.
     "scripts/gen-lesson-charts.ts",
     "scripts/gen-lesson-charts.test.ts",
+    // Themes/palettes shell externalization (HTML shrink).
+    "scripts/gen-theme-static-shells.ts",
+    "scripts/docs-html-shell-external.test.ts",
     "scripts/docs-csp.ts",
     "scripts/docs-csp.test.ts",
     // Deployment generators and smoke contracts change the published artifact.

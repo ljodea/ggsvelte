@@ -101,6 +101,7 @@ const DOCS_SURFACE_CONTENT_INPUTS: readonly string[] = [
   "scripts/check-pages-links.ts",
   // #784: build/check --check gen-lesson-charts; build runs docs-csp after vite.
   "scripts/gen-lesson-charts.ts",
+  "scripts/gen-theme-static-shells.ts",
   "scripts/docs-csp.ts",
   // $scripts imports used by docs routes / layout (typecheck + published site).
   "scripts/gen-llms.ts",
@@ -284,6 +285,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "scripts/gallery-preview-provenance.test.ts",
     // Journeys assert lesson-chart img counts on /guide/getting-started (#784).
     "scripts/gen-lesson-charts.ts",
+    "scripts/gen-theme-static-shells.ts",
     "scripts/cloudflare-pages-config.test.ts",
     "scripts/deployment-artifact.ts",
     "scripts/deployment-artifact.test.ts",

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { base } from "$app/paths";
   import type { ThemeName } from "@ggsvelte/spec";
   import { onMount } from "svelte";
 
@@ -7,10 +8,10 @@
   type SchemeName = (typeof CATEGORICAL_PALETTES)[number]["name"];
 
   const {
-    initialStaticSvg,
+    initialStaticSrc,
   }: {
-    /** Prerendered default-theme shell; live plot replaces it on mount. */
-    initialStaticSvg: string;
+    /** Path to default-theme shell under /theme-shells/. */
+    initialStaticSrc: string;
   } = $props();
 
   let theme = $state<ThemeName>("default");
@@ -38,7 +39,15 @@
         ariaLabel={`${theme} theme with ${scheme} palette`}
       />
     {:else}
-      {@html initialStaticSvg}
+      <img
+        class="static-shell"
+        src={`${base}${initialStaticSrc}`}
+        alt=""
+        width="832"
+        height="400"
+        decoding="async"
+        fetchpriority="high"
+      />
     {/if}
   </div>
 
@@ -75,7 +84,8 @@
     min-width: 0;
   }
 
-  .plot-panel :global(svg) {
+  .plot-panel :global(svg),
+  .static-shell {
     display: block;
     max-width: 100%;
     height: auto;

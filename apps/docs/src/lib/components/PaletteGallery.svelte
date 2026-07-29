@@ -14,7 +14,7 @@
       capacity: number;
       reverse: boolean;
       paperTheme: ThemeName;
-      staticSvg: string;
+      staticSrc: string;
     }[];
   } = $props();
 
@@ -53,7 +53,7 @@
           capacity={palette.capacity}
           {reverse}
           {paperTheme}
-          staticSvg={palette.staticSvg}
+          staticSrc={palette.staticSrc}
         />
       </li>
     {/each}

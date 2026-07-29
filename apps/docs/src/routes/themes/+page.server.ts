@@ -1,22 +1,23 @@
 import { THEME_SPECIMENS } from "$lib/theme-specimens/catalog";
-import { temperaturesStaticSvg, themeSpecimenStaticSvg } from "$lib/theme-specimens/static-svg";
+import { THEME_STATIC_SHELL_BY_ID } from "$lib/generated/theme-static-shells";
 
-/** Precompute static chart shells at prerender so the client never imports core to paint them. */
+/**
+ * Paths only — SVG bodies live under /theme-shells/ so prerendered HTML stays
+ * small (was ~475 KB with inlined shells + kit data payload duplication).
+ */
 export function load() {
   return {
-    themeSpecimens: THEME_SPECIMENS.map((specimen) => ({
-      ...specimen,
-      staticSvg: themeSpecimenStaticSvg({
-        name: specimen.name,
-        kind: specimen.kind,
-        scheme: specimen.scheme,
-        height: 380,
-      }),
-    })),
-    labStaticSvg: temperaturesStaticSvg({
-      theme: "default",
-      scheme: "observable10",
-      height: 400,
+    themeSpecimens: THEME_SPECIMENS.map((specimen) => {
+      const path = THEME_STATIC_SHELL_BY_ID[`theme-${specimen.name}`];
+      if (path === undefined) {
+        throw new Error(`Missing static shell for theme ${specimen.name}`);
+      }
+      return { ...specimen, staticSrc: path };
     }),
+    labStaticSrc: (() => {
+      const path = THEME_STATIC_SHELL_BY_ID["theme-lab-default"];
+      if (path === undefined) throw new Error("Missing theme-lab-default shell");
+      return path;
+    })(),
   };
 }
