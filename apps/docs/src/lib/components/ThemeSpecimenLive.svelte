@@ -89,7 +89,7 @@
     data={attendees}
     aes={{ x: "track", fill: "level", weight: "deaths" }}
     key="id"
-    inspect={{ mode: "xy" }}
+    inspect={{ mode: "exact" }}
     {legendFocus}
     {height}
     ariaLabel={`${label} theme Edgeworth dodged bars`}
@@ -191,7 +191,7 @@
   <GGPlot
     data={revenue}
     aes={{ x: "quarter", y: "amount" }}
-    inspect={{ mode: "xy" }}
+    inspect={{ mode: "exact" }}
     {height}
     ariaLabel={`${label} theme Salk trial columns`}
   >

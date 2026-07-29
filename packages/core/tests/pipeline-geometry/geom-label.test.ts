@@ -119,7 +119,9 @@ describe("geom_label geometry (#792)", () => {
     expect(batch.boxWidths!.length).toBe(2);
   });
 
-  it("does not put box fields on plain text geom", () => {
+  it("measures text extents on plain text but does not paint a label box", () => {
+    // boxWidths/Heights are measured for inspect hover/pin chrome + hit AABB;
+    // visual label chrome (fill/stroke/radius) stays geom_label-only.
     const model = runPipeline(
       gg({ x: [1], y: [1], name: ["a"] }, aes({ x: "x", y: "y", label: "name" }))
         .geomText()
@@ -127,8 +129,13 @@ describe("geom_label geometry (#792)", () => {
       size,
     );
     const batch = model.scene.batches.find((b) => b.kind === "glyphs") as GlyphsBatch;
-    expect(batch.boxWidths).toBeUndefined();
+    expect(batch.boxWidths).toBeInstanceOf(Float32Array);
+    expect(batch.boxHeights).toBeInstanceOf(Float32Array);
+    expect(batch.boxWidths!.length).toBe(1);
+    expect(batch.boxWidths![0]!).toBeGreaterThan(0);
     expect(batch.boxFills).toBeUndefined();
+    expect(batch.boxStroke).toBeUndefined();
+    expect(batch.boxRadius).toBeUndefined();
   });
 });
 

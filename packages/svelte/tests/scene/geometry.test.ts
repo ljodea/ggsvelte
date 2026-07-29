@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   clamp,
+  crosshairGapForBox,
   frozenZoomDomains,
   gappedCrosshairSegments,
+  glyphExtentsFromBatch,
+  glyphHoverBox,
   HOVER_CROSSHAIR_GAP_RADIUS,
   normalizedRect,
   panelBoundsFrom,
@@ -140,5 +143,47 @@ describe("gappedCrosshairSegments", () => {
         }
       }
     }
+  });
+});
+
+describe("glyphHoverBox / glyphExtentsFromBatch", () => {
+  it("centers a middle-anchored box on the focus point", () => {
+    expect(glyphHoverBox({ x: 100, y: 50 }, { width: 40, height: 12 })).toEqual({
+      x: 80,
+      y: 44,
+      width: 40,
+      height: 12,
+    });
+  });
+
+  it("respects start and end text anchors", () => {
+    expect(
+      glyphHoverBox({ x: 100, y: 50 }, { width: 40, height: 12, textAnchor: "start" }),
+    ).toEqual({ x: 100, y: 44, width: 40, height: 12 });
+    expect(glyphHoverBox({ x: 100, y: 50 }, { width: 40, height: 12, textAnchor: "end" })).toEqual({
+      x: 60,
+      y: 44,
+      width: 40,
+      height: 12,
+    });
+  });
+
+  it("reads measured extents from a glyphs batch", () => {
+    expect(
+      glyphExtentsFromBatch(
+        {
+          kind: "glyphs",
+          boxWidths: [24, 48],
+          boxHeights: [10, 14],
+          anchor: "start",
+        },
+        1,
+      ),
+    ).toEqual({ width: 48, height: 14, textAnchor: "start" });
+    expect(glyphExtentsFromBatch({ kind: "points" }, 0)).toBeNull();
+  });
+
+  it("sizes the crosshair gap to clear the box diagonal", () => {
+    expect(crosshairGapForBox(30, 16)).toBeCloseTo(Math.hypot(15, 8) + 2);
   });
 });

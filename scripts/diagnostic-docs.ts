@@ -75,6 +75,25 @@ const recipes = new Map<string, DiagnosticDocEntry["recipe"]>([
     },
   ],
   [
+    "interaction:INTERACTION_INSPECT_X_ON_COL",
+    {
+      language: "svelte",
+      code: `<GGPlot data={rows} aes={{ x: "group", y: "amount" }} inspect={{ mode: "exact" }}>
+  <GeomCol />
+</GGPlot>`,
+    },
+  ],
+  [
+    "interaction:INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+    {
+      language: "svelte",
+      code: `<GGPlot data={rows} aes={{ x: "group", y: "amount" }} inspect={{ mode: "exact" }}>
+  <GeomCol />
+  <GeomText aes={{ label: "label" }} dy={-8} />
+</GGPlot>`,
+    },
+  ],
+  [
     "cli:invalid-json",
     {
       language: "sh",

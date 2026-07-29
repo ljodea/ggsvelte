@@ -124,17 +124,31 @@ export function createSemanticCandidateProjection(
     }
     const model = deps.model();
     if (model === null) return [];
-    return collectCandidates(model.candidates, (candidate) => ({
-      x: candidate.x,
-      y: candidate.y,
-      kind: candidate.kind,
-      batchIndex: candidate.batchIndex,
-      primitiveIndex: candidate.primitiveIndex,
-      panelId: candidate.panelId,
-      keys: deps.candidateSemanticKeys(candidate),
-      ...(candidate.xValue !== undefined && { xValue: candidate.xValue }),
-      ...(candidate.yValue !== undefined && { yValue: candidate.yValue }),
-    }));
+    return collectCandidates(model.candidates, (candidate) => {
+      const batch = model.scene.batches[candidate.batchIndex];
+      const width =
+        batch?.kind === "glyphs" ? batch.boxWidths?.[candidate.primitiveIndex] : undefined;
+      const height =
+        batch?.kind === "glyphs" ? batch.boxHeights?.[candidate.primitiveIndex] : undefined;
+      const textAnchor = batch?.kind === "glyphs" ? batch.anchor : undefined;
+      return {
+        x: candidate.x,
+        y: candidate.y,
+        kind: candidate.kind,
+        batchIndex: candidate.batchIndex,
+        primitiveIndex: candidate.primitiveIndex,
+        panelId: candidate.panelId,
+        keys: deps.candidateSemanticKeys(candidate),
+        ...(candidate.xValue !== undefined && { xValue: candidate.xValue }),
+        ...(candidate.yValue !== undefined && { yValue: candidate.yValue }),
+        ...(width !== undefined &&
+          height !== undefined && {
+            width,
+            height,
+            ...(textAnchor !== undefined && { textAnchor }),
+          }),
+      };
+    });
   });
 
   const intervalConsumptionCandidates = $derived.by(

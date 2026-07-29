@@ -231,6 +231,9 @@
       inspectionPanel={inspectionState.inspectionPanel}
       coordFlipped={engine.coordFlipped}
       hoverChrome={engine.hoverChrome}
+      hoverBoxWidth={engine.hoverBoxWidth}
+      hoverBoxHeight={engine.hoverBoxHeight}
+      hoverBoxAnchor={engine.hoverBoxAnchor}
       selectedAnchors={engine.selectedAnchors}
       emphasizedAnchors={engine.emphasizedAnchors}
       brushRect={surfaceState.brushRect}

@@ -4514,6 +4514,26 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "interaction-inspect-x-on-col",
+        title: "INTERACTION_INSPECT_X_ON_COL",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-x-on-bar",
+        title: "INTERACTION_INSPECT_X_ON_BAR",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-x-bisects-col-labels",
+        title: "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-x-bisects-bar-labels",
+        title: "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+        level: 3,
+      },
+      {
         id: "accessibility",
         title: "Accessibility",
         level: 2,
@@ -5519,6 +5539,26 @@ export const DOCS_ROUTES = [
       {
         id: "interaction-handler-without-capability",
         title: "INTERACTION_HANDLER_WITHOUT_CAPABILITY",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-x-on-col",
+        title: "INTERACTION_INSPECT_X_ON_COL",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-x-on-bar",
+        title: "INTERACTION_INSPECT_X_ON_BAR",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-x-bisects-col-labels",
+        title: "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+        level: 3,
+      },
+      {
+        id: "interaction-inspect-x-bisects-bar-labels",
+        title: "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
         level: 3,
       },
       {
