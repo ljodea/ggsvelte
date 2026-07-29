@@ -9,6 +9,7 @@ import {
   iterateCandidates,
   mergePresentationFocusKeys,
   nextPointSelectionKeys,
+  hoverChromeForKind,
   presentationChromeForKind,
   presentationFocusFromInspection,
   sameOrderedPropertyKeys,
@@ -99,15 +100,26 @@ describe("iterateCandidates / collectCandidates", () => {
 });
 
 describe("presentationChromeForKind", () => {
-  it("rings point marks and unknown kind; continuous and area families mute without rings", () => {
+  it("rings only point marks for selection/emphasis anchors", () => {
     expect(presentationChromeForKind("points")).toBe("ring");
-    // Missing kind: keep ring so hover/crosshair gap works before seed attaches.
-    expect(presentationChromeForKind()).toBe("ring");
-    expect(presentationChromeForKind(null)).toBe("ring");
+    expect(presentationChromeForKind()).toBe("none");
+    expect(presentationChromeForKind(null)).toBe("none");
     expect(presentationChromeForKind("rects")).toBe("none");
     expect(presentationChromeForKind("paths")).toBe("none");
     expect(presentationChromeForKind("segments")).toBe("none");
     expect(presentationChromeForKind("glyphs")).toBe("none");
+  });
+});
+
+describe("hoverChromeForKind", () => {
+  it("keeps rings for strokes and points; rects mute only", () => {
+    expect(hoverChromeForKind("points")).toBe("ring");
+    expect(hoverChromeForKind("paths")).toBe("ring");
+    expect(hoverChromeForKind("segments")).toBe("ring");
+    expect(hoverChromeForKind("glyphs")).toBe("ring");
+    expect(hoverChromeForKind()).toBe("ring");
+    expect(hoverChromeForKind(null)).toBe("ring");
+    expect(hoverChromeForKind("rects")).toBe("none");
   });
 });
 
