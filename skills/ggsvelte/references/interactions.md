@@ -91,8 +91,11 @@ entry has `severity`, `code`, `message`, `prop`, `suggestions`, `docUrl`):
   `INTERACTION_POINT_REQUIRES_KEY`, `INTERACTION_DUPLICATE_KEY`,
   `INTERACTION_UNSTABLE_KEY`, `INTERACTION_INTERVAL_FACET_UNSUPPORTED`,
   `INTERACTION_INTERVAL_SCALE_UNSUPPORTED` (continuous linear/log/time only),
-  `INTERACTION_LEGEND_DISCRETE_ONLY`, `INTERACTION_TOOL_UNAVAILABLE`, and the
-  two wiring advisories named above.
+  `INTERACTION_LEGEND_DISCRETE_ONLY`, `INTERACTION_TOOL_UNAVAILABLE`,
+  `INTERACTION_INSPECT_X_ON_COL` / `INTERACTION_INSPECT_X_ON_BAR` (vertical
+  guide through columns/bars), `INTERACTION_INSPECT_X_BISECTS_COL_LABELS` /
+  `INTERACTION_INSPECT_X_BISECTS_BAR_LABELS` (same guide through on-bar value
+  labels), and the two wiring advisories named above.
 - `DEPRECATION_DIAGNOSTIC_CATALOG` — one code, `DEPRECATED_PLOT_PROP`, for
   every grammar prop deprecated in 0.11.0 (`prop` carries the name).
 - `COMPOSITION_DIAGNOSTIC_CATALOG` — child-layer composition collisions:

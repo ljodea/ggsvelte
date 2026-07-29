@@ -100,23 +100,23 @@ describe("iterateCandidates / collectCandidates", () => {
 });
 
 describe("presentationChromeForKind", () => {
-  it("rings only point marks for selection/emphasis anchors", () => {
+  it("rings points, boxes glyphs, mute-only elsewhere for selection/emphasis", () => {
     expect(presentationChromeForKind("points")).toBe("ring");
     expect(presentationChromeForKind()).toBe("none");
     expect(presentationChromeForKind(null)).toBe("none");
     expect(presentationChromeForKind("rects")).toBe("none");
     expect(presentationChromeForKind("paths")).toBe("none");
     expect(presentationChromeForKind("segments")).toBe("none");
-    expect(presentationChromeForKind("glyphs")).toBe("none");
+    expect(presentationChromeForKind("glyphs")).toBe("box");
   });
 });
 
 describe("hoverChromeForKind", () => {
-  it("keeps rings for strokes and points; rects mute only", () => {
+  it("keeps rings for strokes and points; boxes glyphs; rects mute only", () => {
     expect(hoverChromeForKind("points")).toBe("ring");
     expect(hoverChromeForKind("paths")).toBe("ring");
     expect(hoverChromeForKind("segments")).toBe("ring");
-    expect(hoverChromeForKind("glyphs")).toBe("ring");
+    expect(hoverChromeForKind("glyphs")).toBe("box");
     expect(hoverChromeForKind()).toBe("ring");
     expect(hoverChromeForKind(null)).toBe("ring");
     expect(hoverChromeForKind("rects")).toBe("none");
@@ -167,20 +167,33 @@ describe("anchorsFromCandidateKeys", () => {
     ]);
   });
 
-  it("marks path, segment, and glyph candidates as chrome none", () => {
+  it("marks path and segment candidates as chrome none", () => {
     expect(
       anchorsFromCandidateKeys(
         [
           { x: 1, y: 2, keys: ["a"], kind: "paths" },
           { x: 3, y: 4, keys: ["b"], kind: "segments" },
-          { x: 5, y: 6, keys: ["c"], kind: "glyphs" },
         ],
-        ["a", "b", "c"],
+        ["a", "b"],
       ),
     ).toEqual([
       { x: 1, y: 2, chrome: "none" },
       { x: 3, y: 4, chrome: "none" },
-      { x: 5, y: 6, chrome: "none" },
+    ]);
+  });
+
+  it("marks glyph (text/label) candidates as chrome box", () => {
+    expect(
+      anchorsFromCandidateKeys(
+        [
+          { x: 1, y: 2, keys: ["a"], kind: "glyphs" },
+          { x: 3, y: 4, keys: ["b"], kind: "points" },
+        ],
+        ["a", "b"],
+      ),
+    ).toEqual([
+      { x: 1, y: 2, chrome: "box" },
+      { x: 3, y: 4, chrome: "ring" },
     ]);
   });
 
@@ -194,6 +207,18 @@ describe("anchorsFromCandidateKeys", () => {
         ["a"],
       ),
     ).toEqual([{ x: 1, y: 2, chrome: "ring" }]);
+  });
+
+  it("prefers box chrome when a glyph and rect share an anchor", () => {
+    expect(
+      anchorsFromCandidateKeys(
+        [
+          { x: 1, y: 2, keys: ["a"], kind: "rects" },
+          { x: 1, y: 2, keys: ["a"], kind: "glyphs" },
+        ],
+        ["a"],
+      ),
+    ).toEqual([{ x: 1, y: 2, chrome: "box" }]);
   });
 });
 

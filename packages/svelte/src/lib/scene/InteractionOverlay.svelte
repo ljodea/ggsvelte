@@ -11,7 +11,9 @@
     PresentationChrome,
   } from "../selection/selection.js";
   import {
+    crosshairGapForBox,
     gappedCrosshairSegments,
+    glyphHoverBox,
     HOVER_CROSSHAIR_GAP_RADIUS,
     HOVER_RING_RADIUS,
     normalizedRect,
@@ -37,6 +39,9 @@
     inspectionPanel = null,
     coordFlipped = false,
     hoverChrome = "ring",
+    hoverBoxWidth,
+    hoverBoxHeight,
+    hoverBoxAnchor = "middle",
     selectedAnchors = [],
     emphasizedAnchors = [],
     brushRect = null,
@@ -53,8 +58,12 @@
     > | null;
     inspectionPanel?: Panel | null;
     coordFlipped?: boolean;
-    /** Circle ring for points; `"none"` for non-point marks (mask de-emphasis). */
+    /** Circle ring for points; `"none"` for mute-only; `"box"` for text glyphs. */
     hoverChrome?: PresentationChrome;
+    /** Measured glyph box when hoverChrome is `"box"`. */
+    hoverBoxWidth?: number | undefined;
+    hoverBoxHeight?: number | undefined;
+    hoverBoxAnchor?: "start" | "middle" | "end" | undefined;
     selectedAnchors?: readonly PresentationAnchor[];
     emphasizedAnchors?: readonly PresentationAnchor[];
     brushRect?: BrushRect | null;
@@ -63,10 +72,24 @@
     committedInterval?: IntervalSelection | null;
   } = $props();
 
-  // Gap guides at the hover ring so they never bisect the focused mark.
+  const focusHoverBox = $derived(
+    inspection !== null && hoverChrome === "box"
+      ? glyphHoverBox(inspection.focus.anchor, {
+          width: hoverBoxWidth,
+          height: hoverBoxHeight,
+          textAnchor: hoverBoxAnchor,
+        })
+      : null,
+  );
+
+  // Gap guides at the hover ring/box so they never bisect the focused mark.
   // Rect chrome keeps continuous guides (`gapRadius = 0`).
   const crosshairGap = $derived(
-    hoverChrome === "ring" ? HOVER_CROSSHAIR_GAP_RADIUS : 0,
+    hoverChrome === "ring"
+      ? HOVER_CROSSHAIR_GAP_RADIUS
+      : hoverChrome === "box" && focusHoverBox !== null
+        ? crosshairGapForBox(focusHoverBox.width, focusHoverBox.height)
+        : 0,
   );
   const verticalCrosshair = $derived(
     inspection !== null && inspectionPanel !== null
@@ -147,12 +170,22 @@
         r={HOVER_RING_RADIUS}
         fill="none"
       />
+    {:else if hoverChrome === "box" && focusHoverBox !== null}
+      <rect
+        class="gg-hover-box"
+        x={focusHoverBox.x}
+        y={focusHoverBox.y}
+        width={focusHoverBox.width}
+        height={focusHoverBox.height}
+        rx="2"
+        ry="2"
+        fill="none"
+      />
     {/if}
   {/if}
-  <!-- Selection/emphasis rings: presentation of shared controller state; passive
-       consumers (interactive=false) must still show them. Only point-mark
-       anchors request rings; paths/rects/segments/glyphs use mute-only chrome.
-       Dense emphasis is density-gated before it reaches this overlay. -->
+  <!-- Selection/emphasis chrome: rings for points, boxes for glyphs, mute-only
+       for paths/rects/segments. Passive consumers (interactive=false) still show
+       them. Dense emphasis is density-gated before it reaches this overlay. -->
   {#each selectedAnchors as anchor, index (index)}
     {#if anchor.chrome === "ring"}
       <circle
@@ -160,6 +193,22 @@
         cx={anchor.x}
         cy={anchor.y}
         r="8"
+        fill="none"
+      />
+    {:else if anchor.chrome === "box"}
+      {@const box = glyphHoverBox(anchor, {
+        width: anchor.width,
+        height: anchor.height,
+        textAnchor: anchor.textAnchor,
+      })}
+      <rect
+        class="gg-selected-box"
+        x={box.x}
+        y={box.y}
+        width={box.width}
+        height={box.height}
+        rx="2"
+        ry="2"
         fill="none"
       />
     {/if}
@@ -171,6 +220,22 @@
         cx={anchor.x}
         cy={anchor.y}
         r="11"
+        fill="none"
+      />
+    {:else if anchor.chrome === "box"}
+      {@const box = glyphHoverBox(anchor, {
+        width: anchor.width,
+        height: anchor.height,
+        textAnchor: anchor.textAnchor,
+      })}
+      <rect
+        class="gg-emphasized-box"
+        x={box.x}
+        y={box.y}
+        width={box.width}
+        height={box.height}
+        rx="2"
+        ry="2"
         fill="none"
       />
     {/if}
@@ -238,7 +303,8 @@
     stroke-linejoin: round;
   }
 
-  .gg-hover-ring {
+  .gg-hover-ring,
+  .gg-hover-box {
     stroke: var(
       --gg-interactionInk,
       var(--gg-theme-interactionInk, currentColor)
@@ -247,7 +313,8 @@
     vector-effect: non-scaling-stroke;
   }
 
-  .gg-selected-ring {
+  .gg-selected-ring,
+  .gg-selected-box {
     stroke: var(
       --gg-selectionStroke,
       var(--gg-theme-selectionStroke, currentColor)
@@ -256,7 +323,8 @@
     vector-effect: non-scaling-stroke;
   }
 
-  .gg-emphasized-ring {
+  .gg-emphasized-ring,
+  .gg-emphasized-box {
     stroke: var(
       --gg-interactionInk,
       var(--gg-theme-interactionInk, currentColor)
@@ -302,7 +370,10 @@
 
     .gg-crosshair,
     .gg-hover-ring,
-    .gg-selected-ring {
+    .gg-hover-box,
+    .gg-selected-ring,
+    .gg-selected-box,
+    .gg-emphasized-box {
       stroke: Highlight;
     }
 

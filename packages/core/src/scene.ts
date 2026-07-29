@@ -222,8 +222,11 @@ export interface GlyphsBatch {
   alpha: number;
   alphas?: Float32Array;
   /**
-   * Optional background box (geom_label / geom_sf_label). When set, render/hit
-   * use these extents. Constants for padding/radius/stroke width.
+   * Glyph extents and optional label chrome.
+   * - `boxWidths` / `boxHeights` / `boxPadding`: measured text box for hit AABB
+   *   and inspect hover/pin highlight (always set for text/label glyphs).
+   * - Visual label paint (fill/stroke/radius/strokeWidth): geom_label /
+   *   geom_sf_label only. SVG paint requires one of those fields, not extents.
    */
   boxFill?: string | null;
   boxFills?: string[];

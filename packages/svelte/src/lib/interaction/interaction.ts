@@ -10,6 +10,10 @@ export type {
   InteractionDiagnostic,
   InteractionDiagnosticCode,
 } from "./interaction-diagnostics.js";
+export {
+  inspectAxisOnBarColDiagnostics,
+  layerGeomsFromSpecLayers,
+} from "./inspect-geom-advisories.js";
 
 export type InteractionSource = "pointer" | "keyboard" | "touch" | "programmatic";
 export type InspectMode = "auto" | "exact" | "x" | "y" | "xy";

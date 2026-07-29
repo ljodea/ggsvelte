@@ -20,7 +20,11 @@ export type InteractionDiagnosticCode =
   | "INTERACTION_INTERVAL_SCALE_UNSUPPORTED"
   | "INTERACTION_TOOL_UNAVAILABLE"
   | "INTERACTION_SCOPE_WITHOUT_CONTROLLER"
-  | "INTERACTION_HANDLER_WITHOUT_CAPABILITY";
+  | "INTERACTION_HANDLER_WITHOUT_CAPABILITY"
+  | "INTERACTION_INSPECT_X_ON_COL"
+  | "INTERACTION_INSPECT_X_ON_BAR"
+  | "INTERACTION_INSPECT_X_BISECTS_COL_LABELS"
+  | "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS";
 
 export interface InteractionDiagnostic {
   readonly severity: "error" | "warning" | "advisory";
@@ -168,5 +172,55 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     ],
     docUrl:
       "https://ggsvelte.sh/guide/interaction-reference#interaction-handler-without-capability",
+  },
+  INTERACTION_INSPECT_X_ON_COL: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_X_ON_COL",
+    message:
+      "inspect.mode draws a vertical guide through column marks; columns already encode x as a filled band, so the guide cuts the bar body and rarely adds information.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomCol',
+      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
+    ],
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-x-on-col",
+  },
+  INTERACTION_INSPECT_X_ON_BAR: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_X_ON_BAR",
+    message:
+      "inspect.mode draws a vertical guide through bar marks; bars already encode the band axis as a filled region, so the guide cuts the bar body and rarely adds information.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomBar',
+      "Prefer muteSiblings for sibling de-emphasis instead of an axis guide",
+    ],
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-x-on-bar",
+  },
+  INTERACTION_INSPECT_X_BISECTS_COL_LABELS: {
+    severity: "warning",
+    code: "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+    message:
+      "inspect.mode draws a vertical guide through GeomCol marks that also carry GeomText/GeomLabel values; the guide bisects the on-bar totals and makes them hard to read.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") when columns have value labels',
+      "Keep value labels; drop the x/xy guide rather than dropping the labels",
+    ],
+    docUrl:
+      "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-x-bisects-col-labels",
+  },
+  INTERACTION_INSPECT_X_BISECTS_BAR_LABELS: {
+    severity: "warning",
+    code: "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+    message:
+      "inspect.mode draws a vertical guide through GeomBar marks that also carry GeomText/GeomLabel values; the guide bisects the on-bar totals and makes them hard to read.",
+    prop: "inspect.mode",
+    suggestions: [
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") when bars have value labels',
+      "Keep value labels; drop the x/xy guide rather than dropping the labels",
+    ],
+    docUrl:
+      "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-x-bisects-bar-labels",
   },
 });
