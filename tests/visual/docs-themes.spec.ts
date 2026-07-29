@@ -51,7 +51,7 @@ test("themes compares all built-in chart themes as full-width interactive portra
   const list = page.getByRole("list", { name: "Built-in chart themes" });
   const specimens = list.getByRole("listitem");
   // Non-alias product themes (grey/gray alias ggplot2; not separate portraits).
-  await expect(specimens).toHaveCount(29);
+  await expect(specimens).toHaveCount(26);
   await expect(specimens.getByRole("heading", { level: 3 })).toHaveText([
     "Default",
     "Light",
@@ -78,9 +78,6 @@ test("themes compares all built-in chart themes as full-width interactive portra
     "Highcharts",
     "Highcharts Dark",
     "Pander",
-    "Calc",
-    "Excel",
-    "Excel New",
     "Test",
   ]);
 
@@ -113,10 +110,14 @@ test("chart theme lab picks theme and palette without alias or chrome clutter", 
   await expect(plot).toHaveAttribute("data-gg-ready", "true", { timeout: 30_000 });
   const chartPaper = () => plot.locator(".gg-paper").getAttribute("fill");
 
-  // No grey/gray alias rows (both map to ggplot2) and no follow-docs checkbox
-  // or theme=/scheme= status echo that only restates the selects.
+  // No grey/gray theme alias rows (both map to ggplot2) and no gray palette
+  // twin (same ramp as grey). No follow-docs checkbox or theme=/scheme= status
+  // echo that only restates the selects.
   const themeLabels = await chartTheme.locator("option").allTextContents();
   expect(themeLabels.filter((label) => /^Gre[ya]y$/i.test(label))).toHaveLength(0);
+  const paletteLabels = await palette.locator("option").allTextContents();
+  expect(paletteLabels.filter((label) => label === "Gray")).toHaveLength(0);
+  expect(paletteLabels.filter((label) => label === "Grey")).toHaveLength(1);
   await expect(lab.getByRole("checkbox", { name: "Follow docs appearance" })).toHaveCount(0);
   await expect(lab.getByRole("status")).toHaveCount(0);
   await expect(lab.getByText(/theme="/)).toHaveCount(0);
@@ -142,7 +143,8 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
-  await expect(cards).toHaveCount(49);
+  // Unique ramps only — scheme "gray" is a US-spelling alias of "grey", not a twin card.
+  await expect(cards).toHaveCount(44);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Observable 10",
     "Ipsum",
@@ -180,10 +182,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Highcharts",
     "Highcharts Dark",
     "Pander",
-    "Calc",
-    "Excel",
-    "Excel Fill",
-    "Excel New",
     "Set1",
     "Set2",
     "Set3",
@@ -192,7 +190,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Accent",
     "Hue",
     "Grey",
-    "Gray",
   ]);
   await expect(cards.locator(".capacity")).toHaveText([
     "10 colors",
@@ -237,7 +234,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "8 colors",
     "12 colors",
     "8 colors",
-    "10 colors",
     "10 colors",
     "10 colors",
   ]);
