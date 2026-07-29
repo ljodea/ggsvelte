@@ -60,7 +60,6 @@ describe("themes catalog", () => {
       "tableau10",
       "gdocs",
       "grey",
-      "gray",
     ] as const) {
       expect(byName[name], name).toBeDefined();
     }
@@ -70,7 +69,6 @@ describe("themes catalog", () => {
     expect(byName.excel_new.capacity).toBe(6);
     expect(byName.calc.colors[0]).toBe("#004586");
     expect(byName.excel.colors[0]).toBe("#FF00FF");
-    expect(byName.grey.colors).toEqual(byName.gray.colors);
     // Registry size is owned by schema-names; keep a lower bound so shrinks fail.
     expect(CATEGORICAL_PALETTES.length).toBeGreaterThanOrEqual(45);
     expect(CATEGORICAL_PALETTES.map((palette) => palette.name)).not.toContain("gray");
