@@ -149,6 +149,7 @@ as JSON under the same name on the docs site):
 ## Grammar vocabulary
 
 - [Geoms](/reference/geoms) — every mark, defaults, stats, positions, and params
+- [Guides and legends](/reference/guides) — GuideLegend, colorbar, colorsteps, axis, none
 - [Statistics and positions](/guide/statistics-positions) — stats, jitter, stacking
 - [Scales and guides](/guide/scales-guides) — continuous, discrete, manual, temporal
 - [Facets and coordinates](/guide/facets-coordinates) — small multiples, flip, fixed aspect
@@ -956,7 +957,13 @@ five-channel contract.
 
 ## Responsive guide presentation
 
-Guide appearance is downstream of scale training. Author top-level \`guides\`,
+Guide appearance is downstream of scale training. The full list of guide shells
+and helpers lives in the [guides reference](/reference/guides):
+[GuideLegend](/reference/guides/legend),
+[GuideColorbar](/reference/guides/colorbar),
+[GuideColorsteps](/reference/guides/colorsteps),
+[GuideAxis](/reference/guides/axis), and
+[GuideNone](/reference/guides/none). Author top-level \`guides\`,
 a scale-local \`guide\`, or fluent \`.guides()\` with \`guideAxis\`,
 \`guideLegend\`, \`guideColorbar\`, \`guideColorsteps\`, and \`guideNone\`.
 Top-level entries win over scale-local entries.
@@ -1430,7 +1437,10 @@ transient previews. Continuous ramps remain static. A stable \`key\` is required
 encoded legend values are reported as values, never used as controller keys.
 Focused and muted marks share one semantic mask across SVG and canvas, and the
 mask does not retrain scales, recompute statistics, change layout, or reassign
-colors. See the [runnable three-view example](/examples/interaction/legend-focus).
+colors. Author discrete legend appearance with
+[GuideLegend](/reference/guides/legend); see the full
+[guides reference](/reference/guides) and the
+[runnable three-view example](/examples/interaction/legend-focus).
 
 ## Legend filtering
 

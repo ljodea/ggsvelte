@@ -26,6 +26,10 @@
       "Every position adjustment: stack, dodge, jitter params, and geoms.",
     ],
     [
+      "/reference/guides",
+      "GuideLegend, GuideColorbar, GuideColorsteps, GuideAxis, and GuideNone.",
+    ],
+    [
       "/reference/cli",
       "Render, validate, and export charts from the terminal.",
     ],
