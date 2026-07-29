@@ -572,6 +572,8 @@ describe("planJobs", () => {
       // #784: package.json build/check invoke gen-lesson-charts; build invokes docs-csp.
       "scripts/gen-lesson-charts.ts",
       "scripts/gen-lesson-charts.test.ts",
+      "scripts/gen-theme-static-shells.ts",
+      "scripts/docs-html-shell-external.test.ts",
       "scripts/docs-csp.ts",
       "scripts/docs-csp.test.ts",
     ]) {
@@ -611,13 +613,18 @@ describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
       expect(inputs, execution).toContain("scripts/check-docs-metadata.ts");
       expect(inputs, execution).toContain("scripts/check-pages-links.ts");
       expect(inputs, execution).toContain("scripts/gen-lesson-charts.ts");
+      expect(inputs, execution).toContain("scripts/gen-theme-static-shells.ts");
       expect(inputs, execution).toContain("scripts/docs-csp.ts");
       expect(inputs, execution).toContain("scripts/gen-llms.ts");
       expect(inputs, execution).toContain("scripts/docs-seo.ts");
       expect(inputs, execution).toContain("scripts/quickstart.ts");
       expect(inputs, execution).toContain("scripts/guide-code-contract.ts");
       expect(inputs, execution).toContain("scripts/highlight-code.ts");
-      for (const file of ["scripts/gen-lesson-charts.ts", "scripts/docs-csp.ts"]) {
+      for (const file of [
+        "scripts/gen-lesson-charts.ts",
+        "scripts/gen-theme-static-shells.ts",
+        "scripts/docs-csp.ts",
+      ]) {
         expect(listJobContentPaths(execution, [file]), `${execution}:${file}`).toContain(file);
       }
     }
