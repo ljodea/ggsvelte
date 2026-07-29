@@ -616,7 +616,7 @@ describe("candidateSemanticKeysFromCache", () => {
       );
     }
     expect(lineageCalls).toBe(1);
-    expect(keys[0]).toEqual(sharedRows.map(keyForRow));
+    expect(keys[0]).toEqual(sharedRows.map((rowIndex) => keyForRow(rowIndex)));
     expect(keys[14]).toBe(keys[0]); // same bag reference
   });
 
