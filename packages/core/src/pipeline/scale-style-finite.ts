@@ -14,6 +14,7 @@ import type {
   FiniteStyleConfig,
   StyleResolution,
 } from "./scale-style-types.js";
+import { styleBinIndex } from "./style-bin-index.js";
 import { PipelineError, type PipelineWarning } from "./types.js";
 
 function finiteResolution(input: {
@@ -203,9 +204,7 @@ function finiteResolution(input: {
         value > boundaries.at(-1)!
       )
         return unknownValue;
-      let index = boundaries.findIndex((upper, i) => i > 0 && value < upper) - 1;
-      if (index < 0) index = boundaries.length - 2;
-      return range[index]!;
+      return range[styleBinIndex(boundaries, value)]!;
     };
     const scale: StyleScale = Object.freeze({
       aesthetic,
