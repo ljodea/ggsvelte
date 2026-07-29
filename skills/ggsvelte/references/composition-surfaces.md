@@ -1,6 +1,6 @@
-<!-- Source of truth: packages/spec/src/schema-names.ts (THEME_NAMES), packages/svelte/src/lib/index.ts (component exports), packages/svelte/src/lib/plot-props.ts, packages/svelte/src/lib/layers/ (merge semantics, grammar-families). Inventory tables are asserted complete by scripts/skill-content.test.ts. -->
+<!-- Source of truth: packages/svelte/src/lib/index.ts (component exports), packages/svelte/src/lib/plot-props.ts, packages/svelte/src/lib/layers/ (merge semantics, grammar-families). Theme roster lives in themes.md (asserted complete by scripts/skill-content.test.ts). -->
 
-# Composition surfaces: themes, coords, facets, guides, labs
+# Composition surfaces: coords, facets, guides, labs
 
 Every surface here exists in three equivalent forms: a key in the JSON
 `PortableSpec`, a deprecated `<GGPlot>` prop (removable in 0.13.0), and a
@@ -10,61 +10,9 @@ no markup, register on init, unregister on destroy, and are inert without a
 
 ## Themes
 
-JSON form: `"theme": "minimal"` (a registered name) or a theme object —
-optional `"name"` base plus role overrides, e.g.
-`{"name": "dark", "ink": "#eee"}`. `grey` and `gray` are registered aliases of
-`ggplot2` (same token map).
-
-| Name                    | Look                                                                       |
-| ----------------------- | -------------------------------------------------------------------------- |
-| default                 | quiet hrbrthemes-style base: real typography, hairline grid, no axis frame |
-| light                   | light grid, thin panel border, x/y ticks                                   |
-| dark                    | dark paper and panel, light ink                                            |
-| minimal                 | light grid only, no ticks or border                                        |
-| ggplot2                 | classic grey panel, white grid                                             |
-| classic                 | no grid, black axis lines and ticks                                        |
-| bw                      | white panel, grey grid, black rectangular border (print/B&W)               |
-| hrbr                    | same token map as default                                                  |
-| few                     | no grid, thin panel border (Stephen Few)                                   |
-| clean                   | dashed y grid only, axis lines and ticks                                   |
-| fivethirtyeight         | grey paper and panel, white grid, blue accent                              |
-| economist               | pale blue paper, white grid, x ticks, red accent                           |
-| tufte                   | monochrome ink, no grid                                                    |
-| linedraw                | black-on-white line art: hairline black grid, black border                 |
-| void                    | no axes, grid, or panel chrome; marks and legends remain                   |
-| stata                   | Stata s2color: bluish-gray plot region, white panel, y-grid                |
-| stata_s1color           | Stata s1color: white panel with black border, light y-grid                 |
-| stata_mono              | Stata s2mono: gray plot region, monochrome y-grid                          |
-| solarized               | Solarized light: cream panel, muted base1 chrome, blue accent              |
-| solarizeddark           | Solarized dark: deep teal panel, muted base01 chrome, blue accent          |
-| economist_white         | Economist Graphic Detail: white panel, gray grid, light-gray paper         |
-| solarized_2             | Solarized grey-style variant: base2 panel, base3 grid, no frame            |
-| solarized_2dark         | solarized_2 on dark base tones                                             |
-| wsj                     | Wall Street Journal: brown paper, dotted black y-grid, x line + ticks      |
-| gdocs                   | Google Docs: black x line, no ticks, light-gray grid, plain 20px title     |
-| hc                      | Highcharts default: y-only #D8D8D8 grid on white, no border                |
-| hcdark                  | Highcharts darkunica: #2a2a2b paper, #707073 y-grid                        |
-| pander                  | pander: dashed grey grid and ticks, bold title on white                    |
-| calc                    | LibreOffice Calc: white panel, gray70 border + y-grid, no axis lines       |
-| excel                   | Excel 97 classic: gray panel, black y-grid + border (horizontal=TRUE)      |
-| excel_new               | modern Excel: dark-gray ink, hairline #bfbfbf y-grid, no ticks or border   |
-| base                    | base R: black frame and ticks, no grid, bold title                         |
-| igray                   | inverse gray: white panel, gray90 surround and grid                        |
-| map                     | every axis/panel/grid element blank — marks only, for maps                 |
-| solid                   | nothing but marks — every non-geom element removed                         |
-| grey (alias of ggplot2) | UK theme_grey                                                              |
-| gray (alias of ggplot2) | US theme_gray                                                              |
-
-Svelte: one named shell per product theme — `ThemeDefault`, `ThemeLight`,
-`ThemeDark`, `ThemeMinimal`, `ThemeGgplot2`, `ThemeClassic`, `ThemeBw`,
-`ThemeHrbr`, `ThemeFew`, `ThemeClean`, `ThemeFivethirtyeight`,
-`ThemeEconomist`, `ThemeTufte`, `ThemeLinedraw`, `ThemeVoid`, `ThemeStata`, `ThemeStatas1color`, `ThemeStatamono`, `ThemeSolarized`,
-`ThemeSolarizeddark`, `ThemeEconomistwhite`, `ThemeSolarized2`, `ThemeSolarized2dark`,
-`ThemeWsj`, `ThemeGdocs`, `ThemeHc`, `ThemeHcdark`, `ThemePander`, `ThemeCalc`, `ThemeExcel`, `ThemeExcelnew`, `ThemeBase`, `ThemeIgray`, `ThemeMap`, `ThemeSolid`, `ThemeGrey`, `ThemeGray`. Escape hatch `<Theme name={dynamicName} />` for
-reactive names.
-Every shell and `<Theme>` also accepts role-override props (`ink`, `paper`,
-`accent`, `grid`, `panel`, `axisText`, `axisLine`, `tickColor`,
-`panelBorder`, tooltip/selection/focus roles, …): `<ThemeDark ink="#eee" />`.
+Full product roster (37 names), shells, and role overrides:
+[themes.md](themes.md). Theme is a REPLACE family (last registration wins) —
+see replace-vs-merge below.
 
 ## Coords
 

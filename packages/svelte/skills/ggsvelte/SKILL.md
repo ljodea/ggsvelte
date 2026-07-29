@@ -167,14 +167,22 @@ Two rules worth keeping in working memory:
   year-quarters infer time automatically. Ambiguous ordered dates need
   `"parse": "dmy"` or `"mdy"`; force `{"type": "band"}` for year-like
   identifiers; never preprocess dates into indexes.
-- Themes: 37 names (`default`, `minimal`, `dark`, `ggplot2`, `stata`, `wsj`,
-  `excel_new`…; `grey`/`gray` aliasing `ggplot2`) as
-  `<ThemeTufte/>`-style children or `"theme": "tufte"` in JSON.
+- Themes: 37 names (`default`, `light`, `dark`, `minimal`, `ggplot2`,
+  `classic`, `bw`, `hrbr`, `few`, `clean`, `fivethirtyeight`, `economist`,
+  `tufte`, `linedraw`, `void`, `stata`, `stata_s1color`, `stata_mono`,
+  `solarized`, `solarizeddark`, `economist_white`, `solarized_2`,
+  `solarized_2dark`, `wsj`, `gdocs`, `hc`, `hcdark`, `pander`, `calc`,
+  `excel`, `excel_new`, `base`, `igray`, `map`, `solid`, plus `grey`/`gray`
+  aliasing `ggplot2`) as `<ThemeTufte/>`-style children or `"theme": "tufte"`
+  in JSON. Looks, shells, and role overrides:
+  [references/themes.md](references/themes.md).
 
 Full option surfaces — every scale option, the `Scale*` component matrix, all
 scheme tables, the whole temporal/parser system:
 [references/scales-and-palettes.md](references/scales-and-palettes.md).
-Themes, coords, facets, guides, legend order, and `Labs` in depth:
+Theme roster and shells:
+[references/themes.md](references/themes.md). Coords, facets, guides, legend
+order, and `Labs`:
 [references/composition-surfaces.md](references/composition-surfaces.md).
 
 ## The validation contract (use it!)
@@ -273,7 +281,9 @@ writing any interactive or linked-view code.
   beyond the everyday set, annotations),
   [scales-and-palettes.md](references/scales-and-palettes.md) (scale options,
   palettes, temporal),
-  [composition-surfaces.md](references/composition-surfaces.md) (themes,
-  coords, facets, guides, merge semantics),
+  [themes.md](references/themes.md) (every product theme name, shells,
+  role overrides),
+  [composition-surfaces.md](references/composition-surfaces.md) (coords,
+  facets, guides, merge semantics),
   [interactions.md](references/interactions.md) (tooltips, selection, linking),
   [recipes.md](references/recipes.md) (long-tail chart recipes).
