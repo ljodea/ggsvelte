@@ -1,7 +1,7 @@
 ---
-"@ggsvelte/core": patch
-"@ggsvelte/spec": patch
-"@ggsvelte/svelte": patch
+"@ggsvelte/core": minor
+"@ggsvelte/spec": minor
+"@ggsvelte/svelte": minor
 ---
 
 <!-- markdownlint-disable MD041 -->
@@ -25,4 +25,4 @@ and `scale_colour_solarized()` / `scale_fill_solarized()`.
   both portraits (paired with the solarized scheme) and `/palettes` gains
   the Solarized card.
 
-Migration: none — additive theme/scheme names only.
+Migration: none — additive

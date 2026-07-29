@@ -8,8 +8,10 @@
  *   uses — never a re-derived slug algorithm).
  * - Every pending changeset with a minor or major bump for a published
  *   package carries an explicit `Migration:` line — either a resolving
- *   guide URL or the literal "none — additive". An explicit marker, not
- *   prose keyword sniffing: additive minors must say so.
+ *   guide URL or "none — additive" (optional trailing note allowed). An
+ *   explicit marker, not prose keyword sniffing: additive minors must say so.
+ * - A `Migration: none — additive…` claim requires a minor or major bump
+ *   (not patch-only): new public surface is a feature under SemVer.
  */
 import { describe, expect, it } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
@@ -103,10 +105,31 @@ describe("version-bumping changesets carry an explicit migration marker", () => 
         marker,
         `${context}: minor/major changesets need "Migration: <guide URL>" or "Migration: none — additive"`,
       ).toBeDefined();
-      if (marker! !== "none — additive") {
+      // Exact form is preferred; a trailing note after "additive" is allowed.
+      if (!marker!.startsWith("none — additive")) {
         // Changeset URLs use markdown autolink form (<https://…>) — MD034.
         assertGuideUrlResolves(marker!.trim().replaceAll(/^<|>$/g, ""), context);
       }
+    }
+  });
+
+  it("claims of additive public surface use minor or major, not patch", () => {
+    // SemVer: new themes, schemes, exports, props, and other opt-in public
+    // names are features. "Migration: none — additive" is the marker for that
+    // class of change (ADR 0013). Patch is for fixes, perf, and internal work.
+    for (const name of changesets) {
+      const body = readFileSync(join(changesetDir, name), "utf8");
+      const frontmatter = /^---\n([\s\S]*?)\n---/.exec(body)?.[1] ?? "";
+      const marker = /Migration: (\S[^\n]*)/.exec(body)?.[1];
+      if (!marker?.startsWith("none — additive")) continue;
+      const context = `.changeset/${name}`;
+      const packageBumps = [...frontmatter.matchAll(/"@ggsvelte\/[^"]+":\s*(patch|minor|major)/g)];
+      expect(packageBumps.length, `${context}: expected package bumps`).toBeGreaterThan(0);
+      const levels = new Set(packageBumps.map((match) => match[1]));
+      expect(
+        levels.has("minor") || levels.has("major"),
+        `${context}: "Migration: none — additive" requires minor (or major), not patch-only — new public surface is a feature`,
+      ).toBe(true);
     }
   });
 });
