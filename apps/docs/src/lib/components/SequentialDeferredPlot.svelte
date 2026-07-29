@@ -3,7 +3,7 @@
   import { onMount } from "svelte";
   import type { ColorScaleSpec } from "@ggsvelte/spec";
 
-  import { observeNearViewport } from "$lib/near-viewport";
+  import { observeUserIntent } from "$lib/load-on-intent";
 
   const {
     label,
@@ -26,16 +26,12 @@
     const el = host;
     if (el === null) return;
     let cancelled = false;
-    const stop = observeNearViewport(
-      el,
-      () => {
-        if (cancelled || Live !== null) return;
-        void import("./SequentialColorLabLive.svelte").then((mod) => {
-          if (!cancelled) Live = mod.default;
-        });
-      },
-      { rootMargin: "480px 0px" },
-    );
+    const stop = observeUserIntent(el, () => {
+      if (cancelled || Live !== null) return;
+      void import("./SequentialColorLabLive.svelte").then((mod) => {
+        if (!cancelled) Live = mod.default;
+      });
+    });
     return () => {
       cancelled = true;
       stop();

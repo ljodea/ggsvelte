@@ -23,7 +23,7 @@
       <h2 id="built-in-themes-heading">Chart themes</h2>
     </header>
     <ol aria-label="Built-in chart themes">
-      {#each data.themeSpecimens as specimen, index (specimen.name)}
+      {#each data.themeSpecimens as specimen (specimen.name)}
         <li>
           <ThemeSpecimen
             name={specimen.name}
@@ -33,7 +33,6 @@
             scheme={specimen.scheme}
             legendFocus={specimen.legendFocus}
             staticSrc={specimen.staticSrc}
-            eager={index === 0}
           />
         </li>
       {/each}
