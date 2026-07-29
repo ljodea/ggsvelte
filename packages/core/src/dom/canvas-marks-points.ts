@@ -2,7 +2,7 @@
 /**
  * Canvas point (and point-subset) drawers.
  */
-import { resolvePointMark, type PointShapeGeometry } from "../mark-paint.js";
+import { resolvePointMark, type PointShapeGeometry } from "../mark-style.js";
 import type { PointsBatch } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
 import { themeVar } from "../theme.js";

@@ -6,7 +6,7 @@ import type { SceneLegend, SceneLegendEntry } from "./scene.js";
 import { LEGEND_ROW_HEIGHT } from "./legend.js";
 import type { ThemeTokens } from "./theme.js";
 import { themeVar } from "./theme.js";
-import { linetypeDash } from "./mark-paint.js";
+import { linetypeDash } from "./mark-style.js";
 import { escapeXML, px } from "./render-svg-format.js";
 import { pointShape } from "./render-svg-marks.js";
 
