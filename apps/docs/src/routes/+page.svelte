@@ -5,6 +5,7 @@
   import CodeTabs from "$lib/CodeTabs.svelte";
   import { FEATURED_EXAMPLES, galleryCatalog } from "$lib/catalog/gallery";
   import CopyCode from "$lib/components/CopyCode.svelte";
+  import GrammarDemo from "$lib/components/GrammarDemo.svelte";
   import UiButton from "$lib/components/UiButton.svelte";
   import { EXAMPLES } from "$lib/examples";
   import { HOME_CODE_PATH_TABS } from "$lib/home-code-path";
@@ -23,16 +24,10 @@
   let HeroPlot = $state<
     typeof import("$lib/components/HomeHeroPlot.svelte").default | null
   >(null);
-  let GrammarDemo = $state<
-    typeof import("$lib/components/GrammarDemo.svelte").default | null
-  >(null);
 
   onMount(() => {
     void import("$lib/components/HomeHeroPlot.svelte").then((mod) => {
       HeroPlot = mod.default;
-    });
-    void import("$lib/components/GrammarDemo.svelte").then((mod) => {
-      GrammarDemo = mod.default;
     });
   });
 </script>
@@ -102,9 +97,10 @@
   </ol>
 </section>
 
-{#if GrammarDemo !== null}
-  <GrammarDemo />
-{/if}
+<GrammarDemo
+  staticSvgLightSite={data.grammarStaticSvgLightSite}
+  staticSvgDarkSite={data.grammarStaticSvgDarkSite}
+/>
 
 <section class="code-path" aria-labelledby="code-path-heading">
   <div>

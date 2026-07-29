@@ -1,8 +1,18 @@
 <script lang="ts">
-  import { GeomPoint, GeomSmooth, GGPlot, Theme } from "@ggsvelte/svelte";
-  import { palmerPenguins } from "@ggsvelte/svelte/data";
+  import { onMount } from "svelte";
 
-  import { contrastChartTheme } from "$lib/docs-appearance-state.svelte";
+  /**
+   * Homepage grammar section: chrome always SSR'd; plot upgrades from a static
+   * SVG shell (server-rendered) to live GGPlot after a dynamic import so the
+   * mid-page never sits empty while ~1.3MB of @ggsvelte downloads.
+   */
+  let {
+    staticSvgLightSite,
+    staticSvgDarkSite,
+  }: {
+    staticSvgLightSite: string;
+    staticSvgDarkSite: string;
+  } = $props();
 
   const steps = [
     { label: "Data", note: "Rows as plain objects." },
@@ -11,7 +21,15 @@
     { label: "Interaction", note: "just one more layer" },
   ] as const;
   let active = $state(steps.length - 1);
-  const chartTheme = $derived(contrastChartTheme());
+  let Plot = $state<
+    typeof import("$lib/components/GrammarDemoPlot.svelte").default | null
+  >(null);
+
+  onMount(() => {
+    void import("$lib/components/GrammarDemoPlot.svelte").then((mod) => {
+      Plot = mod.default;
+    });
+  });
 </script>
 
 <section class="grammar-demo" aria-labelledby="grammar-heading">
@@ -27,6 +45,7 @@
           <button
             type="button"
             aria-pressed={active === index}
+            disabled={Plot === null}
             onclick={() => (active = index)}
           >
             <span>{String(index + 1).padStart(2, "0")}</span>
@@ -38,31 +57,20 @@
     </ol>
   </div>
   <div class="grammar-output">
-    <!--
-      Exact inspect (not auto/x): smooth layers auto-mode to "x" and draw a
-      vertical guide that steals hits from points. Homepage needs point
-      tooltips only. Full palmerPenguins (333 complete cases) — not the
-      30-row theme-specimen subset.
-    -->
-    <GGPlot
-      data={palmerPenguins}
-      aes={{
-        x: "flipperLengthMm",
-        y: "bodyMassG",
-        ...(active >= 1 && { color: "species" }),
-      }}
-      inspect={active >= 3
-        ? { mode: "exact", pin: true, maxDistance: 24 }
-        : false}
-      ariaLabel="Penguin body mass increases with flipper length, grouped by species"
-    >
-      <Theme name={chartTheme} />
-      <GeomPoint alpha={0.72} />
-      {#if active >= 2}
-        <!-- degree 1: local-linear loess stays cheap when remounting on 333 rows. -->
-        <GeomSmooth method="loess" span={0.75} degree={1} se={false} />
-      {/if}
-    </GGPlot>
+    {#if Plot !== null}
+      <Plot {active} />
+    {:else}
+      <!--
+        theme.js sets data-theme before paint. Mirror contrastChartTheme():
+        fivethirtyeight on the light site, light chart on dark — no theme flash.
+      -->
+      <div class="grammar-static grammar-static--light-site">
+        {@html staticSvgLightSite}
+      </div>
+      <div class="grammar-static grammar-static--dark-site">
+        {@html staticSvgDarkSite}
+      </div>
+    {/if}
   </div>
 </section>
 
@@ -88,6 +96,24 @@
   .grammar-output {
     grid-area: output;
     min-width: 0;
+  }
+
+  .grammar-output :global(svg) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .grammar-static--dark-site {
+    display: none;
+  }
+
+  :global(:root[data-theme="dark"]) .grammar-static--light-site {
+    display: none;
+  }
+
+  :global(:root[data-theme="dark"]) .grammar-static--dark-site {
+    display: block;
   }
 
   h2 {
@@ -127,6 +153,10 @@
     cursor: pointer;
   }
 
+  button:disabled {
+    cursor: default;
+  }
+
   button > span {
     grid-row: 1 / 3;
     font: 600 0.75rem/1.4 var(--code-font);
@@ -138,7 +168,7 @@
     font-size: 1.2rem;
   }
 
-  button:hover strong {
+  button:hover:not(:disabled) strong {
     text-decoration: underline;
   }
 

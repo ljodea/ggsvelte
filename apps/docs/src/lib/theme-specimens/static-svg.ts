@@ -290,3 +290,40 @@ export function homeHeroStaticSvgFromData(
   cache.set(key, svg);
   return svg;
 }
+
+/**
+ * Homepage grammar-demo shell: full palmerPenguins scatter + loess, default
+ * interaction step (color + smooth). Static only — no inspect/legendFocus.
+ * Matches GrammarDemoPlot at active step 3 (Interaction).
+ */
+export function homeGrammarStaticSvgFromData(
+  rows: readonly Record<string, unknown>[],
+  input?: {
+    readonly theme?: ThemeName;
+    readonly width?: number;
+    readonly height?: number;
+  },
+): string {
+  const theme = input?.theme ?? "default";
+  const width = input?.width ?? DOCS_STATIC_PLOT_WIDTH_PX;
+  const height = input?.height ?? 400;
+  const key = `home-grammar:${theme}:${String(width)}x${String(height)}:${String(rows.length)}`;
+  const hit = cache.get(key);
+  if (hit !== undefined) return hit;
+  const spec = gg(
+    rows as AuthoringRows,
+    aes({ x: "flipperLengthMm", y: "bodyMassG", color: "species" }),
+  )
+    .geomPoint({ alpha: 0.72 })
+    .geomSmooth({ method: "loess", span: 0.75, degree: 1, se: false })
+    .theme(theme)
+    .labs({
+      x: "Flipper length mm",
+      y: "Body mass g",
+      color: "species",
+    })
+    .spec();
+  const svg = namespaceSvgIds(renderToSVGString(spec, { width, height }), key);
+  cache.set(key, svg);
+  return svg;
+}
