@@ -49,7 +49,7 @@ describe("docs route inventory", () => {
     expect(paths.has("/reference/labels")).toBe(true);
     expect(paths.has("/reference/interactions")).toBe(true);
     expect(paths.has("/reference/themes")).toBe(true);
-    expect(paths.has("/reference/palettes")).toBe(true);
+    expect(paths.has("/reference/scales")).toBe(true);
     expect(paths.has("/reference/cli")).toBe(true);
     expect(paths.has("/__perf/r3-interaction")).toBe(true);
     expect(paths.has("/sitemap.xml")).toBe(true);
@@ -236,7 +236,7 @@ describe("docs route inventory", () => {
     ).toContain("scale-breaks-labels");
   });
 
-  it("publishes themes and palettes reference inside the one Reference hierarchy", () => {
+  it("publishes themes and scales reference inside the one Reference hierarchy", () => {
     const inventory = createDocsRouteInventory();
     expect(inventory.find((entry) => entry.path === "/reference/themes")).toMatchObject({
       title: "Themes — ggsvelte",
@@ -247,14 +247,14 @@ describe("docs route inventory", () => {
       shell: "docs",
       navigation: { section: "Reference", label: "Themes", order: 59 },
     });
-    expect(inventory.find((entry) => entry.path === "/reference/palettes")).toMatchObject({
-      title: "Palettes — ggsvelte",
-      canonicalPath: "/reference/palettes",
+    expect(inventory.find((entry) => entry.path === "/reference/scales")).toMatchObject({
+      title: "Scales — ggsvelte",
+      canonicalPath: "/reference/scales",
       kind: "page",
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "Palettes", order: 60 },
+      navigation: { section: "Reference", label: "Scales", order: 60 },
     });
   });
 

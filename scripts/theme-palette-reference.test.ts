@@ -2,9 +2,9 @@ import { describe, expect, it } from "bun:test";
 
 import {
   CATEGORICAL_SCHEME_REFS,
-  PALETTE_HELPER_GROUPS,
+  SCALE_HELPER_GROUPS,
   SEQUENTIAL_SCHEME_REFS,
-} from "../apps/docs/src/lib/catalog/palette-reference.ts";
+} from "../apps/docs/src/lib/catalog/scale-reference.ts";
 import {
   ALL_THEME_ROLES,
   THEME_COLOR_ROLES,
@@ -46,7 +46,7 @@ describe("theme reference catalog", () => {
   });
 });
 
-describe("palette reference catalog", () => {
+describe("scale reference catalog", () => {
   it("covers every registered scheme name", () => {
     expect(CATEGORICAL_SCHEME_REFS.map((s) => s.name)).toEqual([...CATEGORICAL_SCHEME_NAMES]);
     expect(SEQUENTIAL_SCHEME_REFS.map((s) => s.name)).toEqual([...SEQUENTIAL_SCHEME_NAMES]);
@@ -74,6 +74,6 @@ describe("palette reference catalog", () => {
   });
 
   it("documents helper groups for discrete and continuous families", () => {
-    expect(PALETTE_HELPER_GROUPS.map((g) => g.id)).toEqual(["discrete", "continuous"]);
+    expect(SCALE_HELPER_GROUPS.map((g) => g.id)).toEqual(["discrete", "continuous"]);
   });
 });

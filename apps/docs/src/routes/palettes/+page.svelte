@@ -20,8 +20,8 @@
     </p>
     <p class="guide-link">
       Scheme names as scale inputs:
-      <a href={`${base}/reference/palettes`}>Palettes reference</a>. Scale and
-      color channels:
+      <a href={`${base}/reference/scales`}>Scales reference</a>. Scale and color
+      channels:
       <a href={`${base}/guide/scales-guides`}>Scales and guides</a>.
     </p>
   </header>
@@ -33,7 +33,7 @@
     <p class="eyebrow">Next</p>
     <ul>
       <li>
-        <a href={`${base}/reference/palettes`}>Palettes reference</a>
+        <a href={`${base}/reference/scales`}>Scales reference</a>
         — scheme → ScaleColor* / ScaleFill* mapping
       </li>
       <li>

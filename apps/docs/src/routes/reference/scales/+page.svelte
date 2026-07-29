@@ -3,9 +3,9 @@
 
   import {
     CATEGORICAL_SCHEME_REFS,
-    PALETTE_HELPER_GROUPS,
+    SCALE_HELPER_GROUPS,
     SEQUENTIAL_SCHEME_REFS,
-  } from "$lib/catalog/palette-reference";
+  } from "$lib/catalog/scale-reference";
   import CopyCode from "$lib/components/CopyCode.svelte";
 
   // Join so the example's closing script tag does not terminate this module.
@@ -36,8 +36,8 @@
   ].join("\n");
 </script>
 
-<article class="palette-reference prose" aria-labelledby="palette-ref-heading">
-  <h1 id="palette-ref-heading">Palettes</h1>
+<article class="scale-reference prose" aria-labelledby="scale-ref-heading">
+  <h1 id="scale-ref-heading">Scales</h1>
   <p>
     Named color schemes are <strong>scale inputs</strong>, not themes. Pass a
     scheme name into a color or fill scale child to encode data series. Chart
@@ -57,17 +57,17 @@
   </p>
   <CopyCode
     language="svelte"
-    accessibleLabel="Copy discrete palette example"
+    accessibleLabel="Copy discrete scale example"
     code={discreteExample}
   />
   <CopyCode
     language="svelte"
-    accessibleLabel="Copy sequential palette example"
+    accessibleLabel="Copy sequential scale example"
     code={sequentialExample}
   />
 
   <h2 id="helper-map">Scale helpers</h2>
-  {#each PALETTE_HELPER_GROUPS as group (group.id)}
+  {#each SCALE_HELPER_GROUPS as group (group.id)}
     <h3 id={group.id}>{group.title}</h3>
     <p>{group.summary}</p>
     <ul class="shell-list">
@@ -176,7 +176,7 @@
 </article>
 
 <style>
-  .palette-reference {
+  .scale-reference {
     max-width: 52rem;
     margin: 2rem 0 4rem;
   }

@@ -54,7 +54,7 @@
       "Theme components, role tokens, and safe chrome overrides.",
     ],
     [
-      "/reference/palettes",
+      "/reference/scales",
       "Named color schemes mapped to ScaleColor* / ScaleFill* helpers.",
     ],
   ]);

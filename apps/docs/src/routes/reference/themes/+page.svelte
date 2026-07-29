@@ -37,7 +37,7 @@
     <code>&lt;ThemeMinimal /&gt;</code>, or the generic
     <code>&lt;Theme name=&#123;…&#125; /&gt;</code> escape hatch. Themes do not
     encode data colors; those come from
-    <a href={`${base}/reference/palettes`}>palette schemes on color scales</a>.
+    <a href={`${base}/reference/scales`}>named schemes on color scales</a>.
   </p>
   <p>
     Visual portraits of every built-in live on the
@@ -184,7 +184,7 @@
     </li>
     <li>
       Themes style chrome only. Data series colors use
-      <a href={`${base}/reference/palettes`}>named palette schemes</a> on
+      <a href={`${base}/reference/scales`}>named schemes</a> on
       <code>ScaleColor*</code> / <code>ScaleFill*</code> children.
     </li>
   </ul>
@@ -195,8 +195,8 @@
       <a href={`${base}/themes`}>Themes showcase</a> — live portraits of every built-in
     </li>
     <li>
-      <a href={`${base}/reference/palettes`}>Palettes reference</a> — scheme names
-      as scale inputs
+      <a href={`${base}/reference/scales`}>Scales reference</a> — scheme names as
+      scale inputs
     </li>
     <li>
       <a href={`${base}/guide/scales-guides`}>Scales and guides</a> — position, color,

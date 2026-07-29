@@ -411,18 +411,18 @@ export const DOCS_ROUTES = [
     ],
   },
   {
-    path: "/reference/palettes",
-    title: "Palettes — ggsvelte",
+    path: "/reference/scales",
+    title: "Scales — ggsvelte",
     description:
       "Named color schemes as scale inputs: categorical and sequential scheme catalogs mapped to ScaleColor* / ScaleFill* helpers.",
-    canonicalPath: "/reference/palettes",
+    canonicalPath: "/reference/scales",
     kind: "page",
     index: true,
     sitemap: true,
     shell: "docs",
     navigation: {
       section: "Reference",
-      label: "Palettes",
+      label: "Scales",
       order: 60,
     },
     headings: [
@@ -7597,8 +7597,8 @@ export const GUIDE_NAVIGATION = [
         label: "Themes",
       },
       {
-        path: "/reference/palettes",
-        label: "Palettes",
+        path: "/reference/scales",
+        label: "Scales",
       },
       {
         path: "/reference/cli",

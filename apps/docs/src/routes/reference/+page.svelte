@@ -68,8 +68,8 @@
         >Theme* components, role tokens, CSS variables, and interaction chrome.</span
       >
     </a>
-    <a href={`${base}/reference/palettes`}>
-      <strong>Palettes</strong>
+    <a href={`${base}/reference/scales`}>
+      <strong>Scales</strong>
       <span
         >Named schemes as scale inputs: categorical and sequential catalogs.</span
       >

@@ -15,7 +15,7 @@ export const requiredPages = [
   "interactions.html",
   "reference/interactions.html",
   "reference/themes.html",
-  "reference/palettes.html",
+  "reference/scales.html",
   "reference/cli.html",
   "reference/labs.html",
   "reference/axes.html",

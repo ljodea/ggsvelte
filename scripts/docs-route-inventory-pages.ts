@@ -243,16 +243,16 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     ],
   },
   {
-    path: "/reference/palettes",
-    title: "Palettes — ggsvelte",
+    path: "/reference/scales",
+    title: "Scales — ggsvelte",
     description:
       "Named color schemes as scale inputs: categorical and sequential scheme catalogs mapped to ScaleColor* / ScaleFill* helpers.",
-    canonicalPath: "/reference/palettes",
+    canonicalPath: "/reference/scales",
     kind: "page",
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Palettes", order: 60 },
+    navigation: { section: "Reference", label: "Scales", order: 60 },
     headings: [
       { id: "using-schemes", title: "Using schemes", level: 2 },
       { id: "helper-map", title: "Scale helpers", level: 2 },

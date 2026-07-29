@@ -1,16 +1,16 @@
 /**
- * Palette → scale helper mapping for /reference/palettes.
+ * Scheme → scale helper mapping for /reference/scales.
  *
  * Scheme names come from the PortableSpec registries. Scale children pass
  * `scheme` into color/fill scales (or use a family-specific shell).
  */
 import { CATEGORICAL_SCHEME_NAMES, SEQUENTIAL_SCHEME_NAMES } from "@ggsvelte/spec";
 
-export type PaletteFamily = "categorical" | "sequential";
+export type ScaleSchemeFamily = "categorical" | "sequential";
 
-export interface PaletteSchemeRef {
+export interface ScaleSchemeRef {
   readonly name: string;
-  readonly family: PaletteFamily;
+  readonly family: ScaleSchemeFamily;
   /** Primary Svelte shells that accept this scheme (or set it by construction). */
   readonly helpers: readonly string[];
   readonly notes?: string;
@@ -118,7 +118,7 @@ function sequentialNotes(name: string): string | undefined {
 }
 
 /** All registered categorical schemes with scale helper tips. */
-export const CATEGORICAL_SCHEME_REFS: readonly PaletteSchemeRef[] = CATEGORICAL_SCHEME_NAMES.map(
+export const CATEGORICAL_SCHEME_REFS: readonly ScaleSchemeRef[] = CATEGORICAL_SCHEME_NAMES.map(
   (name) => {
     const notes = categoricalNotes(name);
     return {
@@ -131,7 +131,7 @@ export const CATEGORICAL_SCHEME_REFS: readonly PaletteSchemeRef[] = CATEGORICAL_
 );
 
 /** All registered sequential / diverging schemes with scale helper tips. */
-export const SEQUENTIAL_SCHEME_REFS: readonly PaletteSchemeRef[] = SEQUENTIAL_SCHEME_NAMES.map(
+export const SEQUENTIAL_SCHEME_REFS: readonly ScaleSchemeRef[] = SEQUENTIAL_SCHEME_NAMES.map(
   (name) => {
     const notes = sequentialNotes(name);
     return {
@@ -144,7 +144,7 @@ export const SEQUENTIAL_SCHEME_REFS: readonly PaletteSchemeRef[] = SEQUENTIAL_SC
 );
 
 /** High-level helper groups for the reference index (not every shell). */
-export const PALETTE_HELPER_GROUPS = [
+export const SCALE_HELPER_GROUPS = [
   {
     id: "discrete",
     title: "Discrete (categorical schemes)",
