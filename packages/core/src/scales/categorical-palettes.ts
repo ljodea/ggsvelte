@@ -97,6 +97,26 @@ export const ECONOMIST_PALETTE: readonly string[] = [
 ];
 
 /**
+ * ggthemes solarized_pal(accent = "blue") at full capacity: the eight
+ * Solarized accents with the default blue first, then the remaining accents
+ * in source order (ggthemes' max-L*a*b-distance pick is order-degenerate at
+ * n = 8 and falls back to source order). ggthemes re-selects per n; this
+ * port flattens to the fixed n = 8 order, so prefix subsets approximate the
+ * smaller-n picks. The same accents serve light and dark panels — only the
+ * base tones flip between the solarized/solarizeddark themes.
+ */
+export const SOLARIZED_PALETTE: readonly string[] = [
+  "#268bd2",
+  "#b58900",
+  "#cb4b16",
+  "#dc322f",
+  "#d33682",
+  "#6c71c4",
+  "#2aa198",
+  "#859900",
+];
+
+/**
  * ggthemes few_pal("Medium") — Stephen Few's medium-strength qualitative
  * palette (scale_colour_few default). ggthemes reserves its first value
  * (Gray) for non-data parts at n = 1; the data colors are the remaining
@@ -204,6 +224,7 @@ export const CATEGORICAL_SCHEMES = {
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
   economist: ECONOMIST_PALETTE,
+  solarized: SOLARIZED_PALETTE,
   few: FEW_PALETTE,
   few_light: FEW_LIGHT_PALETTE,
   few_dark: FEW_DARK_PALETTE,

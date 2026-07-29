@@ -99,6 +99,18 @@ export const THEME_STATIC_SHELLS = [
     sha256: "61c02ef23f365389c8b10cf599c2a5777749e4c79090ebe4a7393e0e2ffcd9ae",
   },
   {
+    id: "theme-solarized",
+    filename: "theme-solarized.svg",
+    path: "/theme-shells/theme-solarized.svg",
+    sha256: "00b8cc226dabe475282e5e7fcc0fda8b808f96c877570dd32931ed3320cd94d8",
+  },
+  {
+    id: "theme-solarizeddark",
+    filename: "theme-solarizeddark.svg",
+    path: "/theme-shells/theme-solarizeddark.svg",
+    sha256: "005bf1ca1fce023f98ad31b405f011f56b048f377ed399896317b0b06fa6dc41",
+  },
+  {
     id: "theme-economist_white",
     filename: "theme-economist_white.svg",
     path: "/theme-shells/theme-economist_white.svg",
@@ -169,6 +181,12 @@ export const THEME_STATIC_SHELLS = [
     filename: "palette-economist.svg",
     path: "/theme-shells/palette-economist.svg",
     sha256: "4f070e0b2034b38ec2c30054b55489241ee8c7634b249512a20dd665de8c5113",
+  },
+  {
+    id: "palette-solarized",
+    filename: "palette-solarized.svg",
+    path: "/theme-shells/palette-solarized.svg",
+    sha256: "2c14538096dc984f7094fc2cd696171a4274a88a4add9249fd522b3e2a05b9da",
   },
   {
     id: "palette-few",

@@ -29,6 +29,8 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "colorblind",
   /** ggthemes scale_colour/fill_economist — Economist blues/greens (fill order). */
   "economist",
+  /** ggthemes scale_colour/fill_solarized — Solarized accents, blue first. */
+  "solarized",
   // ggthemes ports (#1159): Few "Show Me the Numbers" variants + FiveThirtyEight
   "few",
   "few_light",
@@ -145,6 +147,9 @@ export const THEME_NAMES = [
   "tufte",
   "linedraw",
   "void",
+  // ggthemes theme_solarized: light (default) and dark (light = FALSE) variants.
+  "solarized",
+  "solarizeddark",
   // ggthemes theme ports (#1158)
   "economist_white",
   "solarized_2",
