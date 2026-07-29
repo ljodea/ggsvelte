@@ -150,6 +150,9 @@ as JSON under the same name on the docs site):
 
 - [Geoms](/reference/geoms) — every mark, defaults, stats, positions, and params
 - [Guides and legends](/reference/guides) — GuideLegend, colorbar, colorsteps, axis, none
+- [Labs](/reference/labs) — title, subtitle, caption, axis/legend titles
+- [Axes and ticks](/reference/axes) — GuideAxis, breaks/labels, collision, grids
+- [Labels](/reference/labels) — chrome vs ticks vs GeomText/GeomLabel/SF labels
 - [Statistics and positions](/guide/statistics-positions) — stats, jitter, stacking
 - [Scales](/reference/scales) — every Scale* component (position, color, style)
 - [Scales and guides](/guide/scales-guides) — continuous, discrete, manual, temporal
@@ -793,7 +796,9 @@ Temporal \`dateMinorBreaks\` outranks generic \`minorBreaks\`.
 
 \`reverse\` changes the pixel direction but not semantic tick order. \`nice\`
 controls numeric domain rounding. Guides retain complete semantic values and
-apply the forward transform exactly once.
+apply the forward transform exactly once. For the full split between scale
+formats, axis guides, and plot titles, see
+[Axes and ticks](/reference/axes) and [Labs](/reference/labs).
 
 ## Categorical color
 
@@ -968,7 +973,9 @@ and helpers lives in the [guides reference](/reference/guides):
 [GuideNone](/reference/guides/none). Author top-level \`guides\`,
 a scale-local \`guide\`, or fluent \`.guides()\` with \`guideAxis\`,
 \`guideLegend\`, \`guideColorbar\`, \`guideColorsteps\`, and \`guideNone\`.
-Top-level entries win over scale-local entries.
+Top-level entries win over scale-local entries. Axis shells, collision, and
+band label layout are catalogued under [Axes and ticks](/reference/axes);
+plot titles stay on [Labs](/reference/labs).
 
 \`\`\`ts fragment
 import { guideAxis, guideColorsteps } from "@ggsvelte/spec";

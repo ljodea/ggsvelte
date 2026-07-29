@@ -134,29 +134,29 @@ export const GUIDE_CATALOG = [
     description:
       "Understand validation, render, interaction, and CLI diagnostics and recover safely.",
     section: "Reference",
-    // After /reference/* pages (50–58: overview through CLI, themes, palettes).
-    navigationOrder: 59,
+    // After /reference/* pages (50–61: overview through CLI, including labs/axes/labels).
+    navigationOrder: 62,
   },
   {
     slug: "advisories",
     title: "Advisories",
     description: "Spec-lint advisories and the pipeline's disclosed heuristics.",
     section: "Reference",
-    navigationOrder: 60,
+    navigationOrder: 63,
   },
   {
     slug: "lifecycle",
     title: "Lifecycle & editions",
     description: "API stability tags per export, and the defaults-edition mechanism.",
     section: "Reference",
-    navigationOrder: 61,
+    navigationOrder: 64,
   },
   {
     slug: "upgrading",
     title: "Upgrade guide",
     description: "Check versions, apply fixture-backed changes, and verify each 0.x transition.",
     section: "Release",
-    navigationOrder: 60,
+    navigationOrder: 70,
   },
 ] as const satisfies readonly GuideCatalogEntry[];
 

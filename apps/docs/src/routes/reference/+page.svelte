@@ -6,8 +6,8 @@
   <header>
     <h1 id="reference-heading">Reference</h1>
     <p>
-      Public contracts for geoms, guides, interactions, CLI, diagnostics,
-      lifecycle, and schema.
+      Public contracts for geoms, guides, labs, axes, labels, interactions, CLI,
+      diagnostics, lifecycle, and schema.
     </p>
   </header>
 
@@ -44,6 +44,25 @@
       <span
         >GuideLegend, GuideColorbar, GuideColorsteps, GuideAxis, and GuideNone:
         channels, props, and helpers.</span
+      >
+    </a>
+    <a href={`${base}/reference/labs`}>
+      <strong>Labs</strong>
+      <span
+        >Title, subtitle, caption, and per-aesthetic axis/legend titles.</span
+      >
+    </a>
+    <a href={`${base}/reference/axes`}>
+      <strong>Axes and ticks</strong>
+      <span
+        >GuideAxis, scale breaks/labels, band layout, collision, and theme
+        grids.</span
+      >
+    </a>
+    <a href={`${base}/reference/labels`}>
+      <strong>Labels</strong>
+      <span
+        >Plot chrome vs tick labels vs GeomText / GeomLabel / SF label geoms.</span
       >
     </a>
     <a href={`${base}/reference/interactions`}>

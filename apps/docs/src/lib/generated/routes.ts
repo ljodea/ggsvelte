@@ -73,7 +73,7 @@ export const DOCS_ROUTES = [
     path: "/reference",
     title: "Reference — ggsvelte",
     description:
-      "Geom, guide, interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
+      "Geom, guide, labs, axes, labels, interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
     canonicalPath: "/reference",
     kind: "page",
     index: true,
@@ -261,6 +261,150 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/reference/labs",
+    title: "Labs — ggsvelte",
+    description:
+      "Plot title, subtitle, caption, and per-aesthetic axis/legend titles via the Labs child layer.",
+    canonicalPath: "/reference/labs",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Reference",
+      label: "Labs",
+      order: 56,
+    },
+    headings: [
+      {
+        id: "props",
+        title: "Props",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "PortableSpec JSON",
+        level: 2,
+      },
+      {
+        id: "merge",
+        title: "Keyed merge",
+        level: 2,
+      },
+      {
+        id: "related",
+        title: "Related surfaces",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/axes",
+    title: "Axes and ticks — ggsvelte",
+    description:
+      "Axis titles, GuideAxis presentation, scale breaks/labels, band layout, and theme grids.",
+    canonicalPath: "/reference/axes",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Reference",
+      label: "Axes and ticks",
+      order: 57,
+    },
+    headings: [
+      {
+        id: "who-owns-what",
+        title: "Who owns what",
+        level: 2,
+      },
+      {
+        id: "guide-axis",
+        title: "GuideAxis",
+        level: 2,
+      },
+      {
+        id: "scale-breaks-labels",
+        title: "Scale breaks and label formats",
+        level: 2,
+      },
+      {
+        id: "band-axis-layout",
+        title: "Band axis label layout",
+        level: 2,
+      },
+      {
+        id: "builder-and-json",
+        title: "Builder and JSON",
+        level: 2,
+      },
+      {
+        id: "grid",
+        title: "Grid lines",
+        level: 2,
+      },
+      {
+        id: "related",
+        title: "Related surfaces",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/labels",
+    title: "Labels — ggsvelte",
+    description:
+      "Plot chrome vs tick labels vs data labels (GeomText, GeomLabel, SF text/label geoms).",
+    canonicalPath: "/reference/labels",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Reference",
+      label: "Labels",
+      order: 58,
+    },
+    headings: [
+      {
+        id: "three-kinds",
+        title: "Three kinds of labels",
+        level: 2,
+      },
+      {
+        id: "geom-text",
+        title: "GeomText",
+        level: 2,
+      },
+      {
+        id: "geom-label",
+        title: "GeomLabel",
+        level: 2,
+      },
+      {
+        id: "sf-labels",
+        title: "Simple-features labels",
+        level: 2,
+      },
+      {
+        id: "collision",
+        title: "Collision: geoms vs guides",
+        level: 2,
+      },
+      {
+        id: "related",
+        title: "Related surfaces",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/reference/interactions",
     title: "Search interactions — ggsvelte",
     description:
@@ -273,7 +417,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Interaction reference",
-      order: 56,
+      order: 59,
     },
   },
   {
@@ -289,7 +433,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Themes",
-      order: 57,
+      order: 60,
     },
     headings: [
       {
@@ -337,7 +481,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Palettes",
-      order: 58,
+      order: 61,
     },
     headings: [
       {
@@ -390,7 +534,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "CLI reference",
-      order: 59,
+      order: 62,
     },
     headings: [
       {
@@ -10629,7 +10773,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Errors reference",
-      order: 59,
+      order: 62,
     },
     headings: [
       {
@@ -11686,7 +11830,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Advisories",
-      order: 60,
+      order: 63,
     },
     headings: [
       {
@@ -11808,7 +11952,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Lifecycle & editions",
-      order: 61,
+      order: 64,
     },
     headings: [
       {
@@ -11890,7 +12034,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Release",
       label: "Upgrade guide",
-      order: 60,
+      order: 70,
     },
     headings: [
       {
@@ -13206,6 +13350,18 @@ export const GUIDE_NAVIGATION = [
       {
         path: "/reference/guides",
         label: "Guides and legends",
+      },
+      {
+        path: "/reference/labs",
+        label: "Labs",
+      },
+      {
+        path: "/reference/axes",
+        label: "Axes and ticks",
+      },
+      {
+        path: "/reference/labels",
+        label: "Labels",
       },
       {
         path: "/reference/interactions",
