@@ -55,7 +55,7 @@
     {:else}
       <!--
         theme.js sets data-theme before paint. Mirror contrastChartTheme():
-        dark chart on the light site, light chart on dark — no theme flash.
+        fivethirtyeight on the light site, light chart on dark — no theme flash.
       -->
       <div class="hero-static hero-static--light-site">
         {@html data.heroStaticSvgLightSite}

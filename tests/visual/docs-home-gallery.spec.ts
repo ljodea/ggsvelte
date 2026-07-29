@@ -144,11 +144,15 @@ test("homepage hero tooltip names a single department without axis crosshair noi
 });
 
 test("homepage grammar steps change real chart structure in place", async ({ page }) => {
+  // Full palmerPenguins (333) + loess on step toggles is heavier than the old
+  // 30-row specimen; cold CI hydrate already sits near the 60s project budget.
+  test.setTimeout(120_000);
   await page.goto("/");
   const output = page.locator(".grammar-output");
+  const plot = output.locator(".gg-plot-root");
   // GrammarDemo is dynamic-imported; wait for the live plot before asserting structure.
-  await expect(output.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
-    timeout: 30_000,
+  await expect(plot).toHaveAttribute("data-gg-ready", "true", {
+    timeout: 60_000,
   });
   // The demo opens on the last step: layers, legend, and inspection all live.
   await expect(output.locator(".gg-points")).toHaveCount(1);
@@ -165,7 +169,9 @@ test("homepage grammar steps change real chart structure in place", async ({ pag
   await expect(output.locator(".gg-paths")).toHaveCount(0);
 
   await page.getByRole("button", { name: /Layers/ }).click();
-  await expect(output.locator(".gg-paths")).toHaveCount(1);
+  // Remounting GeomSmooth re-runs loess per species; wait for ready then paths.
+  await expect(plot).toHaveAttribute("data-gg-ready", "true", { timeout: 60_000 });
+  await expect(output.locator(".gg-paths")).toHaveCount(1, { timeout: 30_000 });
 });
 
 test("homepage grammar inspect is exact: point tooltip, no path x-crosshair", async ({ page }) => {
