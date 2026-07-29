@@ -1,5 +1,174 @@
 # @ggsvelte/svelte
 
+## 0.17.0
+
+### Minor Changes
+
+- ac618ad: <!-- markdownlint-disable MD041 -->
+
+  fix(svelte): guard bar/col xy inspect and box GeomText chrome
+
+  Explicit inspect.mode x/xy on GeomBar/GeomCol now emits four interaction
+  advisories (plain guide-through-bar, then stronger bisect-value-label
+  warnings). GeomText hover/pin chrome is a measured rectangular box instead
+  of a point ring. Auto mode was already exact for bar/col.
+
+  Migration: none — additive diagnostics and presentation defaults
+
+- 3f72e4c: <!-- markdownlint-disable MD041 -->
+
+  feat(theme): base + igray + map + solid chart themes (ggthemes minimalist family)
+
+  Clean-room port of ggthemes `theme_base()`, `theme_igray()`, `theme_map()`,
+  and `theme_solid()`. (This family ships no palettes in ggthemes.)
+
+  - Theme `base`: base-R graphics defaults — white panel with a black frame
+    (panel.border; axis.line is blank in the theme_grey lineage), black ticks,
+    no grid, black text, bold rel(1.2) title on base 16.
+  - Theme `igray`: the theme_gray inverse — white panel over a gray90
+    (`#e5e5e5`) surround with a matching gray90 major grid.
+  - Theme `map`: every axis/panel/grid element blank — marks only, for maps.
+    Converges with `void` in this token model (both keep the title).
+  - Theme `solid`: removes every non-geom element. This model has no
+    suppress-title role, so R's blanked title flattens into the shared
+    void-like surface (documented on the token block).
+  - Svelte shells `ThemeBase`, `ThemeIgray`, `ThemeMap`, `ThemeSolid`; docs
+    `/themes` gains the four portraits.
+
+  Migration: none — additive
+
+- 92a9a6c: <!-- markdownlint-disable MD041 -->
+
+  feat(theme): calc + excel + excel_new chart themes and palettes (ggthemes spreadsheet family)
+
+  Clean-room port of the ggthemes spreadsheet family: `theme_calc()` +
+  `calc_pal()`, `theme_excel()` + `excel_pal()`, `theme_excel_new()` +
+  `excel_new_pal()`.
+
+  - Theme `calc`: LibreOffice Calc defaults — white panel, gray70 (`#b3b3b3`)
+    border and y-major grid, no axis lines, black text, 13px title.
+  - Theme `excel`: the Excel 97 classic look — `#c0c0c0` gray panel, black
+    y-major grid and panel border (theme_bw chrome per this port's lineage).
+  - Theme `excel_new`: current Excel defaults — `#595959` text, hairline
+    `#bfbfbf` y-grid, no ticks, no border, plain 14px title. R's blank axis
+    titles flatten into the shared roles (documented on the token block).
+  - Palettes for ordinal color/fill scales: `calc` (12 chart colors), `excel`
+    (Excel 97 line/point set, `scale_colour_excel`), `excel_fill` (Excel 97
+    area set, `scale_fill_excel`), `excel_new` (the default "Office Theme"
+    accents — ggthemes ships 50 named Office themes; only the default is
+    registered, documented subset).
+  - Svelte shells `ThemeCalc`, `ThemeExcel`, `ThemeExcelnew`; docs `/themes`
+    gains the three portraits (each paired with its own scheme) and
+    `/palettes` gains the four cards.
+
+  Migration: none — additive
+
+- cafc230: <!-- markdownlint-disable MD041 -->
+
+  feat(theme): stata chart themes and palettes (ggthemes Stata schemes)
+
+  Clean-room port of ggthemes `theme_stata()` + `stata_pal()` with
+  `scale_colour_stata()` / `scale_fill_stata()`.
+
+  - Theme `stata` (s2color): the default Stata look — ltbluishgray (`#eaf2f3`)
+    plot region around a white panel, matching y-major grid, black axis lines
+    and ticks, no panel border. Sizes from the stata_gsize ratios (base 11,
+    axis 10, title 14, axis title 10). R's dknavy title colour folds into the
+    single ink role; the bottom legend position is not expressible
+    (documented on the token block).
+  - Theme `stata_s1color`: the older s1 look — white plot/panel, gs14 y-grid,
+    black panel border.
+  - Theme `stata_mono` (s2mono): gs15 plot region, dimgray y-grid, no border.
+  - Palettes for ordinal color/fill scales, one scheme per `stata_pal()`
+    variant: `stata` (s2color, the ggthemes default), `stata_s1color`,
+    `stata_s1rcolor`, `stata_mono` — 15 colors each, resolved from Stata's
+    named color table in source order.
+  - Svelte shells `ThemeStata`, `ThemeStatas1color`, `ThemeStatamono`; docs
+    `/themes` gains the three portraits (each paired with its own scheme) and
+    `/palettes` gains the four cards.
+
+  Migration: none — additive
+
+- 8bcf87c: <!-- markdownlint-disable MD041 -->
+
+  feat(scale): thirty tableau gradient ramps (ggthemes tableau_gradient_pal set)
+
+  Clean-room port of every `tableau_color_pal` ordered-sequential (15) and
+  ordered-diverging (15) ramp — the `scale_*_gradient_tableau` /
+  `scale_*_gradient2_tableau` family — completing the Tableau palette set.
+
+  - 15 `tableau_seq_*` ramps: blue-green, blue-light, orange-light (7 stops
+    each) and the single-hue blue, orange, green, red, purple, brown, gray,
+    gray-warm, blue-teal, orange-gold, green-gold, red-gold ramps (20–21
+    stops each).
+  - 15 `tableau_div_*` ramps: orange-blue, red-green, green-blue, red-blue,
+    red-black, gold-purple, red-green-gold, sunset-sunrise, the four
+    *-white variants, orange-blue-light, and temperature (7 stops each).
+  - Values are verbatim copies of the upstream YAML tables in source order.
+    Stop counts exceed `MAX_PAINT_STOPS` safely: ramps are interpolation
+    tables for continuous/binned scales and are re-sampled by the colorbar,
+    never emitted as raw paint stops (documented in the module header).
+  - Resolution follows the ColorBrewer pattern: a new
+    `packages/core/src/scales/tableau-ramps.ts` family module consulted as
+    the fallthrough in `resolveSequentialPipelineRange` and
+    `resolveOrdinalPaletteStops` (Tableau ramps also work ordinally, like the
+    brewer sequential tables).
+
+  Migration: none — additive scheme names only.
+
+### Patch Changes
+
+- 9cce304: <!-- markdownlint-disable MD041 -->
+
+  feat(spec): export schema-derived `GUIDE_REFERENCE` for every guide type
+
+  `GUIDE_REFERENCE` / `guideReferenceList()` publish each public guide variant
+  (`legend`, `colorbar`, `colorsteps`, `axis`, `none`) with channels, props from
+  the matching `*GuideSpec`, and Svelte/helper names. The docs site uses this for
+  `/reference/guides`.
+
+  Migration: none — additive
+
+- e9e40b3: <!-- markdownlint-disable MD041 -->
+
+  feat(spec): export schema-derived `SCALE_REFERENCE` for every Scale* surface
+
+  `SCALE_REFERENCE` / `scaleReferenceList()` publish each public scale helper
+  from `SCALE_CAPABILITIES` (plus Colour/Ordinal aliases) with family, aesthetics,
+  params from position/color/style schemas, and guide notes. The docs site uses
+  this for `/reference/scales`.
+
+  Migration: none — additive
+
+- 1f0ed91: <!-- markdownlint-disable MD041 -->
+
+  docs(skill): keep SKILL.md scheme/theme lead counts in sync with registries
+
+  Slim the theme lead line to representative names, and assert scheme/theme
+  totals (plus reference section headers and example names) against
+  `COLOR_SCHEME_NAMES` / `CATEGORICAL_SCHEME_NAMES` / `SEQUENTIAL_SCHEME_NAMES`
+  and product `THEME_NAMES` in `scripts/skill-content.test.ts` so ggthemes
+  port PRs cannot leave the agent skill summary stale (#1210).
+
+- 4b3dd74: <!-- markdownlint-disable MD041 -->
+
+  docs(skill): comprehensive theme roster via references/themes.md
+
+  Move the full product theme table, shells, and role overrides into
+  `references/themes.md`. SKILL.md again lists every product theme name (not a
+  representative subset) and points agents at the new reference. Inventory tests
+  assert the lead-line list and the themes.md table against product THEME_NAMES.
+
+- Updated dependencies [9cce304]
+- Updated dependencies [ac618ad]
+- Updated dependencies [3f72e4c]
+- Updated dependencies [e9e40b3]
+- Updated dependencies [92a9a6c]
+- Updated dependencies [cafc230]
+- Updated dependencies [8bcf87c]
+  - @ggsvelte/spec@0.17.0
+  - @ggsvelte/core@0.17.0
+
 ## 0.16.0
 
 ### Minor Changes
