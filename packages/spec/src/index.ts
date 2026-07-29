@@ -303,6 +303,26 @@ export { POSITION_REFERENCE, positionReferenceList } from "./position-reference.
 export type { PositionParamDoc, PositionReferenceEntry } from "./position-reference.js";
 /** @lifecycle experimental */
 export {
+  SCALE_FAMILY_LABELS,
+  SCALE_REFERENCE,
+  allScaleHelpers,
+  componentNameForScaleHelper,
+  knownScaleSlugs,
+  primaryScaleHelpers,
+  scaleReferenceByFamily,
+  scaleReferenceList,
+  scaleReferencePrimaries,
+  slugForScaleHelper,
+} from "./scale-reference.js";
+/** @lifecycle experimental */
+export type {
+  ScaleAesthetic,
+  ScaleFamily,
+  ScaleParamDoc,
+  ScaleReferenceEntry,
+} from "./scale-reference.js";
+/** @lifecycle experimental */
+export {
   GUIDE_CHANNELS,
   GUIDE_REFERENCE,
   KNOWN_GUIDE_TYPES,

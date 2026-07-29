@@ -42,6 +42,9 @@ describe("docs route inventory", () => {
     expect(paths.has("/reference/stats/count")).toBe(true);
     expect(paths.has("/reference/positions")).toBe(true);
     expect(paths.has("/reference/positions/stack")).toBe(true);
+    expect(paths.has("/reference/scales")).toBe(true);
+    expect(paths.has("/reference/scales/color_continuous")).toBe(true);
+    expect(paths.has("/reference/scales/x_continuous")).toBe(true);
     expect(paths.has("/reference/guides")).toBe(true);
     expect(paths.has("/reference/guides/legend")).toBe(true);
     expect(paths.has("/reference/interactions")).toBe(true);
@@ -147,6 +150,26 @@ describe("docs route inventory", () => {
     );
   });
 
+  it("publishes the scale reference inside the one Reference hierarchy", () => {
+    const inventory = createDocsRouteInventory();
+    const index = inventory.find((entry) => entry.path === "/reference/scales");
+    expect(index).toMatchObject({
+      title: "Scales — ggsvelte",
+      canonicalPath: "/reference/scales",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "docs",
+      navigation: { section: "Reference", label: "Scales", order: 54 },
+    });
+    const details = inventory.filter((entry) => entry.path.startsWith("/reference/scales/"));
+    expect(details.length).toBe(128);
+    expect(details.every((entry) => entry.navigation === undefined)).toBe(true);
+    expect(
+      inventory.find((entry) => entry.path === "/reference/scales/color_continuous")?.title,
+    ).toBe("ScaleColorContinuous — ggsvelte");
+  });
+
   it("publishes the guides reference inside the one Reference hierarchy", () => {
     const inventory = createDocsRouteInventory();
     const index = inventory.find((entry) => entry.path === "/reference/guides");
@@ -157,7 +180,7 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "Guides and legends", order: 54 },
+      navigation: { section: "Reference", label: "Guides and legends", order: 55 },
     });
     const details = inventory.filter((entry) => entry.path.startsWith("/reference/guides/"));
     expect(details.length).toBe(5);
@@ -203,6 +226,9 @@ describe("docs route inventory", () => {
       "legend-focus",
     ]);
     expect(ids("/reference/guides/none")).toEqual(["channels", "svelte", "json", "props"]);
+    expect(ids("/reference/scales/color_continuous")).toContain("examples");
+    expect(ids("/reference/scales/color_continuous")).toContain("guide");
+    expect(ids("/reference/scales/colour_continuous")).toContain("alias");
   });
 
   it("publishes the CLI reference inside the one Reference hierarchy", () => {
@@ -214,7 +240,7 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "CLI reference", order: 56 },
+      navigation: { section: "Reference", label: "CLI reference", order: 57 },
     });
     expect(cliRoute?.headings?.filter((heading) => heading.level === 3)).toEqual(
       CLI_REFERENCE_OPTIONS.map((option) => ({

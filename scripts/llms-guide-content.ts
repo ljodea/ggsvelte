@@ -151,6 +151,7 @@ as JSON under the same name on the docs site):
 - [Geoms](/reference/geoms) — every mark, defaults, stats, positions, and params
 - [Guides and legends](/reference/guides) — GuideLegend, colorbar, colorsteps, axis, none
 - [Statistics and positions](/guide/statistics-positions) — stats, jitter, stacking
+- [Scales](/reference/scales) — every Scale* component (position, color, style)
 - [Scales and guides](/guide/scales-guides) — continuous, discrete, manual, temporal
 - [Facets and coordinates](/guide/facets-coordinates) — small multiples, flip, fixed aspect
 - [Chart themes](/themes) and [palettes](/palettes) — paper/ink chrome and data color

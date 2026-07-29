@@ -16,6 +16,7 @@ import {
   geomDetailRoutes,
   guideDetailRoutes,
   positionDetailRoutes,
+  scaleDetailRoutes,
   statDetailRoutes,
 } from "./docs-route-inventory-reference.ts";
 
@@ -134,6 +135,7 @@ export function createDocsRouteInventory(): DocsRouteRecord[] {
     ...geomDetailRoutes(),
     ...statDetailRoutes(),
     ...positionDetailRoutes(),
+    ...scaleDetailRoutes(),
     ...guideDetailRoutes(),
     ...guides,
     ...examples,

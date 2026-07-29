@@ -134,6 +134,28 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     ],
   },
   {
+    path: "/reference/scales",
+    title: "Scales — ggsvelte",
+    description:
+      "API reference for every Scale* component: position, color/fill, and style channels with params and guide interaction.",
+    canonicalPath: "/reference/scales",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: { section: "Reference", label: "Scales", order: 54 },
+    headings: [
+      { id: "position-continuous", title: "Position — continuous", level: 2 },
+      { id: "position-binned", title: "Position — binned", level: 2 },
+      { id: "position-temporal", title: "Position — temporal", level: 2 },
+      { id: "position-discrete", title: "Position — discrete", level: 2 },
+      { id: "color-fill", title: "Color and fill", level: 2 },
+      { id: "numeric-style", title: "Size, linewidth, and alpha", level: 2 },
+      { id: "finite-style", title: "Shape and linetype", level: 2 },
+      { id: "how-to-set", title: "How to set a scale", level: 2 },
+    ],
+  },
+  {
     path: "/reference/guides",
     title: "Guides and legends — ggsvelte",
     description:
@@ -143,7 +165,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Guides and legends", order: 54 },
+    navigation: { section: "Reference", label: "Guides and legends", order: 55 },
     headings: [
       { id: "all-guides", title: "All guides", level: 2 },
       { id: "how-to-set", title: "How to set a guide", level: 2 },
@@ -160,7 +182,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Interaction reference", order: 55 },
+    navigation: { section: "Reference", label: "Interaction reference", order: 56 },
   },
   {
     path: "/reference/cli",
@@ -172,7 +194,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "CLI reference", order: 56 },
+    navigation: { section: "Reference", label: "CLI reference", order: 57 },
     headings: [
       { id: "input-and-output", title: "Input and output", level: 2 },
       { id: "options", title: "Options", level: 2 },
