@@ -34,6 +34,9 @@ optional `"name"` base plus role overrides, e.g.
 | void                    | no axes, grid, or panel chrome; marks and legends remain                   |
 | solarized               | Solarized light: cream panel, muted base1 chrome, blue accent              |
 | solarizeddark           | Solarized dark: deep teal panel, muted base01 chrome, blue accent          |
+| economist_white         | Economist Graphic Detail: white panel, gray grid, light-gray paper         |
+| solarized_2             | Solarized grey-style variant: base2 panel, base3 grid, no frame            |
+| solarized_2dark         | solarized_2 on dark base tones                                             |
 | grey (alias of ggplot2) | UK theme_grey                                                              |
 | gray (alias of ggplot2) | US theme_gray                                                              |
 
@@ -41,8 +44,8 @@ Svelte: one named shell per product theme — `ThemeDefault`, `ThemeLight`,
 `ThemeDark`, `ThemeMinimal`, `ThemeGgplot2`, `ThemeClassic`, `ThemeBw`,
 `ThemeHrbr`, `ThemeFew`, `ThemeClean`, `ThemeFivethirtyeight`,
 `ThemeEconomist`, `ThemeTufte`, `ThemeLinedraw`, `ThemeVoid`, `ThemeSolarized`,
-`ThemeSolarizeddark`, `ThemeGrey`, `ThemeGray`. Escape hatch
-`<Theme name={dynamicName} />` for reactive names.
+`ThemeSolarizeddark`, `ThemeEconomistwhite`, `ThemeSolarized2`, `ThemeSolarized2dark`,
+`ThemeGrey`, `ThemeGray`. Escape hatch `<Theme name={dynamicName} />` for reactive names.
 Every shell and `<Theme>` also accepts role-override props (`ink`, `paper`,
 `accent`, `grid`, `panel`, `axisText`, `axisLine`, `tickColor`,
 `panelBorder`, tooltip/selection/focus roles, …): `<ThemeDark ink="#eee" />`.

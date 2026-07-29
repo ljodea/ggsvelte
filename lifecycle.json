@@ -3843,6 +3843,22 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "FEW_DARK_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "FEW_LIGHT_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "FEW_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "FIVETHIRTYEIGHT_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "FLEXOKI_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -6401,6 +6417,10 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ThemeEconomistwhite": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ThemeFew": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -6442,6 +6462,14 @@
           "lifecycle": "experimental"
         },
         "ThemeSolarized": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeSolarized2": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeSolarized2dark": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },

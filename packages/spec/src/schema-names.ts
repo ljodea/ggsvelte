@@ -31,6 +31,11 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "economist",
   /** ggthemes scale_colour/fill_solarized — Solarized accents, blue first. */
   "solarized",
+  // ggthemes ports (#1159): Few "Show Me the Numbers" variants + FiveThirtyEight
+  "few",
+  "few_light",
+  "few_dark",
+  "fivethirtyeight",
   // ColorBrewer qualitative (#825)
   "Set1",
   "Set2",
@@ -136,6 +141,10 @@ export const THEME_NAMES = [
   // ggthemes theme_solarized: light (default) and dark (light = FALSE) variants.
   "solarized",
   "solarizeddark",
+  // ggthemes theme ports (#1158)
+  "economist_white",
+  "solarized_2",
+  "solarized_2dark",
   "grey",
   "gray",
   // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters
