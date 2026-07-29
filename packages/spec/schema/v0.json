@@ -6039,6 +6039,10 @@
                 },
                 {
                   "type": "string",
+                  "const": "solarized"
+                },
+                {
+                  "type": "string",
                   "const": "few"
                 },
                 {
@@ -8495,6 +8499,14 @@
         },
         {
           "type": "string",
+          "const": "solarized"
+        },
+        {
+          "type": "string",
+          "const": "solarizeddark"
+        },
+        {
+          "type": "string",
           "const": "economist_white"
         },
         {
@@ -8534,7 +8546,7 @@
           "const": "test"
         }
       ],
-      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"economist_white\", \"solarized_2\", \"solarized_2dark\", \"gdocs\", \"hc\", \"hcdark\", \"pander\", \"grey\", \"gray\", \"test\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"solarized\", \"solarizeddark\", \"economist_white\", \"solarized_2\", \"solarized_2dark\", \"gdocs\", \"hc\", \"hcdark\", \"pander\", \"grey\", \"gray\", \"test\"."
     },
     "ThemeSpec": {
       "type": "object",

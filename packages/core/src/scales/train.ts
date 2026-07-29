@@ -36,6 +36,7 @@ export {
   IPSUM_PALETTE,
   PANDER_PALETTE,
   PTOL_PALETTE,
+  SOLARIZED_PALETTE,
   TABLEAU10_PALETTE,
 } from "./categorical-palettes.js";
 
