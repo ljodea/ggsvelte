@@ -221,6 +221,8 @@ export { default as ThemeLinedraw } from "./theme/ThemeLinedraw.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeVoid } from "./theme/ThemeVoid.svelte";
 /** @lifecycle stable-intent */
+export { default as ThemeWsj } from "./theme/ThemeWsj.svelte";
+/** @lifecycle stable-intent */
 export { default as ThemeGrey } from "./theme/ThemeGrey.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeGray } from "./theme/ThemeGray.svelte";

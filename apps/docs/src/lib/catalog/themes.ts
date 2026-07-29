@@ -25,6 +25,7 @@ const THEME_LABELS = {
   tufte: "Tufte",
   linedraw: "Linedraw",
   void: "Void",
+  wsj: "WSJ",
   test: "Test",
 } as const satisfies Record<ThemeOptionName, string>;
 
@@ -34,6 +35,11 @@ const PALETTE_LABELS = {
   flexoki: "Flexoki",
   tableau10: "Tableau 10",
   colorblind: "Colorblind",
+  wsj: "WSJ",
+  wsj_rgby: "WSJ R/G/B/Y",
+  wsj_red_green: "WSJ Red/Green",
+  wsj_black_green: "WSJ Black/Green",
+  wsj_dem_rep: "WSJ Dem/Rep",
   hue: "Hue",
   grey: "Grey",
   gray: "Gray",
@@ -63,6 +69,7 @@ const THEME_DEMO_SCHEMES = {
   tufte: "colorblind",
   linedraw: "colorblind",
   void: "colorblind",
+  wsj: "wsj",
   test: "colorblind",
 } as const satisfies Record<ThemeOptionName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
 

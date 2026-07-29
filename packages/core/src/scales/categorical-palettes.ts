@@ -78,6 +78,33 @@ export const COLORBLIND_PALETTE: readonly string[] = [
   "#CC79A7",
 ];
 
+/** ggthemes wsj_pal("colors6") — the default scale_*_wsj palette. */
+export const WSJ_PALETTE: readonly string[] = [
+  "#c72e29",
+  "#016392",
+  "#be9c2e",
+  "#098154",
+  "#fb832d",
+  "#000000",
+];
+
+/** ggthemes wsj_pal("rgby") — red/green/blue/yellow. */
+export const WSJ_RGBY_PALETTE: readonly string[] = ["#d3ba68", "#d5695d", "#5d8ca8", "#65a479"];
+
+/** ggthemes wsj_pal("red_green") — green/red for good/bad. */
+export const WSJ_RED_GREEN_PALETTE: readonly string[] = ["#088158", "#ba2f2a"];
+
+/** ggthemes wsj_pal("black_green") — black-to-green sentiment scale. */
+export const WSJ_BLACK_GREEN_PALETTE: readonly string[] = [
+  "#000000",
+  "#595959",
+  "#59a77f",
+  "#008856",
+];
+
+/** ggthemes wsj_pal("dem_rep") — Democrat/Republican/Undecided. */
+export const WSJ_DEM_REP_PALETTE: readonly string[] = ["#006a8e", "#b1283a", "#a8a6a7"];
+
 /** Named categorical schemes accepted by the portable spec. */
 export const CATEGORICAL_SCHEMES = {
   observable10: CATEGORICAL_PALETTE_10,
@@ -85,6 +112,11 @@ export const CATEGORICAL_SCHEMES = {
   flexoki: FLEXOKI_PALETTE,
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
+  wsj: WSJ_PALETTE,
+  wsj_rgby: WSJ_RGBY_PALETTE,
+  wsj_red_green: WSJ_RED_GREEN_PALETTE,
+  wsj_black_green: WSJ_BLACK_GREEN_PALETTE,
+  wsj_dem_rep: WSJ_DEM_REP_PALETTE,
   ...COLORBREWER_QUALITATIVE,
   hue: HUE_PALETTE_10,
   grey: GREY_PALETTE_10,

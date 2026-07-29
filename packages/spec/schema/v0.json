@@ -6035,6 +6035,26 @@
                 },
                 {
                   "type": "string",
+                  "const": "wsj"
+                },
+                {
+                  "type": "string",
+                  "const": "wsj_rgby"
+                },
+                {
+                  "type": "string",
+                  "const": "wsj_red_green"
+                },
+                {
+                  "type": "string",
+                  "const": "wsj_black_green"
+                },
+                {
+                  "type": "string",
+                  "const": "wsj_dem_rep"
+                },
+                {
+                  "type": "string",
                   "const": "Set1"
                 },
                 {
@@ -8451,6 +8471,10 @@
         },
         {
           "type": "string",
+          "const": "wsj"
+        },
+        {
+          "type": "string",
           "const": "grey"
         },
         {
@@ -8462,7 +8486,7 @@
           "const": "test"
         }
       ],
-      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"grey\", \"gray\", \"test\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"wsj\", \"grey\", \"gray\", \"test\"."
     },
     "ThemeSpec": {
       "type": "object",

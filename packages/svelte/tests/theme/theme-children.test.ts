@@ -141,6 +141,7 @@ describe("Theme* export parity with THEME_NAMES", () => {
       tufte: "ThemeTufte",
       linedraw: "ThemeLinedraw",
       void: "ThemeVoid",
+      wsj: "ThemeWsj",
       grey: "ThemeGrey",
       gray: "ThemeGray",
       test: "ThemeTest",

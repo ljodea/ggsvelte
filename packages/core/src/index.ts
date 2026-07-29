@@ -92,6 +92,11 @@ export {
   trainContinuous,
   trainLinear,
   TABLEAU10_PALETTE,
+  WSJ_BLACK_GREEN_PALETTE,
+  WSJ_DEM_REP_PALETTE,
+  WSJ_PALETTE,
+  WSJ_RED_GREEN_PALETTE,
+  WSJ_RGBY_PALETTE,
 } from "./scales/train.js";
 export type {
   BandConfig,

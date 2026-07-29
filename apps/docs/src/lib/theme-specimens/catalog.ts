@@ -160,6 +160,14 @@ export const THEME_SPECIMENS: readonly ThemeSpecimenConfig[] = [
     legendFocus: false,
   },
   {
+    name: "wsj",
+    label: BY_NAME.wsj.label,
+    caption: "Brown paper, dotted black y-grid — Wall Street Journal chrome.",
+    kind: "revenue-cols",
+    scheme: BY_NAME.wsj.scheme,
+    legendFocus: false,
+  },
+  {
     name: "test",
     label: BY_NAME.test.label,
     caption: "Pinned high-contrast chrome for package tests and VR.",

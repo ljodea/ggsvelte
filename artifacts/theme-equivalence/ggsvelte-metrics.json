@@ -223,6 +223,38 @@
     "xLabels": ["1", "2", "3", "4", "5", "6"],
     "yLabels": ["0", "2", "4", "6", "8", "10"]
   },
+  "void": {
+    "width": 1440,
+    "height": 960,
+    "fontFamily": "\"Roboto Condensed\", \"Arial Narrow\", Arial, sans-serif",
+    "fontSize": "11.5px",
+    "fontWeight": "300",
+    "fontReady": true,
+    "axisLines": 0,
+    "panelBorders": 0,
+    "tickLines": 0,
+    "gridLines": 0,
+    "gridStroke": null,
+    "gridWidth": "0",
+    "xLabels": [],
+    "yLabels": []
+  },
+  "wsj": {
+    "width": 1440,
+    "height": 960,
+    "fontFamily": "Arial, \"Helvetica Neue\", Helvetica, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "fontReady": true,
+    "axisLines": 1,
+    "panelBorders": 0,
+    "tickLines": 6,
+    "gridLines": 6,
+    "gridStroke": "rgb(0, 0, 0)",
+    "gridWidth": "0.5",
+    "xLabels": ["1", "2", "3", "4", "5", "6"],
+    "yLabels": ["0", "2", "4", "6", "8", "10"]
+  },
   "test": {
     "width": 1440,
     "height": 960,

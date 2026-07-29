@@ -27,6 +27,12 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "flexoki",
   "tableau10",
   "colorblind",
+  /** ggthemes wsj_pal — scale_colour/fill_wsj palette variants. */
+  "wsj",
+  "wsj_rgby",
+  "wsj_red_green",
+  "wsj_black_green",
+  "wsj_dem_rep",
   // ColorBrewer qualitative (#825)
   "Set1",
   "Set2",
@@ -129,6 +135,8 @@ export const THEME_NAMES = [
   "tufte",
   "linedraw",
   "void",
+  /** ggthemes theme_wsj (Wall Street Journal). */
+  "wsj",
   "grey",
   "gray",
   // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters

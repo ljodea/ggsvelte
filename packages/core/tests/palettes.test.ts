@@ -11,6 +11,11 @@ import {
   FLEXOKI_PALETTE,
   IPSUM_PALETTE,
   TABLEAU10_PALETTE,
+  WSJ_BLACK_GREEN_PALETTE,
+  WSJ_DEM_REP_PALETTE,
+  WSJ_PALETTE,
+  WSJ_RED_GREEN_PALETTE,
+  WSJ_RGBY_PALETTE,
 } from "../src/scales/train.ts";
 import {
   CATEGORICAL_PALETTE_10 as PALETTE_DIRECT,
@@ -19,6 +24,11 @@ import {
   FLEXOKI_PALETTE as FLEXOKI_DIRECT,
   IPSUM_PALETTE as IPSUM_DIRECT,
   TABLEAU10_PALETTE as TABLEAU10_DIRECT,
+  WSJ_BLACK_GREEN_PALETTE as WSJ_BLACK_GREEN_DIRECT,
+  WSJ_DEM_REP_PALETTE as WSJ_DEM_REP_DIRECT,
+  WSJ_PALETTE as WSJ_DIRECT,
+  WSJ_RED_GREEN_PALETTE as WSJ_RED_GREEN_DIRECT,
+  WSJ_RGBY_PALETTE as WSJ_RGBY_DIRECT,
 } from "../src/scales/categorical-palettes.ts";
 
 const PALETTES = {
@@ -26,6 +36,11 @@ const PALETTES = {
   flexoki: FLEXOKI_PALETTE,
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
+  wsj: WSJ_PALETTE,
+  wsj_rgby: WSJ_RGBY_PALETTE,
+  wsj_red_green: WSJ_RED_GREEN_PALETTE,
+  wsj_black_green: WSJ_BLACK_GREEN_PALETTE,
+  wsj_dem_rep: WSJ_DEM_REP_PALETTE,
 } as const;
 
 describe("train.ts palette re-export identity", () => {
@@ -37,6 +52,11 @@ describe("train.ts palette re-export identity", () => {
     expect(FLEXOKI_PALETTE).toBe(FLEXOKI_DIRECT);
     expect(IPSUM_PALETTE).toBe(IPSUM_DIRECT);
     expect(TABLEAU10_PALETTE).toBe(TABLEAU10_DIRECT);
+    expect(WSJ_BLACK_GREEN_PALETTE).toBe(WSJ_BLACK_GREEN_DIRECT);
+    expect(WSJ_DEM_REP_PALETTE).toBe(WSJ_DEM_REP_DIRECT);
+    expect(WSJ_PALETTE).toBe(WSJ_DIRECT);
+    expect(WSJ_RED_GREEN_PALETTE).toBe(WSJ_RED_GREEN_DIRECT);
+    expect(WSJ_RGBY_PALETTE).toBe(WSJ_RGBY_DIRECT);
   });
 });
 

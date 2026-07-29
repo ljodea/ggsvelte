@@ -44,6 +44,7 @@ const THEME_SHELL: Readonly<Record<string, string>> = {
   tufte: "ThemeTufte",
   linedraw: "ThemeLinedraw",
   void: "ThemeVoid",
+  wsj: "ThemeWsj",
   grey: "ThemeGrey",
   gray: "ThemeGray",
   test: "ThemeTest",
