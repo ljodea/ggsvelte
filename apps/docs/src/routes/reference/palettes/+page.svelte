@@ -8,27 +8,32 @@
   } from "$lib/catalog/palette-reference";
   import CopyCode from "$lib/components/CopyCode.svelte";
 
-  const discreteExample = `<script lang="ts">
-  import {
-    GeomPoint,
-    GGPlot,
-    ScaleColorDiscrete,
-  } from "@ggsvelte/svelte";
+  // Join so the example's closing script tag does not terminate this module.
+  const discreteExample = [
+    '<script lang="ts">',
+    "  import {",
+    "    GeomPoint,",
+    "    GGPlot,",
+    "    ScaleColorDiscrete,",
+    '  } from "@ggsvelte/svelte";',
+    "",
+    "  const rows = [",
+    '    { x: 1, y: 2, species: "a" },',
+    '    { x: 2, y: 4, species: "b" },',
+    "  ];",
+    ["</", "script>"].join(""),
+    "",
+    '<GGPlot data={rows} aes={{ x: "x", y: "y", color: "species" }}>',
+    '  <ScaleColorDiscrete scheme="tableau10" />',
+    "  <GeomPoint />",
+    "</GGPlot>",
+  ].join("\n");
 
-  const rows = [
-    { x: 1, y: 2, species: "a" },
-    { x: 2, y: 4, species: "b" },
-  ];
-<\/script>
-
-<GGPlot data={rows} aes={{ x: "x", y: "y", color: "species" }}>
-  <ScaleColorDiscrete scheme="tableau10" />
-  <GeomPoint />
-</GGPlot>`;
-
-  const sequentialExample = `<ScaleColorContinuous scheme="viridis" />
-<!-- or family shell: -->
-<ScaleColorViridisC option="magma" />`;
+  const sequentialExample = [
+    `<ScaleColorContinuous scheme="viridis" />`,
+    `<!-- or family shell: -->`,
+    `<ScaleColorViridisC option="magma" />`,
+  ].join("\n");
 </script>
 
 <article class="palette-reference prose" aria-labelledby="palette-ref-heading">

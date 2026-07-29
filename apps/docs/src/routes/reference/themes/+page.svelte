@@ -8,19 +8,22 @@
   } from "$lib/catalog/theme-reference";
   import CopyCode from "$lib/components/CopyCode.svelte";
 
-  const namedExample = `<script lang="ts">
-  import { GeomPoint, GGPlot, ThemeDark } from "@ggsvelte/svelte";
-
-  const rows = [
-    { x: 1, y: 2 },
-    { x: 2, y: 4 },
-  ];
-<\/script>
-
-<GGPlot data={rows} aes={{ x: "x", y: "y" }}>
-  <ThemeDark ink="#f5f5f5" tooltipPaper="#1a1a1a" tooltipInk="#f5f5f5" />
-  <GeomPoint />
-</GGPlot>`;
+  // Join so the example's closing script tag does not terminate this module.
+  const namedExample = [
+    '<script lang="ts">',
+    '  import { GeomPoint, GGPlot, ThemeDark } from "@ggsvelte/svelte";',
+    "",
+    "  const rows = [",
+    "    { x: 1, y: 2 },",
+    "    { x: 2, y: 4 },",
+    "  ];",
+    ["</", "script>"].join(""),
+    "",
+    '<GGPlot data={rows} aes={{ x: "x", y: "y" }}>',
+    '  <ThemeDark ink="#f5f5f5" tooltipPaper="#1a1a1a" tooltipInk="#f5f5f5" />',
+    "  <GeomPoint />",
+    "</GGPlot>",
+  ].join("\n");
 
   const genericExample = `<Theme name={activeTheme} paper="none" focusRing="#ffcc00" />`;
 </script>
