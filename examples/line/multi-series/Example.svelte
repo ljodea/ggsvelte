@@ -15,6 +15,8 @@
 <GGPlot
   data={wheatAndWages}
   aes={{ x: "year", y: "value", color: "series" }}
+  key={(row) => `${row.year}:${row.series}`}
+  legendFocus
   width={640}
   height={400}
 >

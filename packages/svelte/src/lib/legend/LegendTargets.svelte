@@ -2,7 +2,13 @@
   /**
    * Interactive legend hit targets + clear control for GGPlot.
    * Host owns focus state machine, key index, and commit/preview side effects.
+   * Clear anchors off the pressed legend box (see resolveClearControlLayout).
    */
+  import {
+    CLEAR_HIDE_DELAY_MS,
+    shouldRevealClearControl,
+    type ClearControlLayout,
+  } from "../assembly/layout.js";
   import type { InteractiveLegendEntry, LegendEntryIdentity } from "./focus.js";
 
   const {
@@ -10,11 +16,11 @@
     previewIdentity = null,
     pressedIdentity = null,
     rovingIndex = 0,
-    sceneWidth,
-    /** Retained for caller layout parity; clear sits right of the scene, not below it. */
+    sceneWidth: _sceneWidth,
+    /** Retained for caller layout parity; Clear is legend-relative, not scene-corner. */
     sceneHeight: _sceneHeight,
-    /** Visibility gate for clear control; null hides the clear button. */
-    clearLegendX = null,
+    /** Scene-local Clear position; null hides the control (no pressed legend). */
+    clearLayout = null,
     onPreviewIndex,
     onPreviewClear,
     onPointerDown,
@@ -34,7 +40,7 @@
     rovingIndex?: number;
     sceneWidth: number;
     sceneHeight: number;
-    clearLegendX?: number | null;
+    clearLayout?: ClearControlLayout | null;
     onPreviewIndex: (index: number, source: "pointer") => void;
     onPreviewClear: () => void;
     onPointerDown: (event: PointerEvent, index: number) => void;
@@ -48,6 +54,95 @@
     onClearPointerCancel: () => void;
     onClearClick: (event: MouseEvent) => void;
   } = $props();
+
+  /** Pointer or focus is inside legend targets / Clear chrome. */
+  let chromeActive = $state(false);
+  /** Hide delay elapsed after leave — Clear fades so screenshots stay clean. */
+  let hideElapsed = $state(false);
+  let hideTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const clearVisible = $derived(
+    shouldRevealClearControl({
+      pressed: clearLayout !== null,
+      chromeActive,
+      hideElapsed,
+    }),
+  );
+
+  function clearHideTimer(): void {
+    if (hideTimer === null) return;
+    clearTimeout(hideTimer);
+    hideTimer = null;
+  }
+
+  function pinChrome(): void {
+    clearHideTimer();
+    chromeActive = true;
+    hideElapsed = false;
+  }
+
+  function scheduleHide(): void {
+    chromeActive = false;
+    clearHideTimer();
+    hideTimer = setTimeout(() => {
+      hideElapsed = true;
+      hideTimer = null;
+    }, CLEAR_HIDE_DELAY_MS);
+  }
+
+  /**
+   * Chrome uses pointer-events:none so plot hit-testing still works; enter/leave
+   * therefore fire on the interactive children (targets + Clear), not the wrapper.
+   * relatedTarget checks keep the pin alive while moving between those children.
+   */
+  function stillInsideChrome(
+    current: EventTarget | null,
+    next: EventTarget | null,
+  ): boolean {
+    return (
+      current instanceof Element &&
+      next instanceof Node &&
+      current.closest(".gg-legend-chrome")?.contains(next) === true
+    );
+  }
+
+  function onChromeChildPointerLeave(event: PointerEvent): void {
+    if (stillInsideChrome(event.currentTarget, event.relatedTarget)) return;
+    scheduleHide();
+  }
+
+  function onChromeFocusOut(event: FocusEvent): void {
+    if (stillInsideChrome(event.currentTarget, event.relatedTarget)) return;
+    scheduleHide();
+  }
+
+  // Track pressed-ness as a boolean so parent re-renders that rebuild the
+  // clearLayout object do not restart the hide clock or fight pinChrome.
+  const clearPressed = $derived(clearLayout !== null);
+
+  // On a fresh press with idle chrome (touch commit, no hover), start the hide
+  // clock. If the pointer is already over a target from the click, stay pinned
+  // until leave/blur calls scheduleHide.
+  $effect(() => {
+    if (!clearPressed) {
+      clearHideTimer();
+      hideElapsed = false;
+      return;
+    }
+    if (chromeActive) {
+      clearHideTimer();
+      hideElapsed = false;
+      return;
+    }
+    clearHideTimer();
+    hideTimer = setTimeout(() => {
+      hideElapsed = true;
+      hideTimer = null;
+    }, CLEAR_HIDE_DELAY_MS);
+    return () => {
+      clearHideTimer();
+    };
+  });
 
   function sameIdentity(
     left: LegendEntryIdentity | null | undefined,
@@ -87,75 +182,106 @@
   }
 </script>
 
-{#if entries.length > 0}
-  <div class="gg-legend-targets" role="group" aria-label="Interactive legends">
-    {#each entries as target, index (`${target.identity.scale}:${target.identity.entryIndex}`)}
+{#if entries.length > 0 || clearLayout !== null}
+  <div
+    class="gg-legend-chrome"
+    role="presentation"
+    onfocusin={pinChrome}
+    onfocusout={onChromeFocusOut}
+  >
+    {#if entries.length > 0}
+      <div
+        class="gg-legend-targets"
+        role="group"
+        aria-label="Interactive legends"
+      >
+        {#each entries as target, index (`${target.identity.scale}:${target.identity.entryIndex}`)}
+          <button
+            type="button"
+            class="gg-legend-target"
+            class:gg-legend-target-active={sameIdentity(
+              previewIdentity,
+              target.identity,
+            )}
+            aria-label={targetAriaLabel(target)}
+            aria-pressed={sameIdentity(pressedIdentity, target.identity)}
+            tabindex={index === rovingIndex ? 0 : -1}
+            data-gg-legend-target
+            data-index={index}
+            style:left={`${targetLeft(target)}px`}
+            style:top={`${target.legend.y + target.entry.y}px`}
+            style:width={`${targetWidth(target, index)}px`}
+            style:height={`${Math.max(24, target.entry.height ?? 24)}px`}
+            onpointerenter={(event) => {
+              pinChrome();
+              if (event.pointerType !== "touch")
+                onPreviewIndex(index, "pointer");
+            }}
+            onpointerleave={(event) => {
+              onPreviewClear();
+              onChromeChildPointerLeave(event);
+            }}
+            onpointerdown={(event) => onPointerDown(event, index)}
+            onpointerup={(event) => onPointerUp(event, index)}
+            onpointercancel={() => onPointerCancel()}
+            onfocus={() => onFocus(index)}
+            onblur={onBlur}
+            onclick={(event) => onClick(event, index)}
+            onkeydown={(event) => onKeyDown(event, index)}
+          >
+            <span class="gg-legend-target-label">{target.entry.label}</span>
+          </button>
+        {/each}
+      </div>
+    {/if}
+    {#if clearLayout !== null}
+      <!-- clearLayout gates visibility (pressed legend scale). Anchored relative to
+           the pressed legend box (below right stacks, beside bottom strips) so
+           title/swatch labels stay readable. Fades after idle so screenshots of a
+           committed series stay clean; reappears on legend chrome hover/focus.
+           Smoke baseline: interaction-legend-focus-committed-light.png. -->
       <button
         type="button"
-        class="gg-legend-target"
-        class:gg-legend-target-active={sameIdentity(
-          previewIdentity,
-          target.identity,
-        )}
-        aria-label={targetAriaLabel(target)}
-        aria-pressed={sameIdentity(pressedIdentity, target.identity)}
-        tabindex={index === rovingIndex ? 0 : -1}
-        data-gg-legend-target
-        data-index={index}
-        style:left={`${targetLeft(target)}px`}
-        style:top={`${target.legend.y + target.entry.y}px`}
-        style:width={`${targetWidth(target, index)}px`}
-        style:height={`${Math.max(24, target.entry.height ?? 24)}px`}
-        onpointerenter={(event) => {
-          if (event.pointerType !== "touch") onPreviewIndex(index, "pointer");
-        }}
-        onpointerleave={() => onPreviewClear()}
-        onpointerdown={(event) => onPointerDown(event, index)}
-        onpointerup={(event) => onPointerUp(event, index)}
-        onpointercancel={() => onPointerCancel()}
-        onfocus={() => onFocus(index)}
-        onblur={onBlur}
-        onclick={(event) => onClick(event, index)}
-        onkeydown={(event) => onKeyDown(event, index)}
+        class="gg-legend-clear"
+        class:gg-legend-clear-faded={!clearVisible}
+        aria-label="Clear legend focus"
+        aria-hidden={!clearVisible ? true : undefined}
+        tabindex={clearVisible ? 0 : -1}
+        style:left={`${clearLayout.left}px`}
+        style:top={`${clearLayout.top}px`}
+        onpointerenter={pinChrome}
+        onpointerleave={onChromeChildPointerLeave}
+        onpointerdown={(event) => onClearPointerDown(event.pointerType)}
+        onpointercancel={() => onClearPointerCancel()}
+        onclick={(event) => onClearClick(event)}>Clear</button
       >
-        <span class="gg-legend-target-label">{target.entry.label}</span>
-      </button>
-    {/each}
+    {/if}
   </div>
-{/if}
-{#if clearLegendX !== null}
-  <!-- clearLegendX gates visibility (pressed legend scale). Top-right of the
-       scene keeps the control off the tool-rail strip and out of the bottom
-       row that used to shove charts below. Inside the scene so capture and
-       hit-testing still reach it (z-index above chrome). Smoke baseline:
-       interaction-legend-focus-committed-light.png. -->
-  <button
-    type="button"
-    class="gg-legend-clear"
-    aria-label="Clear legend focus"
-    style:left={`${Math.max(4, sceneWidth - 52)}px`}
-    style:top="4px"
-    onpointerdown={(event) => onClearPointerDown(event.pointerType)}
-    onpointercancel={() => onClearPointerCancel()}
-    onclick={(event) => onClearClick(event)}>Clear</button
-  >
 {/if}
 
 <style>
+  .gg-legend-chrome {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+  }
+
   .gg-legend-clear {
     position: absolute;
     z-index: 5;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    /* 44×44 touch target (WCAG 2.5.5); top-right of the scene, not below it. */
-    min-width: 44px;
-    min-height: 44px;
+    /* Compact row — matches legend entry height (AA 24px), not a 44×44 slab. */
+    min-width: 24px;
+    min-height: 24px;
+    height: 24px;
     margin: 0;
     border: 1px solid
       var(--gg-tooltipBorder, var(--gg-theme-tooltipBorder, currentColor));
-    border-radius: 0.25rem;
-    padding: 0.4rem 0.75rem;
+    border-radius: 0.2rem;
+    padding: 0 0.4rem;
     background: var(
       --gg-tooltipPaper,
       var(
@@ -170,11 +296,18 @@
         var(--gg-theme-tooltipInk, var(--gg-ink, #1f2328))
       )
     );
-    font: 600 0.8125rem/1.2 var(--gg-font-family, system-ui, sans-serif);
+    font: 600 0.75rem/1 var(--gg-font-family, system-ui, sans-serif);
     letter-spacing: -0.01em;
     white-space: nowrap;
     pointer-events: auto;
     cursor: pointer;
+    opacity: 1;
+    transition: opacity 180ms ease;
+  }
+
+  .gg-legend-clear-faded {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .gg-legend-clear:hover {

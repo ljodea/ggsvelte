@@ -10,6 +10,7 @@ import type { PlotInteractionInterval } from "../interaction/interaction.js";
 import type { IntervalConsumptionCandidate } from "../interval/consumption.js";
 import {
   anchorsFromCandidateKeys,
+  applyEmphasisRingDensityGate,
   collectCandidates,
   mergePresentationFocusKeys,
   type PresentationAnchor,
@@ -140,13 +141,18 @@ export function createSemanticCandidateProjection(
     (): readonly IntervalConsumptionCandidate<PropertyKey>[] =>
       needIntervalConsumptionWalk ? sharedCandidateProjection : [],
   );
+  // Selection: point rings stay on even for large sets (D2).
   const selectedAnchors = $derived(
     anchorsFromCandidateKeys(sharedCandidateProjection, [
       ...new Set([...deps.selectedKeys(), ...deps.intervalKeys()]),
     ]),
   );
+  // Legend/controller emphasis: density-gate rings so dense point series mute
+  // without a dashed-ring field; paths/rects already use chrome "none".
   const emphasizedAnchors = $derived(
-    anchorsFromCandidateKeys(sharedCandidateProjection, deps.emphasisKeys()),
+    applyEmphasisRingDensityGate(
+      anchorsFromCandidateKeys(sharedCandidateProjection, deps.emphasisKeys()),
+    ),
   );
   const interactionMasks = $derived.by((): readonly (BatchInteractionMask | null)[] => {
     const model = deps.model();
