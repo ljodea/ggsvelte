@@ -30,6 +30,9 @@ describe("packed Pages link checks", () => {
     "reference/stats/count.html",
     "reference/positions.html",
     "reference/positions/stack.html",
+    "reference/guides.html",
+    "reference/guides/legend.html",
+    "reference/guides/colorbar.html",
     "examples/interaction/tooltip.html",
     "interactions/brush-zoom.html",
     "interactions/linked-views.html",
@@ -110,6 +113,9 @@ describe("packed Pages link checks", () => {
     expect(requiredPages).toContain("reference/stats/count.html");
     expect(requiredPages).toContain("reference/positions.html");
     expect(requiredPages).toContain("reference/positions/stack.html");
+    expect(requiredPages).toContain("reference/guides.html");
+    expect(requiredPages).toContain("reference/guides/legend.html");
+    expect(requiredPages).toContain("reference/guides/colorbar.html");
     expect(requiredPages).toContain("guide/interaction-reference.html");
     expect(requiredPages).toContain("robots.txt");
     expect(requiredPages).toContain("sitemap.xml");

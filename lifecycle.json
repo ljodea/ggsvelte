@@ -616,6 +616,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "GUIDE_CHANNELS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GUIDE_REFERENCE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeomAblineOptions": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -848,11 +856,27 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GuideChannelName": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GuideParamDoc": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GuideReferenceEntry": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "GuideSpec": {
           "kind": "type",
           "lifecycle": "experimental"
         },
         "GuideThemeSpec": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GuideTypeName": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -945,6 +969,10 @@
           "lifecycle": "experimental"
         },
         "KNOWN_GEOMS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "KNOWN_GUIDE_TYPES": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2261,6 +2289,10 @@
           "lifecycle": "experimental"
         },
         "guideNone": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "guideReferenceList": {
           "kind": "value",
           "lifecycle": "experimental"
         },

@@ -72,7 +72,8 @@ export const DOCS_ROUTES = [
   {
     path: "/reference",
     title: "Reference — ggsvelte",
-    description: "Geom, interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
+    description:
+      "Geom, guide, interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
     canonicalPath: "/reference",
     kind: "page",
     index: true,
@@ -169,6 +170,39 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/reference/guides",
+    title: "Guides and legends — ggsvelte",
+    description:
+      "Schema-derived API reference for GuideLegend, GuideColorbar, GuideColorsteps, GuideAxis, and GuideNone: channels, props, and helpers.",
+    canonicalPath: "/reference/guides",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Reference",
+      label: "Guides and legends",
+      order: 54,
+    },
+    headings: [
+      {
+        id: "all-guides",
+        title: "All guides",
+        level: 2,
+      },
+      {
+        id: "how-to-set",
+        title: "How to set a guide",
+        level: 2,
+      },
+      {
+        id: "legend-focus",
+        title: "Legend focus and clear recovery",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/reference/interactions",
     title: "Search interactions — ggsvelte",
     description:
@@ -181,7 +215,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Interaction reference",
-      order: 54,
+      order: 55,
     },
   },
   {
@@ -197,7 +231,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "CLI reference",
-      order: 55,
+      order: 56,
     },
     headings: [
       {
@@ -3867,6 +3901,176 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/reference/guides/legend",
+    title: "GuideLegend — ggsvelte",
+    description:
+      "GuideLegend: Discrete legend for one non-position aesthetic: title, placement rank, position, direction, key size, and collision. Default guide for categorical color, fill, size, shape, and other style channels.",
+    canonicalPath: "/reference/guides/legend",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "channels",
+        title: "Channels",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON and helpers",
+        level: 2,
+      },
+      {
+        id: "props",
+        title: "Props",
+        level: 2,
+      },
+      {
+        id: "legend-focus",
+        title: "Legend focus",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/guides/colorbar",
+    title: "GuideColorbar — ggsvelte",
+    description:
+      "GuideColorbar: Continuous color ramp for sequential color or fill scales. Shows ticks and labels along a vertical or horizontal bar; incompatible with discrete legends and binned colorsteps.",
+    canonicalPath: "/reference/guides/colorbar",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "channels",
+        title: "Channels",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON and helpers",
+        level: 2,
+      },
+      {
+        id: "props",
+        title: "Props",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/guides/colorsteps",
+    title: "GuideColorsteps — ggsvelte",
+    description:
+      "GuideColorsteps: Binned color legend for binned color or fill scales. Step blocks with optional labels; use instead of legend or colorbar when the scale type is binned.",
+    canonicalPath: "/reference/guides/colorsteps",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "channels",
+        title: "Channels",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON and helpers",
+        level: 2,
+      },
+      {
+        id: "props",
+        title: "Props",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/guides/axis",
+    title: "GuideAxis — ggsvelte",
+    description:
+      "GuideAxis: Axis guide for positional aesthetics x and y: title, tick marks, labels, and collision. Not valid on color, fill, or other style channels.",
+    canonicalPath: "/reference/guides/axis",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "channels",
+        title: "Channels",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON and helpers",
+        level: 2,
+      },
+      {
+        id: "props",
+        title: "Props",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/guides/none",
+    title: "GuideNone — ggsvelte",
+    description:
+      "GuideNone: Suppress the guide for one aesthetic entirely. Valid on every channel; useful to hide size or shape legends while keeping the mapping.",
+    canonicalPath: "/reference/guides/none",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "channels",
+        title: "Channels",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON and helpers",
+        level: 2,
+      },
+      {
+        id: "props",
+        title: "Props",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/guide/getting-started",
     title: "Getting started — ggsvelte",
     description: "Install @ggsvelte/svelte and render one chart from a Svelte file.",
@@ -5751,8 +5955,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-881",
-        title: "experimental (881)",
+        id: "experimental-889",
+        title: "experimental (889)",
         level: 3,
       },
       {
@@ -7122,6 +7326,10 @@ export const GUIDE_NAVIGATION = [
       {
         path: "/reference/positions",
         label: "Positions",
+      },
+      {
+        path: "/reference/guides",
+        label: "Guides and legends",
       },
       {
         path: "/reference/interactions",

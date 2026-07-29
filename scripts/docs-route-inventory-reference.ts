@@ -5,6 +5,7 @@
 import { EXAMPLES } from "../examples/manifest.ts";
 import type { DocsRouteMetadata, RouteHeading } from "../apps/docs/src/lib/route-types.ts";
 import { geomReferenceList } from "../packages/spec/src/geom-reference.ts";
+import { guideReferenceList } from "../packages/spec/src/guide-reference.ts";
 import { positionReferenceList } from "../packages/spec/src/position-reference.ts";
 import { statReferenceList } from "../packages/spec/src/stat-reference.ts";
 
@@ -126,6 +127,32 @@ export function positionDetailRoutes(): DocsRouteRecord[] {
       title: `position ${entry.name} — ggsvelte`,
       description: `position "${entry.name}": ${entry.summary}`,
       canonicalPath: `/reference/positions/${entry.slug}`,
+      kind: "page" as const,
+      index: true,
+      sitemap: true,
+      shell: "docs" as const,
+      headings,
+    };
+  });
+}
+
+/** One indexable page per KNOWN_GUIDE_TYPES entry. */
+export function guideDetailRoutes(): DocsRouteRecord[] {
+  return guideReferenceList().map((entry) => {
+    const headings: RouteHeading[] = [
+      { id: "channels", title: "Channels", level: 2 },
+      { id: "svelte", title: "Svelte component", level: 2 },
+      { id: "json", title: "JSON and helpers", level: 2 },
+      { id: "props", title: "Props", level: 2 },
+    ];
+    if (entry.name === "legend") {
+      headings.push({ id: "legend-focus", title: "Legend focus", level: 2 });
+    }
+    return {
+      path: `/reference/guides/${entry.slug}`,
+      title: `${entry.component} — ggsvelte`,
+      description: `${entry.component}: ${entry.summary}`,
+      canonicalPath: `/reference/guides/${entry.slug}`,
       kind: "page" as const,
       index: true,
       sitemap: true,
