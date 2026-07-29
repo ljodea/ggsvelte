@@ -142,8 +142,8 @@
   <h2 id="related">Related surfaces</h2>
   <ul>
     <li>
-      <a href={`${base}/reference/guides`}>Guides and legends</a> — legend and
-      axis guide components and props.
+      <a href={`${base}/reference/guides`}>Guides and legends</a> — legend and axis
+      guide components and props.
     </li>
     <li>
       <a href={`${base}/reference/axes`}>Axes and ticks</a> —

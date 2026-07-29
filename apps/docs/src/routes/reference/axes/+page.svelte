@@ -248,8 +248,9 @@ const guides = {
   <h2 id="related">Related surfaces</h2>
   <ul>
     <li>
-      <a href={`${base}/reference/guides`}>Guides and legends</a> — schema-derived
-      props for every guide type including <code>GuideAxis</code>.
+      <a href={`${base}/reference/guides`}>Guides and legends</a> —
+      schema-derived props for every guide type including
+      <code>GuideAxis</code>.
     </li>
     <li>
       <a href={`${base}/reference/labs`}><code>Labs</code></a> — plot and axis titles.
