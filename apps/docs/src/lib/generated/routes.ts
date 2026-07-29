@@ -4858,7 +4858,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Errors reference",
-      order: 56,
+      order: 59,
     },
     headings: [
       {
@@ -5915,7 +5915,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Advisories",
-      order: 57,
+      order: 60,
     },
     headings: [
       {
@@ -6037,7 +6037,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Lifecycle & editions",
-      order: 58,
+      order: 61,
     },
     headings: [
       {
@@ -7441,20 +7441,20 @@ export const GUIDE_NAVIGATION = [
         label: "Themes",
       },
       {
-        path: "/guide/errors",
-        label: "Errors reference",
-      },
-      {
         path: "/reference/palettes",
         label: "Palettes",
       },
       {
-        path: "/guide/advisories",
-        label: "Advisories",
-      },
-      {
         path: "/reference/cli",
         label: "CLI reference",
+      },
+      {
+        path: "/guide/errors",
+        label: "Errors reference",
+      },
+      {
+        path: "/guide/advisories",
+        label: "Advisories",
       },
       {
         path: "/guide/lifecycle",
