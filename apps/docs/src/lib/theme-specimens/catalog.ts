@@ -33,7 +33,7 @@ export type ThemeSpecimenConfig = {
 };
 
 const BY_NAME = Object.fromEntries(THEME_OPTIONS.map((theme) => [theme.name, theme])) as Record<
-  ThemeName,
+  (typeof THEME_OPTIONS)[number]["name"],
   (typeof THEME_OPTIONS)[number]
 >;
 

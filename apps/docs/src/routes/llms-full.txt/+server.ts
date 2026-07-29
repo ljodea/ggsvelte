@@ -10,7 +10,7 @@ import type { PortableSpec } from "@ggsvelte/spec";
 import type { LlmsFullExample } from "$scripts/gen-llms";
 import { buildLlmsFull, docsDiscoveryFacts, pruneSpecData } from "$scripts/gen-llms";
 
-import { EXAMPLES } from "$lib/examples";
+import { EXAMPLES } from "$lib/examples-manifest";
 import { indexExampleModulesById, requireExampleModule } from "$lib/example-module-index";
 import { docsBuildConfig } from "$lib/server/build-config";
 import { GUIDE_PAGES } from "$lib/guide";

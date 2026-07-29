@@ -3,7 +3,7 @@
 
   import CodeTabs from "$lib/CodeTabs.svelte";
   import { galleryCatalog } from "$lib/catalog/gallery";
-  import { EXAMPLES } from "$lib/examples";
+  import { EXAMPLES } from "$lib/examples-manifest";
   import { rankRelatedExamples } from "$lib/gallery-filter";
 
   import type { PageProps } from "./$types";

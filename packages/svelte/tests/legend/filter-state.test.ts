@@ -493,15 +493,21 @@ describe("LegendFilters component layout and pointer source", () => {
 
     const root = view.container.querySelector<HTMLElement>(".gg-plot-root")!;
     expect(root.classList.contains("gg-with-legend-filters")).toBe(true);
-    expect(getComputedStyle(root).marginBottom).toBe("106px");
+    // Clear sits to the right of the scene — must not stack a second bottom
+    // row or inflate margin-bottom past the filters-only reservation.
+    expect(getComputedStyle(root).marginBottom).toBe("58px");
 
     const fieldset = view.container.querySelector<HTMLElement>(".gg-legend-filters")!;
-    // Cross-component rewrite: below-clear class carries the old combined
-    // selector's `top: calc(100% + 52px)` (used value = scene height + 52).
-    expect(fieldset.classList.contains("gg-legend-filters-below-clear")).toBe(true);
-    // Used value of calc(100% + 52px) with scene height 260 → 312px
-    // (default without below-clear is calc(100% + 4px) → 264px).
-    expect(getComputedStyle(fieldset).top).toBe("312px");
+    // Clear is no longer below the chart, so filters stay on the first control row.
+    expect(fieldset.classList.contains("gg-legend-filters-below-clear")).toBe(false);
+    // Used value of calc(100% + 4px) with scene height 260 → 264px.
+    expect(getComputedStyle(fieldset).top).toBe("264px");
+
+    const clear = view.container.querySelector<HTMLElement>(".gg-legend-clear")!;
+    expect(clear).not.toBeNull();
+    // Top-right of the scene (width 360) — not below sceneHeight.
+    expect(clear.style.left).toBe("308px");
+    expect(clear.style.top).toBe("4px");
   });
 
   it("narrow container keeps existing max-width and overflow behavior", async () => {

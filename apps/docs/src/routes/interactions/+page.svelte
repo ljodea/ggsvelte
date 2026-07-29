@@ -3,7 +3,7 @@
 
   import { INTERACTION_EXPOSITION_IDS } from "$lib/catalog/interaction-exposition";
   import InteractionDemo from "$lib/components/InteractionDemo.svelte";
-  import { EXAMPLES } from "$lib/examples";
+  import { EXAMPLES } from "$lib/examples-manifest";
 
   const demos = INTERACTION_EXPOSITION_IDS.map((id) => {
     const entry = EXAMPLES.find((example) => example.id === id);

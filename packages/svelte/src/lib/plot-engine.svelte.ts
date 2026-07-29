@@ -611,9 +611,8 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     legendFocusState.computeLegendPressed(runtime.model),
   );
 
-  // Single source for "the legend clear row is shown": the root class and
-  // the filter fieldset's below-clear offset must flip together (the legend
-  // layout test pins their combined geometry).
+  // Signal that the legend clear control is visible (right of the scene).
+  // No longer couples to a bottom-row layout margin.
   const legendClearActive = $derived(legendFocusEnabled && effectiveLegendPressed !== null);
 
   // Host-side derived for catalog reconcile (closes over runtime.model).

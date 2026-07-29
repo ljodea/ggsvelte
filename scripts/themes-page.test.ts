@@ -15,6 +15,7 @@ import { TEMPERATURES_CHART } from "../apps/docs/src/lib/theme-specimens/tempera
 
 describe("themes catalog", () => {
   it("projects every public theme and categorical palette without docs-owned colors", () => {
+    // grey/gray alias ggplot2 (#824) — one picker row (ggplot2), not three.
     expect(THEME_OPTIONS.map(({ name, scheme }) => ({ name, scheme }))).toEqual([
       { name: "default", scheme: "observable10" },
       { name: "light", scheme: "tableau10" },
@@ -33,10 +34,10 @@ describe("themes catalog", () => {
       { name: "void", scheme: "colorblind" },
       { name: "solarized", scheme: "solarized" },
       { name: "solarizeddark", scheme: "solarized" },
-      { name: "grey", scheme: "observable10" },
-      { name: "gray", scheme: "observable10" },
       { name: "test", scheme: "colorblind" },
     ]);
+    expect(THEME_OPTIONS.map((theme) => theme.name)).not.toContain("grey");
+    expect(THEME_OPTIONS.map((theme) => theme.name)).not.toContain("gray");
 
     expect(CATEGORICAL_PALETTES).toEqual([
       {
@@ -301,13 +302,9 @@ describe("themes catalog", () => {
   });
 
   it("lists every non-alias theme as a full-width specimen with a real chart kind", () => {
-    // grey/gray are name aliases of ggplot2 (#824) — they stay in THEME_OPTIONS
-    // (picker/lab) but do not duplicate the ggplot2 portrait on /themes.
-    const specimenThemes = THEME_OPTIONS.filter(
-      (theme) => theme.name !== "grey" && theme.name !== "gray",
-    );
+    // THEME_OPTIONS already drops grey/gray aliases (#824) — specimens match 1:1.
     expect(THEME_SPECIMENS.map((specimen) => specimen.name)).toEqual(
-      specimenThemes.map((theme) => theme.name),
+      THEME_OPTIONS.map((theme) => theme.name),
     );
     for (const specimen of THEME_SPECIMENS) {
       expect(specimen.caption.length).toBeGreaterThan(12);

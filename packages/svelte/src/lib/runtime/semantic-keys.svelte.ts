@@ -9,8 +9,11 @@ import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
 import type { PortableSpec } from "@ggsvelte/spec";
 
 import type { InteractionDiagnostic } from "../interaction/interaction.js";
-import { rowIndexesForCandidate, uniqueKeysFromRowIndexes } from "../selection/selection.js";
-import { resolveSemanticKeysForPlot } from "./semantic-keys.js";
+import {
+  candidateSemanticKeysFromCache,
+  createCandidateKeysProjectionCache,
+  resolveSemanticKeysForPlot,
+} from "./semantic-keys.js";
 
 export type SemanticKeyServiceDeps = {
   model: () => RenderModel | null;
@@ -78,9 +81,10 @@ export function createSemanticKeyService(deps: SemanticKeyServiceDeps): Semantic
    * Interval, selection anchors, and interaction masks all used to re-walk
    * lineage independently (~3× O(C×L) per reactive turn). Entries fill lazily
    * on first lookup so single-candidate paths (point toggle) stay O(L); full
-   * store consumers still share one projection after the first walk. The Map
-   * is mutated after the derived produces it — intentional memoization, not
-   * reactive state. Fresh bag when model or row keys change.
+   * store consumers share one projection after the first walk. Smooth
+   * eval-grid marks that share a lineage expand membership once, not once
+   * per mark. Cache bags are mutated after the derived produces them —
+   * intentional memoization, not reactive state. Fresh bag when model/keys change.
    */
   const candidateKeysEpoch = $derived.by(() => {
     const model = deps.model();
@@ -89,19 +93,19 @@ export function createSemanticKeyService(deps: SemanticKeyServiceDeps): Semantic
     return {
       model,
       rowKeys,
-      cache: new Map<number, PropertyKey[]>(),
+      cache: createCandidateKeysProjectionCache(),
     };
   });
 
   function candidateSemanticKeys(candidate: CandidateFacts): PropertyKey[] {
     const { model, rowKeys, cache } = candidateKeysEpoch;
     if (model === null) return [];
-    const hit = cache.get(candidate.id);
-    if (hit !== undefined) return hit;
-    const rows = rowIndexesForCandidate(candidate, model.lineage.keys(candidate.lineage));
-    const keys = uniqueKeysFromRowIndexes(rows, (rowIndex) => rowKeys.get(rowIndex) ?? null);
-    cache.set(candidate.id, keys);
-    return keys;
+    return candidateSemanticKeysFromCache(
+      candidate,
+      cache,
+      (lineageId) => model.lineage.keys(lineageId),
+      (rowIndex) => rowKeys.get(rowIndex) ?? null,
+    );
   }
 
   return {

@@ -86,41 +86,38 @@ test("themes compares all built-in chart themes as full-width interactive portra
   }
 });
 
-test("chart theme stays separate until follow-docs appearance is explicit", async ({ page }) => {
+test("chart theme lab picks theme and palette without alias or chrome clutter", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/themes?theme=light");
 
   const lab = page.getByRole("region", { name: "Chart theme and palette lab" });
   const chartTheme = lab.getByLabel("Chart theme", { exact: true });
   const palette = lab.getByLabel("Categorical palette", { exact: true });
-  const follow = lab.getByRole("checkbox", { name: "Follow docs appearance" });
   const plot = lab.locator(".gg-plot-root");
   await expect(plot).toHaveAttribute("data-gg-ready", "true", { timeout: 30_000 });
   const chartPaper = () => plot.locator(".gg-paper").getAttribute("fill");
 
+  // No grey/gray alias rows (both map to ggplot2) and no follow-docs checkbox
+  // or theme=/scheme= status echo that only restates the selects.
+  const themeLabels = await chartTheme.locator("option").allTextContents();
+  expect(themeLabels.filter((label) => /^Gre[ya]y$/i.test(label))).toHaveLength(0);
+  await expect(lab.getByRole("checkbox", { name: "Follow docs appearance" })).toHaveCount(0);
+  await expect(lab.getByRole("status")).toHaveCount(0);
+  await expect(lab.getByText(/theme="/)).toHaveCount(0);
+  await expect(lab.getByText(/scheme="/)).toHaveCount(0);
+
   await chartTheme.selectOption("economist");
-  await expect(lab.getByRole("status")).toContainText('theme="economist"');
   await expect.poll(chartPaper).toBe("var(--gg-paper, #d5e4eb)");
   // Palette is independent of theme.
   await palette.selectOption("tableau10");
-  await expect(lab.getByRole("status")).toContainText('scheme="tableau10"');
-  await expect(lab.getByRole("status")).toContainText('theme="economist"');
+  await expect(palette).toHaveValue("tableau10");
+  await expect(chartTheme).toHaveValue("economist");
 
+  // Site appearance must not hijack the chart theme.
   await page.getByRole("button", { name: "Dark appearance" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect.poll(chartPaper).toBe("var(--gg-paper, #d5e4eb)");
-
-  await follow.check();
-  await expect(lab.getByRole("status").filter({ hasText: "follows site" })).toContainText(
-    'scheme="tableau10"',
-  );
-  await expect.poll(chartPaper).toBe("var(--gg-paper, #16181d)");
-  await page.getByRole("button", { name: "Light appearance" }).click();
-  await expect.poll(chartPaper).toBe("var(--gg-paper, #ffffff)");
-
-  await follow.uncheck();
-  await expect(chartTheme).toHaveValue("economist");
-  await expect(palette).toHaveValue("tableau10");
   await expect.poll(chartPaper).toBe("var(--gg-paper, #d5e4eb)");
 });
 
