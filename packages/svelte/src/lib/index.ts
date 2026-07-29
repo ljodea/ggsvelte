@@ -219,7 +219,6 @@ export { default as ThemeTufte } from "./theme/ThemeTufte.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeLinedraw } from "./theme/ThemeLinedraw.svelte";
 /** @lifecycle stable-intent */
-/** @lifecycle stable-intent */
 export { default as ThemeVoid } from "./theme/ThemeVoid.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeSolarized } from "./theme/ThemeSolarized.svelte";
@@ -231,6 +230,7 @@ export { default as ThemeEconomistwhite } from "./theme/ThemeEconomistwhite.svel
 export { default as ThemeSolarized2 } from "./theme/ThemeSolarized2.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeSolarized2dark } from "./theme/ThemeSolarized2dark.svelte";
+/** @lifecycle stable-intent */
 export { default as ThemeGrey } from "./theme/ThemeGrey.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeGray } from "./theme/ThemeGray.svelte";

@@ -6503,7 +6503,7 @@
         },
         "ThemeGrey": {
           "kind": "value",
-          "lifecycle": "experimental"
+          "lifecycle": "stable-intent"
         },
         "ThemeHrbr": {
           "kind": "value",
