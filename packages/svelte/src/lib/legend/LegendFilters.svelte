@@ -15,12 +15,9 @@
   const {
     controller,
     entries,
-    /** When legend-focus clear is also active, fieldset sits on a second row. */
-    belowClearFocus = false,
   }: {
     controller: LegendFilterState;
     entries: readonly FilterableLegendEntry[];
-    belowClearFocus?: boolean;
   } = $props();
 
   let fieldsetEl = $state<HTMLFieldSetElement | null>(null);
@@ -39,11 +36,7 @@
 </script>
 
 {#if entries.length > 0}
-  <fieldset
-    class="gg-legend-filters"
-    class:gg-legend-filters-below-clear={belowClearFocus}
-    bind:this={fieldsetEl}
-  >
+  <fieldset class="gg-legend-filters" bind:this={fieldsetEl}>
     <legend>Filter legend</legend>
     {#each entries as target (`${target.legend.scale}:${target.field}:${encodeKey(target.entry.value)}`)}
       <label>
@@ -89,13 +82,6 @@
     color: var(--gg-ink, var(--gg-theme-ink, currentColor));
     font: 11px/1.2 var(--gg-font-family, sans-serif);
     pointer-events: auto;
-  }
-
-  /* Parent root also has clear-focus: fieldset drops to the second control
-     row so labels never cover the clear button (was a combined parent/child
-     selector on GGPlot; prop variant keeps the rule child-scoped). */
-  .gg-legend-filters-below-clear {
-    top: calc(100% + 52px);
   }
 
   .gg-legend-filters legend {

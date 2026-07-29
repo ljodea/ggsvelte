@@ -3,11 +3,6 @@
   import { onMount } from "svelte";
 
   import { CATEGORICAL_PALETTES, THEME_OPTIONS } from "$lib/catalog/themes";
-  import {
-    readDocsAppearance,
-    watchDocsAppearance,
-    type DocsAppearance,
-  } from "$lib/docs-appearance";
 
   type SchemeName = (typeof CATEGORICAL_PALETTES)[number]["name"];
 
@@ -18,41 +13,16 @@
     initialStaticSvg: string;
   } = $props();
 
-  let explicitTheme = $state<ThemeName>("default");
+  let theme = $state<ThemeName>("default");
   let scheme = $state<SchemeName>("observable10");
-  let followDocs = $state(false);
-  let siteAppearance = $state<DocsAppearance>("light");
   let LiveTemps = $state<
     typeof import("./TemperaturesSpecimen.svelte").default | null
   >(null);
-
-  const resolvedTheme = $derived<ThemeName>(
-    followDocs ? siteAppearance : explicitTheme,
-  );
-
-  const statusText = $derived(
-    followDocs
-      ? `theme follows site appearance (${siteAppearance}) · scheme="${scheme}" remains yours`
-      : `theme="${resolvedTheme}" · scheme="${scheme}"`,
-  );
-
-  function syncSiteAppearance(): void {
-    siteAppearance = readDocsAppearance();
-  }
-
-  function changeFollow(event: Event): void {
-    followDocs = (event.currentTarget as HTMLInputElement).checked;
-    if (followDocs) syncSiteAppearance();
-  }
 
   onMount(() => {
     // Above-fold lab: static SVG first, then upgrade to interactive once.
     void import("./TemperaturesSpecimen.svelte").then((mod) => {
       LiveTemps = mod.default;
-    });
-    syncSiteAppearance();
-    return watchDocsAppearance((appearance) => {
-      if (followDocs) siteAppearance = appearance;
     });
   });
 </script>
@@ -61,11 +31,11 @@
   <div class="plot-panel">
     {#if LiveTemps !== null}
       <LiveTemps
-        theme={resolvedTheme}
+        {theme}
         {scheme}
         height={400}
         legendFocus={true}
-        ariaLabel={`${resolvedTheme} theme with ${scheme} palette`}
+        ariaLabel={`${theme} theme with ${scheme} palette`}
       />
     {:else}
       {@html initialStaticSvg}
@@ -75,9 +45,9 @@
   <div class="controls">
     <div class="select-control">
       <label for="chart-theme">Chart theme</label>
-      <select id="chart-theme" bind:value={explicitTheme} disabled={followDocs}>
-        {#each THEME_OPTIONS as theme (theme.name)}
-          <option value={theme.name}>{theme.label}</option>
+      <select id="chart-theme" bind:value={theme}>
+        {#each THEME_OPTIONS as option (option.name)}
+          <option value={option.name}>{option.label}</option>
         {/each}
       </select>
     </div>
@@ -89,13 +59,7 @@
         {/each}
       </select>
     </div>
-    <label class="follow-control">
-      <input type="checkbox" checked={followDocs} onchange={changeFollow} />
-      <span>Follow docs appearance</span>
-    </label>
   </div>
-
-  <p class="resolved" role="status">{statusText}</p>
 </section>
 
 <style>
@@ -142,33 +106,5 @@
     background: var(--paper);
     color: var(--ink);
     font: inherit;
-  }
-
-  select:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-  }
-
-  .follow-control {
-    display: flex;
-    gap: 0.65rem;
-    align-items: center;
-    min-height: 44px;
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-
-  .follow-control input {
-    width: 1.15rem;
-    height: 1.15rem;
-  }
-
-  .resolved {
-    min-height: 1.5rem;
-    margin: 0;
-    width: min(100%, 52rem);
-    color: var(--muted);
-    font-size: 0.82rem;
-    font-family: var(--code-font);
   }
 </style>

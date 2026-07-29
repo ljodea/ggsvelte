@@ -471,10 +471,17 @@ describe("chart-local legend focus", () => {
       .dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
     await until(() => container.querySelector(".gg-legend-clear") !== null);
 
+    const root = container.querySelector<HTMLElement>(".gg-plot-root")!;
     const clear = container.querySelector<HTMLButtonElement>(".gg-legend-clear")!;
     const clearBounds = clear.getBoundingClientRect();
+    const rootBounds = root.getBoundingClientRect();
     expect(clearBounds.width).toBeGreaterThanOrEqual(44);
     expect(clearBounds.height).toBeGreaterThanOrEqual(44);
+    // Top-right of the scene — not below it (no bottom-row layout jump).
+    expect(clearBounds.left).toBeGreaterThanOrEqual(rootBounds.left + 420 - 52 - 1);
+    expect(clearBounds.top).toBeGreaterThanOrEqual(rootBounds.top - 1);
+    expect(clearBounds.bottom).toBeLessThan(rootBounds.top + 80);
+    expect(getComputedStyle(root).marginBottom).toBe("0px");
     const protectedElements = container.querySelectorAll<SVGGraphicsElement | HTMLButtonElement>(
       ".gg-legend, .gg-title, .gg-subtitle, .gg-legend-target",
     );
