@@ -33,7 +33,7 @@ const HOME_CODE_PATH_SVELTE = `<script lang="ts">
   height={400}
 >
   <Labs x="Flipper length mm" y="Body mass g" color="species" />
-  <GeomJitter alpha={0.55} />
+  <GeomJitter alpha={0.88} />
   <GeomSmooth method="loess" span={0.75} degree={1} se={false} />
 </GGPlot>
 `;
@@ -48,7 +48,7 @@ const HOME_CODE_PATH_BUILDER = `<script lang="ts">
     palmerPenguins,
     aes({ x: "flipperLengthMm", y: "bodyMassG", color: "species" }),
   )
-    .geomJitter({ alpha: 0.55 })
+    .geomJitter({ alpha: 0.88 })
     .geomSmooth({ method: "loess", span: 0.75, degree: 1, se: false })
     .labs({ x: "Flipper length mm", y: "Body mass g", color: "species" })
     .spec();
@@ -87,7 +87,7 @@ const HOME_CODE_PATH_SPEC_JSON = `{
           "y": { "field": "bodyMassG" },
           "color": { "field": "species" }
         },
-        "params": { "alpha": 0.55 }
+        "params": { "alpha": 0.88 }
       },
       {
         "geom": "smooth",

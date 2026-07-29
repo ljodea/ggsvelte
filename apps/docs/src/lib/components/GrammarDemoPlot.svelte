@@ -50,7 +50,7 @@
 >
   <Theme name={chartTheme} />
   <Labs x="Flipper length mm" y="Body mass g" color="species" />
-  <GeomJitter alpha={0.55} />
+  <GeomJitter alpha={0.88} />
   {#if active >= 2}
     <GeomSmooth method="loess" span={0.75} degree={1} se={false} />
   {/if}
