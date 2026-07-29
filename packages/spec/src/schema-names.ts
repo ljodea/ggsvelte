@@ -27,6 +27,11 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "flexoki",
   "tableau10",
   "colorblind",
+  // ggthemes ports (#1159): Google Docs + Highcharts + pander
+  "gdocs",
+  "hc",
+  "hc_dark",
+  "pander",
   // ColorBrewer qualitative (#825)
   "Set1",
   "Set2",
@@ -129,6 +134,11 @@ export const THEME_NAMES = [
   "tufte",
   "linedraw",
   "void",
+  // ggthemes theme ports (#1158)
+  "gdocs",
+  "hc",
+  "hcdark",
+  "pander",
   "grey",
   "gray",
   // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters

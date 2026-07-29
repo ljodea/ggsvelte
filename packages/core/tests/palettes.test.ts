@@ -9,7 +9,11 @@ import {
   CATEGORICAL_SCHEMES,
   COLORBLIND_PALETTE,
   FLEXOKI_PALETTE,
+  GDOCS_PALETTE,
+  HC_DARK_PALETTE,
+  HC_PALETTE,
   IPSUM_PALETTE,
+  PANDER_PALETTE,
   TABLEAU10_PALETTE,
 } from "../src/scales/train.ts";
 import {
@@ -17,7 +21,11 @@ import {
   CATEGORICAL_SCHEMES as SCHEMES_DIRECT,
   COLORBLIND_PALETTE as COLORBLIND_DIRECT,
   FLEXOKI_PALETTE as FLEXOKI_DIRECT,
+  GDOCS_PALETTE as GDOCS_DIRECT,
+  HC_DARK_PALETTE as HC_DARK_DIRECT,
+  HC_PALETTE as HC_DIRECT,
   IPSUM_PALETTE as IPSUM_DIRECT,
+  PANDER_PALETTE as PANDER_DIRECT,
   TABLEAU10_PALETTE as TABLEAU10_DIRECT,
 } from "../src/scales/categorical-palettes.ts";
 
@@ -26,6 +34,10 @@ const PALETTES = {
   flexoki: FLEXOKI_PALETTE,
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
+  gdocs: GDOCS_PALETTE,
+  hc: HC_PALETTE,
+  hc_dark: HC_DARK_PALETTE,
+  pander: PANDER_PALETTE,
 } as const;
 
 describe("train.ts palette re-export identity", () => {
@@ -35,7 +47,11 @@ describe("train.ts palette re-export identity", () => {
     expect(CATEGORICAL_SCHEMES.observable10).toBe(CATEGORICAL_PALETTE_10);
     expect(COLORBLIND_PALETTE).toBe(COLORBLIND_DIRECT);
     expect(FLEXOKI_PALETTE).toBe(FLEXOKI_DIRECT);
+    expect(GDOCS_PALETTE).toBe(GDOCS_DIRECT);
+    expect(HC_DARK_PALETTE).toBe(HC_DARK_DIRECT);
+    expect(HC_PALETTE).toBe(HC_DIRECT);
     expect(IPSUM_PALETTE).toBe(IPSUM_DIRECT);
+    expect(PANDER_PALETTE).toBe(PANDER_DIRECT);
     expect(TABLEAU10_PALETTE).toBe(TABLEAU10_DIRECT);
   });
 });

@@ -3875,6 +3875,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GDOCS_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeometryBatch": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3889,6 +3893,14 @@
         },
         "GuidePlan": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "HC_DARK_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "HC_PALETTE": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "INFERNO_RAMP_10": {
@@ -3997,6 +4009,10 @@
         },
         "OrdinalColorConfig": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PANDER_PALETTE": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "PANEL_SPACING": {
@@ -6457,6 +6473,10 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ThemeGdocs": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ThemeGgplot2": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -6466,6 +6486,14 @@
           "lifecycle": "stable-intent"
         },
         "ThemeGrey": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeHc": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeHcdark": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -6488,6 +6516,10 @@
         "ThemeName": {
           "kind": "type",
           "lifecycle": "experimental"
+        },
+        "ThemePander": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
         },
         "ThemeSpec": {
           "kind": "type",

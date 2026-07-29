@@ -32,13 +32,18 @@ optional `"name"` base plus role overrides, e.g.
 | tufte                   | monochrome ink, no grid                                                    |
 | linedraw                | black-on-white line art: hairline black grid, black border                 |
 | void                    | no axes, grid, or panel chrome; marks and legends remain                   |
+| gdocs                   | Google Docs: black x line, no ticks, light-gray grid, plain 20px title     |
+| hc                      | Highcharts default: y-only #D8D8D8 grid on white, no border                |
+| hcdark                  | Highcharts darkunica: #2a2a2b paper, #707073 y-grid                        |
+| pander                  | pander: dashed grey grid and ticks, bold title on white                    |
 | grey (alias of ggplot2) | UK theme_grey                                                              |
 | gray (alias of ggplot2) | US theme_gray                                                              |
 
 Svelte: one named shell per product theme — `ThemeDefault`, `ThemeLight`,
 `ThemeDark`, `ThemeMinimal`, `ThemeGgplot2`, `ThemeClassic`, `ThemeBw`,
 `ThemeHrbr`, `ThemeFew`, `ThemeClean`, `ThemeFivethirtyeight`,
-`ThemeEconomist`, `ThemeTufte`, `ThemeLinedraw`, `ThemeVoid`, `ThemeGrey`,
+`ThemeEconomist`, `ThemeTufte`, `ThemeLinedraw`, `ThemeVoid`, `ThemeGdocs`,
+`ThemeHc`, `ThemeHcdark`, `ThemePander`, `ThemeGrey`,
 `ThemeGray`. Escape hatch `<Theme name={dynamicName} />` for reactive names.
 Every shell and `<Theme>` also accepts role-override props (`ink`, `paper`,
 `accent`, `grid`, `panel`, `axisText`, `axisLine`, `tickColor`,

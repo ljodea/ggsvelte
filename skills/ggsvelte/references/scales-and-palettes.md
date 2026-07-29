@@ -159,7 +159,7 @@ byte-identity-preserving: `value` is not routed through any helper.
 
 ## Palettes
 
-### Categorical schemes (14)
+### Categorical schemes (18)
 
 | Scheme               | Description                                                       |
 | -------------------- | ----------------------------------------------------------------- |
@@ -168,6 +168,10 @@ byte-identity-preserving: `value` is not routed through any helper.
 | flexoki              | Flexoki light-background qualitative palette                      |
 | tableau10            | Tableau 10 qualitative palette                                    |
 | colorblind           | ggthemes 8-color colorblind-safe palette                          |
+| gdocs                | ggthemes Google Docs colors (6 hues × 4 strengths, verbatim)      |
+| hc                   | ggthemes Highcharts default 10 colors                             |
+| hc_dark              | ggthemes Highcharts darkunica 11 colors                           |
+| pander               | ggthemes pander colorblind/printer-friendly 8 (Okabe-Ito order)   |
 | Set1                 | ColorBrewer qualitative, saturated primaries                      |
 | Set2                 | ColorBrewer qualitative, muted pastels                            |
 | Set3                 | ColorBrewer qualitative, light 12-class                           |

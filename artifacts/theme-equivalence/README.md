@@ -2,7 +2,7 @@
 
 This board compares R and ggsvelte renders using the same data, explicit domains, explicit breaks, explicit colors, 720×480 logical viewport, and 1440×960 output. R uses Cairo at 192 dpi. ggsvelte uses Chromium at device scale factor 2 with its bundled Roboto Condensed faces loaded and verified through `document.fonts.check()`.
 
-Open [index.html](./index.html) for all 12 registered ggsvelte themes and the three side-by-side structural references. Raw structural measurements are in [r-metrics.json](./r-metrics.json) and [ggsvelte-metrics.json](./ggsvelte-metrics.json).
+Open [index.html](./index.html) for all 20 registered ggsvelte themes and the three side-by-side structural references. Raw structural measurements are in [r-metrics.json](./r-metrics.json) and [ggsvelte-metrics.json](./ggsvelte-metrics.json).
 
 ## Structural parity
 
@@ -31,6 +31,10 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - hrbrthemes Flexoki Light: `#D14D41 #DA702C #D0A215 #879A39 #3AA99F #4385BE #8B7EC8 #CE5D97`
 - ggthemes Tableau 10: `#4E79A7 #F28E2B #E15759 #76B7B2 #59A14F #EDC948 #B07AA1 #FF9DA7 #9C755F #BAB0AC`
 - ggthemes colorblind: `#000000 #E69F00 #56B4E9 #009E73 #F0E442 #0072B2 #D55E00 #CC79A7`
+- ggthemes gdocs: `#4285f4 #ea4335 #fbbc04 #34a853 #ff6d01 #46bdc6 #7baaf7 #f07b72 #fcd04f #71c287 #ff994d #ff994d #b3cefb #f7b4ae #fde49b #aedcba #ffc599 #c9e4e7 #ecf3fe #fdeceb #fff8e6 #ebf6ee #fff0e6 #edf8f9`
+- ggthemes hc (default): `#7cb5ec #434348 #90ed7d #f7a35c #8085e9 #f15c80 #e4d354 #8085e8 #8d4653 #91e8e1`
+- ggthemes hc_dark (darkunica): `#2b908f #90ee7e #f45b5b #7798BF #aaeeee #ff0066 #eeaaee #55BF3B #DF5353 #7798BF #aaeeee`
+- ggthemes pander: `#56B4E9 #009E73 #F0E442 #0072B2 #D55E00 #CC79A7 #999999 #E69F00`
 
 ## Sources
 
@@ -38,7 +42,7 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - hrbrthemes Roboto Condensed: `/Users/liamodea/Code/hrbrthemes/R/roboto-condensed.r`
 - hrbrthemes palettes: `/Users/liamodea/Code/hrbrthemes/R/color.r` and `R/flexoki.R`
 - ggthemes Few: `/Users/liamodea/Code/ggthemes/R/few.R`
-- ggthemes palettes: `/Users/liamodea/Code/ggthemes/data-raw/theme-data/tableau.yml` and `colorblind.yml`
+- ggthemes palettes: `/Users/liamodea/Code/ggthemes/data-raw/theme-data/tableau.yml`, `colorblind.yml`, `gdocs.yml`, and `hc.yml`; pander palette in `/Users/liamodea/Code/ggthemes/R/pander.R`
 
 Reproduce everything with:
 

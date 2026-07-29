@@ -221,6 +221,14 @@ export { default as ThemeLinedraw } from "./theme/ThemeLinedraw.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeVoid } from "./theme/ThemeVoid.svelte";
 /** @lifecycle stable-intent */
+export { default as ThemeGdocs } from "./theme/ThemeGdocs.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeHc } from "./theme/ThemeHc.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeHcdark } from "./theme/ThemeHcdark.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemePander } from "./theme/ThemePander.svelte";
+/** @lifecycle stable-intent */
 export { default as ThemeGrey } from "./theme/ThemeGrey.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeGray } from "./theme/ThemeGray.svelte";

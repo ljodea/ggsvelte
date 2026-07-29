@@ -464,6 +464,110 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     showPanelBorder: false,
     tickLength: 0,
   }),
+  // ggthemes theme_gdocs: Google Docs chart defaults — white panel, #cccccc
+  // major grid both directions (minor blank), black x-only axis line, no
+  // ticks, #757575 text, plain 20px left-aligned title. Accent is Google
+  // blue, the first gdocs palette color.
+  gdocs: themed({
+    ink: "#757575",
+    paper: "#ffffff",
+    panel: "#ffffff",
+    accent: "#4285f4",
+    grid: "#cccccc",
+    axisText: "#757575",
+    axisLine: "#000000",
+    tickColor: "#000000",
+    fontSize: 12,
+    axisTextSize: 12,
+    fontWeight: 400,
+    titleSize: 20,
+    titleWeight: 400,
+    subtitleSize: 12,
+    subtitleWeight: 400,
+    axisTitleSize: 12,
+    axisLineWidth: 0.5,
+    gridWidth: 0.5,
+    axisLineX: true,
+    ticksX: false,
+    ticksY: false,
+  }),
+  // ggthemes theme_hc(style = "default"): Highcharts defaults — #D8D8D8
+  // y-only major grid, no panel border (panel background blank over white
+  // rect), theme_grey-lineage ticks and axis text. Accent is the first
+  // Highcharts default color.
+  hc: themed({
+    ink: "#000000",
+    paper: "#ffffff",
+    panel: "#ffffff",
+    accent: "#7cb5ec",
+    grid: "#D8D8D8",
+    axisText: "#4d4d4d",
+    tickColor: "#333333",
+    fontSize: 12,
+    axisTextSize: 9.6,
+    fontWeight: 400,
+    titleSize: 14.4,
+    subtitleSize: 12,
+    axisTitleSize: 12,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.5,
+    ticksX: true,
+    ticksY: true,
+    gridX: false,
+  }),
+  // ggthemes theme_hc(style = "darkunica"): Highcharts dark theme — #2a2a2b
+  // paper, #707073 y-grid, #A0A0A3 text. R leaves axis.text at theme_grey's
+  // dark grey (dark-on-dark); this port uses the style's text colour for
+  // axis text and ticks (documented deviation). R's white title step
+  // flattens into the single ink role, as with the other ports.
+  hcdark: themed({
+    ink: "#A0A0A3",
+    paper: "#2a2a2b",
+    panel: "#2a2a2b",
+    accent: "#2b908f",
+    grid: "#707073",
+    axisText: "#A0A0A3",
+    tickColor: "#A0A0A3",
+    fontSize: 12,
+    axisTextSize: 9.6,
+    fontWeight: 400,
+    titleSize: 14.4,
+    subtitleSize: 12,
+    axisTitleSize: 12,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.5,
+    ticksX: true,
+    ticksY: true,
+    gridX: false,
+  }),
+  // ggthemes theme_pander() with its defaults (fc black, gc grey, gl dashed,
+  // boxes FALSE): white panel (pc "transparent" over white), dashed #bebebe
+  // grid both directions (R "grey" is #BEBEBE), grey ticks, bold 14.4 title,
+  // no visible panel border. Accent is the first pander palette color.
+  pander: themed({
+    ink: "#000000",
+    paper: "#ffffff",
+    panel: "#ffffff",
+    accent: "#56B4E9",
+    grid: "#bebebe",
+    axisText: "#000000",
+    tickColor: "#bebebe",
+    fontSize: 12,
+    axisTextSize: 9.6,
+    fontWeight: 400,
+    titleSize: 14.4,
+    titleWeight: 700,
+    subtitleSize: 12,
+    axisTitleSize: 12,
+    tickWidth: 0.25,
+    tickLength: 3.67,
+    gridWidth: 0.25,
+    gridDasharray: "3 3",
+    ticksX: true,
+    ticksY: true,
+  }),
   // theme_test (#823): pinned high-contrast chrome for package tests / VR.
   // Explicit literals — not an alias of light/classic — so product sweeps
   // cannot retarget snapshot chrome. Stability over brand aesthetics.

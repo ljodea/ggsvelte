@@ -25,6 +25,10 @@ const THEME_LABELS = {
   tufte: "Tufte",
   linedraw: "Linedraw",
   void: "Void",
+  gdocs: "Google Docs",
+  hc: "Highcharts",
+  hcdark: "Highcharts Dark",
+  pander: "Pander",
   test: "Test",
 } as const satisfies Record<ThemeOptionName, string>;
 
@@ -34,6 +38,10 @@ const PALETTE_LABELS = {
   flexoki: "Flexoki",
   tableau10: "Tableau 10",
   colorblind: "Colorblind",
+  gdocs: "Google Docs",
+  hc: "Highcharts",
+  hc_dark: "Highcharts Dark",
+  pander: "Pander",
   hue: "Hue",
   grey: "Grey",
   gray: "Gray",
@@ -63,6 +71,10 @@ const THEME_DEMO_SCHEMES = {
   tufte: "colorblind",
   linedraw: "colorblind",
   void: "colorblind",
+  gdocs: "gdocs",
+  hc: "hc",
+  hcdark: "hc_dark",
+  pander: "pander",
   test: "colorblind",
 } as const satisfies Record<ThemeOptionName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
 
