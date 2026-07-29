@@ -6087,6 +6087,62 @@
                 },
                 {
                   "type": "string",
+                  "const": "tableau20"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_colorblind"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seattle_grays"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_traffic"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_miller_stone"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_superfishel_stone"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_nuriel_stone"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_jewel_bright"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_summer"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_winter"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_green_orange_teal"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_red_blue_brown"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_purple_pink_gray"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_hue_circle"
+                },
+                {
+                  "type": "string",
                   "const": "Set1"
                 },
                 {
