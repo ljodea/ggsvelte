@@ -1,7 +1,7 @@
 ---
-"@ggsvelte/core": patch
-"@ggsvelte/spec": patch
-"@ggsvelte/svelte": patch
+"@ggsvelte/core": minor
+"@ggsvelte/spec": minor
+"@ggsvelte/svelte": minor
 ---
 
 <!-- markdownlint-disable MD041 -->
@@ -24,4 +24,4 @@ and `theme_solid()`. (This family ships no palettes in ggthemes.)
 - Svelte shells `ThemeBase`, `ThemeIgray`, `ThemeMap`, `ThemeSolid`; docs
   `/themes` gains the four portraits.
 
-Migration: none — additive theme names only.
+Migration: none — additive
