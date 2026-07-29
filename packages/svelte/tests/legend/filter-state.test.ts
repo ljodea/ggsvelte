@@ -505,9 +505,16 @@ describe("LegendFilters component layout and pointer source", () => {
 
     const clear = view.container.querySelector<HTMLElement>(".gg-legend-clear")!;
     expect(clear).not.toBeNull();
-    // Top-right of the scene (width 360) — not below sceneHeight.
-    expect(clear.style.left).toBe("308px");
-    expect(clear.style.top).toBe("4px");
+    // Legend-relative: under the pressed guide, still inside the scene
+    // (not the old top-right park and not a second bottom row).
+    const clearTop = Number(clear.style.top.replace("px", ""));
+    const clearLeft = Number(clear.style.left.replace("px", ""));
+    expect(clearTop).toBeGreaterThan(4);
+    expect(clearTop).toBeLessThan(260);
+    expect(clearLeft).toBeGreaterThanOrEqual(4);
+    expect(clearLeft).toBeLessThan(360);
+    expect(clear.style.top).not.toBe("4px");
+    expect(clear.style.left).not.toBe("308px");
   });
 
   it("narrow container keeps existing max-width and overflow behavior", async () => {

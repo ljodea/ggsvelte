@@ -92,9 +92,9 @@ describe("LegendTargets", () => {
     });
     const clear = container.querySelector<HTMLButtonElement>(".gg-legend-clear")!;
     const style = getComputedStyle(clear);
-    expect(parseFloat(style.minHeight)).toBeLessThanOrEqual(24);
-    expect(parseFloat(style.height)).toBeLessThanOrEqual(28);
-    expect(parseFloat(style.minWidth)).toBeLessThanOrEqual(24);
+    expect(Number(style.minHeight.replace("px", ""))).toBeLessThanOrEqual(24);
+    expect(Number(style.height.replace("px", ""))).toBeLessThanOrEqual(28);
+    expect(Number(style.minWidth.replace("px", ""))).toBeLessThanOrEqual(24);
   });
 
   it("honors kebab-case tooltip background/foreground aliases on clear control", () => {
