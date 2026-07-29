@@ -113,6 +113,10 @@ export {
   WSJ_PALETTE,
   WSJ_RED_GREEN_PALETTE,
   WSJ_RGBY_PALETTE,
+  GDOCS_PALETTE,
+  HC_DARK_PALETTE,
+  HC_PALETTE,
+  PANDER_PALETTE,
 } from "./scales/train.js";
 export type {
   BandConfig,

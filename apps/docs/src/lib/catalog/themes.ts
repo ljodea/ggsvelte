@@ -31,6 +31,10 @@ const THEME_LABELS = {
   solarized_2: "Solarized 2",
   solarized_2dark: "Solarized 2 Dark",
   wsj: "WSJ",
+  gdocs: "Google Docs",
+  hc: "Highcharts",
+  hcdark: "Highcharts Dark",
+  pander: "Pander",
   test: "Test",
 } as const satisfies Record<ThemeOptionName, string>;
 
@@ -67,6 +71,10 @@ const PALETTE_LABELS = {
   tableau_red_blue_brown: "Red/Blue/Brown",
   tableau_purple_pink_gray: "Purple/Pink/Gray",
   tableau_hue_circle: "Hue Circle",
+  gdocs: "Google Docs",
+  hc: "Highcharts",
+  hc_dark: "Highcharts Dark",
+  pander: "Pander",
   hue: "Hue",
   grey: "Grey",
   gray: "Gray",
@@ -102,6 +110,10 @@ const THEME_DEMO_SCHEMES = {
   solarized_2: "tableau10",
   solarized_2dark: "tableau10",
   wsj: "wsj",
+  gdocs: "gdocs",
+  hc: "hc",
+  hcdark: "hc_dark",
+  pander: "pander",
   test: "colorblind",
 } as const satisfies Record<ThemeOptionName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
 

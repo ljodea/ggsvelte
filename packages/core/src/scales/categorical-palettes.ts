@@ -427,6 +427,84 @@ export const WSJ_BLACK_GREEN_PALETTE: readonly string[] = [
 /** ggthemes wsj_pal("dem_rep") — Democrat/Republican/Undecided. */
 export const WSJ_DEM_REP_PALETTE: readonly string[] = ["#006a8e", "#b1283a", "#a8a6a7"];
 
+/**
+ * ggthemes gdocs_pal() — Google Docs chart colors: the six brand hues in
+ * four decreasing strengths. Copied verbatim from the upstream YAML,
+ * including its duplicated "teal 2" entry (#ff994d); the doc comment
+ * upstream claims 20 colors but the table holds 24.
+ */
+export const GDOCS_PALETTE: readonly string[] = [
+  "#4285f4",
+  "#ea4335",
+  "#fbbc04",
+  "#34a853",
+  "#ff6d01",
+  "#46bdc6",
+  "#7baaf7",
+  "#f07b72",
+  "#fcd04f",
+  "#71c287",
+  "#ff994d",
+  "#ff994d",
+  "#b3cefb",
+  "#f7b4ae",
+  "#fde49b",
+  "#aedcba",
+  "#ffc599",
+  "#c9e4e7",
+  "#ecf3fe",
+  "#fdeceb",
+  "#fff8e6",
+  "#ebf6ee",
+  "#fff0e6",
+  "#edf8f9",
+];
+
+/** ggthemes hc_pal("default") — Highcharts default 10 colors. */
+export const HC_PALETTE: readonly string[] = [
+  "#7cb5ec",
+  "#434348",
+  "#90ed7d",
+  "#f7a35c",
+  "#8085e9",
+  "#f15c80",
+  "#e4d354",
+  "#8085e8",
+  "#8d4653",
+  "#91e8e1",
+];
+
+/** ggthemes hc_pal("darkunica") — Highcharts dark-unica 11 colors (verbatim, with its trailing repeats). */
+export const HC_DARK_PALETTE: readonly string[] = [
+  "#2b908f",
+  "#90ee7e",
+  "#f45b5b",
+  "#7798BF",
+  "#aaeeee",
+  "#ff0066",
+  "#eeaaee",
+  "#55BF3B",
+  "#DF5353",
+  "#7798BF",
+  "#aaeeee",
+];
+
+/**
+ * ggthemes palette_pander() — the pander package's colorblind- and
+ * printer-friendly eight (borrowed from jfly.iam.u-tokyo.ac.jp/color):
+ * the Okabe-Ito hues in pander's order, with #999999 in place of black.
+ */
+export const PANDER_PALETTE: readonly string[] = [
+  "#56B4E9",
+  "#009E73",
+  "#F0E442",
+  "#0072B2",
+  "#D55E00",
+  "#CC79A7",
+  "#999999",
+  "#E69F00",
+];
+
 /** Named categorical schemes accepted by the portable spec. */
 export const CATEGORICAL_SCHEMES = {
   observable10: CATEGORICAL_PALETTE_10,
@@ -461,6 +539,10 @@ export const CATEGORICAL_SCHEMES = {
   tableau_red_blue_brown: TABLEAU_RED_BLUE_BROWN_PALETTE,
   tableau_purple_pink_gray: TABLEAU_PURPLE_PINK_GRAY_PALETTE,
   tableau_hue_circle: TABLEAU_HUE_CIRCLE_PALETTE,
+  gdocs: GDOCS_PALETTE,
+  hc: HC_PALETTE,
+  hc_dark: HC_DARK_PALETTE,
+  pander: PANDER_PALETTE,
   ...COLORBREWER_QUALITATIVE,
   hue: HUE_PALETTE_10,
   grey: GREY_PALETTE_10,

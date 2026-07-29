@@ -61,6 +61,11 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "tableau_red_blue_brown",
   "tableau_purple_pink_gray",
   "tableau_hue_circle",
+  // ggthemes ports (#1159): Google Docs + Highcharts + pander
+  "gdocs",
+  "hc",
+  "hc_dark",
+  "pander",
   // ColorBrewer qualitative (#825)
   "Set1",
   "Set2",
@@ -172,6 +177,10 @@ export const THEME_NAMES = [
   "solarized_2dark",
   /** ggthemes theme_wsj (Wall Street Journal). */
   "wsj",
+  "gdocs",
+  "hc",
+  "hcdark",
+  "pander",
   "grey",
   "gray",
   // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters

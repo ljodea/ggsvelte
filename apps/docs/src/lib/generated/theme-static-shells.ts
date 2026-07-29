@@ -135,6 +135,30 @@ export const THEME_STATIC_SHELLS = [
     sha256: "da764fda164a3b8b694b9a04f84ab89370fbd247b304871d73505f172311f316",
   },
   {
+    id: "theme-gdocs",
+    filename: "theme-gdocs.svg",
+    path: "/theme-shells/theme-gdocs.svg",
+    sha256: "792a37c3c296d1b893bd22613388e3ac39458221a4793433202aaeaaa72117a7",
+  },
+  {
+    id: "theme-hc",
+    filename: "theme-hc.svg",
+    path: "/theme-shells/theme-hc.svg",
+    sha256: "9a6f42f13b9d06e2fadb253510a55c08a4fbce9d4af30b0aca201cff6ead5170",
+  },
+  {
+    id: "theme-hcdark",
+    filename: "theme-hcdark.svg",
+    path: "/theme-shells/theme-hcdark.svg",
+    sha256: "cab6f84336743e641d198f5dab3afe945eec5cbc655faff20fa94cc188d8603e",
+  },
+  {
+    id: "theme-pander",
+    filename: "theme-pander.svg",
+    path: "/theme-shells/theme-pander.svg",
+    sha256: "960d53b7005a2e932653231359f2e9de4d7f4f2ca5534406cd914e70dfa1769d",
+  },
+  {
     id: "theme-test",
     filename: "theme-test.svg",
     path: "/theme-shells/theme-test.svg",
@@ -337,6 +361,30 @@ export const THEME_STATIC_SHELLS = [
     filename: "palette-tableau_hue_circle.svg",
     path: "/theme-shells/palette-tableau_hue_circle.svg",
     sha256: "926f59072211bbad0468c8fda5e966757a86b3ebb1d661d688fbd30a43e2a40b",
+  },
+  {
+    id: "palette-gdocs",
+    filename: "palette-gdocs.svg",
+    path: "/theme-shells/palette-gdocs.svg",
+    sha256: "83dbc3265eeb8cc64c64b0dd144cb1d76c6f0bdcec06137e25dbe9722c8f644b",
+  },
+  {
+    id: "palette-hc",
+    filename: "palette-hc.svg",
+    path: "/theme-shells/palette-hc.svg",
+    sha256: "82526403d5856f6a04d9901388e4f3f2e51bf65efdbd3ce9658ea0d7912f322f",
+  },
+  {
+    id: "palette-hc_dark",
+    filename: "palette-hc_dark.svg",
+    path: "/theme-shells/palette-hc_dark.svg",
+    sha256: "7a0318382683b86cecc537857f8465cb41d0270f21c521a61474d78d287900d3",
+  },
+  {
+    id: "palette-pander",
+    filename: "palette-pander.svg",
+    path: "/theme-shells/palette-pander.svg",
+    sha256: "5ad0434af675f9fd31a1a4a670941b3ac91cd2052a0e2ecfa1935b086b7adcab",
   },
   {
     id: "palette-Set1",
