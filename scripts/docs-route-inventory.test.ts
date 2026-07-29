@@ -42,6 +42,8 @@ describe("docs route inventory", () => {
     expect(paths.has("/reference/stats/count")).toBe(true);
     expect(paths.has("/reference/positions")).toBe(true);
     expect(paths.has("/reference/positions/stack")).toBe(true);
+    expect(paths.has("/reference/guides")).toBe(true);
+    expect(paths.has("/reference/guides/legend")).toBe(true);
     expect(paths.has("/reference/interactions")).toBe(true);
     expect(paths.has("/reference/cli")).toBe(true);
     expect(paths.has("/__perf/r3-interaction")).toBe(true);
@@ -145,6 +147,29 @@ describe("docs route inventory", () => {
     );
   });
 
+  it("publishes the guides reference inside the one Reference hierarchy", () => {
+    const inventory = createDocsRouteInventory();
+    const index = inventory.find((entry) => entry.path === "/reference/guides");
+    expect(index).toMatchObject({
+      title: "Guides and legends — ggsvelte",
+      canonicalPath: "/reference/guides",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "docs",
+      navigation: { section: "Reference", label: "Guides and legends", order: 54 },
+    });
+    const details = inventory.filter((entry) => entry.path.startsWith("/reference/guides/"));
+    expect(details.length).toBe(5);
+    expect(details.every((entry) => entry.navigation === undefined)).toBe(true);
+    expect(inventory.find((entry) => entry.path === "/reference/guides/legend")?.title).toBe(
+      "GuideLegend — ggsvelte",
+    );
+    expect(inventory.find((entry) => entry.path === "/reference/guides/colorbar")?.title).toBe(
+      "GuideColorbar — ggsvelte",
+    );
+  });
+
   it("pins detail-route headings: aliases, related-examples, and family differences", () => {
     const inventory = createDocsRouteInventory();
     const ids = (path: string) =>
@@ -169,6 +194,15 @@ describe("docs route inventory", () => {
     expect(ids("/reference/stats/bin_hex")).not.toContain("examples");
     expect(ids("/reference/positions/identity")).toContain("examples");
     expect(ids("/reference/positions/nudge")).not.toContain("examples");
+    // Guides: legend alone adds the legend-focus cross-link section.
+    expect(ids("/reference/guides/legend")).toEqual([
+      "channels",
+      "svelte",
+      "json",
+      "props",
+      "legend-focus",
+    ]);
+    expect(ids("/reference/guides/none")).toEqual(["channels", "svelte", "json", "props"]);
   });
 
   it("publishes the CLI reference inside the one Reference hierarchy", () => {
@@ -180,7 +214,7 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "CLI reference", order: 55 },
+      navigation: { section: "Reference", label: "CLI reference", order: 56 },
     });
     expect(cliRoute?.headings?.filter((heading) => heading.level === 3)).toEqual(
       CLI_REFERENCE_OPTIONS.map((option) => ({

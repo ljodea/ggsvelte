@@ -301,6 +301,20 @@ export type { StatReferenceEntry } from "./stat-reference.js";
 export { POSITION_REFERENCE, positionReferenceList } from "./position-reference.js";
 /** @lifecycle experimental */
 export type { PositionParamDoc, PositionReferenceEntry } from "./position-reference.js";
+/** @lifecycle experimental */
+export {
+  GUIDE_CHANNELS,
+  GUIDE_REFERENCE,
+  KNOWN_GUIDE_TYPES,
+  guideReferenceList,
+} from "./guide-reference.js";
+/** @lifecycle experimental */
+export type {
+  GuideChannelName,
+  GuideParamDoc,
+  GuideReferenceEntry,
+  GuideTypeName,
+} from "./guide-reference.js";
 
 // Temporal parsing, inference, and authoring conversions
 export {

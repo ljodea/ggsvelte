@@ -6,8 +6,8 @@
   <header>
     <h1 id="reference-heading">Reference</h1>
     <p>
-      Public contracts for geoms, interactions, CLI, diagnostics, lifecycle, and
-      schema.
+      Public contracts for geoms, guides, interactions, CLI, diagnostics,
+      lifecycle, and schema.
     </p>
   </header>
 
@@ -30,6 +30,13 @@
       <span
         >Every position adjustment: stack, dodge, jitter params, and compatible
         geoms.</span
+      >
+    </a>
+    <a href={`${base}/reference/guides`}>
+      <strong>Guides and legends</strong>
+      <span
+        >GuideLegend, GuideColorbar, GuideColorsteps, GuideAxis, and GuideNone:
+        channels, props, and helpers.</span
       >
     </a>
     <a href={`${base}/reference/interactions`}>

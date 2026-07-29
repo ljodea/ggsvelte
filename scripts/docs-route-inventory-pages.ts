@@ -76,7 +76,8 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
   {
     path: "/reference",
     title: "Reference — ggsvelte",
-    description: "Geom, interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
+    description:
+      "Geom, guide, interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
     canonicalPath: "/reference",
     kind: "page",
     index: true,
@@ -133,6 +134,23 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     ],
   },
   {
+    path: "/reference/guides",
+    title: "Guides and legends — ggsvelte",
+    description:
+      "Schema-derived API reference for GuideLegend, GuideColorbar, GuideColorsteps, GuideAxis, and GuideNone: channels, props, and helpers.",
+    canonicalPath: "/reference/guides",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: { section: "Reference", label: "Guides and legends", order: 54 },
+    headings: [
+      { id: "all-guides", title: "All guides", level: 2 },
+      { id: "how-to-set", title: "How to set a guide", level: 2 },
+      { id: "legend-focus", title: "Legend focus and clear recovery", level: 2 },
+    ],
+  },
+  {
     path: "/reference/interactions",
     title: "Search interactions — ggsvelte",
     description:
@@ -142,7 +160,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Interaction reference", order: 54 },
+    navigation: { section: "Reference", label: "Interaction reference", order: 55 },
   },
   {
     path: "/reference/cli",
@@ -154,7 +172,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "CLI reference", order: 55 },
+    navigation: { section: "Reference", label: "CLI reference", order: 56 },
     headings: [
       { id: "input-and-output", title: "Input and output", level: 2 },
       { id: "options", title: "Options", level: 2 },
