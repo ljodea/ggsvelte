@@ -20,15 +20,19 @@ import { evaluateVrGate } from "./vr-gate";
 import {
   CACHEABLE_EXECUTIONS,
   CONTENT_HASH_SCHEMA,
-  collectGitHeadInputDigests,
-  contentHashCacheKey,
-  parseSuccessMarker,
-  serializeSuccessMarker,
-  shouldBypassContentCache,
-  successMarkerPath,
-  validateSuccessMarker,
   type CacheableExecution,
   type ExecutionShard,
+} from "./content-hash-types";
+import {
+  parseSuccessMarker,
+  serializeSuccessMarker,
+  successMarkerPath,
+  validateSuccessMarker,
+} from "./content-hash-markers";
+import {
+  collectGitHeadInputDigests,
+  contentHashCacheKey,
+  shouldBypassContentCache,
 } from "./content-hash";
 import { runDetectChanges, type DetectChangesInput, type DetectChangesIo } from "./detect-changes";
 
