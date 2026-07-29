@@ -6115,10 +6115,6 @@
                 },
                 {
                   "type": "string",
-                  "const": "tableau_traffic"
-                },
-                {
-                  "type": "string",
                   "const": "tableau_miller_stone"
                 },
                 {

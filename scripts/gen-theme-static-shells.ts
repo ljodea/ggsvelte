@@ -95,9 +95,9 @@ function buildShells(): ShellFile[] {
       filename: `palette-${palette.name}.svg`,
       body: paletteSpecimenStaticSvg({
         scheme: palette.name,
+        capacity: palette.capacity,
         reverse: false,
         paperTheme: "light",
-        height: 340,
       }),
     });
   }

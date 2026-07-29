@@ -19803,14 +19803,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-315",
+    id: "heading:guide-lifecycle:experimental-314",
     kind: "heading",
-    title: "experimental (315)",
+    title: "experimental (314)",
     summary:
-      "experimental (315) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-315",
+      "experimental (314) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-314",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (315)"],
+    exact: ["experimental (314)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -31823,15 +31823,6 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["TABLEAU_SUPERFISHEL_STONE_PALETTE"],
-  },
-  {
-    id: "api:ggsvelte-core:TABLEAU_TRAFFIC_PALETTE",
-    kind: "api",
-    title: "TABLEAU_TRAFFIC_PALETTE",
-    summary: "@ggsvelte/core · value · experimental.",
-    href: "/guide/lifecycle#ggsvelte-core",
-    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
-    exact: ["TABLEAU_TRAFFIC_PALETTE"],
   },
   {
     id: "api:ggsvelte-core:TABLEAU_WINTER_PALETTE",

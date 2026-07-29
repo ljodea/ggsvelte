@@ -18,22 +18,6 @@
  */
 
 /**
- * Spanish Armada squadron tonnage, 1588 (Medina Sidonia muster).
- * HistData::Armada (see NOTICE); zero-ton squadrons omitted for the palette bars.
- * English squadron labels match examples/bar/horizontal (HistData Fleet is abbreviated).
- */
-export const armadaTonnage: { squadron: string; tons: number }[] = [
-  { squadron: "Pataches", tons: 1221 },
-  { squadron: "Biscay", tons: 6567 },
-  { squadron: "Guipúzcoa", tons: 6991 },
-  { squadron: "Levant", tons: 7705 },
-  { squadron: "Portugal", tons: 7737 },
-  { squadron: "Castile", tons: 8714 },
-  { squadron: "Andalusia", tons: 8762 },
-  { squadron: "Hulks", tons: 10271 },
-];
-
-/**
  * 1954 Salk polio vaccine field trial — paralytic cases per 100,000.
  * Francis et al. (1955), HistData::PolioTrials (see NOTICE).
  * Field names match the value-labelled column specimen (`quarter` / `amount` / `label`).

@@ -4,6 +4,7 @@
   import type { CATEGORICAL_SCHEME_NAMES, ThemeName } from "@ggsvelte/spec";
 
   import { observeUserIntent } from "$lib/load-on-intent";
+  import { paletteSpecimenChart } from "$lib/theme-specimens/palette-bars";
 
   type CategoricalSchemeName = (typeof CATEGORICAL_SCHEME_NAMES)[number];
 
@@ -26,7 +27,8 @@
     staticSrc: string;
   } = $props();
 
-  const plotHeight = 340;
+  const chart = $derived(paletteSpecimenChart(capacity));
+  const plotHeight = $derived(chart.height);
   const displayColors = $derived(reverse ? colors.toReversed() : colors);
   /** Shell matches only the prerender defaults; other control combos need live. */
   const shellMatches = $derived(!reverse && paperTheme === "light");
@@ -80,7 +82,14 @@
 
   <div class="plot-panel" bind:this={host} style:min-height="{plotHeight}px">
     {#if Live !== null}
-      <Live {name} {label} {reverse} {paperTheme} height={plotHeight} />
+      <Live
+        {name}
+        {label}
+        {capacity}
+        {reverse}
+        {paperTheme}
+        height={plotHeight}
+      />
     {:else if shellMatches}
       <img
         class="static-shell"

@@ -4515,10 +4515,6 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "TABLEAU_TRAFFIC_PALETTE": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "TABLEAU_WINTER_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"

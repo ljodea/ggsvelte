@@ -54,7 +54,6 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "tableau20",
   "tableau_colorblind",
   "tableau_seattle_grays",
-  "tableau_traffic",
   "tableau_miller_stone",
   "tableau_superfishel_stone",
   "tableau_nuriel_stone",

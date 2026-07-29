@@ -15,13 +15,13 @@ import {
   countries,
   generation,
   grid,
-  armadaTonnage,
   longRunSeries,
   penguins,
   revenue,
   ridership,
   temperaturesKeyed,
 } from "./data.js";
+import { paletteSpecimenChart } from "./palette-bars.js";
 import { TEMPERATURES_CHART } from "./temperatures-chart.js";
 
 /** Matches packages/svelte DEFAULT_PLOT_WIDTH_PX and docs .plot-panel max. */
@@ -201,17 +201,19 @@ export function temperaturesStaticSvg(input: {
 
 export function paletteSpecimenStaticSvg(input: {
   readonly scheme: SchemeName;
+  readonly capacity: number;
   readonly reverse: boolean;
   readonly paperTheme: ThemeName;
   readonly width?: number;
   readonly height?: number;
 }): string {
+  const chart = paletteSpecimenChart(input.capacity);
   const width = input.width ?? DOCS_STATIC_PLOT_WIDTH_PX;
-  const height = input.height ?? 340;
-  const key = `palette:${input.scheme}:${String(input.reverse)}:${input.paperTheme}:${String(width)}x${String(height)}`;
+  const height = input.height ?? chart.height;
+  const key = `palette:${input.scheme}:${String(input.capacity)}:${String(input.reverse)}:${input.paperTheme}:${String(width)}x${String(height)}`;
   const hit = cache.get(key);
   if (hit !== undefined) return hit;
-  const spec = gg(armadaTonnage, aes({ x: "squadron", y: "tons", fill: "squadron" }))
+  let builder = gg(chart.rows, aes({ x: "category", y: "value", fill: "category" }))
     .geomCol({ width: 0.75 })
     .scales({
       fill: { type: "ordinal", scheme: input.scheme, reverse: input.reverse },
@@ -219,11 +221,14 @@ export function paletteSpecimenStaticSvg(input: {
     .guides({ fill: { type: "none" } })
     .theme(input.paperTheme)
     .labs({
-      title: "Spanish Armada squadron tonnage, 1588",
-      x: "Squadron",
-      y: "Tons",
-    })
-    .spec();
+      title: chart.title,
+      x: chart.x,
+      y: chart.y,
+    });
+  if (chart.flip) {
+    builder = builder.coord("flip");
+  }
+  const spec = builder.spec();
   const svg = namespaceSvgIds(renderToSVGString(spec, { width, height }), key);
   cache.set(key, svg);
   return svg;

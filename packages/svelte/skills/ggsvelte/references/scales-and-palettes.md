@@ -159,7 +159,7 @@ byte-identity-preserving: `value` is not routed through any helper.
 
 ## Palettes
 
-### Categorical schemes (53)
+### Categorical schemes (52)
 
 | Scheme                    | Description                                                        |
 | ------------------------- | ------------------------------------------------------------------ |
@@ -188,7 +188,6 @@ byte-identity-preserving: `value` is not routed through any helper.
 | tableau20                 | ggthemes Tableau 20 (classic paired set)                           |
 | tableau_colorblind        | ggthemes Tableau Color Blind 10                                    |
 | tableau_seattle_grays     | ggthemes Tableau Seattle Grays (5)                                 |
-| tableau_traffic           | ggthemes Tableau Traffic red/yellow/green triples                  |
 | tableau_miller_stone      | ggthemes Tableau Miller Stone (11)                                 |
 | tableau_superfishel_stone | ggthemes Tableau Superfishel Stone (10)                            |
 | tableau_nuriel_stone      | ggthemes Tableau Nuriel Stone (9)                                  |
