@@ -11,8 +11,9 @@
     pressedIdentity = null,
     rovingIndex = 0,
     sceneWidth,
-    sceneHeight,
-    /** Anchor x for clear control; null hides the clear button. */
+    /** Retained for caller layout parity; clear sits right of the scene, not below it. */
+    sceneHeight: _sceneHeight,
+    /** Visibility gate for clear control; null hides the clear button. */
     clearLegendX = null,
     onPreviewIndex,
     onPreviewClear,
@@ -123,12 +124,17 @@
   </div>
 {/if}
 {#if clearLegendX !== null}
+  <!-- clearLegendX gates visibility (pressed legend scale). Top-right of the
+       scene keeps the control off the tool-rail strip and out of the bottom
+       row that used to shove charts below. Inside the scene so capture and
+       hit-testing still reach it (z-index above chrome). Smoke baseline:
+       interaction-legend-focus-committed-light.png. -->
   <button
     type="button"
     class="gg-legend-clear"
     aria-label="Clear legend focus"
-    style:left={`${Math.max(4, Math.min(clearLegendX, sceneWidth - 52))}px`}
-    style:top={`${sceneHeight + 4}px`}
+    style:left={`${Math.max(4, sceneWidth - 52)}px`}
+    style:top="4px"
     onpointerdown={(event) => onClearPointerDown(event.pointerType)}
     onpointercancel={() => onClearPointerCancel()}
     onclick={(event) => onClearClick(event)}>Clear</button
@@ -139,12 +145,17 @@
   .gg-legend-clear {
     position: absolute;
     z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* 44×44 touch target (WCAG 2.5.5); top-right of the scene, not below it. */
     min-width: 44px;
     min-height: 44px;
+    margin: 0;
     border: 1px solid
       var(--gg-tooltipBorder, var(--gg-theme-tooltipBorder, currentColor));
-    border-radius: 3px;
-    padding: 2px 6px;
+    border-radius: 0.25rem;
+    padding: 0.4rem 0.75rem;
     background: var(
       --gg-tooltipPaper,
       var(
@@ -159,9 +170,23 @@
         var(--gg-theme-tooltipInk, var(--gg-ink, #1f2328))
       )
     );
-    font: 11px/1.2 var(--gg-font-family, sans-serif);
+    font: 600 0.8125rem/1.2 var(--gg-font-family, system-ui, sans-serif);
+    letter-spacing: -0.01em;
     white-space: nowrap;
     pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .gg-legend-clear:hover {
+    background: color-mix(
+      in srgb,
+      var(--gg-tooltipInk, var(--gg-theme-tooltipInk, var(--gg-ink, #1f2328)))
+        6%,
+      var(
+        --gg-tooltipPaper,
+        var(--gg-theme-tooltipPaper, var(--gg-paper, #fff))
+      )
+    );
   }
 
   .gg-legend-targets {

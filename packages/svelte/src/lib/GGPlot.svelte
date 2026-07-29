@@ -219,7 +219,6 @@
     <LegendFilters
       controller={legendFilterState}
       entries={engine.filterableLegendEntries}
-      belowClearFocus={engine.legendClearActive}
     />
     <SceneOverlays
       width={currentModel.scene.width}
@@ -364,19 +363,10 @@
     margin-top: 52px;
   }
 
-  .gg-with-legend-clear {
-    margin-bottom: 48px;
-  }
-
+  /* Clear sits top-right inside the scene (absolute) — no layout margin.
+     Filters still need a bottom row when present. */
   .gg-with-legend-filters {
     margin-bottom: 58px;
-  }
-
-  /* Both control sets active: the Clear-focus button keeps the first row;
-     the filter fieldset moves to its own row below so its labels can never
-     cover the button. Reserve both rows. */
-  .gg-with-legend-clear.gg-with-legend-filters {
-    margin-bottom: 106px;
   }
 
   .gg-with-docked-tooltip {

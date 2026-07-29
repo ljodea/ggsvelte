@@ -444,7 +444,7 @@ describe("buildLegendEntryKeyIndex", () => {
     expect(index.get("color:0")).toEqual([]);
   });
 
-  it("calls layerFields once per distinct layer and lineageKeys once per applicable candidate", () => {
+  it("calls layerFields once per distinct layer and lineageKeys once per unique lineage", () => {
     let layerFieldsCalls = 0;
     let lineageKeysCalls = 0;
     const dualLegend: SceneLegend = {
@@ -482,8 +482,28 @@ describe("buildLegendEntryKeyIndex", () => {
     expect(index.get("color:0")).toEqual(["a", "b", "c"]);
     // One layerFields call per distinct layerIndex (0 and 1), not per candidate×legend.
     expect(layerFieldsCalls).toBe(2);
-    // One lineageKeys call per candidate (all three apply at least one legend).
+    // One lineageKeys call per unique lineage id (1, 2, 3).
     expect(lineageKeysCalls).toBe(3);
+  });
+
+  it("expands a shared lineage once across many candidates (smooth eval grid)", () => {
+    let lineageKeysCalls = 0;
+    const sharedRows = Array.from({ length: 40 }, (_, i) => i);
+    const index = buildLegendEntryKeyIndex({
+      legends: [discreteFill],
+      candidates: () =>
+        Array.from({ length: 12 }, () => ({ layerIndex: 0, lineage: 7, rowIndex: null })),
+      layerFields: () => [{ channel: "fill", field: "channel" }],
+      lineageKeys(lineageId) {
+        lineageKeysCalls += 1;
+        return lineageId === 7 ? sharedRows : [];
+      },
+      row: (rowIndex) => ({ channel: rowIndex % 2 === 0 ? "web" : "store" }),
+      semanticKey: (rowIndex) => `k${String(rowIndex)}`,
+    });
+    expect(lineageKeysCalls).toBe(1);
+    expect(index.get("fill:0")?.length).toBe(20);
+    expect(index.get("fill:1")?.length).toBe(20);
   });
 
   it("does not call lineageKeys when no discrete legend applies to the candidate", () => {

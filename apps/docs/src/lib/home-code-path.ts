@@ -10,32 +10,35 @@
  * cases). Field names match the published dataset, not the short theme-specimen
  * aliases.
  *
- * Interaction: GrammarDemo step 4 uses exact inspect (nearest-point hover/pin
- * tooltips, no vertical axis guide). That is a GGPlot host prop — not a
- * PortableSpec field and not a builder method.
- * - Svelte / builder: set `inspect` on <GGPlot>
+ * Interaction: GrammarDemo step 4 uses xy inspect (numeric crosshair on both
+ * axes) plus legendFocus. Those are GGPlot host props — not PortableSpec
+ * fields and not builder methods.
+ * - Svelte / builder: set `inspect` / `legendFocus` / `key` on <GGPlot>
  * - JSON: agent envelope `{ interactions, spec }` (host maps interactions onto
  *   GGPlot props; bare PortableSpec is also accepted and defaults inspect on)
  */
 
 const HOME_CODE_PATH_SVELTE = `<script lang="ts">
-  import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
+  import { GeomJitter, GeomSmooth, GGPlot, Labs } from "@ggsvelte/svelte";
   import { palmerPenguins } from "@ggsvelte/svelte/data";
 </script>
 
 <GGPlot
   data={palmerPenguins}
+  key="id"
   aes={{ x: "flipperLengthMm", y: "bodyMassG", color: "species" }}
-  inspect={{ mode: "exact", pin: true, maxDistance: 24 }}
+  inspect={{ mode: "xy", pin: true, maxDistance: 24 }}
+  legendFocus
   width={640}
   height={400}
 >
-  <GeomPoint alpha={0.72} />
+  <Labs x="Flipper length mm" y="Body mass g" color="species" />
+  <GeomJitter alpha={0.55} />
   <GeomSmooth method="loess" span={0.75} degree={1} se={false} />
 </GGPlot>
 `;
 
-/** Builder produces PortableSpec; inspect is enabled on the host GGPlot. */
+/** Builder produces PortableSpec; inspect/legendFocus are host GGPlot props. */
 const HOME_CODE_PATH_BUILDER = `<script lang="ts">
   import { aes, gg } from "@ggsvelte/spec";
   import { GGPlot } from "@ggsvelte/svelte";
@@ -45,14 +48,17 @@ const HOME_CODE_PATH_BUILDER = `<script lang="ts">
     palmerPenguins,
     aes({ x: "flipperLengthMm", y: "bodyMassG", color: "species" }),
   )
-    .geomPoint({ alpha: 0.72 })
+    .geomJitter({ alpha: 0.55 })
     .geomSmooth({ method: "loess", span: 0.75, degree: 1, se: false })
+    .labs({ x: "Flipper length mm", y: "Body mass g", color: "species" })
     .spec();
 </script>
 
 <GGPlot
   {spec}
-  inspect={{ mode: "exact", pin: true, maxDistance: 24 }}
+  key="id"
+  inspect={{ mode: "xy", pin: true, maxDistance: 24 }}
+  legendFocus
   width={640}
   height={400}
 />
@@ -61,27 +67,27 @@ const HOME_CODE_PATH_BUILDER = `<script lang="ts">
 /**
  * Agent envelope: host interaction flags + named-data PortableSpec.
  * `spec` alone is valid PortableSpec; interactions are applied by the host.
- * `inspect: true` still defaults mode "auto" (path layers use x-crosshair);
- * the homepage host opts into exact via the Svelte/builder tabs above.
+ * `inspect: true` still defaults mode "auto"; the homepage host opts into xy.
  */
 const HOME_CODE_PATH_SPEC_JSON = `{
   "interactions": {
-    "inspect": true
+    "inspect": true,
+    "legendFocus": true
   },
   "spec": {
     "edition": 2,
     "data": { "name": "palmerPenguins" },
     "layers": [
       {
-        "geom": "point",
+        "geom": "jitter",
         "stat": "identity",
-        "position": "identity",
+        "position": "jitter",
         "aes": {
           "x": { "field": "flipperLengthMm" },
           "y": { "field": "bodyMassG" },
           "color": { "field": "species" }
         },
-        "params": { "alpha": 0.72 }
+        "params": { "alpha": 0.55 }
       },
       {
         "geom": "smooth",

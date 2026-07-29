@@ -3,14 +3,16 @@
  * example modules themselves. Vite's import.meta.glob provides lazy module
  * access plus ?raw sources for the code triptych (spec JSON / builder /
  * Svelte — plan: "docs triptychs").
+ *
+ * Metadata-only consumers should import `$lib/examples-manifest` instead so
+ * they do not register the Example.svelte globs (and their chart deps).
  */
 import type { PortableSpec } from "@ggsvelte/spec";
 import type { Component } from "svelte";
 
 import { indexExampleModulesById, requireExampleModule } from "./example-module-index.js";
 
-export { EXAMPLES } from "$examples/manifest";
-export type { ExampleManifestEntry } from "$examples/manifest";
+export { EXAMPLES, type ExampleManifestEntry } from "./examples-manifest.js";
 
 const components = import.meta.glob<{ default: Component }>("$examples/*/*/Example.svelte");
 const specs = import.meta.glob<{ default: PortableSpec }>("$examples/*/*/spec.ts");

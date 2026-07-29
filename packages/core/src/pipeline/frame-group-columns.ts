@@ -7,6 +7,7 @@ import { deriveGroups, type ChannelGroupingOverrides } from "../grouping.js";
 import { cellToNumber, type CellValue, type Discreteness } from "../table.js";
 import type { ColumnTable } from "../table.js";
 
+import { styleBinIndex } from "./style-bin-index.js";
 import { positionDiscreteness } from "./temporal-position.js";
 import type { LayerBinding } from "./types.js";
 
@@ -101,9 +102,7 @@ function binnedStyleColumn(
       if (binding.binOob !== "squish") return null;
       bounded = Math.min(breaks.at(-1)!, Math.max(breaks[0]!, value));
     }
-    let bin = breaks.findIndex((upper, index) => index > 0 && bounded < upper) - 1;
-    if (bin < 0) bin = breaks.length - 2;
-    return bin;
+    return styleBinIndex(breaks, bounded);
   });
 }
 

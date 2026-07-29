@@ -6,7 +6,7 @@
  */
 import { buildLlmsIndex, docsDiscoveryFacts } from "$scripts/gen-llms";
 
-import { EXAMPLES } from "$lib/examples";
+import { EXAMPLES } from "$lib/examples-manifest";
 import { docsBuildConfig } from "$lib/server/build-config";
 import { GUIDE_PAGES } from "$lib/guide";
 

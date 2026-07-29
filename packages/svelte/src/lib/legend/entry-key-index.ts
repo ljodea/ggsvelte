@@ -77,7 +77,8 @@ export type LegendKeyIndexAdapter = {
  * - Match entry values via pre-built token→index maps (legendValueEqual
  *   semantics: NaN, Date, -0/0); O(E) prep + O(1) per row, not findIndex.
  * - Layer field maps built once per layer (first non-stat channel → field);
- *   lineage Sets once per candidate when any discrete legend applies.
+ *   lineage Sets once per lineage id when any discrete legend applies
+ *   (smooth eval-grid marks share membership — not once per candidate).
  * - Final keys are first-seen unique order, frozen.
  */
 /** Row field value or scaled constant; `skip` when the row is missing. */
@@ -222,14 +223,31 @@ export function buildLegendEntryKeyIndex(
     }
   };
 
+  // Lineage membership once per lineage id (smooth shares one bag across
+  // the eval grid). Candidates may still append their own rowIndex.
+  const rowsByLineage = new Map<number, Set<number>>();
+  const lineageRows = (lineageId: number): Set<number> => {
+    let rows = rowsByLineage.get(lineageId);
+    if (rows === undefined) {
+      rows = new Set(adapter.lineageKeys(lineageId));
+      rowsByLineage.set(lineageId, rows);
+    }
+    return rows;
+  };
+
   for (const candidate of adapter.candidates()) {
-    // Lineage Set once per candidate when any discrete legend applies —
-    // not once per legend (was O(C·L·R) Set construction).
     let sourceRows: Set<number> | null = null;
     const rowsForCandidate = (): Set<number> => {
       if (sourceRows === null) {
-        sourceRows = new Set(adapter.lineageKeys(candidate.lineage));
-        if (candidate.rowIndex !== null) sourceRows.add(candidate.rowIndex);
+        const shared = lineageRows(candidate.lineage);
+        if (candidate.rowIndex !== null && !shared.has(candidate.rowIndex)) {
+          // Copy only when we must attach a candidate-local row not already
+          // in the shared membership (identity marks). Shared smooth bags
+          // stay one Set for every eval-grid mark.
+          sourceRows = new Set([...shared, candidate.rowIndex]);
+        } else {
+          sourceRows = shared;
+        }
       }
       return sourceRows;
     };

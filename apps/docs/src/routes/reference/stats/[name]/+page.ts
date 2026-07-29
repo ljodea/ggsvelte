@@ -2,7 +2,7 @@ import { error } from "@sveltejs/kit";
 
 import { STAT_REFERENCE, type StatName, KNOWN_STATS } from "@ggsvelte/spec";
 
-import { EXAMPLES } from "$lib/examples";
+import { EXAMPLES } from "$lib/examples-manifest";
 
 import type { EntryGenerator, PageLoad } from "./$types";
 

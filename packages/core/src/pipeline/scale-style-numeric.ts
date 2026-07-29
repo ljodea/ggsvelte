@@ -10,6 +10,7 @@ import { minAdjacentWidth, resolveStyleLegendFormat } from "./scale-color-sequen
 import { discreteStyleResolution, styleGuideEntry } from "./scale-style-discrete.js";
 import type { NumericStyleAesthetic, StyleResolution } from "./scale-style-types.js";
 import { resolveNumericStyleValueView, type NumericStyleConfig } from "./scale-style-values.js";
+import { styleBinIndex } from "./style-bin-index.js";
 import { PipelineError, type PipelineWarning } from "./types.js";
 
 const NUMERIC_DEFAULT_RANGE: Record<NumericStyleAesthetic, readonly [number, number]> = {
@@ -198,8 +199,7 @@ function numericSequentialResolution(input: {
     }
     let t: number;
     if (kind === "binned") {
-      let bin = boundaries.findIndex((upper, index) => index > 0 && bounded < upper) - 1;
-      if (bin < 0) bin = boundaries.length - 2;
+      const bin = styleBinIndex(boundaries, bounded);
       t = boundaries.length <= 2 ? 0.5 : bin / (boundaries.length - 2);
     } else {
       t = high === low ? 0.5 : (bounded - low) / (high - low);

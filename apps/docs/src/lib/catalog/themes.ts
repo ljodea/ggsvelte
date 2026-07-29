@@ -1,5 +1,13 @@
 import { CATEGORICAL_SCHEMES, VIRIDIS_RAMP_10 } from "@ggsvelte/core";
-import { CATEGORICAL_SCHEME_NAMES, THEME_NAMES, type ThemeName } from "@ggsvelte/spec";
+import {
+  CATEGORICAL_SCHEME_NAMES,
+  THEME_NAME_ALIASES,
+  THEME_NAMES,
+  type ThemeName,
+} from "@ggsvelte/spec";
+
+/** Canonical picker themes — grey/gray alias ggplot2 and stay out of the list. */
+type ThemeOptionName = Exclude<ThemeName, keyof typeof THEME_NAME_ALIASES>;
 
 const THEME_LABELS = {
   default: "Default",
@@ -17,11 +25,8 @@ const THEME_LABELS = {
   tufte: "Tufte",
   linedraw: "Linedraw",
   void: "Void",
-  // Aliases of the ggplot2 grey-panel look (theme_grey / theme_gray, #824).
-  grey: "Grey",
-  gray: "Gray",
   test: "Test",
-} as const satisfies Record<ThemeName, string>;
+} as const satisfies Record<ThemeOptionName, string>;
 
 const PALETTE_LABELS = {
   observable10: "Observable 10",
@@ -59,12 +64,13 @@ const THEME_DEMO_SCHEMES = {
   tufte: "colorblind",
   linedraw: "colorblind",
   void: "colorblind",
-  grey: "observable10",
-  gray: "observable10",
   test: "colorblind",
-} as const satisfies Record<ThemeName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
+} as const satisfies Record<ThemeOptionName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
 
-export const THEME_OPTIONS = THEME_NAMES.map((name) => ({
+/** Picker/specimen themes only — API still accepts grey/gray via THEME_NAME_ALIASES. */
+export const THEME_OPTIONS = THEME_NAMES.filter(
+  (name): name is ThemeOptionName => !(name in THEME_NAME_ALIASES),
+).map((name) => ({
   name,
   label: THEME_LABELS[name],
   scheme: THEME_DEMO_SCHEMES[name],
