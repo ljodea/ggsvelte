@@ -89,6 +89,8 @@ export const DOCS_CONTENT_ONLY_PATHS: readonly string[] = [
  */
 export const DOCS_CONTENT_SCRIPT_PATTERNS: readonly string[] = [
   "scripts/gen-llms.ts",
+  "scripts/llms-diagnostic-docs.ts",
+  "scripts/llms-lifecycle-docs.ts",
   "scripts/gen-llms.test.ts",
   "scripts/llms-markdown.ts",
   "scripts/llms-guide-content.ts",
@@ -120,6 +122,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     "apps/docs/**",
     // Docs app imports `$scripts/gen-llms` and ships lifecycle-driven guide content.
     "scripts/gen-llms.ts",
+    "scripts/llms-diagnostic-docs.ts",
+    "scripts/llms-lifecycle-docs.ts",
     "scripts/gen-llms.test.ts",
     "scripts/llms-markdown.ts",
     "scripts/highlight-code.ts",
