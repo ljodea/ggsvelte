@@ -25,6 +25,9 @@ describe("packed Pages link checks", () => {
     "reference/themes.html",
     "reference/palettes.html",
     "reference/cli.html",
+    "reference/labs.html",
+    "reference/axes.html",
+    "reference/labels.html",
     "reference/geoms.html",
     "reference/geoms/point.html",
     "reference/geoms/line.html",
@@ -110,6 +113,9 @@ describe("packed Pages link checks", () => {
     expect(requiredPages).toContain("reference/themes.html");
     expect(requiredPages).toContain("reference/palettes.html");
     expect(requiredPages).toContain("reference/cli.html");
+    expect(requiredPages).toContain("reference/labs.html");
+    expect(requiredPages).toContain("reference/axes.html");
+    expect(requiredPages).toContain("reference/labels.html");
     expect(requiredPages).toContain("reference/geoms.html");
     expect(requiredPages).toContain("reference/geoms/point.html");
     expect(requiredPages).toContain("reference/geoms/line.html");

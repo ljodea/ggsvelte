@@ -122,7 +122,7 @@ test("desktop docs shell exposes chapter, breadcrumb, contents, and sequence nav
   const chapters = page.getByRole("navigation", { name: "Guide chapters" });
   await expect(chapters).toBeVisible();
   // Overview + consolidated guide/reference chapters.
-  await expect(chapters.getByRole("link")).toHaveCount(21);
+  await expect(chapters.getByRole("link")).toHaveCount(24);
   await expect(chapters.getByRole("link", { name: "Dates without preprocessing" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText(
     "Getting started",

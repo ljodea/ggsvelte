@@ -44,6 +44,9 @@ describe("docs route inventory", () => {
     expect(paths.has("/reference/positions/stack")).toBe(true);
     expect(paths.has("/reference/guides")).toBe(true);
     expect(paths.has("/reference/guides/legend")).toBe(true);
+    expect(paths.has("/reference/labs")).toBe(true);
+    expect(paths.has("/reference/axes")).toBe(true);
+    expect(paths.has("/reference/labels")).toBe(true);
     expect(paths.has("/reference/interactions")).toBe(true);
     expect(paths.has("/reference/themes")).toBe(true);
     expect(paths.has("/reference/palettes")).toBe(true);
@@ -207,6 +210,32 @@ describe("docs route inventory", () => {
     expect(ids("/reference/guides/none")).toEqual(["channels", "svelte", "json", "props"]);
   });
 
+  it("publishes Labs, axes, and labels reference inside the one Reference hierarchy", () => {
+    const inventory = createDocsRouteInventory();
+    expect(inventory.find((entry) => entry.path === "/reference/labs")).toMatchObject({
+      title: "Labs — ggsvelte",
+      canonicalPath: "/reference/labs",
+      kind: "page",
+      index: true,
+      sitemap: true,
+      shell: "docs",
+      navigation: { section: "Reference", label: "Labs", order: 55 },
+    });
+    expect(inventory.find((entry) => entry.path === "/reference/axes")).toMatchObject({
+      title: "Axes and ticks — ggsvelte",
+      canonicalPath: "/reference/axes",
+      navigation: { section: "Reference", label: "Axes and ticks", order: 56 },
+    });
+    expect(inventory.find((entry) => entry.path === "/reference/labels")).toMatchObject({
+      title: "Labels — ggsvelte",
+      canonicalPath: "/reference/labels",
+      navigation: { section: "Reference", label: "Labels", order: 57 },
+    });
+    expect(
+      inventory.find((entry) => entry.path === "/reference/axes")?.headings?.map((h) => h.id),
+    ).toContain("scale-breaks-labels");
+  });
+
   it("publishes themes and palettes reference inside the one Reference hierarchy", () => {
     const inventory = createDocsRouteInventory();
     expect(inventory.find((entry) => entry.path === "/reference/themes")).toMatchObject({
@@ -216,7 +245,7 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "Themes", order: 56 },
+      navigation: { section: "Reference", label: "Themes", order: 59 },
     });
     expect(inventory.find((entry) => entry.path === "/reference/palettes")).toMatchObject({
       title: "Palettes — ggsvelte",
@@ -225,7 +254,7 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "Palettes", order: 57 },
+      navigation: { section: "Reference", label: "Palettes", order: 60 },
     });
   });
 
@@ -238,7 +267,7 @@ describe("docs route inventory", () => {
       index: true,
       sitemap: true,
       shell: "docs",
-      navigation: { section: "Reference", label: "CLI reference", order: 58 },
+      navigation: { section: "Reference", label: "CLI reference", order: 61 },
     });
     expect(cliRoute?.headings?.filter((heading) => heading.level === 3)).toEqual(
       CLI_REFERENCE_OPTIONS.map((option) => ({

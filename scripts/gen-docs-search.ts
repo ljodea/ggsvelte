@@ -21,6 +21,11 @@ const SEARCH_EXACT_ALIASES: Readonly<Record<string, readonly string[]>> = {
   "/guide/interactions#inspection": ["tooltip"],
   "/guide/production#server-and-export": ["server render"],
   "/guide/production#rendering": ["canvas selection"],
+  "/reference/labs": ["labs", "plot title", "axis title"],
+  "/reference/axes": ["axis", "ticks", "GuideAxis", "tick labels"],
+  "/reference/labels": ["GeomText", "GeomLabel", "data labels"],
+  "/reference/axes#scale-breaks-labels": ["breaks", "tick format"],
+  "/reference/axes#guide-axis": ["showTicks", "collision"],
 };
 
 const OUTPUT_PATH = join(
