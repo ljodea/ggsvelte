@@ -5751,13 +5751,13 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-473",
-        title: "experimental (473)",
+        id: "experimental-472",
+        title: "experimental (472)",
         level: 3,
       },
       {
-        id: "stable-intent-227",
-        title: "stable-intent (227)",
+        id: "stable-intent-228",
+        title: "stable-intent (228)",
         level: 3,
       },
     ],
