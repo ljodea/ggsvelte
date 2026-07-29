@@ -1,6 +1,5 @@
 <script lang="ts">
   import { base } from "$app/paths";
-  import { onMount } from "svelte";
 
   import CodeTabs from "$lib/CodeTabs.svelte";
   import { FEATURED_EXAMPLES, galleryCatalog } from "$lib/catalog/gallery";
@@ -21,15 +20,9 @@
   );
   const tabs = HOME_CODE_PATH_TABS;
 
-  let HeroPlot = $state<
-    typeof import("$lib/components/HomeHeroPlot.svelte").default | null
-  >(null);
-
-  onMount(() => {
-    void import("$lib/components/HomeHeroPlot.svelte").then((mod) => {
-      HeroPlot = mod.default;
-    });
-  });
+  // Hero stays on the prerendered static SVG shell. Auto-upgrading to live
+  // GGPlot on mount pulled ~1MB of chart stack and locked clicks for seconds.
+  // Interactive demos live on /examples and /interactions.
 </script>
 
 <section class="home-hero" aria-labelledby="home-heading">
@@ -45,20 +38,16 @@
   </div>
 
   <div class="hero-plot">
-    {#if HeroPlot !== null}
-      <HeroPlot />
-    {:else}
-      <!--
-        theme.js sets data-theme before paint. Mirror contrastChartTheme():
-        fivethirtyeight on the light site, light chart on dark — no theme flash.
-      -->
-      <div class="hero-static hero-static--light-site">
-        {@html data.heroStaticSvgLightSite}
-      </div>
-      <div class="hero-static hero-static--dark-site">
-        {@html data.heroStaticSvgDarkSite}
-      </div>
-    {/if}
+    <!--
+      theme.js sets data-theme before paint. Mirror contrastChartTheme():
+      fivethirtyeight on the light site, light chart on dark — no theme flash.
+    -->
+    <div class="hero-static hero-static--light-site">
+      {@html data.heroStaticSvgLightSite}
+    </div>
+    <div class="hero-static hero-static--dark-site">
+      {@html data.heroStaticSvgDarkSite}
+    </div>
   </div>
 
   <div class="hero-actions">
