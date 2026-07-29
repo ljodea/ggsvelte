@@ -133,7 +133,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
-  await expect(cards).toHaveCount(0
+  await expect(cards).toHaveCount(25);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Observable 10",
     "Ipsum",
@@ -174,6 +174,10 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "3 colors",
     "12 colors",
     "4 colors",
+    "24 colors",
+    "10 colors",
+    "11 colors",
+    "8 colors",
     "9 colors",
     "8 colors",
     "12 colors",
@@ -189,7 +193,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   const swatches = observable
     .getByRole("list", { name: "Observable 10 ordered colors" })
     .getByRole("listitem");
-  await expect(swatches).toHaveCount(25);
+  await expect(swatches).toHaveCount(10);
   // Hex lives in accessible names only — not as visible code under every chip.
   await expect(swatches.first()).toHaveAttribute("aria-label", "1: #4269d0");
   await expect(swatches.last()).toHaveAttribute("aria-label", "10: #9498a0");
