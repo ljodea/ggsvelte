@@ -28,8 +28,6 @@ export type {
 } from "./interaction/controller.svelte.js";
 export {
   INTERACTION_DIAGNOSTIC_CATALOG,
-  inspectAxisOnBarColDiagnostics,
-  layerGeomsFromSpecLayers,
   normalizeInteractionConfig,
 } from "./interaction/interaction.js";
 export type {
