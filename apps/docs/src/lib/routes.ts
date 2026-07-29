@@ -1,7 +1,15 @@
-import { DOCS_ROUTES, GUIDE_NAVIGATION } from "./generated/routes.js";
+import { DOCS_ROUTES } from "./generated/routes.js";
 import type { DocsRouteMetadata } from "./route-types.js";
 
-export { DOCS_ROUTES, GUIDE_NAVIGATION };
+// Re-export the thin client surface so server tests and scripts can keep one
+// import path. Client chrome must import from `$lib/routes-nav` instead so
+// DOCS_ROUTES stays out of the layout graph.
+export {
+  GUIDE_NAVIGATION,
+  primaryNavigationOwner,
+  type PrimaryNavigationOwner,
+} from "./routes-nav.js";
+export { DOCS_ROUTES };
 
 const ROUTES: readonly DocsRouteMetadata[] = DOCS_ROUTES;
 const ROUTES_BY_PATH = new Map<string, DocsRouteMetadata>(
@@ -25,22 +33,6 @@ export function canonicalUrl(route: DocsRouteMetadata, canonicalBase: string): s
 
 export function sitemapRoutes(): DocsRouteMetadata[] {
   return ROUTES.filter((route) => route.sitemap);
-}
-
-export type PrimaryNavigationOwner = "docs" | "reference";
-
-export function primaryNavigationOwner(
-  route: DocsRouteMetadata | undefined,
-): PrimaryNavigationOwner | undefined {
-  if (route === undefined) return undefined;
-  if (
-    route.primaryNavigationOwner === "reference" ||
-    route.path.startsWith("/reference") ||
-    route.navigation?.section === "Reference"
-  ) {
-    return "reference";
-  }
-  return route.shell === "docs" ? "docs" : undefined;
 }
 
 export function guideSequence(path: string): {

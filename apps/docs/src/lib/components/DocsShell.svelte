@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import { GUIDE_NAVIGATION, primaryNavigationOwner } from "$lib/routes";
+  import { GUIDE_NAVIGATION, primaryNavigationOwner } from "$lib/routes-nav";
   import type { DocsRouteMetadata } from "$lib/route-types";
 
   import Breadcrumbs from "./Breadcrumbs.svelte";
