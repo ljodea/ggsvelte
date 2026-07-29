@@ -64,7 +64,13 @@
       {@html COPY_ICON_SVG}
     {/if}
   </button>
-  <div class="code-body" bind:this={source}>
+  <!--
+    Stable selection target for the clipboard-unavailable path. Highlight swaps
+    its DOM after mount; selecting the display tree races and leaves an empty
+    selection (docs-home-gallery manual-copy journey).
+  -->
+  <pre class="copy-source" bind:this={source} aria-hidden="true">{code}</pre>
+  <div class="code-body">
     {#if Highlight !== null && languageModule !== null}
       <Highlight {code} language={languageModule} />
     {:else}
@@ -111,6 +117,18 @@
   .copy-trigger:hover {
     border-color: color-mix(in srgb, var(--code-ink) 55%, transparent);
     background: color-mix(in srgb, var(--code-paper) 70%, var(--code-ink) 8%);
+  }
+
+  .copy-source {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: pre;
+    border: 0;
   }
 
   .code-body {

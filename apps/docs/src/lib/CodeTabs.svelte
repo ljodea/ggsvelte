@@ -128,13 +128,17 @@
     role="tabpanel"
     aria-labelledby={`${tabsetId}-tab-${String(active)}`}
   >
+    <!-- Stable selection target — Highlight remounts must not clear manual copy. -->
+    <pre
+      class="copy-source"
+      bind:this={codeNode}
+      aria-hidden="true">{activeTab?.code ?? ""}</pre>
     <!-- svelte-ignore a11y_no_noninteractive_tabindex (scrollable code must be keyboard reachable) -->
     <div
       class="scroll-region code-surface"
       role="region"
       aria-label="Code example"
       tabindex="0"
-      bind:this={codeNode}
     >
       {#if Highlight !== null && languageModule !== null}
         <Highlight code={activeTab?.code ?? ""} language={languageModule} />
@@ -213,6 +217,18 @@
    * Keep padding on the scrollable pre so inline-end gap survives horizontal
    * scroll (Blink/WebKit drop scrollport padding at the end of overflow).
    */
+  .copy-source {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: pre;
+    border: 0;
+  }
+
   .scroll-region {
     max-width: 100%;
     padding: 0;
