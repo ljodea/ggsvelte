@@ -67,7 +67,7 @@ export const HOVER_CROSSHAIR_GAP_RADIUS = 8;
  * Fallback glyph highlight size when measured box extents are unavailable.
  * Wide enough to read a short label; measured extents replace this at runtime.
  */
-export const DEFAULT_GLYPH_HOVER_BOX = Object.freeze({ width: 48, height: 16 });
+const DEFAULT_GLYPH_HOVER_BOX = Object.freeze({ width: 48, height: 16 });
 
 export type GlyphHoverBox = {
   readonly x: number;
