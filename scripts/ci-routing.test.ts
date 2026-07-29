@@ -440,6 +440,8 @@ describe("planJobs", () => {
   test("consumer harness and canonical Quickstart sources schedule the packed-consumer matrix", () => {
     for (const path of [
       "scripts/consumer-compat.ts",
+      "scripts/consumer-compat-plan.ts",
+      "scripts/consumer-compat-fixture.ts",
       "scripts/guide-code-contract.ts",
       "scripts/quickstart.ts",
       "scripts/quickstart-timing.ts",
