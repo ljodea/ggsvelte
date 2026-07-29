@@ -3,7 +3,10 @@
  *
  * Implementation is split for maintainability:
  * - `scripts/ci-routing/routing.ts` — path lanes, job planning, gate, outputs
- * - `scripts/ci-routing/content-hash.ts` — content-hash skip protocol
+ * - `scripts/ci-routing/content-hash-types.ts` — schema, execution keys, shards
+ * - `scripts/ci-routing/content-hash-inputs.ts` — JOB_CONTENT_INPUTS tables
+ * - `scripts/ci-routing/content-hash-markers.ts` — success markers
+ * - `scripts/ci-routing/content-hash.ts` — hash, cache keys, git digests
  * - `scripts/ci-routing/cli.ts` — argv commands (not re-exported)
  *
  * Workflows and composite actions continue to run:
@@ -41,25 +44,22 @@ export {
   jobNames,
 } from "./ci-routing/routing";
 
-export type {
-  CacheableExecution,
-  HashJobInputsOptions,
-  ContentHashCacheKeyInput,
-  SuccessMarker,
-} from "./ci-routing/content-hash";
+export type { CacheableExecution } from "./ci-routing/content-hash-types";
+export { CONTENT_HASH_SCHEMA, CACHEABLE_EXECUTIONS } from "./ci-routing/content-hash-types";
+export { JOB_CONTENT_INPUTS, listJobContentPaths } from "./ci-routing/content-hash-inputs";
+export type { SuccessMarker } from "./ci-routing/content-hash-markers";
 export {
-  CONTENT_HASH_SCHEMA,
-  CACHEABLE_EXECUTIONS,
-  JOB_CONTENT_INPUTS,
-  listJobContentPaths,
-  hashJobInputs,
-  requireJobInputDigests,
-  shouldBypassContentCache,
-  contentHashCacheKey,
   serializeSuccessMarker,
   parseSuccessMarker,
   validateSuccessMarker,
   successMarkerPath,
+} from "./ci-routing/content-hash-markers";
+export type { HashJobInputsOptions, ContentHashCacheKeyInput } from "./ci-routing/content-hash";
+export {
+  hashJobInputs,
+  requireJobInputDigests,
+  shouldBypassContentCache,
+  contentHashCacheKey,
   parseGitLsTreeLine,
   formatTreeEntryDigest,
   collectGitHeadInputDigests,
