@@ -10,7 +10,7 @@ export const NUMERIC_DEFAULT_RANGE: Record<NumericStyleAesthetic, readonly [numb
   linewidth: [0.5, 4],
   alpha: [0.2, 1],
 };
-export const NUMERIC_DEFAULT_CONSTANT: Record<NumericStyleAesthetic, number> = {
+const NUMERIC_DEFAULT_CONSTANT: Record<NumericStyleAesthetic, number> = {
   size: 2.5,
   linewidth: 1.5,
   alpha: 1,
