@@ -171,6 +171,7 @@ export function buildLlmsIndex(
     "- [Geoms](/reference/geoms): every Geom* component with defaults, allowed stats/positions, and params from the schema",
     "- [Stats](/reference/stats): every statistical transform with after_stat columns and compatible geoms",
     "- [Positions](/reference/positions): every position adjustment with positionParams and compatible geoms",
+    "- [Scales](/reference/scales): every Scale* component for position, color/fill, and style channels",
     "- [Guides and legends](/reference/guides): GuideLegend, GuideColorbar, GuideColorsteps, GuideAxis, and GuideNone with channels and props",
     "- [Labs](/reference/labs): plot title, subtitle, caption, and per-aesthetic axis/legend titles",
     "- [Axes and ticks](/reference/axes): GuideAxis presentation, scale breaks/labels, band layout, and grids",

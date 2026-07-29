@@ -170,6 +170,64 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/reference/scales",
+    title: "Scales — ggsvelte",
+    description:
+      "API reference for every Scale* component: position, color/fill, and style channels with params and guide interaction.",
+    canonicalPath: "/reference/scales",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Reference",
+      label: "Scales",
+      order: 54,
+    },
+    headings: [
+      {
+        id: "position-continuous",
+        title: "Position — continuous",
+        level: 2,
+      },
+      {
+        id: "position-binned",
+        title: "Position — binned",
+        level: 2,
+      },
+      {
+        id: "position-temporal",
+        title: "Position — temporal",
+        level: 2,
+      },
+      {
+        id: "position-discrete",
+        title: "Position — discrete",
+        level: 2,
+      },
+      {
+        id: "color-fill",
+        title: "Color and fill",
+        level: 2,
+      },
+      {
+        id: "numeric-style",
+        title: "Size, linewidth, and alpha",
+        level: 2,
+      },
+      {
+        id: "finite-style",
+        title: "Shape and linetype",
+        level: 2,
+      },
+      {
+        id: "how-to-set",
+        title: "How to set a scale",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/reference/guides",
     title: "Guides and legends — ggsvelte",
     description:
@@ -182,7 +240,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Guides and legends",
-      order: 54,
+      order: 55,
     },
     headings: [
       {
@@ -215,7 +273,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Labs",
-      order: 55,
+      order: 56,
     },
     headings: [
       {
@@ -258,7 +316,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Axes and ticks",
-      order: 56,
+      order: 57,
     },
     headings: [
       {
@@ -311,7 +369,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Labels",
-      order: 57,
+      order: 58,
     },
     headings: [
       {
@@ -359,7 +417,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Interaction reference",
-      order: 58,
+      order: 59,
     },
   },
   {
@@ -375,7 +433,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Themes",
-      order: 59,
+      order: 60,
     },
     headings: [
       {
@@ -423,7 +481,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "Palettes",
-      order: 60,
+      order: 61,
     },
     headings: [
       {
@@ -476,7 +534,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "CLI reference",
-      order: 61,
+      order: 62,
     },
     headings: [
       {
@@ -4146,6 +4204,5719 @@ export const DOCS_ROUTES = [
     ],
   },
   {
+    path: "/reference/scales/alpha_binned",
+    title: "ScaleAlphaBinned — ggsvelte",
+    description: "ScaleAlphaBinned: Binned alpha scale: continuous values → stepped numeric style.",
+    canonicalPath: "/reference/scales/alpha_binned",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/alpha_continuous",
+    title: "ScaleAlphaContinuous — ggsvelte",
+    description: "ScaleAlphaContinuous: Continuous sequential alpha scale.",
+    canonicalPath: "/reference/scales/alpha_continuous",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/alpha_date",
+    title: "ScaleAlphaDate — ggsvelte",
+    description: "ScaleAlphaDate: Sequential alpha scale trained on calendar dates.",
+    canonicalPath: "/reference/scales/alpha_date",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/alpha_datetime",
+    title: "ScaleAlphaDatetime — ggsvelte",
+    description: "ScaleAlphaDatetime: Sequential alpha scale trained on datetime values.",
+    canonicalPath: "/reference/scales/alpha_datetime",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/alpha_discrete",
+    title: "ScaleAlphaDiscrete — ggsvelte",
+    description: "ScaleAlphaDiscrete: Discrete alpha scale for categories (ordinal).",
+    canonicalPath: "/reference/scales/alpha_discrete",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/alpha_identity",
+    title: "ScaleAlphaIdentity — ggsvelte",
+    description:
+      "ScaleAlphaIdentity: Identity alpha scale: source numbers used as mapped style values.",
+    canonicalPath: "/reference/scales/alpha_identity",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/alpha_manual",
+    title: "ScaleAlphaManual — ggsvelte",
+    description:
+      "ScaleAlphaManual: Manual alpha mapping: domain values paired with explicit numbers.",
+    canonicalPath: "/reference/scales/alpha_manual",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/alpha_ordinal",
+    title: "ScaleAlphaOrdinal — ggsvelte",
+    description:
+      "ScaleAlphaOrdinal: Discrete alpha scale for categories (ordinal). ggplot2 *Ordinal alias — same binding as ScaleAlphaDiscrete.",
+    canonicalPath: "/reference/scales/alpha_ordinal",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_binned",
+    title: "ScaleColorBinned — ggsvelte",
+    description: "ScaleColorBinned: Binned color scale: continuous values → ordered color steps.",
+    canonicalPath: "/reference/scales/color_binned",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_brewer",
+    title: "ScaleColorBrewer — ggsvelte",
+    description: "ScaleColorBrewer: ColorBrewer qualitative color scale (discrete categories).",
+    canonicalPath: "/reference/scales/color_brewer",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_continuous",
+    title: "ScaleColorContinuous — ggsvelte",
+    description:
+      "ScaleColorContinuous: Continuous sequential color scale (default continuous color family).",
+    canonicalPath: "/reference/scales/color_continuous",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_date",
+    title: "ScaleColorDate — ggsvelte",
+    description: "ScaleColorDate: Sequential color scale trained on calendar dates.",
+    canonicalPath: "/reference/scales/color_date",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_datetime",
+    title: "ScaleColorDatetime — ggsvelte",
+    description: "ScaleColorDatetime: Sequential color scale trained on datetime values.",
+    canonicalPath: "/reference/scales/color_datetime",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_discrete",
+    title: "ScaleColorDiscrete — ggsvelte",
+    description:
+      "ScaleColorDiscrete: Discrete color scale for categorical data (default ordinal family).",
+    canonicalPath: "/reference/scales/color_discrete",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_distiller",
+    title: "ScaleColorDistiller — ggsvelte",
+    description: "ScaleColorDistiller: ColorBrewer sequential/diverging color ramp (distiller).",
+    canonicalPath: "/reference/scales/color_distiller",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_fermenter",
+    title: "ScaleColorFermenter — ggsvelte",
+    description: "ScaleColorFermenter: ColorBrewer binned color steps (fermenter).",
+    canonicalPath: "/reference/scales/color_fermenter",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_gradient",
+    title: "ScaleColorGradient — ggsvelte",
+    description: "ScaleColorGradient: Two-stop continuous color gradient (low/high).",
+    canonicalPath: "/reference/scales/color_gradient",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_gradient2",
+    title: "ScaleColorGradient2 — ggsvelte",
+    description:
+      "ScaleColorGradient2: Three-stop diverging continuous color gradient (low/mid/high).",
+    canonicalPath: "/reference/scales/color_gradient2",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_gradientn",
+    title: "ScaleColorGradientn — ggsvelte",
+    description:
+      "ScaleColorGradientn: N-stop continuous color gradient from an ordered color list.",
+    canonicalPath: "/reference/scales/color_gradientn",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_grey",
+    title: "ScaleColorGrey — ggsvelte",
+    description: "ScaleColorGrey: Grey ramp color palette for discrete categories.",
+    canonicalPath: "/reference/scales/color_grey",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_hue",
+    title: "ScaleColorHue — ggsvelte",
+    description: "ScaleColorHue: Evenly spaced hue color palette for discrete categories.",
+    canonicalPath: "/reference/scales/color_hue",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_identity",
+    title: "ScaleColorIdentity — ggsvelte",
+    description:
+      "ScaleColorIdentity: Identity color scale: source values are validated #rgb/#rrggbb colors used as-is.",
+    canonicalPath: "/reference/scales/color_identity",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_log10",
+    title: "ScaleColorLog10 — ggsvelte",
+    description: "ScaleColorLog10: Sequential color scale with log10 pre-training transform.",
+    canonicalPath: "/reference/scales/color_log10",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_manual",
+    title: "ScaleColorManual — ggsvelte",
+    description:
+      "ScaleColorManual: Manual color mapping: domain values paired with explicit colors.",
+    canonicalPath: "/reference/scales/color_manual",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_ordinal",
+    title: "ScaleColorOrdinal — ggsvelte",
+    description: "ScaleColorOrdinal: Explicit ordinal color scale (categories → colors).",
+    canonicalPath: "/reference/scales/color_ordinal",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_sqrt",
+    title: "ScaleColorSqrt — ggsvelte",
+    description: "ScaleColorSqrt: Sequential color scale with sqrt pre-training transform.",
+    canonicalPath: "/reference/scales/color_sqrt",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_steps",
+    title: "ScaleColorSteps — ggsvelte",
+    description: "ScaleColorSteps: Two-stop binned color steps (low/high).",
+    canonicalPath: "/reference/scales/color_steps",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_steps2",
+    title: "ScaleColorSteps2 — ggsvelte",
+    description: "ScaleColorSteps2: Three-stop diverging binned color steps (low/mid/high).",
+    canonicalPath: "/reference/scales/color_steps2",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_stepsn",
+    title: "ScaleColorStepsn — ggsvelte",
+    description: "ScaleColorStepsn: N-stop binned color steps from an ordered color list.",
+    canonicalPath: "/reference/scales/color_stepsn",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_viridis_b",
+    title: "ScaleColorViridisB — ggsvelte",
+    description: "ScaleColorViridisB: Viridis-family color scale — binned (viridis_b).",
+    canonicalPath: "/reference/scales/color_viridis_b",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_viridis_c",
+    title: "ScaleColorViridisC — ggsvelte",
+    description: "ScaleColorViridisC: Viridis-family color scale — continuous (viridis_c).",
+    canonicalPath: "/reference/scales/color_viridis_c",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/color_viridis_d",
+    title: "ScaleColorViridisD — ggsvelte",
+    description: "ScaleColorViridisD: Viridis-family color scale — discrete (viridis_d).",
+    canonicalPath: "/reference/scales/color_viridis_d",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_binned",
+    title: "ScaleColourBinned — ggsvelte",
+    description:
+      "ScaleColourBinned: Binned color scale: continuous values → ordered color steps. British Colour spelling — same binding as ScaleColorBinned.",
+    canonicalPath: "/reference/scales/colour_binned",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_brewer",
+    title: "ScaleColourBrewer — ggsvelte",
+    description:
+      "ScaleColourBrewer: ColorBrewer qualitative color scale (discrete categories). British Colour spelling — same binding as ScaleColorBrewer.",
+    canonicalPath: "/reference/scales/colour_brewer",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_continuous",
+    title: "ScaleColourContinuous — ggsvelte",
+    description:
+      "ScaleColourContinuous: Continuous sequential color scale (default continuous color family). British Colour spelling — same binding as ScaleColorContinuous.",
+    canonicalPath: "/reference/scales/colour_continuous",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_date",
+    title: "ScaleColourDate — ggsvelte",
+    description:
+      "ScaleColourDate: Sequential color scale trained on calendar dates. British Colour spelling — same binding as ScaleColorDate.",
+    canonicalPath: "/reference/scales/colour_date",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_datetime",
+    title: "ScaleColourDatetime — ggsvelte",
+    description:
+      "ScaleColourDatetime: Sequential color scale trained on datetime values. British Colour spelling — same binding as ScaleColorDatetime.",
+    canonicalPath: "/reference/scales/colour_datetime",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_discrete",
+    title: "ScaleColourDiscrete — ggsvelte",
+    description:
+      "ScaleColourDiscrete: Discrete color scale for categorical data (default ordinal family). British Colour spelling — same binding as ScaleColorDiscrete.",
+    canonicalPath: "/reference/scales/colour_discrete",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_distiller",
+    title: "ScaleColourDistiller — ggsvelte",
+    description:
+      "ScaleColourDistiller: ColorBrewer sequential/diverging color ramp (distiller). British Colour spelling — same binding as ScaleColorDistiller.",
+    canonicalPath: "/reference/scales/colour_distiller",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_fermenter",
+    title: "ScaleColourFermenter — ggsvelte",
+    description:
+      "ScaleColourFermenter: ColorBrewer binned color steps (fermenter). British Colour spelling — same binding as ScaleColorFermenter.",
+    canonicalPath: "/reference/scales/colour_fermenter",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_gradient",
+    title: "ScaleColourGradient — ggsvelte",
+    description:
+      "ScaleColourGradient: Two-stop continuous color gradient (low/high). British Colour spelling — same binding as ScaleColorGradient.",
+    canonicalPath: "/reference/scales/colour_gradient",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_gradient2",
+    title: "ScaleColourGradient2 — ggsvelte",
+    description:
+      "ScaleColourGradient2: Three-stop diverging continuous color gradient (low/mid/high). British Colour spelling — same binding as ScaleColorGradient2.",
+    canonicalPath: "/reference/scales/colour_gradient2",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_gradientn",
+    title: "ScaleColourGradientn — ggsvelte",
+    description:
+      "ScaleColourGradientn: N-stop continuous color gradient from an ordered color list. British Colour spelling — same binding as ScaleColorGradientn.",
+    canonicalPath: "/reference/scales/colour_gradientn",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_grey",
+    title: "ScaleColourGrey — ggsvelte",
+    description:
+      "ScaleColourGrey: Grey ramp color palette for discrete categories. British Colour spelling — same binding as ScaleColorGrey.",
+    canonicalPath: "/reference/scales/colour_grey",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_hue",
+    title: "ScaleColourHue — ggsvelte",
+    description:
+      "ScaleColourHue: Evenly spaced hue color palette for discrete categories. British Colour spelling — same binding as ScaleColorHue.",
+    canonicalPath: "/reference/scales/colour_hue",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_identity",
+    title: "ScaleColourIdentity — ggsvelte",
+    description:
+      "ScaleColourIdentity: Identity color scale: source values are validated #rgb/#rrggbb colors used as-is. British Colour spelling — same binding as ScaleColorIdentity.",
+    canonicalPath: "/reference/scales/colour_identity",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_log10",
+    title: "ScaleColourLog10 — ggsvelte",
+    description:
+      "ScaleColourLog10: Sequential color scale with log10 pre-training transform. British Colour spelling — same binding as ScaleColorLog10.",
+    canonicalPath: "/reference/scales/colour_log10",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_manual",
+    title: "ScaleColourManual — ggsvelte",
+    description:
+      "ScaleColourManual: Manual color mapping: domain values paired with explicit colors. British Colour spelling — same binding as ScaleColorManual.",
+    canonicalPath: "/reference/scales/colour_manual",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_ordinal",
+    title: "ScaleColourOrdinal — ggsvelte",
+    description:
+      "ScaleColourOrdinal: Explicit ordinal color scale (categories → colors). British Colour spelling — same binding as ScaleColorOrdinal.",
+    canonicalPath: "/reference/scales/colour_ordinal",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_sqrt",
+    title: "ScaleColourSqrt — ggsvelte",
+    description:
+      "ScaleColourSqrt: Sequential color scale with sqrt pre-training transform. British Colour spelling — same binding as ScaleColorSqrt.",
+    canonicalPath: "/reference/scales/colour_sqrt",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_steps",
+    title: "ScaleColourSteps — ggsvelte",
+    description:
+      "ScaleColourSteps: Two-stop binned color steps (low/high). British Colour spelling — same binding as ScaleColorSteps.",
+    canonicalPath: "/reference/scales/colour_steps",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_steps2",
+    title: "ScaleColourSteps2 — ggsvelte",
+    description:
+      "ScaleColourSteps2: Three-stop diverging binned color steps (low/mid/high). British Colour spelling — same binding as ScaleColorSteps2.",
+    canonicalPath: "/reference/scales/colour_steps2",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_stepsn",
+    title: "ScaleColourStepsn — ggsvelte",
+    description:
+      "ScaleColourStepsn: N-stop binned color steps from an ordered color list. British Colour spelling — same binding as ScaleColorStepsn.",
+    canonicalPath: "/reference/scales/colour_stepsn",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_viridis_b",
+    title: "ScaleColourViridisB — ggsvelte",
+    description:
+      "ScaleColourViridisB: Viridis-family color scale — binned (viridis_b). British Colour spelling — same binding as ScaleColorViridisB.",
+    canonicalPath: "/reference/scales/colour_viridis_b",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_viridis_c",
+    title: "ScaleColourViridisC — ggsvelte",
+    description:
+      "ScaleColourViridisC: Viridis-family color scale — continuous (viridis_c). British Colour spelling — same binding as ScaleColorViridisC.",
+    canonicalPath: "/reference/scales/colour_viridis_c",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/colour_viridis_d",
+    title: "ScaleColourViridisD — ggsvelte",
+    description:
+      "ScaleColourViridisD: Viridis-family color scale — discrete (viridis_d). British Colour spelling — same binding as ScaleColorViridisD.",
+    canonicalPath: "/reference/scales/colour_viridis_d",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_binned",
+    title: "ScaleFillBinned — ggsvelte",
+    description: "ScaleFillBinned: Binned fill scale: continuous values → ordered color steps.",
+    canonicalPath: "/reference/scales/fill_binned",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_brewer",
+    title: "ScaleFillBrewer — ggsvelte",
+    description: "ScaleFillBrewer: ColorBrewer qualitative fill scale (discrete categories).",
+    canonicalPath: "/reference/scales/fill_brewer",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_continuous",
+    title: "ScaleFillContinuous — ggsvelte",
+    description:
+      "ScaleFillContinuous: Continuous sequential fill scale (default continuous color family).",
+    canonicalPath: "/reference/scales/fill_continuous",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_date",
+    title: "ScaleFillDate — ggsvelte",
+    description: "ScaleFillDate: Sequential fill scale trained on calendar dates.",
+    canonicalPath: "/reference/scales/fill_date",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_datetime",
+    title: "ScaleFillDatetime — ggsvelte",
+    description: "ScaleFillDatetime: Sequential fill scale trained on datetime values.",
+    canonicalPath: "/reference/scales/fill_datetime",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_discrete",
+    title: "ScaleFillDiscrete — ggsvelte",
+    description:
+      "ScaleFillDiscrete: Discrete fill scale for categorical data (default ordinal family).",
+    canonicalPath: "/reference/scales/fill_discrete",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_distiller",
+    title: "ScaleFillDistiller — ggsvelte",
+    description: "ScaleFillDistiller: ColorBrewer sequential/diverging fill ramp (distiller).",
+    canonicalPath: "/reference/scales/fill_distiller",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_fermenter",
+    title: "ScaleFillFermenter — ggsvelte",
+    description: "ScaleFillFermenter: ColorBrewer binned fill steps (fermenter).",
+    canonicalPath: "/reference/scales/fill_fermenter",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_gradient",
+    title: "ScaleFillGradient — ggsvelte",
+    description: "ScaleFillGradient: Two-stop continuous fill gradient (low/high).",
+    canonicalPath: "/reference/scales/fill_gradient",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_gradient2",
+    title: "ScaleFillGradient2 — ggsvelte",
+    description:
+      "ScaleFillGradient2: Three-stop diverging continuous fill gradient (low/mid/high).",
+    canonicalPath: "/reference/scales/fill_gradient2",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_gradientn",
+    title: "ScaleFillGradientn — ggsvelte",
+    description: "ScaleFillGradientn: N-stop continuous fill gradient from an ordered color list.",
+    canonicalPath: "/reference/scales/fill_gradientn",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_grey",
+    title: "ScaleFillGrey — ggsvelte",
+    description: "ScaleFillGrey: Grey ramp fill palette for discrete categories.",
+    canonicalPath: "/reference/scales/fill_grey",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_hue",
+    title: "ScaleFillHue — ggsvelte",
+    description: "ScaleFillHue: Evenly spaced hue fill palette for discrete categories.",
+    canonicalPath: "/reference/scales/fill_hue",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_identity",
+    title: "ScaleFillIdentity — ggsvelte",
+    description:
+      "ScaleFillIdentity: Identity fill scale: source values are validated #rgb/#rrggbb colors used as-is.",
+    canonicalPath: "/reference/scales/fill_identity",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_log10",
+    title: "ScaleFillLog10 — ggsvelte",
+    description: "ScaleFillLog10: Sequential fill scale with log10 pre-training transform.",
+    canonicalPath: "/reference/scales/fill_log10",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_manual",
+    title: "ScaleFillManual — ggsvelte",
+    description: "ScaleFillManual: Manual fill mapping: domain values paired with explicit colors.",
+    canonicalPath: "/reference/scales/fill_manual",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_ordinal",
+    title: "ScaleFillOrdinal — ggsvelte",
+    description: "ScaleFillOrdinal: Explicit ordinal fill scale (categories → colors).",
+    canonicalPath: "/reference/scales/fill_ordinal",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_sqrt",
+    title: "ScaleFillSqrt — ggsvelte",
+    description: "ScaleFillSqrt: Sequential fill scale with sqrt pre-training transform.",
+    canonicalPath: "/reference/scales/fill_sqrt",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_steps",
+    title: "ScaleFillSteps — ggsvelte",
+    description: "ScaleFillSteps: Two-stop binned fill steps (low/high).",
+    canonicalPath: "/reference/scales/fill_steps",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_steps2",
+    title: "ScaleFillSteps2 — ggsvelte",
+    description: "ScaleFillSteps2: Three-stop diverging binned fill steps (low/mid/high).",
+    canonicalPath: "/reference/scales/fill_steps2",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_stepsn",
+    title: "ScaleFillStepsn — ggsvelte",
+    description: "ScaleFillStepsn: N-stop binned fill steps from an ordered color list.",
+    canonicalPath: "/reference/scales/fill_stepsn",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_viridis_b",
+    title: "ScaleFillViridisB — ggsvelte",
+    description: "ScaleFillViridisB: Viridis-family fill scale — binned (viridis_b).",
+    canonicalPath: "/reference/scales/fill_viridis_b",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_viridis_c",
+    title: "ScaleFillViridisC — ggsvelte",
+    description: "ScaleFillViridisC: Viridis-family fill scale — continuous (viridis_c).",
+    canonicalPath: "/reference/scales/fill_viridis_c",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/fill_viridis_d",
+    title: "ScaleFillViridisD — ggsvelte",
+    description: "ScaleFillViridisD: Viridis-family fill scale — discrete (viridis_d).",
+    canonicalPath: "/reference/scales/fill_viridis_d",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/linetype_binned",
+    title: "ScaleLinetypeBinned — ggsvelte",
+    description:
+      "ScaleLinetypeBinned: Binned linetype scale: continuous values → finite named symbols.",
+    canonicalPath: "/reference/scales/linetype_binned",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/linetype_discrete",
+    title: "ScaleLinetypeDiscrete — ggsvelte",
+    description: "ScaleLinetypeDiscrete: Discrete linetype scale for categories (named symbols).",
+    canonicalPath: "/reference/scales/linetype_discrete",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/linetype_identity",
+    title: "ScaleLinetypeIdentity — ggsvelte",
+    description:
+      "ScaleLinetypeIdentity: Identity linetype scale: source names used as mapped symbols.",
+    canonicalPath: "/reference/scales/linetype_identity",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/linetype_manual",
+    title: "ScaleLinetypeManual — ggsvelte",
+    description:
+      "ScaleLinetypeManual: Manual linetype mapping: domain values paired with named symbols.",
+    canonicalPath: "/reference/scales/linetype_manual",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/linewidth_binned",
+    title: "ScaleLinewidthBinned — ggsvelte",
+    description:
+      "ScaleLinewidthBinned: Binned linewidth scale: continuous values → stepped numeric style.",
+    canonicalPath: "/reference/scales/linewidth_binned",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/linewidth_continuous",
+    title: "ScaleLinewidthContinuous — ggsvelte",
+    description: "ScaleLinewidthContinuous: Continuous sequential linewidth scale.",
+    canonicalPath: "/reference/scales/linewidth_continuous",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/linewidth_date",
+    title: "ScaleLinewidthDate — ggsvelte",
+    description: "ScaleLinewidthDate: Sequential linewidth scale trained on calendar dates.",
+    canonicalPath: "/reference/scales/linewidth_date",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/linewidth_datetime",
+    title: "ScaleLinewidthDatetime — ggsvelte",
+    description: "ScaleLinewidthDatetime: Sequential linewidth scale trained on datetime values.",
+    canonicalPath: "/reference/scales/linewidth_datetime",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/linewidth_discrete",
+    title: "ScaleLinewidthDiscrete — ggsvelte",
+    description: "ScaleLinewidthDiscrete: Discrete linewidth scale for categories (ordinal).",
+    canonicalPath: "/reference/scales/linewidth_discrete",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/linewidth_identity",
+    title: "ScaleLinewidthIdentity — ggsvelte",
+    description:
+      "ScaleLinewidthIdentity: Identity linewidth scale: source numbers used as mapped style values.",
+    canonicalPath: "/reference/scales/linewidth_identity",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/linewidth_manual",
+    title: "ScaleLinewidthManual — ggsvelte",
+    description:
+      "ScaleLinewidthManual: Manual linewidth mapping: domain values paired with explicit numbers.",
+    canonicalPath: "/reference/scales/linewidth_manual",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/linewidth_ordinal",
+    title: "ScaleLinewidthOrdinal — ggsvelte",
+    description:
+      "ScaleLinewidthOrdinal: Discrete linewidth scale for categories (ordinal). ggplot2 *Ordinal alias — same binding as ScaleLinewidthDiscrete.",
+    canonicalPath: "/reference/scales/linewidth_ordinal",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/radius",
+    title: "ScaleRadius — ggsvelte",
+    description: "ScaleRadius: Continuous size scale with radius (linear) mapping instead of area.",
+    canonicalPath: "/reference/scales/radius",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/shape_binned",
+    title: "ScaleShapeBinned — ggsvelte",
+    description: "ScaleShapeBinned: Binned shape scale: continuous values → finite named symbols.",
+    canonicalPath: "/reference/scales/shape_binned",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/shape_discrete",
+    title: "ScaleShapeDiscrete — ggsvelte",
+    description: "ScaleShapeDiscrete: Discrete shape scale for categories (named symbols).",
+    canonicalPath: "/reference/scales/shape_discrete",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/shape_identity",
+    title: "ScaleShapeIdentity — ggsvelte",
+    description: "ScaleShapeIdentity: Identity shape scale: source names used as mapped symbols.",
+    canonicalPath: "/reference/scales/shape_identity",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/shape_manual",
+    title: "ScaleShapeManual — ggsvelte",
+    description: "ScaleShapeManual: Manual shape mapping: domain values paired with named symbols.",
+    canonicalPath: "/reference/scales/shape_manual",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/shape_ordinal",
+    title: "ScaleShapeOrdinal — ggsvelte",
+    description:
+      "ScaleShapeOrdinal: Discrete shape scale for categories (named symbols). ggplot2 *Ordinal alias — same binding as ScaleShapeDiscrete.",
+    canonicalPath: "/reference/scales/shape_ordinal",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/size_area",
+    title: "ScaleSizeArea — ggsvelte",
+    description: "ScaleSizeArea: Continuous size scale with area mapping (zero maps to zero area).",
+    canonicalPath: "/reference/scales/size_area",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/size_binned",
+    title: "ScaleSizeBinned — ggsvelte",
+    description: "ScaleSizeBinned: Binned size scale: continuous values → stepped numeric style.",
+    canonicalPath: "/reference/scales/size_binned",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/size_binned_area",
+    title: "ScaleSizeBinnedArea — ggsvelte",
+    description:
+      "ScaleSizeBinnedArea: Binned size scale with area mapping (zero maps to zero area).",
+    canonicalPath: "/reference/scales/size_binned_area",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/size_continuous",
+    title: "ScaleSizeContinuous — ggsvelte",
+    description: "ScaleSizeContinuous: Continuous sequential size scale.",
+    canonicalPath: "/reference/scales/size_continuous",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/size_date",
+    title: "ScaleSizeDate — ggsvelte",
+    description: "ScaleSizeDate: Sequential size scale trained on calendar dates.",
+    canonicalPath: "/reference/scales/size_date",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/size_datetime",
+    title: "ScaleSizeDatetime — ggsvelte",
+    description: "ScaleSizeDatetime: Sequential size scale trained on datetime values.",
+    canonicalPath: "/reference/scales/size_datetime",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/size_discrete",
+    title: "ScaleSizeDiscrete — ggsvelte",
+    description: "ScaleSizeDiscrete: Discrete size scale for categories (ordinal).",
+    canonicalPath: "/reference/scales/size_discrete",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "aliases",
+        title: "Also exported as",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/size_identity",
+    title: "ScaleSizeIdentity — ggsvelte",
+    description:
+      "ScaleSizeIdentity: Identity size scale: source numbers used as mapped style values.",
+    canonicalPath: "/reference/scales/size_identity",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/size_manual",
+    title: "ScaleSizeManual — ggsvelte",
+    description:
+      "ScaleSizeManual: Manual size mapping: domain values paired with explicit numbers.",
+    canonicalPath: "/reference/scales/size_manual",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/size_ordinal",
+    title: "ScaleSizeOrdinal — ggsvelte",
+    description:
+      "ScaleSizeOrdinal: Discrete size scale for categories (ordinal). ggplot2 *Ordinal alias — same binding as ScaleSizeDiscrete.",
+    canonicalPath: "/reference/scales/size_ordinal",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "alias",
+        title: "Alias",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/x_binned",
+    title: "ScaleXBinned — ggsvelte",
+    description:
+      "ScaleXBinned: Binned x position scale: quantitative values map to ordered bins (breaks are bin boundaries).",
+    canonicalPath: "/reference/scales/x_binned",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/x_continuous",
+    title: "ScaleXContinuous — ggsvelte",
+    description: "ScaleXContinuous: Continuous linear x position scale (default numeric family).",
+    canonicalPath: "/reference/scales/x_continuous",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/x_date",
+    title: "ScaleXDate — ggsvelte",
+    description: "ScaleXDate: Temporal x position scale (date).",
+    canonicalPath: "/reference/scales/x_date",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/x_datetime",
+    title: "ScaleXDatetime — ggsvelte",
+    description: "ScaleXDatetime: Temporal x position scale (datetime).",
+    canonicalPath: "/reference/scales/x_datetime",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/x_discrete",
+    title: "ScaleXDiscrete — ggsvelte",
+    description: "ScaleXDiscrete: Discrete (band) x position scale for categories.",
+    canonicalPath: "/reference/scales/x_discrete",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/x_log10",
+    title: "ScaleXLog10 — ggsvelte",
+    description:
+      "ScaleXLog10: Base-10 log x position scale (pre-stat log10 transform on a linear scale).",
+    canonicalPath: "/reference/scales/x_log10",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/x_month_day",
+    title: "ScaleXMonthDay — ggsvelte",
+    description: "ScaleXMonthDay: Temporal x position scale (month-day (year collapsed)).",
+    canonicalPath: "/reference/scales/x_month_day",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/x_reverse",
+    title: "ScaleXReverse — ggsvelte",
+    description:
+      "ScaleXReverse: Continuous x position scale with reverse: true (output direction flipped).",
+    canonicalPath: "/reference/scales/x_reverse",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/x_sqrt",
+    title: "ScaleXSqrt — ggsvelte",
+    description:
+      "ScaleXSqrt: Square-root x position scale (pre-stat sqrt transform on a linear scale).",
+    canonicalPath: "/reference/scales/x_sqrt",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/x_time",
+    title: "ScaleXTime — ggsvelte",
+    description: "ScaleXTime: Temporal x position scale (time-of-day).",
+    canonicalPath: "/reference/scales/x_time",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/y_binned",
+    title: "ScaleYBinned — ggsvelte",
+    description:
+      "ScaleYBinned: Binned y position scale: quantitative values map to ordered bins (breaks are bin boundaries).",
+    canonicalPath: "/reference/scales/y_binned",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/y_continuous",
+    title: "ScaleYContinuous — ggsvelte",
+    description: "ScaleYContinuous: Continuous linear y position scale (default numeric family).",
+    canonicalPath: "/reference/scales/y_continuous",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/y_date",
+    title: "ScaleYDate — ggsvelte",
+    description: "ScaleYDate: Temporal y position scale (date).",
+    canonicalPath: "/reference/scales/y_date",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/y_datetime",
+    title: "ScaleYDatetime — ggsvelte",
+    description: "ScaleYDatetime: Temporal y position scale (datetime).",
+    canonicalPath: "/reference/scales/y_datetime",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/y_discrete",
+    title: "ScaleYDiscrete — ggsvelte",
+    description: "ScaleYDiscrete: Discrete (band) y position scale for categories.",
+    canonicalPath: "/reference/scales/y_discrete",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/y_log10",
+    title: "ScaleYLog10 — ggsvelte",
+    description:
+      "ScaleYLog10: Base-10 log y position scale (pre-stat log10 transform on a linear scale).",
+    canonicalPath: "/reference/scales/y_log10",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/y_month_day",
+    title: "ScaleYMonthDay — ggsvelte",
+    description: "ScaleYMonthDay: Temporal y position scale (month-day (year collapsed)).",
+    canonicalPath: "/reference/scales/y_month_day",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/y_reverse",
+    title: "ScaleYReverse — ggsvelte",
+    description:
+      "ScaleYReverse: Continuous y position scale with reverse: true (output direction flipped).",
+    canonicalPath: "/reference/scales/y_reverse",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/y_sqrt",
+    title: "ScaleYSqrt — ggsvelte",
+    description:
+      "ScaleYSqrt: Square-root y position scale (pre-stat sqrt transform on a linear scale).",
+    canonicalPath: "/reference/scales/y_sqrt",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/scales/y_time",
+    title: "ScaleYTime — ggsvelte",
+    description: "ScaleYTime: Temporal y position scale (time-of-day).",
+    canonicalPath: "/reference/scales/y_time",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    headings: [
+      {
+        id: "defaults",
+        title: "Defaults",
+        level: 2,
+      },
+      {
+        id: "svelte",
+        title: "Svelte component",
+        level: 2,
+      },
+      {
+        id: "json",
+        title: "JSON scales",
+        level: 2,
+      },
+      {
+        id: "params",
+        title: "Params",
+        level: 2,
+      },
+      {
+        id: "guide",
+        title: "Guide interaction",
+        level: 2,
+      },
+      {
+        id: "examples",
+        title: "Examples",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/reference/guides/legend",
     title: "GuideLegend — ggsvelte",
     description:
@@ -6200,8 +11971,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-889",
-        title: "experimental (889)",
+        id: "experimental-903",
+        title: "experimental (903)",
         level: 3,
       },
       {
@@ -7571,6 +13342,10 @@ export const GUIDE_NAVIGATION = [
       {
         path: "/reference/positions",
         label: "Positions",
+      },
+      {
+        path: "/reference/scales",
+        label: "Scales",
       },
       {
         path: "/reference/guides",

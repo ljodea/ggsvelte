@@ -7,6 +7,10 @@ import type { DocsRouteMetadata, RouteHeading } from "../apps/docs/src/lib/route
 import { geomReferenceList } from "../packages/spec/src/geom-reference.ts";
 import { guideReferenceList } from "../packages/spec/src/guide-reference.ts";
 import { positionReferenceList } from "../packages/spec/src/position-reference.ts";
+import {
+  scaleReferenceList,
+  type ScaleReferenceEntry,
+} from "../packages/spec/src/scale-reference.ts";
 import { statReferenceList } from "../packages/spec/src/stat-reference.ts";
 
 type DocsRouteRecord = DocsRouteMetadata;
@@ -127,6 +131,62 @@ export function positionDetailRoutes(): DocsRouteRecord[] {
       title: `position ${entry.name} — ggsvelte`,
       description: `position "${entry.name}": ${entry.summary}`,
       canonicalPath: `/reference/positions/${entry.slug}`,
+      kind: "page" as const,
+      index: true,
+      sitemap: true,
+      shell: "docs" as const,
+      headings,
+    };
+  });
+}
+
+/** Same matching rule as apps/docs reference/scales/[name] page load. */
+function scaleHasRelatedExamples(entry: ScaleReferenceEntry): boolean {
+  const tokens = [
+    entry.slug,
+    entry.helper,
+    entry.component.toLowerCase(),
+    ...entry.aesthetics,
+    entry.scaleType,
+    entry.family,
+    ...(entry.aesthetics.includes("color") || entry.aesthetics.includes("fill")
+      ? ["color", "fill", "palette", "viridis", "gradient", "hue"]
+      : []),
+    ...(entry.aesthetics.includes("x") || entry.aesthetics.includes("y")
+      ? ["log", "scale", "time", "date"]
+      : []),
+    ...(entry.aesthetics.includes("size") ? ["size"] : []),
+  ];
+  return EXAMPLES.some((ex) => {
+    const hay = [ex.id, ex.category, ...ex.tags].join(" ").toLowerCase();
+    return tokens.some((t) => hay.includes(t.toLowerCase()));
+  });
+}
+
+/** One indexable page per public Scale* surface. */
+export function scaleDetailRoutes(): DocsRouteRecord[] {
+  return scaleReferenceList().map((entry) => {
+    const headings: RouteHeading[] = [{ id: "defaults", title: "Defaults", level: 2 }];
+    if (entry.aliasOf !== undefined) {
+      headings.push({ id: "alias", title: "Alias", level: 2 });
+    }
+    if (entry.alsoExportedAs.length > 0) {
+      headings.push({ id: "aliases", title: "Also exported as", level: 2 });
+    }
+    headings.push(
+      { id: "svelte", title: "Svelte component", level: 2 },
+      { id: "json", title: "JSON scales", level: 2 },
+      { id: "params", title: "Params", level: 2 },
+      { id: "guide", title: "Guide interaction", level: 2 },
+    );
+    if (scaleHasRelatedExamples(entry)) {
+      headings.push({ id: "examples", title: "Examples", level: 2 });
+    }
+    return {
+      path: `/reference/scales/${entry.slug}`,
+      title: `${entry.component} — ggsvelte`,
+      description: `${entry.component}: ${entry.summary}`,
+      canonicalPath: `/reference/scales/${entry.slug}`,
       kind: "page" as const,
       index: true,
       sitemap: true,

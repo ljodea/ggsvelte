@@ -32,6 +32,13 @@
         geoms.</span
       >
     </a>
+    <a href={`${base}/reference/scales`}>
+      <strong>Scales</strong>
+      <span
+        >Every Scale* component: position, color/fill, and style channels with
+        params and guides.</span
+      >
+    </a>
     <a href={`${base}/reference/guides`}>
       <strong>Guides and legends</strong>
       <span

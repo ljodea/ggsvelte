@@ -154,6 +154,7 @@ as JSON under the same name on the docs site):
 - [Axes and ticks](/reference/axes) — GuideAxis, breaks/labels, collision, grids
 - [Labels](/reference/labels) — chrome vs ticks vs GeomText/GeomLabel/SF labels
 - [Statistics and positions](/guide/statistics-positions) — stats, jitter, stacking
+- [Scales](/reference/scales) — every Scale* component (position, color, style)
 - [Scales and guides](/guide/scales-guides) — continuous, discrete, manual, temporal
 - [Facets and coordinates](/guide/facets-coordinates) — small multiples, flip, fixed aspect
 - [Chart themes](/themes) and [palettes](/palettes) — paper/ink chrome and data color

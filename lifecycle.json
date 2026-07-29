@@ -1688,6 +1688,14 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "SCALE_FAMILY_LABELS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "SCALE_REFERENCE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "SCHEMA_VERSION": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -1716,11 +1724,27 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "ScaleAesthetic": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ScaleCapability": {
           "kind": "type",
           "lifecycle": "experimental"
         },
         "ScaleExpansion": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleFamily": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleParamDoc": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleReferenceEntry": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -2148,6 +2172,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "allScaleHelpers": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "buildGreyPalette": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2173,6 +2201,10 @@
           "lifecycle": "experimental"
         },
         "componentNameForGeom": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "componentNameForScaleHelper": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2332,6 +2364,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "knownScaleSlugs": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "levenshtein": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2397,6 +2433,10 @@
           "lifecycle": "experimental"
         },
         "positionReferenceList": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "primaryScaleHelpers": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -2809,6 +2849,18 @@
           "lifecycle": "experimental"
         },
         "scaleRadius": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleReferenceByFamily": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleReferenceList": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "scaleReferencePrimaries": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3525,6 +3577,10 @@
           "lifecycle": "experimental"
         },
         "schemaArtifactJSON": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "slugForScaleHelper": {
           "kind": "value",
           "lifecycle": "experimental"
         },

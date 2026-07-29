@@ -20,8 +20,15 @@
     </p>
     <p class="guide-link">
       Scheme names as scale inputs:
-      <a href={`${base}/reference/palettes`}>Palettes reference</a>. Scale and
-      color channels:
+      <a href={`${base}/reference/palettes`}>Palettes reference</a>. How to set
+      a palette on a plot:
+      <a href={`${base}/reference/scales`}>Scale reference</a>
+      (e.g.
+      <a href={`${base}/reference/scales/color_discrete`}>ScaleColorDiscrete</a
+      >,
+      <a href={`${base}/reference/scales/color_continuous`}
+        >ScaleColorContinuous</a
+      >). Narrative guide:
       <a href={`${base}/guide/scales-guides`}>Scales and guides</a>.
     </p>
   </header>
@@ -39,6 +46,10 @@
       <li>
         <a href={`${base}/themes`}>Themes</a>
         — paper, grids, axes, and type
+      </li>
+      <li>
+        <a href={`${base}/reference/scales`}>Scale reference</a>
+        — every Scale* component and how to set color on a plot
       </li>
       <li>
         <a href={`${base}/guide/scales-guides`}>Scales and guides</a>
