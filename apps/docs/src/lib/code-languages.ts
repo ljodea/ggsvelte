@@ -6,10 +6,7 @@
  * module via `scripts/code-languages.test.ts`, and that project has no SvelteKit
  * path aliases.
  */
-import {
-  highlightCodeToHtml,
-  resolveHighlightLanguage,
-} from "../../../../scripts/highlight-code.ts";
+import { highlightCodeToHtml, resolveHighlightLanguage } from "../../../../scripts/highlight-code";
 
 /**
  * Infer a highlight language from a code-tab label when no explicit language prop is set
