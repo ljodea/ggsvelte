@@ -61,14 +61,16 @@
     </section>
   {/if}
 
-  <ExampleLiveFrame
-    exampleId={data.entry.id}
-    previewPath={data.previewPath}
-    title={data.entry.title}
-    width={frameWidth}
-    height={frameHeight}
-    fullWidth={data.entry.journey?.fullWidth ?? false}
-  />
+  {#key data.entry.id}
+    <ExampleLiveFrame
+      exampleId={data.entry.id}
+      previewPath={data.previewPath}
+      title={data.entry.title}
+      width={frameWidth}
+      height={frameHeight}
+      fullWidth={data.entry.journey?.fullWidth ?? false}
+    />
+  {/key}
 
   <section
     class="example-prose code-section"

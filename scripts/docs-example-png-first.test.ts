@@ -26,6 +26,8 @@ describe("docs example PNG-first (PR3)", () => {
     expect(page).toContain("ExampleLiveFrame");
     expect(page).not.toMatch(/\bdata\.component\b/);
     expect(page).not.toMatch(/<\s*Example\s*\/>/);
+    // Remount on client nav so Live state does not stick to the prior id.
+    expect(page).toContain("{#key data.entry.id}");
   });
 
   it("defers Example.svelte via near-viewport or ?vr eager load", () => {
