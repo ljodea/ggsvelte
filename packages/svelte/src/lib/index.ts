@@ -221,6 +221,12 @@ export { default as ThemeLinedraw } from "./theme/ThemeLinedraw.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeVoid } from "./theme/ThemeVoid.svelte";
 /** @lifecycle stable-intent */
+export { default as ThemeStata } from "./theme/ThemeStata.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeStatas1color } from "./theme/ThemeStatas1color.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeStatamono } from "./theme/ThemeStatamono.svelte";
+/** @lifecycle stable-intent */
 export { default as ThemeSolarized } from "./theme/ThemeSolarized.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeSolarizeddark } from "./theme/ThemeSolarizeddark.svelte";

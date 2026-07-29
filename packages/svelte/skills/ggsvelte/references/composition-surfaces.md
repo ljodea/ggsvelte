@@ -32,6 +32,9 @@ optional `"name"` base plus role overrides, e.g.
 | tufte                   | monochrome ink, no grid                                                    |
 | linedraw                | black-on-white line art: hairline black grid, black border                 |
 | void                    | no axes, grid, or panel chrome; marks and legends remain                   |
+| stata                   | Stata s2color: bluish-gray plot region, white panel, y-grid                |
+| stata_s1color           | Stata s1color: white panel with black border, light y-grid                 |
+| stata_mono              | Stata s2mono: gray plot region, monochrome y-grid                          |
 | solarized               | Solarized light: cream panel, muted base1 chrome, blue accent              |
 | solarizeddark           | Solarized dark: deep teal panel, muted base01 chrome, blue accent          |
 | economist_white         | Economist Graphic Detail: white panel, gray grid, light-gray paper         |
@@ -55,7 +58,7 @@ optional `"name"` base plus role overrides, e.g.
 Svelte: one named shell per product theme — `ThemeDefault`, `ThemeLight`,
 `ThemeDark`, `ThemeMinimal`, `ThemeGgplot2`, `ThemeClassic`, `ThemeBw`,
 `ThemeHrbr`, `ThemeFew`, `ThemeClean`, `ThemeFivethirtyeight`,
-`ThemeEconomist`, `ThemeTufte`, `ThemeLinedraw`, `ThemeVoid`, `ThemeSolarized`,
+`ThemeEconomist`, `ThemeTufte`, `ThemeLinedraw`, `ThemeVoid`, `ThemeStata`, `ThemeStatas1color`, `ThemeStatamono`, `ThemeSolarized`,
 `ThemeSolarizeddark`, `ThemeEconomistwhite`, `ThemeSolarized2`, `ThemeSolarized2dark`,
 `ThemeWsj`, `ThemeGdocs`, `ThemeHc`, `ThemeHcdark`, `ThemePander`, `ThemeCalc`, `ThemeExcel`, `ThemeExcelnew`, `ThemeBase`, `ThemeIgray`, `ThemeMap`, `ThemeSolid`, `ThemeGrey`, `ThemeGray`. Escape hatch `<Theme name={dynamicName} />` for
 reactive names.

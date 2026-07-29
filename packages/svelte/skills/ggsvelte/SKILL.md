@@ -153,9 +153,9 @@ Two rules worth keeping in working memory:
   `type:"log"` canonicalizes to linear+log10. Scale transforms run before
   stats and positions; coord transforms run after stats.
 - color/fill families: `ordinal`, `sequential`, `binned`, `manual`,
-  `identity`. 69 named schemes — 49 categorical (`observable10`, `tableau10`,
-  `colorblind`, `Set1`…) and 20 sequential/diverging (`viridis`, `magma`,
-  `Blues`, `RdBu`…). Size/linewidth/alpha and shape/linetype have their own
+  `identity`. 103 named schemes — 53 categorical (`observable10`, `tableau10`,
+  `colorblind`, `Set1`…) and 50 sequential/diverging (`viridis`, `magma`,
+  `Blues`, `RdBu`, Tableau gradient ramps…). Size/linewidth/alpha and shape/linetype have their own
   scale families.
 - Three equivalent skins:
   JSON `"scales": {"x": {"type": "linear", "transform": "log10"}}` ≡ helper
@@ -167,12 +167,7 @@ Two rules worth keeping in working memory:
   year-quarters infer time automatically. Ambiguous ordered dates need
   `"parse": "dmy"` or `"mdy"`; force `{"type": "band"}` for year-like
   identifiers; never preprocess dates into indexes.
-- Themes: 34 names (`default`, `light`, `dark`, `minimal`, `ggplot2`,
-  `classic`, `bw`, `hrbr`, `few`, `clean`, `fivethirtyeight`, `economist`,
-  `tufte`, `linedraw`, `void`, `solarized`, `solarizeddark`, `economist_white`,
-  `solarized_2`, `solarized_2dark`, `wsj`, `gdocs`, `hc`, `hcdark`, `pander`,
-  `calc`, `excel`, `excel_new`, `base`, `igray`, `map`, `solid`, plus
-  `grey`/`gray` aliasing `ggplot2`) as
+- Themes: 37 names (`default`, `light`, `dark`, `minimal`, `ggplot2`, `classic`, `bw`, `hrbr`, `few`, `clean`, `fivethirtyeight`, `economist`, `tufte`, `linedraw`, `void`, `stata`, `stata_s1color`, `stata_mono`, `solarized`, `solarizeddark`, `economist_white`, `solarized_2`, `solarized_2dark`, `wsj`, `gdocs`, `hc`, `hcdark`, `pander`, `calc`, `excel`, `excel_new`, `base`, `igray`, `map`, `solid`, plus `grey`/`gray` aliasing `ggplot2`) as
   `<ThemeTufte/>`-style children or `"theme": "tufte"` in JSON.
 
 Full option surfaces — every scale option, the `Scale*` component matrix, all

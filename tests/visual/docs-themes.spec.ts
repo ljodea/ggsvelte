@@ -46,12 +46,15 @@ test("palettes is a first-class route from site navigation and the homepage", as
 test("themes compares all built-in chart themes as full-width interactive portraits", async ({
   page,
 }) => {
+  // Intent-gated live load per portrait; budget scales with the registry so
+  // ggthemes ports do not trip the default 60s test timeout.
+  test.setTimeout(240_000);
   await page.goto("/themes?theme=light");
 
   const list = page.getByRole("list", { name: "Built-in chart themes" });
   const specimens = list.getByRole("listitem");
   // Non-alias product themes (grey/gray alias ggplot2; not separate portraits).
-  await expect(specimens).toHaveCount(33);
+  await expect(specimens).toHaveCount(36);
   await expect(specimens.getByRole("heading", { level: 3 })).toHaveText([
     "Default",
     "Light",
@@ -68,6 +71,9 @@ test("themes compares all built-in chart themes as full-width interactive portra
     "Tufte",
     "Linedraw",
     "Void",
+    "Stata",
+    "Stata S1 Color",
+    "Stata Mono",
     "Solarized",
     "Solarized Dark",
     "Economist White",
@@ -151,13 +157,17 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
   // Unique ramps only — scheme "gray" is a US-spelling alias of "grey", not a twin card.
-  await expect(cards).toHaveCount(48);
+  await expect(cards).toHaveCount(52);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Observable 10",
     "Ipsum",
     "Flexoki",
     "Tableau 10",
     "Colorblind",
+    "Stata",
+    "Stata S1 Color",
+    "Stata S1R Color",
+    "Stata Mono",
     "Economist",
     "Solarized",
     "Few",
@@ -208,6 +218,10 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "8 colors",
     "10 colors",
     "8 colors",
+    "15 colors",
+    "15 colors",
+    "15 colors",
+    "15 colors",
     "9 colors",
     "8 colors",
     "8 colors",
