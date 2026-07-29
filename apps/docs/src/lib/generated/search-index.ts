@@ -9566,14 +9566,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-285",
+    id: "heading:guide-lifecycle:experimental-288",
     kind: "heading",
-    title: "experimental (285)",
+    title: "experimental (288)",
     summary:
-      "experimental (285) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-285",
+      "experimental (288) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-288",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (285)"],
+    exact: ["experimental (288)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -21327,6 +21327,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["areaOutlineActive"],
   },
   {
+    id: "api:ggsvelte-core:bandKey",
+    kind: "api",
+    title: "bandKey",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["bandKey"],
+  },
+  {
     id: "api:ggsvelte-core:batchMarkCount",
     kind: "api",
     title: "batchMarkCount",
@@ -21525,6 +21534,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["encodeKey"],
   },
   {
+    id: "api:ggsvelte-core:finiteExtent",
+    kind: "api",
+    title: "finiteExtent",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["finiteExtent"],
+  },
+  {
     id: "api:ggsvelte-core:fnv1a",
     kind: "api",
     title: "fnv1a",
@@ -21685,6 +21703,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["markLinetype"],
+  },
+  {
+    id: "api:ggsvelte-core:niceLinearDomain",
+    kind: "api",
+    title: "niceLinearDomain",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["niceLinearDomain"],
   },
   {
     id: "api:ggsvelte-core:numberFormatter",

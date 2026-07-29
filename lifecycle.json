@@ -4399,6 +4399,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "bandKey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "batchMarkCount": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4487,6 +4491,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "finiteExtent": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "fnv1a": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4556,6 +4564,10 @@
           "lifecycle": "experimental"
         },
         "markLinetype": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "niceLinearDomain": {
           "kind": "value",
           "lifecycle": "experimental"
         },
