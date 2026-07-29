@@ -32,7 +32,9 @@
       // scripts/emit-schema.ts is invoked by the ROOT "schema:emit" script;
       // knip does not trace cross-workspace script paths, so it is an
       // explicit entry here.
-      "entry": ["tests/**/*.test.ts", "scripts/emit-schema.ts"],
+      // *-build.ts modules are gen-only (scripts/gen-reference-catalogs.ts);
+      // knip does not follow cross-workspace script imports into packages/spec.
+      "entry": ["tests/**/*.test.ts", "scripts/emit-schema.ts", "src/*-build.ts"],
       "project": ["src/**", "scripts/**", "tests/**"],
     },
     "packages/core": {
