@@ -32,6 +32,8 @@ describe("themes catalog", () => {
       { name: "tufte", scheme: "colorblind" },
       { name: "linedraw", scheme: "colorblind" },
       { name: "void", scheme: "colorblind" },
+      { name: "solarized", scheme: "solarized" },
+      { name: "solarizeddark", scheme: "solarized" },
       { name: "economist_white", scheme: "economist" },
       { name: "solarized_2", scheme: "tableau10" },
       { name: "solarized_2dark", scheme: "tableau10" },

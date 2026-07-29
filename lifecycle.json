@@ -6525,11 +6525,19 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ThemeSolarized": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ThemeSolarized2": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
         "ThemeSolarized2dark": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeSolarizeddark": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },

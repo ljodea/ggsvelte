@@ -157,6 +157,9 @@ export const THEME_NAMES = [
   "tufte",
   "linedraw",
   "void",
+  // ggthemes theme_solarized: light (default) and dark (light = FALSE) variants.
+  "solarized",
+  "solarizeddark",
   // ggthemes theme ports (#1158)
   "economist_white",
   "solarized_2",
