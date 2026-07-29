@@ -78,6 +78,24 @@ export const COLORBLIND_PALETTE: readonly string[] = [
   "#CC79A7",
 ];
 
+/**
+ * ggthemes economist_pal(fill = TRUE) at full capacity (n = 9 selection):
+ * blue-gray, dark blue, blue, light blue, dark green, light green, dark red,
+ * pink, gray. ggthemes re-selects per n; this port flattens to the fixed
+ * full-capacity order (prefix subsets approximate the smaller-n picks).
+ */
+export const ECONOMIST_PALETTE: readonly string[] = [
+  "#6794a7",
+  "#014d64",
+  "#01a2d9",
+  "#7ad2f6",
+  "#00887d",
+  "#76c0c1",
+  "#7c260b",
+  "#ee8f71",
+  "#adadad",
+];
+
 /** Named categorical schemes accepted by the portable spec. */
 export const CATEGORICAL_SCHEMES = {
   observable10: CATEGORICAL_PALETTE_10,
@@ -85,6 +103,7 @@ export const CATEGORICAL_SCHEMES = {
   flexoki: FLEXOKI_PALETTE,
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
+  economist: ECONOMIST_PALETTE,
   ...COLORBREWER_QUALITATIVE,
   hue: HUE_PALETTE_10,
   grey: GREY_PALETTE_10,
