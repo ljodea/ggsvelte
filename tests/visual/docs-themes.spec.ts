@@ -51,7 +51,7 @@ test("themes compares all built-in chart themes as full-width interactive portra
   const list = page.getByRole("list", { name: "Built-in chart themes" });
   const specimens = list.getByRole("listitem");
   // Non-alias product themes (grey/gray alias ggplot2; not separate portraits).
-  await expect(specimens).toHaveCount(16);
+  await expect(specimens).toHaveCount(19);
   await expect(specimens.getByRole("heading", { level: 3 })).toHaveText([
     "Default",
     "Light",
@@ -68,6 +68,9 @@ test("themes compares all built-in chart themes as full-width interactive portra
     "Tufte",
     "Linedraw",
     "Void",
+    "Economist White",
+    "Solarized 2",
+    "Solarized 2 Dark",
     "Test",
   ]);
 
@@ -126,7 +129,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
-  await expect(cards).toHaveCount(15);
+  await expect(cards).toHaveCount(19);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Observable 10",
     "Ipsum",
@@ -134,6 +137,10 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Tableau 10",
     "Colorblind",
     "Economist",
+    "Few",
+    "Few Light",
+    "Few Dark",
+    "FiveThirtyEight",
     "Set1",
     "Set2",
     "Set3",
@@ -151,6 +158,10 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "10 colors",
     "8 colors",
     "9 colors",
+    "8 colors",
+    "8 colors",
+    "8 colors",
+    "3 colors",
     "9 colors",
     "8 colors",
     "12 colors",

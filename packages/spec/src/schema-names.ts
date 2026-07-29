@@ -29,6 +29,11 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "colorblind",
   /** ggthemes scale_colour/fill_economist — Economist blues/greens (fill order). */
   "economist",
+  // ggthemes ports (#1159): Few "Show Me the Numbers" variants + FiveThirtyEight
+  "few",
+  "few_light",
+  "few_dark",
+  "fivethirtyeight",
   // ColorBrewer qualitative (#825)
   "Set1",
   "Set2",
@@ -131,6 +136,10 @@ export const THEME_NAMES = [
   "tufte",
   "linedraw",
   "void",
+  // ggthemes theme ports (#1158)
+  "economist_white",
+  "solarized_2",
+  "solarized_2dark",
   "grey",
   "gray",
   // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters
