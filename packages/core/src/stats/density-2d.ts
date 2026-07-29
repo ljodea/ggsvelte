@@ -7,6 +7,8 @@
  * Bandwidth: MASS::bandwidth.nrd then kde2d's h/4 scaling (fixture-oriented).
  * Grid: n×n over data range expanded by 5% each side (approx ggplot expand).
  * Contour levels: contourLevels(breaks | bins | binwidth) of the density surface.
+ * KDE surface: sorted-x sliding window (same ±8σ product kernel as a full
+ * G²·n scan; fewer examinations when bandwidth is local).
  *
  * Filled v1 (#802 phase 2): closed isoline rings only (open rings dropped).
  * True isobands between consecutive levels deferred.
@@ -83,6 +85,88 @@ const INV_SQRT_2PI = 1 / Math.sqrt(2 * Math.PI);
 
 function dnorm(u: number): number {
   return INV_SQRT_2PI * Math.exp(-0.5 * u * u);
+}
+
+export type ProductKdeGridOptions = {
+  /**
+   * When true, also return how many (grid-cell, sample) pairs the inner loop
+   * examined (post x-window admission). Used by complexity tests only.
+   */
+  countExaminations?: boolean;
+};
+
+export type ProductKdeGridResult = number[][] & {
+  examinations?: number;
+};
+
+/**
+ * Product-Gaussian KDE on a regular grid.
+ *
+ * Samples are sorted once by x; each grid row slides an x-window across
+ * ascending `gx` so far-away points are never visited — O(G·n + work) average
+ * vs a full O(G²·n) scan of every sample at every cell. Same ±8σ truncation
+ * and invN scaling as the historical direct product (MASS::kde2d-shaped).
+ */
+export function productKdeGrid(
+  xs: Float64Array,
+  ys: Float64Array,
+  gx: Float64Array,
+  gy: Float64Array,
+  hx: number,
+  hy: number,
+  options: ProductKdeGridOptions = {},
+): ProductKdeGridResult {
+  const nx = xs.length;
+  const gridNX = gx.length;
+  const gridNY = gy.length;
+  const z: ProductKdeGridResult = Array.from({ length: gridNY }, () =>
+    Array.from({ length: gridNX }, () => 0),
+  );
+  if (nx === 0 || gridNX === 0 || gridNY === 0 || !(hx > 0) || !(hy > 0)) {
+    if (options.countExaminations === true) z.examinations = 0;
+    return z;
+  }
+
+  const order = Array.from({ length: nx }, (_, i) => i).toSorted(
+    (a, b) => xs[a]! - xs[b]! || a - b,
+  );
+  const sortedX = new Float64Array(nx);
+  const sortedY = new Float64Array(nx);
+  for (let i = 0; i < nx; i++) {
+    sortedX[i] = xs[order[i]!]!;
+    sortedY[i] = ys[order[i]!]!;
+  }
+
+  const wx = 8 * hx;
+  const wy = 8 * hy;
+  const invN = 1 / (nx * hx * hy);
+  let examinations = 0;
+  const count = options.countExaminations === true;
+
+  for (let j = 0; j < gridNY; j++) {
+    const yj = gy[j]!;
+    let lo = 0;
+    for (let i = 0; i < gridNX; i++) {
+      const xi = gx[i]!;
+      const xLo = xi - wx;
+      const xHi = xi + wx;
+      while (lo < nx && sortedX[lo]! < xLo) lo++;
+      let s = 0;
+      for (let k = lo; k < nx; k++) {
+        const xv = sortedX[k]!;
+        if (xv > xHi) break;
+        if (count) examinations++;
+        const dy = yj - sortedY[k]!;
+        if (Math.abs(dy) > wy) continue;
+        const dx = xi - xv;
+        s += dnorm(dx / hx) * dnorm(dy / hy);
+      }
+      z[j]![i] = s * invN;
+    }
+  }
+
+  if (count) z.examinations = examinations;
+  return z;
 }
 
 function expandRange(min: number, max: number, mul = 0.05): [number, number] {
@@ -216,31 +300,8 @@ export function statDensity2d(input: Density2dStatInput): Density2dStatResult {
     const [y0, y1] = expandRange(ymin, ymax, 0.05);
     const gx = linspace(x0, x1, gridN);
     const gy = linspace(y0, y1, gridN);
-    const z: number[][] = Array.from({ length: gridN }, () =>
-      Array.from({ length: gridN }, () => 0),
-    );
-
-    // Direct product kernel; window ±8σ for exactness at double precision.
-    const wx = 8 * hx;
-    const wy = 8 * hy;
-    const invN = 1 / (nx * hx * hy);
-    const kernelSum = (xi: number, yj: number): number => {
-      let s = 0;
-      for (let k = 0; k < nx; k++) {
-        const dx = xi - xs[k]!;
-        if (Math.abs(dx) > wx) continue;
-        const dy = yj - ys[k]!;
-        if (Math.abs(dy) > wy) continue;
-        s += dnorm(dx / hx) * dnorm(dy / hy);
-      }
-      return s * invN;
-    };
-    for (let j = 0; j < gridN; j++) {
-      const yj = gy[j]!;
-      for (let i = 0; i < gridN; i++) {
-        z[j]![i] = kernelSum(gx[i]!, yj);
-      }
-    }
+    // Sorted-x sliding window (same ±8σ / invN contract as the direct product).
+    const z = productKdeGrid(xs, ys, gx, gy, hx, hy);
 
     let zmin = Infinity;
     let zmax = -Infinity;
