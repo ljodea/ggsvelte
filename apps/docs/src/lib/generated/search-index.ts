@@ -61,7 +61,8 @@ export const DOCS_SEARCH_INDEX = [
     id: "page:reference",
     kind: "page",
     title: "Reference",
-    summary: "Geom, guide, interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
+    summary:
+      "Geom, guide, labs, axes, labels, interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
     href: "/reference",
     keywords: ["Reference"],
     exact: ["Reference"],
@@ -195,6 +196,216 @@ export const DOCS_SEARCH_INDEX = [
     href: "/reference/guides#legend-focus",
     keywords: ["Guides and legends", "Reference"],
     exact: ["Legend focus and clear recovery"],
+  },
+  {
+    id: "page:reference-labs",
+    kind: "page",
+    title: "Labs",
+    summary:
+      "Plot title, subtitle, caption, and per-aesthetic axis/legend titles via the Labs child layer.",
+    href: "/reference/labs",
+    keywords: ["Reference"],
+    exact: ["Labs", "labs", "plot title", "axis title"],
+  },
+  {
+    id: "heading:reference-labs:props",
+    kind: "heading",
+    title: "Props",
+    summary:
+      "Props in Labs. Plot title, subtitle, caption, and per-aesthetic axis/legend titles via the Labs child layer.",
+    href: "/reference/labs#props",
+    keywords: ["Labs", "Reference"],
+    exact: ["Props"],
+  },
+  {
+    id: "heading:reference-labs:svelte",
+    kind: "heading",
+    title: "Svelte",
+    summary:
+      "Svelte in Labs. Plot title, subtitle, caption, and per-aesthetic axis/legend titles via the Labs child layer.",
+    href: "/reference/labs#svelte",
+    keywords: ["Labs", "Reference"],
+    exact: ["Svelte"],
+  },
+  {
+    id: "heading:reference-labs:json",
+    kind: "heading",
+    title: "PortableSpec JSON",
+    summary:
+      "PortableSpec JSON in Labs. Plot title, subtitle, caption, and per-aesthetic axis/legend titles via the Labs child layer.",
+    href: "/reference/labs#json",
+    keywords: ["Labs", "Reference"],
+    exact: ["PortableSpec JSON"],
+  },
+  {
+    id: "heading:reference-labs:merge",
+    kind: "heading",
+    title: "Keyed merge",
+    summary:
+      "Keyed merge in Labs. Plot title, subtitle, caption, and per-aesthetic axis/legend titles via the Labs child layer.",
+    href: "/reference/labs#merge",
+    keywords: ["Labs", "Reference"],
+    exact: ["Keyed merge"],
+  },
+  {
+    id: "heading:reference-labs:related",
+    kind: "heading",
+    title: "Related surfaces",
+    summary:
+      "Related surfaces in Labs. Plot title, subtitle, caption, and per-aesthetic axis/legend titles via the Labs child layer.",
+    href: "/reference/labs#related",
+    keywords: ["Labs", "Reference"],
+    exact: ["Related surfaces"],
+  },
+  {
+    id: "page:reference-axes",
+    kind: "page",
+    title: "Axes and ticks",
+    summary:
+      "Axis titles, GuideAxis presentation, scale breaks/labels, band layout, and theme grids.",
+    href: "/reference/axes",
+    keywords: ["Reference"],
+    exact: ["Axes and ticks", "axis", "ticks", "GuideAxis", "tick labels"],
+  },
+  {
+    id: "heading:reference-axes:who-owns-what",
+    kind: "heading",
+    title: "Who owns what",
+    summary:
+      "Who owns what in Axes and ticks. Axis titles, GuideAxis presentation, scale breaks/labels, band layout, and theme grids.",
+    href: "/reference/axes#who-owns-what",
+    keywords: ["Axes and ticks", "Reference"],
+    exact: ["Who owns what"],
+  },
+  {
+    id: "heading:reference-axes:guide-axis",
+    kind: "heading",
+    title: "GuideAxis",
+    summary:
+      "GuideAxis in Axes and ticks. Axis titles, GuideAxis presentation, scale breaks/labels, band layout, and theme grids.",
+    href: "/reference/axes#guide-axis",
+    keywords: ["Axes and ticks", "Reference"],
+    exact: ["GuideAxis", "showTicks", "collision"],
+  },
+  {
+    id: "heading:reference-axes:scale-breaks-labels",
+    kind: "heading",
+    title: "Scale breaks and label formats",
+    summary:
+      "Scale breaks and label formats in Axes and ticks. Axis titles, GuideAxis presentation, scale breaks/labels, band layout, and theme grids.",
+    href: "/reference/axes#scale-breaks-labels",
+    keywords: ["Axes and ticks", "Reference"],
+    exact: ["Scale breaks and label formats", "breaks", "tick format"],
+  },
+  {
+    id: "heading:reference-axes:band-axis-layout",
+    kind: "heading",
+    title: "Band axis label layout",
+    summary:
+      "Band axis label layout in Axes and ticks. Axis titles, GuideAxis presentation, scale breaks/labels, band layout, and theme grids.",
+    href: "/reference/axes#band-axis-layout",
+    keywords: ["Axes and ticks", "Reference"],
+    exact: ["Band axis label layout"],
+  },
+  {
+    id: "heading:reference-axes:builder-and-json",
+    kind: "heading",
+    title: "Builder and JSON",
+    summary:
+      "Builder and JSON in Axes and ticks. Axis titles, GuideAxis presentation, scale breaks/labels, band layout, and theme grids.",
+    href: "/reference/axes#builder-and-json",
+    keywords: ["Axes and ticks", "Reference"],
+    exact: ["Builder and JSON"],
+  },
+  {
+    id: "heading:reference-axes:grid",
+    kind: "heading",
+    title: "Grid lines",
+    summary:
+      "Grid lines in Axes and ticks. Axis titles, GuideAxis presentation, scale breaks/labels, band layout, and theme grids.",
+    href: "/reference/axes#grid",
+    keywords: ["Axes and ticks", "Reference"],
+    exact: ["Grid lines"],
+  },
+  {
+    id: "heading:reference-axes:related",
+    kind: "heading",
+    title: "Related surfaces",
+    summary:
+      "Related surfaces in Axes and ticks. Axis titles, GuideAxis presentation, scale breaks/labels, band layout, and theme grids.",
+    href: "/reference/axes#related",
+    keywords: ["Axes and ticks", "Reference"],
+    exact: ["Related surfaces"],
+  },
+  {
+    id: "page:reference-labels",
+    kind: "page",
+    title: "Labels",
+    summary:
+      "Plot chrome vs tick labels vs data labels (GeomText, GeomLabel, SF text/label geoms).",
+    href: "/reference/labels",
+    keywords: ["Reference"],
+    exact: ["Labels", "GeomText", "GeomLabel", "data labels"],
+  },
+  {
+    id: "heading:reference-labels:three-kinds",
+    kind: "heading",
+    title: "Three kinds of labels",
+    summary:
+      "Three kinds of labels in Labels. Plot chrome vs tick labels vs data labels (GeomText, GeomLabel, SF text/label geoms).",
+    href: "/reference/labels#three-kinds",
+    keywords: ["Labels", "Reference"],
+    exact: ["Three kinds of labels"],
+  },
+  {
+    id: "heading:reference-labels:geom-text",
+    kind: "heading",
+    title: "GeomText",
+    summary:
+      "GeomText in Labels. Plot chrome vs tick labels vs data labels (GeomText, GeomLabel, SF text/label geoms).",
+    href: "/reference/labels#geom-text",
+    keywords: ["Labels", "Reference"],
+    exact: ["GeomText"],
+  },
+  {
+    id: "heading:reference-labels:geom-label",
+    kind: "heading",
+    title: "GeomLabel",
+    summary:
+      "GeomLabel in Labels. Plot chrome vs tick labels vs data labels (GeomText, GeomLabel, SF text/label geoms).",
+    href: "/reference/labels#geom-label",
+    keywords: ["Labels", "Reference"],
+    exact: ["GeomLabel"],
+  },
+  {
+    id: "heading:reference-labels:sf-labels",
+    kind: "heading",
+    title: "Simple-features labels",
+    summary:
+      "Simple-features labels in Labels. Plot chrome vs tick labels vs data labels (GeomText, GeomLabel, SF text/label geoms).",
+    href: "/reference/labels#sf-labels",
+    keywords: ["Labels", "Reference"],
+    exact: ["Simple-features labels"],
+  },
+  {
+    id: "heading:reference-labels:collision",
+    kind: "heading",
+    title: "Collision: geoms vs guides",
+    summary:
+      "Collision: geoms vs guides in Labels. Plot chrome vs tick labels vs data labels (GeomText, GeomLabel, SF text/label geoms).",
+    href: "/reference/labels#collision",
+    keywords: ["Labels", "Reference"],
+    exact: ["Collision: geoms vs guides"],
+  },
+  {
+    id: "heading:reference-labels:related",
+    kind: "heading",
+    title: "Related surfaces",
+    summary:
+      "Related surfaces in Labels. Plot chrome vs tick labels vs data labels (GeomText, GeomLabel, SF text/label geoms).",
+    href: "/reference/labels#related",
+    keywords: ["Labels", "Reference"],
+    exact: ["Related surfaces"],
   },
   {
     id: "page:reference-interactions",

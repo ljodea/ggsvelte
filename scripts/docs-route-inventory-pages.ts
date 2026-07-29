@@ -77,7 +77,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     path: "/reference",
     title: "Reference — ggsvelte",
     description:
-      "Geom, guide, interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
+      "Geom, guide, labs, axes, labels, interaction, CLI, diagnostic, lifecycle, and PortableSpec contracts.",
     canonicalPath: "/reference",
     kind: "page",
     index: true,
@@ -151,6 +151,66 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     ],
   },
   {
+    path: "/reference/labs",
+    title: "Labs — ggsvelte",
+    description:
+      "Plot title, subtitle, caption, and per-aesthetic axis/legend titles via the Labs child layer.",
+    canonicalPath: "/reference/labs",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: { section: "Reference", label: "Labs", order: 55 },
+    headings: [
+      { id: "props", title: "Props", level: 2 },
+      { id: "svelte", title: "Svelte", level: 2 },
+      { id: "json", title: "PortableSpec JSON", level: 2 },
+      { id: "merge", title: "Keyed merge", level: 2 },
+      { id: "related", title: "Related surfaces", level: 2 },
+    ],
+  },
+  {
+    path: "/reference/axes",
+    title: "Axes and ticks — ggsvelte",
+    description:
+      "Axis titles, GuideAxis presentation, scale breaks/labels, band layout, and theme grids.",
+    canonicalPath: "/reference/axes",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: { section: "Reference", label: "Axes and ticks", order: 56 },
+    headings: [
+      { id: "who-owns-what", title: "Who owns what", level: 2 },
+      { id: "guide-axis", title: "GuideAxis", level: 2 },
+      { id: "scale-breaks-labels", title: "Scale breaks and label formats", level: 2 },
+      { id: "band-axis-layout", title: "Band axis label layout", level: 2 },
+      { id: "builder-and-json", title: "Builder and JSON", level: 2 },
+      { id: "grid", title: "Grid lines", level: 2 },
+      { id: "related", title: "Related surfaces", level: 2 },
+    ],
+  },
+  {
+    path: "/reference/labels",
+    title: "Labels — ggsvelte",
+    description:
+      "Plot chrome vs tick labels vs data labels (GeomText, GeomLabel, SF text/label geoms).",
+    canonicalPath: "/reference/labels",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: { section: "Reference", label: "Labels", order: 57 },
+    headings: [
+      { id: "three-kinds", title: "Three kinds of labels", level: 2 },
+      { id: "geom-text", title: "GeomText", level: 2 },
+      { id: "geom-label", title: "GeomLabel", level: 2 },
+      { id: "sf-labels", title: "Simple-features labels", level: 2 },
+      { id: "collision", title: "Collision: geoms vs guides", level: 2 },
+      { id: "related", title: "Related surfaces", level: 2 },
+    ],
+  },
+  {
     path: "/reference/interactions",
     title: "Search interactions — ggsvelte",
     description:
@@ -160,7 +220,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Interaction reference", order: 55 },
+    navigation: { section: "Reference", label: "Interaction reference", order: 58 },
   },
   {
     path: "/reference/themes",
@@ -172,7 +232,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Themes", order: 56 },
+    navigation: { section: "Reference", label: "Themes", order: 59 },
     headings: [
       { id: "components", title: "Components", level: 2 },
       { id: "usage", title: "Usage", level: 2 },
@@ -192,7 +252,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "Palettes", order: 57 },
+    navigation: { section: "Reference", label: "Palettes", order: 60 },
     headings: [
       { id: "using-schemes", title: "Using schemes", level: 2 },
       { id: "helper-map", title: "Scale helpers", level: 2 },
@@ -213,7 +273,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     index: true,
     sitemap: true,
     shell: "docs",
-    navigation: { section: "Reference", label: "CLI reference", order: 58 },
+    navigation: { section: "Reference", label: "CLI reference", order: 61 },
     headings: [
       { id: "input-and-output", title: "Input and output", level: 2 },
       { id: "options", title: "Options", level: 2 },

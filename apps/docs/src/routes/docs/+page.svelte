@@ -30,6 +30,18 @@
       "GuideLegend, GuideColorbar, GuideColorsteps, GuideAxis, and GuideNone.",
     ],
     [
+      "/reference/labs",
+      "Plot title, subtitle, caption, and per-aesthetic axis/legend titles.",
+    ],
+    [
+      "/reference/axes",
+      "GuideAxis, scale breaks/labels, band layout, collision, and theme grids.",
+    ],
+    [
+      "/reference/labels",
+      "Plot chrome vs tick labels vs GeomText / GeomLabel / SF label geoms.",
+    ],
+    [
       "/reference/cli",
       "Render, validate, and export charts from the terminal.",
     ],
