@@ -13,6 +13,5 @@ by default. `runPipeline` / `assemblePortableSpec` still run `normalize()` plus
 TypeBox-free structural gates. Full schema `validate()` remains on the agent
 path (`validate()`, builder `.spec()`, CLI).
 
-Migration: none — agents and the CLI still use `validate()`; only the browser
-render path drops TypeBox schema-shape checks. Structural gates (scheme family,
-binned breaks, guides) still throw SpecValidationError from `runPipeline`.
+Migration: none — additive for new structural-gate exports; CLI still validates
+with TypeBox while browser render uses normalize + structural gates only

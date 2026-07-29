@@ -63,7 +63,10 @@ export default defineConfig({
             // schema-declarations or description-rich reference bags.
             {
               name: "ggsvelte-spec-validate",
-              test: /(?:[\\/]node_modules[\\/]@ggsvelte[\\/]spec[\\/]|[\\/]packages[\\/]spec[\\/])(?:dist[\\/]|src[\\/])?(?:validate|schema-declarations|schema-name-schemas|schema\.|temporal-parse-schema|temporal-interval-schema|artifact|lint|geom-reference|stat-reference|position-reference|guide-reference|geom-params)(?:[-.]|$)/,
+              // TypeBox schema/validate + schema-derived API catalogs.
+              // Excludes validate-structure* (TypeBox-free structuralGate for render).
+              // Excludes schema-catalog / schema-names (runtime name lists).
+              test: /(?:packages[\\/]spec[\\/](?:src|dist)[\\/]|@ggsvelte[\\/]spec[\\/](?:dist[\\/])?)(?:validate(?:\.[cm]?[jt]s$|-(?:data|map|schema))|schema(?:\.[cm]?[jt]s$|-declarations|-name-schemas)|temporal-(?:parse|interval)-schema|artifact\.|lint(?:\.|-)|geom-reference|stat-reference|position-reference|guide-reference|geom-params)/,
               priority: 40,
             },
             {
