@@ -42,6 +42,9 @@ optional `"name"` base plus role overrides, e.g.
 | hc                      | Highcharts default: y-only #D8D8D8 grid on white, no border                |
 | hcdark                  | Highcharts darkunica: #2a2a2b paper, #707073 y-grid                        |
 | pander                  | pander: dashed grey grid and ticks, bold title on white                    |
+| calc                    | LibreOffice Calc: white panel, gray70 border + y-grid, no axis lines       |
+| excel                   | Excel 97 classic: gray panel, black y-grid + border (horizontal=TRUE)      |
+| excel_new               | modern Excel: dark-gray ink, hairline #bfbfbf y-grid, no ticks or border   |
 | grey (alias of ggplot2) | UK theme_grey                                                              |
 | gray (alias of ggplot2) | US theme_gray                                                              |
 
