@@ -143,6 +143,39 @@ describe("decideChangesetComment", () => {
     );
     expect(decision.verdict).toBe("not-needed");
   });
+
+  // Regression: #1194 reclassified pending theme/palette changesets
+  // patch → minor without touching package src. That is a legitimate release
+  // fix, not docs pollution — only *added* changesets without package code
+  // are unwarranted.
+  it("allows modifying already-queued changesets without package code", () => {
+    const decision = decideChangesetComment(
+      [
+        "M\t.changeset/economist-palette.md",
+        "M\t.changeset/solarized-themes-palette.md",
+        "M\tCONTRIBUTING.md",
+        "M\tscripts/deprecation-wiring.test.ts",
+      ],
+      PACKAGES,
+    );
+    expect(decision.verdict).toBe("not-needed");
+  });
+
+  it("still blocks newly added changesets without package code (name-status)", () => {
+    const decision = decideChangesetComment(
+      ["A\t.changeset/docs-only.md", "M\tapps/docs/src/routes/+page.svelte"],
+      PACKAGES,
+    );
+    expect(decision.verdict).toBe("unwarranted");
+  });
+
+  it("treats a newly added changeset with shipped code as present (name-status)", () => {
+    const decision = decideChangesetComment(
+      ["A\t.changeset/my-change.md", "M\tpackages/core/src/scales.ts"],
+      PACKAGES,
+    );
+    expect(decision.verdict).toBe("changeset-present");
+  });
 });
 
 describe("changeset-check workflow wiring", () => {

@@ -121,7 +121,7 @@ describe("version-bumping changesets carry an explicit migration marker", () => 
       const body = readFileSync(join(changesetDir, name), "utf8");
       const frontmatter = /^---\n([\s\S]*?)\n---/.exec(body)?.[1] ?? "";
       const marker = /Migration: (\S[^\n]*)/.exec(body)?.[1];
-      if (!marker?.startsWith("none — additive")) continue;
+      if (marker === undefined || !marker.startsWith("none — additive")) continue;
       const context = `.changeset/${name}`;
       const packageBumps = [...frontmatter.matchAll(/"@ggsvelte\/[^"]+":\s*(patch|minor|major)/g)];
       expect(packageBumps.length, `${context}: expected package bumps`).toBeGreaterThan(0);
