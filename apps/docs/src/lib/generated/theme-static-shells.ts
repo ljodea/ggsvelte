@@ -207,6 +207,18 @@ export const THEME_STATIC_SHELLS = [
     sha256: "597f57d1f505d262b7ea00435970337477cd3111769a15badc00d40dde0d0ac1",
   },
   {
+    id: "palette-ptol",
+    filename: "palette-ptol.svg",
+    path: "/theme-shells/palette-ptol.svg",
+    sha256: "8a3d571fd14d5f4cffa8f9440be5624ef73c1b29475dfc753c2a7c6dbc6c6f5a",
+  },
+  {
+    id: "palette-canva",
+    filename: "palette-canva.svg",
+    path: "/theme-shells/palette-canva.svg",
+    sha256: "6e265313f53296cf01d712406d17eabce90b24c03899bdb205063e7c8301939b",
+  },
+  {
     id: "palette-Set1",
     filename: "palette-Set1.svg",
     path: "/theme-shells/palette-Set1.svg",
