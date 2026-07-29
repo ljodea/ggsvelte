@@ -27,10 +27,9 @@ test("Getting Started renders the packed file and the built-up chart", async ({ 
 test("each step shows its own delta and the finished chart is live", async ({ page }) => {
   await page.goto("/guide/getting-started?theme=light");
   const steps = page.locator(".progressive-step");
-  await expect(steps).toHaveCount(5);
+  await expect(steps).toHaveCount(4);
   await expect(steps.getByRole("heading", { level: 3 })).toHaveText([
     "Pick a minimal theme and add a rolling median line",
-    "Put earlier bloom on top",
     "Add epoch bands",
     "Annotate record years",
     "Finish it",
@@ -38,7 +37,7 @@ test("each step shows its own delta and the finished chart is live", async ({ pa
 
   // Intermediate steps are build-time SVGs; Finish it is the one live plot
   // (hydrate near-viewport, #972). Before that scroll, every step is an img.
-  await expect(steps.locator("img.lesson-chart")).toHaveCount(5);
+  await expect(steps.locator("img.lesson-chart")).toHaveCount(4);
   await expect(steps.locator(".gg-plot-root")).toHaveCount(0);
   const finishedChart = page.locator(".finished-chart");
   await finishedChart.scrollIntoViewIfNeeded();
@@ -47,7 +46,7 @@ test("each step shows its own delta and the finished chart is live", async ({ pa
     timeout: 45_000,
   });
   await expect(page.locator(".gg-plot-root")).toHaveCount(1);
-  await expect(steps.locator("img.lesson-chart")).toHaveCount(4);
+  await expect(steps.locator("img.lesson-chart")).toHaveCount(3);
   await expectNoDocumentOverflow(page);
 });
 

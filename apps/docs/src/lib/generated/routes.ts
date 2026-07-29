@@ -3902,11 +3902,6 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "put-earlier-bloom-on-top",
-        title: "Put earlier bloom on top",
-        level: 3,
-      },
-      {
         id: "add-epoch-bands",
         title: "Add epoch bands",
         level: 3,

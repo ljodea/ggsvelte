@@ -41,7 +41,7 @@ function renderedHeadingIds(): string[] {
 describe("getting-started page navigation", () => {
   it("offers only headings the component renders, in page order", () => {
     const stepIds = GETTING_STARTED_PAGE_HEADINGS.filter((h) => h.level === 3).map((h) => h.id);
-    expect(stepIds.length).toBeGreaterThanOrEqual(5);
+    expect(stepIds.length).toBeGreaterThanOrEqual(4);
 
     const expected = GETTING_STARTED_PAGE_HEADINGS.map((heading) =>
       stepIds.includes(heading.id) ? "(steps)" : heading.id,

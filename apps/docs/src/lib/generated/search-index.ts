@@ -6166,16 +6166,6 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Pick a minimal theme and add a rolling median line"],
   },
   {
-    id: "heading:guide-getting-started:put-earlier-bloom-on-top",
-    kind: "heading",
-    title: "Put earlier bloom on top",
-    summary:
-      "Put earlier bloom on top in Getting started. Install @ggsvelte/svelte and render one chart from a Svelte file.",
-    href: "/guide/getting-started#put-earlier-bloom-on-top",
-    keywords: ["Getting started", "Start"],
-    exact: ["Put earlier bloom on top"],
-  },
-  {
     id: "heading:guide-getting-started:add-epoch-bands",
     kind: "heading",
     title: "Add epoch bands",
