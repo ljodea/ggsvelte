@@ -143,14 +143,27 @@ test("homepage hero tooltip names a single department without axis crosshair noi
   await expect(tooltip.locator(".hero-tooltip")).toHaveCount(1);
 });
 
+test("homepage grammar section SSRs chrome and a static chart shell", async ({ request }) => {
+  const response = await request.get("/");
+  const html = await response.text();
+  // Section chrome is not gated on the dynamic plot import.
+  expect(html).toContain("Declare a layer interactive");
+  expect(html).toContain('id="grammar-heading"');
+  // Static shell ships before live GGPlot hydrates (same pattern as hero).
+  expect(html).toContain("grammar-static");
+  expect(html).toContain("Flipper length mm");
+});
+
 test("homepage grammar steps change real chart structure in place", async ({ page }) => {
   // Full palmerPenguins (333) + loess on step toggles is heavier than the old
   // 30-row specimen; cold CI hydrate already sits near the 60s project budget.
   test.setTimeout(120_000);
   await page.goto("/");
+  // Chrome is SSR'd immediately — not blocked on the dynamic plot chunk.
+  await expect(page.getByRole("heading", { name: "Declare a layer interactive" })).toBeVisible();
   const output = page.locator(".grammar-output");
   const plot = output.locator(".gg-plot-root");
-  // GrammarDemo is dynamic-imported; wait for the live plot before asserting structure.
+  // Live plot upgrades from the static shell after dynamic import.
   await expect(plot).toHaveAttribute("data-gg-ready", "true", {
     timeout: 60_000,
   });
@@ -174,12 +187,12 @@ test("homepage grammar steps change real chart structure in place", async ({ pag
   await expect(output.locator(".gg-paths")).toHaveCount(1, { timeout: 30_000 });
 });
 
-test("homepage grammar inspect is exact: point tooltip, no path x-crosshair", async ({ page }) => {
+test("homepage grammar inspect draws xy crosshair and supports legend focus", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=dark");
   const output = page.locator(".grammar-output");
   await expect(output.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
-    timeout: 30_000,
+    timeout: 60_000,
   });
   // Step 4 (Interaction) is the default open step.
   await expect(output.locator(".gg-capture")).toBeVisible();
@@ -193,8 +206,14 @@ test("homepage grammar inspect is exact: point tooltip, no path x-crosshair", as
   // path under auto mode "x" instead of a point.
   await expect(tooltip.getByText("species")).toBeVisible();
   await expect(tooltip.getByText("-")).toHaveCount(0);
-  // Exact mode: no full-panel vertical guide from path auto-mode "x".
-  await expect(output.locator(".gg-crosshair")).toHaveCount(0);
+  // mode "xy": full numeric crosshair — one line per continuous axis.
+  await expect(output.locator(".gg-crosshair")).toHaveCount(2);
+
+  // legendFocus: discrete color entries are keyboard-reachable targets.
+  const legendTarget = output.locator("[data-gg-legend-target]").first();
+  await expect(legendTarget).toBeVisible();
+  await legendTarget.focus();
+  await expect(legendTarget).toBeFocused();
 });
 
 test("homepage mobile order is claim, specimen, then install", async ({ page }) => {
