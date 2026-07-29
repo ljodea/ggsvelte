@@ -30,6 +30,7 @@ const THEME_LABELS = {
   economist_white: "Economist White",
   solarized_2: "Solarized 2",
   solarized_2dark: "Solarized 2 Dark",
+  wsj: "WSJ",
   test: "Test",
 } as const satisfies Record<ThemeOptionName, string>;
 
@@ -47,6 +48,11 @@ const PALETTE_LABELS = {
   fivethirtyeight: "FiveThirtyEight",
   ptol: "Paul Tol",
   canva: "Canva",
+  wsj: "WSJ",
+  wsj_rgby: "WSJ R/G/B/Y",
+  wsj_red_green: "WSJ Red/Green",
+  wsj_black_green: "WSJ Black/Green",
+  wsj_dem_rep: "WSJ Dem/Rep",
   hue: "Hue",
   grey: "Grey",
   gray: "Gray",
@@ -81,6 +87,7 @@ const THEME_DEMO_SCHEMES = {
   economist_white: "economist",
   solarized_2: "tableau10",
   solarized_2dark: "tableau10",
+  wsj: "wsj",
   test: "colorblind",
 } as const satisfies Record<ThemeOptionName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
 

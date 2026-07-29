@@ -4375,6 +4375,26 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "WSJ_BLACK_GREEN_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "WSJ_DEM_REP_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "WSJ_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "WSJ_RED_GREEN_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "WSJ_RGBY_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "adoptScaleState": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -6502,6 +6522,10 @@
           "lifecycle": "stable-intent"
         },
         "ThemeVoid": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeWsj": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },

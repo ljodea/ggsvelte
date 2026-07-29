@@ -37,6 +37,7 @@ describe("themes catalog", () => {
       { name: "economist_white", scheme: "economist" },
       { name: "solarized_2", scheme: "tableau10" },
       { name: "solarized_2dark", scheme: "tableau10" },
+      { name: "wsj", scheme: "wsj" },
       { name: "test", scheme: "colorblind" },
     ]);
     expect(THEME_OPTIONS.map((theme) => theme.name)).not.toContain("grey");
@@ -229,6 +230,36 @@ describe("themes catalog", () => {
         label: "Canva",
         capacity: 4,
         colors: ["#f98866", "#ff420e", "#80bd9e", "#89da59"],
+      },
+      {
+        name: "wsj",
+        label: "WSJ",
+        capacity: 6,
+        colors: ["#c72e29", "#016392", "#be9c2e", "#098154", "#fb832d", "#000000"],
+      },
+      {
+        name: "wsj_rgby",
+        label: "WSJ R/G/B/Y",
+        capacity: 4,
+        colors: ["#d3ba68", "#d5695d", "#5d8ca8", "#65a479"],
+      },
+      {
+        name: "wsj_red_green",
+        label: "WSJ Red/Green",
+        capacity: 2,
+        colors: ["#088158", "#ba2f2a"],
+      },
+      {
+        name: "wsj_black_green",
+        label: "WSJ Black/Green",
+        capacity: 4,
+        colors: ["#000000", "#595959", "#59a77f", "#008856"],
+      },
+      {
+        name: "wsj_dem_rep",
+        label: "WSJ Dem/Rep",
+        capacity: 3,
+        colors: ["#006a8e", "#b1283a", "#a8a6a7"],
       },
       {
         name: "Set1",

@@ -49,6 +49,7 @@ const THEME_SHELL: Readonly<Record<string, string>> = {
   economist_white: "ThemeEconomistwhite",
   solarized_2: "ThemeSolarized2",
   solarized_2dark: "ThemeSolarized2dark",
+  wsj: "ThemeWsj",
   grey: "ThemeGrey",
   gray: "ThemeGray",
   test: "ThemeTest",
