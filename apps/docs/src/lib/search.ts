@@ -23,14 +23,44 @@ function includesToken(haystack: string, token: string): boolean {
   return haystack.includes(token);
 }
 
-function scoreEntry(query: string, tokens: readonly string[], entry: DocsSearchEntry): number {
+/**
+ * Pre-normalized fields for one search entry. Built once per entries array
+ * identity so keystrokes do not re-run NFKD / diacritic / lower work over the
+ * full index (n ≈ thousands and grows with the docs surface).
+ */
+type PreparedEntry = {
+  entry: DocsSearchEntry;
+  title: string;
+  exact: readonly string[];
+  titleAndExact: string;
+  broad: string;
+};
+
+const preparedCache = new WeakMap<object, PreparedEntry[]>();
+
+function prepareEntry(entry: DocsSearchEntry): PreparedEntry {
   const title = normalize(entry.title);
   const exact = entry.exact.map(normalize);
   const titleAndExact = [title, ...exact].join(" ");
   const broad = normalize(
     [entry.title, entry.summary, ...entry.keywords, ...entry.exact].join(" "),
   );
+  return { entry, title, exact, titleAndExact, broad };
+}
 
+function preparedFor(entries: readonly DocsSearchEntry[]): PreparedEntry[] {
+  const cached = preparedCache.get(entries);
+  if (cached !== undefined) return cached;
+  const prepared: PreparedEntry[] = [];
+  for (const entry of entries) {
+    prepared.push(prepareEntry(entry));
+  }
+  preparedCache.set(entries, prepared);
+  return prepared;
+}
+
+function scorePrepared(query: string, tokens: readonly string[], prepared: PreparedEntry): number {
+  const { title, exact, titleAndExact, broad } = prepared;
   if (title !== query && exact.includes(query)) return 1100;
   if (title === query || exact.includes(query)) return 1000;
   if (title.startsWith(query) || exact.some((term) => term.startsWith(query))) return 900;
@@ -47,22 +77,31 @@ export function searchDocs<Entry extends DocsSearchEntry>(
   const query = normalize(queryInput);
   if (query === "" || limit <= 0) return [];
   const tokens = query.split(" ");
-  const ranked = entries
-    .map((entry, order) => ({ entry, order, score: scoreEntry(query, tokens, entry) }))
-    .filter((candidate) => candidate.score > 0)
-    .toSorted(
-      (left, right) =>
-        right.score - left.score ||
-        KIND_PRIORITY[right.entry.kind] - KIND_PRIORITY[left.entry.kind] ||
-        left.order - right.order,
-    );
+  // Prepared rows keep the same order as `entries`; reclaim Entry via index.
+  const prepared = preparedFor(entries);
+  const scored: { order: number; score: number; kind: DocsSearchKind }[] = [];
+  for (let order = 0; order < prepared.length; order += 1) {
+    const item = prepared[order];
+    if (item === undefined) continue;
+    const score = scorePrepared(query, tokens, item);
+    if (score <= 0) continue;
+    scored.push({ order, score, kind: item.entry.kind });
+  }
+  scored.sort(
+    (left, right) =>
+      right.score - left.score ||
+      KIND_PRIORITY[right.kind] - KIND_PRIORITY[left.kind] ||
+      left.order - right.order,
+  );
 
   const hrefs = new Set<string>();
   const results: Entry[] = [];
-  for (const candidate of ranked) {
-    if (hrefs.has(candidate.entry.href)) continue;
-    hrefs.add(candidate.entry.href);
-    results.push(candidate.entry);
+  for (const candidate of scored) {
+    const entry = entries[candidate.order];
+    if (entry === undefined) continue;
+    if (hrefs.has(entry.href)) continue;
+    hrefs.add(entry.href);
+    results.push(entry);
     if (results.length === limit) break;
   }
   return results;
