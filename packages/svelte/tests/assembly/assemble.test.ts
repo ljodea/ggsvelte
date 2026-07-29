@@ -250,9 +250,12 @@ describe("assemblePortableSpec", () => {
       data: mutable,
       aes: { x: "x", y: "y" },
       layers: [{ geom: "point" }],
-    })!;
-    mutable[0]!.x = 99;
-    expect(assembled.data).toEqual({
+    });
+    expect(assembled).not.toBeNull();
+    const first = mutable[0];
+    expect(first).toBeDefined();
+    first.x = 99;
+    expect(assembled!.data).toEqual({
       values: [
         { x: 1, y: 2 },
         { x: 3, y: 4 },
@@ -266,10 +269,13 @@ describe("assemblePortableSpec", () => {
       data: [{ t: day, y: 1 }],
       aes: { x: "t", y: "y" },
       layers: [{ geom: "point" }],
-    })!;
-    const values = (assembled.data as { values: { t: string; y: number }[] }).values;
-    expect(typeof values[0]!.t).toBe("string");
-    expect(values[0]!.t).toContain("2020-01-15");
+    });
+    expect(assembled).not.toBeNull();
+    const values = (assembled!.data as { values: { t: string; y: number }[] }).values;
+    const row = values[0];
+    expect(row).toBeDefined();
+    expect(typeof row.t).toBe("string");
+    expect(row.t).toContain("2020-01-15");
   });
 });
 

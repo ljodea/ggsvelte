@@ -52,7 +52,7 @@ export function foldPlotLayer(draft: AssembleDraft, layer: PlotLayerLike): Assem
     layer.kind
   ];
   if (family === undefined) {
-    throw new TypeError(`Unhandled plot layer kind: ${String(layer.kind)}`);
+    throw new TypeError(`Unhandled plot layer kind: ${layer.kind}`);
   }
   switch (family.builderMethod) {
     case "scales":

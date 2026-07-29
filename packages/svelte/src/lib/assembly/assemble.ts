@@ -1,7 +1,6 @@
 import type {
   A11yMode,
   AesInput,
-  AuthoringDataRef,
   CoordSpec,
   DataInput,
   FacetInput,
@@ -123,9 +122,10 @@ export function isFacetedPlotIntent(input: {
  * into the assembled spec (same contract as builder.layer / layerFrom).
  */
 function snapshotLayerInput(layer: LayerInput): LayerInput {
+  // Same pattern as builder-core.layer: assign through DataInput for snapshot.
   if (layer.data === undefined) return layer;
-  const data = toAuthoringDataRef(layer.data as DataInput) as NonNullable<LayerInput["data"]>;
-  return { ...layer, data };
+  const data: DataInput = layer.data;
+  return { ...layer, data: toAuthoringDataRef(data) } as LayerInput;
 }
 
 /**
@@ -141,9 +141,10 @@ function materializeAndNormalize(draft: AssembleDraft): PortableSpec {
     ...(draft.aes !== undefined && { aes: draft.aes }),
     ...(draft.scales !== undefined && { scales: draft.scales }),
   });
-  const portableLayers = layers.map((layer) => {
+  const portableLayers: LayerInput[] = layers.map((layer) => {
     if (layer.data === undefined) return layer;
-    const data = toDataRef(layer.data as AuthoringDataRef, calendarFields);
+    // layerFrom/snapshot stores AuthoringDataRef; portable ISO conversion here.
+    const data = toDataRef(layer.data, calendarFields);
     return { ...layer, data };
   });
   const coord = draft.coord === "flip" ? ({ type: "flip" } as const) : draft.coord;
