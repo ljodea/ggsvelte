@@ -57,6 +57,15 @@ export default defineConfig({
               test: /(?:[\\/]node_modules[\\/]@ggsvelte[\\/]svelte[\\/]|[\\/]packages[\\/]svelte[\\/])/,
               priority: 20,
             },
+            // TypeBox schema + validate/lint/artifact + schema-derived API
+            // catalogs (GEOM_REFERENCE etc.) — agent/LLM / reference-docs path.
+            // Higher priority than ggsvelte-spec so chart pages do not pay for
+            // schema-declarations or description-rich reference bags.
+            {
+              name: "ggsvelte-spec-validate",
+              test: /(?:[\\/]node_modules[\\/]@ggsvelte[\\/]spec[\\/]|[\\/]packages[\\/]spec[\\/])(?:dist[\\/]|src[\\/])?(?:validate|schema-declarations|schema-name-schemas|schema\.|temporal-parse-schema|temporal-interval-schema|artifact|lint|geom-reference|stat-reference|position-reference|guide-reference|geom-params)(?:[-.]|$)/,
+              priority: 40,
+            },
             {
               name: "ggsvelte-spec",
               test: /(?:[\\/]node_modules[\\/]@ggsvelte[\\/]spec[\\/]|[\\/]packages[\\/]spec[\\/])/,

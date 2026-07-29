@@ -14,20 +14,22 @@ import {
   TemporalIntervalSpecSchema,
   TemporalLabelSpecSchema,
   TemporalWeekStartSchema,
-} from "./temporal-interval.js";
+} from "./temporal-interval-schema.js";
 
-import { TemporalParserSpecSchema } from "./temporal-parse.js";
+import { TemporalParserSpecSchema } from "./temporal-parse-schema.js";
 import { CURRENT_EDITION } from "./schema-catalog.js";
 
 import {
   COLOR_SCHEME_NAME_SCHEMAS,
   LINETYPE_NAME_SCHEMAS,
+  POINT_SHAPE_NAME_SCHEMAS,
+  THEME_NAME_SCHEMAS,
+} from "./schema-name-schemas.js";
+import {
   MAX_BINNED_BREAKS,
   MAX_GLOW_RADIUS,
   MAX_PAINT_STOPS,
-  POINT_SHAPE_NAME_SCHEMAS,
   THEME_NAMES,
-  THEME_NAME_SCHEMAS,
 } from "./schema-names.js";
 
 /** Portable #rgb / #rrggbb only — no CSS names, url(), or filter strings. */

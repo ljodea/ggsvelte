@@ -1,13 +1,18 @@
 /**
- * Normalize + validate a pipeline spec entry.
+ * Normalize + TypeBox-free structural gate for a pipeline spec entry.
+ *
+ * Full TypeBox schema validation stays on the agent path (`validate()`,
+ * builder `.spec()`). Render uses normalize + structuralGate + pipeline
+ * preflights so browser chart chunks do not load schema-declarations /
+ * typebox/compile.
  */
 import type { NormalizedSpec, PortableSpec, SpecError, SpecInput } from "@ggsvelte/spec";
 import {
+  assertStructuralGate,
   normalize,
   SpecValidationError,
   temporalLabelConfigurationError,
   temporalLocaleConfigurationError,
-  validate,
 } from "@ggsvelte/spec";
 
 import { PipelineError } from "./types.js";
@@ -62,8 +67,8 @@ export function normalizeAndValidateSpec(spec: SpecInput | PortableSpec): Normal
   // the same closed-token violation as a generic shape error.
   preflightTemporalLabels(normalized);
   preflightStyleScales(normalized);
-  const result = validate(normalized);
-  if (!result.ok) throw new SpecValidationError(result.errors);
+  // Color scheme / binned-style / guide / coord-facet gates without TypeBox.
+  assertStructuralGate(normalized);
 
   const scaleTypeMismatchCode: SpecError["code"] = "scale-type-mismatch";
   const temporalScaleErrors: SpecError[] = [];

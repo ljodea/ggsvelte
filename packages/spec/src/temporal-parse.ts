@@ -27,7 +27,6 @@ import { exactFormatConfigurationError, parseExactFormat } from "./temporal-pars
 export {
   MONTH_DAY_REFERENCE_YEAR,
   TEMPORAL_PARSER_NAMES,
-  TemporalParserSpecSchema,
   TemporalParseError,
   temporalParseFailure,
   temporalImplementation,
@@ -40,6 +39,7 @@ export {
   type TemporalParserSpec,
   type TemporalPrecision,
 } from "./temporal-parse-core.js";
+export { TemporalParserSpecSchema } from "./temporal-parse-schema.js";
 
 const ISO_RE =
   /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,9}))?)?(Z|[+-]\d{2}:?\d{2})?)?$/;

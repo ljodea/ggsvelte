@@ -6,7 +6,6 @@
  * Facade: temporal.ts.
  */
 import { Temporal as PolyfillTemporal } from "@js-temporal/polyfill";
-import Type, { type Static, type TLiteral } from "typebox";
 
 export const TEMPORAL_PARSER_NAMES = [
   "iso",
@@ -37,38 +36,11 @@ export const TEMPORAL_PARSER_NAMES = [
 
 export type TemporalParserName = (typeof TEMPORAL_PARSER_NAMES)[number];
 
-const TEMPORAL_PARSER_NAME_SCHEMAS = TEMPORAL_PARSER_NAMES.map((name) =>
-  Type.Literal(name),
-) as unknown as [TLiteral<TemporalParserName>, ...TLiteral<TemporalParserName>[]];
-
-export const TemporalParserSpecSchema = Type.Union(
-  [
-    Type.Union(TEMPORAL_PARSER_NAME_SCHEMAS),
-    Type.Object(
-      {
-        format: Type.String({
-          minLength: 1,
-          maxLength: 128,
-          description:
-            "Closed strftime-style input grammar (maximum 128 characters and 32 tokens). Supported tokens: %Y, %m, %d, %H, %M, %S, %L, %z, %q, and %%.",
-        }),
-      },
-      { additionalProperties: false },
-    ),
-    Type.Object(
-      {
-        epoch: Type.Union([Type.Literal("seconds"), Type.Literal("milliseconds")]),
-      },
-      { additionalProperties: false },
-    ),
-  ],
-  {
-    description:
-      "A deterministic temporal parser name, exact closed format, or epoch unit. JavaScript callbacks and regular expressions are not portable parsers.",
-  },
-);
-
-export type TemporalParserSpec = Static<typeof TemporalParserSpecSchema>;
+/** Portable temporal parser: named engine, exact format, or epoch unit. */
+export type TemporalParserSpec =
+  | TemporalParserName
+  | { readonly format: string }
+  | { readonly epoch: "seconds" | "milliseconds" };
 /**
  * Temporal precision for position/time scales.
  * - `date` — calendar day (UTC)

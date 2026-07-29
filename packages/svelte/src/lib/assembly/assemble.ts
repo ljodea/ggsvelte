@@ -1,6 +1,7 @@
 import type {
   A11yMode,
   AesInput,
+  AuthoringDataRef,
   CoordSpec,
   DataInput,
   FacetInput,
@@ -14,10 +15,10 @@ import type {
   ThemeName,
   ThemeSpec,
 } from "@ggsvelte/spec";
-import { gg, normalize } from "@ggsvelte/spec";
+import { calendarDateFields, normalize, toAuthoringDataRef, toDataRef } from "@ggsvelte/spec";
 
 import type { PlotInteractionScope, ZoomInput } from "../interaction/interaction.js";
-import { foldPlotLayer } from "../layers/fold.js";
+import { foldPlotLayer, type AssembleDraft } from "../layers/fold.js";
 import type { MarkLayerDescriptor, PlotLayerLike } from "../layers/types.js";
 
 /**
@@ -118,33 +119,91 @@ export function isFacetedPlotIntent(input: {
 }
 
 /**
+ * Snapshot layer data so later mutation of caller-owned arrays cannot leak
+ * into the assembled spec (same contract as builder.layer / layerFrom).
+ */
+function snapshotLayerInput(layer: LayerInput): LayerInput {
+  if (layer.data === undefined) return layer;
+  return {
+    ...layer,
+    data: toAuthoringDataRef(layer.data as DataInput) as LayerInput["data"],
+  };
+}
+
+/**
+ * Materialize authoring data (Date → ISO) then normalize — TypeBox validate
+ * stays on builder.spec() / validate(), not the GGPlot assemble path.
+ */
+function materializeAndNormalize(draft: AssembleDraft): PortableSpec {
+  const layers = draft.layers.map(snapshotLayerInput);
+  const authoringData =
+    draft.data === undefined ? undefined : toAuthoringDataRef(draft.data as DataInput);
+  const calendarSource = {
+    aes: draft.aes,
+    layers,
+    scales: draft.scales,
+  };
+  const calendarFields = calendarDateFields(calendarSource);
+  const portableLayers = layers.map((layer) => {
+    if (layer.data === undefined) return layer;
+    return {
+      ...layer,
+      data: toDataRef(layer.data as AuthoringDataRef, calendarFields),
+    };
+  });
+  const coord = draft.coord === "flip" ? ({ type: "flip" } as const) : draft.coord;
+  const input: SpecInput = {
+    ...(authoringData !== undefined && {
+      data: toDataRef(authoringData, calendarFields),
+    }),
+    ...(draft.aes !== undefined && { aes: draft.aes }),
+    layers: portableLayers,
+    ...(draft.facet !== undefined && { facet: draft.facet }),
+    ...(coord !== undefined && { coord }),
+    ...(draft.a11y !== undefined && { a11y: draft.a11y }),
+    ...(draft.scales !== undefined && { scales: draft.scales }),
+    ...(draft.guides !== undefined && { guides: draft.guides }),
+    ...(draft.legend !== undefined && { legend: draft.legend }),
+    ...(draft.labs !== undefined && { labs: draft.labs }),
+    ...(draft.theme !== undefined && { theme: draft.theme }),
+  };
+  return normalize(input);
+}
+
+/**
  * Build the normalized PortableSpec for GGPlot.
  * Explicit `spec` wins over everything (including non-mark children).
  * Empty mark `layers` yields null even when non-mark plotLayers exist —
  * a theme-only plot must not paint an empty axis frame, and PortableSpec.layers
  * is minItems: 1.
+ *
+ * Does not call TypeBox validate / builder.spec() — pipeline structuralGate
+ * + pipeline errors cover render-time diagnostics; agents use validate().
  */
 export function assemblePortableSpec(input: AssemblePortableSpecInput): PortableSpec | null {
   if (input.spec !== undefined) return normalize(input.spec);
   if (input.layers.length === 0) return null;
-  let builder = gg(input.data as DataInput, input.aes);
-  for (const layer of input.layers) builder = builder.layer(layer);
+
   // Props first, then non-mark children (registration order) — children win (D2).
   // REPLACE families (theme/coord/facet): last write wins.
   // MERGE families (scales/guides/labs/legend): {...prev, ...next} puts child last.
-  // Fold dispatch is table-driven via foldPlotLayer (#785).
-  if (input.facet !== undefined) builder = builder.facet(input.facet);
-  if (input.coord !== undefined) builder = builder.coord(input.coord);
-  if (input.a11y !== undefined) builder = builder.a11y(input.a11y);
-  if (input.scales !== undefined) builder = builder.scales(input.scales);
-  if (input.guides !== undefined) builder = builder.guides(input.guides);
-  if (input.legend !== undefined) builder = builder.legend(input.legend);
-  if (input.theme !== undefined) builder = builder.theme(input.theme);
-  if (input.labs !== undefined) builder = builder.labs(input.labs);
+  let draft: AssembleDraft = {
+    ...(input.data !== undefined && { data: input.data }),
+    ...(input.aes !== undefined && { aes: input.aes }),
+    layers: input.layers.map(snapshotLayerInput),
+    ...(input.facet !== undefined && { facet: input.facet }),
+    ...(input.coord !== undefined && { coord: input.coord }),
+    ...(input.a11y !== undefined && { a11y: input.a11y }),
+    ...(input.scales !== undefined && { scales: input.scales }),
+    ...(input.guides !== undefined && { guides: input.guides }),
+    ...(input.legend !== undefined && { legend: input.legend }),
+    ...(input.theme !== undefined && { theme: input.theme }),
+    ...(input.labs !== undefined && { labs: input.labs }),
+  };
   for (const plotLayer of input.plotLayers ?? []) {
-    builder = foldPlotLayer(builder, plotLayer);
+    draft = foldPlotLayer(draft, plotLayer);
   }
-  return builder.spec();
+  return materializeAndNormalize(draft);
 }
 
 /**

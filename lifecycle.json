@@ -2176,6 +2176,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "assertStructuralGate": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "buildGreyPalette": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -2189,6 +2193,10 @@
           "lifecycle": "experimental"
         },
         "builderScaleHelperNames": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "calendarDateFields": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3596,6 +3604,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "structuralGateErrors": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "temporalIntervalTicks": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3609,6 +3621,14 @@
           "lifecycle": "experimental"
         },
         "temporalParserConfigurationError": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "toAuthoringDataRef": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "toDataRef": {
           "kind": "value",
           "lifecycle": "experimental"
         },

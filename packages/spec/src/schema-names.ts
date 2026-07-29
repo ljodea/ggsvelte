@@ -3,7 +3,6 @@
  * Kept separate from the `$defs` object so scale/theme name lists can change
  * without editing the full declarations bag.
  */
-import Type, { type TLiteral } from "typebox";
 
 /**
  * Hard cap on a binned position scale's bins (automatic or explicit). This is
@@ -157,12 +156,6 @@ export const COLOR_SCHEME_NAMES = [
   ...SEQUENTIAL_SCHEME_NAMES,
 ] as const;
 
-type ColorSchemeNameValue = (typeof COLOR_SCHEME_NAMES)[number];
-/** TypeBox literals for color scheme names (used by ColorScaleSpec). */
-export const COLOR_SCHEME_NAME_SCHEMAS = COLOR_SCHEME_NAMES.map((name) =>
-  Type.Literal(name),
-) as unknown as [TLiteral<ColorSchemeNameValue>, ...TLiteral<ColorSchemeNameValue>[]];
-
 /** Audited finite point symbols, ordered by default assignment priority. */
 export const POINT_SHAPE_NAMES = [
   "circle",
@@ -173,10 +166,6 @@ export const POINT_SHAPE_NAMES = [
   "cross",
 ] as const;
 export type PointShapeName = (typeof POINT_SHAPE_NAMES)[number];
-type PointShapeNameValue = PointShapeName;
-export const POINT_SHAPE_NAME_SCHEMAS = POINT_SHAPE_NAMES.map((name) =>
-  Type.Literal(name),
-) as unknown as [TLiteral<PointShapeNameValue>, ...TLiteral<PointShapeNameValue>[]];
 
 /** Audited finite stroke patterns, ordered by default assignment priority. */
 export const LINETYPE_NAMES = [
@@ -188,10 +177,6 @@ export const LINETYPE_NAMES = [
   "twodash",
 ] as const;
 export type LinetypeName = (typeof LINETYPE_NAMES)[number];
-type LinetypeNameValue = LinetypeName;
-export const LINETYPE_NAME_SCHEMAS = LINETYPE_NAMES.map((name) =>
-  Type.Literal(name),
-) as unknown as [TLiteral<LinetypeNameValue>, ...TLiteral<LinetypeNameValue>[]];
 
 /** Built-in theme names known to this schema version. */
 export const THEME_NAMES = [
@@ -254,9 +239,3 @@ export const THEME_NAME_ALIASES = {
   grey: "ggplot2",
   gray: "ggplot2",
 } as const satisfies Partial<Record<ThemeNameValue, ThemeNameValue>>;
-
-/** TypeBox literals for theme names (used by ThemeName def). */
-export const THEME_NAME_SCHEMAS = THEME_NAMES.map((name) => Type.Literal(name)) as unknown as [
-  TLiteral<ThemeNameValue>,
-  ...TLiteral<ThemeNameValue>[],
-];

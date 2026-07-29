@@ -7,7 +7,7 @@
  */
 import type { SpecError } from "./errors.js";
 import type { Aes, ChannelName, GeomName } from "./schema.js";
-import { GEOM_DEFAULTS } from "./schema.js";
+import { GEOM_DEFAULTS } from "./schema-catalog.js";
 import { STYLE_AESTHETIC_GEOMS, type StyleAesthetic } from "./capabilities.js";
 import { effectiveChannel } from "./validate-data.js";
 import { paintStructuralErrors } from "./validate-structure-paint.js";

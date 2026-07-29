@@ -45,7 +45,7 @@ import type {
 import { normalizeCoord } from "./normalize-coord.js";
 import { normalizeLayerParamsPaint } from "./normalize-paint.js";
 import { normalizeScales } from "./normalize-scales.js";
-import { CHANNELS, CURRENT_EDITION, GEOM_ALIASES, GEOM_DEFAULTS } from "./schema.js";
+import { CHANNELS, CURRENT_EDITION, GEOM_ALIASES, GEOM_DEFAULTS } from "./schema-catalog.js";
 import type {
   AesInput,
   ChannelInput,

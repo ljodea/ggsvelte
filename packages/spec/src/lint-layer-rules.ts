@@ -4,7 +4,7 @@
  * Scale-level rules: lint-scale-rules.ts. Orchestrator: lint.ts.
  */
 import type { Aes, ChannelName } from "./schema.js";
-import { GEOM_DEFAULTS } from "./schema.js";
+import { GEOM_DEFAULTS } from "./schema-catalog.js";
 import type { FieldEvidenceEntry, ProfileFieldType } from "./validate-data.js";
 import type { SpecAdvisory } from "./lint.js";
 

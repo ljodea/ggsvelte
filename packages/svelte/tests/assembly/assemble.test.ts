@@ -240,6 +240,37 @@ describe("assemblePortableSpec", () => {
       }),
     ).toBeNull();
   });
+
+  it("snapshots row data so later mutation does not change the assembled spec", () => {
+    const mutable = [
+      { x: 1, y: 2 },
+      { x: 3, y: 4 },
+    ];
+    const assembled = assemblePortableSpec({
+      data: mutable,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point" }],
+    })!;
+    mutable[0]!.x = 99;
+    expect(assembled.data).toEqual({
+      values: [
+        { x: 1, y: 2 },
+        { x: 3, y: 4 },
+      ],
+    });
+  });
+
+  it("materializes Date cells to portable ISO strings", () => {
+    const day = new Date("2020-01-15T12:00:00.000Z");
+    const assembled = assemblePortableSpec({
+      data: [{ t: day, y: 1 }],
+      aes: { x: "t", y: "y" },
+      layers: [{ geom: "point" }],
+    })!;
+    const values = (assembled.data as { values: { t: string; y: number }[] }).values;
+    expect(typeof values[0]!.t).toBe("string");
+    expect(values[0]!.t).toContain("2020-01-15");
+  });
 });
 
 describe("mappedChannelField", () => {
