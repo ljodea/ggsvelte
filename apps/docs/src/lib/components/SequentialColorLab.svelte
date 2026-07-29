@@ -12,7 +12,7 @@
     examples: readonly {
       label: string;
       scale: ColorScaleSpec;
-      staticSvg: string;
+      staticSrc: string;
     }[];
   } = $props();
 </script>
@@ -48,7 +48,7 @@
           <SequentialDeferredPlot
             label={example.label}
             scale={example.scale}
-            staticSvg={example.staticSvg}
+            staticSrc={example.staticSrc}
           />
         </article>
       </li>

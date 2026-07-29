@@ -15,7 +15,7 @@
     <h1>Chart themes</h1>
   </header>
 
-  <ChartThemeLab initialStaticSvg={data.labStaticSvg} />
+  <ChartThemeLab initialStaticSrc={data.labStaticSrc} />
 
   <section class="theme-collection" aria-labelledby="built-in-themes-heading">
     <header class="section-heading">
@@ -32,7 +32,7 @@
             kind={specimen.kind}
             scheme={specimen.scheme}
             legendFocus={specimen.legendFocus}
-            staticSvg={specimen.staticSvg}
+            staticSrc={specimen.staticSrc}
             eager={index === 0}
           />
         </li>
