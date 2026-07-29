@@ -19,7 +19,9 @@
       <a href={`${base}/themes`}>Themes</a>.
     </p>
     <p class="guide-link">
-      Scale and color channel reference:
+      Scheme names as scale inputs:
+      <a href={`${base}/reference/palettes`}>Palettes reference</a>. Scale and
+      color channels:
       <a href={`${base}/guide/scales-guides`}>Scales and guides</a>.
     </p>
   </header>
@@ -30,6 +32,10 @@
   <nav class="learning-path" aria-label="Next steps">
     <p class="eyebrow">Next</p>
     <ul>
+      <li>
+        <a href={`${base}/reference/palettes`}>Palettes reference</a>
+        — scheme → ScaleColor* / ScaleFill* mapping
+      </li>
       <li>
         <a href={`${base}/themes`}>Themes</a>
         — paper, grids, axes, and type

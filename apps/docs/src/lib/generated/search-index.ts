@@ -207,6 +207,156 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Search interactions"],
   },
   {
+    id: "page:reference-themes",
+    kind: "page",
+    title: "Themes",
+    summary:
+      "Theme components, role tokens, CSS variables, and safe overrides for paper, ink, and interaction chrome.",
+    href: "/reference/themes",
+    keywords: ["Reference"],
+    exact: ["Themes"],
+  },
+  {
+    id: "heading:reference-themes:components",
+    kind: "heading",
+    title: "Components",
+    summary:
+      "Components in Themes. Theme components, role tokens, CSS variables, and safe overrides for paper, ink, and interaction chrome.",
+    href: "/reference/themes#components",
+    keywords: ["Themes", "Reference"],
+    exact: ["Components"],
+  },
+  {
+    id: "heading:reference-themes:usage",
+    kind: "heading",
+    title: "Usage",
+    summary:
+      "Usage in Themes. Theme components, role tokens, CSS variables, and safe overrides for paper, ink, and interaction chrome.",
+    href: "/reference/themes#usage",
+    keywords: ["Themes", "Reference"],
+    exact: ["Usage"],
+  },
+  {
+    id: "heading:reference-themes:color-and-interaction-roles",
+    kind: "heading",
+    title: "Color and interaction roles",
+    summary:
+      "Color and interaction roles in Themes. Theme components, role tokens, CSS variables, and safe overrides for paper, ink, and interaction chrome.",
+    href: "/reference/themes#color-and-interaction-roles",
+    keywords: ["Themes", "Reference"],
+    exact: ["Color and interaction roles"],
+  },
+  {
+    id: "heading:reference-themes:type-and-geometry-roles",
+    kind: "heading",
+    title: "Type and geometry roles",
+    summary:
+      "Type and geometry roles in Themes. Theme components, role tokens, CSS variables, and safe overrides for paper, ink, and interaction chrome.",
+    href: "/reference/themes#type-and-geometry-roles",
+    keywords: ["Themes", "Reference"],
+    exact: ["Type and geometry roles"],
+  },
+  {
+    id: "heading:reference-themes:safe-overrides",
+    kind: "heading",
+    title: "Safe overrides",
+    summary:
+      "Safe overrides in Themes. Theme components, role tokens, CSS variables, and safe overrides for paper, ink, and interaction chrome.",
+    href: "/reference/themes#safe-overrides",
+    keywords: ["Themes", "Reference"],
+    exact: ["Safe overrides"],
+  },
+  {
+    id: "heading:reference-themes:see-also",
+    kind: "heading",
+    title: "See also",
+    summary:
+      "See also in Themes. Theme components, role tokens, CSS variables, and safe overrides for paper, ink, and interaction chrome.",
+    href: "/reference/themes#see-also",
+    keywords: ["Themes", "Reference"],
+    exact: ["See also"],
+  },
+  {
+    id: "page:reference-palettes",
+    kind: "page",
+    title: "Palettes",
+    summary:
+      "Named color schemes as scale inputs: categorical and sequential scheme catalogs mapped to ScaleColor* / ScaleFill* helpers.",
+    href: "/reference/palettes",
+    keywords: ["Reference"],
+    exact: ["Palettes"],
+  },
+  {
+    id: "heading:reference-palettes:using-schemes",
+    kind: "heading",
+    title: "Using schemes",
+    summary:
+      "Using schemes in Palettes. Named color schemes as scale inputs: categorical and sequential scheme catalogs mapped to ScaleColor* / ScaleFill* helpers.",
+    href: "/reference/palettes#using-schemes",
+    keywords: ["Palettes", "Reference"],
+    exact: ["Using schemes"],
+  },
+  {
+    id: "heading:reference-palettes:helper-map",
+    kind: "heading",
+    title: "Scale helpers",
+    summary:
+      "Scale helpers in Palettes. Named color schemes as scale inputs: categorical and sequential scheme catalogs mapped to ScaleColor* / ScaleFill* helpers.",
+    href: "/reference/palettes#helper-map",
+    keywords: ["Palettes", "Reference"],
+    exact: ["Scale helpers"],
+  },
+  {
+    id: "heading:reference-palettes:discrete",
+    kind: "heading",
+    title: "Discrete (categorical schemes)",
+    summary:
+      "Discrete (categorical schemes) in Palettes. Named color schemes as scale inputs: categorical and sequential scheme catalogs mapped to ScaleColor* / ScaleFill* helpers.",
+    href: "/reference/palettes#discrete",
+    keywords: ["Palettes", "Reference"],
+    exact: ["Discrete (categorical schemes)"],
+  },
+  {
+    id: "heading:reference-palettes:continuous",
+    kind: "heading",
+    title: "Continuous and binned (sequential schemes)",
+    summary:
+      "Continuous and binned (sequential schemes) in Palettes. Named color schemes as scale inputs: categorical and sequential scheme catalogs mapped to ScaleColor* / ScaleFill* helpers.",
+    href: "/reference/palettes#continuous",
+    keywords: ["Palettes", "Reference"],
+    exact: ["Continuous and binned (sequential schemes)"],
+  },
+  {
+    id: "heading:reference-palettes:categorical-schemes",
+    kind: "heading",
+    title: "Categorical schemes",
+    summary:
+      "Categorical schemes in Palettes. Named color schemes as scale inputs: categorical and sequential scheme catalogs mapped to ScaleColor* / ScaleFill* helpers.",
+    href: "/reference/palettes#categorical-schemes",
+    keywords: ["Palettes", "Reference"],
+    exact: ["Categorical schemes"],
+  },
+  {
+    id: "heading:reference-palettes:sequential-schemes",
+    kind: "heading",
+    title: "Sequential schemes",
+    summary:
+      "Sequential schemes in Palettes. Named color schemes as scale inputs: categorical and sequential scheme catalogs mapped to ScaleColor* / ScaleFill* helpers.",
+    href: "/reference/palettes#sequential-schemes",
+    keywords: ["Palettes", "Reference"],
+    exact: ["Sequential schemes"],
+  },
+  {
+    id: "heading:reference-palettes:see-also",
+    kind: "heading",
+    title: "See also",
+    summary:
+      "See also in Palettes. Named color schemes as scale inputs: categorical and sequential scheme catalogs mapped to ScaleColor* / ScaleFill* helpers.",
+    href: "/reference/palettes#see-also",
+    keywords: ["Palettes", "Reference"],
+    exact: ["See also"],
+  },
+  {
     id: "page:reference-cli",
     kind: "page",
     title: "Command-line reference",

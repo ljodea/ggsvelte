@@ -37,6 +37,14 @@
       "/reference/interactions",
       "Search interaction props, callbacks, event phases, and diagnostic codes.",
     ],
+    [
+      "/reference/themes",
+      "Theme components, role tokens, and safe chrome overrides.",
+    ],
+    [
+      "/reference/palettes",
+      "Named color schemes mapped to ScaleColor* / ScaleFill* helpers.",
+    ],
   ]);
 
   // Overview is this page — do not list it again under the chapter map.

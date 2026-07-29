@@ -219,6 +219,107 @@ export const DOCS_ROUTES = [
     },
   },
   {
+    path: "/reference/themes",
+    title: "Themes — ggsvelte",
+    description:
+      "Theme components, role tokens, CSS variables, and safe overrides for paper, ink, and interaction chrome.",
+    canonicalPath: "/reference/themes",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Reference",
+      label: "Themes",
+      order: 56,
+    },
+    headings: [
+      {
+        id: "components",
+        title: "Components",
+        level: 2,
+      },
+      {
+        id: "usage",
+        title: "Usage",
+        level: 2,
+      },
+      {
+        id: "color-and-interaction-roles",
+        title: "Color and interaction roles",
+        level: 2,
+      },
+      {
+        id: "type-and-geometry-roles",
+        title: "Type and geometry roles",
+        level: 2,
+      },
+      {
+        id: "safe-overrides",
+        title: "Safe overrides",
+        level: 2,
+      },
+      {
+        id: "see-also",
+        title: "See also",
+        level: 2,
+      },
+    ],
+  },
+  {
+    path: "/reference/palettes",
+    title: "Palettes — ggsvelte",
+    description:
+      "Named color schemes as scale inputs: categorical and sequential scheme catalogs mapped to ScaleColor* / ScaleFill* helpers.",
+    canonicalPath: "/reference/palettes",
+    kind: "page",
+    index: true,
+    sitemap: true,
+    shell: "docs",
+    navigation: {
+      section: "Reference",
+      label: "Palettes",
+      order: 57,
+    },
+    headings: [
+      {
+        id: "using-schemes",
+        title: "Using schemes",
+        level: 2,
+      },
+      {
+        id: "helper-map",
+        title: "Scale helpers",
+        level: 2,
+      },
+      {
+        id: "discrete",
+        title: "Discrete (categorical schemes)",
+        level: 3,
+      },
+      {
+        id: "continuous",
+        title: "Continuous and binned (sequential schemes)",
+        level: 3,
+      },
+      {
+        id: "categorical-schemes",
+        title: "Categorical schemes",
+        level: 2,
+      },
+      {
+        id: "sequential-schemes",
+        title: "Sequential schemes",
+        level: 2,
+      },
+      {
+        id: "see-also",
+        title: "See also",
+        level: 2,
+      },
+    ],
+  },
+  {
     path: "/reference/cli",
     title: "Command-line reference — ggsvelte",
     description:
@@ -231,7 +332,7 @@ export const DOCS_ROUTES = [
     navigation: {
       section: "Reference",
       label: "CLI reference",
-      order: 56,
+      order: 58,
     },
     headings: [
       {
@@ -7336,16 +7437,24 @@ export const GUIDE_NAVIGATION = [
         label: "Interaction reference",
       },
       {
-        path: "/reference/cli",
-        label: "CLI reference",
+        path: "/reference/themes",
+        label: "Themes",
       },
       {
         path: "/guide/errors",
         label: "Errors reference",
       },
       {
+        path: "/reference/palettes",
+        label: "Palettes",
+      },
+      {
         path: "/guide/advisories",
         label: "Advisories",
+      },
+      {
+        path: "/reference/cli",
+        label: "CLI reference",
       },
       {
         path: "/guide/lifecycle",
