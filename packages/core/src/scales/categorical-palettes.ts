@@ -311,19 +311,6 @@ export const TABLEAU_SEATTLE_GRAYS_PALETTE: readonly string[] = [
   "#989ca3",
 ];
 
-/** ggthemes tableau_color_pal("Traffic", "regular") — red/yellow/green KPI triples. */
-export const TABLEAU_TRAFFIC_PALETTE: readonly string[] = [
-  "#b60a1c",
-  "#e39802",
-  "#309143",
-  "#e03531",
-  "#f0bd27",
-  "#51b364",
-  "#ff684c",
-  "#ffda66",
-  "#8ace7e",
-];
-
 /** ggthemes tableau_color_pal("Miller Stone", "regular"). */
 export const TABLEAU_MILLER_STONE_PALETTE: readonly string[] = [
   "#4f6980",
@@ -660,7 +647,6 @@ export const CATEGORICAL_SCHEMES = {
   tableau20: TABLEAU20_PALETTE,
   tableau_colorblind: TABLEAU_COLORBLIND_PALETTE,
   tableau_seattle_grays: TABLEAU_SEATTLE_GRAYS_PALETTE,
-  tableau_traffic: TABLEAU_TRAFFIC_PALETTE,
   tableau_miller_stone: TABLEAU_MILLER_STONE_PALETTE,
   tableau_superfishel_stone: TABLEAU_SUPERFISHEL_STONE_PALETTE,
   tableau_nuriel_stone: TABLEAU_NURIEL_STONE_PALETTE,

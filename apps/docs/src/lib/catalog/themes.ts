@@ -96,7 +96,6 @@ const PALETTE_LABELS = {
   tableau20: "Tableau 20",
   tableau_colorblind: "Tableau Color Blind",
   tableau_seattle_grays: "Seattle Grays",
-  tableau_traffic: "Traffic",
   tableau_miller_stone: "Miller Stone",
   tableau_superfishel_stone: "Superfishel Stone",
   tableau_nuriel_stone: "Nuriel Stone",

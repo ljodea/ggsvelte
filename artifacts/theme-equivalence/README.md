@@ -39,7 +39,6 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - ggthemes tableau20 (Tableau 20): `#4E79A7 #A0CBE8 #F28E2B #FFBE7D #59A14F #8CD17D #B6992D #F1CE63 #499894 #86BCB6 #E15759 #FF9D9A #79706E #BAB0AC #D37295 #FABFD2 #B07AA1 #D4A6C8 #9D7660 #D7B5A6`
 - ggthemes tableau_colorblind (Tableau Color Blind): `#1170aa #fc7d0b #a3acb9 #57606c #5fa2ce #c85200 #7b848f #a3cce9 #ffbc79 #c8d0d9`
 - ggthemes tableau_seattle_grays (Seattle Grays): `#767f8b #b3b7b8 #5c6068 #d3d3d3 #989ca3`
-- ggthemes tableau_traffic (Traffic): `#b60a1c #e39802 #309143 #e03531 #f0bd27 #51b364 #ff684c #ffda66 #8ace7e`
 - ggthemes tableau_miller_stone (Miller Stone): `#4f6980 #849db1 #a2ceaa #638b66 #bfbb60 #f47942 #fbb04e #b66353 #d7ce9f #b9aa97 #7e756d`
 - ggthemes tableau_superfishel_stone (Superfishel Stone): `#6388b4 #ffae34 #ef6f6a #8cc2ca #55ad89 #c3bc3f #bb7693 #baa094 #a9b5ae #767676`
 - ggthemes tableau_nuriel_stone (Nuriel Stone): `#8175aa #6fb899 #31a1b3 #ccb22b #a39fc9 #94d0c0 #959c9e #027b8e #9f8f12`
