@@ -244,8 +244,7 @@ export function buildLegendEntryKeyIndex(
           // Copy only when we must attach a candidate-local row not already
           // in the shared membership (identity marks). Shared smooth bags
           // stay one Set for every eval-grid mark.
-          sourceRows = new Set(shared);
-          sourceRows.add(candidate.rowIndex);
+          sourceRows = new Set([...shared, candidate.rowIndex]);
         } else {
           sourceRows = shared;
         }
