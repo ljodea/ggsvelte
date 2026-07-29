@@ -16,7 +16,7 @@ function read(rel: string): string {
 /** Value-import of ./schema.js (not import type). */
 function valueImportsSchemaJs(source: string): boolean {
   // Strip block comments and line comments so docs don't false-positive.
-  const stripped = source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+  const stripped = source.replaceAll(/\/\*[\s\S]*?\*\//g, "").replaceAll(/(^|[^:])\/\/.*$/gm, "$1");
   // Walk back from each `from "./schema.js"` to the nearest `import` so a
   // preceding multi-line import cannot swallow the schema clause.
   const fromRe = /from\s+["']\.\/schema\.js["']/g;
@@ -77,7 +77,7 @@ describe("spec render path isolation", () => {
 
   it("keeps assemblePortableSpec off the fluent builder validate path", () => {
     const assemble = read("packages/svelte/src/lib/assembly/assemble.ts");
-    const code = assemble.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+    const code = assemble.replaceAll(/\/\*[\s\S]*?\*\//g, "").replaceAll(/(^|[^:])\/\/.*$/gm, "$1");
     expect(code).not.toMatch(/import\s*\{[^}]*\bgg\b/);
     // No builder.spec() call (comments already stripped).
     expect(code).not.toMatch(/\bgg\s*\(/);
