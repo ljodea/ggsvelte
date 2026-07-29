@@ -727,24 +727,9 @@ describe("themes catalog", () => {
           "#cccccc",
         ],
       },
-      {
-        name: "gray",
-        label: "Gray",
-        capacity: 10,
-        colors: [
-          "#333333",
-          "#444444",
-          "#555555",
-          "#666666",
-          "#777777",
-          "#888888",
-          "#999999",
-          "#aaaaaa",
-          "#bbbbbb",
-          "#cccccc",
-        ],
-      },
+      // gray is a US-spelling alias of grey — not a second picker/specimen row.
     ]);
+    expect(CATEGORICAL_PALETTES.map((palette) => palette.name)).not.toContain("gray");
 
     expect(VIRIDIS_COLORS).toEqual([
       "#440154",
