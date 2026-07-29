@@ -92,7 +92,7 @@ describe("GGBuilder scale mixin ↔ SCALE_CAPABILITIES", () => {
 
   it("palette constructors match free helpers with options", () => {
     const cases: Array<{ method: string; args: unknown[] }> = [
-      { method: "scaleColorBrewer", args: [{ palette: "Set2" }] },
+      { method: "scaleColorBrewer", args: [{ palette: "Dark2" }] },
       { method: "scaleFillHue", args: [{}] },
       { method: "scaleColorGradient", args: [{ low: "#000000", high: "#ffffff" }] },
       { method: "scaleColorSteps", args: [{ low: "#000000", high: "#ffffff" }] },

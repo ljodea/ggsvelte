@@ -489,24 +489,6 @@ export const THEME_STATIC_SHELLS = [
     sha256: "4f76d0c83db0961f95408fb518ac1bc4cf89156457ecf6f1cce129bb7d7b141f",
   },
   {
-    id: "palette-Set1",
-    filename: "palette-Set1.svg",
-    path: "/theme-shells/palette-Set1.svg",
-    sha256: "d6b6b62a02e7a56b158229bd70d6ad967e86ef82d06bb786100c45ce7c8c82f4",
-  },
-  {
-    id: "palette-Set2",
-    filename: "palette-Set2.svg",
-    path: "/theme-shells/palette-Set2.svg",
-    sha256: "c522d5e48ab73f496eb2d5f88bc997649e743b58ea73354dc864f9bb4d393678",
-  },
-  {
-    id: "palette-Set3",
-    filename: "palette-Set3.svg",
-    path: "/theme-shells/palette-Set3.svg",
-    sha256: "a0fd0e8a04030d7ba10e990ac23700fff48700aa39dfc5bf991dd3891f25f908",
-  },
-  {
     id: "palette-Dark2",
     filename: "palette-Dark2.svg",
     path: "/theme-shells/palette-Dark2.svg",

@@ -159,7 +159,7 @@ byte-identity-preserving: `value` is not routed through any helper.
 
 ## Palettes
 
-### Categorical schemes (52)
+### Categorical schemes (49)
 
 | Scheme                    | Description                                                        |
 | ------------------------- | ------------------------------------------------------------------ |
@@ -206,9 +206,6 @@ byte-identity-preserving: `value` is not routed through any helper.
 | excel                     | ggthemes Excel 97 line/point palette (`scale_colour_excel`)        |
 | excel_fill                | ggthemes Excel 97 area palette (`scale_fill_excel`)                |
 | excel_new                 | ggthemes current-Office accents ("Office Theme" default)           |
-| Set1                      | ColorBrewer qualitative, saturated primaries                       |
-| Set2                      | ColorBrewer qualitative, muted pastels                             |
-| Set3                      | ColorBrewer qualitative, light 12-class                            |
 | Dark2                     | ColorBrewer qualitative, dark tones                                |
 | Paired                    | ColorBrewer qualitative, light/dark pairs                          |
 | Accent                    | ColorBrewer qualitative, accented mix                              |

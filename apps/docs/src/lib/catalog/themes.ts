@@ -118,9 +118,6 @@ const PALETTE_LABELS = {
   // Also scheme "gray" (US spelling) — same ramp; filtered via DISPLAY_ALIASES.
   grey: "Grey",
   // ColorBrewer qualitative (#825) — keep the upstream palette names.
-  Set1: "Set1",
-  Set2: "Set2",
-  Set3: "Set3",
   Dark2: "Dark2",
   Paired: "Paired",
   Accent: "Accent",

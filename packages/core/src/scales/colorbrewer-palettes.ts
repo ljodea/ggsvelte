@@ -5,41 +5,6 @@
  */
 
 /** Qualitative (max-n) */
-const CB_SET1 = [
-  "#e41a1c",
-  "#377eb8",
-  "#4daf4a",
-  "#984ea3",
-  "#ff7f00",
-  "#ffff33",
-  "#a65628",
-  "#f781bf",
-  "#999999",
-] as const;
-const CB_SET2 = [
-  "#66c2a5",
-  "#fc8d62",
-  "#8da0cb",
-  "#e78ac3",
-  "#a6d854",
-  "#ffd92f",
-  "#e5c494",
-  "#b3b3b3",
-] as const;
-const CB_SET3 = [
-  "#8dd3c7",
-  "#ffffb3",
-  "#bebada",
-  "#fb8072",
-  "#80b1d3",
-  "#fdb462",
-  "#b3de69",
-  "#fccde5",
-  "#d9d9d9",
-  "#bc80bd",
-  "#ccebc5",
-  "#ffed6f",
-] as const;
 const CB_DARK2 = [
   "#1b9e77",
   "#d95f02",
@@ -245,9 +210,6 @@ const CB_PUOR = [
 
 /** Qualitative schemes for ordinal/brewer. */
 export const COLORBREWER_QUALITATIVE = {
-  Set1: CB_SET1,
-  Set2: CB_SET2,
-  Set3: CB_SET3,
   Dark2: CB_DARK2,
   Paired: CB_PAIRED,
   Accent: CB_ACCENT,
