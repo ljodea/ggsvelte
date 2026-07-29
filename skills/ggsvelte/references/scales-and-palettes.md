@@ -159,7 +159,7 @@ byte-identity-preserving: `value` is not routed through any helper.
 
 ## Palettes
 
-### Categorical schemes (21)
+### Categorical schemes (22)
 
 | Scheme               | Description                                                        |
 | -------------------- | ------------------------------------------------------------------ |
@@ -169,6 +169,7 @@ byte-identity-preserving: `value` is not routed through any helper.
 | tableau10            | Tableau 10 qualitative palette                                     |
 | colorblind           | ggthemes 8-color colorblind-safe palette                           |
 | economist            | ggthemes Economist blues/greens (scale_colour/fill_economist)      |
+| solarized            | ggthemes Solarized accents, blue first (scale_*_solarized)         |
 | few                  | ggthemes Few "Medium" — the default `scale_colour_few` palette     |
 | few_light            | ggthemes Few "Light" — for filled areas (`scale_fill_few` default) |
 | few_dark             | ggthemes Few "Dark" — for thin lines and highlighting              |

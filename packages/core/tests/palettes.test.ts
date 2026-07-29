@@ -17,6 +17,7 @@ import {
   FLEXOKI_PALETTE,
   IPSUM_PALETTE,
   PTOL_PALETTE,
+  SOLARIZED_PALETTE,
   TABLEAU10_PALETTE,
 } from "../src/scales/train.ts";
 import {
@@ -32,6 +33,7 @@ import {
   FLEXOKI_PALETTE as FLEXOKI_DIRECT,
   IPSUM_PALETTE as IPSUM_DIRECT,
   PTOL_PALETTE as PTOL_DIRECT,
+  SOLARIZED_PALETTE as SOLARIZED_DIRECT,
   TABLEAU10_PALETTE as TABLEAU10_DIRECT,
 } from "../src/scales/categorical-palettes.ts";
 
@@ -41,6 +43,7 @@ const PALETTES = {
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
   economist: ECONOMIST_PALETTE,
+  solarized: SOLARIZED_PALETTE,
   few: FEW_PALETTE,
   few_light: FEW_LIGHT_PALETTE,
   few_dark: FEW_DARK_PALETTE,
@@ -64,6 +67,7 @@ describe("train.ts palette re-export identity", () => {
     expect(FLEXOKI_PALETTE).toBe(FLEXOKI_DIRECT);
     expect(IPSUM_PALETTE).toBe(IPSUM_DIRECT);
     expect(PTOL_PALETTE).toBe(PTOL_DIRECT);
+    expect(SOLARIZED_PALETTE).toBe(SOLARIZED_DIRECT);
     expect(TABLEAU10_PALETTE).toBe(TABLEAU10_DIRECT);
   });
 });

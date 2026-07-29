@@ -9566,14 +9566,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-283",
+    id: "heading:guide-lifecycle:experimental-284",
     kind: "heading",
-    title: "experimental (283)",
+    title: "experimental (284)",
     summary:
-      "experimental (283) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-283",
+      "experimental (284) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-284",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (283)"],
+    exact: ["experimental (284)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -9626,14 +9626,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["experimental (472)"],
   },
   {
-    id: "heading:guide-lifecycle:stable-intent-226",
+    id: "heading:guide-lifecycle:stable-intent-228",
     kind: "heading",
-    title: "stable-intent (226)",
+    title: "stable-intent (228)",
     summary:
-      "stable-intent (226) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#stable-intent-226",
+      "stable-intent (228) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#stable-intent-228",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["stable-intent (226)"],
+    exact: ["stable-intent (228)"],
   },
   {
     id: "page:guide-upgrading",
@@ -20787,6 +20787,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["SCALE_STATE_VERSION"],
   },
   {
+    id: "api:ggsvelte-core:SOLARIZED_PALETTE",
+    kind: "api",
+    title: "SOLARIZED_PALETTE",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["SOLARIZED_PALETTE"],
+  },
+  {
     id: "api:ggsvelte-core:STRIP_BAND",
     kind: "api",
     title: "STRIP_BAND",
@@ -25944,6 +25953,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["ThemeName"],
   },
   {
+    id: "api:ggsvelte-svelte:ThemeSolarized",
+    kind: "api",
+    title: "ThemeSolarized",
+    summary: "@ggsvelte/svelte · value · stable-intent.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "stable-intent"],
+    exact: ["ThemeSolarized"],
+  },
+  {
     id: "api:ggsvelte-svelte:ThemeSolarized2",
     kind: "api",
     title: "ThemeSolarized2",
@@ -25960,6 +25978,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-svelte",
     keywords: ["@ggsvelte/svelte", ".", "value", "stable-intent"],
     exact: ["ThemeSolarized2dark"],
+  },
+  {
+    id: "api:ggsvelte-svelte:ThemeSolarizeddark",
+    kind: "api",
+    title: "ThemeSolarizeddark",
+    summary: "@ggsvelte/svelte · value · stable-intent.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "stable-intent"],
+    exact: ["ThemeSolarizeddark"],
   },
   {
     id: "api:ggsvelte-svelte:ThemeSpec",
