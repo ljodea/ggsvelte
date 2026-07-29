@@ -9,6 +9,22 @@ import {
 /** Canonical picker themes — grey/gray alias ggplot2 and stay out of the list. */
 type ThemeOptionName = Exclude<ThemeName, keyof typeof THEME_NAME_ALIASES>;
 
+/**
+ * Display-only scheme aliases for the docs catalog. Both spellings stay valid
+ * API scheme names (identical GREY_PALETTE_10); only the canonical row is listed.
+ * US `gray` is the spelling twin of UK `grey` — not a second palette.
+ */
+const CATEGORICAL_SCHEME_DISPLAY_ALIASES = {
+  gray: "grey",
+} as const satisfies Partial<
+  Record<(typeof CATEGORICAL_SCHEME_NAMES)[number], (typeof CATEGORICAL_SCHEME_NAMES)[number]>
+>;
+
+type PaletteOptionName = Exclude<
+  (typeof CATEGORICAL_SCHEME_NAMES)[number],
+  keyof typeof CATEGORICAL_SCHEME_DISPLAY_ALIASES
+>;
+
 const THEME_LABELS = {
   default: "Default",
   light: "Light",
@@ -76,8 +92,8 @@ const PALETTE_LABELS = {
   hc_dark: "Highcharts Dark",
   pander: "Pander",
   hue: "Hue",
+  // Also scheme "gray" (US spelling) — same ramp; filtered via DISPLAY_ALIASES.
   grey: "Grey",
-  gray: "Gray",
   // ColorBrewer qualitative (#825) — keep the upstream palette names.
   Set1: "Set1",
   Set2: "Set2",
@@ -85,7 +101,7 @@ const PALETTE_LABELS = {
   Dark2: "Dark2",
   Paired: "Paired",
   Accent: "Accent",
-} as const satisfies Record<(typeof CATEGORICAL_SCHEME_NAMES)[number], string>;
+} as const satisfies Record<PaletteOptionName, string>;
 
 /** Categorical scheme paired with each theme demo so paper + marks read as a set. */
 const THEME_DEMO_SCHEMES = {
@@ -126,7 +142,10 @@ export const THEME_OPTIONS = THEME_NAMES.filter(
   scheme: THEME_DEMO_SCHEMES[name],
 }));
 
-export const CATEGORICAL_PALETTES = CATEGORICAL_SCHEME_NAMES.map((name) => {
+/** Picker/specimen palettes only — API still accepts gray via the same GREY_PALETTE_10. */
+export const CATEGORICAL_PALETTES = CATEGORICAL_SCHEME_NAMES.filter(
+  (name): name is PaletteOptionName => !(name in CATEGORICAL_SCHEME_DISPLAY_ALIASES),
+).map((name) => {
   const colors = CATEGORICAL_SCHEMES[name];
   return {
     name,

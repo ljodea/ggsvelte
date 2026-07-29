@@ -435,12 +435,6 @@ export const THEME_STATIC_SHELLS = [
     sha256: "4df8c488dd54f048220ca6fa5ead1469e527cd98ca984be6533c0eaa184d4d19",
   },
   {
-    id: "palette-gray",
-    filename: "palette-gray.svg",
-    path: "/theme-shells/palette-gray.svg",
-    sha256: "4614ec696ccfa1612080b3624370639e7549d58db36815629a51656f7af1dbc5",
-  },
-  {
     id: "sequential-viridis",
     filename: "sequential-viridis.svg",
     path: "/theme-shells/sequential-viridis.svg",
