@@ -33,6 +33,8 @@ const DOCS_SURFACE_CONTENT_INPUTS: readonly string[] = [
   // apps/docs package.json build/check invoke these generators.
   "scripts/gen-docs-routes.ts",
   "scripts/docs-route-inventory.ts",
+  "scripts/docs-route-inventory-pages.ts",
+  "scripts/docs-route-inventory-reference.ts",
   "scripts/docs-route-inventory.test.ts",
   "scripts/gen-docs-search.ts",
   "scripts/gen-docs-search.test.ts",
