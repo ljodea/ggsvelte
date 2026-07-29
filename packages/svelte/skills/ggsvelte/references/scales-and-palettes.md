@@ -159,7 +159,7 @@ byte-identity-preserving: `value` is not routed through any helper.
 
 ## Palettes
 
-### Categorical schemes (45)
+### Categorical schemes (49)
 
 | Scheme                    | Description                                                        |
 | ------------------------- | ------------------------------------------------------------------ |
@@ -195,6 +195,10 @@ byte-identity-preserving: `value` is not routed through any helper.
 | tableau_red_blue_brown    | ggthemes Tableau Red-Blue-Brown (12)                               |
 | tableau_purple_pink_gray  | ggthemes Tableau Purple-Pink-Gray (12)                             |
 | tableau_hue_circle        | ggthemes Tableau Hue Circle (19)                                   |
+| gdocs                     | ggthemes Google Docs colors (6 hues × 4 strengths, verbatim)       |
+| hc                        | ggthemes Highcharts default 10 colors                              |
+| hc_dark                   | ggthemes Highcharts darkunica 11 colors                            |
+| pander                    | ggthemes pander colorblind/printer-friendly 8 (Okabe-Ito order)    |
 | calc                      | ggthemes LibreOffice Calc 12 chart colors                          |
 | excel                     | ggthemes Excel 97 line/point palette (`scale_colour_excel`)        |
 | excel_fill                | ggthemes Excel 97 area palette (`scale_fill_excel`)                |

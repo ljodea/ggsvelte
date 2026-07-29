@@ -45,11 +45,6 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "wsj_red_green",
   "wsj_black_green",
   "wsj_dem_rep",
-  // ggthemes ports (#1159): LibreOffice Calc + Excel 97 + current Office
-  "calc",
-  "excel",
-  "excel_fill",
-  "excel_new",
   // ggthemes tableau_color_pal regular variants (#1159); Tableau 10 above is
   // the default — these complete the set.
   "tableau20",
@@ -66,6 +61,16 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "tableau_red_blue_brown",
   "tableau_purple_pink_gray",
   "tableau_hue_circle",
+  // ggthemes ports (#1159): Google Docs + Highcharts + pander
+  "gdocs",
+  "hc",
+  "hc_dark",
+  "pander",
+  // ggthemes ports (#1159): LibreOffice Calc + Excel 97 + current Office
+  "calc",
+  "excel",
+  "excel_fill",
+  "excel_new",
   // ColorBrewer qualitative (#825)
   "Set1",
   "Set2",
@@ -177,6 +182,10 @@ export const THEME_NAMES = [
   "solarized_2dark",
   /** ggthemes theme_wsj (Wall Street Journal). */
   "wsj",
+  "gdocs",
+  "hc",
+  "hcdark",
+  "pander",
   "calc",
   "excel",
   "excel_new",

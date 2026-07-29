@@ -51,7 +51,7 @@ test("themes compares all built-in chart themes as full-width interactive portra
   const list = page.getByRole("list", { name: "Built-in chart themes" });
   const specimens = list.getByRole("listitem");
   // Non-alias product themes (grey/gray alias ggplot2; not separate portraits).
-  await expect(specimens).toHaveCount(25);
+  await expect(specimens).toHaveCount(29);
   await expect(specimens.getByRole("heading", { level: 3 })).toHaveText([
     "Default",
     "Light",
@@ -74,6 +74,10 @@ test("themes compares all built-in chart themes as full-width interactive portra
     "Solarized 2",
     "Solarized 2 Dark",
     "WSJ",
+    "Google Docs",
+    "Highcharts",
+    "Highcharts Dark",
+    "Pander",
     "Calc",
     "Excel",
     "Excel New",
@@ -138,7 +142,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
-  await expect(cards).toHaveCount(45);
+  await expect(cards).toHaveCount(49);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Observable 10",
     "Ipsum",
@@ -158,10 +162,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "WSJ Red/Green",
     "WSJ Black/Green",
     "WSJ Dem/Rep",
-    "Calc",
-    "Excel",
-    "Excel Fill",
-    "Excel New",
     "Tableau 20",
     "Tableau Color Blind",
     "Seattle Grays",
@@ -176,6 +176,14 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Red/Blue/Brown",
     "Purple/Pink/Gray",
     "Hue Circle",
+    "Google Docs",
+    "Highcharts",
+    "Highcharts Dark",
+    "Pander",
+    "Calc",
+    "Excel",
+    "Excel Fill",
+    "Excel New",
     "Set1",
     "Set2",
     "Set3",
@@ -205,10 +213,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "2 colors",
     "4 colors",
     "3 colors",
-    "12 colors",
-    "7 colors",
-    "7 colors",
-    "6 colors",
     "20 colors",
     "10 colors",
     "5 colors",
@@ -223,6 +227,10 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "12 colors",
     "12 colors",
     "19 colors",
+    "24 colors",
+    "10 colors",
+    "11 colors",
+    "8 colors",
     "9 colors",
     "8 colors",
     "12 colors",

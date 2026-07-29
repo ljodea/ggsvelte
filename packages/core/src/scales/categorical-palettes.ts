@@ -160,21 +160,6 @@ export const FEW_DARK_PALETTE: readonly string[] = [
 
 /** ggthemes fivethirtyeight_pal() — the standard three-color 538 line palette: blue, red, green. */
 export const FIVETHIRTYEIGHT_PALETTE: readonly string[] = ["#008FD5", "#FF2700", "#77AB43"];
-/** ggthemes calc_pal() — the 12 LibreOffice Calc chart colors, in source order. */
-export const CALC_PALETTE: readonly string[] = [
-  "#004586",
-  "#ff420e",
-  "#ffd320",
-  "#579d1c",
-  "#7e0021",
-  "#83caff",
-  "#314004",
-  "#aecf00",
-  "#4b1f6f",
-  "#ff950e",
-  "#c5000b",
-  "#0084d1",
-];
 
 /**
  * ggthemes ptol_pal() at full capacity (n = 12 selection) — Paul Tol's
@@ -203,16 +188,6 @@ export const PTOL_PALETTE: readonly string[] = [
  * registered (documented subset).
  */
 export const CANVA_PALETTE: readonly string[] = ["#f98866", "#ff420e", "#80bd9e", "#89da59"];
-/** ggthemes excel_pal(line = TRUE) — the Excel 97 line/point palette (scale_colour_excel). */
-export const EXCEL_PALETTE: readonly string[] = [
-  "#FF00FF",
-  "#FFFF00",
-  "#00FFFF",
-  "#800080",
-  "#800000",
-  "#008080",
-  "#0000FF",
-];
 
 export const TABLEAU20_PALETTE: readonly string[] = [
   "#4E79A7",
@@ -452,6 +427,111 @@ export const WSJ_BLACK_GREEN_PALETTE: readonly string[] = [
 /** ggthemes wsj_pal("dem_rep") — Democrat/Republican/Undecided. */
 export const WSJ_DEM_REP_PALETTE: readonly string[] = ["#006a8e", "#b1283a", "#a8a6a7"];
 
+/**
+ * ggthemes gdocs_pal() — Google Docs chart colors: the six brand hues in
+ * four decreasing strengths. Copied verbatim from the upstream YAML,
+ * including its duplicated "teal 2" entry (#ff994d); the doc comment
+ * upstream claims 20 colors but the table holds 24.
+ */
+export const GDOCS_PALETTE: readonly string[] = [
+  "#4285f4",
+  "#ea4335",
+  "#fbbc04",
+  "#34a853",
+  "#ff6d01",
+  "#46bdc6",
+  "#7baaf7",
+  "#f07b72",
+  "#fcd04f",
+  "#71c287",
+  "#ff994d",
+  "#ff994d",
+  "#b3cefb",
+  "#f7b4ae",
+  "#fde49b",
+  "#aedcba",
+  "#ffc599",
+  "#c9e4e7",
+  "#ecf3fe",
+  "#fdeceb",
+  "#fff8e6",
+  "#ebf6ee",
+  "#fff0e6",
+  "#edf8f9",
+];
+
+/** ggthemes hc_pal("default") — Highcharts default 10 colors. */
+export const HC_PALETTE: readonly string[] = [
+  "#7cb5ec",
+  "#434348",
+  "#90ed7d",
+  "#f7a35c",
+  "#8085e9",
+  "#f15c80",
+  "#e4d354",
+  "#8085e8",
+  "#8d4653",
+  "#91e8e1",
+];
+
+/** ggthemes hc_pal("darkunica") — Highcharts dark-unica 11 colors (verbatim, with its trailing repeats). */
+export const HC_DARK_PALETTE: readonly string[] = [
+  "#2b908f",
+  "#90ee7e",
+  "#f45b5b",
+  "#7798BF",
+  "#aaeeee",
+  "#ff0066",
+  "#eeaaee",
+  "#55BF3B",
+  "#DF5353",
+  "#7798BF",
+  "#aaeeee",
+];
+
+/**
+ * ggthemes palette_pander() — the pander package's colorblind- and
+ * printer-friendly eight (borrowed from jfly.iam.u-tokyo.ac.jp/color):
+ * the Okabe-Ito hues in pander's order, with #999999 in place of black.
+ */
+export const PANDER_PALETTE: readonly string[] = [
+  "#56B4E9",
+  "#009E73",
+  "#F0E442",
+  "#0072B2",
+  "#D55E00",
+  "#CC79A7",
+  "#999999",
+  "#E69F00",
+];
+
+/** ggthemes calc_pal() — the 12 LibreOffice Calc chart colors, in source order. */
+export const CALC_PALETTE: readonly string[] = [
+  "#004586",
+  "#ff420e",
+  "#ffd320",
+  "#579d1c",
+  "#7e0021",
+  "#83caff",
+  "#314004",
+  "#aecf00",
+  "#4b1f6f",
+  "#ff950e",
+  "#c5000b",
+  "#0084d1",
+];
+
+/** ggthemes excel_pal(line = TRUE) — the Excel 97 line/point palette (scale_colour_excel). */
+export const EXCEL_PALETTE: readonly string[] = [
+  "#FF00FF",
+  "#FFFF00",
+  "#00FFFF",
+  "#800080",
+  "#800000",
+  "#008080",
+  "#0000FF",
+];
+
 /** ggthemes excel_pal(line = FALSE) — the Excel 97 area/fill palette (scale_fill_excel). */
 export const EXCEL_FILL_PALETTE: readonly string[] = [
   "#993366",
@@ -476,6 +556,7 @@ export const EXCEL_NEW_PALETTE: readonly string[] = [
   "#5B9BD5",
   "#70AD47",
 ];
+
 /** Named categorical schemes accepted by the portable spec. */
 export const CATEGORICAL_SCHEMES = {
   observable10: CATEGORICAL_PALETTE_10,
@@ -496,10 +577,6 @@ export const CATEGORICAL_SCHEMES = {
   wsj_red_green: WSJ_RED_GREEN_PALETTE,
   wsj_black_green: WSJ_BLACK_GREEN_PALETTE,
   wsj_dem_rep: WSJ_DEM_REP_PALETTE,
-  calc: CALC_PALETTE,
-  excel: EXCEL_PALETTE,
-  excel_fill: EXCEL_FILL_PALETTE,
-  excel_new: EXCEL_NEW_PALETTE,
   tableau20: TABLEAU20_PALETTE,
   tableau_colorblind: TABLEAU_COLORBLIND_PALETTE,
   tableau_seattle_grays: TABLEAU_SEATTLE_GRAYS_PALETTE,
@@ -514,6 +591,14 @@ export const CATEGORICAL_SCHEMES = {
   tableau_red_blue_brown: TABLEAU_RED_BLUE_BROWN_PALETTE,
   tableau_purple_pink_gray: TABLEAU_PURPLE_PINK_GRAY_PALETTE,
   tableau_hue_circle: TABLEAU_HUE_CIRCLE_PALETTE,
+  gdocs: GDOCS_PALETTE,
+  hc: HC_PALETTE,
+  hc_dark: HC_DARK_PALETTE,
+  pander: PANDER_PALETTE,
+  calc: CALC_PALETTE,
+  excel: EXCEL_PALETTE,
+  excel_fill: EXCEL_FILL_PALETTE,
+  excel_new: EXCEL_NEW_PALETTE,
   ...COLORBREWER_QUALITATIVE,
   hue: HUE_PALETTE_10,
   grey: GREY_PALETTE_10,
