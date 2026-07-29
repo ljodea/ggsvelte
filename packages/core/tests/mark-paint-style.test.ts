@@ -11,7 +11,7 @@ import {
   pointShapePathD,
   resolvePathMark,
   resolvePointMark,
-} from "../src/mark-paint.ts";
+} from "../src/mark-style.ts";
 
 describe("pointShapeGeometry proportions", () => {
   it("triangle uses the shared 1.2 / 1.1 / 0.9 vertices", () => {
