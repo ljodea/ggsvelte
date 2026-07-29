@@ -11,16 +11,18 @@ import { SCALE_CAPABILITIES } from "@ggsvelte/spec";
 import {
   expectedCamelHelpers,
   expectedColourAliases,
-  GENERATED_HEADER,
-  INDEX_PATH,
   manifestAliases,
   manifestHelpers,
+  SHELL_MANIFEST,
+} from "./gen-scale-children-manifest.ts";
+import {
+  GENERATED_HEADER,
+  INDEX_PATH,
   REGION_END,
   REGION_START,
   renderIndexRegion,
   renderShell,
   rewriteIndexRegion,
-  SHELL_MANIFEST,
   shellRelPath,
 } from "./gen-scale-children.ts";
 
