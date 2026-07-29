@@ -6,17 +6,19 @@
  * sequential ifs) so an odd pairing can still emit more than one error.
  */
 import type { SpecError } from "./errors.js";
-import type { ChannelName } from "./schema.js";
+import type { ChannelName, ChannelValue } from "./schema.js";
 
 /** Reject data-mapped y when the geom/stat computes y. */
 export function computedYMappedErrors(
   geom: string,
   stat: string,
   layerPath: string,
-  mapped: (channel: ChannelName) => unknown,
+  /** Same shape as `effectiveChannel` — null unset already collapsed to undefined. */
+  mapped: (channel: ChannelName) => Exclude<ChannelValue, null> | undefined,
 ): SpecError[] {
   const errors: SpecError[] = [];
   const y = mapped("y");
+  // Unmapped or after_stat form ({ stat }) is fine; data-mapped y is not.
   if (y === undefined || "stat" in y) return errors;
 
   if (
