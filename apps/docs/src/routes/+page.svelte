@@ -43,8 +43,9 @@
       A layered grammar of graphics implemented for agents
     </h1>
     <p>
-      ggplot2's grammar for Svelte. Every plot is strict JSON: validate,
-      correct, render headless.
+      The declarative ggplot2 mental model: Instead of picking a preset
+      "BarChart" or "LineChart" component, you compose plots out of independent
+      structural layers.
     </p>
   </div>
 

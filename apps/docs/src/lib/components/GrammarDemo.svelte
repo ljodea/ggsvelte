@@ -19,8 +19,11 @@
 
 <section class="grammar-demo" aria-labelledby="grammar-heading">
   <div class="grammar-copy">
-    <h2 id="grammar-heading">Interaction is a layer.</h2>
-    <p>Zero D3.js. Inspect and pin are plot props.</p>
+    <h2 id="grammar-heading">Declare a layer interactive</h2>
+    <p>
+      Zero D3.js. Headless SVG rendering for CLI, SSR environments, &amp; agent
+      validation loops.
+    </p>
     <ol>
       {#each steps as step, index (step.label)}
         <li class:active={active === index}>
@@ -66,24 +69,38 @@
 </section>
 
 <style>
+  /*
+   * Chart owns the wide column on the left; title + step accordion stay narrow
+   * on the right. Source order keeps copy first for mobile stack / a11y.
+   */
   .grammar-demo {
     display: grid;
-    grid-template-columns: minmax(17rem, 0.8fr) minmax(0, 1.2fr);
-    gap: clamp(2rem, 6vw, 6rem);
+    grid-template-areas: "output copy";
+    grid-template-columns: minmax(0, 1.55fr) minmax(12rem, 0.5fr);
+    gap: clamp(1.5rem, 4vw, 3rem);
     align-items: center;
     padding-block: clamp(4rem, 9vw, 8rem);
     border-block: 1px solid var(--line);
   }
 
+  .grammar-copy {
+    grid-area: copy;
+  }
+
+  .grammar-output {
+    grid-area: output;
+    min-width: 0;
+  }
+
   h2 {
-    max-width: 12ch;
+    max-width: 11ch;
     margin: 0.25rem 0 1rem;
     font-size: clamp(2.5rem, 5vw, 4.5rem);
     line-height: 0.95;
   }
 
   .grammar-copy > p {
-    max-width: 34rem;
+    max-width: 28rem;
     color: var(--muted);
   }
 
@@ -145,10 +162,6 @@
     opacity: 1;
   }
 
-  .grammar-output {
-    min-width: 0;
-  }
-
   @media (prefers-reduced-motion: reduce) {
     button small {
       transition: none;
@@ -157,6 +170,7 @@
 
   @media (max-width: 50rem) {
     .grammar-demo {
+      grid-template-areas: "copy" "output";
       grid-template-columns: 1fr;
       gap: 2rem;
     }
