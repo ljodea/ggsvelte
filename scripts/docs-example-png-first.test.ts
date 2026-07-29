@@ -35,6 +35,8 @@ describe("docs example PNG-first (PR3)", () => {
     expect(frame).toContain('has("vr")');
     expect(frame).toContain("example-preview");
     expect(frame).toContain("previewPath");
+    // VR starts the import at module init, not only in onMount.
+    expect(frame).toContain('typeof window !== "undefined"');
   });
 
   it("keeps loadExample for callers that still need the full bundle", () => {

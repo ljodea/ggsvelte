@@ -18,5 +18,10 @@ export async function settleVisualState(page: Page, expectedPlots = 1): Promise<
       });
     });
   });
-  await expect(page.locator('.gg-plot-root[data-gg-ready="true"]')).toHaveCount(expectedPlots);
+  // 30s: example pages may cold-import the chart stack after a PNG placeholder
+  // (ExampleLiveFrame / near-viewport upgrade). First smoke case after a fresh
+  // worker is the slow path; cached modules keep later cases well under this.
+  await expect(page.locator('.gg-plot-root[data-gg-ready="true"]')).toHaveCount(expectedPlots, {
+    timeout: 30_000,
+  });
 }

@@ -32,31 +32,40 @@
 
   let host = $state<HTMLDivElement | null>(null);
   let Live = $state<Component | null>(null);
+  let loadStarted = false;
+  let cancelled = false;
+
+  function startLoad(): void {
+    if (loadStarted || Live !== null) return;
+    loadStarted = true;
+    void loadExampleComponent(exampleId).then((component) => {
+      if (!cancelled) Live = component;
+    });
+  }
+
+  // Kick off the VR import as soon as the client module runs (before paint
+  // settles). onMount still owns near-viewport upgrades for normal visits.
+  if (typeof window !== "undefined") {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("vr")) startLoad();
+  }
 
   onMount(() => {
-    const el = host;
-    if (el === null) return;
-    let cancelled = false;
-
-    const load = (): void => {
-      if (cancelled || Live !== null) return;
-      void loadExampleComponent(exampleId).then((component) => {
-        if (!cancelled) Live = component;
-      });
-    };
-
-    const eager =
-      typeof window !== "undefined" &&
-      new URLSearchParams(window.location.search).has("vr");
-
-    if (eager) {
-      load();
+    cancelled = false;
+    if (Live !== null || loadStarted) {
       return () => {
         cancelled = true;
       };
     }
-
-    const stop = observeNearViewport(el, load, { rootMargin: "480px 0px" });
+    const el = host;
+    if (el === null) {
+      return () => {
+        cancelled = true;
+      };
+    }
+    const stop = observeNearViewport(el, startLoad, {
+      rootMargin: "480px 0px",
+    });
     return () => {
       cancelled = true;
       stop();
