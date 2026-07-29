@@ -27,6 +27,11 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "flexoki",
   "tableau10",
   "colorblind",
+  // ggthemes ports (#1159): Stata schemes
+  "stata",
+  "stata_s1color",
+  "stata_s1rcolor",
+  "stata_mono",
   // ColorBrewer qualitative (#825)
   "Set1",
   "Set2",
@@ -129,6 +134,10 @@ export const THEME_NAMES = [
   "tufte",
   "linedraw",
   "void",
+  // ggthemes theme ports (#1158)
+  "stata",
+  "stata_s1color",
+  "stata_mono",
   "grey",
   "gray",
   // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters

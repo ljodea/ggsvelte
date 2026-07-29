@@ -25,6 +25,9 @@ const THEME_LABELS = {
   tufte: "Tufte",
   linedraw: "Linedraw",
   void: "Void",
+  stata: "Stata",
+  stata_s1color: "Stata S1 Color",
+  stata_mono: "Stata Mono",
   test: "Test",
 } as const satisfies Record<ThemeOptionName, string>;
 
@@ -34,6 +37,10 @@ const PALETTE_LABELS = {
   flexoki: "Flexoki",
   tableau10: "Tableau 10",
   colorblind: "Colorblind",
+  stata: "Stata",
+  stata_s1color: "Stata S1 Color",
+  stata_s1rcolor: "Stata S1R Color",
+  stata_mono: "Stata Mono",
   hue: "Hue",
   grey: "Grey",
   gray: "Gray",
@@ -63,6 +70,9 @@ const THEME_DEMO_SCHEMES = {
   tufte: "colorblind",
   linedraw: "colorblind",
   void: "colorblind",
+  stata: "stata",
+  stata_s1color: "stata_s1color",
+  stata_mono: "stata_mono",
   test: "colorblind",
 } as const satisfies Record<ThemeOptionName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
 

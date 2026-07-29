@@ -78,6 +78,82 @@ export const COLORBLIND_PALETTE: readonly string[] = [
   "#CC79A7",
 ];
 
+/** ggthemes stata_pal("s2color") — the default Stata s2color scheme's 15 colors. */
+export const STATA_PALETTE: readonly string[] = [
+  "#1a476f",
+  "#90353b",
+  "#55752f",
+  "#e37e00",
+  "#6e8e84",
+  "#c10534",
+  "#938dd2",
+  "#cac27e",
+  "#a0522d",
+  "#7b92a8",
+  "#2d6d66",
+  "#9c8847",
+  "#bfa19c",
+  "#ffd200",
+  "#d9e6eb",
+];
+
+/** ggthemes stata_pal("s1color") — the Stata s1color scheme's 15 colors. */
+export const STATA_S1COLOR_PALETTE: readonly string[] = [
+  "#006000",
+  "#ff4500",
+  "#1a476f",
+  "#90353b",
+  "#6e8e84",
+  "#a0522d",
+  "#ff7f00",
+  "#ff00ff",
+  "#00ffff",
+  "#ff0000",
+  "#00ff00",
+  "#9c8847",
+  "#800080",
+  "#c0dcc0",
+  "#add8e6",
+];
+
+/** ggthemes stata_pal("s1rcolor") — the Stata s1rcolor (dark-background) scheme's 15 colors. */
+export const STATA_S1RCOLOR_PALETTE: readonly string[] = [
+  "#ffff00",
+  "#00ff00",
+  "#0080ff",
+  "#ff00ff",
+  "#ff7f00",
+  "#ff0000",
+  "#add8e6",
+  "#ffe474",
+  "#00ff80",
+  "#c0dcc0",
+  "#ff4500",
+  "#0000ff",
+  "#ff0080",
+  "#6e8e84",
+  "#a0522d",
+];
+
+/** ggthemes stata_pal("mono") — the Stata monochrome scheme's 15 grays. */
+export const STATA_MONO_PALETTE: readonly string[] = [
+  "#606060",
+  "#a0a0a0",
+  "#808080",
+  "#404040",
+  "#000000",
+  "#e0e0e0",
+  "#202020",
+  "#707070",
+  "#909090",
+  "#b0b0b0",
+  "#d0d0d0",
+  "#f0f0f0",
+  "#303030",
+  "#c0c0c0",
+  "#505050",
+];
+
 /** Named categorical schemes accepted by the portable spec. */
 export const CATEGORICAL_SCHEMES = {
   observable10: CATEGORICAL_PALETTE_10,
@@ -85,6 +161,10 @@ export const CATEGORICAL_SCHEMES = {
   flexoki: FLEXOKI_PALETTE,
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
+  stata: STATA_PALETTE,
+  stata_s1color: STATA_S1COLOR_PALETTE,
+  stata_s1rcolor: STATA_S1RCOLOR_PALETTE,
+  stata_mono: STATA_MONO_PALETTE,
   ...COLORBREWER_QUALITATIVE,
   hue: HUE_PALETTE_10,
   grey: GREY_PALETTE_10,

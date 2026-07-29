@@ -2,7 +2,7 @@
 
 This board compares R and ggsvelte renders using the same data, explicit domains, explicit breaks, explicit colors, 720×480 logical viewport, and 1440×960 output. R uses Cairo at 192 dpi. ggsvelte uses Chromium at device scale factor 2 with its bundled Roboto Condensed faces loaded and verified through `document.fonts.check()`.
 
-Open [index.html](./index.html) for all 12 registered ggsvelte themes and the three side-by-side structural references. Raw structural measurements are in [r-metrics.json](./r-metrics.json) and [ggsvelte-metrics.json](./ggsvelte-metrics.json).
+Open [index.html](./index.html) for all 19 registered ggsvelte themes and the three side-by-side structural references. Raw structural measurements are in [r-metrics.json](./r-metrics.json) and [ggsvelte-metrics.json](./ggsvelte-metrics.json).
 
 ## Structural parity
 
@@ -31,6 +31,10 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - hrbrthemes Flexoki Light: `#D14D41 #DA702C #D0A215 #879A39 #3AA99F #4385BE #8B7EC8 #CE5D97`
 - ggthemes Tableau 10: `#4E79A7 #F28E2B #E15759 #76B7B2 #59A14F #EDC948 #B07AA1 #FF9DA7 #9C755F #BAB0AC`
 - ggthemes colorblind: `#000000 #E69F00 #56B4E9 #009E73 #F0E442 #0072B2 #D55E00 #CC79A7`
+- ggthemes stata (s2color): `#1a476f #90353b #55752f #e37e00 #6e8e84 #c10534 #938dd2 #cac27e #a0522d #7b92a8 #2d6d66 #9c8847 #bfa19c #ffd200 #d9e6eb`
+- ggthemes stata_s1color: `#006000 #ff4500 #1a476f #90353b #6e8e84 #a0522d #ff7f00 #ff00ff #00ffff #ff0000 #00ff00 #9c8847 #800080 #c0dcc0 #add8e6`
+- ggthemes stata_s1rcolor: `#ffff00 #00ff00 #0080ff #ff00ff #ff7f00 #ff0000 #add8e6 #ffe474 #00ff80 #c0dcc0 #ff4500 #0000ff #ff0080 #6e8e84 #a0522d`
+- ggthemes stata_mono: `#606060 #a0a0a0 #808080 #404040 #000000 #e0e0e0 #202020 #707070 #909090 #b0b0b0 #d0d0d0 #f0f0f0 #303030 #c0c0c0 #505050`
 
 ## Sources
 
@@ -38,7 +42,7 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - hrbrthemes Roboto Condensed: `/Users/liamodea/Code/hrbrthemes/R/roboto-condensed.r`
 - hrbrthemes palettes: `/Users/liamodea/Code/hrbrthemes/R/color.r` and `R/flexoki.R`
 - ggthemes Few: `/Users/liamodea/Code/ggthemes/R/few.R`
-- ggthemes palettes: `/Users/liamodea/Code/ggthemes/data-raw/theme-data/tableau.yml` and `colorblind.yml`
+- ggthemes palettes: `/Users/liamodea/Code/ggthemes/data-raw/theme-data/tableau.yml`, `colorblind.yml`, and `stata.yml`
 
 Reproduce everything with:
 

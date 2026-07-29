@@ -99,6 +99,24 @@ export const THEME_STATIC_SHELLS = [
     sha256: "61c02ef23f365389c8b10cf599c2a5777749e4c79090ebe4a7393e0e2ffcd9ae",
   },
   {
+    id: "theme-stata",
+    filename: "theme-stata.svg",
+    path: "/theme-shells/theme-stata.svg",
+    sha256: "5f802b7a9524331086ad7b90ea3c0804b1094b13497656731dbef76c5cd13757",
+  },
+  {
+    id: "theme-stata_s1color",
+    filename: "theme-stata_s1color.svg",
+    path: "/theme-shells/theme-stata_s1color.svg",
+    sha256: "8e490fb1d175b57d276c2c4383996cef8da9083a270d129f22d15792011708f9",
+  },
+  {
+    id: "theme-stata_mono",
+    filename: "theme-stata_mono.svg",
+    path: "/theme-shells/theme-stata_mono.svg",
+    sha256: "c411bbbb21ead41bc9242783a0f5c4feec396a293f49f0cb3c1d6144318ef319",
+  },
+  {
     id: "theme-test",
     filename: "theme-test.svg",
     path: "/theme-shells/theme-test.svg",
@@ -139,6 +157,30 @@ export const THEME_STATIC_SHELLS = [
     filename: "palette-colorblind.svg",
     path: "/theme-shells/palette-colorblind.svg",
     sha256: "bc5da80dd99a61095b0e5c0b577d29813d8a005bc52078dbca325b030cbb6177",
+  },
+  {
+    id: "palette-stata",
+    filename: "palette-stata.svg",
+    path: "/theme-shells/palette-stata.svg",
+    sha256: "69cca2c8906aa752229e8a8f711f0edda26e1f39d00ae8893ec6d200aaff1da0",
+  },
+  {
+    id: "palette-stata_s1color",
+    filename: "palette-stata_s1color.svg",
+    path: "/theme-shells/palette-stata_s1color.svg",
+    sha256: "d31edc193656232adb6231bff8719c3ad621658cfdad9bec7cf34ca467a545bf",
+  },
+  {
+    id: "palette-stata_s1rcolor",
+    filename: "palette-stata_s1rcolor.svg",
+    path: "/theme-shells/palette-stata_s1rcolor.svg",
+    sha256: "f6da9a5a3dfd2a28a838f1c09468709bbd4a6b62c9d8fa4ba5a4264765265cc1",
+  },
+  {
+    id: "palette-stata_mono",
+    filename: "palette-stata_mono.svg",
+    path: "/theme-shells/palette-stata_mono.svg",
+    sha256: "74dc604ddde753ca9f347fad46f5e2036dc04f31594154f5943037300e048060",
   },
   {
     id: "palette-Set1",

@@ -6035,6 +6035,22 @@
                 },
                 {
                   "type": "string",
+                  "const": "stata"
+                },
+                {
+                  "type": "string",
+                  "const": "stata_s1color"
+                },
+                {
+                  "type": "string",
+                  "const": "stata_s1rcolor"
+                },
+                {
+                  "type": "string",
+                  "const": "stata_mono"
+                },
+                {
+                  "type": "string",
                   "const": "Set1"
                 },
                 {
@@ -8451,6 +8467,18 @@
         },
         {
           "type": "string",
+          "const": "stata"
+        },
+        {
+          "type": "string",
+          "const": "stata_s1color"
+        },
+        {
+          "type": "string",
+          "const": "stata_mono"
+        },
+        {
+          "type": "string",
           "const": "grey"
         },
         {
@@ -8462,7 +8490,7 @@
           "const": "test"
         }
       ],
-      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"grey\", \"gray\", \"test\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"stata\", \"stata_s1color\", \"stata_mono\", \"grey\", \"gray\", \"test\"."
     },
     "ThemeSpec": {
       "type": "object",
