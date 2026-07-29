@@ -147,8 +147,9 @@ describe("the sakura lesson folds to renderable specs", () => {
     const lastChild = new Map<string, string>();
     for (const step of SAKURA_STEPS) {
       for (const [key, text] of Object.entries(step.source.attrs ?? {})) lastAttr.set(key, text);
-      // Grammar children ride with the attrs they replaced (#659 slice 8):
-      // they are not layers, so they must stay out of the layer count below.
+      // Grammar children ride with the attrs they replaced (#659 slice 8).
+      // They are plot layers (scale/theme/labs/guides/…), but not mark layers,
+      // so they must stay out of the PortableSpec `layers[]` / mark count below.
       for (const [key, text] of Object.entries(step.source.grammar ?? {})) lastAttr.set(key, text);
       for (const [key, text] of Object.entries(step.source.children ?? {}))
         lastChild.set(key, text);

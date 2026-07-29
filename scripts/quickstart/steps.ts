@@ -123,19 +123,25 @@ export interface SakuraSourceDelta {
   /** `<GGPlot>` attributes, keyed by attribute name; a repeat replaces it. */
   readonly attrs?: Readonly<Record<string, string>>;
   /**
-   * Declaration-only grammar children (`<ScaleYMonthDay>`, `<Labs>`,
+   * Declaration-only **grammar layers** (`<ScaleYMonthDay>`, `<Labs>`,
    * `<GuideLegend>`, `<ThemeTufte>`, …), keyed by the grammar piece they
    * carry; a repeat replaces it.
    *
-   * Held apart from {@link children} because they are not layers: they never
-   * appear in `childOrder`, and they are emitted ahead of every geom so that a
-   * later step adding a geom cannot silently reorder them (#659 D2 — child
-   * layers apply in registration order).
+   * These **are** plot layers (`Layer.kind` scale/theme/coord/facet/labs/
+   * guides/legend via `createPlotLayer`). They are held apart from
+   * {@link children} only because they are **not mark layers**: they never
+   * appear in `childOrder` (geom z-order), and they are emitted ahead of every
+   * geom so a later step adding a geom cannot silently reorder them
+   * (#659 D2 — child layers apply in registration order).
+   *
+   * Do not call them “non-layers.” PortableSpec puts marks in `layers[]` and
+   * folds these families into top-level keys; that is serialization, not
+   * ontology.
    */
   readonly grammar?: Readonly<Record<string, string>>;
-  /** Child elements keyed by the layer they draw; a repeat replaces it. */
+  /** Mark/geom child elements keyed by the layer they draw; a repeat replaces it. */
   readonly children?: Readonly<Record<string, string>>;
-  /** Full bottom-to-top child order after this step. */
+  /** Full bottom-to-top mark child order after this step. */
   readonly childOrder?: readonly string[];
 }
 
