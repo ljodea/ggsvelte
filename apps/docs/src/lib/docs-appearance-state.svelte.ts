@@ -1,7 +1,7 @@
 /**
  * Reactive view of the site appearance (data-theme on <html>) for components
- * that must invert chart themes against the page: a dark chart on the light
- * site needs no border to read as a plot, and vice versa.
+ * that pick a chart theme against the page: FiveThirtyEight on the light site,
+ * light chart paper on the dark site.
  */
 import { browser } from "$app/environment";
 
@@ -18,7 +18,11 @@ if (browser) {
   });
 }
 
-/** Chart theme that contrasts with the current site appearance. */
-export function contrastChartTheme(): "light" | "dark" {
-  return docsAppearance.current === "light" ? "dark" : "light";
+/**
+ * Chart theme for homepage hero / grammar demo plots.
+ * Light site → fivethirtyeight (light paper, editorial chrome).
+ * Dark site → light (so the plot still reads as a chart on a dark frame).
+ */
+export function contrastChartTheme(): "fivethirtyeight" | "light" {
+  return docsAppearance.current === "light" ? "fivethirtyeight" : "light";
 }

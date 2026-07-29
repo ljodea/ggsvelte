@@ -1,10 +1,7 @@
 <script lang="ts">
   import { GeomPoint, GeomSmooth, GGPlot, Theme } from "@ggsvelte/svelte";
+  import { palmerPenguins } from "@ggsvelte/svelte/data";
 
-  // Docs-owned specimen corpus, not the gallery example: point/scatter-color
-  // now carries Guerry's 1833 moral statistics, and the hero wants a scatter
-  // with three colour groups. See lib/theme-specimens/data.ts.
-  import { penguins } from "$lib/theme-specimens/data";
   import { contrastChartTheme } from "$lib/docs-appearance-state.svelte";
 
   const steps = [
@@ -44,25 +41,25 @@
     <!--
       Exact inspect (not auto/x): smooth layers auto-mode to "x" and draw a
       vertical guide that steals hits from points. Homepage needs point
-      tooltips only. degree 1 + wider span: specimen has ~10 rows/species;
-      default degree-2 loess at span 0.75 overfits and looks jagged.
+      tooltips only. Full palmerPenguins (333 complete cases) — not the
+      30-row theme-specimen subset.
     -->
     <GGPlot
-      data={penguins}
+      data={palmerPenguins}
       aes={{
-        x: "flipper",
-        y: "mass",
+        x: "flipperLengthMm",
+        y: "bodyMassG",
         ...(active >= 1 && { color: "species" }),
       }}
       inspect={active >= 3
         ? { mode: "exact", pin: true, maxDistance: 24 }
         : false}
-      ariaLabel="Penguin mass increases with flipper length, grouped by species"
+      ariaLabel="Penguin body mass increases with flipper length, grouped by species"
     >
       <Theme name={chartTheme} />
       <GeomPoint alpha={0.72} />
       {#if active >= 2}
-        <GeomSmooth method="loess" span={0.9} degree={1} se={false} />
+        <GeomSmooth method="loess" span={0.75} se={false} />
       {/if}
     </GGPlot>
   </div>

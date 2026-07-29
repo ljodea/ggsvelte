@@ -6,32 +6,32 @@
  * never dump every row into a mile-tall panel. Matches the interactive demo
  * above the fold — not the hero Guerry chart.
  *
+ * Data: bundled `palmerPenguins` from `@ggsvelte/svelte/data` (333 complete
+ * cases). Field names match the published dataset, not the short theme-specimen
+ * aliases.
+ *
  * Interaction: GrammarDemo step 4 uses exact inspect (nearest-point hover/pin
  * tooltips, no vertical axis guide). That is a GGPlot host prop — not a
  * PortableSpec field and not a builder method.
  * - Svelte / builder: set `inspect` on <GGPlot>
  * - JSON: agent envelope `{ interactions, spec }` (host maps interactions onto
  *   GGPlot props; bare PortableSpec is also accepted and defaults inspect on)
- *
- * Smooth params: local-linear loess (degree 1, span 0.9). The specimen has
- * ~10 rows per species; default degree-2 / span 0.75 overfits and jaggeds.
  */
 
 const HOME_CODE_PATH_SVELTE = `<script lang="ts">
   import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
-
-  import { penguins } from "./penguins.js";
+  import { palmerPenguins } from "@ggsvelte/svelte/data";
 </script>
 
 <GGPlot
-  data={penguins}
-  aes={{ x: "flipper", y: "mass", color: "species" }}
+  data={palmerPenguins}
+  aes={{ x: "flipperLengthMm", y: "bodyMassG", color: "species" }}
   inspect={{ mode: "exact", pin: true, maxDistance: 24 }}
   width={640}
   height={400}
 >
   <GeomPoint alpha={0.72} />
-  <GeomSmooth method="loess" span={0.9} degree={1} se={false} />
+  <GeomSmooth method="loess" span={0.75} se={false} />
 </GGPlot>
 `;
 
@@ -39,15 +39,14 @@ const HOME_CODE_PATH_SVELTE = `<script lang="ts">
 const HOME_CODE_PATH_BUILDER = `<script lang="ts">
   import { aes, gg } from "@ggsvelte/spec";
   import { GGPlot } from "@ggsvelte/svelte";
-
-  import { penguins } from "./penguins.js";
+  import { palmerPenguins } from "@ggsvelte/svelte/data";
 
   const spec = gg(
-    penguins,
-    aes({ x: "flipper", y: "mass", color: "species" }),
+    palmerPenguins,
+    aes({ x: "flipperLengthMm", y: "bodyMassG", color: "species" }),
   )
     .geomPoint({ alpha: 0.72 })
-    .geomSmooth({ method: "loess", span: 0.9, degree: 1, se: false })
+    .geomSmooth({ method: "loess", span: 0.75, se: false })
     .spec();
 </script>
 
@@ -71,15 +70,15 @@ const HOME_CODE_PATH_SPEC_JSON = `{
   },
   "spec": {
     "edition": 2,
-    "data": { "name": "penguins" },
+    "data": { "name": "palmerPenguins" },
     "layers": [
       {
         "geom": "point",
         "stat": "identity",
         "position": "identity",
         "aes": {
-          "x": { "field": "flipper" },
-          "y": { "field": "mass" },
+          "x": { "field": "flipperLengthMm" },
+          "y": { "field": "bodyMassG" },
           "color": { "field": "species" }
         },
         "params": { "alpha": 0.72 }
@@ -89,14 +88,13 @@ const HOME_CODE_PATH_SPEC_JSON = `{
         "stat": "smooth",
         "position": "identity",
         "aes": {
-          "x": { "field": "flipper" },
-          "y": { "field": "mass" },
+          "x": { "field": "flipperLengthMm" },
+          "y": { "field": "bodyMassG" },
           "color": { "field": "species" }
         },
         "params": {
           "method": "loess",
-          "span": 0.9,
-          "degree": 1,
+          "span": 0.75,
           "se": false
         }
       }
