@@ -38,6 +38,7 @@ const PALETTE_LABELS = {
   tableau10: "Tableau 10",
   colorblind: "Colorblind",
   economist: "Economist",
+  solarized: "Solarized",
   few: "Few",
   few_light: "Few Light",
   few_dark: "Few Dark",

@@ -138,6 +138,21 @@ describe("themes catalog", () => {
         ],
       },
       {
+        name: "solarized",
+        label: "Solarized",
+        capacity: 8,
+        colors: [
+          "#268bd2",
+          "#b58900",
+          "#cb4b16",
+          "#dc322f",
+          "#d33682",
+          "#6c71c4",
+          "#2aa198",
+          "#859900",
+        ],
+      },
+      {
         name: "few",
         label: "Few",
         capacity: 8,

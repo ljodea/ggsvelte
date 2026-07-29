@@ -165,6 +165,12 @@ export const THEME_STATIC_SHELLS = [
     sha256: "4f070e0b2034b38ec2c30054b55489241ee8c7634b249512a20dd665de8c5113",
   },
   {
+    id: "palette-solarized",
+    filename: "palette-solarized.svg",
+    path: "/theme-shells/palette-solarized.svg",
+    sha256: "2c14538096dc984f7094fc2cd696171a4274a88a4add9249fd522b3e2a05b9da",
+  },
+  {
     id: "palette-few",
     filename: "palette-few.svg",
     path: "/theme-shells/palette-few.svg",

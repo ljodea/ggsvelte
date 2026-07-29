@@ -4159,7 +4159,15 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "SOLARIZED_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "STRIP_BAND": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "ScaleConfigError": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4431,6 +4439,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "bandKey": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "batchMarkCount": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4519,6 +4531,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "finiteExtent": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "fnv1a": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4588,6 +4604,10 @@
           "lifecycle": "experimental"
         },
         "markLinetype": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "niceLinearDomain": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4731,7 +4751,23 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "trainBand": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "trainColor": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "trainContinuous": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "trainDiscrete": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "trainLinear": {
           "kind": "value",
           "lifecycle": "experimental"
         },

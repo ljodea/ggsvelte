@@ -6039,6 +6039,10 @@
                 },
                 {
                   "type": "string",
+                  "const": "solarized"
+                },
+                {
+                  "type": "string",
                   "const": "few"
                 },
                 {
