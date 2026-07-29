@@ -259,7 +259,7 @@ describe("createSemanticKeyService", () => {
     const first = walkAll();
     const callsAfterFirstWalk = keysSpy.mock.calls.length;
     expect(first).toEqual([["a"], ["b"]]);
-    // At least one lineage resolution per candidate on the cold walk.
+    // Distinct point lineages: one cold expansion per candidate membership.
     expect(callsAfterFirstWalk).toBeGreaterThanOrEqual(model.candidates.size);
 
     // Two more full walks (interval + selection consumers) must reuse the
@@ -271,6 +271,69 @@ describe("createSemanticKeyService", () => {
     keysSpy.mockRestore();
     destroy();
     model.dispose();
+  });
+
+  it("expands a shared lineage once on a full-store cold walk (smooth-shaped)", () => {
+    // Smooth eval grids share one lineage of L rows across C marks. The service
+    // must not call lineage.keys once per mark on the first projection walk.
+    const sharedRows = Array.from({ length: 40 }, (_, i) => i);
+    const lineage = {
+      keys: vi.fn((id: number) => (id === 7 ? sharedRows : [])),
+    };
+    const candidates = {
+      size: 12,
+      candidate(id: number) {
+        if (id < 0 || id >= 12) return null;
+        return {
+          id,
+          lineage: 7,
+          rowIndex: null,
+          layerIndex: 0,
+          x: 0,
+          y: 0,
+          kind: "points",
+          batchIndex: 0,
+          primitiveIndex: id,
+          panelId: "p0",
+        };
+      },
+    };
+    const model = {
+      candidates,
+      lineage,
+      row: (index: number) => ({ id: `k${String(index)}` }),
+      dispose() {},
+    } as unknown as RenderModel;
+
+    const tracker = createSourceIdentityTracker();
+    const { value: service, destroy } = withFlushedEffectRoot(() =>
+      createSemanticKeyService({
+        model: () => model,
+        assembled: () => null,
+        datumKey: () => "id",
+        data: () => sharedRows.map((i) => ({ id: `k${String(i)}` })),
+        spec: () => null,
+        sourceIdentity: (value) => tracker.sourceIdentity(value),
+        deliverDiagnostic: () => {},
+      }),
+    );
+
+    // resolveSemanticKeys already expanded lineage once at construction.
+    const afterResolve = lineage.keys.mock.calls.length;
+    expect(afterResolve).toBeGreaterThanOrEqual(1);
+
+    const bags: PropertyKey[][] = [];
+    for (let id = 0; id < 12; id++) {
+      const c = candidates.candidate(id);
+      expect(c).not.toBeNull();
+      bags.push(service.candidateSemanticKeys(c as never));
+    }
+    // Projection expands the shared lineage once more (not once per mark).
+    expect(lineage.keys.mock.calls.length - afterResolve).toBe(1);
+    expect(bags[0]?.length).toBe(40);
+    expect(bags[11]).toBe(bags[0]);
+
+    destroy();
   });
 
   it("rebuilds the candidate projection when the model is replaced", () => {
