@@ -70,7 +70,13 @@
   <div class="controls">
     <div class="select-control">
       <label for="chart-theme">Chart theme</label>
-      <select id="chart-theme" bind:value={theme} onfocus={ensureLive}>
+      <select
+        id="chart-theme"
+        bind:value={theme}
+        onfocus={() => {
+          ensureLive();
+        }}
+      >
         {#each THEME_OPTIONS as option (option.name)}
           <option value={option.name}>{option.label}</option>
         {/each}
@@ -78,7 +84,13 @@
     </div>
     <div class="select-control">
       <label for="chart-palette">Categorical palette</label>
-      <select id="chart-palette" bind:value={scheme} onfocus={ensureLive}>
+      <select
+        id="chart-palette"
+        bind:value={scheme}
+        onfocus={() => {
+          ensureLive();
+        }}
+      >
         {#each CATEGORICAL_PALETTES as palette (palette.name)}
           <option value={palette.name}>{palette.label}</option>
         {/each}

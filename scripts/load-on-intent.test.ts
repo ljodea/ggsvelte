@@ -4,7 +4,7 @@ import { observeUserIntent } from "../apps/docs/src/lib/load-on-intent.ts";
 
 function makeTarget(): {
   el: Element;
-  fire(type: "pointerenter" | "focusin"): void;
+  fire: (type: "pointerenter" | "focusin") => void;
 } {
   const listeners = new Map<string, Set<EventListener>>();
   const el = {
@@ -18,14 +18,13 @@ function makeTarget(): {
     },
   } as unknown as Element;
 
-  return {
-    el,
-    fire(type) {
-      for (const listener of listeners.get(type) ?? []) {
-        listener(new Event(type));
-      }
-    },
+  const fire = (type: "pointerenter" | "focusin"): void => {
+    for (const listener of listeners.get(type) ?? []) {
+      listener(new Event(type));
+    }
   };
+
+  return { el, fire };
 }
 
 describe("observeUserIntent", () => {
