@@ -59,9 +59,10 @@ describe("GUIDE_REFERENCE", () => {
   it("legend documents position, direction, keySize, and order", () => {
     const legend = GUIDE_REFERENCE.legend;
     expect(legend.component).toBe("GuideLegend");
-    expect(legend.params.map((p) => p.name)).toEqual(
-      expect.arrayContaining(["title", "order", "position", "direction", "keySize", "collision"]),
-    );
+    const legendParamNames = legend.params.map((p) => p.name);
+    for (const required of ["title", "order", "position", "direction", "keySize", "collision"]) {
+      expect(legendParamNames, `legend.${required}`).toContain(required);
+    }
     const position = legend.params.find((p) => p.name === "position");
     expect(position?.typeSummary).toContain('"auto"');
     expect(position?.typeSummary).toContain('"right"');
@@ -71,9 +72,10 @@ describe("GUIDE_REFERENCE", () => {
   it("colorbar and colorsteps document continuous-guide options", () => {
     const colorbar = GUIDE_REFERENCE.colorbar;
     expect(colorbar.component).toBe("GuideColorbar");
-    expect(colorbar.params.map((p) => p.name)).toEqual(
-      expect.arrayContaining(["showTicks", "showLabels", "position", "direction"]),
-    );
+    const colorbarParamNames = colorbar.params.map((p) => p.name);
+    for (const required of ["showTicks", "showLabels", "position", "direction"]) {
+      expect(colorbarParamNames, `colorbar.${required}`).toContain(required);
+    }
     expect(colorbar.params.find((p) => p.name === "keySize")).toBeUndefined();
 
     const colorsteps = GUIDE_REFERENCE.colorsteps;
