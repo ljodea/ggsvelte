@@ -158,7 +158,7 @@ export const CLEAR_CONTROL_GAP_PX = 4;
  * target size) rather than the old 44×44 AAA square that dwarfed swatches.
  */
 export const CLEAR_CONTROL_HEIGHT_PX = 24;
-/** Approximate painted width of the "Clear" label + horizontal padding. */
+/** Approximate painted width of the "Clear" label + horizontal padding (layout clamp only). */
 export const CLEAR_CONTROL_WIDTH_PX = 44;
 /** Grace period after pointer leaves legend chrome before Clear fades for screenshots. */
 export const CLEAR_HIDE_DELAY_MS = 2500;
