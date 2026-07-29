@@ -3,7 +3,7 @@
  *
  * The skill ships inside the ggsvelte npm package and teaches agents the
  * grammar; a stale or broken claim there produces broken charts downstream.
- * Three guards:
+ * Four guards:
  *
  * 1. Fence contract — every code fence carries exactly one of
  *    `complete`/`fragment`, and every `json complete` fence must normalize
@@ -15,6 +15,15 @@
  *    for every geom, stat, position, theme, and color scheme the spec knows.
  *    Adding one upstream turns the skill red until it is documented; this is
  *    the pre-changesets lock-step guard.
+ * 4. SKILL.md lead-line counts — the summary prose in "Scales, palettes,
+ *    themes" states totals that agents see without opening references/. Format
+ *    (keep this shape so the parser stays stable across port PRs):
+ *      `N named schemes — M categorical (…examples…) and K sequential…`
+ *      `Themes: T names (…examples…; grey/gray alias note)`
+ *    N = COLOR_SCHEME_NAMES.length, M = CATEGORICAL_SCHEME_NAMES.length,
+ *    K = SEQUENTIAL_SCHEME_NAMES.length, T = THEME_NAMES without `test`.
+ *    Reference section headers `### Categorical schemes (M)` and
+ *    `### Sequential schemes (K)` must match the same M/K.
  *
  * The `test` theme is excluded from the theme inventory on purpose: it is
  *    the internal snapshot theme, not a product surface.
@@ -25,6 +34,7 @@ import { join, relative } from "node:path";
 
 import {
   CATEGORICAL_SCHEME_NAMES,
+  COLOR_SCHEME_NAMES,
   KNOWN_GEOMS,
   KNOWN_POSITIONS,
   KNOWN_STATS,
@@ -149,4 +159,75 @@ describe("reference inventories are complete", () => {
       expect(missing).toEqual([]);
     });
   }
+});
+
+/**
+ * Product themes agents may name — every THEME_NAMES entry except the internal
+ * snapshot theme `test`. Includes `grey`/`gray` aliases of `ggplot2`.
+ */
+const PRODUCT_THEME_NAMES = THEME_NAMES.filter((name) => name !== "test");
+
+/**
+ * Lead-line inventory in SKILL.md. Table rows in references/ are already
+ * locked by the inventory suite above; this guards the short counts agents
+ * see when they only load SKILL.md (#1210).
+ */
+describe("SKILL.md lead-line scheme/theme counts match registries", () => {
+  const skillMd = readFileSync(join(SKILL_DIR, "SKILL.md"), "utf8");
+  const scalesRef = readFileSync(join(SKILL_DIR, "references", "scales-and-palettes.md"), "utf8");
+
+  it("states named scheme totals that match COLOR/CATEGORICAL/SEQUENTIAL registries", () => {
+    const match = skillMd.match(
+      /(\d+) named schemes — (\d+) categorical[\s\S]*?and (\d+) sequential/,
+    );
+    expect(match).not.toBeNull();
+    const [, total, categorical, sequential] = match!;
+    expect({
+      total: Number(total),
+      categorical: Number(categorical),
+      sequential: Number(sequential),
+    }).toEqual({
+      total: COLOR_SCHEME_NAMES.length,
+      categorical: CATEGORICAL_SCHEME_NAMES.length,
+      sequential: SEQUENTIAL_SCHEME_NAMES.length,
+    });
+  });
+
+  it("states a theme total that matches product THEME_NAMES (excludes test)", () => {
+    const match = skillMd.match(/Themes:\s*(\d+) names/);
+    expect(match).not.toBeNull();
+    expect(Number(match![1])).toBe(PRODUCT_THEME_NAMES.length);
+  });
+
+  it("reference palette section headers carry the same categorical/sequential totals", () => {
+    const cat = scalesRef.match(/### Categorical schemes \((\d+)\)/);
+    const seq = scalesRef.match(/### Sequential schemes \((\d+)\)/);
+    expect(cat).not.toBeNull();
+    expect(seq).not.toBeNull();
+    expect(Number(cat![1])).toBe(CATEGORICAL_SCHEME_NAMES.length);
+    expect(Number(seq![1])).toBe(SEQUENTIAL_SCHEME_NAMES.length);
+  });
+
+  it("lead-line example scheme names are real registry members", () => {
+    // Pull the two parenthetical example lists from the scheme lead line.
+    const match = skillMd.match(
+      /(\d+) named schemes — (\d+) categorical \(([^)]*)\)[\s\S]*?and (\d+) sequential[^(]*\(([^)]*)\)/,
+    );
+    expect(match).not.toBeNull();
+    const known = new Set<string>(COLOR_SCHEME_NAMES);
+    const examples = [...`${match![3]} ${match![5]}`.matchAll(/`([^`]+)`/g)].map((m) => m[1]!);
+    expect(examples.length).toBeGreaterThan(0);
+    const unknown = examples.filter((name) => !known.has(name));
+    expect(unknown).toEqual([]);
+  });
+
+  it("lead-line example theme names are real product themes or documented aliases", () => {
+    const match = skillMd.match(/Themes:\s*\d+ names \(([^)]*)\)/);
+    expect(match).not.toBeNull();
+    const known = new Set<string>(PRODUCT_THEME_NAMES);
+    const examples = [...match![1]!.matchAll(/`([^`]+)`/g)].map((m) => m[1]!);
+    expect(examples.length).toBeGreaterThan(0);
+    const unknown = examples.filter((name) => !known.has(name));
+    expect(unknown).toEqual([]);
+  });
 });
