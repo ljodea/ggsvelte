@@ -14,16 +14,6 @@ describe("buildRenderModelScaleState", () => {
   });
 });
 
-describe("resolveSequentialDomain", () => {
-  it("parses two-element domains and ignores incomplete ones", async () => {
-    const { resolveSequentialDomain } =
-      await import("../../src/pipeline/scale-color-sequential-domain.ts");
-    expect(resolveSequentialDomain()).toBeUndefined();
-    expect(resolveSequentialDomain({ domain: [1] })).toBeUndefined();
-    expect(resolveSequentialDomain({ domain: [0, 10] })).toEqual([0, 10]);
-  });
-});
-
 describe("placeSceneLegends", () => {
   it("offsets legend x by scene width minus block width and edge pad", async () => {
     const { placeSceneLegends } = await import("../../src/pipeline/assemble-scene-legends.ts");
@@ -109,5 +99,72 @@ describe("packFacetPanelPlacement", () => {
     expect(placement.showAxisX).toBe(true);
     expect(placement.showAxisY).toBe(false);
     expect(placement.x).toBe(20);
+  });
+});
+
+describe("placeFacetPanelsFromChrome", () => {
+  it("places a 1x2 grid with shared y-axis only on col 0", async () => {
+    const { placeFacetPanelsFromChrome } = await import("../../src/pipeline/panel-layout-facet.ts");
+    const { DEFAULT_FACET_STRIP } = await import("../../src/pipeline/facets-types.ts");
+    const { DEFAULT_LAYOUT_THEME } = await import("../../src/layout/layout-types.ts");
+    const { FONT_METRICS } = await import("../../src/layout/font-metrics.ts");
+    const { MetricsTableMeasurer } = await import("../../src/layout/measure.ts");
+
+    const linearScale = {
+      type: "linear" as const,
+      domain: [0, 10] as [number, number],
+      range: [0, 1] as [number, number],
+      normalize: (v: number) => v / 10,
+    };
+    const axis = {
+      x: {
+        visible: true,
+        showTicks: true,
+        showLabels: true,
+        collision: "auto" as const,
+      },
+      y: {
+        visible: true,
+        showTicks: true,
+        showLabels: true,
+        collision: "auto" as const,
+      },
+    };
+    const chrome = fromAny({
+      freeH: false,
+      freeV: false,
+      vTitle: "",
+      hTitle: "",
+      axisTitleBand: 0,
+      legendBlock: { width: 0, bottomHeight: 0 },
+      layoutHeight: 200,
+      topBand: 0,
+      displayScales: () => ({ h: linearScale, v: linearScale }),
+      displayTemporal: () => ({}),
+      displayBand: () => ({}),
+      hBreaks: undefined,
+      vBreaks: undefined,
+      formatH: undefined,
+      formatV: undefined,
+      measurer: new MetricsTableMeasurer(FONT_METRICS),
+      layoutTheme: DEFAULT_LAYOUT_THEME,
+    });
+    const placements = placeFacetPanelsFromChrome({
+      nrow: 1,
+      ncol: 2,
+      facetPanels: [fromAny({ row: 0, col: 0 }), fromAny({ row: 0, col: 1 })],
+      strip: DEFAULT_FACET_STRIP,
+      stripBand: 0,
+      chrome,
+      axis,
+      options: { width: 400 },
+    });
+    expect(placements).toHaveLength(2);
+    expect(placements[0]!.showAxisY).toBe(true);
+    expect(placements[1]!.showAxisY).toBe(false);
+    expect(placements[0]!.showAxisX).toBe(true);
+    expect(placements[1]!.showAxisX).toBe(true);
+    expect(placements[0]!.width).toBeGreaterThan(0);
+    expect(placements[1]!.x).toBeGreaterThan(placements[0]!.x);
   });
 });

@@ -1,33 +1,16 @@
 /**
- * Errorbar cap half-width in normalized [0,1] x units.
+ * Errorbar cap span in normalized [0,1] x units.
+ *
+ * Nonlinear coordinate wrappers must project each scale-space endpoint
+ * (not mirror one projected half-width) — that is why the public surface is
+ * span endpoints, not a half-width scalar.
  */
 import { resolution as resolutionOf } from "../stats/numeric.js";
 
 import type { LayerFrame } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 
-export function makeErrorbarHalfWidth(
-  frame: LayerFrame,
-  fx: Frame,
-  widthParam: number,
-): (row: number) => number {
-  if (fx.xScale.type === "band") {
-    const half = (widthParam * fx.xScale.step) / 2;
-    return () => half;
-  }
-  const res = frame.xNumeric === null ? 0 : resolutionOf(frame.xNumeric);
-  const scale = fx.xScale;
-  return (row: number) => {
-    if (res === 0 || frame.xNumeric === null) return 0.01; // lone x: 2% of panel
-    const v = frame.xNumeric[row]!;
-    return Math.abs(
-      scale.normalizeTransformed(v + (widthParam * res) / 2) - scale.normalizeTransformed(v),
-    );
-  };
-}
-
-/** Final normalized cap endpoints. Nonlinear coordinate wrappers must project
- * each scale-space endpoint instead of mirroring one projected half-width. */
+/** Final normalized cap endpoints for one errorbar row. */
 export function makeErrorbarXSpan(
   frame: LayerFrame,
   fx: Frame,

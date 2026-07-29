@@ -492,6 +492,24 @@ packages. The Changeset check workflow fails with verdict `unwarranted` if they
 do. Packaged agent skills under `packages/svelte/skills/` _do_ ship and may
 warrant a patch. Missing changesets on package code stay advisory only.
 
+### Bump level (SemVer)
+
+Pick the level from the **public surface change**, not from how small the
+diff looks. Spec, core, and svelte share one version, so the highest level
+among pending changesets wins.
+
+| Level     | Use for                                                                                                                                                                            |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **major** | Breaking change after 1.0 (pre-1.0, breakings ride **minor** — ADR 0013).                                                                                                          |
+| **minor** | Additive public surface: new theme or scheme names, new exports, new props/options, new geom/stat/scale helpers, new Svelte shells, schema enum widenings. Also pre-1.0 breakings. |
+| **patch** | Bug fixes, performance, internal refactors, docs-in-package, skill text, and “dead API now works” repairs that do not add names.                                                   |
+
+`feat` in the commit subject is a signal you almost certainly want **minor**,
+not patch. A changeset that says `Migration: none — additive` must bump
+**minor** (or major) — `scripts/deprecation-wiring.test.ts` enforces that.
+Internal-only work should say so (`Migration: none — internal …`) and stay
+patch.
+
 ## Lifecycle policy (Hadley lesson 13)
 
 Every public export of `@ggsvelte/spec`, `@ggsvelte/core` (both entries), and

@@ -227,6 +227,26 @@ export { default as ThemeStatas1color } from "./theme/ThemeStatas1color.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeStatamono } from "./theme/ThemeStatamono.svelte";
 /** @lifecycle stable-intent */
+export { default as ThemeSolarized } from "./theme/ThemeSolarized.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeSolarizeddark } from "./theme/ThemeSolarizeddark.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeEconomistwhite } from "./theme/ThemeEconomistwhite.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeSolarized2 } from "./theme/ThemeSolarized2.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeSolarized2dark } from "./theme/ThemeSolarized2dark.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeWsj } from "./theme/ThemeWsj.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeGdocs } from "./theme/ThemeGdocs.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeHc } from "./theme/ThemeHc.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeHcdark } from "./theme/ThemeHcdark.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemePander } from "./theme/ThemePander.svelte";
+/** @lifecycle stable-intent */
 export { default as ThemeGrey } from "./theme/ThemeGrey.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeGray } from "./theme/ThemeGray.svelte";
@@ -562,11 +582,13 @@ export type {
 /** @lifecycle stable-intent */
 export { default as Legend } from "./legend/Legend.svelte";
 
-// Deprecation + composition diagnostics (sibling unions to InteractionDiagnostic)
+// Deprecation + composition diagnostics (sibling unions to InteractionDiagnostic).
+// Grammar-prop emission left in 0.13.0 (#704); catalog + builder remain for
+// PlotDiagnostic union typing, upgrade-guide anchors, and codemod consumers.
+// Discriminate with `d.code === "DEPRECATED_PLOT_PROP"` if needed.
 export {
   DEPRECATION_DIAGNOSTIC_CATALOG,
   deprecatedPropDiagnostic,
-  isDeprecationDiagnostic,
 } from "./diagnostics/deprecation.js";
 export type {
   DeprecationDiagnostic,

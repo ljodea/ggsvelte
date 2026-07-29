@@ -3,7 +3,7 @@
   import { onMount } from "svelte";
   import type { CATEGORICAL_SCHEME_NAMES, ThemeName } from "@ggsvelte/spec";
 
-  import { observeNearViewport } from "$lib/near-viewport";
+  import { observeUserIntent } from "$lib/load-on-intent";
 
   type CategoricalSchemeName = (typeof CATEGORICAL_SCHEME_NAMES)[number];
 
@@ -48,10 +48,9 @@
       });
     };
 
-    // Near-viewport only. Do not $effect-load every off-screen specimen when
-    // reverse/paper toggles — that freezes the page. Live specimens already
-    // upgrade via props; others load on scroll.
-    const stop = observeNearViewport(el, load, { rootMargin: "480px 0px" });
+    // Intent only. Near-viewport still stacked many chart imports and locked
+    // SPA nav off /palettes. Static shell stays until hover/focus.
+    const stop = observeUserIntent(el, load);
     return () => {
       cancelled = true;
       stop();

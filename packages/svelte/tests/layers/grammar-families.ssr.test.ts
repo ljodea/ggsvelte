@@ -5,7 +5,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  DEPRECATION_EMIT_ORDER,
   GGPLOT_PROP_ORDER,
   GRAMMAR_DOC_URLS,
   GRAMMAR_FAMILIES,
@@ -14,9 +13,7 @@ import {
   REPLACE_EMIT_ORDER,
   deprecatedGrammarPropPattern,
   grammarCodemodRules,
-  grammarDeprecationInputs,
   grammarDocUrl,
-  grammarFamilyByProp,
 } from "../../src/lib/layers/grammar-families.js";
 import type { GrammarLayerKind, Layer } from "../../src/lib/layers/types.js";
 
@@ -46,7 +43,6 @@ describe("GRAMMAR_FAMILIES completeness", () => {
   it("propNames match the seven deprecated GGPlot props (scale → scales)", () => {
     expect(new Set(GRAMMAR_PROP_NAMES)).toEqual(new Set(EXPECTED_PROPS));
     expect(GRAMMAR_FAMILIES.scale.propName).toBe("scales");
-    expect(grammarFamilyByProp("scales")?.kind).toBe("scale");
   });
 
   it("composition partition matches pre-#785 MERGE/REPLACE taxonomy", () => {
@@ -62,18 +58,7 @@ describe("GRAMMAR_FAMILIES completeness", () => {
   });
 
   it("order constants are complete permutations / composition subsets", () => {
-    expect(new Set(DEPRECATION_EMIT_ORDER)).toEqual(new Set(ALL_KINDS));
     expect(new Set(GGPLOT_PROP_ORDER)).toEqual(new Set(ALL_KINDS));
-    // Deprecation ladder historical order.
-    expect([...DEPRECATION_EMIT_ORDER]).toEqual([
-      "theme",
-      "scale",
-      "coord",
-      "facet",
-      "guides",
-      "legend",
-      "labs",
-    ]);
     // GGPlotProps / codemod declaration order.
     expect([...GGPLOT_PROP_ORDER]).toEqual([
       "facet",
@@ -116,34 +101,6 @@ describe("GRAMMAR_FAMILIES completeness", () => {
     expect(rules.facet?.form).toBe("spread");
     expect(rules.labs?.form).toBe("spread");
     expect(rules.scales?.form).toBe("value");
-  });
-
-  it("suggestion copy matches the pre-#785 deprecation ladder (theme + labs samples)", () => {
-    expect(GRAMMAR_FAMILIES.theme.suggestions).toEqual([
-      'Replace theme="dark" with <ThemeDark /> (or <Theme name="dark" />)',
-      'Role overrides stay as props on the child: <ThemeDark ink="#eee" />',
-    ]);
-    expect(GRAMMAR_FAMILIES.labs.suggestions[0]).toContain("<Labs title=");
-    expect(GRAMMAR_FAMILIES.scale.suggestions).toHaveLength(3);
-  });
-});
-
-describe("grammarDeprecationInputs", () => {
-  it("emits only defined props in DEPRECATION_EMIT_ORDER", () => {
-    const absent = (): unknown => undefined;
-    const inputs = grammarDeprecationInputs({
-      theme: () => "dark",
-      scales: absent,
-      coord: () => "flip",
-      facet: absent,
-      guides: absent,
-      legend: absent,
-      labs: () => ({ title: "T" }),
-    });
-    expect(inputs.map((d) => d.prop)).toEqual(["theme", "coord", "labs"]);
-    expect(inputs[0]?.since).toBe("0.11.0");
-    expect(inputs[0]?.removeIn).toBe("0.13.0");
-    expect(inputs[0]?.anchor).toBe("compose-the-theme-as-a-child-layer");
   });
 });
 

@@ -3,7 +3,7 @@
   import { onMount } from "svelte";
   import type { ThemeName } from "@ggsvelte/spec";
 
-  import { observeNearViewport } from "$lib/near-viewport";
+  import { observeUserIntent } from "$lib/load-on-intent";
   import type {
     SchemeName,
     ThemeSpecimenKind,
@@ -17,7 +17,6 @@
     scheme,
     legendFocus,
     staticSrc,
-    eager = false,
   }: {
     name: ThemeName;
     label: string;
@@ -27,8 +26,6 @@
     legendFocus: boolean;
     /** Path under /theme-shells/ (no inlined SVG in HTML). */
     staticSrc: string;
-    /** When true, upgrade to interactive immediately on mount (above-fold). */
-    eager?: boolean;
   } = $props();
 
   const plotHeight = 380;
@@ -43,21 +40,12 @@
     if (el === null) return;
     let cancelled = false;
 
-    const load = (): void => {
+    const stop = observeUserIntent(el, () => {
       if (cancelled || Live !== null) return;
       void import("./ThemeSpecimenLive.svelte").then((mod) => {
         if (!cancelled) Live = mod.default;
       });
-    };
-
-    if (eager) {
-      load();
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    const stop = observeNearViewport(el, load, { rootMargin: "480px 0px" });
+    });
     return () => {
       cancelled = true;
       stop();
@@ -82,7 +70,7 @@
         width="832"
         height={plotHeight}
         decoding="async"
-        loading={eager ? "eager" : "lazy"}
+        loading="lazy"
       />
     {/if}
   </div>

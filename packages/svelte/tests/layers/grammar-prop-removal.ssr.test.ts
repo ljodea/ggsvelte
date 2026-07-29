@@ -28,8 +28,10 @@ describe("#704 grammar prop removal", () => {
 
   it("engine no longer emits DEPRECATED_PLOT_PROP for grammar props", () => {
     const source = readFileSync(join(root, "plot-engine.svelte.ts"), "utf8");
-    expect(source).not.toContain("grammarDeprecationInputs");
+    // Runtime emit path removed with the props (#704); catalog types remain
+    // for ondiagnostic consumers and the codemod/upgrade guide.
     expect(source).not.toContain("deprecationDiagnostics");
+    expect(source).not.toContain("deprecatedPropDiagnostic");
   });
 
   it("LayerDescriptor alias is removed (use MarkLayerDescriptor)", () => {

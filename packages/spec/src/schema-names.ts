@@ -32,6 +32,45 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "stata_s1color",
   "stata_s1rcolor",
   "stata_mono",
+  /** ggthemes scale_colour/fill_economist — Economist blues/greens (fill order). */
+  "economist",
+  /** ggthemes scale_colour/fill_solarized — Solarized accents, blue first. */
+  "solarized",
+  // ggthemes ports (#1159): Few "Show Me the Numbers" variants + FiveThirtyEight
+  "few",
+  "few_light",
+  "few_dark",
+  "fivethirtyeight",
+  // ggthemes ports (#1159): Paul Tol + Canva default
+  "ptol",
+  "canva",
+  /** ggthemes wsj_pal — scale_colour/fill_wsj palette variants. */
+  "wsj",
+  "wsj_rgby",
+  "wsj_red_green",
+  "wsj_black_green",
+  "wsj_dem_rep",
+  // ggthemes tableau_color_pal regular variants (#1159); Tableau 10 above is
+  // the default — these complete the set.
+  "tableau20",
+  "tableau_colorblind",
+  "tableau_seattle_grays",
+  "tableau_traffic",
+  "tableau_miller_stone",
+  "tableau_superfishel_stone",
+  "tableau_nuriel_stone",
+  "tableau_jewel_bright",
+  "tableau_summer",
+  "tableau_winter",
+  "tableau_green_orange_teal",
+  "tableau_red_blue_brown",
+  "tableau_purple_pink_gray",
+  "tableau_hue_circle",
+  // ggthemes ports (#1159): Google Docs + Highcharts + pander
+  "gdocs",
+  "hc",
+  "hc_dark",
+  "pander",
   // ColorBrewer qualitative (#825)
   "Set1",
   "Set2",
@@ -134,10 +173,23 @@ export const THEME_NAMES = [
   "tufte",
   "linedraw",
   "void",
-  // ggthemes theme ports (#1158)
+  // ggthemes theme ports (#1158): Stata family
   "stata",
   "stata_s1color",
   "stata_mono",
+  // ggthemes theme_solarized: light (default) and dark (light = FALSE) variants.
+  "solarized",
+  "solarizeddark",
+  // ggthemes theme ports (#1158)
+  "economist_white",
+  "solarized_2",
+  "solarized_2dark",
+  /** ggthemes theme_wsj (Wall Street Journal). */
+  "wsj",
+  "gdocs",
+  "hc",
+  "hcdark",
+  "pander",
   "grey",
   "gray",
   // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters

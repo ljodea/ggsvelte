@@ -35,15 +35,26 @@ optional `"name"` base plus role overrides, e.g.
 | stata                   | Stata s2color: bluish-gray plot region, white panel, y-grid                |
 | stata_s1color           | Stata s1color: white panel with black border, light y-grid                 |
 | stata_mono              | Stata s2mono: gray plot region, monochrome y-grid                          |
+| solarized               | Solarized light: cream panel, muted base1 chrome, blue accent              |
+| solarizeddark           | Solarized dark: deep teal panel, muted base01 chrome, blue accent          |
+| economist_white         | Economist Graphic Detail: white panel, gray grid, light-gray paper         |
+| solarized_2             | Solarized grey-style variant: base2 panel, base3 grid, no frame            |
+| solarized_2dark         | solarized_2 on dark base tones                                             |
+| wsj                     | Wall Street Journal: brown paper, dotted black y-grid, x line + ticks      |
+| gdocs                   | Google Docs: black x line, no ticks, light-gray grid, plain 20px title     |
+| hc                      | Highcharts default: y-only #D8D8D8 grid on white, no border                |
+| hcdark                  | Highcharts darkunica: #2a2a2b paper, #707073 y-grid                        |
+| pander                  | pander: dashed grey grid and ticks, bold title on white                    |
 | grey (alias of ggplot2) | UK theme_grey                                                              |
 | gray (alias of ggplot2) | US theme_gray                                                              |
 
 Svelte: one named shell per product theme — `ThemeDefault`, `ThemeLight`,
 `ThemeDark`, `ThemeMinimal`, `ThemeGgplot2`, `ThemeClassic`, `ThemeBw`,
 `ThemeHrbr`, `ThemeFew`, `ThemeClean`, `ThemeFivethirtyeight`,
-`ThemeEconomist`, `ThemeTufte`, `ThemeLinedraw`, `ThemeVoid`, `ThemeStata`,
-`ThemeStatas1color`, `ThemeStatamono`, `ThemeGrey`,
-`ThemeGray`. Escape hatch `<Theme name={dynamicName} />` for reactive names.
+`ThemeEconomist`, `ThemeTufte`, `ThemeLinedraw`, `ThemeVoid`, `ThemeStata`, `ThemeStatas1color`, `ThemeStatamono`, `ThemeSolarized`,
+`ThemeSolarizeddark`, `ThemeEconomistwhite`, `ThemeSolarized2`, `ThemeSolarized2dark`,
+`ThemeWsj`, `ThemeGdocs`, `ThemeHc`, `ThemeHcdark`, `ThemePander`, `ThemeGrey`, `ThemeGray`. Escape hatch `<Theme name={dynamicName} />` for
+reactive names.
 Every shell and `<Theme>` also accepts role-override props (`ink`, `paper`,
 `accent`, `grid`, `panel`, `axisText`, `axisLine`, `tickColor`,
 `panelBorder`, tooltip/selection/focus roles, …): `<ThemeDark ink="#eee" />`.

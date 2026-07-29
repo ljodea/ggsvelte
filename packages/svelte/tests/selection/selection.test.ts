@@ -2,13 +2,16 @@ import { describe, expect, it } from "vitest";
 
 import {
   anchorsFromCandidateKeys,
+  applyEmphasisRingDensityGate,
   buildPointSelectionEvent,
   collectCandidates,
+  EMPHASIS_RING_DENSITY_LIMIT,
   iterateCandidates,
   mergePresentationFocusKeys,
   nextPointSelectionKeys,
+  hoverChromeForKind,
+  presentationChromeForKind,
   presentationFocusFromInspection,
-  rowIndexesForCandidate,
   sameOrderedPropertyKeys,
   uniqueKeysFromRowIndexes,
 } from "../../src/lib/selection/selection.js";
@@ -96,13 +99,37 @@ describe("iterateCandidates / collectCandidates", () => {
   });
 });
 
+describe("presentationChromeForKind", () => {
+  it("rings only point marks for selection/emphasis anchors", () => {
+    expect(presentationChromeForKind("points")).toBe("ring");
+    expect(presentationChromeForKind()).toBe("none");
+    expect(presentationChromeForKind(null)).toBe("none");
+    expect(presentationChromeForKind("rects")).toBe("none");
+    expect(presentationChromeForKind("paths")).toBe("none");
+    expect(presentationChromeForKind("segments")).toBe("none");
+    expect(presentationChromeForKind("glyphs")).toBe("none");
+  });
+});
+
+describe("hoverChromeForKind", () => {
+  it("keeps rings for strokes and points; rects mute only", () => {
+    expect(hoverChromeForKind("points")).toBe("ring");
+    expect(hoverChromeForKind("paths")).toBe("ring");
+    expect(hoverChromeForKind("segments")).toBe("ring");
+    expect(hoverChromeForKind("glyphs")).toBe("ring");
+    expect(hoverChromeForKind()).toBe("ring");
+    expect(hoverChromeForKind(null)).toBe("ring");
+    expect(hoverChromeForKind("rects")).toBe("none");
+  });
+});
+
 describe("anchorsFromCandidateKeys", () => {
   const candidates = [
-    { x: 1, y: 2, keys: ["a"] },
-    { x: 3, y: 4, keys: ["b"] },
-    { x: 1, y: 2, keys: ["c"] }, // same anchor as first
-    { x: 5, y: 6, keys: ["a", "d"] },
-    { x: 7, y: 8, keys: [] },
+    { x: 1, y: 2, keys: ["a"], kind: "points" },
+    { x: 3, y: 4, keys: ["b"], kind: "points" },
+    { x: 1, y: 2, keys: ["c"], kind: "points" }, // same anchor as first
+    { x: 5, y: 6, keys: ["a", "d"], kind: "points" },
+    { x: 7, y: 8, keys: [], kind: "points" },
   ];
 
   it("returns empty when nothing is selected", () => {
@@ -119,8 +146,8 @@ describe("anchorsFromCandidateKeys", () => {
 
   it("uses String(x):String(y) identity for dedup", () => {
     const dupes = [
-      { x: 1, y: 2, keys: ["a"] },
-      { x: 1, y: 2, keys: ["a"] },
+      { x: 1, y: 2, keys: ["a"], kind: "points" },
+      { x: 1, y: 2, keys: ["a"], kind: "points" },
     ];
     expect(anchorsFromCandidateKeys(dupes, ["a"])).toEqual([{ x: 1, y: 2, chrome: "ring" }]);
   });
@@ -140,6 +167,23 @@ describe("anchorsFromCandidateKeys", () => {
     ]);
   });
 
+  it("marks path, segment, and glyph candidates as chrome none", () => {
+    expect(
+      anchorsFromCandidateKeys(
+        [
+          { x: 1, y: 2, keys: ["a"], kind: "paths" },
+          { x: 3, y: 4, keys: ["b"], kind: "segments" },
+          { x: 5, y: 6, keys: ["c"], kind: "glyphs" },
+        ],
+        ["a", "b", "c"],
+      ),
+    ).toEqual([
+      { x: 1, y: 2, chrome: "none" },
+      { x: 3, y: 4, chrome: "none" },
+      { x: 5, y: 6, chrome: "none" },
+    ]);
+  });
+
   it("prefers ring chrome when a point and rect share an anchor", () => {
     expect(
       anchorsFromCandidateKeys(
@@ -153,11 +197,52 @@ describe("anchorsFromCandidateKeys", () => {
   });
 });
 
-describe("rowIndexesForCandidate", () => {
-  it("preserves lineage order and appends rowIndex only if absent", () => {
-    expect(rowIndexesForCandidate({ rowIndex: 9 }, [3, 1, 4])).toEqual([3, 1, 4, 9]);
-    expect(rowIndexesForCandidate({ rowIndex: 1 }, [3, 1, 4])).toEqual([3, 1, 4]);
-    expect(rowIndexesForCandidate({ rowIndex: null }, [3, 1])).toEqual([3, 1]);
+describe("applyEmphasisRingDensityGate", () => {
+  it("keeps point rings when the ring count is within the limit", () => {
+    const anchors = Array.from({ length: EMPHASIS_RING_DENSITY_LIMIT }, (_, i) => ({
+      x: i,
+      y: 0,
+      chrome: "ring" as const,
+    }));
+    expect(applyEmphasisRingDensityGate(anchors)).toBe(anchors);
+    expect(applyEmphasisRingDensityGate(anchors).every((a) => a.chrome === "ring")).toBe(true);
+  });
+
+  it("demotes all rings to none when ring count exceeds the density limit", () => {
+    const anchors = Array.from({ length: EMPHASIS_RING_DENSITY_LIMIT + 1 }, (_, i) => ({
+      x: i,
+      y: 0,
+      chrome: "ring" as const,
+    }));
+    const gated = applyEmphasisRingDensityGate(anchors);
+    expect(gated).toHaveLength(EMPHASIS_RING_DENSITY_LIMIT + 1);
+    expect(gated.every((a) => a.chrome === "none")).toBe(true);
+    expect(gated).not.toBe(anchors);
+  });
+
+  it("counts only ring chrome toward the density limit", () => {
+    const anchors = [
+      ...Array.from({ length: EMPHASIS_RING_DENSITY_LIMIT }, (_, i) => ({
+        x: i,
+        y: 0,
+        chrome: "ring" as const,
+      })),
+      { x: 999, y: 0, chrome: "none" as const },
+    ];
+    // ring count === limit → keep rings; the none anchor does not push over
+    expect(applyEmphasisRingDensityGate(anchors).filter((a) => a.chrome === "ring")).toHaveLength(
+      EMPHASIS_RING_DENSITY_LIMIT,
+    );
+  });
+
+  it("accepts an explicit maxRingAnchors override", () => {
+    const anchors = [
+      { x: 0, y: 0, chrome: "ring" as const },
+      { x: 1, y: 0, chrome: "ring" as const },
+      { x: 2, y: 0, chrome: "ring" as const },
+    ];
+    expect(applyEmphasisRingDensityGate(anchors, 2).every((a) => a.chrome === "none")).toBe(true);
+    expect(applyEmphasisRingDensityGate(anchors, 3).every((a) => a.chrome === "ring")).toBe(true);
   });
 });
 

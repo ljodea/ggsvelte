@@ -13,6 +13,8 @@
 <GGPlot
   data={guerry}
   aes={{ x: "literacy", y: "crimePersons", color: "region" }}
+  key="department"
+  legendFocus
   width={640}
   height={400}
 >

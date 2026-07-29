@@ -1,6 +1,6 @@
 /**
  * Data-free structural checks for named color/fill schemes vs scale family.
- * Layer grammar: validate-structure-layers.ts. Facet: validate-structure-facet.ts.
+ * Layer grammar: validate-structure-layers.ts (+ layer-rule/ribbon/computed-y). Facet: validate-structure-facet.ts.
  */
 import type { SpecError } from "./errors.js";
 import { CATEGORICAL_SCHEME_NAMES, SEQUENTIAL_SCHEME_NAMES } from "./schema.js";

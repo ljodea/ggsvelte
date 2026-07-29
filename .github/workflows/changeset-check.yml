@@ -63,7 +63,9 @@ jobs:
           set -euo pipefail
           # Ensure the base object exists for the three-dot diff.
           git fetch --no-tags --depth=1 origin "${BASE_SHA}" 2>/dev/null || true
-          git diff --name-only "${BASE_SHA}...${HEAD_SHA}" |
+          # name-status: pure edits of already-queued changesets (M) are not
+          # "unwarranted" — only A/R/C introduce a new pending release note.
+          git diff --name-status "${BASE_SHA}...${HEAD_SHA}" |
             bun scripts/changeset-check.ts emit --stdin --body-out "${RUNNER_TEMP}/changeset-comment.md"
       - name: sync sticky comment
         env:

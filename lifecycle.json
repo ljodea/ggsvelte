@@ -3647,15 +3647,15 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "CANVA_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "CATEGORICAL_PALETTE_10": {
           "kind": "value",
           "lifecycle": "experimental"
         },
         "CATEGORICAL_SCHEMES": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "CIVIDIS_RAMP_10": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3827,6 +3827,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ECONOMIST_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "EDITION_DEFAULTS": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3841,6 +3845,22 @@
         },
         "EditionDefaults": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "FEW_DARK_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "FEW_LIGHT_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "FEW_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "FIVETHIRTYEIGHT_PALETTE": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "FLEXOKI_PALETTE": {
@@ -3875,6 +3895,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GDOCS_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeometryBatch": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3891,7 +3915,11 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "INFERNO_RAMP_10": {
+        "HC_DARK_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "HC_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -3939,10 +3967,6 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "LegendValueMembership": {
-          "kind": "type",
-          "lifecycle": "experimental"
-        },
         "LetterboxRect": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3957,10 +3981,6 @@
         },
         "Linetype": {
           "kind": "type",
-          "lifecycle": "experimental"
-        },
-        "MAGMA_RAMP_10": {
-          "kind": "value",
           "lifecycle": "experimental"
         },
         "MAX_BINNED_BREAKS": {
@@ -3999,6 +4019,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "PANDER_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "PANEL_SPACING": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4011,11 +4035,11 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "PLASMA_RAMP_10": {
+        "POSITION_TRANSFORM_NAMES": {
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "POSITION_TRANSFORM_NAMES": {
+        "PTOL_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4135,14 +4159,6 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "RuntimeRow": {
-          "kind": "type",
-          "lifecycle": "experimental"
-        },
-        "RuntimeRowFilter": {
-          "kind": "type",
-          "lifecycle": "experimental"
-        },
         "RuntimeRowFilterClause": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4159,7 +4175,7 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "SEQUENTIAL_SCHEME_RAMPS": {
+        "SOLARIZED_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4327,7 +4343,59 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "TURBO_RAMP_10": {
+        "TABLEAU20_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_COLORBLIND_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_GREEN_ORANGE_TEAL_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_HUE_CIRCLE_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_JEWEL_BRIGHT_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_MILLER_STONE_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_NURIEL_STONE_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_PURPLE_PINK_GRAY_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_RED_BLUE_BROWN_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_SEATTLE_GRAYS_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_SUMMER_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_SUPERFISHEL_STONE_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_TRAFFIC_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_WINTER_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4395,6 +4463,26 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "WSJ_BLACK_GREEN_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "WSJ_DEM_REP_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "WSJ_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "WSJ_RED_GREEN_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "WSJ_RGBY_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "adoptScaleState": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4444,10 +4532,6 @@
           "lifecycle": "experimental"
         },
         "cellsToNumeric": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "compileRuntimeRowFilter": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4539,19 +4623,11 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "isSequentialSchemeName": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "layout": {
           "kind": "value",
           "lifecycle": "experimental"
         },
         "layoutPass": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "legendValueEqual": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4655,10 +4731,6 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "resolveLegendFocusKeys": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "resolvePathMark": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4676,10 +4748,6 @@
           "lifecycle": "experimental"
         },
         "runPipeline": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "runtimeFilterValueEqual": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -6465,11 +6533,19 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ThemeEconomistwhite": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ThemeFew": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
         "ThemeFivethirtyeight": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeGdocs": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -6482,6 +6558,14 @@
           "lifecycle": "stable-intent"
         },
         "ThemeGrey": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeHc": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeHcdark": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -6504,6 +6588,26 @@
         "ThemeName": {
           "kind": "type",
           "lifecycle": "experimental"
+        },
+        "ThemePander": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeSolarized": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeSolarized2": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeSolarized2dark": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeSolarizeddark": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
         },
         "ThemeSpec": {
           "kind": "type",
@@ -6534,6 +6638,10 @@
           "lifecycle": "stable-intent"
         },
         "ThemeVoid": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeWsj": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -6726,10 +6834,6 @@
           "lifecycle": "experimental"
         },
         "isCompositionDiagnostic": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "isDeprecationDiagnostic": {
           "kind": "value",
           "lifecycle": "experimental"
         },

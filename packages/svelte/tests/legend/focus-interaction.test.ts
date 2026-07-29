@@ -463,7 +463,7 @@ describe("chart-local legend focus", () => {
     expect(lastEvent(stateElement)["source"]).toBe("touch");
   });
 
-  it("places the 44px recovery target outside every legend, title, and legend target", async () => {
+  it("places a compact recovery control outside every legend, title, and legend target", async () => {
     const { container } = render(LegendClearGeometryPlot);
     await until(() => container.querySelectorAll(".gg-legend-target").length === 4);
     container
@@ -473,14 +473,19 @@ describe("chart-local legend focus", () => {
 
     const root = container.querySelector<HTMLElement>(".gg-plot-root")!;
     const clear = container.querySelector<HTMLButtonElement>(".gg-legend-clear")!;
+    // Pin chrome so Clear is opaque and hittable for geometry asserts.
+    container
+      .querySelector<HTMLButtonElement>("[data-gg-legend-target]")!
+      .dispatchEvent(new PointerEvent("pointerenter", { bubbles: true, pointerType: "mouse" }));
     const clearBounds = clear.getBoundingClientRect();
     const rootBounds = root.getBoundingClientRect();
-    expect(clearBounds.width).toBeGreaterThanOrEqual(44);
-    expect(clearBounds.height).toBeGreaterThanOrEqual(44);
-    // Top-right of the scene — not below it (no bottom-row layout jump).
-    expect(clearBounds.left).toBeGreaterThanOrEqual(rootBounds.left + 420 - 52 - 1);
+    // Compact legend-row sizing (AA 24px), not the old 44×44 slab.
+    expect(clearBounds.height).toBeGreaterThanOrEqual(20);
+    expect(clearBounds.height).toBeLessThanOrEqual(28);
+    expect(clearBounds.width).toBeLessThan(80);
+    // Stays inside the scene (no bottom-row layout jump / margin shove).
+    expect(clearBounds.bottom).toBeLessThanOrEqual(rootBounds.bottom + 1);
     expect(clearBounds.top).toBeGreaterThanOrEqual(rootBounds.top - 1);
-    expect(clearBounds.bottom).toBeLessThan(rootBounds.top + 80);
     expect(getComputedStyle(root).marginBottom).toBe("0px");
     const protectedElements = container.querySelectorAll<SVGGraphicsElement | HTMLButtonElement>(
       ".gg-legend, .gg-title, .gg-subtitle, .gg-legend-target",

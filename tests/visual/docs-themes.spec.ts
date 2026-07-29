@@ -51,7 +51,7 @@ test("themes compares all built-in chart themes as full-width interactive portra
   const list = page.getByRole("list", { name: "Built-in chart themes" });
   const specimens = list.getByRole("listitem");
   // Non-alias product themes (grey/gray alias ggplot2; not separate portraits).
-  await expect(specimens).toHaveCount(19);
+  await expect(specimens).toHaveCount(29);
   await expect(specimens.getByRole("heading", { level: 3 })).toHaveText([
     "Default",
     "Light",
@@ -71,12 +71,23 @@ test("themes compares all built-in chart themes as full-width interactive portra
     "Stata",
     "Stata S1 Color",
     "Stata Mono",
+    "Solarized",
+    "Solarized Dark",
+    "Economist White",
+    "Solarized 2",
+    "Solarized 2 Dark",
+    "WSJ",
+    "Google Docs",
+    "Highcharts",
+    "Highcharts Dark",
+    "Pander",
     "Test",
   ]);
 
-  // Specimens mount live plots only near the viewport (#1037) — scroll each in.
+  // Specimens stay on static shells until hover/focus (intent-gated load).
   for (const specimen of await specimens.all()) {
     await specimen.scrollIntoViewIfNeeded();
+    await specimen.locator(".plot-panel").hover();
     await expect(specimen.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
       timeout: 30_000,
     });
@@ -97,13 +108,19 @@ test("chart theme lab picks theme and palette without alias or chrome clutter", 
   const chartTheme = lab.getByLabel("Chart theme", { exact: true });
   const palette = lab.getByLabel("Categorical palette", { exact: true });
   const plot = lab.locator(".gg-plot-root");
+  // Lab stays static until the user engages a control or the plot.
+  await chartTheme.focus();
   await expect(plot).toHaveAttribute("data-gg-ready", "true", { timeout: 30_000 });
   const chartPaper = () => plot.locator(".gg-paper").getAttribute("fill");
 
-  // No grey/gray alias rows (both map to ggplot2) and no follow-docs checkbox
-  // or theme=/scheme= status echo that only restates the selects.
+  // No grey/gray theme alias rows (both map to ggplot2) and no gray palette
+  // twin (same ramp as grey). No follow-docs checkbox or theme=/scheme= status
+  // echo that only restates the selects.
   const themeLabels = await chartTheme.locator("option").allTextContents();
   expect(themeLabels.filter((label) => /^Gre[ya]y$/i.test(label))).toHaveLength(0);
+  const paletteLabels = await palette.locator("option").allTextContents();
+  expect(paletteLabels.filter((label) => label === "Gray")).toHaveLength(0);
+  expect(paletteLabels.filter((label) => label === "Grey")).toHaveLength(1);
   await expect(lab.getByRole("checkbox", { name: "Follow docs appearance" })).toHaveCount(0);
   await expect(lab.getByRole("status")).toHaveCount(0);
   await expect(lab.getByText(/theme="/)).toHaveCount(0);
@@ -129,7 +146,8 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
-  await expect(cards).toHaveCount(18);
+  // Unique ramps only — scheme "gray" is a US-spelling alias of "grey", not a twin card.
+  await expect(cards).toHaveCount(48);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Observable 10",
     "Ipsum",
@@ -140,6 +158,37 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Stata S1 Color",
     "Stata S1R Color",
     "Stata Mono",
+    "Economist",
+    "Solarized",
+    "Few",
+    "Few Light",
+    "Few Dark",
+    "FiveThirtyEight",
+    "Paul Tol",
+    "Canva",
+    "WSJ",
+    "WSJ R/G/B/Y",
+    "WSJ Red/Green",
+    "WSJ Black/Green",
+    "WSJ Dem/Rep",
+    "Tableau 20",
+    "Tableau Color Blind",
+    "Seattle Grays",
+    "Traffic",
+    "Miller Stone",
+    "Superfishel Stone",
+    "Nuriel Stone",
+    "Jewel Bright",
+    "Summer",
+    "Winter",
+    "Green/Orange/Teal",
+    "Red/Blue/Brown",
+    "Purple/Pink/Gray",
+    "Hue Circle",
+    "Google Docs",
+    "Highcharts",
+    "Highcharts Dark",
+    "Pander",
     "Set1",
     "Set2",
     "Set3",
@@ -148,7 +197,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Accent",
     "Hue",
     "Grey",
-    "Gray",
   ]);
   await expect(cards.locator(".capacity")).toHaveText([
     "10 colors",
@@ -156,17 +204,43 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "8 colors",
     "10 colors",
     "8 colors",
-    "15 colors",
-    "15 colors",
-    "15 colors",
-    "15 colors",
+    "9 colors",
+    "8 colors",
+    "8 colors",
+    "8 colors",
+    "8 colors",
+    "3 colors",
+    "12 colors",
+    "4 colors",
+    "6 colors",
+    "4 colors",
+    "2 colors",
+    "4 colors",
+    "3 colors",
+    "20 colors",
+    "10 colors",
+    "5 colors",
+    "9 colors",
+    "11 colors",
+    "10 colors",
+    "9 colors",
+    "9 colors",
+    "8 colors",
+    "10 colors",
+    "12 colors",
+    "12 colors",
+    "12 colors",
+    "19 colors",
+    "24 colors",
+    "10 colors",
+    "11 colors",
+    "8 colors",
     "9 colors",
     "8 colors",
     "12 colors",
     "8 colors",
     "12 colors",
     "8 colors",
-    "10 colors",
     "10 colors",
     "10 colors",
   ]);
@@ -181,8 +255,9 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   await expect(swatches.last()).toHaveAttribute("aria-label", "10: #9498a0");
   await expect(swatches.first().locator("code")).toHaveCount(0);
 
-  // Col chart uses fill (not the old 5-point scatter). Live plot mounts near viewport (#1037).
+  // Col chart uses fill (not the old 5-point scatter). Live plot mounts on intent.
   await observable.scrollIntoViewIfNeeded();
+  await observable.locator(".plot-panel").hover();
   await expect(observable.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
     timeout: 30_000,
   });
@@ -228,6 +303,7 @@ test("sequential color compares direction, custom stops, and a pinned domain on 
 
   for (const card of await cards.all()) {
     await card.scrollIntoViewIfNeeded();
+    await card.locator(".plot-panel").hover();
     await expect(card.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
       timeout: 30_000,
     });
