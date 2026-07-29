@@ -8,7 +8,6 @@ import {
   mergePresentationFocusKeys,
   nextPointSelectionKeys,
   presentationFocusFromInspection,
-  rowIndexesForCandidate,
   sameOrderedPropertyKeys,
   uniqueKeysFromRowIndexes,
 } from "../../src/lib/selection/selection.js";
@@ -150,14 +149,6 @@ describe("anchorsFromCandidateKeys", () => {
         ["a"],
       ),
     ).toEqual([{ x: 1, y: 2, chrome: "ring" }]);
-  });
-});
-
-describe("rowIndexesForCandidate", () => {
-  it("preserves lineage order and appends rowIndex only if absent", () => {
-    expect(rowIndexesForCandidate({ rowIndex: 9 }, [3, 1, 4])).toEqual([3, 1, 4, 9]);
-    expect(rowIndexesForCandidate({ rowIndex: 1 }, [3, 1, 4])).toEqual([3, 1, 4]);
-    expect(rowIndexesForCandidate({ rowIndex: null }, [3, 1])).toEqual([3, 1]);
   });
 });
 
