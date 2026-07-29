@@ -34,4 +34,42 @@ describe("Docs search ranking", () => {
     expect(results.length).toBeGreaterThan(0);
     expect(new Set(results.map((result) => result.href)).size).toBe(results.length);
   });
+
+  it("keeps ranking stable across many queries on the same frozen index", () => {
+    // SiteSearch reuses one entries reference after load; prepare-once must not
+    // change winners when the same array is scored repeatedly.
+    const first = winners.map(([query]) => searchDocs(query, DOCS_SEARCH_INDEX)[0]?.href);
+    for (let i = 0; i < 20; i += 1) {
+      for (const [query] of winners) {
+        void searchDocs(query, DOCS_SEARCH_INDEX);
+      }
+    }
+    const again = winners.map(([query]) => searchDocs(query, DOCS_SEARCH_INDEX)[0]?.href);
+    expect(again).toEqual(first);
+    expect(first).toEqual(winners.map(([, href]) => href));
+  });
+
+  it("matches accented queries via the same normalize path as entry text", () => {
+    const withAccent = {
+      id: "fixture:cafe",
+      kind: "page" as const,
+      title: "Café scales",
+      summary: "Accented title fixture",
+      href: "/fixture/cafe",
+      keywords: ["café"],
+      exact: ["Café scales"],
+    };
+    const plain = {
+      id: "fixture:plain",
+      kind: "page" as const,
+      title: "Other page",
+      summary: "No accent",
+      href: "/fixture/plain",
+      keywords: [],
+      exact: ["Other page"],
+    };
+    const index = [withAccent, plain] as const;
+    expect(searchDocs("cafe", index)[0]?.href).toBe("/fixture/cafe");
+    expect(searchDocs("CAFÉ", index)[0]?.href).toBe("/fixture/cafe");
+  });
 });

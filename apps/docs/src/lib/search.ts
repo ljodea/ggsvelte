@@ -23,14 +23,49 @@ function includesToken(haystack: string, token: string): boolean {
   return haystack.includes(token);
 }
 
-function scoreEntry(query: string, tokens: readonly string[], entry: DocsSearchEntry): number {
+/**
+ * Pre-normalized fields for one search entry. Built once per entries array
+ * identity so keystrokes do not re-run NFKD / diacritic / lower work over the
+ * full index (n ≈ thousands and grows with the docs surface).
+ */
+type PreparedEntry<Entry extends DocsSearchEntry> = {
+  entry: Entry;
+  title: string;
+  exact: readonly string[];
+  titleAndExact: string;
+  broad: string;
+};
+
+const preparedCache = new WeakMap<object, PreparedEntry<DocsSearchEntry>[]>();
+
+function prepareEntry<Entry extends DocsSearchEntry>(entry: Entry): PreparedEntry<Entry> {
   const title = normalize(entry.title);
   const exact = entry.exact.map(normalize);
   const titleAndExact = [title, ...exact].join(" ");
   const broad = normalize(
     [entry.title, entry.summary, ...entry.keywords, ...entry.exact].join(" "),
   );
+  return { entry, title, exact, titleAndExact, broad };
+}
 
+function preparedFor<Entry extends DocsSearchEntry>(
+  entries: readonly Entry[],
+): readonly PreparedEntry<Entry>[] {
+  const cached = preparedCache.get(entries as object);
+  if (cached !== undefined) {
+    return cached as PreparedEntry<Entry>[];
+  }
+  const prepared = entries.map((entry) => prepareEntry(entry));
+  preparedCache.set(entries as object, prepared as PreparedEntry<DocsSearchEntry>[]);
+  return prepared;
+}
+
+function scorePrepared(
+  query: string,
+  tokens: readonly string[],
+  prepared: PreparedEntry<DocsSearchEntry>,
+): number {
+  const { title, exact, titleAndExact, broad } = prepared;
   if (title !== query && exact.includes(query)) return 1100;
   if (title === query || exact.includes(query)) return 1000;
   if (title.startsWith(query) || exact.some((term) => term.startsWith(query))) return 900;
@@ -47,8 +82,13 @@ export function searchDocs<Entry extends DocsSearchEntry>(
   const query = normalize(queryInput);
   if (query === "" || limit <= 0) return [];
   const tokens = query.split(" ");
-  const ranked = entries
-    .map((entry, order) => ({ entry, order, score: scoreEntry(query, tokens, entry) }))
+  const prepared = preparedFor(entries);
+  const ranked = prepared
+    .map((item, order) => ({
+      entry: item.entry,
+      order,
+      score: scorePrepared(query, tokens, item),
+    }))
     .filter((candidate) => candidate.score > 0)
     .toSorted(
       (left, right) =>
