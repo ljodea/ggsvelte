@@ -1,5 +1,74 @@
 # @ggsvelte/svelte
 
+## 0.15.1
+
+### Patch Changes
+
+- dd76c10: <!-- markdownlint-disable MD041 -->
+
+  fix(tooltip): format stat-layer position values with axis formatters
+
+  Default tooltip field rows for stat layers (no source row) now route x/y
+  through the same scale-aware axis formatters as the axis header. Temporal
+  stats no longer dump raw epoch milliseconds (#1113). Live-region text
+  matches. Non-position channels and identity rows keep the plain cell path
+  when formatters are absent.
+
+  Migration: none — display-only for default tooltips and keyboard live text
+
+- 69afc23: <!-- markdownlint-disable MD041 -->
+
+  fix(svelte): interval bounds editor shows month-day as MM-DD
+
+  `temporalKind: "monthDay"` resolves values into a fixed leap reference year.
+  The bounds editor was printing that year via `toISOString()`, so authors saw
+  `2000-04-01T00:00:00.000Z` instead of the `04-01` form they write and the axis
+  shows. Drafts now format and parse as month-day (`MM-DD`) when the axis kind is
+  `monthDay`.
+
+  Closes #1114.
+
+- 4883364: <!-- markdownlint-disable MD041 -->
+
+  refactor(core): collapse the finalize pipeline chain into one module
+
+  The finalize phase had hop-only modules that only redeclared and
+  forwarded the same run-state blob. One entry, `finalize(PipelineRunState)`,
+  now owns layout → geometry → contracts → candidates → RenderModel.
+  Layout and geometry stay in their own files. Public `RenderModel` shape
+  is unchanged.
+
+  Migration: none — internal collapse only
+
+- 3607ef1: <!-- markdownlint-disable MD041 -->
+
+  perf(core): density_2d KDE uses a sorted-x sliding window
+
+  Product-Gaussian grid evaluation sorts samples by x once and slides an
+  x-window across each grid row, so far-away points are not examined when
+  bandwidth is local. Same ±8σ product kernel and isoline path as before.
+
+  Migration: none — internal speedup only
+
+- c0d1e63: <!-- markdownlint-disable MD041 -->
+
+  perf(svelte): expand each lineage id once for key and interval resolve
+
+  Smooth and other aggregate eval-grid marks share one lineage membership
+  across many candidates. resolveSemanticKeys and
+  lineageRowIndexesFromCandidates now walk each lineage id once instead of
+  re-spreading O(C·L) times. Diagnostics for empty lineages still fire per
+  candidate.
+
+  Migration: none — internal speedup only
+
+- Updated dependencies [095865f]
+- Updated dependencies [4883364]
+- Updated dependencies [3607ef1]
+- Updated dependencies [c0d1e63]
+  - @ggsvelte/core@0.15.1
+  - @ggsvelte/spec@0.15.1
+
 ## 0.15.0
 
 ### Minor Changes
