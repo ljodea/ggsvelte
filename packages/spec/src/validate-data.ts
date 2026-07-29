@@ -11,6 +11,7 @@
  *  - validate-data-checks-temporal.ts — shared temporalDecisionForField memoization
  *  - validate-data-checks-position.ts — pre-evidence temporal config + x/y scale types
  *  - validate-data-checks-color.ts — color/fill scale types + manual domain/range
+ *  - validate-data-checks-color-temporal.ts — temporal censor recovery lattice
  *  - validate-data-checks-style.ts — shape/linetype + size/linewidth/alpha (finite + numeric modules)
  *
  * Style and color scale checks use per-layer evidenceForUse like position
