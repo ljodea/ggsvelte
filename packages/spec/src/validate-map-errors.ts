@@ -17,7 +17,7 @@ import type { TLocalizedValidationError } from "typebox/error";
 
 import type { SpecError } from "./errors.js";
 import { didYouMean } from "./errors.js";
-import { KNOWN_GEOMS } from "./schema.js";
+import { KNOWN_GEOMS } from "./schema-catalog.js";
 import { lastSegment, pointerGet } from "./validate-schema-walk.js";
 import { mapKeywordPathGroup } from "./validate-map-path-keywords.js";
 import { mapUnionPathGroup } from "./validate-map-path-unions.js";

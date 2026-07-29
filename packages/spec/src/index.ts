@@ -896,6 +896,8 @@ export type {
 export { validate } from "./validate.js";
 /** @lifecycle stable-intent */
 export type { ValidateResult } from "./validate.js";
+/** TypeBox-free structural gate used by the render pipeline. */
+export { assertStructuralGate, structuralGateErrors } from "./structural-gate.js";
 export { LINT_CATALOG, lintSpec } from "./lint.js";
 export type { LintAdvisoryCode, LintCatalogEntry, SpecAdvisory } from "./lint.js";
 export { ERROR_CATALOG } from "./errors.js";
@@ -921,6 +923,8 @@ export type { SpecError, SpecErrorCode, SpecErrorFix } from "./errors.js";
 
 // Fluent builder
 export { aes, gg, GGBuilder } from "./builder.js";
+/** Authoring data snapshot + portable Date→ISO (shared by builder + assemble). */
+export { calendarDateFields, toAuthoringDataRef, toDataRef } from "./builder-data.js";
 export type {
   AuthoringCellValue,
   AuthoringColumns,

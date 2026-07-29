@@ -8,7 +8,7 @@
 import type { SpecError } from "./errors.js";
 import { didYouMean } from "./errors.js";
 import type { Aes, ChannelName } from "./schema.js";
-import { CHANNELS, GEOM_DEFAULTS } from "./schema.js";
+import { CHANNELS, GEOM_DEFAULTS } from "./schema-catalog.js";
 import type { ProfileFieldType } from "./validate-data.js";
 import { effectiveChannel, type FieldEvidenceMap } from "./validate-data-evidence.js";
 import type { ChannelFieldUse } from "./validate-data-checks-temporal.js";

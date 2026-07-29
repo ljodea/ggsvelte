@@ -24,7 +24,7 @@
  *   3  invalid spec (validation errors — see stderr JSON lines)
  */
 import type { SpecInput } from "@ggsvelte/spec";
-import { lintSpec, SpecValidationError } from "@ggsvelte/spec";
+import { lintSpec, SpecValidationError, validate } from "@ggsvelte/spec";
 
 import type { CLIDiagnosticCode } from "./diagnostics.js";
 import type { NamedData } from "./pipeline.js";
@@ -296,6 +296,11 @@ export async function runCLI(
     args.height ?? (typeof specRecord["height"] === "number" ? specRecord["height"] : 400);
 
   try {
+    // Agent/CLI path: full TypeBox schema validation (exit 3). The render
+    // pipeline itself no longer loads typebox/compile for chart pages.
+    const schema = validate(spec);
+    if (!schema.ok) throw new SpecValidationError(schema.errors);
+
     const model = runPipeline(spec as SpecInput, {
       width,
       height,

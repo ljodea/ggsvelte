@@ -56,6 +56,15 @@ describe("docs chart stack isolation (PR1)", () => {
     expect(vite).toContain("priority: 30");
   });
 
+  it("carves TypeBox validate/schema out of the render ggsvelte-spec group", () => {
+    // Same priority trick as ggsvelte-data / palette-tables: a client import of
+    // validate() must not re-inflate the chart render chunk.
+    const vite = readFileSync(path.join(root, "apps/docs/vite.config.ts"), "utf8");
+    expect(vite).toContain("ggsvelte-spec-validate");
+    expect(vite).toMatch(/name:\s*["']ggsvelte-spec-validate["'][\s\S]*?priority:\s*40/);
+    expect(vite).toMatch(/schema-declarations|validate/);
+  });
+
   it("splits pure data out of the chart mega-chunks (priority > package groups)", () => {
     // Named package groups put every matching module into one shared chunk. A
     // one-line import of palette colors or kyotoSakura then modulepreloads the

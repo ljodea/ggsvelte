@@ -3,8 +3,6 @@
  * Tick generation lives in temporal-ticks.ts; facade re-exports in temporal-guides.ts.
  */
 
-import Type, { type Static, type TLiteral } from "typebox";
-
 import type { TemporalScaleKind } from "./temporal-parse-core.js";
 
 export const TEMPORAL_INTERVAL_UNITS = [
@@ -31,25 +29,10 @@ export const TEMPORAL_WEEKDAYS = [
 ] as const;
 export type TemporalWeekStart = (typeof TEMPORAL_WEEKDAYS)[number];
 
-const WEEKDAY_SCHEMAS = TEMPORAL_WEEKDAYS.map((weekday) => Type.Literal(weekday)) as unknown as [
-  TLiteral<TemporalWeekStart>,
-  ...TLiteral<TemporalWeekStart>[],
-];
-
 const TEMPORAL_INTERVAL_STEP_PATTERN = "(?:[1-9][0-9]{0,5}|1000000)";
 
-export const TemporalIntervalSpecSchema = Type.String({
-  minLength: 1,
-  maxLength: 128,
-  pattern: `^[ ]*${TEMPORAL_INTERVAL_STEP_PATTERN}[ ]+(?:millisecond|second|minute|hour|day|week|month|quarter|year)s?[ ]*$`,
-  description:
-    'A positive integer calendar interval such as "2 weeks", "3 months", or "10 years". Canonical units are millisecond, second, minute, hour, day, week, month, quarter, and year.',
-});
-export type TemporalIntervalSpec = Static<typeof TemporalIntervalSpecSchema>;
-
-export const TemporalWeekStartSchema = Type.Union(WEEKDAY_SCHEMAS, {
-  description: 'Week boundary used by temporal interval breaks. Default "monday".',
-});
+/** Portable interval string (schema-validated by TypeBox on the agent path). */
+export type TemporalIntervalSpec = string;
 
 export interface TemporalInterval {
   unit: TemporalIntervalUnit;
@@ -118,16 +101,6 @@ export const TEMPORAL_LABEL_TOKENS = [
   "%",
 ] as const;
 const LABEL_TOKEN_SET = new Set<string>(TEMPORAL_LABEL_TOKENS);
-const TEMPORAL_LABEL_PATTERN = `^(?:[^%]|%(?:${TEMPORAL_LABEL_TOKENS.join("|")}))+$`;
-
-export const TemporalLabelSpecSchema = Type.String({
-  minLength: 1,
-  maxLength: 128,
-  pattern: TEMPORAL_LABEL_PATTERN,
-  description:
-    "Strict temporal label format. Supported tokens: %Y %y %m %b %B %d %e %a %A %H %I %M %S %L %p %q %z %Z %%.",
-});
-
 /**
  * Tokens a month-day axis can fill truthfully: those the month and the day
  * determine. A year is absent by construction; the clock and zone would print

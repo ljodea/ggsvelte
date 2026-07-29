@@ -3,7 +3,7 @@
  * Layer grammar: validate-structure-layers.ts (+ layer-rule/ribbon/computed-y). Facet: validate-structure-facet.ts.
  */
 import type { SpecError } from "./errors.js";
-import { CATEGORICAL_SCHEME_NAMES, SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
+import { CATEGORICAL_SCHEME_NAMES, SEQUENTIAL_SCHEME_NAMES } from "./schema-names.js";
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
@@ -77,6 +77,18 @@ export function colorScaleStructuralErrors(scales: Record<string, unknown>): Spe
     if (!isRecord(scale)) continue;
     const type = scale["type"];
     const scheme = scale["scheme"];
+    // range must be an array when present (schema shape; kept TypeBox-free for render).
+    if ("range" in scale && scale["range"] !== undefined && !Array.isArray(scale["range"])) {
+      errors.push({
+        code: "invalid-type",
+        path: `/scales/${channel}/range`,
+        message: `scales.${channel}.range must be an array of colors (got ${typeof scale["range"]}).`,
+        fix: {
+          description: "Provide range as a JSON array of #rgb/#rrggbb colors.",
+          example: ["#f00", "#0f0", "#00f"],
+        },
+      });
+    }
     if (
       (type === "sequential" || type === "binned") &&
       typeof scheme === "string" &&

@@ -10,7 +10,7 @@
 import type { SpecError } from "./errors.js";
 import { configuredColorScaleType } from "./scale-helpers.js";
 import type { ColorScaleSpec } from "./schema.js";
-import { SEQUENTIAL_SCHEME_NAMES } from "./schema.js";
+import { SEQUENTIAL_SCHEME_NAMES } from "./schema-names.js";
 import type { FieldEvidenceEntry, FieldEvidenceMap } from "./validate-data-evidence.js";
 import {
   temporalDecisionForField,

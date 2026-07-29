@@ -1,21 +1,50 @@
 /**
- * Fold non-mark grammar layers onto the fluent builder (#785).
- * Pure module: no Svelte runes. Safe for assemble.ts.
+ * Fold non-mark grammar layers onto an assemble draft (#785).
+ * Pure module: no Svelte runes, no fluent builder / TypeBox validate.
+ * Safe for assemble.ts.
  */
-import { gg } from "@ggsvelte/spec";
+import type {
+  AesInput,
+  CoordSpec,
+  DataInput,
+  FacetInput,
+  GuidesSpec,
+  Labs,
+  LayerInput,
+  LegendSpec,
+  Scales,
+  ThemeName,
+  ThemeSpec,
+} from "@ggsvelte/spec";
 
 import { GRAMMAR_FAMILIES, type GrammarFamilyMeta } from "./grammar-families.js";
 import type { PlotLayerLike } from "./types.js";
 
-type GgBuilder = ReturnType<typeof gg>;
+/**
+ * Mutable assemble state before normalize(). Mirrors builder composition:
+ * REPLACE families overwrite; MERGE families shallow-merge.
+ */
+export type AssembleDraft = {
+  data?: DataInput | readonly Record<string, unknown>[];
+  aes?: AesInput;
+  layers: LayerInput[];
+  facet?: FacetInput;
+  coord?: CoordSpec | "flip";
+  a11y?: import("@ggsvelte/spec").A11yMode;
+  scales?: Scales;
+  guides?: GuidesSpec;
+  legend?: LegendSpec;
+  labs?: Labs;
+  theme?: ThemeName | ThemeSpec;
+};
 
 /**
- * Apply one plot layer onto the fluent builder.
+ * Apply one plot layer onto the assemble draft.
  * Marks are ignored (they travel through `input.layers` / `toLayerInput`).
  */
-export function foldPlotLayer(builder: GgBuilder, layer: PlotLayerLike): GgBuilder {
+export function foldPlotLayer(draft: AssembleDraft, layer: PlotLayerLike): AssembleDraft {
   if (layer.kind === "mark") {
-    return builder;
+    return draft;
   }
   // Index via string map so unforeseen runtime kinds are undefined (not a
   // silent miss). Typed callers already exhaust GrammarLayerKind.
@@ -25,23 +54,21 @@ export function foldPlotLayer(builder: GgBuilder, layer: PlotLayerLike): GgBuild
   if (family === undefined) {
     throw new TypeError(`Unhandled plot layer kind: ${layer.kind}`);
   }
-  // Per-kind value types are checked by Layer / PlotLayerLike; one cast at the
-  // fold boundary keeps the table free of builder imports.
   switch (family.builderMethod) {
     case "scales":
-      return builder.scales(layer.value as Parameters<GgBuilder["scales"]>[0]);
+      return { ...draft, scales: { ...draft.scales, ...(layer.value as Scales) } };
     case "theme":
-      return builder.theme(layer.value as Parameters<GgBuilder["theme"]>[0]);
+      return { ...draft, theme: layer.value as ThemeName | ThemeSpec };
     case "coord":
-      return builder.coord(layer.value as Parameters<GgBuilder["coord"]>[0]);
+      return { ...draft, coord: layer.value as CoordSpec | "flip" };
     case "facet":
-      return builder.facet(layer.value as Parameters<GgBuilder["facet"]>[0]);
+      return { ...draft, facet: layer.value as FacetInput };
     case "labs":
-      return builder.labs(layer.value as Parameters<GgBuilder["labs"]>[0]);
+      return { ...draft, labs: { ...draft.labs, ...(layer.value as Labs) } };
     case "guides":
-      return builder.guides(layer.value as Parameters<GgBuilder["guides"]>[0]);
+      return { ...draft, guides: { ...draft.guides, ...(layer.value as GuidesSpec) } };
     case "legend":
-      return builder.legend(layer.value as Parameters<GgBuilder["legend"]>[0]);
+      return { ...draft, legend: { ...draft.legend, ...(layer.value as LegendSpec) } };
     default: {
       const unhandled: never = family.builderMethod;
       throw new TypeError(`Unhandled builder method: ${String(unhandled)}`);

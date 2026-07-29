@@ -16,15 +16,17 @@ export {
   TEMPORAL_LABEL_TOKENS,
   TEMPORAL_WEEKDAYS,
   TemporalIntervalError,
-  TemporalIntervalSpecSchema,
-  TemporalLabelSpecSchema,
   temporalLabelConfigurationError,
   temporalLocaleConfigurationError,
-  TemporalWeekStartSchema,
   type TemporalInterval,
   type TemporalIntervalSpec,
   type TemporalIntervalUnit,
   type TemporalWeekStart,
 } from "./temporal-interval.js";
+export {
+  TemporalIntervalSpecSchema,
+  TemporalLabelSpecSchema,
+  TemporalWeekStartSchema,
+} from "./temporal-interval-schema.js";
 
 export { temporalIntervalTicks } from "./temporal-ticks.js";

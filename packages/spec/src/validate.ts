@@ -33,14 +33,8 @@ import {
   resolveLayerFieldEvidence,
 } from "./validate-data.js";
 import { collectSchemaShapeErrors, GEOM_BRANCHES } from "./validate-schema-shape.js";
-import {
-  binnedStyleScaleStructuralErrors,
-  colorScaleStructuralErrors,
-  coordFacetStructuralErrors,
-  facetStructuralErrors,
-  guideStructuralErrors,
-  layerStructuralErrors,
-} from "./validate-structure.js";
+import { structuralGateErrors } from "./structural-gate.js";
+import { facetStructuralErrors, layerStructuralErrors } from "./validate-structure.js";
 
 export type ValidateResult =
   | { ok: true; spec: PortableSpec; advisories?: SpecAdvisory[] }
@@ -124,16 +118,9 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
       errors.push(...collectSchemaShapeErrors(input));
     }
 
-    if (schemaValid && isRecord(input) && isRecord(input["scales"])) {
-      errors.push(
-        ...colorScaleStructuralErrors(input["scales"]),
-        ...binnedStyleScaleStructuralErrors(input["scales"]),
-      );
-    }
-    if (schemaValid && isRecord(input)) {
-      const guides = isRecord(input["guides"]) ? input["guides"] : {};
-      const scales = isRecord(input["scales"]) ? input["scales"] : undefined;
-      errors.push(...guideStructuralErrors(guides, scales), ...coordFacetStructuralErrors(input));
+    // TypeBox-free structural gates (shared with pipeline render path).
+    if (schemaValid) {
+      errors.push(...structuralGateErrors(input));
     }
 
     // --- tier 2 (opt-in via options): structural grammar checks ----------------
