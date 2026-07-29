@@ -2,8 +2,8 @@
  * Reactive semantic-key service for GGPlot.
  *
  * Owns priorKeys, derived key resolution, candidate key cache, and diagnostics
- * delivery. Pure helpers live in ./semantic-keys.ts and are re-exported here
- * for the historical import path.
+ * delivery. Pure helpers: semantic-keys-resolve.ts, semantic-keys-projection.ts,
+ * semantic-data-identity.ts, semantic-source-identity.ts.
  */
 import type { CandidateFacts, CellValue, RenderModel } from "@ggsvelte/core";
 import type { PortableSpec } from "@ggsvelte/spec";
@@ -12,8 +12,8 @@ import type { InteractionDiagnostic } from "../interaction/interaction.js";
 import {
   candidateSemanticKeysFromCache,
   createCandidateKeysProjectionCache,
-  resolveSemanticKeysForPlot,
-} from "./semantic-keys.js";
+} from "./semantic-keys-projection.js";
+import { resolveSemanticKeysForPlot } from "./semantic-keys-resolve.js";
 
 export type SemanticKeyServiceDeps = {
   model: () => RenderModel | null;

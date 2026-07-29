@@ -17,7 +17,7 @@ import { createPlotInteraction } from "../../src/lib/interaction/controller.svel
 import { createLegendEntryKeyIndex } from "../../src/lib/legend/entry-key-index.svelte.js";
 import { createLegendFocusState } from "../../src/lib/legend/focus-state.svelte.js";
 import type { InteractiveLegendEntry, LegendEntryIdentity } from "../../src/lib/legend/focus.js";
-import { createSourceIdentityTracker } from "../../src/lib/runtime/semantic-keys.js";
+import { createSourceIdentityTracker } from "../../src/lib/runtime/semantic-source-identity.js";
 import { createSemanticKeyService } from "../../src/lib/runtime/semantic-keys.svelte.js";
 import { withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
 import { modelFor } from "../helpers/model.js";
