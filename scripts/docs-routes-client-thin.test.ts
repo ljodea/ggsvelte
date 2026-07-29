@@ -1,0 +1,49 @@
+/**
+ * Guards: client shell must not pull the full DOCS_ROUTES catalog (~120KB).
+ * Server layout load already serializes the current route; chrome only needs
+ * GUIDE_NAVIGATION + primaryNavigationOwner.
+ */
+import { describe, expect, it } from "bun:test";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
+const root = path.join(import.meta.dirname, "..");
+const docsSrc = path.join(root, "apps/docs/src");
+
+function read(rel: string): string {
+  return readFileSync(path.join(docsSrc, rel), "utf8");
+}
+
+describe("docs routes client thin catalog", () => {
+  it("keeps routes-nav free of DOCS_ROUTES value imports", () => {
+    const nav = read("lib/routes-nav.ts");
+    expect(nav).toContain("GUIDE_NAVIGATION");
+    expect(nav).toContain("primaryNavigationOwner");
+    // Comments may name DOCS_ROUTES; ban value imports only.
+    expect(nav).not.toMatch(/import\s*\{[^}]*\bDOCS_ROUTES\b[^}]*\}\s*from/);
+    expect(nav).not.toMatch(/findDocsRoute|guideSequence|sitemapRoutes/);
+  });
+
+  it("loads DocsShell and SiteHeader from routes-nav, not the full routes module", () => {
+    const shell = read("lib/components/DocsShell.svelte");
+    expect(shell).toContain("$lib/routes-nav");
+    expect(shell).not.toMatch(/from\s*["']\$lib\/routes["']/);
+
+    const header = read("lib/components/SiteHeader.svelte");
+    expect(header).toContain("$lib/routes-nav");
+    expect(header).not.toMatch(/from\s*["']\$lib\/routes["']/);
+  });
+
+  it("loads docs overview chapters from routes-nav", () => {
+    const page = read("routes/docs/+page.svelte");
+    expect(page).toContain("$lib/routes-nav");
+    expect(page).not.toMatch(/from\s*["']\$lib\/routes["']/);
+  });
+
+  it("keeps full route helpers on the server-facing routes module", () => {
+    const routes = read("lib/routes.ts");
+    expect(routes).toContain("DOCS_ROUTES");
+    expect(routes).toContain("findDocsRoute");
+    expect(routes).toContain("guideSequence");
+  });
+});

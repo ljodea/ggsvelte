@@ -6,7 +6,7 @@
     guideNavBlocks,
     guideSectionDomId,
   } from "$lib/catalog/guide";
-  import { GUIDE_NAVIGATION } from "$lib/routes";
+  import { GUIDE_NAVIGATION } from "$lib/routes-nav";
 
   const descriptionByPath = new Map<string, string>([
     ...GUIDE_CATALOG.map(

@@ -9,7 +9,7 @@
     type DocsAppearance,
   } from "$lib/docs-appearance";
   import { primaryNavLinks } from "$lib/primary-nav-links";
-  import { primaryNavigationOwner } from "$lib/routes";
+  import { primaryNavigationOwner } from "$lib/routes-nav";
   import type { DocsRouteMetadata } from "$lib/route-types";
   import type { Component } from "svelte";
 
