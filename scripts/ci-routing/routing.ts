@@ -213,6 +213,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
   // Packed-consumer harness (not the whole scripts/ tree — matrix is expensive).
   consumer_tools: [
     "scripts/consumer-compat.ts",
+    "scripts/consumer-compat-plan.ts",
+    "scripts/consumer-compat-fixture.ts",
     "scripts/consumer-compat.test.ts",
     // Packed fixture snippets live here; consumer-compat imports them.
     "scripts/guide-code-contract.ts",
