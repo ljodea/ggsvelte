@@ -2,58 +2,72 @@ import type { InteractionSource, PointSelection } from "../interaction/interacti
 
 /**
  * Overlay chrome for a presentation anchor.
- * Rings are for discrete point marks only; continuous/filled/rect families use
- * mute-only de-emphasis (mask alpha) — never hollow circles on path vertices.
+ * - `ring` — discrete point marks only (selection / legend emphasis)
+ * - `none` — paths, rects, segments: mute-only de-emphasis (mask alpha)
+ * - `box` — text/label glyphs (circle never fits the string)
  */
-export type PresentationChrome = "ring" | "none";
+export type PresentationChrome = "ring" | "none" | "box";
 
 export type PresentationAnchor = {
   readonly x: number;
   readonly y: number;
   readonly chrome: PresentationChrome;
+  /** CSS-px box size when chrome is `"box"` (glyph highlight). */
+  readonly width?: number;
+  readonly height?: number;
+  /** Glyph text-anchor when chrome is `"box"`. */
+  readonly textAnchor?: "start" | "middle" | "end";
 };
 
 export type CandidateAnchorKeys = {
   readonly x: number;
   readonly y: number;
   readonly keys: readonly PropertyKey[];
-  /** Geometry batch kind when known (`points` alone use rings). */
+  /** Geometry batch kind when known (`points` rings; `glyphs` boxes). */
   readonly kind?: string;
+  /** Glyph highlight extents when known (from GlyphsBatch boxWidths/Heights). */
+  readonly width?: number;
+  readonly height?: number;
+  readonly textAnchor?: "start" | "middle" | "end";
 };
 
 /**
  * Max ring anchors kept under legend/controller emphasis before demoting all
  * rings to mute-only. Dense series (e.g. species scatter) stay readable;
- * selection anchors are not gated by this limit.
+ * selection anchors are not gated by this limit. Box chrome is not density-gated.
  */
 export const EMPHASIS_RING_DENSITY_LIMIT = 48;
 
 /**
  * Anchor chrome for selection / legend emphasis rings.
- * Only discrete point marks get hollow rings. Paths, rects, segments, and
- * glyphs use mute-only de-emphasis — continuous geometry must not look like it
- * has a ring at every vertex (area/line legend focus).
+ * Only discrete point marks get hollow rings. Glyphs get a rectangular box so
+ * text is enclosed. Paths, rects, and segments use mute-only de-emphasis.
  */
 export function presentationChromeForKind(kind?: string | null): PresentationChrome {
-  return kind === "points" ? "ring" : "none";
+  if (kind === "points") return "ring";
+  if (kind === "glyphs") return "box";
+  return "none";
 }
 
 /**
- * Hover overlay chrome (hover ring + gapped crosshair).
+ * Hover overlay chrome (hover ring/box + gapped crosshair).
  * Keep rings for strokes and points so path/line inspect still gaps guides at
- * the focus. Rect marks stay mute-only (sibling de-emphasis via masks).
+ * the focus. Glyphs use a box. Rect marks stay mute-only.
  * Missing kind keeps ring so crosshair gap works before the seed attaches.
  */
 export function hoverChromeForKind(kind?: string | null): PresentationChrome {
-  return kind === "rects" ? "none" : "ring";
+  if (kind === "rects") return "none";
+  if (kind === "glyphs") return "box";
+  return "ring";
 }
 
-/**
- * Density gate for **legend/controller emphasis** only: when the number of
- * ring anchors exceeds `maxRingAnchors`, demote every ring to `"none"` so mute
- * alone carries series highlight. Returns the same array reference when under
- * the limit (no allocation). Point selection does not call this.
- */
+/** Chrome preference when two marks share a pixel (higher wins). */
+function chromeRank(chrome: PresentationChrome): number {
+  if (chrome === "none") return 0;
+  if (chrome === "ring") return 1;
+  return 2; // box
+}
+
 export function applyEmphasisRingDensityGate(
   anchors: readonly PresentationAnchor[],
   maxRingAnchors: number = EMPHASIS_RING_DENSITY_LIMIT,
@@ -64,7 +78,7 @@ export function applyEmphasisRingDensityGate(
   }
   if (ringCount <= maxRingAnchors) return anchors as PresentationAnchor[];
   return anchors.map((anchor) =>
-    anchor.chrome === "ring" ? { x: anchor.x, y: anchor.y, chrome: "none" as const } : anchor,
+    anchor.chrome === "ring" ? { ...anchor, chrome: "none" as const } : anchor,
   );
 }
 
@@ -178,9 +192,8 @@ export function collectCandidates<T, R>(
  * Collect unique pixel anchors for selected semantic keys.
  * Candidates must already be in id-ascending order; key resolution stays with
  * the caller. Dedup identity is `${String(x)}:${String(y)}`.
- * `chrome` prefers `"ring"` when any coincident candidate needs it (e.g. point
- * overlaid on a rect at the same pixel), so the first-seen rect does not hide
- * point chrome. Only `points` batch kinds request rings.
+ * `chrome` upgrades none → ring → box when coincident candidates need richer
+ * chrome (point overlaid on a rect, or glyph overlaid on either).
  */
 export function anchorsFromCandidateKeys(
   candidates: Iterable<CandidateAnchorKeys>,
@@ -200,15 +213,27 @@ export function anchorsFromCandidateKeys(
     if (!selected) continue;
     const identity = `${String(candidate.x)}:${String(candidate.y)}`;
     const chrome = presentationChromeForKind(candidate.kind);
+    const next: PresentationAnchor = {
+      x: candidate.x,
+      y: candidate.y,
+      chrome,
+      ...(chrome === "box" &&
+        candidate.width !== undefined &&
+        candidate.height !== undefined && {
+          width: candidate.width,
+          height: candidate.height,
+          ...(candidate.textAnchor !== undefined && { textAnchor: candidate.textAnchor }),
+        }),
+    };
     const existing = indexByIdentity.get(identity);
     if (existing === undefined) {
       indexByIdentity.set(identity, anchors.length);
-      anchors.push({ x: candidate.x, y: candidate.y, chrome });
+      anchors.push(next);
       continue;
     }
-    // Upgrade none → ring if a later coincident candidate needs point chrome.
-    if (chrome === "ring" && anchors[existing]?.chrome === "none") {
-      anchors[existing] = { x: candidate.x, y: candidate.y, chrome: "ring" };
+    const prev = anchors[existing]!;
+    if (chromeRank(chrome) > chromeRank(prev.chrome)) {
+      anchors[existing] = next;
     }
   }
   return anchors;

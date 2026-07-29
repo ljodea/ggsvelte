@@ -41,6 +41,9 @@
     inspectionPanel = null,
     coordFlipped = false,
     hoverChrome = "ring",
+    hoverBoxWidth = undefined,
+    hoverBoxHeight = undefined,
+    hoverBoxAnchor = undefined,
     selectedAnchors = [],
     emphasizedAnchors = [],
     brushRect = null,
@@ -61,6 +64,9 @@
     inspectionPanel?: Panel | null;
     coordFlipped?: boolean;
     hoverChrome?: PresentationChrome;
+    hoverBoxWidth?: number;
+    hoverBoxHeight?: number;
+    hoverBoxAnchor?: "start" | "middle" | "end";
     selectedAnchors?: readonly PresentationAnchor[];
     emphasizedAnchors?: readonly PresentationAnchor[];
     brushRect?: BrushRect | null;
@@ -86,6 +92,9 @@
     {inspectionPanel}
     {coordFlipped}
     {hoverChrome}
+    {hoverBoxWidth}
+    {hoverBoxHeight}
+    {hoverBoxAnchor}
     {selectedAnchors}
     {emphasizedAnchors}
     {brushRect}

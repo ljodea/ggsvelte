@@ -60,6 +60,8 @@ import {
   resolveFilteredAvailableTools,
 } from "./interaction/capability.js";
 import {
+  inspectAxisOnBarColDiagnostics,
+  layerGeomsFromSpecLayers,
   normalizeInteractionConfig,
   type InteractionDiagnostic,
   type PlotInteractionScope,
@@ -104,6 +106,7 @@ import {
   type PresentationAnchor,
   type PresentationChrome,
 } from "./selection/selection.js";
+import { glyphExtentsFromBatch } from "./scene/geometry.js";
 import { createSurfaceState } from "./surface/surface-state.svelte.js";
 import type { SurfaceState } from "./surface/surface-state.svelte.js";
 import { createPlotZoomState } from "./zoom/zoom-state.svelte.js";
@@ -160,6 +163,10 @@ export type PlotEngine = {
   readonly selectedAnchors: PresentationAnchor[];
   readonly emphasizedAnchors: PresentationAnchor[];
   readonly hoverChrome: PresentationChrome;
+  /** Measured glyph box when hoverChrome is `"box"`. */
+  readonly hoverBoxWidth: number | undefined;
+  readonly hoverBoxHeight: number | undefined;
+  readonly hoverBoxAnchor: "start" | "middle" | "end" | undefined;
   readonly interactionMasks: readonly (BatchInteractionMask | null)[];
   readonly interactiveLegendEntries: InteractiveLegendEntry[];
   readonly effectiveLegendPressed: LegendEntryIdentity | null;
@@ -318,6 +325,22 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   $effect(() => {
     for (const diagnostic of compositionDiagnostics) {
       const dedupKey = compositionAdvisoryDedupKey(diagnostic);
+      if (deliveredAdvisories.has(dedupKey)) continue;
+      deliveredAdvisories.add(dedupKey);
+      deliverDiagnostic(diagnostic);
+    }
+  });
+
+  // Inspect axis guides that fight bar/col geometry (or bisect on-bar labels).
+  // Needs assembled layers + resolved inspect.mode; once-per-code:prop like wiring.
+  const inspectGeomDiagnostics = $derived.by((): InteractionDiagnostic[] => {
+    const mode = interactionConfig.inspect?.mode;
+    if (mode === undefined) return [];
+    return inspectAxisOnBarColDiagnostics(mode, layerGeomsFromSpecLayers(assembled()?.layers));
+  });
+  $effect(() => {
+    for (const diagnostic of inspectGeomDiagnostics) {
+      const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
       if (deliveredAdvisories.has(dedupKey)) continue;
       deliveredAdvisories.add(dedupKey);
       deliverDiagnostic(diagnostic);
@@ -618,6 +641,17 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   // Host-side derived for catalog reconcile (closes over runtime.model).
   const filterableLegendEntries = $derived(legendFilterState.computeEntries(runtime.model));
 
+  function hoverGlyphExtents(): {
+    readonly width: number;
+    readonly height: number;
+    readonly textAnchor: "start" | "middle" | "end";
+  } | null {
+    const seed = inspectionState.inspectionSeed;
+    const model = runtime.model;
+    if (seed === null || model === null || seed.kind !== "glyphs") return null;
+    return glyphExtentsFromBatch(model.scene.batches[seed.batchIndex], seed.primitiveIndex);
+  }
+
   // After host entry deriveds exist (irreducible late data for legend focus).
   legendFocusState.installHostDerivedEffects();
 
@@ -663,6 +697,15 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       const focus = inspectionState.presentationFocus;
       if (focus === null) return "ring";
       return hoverChromeForKind(focus.kind);
+    },
+    get hoverBoxWidth() {
+      return hoverGlyphExtents()?.width;
+    },
+    get hoverBoxHeight() {
+      return hoverGlyphExtents()?.height;
+    },
+    get hoverBoxAnchor() {
+      return hoverGlyphExtents()?.textAnchor;
     },
     get interactionMasks() {
       return semanticCandidateProjection.interactionMasks;

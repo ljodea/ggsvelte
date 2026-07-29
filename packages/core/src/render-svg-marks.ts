@@ -314,7 +314,16 @@ function renderGlyphs(batch: GlyphsBatch, theme: ThemeTokens): string {
   const n = batch.texts.length;
   const themeInk = themeVar("ink", theme);
   const themePaper = themeVar("paper", theme);
-  const hasBox = batch.boxWidths !== undefined && batch.boxHeights !== undefined;
+  // Measured extents alone do not paint a label box (geom_text measures for
+  // inspect hover/hit). Visual chrome is geom_label / sf_label only.
+  const hasBox =
+    batch.boxWidths !== undefined &&
+    batch.boxHeights !== undefined &&
+    (batch.boxRadius !== undefined ||
+      batch.boxFill !== undefined ||
+      batch.boxFills !== undefined ||
+      batch.boxStroke !== undefined ||
+      batch.boxStrokes !== undefined);
   for (let j = 0; j < n; j++) {
     const fill = batch.colors?.[j] ?? batch.color ?? themeInk;
     const size = batch.sizes?.[j];
