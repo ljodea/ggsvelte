@@ -51,7 +51,7 @@ test("themes compares all built-in chart themes as full-width interactive portra
   const list = page.getByRole("list", { name: "Built-in chart themes" });
   const specimens = list.getByRole("listitem");
   // Non-alias product themes (grey/gray alias ggplot2; not separate portraits).
-  await expect(specimens).toHaveCount(21);
+  await expect(specimens).toHaveCount(22);
   await expect(specimens.getByRole("heading", { level: 3 })).toHaveText([
     "Default",
     "Light",
@@ -73,6 +73,7 @@ test("themes compares all built-in chart themes as full-width interactive portra
     "Economist White",
     "Solarized 2",
     "Solarized 2 Dark",
+    "WSJ",
     "Test",
   ]);
 
@@ -131,7 +132,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
-  await expect(cards).toHaveCount(36);
+  await expect(cards).toHaveCount(41);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Observable 10",
     "Ipsum",
@@ -146,6 +147,11 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "FiveThirtyEight",
     "Paul Tol",
     "Canva",
+    "WSJ",
+    "WSJ R/G/B/Y",
+    "WSJ Red/Green",
+    "WSJ Black/Green",
+    "WSJ Dem/Rep",
     "Tableau 20",
     "Tableau Color Blind",
     "Seattle Grays",
@@ -184,6 +190,11 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "3 colors",
     "12 colors",
     "4 colors",
+    "6 colors",
+    "4 colors",
+    "2 colors",
+    "4 colors",
+    "3 colors",
     "20 colors",
     "10 colors",
     "5 colors",

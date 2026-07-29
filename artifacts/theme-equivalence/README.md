@@ -2,7 +2,7 @@
 
 This board compares R and ggsvelte renders using the same data, explicit domains, explicit breaks, explicit colors, 720×480 logical viewport, and 1440×960 output. R uses Cairo at 192 dpi. ggsvelte uses Chromium at device scale factor 2 with its bundled Roboto Condensed faces loaded and verified through `document.fonts.check()`.
 
-Open [index.html](./index.html) for all 21 registered ggsvelte themes and the three side-by-side structural references. Raw structural measurements are in [r-metrics.json](./r-metrics.json) and [ggsvelte-metrics.json](./ggsvelte-metrics.json).
+Open [index.html](./index.html) for all 22 registered ggsvelte themes and the three side-by-side structural references. Raw structural measurements are in [r-metrics.json](./r-metrics.json) and [ggsvelte-metrics.json](./ggsvelte-metrics.json).
 
 ## Structural parity
 
@@ -52,6 +52,11 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - ggthemes fivethirtyeight: `#008FD5 #FF2700 #77AB43`
 - ggthemes ptol (full capacity): `#332288 #6699CC #88CCEE #44AA99 #117733 #999933 #DDCC77 #661100 #CC6677 #AA4466 #882255 #AA4499`
 - ggthemes canva (Fresh and bright): `#f98866 #ff420e #80bd9e #89da59`
+- ggthemes wsj (colors6): `#c72e29 #016392 #be9c2e #098154 #fb832d #000000`
+- ggthemes wsj_rgby: `#d3ba68 #d5695d #5d8ca8 #65a479`
+- ggthemes wsj_red_green: `#088158 #ba2f2a`
+- ggthemes wsj_black_green: `#000000 #595959 #59a77f #008856`
+- ggthemes wsj_dem_rep: `#006a8e #b1283a #a8a6a7`
 
 ## Sources
 
@@ -59,8 +64,9 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - hrbrthemes Roboto Condensed: `/Users/liamodea/Code/hrbrthemes/R/roboto-condensed.r`
 - hrbrthemes palettes: `/Users/liamodea/Code/hrbrthemes/R/color.r` and `R/flexoki.R`
 - ggthemes Few: `/Users/liamodea/Code/ggthemes/R/few.R`
+- ggthemes WSJ theme: `/Users/liamodea/Code/ggthemes/R/wsj.R`
 - ggthemes Solarized themes: `/Users/liamodea/Code/ggthemes/R/solarized.R`
-- ggthemes palettes: `/Users/liamodea/Code/ggthemes/data-raw/theme-data/tableau.yml`, `colorblind.yml`, `solarized.yml`, `few.yml`, `fivethirtyeight.yml`, and `pault.yml`; canva palette from `/Users/liamodea/Code/ggthemes/data/canva_palettes.rda`
+- ggthemes palettes: `/Users/liamodea/Code/ggthemes/data-raw/theme-data/tableau.yml`, `colorblind.yml`, `solarized.yml`, `few.yml`, `fivethirtyeight.yml`, `wsj.yml`, and `pault.yml`; canva palette from `/Users/liamodea/Code/ggthemes/data/canva_palettes.rda`
 
 Reproduce everything with:
 

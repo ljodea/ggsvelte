@@ -1,6 +1,6 @@
 /**
  * Data-free structural checks for facet wrap XOR grid form.
- * Layer grammar: validate-structure-layers.ts. Color schemes: validate-structure-scales.ts.
+ * Layer grammar: validate-structure-layers.ts (+ layer-rule/ribbon/computed-y). Color schemes: validate-structure-scales.ts.
  */
 import type { SpecError } from "./errors.js";
 

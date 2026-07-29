@@ -11,12 +11,17 @@
  * - `changeset-present` — has a changeset and touches shipped package code
  * - `missing` — touches shipped package code, no changeset (advisory only)
  * - `not-needed` — no shipped package code, no changeset
- * - `unwarranted` — has a changeset but no shipped package code (blocks merge)
+ * - `unwarranted` — **adds** a changeset but no shipped package code (blocks merge)
  *
  * Missing stays non-blocking: internal-only package changes are common and
  * forcing empty changesets is worse than an ignorable comment. Unwarranted
  * blocks: docs/examples/script-only changesets have repeatedly bumped
  * core/spec/svelte with notes that change nothing consumers import.
+ *
+ * Pure **edits** of already-queued `.changeset/*.md` files (e.g. promoting
+ * patch → minor on a pending entry) do not introduce a new release note and
+ * are not `unwarranted`. Only status A/R/C (add/rename/copy) count as
+ * introducing a changeset; the workflow feeds `git diff --name-status`.
  */
 
 import { appendFileSync, existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -128,6 +133,48 @@ function isChangesetFile(path: string): boolean {
   return /^\.changeset\/(?!README\.md$)[^/]+\.md$/.test(path);
 }
 
+/** One row from `git diff --name-status` (or a bare path for tests). */
+export type DiffEntry = {
+  /** First letter of git status: A, M, D, R, C, … */
+  status: string;
+  path: string;
+};
+
+/**
+ * Parse a `git diff --name-status` line, or a bare path.
+ *
+ * Bare paths (no tab) are treated as **added** so unit tests and older
+ * callers keep the strict "changeset without package code = unwarranted"
+ * behaviour. The workflow feeds real name-status lines so pure edits of
+ * existing changesets can pass.
+ */
+export function parseNameStatusLine(line: string): DiffEntry | null {
+  const trimmed = line.trim();
+  if (trimmed.length === 0) return null;
+  if (!trimmed.includes("\t")) {
+    return { status: "A", path: trimmed };
+  }
+  const parts = trimmed.split("\t");
+  const statusField = parts[0];
+  if (statusField === undefined || statusField.length === 0) return null;
+  const kind = statusField[0]!;
+  // R100 / C50: path is the destination (last column).
+  if ((kind === "R" || kind === "C") && parts.length >= 3 && parts[2] !== undefined) {
+    return { status: kind, path: parts[2] };
+  }
+  const path = parts[1];
+  if (path === undefined || path.length === 0) return null;
+  return { status: kind, path };
+}
+
+/** True when this diff row *introduces* a pending changeset entry. */
+function introducesChangeset(entry: DiffEntry): boolean {
+  if (!isChangesetFile(entry.path)) return false;
+  // A = new file; R/C = moved/copied into .changeset/. Pure M/D do not
+  // queue a new release note — they reclassify or drop an existing one.
+  return entry.status === "A" || entry.status === "R" || entry.status === "C";
+}
+
 function isShippedPath(path: string, pkg: PublishedPackage): boolean {
   if (path === `${pkg.dir}/package.json`) return true;
   // Colocated test files live under src/ but are not part of the consumer
@@ -149,12 +196,21 @@ function isShippedPath(path: string, pkg: PublishedPackage): boolean {
   return false;
 }
 
+/**
+ * Classify a PR diff. Accepts bare paths (tests / legacy) or
+ * `status\\tpath` name-status lines from the workflow.
+ */
 export function decideChangesetComment(
   changedFiles: string[],
   packages: PublishedPackage[],
 ): Decision {
-  const hasChangeset = changedFiles.some((path) => isChangesetFile(path));
-  const touched = changedFiles.filter((path) => packages.some((pkg) => isShippedPath(path, pkg)));
+  const entries = changedFiles
+    .map((line) => parseNameStatusLine(line))
+    .filter((entry): entry is DiffEntry => entry !== null);
+  const hasChangeset = entries.some((entry) => introducesChangeset(entry));
+  const touched = entries
+    .map((entry) => entry.path)
+    .filter((path) => packages.some((pkg) => isShippedPath(path, pkg)));
   if (hasChangeset) {
     if (touched.length > 0) {
       return { verdict: "changeset-present", touched: [] };
@@ -167,7 +223,7 @@ export function decideChangesetComment(
   return { verdict: "not-needed", touched: [] };
 }
 
-async function readStdinPaths(): Promise<string[]> {
+async function readStdinLines(): Promise<string[]> {
   const text = await new Response(Bun.stdin.stream()).text();
   return text
     .split("\n")
@@ -181,7 +237,7 @@ async function runEmitCli(args: string[]): Promise<void> {
   if (!args.includes("--stdin") || bodyOut === undefined) {
     throw new Error("usage: changeset-check.ts emit --stdin --body-out <path>");
   }
-  const files = await readStdinPaths();
+  const files = await readStdinLines();
   const decision = decideChangesetComment(files, discoverPublishedPackages(process.cwd()));
   writeFileSync(bodyOut, renderComment(decision));
   const outputs = `verdict=${decision.verdict}\n`;

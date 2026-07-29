@@ -117,11 +117,78 @@ export const SOLARIZED_PALETTE: readonly string[] = [
 ];
 
 /**
- * ggthemes tableau_color_pal("Tableau 20", "regular") — the classic paired
- * Tableau 20. The remaining regular variants below are verbatim copies of
- * the upstream YAML tables, in source order (ggthemes' n picks are prefix
- * walks, so fixed lists match exactly).
+ * ggthemes few_pal("Medium") — Stephen Few's medium-strength qualitative
+ * palette (scale_colour_few default). ggthemes reserves its first value
+ * (Gray) for non-data parts at n = 1; the data colors are the remaining
+ * eight, and its n picks are prefix walks, so this fixed list is exactly
+ * the ggthemes full-capacity order.
  */
+export const FEW_PALETTE: readonly string[] = [
+  "#5DA5DA",
+  "#FAA43A",
+  "#60BD68",
+  "#F17CB0",
+  "#B2912F",
+  "#B276B2",
+  "#DECF3F",
+  "#F15854",
+];
+
+/** ggthemes few_pal("Light") — Few's light variant for filled areas (scale_fill_few default). */
+export const FEW_LIGHT_PALETTE: readonly string[] = [
+  "#88BDE6",
+  "#FBB258",
+  "#90CD97",
+  "#F6AAC9",
+  "#BFA554",
+  "#BC99C7",
+  "#EDDD46",
+  "#F07E6E",
+];
+
+/** ggthemes few_pal("Dark") — Few's dark variant for thin lines / highlighting. */
+export const FEW_DARK_PALETTE: readonly string[] = [
+  "#265DAB",
+  "#DF5C24",
+  "#059748",
+  "#E5126F",
+  "#9D722A",
+  "#7B3A96",
+  "#C7B42E",
+  "#CB2027",
+];
+
+/** ggthemes fivethirtyeight_pal() — the standard three-color 538 line palette: blue, red, green. */
+export const FIVETHIRTYEIGHT_PALETTE: readonly string[] = ["#008FD5", "#FF2700", "#77AB43"];
+
+/**
+ * ggthemes ptol_pal() at full capacity (n = 12 selection) — Paul Tol's
+ * qualitative palette (SRON/EPS/TN/09-002). ggthemes re-selects the set per
+ * n; this port flattens to the fixed full-capacity order (prefix subsets
+ * approximate the smaller-n picks), as with the economist palette.
+ */
+export const PTOL_PALETTE: readonly string[] = [
+  "#332288",
+  "#6699CC",
+  "#88CCEE",
+  "#44AA99",
+  "#117733",
+  "#999933",
+  "#DDCC77",
+  "#661100",
+  "#CC6677",
+  "#AA4466",
+  "#882255",
+  "#AA4499",
+];
+
+/**
+ * ggthemes canva_pal("Fresh and bright") — the scale_*_canva default.
+ * ggthemes ships 150 named four-color Canva palettes; only the default is
+ * registered (documented subset).
+ */
+export const CANVA_PALETTE: readonly string[] = ["#f98866", "#ff420e", "#80bd9e", "#89da59"];
+
 export const TABLEAU20_PALETTE: readonly string[] = [
   "#4E79A7",
   "#A0CBE8",
@@ -333,78 +400,32 @@ export const TABLEAU_HUE_CIRCLE_PALETTE: readonly string[] = [
   "#4f7cba",
 ];
 
-/**
- * ggthemes few_pal("Medium") — Stephen Few's medium-strength qualitative
- * palette (scale_colour_few default). ggthemes reserves its first value
- * (Gray) for non-data parts at n = 1; the data colors are the remaining
- * eight, and its n picks are prefix walks, so this fixed list is exactly
- * the ggthemes full-capacity order.
- */
-export const FEW_PALETTE: readonly string[] = [
-  "#5DA5DA",
-  "#FAA43A",
-  "#60BD68",
-  "#F17CB0",
-  "#B2912F",
-  "#B276B2",
-  "#DECF3F",
-  "#F15854",
+/** ggthemes wsj_pal("colors6") — the default scale_*_wsj palette. */
+export const WSJ_PALETTE: readonly string[] = [
+  "#c72e29",
+  "#016392",
+  "#be9c2e",
+  "#098154",
+  "#fb832d",
+  "#000000",
 ];
 
-/** ggthemes few_pal("Light") — Few's light variant for filled areas (scale_fill_few default). */
-export const FEW_LIGHT_PALETTE: readonly string[] = [
-  "#88BDE6",
-  "#FBB258",
-  "#90CD97",
-  "#F6AAC9",
-  "#BFA554",
-  "#BC99C7",
-  "#EDDD46",
-  "#F07E6E",
+/** ggthemes wsj_pal("rgby") — red/green/blue/yellow. */
+export const WSJ_RGBY_PALETTE: readonly string[] = ["#d3ba68", "#d5695d", "#5d8ca8", "#65a479"];
+
+/** ggthemes wsj_pal("red_green") — green/red for good/bad. */
+export const WSJ_RED_GREEN_PALETTE: readonly string[] = ["#088158", "#ba2f2a"];
+
+/** ggthemes wsj_pal("black_green") — black-to-green sentiment scale. */
+export const WSJ_BLACK_GREEN_PALETTE: readonly string[] = [
+  "#000000",
+  "#595959",
+  "#59a77f",
+  "#008856",
 ];
 
-/** ggthemes few_pal("Dark") — Few's dark variant for thin lines / highlighting. */
-export const FEW_DARK_PALETTE: readonly string[] = [
-  "#265DAB",
-  "#DF5C24",
-  "#059748",
-  "#E5126F",
-  "#9D722A",
-  "#7B3A96",
-  "#C7B42E",
-  "#CB2027",
-];
-
-/** ggthemes fivethirtyeight_pal() — the standard three-color 538 line palette: blue, red, green. */
-export const FIVETHIRTYEIGHT_PALETTE: readonly string[] = ["#008FD5", "#FF2700", "#77AB43"];
-
-/**
- * ggthemes ptol_pal() at full capacity (n = 12 selection) — Paul Tol's
- * qualitative palette (SRON/EPS/TN/09-002). ggthemes re-selects the set per
- * n; this port flattens to the fixed full-capacity order (prefix subsets
- * approximate the smaller-n picks), as with the economist palette.
- */
-export const PTOL_PALETTE: readonly string[] = [
-  "#332288",
-  "#6699CC",
-  "#88CCEE",
-  "#44AA99",
-  "#117733",
-  "#999933",
-  "#DDCC77",
-  "#661100",
-  "#CC6677",
-  "#AA4466",
-  "#882255",
-  "#AA4499",
-];
-
-/**
- * ggthemes canva_pal("Fresh and bright") — the scale_*_canva default.
- * ggthemes ships 150 named four-color Canva palettes; only the default is
- * registered (documented subset).
- */
-export const CANVA_PALETTE: readonly string[] = ["#f98866", "#ff420e", "#80bd9e", "#89da59"];
+/** ggthemes wsj_pal("dem_rep") — Democrat/Republican/Undecided. */
+export const WSJ_DEM_REP_PALETTE: readonly string[] = ["#006a8e", "#b1283a", "#a8a6a7"];
 
 /** Named categorical schemes accepted by the portable spec. */
 export const CATEGORICAL_SCHEMES = {
@@ -421,6 +442,11 @@ export const CATEGORICAL_SCHEMES = {
   fivethirtyeight: FIVETHIRTYEIGHT_PALETTE,
   ptol: PTOL_PALETTE,
   canva: CANVA_PALETTE,
+  wsj: WSJ_PALETTE,
+  wsj_rgby: WSJ_RGBY_PALETTE,
+  wsj_red_green: WSJ_RED_GREEN_PALETTE,
+  wsj_black_green: WSJ_BLACK_GREEN_PALETTE,
+  wsj_dem_rep: WSJ_DEM_REP_PALETTE,
   tableau20: TABLEAU20_PALETTE,
   tableau_colorblind: TABLEAU_COLORBLIND_PALETTE,
   tableau_seattle_grays: TABLEAU_SEATTLE_GRAYS_PALETTE,

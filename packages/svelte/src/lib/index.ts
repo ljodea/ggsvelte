@@ -231,6 +231,8 @@ export { default as ThemeSolarized2 } from "./theme/ThemeSolarized2.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeSolarized2dark } from "./theme/ThemeSolarized2dark.svelte";
 /** @lifecycle stable-intent */
+export { default as ThemeWsj } from "./theme/ThemeWsj.svelte";
+/** @lifecycle stable-intent */
 export { default as ThemeGrey } from "./theme/ThemeGrey.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeGray } from "./theme/ThemeGray.svelte";

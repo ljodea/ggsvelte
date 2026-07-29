@@ -30,6 +30,7 @@ const THEME_LABELS = {
   economist_white: "Economist White",
   solarized_2: "Solarized 2",
   solarized_2dark: "Solarized 2 Dark",
+  wsj: "WSJ",
   test: "Test",
 } as const satisfies Record<ThemeOptionName, string>;
 
@@ -47,6 +48,11 @@ const PALETTE_LABELS = {
   fivethirtyeight: "FiveThirtyEight",
   ptol: "Paul Tol",
   canva: "Canva",
+  wsj: "WSJ",
+  wsj_rgby: "WSJ R/G/B/Y",
+  wsj_red_green: "WSJ Red/Green",
+  wsj_black_green: "WSJ Black/Green",
+  wsj_dem_rep: "WSJ Dem/Rep",
   tableau20: "Tableau 20",
   tableau_colorblind: "Tableau Color Blind",
   tableau_seattle_grays: "Seattle Grays",
@@ -61,6 +67,9 @@ const PALETTE_LABELS = {
   tableau_red_blue_brown: "Red/Blue/Brown",
   tableau_purple_pink_gray: "Purple/Pink/Gray",
   tableau_hue_circle: "Hue Circle",
+  hue: "Hue",
+  grey: "Grey",
+  gray: "Gray",
   // ColorBrewer qualitative (#825) — keep the upstream palette names.
   Set1: "Set1",
   Set2: "Set2",
@@ -68,9 +77,6 @@ const PALETTE_LABELS = {
   Dark2: "Dark2",
   Paired: "Paired",
   Accent: "Accent",
-  hue: "Hue",
-  grey: "Grey",
-  gray: "Gray",
 } as const satisfies Record<(typeof CATEGORICAL_SCHEME_NAMES)[number], string>;
 
 /** Categorical scheme paired with each theme demo so paper + marks read as a set. */
@@ -95,6 +101,7 @@ const THEME_DEMO_SCHEMES = {
   economist_white: "economist",
   solarized_2: "tableau10",
   solarized_2dark: "tableau10",
+  wsj: "wsj",
   test: "colorblind",
 } as const satisfies Record<ThemeOptionName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
 
