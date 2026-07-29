@@ -60,7 +60,7 @@ describe("LegendTargets", () => {
     expect(container.querySelector(".gg-legend-clear")).toBeNull();
   });
 
-  it("shows clear control at clamped left and sceneHeight+4 top", () => {
+  it("shows clear control above the scene (no below-chart layout shift)", () => {
     const { container } = render(LegendTargets, {
       entries,
       sceneWidth: 400,
@@ -71,8 +71,10 @@ describe("LegendTargets", () => {
     });
     const clear = container.querySelector<HTMLButtonElement>(".gg-legend-clear");
     expect(clear).not.toBeNull();
+    // Anchored to the legend x, above the scene — never sceneHeight+N below.
     expect(clear?.style.left).toBe("100px");
-    expect(clear?.style.top).toBe("304px");
+    expect(clear?.style.top).toBe("-48px");
+    expect(Number.parseFloat(clear?.style.top ?? "")).toBeLessThan(0);
   });
 
   it("honors kebab-case tooltip background/foreground aliases on clear control", () => {

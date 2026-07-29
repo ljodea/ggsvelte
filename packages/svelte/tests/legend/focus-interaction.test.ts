@@ -465,6 +465,9 @@ describe("chart-local legend focus", () => {
 
   it("places the 44px recovery target outside every legend, title, and legend target", async () => {
     const { container } = render(LegendClearGeometryPlot);
+    // Clear sits above the scene (top: -48). Pad the harness so that absolute
+    // region stays inside the browser viewport for hit-testing.
+    container.style.paddingTop = "56px";
     await until(() => container.querySelectorAll(".gg-legend-target").length === 4);
     container
       .querySelector<HTMLButtonElement>(".gg-legend-target")!
@@ -475,6 +478,10 @@ describe("chart-local legend focus", () => {
     const clearBounds = clear.getBoundingClientRect();
     expect(clearBounds.width).toBeGreaterThanOrEqual(44);
     expect(clearBounds.height).toBeGreaterThanOrEqual(44);
+    // Above the scene, not below it — no bottom-row layout jump.
+    expect(clearBounds.bottom).toBeLessThanOrEqual(
+      container.querySelector(".gg-plot-root")!.getBoundingClientRect().top + 1,
+    );
     const protectedElements = container.querySelectorAll<SVGGraphicsElement | HTMLButtonElement>(
       ".gg-legend, .gg-title, .gg-subtitle, .gg-legend-target",
     );
