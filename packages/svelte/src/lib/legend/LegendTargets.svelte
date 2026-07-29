@@ -126,8 +126,9 @@
 {#if clearLegendX !== null}
   <!-- clearLegendX gates visibility (pressed legend scale). Top-right of the
        scene keeps the control off the tool-rail strip and out of the bottom
-       row that used to shove charts below. Stays inside the scene so capture
-       and hit-testing still reach it (z-index above chrome). -->
+       row that used to shove charts below. Inside the scene so capture and
+       hit-testing still reach it (z-index above chrome). Smoke baseline:
+       interaction-legend-focus-committed-light.png. -->
   <button
     type="button"
     class="gg-legend-clear"
