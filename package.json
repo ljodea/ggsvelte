@@ -68,6 +68,8 @@
     "build:cloudflare": "bun run build && bun run build:docs && bun run check:pages-links && bun scripts/deployment-artifact.ts",
     "smoke:deployment": "bun scripts/deployment-smoke-cli.ts",
     "schema:emit": "bun packages/spec/scripts/emit-schema.ts",
+    "reference:catalogs:gen": "bun scripts/gen-reference-catalogs.ts",
+    "reference:catalogs:check": "bun scripts/gen-reference-catalogs.ts --check",
     "test:components": "cd packages/svelte && bun run --bun test && cd ../../apps/docs && bun run --bun test",
     "bench": "cd benchmarks && bun run bench",
     "bench:smoke": "cd benchmarks && bun run bench:smoke",

@@ -30,10 +30,9 @@ describe.skipIf(!hasBuild)("docs ggsvelte-spec render/validate chunk split", () 
     expect(validateCompileHits).toBeGreaterThan(10);
     // Validate path is the heavier of the two (schema graph + compile).
     expect(statSync(validateChunk).size).toBeGreaterThan(statSync(renderChunk).size);
-    // Server SSR of the docs site may import the validate chunk for schema
-    // catalogs (GEOM_REFERENCE / SCALE_REFERENCE). What matters for chart
-    // decode is that TypeBox *compile templates* stay out of the render body
-    // (asserted above) and validate-structure* stay TypeBox-free for the gate.
+    // Reference catalogs (GEOM_REFERENCE / SCALE_REFERENCE / …) are precomputed
+    // plain data and must not force the validate chunk. Chart decode only needs
+    // TypeBox compile templates out of the render body (asserted above).
   });
 
   it("keeps the render chunk well under the pre-split ~1MB client bill", () => {

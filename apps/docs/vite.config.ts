@@ -57,16 +57,17 @@ export default defineConfig({
               test: /(?:[\\/]node_modules[\\/]@ggsvelte[\\/]svelte[\\/]|[\\/]packages[\\/]svelte[\\/])/,
               priority: 20,
             },
-            // TypeBox schema + validate/lint/artifact + schema-derived API
-            // catalogs (GEOM_REFERENCE etc.) — agent/LLM / reference-docs path.
+            // TypeBox schema + validate/lint/artifact — agent/LLM path.
             // Higher priority than ggsvelte-spec so chart pages do not pay for
-            // schema-declarations or description-rich reference bags.
+            // schema-declarations or compiled validators. API docs catalogs and
+            // GEOM_PARAM_KEYS are precomputed plain data (gen-reference-catalogs).
             {
               name: "ggsvelte-spec-validate",
-              // TypeBox schema/validate + schema-derived API catalogs.
+              // TypeBox schema/validate only.
               // Excludes validate-structure* (TypeBox-free structuralGate for render).
               // Excludes schema-catalog / schema-names (runtime name lists).
-              test: /(?:packages[\\/]spec[\\/](?:src|dist)[\\/]|@ggsvelte[\\/]spec[\\/](?:dist[\\/])?)(?:validate(?:\.[cm]?[jt]s$|-(?:data|map|schema))|schema(?:\.[cm]?[jt]s$|-declarations|-name-schemas)|temporal-(?:parse|interval)-schema|artifact\.|lint(?:\.|-)|geom-reference|stat-reference|position-reference|guide-reference|geom-params)/,
+              // Excludes precomputed docs catalogs (no TypeBox at runtime).
+              test: /(?:packages[\\/]spec[\\/](?:src|dist)[\\/]|@ggsvelte[\\/]spec[\\/](?:dist[\\/])?)(?:validate(?:\.[cm]?[jt]s$|-(?:data|map|schema))|schema(?:\.[cm]?[jt]s$|-declarations|-name-schemas)|temporal-(?:parse|interval)-schema|artifact\.|lint(?:\.|-))/,
               priority: 40,
             },
             {
