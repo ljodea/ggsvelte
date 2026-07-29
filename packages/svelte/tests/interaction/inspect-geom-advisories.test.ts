@@ -1,11 +1,15 @@
 /**
  * Guardrails when inspect axis guides fight bar/col geometry or value labels.
+ *
+ * Browser lane: these pure collectors feed plot-engine advisories. CI coverage
+ * is browser-only (SSR vitest does not collect), so the suite lives here.
  */
 import { describe, expect, it } from "vitest";
 
 import {
   INTERACTION_DIAGNOSTIC_CATALOG,
   inspectAxisOnBarColDiagnostics,
+  layerGeomsFromSpecLayers,
 } from "../../src/lib/interaction/interaction.js";
 
 describe("inspectAxisOnBarColDiagnostics", () => {
@@ -89,5 +93,30 @@ describe("inspectAxisOnBarColDiagnostics", () => {
     ] as const) {
       expect(INTERACTION_DIAGNOSTIC_CATALOG[code].code).toBe(code);
     }
+  });
+});
+
+describe("layerGeomsFromSpecLayers", () => {
+  it("returns an empty list for non-arrays and empty layers", () => {
+    expect(layerGeomsFromSpecLayers(undefined)).toEqual([]);
+    expect(layerGeomsFromSpecLayers(null)).toEqual([]);
+    expect(layerGeomsFromSpecLayers("col")).toEqual([]);
+    expect(layerGeomsFromSpecLayers({})).toEqual([]);
+    expect(layerGeomsFromSpecLayers([])).toEqual([]);
+  });
+
+  it("collects non-empty geom strings and skips junk entries", () => {
+    expect(
+      layerGeomsFromSpecLayers([
+        { geom: "col" },
+        null,
+        "skip",
+        { geom: "" },
+        { geom: 12 },
+        ["not-object"],
+        { geom: "text" },
+        { noGeom: true },
+      ]),
+    ).toEqual(["col", "text"]);
   });
 });

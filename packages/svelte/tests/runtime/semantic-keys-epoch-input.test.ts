@@ -1,11 +1,14 @@
 /**
- * #852 — pure host-side data-identity epoch input assembly.
- * SSR lane: markLayers vs layers-prop, ready-without-assembled, content pick.
+ * #852 — pure host-side data-identity epoch input assembly + content tokens.
+ *
+ * Browser lane: plot-engine imports these helpers; CI coverage is browser-only
+ * (SSR vitest does not collect), so the suite lives here.
  */
 import { describe, expect, it } from "vitest";
 
 import {
   buildDataIdentityEpochInput,
+  dataContentOrderToken,
   dataIdentityEpochToken,
 } from "../../src/lib/runtime/semantic-data-identity.js";
 import { createSourceIdentityTracker } from "../../src/lib/runtime/semantic-source-identity.js";
@@ -161,5 +164,88 @@ describe("buildDataIdentityEpochInput", () => {
     expect(first.specToken).toBe(second.specToken);
     expect(first.dataToken).toBe(id(data));
     expect(first.specToken).toBe(id(spec));
+  });
+});
+
+describe("dataContentOrderToken edge forms", () => {
+  it("fingerprints named DataRefs, single-key values bags, and non-row primitives", () => {
+    const tracker = createSourceIdentityTracker();
+    const id = (value: unknown) => tracker.sourceIdentity(value);
+    expect(dataContentOrderToken(null, id)).toBe("null");
+    expect(dataContentOrderToken(undefined, id)).toBe("null");
+    expect(dataContentOrderToken({ name: "mpg" }, id)).toBe("n:mpg");
+    const rowA = { x: 1 };
+    const rowB = { x: 2 };
+    const valuesBag = { values: [rowA, rowB] };
+    const valuesToken = dataContentOrderToken(valuesBag, id);
+    expect(valuesToken).toBe(`v:2:${id(rowA)}:${id(rowB)}`);
+    // Same row refs → stable; reverse bumps order.
+    valuesBag.values.reverse();
+    expect(dataContentOrderToken(valuesBag, id)).toBe(`v:2:${id(rowB)}:${id(rowA)}`);
+    expect(dataContentOrderToken("inline", id)).toBe("p:inline");
+    expect(dataContentOrderToken(42, id)).toBe("p:42");
+    expect(dataContentOrderToken(true, id)).toBe("p:true");
+    expect(dataContentOrderToken(10n, id)).toBe("p:10");
+    // Non-JSON primitives (symbol) fall through to sourceIdentity.
+    const sym = Symbol("row");
+    expect(dataContentOrderToken(sym, id)).toBe(`p:${id(sym)}`);
+  });
+
+  it("falls back to source identity for non-column objects and bare columns wrapper", () => {
+    const tracker = createSourceIdentityTracker();
+    const id = (value: unknown) => tracker.sourceIdentity(value);
+    const odd = { notRows: 1, meta: "x" };
+    expect(dataContentOrderToken(odd, id)).toBe(`o:${id(odd)}`);
+    // Single-key { columns } uses the column-map path.
+    const x = [1, 2];
+    const y = [3, 4];
+    const wrapped = dataContentOrderToken({ columns: { x, y } }, id);
+    expect(wrapped.startsWith("c:")).toBe(true);
+    expect(wrapped).toContain(id(x));
+    expect(wrapped).toContain(id(y));
+  });
+
+  it("includes named datasets in the epoch via datasetsOrderToken", () => {
+    const tracker = createSourceIdentityTracker();
+    const id = (value: unknown) => tracker.sourceIdentity(value);
+    const rowsA = [{ x: 1 }];
+    const rowsB = [{ x: 2 }];
+    const withA = dataIdentityEpochToken({
+      ready: true,
+      dataToken: "d",
+      specToken: "s",
+      data: null,
+      datasets: { a: rowsA },
+      sourceIdentity: id,
+    });
+    const withB = dataIdentityEpochToken({
+      ready: true,
+      dataToken: "d",
+      specToken: "s",
+      data: null,
+      datasets: { a: rowsB },
+      sourceIdentity: id,
+    });
+    const withBoth = dataIdentityEpochToken({
+      ready: true,
+      dataToken: "d",
+      specToken: "s",
+      data: null,
+      datasets: { a: rowsA, b: rowsB },
+      sourceIdentity: id,
+    });
+    expect(withA).not.toBe(withB);
+    expect(withBoth).not.toBe(withA);
+    // Non-object datasets fall through to source identity.
+    expect(
+      dataIdentityEpochToken({
+        ready: true,
+        dataToken: "d",
+        specToken: "s",
+        data: null,
+        datasets: "named-bag",
+        sourceIdentity: id,
+      }),
+    ).toContain(id("named-bag"));
   });
 });
