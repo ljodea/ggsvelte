@@ -4,12 +4,12 @@
 import { fromAny, fromPartial } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "bun:test";
 import { batchMarkCount } from "../../src/pipeline.ts";
-import { makeErrorbarHalfWidth } from "../../src/pipeline/geometry-errorbar-width.ts";
+import { makeErrorbarXSpan } from "../../src/pipeline/geometry-errorbar-width.ts";
 import type { PathsBatch, PointsBatch, RectsBatch, SegmentsBatch } from "../../src/scene.ts";
 import type { LayerFrame } from "../../src/pipeline/types.ts";
 import type { Frame } from "../../src/pipeline/geometry-shared.ts";
 
-describe("makeErrorbarHalfWidth", () => {
+describe("makeErrorbarXSpan", () => {
   it("uses half band-step for discrete x", () => {
     const frame = fromPartial<LayerFrame>({ xNumeric: null });
     const fx = fromPartial<Frame>({
@@ -18,8 +18,9 @@ describe("makeErrorbarHalfWidth", () => {
       innerWidth: 100,
       innerHeight: 100,
     });
-    const halfOf = makeErrorbarHalfWidth(frame, fx, 0.5);
-    expect(halfOf(0)).toBeCloseTo(0.1);
+    // widthParam 0.5 · step 0.4 → half 0.1; span is symmetric about center
+    const spanOf = makeErrorbarXSpan(frame, fx, 0.5);
+    expect(spanOf(0, 0.5)).toEqual([0.4, 0.6]);
   });
 });
 

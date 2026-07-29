@@ -1,6 +1,4 @@
 export const MANUAL_COPY_STATUS = "Clipboard unavailable. Code selected for manual copy.";
-export const MANUAL_LINK_COPY_STATUS =
-  "Clipboard unavailable. Share link selected for manual copy.";
 
 /** Transient status after a successful code copy (CodeTabs / CopyCode). */
 export const COPIED_STATUS = "Copied.";

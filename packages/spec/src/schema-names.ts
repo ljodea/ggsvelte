@@ -29,6 +29,14 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "colorblind",
   /** ggthemes scale_colour/fill_economist — Economist blues/greens (fill order). */
   "economist",
+  // ggthemes ports (#1159): Few "Show Me the Numbers" variants + FiveThirtyEight
+  "few",
+  "few_light",
+  "few_dark",
+  "fivethirtyeight",
+  // ggthemes ports (#1159): Paul Tol + Canva default
+  "ptol",
+  "canva",
   // ggthemes tableau_color_pal regular variants (#1159); Tableau 10 above is
   // the default — these complete the set.
   "tableau20",
@@ -147,6 +155,10 @@ export const THEME_NAMES = [
   "tufte",
   "linedraw",
   "void",
+  // ggthemes theme ports (#1158)
+  "economist_white",
+  "solarized_2",
+  "solarized_2dark",
   "grey",
   "gray",
   // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters

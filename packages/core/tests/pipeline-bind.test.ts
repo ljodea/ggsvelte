@@ -6,7 +6,7 @@ import { describe, expect, it } from "bun:test";
 
 import { aes, gg } from "@ggsvelte/spec";
 
-import { bindData } from "../src/pipeline/bind-data.ts";
+import { bindLayerTable, bindPlotData } from "../src/pipeline/bind-data.ts";
 import { bindLayer } from "../src/pipeline/bind-layer.ts";
 import { PipelineError, runPipeline } from "../src/pipeline.ts";
 import { ColumnTable } from "../src/table.ts";
@@ -17,16 +17,24 @@ const table = ColumnTable.fromRows([
   { x: 2, y: 20, g: "b" },
 ]);
 
-describe("bindData", () => {
-  it("binds inline values data", () => {
-    const t = bindData({ data: { values: [{ a: 1 }] }, layers: [] }, { width: 100, height: 100 });
-    expect(t.rowCount).toBe(1);
-    expect(t.has("a")).toBe(true);
+describe("bindPlotData / bindLayerTable", () => {
+  it("binds inline values data at plot level", () => {
+    const t = bindPlotData(
+      { data: { values: [{ a: 1 }] }, layers: [] },
+      { width: 100, height: 100 },
+    );
+    expect(t).not.toBeNull();
+    expect(t!.rowCount).toBe(1);
+    expect(t!.has("a")).toBe(true);
   });
 
-  it("throws no-data when the spec has no data ref", () => {
+  it("returns null when the plot omits data (layers may supply their own)", () => {
+    expect(bindPlotData({ layers: [] }, { width: 100, height: 100 })).toBeNull();
+  });
+
+  it("throws no-data when a layer has neither layer nor plot data", () => {
     try {
-      bindData({ layers: [] }, { width: 100, height: 100 });
+      bindLayerTable(undefined, null, 0, { layers: [] }, { width: 100, height: 100 });
       expect.unreachable("should throw");
     } catch (e) {
       expect(e).toBeInstanceOf(PipelineError);
@@ -36,7 +44,7 @@ describe("bindData", () => {
 
   it("throws unknown-dataset for missing named data", () => {
     try {
-      bindData({ data: { name: "missing" }, layers: [] }, { width: 100, height: 100 });
+      bindPlotData({ data: { name: "missing" }, layers: [] }, { width: 100, height: 100 });
       expect.unreachable("should throw");
     } catch (e) {
       expect(e).toBeInstanceOf(PipelineError);
@@ -45,7 +53,7 @@ describe("bindData", () => {
   });
 
   it("resolves RunOptions.data by name", () => {
-    const t = bindData(
+    const t = bindPlotData(
       { data: { name: "cars" }, layers: [] },
       {
         width: 100,
@@ -53,13 +61,14 @@ describe("bindData", () => {
         data: { cars: [{ displ: 1.8, hwy: 29 }] },
       },
     );
-    expect(t.rowCount).toBe(1);
-    expect(t.has("displ")).toBe(true);
+    expect(t).not.toBeNull();
+    expect(t!.rowCount).toBe(1);
+    expect(t!.has("displ")).toBe(true);
   });
 
   it("throws dataset-collision without allowOverride", () => {
     try {
-      bindData(
+      bindPlotData(
         {
           data: { name: "cars" },
           datasets: { cars: { values: [{ x: 1 }] } },

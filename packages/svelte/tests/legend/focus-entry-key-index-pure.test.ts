@@ -184,7 +184,7 @@ describe("buildLegendEntryKeyIndex", () => {
     expect(index.get("fill:0")).toEqual([]);
   });
 
-  it("matches Date, NaN, and -0 via legendValueEqual and isolates scales", () => {
+  it("matches Date, NaN, and -0 via legend value tokens and isolates scales", () => {
     const dateLegend: SceneLegend = {
       type: "discrete",
       scale: "color",
@@ -297,8 +297,8 @@ describe("buildLegendEntryKeyIndex", () => {
     expect(index.get("fill:1")).toEqual([]);
   });
 
-  it("prefers the first legend entry when values are legendValueEqual", () => {
-    // 0 and -0 are equal under legendValueEqual; findIndex / token lookup must
+  it("prefers the first legend entry when values share a legend value token", () => {
+    // 0 and -0 share a token; findIndex / token lookup must
     // both resolve to the earliest entry (index 0), not the later -0 swatch.
     const dualZero: SceneLegend = {
       type: "discrete",

@@ -2,7 +2,7 @@
 
 This board compares R and ggsvelte renders using the same data, explicit domains, explicit breaks, explicit colors, 720×480 logical viewport, and 1440×960 output. R uses Cairo at 192 dpi. ggsvelte uses Chromium at device scale factor 2 with its bundled Roboto Condensed faces loaded and verified through `document.fonts.check()`.
 
-Open [index.html](./index.html) for all 12 registered ggsvelte themes and the three side-by-side structural references. Raw structural measurements are in [r-metrics.json](./r-metrics.json) and [ggsvelte-metrics.json](./ggsvelte-metrics.json).
+Open [index.html](./index.html) for all 19 registered ggsvelte themes and the three side-by-side structural references. Raw structural measurements are in [r-metrics.json](./r-metrics.json) and [ggsvelte-metrics.json](./ggsvelte-metrics.json).
 
 ## Structural parity
 
@@ -45,6 +45,12 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - ggthemes tableau_red_blue_brown (Red-Blue-Brown): `#466f9d #91b3d7 #ed444a #feb5a2 #9d7660 #d7b5a6 #3896c4 #a0d4ee #ba7e45 #39b87f #c8133b #ea8783`
 - ggthemes tableau_purple_pink_gray (Purple-Pink-Gray): `#8074a8 #c6c1f0 #c46487 #ffbed1 #9c9290 #c5bfbe #9b93c9 #ddb5d5 #7c7270 #f498b6 #b173a0 #c799bc`
 - ggthemes tableau_hue_circle (Hue Circle): `#1ba3c6 #2cb5c0 #30bcad #21B087 #33a65c #57a337 #a2b627 #d5bb21 #f8b620 #f89217 #f06719 #e03426 #f64971 #fc719e #eb73b3 #ce69be #a26dc2 #7873c0 #4f7cba`
+- ggthemes few (Medium): `#5DA5DA #FAA43A #60BD68 #F17CB0 #B2912F #B276B2 #DECF3F #F15854`
+- ggthemes few_light (Light): `#88BDE6 #FBB258 #90CD97 #F6AAC9 #BFA554 #BC99C7 #EDDD46 #F07E6E`
+- ggthemes few_dark (Dark): `#265DAB #DF5C24 #059748 #E5126F #9D722A #7B3A96 #C7B42E #CB2027`
+- ggthemes fivethirtyeight: `#008FD5 #FF2700 #77AB43`
+- ggthemes ptol (full capacity): `#332288 #6699CC #88CCEE #44AA99 #117733 #999933 #DDCC77 #661100 #CC6677 #AA4466 #882255 #AA4499`
+- ggthemes canva (Fresh and bright): `#f98866 #ff420e #80bd9e #89da59`
 
 ## Sources
 
@@ -52,7 +58,7 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - hrbrthemes Roboto Condensed: `/Users/liamodea/Code/hrbrthemes/R/roboto-condensed.r`
 - hrbrthemes palettes: `/Users/liamodea/Code/hrbrthemes/R/color.r` and `R/flexoki.R`
 - ggthemes Few: `/Users/liamodea/Code/ggthemes/R/few.R`
-- ggthemes palettes: `/Users/liamodea/Code/ggthemes/data-raw/theme-data/tableau.yml` and `colorblind.yml`
+- ggthemes palettes: `/Users/liamodea/Code/ggthemes/data-raw/theme-data/tableau.yml`, `colorblind.yml`, `few.yml`, `fivethirtyeight.yml`, and `pault.yml`; canva palette from `/Users/liamodea/Code/ggthemes/data/canva_palettes.rda`
 
 Reproduce everything with:
 

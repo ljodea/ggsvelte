@@ -60,7 +60,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-few",
     filename: "theme-few.svg",
     path: "/theme-shells/theme-few.svg",
-    sha256: "738565219d4b5d272b9f864b23590f77d32461be53a3513162c4c2b4d95d603f",
+    sha256: "1224498c8c170b77e3b82eba5cd4b76cbe4e57ca8ffd21a77d6c93fd0267ad2c",
   },
   {
     id: "theme-clean",
@@ -72,7 +72,7 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-fivethirtyeight",
     filename: "theme-fivethirtyeight.svg",
     path: "/theme-shells/theme-fivethirtyeight.svg",
-    sha256: "5af61e034f8154d4d27575b2c3f0be7deedc54e7773efdb7f4b7c755b45e961d",
+    sha256: "46254ad9ab798e1eacb78b3b17a92d959c0b6e97e4380c1dc7d4363221e4e839",
   },
   {
     id: "theme-economist",
@@ -97,6 +97,24 @@ export const THEME_STATIC_SHELLS = [
     filename: "theme-void.svg",
     path: "/theme-shells/theme-void.svg",
     sha256: "61c02ef23f365389c8b10cf599c2a5777749e4c79090ebe4a7393e0e2ffcd9ae",
+  },
+  {
+    id: "theme-economist_white",
+    filename: "theme-economist_white.svg",
+    path: "/theme-shells/theme-economist_white.svg",
+    sha256: "e61245feb788d93b8de9359c5d546494587ac34adcd6e1c3608dcd8ece129601",
+  },
+  {
+    id: "theme-solarized_2",
+    filename: "theme-solarized_2.svg",
+    path: "/theme-shells/theme-solarized_2.svg",
+    sha256: "4bf835f7b86779d287e6f86f39fefbd80fe562be6c81e5839dae7a1d98455a2c",
+  },
+  {
+    id: "theme-solarized_2dark",
+    filename: "theme-solarized_2dark.svg",
+    path: "/theme-shells/theme-solarized_2dark.svg",
+    sha256: "1dad7c045de60ec7de5961ccaa136799faf2ad63832c2b28a15a962239bdf8e2",
   },
   {
     id: "theme-test",
@@ -145,6 +163,42 @@ export const THEME_STATIC_SHELLS = [
     filename: "palette-economist.svg",
     path: "/theme-shells/palette-economist.svg",
     sha256: "4f070e0b2034b38ec2c30054b55489241ee8c7634b249512a20dd665de8c5113",
+  },
+  {
+    id: "palette-few",
+    filename: "palette-few.svg",
+    path: "/theme-shells/palette-few.svg",
+    sha256: "891e6e966746e550814fade06679452e112aafc638e9eb63231f64f09890d85e",
+  },
+  {
+    id: "palette-few_light",
+    filename: "palette-few_light.svg",
+    path: "/theme-shells/palette-few_light.svg",
+    sha256: "8eed573075eedfa8761b69d9eb85482402b79f7ca3dff24031f02effd0909942",
+  },
+  {
+    id: "palette-few_dark",
+    filename: "palette-few_dark.svg",
+    path: "/theme-shells/palette-few_dark.svg",
+    sha256: "4fd33b14a252742c457f5c3ca9fa2e7877d90eecc5178d6113dfc0232ea6ce4d",
+  },
+  {
+    id: "palette-fivethirtyeight",
+    filename: "palette-fivethirtyeight.svg",
+    path: "/theme-shells/palette-fivethirtyeight.svg",
+    sha256: "597f57d1f505d262b7ea00435970337477cd3111769a15badc00d40dde0d0ac1",
+  },
+  {
+    id: "palette-ptol",
+    filename: "palette-ptol.svg",
+    path: "/theme-shells/palette-ptol.svg",
+    sha256: "8a3d571fd14d5f4cffa8f9440be5624ef73c1b29475dfc753c2a7c6dbc6c6f5a",
+  },
+  {
+    id: "palette-canva",
+    filename: "palette-canva.svg",
+    path: "/theme-shells/palette-canva.svg",
+    sha256: "6e265313f53296cf01d712406d17eabce90b24c03899bdb205063e7c8301939b",
   },
   {
     id: "palette-tableau20",

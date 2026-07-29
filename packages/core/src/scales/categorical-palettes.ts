@@ -313,6 +313,79 @@ export const TABLEAU_HUE_CIRCLE_PALETTE: readonly string[] = [
   "#4f7cba",
 ];
 
+/**
+ * ggthemes few_pal("Medium") — Stephen Few's medium-strength qualitative
+ * palette (scale_colour_few default). ggthemes reserves its first value
+ * (Gray) for non-data parts at n = 1; the data colors are the remaining
+ * eight, and its n picks are prefix walks, so this fixed list is exactly
+ * the ggthemes full-capacity order.
+ */
+export const FEW_PALETTE: readonly string[] = [
+  "#5DA5DA",
+  "#FAA43A",
+  "#60BD68",
+  "#F17CB0",
+  "#B2912F",
+  "#B276B2",
+  "#DECF3F",
+  "#F15854",
+];
+
+/** ggthemes few_pal("Light") — Few's light variant for filled areas (scale_fill_few default). */
+export const FEW_LIGHT_PALETTE: readonly string[] = [
+  "#88BDE6",
+  "#FBB258",
+  "#90CD97",
+  "#F6AAC9",
+  "#BFA554",
+  "#BC99C7",
+  "#EDDD46",
+  "#F07E6E",
+];
+
+/** ggthemes few_pal("Dark") — Few's dark variant for thin lines / highlighting. */
+export const FEW_DARK_PALETTE: readonly string[] = [
+  "#265DAB",
+  "#DF5C24",
+  "#059748",
+  "#E5126F",
+  "#9D722A",
+  "#7B3A96",
+  "#C7B42E",
+  "#CB2027",
+];
+
+/** ggthemes fivethirtyeight_pal() — the standard three-color 538 line palette: blue, red, green. */
+export const FIVETHIRTYEIGHT_PALETTE: readonly string[] = ["#008FD5", "#FF2700", "#77AB43"];
+
+/**
+ * ggthemes ptol_pal() at full capacity (n = 12 selection) — Paul Tol's
+ * qualitative palette (SRON/EPS/TN/09-002). ggthemes re-selects the set per
+ * n; this port flattens to the fixed full-capacity order (prefix subsets
+ * approximate the smaller-n picks), as with the economist palette.
+ */
+export const PTOL_PALETTE: readonly string[] = [
+  "#332288",
+  "#6699CC",
+  "#88CCEE",
+  "#44AA99",
+  "#117733",
+  "#999933",
+  "#DDCC77",
+  "#661100",
+  "#CC6677",
+  "#AA4466",
+  "#882255",
+  "#AA4499",
+];
+
+/**
+ * ggthemes canva_pal("Fresh and bright") — the scale_*_canva default.
+ * ggthemes ships 150 named four-color Canva palettes; only the default is
+ * registered (documented subset).
+ */
+export const CANVA_PALETTE: readonly string[] = ["#f98866", "#ff420e", "#80bd9e", "#89da59"];
+
 /** Named categorical schemes accepted by the portable spec. */
 export const CATEGORICAL_SCHEMES = {
   observable10: CATEGORICAL_PALETTE_10,
@@ -335,6 +408,12 @@ export const CATEGORICAL_SCHEMES = {
   tableau_red_blue_brown: TABLEAU_RED_BLUE_BROWN_PALETTE,
   tableau_purple_pink_gray: TABLEAU_PURPLE_PINK_GRAY_PALETTE,
   tableau_hue_circle: TABLEAU_HUE_CIRCLE_PALETTE,
+  few: FEW_PALETTE,
+  few_light: FEW_LIGHT_PALETTE,
+  few_dark: FEW_DARK_PALETTE,
+  fivethirtyeight: FIVETHIRTYEIGHT_PALETTE,
+  ptol: PTOL_PALETTE,
+  canva: CANVA_PALETTE,
   ...COLORBREWER_QUALITATIVE,
   hue: HUE_PALETTE_10,
   grey: GREY_PALETTE_10,
