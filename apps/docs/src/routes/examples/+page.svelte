@@ -9,7 +9,7 @@
     serializeGalleryFilter,
     type GalleryFilterState,
   } from "$lib/gallery-filter";
-  import { EXAMPLES } from "$lib/examples";
+  import { EXAMPLES } from "$lib/examples-manifest";
 
   // One flat grid; the former featured six lead, the rest follow in
   // manifest order. Interaction expositions are not gallery specimens.

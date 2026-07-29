@@ -1,17 +1,17 @@
 <script lang="ts">
-  import GettingStartedGuide from "$lib/components/GettingStartedGuide.svelte";
+  /**
+   * Markdown guide chapters only. Getting started lives at
+   * `guide/getting-started/` so this client module stays free of the lesson
+   * chart dependency graph.
+   */
   import { attachGuideCodeCopy } from "$lib/guide-code-copy";
   import type { PageProps } from "./$types";
 
   const { data }: PageProps = $props();
 </script>
 
-{#if data.page.slug === "getting-started"}
-  <GettingStartedGuide />
-{:else}
-  <!-- Guide markdown is repository-authored catalog content, never user input. -->
-  <article class="guide prose" {@attach attachGuideCodeCopy}>
-    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-    {@html data.html}
-  </article>
-{/if}
+<!-- Guide markdown is repository-authored catalog content, never user input. -->
+<article class="guide prose" {@attach attachGuideCodeCopy}>
+  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+  {@html data.html}
+</article>
