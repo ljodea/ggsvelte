@@ -27,6 +27,8 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "flexoki",
   "tableau10",
   "colorblind",
+  /** ggthemes scale_colour/fill_economist — Economist blues/greens (fill order). */
+  "economist",
   // ColorBrewer qualitative (#825)
   "Set1",
   "Set2",

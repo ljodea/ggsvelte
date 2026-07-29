@@ -3827,6 +3827,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ECONOMIST_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "EDITION_DEFAULTS": {
           "kind": "value",
           "lifecycle": "experimental"

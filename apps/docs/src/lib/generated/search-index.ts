@@ -9566,14 +9566,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-290",
+    id: "heading:guide-lifecycle:experimental-291",
     kind: "heading",
-    title: "experimental (290)",
+    title: "experimental (291)",
     summary:
-      "experimental (290) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-290",
+      "experimental (291) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-291",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (290)"],
+    exact: ["experimental (291)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -20038,6 +20038,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "type", "experimental"],
     exact: ["Domain"],
+  },
+  {
+    id: "api:ggsvelte-core:ECONOMIST_PALETTE",
+    kind: "api",
+    title: "ECONOMIST_PALETTE",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["ECONOMIST_PALETTE"],
   },
   {
     id: "api:ggsvelte-core:EDITION_DEFAULTS",
