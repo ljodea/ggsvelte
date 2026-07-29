@@ -17,15 +17,34 @@ same grammar — never build SVG or canvas output yourself:
 
 ## Mental model
 
+**Everything that composes a plot is a layer in Svelte.** Marks _and_ the
+seven grammar families (scale, theme, coord, facet, labs, guides, legend)
+register as `Layer` kinds via `createPlotLayer` / geom factories. Never call
+Scale/Theme/Guide/Labs/Coord/Facet/Legend “non-layers.”
+
+Two serializations of the same grammar:
+
 ```text fragment
-spec = data + aes (mappings) + layers[]
-       + scales? coord? facet? labs? theme? guides?
-one layer = { geom, stat?, position?, positionParams?, aes?, params?, render?, data? }
+# Svelte composition (canonical product model)
+plot children = mark layers + grammar layers
+  mark    = Geom*  → Layer.kind "mark"
+  grammar = Scale* | Theme* | Coord* | Facet* | Labs | Guide* | Legend
+            → Layer.kind "scale"|"theme"|"coord"|"facet"|"labs"|"guides"|"legend"
+
+# PortableSpec JSON (agent / headless wire format)
+spec = data + aes + layers[]          # layers[] = MARKS ONLY
+       + scales? coord? facet? labs? theme? guides? legend?
+one mark layer = { geom, stat?, position?, positionParams?, aes?, params?, render?, data? }
 ```
+
+PortableSpec puts grammar pieces in top-level keys because that is how the
+JSON schema folds them — **not** because they are outside the layer model.
+“Non-mark layer” / “grammar layer” is correct; “non-layer grammar component”
+is wrong and must never appear in issues, docs, or comments.
 
 - **data**: `{"values": [rows]}`, `{"columns": {name: [...]}}`, or
   `{"name": "dataset"}` (resolved from `spec.datasets` or runtime data).
-- **layers** draw in order — later layers on top (z-order).
+- **mark `layers[]`** draw in order — later marks on top (z-order).
 - Geom defaults: bar → count+stack, histogram → bin+stack, col/area →
   identity+stack, boxplot → boxplot+dodge, violin → ydensity+dodge,
   jitter → point+jitter, freqpoly → bin, smooth → smooth, count → sum,
@@ -85,12 +104,13 @@ only on the geoms in `STYLE_AESTHETIC_GEOMS`.
 </GGPlot>
 ```
 
-Convention: theme → scales → guides → labs → mark layers. Grammar children
+Convention: theme → scales → guides → labs → mark layers. Grammar **layers**
 (theme/scale/coord/facet/guides/labs/legend) render no markup and register
-declaratively; mark-layer registration order is z-order (points above smooth
-here). Every geom takes aesthetics through one `aes` object prop (bare-string
-shorthand allowed) and constant style params as direct props (`size={3}`);
-structural props are `data`, `stat`, `position`, `positionParams`, `render`.
+declaratively as non-mark `Layer` kinds; mark-layer registration order is
+z-order (points above smooth here). Every geom takes aesthetics through one
+`aes` object prop (bare-string shorthand allowed) and constant style params as
+direct props (`size={3}`); structural props are `data`, `stat`, `position`,
+`positionParams`, `render`.
 
 `<GGPlot>` props: `spec`, `data`, `aes`, `layers`, `key`, `width`
 (number | "container"), `height`, `a11y`, `ariaLabel`, the interaction props

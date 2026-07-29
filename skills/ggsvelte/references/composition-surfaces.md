@@ -2,11 +2,16 @@
 
 # Composition surfaces: coords, facets, guides, labs
 
-Every surface here exists in three equivalent forms: a key in the JSON
-`PortableSpec`, a deprecated `<GGPlot>` prop (removable in 0.13.0), and a
-declaration-only child component (canonical in Svelte). Child components emit
-no markup, register on init, unregister on destroy, and are inert without a
-`<GGPlot>` ancestor.
+Every surface here is a **grammar layer** (non-mark `Layer` kind). Each exists
+in three equivalent forms: a key in the JSON `PortableSpec`, a deprecated
+`<GGPlot>` prop (removable in 0.13.0), and a declaration-only child component
+(canonical in Svelte). Child components emit no markup, register on init via
+`createPlotLayer` / `registerPlotLayer`, unregister on destroy, and are inert
+without a `<GGPlot>` ancestor.
+
+**Ontology:** scale, theme, coord, facet, labs, guides, and legend **are
+layers**. PortableSpec’s top-level `layers[]` array holds marks only; these
+families fold into sibling keys. That is wire format, not “not a layer.”
 
 ## Themes
 

@@ -108,6 +108,37 @@ describe("skill Svelte fences use child layers, not deprecated grammar props", (
 });
 
 /**
+ * #1200 postmortem: an agent read PortableSpec.layers[] (marks only) plus a
+ * false "are not layers" comment and filed issues claiming Scale/Theme/Guide/
+ * Labs/Coord/Facet/Legend were "non-layer grammar components." They are Layer
+ * kinds in Svelte. Keep the skill and quickstart from reintroducing that claim.
+ */
+describe("layer ontology (grammar families are layers)", () => {
+  it("SKILL.md states Svelte Layer union and PortableSpec dual vocabulary", () => {
+    const skill = readFileSync(join(SKILL_DIR, "SKILL.md"), "utf8");
+    expect(skill).toMatch(/Everything that composes a plot is a layer/i);
+    expect(skill).toMatch(/layers\[\] = MARKS ONLY/);
+    expect(skill).toMatch(/non-layer grammar component/);
+    expect(skill).toMatch(/is wrong/);
+    // Affirmative inverted claim must not reappear.
+    expect(skill).not.toMatch(/that are not themselves/);
+    expect(skill).not.toMatch(/because they are not layers/i);
+  });
+
+  it("composition-surfaces.md calls grammar surfaces layers", () => {
+    const prose = readFileSync(join(SKILL_DIR, "references", "composition-surfaces.md"), "utf8");
+    expect(prose).toMatch(/grammar layer/i);
+    expect(prose).not.toMatch(/because they are not layers/i);
+  });
+
+  it("quickstart holds grammar children as plot layers, not non-layers", () => {
+    const steps = readFileSync(join(ROOT, "scripts", "quickstart", "steps.ts"), "utf8");
+    expect(steps).toMatch(/are\*\* plot layers|\*\*are\*\* plot layers|are plot layers/);
+    expect(steps).not.toMatch(/because they are not layers/);
+  });
+});
+
+/**
  * A name counts as documented only when it appears as its own table cell
  * (`| name |`) or leads one (`| name (…` for annotations like aliases) in the
  * expected reference file — prose mentions and substrings do not count.
