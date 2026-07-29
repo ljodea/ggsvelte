@@ -246,6 +246,8 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/core/**",
     "packages/svelte/**",
     "scripts/consumer-compat.ts",
+    "scripts/consumer-compat-plan.ts",
+    "scripts/consumer-compat-fixture.ts",
     "scripts/consumer-compat.test.ts",
     "scripts/guide-code-contract.ts",
     "scripts/quickstart.ts",
