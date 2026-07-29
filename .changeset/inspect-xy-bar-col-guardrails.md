@@ -1,6 +1,6 @@
 ---
-"@ggsvelte/svelte": patch
-"@ggsvelte/core": patch
+"@ggsvelte/svelte": minor
+"@ggsvelte/core": minor
 ---
 
 <!-- markdownlint-disable MD041 -->

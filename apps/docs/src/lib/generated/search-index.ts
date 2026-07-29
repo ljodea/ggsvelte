@@ -7219,6 +7219,46 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["INTERACTION_HANDLER_WITHOUT_CAPABILITY"],
   },
   {
+    id: "heading:guide-interaction-reference:interaction-inspect-x-on-col",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_X_ON_COL",
+    summary:
+      "INTERACTION_INSPECT_X_ON_COL in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#interaction-inspect-x-on-col",
+    keywords: ["Interaction reference", "documentation"],
+    exact: ["INTERACTION_INSPECT_X_ON_COL"],
+  },
+  {
+    id: "heading:guide-interaction-reference:interaction-inspect-x-on-bar",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_X_ON_BAR",
+    summary:
+      "INTERACTION_INSPECT_X_ON_BAR in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#interaction-inspect-x-on-bar",
+    keywords: ["Interaction reference", "documentation"],
+    exact: ["INTERACTION_INSPECT_X_ON_BAR"],
+  },
+  {
+    id: "heading:guide-interaction-reference:interaction-inspect-x-bisects-col-labels",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+    summary:
+      "INTERACTION_INSPECT_X_BISECTS_COL_LABELS in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#interaction-inspect-x-bisects-col-labels",
+    keywords: ["Interaction reference", "documentation"],
+    exact: ["INTERACTION_INSPECT_X_BISECTS_COL_LABELS"],
+  },
+  {
+    id: "heading:guide-interaction-reference:interaction-inspect-x-bisects-bar-labels",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+    summary:
+      "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#interaction-inspect-x-bisects-bar-labels",
+    keywords: ["Interaction reference", "documentation"],
+    exact: ["INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"],
+  },
+  {
     id: "heading:guide-interaction-reference:accessibility",
     kind: "heading",
     title: "Accessibility",
@@ -9206,6 +9246,46 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/errors#interaction-handler-without-capability",
     keywords: ["Errors reference", "Reference"],
     exact: ["INTERACTION_HANDLER_WITHOUT_CAPABILITY"],
+  },
+  {
+    id: "heading:guide-errors:interaction-inspect-x-on-col",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_X_ON_COL",
+    summary:
+      "INTERACTION_INSPECT_X_ON_COL in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#interaction-inspect-x-on-col",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["INTERACTION_INSPECT_X_ON_COL"],
+  },
+  {
+    id: "heading:guide-errors:interaction-inspect-x-on-bar",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_X_ON_BAR",
+    summary:
+      "INTERACTION_INSPECT_X_ON_BAR in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#interaction-inspect-x-on-bar",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["INTERACTION_INSPECT_X_ON_BAR"],
+  },
+  {
+    id: "heading:guide-errors:interaction-inspect-x-bisects-col-labels",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+    summary:
+      "INTERACTION_INSPECT_X_BISECTS_COL_LABELS in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#interaction-inspect-x-bisects-col-labels",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["INTERACTION_INSPECT_X_BISECTS_COL_LABELS"],
+  },
+  {
+    id: "heading:guide-errors:interaction-inspect-x-bisects-bar-labels",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+    summary:
+      "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#interaction-inspect-x-bisects-bar-labels",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"],
   },
   {
     id: "heading:guide-errors:cli-diagnostics-ggsvelte-render",
@@ -31189,6 +31269,68 @@ export const DOCS_SEARCH_INDEX = [
     exact: [
       "INTERACTION_HANDLER_WITHOUT_CAPABILITY",
       "interaction:INTERACTION_HANDLER_WITHOUT_CAPABILITY",
+    ],
+  },
+  {
+    id: "diagnostic:interaction:INTERACTION_INSPECT_X_ON_COL",
+    kind: "diagnostic",
+    title: "INTERACTION_INSPECT_X_ON_COL · interaction",
+    summary:
+      "inspect.mode draws a vertical guide through column marks; columns already encode x as a filled band, so the guide cuts the bar body and rarely adds information.",
+    href: "/guide/errors#interaction-inspect-x-on-col",
+    keywords: [
+      "interaction",
+      "advisory",
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomCol; Prefer muteSiblings for sibling de-emphasis instead of an axis guide',
+    ],
+    exact: ["INTERACTION_INSPECT_X_ON_COL", "interaction:INTERACTION_INSPECT_X_ON_COL"],
+  },
+  {
+    id: "diagnostic:interaction:INTERACTION_INSPECT_X_ON_BAR",
+    kind: "diagnostic",
+    title: "INTERACTION_INSPECT_X_ON_BAR · interaction",
+    summary:
+      "inspect.mode draws a vertical guide through bar marks; bars already encode the band axis as a filled region, so the guide cuts the bar body and rarely adds information.",
+    href: "/guide/errors#interaction-inspect-x-on-bar",
+    keywords: [
+      "interaction",
+      "advisory",
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") for GeomBar; Prefer muteSiblings for sibling de-emphasis instead of an axis guide',
+    ],
+    exact: ["INTERACTION_INSPECT_X_ON_BAR", "interaction:INTERACTION_INSPECT_X_ON_BAR"],
+  },
+  {
+    id: "diagnostic:interaction:INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+    kind: "diagnostic",
+    title: "INTERACTION_INSPECT_X_BISECTS_COL_LABELS · interaction",
+    summary:
+      "inspect.mode draws a vertical guide through GeomCol marks that also carry GeomText/GeomLabel values; the guide bisects the on-bar totals and makes them hard to read.",
+    href: "/guide/errors#interaction-inspect-x-bisects-col-labels",
+    keywords: [
+      "interaction",
+      "warning",
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") when columns have value labels; Keep value labels; drop the x/xy guide rather than dropping the labels',
+    ],
+    exact: [
+      "INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+      "interaction:INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
+    ],
+  },
+  {
+    id: "diagnostic:interaction:INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+    kind: "diagnostic",
+    title: "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS · interaction",
+    summary:
+      "inspect.mode draws a vertical guide through GeomBar marks that also carry GeomText/GeomLabel values; the guide bisects the on-bar totals and makes them hard to read.",
+    href: "/guide/errors#interaction-inspect-x-bisects-bar-labels",
+    keywords: [
+      "interaction",
+      "warning",
+      'Use inspect={{ mode: "exact" }} (or leave mode as "auto") when bars have value labels; Keep value labels; drop the x/xy guide rather than dropping the labels',
+    ],
+    exact: [
+      "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+      "interaction:INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
     ],
   },
   {
