@@ -1,10 +1,9 @@
 <script lang="ts">
-  import CheckIcon from "phosphor-svelte/lib/CheckIcon";
-  import CopyIcon from "phosphor-svelte/lib/CopyIcon";
   import Highlight from "svelte-highlight";
 
   import { briefCopyStatus, COPIED_STATUS, copyText } from "$lib/clipboard";
   import { resolveCodeLanguage } from "$lib/code-languages";
+  import { CHECK_ICON_SVG, COPY_ICON_SVG } from "$lib/copy-icons";
 
   const {
     code,
@@ -44,9 +43,11 @@
     onclick={copy}
   >
     {#if copied}
-      <CheckIcon size={18} weight="bold" aria-hidden="true" />
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
+      {@html CHECK_ICON_SVG}
     {:else}
-      <CopyIcon size={18} weight="regular" aria-hidden="true" />
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
+      {@html COPY_ICON_SVG}
     {/if}
   </button>
   <div class="code-body" bind:this={source}>
