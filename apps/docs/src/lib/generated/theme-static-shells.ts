@@ -120,13 +120,13 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-solarized_2",
     filename: "theme-solarized_2.svg",
     path: "/theme-shells/theme-solarized_2.svg",
-    sha256: "4bf835f7b86779d287e6f86f39fefbd80fe562be6c81e5839dae7a1d98455a2c",
+    sha256: "bdb08e81d575d9e1de5fe110f5b7913de9dd9886921927368f13b1edb629950a",
   },
   {
     id: "theme-solarized_2dark",
     filename: "theme-solarized_2dark.svg",
     path: "/theme-shells/theme-solarized_2dark.svg",
-    sha256: "1dad7c045de60ec7de5961ccaa136799faf2ad63832c2b28a15a962239bdf8e2",
+    sha256: "35e4921ae22822bb3914f78e868d6a581d6ea787a0c21c87bb6f21596038fab3",
   },
   {
     id: "theme-wsj",
