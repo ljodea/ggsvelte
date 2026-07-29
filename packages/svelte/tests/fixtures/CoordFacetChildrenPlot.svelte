@@ -15,6 +15,7 @@
   import CoordCartesian from "../../src/lib/coord/CoordCartesian.svelte";
   import CoordFixed from "../../src/lib/coord/CoordFixed.svelte";
   import CoordFlip from "../../src/lib/coord/CoordFlip.svelte";
+  import CoordSf from "../../src/lib/coord/CoordSf.svelte";
   import CoordTransform from "../../src/lib/coord/CoordTransform.svelte";
   import Facet from "../../src/lib/facet/Facet.svelte";
   import FacetGrid from "../../src/lib/facet/FacetGrid.svelte";
@@ -27,11 +28,13 @@
   const {
     useCoordFlip = false,
     useCoordFixed = false,
+    useCoordSf = false,
     useCoordTransform = false,
     useCoordCartesian = false,
     useCoordValue = false,
     coordValue,
     fixedRatio,
+    sfRatio,
     transformX,
     transformY,
     transformClip,
@@ -58,11 +61,13 @@
   }: {
     useCoordFlip?: boolean;
     useCoordFixed?: boolean;
+    useCoordSf?: boolean;
     useCoordTransform?: boolean;
     useCoordCartesian?: boolean;
     useCoordValue?: boolean;
     coordValue?: CoordSpec | "flip";
     fixedRatio?: number;
+    sfRatio?: number;
     transformX?: string;
     transformY?: string;
     transformClip?: boolean;
@@ -155,6 +160,11 @@
     {/if}
     {#if useCoordFixed}
       <CoordFixed ratio={fixedRatio} />
+    {/if}
+    {#if useCoordSf && sfRatio !== undefined}
+      <CoordSf ratio={sfRatio} />
+    {:else if useCoordSf}
+      <CoordSf />
     {/if}
     {#if useCoordTransform}
       <CoordTransform x={transformX} y={transformY} clip={transformClip} />

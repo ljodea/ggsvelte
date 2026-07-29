@@ -56,6 +56,16 @@ describe("Coord/Facet children → assembled PortableSpec", () => {
     expect(fromChild.coord).toEqual({ type: "fixed", ratio: 2 });
   });
 
+  it('1b-sf: <CoordSf/> assembles { type: "sf" }', async () => {
+    const fromChild = await assembleWithProps({ useCoordSf: true });
+    expect(fromChild.coord).toEqual({ type: "sf" });
+  });
+
+  it("1b-sf-ratio: <CoordSf ratio={2}/> assembles sf ratio 2", async () => {
+    const fromChild = await assembleWithProps({ useCoordSf: true, sfRatio: 2 });
+    expect(fromChild.coord).toEqual({ type: "sf", ratio: 2 });
+  });
+
   it('1c: <CoordTransform x="log10"/> assembles transform coord', async () => {
     const fromChild = await assembleWithProps({
       useCoordTransform: true,
