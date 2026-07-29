@@ -214,13 +214,6 @@ export function pathSemanticNeighborRange(
   return [previous, next];
 }
 
-/** True when a and b lie in the same half-open pathOffsets subpath. */
-export function samePath(batch: GeometryBatch, a: number, b: number): boolean {
-  if (batch.kind !== "paths") return false;
-  const range = pathRange(batch, a);
-  return range !== null && b >= range[0] && b < range[1];
-}
-
 // Nearest-nav (orthogonal group pick + directional panel traversal) lives in
 // candidate-geometry-nearest.ts (#534). Re-export for existing import sites.
 export {

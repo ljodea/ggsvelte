@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from "bun:test";
 
-import { representativePoint, representativePoints } from "../../src/pipeline/sf-geometry.ts";
+import { representativePoints } from "../../src/pipeline/sf-geometry.ts";
 
 describe("representativePoints (#809 multi-part labels)", () => {
   it("returns one point for Point / LineString / Polygon", () => {
@@ -111,9 +111,11 @@ describe("representativePoints (#809 multi-part labels)", () => {
     ).toEqual([[1, 1]]);
   });
 
-  it("representativePoint remains first of multi-part list (compat)", () => {
+  it("first multipolygon centroid is the first multi-part list entry", () => {
+    // Production labels expand every part via representativePoints; first entry
+    // is the historical single-point pick when only one label is needed.
     expect(
-      representativePoint("MultiPolygon", [
+      representativePoints("MultiPolygon", [
         [
           [
             [0, 0],
@@ -132,7 +134,7 @@ describe("representativePoints (#809 multi-part labels)", () => {
             [10, 10],
           ],
         ],
-      ]),
+      ])[0],
     ).toEqual([1, 1]);
   });
 });

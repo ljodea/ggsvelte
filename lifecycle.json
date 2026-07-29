@@ -3655,10 +3655,6 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "CIVIDIS_RAMP_10": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "CLIDiagnosticCode": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3895,10 +3891,6 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "INFERNO_RAMP_10": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "IPSUM_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3943,10 +3935,6 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "LegendValueMembership": {
-          "kind": "type",
-          "lifecycle": "experimental"
-        },
         "LetterboxRect": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3961,10 +3949,6 @@
         },
         "Linetype": {
           "kind": "type",
-          "lifecycle": "experimental"
-        },
-        "MAGMA_RAMP_10": {
-          "kind": "value",
           "lifecycle": "experimental"
         },
         "MAX_BINNED_BREAKS": {
@@ -4012,10 +3996,6 @@
           "lifecycle": "experimental"
         },
         "PIPELINE_WARNING_CATALOG": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "PLASMA_RAMP_10": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4139,14 +4119,6 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
-        "RuntimeRow": {
-          "kind": "type",
-          "lifecycle": "experimental"
-        },
-        "RuntimeRowFilter": {
-          "kind": "type",
-          "lifecycle": "experimental"
-        },
         "RuntimeRowFilterClause": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4160,10 +4132,6 @@
           "lifecycle": "experimental"
         },
         "SCALE_STATE_VERSION": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "SEQUENTIAL_SCHEME_RAMPS": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4319,10 +4287,6 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "TURBO_RAMP_10": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "TemporalAxisPlanInput": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4439,10 +4403,6 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "compileRuntimeRowFilter": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "compileRuntimeRowIndexFilter": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4531,19 +4491,11 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "isSequentialSchemeName": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "layout": {
           "kind": "value",
           "lifecycle": "experimental"
         },
         "layoutPass": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "legendValueEqual": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -4647,10 +4599,6 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
-        "resolveLegendFocusKeys": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
         "resolvePathMark": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -4668,10 +4616,6 @@
           "lifecycle": "experimental"
         },
         "runPipeline": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "runtimeFilterValueEqual": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -6714,10 +6658,6 @@
           "lifecycle": "experimental"
         },
         "isCompositionDiagnostic": {
-          "kind": "value",
-          "lifecycle": "experimental"
-        },
-        "isDeprecationDiagnostic": {
           "kind": "value",
           "lifecycle": "experimental"
         },

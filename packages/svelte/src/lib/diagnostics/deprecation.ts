@@ -5,6 +5,11 @@
  * `ondiagnostic` channel as PlotDiagnostic. One code (`DEPRECATED_PLOT_PROP`)
  * covers every deprecated grammar prop — `prop` carries the name.
  *
+ * Runtime emission left in 0.13.0 (#704) when the seven grammar props were
+ * removed. Types + catalog + builder stay for union typing, upgrade-guide
+ * anchors, and codemod consumers. Discriminate with
+ * `d.code === "DEPRECATED_PLOT_PROP"` (no type-guard export).
+ *
  * Deliberately NOT merged into INTERACTION_DIAGNOSTIC_CATALOG / the
  * interaction-reference guide page: a deprecated grammar prop is not an
  * interaction concern, and migration guidance belongs on /guide/upgrading
@@ -36,10 +41,6 @@ export interface DeprecationDiagnostic {
  * `DUPLICATE_PLOT_LAYER`.
  */
 export type PlotDiagnostic = InteractionDiagnostic | DeprecationDiagnostic | CompositionDiagnostic;
-
-export function isDeprecationDiagnostic(d: PlotDiagnostic): d is DeprecationDiagnostic {
-  return d.code === "DEPRECATED_PLOT_PROP";
-}
 
 const GUIDE_UPGRADING = "https://ggsvelte.sh/guide/upgrading";
 

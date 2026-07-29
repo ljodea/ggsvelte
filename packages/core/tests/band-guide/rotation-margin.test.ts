@@ -1,6 +1,5 @@
 import { describe, expect, it } from "bun:test";
 
-import { neighbourOverlapAsym } from "../../src/layout/axis-overlap.ts";
 import { plan } from "./fixtures.ts";
 
 describe("planBandAxis: rotated angle + side cap (Codex P2)", () => {
@@ -71,47 +70,5 @@ describe("planBandAxis: rotated overhang is left-heavy (Codex P2)", () => {
     // At −90 the footprint is symmetric, so the assertion above is angle-gated;
     // the plan must still label every category regardless of chosen angle.
     expect(p.ticks.every((t) => t.labeled)).toBe(true);
-  });
-});
-describe("neighbourOverlapAsym: end-anchored rotated footprint (Codex P2)", () => {
-  it("catches a left-heavy label colliding with its LEFT neighbour", () => {
-    // Two ticks 20px apart. The right tick's label extends 30px to its LEFT
-    // (end-anchored rotation) and only 2px right; the left tick is tiny. A
-    // symmetric/centered model (half≈16 each side) would just barely pass, but
-    // the real left extent reaches back into the left tick → overlap.
-    const items = [
-      { pos: 0, left: 2, right: 2 },
-      { pos: 20, left: 30, right: 2 },
-    ];
-    expect(neighbourOverlapAsym(items, 4)).toBe(true);
-  });
-
-  it("does not flag when the left extent stays clear of the neighbour", () => {
-    const items = [
-      { pos: 0, left: 2, right: 2 },
-      { pos: 60, left: 30, right: 2 },
-    ];
-    expect(neighbourOverlapAsym(items, 4)).toBe(false);
-  });
-
-  it("alreadySorted matches default sort for ascending pos order", () => {
-    const items = [
-      { pos: 0, left: 2, right: 2 },
-      { pos: 20, left: 30, right: 2 },
-      { pos: 80, left: 5, right: 5 },
-    ];
-    expect(neighbourOverlapAsym(items, 4, { alreadySorted: true })).toBe(
-      neighbourOverlapAsym(items, 4),
-    );
-  });
-
-  it("alreadySorted still catches overlap when items are pre-ordered ascending", () => {
-    // Descending construction then reverse → ascending for alreadySorted.
-    const descending = [
-      { pos: 20, left: 30, right: 2 },
-      { pos: 0, left: 2, right: 2 },
-    ];
-    const ascending = [...descending].toSorted((a, b) => a.pos - b.pos);
-    expect(neighbourOverlapAsym(ascending, 4, { alreadySorted: true })).toBe(true);
   });
 });

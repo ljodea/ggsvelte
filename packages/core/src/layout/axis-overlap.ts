@@ -38,34 +38,6 @@ export function neighbourOverlap(
   return false;
 }
 
-/** A label whose footprint is asymmetric about `pos` (e.g. an end-anchored
- *  rotated label whose text extends mostly to one side of the tick). */
-export interface AsymProjectedLabel {
-  pos: number;
-  /** Along-axis extent to the LEFT of `pos`, px. */
-  left: number;
-  /** Along-axis extent to the RIGHT of `pos`, px. */
-  right: number;
-}
-
-/** Asymmetric variant: collide the left neighbour's right extent against the
- *  right neighbour's left extent, so end-anchored rotated labels are judged at
- *  their real (renderer-matched) footprint rather than a centered approximation. */
-export function neighbourOverlapAsym(
-  items: readonly AsymProjectedLabel[],
-  gapPx: number,
-  options?: OverlapOrderOptions,
-): boolean {
-  const sorted =
-    options?.alreadySorted === true ? items : [...items].toSorted((a, b) => a.pos - b.pos);
-  for (let i = 1; i < sorted.length; i++) {
-    const prev = sorted[i - 1]!;
-    const cur = sorted[i]!;
-    if (prev.pos + prev.right + gapPx > cur.pos - cur.left) return true;
-  }
-  return false;
-}
-
 /**
  * Multi-line label whose horizontal half-extents are per vertical plane.
  * Plane index matches top-aligned wrap rendering (plane 0 = first line; plane
@@ -104,8 +76,8 @@ export function neighbourOverlapByPlane(
  * Uniform-angle end-anchored labels sit on parallel baselines. Glyphs collide
  * iff perpendicular separation `centerSeparation · sin(|angle|)` is below
  * `lineHeight + gap`. Label width does not enter — a long AABB into the
- * neighbour's column box is not text-on-text. Keep `neighbourOverlapAsym` for
- * overhang / side-margin geometry.
+ * neighbour's column box is not text-on-text. Asym left/right extents still
+ * drive overhang / side-cap truncation in the band planner separately.
  */
 export function uniformAngleBaselinesCollide(
   angleDeg: number,

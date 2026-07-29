@@ -153,7 +153,7 @@ Two rules worth keeping in working memory:
   `type:"log"` canonicalizes to linear+log10. Scale transforms run before
   stats and positions; coord transforms run after stats.
 - color/fill families: `ordinal`, `sequential`, `binned`, `manual`,
-  `identity`. 34 named schemes — 14 categorical (`observable10`, `tableau10`,
+  `identity`. 35 named schemes — 15 categorical (`observable10`, `tableau10`,
   `colorblind`, `Set1`…) and 20 sequential/diverging (`viridis`, `magma`,
   `Blues`, `RdBu`…). Size/linewidth/alpha and shape/linetype have their own
   scale families.

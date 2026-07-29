@@ -7,7 +7,10 @@
  * - `scripts/ci-routing/content-hash-inputs.ts` — JOB_CONTENT_INPUTS tables
  * - `scripts/ci-routing/content-hash-markers.ts` — success markers
  * - `scripts/ci-routing/content-hash.ts` — hash, cache keys, git digests
- * - `scripts/ci-routing/cli.ts` — argv commands (not re-exported)
+ * - `scripts/ci-routing/cli.ts` — argv dispatch + plan/classify/emit + gates
+ * - `scripts/ci-routing/cli-io.ts` — shared flagValue / GITHUB_OUTPUT write
+ * - `scripts/ci-routing/content-hash-cli.ts` — hash-inputs / success markers
+ * - `scripts/ci-routing/detect-changes-cli.ts` — detect-changes production IO
  *
  * Workflows and composite actions continue to run:
  *   bun scripts/ci-routing.ts <command> …

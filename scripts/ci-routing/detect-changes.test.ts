@@ -373,7 +373,7 @@ describe("runDetectChanges end-to-end (injected io)", () => {
 
 describe("production adapter contracts", () => {
   test("lastSuccessfulMainHeadJq embeds head as a JSON string (no jq --arg)", async () => {
-    const { lastSuccessfulMainHeadJq } = await import("./cli");
+    const { lastSuccessfulMainHeadJq } = await import("./detect-changes-cli");
     const jq = lastSuccessfulMainHeadJq("abc123");
     expect(jq).toContain('.head_sha != "abc123"');
     expect(jq).not.toContain("--arg");
