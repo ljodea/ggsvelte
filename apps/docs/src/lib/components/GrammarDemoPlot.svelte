@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { GeomPoint, GeomSmooth, GGPlot, Labs, Theme } from "@ggsvelte/svelte";
+  import {
+    GeomJitter,
+    GeomSmooth,
+    GGPlot,
+    Labs,
+    Theme,
+  } from "@ggsvelte/svelte";
   import { palmerPenguins } from "@ggsvelte/svelte/data";
 
   import { contrastChartTheme } from "$lib/docs-appearance-state.svelte";
@@ -26,7 +32,9 @@
 <!--
   mode "xy": full crosshair on two continuous axes (not path auto "x").
   legendFocus needs stable row keys (`id` on palmerPenguins).
-  degree 1: local-linear loess stays cheap when remounting on 333 rows.
+  GeomJitter + alpha: 333 points stack on integer measurements; seeded jitter
+  (default 0.4·resolution) and alpha spread the cloud. degree 1 loess stays
+  cheap when remounting.
 -->
 <GGPlot
   data={palmerPenguins}
@@ -42,7 +50,7 @@
 >
   <Theme name={chartTheme} />
   <Labs x="Flipper length mm" y="Body mass g" color="species" />
-  <GeomPoint alpha={0.72} />
+  <GeomJitter alpha={0.55} />
   {#if active >= 2}
     <GeomSmooth method="loess" span={0.75} degree={1} se={false} />
   {/if}
