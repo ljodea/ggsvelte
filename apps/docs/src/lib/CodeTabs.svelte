@@ -4,8 +4,6 @@
    * spec JSON (what agents emit), fluent-builder TypeScript (spec.ts), and
    * idiomatic Svelte components (Example.svelte) — each with a copy button.
    */
-  import CheckIcon from "phosphor-svelte/lib/CheckIcon";
-  import CopyIcon from "phosphor-svelte/lib/CopyIcon";
   import Highlight from "svelte-highlight";
 
   import { briefCopyStatus, COPIED_STATUS, copyText } from "$lib/clipboard";
@@ -13,6 +11,7 @@
     languageFromCodeTabLabel,
     resolveCodeLanguage,
   } from "$lib/code-languages";
+  import { CHECK_ICON_SVG, COPY_ICON_SVG } from "$lib/copy-icons";
   import { nextRovingTabIndex } from "$lib/tab-roving";
 
   interface Tab {
@@ -103,9 +102,11 @@
       onclick={copy}
     >
       {#if copied}
-        <CheckIcon size={18} weight="bold" aria-hidden="true" />
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
+        {@html CHECK_ICON_SVG}
       {:else}
-        <CopyIcon size={18} weight="regular" aria-hidden="true" />
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted static SVG -->
+        {@html COPY_ICON_SVG}
       {/if}
     </button>
     <span class="visually-hidden" role="status">{copyStatus}</span>

@@ -11,14 +11,19 @@
   import { primaryNavLinks } from "$lib/primary-nav-links";
   import { primaryNavigationOwner } from "$lib/routes";
   import type { DocsRouteMetadata } from "$lib/route-types";
+  import type { Component } from "svelte";
 
-  import SiteSearch from "./SiteSearch.svelte";
+  type SiteSearchApi = { open: (trigger: HTMLElement) => void };
 
   const { path, route }: { path: string; route?: DocsRouteMetadata } = $props();
   const owner = $derived(primaryNavigationOwner(route));
 
   let menu = $state<HTMLDialogElement>();
-  let search = $state<{ open: (trigger: HTMLElement) => void }>();
+  let search = $state<SiteSearchApi | undefined>();
+  // Dynamic component; bind:this is narrowed via $effect after mount.
+  let SiteSearch = $state<Component | null>(null);
+  /** Open target while SiteSearch is mounting (first open only). */
+  let pendingSearchTrigger = $state<HTMLElement | null>(null);
   let appearance = $state<DocsAppearance>("light");
 
   const links = $derived(primaryNavLinks(path, owner));
@@ -37,10 +42,31 @@
     menu?.showModal();
   }
 
-  function openSearch(event: MouseEvent): void {
-    if (event.currentTarget instanceof HTMLElement)
-      search?.open(event.currentTarget);
+  /**
+   * Search UI + index stay off the first-paint graph. Mount the dialog on the
+   * first open, then call open() once bind:this is set.
+   */
+  async function openSearch(event: MouseEvent): Promise<void> {
+    if (!(event.currentTarget instanceof HTMLElement)) return;
+    const trigger = event.currentTarget;
+    if (search !== undefined) {
+      search.open(trigger);
+      return;
+    }
+    pendingSearchTrigger = trigger;
+    if (SiteSearch === null) {
+      const mod = await import("./SiteSearch.svelte");
+      SiteSearch = mod.default;
+    }
   }
+
+  $effect(() => {
+    const api = search;
+    const trigger = pendingSearchTrigger;
+    if (api === undefined || trigger === null) return;
+    pendingSearchTrigger = null;
+    api.open(trigger);
+  });
 
   function closeMenu(): void {
     menu?.close();
@@ -135,4 +161,13 @@
   </div>
 </dialog>
 
-<SiteSearch bind:this={search} />
+{#if SiteSearch}
+  <SiteSearch
+    bind:this={
+      () => search,
+      (value) => {
+        search = value as unknown as SiteSearchApi | undefined;
+      }
+    }
+  />
+{/if}
