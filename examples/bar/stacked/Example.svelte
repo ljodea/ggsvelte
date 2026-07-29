@@ -14,6 +14,8 @@
 <GGPlot
   data={pyxTrial}
   aes={{ x: "bag", fill: "deviation", weight: "count" }}
+  key={(row) => `${row.bag}:${row.deviation}`}
+  legendFocus
   width={640}
   height={400}
 >

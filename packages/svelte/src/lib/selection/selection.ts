@@ -1,6 +1,10 @@
 import type { InteractionSource, PointSelection } from "../interaction/interaction.js";
 
-/** Overlay chrome for a presentation anchor. Rect marks never use rings (#386). */
+/**
+ * Overlay chrome for a presentation anchor.
+ * Rings are for discrete point marks only; continuous/filled/rect families use
+ * mute-only de-emphasis (mask alpha) — never hollow circles on path vertices.
+ */
 export type PresentationChrome = "ring" | "none";
 
 export type PresentationAnchor = {
@@ -13,13 +17,44 @@ export type CandidateAnchorKeys = {
   readonly x: number;
   readonly y: number;
   readonly keys: readonly PropertyKey[];
-  /** Geometry batch kind when known (`rects` suppresses point rings — #386). */
+  /** Geometry batch kind when known (`points` alone use rings). */
   readonly kind?: string;
 };
 
-/** Point-like chrome by default; rect batches suppress rings (#386). */
+/**
+ * Max ring anchors kept under legend/controller emphasis before demoting all
+ * rings to mute-only. Dense series (e.g. species scatter) stay readable;
+ * selection anchors are not gated by this limit.
+ */
+export const EMPHASIS_RING_DENSITY_LIMIT = 48;
+
+/**
+ * Point marks get dashed emphasis/selection rings. Every other batch kind
+ * (rects, paths, segments, glyphs) is mute-only — continuous geometry must not
+ * look like it has hollow point markers at every vertex.
+ */
 export function presentationChromeForKind(kind: string | null | undefined): PresentationChrome {
-  return kind === "rects" ? "none" : "ring";
+  return kind === "points" ? "ring" : "none";
+}
+
+/**
+ * Density gate for **legend/controller emphasis** only: when the number of
+ * ring anchors exceeds `maxRingAnchors`, demote every ring to `"none"` so mute
+ * alone carries series highlight. Returns the same array reference when under
+ * the limit (no allocation). Point selection does not call this.
+ */
+export function applyEmphasisRingDensityGate(
+  anchors: readonly PresentationAnchor[],
+  maxRingAnchors: number = EMPHASIS_RING_DENSITY_LIMIT,
+): PresentationAnchor[] {
+  let ringCount = 0;
+  for (const anchor of anchors) {
+    if (anchor.chrome === "ring") ringCount += 1;
+  }
+  if (ringCount <= maxRingAnchors) return anchors as PresentationAnchor[];
+  return anchors.map((anchor) =>
+    anchor.chrome === "ring" ? { x: anchor.x, y: anchor.y, chrome: "none" as const } : anchor,
+  );
 }
 
 /**
@@ -134,7 +169,7 @@ export function collectCandidates<T, R>(
  * the caller. Dedup identity is `${String(x)}:${String(y)}`.
  * `chrome` prefers `"ring"` when any coincident candidate needs it (e.g. point
  * overlaid on a rect at the same pixel), so the first-seen rect does not hide
- * point chrome (#386).
+ * point chrome. Only `points` batch kinds request rings.
  */
 export function anchorsFromCandidateKeys(
   candidates: Iterable<CandidateAnchorKeys>,
