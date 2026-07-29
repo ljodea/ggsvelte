@@ -14,18 +14,17 @@
  * position (#609 / #844): multi-table layers that share a field name keep their
  * own type evidence. The last-wins union `fields` map remains a fallback only.
  *
- * Consumes a FieldEvidenceMap built by validate-data-evidence.ts (or builds one
- * when not pre-resolved).
+ * Evidence is one `resolveLayerFieldEvidence` pass (plot + per-layer tables).
+ * validate() may pre-resolve and pass the result so lint shares the same pass.
  */
 import type { SpecError } from "./errors.js";
 import type { Aes, ChannelName } from "./schema.js";
 import type { ValidateLimits, ValidateOptions } from "./validate-data.js";
 import type { TemporalDecision } from "./temporal-column.js";
 import {
-  resolveFieldEvidence,
   resolveLayerFieldEvidence,
   type FieldEvidenceMap,
-  type ResolveFieldEvidenceResult,
+  type ResolveLayerFieldEvidenceResult,
 } from "./validate-data-evidence.js";
 import { checkColorScaleDataCompatibility } from "./validate-data-checks-color.js";
 import { collectLayerDataChecks, STAT_COLUMNS } from "./validate-data-checks-layer.js";
@@ -49,8 +48,11 @@ export function dataChecks(
   spec: Record<string, unknown>,
   options: ValidateOptions,
   limits: ValidateLimits,
-  /** Pre-resolved evidence from validate() so lint can share the same pass. */
-  preResolved?: ResolveFieldEvidenceResult,
+  /**
+   * Pre-resolved layer evidence from validate() so the pivot/type pass runs
+   * once and can be shared with lintSpec.
+   */
+  preResolvedLayer?: ResolveLayerFieldEvidenceResult,
 ): SpecError[] {
   const errors: SpecError[] = [];
   // One cache per dataChecks call — shared by position, color, and style checkers.
@@ -62,20 +64,13 @@ export function dataChecks(
   errors.push(...temporalConfig.errors);
   const { invalidTemporalAxes } = temporalConfig;
 
-  // Prefer per-layer evidence when available (#589); fall back to plot-level
-  // resolveFieldEvidence for preResolved/lint sharing and profile mode.
-  const layerResolved = resolveLayerFieldEvidence(spec, options, limits);
+  // One pass over plot + layer tables (#589 multi-table evidence).
+  const layerResolved = preResolvedLayer ?? resolveLayerFieldEvidence(spec, options, limits);
   if (layerResolved.status === "errors") return [...errors, ...layerResolved.errors];
+  if (layerResolved.status === "none") return errors;
 
-  const resolved = preResolved ?? resolveFieldEvidence(spec, options, limits);
-  if (resolved.status === "errors") return [...errors, ...resolved.errors];
-  if (resolved.status === "none" && layerResolved.status === "none") return errors;
-  const plotFields: FieldEvidenceMap | null =
-    layerResolved.status === "ok"
-      ? layerResolved.plot
-      : resolved.status === "ok"
-        ? resolved.fields
-        : null;
+  const plotFields: FieldEvidenceMap | null = layerResolved.plot;
+  const layerMaps = layerResolved.layers;
 
   const plotAes = isRecord(spec["aes"]) ? (spec["aes"] as Aes) : undefined;
   const layers = Array.isArray(spec["layers"]) ? (spec["layers"] as unknown[]) : [];
@@ -89,7 +84,6 @@ export function dataChecks(
     return axis !== null && scaleRequestsTime(scales, axis);
   };
 
-  const layerMaps = layerResolved.status === "ok" ? layerResolved.layers : null;
   const walk = collectLayerDataChecks({
     layers,
     plotAes,
@@ -104,18 +98,13 @@ export function dataChecks(
   // style, and color scale checks prefer per-layer evidence via evidenceForUse
   // so same field names on different tables stay independent (#609 / #844).
   const fields: FieldEvidenceMap = new Map(plotFields ?? undefined);
-  if (layerResolved.status === "ok") {
-    for (const layerMap of layerResolved.layers) {
-      if (layerMap === null) continue;
-      for (const [name, entry] of layerMap) fields.set(name, entry);
-    }
-  }
-  if (fields.size === 0 && resolved.status === "ok") {
-    for (const [name, entry] of resolved.fields) fields.set(name, entry);
+  for (const layerMap of layerMaps) {
+    if (layerMap === null) continue;
+    for (const [name, entry] of layerMap) fields.set(name, entry);
   }
   const evidenceForUse = (use: { field: string; path: string }) => {
     const match = /^\/layers\/(\d+)\//.exec(use.path);
-    if (match !== null && layerMaps !== null) {
+    if (match !== null) {
       const layerMap = layerMaps[Number(match[1])];
       if (layerMap !== null && layerMap !== undefined) {
         const hit = layerMap.get(use.field);

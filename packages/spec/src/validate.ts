@@ -30,7 +30,7 @@ import {
   dataChecks,
   DEFAULT_VALIDATE_LIMITS,
   jsonDepth,
-  resolveFieldEvidence,
+  resolveLayerFieldEvidence,
 } from "./validate-data.js";
 import { collectSchemaShapeErrors, GEOM_BRANCHES } from "./validate-schema-shape.js";
 import {
@@ -167,17 +167,15 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
     }
 
     // --- tier 2 (opt-in): data-aware checks + optional lint --------------------
-    // Resolve field evidence once so dataChecks and lintSpec share the same
-    // pivot + type-inference pass over large inline data. Still runs on record
-    // roots even when schema/structural errors already accumulated.
+    // One resolveLayerFieldEvidence pass for plot + layer tables; dataChecks and
+    // lintSpec share it. On limit/profile errors, lint gets no shared map so it
+    // does not re-scan data that data-aware validation already refused.
     let advisories: SpecAdvisory[] | undefined;
     if (options !== undefined && isRecord(input)) {
-      const resolved = resolveFieldEvidence(input, options, limits);
-      errors.push(...dataChecks(input, options, limits, resolved));
+      const layerResolved = resolveLayerFieldEvidence(input, options, limits);
+      errors.push(...dataChecks(input, options, limits, layerResolved));
       if (options.lint === true) {
-        // Reuse the map on success; on none/errors pass null so lint does not
-        // re-scan data that data-aware validation already refused or lacked.
-        const shared = resolved.status === "ok" ? resolved.fields : null;
+        const shared = layerResolved.status === "ok" ? layerResolved.plot : null;
         advisories = lintSpec(input, options, shared);
       }
     }

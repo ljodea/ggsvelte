@@ -1,10 +1,11 @@
 /**
  * Field-evidence construction for tier-2 validation and lint.
  *
- * Builds a FieldEvidenceMap once per validate()/lintSpec() call from either a
- * DataProfile or inline data (pivot + type inference), under input limits.
- * Shared so large inline data is not scanned twice when both dataChecks and
- * lintSpec run.
+ * `resolveLayerFieldEvidence` builds plot + per-layer maps in one pass
+ * (pivot + type inference, under input limits). validate() runs that once and
+ * shares the result with dataChecks and lintSpec so large inline data is not
+ * scanned twice. Standalone lintSpec / resolveFieldEvidence still use the
+ * plot-only path.
  */
 import type { SpecError } from "./errors.js";
 import type { Aes, CellValue, ChannelName } from "./schema.js";
@@ -35,6 +36,12 @@ export type FieldEvidenceMap = Map<string, FieldEvidenceEntry>;
 /** Result of resolving profile/inline data into a field evidence map. */
 export type ResolveFieldEvidenceResult =
   | { status: "ok"; fields: FieldEvidenceMap }
+  | { status: "none" }
+  | { status: "errors"; errors: SpecError[] };
+
+/** Plot + per-layer field evidence from one pass over inline tables / profile. */
+export type ResolveLayerFieldEvidenceResult =
+  | { status: "ok"; plot: FieldEvidenceMap | null; layers: Array<FieldEvidenceMap | null> }
   | { status: "none" }
   | { status: "errors"; errors: SpecError[] };
 
@@ -183,10 +190,7 @@ export function resolveLayerFieldEvidence(
   spec: Record<string, unknown>,
   options: ValidateOptions,
   limits: ValidateLimits,
-):
-  | { status: "ok"; plot: FieldEvidenceMap | null; layers: Array<FieldEvidenceMap | null> }
-  | { status: "none" }
-  | { status: "errors"; errors: SpecError[] } {
+): ResolveLayerFieldEvidenceResult {
   if (options.profile !== undefined) {
     const bad = profileErrors(options.profile);
     if (bad.length > 0) return { status: "errors", errors: bad };
