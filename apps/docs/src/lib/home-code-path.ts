@@ -19,7 +19,7 @@
  */
 
 const HOME_CODE_PATH_SVELTE = `<script lang="ts">
-  import { GeomPoint, GeomSmooth, GGPlot } from "@ggsvelte/svelte";
+  import { GeomPoint, GeomSmooth, GGPlot, Labs } from "@ggsvelte/svelte";
   import { palmerPenguins } from "@ggsvelte/svelte/data";
 </script>
 
@@ -32,6 +32,7 @@ const HOME_CODE_PATH_SVELTE = `<script lang="ts">
   width={640}
   height={400}
 >
+  <Labs x="Flipper length mm" y="Body mass g" color="species" />
   <GeomPoint alpha={0.72} />
   <GeomSmooth method="loess" span={0.75} degree={1} se={false} />
 </GGPlot>
@@ -49,6 +50,7 @@ const HOME_CODE_PATH_BUILDER = `<script lang="ts">
   )
     .geomPoint({ alpha: 0.72 })
     .geomSmooth({ method: "loess", span: 0.75, degree: 1, se: false })
+    .labs({ x: "Flipper length mm", y: "Body mass g", color: "species" })
     .spec();
 </script>
 

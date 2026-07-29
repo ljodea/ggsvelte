@@ -172,6 +172,10 @@ test("homepage grammar steps change real chart structure in place", async ({ pag
   await expect(output.locator(".gg-legend")).toHaveCount(1);
   await expect(output.locator(".gg-paths")).toHaveCount(1);
   await expect(output.locator(".gg-capture")).toBeVisible();
+  // Labs match the SSR shell — no flash of raw field names on upgrade.
+  await expect(output.locator(".gg-axis-title", { hasText: "Flipper length mm" })).toBeVisible();
+  await expect(output.locator(".gg-axis-title", { hasText: "Body mass g" })).toBeVisible();
+  await expect(output.getByText("flipperLengthMm")).toHaveCount(0);
 
   await page.getByRole("button", { name: /Data/ }).click();
   await expect(output.locator(".gg-legend")).toHaveCount(0);
