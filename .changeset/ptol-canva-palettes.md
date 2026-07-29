@@ -1,7 +1,7 @@
 ---
-"@ggsvelte/core": patch
-"@ggsvelte/spec": patch
-"@ggsvelte/svelte": patch
+"@ggsvelte/core": minor
+"@ggsvelte/spec": minor
+"@ggsvelte/svelte": minor
 ---
 
 <!-- markdownlint-disable MD041 -->
@@ -21,4 +21,4 @@ Clean-room port of ggthemes `ptol_pal()` and `canva_pal()`.
   subset, same call as excel_new's Office themes).
 - Docs `/palettes` gains the two cards (21 total).
 
-Migration: none — additive scheme names only.
+Migration: none — additive

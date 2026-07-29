@@ -1,7 +1,7 @@
 ---
-"@ggsvelte/core": patch
-"@ggsvelte/spec": patch
-"@ggsvelte/svelte": patch
+"@ggsvelte/core": minor
+"@ggsvelte/spec": minor
+"@ggsvelte/svelte": minor
 ---
 
 <!-- markdownlint-disable MD041 -->
@@ -16,4 +16,4 @@ n = 9 order, so prefix subsets approximate the smaller-n picks. The docs
 themes page now demos the Economist theme with its own palette, and the
 palettes page gains the Economist card.
 
-Migration: none — additive scheme name only.
+Migration: none — additive
