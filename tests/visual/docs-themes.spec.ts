@@ -46,6 +46,9 @@ test("palettes is a first-class route from site navigation and the homepage", as
 test("themes compares all built-in chart themes as full-width interactive portraits", async ({
   page,
 }) => {
+  // Intent-gated live load per portrait; budget scales with the registry so
+  // ggthemes ports do not trip the default 60s test timeout.
+  test.setTimeout(240_000);
   await page.goto("/themes?theme=light");
 
   const list = page.getByRole("list", { name: "Built-in chart themes" });
