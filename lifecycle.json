@@ -4327,6 +4327,62 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "TABLEAU20_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_COLORBLIND_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_GREEN_ORANGE_TEAL_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_HUE_CIRCLE_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_JEWEL_BRIGHT_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_MILLER_STONE_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_NURIEL_STONE_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_PURPLE_PINK_GRAY_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_RED_BLUE_BROWN_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_SEATTLE_GRAYS_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_SUMMER_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_SUPERFISHEL_STONE_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_TRAFFIC_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_WINTER_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "TemporalAxisPlanInput": {
           "kind": "type",
           "lifecycle": "experimental"

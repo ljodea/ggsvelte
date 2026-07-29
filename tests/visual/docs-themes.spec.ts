@@ -80,9 +80,10 @@ test("themes compares all built-in chart themes as full-width interactive portra
     "Test",
   ]);
 
-  // Specimens mount live plots only near the viewport (#1037) — scroll each in.
+  // Specimens stay on static shells until hover/focus (intent-gated load).
   for (const specimen of await specimens.all()) {
     await specimen.scrollIntoViewIfNeeded();
+    await specimen.locator(".plot-panel").hover();
     await expect(specimen.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
       timeout: 30_000,
     });
@@ -103,6 +104,8 @@ test("chart theme lab picks theme and palette without alias or chrome clutter", 
   const chartTheme = lab.getByLabel("Chart theme", { exact: true });
   const palette = lab.getByLabel("Categorical palette", { exact: true });
   const plot = lab.locator(".gg-plot-root");
+  // Lab stays static until the user engages a control or the plot.
+  await chartTheme.focus();
   await expect(plot).toHaveAttribute("data-gg-ready", "true", { timeout: 30_000 });
   const chartPaper = () => plot.locator(".gg-paper").getAttribute("fill");
 
@@ -135,7 +138,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
 
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
-  await expect(cards).toHaveCount(31);
+  await expect(cards).toHaveCount(45);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Observable 10",
     "Ipsum",
@@ -159,6 +162,20 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Excel",
     "Excel Fill",
     "Excel New",
+    "Tableau 20",
+    "Tableau Color Blind",
+    "Seattle Grays",
+    "Traffic",
+    "Miller Stone",
+    "Superfishel Stone",
+    "Nuriel Stone",
+    "Jewel Bright",
+    "Summer",
+    "Winter",
+    "Green/Orange/Teal",
+    "Red/Blue/Brown",
+    "Purple/Pink/Gray",
+    "Hue Circle",
     "Set1",
     "Set2",
     "Set3",
@@ -192,6 +209,20 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "7 colors",
     "7 colors",
     "6 colors",
+    "20 colors",
+    "10 colors",
+    "5 colors",
+    "9 colors",
+    "11 colors",
+    "10 colors",
+    "9 colors",
+    "9 colors",
+    "8 colors",
+    "10 colors",
+    "12 colors",
+    "12 colors",
+    "12 colors",
+    "19 colors",
     "9 colors",
     "8 colors",
     "12 colors",
@@ -213,8 +244,9 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   await expect(swatches.last()).toHaveAttribute("aria-label", "10: #9498a0");
   await expect(swatches.first().locator("code")).toHaveCount(0);
 
-  // Col chart uses fill (not the old 5-point scatter). Live plot mounts near viewport (#1037).
+  // Col chart uses fill (not the old 5-point scatter). Live plot mounts on intent.
   await observable.scrollIntoViewIfNeeded();
+  await observable.locator(".plot-panel").hover();
   await expect(observable.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
     timeout: 30_000,
   });
@@ -260,6 +292,7 @@ test("sequential color compares direction, custom stops, and a pinned domain on 
 
   for (const card of await cards.all()) {
     await card.scrollIntoViewIfNeeded();
+    await card.locator(".plot-panel").hover();
     await expect(card.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
       timeout: 30_000,
     });

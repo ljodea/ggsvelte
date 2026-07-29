@@ -50,6 +50,22 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "excel",
   "excel_fill",
   "excel_new",
+  // ggthemes tableau_color_pal regular variants (#1159); Tableau 10 above is
+  // the default — these complete the set.
+  "tableau20",
+  "tableau_colorblind",
+  "tableau_seattle_grays",
+  "tableau_traffic",
+  "tableau_miller_stone",
+  "tableau_superfishel_stone",
+  "tableau_nuriel_stone",
+  "tableau_jewel_bright",
+  "tableau_summer",
+  "tableau_winter",
+  "tableau_green_orange_teal",
+  "tableau_red_blue_brown",
+  "tableau_purple_pink_gray",
+  "tableau_hue_circle",
   // ColorBrewer qualitative (#825)
   "Set1",
   "Set2",

@@ -9,6 +9,7 @@ import {
   ensureNotFoundNoindex,
   ensurePreviewCleanupRedirects,
   ensurePreviewNoindexHeader,
+  hasHtmlRevalidateCacheControl,
   validateDeploymentArtifact,
 } from "./deployment-artifact.ts";
 
@@ -23,6 +24,24 @@ const REQUIRED_HEADERS = `/*
 /_app/immutable/*
   ! Cache-Control
   Cache-Control: public, max-age=31536000, immutable
+`;
+
+/** Production docs `_headers` after #1167 — edge s-maxage must still validate. */
+const S_MAXAGE_HEADERS = `/*
+  Cache-Control: public, max-age=0, s-maxage=600, must-revalidate
+  Content-Security-Policy: frame-ancestors 'none'
+  Permissions-Policy: camera=(), geolocation=(), microphone=()
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+
+/_app/immutable/*
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+
+/theme-shells/*
+  ! Cache-Control
+  Cache-Control: public, max-age=0, s-maxage=86400, must-revalidate
 `;
 
 const PRODUCTION_REDIRECTS = `/ggsvelte https://ggsvelte.sh/ 301
@@ -403,6 +422,24 @@ describe("deployment artifact identity", () => {
       expect(
         validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-production")),
       ).toContain("_headers must detach the inherited HTML cache policy from immutable assets");
+    } finally {
+      rmSync(buildDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it("accepts HTML Cache-Control with optional edge s-maxage", () => {
+    expect(hasHtmlRevalidateCacheControl(REQUIRED_HEADERS)).toBe(true);
+    expect(hasHtmlRevalidateCacheControl(S_MAXAGE_HEADERS)).toBe(true);
+    expect(
+      hasHtmlRevalidateCacheControl("/*\n  Cache-Control: public, max-age=3600, must-revalidate\n"),
+    ).toBe(false);
+
+    const buildDirectory = makeCompleteArtifact("cloudflare-production");
+    try {
+      writeFileSync(join(buildDirectory, "_headers"), S_MAXAGE_HEADERS);
+      expect(
+        validateDeploymentArtifact(buildDirectory, expectedArtifact("cloudflare-production")),
+      ).toEqual([]);
     } finally {
       rmSync(buildDirectory, { recursive: true, force: true });
     }

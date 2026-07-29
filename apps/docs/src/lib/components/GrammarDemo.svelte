@@ -1,10 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
+  import { observeUserIntent } from "$lib/load-on-intent";
+
   /**
-   * Homepage grammar section: chrome always SSR'd; plot upgrades from a static
-   * SVG shell (server-rendered) to live GGPlot after a dynamic import so the
-   * mid-page never sits empty while ~1.3MB of @ggsvelte downloads.
+   * Homepage grammar section: chrome always SSR'd; plot stays on the static
+   * SVG shell until the user engages (hover/focus/step click). Auto-import on
+   * mount pulled the full chart stack and locked the homepage for seconds.
    */
   let {
     staticSvgLightSite,
@@ -21,18 +23,37 @@
     { label: "Interaction", note: "just one more layer" },
   ] as const;
   let active = $state(steps.length - 1);
+  let host = $state<HTMLElement | null>(null);
   let Plot = $state<
     typeof import("$lib/components/GrammarDemoPlot.svelte").default | null
   >(null);
+  let loadStarted = false;
 
-  onMount(() => {
+  function ensureLive(): void {
+    if (loadStarted || Plot !== null) return;
+    loadStarted = true;
     void import("$lib/components/GrammarDemoPlot.svelte").then((mod) => {
       Plot = mod.default;
     });
+  }
+
+  function selectStep(index: number): void {
+    active = index;
+    ensureLive();
+  }
+
+  onMount(() => {
+    const el = host;
+    if (el === null) return;
+    return observeUserIntent(el, ensureLive);
   });
 </script>
 
-<section class="grammar-demo" aria-labelledby="grammar-heading">
+<section
+  class="grammar-demo"
+  aria-labelledby="grammar-heading"
+  bind:this={host}
+>
   <div class="grammar-copy">
     <h2 id="grammar-heading">Declare a layer interactive</h2>
     <p>
@@ -45,8 +66,7 @@
           <button
             type="button"
             aria-pressed={active === index}
-            disabled={Plot === null}
-            onclick={() => (active = index)}
+            onclick={() => selectStep(index)}
           >
             <span>{String(index + 1).padStart(2, "0")}</span>
             <strong>{step.label}</strong>

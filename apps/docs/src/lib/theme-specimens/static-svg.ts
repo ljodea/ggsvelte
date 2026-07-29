@@ -3,7 +3,7 @@
  *
  * Live <GGPlot> trees are expensive to hydrate (full interaction controllers).
  * SSR + first client paint use these strings so the page is readable and
- * full-width immediately; near-viewport dynamic import upgrades to interactive.
+ * full-width immediately; user intent (hover/focus) upgrades to interactive.
  */
 import { renderToSVGString } from "@ggsvelte/core";
 import { aes, gg, scaleXLog10, type AuthoringRows, type ThemeName } from "@ggsvelte/spec";

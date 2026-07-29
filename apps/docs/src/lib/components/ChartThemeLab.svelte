@@ -4,6 +4,7 @@
   import { onMount } from "svelte";
 
   import { CATEGORICAL_PALETTES, THEME_OPTIONS } from "$lib/catalog/themes";
+  import { observeUserIntent } from "$lib/load-on-intent";
 
   type SchemeName = (typeof CATEGORICAL_PALETTES)[number]["name"];
 
@@ -16,19 +17,34 @@
 
   let theme = $state<ThemeName>("default");
   let scheme = $state<SchemeName>("observable10");
+  let host = $state<HTMLElement | null>(null);
   let LiveTemps = $state<
     typeof import("./TemperaturesSpecimen.svelte").default | null
   >(null);
+  let loadStarted = false;
 
-  onMount(() => {
-    // Above-fold lab: static SVG first, then upgrade to interactive once.
+  function ensureLive(): void {
+    if (loadStarted || LiveTemps !== null) return;
+    loadStarted = true;
     void import("./TemperaturesSpecimen.svelte").then((mod) => {
       LiveTemps = mod.default;
     });
+  }
+
+  onMount(() => {
+    const el = host;
+    if (el === null) return;
+    // Static shell until the user engages the lab (hover/focus/change).
+    // Immediate onMount import blocked SPA nav off /themes for seconds.
+    return observeUserIntent(el, ensureLive);
   });
 </script>
 
-<section class="theme-lab" aria-label="Chart theme and palette lab">
+<section
+  class="theme-lab"
+  aria-label="Chart theme and palette lab"
+  bind:this={host}
+>
   <div class="plot-panel">
     {#if LiveTemps !== null}
       <LiveTemps
@@ -54,7 +70,13 @@
   <div class="controls">
     <div class="select-control">
       <label for="chart-theme">Chart theme</label>
-      <select id="chart-theme" bind:value={theme}>
+      <select
+        id="chart-theme"
+        bind:value={theme}
+        onfocus={() => {
+          ensureLive();
+        }}
+      >
         {#each THEME_OPTIONS as option (option.name)}
           <option value={option.name}>{option.label}</option>
         {/each}
@@ -62,7 +84,13 @@
     </div>
     <div class="select-control">
       <label for="chart-palette">Categorical palette</label>
-      <select id="chart-palette" bind:value={scheme}>
+      <select
+        id="chart-palette"
+        bind:value={scheme}
+        onfocus={() => {
+          ensureLive();
+        }}
+      >
         {#each CATEGORICAL_PALETTES as palette (palette.name)}
           <option value={palette.name}>{palette.label}</option>
         {/each}
