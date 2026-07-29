@@ -1,6 +1,10 @@
 import type { InteractionSource, PointSelection } from "../interaction/interaction.js";
 
-/** Overlay chrome for a presentation anchor. Rect marks never use rings (#386). */
+/**
+ * Overlay chrome for a presentation anchor.
+ * Rings are for discrete point marks only; continuous/filled/rect families use
+ * mute-only de-emphasis (mask alpha) — never hollow circles on path vertices.
+ */
 export type PresentationChrome = "ring" | "none";
 
 export type PresentationAnchor = {
@@ -13,18 +17,56 @@ export type CandidateAnchorKeys = {
   readonly x: number;
   readonly y: number;
   readonly keys: readonly PropertyKey[];
-  /** Geometry batch kind when known (`rects` suppresses point rings — #386). */
+  /** Geometry batch kind when known (`points` alone use rings). */
   readonly kind?: string;
 };
 
-/** Point-like chrome by default; rect batches suppress rings (#386). */
-export function presentationChromeForKind(kind: string | null | undefined): PresentationChrome {
+/**
+ * Max ring anchors kept under legend/controller emphasis before demoting all
+ * rings to mute-only. Dense series (e.g. species scatter) stay readable;
+ * selection anchors are not gated by this limit.
+ */
+export const EMPHASIS_RING_DENSITY_LIMIT = 48;
+
+/**
+ * Anchor chrome for selection / legend emphasis rings.
+ * Only discrete point marks get hollow rings. Paths, rects, segments, and
+ * glyphs use mute-only de-emphasis — continuous geometry must not look like it
+ * has a ring at every vertex (area/line legend focus).
+ */
+export function presentationChromeForKind(kind?: string | null): PresentationChrome {
+  return kind === "points" ? "ring" : "none";
+}
+
+/**
+ * Hover overlay chrome (hover ring + gapped crosshair).
+ * Keep rings for strokes and points so path/line inspect still gaps guides at
+ * the focus. Rect marks stay mute-only (sibling de-emphasis via masks).
+ * Missing kind keeps ring so crosshair gap works before the seed attaches.
+ */
+export function hoverChromeForKind(kind?: string | null): PresentationChrome {
   return kind === "rects" ? "none" : "ring";
 }
 
-export type CandidateRowRef = {
-  readonly rowIndex: number | null;
-};
+/**
+ * Density gate for **legend/controller emphasis** only: when the number of
+ * ring anchors exceeds `maxRingAnchors`, demote every ring to `"none"` so mute
+ * alone carries series highlight. Returns the same array reference when under
+ * the limit (no allocation). Point selection does not call this.
+ */
+export function applyEmphasisRingDensityGate(
+  anchors: readonly PresentationAnchor[],
+  maxRingAnchors: number = EMPHASIS_RING_DENSITY_LIMIT,
+): PresentationAnchor[] {
+  let ringCount = 0;
+  for (const anchor of anchors) {
+    if (anchor.chrome === "ring") ringCount += 1;
+  }
+  if (ringCount <= maxRingAnchors) return anchors as PresentationAnchor[];
+  return anchors.map((anchor) =>
+    anchor.chrome === "ring" ? { x: anchor.x, y: anchor.y, chrome: "none" as const } : anchor,
+  );
+}
 
 /**
  * Ordered equality for PropertyKey sequences (length + Object.is per index).
@@ -53,20 +95,6 @@ export function buildPointSelectionEvent(
     keys: Object.freeze([...keys]),
     source,
   });
-}
-
-/**
- * Union lineage row indexes with the candidate's own rowIndex when set.
- * Lineage order is preserved; the candidate row is appended only if absent.
- */
-export function rowIndexesForCandidate(
-  candidate: CandidateRowRef,
-  lineageRowIndexes: Iterable<number>,
-): number[] {
-  const rows = [...lineageRowIndexes];
-  if (candidate.rowIndex !== null && !rows.includes(candidate.rowIndex))
-    rows.push(candidate.rowIndex);
-  return rows;
 }
 
 /**
@@ -152,7 +180,7 @@ export function collectCandidates<T, R>(
  * the caller. Dedup identity is `${String(x)}:${String(y)}`.
  * `chrome` prefers `"ring"` when any coincident candidate needs it (e.g. point
  * overlaid on a rect at the same pixel), so the first-seen rect does not hide
- * point chrome (#386).
+ * point chrome. Only `points` batch kinds request rings.
  */
 export function anchorsFromCandidateKeys(
   candidates: Iterable<CandidateAnchorKeys>,

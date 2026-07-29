@@ -1,5 +1,215 @@
 # @ggsvelte/core
 
+## 0.16.0
+
+### Minor Changes
+
+- 8e3b64b: <!-- markdownlint-disable MD041 -->
+
+  feat(scale): economist categorical palette (ggthemes scale_colour/fill_economist)
+
+  Registers the `economist` scheme for ordinal color/fill scales: the nine
+  ggthemes Economist fg colors in the fill palette's full-capacity order
+  (blue-gray, dark blue, blue, light blue, dark green, light green, dark red,
+  pink, gray). ggthemes re-selects hues per n; this port flattens to the fixed
+  n = 9 order, so prefix subsets approximate the smaller-n picks. The docs
+  themes page now demos the Economist theme with its own palette, and the
+  palettes page gains the Economist card.
+
+  Migration: none — additive
+
+- b4a58c1: <!-- markdownlint-disable MD041 -->
+
+  feat(theme): economist_white + solarized_2 themes, few + fivethirtyeight palettes (ggthemes completions)
+
+  Clean-room ports completing four already-shipped ggthemes families.
+
+  - Theme `economist_white`: ggthemes `theme_economist_white(gray_bg = TRUE)` —
+    the Graphic Detail blog variant of `theme_economist`: white panel on
+    light-gray (`#ebebeb`) paper, dark-gray (`#c9c9c9`) major grid, economist
+    chrome otherwise unchanged.
+  - Themes `solarized_2` / `solarized_2dark`: ggthemes `theme_solarized_2()`
+    light/dark — the theme_grey-flavored Solarized variant (base2 panel, base3
+    grid, no frame; R's misspelled `reabase01` axis-line key resolves to NA,
+    so no axis line — documented on the token block).
+  - Palettes for ordinal color/fill scales: `few` (Few "Medium", the
+    `scale_colour_few` default), `few_light` (the `scale_fill_few` default),
+    `few_dark`, and `fivethirtyeight` (blue/red/green). ggthemes reserves
+    Few's first value (Gray) for non-data parts at n = 1; the fixed lists are
+    the eight data colors in source order, matching ggthemes' prefix picks.
+  - Svelte shells `ThemeEconomistwhite`, `ThemeSolarized2`,
+    `ThemeSolarized2dark`; docs `/themes` gains the three portraits (the Few
+    and FiveThirtyEight themes now demo with their own palettes) and
+    `/palettes` gains the four cards.
+
+  Migration: none — additive
+
+- 1256265: <!-- markdownlint-disable MD041 -->
+
+  feat(scale): ptol and canva categorical palettes (ggthemes ptol_pal / canva_pal)
+
+  Clean-room port of ggthemes `ptol_pal()` and `canva_pal()`.
+
+  - `ptol`: Paul Tol's qualitative palette (SRON/EPS/TN/09-002) at full
+    capacity — the n = 12 selection. ggthemes re-selects the set per n; this
+    port flattens to the fixed full-capacity order (prefix subsets
+    approximate the smaller-n picks, documented on the constant), matching
+    the economist palette's precedent.
+  - `canva`: the `scale_*_canva` default "Fresh and bright" (4 colors,
+    extracted from `data/canva_palettes.rda`). ggthemes ships 150 named
+    four-color Canva palettes; only the default is registered (documented
+    subset, same call as excel_new's Office themes).
+  - Docs `/palettes` gains the two cards (21 total).
+
+  Migration: none — additive
+
+- 65bce1d: <!-- markdownlint-disable MD041 -->
+
+  feat(theme): solarized + solarizeddark chart themes and solarized palette
+
+  Clean-room port of ggthemes `theme_solarized()` (light and `light = FALSE`)
+  and `scale_colour_solarized()` / `scale_fill_solarized()`.
+
+  - Themes `solarized` and `solarizeddark`: theme_bw geometry on Schoonover's
+    rebased tones — base3/base03 panels, base2/base02 grids, base1/base01
+    chrome and text, transparent plot background, framed panel, blue `#268bd2`
+    accent. As with the other ports, R's darker title step (rebase0) flattens
+    into the single ink role.
+  - Palette `solarized` for ordinal color/fill scales: the eight Solarized
+    accents with ggthemes' default blue first, then source order — ggthemes'
+    max-L*a*b-distance selection is order-degenerate at n = 8. The same accent
+    ramp serves both themes; only the base tones flip (Schoonover's design),
+    so no separate dark scheme is registered.
+  - Svelte shells `ThemeSolarized` / `ThemeSolarizeddark`; docs `/themes` gains
+    both portraits (paired with the solarized scheme) and `/palettes` gains
+    the Solarized card.
+
+  Migration: none — additive
+
+- 537f6ae: <!-- markdownlint-disable MD041 -->
+
+  feat(scale): fourteen tableau categorical palette variants (ggthemes tableau_color_pal regular set)
+
+  Clean-room port of every remaining `tableau_color_pal(type = "regular")`
+  variant, completing the regular Tableau set alongside the existing
+  `tableau10`. Values are verbatim copies of the upstream YAML tables in
+  source order (ggthemes' n picks are prefix walks, so the fixed lists match
+  exactly).
+
+  - `tableau20` — the classic paired Tableau 20.
+  - `tableau_colorblind` — Tableau's colorblind-safe 10.
+  - `tableau_seattle_grays` (5), `tableau_traffic` (9),
+    `tableau_miller_stone` (11), `tableau_superfishel_stone` (10),
+    `tableau_nuriel_stone` (9), `tableau_jewel_bright` (9),
+    `tableau_summer` (8), `tableau_winter` (10),
+    `tableau_green_orange_teal` (12), `tableau_red_blue_brown` (12),
+    `tableau_purple_pink_gray` (12), `tableau_hue_circle` (19).
+  - Docs `/palettes` gains the fourteen cards (29 total).
+
+  The ordered-sequential and ordered-diverging Tableau ramps are a separate
+  follow-up (they feed the sequential scheme registry, not the categorical
+  one).
+
+  Migration: none — additive
+
+- 1ba87f8: <!-- markdownlint-disable MD041 -->
+
+  feat(theme): gdocs + hc + hcdark + pander chart themes and palettes (ggthemes web/tech family)
+
+  Clean-room port of the ggthemes web/tech family: `theme_gdocs()` +
+  `gdocs_pal()`, `theme_hc()` default/darkunica + `hc_pal()`, and
+  `theme_pander()` + `palette_pander()`.
+
+  - Theme `gdocs`: Google Docs defaults — white panel, `#cccccc` major grid,
+    black x-only axis line, no ticks, `#757575` text, plain 20px title.
+  - Themes `hc` / `hcdark`: Highcharts default and darkunica — y-only major
+    grid (`#D8D8D8` / `#707073`), no border. `hcdark` documents one deviation:
+    R leaves axis text at theme_grey's dark grey (dark-on-dark); this port
+    uses the style's `#A0A0A3` text colour for axis text and ticks.
+  - Theme `pander`: pander defaults — dashed `#bebebe` grid (R "grey"),
+    grey ticks, bold 14.4px title, no visible border.
+  - Palettes for ordinal color/fill scales: `gdocs` (6 hues × 4 strengths,
+    copied verbatim including the upstream teal-2 duplicate), `hc` (10),
+    `hc_dark` (11, verbatim with trailing repeats), `pander` (Okabe-Ito hues
+    in pander's order, `#999999` for black).
+  - Svelte shells `ThemeGdocs`, `ThemeHc`, `ThemeHcdark`, `ThemePander`; docs
+    `/themes` gains the four portraits (each paired with its own scheme) and
+    `/palettes` gains the four cards.
+
+  Migration: none — additive
+
+- 6d4352a: <!-- markdownlint-disable MD041 -->
+
+  feat(theme): wsj chart theme and five wsj palettes (ggthemes theme_wsj / scale_*_wsj)
+
+  Clean-room port of ggthemes `theme_wsj()` and `wsj_pal()` with
+  `scale_colour_wsj()` / `scale_fill_wsj()`.
+
+  - Theme `wsj`: Wall Street Journal chrome — "brown" paper `#f8f2e4`, dotted
+    black y-grid only, x axis line and ticks, no y line/ticks, big bold title
+    (rel(2) of base 12). R's `title_family = "mono"`, bold axis text, and blank
+    axis titles flatten into the shared font/weight roles (documented on the
+    token block); the colors6 red `#c72e29` accent pairs unmapped marks with
+    the wsj palette.
+  - Palettes for ordinal color/fill scales, one scheme per `wsj_pal()`
+    variant: `wsj` (colors6, the ggthemes default), `wsj_rgby`,
+    `wsj_red_green`, `wsj_black_green`, `wsj_dem_rep`.
+  - Svelte shell `ThemeWsj`; docs `/themes` gains the WSJ portrait (paired
+    with the wsj scheme) and `/palettes` gains the five WSJ cards.
+
+  Migration: none — additive
+
+### Patch Changes
+
+- Updated dependencies [8e3b64b]
+- Updated dependencies [b4a58c1]
+- Updated dependencies [1256265]
+- Updated dependencies [65bce1d]
+- Updated dependencies [537f6ae]
+- Updated dependencies [1ba87f8]
+- Updated dependencies [6d4352a]
+  - @ggsvelte/spec@0.16.0
+
+## 0.15.2
+
+### Patch Changes
+
+- 3fe70c3: <!-- markdownlint-disable MD041 -->
+
+  perf(svelte): cache candidate semantic keys by lineage membership
+
+  Interval, selection, and mask projection walk every candidate. Marks that
+  share a lineage (smooth eval grids) now expand membership once and reuse
+  the key bag. Single-candidate paths stay O(L) on first hit.
+
+  Migration: none — internal speedup only
+
+- aeac77b: <!-- markdownlint-disable MD041 -->
+
+  perf(svelte): expand legend lineages once per lineage id
+
+  buildLegendEntryKeyIndex shared membership Sets across candidates with the
+  same lineage id (smooth eval grids). Lineage is no longer re-walked once
+  per mark. Candidate-local rowIndex still attaches without mutating the
+  shared bag.
+
+  Migration: none — internal speedup only
+
+- b08d256: <!-- markdownlint-disable MD041 -->
+
+  perf(core): O(log B) style bin lookup for binned size/shape/group
+
+  Binned style scales and style-driven grouping used linear findIndex over
+  break edges on every mapped row. styleBinIndex binary-searches the same
+  left-closed contract (B ≤ 64). Color binned scales already did this.
+
+  Migration: none — internal speedup only
+
+- Updated dependencies [3fe70c3]
+- Updated dependencies [aeac77b]
+- Updated dependencies [b08d256]
+  - @ggsvelte/spec@0.15.2
+
 ## 0.15.1
 
 ### Patch Changes

@@ -49,7 +49,7 @@
     isTooltipDocked,
     plotTooltipDomId,
     resolveCaptureAriaControls,
-    resolveClearLegendX,
+    resolveClearControlLayout,
     tooltipViewportSize,
   } from "./assembly/layout.js";
   import BoundsEditor from "./interval/BoundsEditor.svelte";
@@ -198,10 +198,12 @@
       rovingIndex={legendFocusState.rovingIndex}
       sceneWidth={currentModel.scene.width}
       sceneHeight={currentModel.scene.height}
-      clearLegendX={resolveClearLegendX({
+      clearLayout={resolveClearControlLayout({
         legendFocusEnabled: engine.legendFocusEnabled,
         pressedScale: engine.effectiveLegendPressed?.scale ?? null,
         legends: currentModel.scene.legends,
+        sceneWidth: currentModel.scene.width,
+        sceneHeight: currentModel.scene.height,
       })}
       onPreviewIndex={legendFocusState.onPreviewIndex}
       onPreviewClear={legendFocusState.onPreviewClear}

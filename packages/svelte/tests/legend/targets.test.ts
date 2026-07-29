@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { InteractiveLegendEntry } from "../../src/lib/legend/focus.js";
 import LegendTargets from "../../src/lib/legend/LegendTargets.svelte";
+import { CLEAR_HIDE_DELAY_MS } from "../../src/lib/assembly/layout.js";
 import { render } from "../helpers/render.js";
 
 const webEntry = { value: "web", label: "Web", color: "#123456", y: 18 };
@@ -47,33 +48,53 @@ const noopHandlers = {
   onClearClick: () => {},
 };
 
+const clearLayout = { left: 100, top: 88 };
+
 describe("LegendTargets", () => {
-  it("renders one hit target per entry and hides clear when clearLegendX is null", () => {
+  it("renders one hit target per entry and hides clear when clearLayout is null", () => {
     const { container } = render(LegendTargets, {
       entries,
       sceneWidth: 400,
       sceneHeight: 300,
-      clearLegendX: null,
+      clearLayout: null,
       ...noopHandlers,
     });
     expect(container.querySelectorAll("[data-gg-legend-target]")).toHaveLength(2);
     expect(container.querySelector(".gg-legend-clear")).toBeNull();
   });
 
-  it("shows clear control at top-right of the scene (no below-chart layout shift)", () => {
+  it("places clear at the resolved legend-relative layout (not scene top-right)", () => {
     const { container } = render(LegendTargets, {
       entries,
       sceneWidth: 400,
       sceneHeight: 300,
-      clearLegendX: 100,
+      clearLayout: { left: 112, top: 96 },
       pressedIdentity: { scale: "fill", entryIndex: 0 },
       ...noopHandlers,
     });
     const clear = container.querySelector<HTMLButtonElement>(".gg-legend-clear");
     expect(clear).not.toBeNull();
-    // Top-right of the scene — never sceneHeight+N below.
-    expect(clear?.style.left).toBe("348px");
-    expect(clear?.style.top).toBe("4px");
+    expect(clear?.style.left).toBe("112px");
+    expect(clear?.style.top).toBe("96px");
+    // Must not hardcode the old scene-corner park (sceneWidth-52, top 4).
+    expect(clear?.style.left).not.toBe("348px");
+    expect(clear?.style.top).not.toBe("4px");
+  });
+
+  it("keeps clear compact (legend-row height, not a 44×44 slab)", () => {
+    const { container } = render(LegendTargets, {
+      entries,
+      sceneWidth: 400,
+      sceneHeight: 300,
+      clearLayout,
+      pressedIdentity: { scale: "fill", entryIndex: 0 },
+      ...noopHandlers,
+    });
+    const clear = container.querySelector<HTMLButtonElement>(".gg-legend-clear")!;
+    const style = getComputedStyle(clear);
+    expect(Number(style.minHeight.replace("px", ""))).toBeLessThanOrEqual(24);
+    expect(Number(style.height.replace("px", ""))).toBeLessThanOrEqual(28);
+    expect(Number(style.minWidth.replace("px", ""))).toBeLessThanOrEqual(24);
   });
 
   it("honors kebab-case tooltip background/foreground aliases on clear control", () => {
@@ -83,7 +104,7 @@ describe("LegendTargets", () => {
       entries,
       sceneWidth: 400,
       sceneHeight: 300,
-      clearLegendX: 100,
+      clearLayout,
       pressedIdentity: { scale: "fill", entryIndex: 0 },
       ...noopHandlers,
     });
@@ -100,7 +121,7 @@ describe("LegendTargets", () => {
       entries,
       sceneWidth: 400,
       sceneHeight: 300,
-      clearLegendX: 100,
+      clearLayout,
       pressedIdentity: { scale: "fill", entryIndex: 0 },
       ...noopHandlers,
     });
@@ -114,26 +135,46 @@ describe("LegendTargets", () => {
     expect(getComputedStyle(clear).color).toBe("rgb(38, 38, 38)");
   });
 
-  it("anchors clear left at max(4, sceneWidth-52) regardless of legend x", () => {
-    const low = render(LegendTargets, {
-      entries,
-      sceneWidth: 400,
-      sceneHeight: 200,
-      clearLegendX: 0,
-      ...noopHandlers,
-    });
-    const lowClear = low.container.querySelector<HTMLButtonElement>(".gg-legend-clear");
-    expect(lowClear?.style.left).toBe("348px");
+  it("fades clear after idle leave so committed screenshots stay clean", async () => {
+    vi.useFakeTimers();
+    try {
+      const { container } = render(LegendTargets, {
+        entries,
+        sceneWidth: 400,
+        sceneHeight: 300,
+        clearLayout,
+        pressedIdentity: { scale: "fill", entryIndex: 0 },
+        ...noopHandlers,
+      });
+      // Chrome wrapper is pointer-events:none; enter/leave fire on children.
+      const target = container.querySelector<HTMLButtonElement>("[data-gg-legend-target]")!;
+      const clear = container.querySelector<HTMLButtonElement>(".gg-legend-clear")!;
 
-    const narrow = render(LegendTargets, {
-      entries,
-      sceneWidth: 40,
-      sceneHeight: 200,
-      clearLegendX: 500,
-      ...noopHandlers,
-    });
-    const narrowClear = narrow.container.querySelector<HTMLButtonElement>(".gg-legend-clear");
-    expect(narrowClear?.style.left).toBe("4px");
+      // Mount schedules the hide clock; pin cancels it while the pointer is over chrome.
+      target.dispatchEvent(
+        new PointerEvent("pointerenter", { bubbles: true, pointerType: "mouse" }),
+      );
+      expect(clear.classList.contains("gg-legend-clear-faded")).toBe(false);
+
+      target.dispatchEvent(
+        new PointerEvent("pointerleave", { bubbles: true, pointerType: "mouse" }),
+      );
+      expect(clear.classList.contains("gg-legend-clear-faded")).toBe(false);
+      await vi.advanceTimersByTimeAsync(CLEAR_HIDE_DELAY_MS);
+      expect(clear.classList.contains("gg-legend-clear-faded")).toBe(true);
+      expect(clear.getAttribute("aria-hidden")).toBe("true");
+
+      // Re-enter via a legend target (Clear itself is pointer-events:none when faded).
+      target.dispatchEvent(
+        new PointerEvent("pointerenter", { bubbles: true, pointerType: "mouse" }),
+      );
+      // Force a microtask flush so Svelte applies the pin state to the class.
+      await Promise.resolve();
+      expect(clear.classList.contains("gg-legend-clear-faded")).toBe(false);
+      expect(clear.getAttribute("aria-hidden")).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("applies min target width of 24 when legend width is smaller", () => {
@@ -141,7 +182,7 @@ describe("LegendTargets", () => {
       entries,
       sceneWidth: 400,
       sceneHeight: 300,
-      clearLegendX: null,
+      clearLayout: null,
       ...noopHandlers,
     });
     const targets = container.querySelectorAll<HTMLButtonElement>("[data-gg-legend-target]");
@@ -170,7 +211,7 @@ describe("LegendTargets", () => {
       entries: horizontalEntries,
       sceneWidth: 400,
       sceneHeight: 300,
-      clearLegendX: null,
+      clearLayout: null,
       ...noopHandlers,
     });
     const targets = container.querySelectorAll<HTMLButtonElement>("[data-gg-legend-target]");
@@ -183,7 +224,7 @@ describe("LegendTargets", () => {
       entries,
       sceneWidth: 400,
       sceneHeight: 300,
-      clearLegendX: null,
+      clearLayout: null,
       ...noopHandlers,
       onPreviewIndex,
     });

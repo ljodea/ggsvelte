@@ -10,8 +10,8 @@ import { iterateCandidates, type CandidateLookup } from "../selection/selection.
 import { legendIdentityKey } from "./focus.js";
 
 /**
- * Stable Map key with the same equality as `legendValueEqual`:
- * Date by getTime, NaN ≡ NaN, and `-0` ≡ `0` (unlike raw `encodeKey`).
+ * Stable Map key for discrete legend values: `encodeKey` plus `-0` ≡ `0`
+ * (raw encodeKey distinguishes signed zero; Date by getTime, NaN ≡ NaN).
  */
 function legendValueToken(value: unknown): string {
   if (typeof value === "number" && Object.is(value, -0)) return encodeKey(0);
@@ -74,8 +74,8 @@ export type LegendKeyIndexAdapter = {
  *   rowIndex if not already present.
  * - Visit key is scale:layerIndex:field|const:rowIndex (dedupe repeated candidates).
  * - Skip null rows (field path) / null keys; constant path only needs keys.
- * - Match entry values via pre-built token→index maps (legendValueEqual
- *   semantics: NaN, Date, -0/0); O(E) prep + O(1) per row, not findIndex.
+ * - Match entry values via pre-built token→index maps (NaN, Date, -0/0);
+ *   O(E) prep + O(1) per row, not findIndex.
  * - Layer field maps built once per layer (first non-stat channel → field);
  *   lineage Sets once per lineage id when any discrete legend applies
  *   (smooth eval-grid marks share membership — not once per candidate).

@@ -20,14 +20,8 @@ export {
 export type { CellValue, Columns, Discreteness, FieldType, Rows } from "./table.js";
 
 // Runtime data-changing filters (interactive legends and linked views)
-export {
-  compileRuntimeRowFilter,
-  compileRuntimeRowIndexFilter,
-  runtimeFilterValueEqual,
-} from "./runtime-filter.js";
+export { compileRuntimeRowIndexFilter } from "./runtime-filter.js";
 export type {
-  RuntimeRow,
-  RuntimeRowFilter,
   RuntimeRowIndexFilter,
   RuntimeRowFilterClause,
   RuntimeRowFilterMode,
@@ -82,16 +76,51 @@ export {
   CATEGORICAL_SCHEMES,
   CATEGORICAL_PALETTE_10,
   COLORBLIND_PALETTE,
+  ECONOMIST_PALETTE,
+  FEW_DARK_PALETTE,
+  FEW_LIGHT_PALETTE,
+  FEW_PALETTE,
   finiteExtent,
+  FIVETHIRTYEIGHT_PALETTE,
   FLEXOKI_PALETTE,
   IPSUM_PALETTE,
   niceLinearDomain,
+  PTOL_PALETTE,
+  CANVA_PALETTE,
+  CALC_PALETTE,
+  EXCEL_FILL_PALETTE,
+  EXCEL_NEW_PALETTE,
+  EXCEL_PALETTE,
   ScaleConfigError,
+  SOLARIZED_PALETTE,
   trainBand,
   trainColor,
   trainContinuous,
   trainLinear,
   TABLEAU10_PALETTE,
+  WSJ_BLACK_GREEN_PALETTE,
+  WSJ_DEM_REP_PALETTE,
+  TABLEAU20_PALETTE,
+  TABLEAU_COLORBLIND_PALETTE,
+  TABLEAU_GREEN_ORANGE_TEAL_PALETTE,
+  TABLEAU_HUE_CIRCLE_PALETTE,
+  TABLEAU_JEWEL_BRIGHT_PALETTE,
+  TABLEAU_MILLER_STONE_PALETTE,
+  TABLEAU_NURIEL_STONE_PALETTE,
+  TABLEAU_PURPLE_PINK_GRAY_PALETTE,
+  TABLEAU_RED_BLUE_BROWN_PALETTE,
+  TABLEAU_SEATTLE_GRAYS_PALETTE,
+  TABLEAU_SUMMER_PALETTE,
+  TABLEAU_SUPERFISHEL_STONE_PALETTE,
+  TABLEAU_TRAFFIC_PALETTE,
+  TABLEAU_WINTER_PALETTE,
+  WSJ_PALETTE,
+  WSJ_RED_GREEN_PALETTE,
+  WSJ_RGBY_PALETTE,
+  GDOCS_PALETTE,
+  HC_DARK_PALETTE,
+  HC_PALETTE,
+  PANDER_PALETTE,
 } from "./scales/train.js";
 export type {
   BandConfig,
@@ -104,16 +133,7 @@ export type {
   PositionScale,
 } from "./scales/train.js";
 export { rampColor, trainSequential, VIRIDIS_RAMP_10 } from "./scales/color.js";
-export {
-  CIVIDIS_RAMP_10,
-  INFERNO_RAMP_10,
-  MAGMA_RAMP_10,
-  PLASMA_RAMP_10,
-  SEQUENTIAL_SCHEME_RAMPS,
-  TURBO_RAMP_10,
-  isSequentialSchemeName,
-  sequentialSchemeRamp,
-} from "./scales/sequential-schemes.js";
+export { sequentialSchemeRamp } from "./scales/sequential-schemes.js";
 export { sampleSequentialPalette } from "./scales/train-color.js";
 export type { SequentialColorScale, SequentialConfig } from "./scales/color.js";
 
@@ -272,16 +292,10 @@ export type {
   CanonicalAxisToken,
   TraversalDirection,
 } from "./candidate-store.js";
-export {
-  buildInteractionMasks,
-  buildPrimitiveInteractionMasks,
-  legendValueEqual,
-  resolveLegendFocusKeys,
-} from "./interaction-mask.js";
+export { buildInteractionMasks, buildPrimitiveInteractionMasks } from "./interaction-mask.js";
 export type {
   BatchInteractionMask,
   FocusedPrimitive,
-  LegendValueMembership,
   SemanticCandidateKeys,
 } from "./interaction-mask.js";
 export { PANEL_SPACING, STRIP_BAND } from "./scene.js";

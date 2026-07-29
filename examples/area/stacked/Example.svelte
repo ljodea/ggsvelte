@@ -14,6 +14,8 @@
 <GGPlot
   data={crimeanMortality}
   aes={{ x: "month", y: "deaths", fill: "cause" }}
+  key={(row) => `${row.month}:${row.cause}`}
+  legendFocus
   width={640}
   height={400}
 >

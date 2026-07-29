@@ -15,6 +15,7 @@
   data={londonCholera}
   aes={{ x: "density", y: "deathRate", color: "water" }}
   key="district"
+  legendFocus
   inspect={{ mode: "xy", pin: true }}
   width="container"
   height={400}

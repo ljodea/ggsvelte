@@ -100,7 +100,7 @@ import {
 import { createSelectionState } from "./selection/selection-state.svelte.js";
 import type { SelectionState } from "./selection/selection-state.svelte.js";
 import {
-  presentationChromeForKind,
+  hoverChromeForKind,
   type PresentationAnchor,
   type PresentationChrome,
 } from "./selection/selection.js";
@@ -658,10 +658,11 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       return semanticCandidateProjection.emphasizedAnchors;
     },
     get hoverChrome() {
-      // presentationFocus carries seed kind; null inspection → default ring.
+      // Hover chrome is separate from selection/emphasis anchor rings: paths
+      // still gap the crosshair; only rects mute. Null inspection → default ring.
       const focus = inspectionState.presentationFocus;
       if (focus === null) return "ring";
-      return presentationChromeForKind(focus.kind);
+      return hoverChromeForKind(focus.kind);
     },
     get interactionMasks() {
       return semanticCandidateProjection.interactionMasks;

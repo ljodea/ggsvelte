@@ -3,8 +3,6 @@ import { describe, expect, it } from "bun:test";
 import {
   buildInteractionMasks,
   buildPrimitiveInteractionMasks,
-  legendValueEqual,
-  resolveLegendFocusKeys,
   type SemanticCandidateKeys,
 } from "../src/interaction-mask.ts";
 import type { GeometryBatch } from "../src/scene.ts";
@@ -187,32 +185,5 @@ describe("buildPrimitiveInteractionMasks", () => {
     expect(masks[0]?.focusedCount).toBe(1);
     expect(masks[0]?.isFocused(0)).toBe(false);
     expect(masks[0]?.isFocused(1)).toBe(true);
-  });
-});
-
-describe("legend value resolution", () => {
-  it("uses typed canonical equality for dates, NaN, signed zero, and null", () => {
-    expect(legendValueEqual(new Date(123), new Date(123))).toBe(true);
-    expect(legendValueEqual(new Date(123), 123)).toBe(false);
-    expect(legendValueEqual(Number.NaN, Number.NaN)).toBe(true);
-    expect(legendValueEqual(-0, 0)).toBe(true);
-    expect(legendValueEqual(null, null)).toBe(true);
-    expect(legendValueEqual(null, false)).toBe(false);
-    expect(legendValueEqual("1", 1)).toBe(false);
-  });
-
-  it("resolves encoded values to deduplicated stable keys in source order", () => {
-    const symbol = Symbol("row");
-    const memberships = [
-      { value: "west", keys: ["row-3", "row-1"] as const },
-      { value: "east", keys: ["row-2"] as const },
-      { value: "west", keys: ["row-1", symbol] as const },
-    ];
-
-    const keys = resolveLegendFocusKeys("west", memberships);
-
-    expect(keys).toEqual(["row-3", "row-1", symbol]);
-    expect(Object.isFrozen(keys)).toBe(true);
-    expect(memberships[0]!.value).toBe("west");
   });
 });

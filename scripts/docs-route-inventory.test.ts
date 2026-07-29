@@ -145,6 +145,32 @@ describe("docs route inventory", () => {
     );
   });
 
+  it("pins detail-route headings: aliases, related-examples, and family differences", () => {
+    const inventory = createDocsRouteInventory();
+    const ids = (path: string) =>
+      inventory.find((entry) => entry.path === path)?.headings?.map((h) => h.id) ?? [];
+
+    // Alias geoms insert an "alias" section between defaults and the shared body.
+    expect(ids("/reference/geoms/histogram")).toEqual([
+      "defaults",
+      "alias",
+      "svelte",
+      "json",
+      "params",
+      "allowed-stats",
+      "allowed-positions",
+      "examples",
+    ]);
+    // Related-examples matchers differ by family: geom tags/category, stat-
+    // prefixed tags, position id/tag includes. Pin both sides of each gate.
+    expect(ids("/reference/geoms/point")).toContain("examples");
+    expect(ids("/reference/geoms/linerange")).not.toContain("examples");
+    expect(ids("/reference/stats/identity")).toContain("examples");
+    expect(ids("/reference/stats/bin_hex")).not.toContain("examples");
+    expect(ids("/reference/positions/identity")).toContain("examples");
+    expect(ids("/reference/positions/nudge")).not.toContain("examples");
+  });
+
   it("publishes the CLI reference inside the one Reference hierarchy", () => {
     const cliRoute = createDocsRouteInventory().find((entry) => entry.path === "/reference/cli");
     expect(cliRoute).toMatchObject({

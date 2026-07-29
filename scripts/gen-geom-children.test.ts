@@ -11,15 +11,17 @@ import { KNOWN_GEOMS } from "@ggsvelte/spec";
 import {
   componentNameForGeom,
   expectedGeoms,
+  manifestGeoms,
+  SHELL_MANIFEST,
+} from "./gen-geom-children-manifest.ts";
+import {
   GENERATED_HEADER,
   INDEX_PATH,
-  manifestGeoms,
   REGION_END,
   REGION_START,
   renderIndexRegion,
   renderShell,
   rewriteIndexRegion,
-  SHELL_MANIFEST,
   shellRelPath,
 } from "./gen-geom-children.ts";
 

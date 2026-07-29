@@ -14,40 +14,16 @@ export interface RuntimeRowFilterClause {
   readonly mode: RuntimeRowFilterMode;
 }
 
-export type RuntimeRow = Readonly<Record<string, CellValue>>;
-export type RuntimeRowFilter = (row: RuntimeRow) => boolean;
 export type RuntimeRowIndexFilter = (rowIndex: number) => boolean;
 
-/** Type-aware equality shared with stable categorical scale assignment. */
-export function runtimeFilterValueEqual(left: CellValue, right: CellValue): boolean {
-  return encodeKey(left) === encodeKey(right);
-}
-
 /**
- * Compile clauses once per pipeline run. Clauses compose with AND. The
- * returned predicate snapshots caller-owned arrays so mutation cannot change
- * a render already in progress.
- */
-export function compileRuntimeRowFilter(
-  clauses: readonly RuntimeRowFilterClause[],
-): RuntimeRowFilter {
-  const compiled = clauses.map((clause) => ({
-    field: clause.field,
-    mode: clause.mode,
-    values: new Set(clause.values.map(encodeKey)),
-  }));
-  if (compiled.length === 0) return () => true;
-  return (row) =>
-    compiled.every((clause) => {
-      const value = Object.hasOwn(row, clause.field) ? row[clause.field] : null;
-      const included = clause.values.has(encodeKey(value));
-      return clause.mode === "include" ? included : !included;
-    });
-}
-
-/**
- * Compile the same typed clauses against columnar storage. Only referenced
- * columns are resolved, once per distinct field; no row objects are built.
+ * Compile typed clauses against columnar storage. Clauses compose with AND.
+ * Only referenced columns are resolved, once per distinct field; no row
+ * objects are built. The returned predicate snapshots caller-owned arrays so
+ * mutation cannot change a render already in progress.
+ *
+ * Equality is {@link encodeKey} (Date by getTime, NaN ≡ NaN; ±0 distinct) —
+ * the same tokens used by discrete scale assignment.
  */
 export function compileRuntimeRowIndexFilter(
   clauses: readonly RuntimeRowFilterClause[],

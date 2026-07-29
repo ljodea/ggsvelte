@@ -6035,6 +6035,146 @@
                 },
                 {
                   "type": "string",
+                  "const": "economist"
+                },
+                {
+                  "type": "string",
+                  "const": "solarized"
+                },
+                {
+                  "type": "string",
+                  "const": "few"
+                },
+                {
+                  "type": "string",
+                  "const": "few_light"
+                },
+                {
+                  "type": "string",
+                  "const": "few_dark"
+                },
+                {
+                  "type": "string",
+                  "const": "fivethirtyeight"
+                },
+                {
+                  "type": "string",
+                  "const": "ptol"
+                },
+                {
+                  "type": "string",
+                  "const": "canva"
+                },
+                {
+                  "type": "string",
+                  "const": "wsj"
+                },
+                {
+                  "type": "string",
+                  "const": "wsj_rgby"
+                },
+                {
+                  "type": "string",
+                  "const": "wsj_red_green"
+                },
+                {
+                  "type": "string",
+                  "const": "wsj_black_green"
+                },
+                {
+                  "type": "string",
+                  "const": "wsj_dem_rep"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau20"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_colorblind"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_seattle_grays"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_traffic"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_miller_stone"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_superfishel_stone"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_nuriel_stone"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_jewel_bright"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_summer"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_winter"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_green_orange_teal"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_red_blue_brown"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_purple_pink_gray"
+                },
+                {
+                  "type": "string",
+                  "const": "tableau_hue_circle"
+                },
+                {
+                  "type": "string",
+                  "const": "gdocs"
+                },
+                {
+                  "type": "string",
+                  "const": "hc"
+                },
+                {
+                  "type": "string",
+                  "const": "hc_dark"
+                },
+                {
+                  "type": "string",
+                  "const": "pander"
+                },
+                {
+                  "type": "string",
+                  "const": "calc"
+                },
+                {
+                  "type": "string",
+                  "const": "excel"
+                },
+                {
+                  "type": "string",
+                  "const": "excel_fill"
+                },
+                {
+                  "type": "string",
+                  "const": "excel_new"
+                },
+                {
+                  "type": "string",
                   "const": "Set1"
                 },
                 {
@@ -8451,6 +8591,58 @@
         },
         {
           "type": "string",
+          "const": "solarized"
+        },
+        {
+          "type": "string",
+          "const": "solarizeddark"
+        },
+        {
+          "type": "string",
+          "const": "economist_white"
+        },
+        {
+          "type": "string",
+          "const": "solarized_2"
+        },
+        {
+          "type": "string",
+          "const": "solarized_2dark"
+        },
+        {
+          "type": "string",
+          "const": "wsj"
+        },
+        {
+          "type": "string",
+          "const": "gdocs"
+        },
+        {
+          "type": "string",
+          "const": "hc"
+        },
+        {
+          "type": "string",
+          "const": "hcdark"
+        },
+        {
+          "type": "string",
+          "const": "pander"
+        },
+        {
+          "type": "string",
+          "const": "calc"
+        },
+        {
+          "type": "string",
+          "const": "excel"
+        },
+        {
+          "type": "string",
+          "const": "excel_new"
+        },
+        {
+          "type": "string",
           "const": "base"
         },
         {
@@ -8478,7 +8670,7 @@
           "const": "test"
         }
       ],
-      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"base\", \"igray\", \"map\", \"solid\", \"grey\", \"gray\", \"test\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"solarized\", \"solarizeddark\", \"economist_white\", \"solarized_2\", \"solarized_2dark\", \"wsj\", \"gdocs\", \"hc\", \"hcdark\", \"pander\", \"calc\", \"excel\", \"excel_new\", \"base\", \"igray\", \"map\", \"solid\", \"grey\", \"gray\", \"test\"."
     },
     "ThemeSpec": {
       "type": "object",

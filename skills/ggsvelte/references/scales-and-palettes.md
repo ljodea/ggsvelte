@@ -159,24 +159,59 @@ byte-identity-preserving: `value` is not routed through any helper.
 
 ## Palettes
 
-### Categorical schemes (14)
+### Categorical schemes (49)
 
-| Scheme               | Description                                                       |
-| -------------------- | ----------------------------------------------------------------- |
-| observable10         | Default: 10-hue Observable 10 palette                             |
-| ipsum                | hrbrthemes ipsum palette, published source order                  |
-| flexoki              | Flexoki light-background qualitative palette                      |
-| tableau10            | Tableau 10 qualitative palette                                    |
-| colorblind           | ggthemes 8-color colorblind-safe palette                          |
-| Set1                 | ColorBrewer qualitative, saturated primaries                      |
-| Set2                 | ColorBrewer qualitative, muted pastels                            |
-| Set3                 | ColorBrewer qualitative, light 12-class                           |
-| Dark2                | ColorBrewer qualitative, dark tones                               |
-| Paired               | ColorBrewer qualitative, light/dark pairs                         |
-| Accent               | ColorBrewer qualitative, accented mix                             |
-| hue                  | Evenly spaced HSL hues — the ggplot2-shaped `scale_*_hue` default |
-| grey                 | Greyscale discrete ramp (`scale_*_grey`)                          |
-| gray (alias of grey) | Same scheme, US spelling — identical colors                       |
+| Scheme                    | Description                                                        |
+| ------------------------- | ------------------------------------------------------------------ |
+| observable10              | Default: 10-hue Observable 10 palette                              |
+| ipsum                     | hrbrthemes ipsum palette, published source order                   |
+| flexoki                   | Flexoki light-background qualitative palette                       |
+| tableau10                 | Tableau 10 qualitative palette                                     |
+| colorblind                | ggthemes 8-color colorblind-safe palette                           |
+| economist                 | ggthemes Economist blues/greens (scale_colour/fill_economist)      |
+| solarized                 | ggthemes Solarized accents, blue first (scale_*_solarized)         |
+| few                       | ggthemes Few "Medium" — the default `scale_colour_few` palette     |
+| few_light                 | ggthemes Few "Light" — for filled areas (`scale_fill_few` default) |
+| few_dark                  | ggthemes Few "Dark" — for thin lines and highlighting              |
+| fivethirtyeight           | ggthemes FiveThirtyEight three-color line palette (blue/red/green) |
+| ptol                      | ggthemes Paul Tol qualitative 12 (full-capacity order)             |
+| canva                     | ggthemes Canva "Fresh and bright" 4 (the `scale_*_canva` default)  |
+| wsj                       | ggthemes WSJ colors6 — the default `scale_*_wsj` palette           |
+| wsj_rgby                  | ggthemes WSJ red/green/blue/yellow                                 |
+| wsj_red_green             | ggthemes WSJ green/red good–bad pair                               |
+| wsj_black_green           | ggthemes WSJ black-to-green sentiment scale                        |
+| wsj_dem_rep               | ggthemes WSJ Democrat/Republican/Undecided                         |
+| tableau20                 | ggthemes Tableau 20 (classic paired set)                           |
+| tableau_colorblind        | ggthemes Tableau Color Blind 10                                    |
+| tableau_seattle_grays     | ggthemes Tableau Seattle Grays (5)                                 |
+| tableau_traffic           | ggthemes Tableau Traffic red/yellow/green triples                  |
+| tableau_miller_stone      | ggthemes Tableau Miller Stone (11)                                 |
+| tableau_superfishel_stone | ggthemes Tableau Superfishel Stone (10)                            |
+| tableau_nuriel_stone      | ggthemes Tableau Nuriel Stone (9)                                  |
+| tableau_jewel_bright      | ggthemes Tableau Jewel Bright (9)                                  |
+| tableau_summer            | ggthemes Tableau Summer (8)                                        |
+| tableau_winter            | ggthemes Tableau Winter (10)                                       |
+| tableau_green_orange_teal | ggthemes Tableau Green-Orange-Teal (12)                            |
+| tableau_red_blue_brown    | ggthemes Tableau Red-Blue-Brown (12)                               |
+| tableau_purple_pink_gray  | ggthemes Tableau Purple-Pink-Gray (12)                             |
+| tableau_hue_circle        | ggthemes Tableau Hue Circle (19)                                   |
+| gdocs                     | ggthemes Google Docs colors (6 hues × 4 strengths, verbatim)       |
+| hc                        | ggthemes Highcharts default 10 colors                              |
+| hc_dark                   | ggthemes Highcharts darkunica 11 colors                            |
+| pander                    | ggthemes pander colorblind/printer-friendly 8 (Okabe-Ito order)    |
+| calc                      | ggthemes LibreOffice Calc 12 chart colors                          |
+| excel                     | ggthemes Excel 97 line/point palette (`scale_colour_excel`)        |
+| excel_fill                | ggthemes Excel 97 area palette (`scale_fill_excel`)                |
+| excel_new                 | ggthemes current-Office accents ("Office Theme" default)           |
+| Set1                      | ColorBrewer qualitative, saturated primaries                       |
+| Set2                      | ColorBrewer qualitative, muted pastels                             |
+| Set3                      | ColorBrewer qualitative, light 12-class                            |
+| Dark2                     | ColorBrewer qualitative, dark tones                                |
+| Paired                    | ColorBrewer qualitative, light/dark pairs                          |
+| Accent                    | ColorBrewer qualitative, accented mix                              |
+| hue                       | Evenly spaced HSL hues — the ggplot2-shaped `scale_*_hue` default  |
+| grey                      | Greyscale discrete ramp (`scale_*_grey`)                           |
+| gray (alias of grey)      | Same scheme, US spelling — identical colors                        |
 
 `grey` and `gray` are the same scheme; both spellings validate and produce
 identical output. Sequential scheme names are also legal on ordinal scales

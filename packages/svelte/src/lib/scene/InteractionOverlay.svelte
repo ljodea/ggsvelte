@@ -53,7 +53,7 @@
     > | null;
     inspectionPanel?: Panel | null;
     coordFlipped?: boolean;
-    /** Circle ring for points; `"none"` for rect marks (mask de-emphasis). */
+    /** Circle ring for points; `"none"` for non-point marks (mask de-emphasis). */
     hoverChrome?: PresentationChrome;
     selectedAnchors?: readonly PresentationAnchor[];
     emphasizedAnchors?: readonly PresentationAnchor[];
@@ -149,9 +149,10 @@
       />
     {/if}
   {/if}
-  <!-- Selection rings are presentation of shared controller state; passive
-       consumers (interactive=false) must still show them. Rect anchors use
-       relative de-emphasis instead of a point ring (#386). -->
+  <!-- Selection/emphasis rings: presentation of shared controller state; passive
+       consumers (interactive=false) must still show them. Only point-mark
+       anchors request rings; paths/rects/segments/glyphs use mute-only chrome.
+       Dense emphasis is density-gated before it reaches this overlay. -->
   {#each selectedAnchors as anchor, index (index)}
     {#if anchor.chrome === "ring"}
       <circle
