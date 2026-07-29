@@ -7,6 +7,12 @@ import { renderMarkdown } from "$scripts/gen-llms";
 import type { EntryGenerator, PageServerLoad } from "./$types";
 
 /**
+ * Pure prerendered HTML — no page hydration. Layout/DocsShell still hydrate
+ * for nav, appearance, and guide fence copy (attachGuideCodeCopy on shell).
+ */
+export const csr = false;
+
+/**
  * Prerender markdown guide chapters only. `/guide/getting-started` is a
  * dedicated static route so its client graph stays off every other chapter.
  */

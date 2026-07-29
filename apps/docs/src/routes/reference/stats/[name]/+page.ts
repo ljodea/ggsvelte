@@ -8,6 +8,9 @@ import type { EntryGenerator, PageLoad } from "./$types";
 
 const STAT_SET = new Set<string>(KNOWN_STATS);
 
+/** Static API card — no page hydration (layout chrome still hydrates). */
+export const csr = false;
+
 /** Prerender one page per stat (adapter-static). */
 export const entries: EntryGenerator = () => KNOWN_STATS.map((name) => ({ name }));
 

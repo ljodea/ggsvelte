@@ -8,6 +8,9 @@ import type { EntryGenerator, PageLoad } from "./$types";
 
 const POSITION_SET = new Set<string>(KNOWN_POSITIONS);
 
+/** Static API card — no page hydration (layout chrome still hydrates). */
+export const csr = false;
+
 /** Prerender one page per position (adapter-static). */
 export const entries: EntryGenerator = () => KNOWN_POSITIONS.map((name) => ({ name }));
 

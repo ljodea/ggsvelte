@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
+  import { attachGuideCodeCopy } from "$lib/guide-code-copy";
   import { GUIDE_NAVIGATION, primaryNavigationOwner } from "$lib/routes";
   import type { DocsRouteMetadata } from "$lib/route-types";
 
@@ -127,7 +128,7 @@
     <DocsSidebar groups={GUIDE_NAVIGATION} {path} />
   </aside>
 
-  <div class="docs-article">
+  <div class="docs-article" {@attach attachGuideCodeCopy}>
     <Breadcrumbs {crumbs} />
     {@render children()}
     <PrevNext {previous} {next} />

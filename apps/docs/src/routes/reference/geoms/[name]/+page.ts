@@ -8,6 +8,9 @@ import type { EntryGenerator, PageLoad } from "./$types";
 
 const GEOM_SET = new Set<string>(KNOWN_GEOMS);
 
+/** Static API card — no page hydration (layout chrome still hydrates). */
+export const csr = false;
+
 /** Prerender one page per geom (adapter-static). */
 export const entries: EntryGenerator = () => KNOWN_GEOMS.map((name) => ({ name }));
 

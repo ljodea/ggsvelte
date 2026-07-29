@@ -35,7 +35,9 @@ describe("docs chart stack isolation (PR1)", () => {
   it("does not put GettingStartedGuide on the shared markdown guide module", () => {
     const markdownGuide = read("routes/guide/[slug]/+page.svelte");
     expect(markdownGuide).not.toContain("GettingStartedGuide");
-    expect(markdownGuide).toContain("attachGuideCodeCopy");
+    // Fence copy lives on DocsShell so guide/[slug] can use csr=false (PR4).
+    expect(markdownGuide).not.toContain("attachGuideCodeCopy");
+    expect(read("lib/components/DocsShell.svelte")).toContain("attachGuideCodeCopy");
 
     const lesson = read("routes/guide/getting-started/+page.svelte");
     expect(lesson).toContain("GettingStartedGuide");
