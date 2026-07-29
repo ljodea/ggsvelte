@@ -8451,6 +8451,22 @@
         },
         {
           "type": "string",
+          "const": "base"
+        },
+        {
+          "type": "string",
+          "const": "igray"
+        },
+        {
+          "type": "string",
+          "const": "map"
+        },
+        {
+          "type": "string",
+          "const": "solid"
+        },
+        {
+          "type": "string",
           "const": "grey"
         },
         {
@@ -8462,7 +8478,7 @@
           "const": "test"
         }
       ],
-      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"grey\", \"gray\", \"test\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"base\", \"igray\", \"map\", \"solid\", \"grey\", \"gray\", \"test\"."
     },
     "ThemeSpec": {
       "type": "object",

@@ -6425,6 +6425,10 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ThemeBase": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ThemeBw": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -6473,11 +6477,19 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ThemeIgray": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ThemeLight": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
         "ThemeLinedraw": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeMap": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },
@@ -6488,6 +6500,10 @@
         "ThemeName": {
           "kind": "type",
           "lifecycle": "experimental"
+        },
+        "ThemeSolid": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
         },
         "ThemeSpec": {
           "kind": "type",

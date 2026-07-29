@@ -42,9 +42,12 @@ describe("theme_void registry (#822)", () => {
     expect(t.showPanelBorder).toBe(false);
   });
 
-  it("keeps labelsX/labelsY true on every non-void builtin (no layout regression)", () => {
+  it("keeps labelsX/labelsY true on every labeled builtin (no layout regression)", () => {
+    // ggthemes theme_map/theme_solid blank all axis text like theme_void —
+    // marks-only surfaces by definition (#1158).
+    const MARKS_ONLY = new Set(["void", "map", "solid"]);
     for (const name of THEME_NAMES) {
-      if (name === "void") continue;
+      if (MARKS_ONLY.has(name)) continue;
       const t = resolveTheme(name);
       expect(t.labelsX, `${name}.labelsX`).toBe(true);
       expect(t.labelsY, `${name}.labelsY`).toBe(true);

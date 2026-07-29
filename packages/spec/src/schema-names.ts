@@ -129,6 +129,11 @@ export const THEME_NAMES = [
   "tufte",
   "linedraw",
   "void",
+  // ggthemes theme ports (#1158)
+  "base",
+  "igray",
+  "map",
+  "solid",
   "grey",
   "gray",
   // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters

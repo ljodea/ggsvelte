@@ -9626,14 +9626,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["experimental (473)"],
   },
   {
-    id: "heading:guide-lifecycle:stable-intent-223",
+    id: "heading:guide-lifecycle:stable-intent-227",
     kind: "heading",
-    title: "stable-intent (223)",
+    title: "stable-intent (227)",
     summary:
-      "stable-intent (223) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#stable-intent-223",
+      "stable-intent (227) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#stable-intent-227",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["stable-intent (223)"],
+    exact: ["stable-intent (227)"],
   },
   {
     id: "page:guide-upgrading",
@@ -25854,6 +25854,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Theme"],
   },
   {
+    id: "api:ggsvelte-svelte:ThemeBase",
+    kind: "api",
+    title: "ThemeBase",
+    summary: "@ggsvelte/svelte · value · stable-intent.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "stable-intent"],
+    exact: ["ThemeBase"],
+  },
+  {
     id: "api:ggsvelte-svelte:ThemeBw",
     kind: "api",
     title: "ThemeBw",
@@ -25962,6 +25971,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["ThemeHrbr"],
   },
   {
+    id: "api:ggsvelte-svelte:ThemeIgray",
+    kind: "api",
+    title: "ThemeIgray",
+    summary: "@ggsvelte/svelte · value · stable-intent.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "stable-intent"],
+    exact: ["ThemeIgray"],
+  },
+  {
     id: "api:ggsvelte-svelte:ThemeLight",
     kind: "api",
     title: "ThemeLight",
@@ -25980,6 +25998,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["ThemeLinedraw"],
   },
   {
+    id: "api:ggsvelte-svelte:ThemeMap",
+    kind: "api",
+    title: "ThemeMap",
+    summary: "@ggsvelte/svelte · value · stable-intent.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "stable-intent"],
+    exact: ["ThemeMap"],
+  },
+  {
     id: "api:ggsvelte-svelte:ThemeMinimal",
     kind: "api",
     title: "ThemeMinimal",
@@ -25996,6 +26023,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-svelte",
     keywords: ["@ggsvelte/svelte", ".", "type", "experimental"],
     exact: ["ThemeName"],
+  },
+  {
+    id: "api:ggsvelte-svelte:ThemeSolid",
+    kind: "api",
+    title: "ThemeSolid",
+    summary: "@ggsvelte/svelte · value · stable-intent.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "stable-intent"],
+    exact: ["ThemeSolid"],
   },
   {
     id: "api:ggsvelte-svelte:ThemeSpec",

@@ -25,6 +25,10 @@ const THEME_LABELS = {
   tufte: "Tufte",
   linedraw: "Linedraw",
   void: "Void",
+  base: "Base",
+  igray: "Inverse Gray",
+  map: "Map",
+  solid: "Solid",
   test: "Test",
 } as const satisfies Record<ThemeOptionName, string>;
 
@@ -63,6 +67,10 @@ const THEME_DEMO_SCHEMES = {
   tufte: "colorblind",
   linedraw: "colorblind",
   void: "colorblind",
+  base: "tableau10",
+  igray: "tableau10",
+  map: "colorblind",
+  solid: "colorblind",
   test: "colorblind",
 } as const satisfies Record<ThemeOptionName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
 
