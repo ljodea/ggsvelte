@@ -189,11 +189,16 @@ export function staticLessonSteps(): number[] {
 export function italicizeEpochNames(svg: string): string {
   let out = svg;
   for (const band of SAKURA_EPOCHS) {
-    const escaped = band.epoch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    out = out.replace(
+    const escaped = band.epoch.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    out = out.replaceAll(
       new RegExp(`(<text\\b[^>]*?)(\\s*>${escaped}</text>)`, "g"),
-      (_match, open: string, close: string) =>
-        open.includes("font-style") ? `${open}${close}` : `${open} font-style="italic"${close}`,
+      (...args: string[]) => {
+        const open = args[1] ?? "";
+        const close = args[2] ?? "";
+        return open.includes("font-style")
+          ? `${open}${close}`
+          : `${open} font-style="italic"${close}`;
+      },
     );
   }
   return out;
