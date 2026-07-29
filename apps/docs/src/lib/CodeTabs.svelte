@@ -4,12 +4,10 @@
    * spec JSON (what agents emit), fluent-builder TypeScript (spec.ts), and
    * idiomatic Svelte components (Example.svelte) — each with a copy button.
    */
-  import Highlight from "svelte-highlight";
-
   import { briefCopyStatus, COPIED_STATUS, copyText } from "$lib/clipboard";
   import {
+    highlightDocsBlock,
     languageFromCodeTabLabel,
-    resolveCodeLanguage,
   } from "$lib/code-languages";
   import { CHECK_ICON_SVG, COPY_ICON_SVG } from "$lib/copy-icons";
   import { nextRovingTabIndex } from "$lib/tab-roving";
@@ -30,8 +28,9 @@
   let copyTimer: ReturnType<typeof setTimeout> | undefined;
 
   const activeTab = $derived(tabs[active]);
-  const languageModule = $derived(
-    resolveCodeLanguage(
+  const highlighted = $derived(
+    highlightDocsBlock(
+      activeTab?.code ?? "",
       activeTab?.language ?? languageFromCodeTabLabel(activeTab?.label),
     ),
   );
@@ -70,11 +69,7 @@
 
 <div class="code-tabs">
   <div class="bar">
-    <div
-      class="representations"
-      role="tablist"
-      aria-label="Code representations"
-    >
+    <div class="tabs" role="tablist" aria-label="Code representations">
       {#each tabs as tab, i (tab.label)}
         <button
           id={`${tabsetId}-tab-${String(i)}`}
@@ -124,7 +119,8 @@
       tabindex="0"
       bind:this={codeNode}
     >
-      <Highlight code={activeTab?.code ?? ""} language={languageModule} />
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- highlight.js token spans; plaintext is escaped -->
+      {@html highlighted}
     </div>
   </div>
 </div>
@@ -147,7 +143,7 @@
     background: var(--bg);
   }
 
-  .representations {
+  .tabs {
     display: flex;
     min-width: 0;
     gap: 0.15rem;

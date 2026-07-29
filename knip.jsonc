@@ -79,7 +79,9 @@
       "project": ["src/**/*.ts", "tests/**/*.ts", "*.{js,ts}"],
       // Imported only from .svelte files / the $examples alias, which knip
       // does not trace. bits-ui is deep-imported only from .svelte.
-      "ignoreDependencies": ["@ggsvelte/examples", "bits-ui"],
+      // highlight.js: atom-one-dark CSS via app.css + shared scripts/highlight-code
+      // (relative import from code-languages.ts). Knip does not follow either.
+      "ignoreDependencies": ["@ggsvelte/examples", "bits-ui", "highlight.js"],
     },
   },
 }
