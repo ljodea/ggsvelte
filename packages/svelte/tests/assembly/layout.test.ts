@@ -347,6 +347,31 @@ describe("resolveClearControlLayout", () => {
     expect(layout!.left).toBeGreaterThanOrEqual(CLEAR_CONTROL_GAP_PX);
   });
 
+  it("parks Clear above a tall right legend when below would clamp into the box", () => {
+    // Bottom of legend near scene bottom — preferred under-park would clamp
+    // upward into the swatch stack (Devin finding on #1201).
+    const tallLow = {
+      scale: "color",
+      x: 340,
+      y: 40,
+      width: 72,
+      height: 250,
+      position: "right" as const,
+      direction: "vertical" as const,
+    };
+    const layout = resolveClearControlLayout({
+      legendFocusEnabled: true,
+      pressedScale: "color",
+      legends: [tallLow],
+      sceneWidth: 420,
+      sceneHeight: 300,
+    });
+    expect(layout).not.toBeNull();
+    // Above the legend box, not inside it.
+    expect(layout!.top + CLEAR_CONTROL_HEIGHT_PX).toBeLessThanOrEqual(tallLow.y);
+    expect(layout!.top).toBeGreaterThanOrEqual(CLEAR_CONTROL_GAP_PX);
+  });
+
   it("anchors to the pressed scale when multiple legends are present", () => {
     expect(
       resolveClearControlLayout({

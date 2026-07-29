@@ -196,11 +196,12 @@ export type ClearControlLayout = {
  * Scene-local position for the legend Clear recovery control, or null to hide.
  *
  * Placement (collision-safe relative to the pressed legend):
- * - **right / vertical** — immediately **below** the legend stack (never over title/swatches)
- * - **bottom / horizontal** — to the **right** of the strip when space allows, else under it
+ * - **right / vertical** — prefer **below** the stack; if that would clamp into
+ *   the legend box (tall low guide), try **above**, then **left** of the box
+ * - **bottom / horizontal** — prefer **right** of the strip; else under, then above
  *
- * Always clamps into the scene box so capture/hit-testing still reach the control.
- * null when legend focus is off, nothing is pressed, or no legend matches.
+ * Candidates are clamped into the scene, then the first that does not intersect
+ * the pressed legend box wins. null when focus is off / nothing pressed / no match.
  */
 export function resolveClearControlLayout(
   input: ClearControlLayoutInput,
@@ -214,32 +215,48 @@ export function resolveClearControlLayout(
   const gap = CLEAR_CONTROL_GAP_PX;
   const btnW = CLEAR_CONTROL_WIDTH_PX;
   const btnH = CLEAR_CONTROL_HEIGHT_PX;
-
-  let left: number;
-  let top: number;
-
-  if (position === "bottom" || direction === "horizontal") {
-    const besideLeft = legend.x + legend.width + gap;
-    const fitsBeside = besideLeft + btnW + gap <= input.sceneWidth;
-    if (fitsBeside) {
-      left = besideLeft;
-      top = legend.y + Math.max(0, (legend.height - btnH) / 2);
-    } else {
-      left = legend.x;
-      top = legend.y + legend.height + gap;
-    }
-  } else {
-    // right / vertical stack: under the full legend box
-    left = legend.x;
-    top = legend.y + legend.height + gap;
-  }
-
   const maxLeft = Math.max(gap, input.sceneWidth - btnW - gap);
   const maxTop = Math.max(gap, input.sceneHeight - btnH - gap);
-  return {
+
+  const clamp = (left: number, top: number): ClearControlLayout => ({
     left: Math.min(Math.max(gap, left), maxLeft),
     top: Math.min(Math.max(gap, top), maxTop),
+  });
+
+  const overlapsLegend = (layout: ClearControlLayout): boolean => {
+    const right = layout.left + btnW;
+    const bottom = layout.top + btnH;
+    const legRight = legend.x + legend.width;
+    const legBottom = legend.y + legend.height;
+    return !(
+      right <= legend.x ||
+      layout.left >= legRight ||
+      bottom <= legend.y ||
+      layout.top >= legBottom
+    );
   };
+
+  const candidates: ClearControlLayout[] =
+    position === "bottom" || direction === "horizontal"
+      ? [
+          // beside, then under, then above the horizontal strip
+          clamp(legend.x + legend.width + gap, legend.y + Math.max(0, (legend.height - btnH) / 2)),
+          clamp(legend.x, legend.y + legend.height + gap),
+          clamp(legend.x, legend.y - gap - btnH),
+        ]
+      : [
+          // under, then above, then left of the vertical stack
+          clamp(legend.x, legend.y + legend.height + gap),
+          clamp(legend.x, legend.y - gap - btnH),
+          clamp(legend.x - gap - btnW, legend.y),
+        ];
+
+  for (const candidate of candidates) {
+    if (!overlapsLegend(candidate)) return candidate;
+  }
+  // Last resort: first candidate (still scene-clamped) when every park collides
+  // (degenerate: legend fills the scene). Prefer under/beside intent over hide.
+  return candidates[0] ?? null;
 }
 
 /**
