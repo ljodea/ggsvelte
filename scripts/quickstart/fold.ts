@@ -29,7 +29,7 @@ const BASE_CHILDREN: Record<string, string> = { points: "  <GeomPoint />" };
  * Readable defaults so the first chart does not ship camelCase axis titles or
  * grouped year ticks. `bloomDate` is a full ISO date per year; month-day y
  * collapses the year so the scatter is bloom timing, not a year-vs-year
- * diagonal. Reverse matches the "earlier ↑" lab from the first render.
+ * diagonal. Reverse puts earlier blooms higher on the y-axis.
  * X domain is fixed from the first render so year ticks stay stable as steps
  * add chrome (labels: "d" so 1000 CE is not "1,000").
  */
