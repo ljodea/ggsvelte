@@ -1,7 +1,7 @@
 ---
-"@ggsvelte/core": patch
-"@ggsvelte/spec": patch
-"@ggsvelte/svelte": patch
+"@ggsvelte/core": minor
+"@ggsvelte/spec": minor
+"@ggsvelte/svelte": minor
 ---
 
 <!-- markdownlint-disable MD041 -->
@@ -28,4 +28,4 @@ The ordered-sequential and ordered-diverging Tableau ramps are a separate
 follow-up (they feed the sequential scheme registry, not the categorical
 one).
 
-Migration: none — additive scheme names only.
+Migration: none — additive
