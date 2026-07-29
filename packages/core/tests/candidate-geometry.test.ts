@@ -9,7 +9,6 @@ import {
   pathSubpathIndex,
   primitiveCount,
   renderPrimitiveCount,
-  samePath,
 } from "../src/candidate-geometry.ts";
 import { batchMarkCount } from "../src/pipeline.ts";
 import { batchPrimitiveCount } from "../src/dom/canvas-marks-mask.ts";
@@ -88,29 +87,6 @@ describe("render vs candidate primitive algebra (tessellated path)", () => {
     expect(candidatePrimitiveCount(batch)).toBe(3); // anchors
     expect(batchMarkCount(batch)).toBe(2);
     expect(batchPrimitiveCount(batch)).toBe(2);
-  });
-});
-
-describe("samePath", () => {
-  const batch = pathsBatch([0, 4, 7]);
-
-  it("is true for vertices in the same subpath, including ends of the half-open range", () => {
-    expect(samePath(batch, 0, 3)).toBe(true);
-    expect(samePath(batch, 3, 1)).toBe(true);
-    expect(samePath(batch, 4, 6)).toBe(true);
-  });
-
-  it("is false across subpath boundaries and for out-of-range seeds", () => {
-    expect(samePath(batch, 3, 4)).toBe(false);
-    expect(samePath(batch, 0, 4)).toBe(false);
-    expect(samePath(batch, -1, 0)).toBe(false);
-    expect(samePath(batch, 7, 6)).toBe(false);
-  });
-
-  it("treats adjacent vertices on a shared boundary as different subpaths", () => {
-    // Vertex 3 is last of first path; vertex 4 is first of second — not samePath.
-    expect(samePath(batch, 3, 4)).toBe(false);
-    expect(samePath(batch, 4, 3)).toBe(false);
   });
 });
 

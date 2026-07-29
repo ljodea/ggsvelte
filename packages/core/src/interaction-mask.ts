@@ -16,12 +16,6 @@ export interface BatchInteractionMask {
   isFocused(primitiveIndex: number): boolean;
 }
 
-/** An encoded legend value and the distinct semantic row keys it represents. */
-export interface LegendValueMembership<Key extends PropertyKey = PropertyKey> {
-  readonly value: unknown;
-  readonly keys: readonly Key[];
-}
-
 function pathForVertex(offsets: Uint32Array, vertexIndex: number): number | null {
   if (
     !Number.isInteger(vertexIndex) ||
@@ -180,32 +174,4 @@ export function buildPrimitiveInteractionMasks(
   }
   if (!any) return Object.freeze(Array.from<null>({ length: batches.length }).fill(null));
   return freezeMasks(batches, focused);
-}
-
-/** Typed canonical equality for raw discrete legend values. */
-export function legendValueEqual(a: unknown, b: unknown): boolean {
-  if (a instanceof Date || b instanceof Date)
-    return a instanceof Date && b instanceof Date && Object.is(a.getTime(), b.getTime());
-  return (
-    a === b ||
-    (typeof a === "number" && typeof b === "number" && Number.isNaN(a) && Number.isNaN(b))
-  );
-}
-
-/** Resolve a raw legend value to stable semantic keys, preserving source order. */
-export function resolveLegendFocusKeys<Key extends PropertyKey>(
-  value: unknown,
-  memberships: readonly LegendValueMembership<Key>[],
-): readonly Key[] {
-  const seen = new Set<Key>();
-  const keys: Key[] = [];
-  for (const membership of memberships) {
-    if (!legendValueEqual(value, membership.value)) continue;
-    for (const key of membership.keys) {
-      if (seen.has(key)) continue;
-      seen.add(key);
-      keys.push(key);
-    }
-  }
-  return Object.freeze(keys);
 }

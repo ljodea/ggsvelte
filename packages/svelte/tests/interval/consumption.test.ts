@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  candidateInInterval,
   consumeIntervalKeys,
   nextLocalIntervalRecords,
-  recomputePanelIntervalKeys,
   recomputePanelIntervalProjection,
   sameIntervalRecord,
   type IntervalConsumptionCandidate,
@@ -321,31 +319,37 @@ describe("facet interval consumption", () => {
     expect(keys).not.toContain(`k${selectedCount}`);
   });
 
-  it("candidateInInterval rejects undefined axis values and keeps numeric axes", () => {
+  it("panel recompute rejects undefined axis values and keeps numeric axes", () => {
+    // Membership is private to consume/recompute; assert via projection keys.
+    const bandDomains = {
+      x: { kind: "band" as const, values: ["low"] },
+      y: { kind: "band" as const, values: ["low"] },
+    };
     expect(
-      candidateInInterval(
-        { xValue: undefined, yValue: "low" },
-        { x: { kind: "band", values: ["low"] }, y: { kind: "band", values: ["low"] } },
-      ),
-    ).toBe(false);
+      recomputePanelIntervalProjection({
+        panelId: "p",
+        domains: bandDomains,
+        candidates: [{ panelId: "p", xValue: undefined, yValue: "low", keys: ["a"] }],
+      }).keys,
+    ).toEqual([]);
+    const numericDomains = {
+      x: { kind: "linear" as const, domain: [1, 5] as const },
+      y: { kind: "linear" as const, transform: "log10" as const, domain: [1, 100] as const },
+    };
     expect(
-      candidateInInterval(
-        { xValue: 3, yValue: 10 },
-        {
-          x: { kind: "linear", domain: [1, 5] },
-          y: { kind: "linear", transform: "log10", domain: [1, 100] },
-        },
-      ),
-    ).toBe(true);
+      recomputePanelIntervalProjection({
+        panelId: "p",
+        domains: numericDomains,
+        candidates: [{ panelId: "p", xValue: 3, yValue: 10, keys: ["ok"] }],
+      }).keys,
+    ).toEqual(["ok"]);
     expect(
-      candidateInInterval(
-        { xValue: 3, yValue: -1 },
-        {
-          x: { kind: "linear", domain: [1, 5] },
-          y: { kind: "linear", transform: "log10", domain: [1, 100] },
-        },
-      ),
-    ).toBe(false);
+      recomputePanelIntervalProjection({
+        panelId: "p",
+        domains: numericDomains,
+        candidates: [{ panelId: "p", xValue: 3, yValue: -1, keys: ["bad"] }],
+      }).keys,
+    ).toEqual([]);
   });
 
   it("treats records as the same across key order and controller canonicalization", () => {
@@ -414,14 +418,14 @@ describe("facet interval consumption", () => {
 
   it("recomputes precise-bound keys in only the edited panel", () => {
     expect(
-      recomputePanelIntervalKeys({
+      recomputePanelIntervalProjection({
         panelId: "south",
         domains: {
           x: { kind: "linear", domain: [1, 3] },
           y: { kind: "band", values: ["low"] },
         },
         candidates,
-      }),
+      }).keys,
     ).toEqual(["s2", "shared"]);
   });
 
@@ -487,11 +491,11 @@ describe("facet interval consumption", () => {
         keys: [`p${i}`],
       }),
     );
-    const keys = recomputePanelIntervalKeys({
+    const keys = recomputePanelIntervalProjection({
       panelId: "south",
       domains: { x: { kind: "band", values } },
       candidates: panelCandidates,
-    });
+    }).keys;
     const expected = [
       ...Array.from({ length: 150 }, (_, i) => `p${i}`),
       ...Array.from({ length: 150 }, (_, i) => `p${300 + i}`),

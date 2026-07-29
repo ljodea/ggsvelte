@@ -56,19 +56,6 @@ function resolveDataRef(
   );
 }
 
-/** Plot-level data only (throws no-data when missing — legacy single-table path). */
-export function bindData(spec: PortableSpec, options: RunOptions): ColumnTable {
-  const ref = spec.data;
-  if (ref === undefined) {
-    throw new PipelineError(
-      "no-data",
-      "/data",
-      "The spec has no data. Provide spec.data ({values}, {columns}, or {name}) or layer data.",
-    );
-  }
-  return resolveDataRef(ref, spec, options, "/data");
-}
-
 /**
  * Optional plot-level data. Returns null when the plot omits `data` so layers
  * can supply their own tables.

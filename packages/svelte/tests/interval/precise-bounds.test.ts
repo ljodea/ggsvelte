@@ -9,7 +9,7 @@ import {
 } from "../../src/lib/interval/precise-bounds.js";
 import {
   consumeIntervalKeys,
-  recomputePanelIntervalKeys,
+  recomputePanelIntervalProjection,
 } from "../../src/lib/interval/consumption.js";
 
 function continuousEdit(
@@ -166,11 +166,11 @@ describe("precise plot bounds adapters", () => {
     ];
 
     expect(
-      recomputePanelIntervalKeys({
+      recomputePanelIntervalProjection({
         panelId: "north",
         domains: { x: numericAxis },
         candidates,
-      }),
+      }).keys,
     ).toEqual(["number"]);
     expect(
       consumeIntervalKeys({

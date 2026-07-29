@@ -263,14 +263,6 @@ export function representativePoints(type: string, coordinates: unknown): readon
   return [];
 }
 
-/**
- * First representative point (compat for single-point consumers).
- * Prefer {@link representativePoints} for Multi* label expansion.
- */
-export function representativePoint(type: string, coordinates: unknown): SfPosition | null {
-  return representativePoints(type, coordinates)[0] ?? null;
-}
-
 export function geometryFieldName(params: { geometry?: string } | undefined): string {
   const g = params?.geometry;
   return g !== undefined && g !== "" ? g : "geometry";

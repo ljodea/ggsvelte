@@ -14,16 +14,6 @@ describe("buildRenderModelScaleState", () => {
   });
 });
 
-describe("resolveSequentialDomain", () => {
-  it("parses two-element domains and ignores incomplete ones", async () => {
-    const { resolveSequentialDomain } =
-      await import("../../src/pipeline/scale-color-sequential-domain.ts");
-    expect(resolveSequentialDomain()).toBeUndefined();
-    expect(resolveSequentialDomain({ domain: [1] })).toBeUndefined();
-    expect(resolveSequentialDomain({ domain: [0, 10] })).toEqual([0, 10]);
-  });
-});
-
 describe("placeSceneLegends", () => {
   it("offsets legend x by scene width minus block width and edge pad", async () => {
     const { placeSceneLegends } = await import("../../src/pipeline/assemble-scene-legends.ts");

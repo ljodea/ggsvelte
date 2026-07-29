@@ -4,7 +4,7 @@
 import { gg } from "@ggsvelte/spec";
 import { describe, expect, it } from "vitest";
 
-import { foldPlotLayer, foldPlotLayers } from "../../src/lib/layers/fold.js";
+import { foldPlotLayer } from "../../src/lib/layers/fold.js";
 
 const rows = [
   { x: 1, y: 2 },
@@ -48,13 +48,18 @@ describe("foldPlotLayer", () => {
     expect(after.theme).toEqual(before.theme);
   });
 
-  it("preserves array order when folding multiple layers", () => {
-    const spec = foldPlotLayers(base(), [
-      { kind: "theme", value: "light" },
-      { kind: "theme", value: "dark" },
-      { kind: "labs", value: { title: "first" } },
-      { kind: "labs", value: { subtitle: "second" } },
-    ]).spec();
+  it("preserves registration order when folding multiple layers", () => {
+    // Production assemble folds one layer at a time; same order semantics.
+    let builder = base();
+    for (const layer of [
+      { kind: "theme" as const, value: "light" },
+      { kind: "theme" as const, value: "dark" },
+      { kind: "labs" as const, value: { title: "first" } },
+      { kind: "labs" as const, value: { subtitle: "second" } },
+    ]) {
+      builder = foldPlotLayer(builder, layer);
+    }
+    const spec = builder.spec();
     // REPLACE family: last theme wins.
     expect(spec.theme).toBe("dark");
     // MERGE family: later keys win / combine (builder shallow merge).
