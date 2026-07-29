@@ -189,6 +189,217 @@ export const PTOL_PALETTE: readonly string[] = [
  */
 export const CANVA_PALETTE: readonly string[] = ["#f98866", "#ff420e", "#80bd9e", "#89da59"];
 
+export const TABLEAU20_PALETTE: readonly string[] = [
+  "#4E79A7",
+  "#A0CBE8",
+  "#F28E2B",
+  "#FFBE7D",
+  "#59A14F",
+  "#8CD17D",
+  "#B6992D",
+  "#F1CE63",
+  "#499894",
+  "#86BCB6",
+  "#E15759",
+  "#FF9D9A",
+  "#79706E",
+  "#BAB0AC",
+  "#D37295",
+  "#FABFD2",
+  "#B07AA1",
+  "#D4A6C8",
+  "#9D7660",
+  "#D7B5A6",
+];
+
+/** ggthemes tableau_color_pal("Color Blind", "regular") — Tableau's colorblind-safe 10. */
+export const TABLEAU_COLORBLIND_PALETTE: readonly string[] = [
+  "#1170aa",
+  "#fc7d0b",
+  "#a3acb9",
+  "#57606c",
+  "#5fa2ce",
+  "#c85200",
+  "#7b848f",
+  "#a3cce9",
+  "#ffbc79",
+  "#c8d0d9",
+];
+
+/** ggthemes tableau_color_pal("Seattle Grays", "regular"). */
+export const TABLEAU_SEATTLE_GRAYS_PALETTE: readonly string[] = [
+  "#767f8b",
+  "#b3b7b8",
+  "#5c6068",
+  "#d3d3d3",
+  "#989ca3",
+];
+
+/** ggthemes tableau_color_pal("Traffic", "regular") — red/yellow/green KPI triples. */
+export const TABLEAU_TRAFFIC_PALETTE: readonly string[] = [
+  "#b60a1c",
+  "#e39802",
+  "#309143",
+  "#e03531",
+  "#f0bd27",
+  "#51b364",
+  "#ff684c",
+  "#ffda66",
+  "#8ace7e",
+];
+
+/** ggthemes tableau_color_pal("Miller Stone", "regular"). */
+export const TABLEAU_MILLER_STONE_PALETTE: readonly string[] = [
+  "#4f6980",
+  "#849db1",
+  "#a2ceaa",
+  "#638b66",
+  "#bfbb60",
+  "#f47942",
+  "#fbb04e",
+  "#b66353",
+  "#d7ce9f",
+  "#b9aa97",
+  "#7e756d",
+];
+
+/** ggthemes tableau_color_pal("Superfishel Stone", "regular"). */
+export const TABLEAU_SUPERFISHEL_STONE_PALETTE: readonly string[] = [
+  "#6388b4",
+  "#ffae34",
+  "#ef6f6a",
+  "#8cc2ca",
+  "#55ad89",
+  "#c3bc3f",
+  "#bb7693",
+  "#baa094",
+  "#a9b5ae",
+  "#767676",
+];
+
+/** ggthemes tableau_color_pal("Nuriel Stone", "regular"). */
+export const TABLEAU_NURIEL_STONE_PALETTE: readonly string[] = [
+  "#8175aa",
+  "#6fb899",
+  "#31a1b3",
+  "#ccb22b",
+  "#a39fc9",
+  "#94d0c0",
+  "#959c9e",
+  "#027b8e",
+  "#9f8f12",
+];
+
+/** ggthemes tableau_color_pal("Jewel Bright", "regular"). */
+export const TABLEAU_JEWEL_BRIGHT_PALETTE: readonly string[] = [
+  "#eb1e2c",
+  "#fd6f30",
+  "#f9a729",
+  "#f9d23c",
+  "#5fbb68",
+  "#64cdcc",
+  "#91dcea",
+  "#a4a4d5",
+  "#bbc9e5",
+];
+
+/** ggthemes tableau_color_pal("Summer", "regular"). */
+export const TABLEAU_SUMMER_PALETTE: readonly string[] = [
+  "#bfb202",
+  "#b9ca5d",
+  "#cf3e53",
+  "#f1788d",
+  "#00a2b3",
+  "#97cfd0",
+  "#f3a546",
+  "#f7c480",
+];
+
+/** ggthemes tableau_color_pal("Winter", "regular"). */
+export const TABLEAU_WINTER_PALETTE: readonly string[] = [
+  "#90728f",
+  "#b9a0b4",
+  "#9d983d",
+  "#cecb76",
+  "#e15759",
+  "#ff9888",
+  "#6b6b6b",
+  "#bab2ae",
+  "#aa8780",
+  "#dab6af",
+];
+
+/** ggthemes tableau_color_pal("Green-Orange-Teal", "regular"). */
+export const TABLEAU_GREEN_ORANGE_TEAL_PALETTE: readonly string[] = [
+  "#4e9f50",
+  "#87d180",
+  "#ef8a0c",
+  "#fcc66d",
+  "#3ca8bc",
+  "#98d9e4",
+  "#94a323",
+  "#c3ce3d",
+  "#a08400",
+  "#f7d42a",
+  "#26897e",
+  "#8dbfa8",
+];
+
+/** ggthemes tableau_color_pal("Red-Blue-Brown", "regular"). */
+export const TABLEAU_RED_BLUE_BROWN_PALETTE: readonly string[] = [
+  "#466f9d",
+  "#91b3d7",
+  "#ed444a",
+  "#feb5a2",
+  "#9d7660",
+  "#d7b5a6",
+  "#3896c4",
+  "#a0d4ee",
+  "#ba7e45",
+  "#39b87f",
+  "#c8133b",
+  "#ea8783",
+];
+
+/** ggthemes tableau_color_pal("Purple-Pink-Gray", "regular"). */
+export const TABLEAU_PURPLE_PINK_GRAY_PALETTE: readonly string[] = [
+  "#8074a8",
+  "#c6c1f0",
+  "#c46487",
+  "#ffbed1",
+  "#9c9290",
+  "#c5bfbe",
+  "#9b93c9",
+  "#ddb5d5",
+  "#7c7270",
+  "#f498b6",
+  "#b173a0",
+  "#c799bc",
+];
+
+/** ggthemes tableau_color_pal("Hue Circle", "regular") — 19 steps around the hue wheel. */
+export const TABLEAU_HUE_CIRCLE_PALETTE: readonly string[] = [
+  "#1ba3c6",
+  "#2cb5c0",
+  "#30bcad",
+  "#21B087",
+  "#33a65c",
+  "#57a337",
+  "#a2b627",
+  "#d5bb21",
+  "#f8b620",
+  "#f89217",
+  "#f06719",
+  "#e03426",
+  "#f64971",
+  "#fc719e",
+  "#eb73b3",
+  "#ce69be",
+  "#a26dc2",
+  "#7873c0",
+  "#4f7cba",
+];
+
 /** ggthemes wsj_pal("colors6") — the default scale_*_wsj palette. */
 export const WSJ_PALETTE: readonly string[] = [
   "#c72e29",
@@ -314,6 +525,20 @@ export const CATEGORICAL_SCHEMES = {
   wsj_red_green: WSJ_RED_GREEN_PALETTE,
   wsj_black_green: WSJ_BLACK_GREEN_PALETTE,
   wsj_dem_rep: WSJ_DEM_REP_PALETTE,
+  tableau20: TABLEAU20_PALETTE,
+  tableau_colorblind: TABLEAU_COLORBLIND_PALETTE,
+  tableau_seattle_grays: TABLEAU_SEATTLE_GRAYS_PALETTE,
+  tableau_traffic: TABLEAU_TRAFFIC_PALETTE,
+  tableau_miller_stone: TABLEAU_MILLER_STONE_PALETTE,
+  tableau_superfishel_stone: TABLEAU_SUPERFISHEL_STONE_PALETTE,
+  tableau_nuriel_stone: TABLEAU_NURIEL_STONE_PALETTE,
+  tableau_jewel_bright: TABLEAU_JEWEL_BRIGHT_PALETTE,
+  tableau_summer: TABLEAU_SUMMER_PALETTE,
+  tableau_winter: TABLEAU_WINTER_PALETTE,
+  tableau_green_orange_teal: TABLEAU_GREEN_ORANGE_TEAL_PALETTE,
+  tableau_red_blue_brown: TABLEAU_RED_BLUE_BROWN_PALETTE,
+  tableau_purple_pink_gray: TABLEAU_PURPLE_PINK_GRAY_PALETTE,
+  tableau_hue_circle: TABLEAU_HUE_CIRCLE_PALETTE,
   gdocs: GDOCS_PALETTE,
   hc: HC_PALETTE,
   hc_dark: HC_DARK_PALETTE,

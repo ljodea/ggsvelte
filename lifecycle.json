@@ -3895,6 +3895,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "GDOCS_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "GeometryBatch": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -3909,6 +3913,14 @@
         },
         "GuidePlan": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "HC_DARK_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "HC_PALETTE": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "IPSUM_PALETTE": {
@@ -4005,6 +4017,10 @@
         },
         "OrdinalColorConfig": {
           "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PANDER_PALETTE": {
+          "kind": "value",
           "lifecycle": "experimental"
         },
         "PANEL_SPACING": {
@@ -4308,6 +4324,62 @@
           "lifecycle": "experimental"
         },
         "TABLEAU10_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU20_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_COLORBLIND_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_GREEN_ORANGE_TEAL_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_HUE_CIRCLE_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_JEWEL_BRIGHT_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_MILLER_STONE_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_NURIEL_STONE_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_PURPLE_PINK_GRAY_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_RED_BLUE_BROWN_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_SEATTLE_GRAYS_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_SUMMER_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_SUPERFISHEL_STONE_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_TRAFFIC_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "TABLEAU_WINTER_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
         },

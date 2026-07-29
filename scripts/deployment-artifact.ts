@@ -48,6 +48,21 @@ function hasRedirectRule(redirects: string, rule: string): boolean {
   return redirects.split(/\r?\n/).some((line) => line.trim() === rule);
 }
 
+/**
+ * HTML/metadata cache policy: browser revalidate (`max-age=0` +
+ * `must-revalidate`), optionally with edge `s-maxage=<seconds>`.
+ *
+ * Exact substring match on `max-age=0, must-revalidate` rejected the
+ * production `_headers` line after #1167 (`…max-age=0, s-maxage=600,
+ * must-revalidate`), which blocked every Cloudflare Pages deploy and left
+ * production stuck on the pre-shell commit.
+ */
+export function hasHtmlRevalidateCacheControl(headers: string): boolean {
+  return /Cache-Control:\s*public,\s*max-age=0(?:,\s*s-maxage=\d+)?,\s*must-revalidate/m.test(
+    headers,
+  );
+}
+
 export function routeInventoryDigest(routes: readonly DeploymentRoute[]): string {
   const inventory = routes
     .map((route) =>
@@ -206,7 +221,9 @@ export function validateDeploymentArtifact(
         problems.push(`_headers is missing required security policy: ${policy}`);
       }
     }
-    if (!headers.includes("Cache-Control: public, max-age=0, must-revalidate")) {
+    // Browsers always revalidate (max-age=0). Optional s-maxage=N lets the
+    // edge hold HTML briefly (#1167) without changing browser cache semantics.
+    if (!hasHtmlRevalidateCacheControl(headers)) {
       problems.push("_headers must revalidate public HTML and metadata");
     }
     if (
