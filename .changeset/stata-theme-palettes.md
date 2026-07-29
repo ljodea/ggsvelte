@@ -1,7 +1,7 @@
 ---
-"@ggsvelte/core": patch
-"@ggsvelte/spec": patch
-"@ggsvelte/svelte": patch
+"@ggsvelte/core": minor
+"@ggsvelte/spec": minor
+"@ggsvelte/svelte": minor
 ---
 
 <!-- markdownlint-disable MD041 -->
@@ -28,4 +28,4 @@ Clean-room port of ggthemes `theme_stata()` + `stata_pal()` with
   `/themes` gains the three portraits (each paired with its own scheme) and
   `/palettes` gains the four cards.
 
-Migration: none — additive theme/scheme names only.
+Migration: none — additive
