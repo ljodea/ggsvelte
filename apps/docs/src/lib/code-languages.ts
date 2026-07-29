@@ -1,8 +1,15 @@
 /**
  * Docs code-block language helpers. Highlighting uses the shared highlight.js
- * allowlist in `$scripts/highlight-code` (same as guide markdown fences).
+ * allowlist in scripts/highlight-code (same as guide markdown fences).
+ *
+ * Relative import (not `$scripts/…`): `scripts/tsconfig.json` typechecks this
+ * module via `scripts/code-languages.test.ts`, and that project has no SvelteKit
+ * path aliases.
  */
-import { highlightCodeToHtml, resolveHighlightLanguage } from "$scripts/highlight-code";
+import {
+  highlightCodeToHtml,
+  resolveHighlightLanguage,
+} from "../../../../scripts/highlight-code.ts";
 
 /**
  * Infer a highlight language from a code-tab label when no explicit language prop is set

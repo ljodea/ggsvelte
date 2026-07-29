@@ -16,7 +16,8 @@
     "@ggsvelte/examples": "workspace:*",
     "@ggsvelte/spec": "workspace:*",
     "@ggsvelte/svelte": "workspace:*",
-    "bits-ui": "^2.18.1"
+    "bits-ui": "^2.18.1",
+    "highlight.js": "^11.11.1"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.10",
