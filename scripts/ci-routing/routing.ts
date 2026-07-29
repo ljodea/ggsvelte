@@ -144,6 +144,8 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     // Shared inventory imported by gen-docs-routes / check-docs-metadata /
     // deployment-artifact (Codex P2: inventory-only PRs were scripts-lane only).
     "scripts/docs-route-inventory.ts",
+    "scripts/docs-route-inventory-pages.ts",
+    "scripts/docs-route-inventory-reference.ts",
     "scripts/docs-route-inventory.test.ts",
     "scripts/check-docs-metadata.ts",
     "scripts/check-docs-metadata.test.ts",

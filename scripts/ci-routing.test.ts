@@ -569,6 +569,8 @@ describe("planJobs", () => {
     for (const path of [
       "scripts/gen-docs-routes.ts",
       "scripts/docs-route-inventory.ts",
+      "scripts/docs-route-inventory-pages.ts",
+      "scripts/docs-route-inventory-reference.ts",
       "scripts/check-docs-metadata.ts",
       "scripts/check-pages-links.ts",
       // #784: package.json build/check invoke gen-lesson-charts; build invokes docs-csp.
@@ -611,6 +613,8 @@ describe("JOB_CONTENT_INPUTS (split build hashes)", () => {
       expect(inputs, execution).toContain("apps/docs/**");
       expect(inputs, execution).toContain("scripts/gen-docs-routes.ts");
       expect(inputs, execution).toContain("scripts/docs-route-inventory.ts");
+      expect(inputs, execution).toContain("scripts/docs-route-inventory-pages.ts");
+      expect(inputs, execution).toContain("scripts/docs-route-inventory-reference.ts");
       expect(inputs, execution).not.toContain("scripts/gen-playground-seeds.ts");
       expect(inputs, execution).toContain("scripts/check-docs-metadata.ts");
       expect(inputs, execution).toContain("scripts/check-pages-links.ts");
