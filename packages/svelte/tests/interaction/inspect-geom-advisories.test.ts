@@ -98,7 +98,9 @@ describe("inspectAxisOnBarColDiagnostics", () => {
 
 describe("layerGeomsFromSpecLayers", () => {
   it("returns an empty list for non-arrays and empty layers", () => {
-    expect(layerGeomsFromSpecLayers(undefined)).toEqual([]);
+    // void 0 — oxlint unicorn/no-useless-undefined rejects an undefined literal arg.
+    const missing: unknown = void 0;
+    expect(layerGeomsFromSpecLayers(missing)).toEqual([]);
     expect(layerGeomsFromSpecLayers(null)).toEqual([]);
     expect(layerGeomsFromSpecLayers("col")).toEqual([]);
     expect(layerGeomsFromSpecLayers({})).toEqual([]);
