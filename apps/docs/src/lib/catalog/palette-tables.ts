@@ -7,5 +7,5 @@
  * These deep source paths match the higher-priority `ggsvelte-palette-tables`
  * codeSplitting group instead.
  */
-export { CATEGORICAL_SCHEMES } from "../../../../../packages/core/src/scales/categorical-palettes.ts";
-export { VIRIDIS_RAMP_10 } from "../../../../../packages/core/src/scales/viridis-ramp.ts";
+export { CATEGORICAL_SCHEMES } from "../../../../../packages/core/src/scales/categorical-palettes.js";
+export { VIRIDIS_RAMP_10 } from "../../../../../packages/core/src/scales/viridis-ramp.js";
