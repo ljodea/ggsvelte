@@ -241,6 +241,12 @@ export { default as ThemeHcdark } from "./theme/ThemeHcdark.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemePander } from "./theme/ThemePander.svelte";
 /** @lifecycle stable-intent */
+export { default as ThemeCalc } from "./theme/ThemeCalc.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeExcel } from "./theme/ThemeExcel.svelte";
+/** @lifecycle stable-intent */
+export { default as ThemeExcelnew } from "./theme/ThemeExcelnew.svelte";
+/** @lifecycle stable-intent */
 export { default as ThemeGrey } from "./theme/ThemeGrey.svelte";
 /** @lifecycle stable-intent */
 export { default as ThemeGray } from "./theme/ThemeGray.svelte";

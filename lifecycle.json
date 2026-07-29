@@ -3643,6 +3643,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "CALC_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "CANVAS_AUTO_THRESHOLD": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -3832,6 +3836,18 @@
           "lifecycle": "experimental"
         },
         "EDITION_DEFAULTS": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "EXCEL_FILL_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "EXCEL_NEW_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "EXCEL_PALETTE": {
           "kind": "value",
           "lifecycle": "experimental"
         },
@@ -6497,6 +6513,10 @@
           "kind": "value",
           "lifecycle": "stable-intent"
         },
+        "ThemeCalc": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
         "ThemeClassic": {
           "kind": "value",
           "lifecycle": "stable-intent"
@@ -6518,6 +6538,14 @@
           "lifecycle": "stable-intent"
         },
         "ThemeEconomistwhite": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeExcel": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeExcelnew": {
           "kind": "value",
           "lifecycle": "stable-intent"
         },

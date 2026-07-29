@@ -6,6 +6,10 @@ import { runPipeline } from "../src/pipeline.ts";
 import { renderToSVGString } from "../src/render-svg.ts";
 import {
   CANVA_PALETTE,
+  CALC_PALETTE,
+  EXCEL_FILL_PALETTE,
+  EXCEL_NEW_PALETTE,
+  EXCEL_PALETTE,
   CATEGORICAL_PALETTE_10,
   CATEGORICAL_SCHEMES,
   COLORBLIND_PALETTE,
@@ -45,6 +49,10 @@ import {
 } from "../src/scales/train.ts";
 import {
   CANVA_PALETTE as CANVA_DIRECT,
+  CALC_PALETTE as CALC_DIRECT,
+  EXCEL_FILL_PALETTE as EXCEL_FILL_DIRECT,
+  EXCEL_NEW_PALETTE as EXCEL_NEW_DIRECT,
+  EXCEL_PALETTE as EXCEL_DIRECT,
   CATEGORICAL_PALETTE_10 as PALETTE_DIRECT,
   CATEGORICAL_SCHEMES as SCHEMES_DIRECT,
   COLORBLIND_PALETTE as COLORBLIND_DIRECT,
@@ -96,6 +104,10 @@ const PALETTES = {
   fivethirtyeight: FIVETHIRTYEIGHT_PALETTE,
   ptol: PTOL_PALETTE,
   canva: CANVA_PALETTE,
+  calc: CALC_PALETTE,
+  excel: EXCEL_PALETTE,
+  excel_fill: EXCEL_FILL_PALETTE,
+  excel_new: EXCEL_NEW_PALETTE,
   tableau20: TABLEAU20_PALETTE,
   tableau_winter: TABLEAU_WINTER_PALETTE,
   tableau_traffic: TABLEAU_TRAFFIC_PALETTE,
@@ -127,6 +139,10 @@ describe("train.ts palette re-export identity", () => {
     expect(CATEGORICAL_SCHEMES).toBe(SCHEMES_DIRECT);
     expect(CATEGORICAL_SCHEMES.observable10).toBe(CATEGORICAL_PALETTE_10);
     expect(CANVA_PALETTE).toBe(CANVA_DIRECT);
+    expect(CALC_PALETTE).toBe(CALC_DIRECT);
+    expect(EXCEL_FILL_PALETTE).toBe(EXCEL_FILL_DIRECT);
+    expect(EXCEL_NEW_PALETTE).toBe(EXCEL_NEW_DIRECT);
+    expect(EXCEL_PALETTE).toBe(EXCEL_DIRECT);
     expect(COLORBLIND_PALETTE).toBe(COLORBLIND_DIRECT);
     expect(ECONOMIST_PALETTE).toBe(ECONOMIST_DIRECT);
     expect(FEW_DARK_PALETTE).toBe(FEW_DARK_DIRECT);

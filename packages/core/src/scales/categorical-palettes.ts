@@ -505,6 +505,58 @@ export const PANDER_PALETTE: readonly string[] = [
   "#E69F00",
 ];
 
+/** ggthemes calc_pal() — the 12 LibreOffice Calc chart colors, in source order. */
+export const CALC_PALETTE: readonly string[] = [
+  "#004586",
+  "#ff420e",
+  "#ffd320",
+  "#579d1c",
+  "#7e0021",
+  "#83caff",
+  "#314004",
+  "#aecf00",
+  "#4b1f6f",
+  "#ff950e",
+  "#c5000b",
+  "#0084d1",
+];
+
+/** ggthemes excel_pal(line = TRUE) — the Excel 97 line/point palette (scale_colour_excel). */
+export const EXCEL_PALETTE: readonly string[] = [
+  "#FF00FF",
+  "#FFFF00",
+  "#00FFFF",
+  "#800080",
+  "#800000",
+  "#008080",
+  "#0000FF",
+];
+
+/** ggthemes excel_pal(line = FALSE) — the Excel 97 area/fill palette (scale_fill_excel). */
+export const EXCEL_FILL_PALETTE: readonly string[] = [
+  "#993366",
+  "#FFFFCC",
+  "#CCFFFF",
+  "#660066",
+  "#FF8080",
+  "#0066CC",
+  "#CCCCFF",
+];
+
+/**
+ * ggthemes excel_new_pal("Office Theme") — current Office's six accents.
+ * ggthemes ships 50 named Office color themes; only the default is
+ * registered (documented subset, as with canva).
+ */
+export const EXCEL_NEW_PALETTE: readonly string[] = [
+  "#4472C4",
+  "#ED7D31",
+  "#A5A5A5",
+  "#FFC000",
+  "#5B9BD5",
+  "#70AD47",
+];
+
 /** Named categorical schemes accepted by the portable spec. */
 export const CATEGORICAL_SCHEMES = {
   observable10: CATEGORICAL_PALETTE_10,
@@ -543,6 +595,10 @@ export const CATEGORICAL_SCHEMES = {
   hc: HC_PALETTE,
   hc_dark: HC_DARK_PALETTE,
   pander: PANDER_PALETTE,
+  calc: CALC_PALETTE,
+  excel: EXCEL_PALETTE,
+  excel_fill: EXCEL_FILL_PALETTE,
+  excel_new: EXCEL_NEW_PALETTE,
   ...COLORBREWER_QUALITATIVE,
   hue: HUE_PALETTE_10,
   grey: GREY_PALETTE_10,
