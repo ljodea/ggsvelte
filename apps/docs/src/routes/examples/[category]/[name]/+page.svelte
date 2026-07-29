@@ -3,13 +3,13 @@
 
   import CodeTabs from "$lib/CodeTabs.svelte";
   import { galleryCatalog } from "$lib/catalog/gallery";
+  import ExampleLiveFrame from "$lib/components/ExampleLiveFrame.svelte";
   import { EXAMPLES } from "$lib/examples-manifest";
   import { rankRelatedExamples } from "$lib/gallery-filter";
 
   import type { PageProps } from "./$types";
 
   const { data }: PageProps = $props();
-  const Example = $derived(data.component);
   const frameWidth = $derived(data.entry.vrWidth ?? 640);
   const frameHeight = $derived(data.entry.vrHeight ?? 400);
   const galleryEntries = galleryCatalog(EXAMPLES);
@@ -61,13 +61,14 @@
     </section>
   {/if}
 
-  <div
-    class="gg-example-frame"
-    class:full-width={data.entry.journey?.fullWidth}
-    style={`--example-vr-width:${String(frameWidth)}px;--example-vr-height:${String(frameHeight)}px`}
-  >
-    <Example />
-  </div>
+  <ExampleLiveFrame
+    exampleId={data.entry.id}
+    previewPath={data.previewPath}
+    title={data.entry.title}
+    width={frameWidth}
+    height={frameHeight}
+    fullWidth={data.entry.journey?.fullWidth ?? false}
+  />
 
   <section
     class="example-prose code-section"
@@ -190,17 +191,6 @@
     max-width: 45rem;
     color: var(--muted);
     font-size: 1.1rem;
-  }
-
-  .gg-example-frame {
-    margin: 2.5rem 0;
-    width: 100%;
-    max-width: var(--example-vr-width);
-    min-width: 0;
-  }
-
-  .gg-example-frame.full-width {
-    max-width: none;
   }
 
   .try-it {
