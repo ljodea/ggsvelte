@@ -124,10 +124,8 @@ export function isFacetedPlotIntent(input: {
  */
 function snapshotLayerInput(layer: LayerInput): LayerInput {
   if (layer.data === undefined) return layer;
-  return {
-    ...layer,
-    data: toAuthoringDataRef(layer.data as DataInput) as LayerInput["data"],
-  };
+  const data = toAuthoringDataRef(layer.data as DataInput) as NonNullable<LayerInput["data"]>;
+  return { ...layer, data };
 }
 
 /**
@@ -138,18 +136,15 @@ function materializeAndNormalize(draft: AssembleDraft): PortableSpec {
   const layers = draft.layers.map(snapshotLayerInput);
   const authoringData =
     draft.data === undefined ? undefined : toAuthoringDataRef(draft.data as DataInput);
-  const calendarSource = {
-    aes: draft.aes,
+  const calendarFields = calendarDateFields({
     layers,
-    scales: draft.scales,
-  };
-  const calendarFields = calendarDateFields(calendarSource);
+    ...(draft.aes !== undefined && { aes: draft.aes }),
+    ...(draft.scales !== undefined && { scales: draft.scales }),
+  });
   const portableLayers = layers.map((layer) => {
     if (layer.data === undefined) return layer;
-    return {
-      ...layer,
-      data: toDataRef(layer.data as AuthoringDataRef, calendarFields),
-    };
+    const data = toDataRef(layer.data as AuthoringDataRef, calendarFields);
+    return { ...layer, data };
   });
   const coord = draft.coord === "flip" ? ({ type: "flip" } as const) : draft.coord;
   const input: SpecInput = {
