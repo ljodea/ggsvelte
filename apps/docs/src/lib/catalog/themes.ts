@@ -43,6 +43,8 @@ const PALETTE_LABELS = {
   few_light: "Few Light",
   few_dark: "Few Dark",
   fivethirtyeight: "FiveThirtyEight",
+  ptol: "Paul Tol",
+  canva: "Canva",
   wsj: "WSJ",
   wsj_rgby: "WSJ R/G/B/Y",
   wsj_red_green: "WSJ Red/Green",

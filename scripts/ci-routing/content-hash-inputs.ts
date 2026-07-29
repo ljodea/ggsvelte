@@ -33,6 +33,8 @@ const DOCS_SURFACE_CONTENT_INPUTS: readonly string[] = [
   // apps/docs package.json build/check invoke these generators.
   "scripts/gen-docs-routes.ts",
   "scripts/docs-route-inventory.ts",
+  "scripts/docs-route-inventory-pages.ts",
+  "scripts/docs-route-inventory-reference.ts",
   "scripts/docs-route-inventory.test.ts",
   "scripts/gen-docs-search.ts",
   "scripts/gen-docs-search.test.ts",
@@ -48,6 +50,8 @@ const DOCS_SURFACE_CONTENT_INPUTS: readonly string[] = [
   "scripts/docs-csp.ts",
   // $scripts imports used by docs routes / layout (typecheck + published site).
   "scripts/gen-llms.ts",
+  "scripts/llms-diagnostic-docs.ts",
+  "scripts/llms-lifecycle-docs.ts",
   "scripts/gen-llms.test.ts",
   "scripts/llms-markdown.ts",
   "scripts/llms-guide-content.ts",
@@ -209,6 +213,8 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     // Docs generators that schedule docs_journeys must bust this cache
     // (Codex P2: content-only scripts were omitting gen-docs-search / gallery).
     "scripts/gen-llms.ts",
+    "scripts/llms-diagnostic-docs.ts",
+    "scripts/llms-lifecycle-docs.ts",
     "scripts/gen-llms.test.ts",
     "scripts/llms-markdown.ts",
     // llms-markdown imports highlight-code for fenced-block HTML; hash it or

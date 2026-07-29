@@ -3,180 +3,18 @@
  * KNOWN_GEOMS entry (#1039). Param keys live in GEOM_PARAM_KEYS; shells only
  * wire types + createGeomLayer.
  *
- * Manifest-driven: component order matches the pre-generation index export
- * order (lifecycle.json is order-sensitive). Naming is derived
- * (snake_case → GeomPascal); the manifest asserts that derivation.
+ * Manifest: scripts/gen-geom-children-manifest.ts (ledger + completeness).
+ * This file owns pure emission, index rewrite, and the CLI entrypoint.
  *
  * Usage:
  *   bun scripts/gen-geom-children.ts           # (re)write shells + index region
  *   bun scripts/gen-geom-children.ts --check   # exit 1 on drift without writing
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-
-import { KNOWN_GEOMS, type GeomName } from "@ggsvelte/spec";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import { defineArtifact, defineArtifactGroup } from "./artifact.ts";
-
-// ---------------------------------------------------------------------------
-// Manifest
-// ---------------------------------------------------------------------------
-
-export type ShellKind = "default" | "jitter";
-
-export interface ShellSpec {
-  /** Wire geom name, e.g. "bin_2d". */
-  geom: GeomName;
-  /** PascalCase component name, e.g. "GeomBin2d". */
-  component: string;
-  /** Params type export, e.g. "HexParams". */
-  paramsType: string;
-  /** LayerInput type export, e.g. "HexLayerInput". */
-  layerInput: string;
-  /** Special shell template (jitter merges flat width/height/seed). */
-  kind: ShellKind;
-}
-
-/** snake_case geom → GeomPascalCase component name. */
-export function componentNameForGeom(geom: string): string {
-  const pascal = geom
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join("");
-  return `Geom${pascal}`;
-}
-
-/** snake_case geom → PascalCase LayerInput name prefix (without LayerInput). */
-function pascalGeom(geom: string): string {
-  return geom
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join("");
-}
-
-/**
- * Params type name for each geom (must match SpecDeclarations layer refs).
- * histogram/freqpoly/count/jitter share another geom's params type.
- */
-const PARAMS_TYPE: Record<GeomName, string> = {
-  point: "PointParams",
-  line: "LineParams",
-  path: "PathParams",
-  col: "ColParams",
-  bar: "BarParams",
-  histogram: "BarParams",
-  freqpoly: "LineParams",
-  area: "AreaParams",
-  rule: "RuleParams",
-  hline: "HlineParams",
-  vline: "VlineParams",
-  text: "TextParams",
-  label: "LabelParams",
-  smooth: "SmoothParams",
-  quantile: "QuantileParams",
-  boxplot: "BoxplotParams",
-  density: "DensityParams",
-  errorbar: "ErrorbarParams",
-  linerange: "LinerangeParams",
-  pointrange: "PointrangeParams",
-  crossbar: "CrossbarParams",
-  rect: "RectParams",
-  tile: "TileParams",
-  raster: "RasterParams",
-  ribbon: "RibbonParams",
-  segment: "SegmentParams",
-  count: "PointParams",
-  violin: "ViolinParams",
-  function: "FunctionParams",
-  polygon: "PolygonParams",
-  hex: "HexParams",
-  bin_2d: "Bin2dParams",
-  abline: "AblineParams",
-  curve: "CurveParams",
-  contour: "ContourParams",
-  density_2d: "Density2dParams",
-  density_2d_filled: "Density2dParams",
-  dotplot: "DotplotParams",
-  map: "MapParams",
-  sf: "SfParams",
-  sf_text: "SfTextParams",
-  sf_label: "SfLabelParams",
-  blank: "BlankParams",
-  jitter: "PointParams",
-  spoke: "SpokeParams",
-  rug: "RugParams",
-  step: "StepParams",
-  qq: "QqParams",
-  qq_line: "QqLineParams",
-};
-
-/**
- * Export order matches the pre-#1039 index (lifecycle.json is order-sensitive).
- * Every KNOWN_GEOMS entry appears exactly once.
- */
-const EXPORT_ORDER: readonly GeomName[] = [
-  "point",
-  "count",
-  "contour",
-  "dotplot",
-  "line",
-  "path",
-  "col",
-  "bar",
-  "area",
-  "rule",
-  "hline",
-  "vline",
-  "jitter",
-  "text",
-  "label",
-  "histogram",
-  "freqpoly",
-  "smooth",
-  "quantile",
-  "boxplot",
-  "density",
-  "density_2d",
-  "density_2d_filled",
-  "errorbar",
-  "linerange",
-  "pointrange",
-  "crossbar",
-  "rect",
-  "tile",
-  "bin_2d",
-  "raster",
-  "hex",
-  "ribbon",
-  "segment",
-  "violin",
-  "function",
-  "polygon",
-  "abline",
-  "curve",
-  "map",
-  "sf",
-  "sf_text",
-  "sf_label",
-  "blank",
-  "spoke",
-  "rug",
-  "step",
-  "qq",
-  "qq_line",
-];
-
-function shell(geom: GeomName): ShellSpec {
-  return {
-    geom,
-    component: componentNameForGeom(geom),
-    paramsType: PARAMS_TYPE[geom],
-    layerInput: `${pascalGeom(geom)}LayerInput`,
-    kind: geom === "jitter" ? "jitter" : "default",
-  };
-}
-
-export const SHELL_MANIFEST: readonly ShellSpec[] = EXPORT_ORDER.map((geom) => shell(geom));
+import { SHELL_MANIFEST, type ShellSpec } from "./gen-geom-children-manifest.ts";
 
 // ---------------------------------------------------------------------------
 // Paths + markers
@@ -348,28 +186,6 @@ export function shellRelPath(component: string): string {
   return `${GEOM_DIR}/${component}.svelte`;
 }
 
-// ---------------------------------------------------------------------------
-// Completeness helpers (exported for tests)
-// ---------------------------------------------------------------------------
-
-export function manifestGeoms(): Set<string> {
-  return new Set(SHELL_MANIFEST.map((s) => s.geom));
-}
-
-export function expectedGeoms(): Set<string> {
-  return new Set(KNOWN_GEOMS);
-}
-
-// ---------------------------------------------------------------------------
-// CLI (#783 shared protocol)
-// ---------------------------------------------------------------------------
-
-export interface GenerateResult {
-  wrote: string[];
-  unchanged: string[];
-  indexChanged: boolean;
-}
-
 function geomChildrenGroup(repoRoot: string) {
   const shellMembers = SHELL_MANIFEST.map((spec) => {
     const rel = shellRelPath(spec.component);
@@ -393,47 +209,6 @@ function geomChildrenGroup(repoRoot: string) {
     regenerateWith: "geom:children:gen",
     members: [...shellMembers, indexMember],
   });
-}
-
-export function generateGeomChildren(opts: { repoRoot: string; check?: boolean }): GenerateResult {
-  const { repoRoot, check = false } = opts;
-  const wrote: string[] = [];
-  const unchanged: string[] = [];
-  let indexChanged = false;
-
-  for (const spec of SHELL_MANIFEST) {
-    const rel = shellRelPath(spec.component);
-    const abs = join(repoRoot, rel);
-    const fresh = renderShell(spec);
-    const current = existsSync(abs) ? readFileSync(abs, "utf8") : null;
-    if (current === fresh) {
-      unchanged.push(rel);
-      continue;
-    }
-    if (check) {
-      throw new Error(
-        current === null
-          ? `${rel} is MISSING. Run: bun run geom:children:gen`
-          : `${rel} is STALE. Run: bun run geom:children:gen`,
-      );
-    }
-    mkdirSync(dirname(abs), { recursive: true });
-    writeFileSync(abs, fresh);
-    wrote.push(rel);
-  }
-
-  const indexAbs = join(repoRoot, INDEX_PATH);
-  const indexSrc = readFileSync(indexAbs, "utf8");
-  const freshIndex = rewriteIndexRegion(indexSrc);
-  if (freshIndex !== indexSrc) {
-    indexChanged = true;
-    if (check) {
-      throw new Error(`${INDEX_PATH} generated region is STALE. Run: bun run geom:children:gen`);
-    }
-    writeFileSync(indexAbs, freshIndex);
-  }
-
-  return { wrote, unchanged, indexChanged };
 }
 
 if (import.meta.main) {

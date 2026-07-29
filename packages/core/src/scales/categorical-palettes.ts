@@ -141,6 +141,34 @@ export const FEW_DARK_PALETTE: readonly string[] = [
 /** ggthemes fivethirtyeight_pal() — the standard three-color 538 line palette: blue, red, green. */
 export const FIVETHIRTYEIGHT_PALETTE: readonly string[] = ["#008FD5", "#FF2700", "#77AB43"];
 
+/**
+ * ggthemes ptol_pal() at full capacity (n = 12 selection) — Paul Tol's
+ * qualitative palette (SRON/EPS/TN/09-002). ggthemes re-selects the set per
+ * n; this port flattens to the fixed full-capacity order (prefix subsets
+ * approximate the smaller-n picks), as with the economist palette.
+ */
+export const PTOL_PALETTE: readonly string[] = [
+  "#332288",
+  "#6699CC",
+  "#88CCEE",
+  "#44AA99",
+  "#117733",
+  "#999933",
+  "#DDCC77",
+  "#661100",
+  "#CC6677",
+  "#AA4466",
+  "#882255",
+  "#AA4499",
+];
+
+/**
+ * ggthemes canva_pal("Fresh and bright") — the scale_*_canva default.
+ * ggthemes ships 150 named four-color Canva palettes; only the default is
+ * registered (documented subset).
+ */
+export const CANVA_PALETTE: readonly string[] = ["#f98866", "#ff420e", "#80bd9e", "#89da59"];
+
 /** ggthemes wsj_pal("colors6") — the default scale_*_wsj palette. */
 export const WSJ_PALETTE: readonly string[] = [
   "#c72e29",
@@ -180,6 +208,8 @@ export const CATEGORICAL_SCHEMES = {
   few_light: FEW_LIGHT_PALETTE,
   few_dark: FEW_DARK_PALETTE,
   fivethirtyeight: FIVETHIRTYEIGHT_PALETTE,
+  ptol: PTOL_PALETTE,
+  canva: CANVA_PALETTE,
   wsj: WSJ_PALETTE,
   wsj_rgby: WSJ_RGBY_PALETTE,
   wsj_red_green: WSJ_RED_GREEN_PALETTE,

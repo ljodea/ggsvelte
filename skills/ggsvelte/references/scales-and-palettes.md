@@ -159,7 +159,7 @@ byte-identity-preserving: `value` is not routed through any helper.
 
 ## Palettes
 
-### Categorical schemes (19)
+### Categorical schemes (21)
 
 | Scheme               | Description                                                        |
 | -------------------- | ------------------------------------------------------------------ |
@@ -173,6 +173,8 @@ byte-identity-preserving: `value` is not routed through any helper.
 | few_light            | ggthemes Few "Light" — for filled areas (`scale_fill_few` default) |
 | few_dark             | ggthemes Few "Dark" — for thin lines and highlighting              |
 | fivethirtyeight      | ggthemes FiveThirtyEight three-color line palette (blue/red/green) |
+| ptol                 | ggthemes Paul Tol qualitative 12 (full-capacity order)             |
+| canva                | ggthemes Canva "Fresh and bright" 4 (the `scale_*_canva` default)  |
 | wsj                  | ggthemes WSJ colors6 — the default `scale_*_wsj` palette           |
 | wsj_rgby             | ggthemes WSJ red/green/blue/yellow                                 |
 | wsj_red_green        | ggthemes WSJ green/red good–bad pair                               |
