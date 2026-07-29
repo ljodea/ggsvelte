@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GeomPoint, GeomSmooth, GGPlot, Theme } from "@ggsvelte/svelte";
+  import { GeomPoint, GeomSmooth, GGPlot, Labs, Theme } from "@ggsvelte/svelte";
   import { palmerPenguins } from "@ggsvelte/svelte/data";
 
   import { contrastChartTheme } from "$lib/docs-appearance-state.svelte";
@@ -10,6 +10,9 @@
    *
    * Default step (Interaction): xy inspect (numeric crosshair) + legendFocus.
    * Full palmerPenguins (333 complete cases).
+   *
+   * Labs titles must match `homeGrammarStaticSvgFromData` so the shell→live
+   * upgrade does not flash raw field names onto the axes.
    */
   let {
     active,
@@ -38,6 +41,7 @@
   ariaLabel="Penguin body mass increases with flipper length, grouped by species"
 >
   <Theme name={chartTheme} />
+  <Labs x="Flipper length mm" y="Body mass g" color="species" />
   <GeomPoint alpha={0.72} />
   {#if active >= 2}
     <GeomSmooth method="loess" span={0.75} degree={1} se={false} />
