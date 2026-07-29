@@ -1,40 +1,8 @@
 /**
- * Language modules for svelte-highlight, keyed by the fence / prop aliases
- * used across docs call sites.
+ * Docs code-block language helpers. Highlighting uses the shared highlight.js
+ * allowlist in `$scripts/highlight-code` (same as guide markdown fences).
  */
-import type { LanguageType } from "svelte-highlight/languages";
-import bash from "svelte-highlight/languages/bash";
-import css from "svelte-highlight/languages/css";
-import javascript from "svelte-highlight/languages/javascript";
-import json from "svelte-highlight/languages/json";
-import plaintext from "svelte-highlight/languages/plaintext";
-import svelte from "svelte-highlight/languages/svelte";
-import typescript from "svelte-highlight/languages/typescript";
-import xml from "svelte-highlight/languages/xml";
-
-const LANGUAGE_MODULES: Record<string, LanguageType<string>> = {
-  bash,
-  sh: bash,
-  shell: bash,
-  zsh: bash,
-  css,
-  js: javascript,
-  javascript,
-  json,
-  plaintext,
-  text: plaintext,
-  svelte,
-  ts: typescript,
-  typescript,
-  html: xml,
-  xml,
-};
-
-/** Resolve a language name (or empty) to a svelte-highlight language module. */
-export function resolveCodeLanguage(lang?: string): LanguageType<string> {
-  if (lang === undefined || lang.trim() === "") return plaintext;
-  return LANGUAGE_MODULES[lang.trim().toLowerCase()] ?? plaintext;
-}
+import { highlightCodeToHtml, resolveHighlightLanguage } from "$scripts/highlight-code";
 
 /**
  * Infer a highlight language from a code-tab label when no explicit language prop is set
@@ -49,4 +17,28 @@ export function languageFromCodeTabLabel(label?: string): string {
     return "typescript";
   }
   return "plaintext";
+}
+
+/**
+ * Normalize a fence / prop language to a stable id. Unknown or empty names
+ * become `"plaintext"` (escaped, no tokens).
+ */
+export function resolveCodeLanguage(lang?: string): string {
+  if (lang === undefined || lang.trim() === "") return "plaintext";
+  const key = lang.trim().toLowerCase();
+  if (key === "plaintext" || key === "text") return "plaintext";
+  if (resolveHighlightLanguage(key) !== undefined) return key;
+  return "plaintext";
+}
+
+/**
+ * Full `<pre><code class="hljs …">` HTML for docs CopyCode / CodeTabs.
+ * Token spans come from highlight.js; unknown languages are escaped plaintext.
+ */
+export function highlightDocsBlock(source: string, lang?: string): string {
+  const id = resolveCodeLanguage(lang);
+  const fenceLang = id === "plaintext" ? "" : id;
+  const body = highlightCodeToHtml(source, fenceLang);
+  const languageClass = fenceLang === "" ? ' class="hljs"' : ` class="hljs language-${fenceLang}"`;
+  return `<pre class="hljs"><code${languageClass}>${body}</code></pre>`;
 }

@@ -1,8 +1,6 @@
 <script lang="ts">
-  import Highlight from "svelte-highlight";
-
   import { briefCopyStatus, COPIED_STATUS, copyText } from "$lib/clipboard";
-  import { resolveCodeLanguage } from "$lib/code-languages";
+  import { highlightDocsBlock } from "$lib/code-languages";
   import { CHECK_ICON_SVG, COPY_ICON_SVG } from "$lib/copy-icons";
 
   const {
@@ -23,7 +21,7 @@
   let source = $state<HTMLElement>();
   let status = $state("");
   let timer: ReturnType<typeof setTimeout> | undefined;
-  const languageModule = $derived(resolveCodeLanguage(language));
+  const highlighted = $derived(highlightDocsBlock(code, language));
   const copied = $derived(status === COPIED_STATUS);
 
   async function copy(): Promise<void> {
@@ -51,7 +49,8 @@
     {/if}
   </button>
   <div class="code-body" bind:this={source}>
-    <Highlight {code} language={languageModule} />
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -- highlight.js token spans; plaintext is escaped -->
+    {@html highlighted}
   </div>
   <span class="visually-hidden" role="status">{status}</span>
 </div>

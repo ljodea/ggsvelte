@@ -6,7 +6,7 @@
 @import "./styles/base.css";
 @import "./styles/shell.css";
 /* Code blocks are always dark (see --code-paper); atom-one-dark token colors. */
-@import "svelte-highlight/styles/atom-one-dark.css";
+@import "highlight.js/styles/atom-one-dark.css";
 
 .app-contents {
   display: contents;
