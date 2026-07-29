@@ -1,5 +1,55 @@
 # @ggsvelte/spec
 
+## 0.18.0
+
+### Minor Changes
+
+- 68cc5ec: <!-- markdownlint-disable MD041 -->
+
+  fix(docs): capacity-matched palette specimens; drop tableau_traffic
+
+  /palettes always plotted the 8-squadron Armada tonnage bars. Short palettes
+  cycled colours and long palettes left most swatches unused. Specimens now pick
+  a real HistData series with exactly as many categories as the palette has
+  colours (polio 2–3, Armada men 4–10, Langren 11–12, chest sizes 13–16, cholera
+  districts 17–24).
+
+  Also remove the Tableau Traffic categorical scheme (`tableau_traffic` /
+  `TABLEAU_TRAFFIC_PALETTE`) — the red/yellow/green KPI triples were a weak
+  showcase ramp and are not kept in the docs or skill tables.
+
+  Migration: <https://ggsvelte.sh/guide/scales-guides>
+
+  If you set `scheme: "tableau_traffic"`, switch to another ordinal scheme
+  (e.g. `tableau10`, `Set1`, or an explicit `range`).
+
+- 5627ff9: <!-- markdownlint-disable MD041 -->
+
+  perf(spec): split render path off TypeBox schema validation
+
+  Browser chart bundles no longer load `schema-declarations` / `typebox/compile`
+  by default. `runPipeline` / `assemblePortableSpec` still run `normalize()` plus
+  TypeBox-free structural gates. Full schema `validate()` remains on the agent
+  path (`validate()`, builder `.spec()`, CLI).
+
+  Migration: none — additive for new structural-gate exports; CLI still validates
+  with TypeBox while browser render uses normalize + structural gates only
+
+### Patch Changes
+
+- 4b059b0: <!-- markdownlint-disable MD041 -->
+
+  perf(spec): one field-evidence pass for validate + dataChecks
+
+  `validate(spec, options)` now builds plot and layer field evidence once via
+  `resolveLayerFieldEvidence` and shares it with data-aware checks and lint,
+  instead of pivoting/type-scanning plot tables twice.
+
+  When aggregate plot+layer tables exceed maxRows/maxBytes, data-backed lint
+  advisories are skipped (no plot-only evidence handoff on that error path).
+
+  Migration: none for valid under-limit specs
+
 ## 0.17.0
 
 ### Minor Changes
