@@ -7,7 +7,7 @@
   import CopyCode from "$lib/components/CopyCode.svelte";
   import GrammarDemo from "$lib/components/GrammarDemo.svelte";
   import UiButton from "$lib/components/UiButton.svelte";
-  import { EXAMPLES } from "$lib/examples";
+  import { EXAMPLES } from "$lib/examples-manifest";
   import { HOME_CODE_PATH_TABS } from "$lib/home-code-path";
 
   import type { PageProps } from "./$types";

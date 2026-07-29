@@ -2,7 +2,7 @@ import { error } from "@sveltejs/kit";
 
 import { POSITION_REFERENCE, type PositionName, KNOWN_POSITIONS } from "@ggsvelte/spec";
 
-import { EXAMPLES } from "$lib/examples";
+import { EXAMPLES } from "$lib/examples-manifest";
 
 import type { EntryGenerator, PageLoad } from "./$types";
 
