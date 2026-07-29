@@ -147,7 +147,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   const region = page.getByRole("region", { name: "Categorical palettes" });
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
   // Unique ramps only — scheme "gray" is a US-spelling alias of "grey", not a twin card.
-  await expect(cards).toHaveCount(44);
+  await expect(cards).toHaveCount(48);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Observable 10",
     "Ipsum",
