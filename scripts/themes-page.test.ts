@@ -45,6 +45,10 @@ describe("themes catalog", () => {
       { name: "calc", scheme: "calc" },
       { name: "excel", scheme: "excel" },
       { name: "excel_new", scheme: "excel_new" },
+      { name: "base", scheme: "tableau10" },
+      { name: "igray", scheme: "tableau10" },
+      { name: "map", scheme: "colorblind" },
+      { name: "solid", scheme: "colorblind" },
       { name: "test", scheme: "colorblind" },
     ]);
     expect(THEME_OPTIONS.map((theme) => theme.name)).not.toContain("grey");

@@ -60,6 +60,10 @@ const THEME_LABELS = {
   calc: "Calc",
   excel: "Excel",
   excel_new: "Excel New",
+  base: "Base",
+  igray: "Inverse Gray",
+  map: "Map",
+  solid: "Solid",
   test: "Test",
 } as const satisfies Record<ThemeOptionName, string>;
 
@@ -146,6 +150,10 @@ const THEME_DEMO_SCHEMES = {
   calc: "calc",
   excel: "excel",
   excel_new: "excel_new",
+  base: "tableau10",
+  igray: "tableau10",
+  map: "colorblind",
+  solid: "colorblind",
   test: "colorblind",
 } as const satisfies Record<ThemeOptionName, keyof typeof CATEGORICAL_SCHEMES>;
 

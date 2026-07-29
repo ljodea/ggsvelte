@@ -51,7 +51,7 @@ test("themes compares all built-in chart themes as full-width interactive portra
   const list = page.getByRole("list", { name: "Built-in chart themes" });
   const specimens = list.getByRole("listitem");
   // Non-alias product themes (grey/gray alias ggplot2; not separate portraits).
-  await expect(specimens).toHaveCount(29);
+  await expect(specimens).toHaveCount(33);
   await expect(specimens.getByRole("heading", { level: 3 })).toHaveText([
     "Default",
     "Light",
@@ -81,6 +81,10 @@ test("themes compares all built-in chart themes as full-width interactive portra
     "Calc",
     "Excel",
     "Excel New",
+    "Base",
+    "Inverse Gray",
+    "Map",
+    "Solid",
     "Test",
   ]);
 

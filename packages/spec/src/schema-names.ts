@@ -221,6 +221,11 @@ export const THEME_NAMES = [
   "calc",
   "excel",
   "excel_new",
+  // ggthemes minimalist family (#1158): theme_base / igray / map / solid
+  "base",
+  "igray",
+  "map",
+  "solid",
   "grey",
   "gray",
   // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters

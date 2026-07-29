@@ -177,6 +177,30 @@ export const THEME_STATIC_SHELLS = [
     sha256: "9748be9ab56e2a3b5ed44a9a43dffd44c00529f980b18889de19667808b2f01d",
   },
   {
+    id: "theme-base",
+    filename: "theme-base.svg",
+    path: "/theme-shells/theme-base.svg",
+    sha256: "e94b14ae8a61d92e36bbc10fbd759e474c349e3d864c50f10247b8d449b08832",
+  },
+  {
+    id: "theme-igray",
+    filename: "theme-igray.svg",
+    path: "/theme-shells/theme-igray.svg",
+    sha256: "57a84545004a89df9ba4b68c7e5b57da565e9ad16cc326627ca145d33b4c750a",
+  },
+  {
+    id: "theme-map",
+    filename: "theme-map.svg",
+    path: "/theme-shells/theme-map.svg",
+    sha256: "04a2e4ae687aaaba48aa844678ca556d2232ab7cbefa75fa932b2eff88cb7aaa",
+  },
+  {
+    id: "theme-solid",
+    filename: "theme-solid.svg",
+    path: "/theme-shells/theme-solid.svg",
+    sha256: "80bd2ea1d0b673d622714d6f6a962fccdc46015b46afa676394b921d2bd73341",
+  },
+  {
     id: "theme-test",
     filename: "theme-test.svg",
     path: "/theme-shells/theme-test.svg",

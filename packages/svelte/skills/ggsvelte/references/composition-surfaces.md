@@ -45,6 +45,10 @@ optional `"name"` base plus role overrides, e.g.
 | calc                    | LibreOffice Calc: white panel, gray70 border + y-grid, no axis lines       |
 | excel                   | Excel 97 classic: gray panel, black y-grid + border (horizontal=TRUE)      |
 | excel_new               | modern Excel: dark-gray ink, hairline #bfbfbf y-grid, no ticks or border   |
+| base                    | base R: black frame and ticks, no grid, bold title                         |
+| igray                   | inverse gray: white panel, gray90 surround and grid                        |
+| map                     | every axis/panel/grid element blank — marks only, for maps                 |
+| solid                   | nothing but marks — every non-geom element removed                         |
 | grey (alias of ggplot2) | UK theme_grey                                                              |
 | gray (alias of ggplot2) | US theme_gray                                                              |
 
@@ -53,7 +57,7 @@ Svelte: one named shell per product theme — `ThemeDefault`, `ThemeLight`,
 `ThemeHrbr`, `ThemeFew`, `ThemeClean`, `ThemeFivethirtyeight`,
 `ThemeEconomist`, `ThemeTufte`, `ThemeLinedraw`, `ThemeVoid`, `ThemeSolarized`,
 `ThemeSolarizeddark`, `ThemeEconomistwhite`, `ThemeSolarized2`, `ThemeSolarized2dark`,
-`ThemeWsj`, `ThemeGdocs`, `ThemeHc`, `ThemeHcdark`, `ThemePander`, `ThemeCalc`, `ThemeExcel`, `ThemeExcelnew`, `ThemeGrey`, `ThemeGray`. Escape hatch `<Theme name={dynamicName} />` for
+`ThemeWsj`, `ThemeGdocs`, `ThemeHc`, `ThemeHcdark`, `ThemePander`, `ThemeCalc`, `ThemeExcel`, `ThemeExcelnew`, `ThemeBase`, `ThemeIgray`, `ThemeMap`, `ThemeSolid`, `ThemeGrey`, `ThemeGray`. Escape hatch `<Theme name={dynamicName} />` for
 reactive names.
 Every shell and `<Theme>` also accepts role-override props (`ink`, `paper`,
 `accent`, `grid`, `panel`, `axisText`, `axisLine`, `tickColor`,
