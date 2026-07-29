@@ -175,10 +175,10 @@ byte-identity-preserving: `value` is not routed through any helper.
 | fivethirtyeight      | ggthemes FiveThirtyEight three-color line palette (blue/red/green) |
 | ptol                 | ggthemes Paul Tol qualitative 12 (full-capacity order)             |
 | canva                | ggthemes Canva "Fresh and bright" 4 (the `scale_*_canva` default)  |
-| gdocs                | ggthemes Google Docs colors (6 hues × 4 strengths, verbatim)      |
-| hc                   | ggthemes Highcharts default 10 colors                             |
-| hc_dark              | ggthemes Highcharts darkunica 11 colors                           |
-| pander               | ggthemes pander colorblind/printer-friendly 8 (Okabe-Ito order)   |
+| gdocs                | ggthemes Google Docs colors (6 hues × 4 strengths, verbatim)       |
+| hc                   | ggthemes Highcharts default 10 colors                              |
+| hc_dark              | ggthemes Highcharts darkunica 11 colors                            |
+| pander               | ggthemes pander colorblind/printer-friendly 8 (Okabe-Ito order)    |
 | Set1                 | ColorBrewer qualitative, saturated primaries                       |
 | Set2                 | ColorBrewer qualitative, muted pastels                             |
 | Set3                 | ColorBrewer qualitative, light 12-class                            |
