@@ -82,7 +82,7 @@ export function referenceCatalogArtifacts(repoRoot: string) {
       path: join(repoRoot, rel),
       label: rel,
       regenerateWith: "reference:catalogs:gen",
-      build: async () => {
+      build: () => {
         const raw = renderCatalogSource({
           file: catalog.file,
           exportName: catalog.exportName,

@@ -68,7 +68,7 @@ export interface GuideReferenceEntry {
  * Precomputed at gen time.
  */
 export const GUIDE_REFERENCE: Readonly<Record<GuideTypeName, GuideReferenceEntry>> =
-  GUIDE_REFERENCE_DATA as unknown as Readonly<Record<GuideTypeName, GuideReferenceEntry>>;
+  GUIDE_REFERENCE_DATA;
 
 /** Stable list order matching KNOWN_GUIDE_TYPES (docs index, search, inventory). */
 export function guideReferenceList(): readonly GuideReferenceEntry[] {

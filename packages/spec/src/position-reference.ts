@@ -33,7 +33,7 @@ export interface PositionReferenceEntry {
  * Precomputed at gen time.
  */
 export const POSITION_REFERENCE: Readonly<Record<PositionName, PositionReferenceEntry>> =
-  POSITION_REFERENCE_DATA as unknown as Readonly<Record<PositionName, PositionReferenceEntry>>;
+  POSITION_REFERENCE_DATA;
 
 /** Stable list order matching KNOWN_POSITIONS (docs index, search, inventory). */
 export function positionReferenceList(): readonly PositionReferenceEntry[] {

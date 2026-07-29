@@ -30,8 +30,7 @@ export interface StatReferenceEntry {
  * Complete per-stat API reference. Keys are exactly KNOWN_STATS.
  * Precomputed at gen time from GEOM_REFERENCE + STAT_COLUMNS.
  */
-export const STAT_REFERENCE: Readonly<Record<StatName, StatReferenceEntry>> =
-  STAT_REFERENCE_DATA as unknown as Readonly<Record<StatName, StatReferenceEntry>>;
+export const STAT_REFERENCE: Readonly<Record<StatName, StatReferenceEntry>> = STAT_REFERENCE_DATA;
 
 /** Stable list order matching KNOWN_STATS (docs index, search, inventory). */
 export function statReferenceList(): readonly StatReferenceEntry[] {

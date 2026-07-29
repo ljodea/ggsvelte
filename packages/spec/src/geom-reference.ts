@@ -119,8 +119,7 @@ export function componentNameForGeom(geom: string): string {
  * Complete per-geom API reference derived from SpecDeclarations at gen time.
  * Keys are exactly KNOWN_GEOMS; a missing geom is a generate-time throw.
  */
-export const GEOM_REFERENCE: Readonly<Record<GeomName, GeomReferenceEntry>> =
-  GEOM_REFERENCE_DATA as unknown as Readonly<Record<GeomName, GeomReferenceEntry>>;
+export const GEOM_REFERENCE: Readonly<Record<GeomName, GeomReferenceEntry>> = GEOM_REFERENCE_DATA;
 
 /** Stable list order matching KNOWN_GEOMS (docs index, search, inventory). */
 export function geomReferenceList(): readonly GeomReferenceEntry[] {

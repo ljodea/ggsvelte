@@ -117,8 +117,7 @@ export function allScaleHelpers(): readonly string[] {
  * Complete per-scale API reference. Keys are route slugs
  * (e.g. color_continuous, x_log10). Precomputed at gen time.
  */
-export const SCALE_REFERENCE: Readonly<Record<string, ScaleReferenceEntry>> =
-  SCALE_REFERENCE_DATA as unknown as Readonly<Record<string, ScaleReferenceEntry>>;
+export const SCALE_REFERENCE: Readonly<Record<string, ScaleReferenceEntry>> = SCALE_REFERENCE_DATA;
 
 /** Stable sorted list for docs index, search, and inventory. */
 export function scaleReferenceList(): readonly ScaleReferenceEntry[] {
