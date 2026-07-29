@@ -2,6 +2,7 @@
  * Data-free structural grammar checks for layers (required channels, rule forms,
  * computed-y bans, bin center/boundary, errorbar stat channels).
  * Color-scheme rules: validate-structure-scales.ts. Facet form: validate-structure-facet.ts.
+ * Form families: validate-structure-layer-{rule,ribbon,computed-y,shared}.ts.
  * Barrel: validate-structure.ts.
  */
 import type { SpecError } from "./errors.js";
@@ -10,12 +11,14 @@ import { GEOM_DEFAULTS } from "./schema.js";
 import { STYLE_AESTHETIC_GEOMS, type StyleAesthetic } from "./capabilities.js";
 import { effectiveChannel } from "./validate-data.js";
 import { paintStructuralErrors } from "./validate-structure-paint.js";
-
-const CHANNEL_FIX_EXAMPLE = { field: "column_name" };
-
-function isRecord(v: unknown): v is Record<string, unknown> {
-  return typeof v === "object" && v !== null && !Array.isArray(v);
-}
+import { computedYMappedErrors } from "./validate-structure-layer-computed-y.js";
+import { hasGeomIntercepts, ruleFamilyStructuralErrors } from "./validate-structure-layer-rule.js";
+import { ribbonStructuralErrors } from "./validate-structure-layer-ribbon.js";
+import {
+  CHANNEL_FIX_EXAMPLE,
+  isRecord,
+  pushMissingChannel,
+} from "./validate-structure-layer-shared.js";
 
 /**
  * Channels every geom needs mapped (after plot-aes inheritance).
@@ -74,86 +77,6 @@ const REQUIRED_CHANNELS: Record<GeomName, readonly ChannelName[]> = {
   blank: [], // trains whatever is mapped; nothing required
 };
 
-/** Asymmetric intercept presence for rule / hline / vline form checks. */
-function hasGeomIntercepts(geom: string, layer: Record<string, unknown>): boolean {
-  const params = layer["params"];
-  if (!isRecord(params)) return false;
-  if (geom === "hline") return params["yintercept"] !== undefined;
-  if (geom === "vline") return params["xintercept"] !== undefined;
-  return params["xintercept"] !== undefined || params["yintercept"] !== undefined;
-}
-
-function pushMissingChannel(
-  errors: SpecError[],
-  layerPath: string,
-  channel: ChannelName,
-  message: string,
-): void {
-  errors.push({
-    code: "missing-required-channel",
-    path: `${layerPath}/aes/${channel}`,
-    message,
-    fix: {
-      description: `Map "${channel}" to a data field.`,
-      example: { [channel]: CHANNEL_FIX_EXAMPLE },
-    },
-  });
-}
-
-function ribbonStructuralErrors(
-  layer: Record<string, unknown>,
-  layerPath: string,
-  mapped: (channel: ChannelName) => unknown,
-): SpecError[] {
-  const errors: SpecError[] = [];
-  const params = isRecord(layer["params"]) ? layer["params"] : {};
-  const pinned =
-    params["orientation"] === "x" || params["orientation"] === "y" ? params["orientation"] : null;
-  const xContract =
-    mapped("x") !== undefined && mapped("ymin") !== undefined && mapped("ymax") !== undefined;
-  const yContract =
-    mapped("y") !== undefined && mapped("xmin") !== undefined && mapped("xmax") !== undefined;
-
-  if (pinned === null && xContract && yContract) {
-    errors.push({
-      code: "ribbon-orientation-ambiguous",
-      path: `${layerPath}/params/orientation`,
-      message:
-        'This ribbon layer maps both x-orientation (x+ymin+ymax) and y-orientation (y+xmin+xmax) contracts. Set params.orientation to "x" or "y".',
-      fix: {
-        description: "Pin orientation explicitly.",
-        example: { params: { orientation: "x" } },
-      },
-    });
-    return errors;
-  }
-
-  const orientation: "x" | "y" | null =
-    pinned === "x" || pinned === "y" ? pinned : xContract ? "x" : yContract ? "y" : null;
-
-  const needed: ChannelName[] =
-    orientation === "y" ||
-    (orientation === null &&
-      (mapped("y") !== undefined || mapped("xmin") !== undefined || mapped("xmax") !== undefined))
-      ? ["y", "xmin", "xmax"]
-      : orientation === "x" || orientation === null
-        ? ["x", "ymin", "ymax"]
-        : ["x", "ymin", "ymax"];
-
-  for (const channel of needed) {
-    if (mapped(channel) !== undefined) continue;
-    const suffix =
-      orientation === null ? "for its interval contract" : `with orientation "${orientation}"`;
-    pushMissingChannel(
-      errors,
-      layerPath,
-      channel,
-      `The ribbon geom ${suffix} requires a "${channel}" channel; map it in the layer's aes or the plot-level aes.`,
-    );
-  }
-  return errors;
-}
-
 /** Grammar checks for one schema-valid layer. */
 export function layerStructuralErrors(
   layer: Record<string, unknown>,
@@ -188,70 +111,7 @@ export function layerStructuralErrors(
   }
 
   if (isRuleFamily) {
-    const intercepts = hasGeomIntercepts(geom, layer);
-    // The annotation form inherits NO plot aes (normalize drops it, matching
-    // ggplot2's inherit.aes = FALSE) — only the layer's OWN x/y mappings
-    // conflict with intercepts. Data-driven hline/vline sugar also nulls the
-    // orthogonal axis during normalize; pre-normalize validation still sees
-    // raw layer aes here.
-    const own = (channel: "x" | "y") => layerAes?.[channel] ?? undefined;
-    let x = intercepts ? own("x") : mapped("x");
-    let y = intercepts ? own("y") : mapped("y");
-    // Pre-normalize data-driven aliases: orthogonal axis is not part of the form.
-    if (!intercepts && geom === "hline") x = undefined;
-    if (!intercepts && geom === "vline") y = undefined;
-    const interceptHint =
-      geom === "hline"
-        ? "params.yintercept"
-        : geom === "vline"
-          ? "params.xintercept"
-          : "params.xintercept/yintercept";
-    const dataHint = geom === "hline" ? "aes.y" : geom === "vline" ? "aes.x" : "aes.x/aes.y";
-    if (intercepts && (x !== undefined || y !== undefined)) {
-      errors.push({
-        code: "rule-form-ambiguous",
-        path: layerPath,
-        message: `This ${geom} layer mixes the annotation form (${interceptHint}) with mapped ${dataHint}. Use fixed intercepts OR a data mapping, never both.`,
-        fix: {
-          description:
-            "Remove the intercept params (data-driven form), or unset the position aes with null (annotation form).",
-          example:
-            geom === "vline"
-              ? { geom: "vline", params: { xintercept: 0 } }
-              : { geom: geom === "hline" ? "hline" : "rule", params: { yintercept: 0 } },
-        },
-      });
-    } else if (!intercepts && x === undefined && y === undefined) {
-      errors.push({
-        code: "rule-form-missing",
-        path: layerPath,
-        message: `This ${geom} layer has neither fixed intercepts (${interceptHint}) nor a mapped ${dataHint} — nothing to draw.`,
-        fix: {
-          description:
-            geom === "hline"
-              ? "Set params.yintercept for an annotation, or map aes.y for data-driven rules."
-              : geom === "vline"
-                ? "Set params.xintercept for an annotation, or map aes.x for data-driven rules."
-                : "Set params.yintercept (or xintercept) for an annotation, or map aes.x/aes.y to a field for data-driven rules.",
-          example:
-            geom === "vline"
-              ? { geom: "vline", params: { xintercept: 0 } }
-              : { geom: geom === "hline" ? "hline" : "rule", params: { yintercept: 0 } },
-        },
-      });
-    } else if (!intercepts && x !== undefined && y !== undefined) {
-      errors.push({
-        code: "rule-both-axes",
-        path: layerPath,
-        message:
-          "This rule layer maps BOTH aes.x and aes.y; a data-driven rule is either vertical (map x) or horizontal (map y). Unset the other channel with null.",
-        fix: {
-          description: "Keep one direction and unset the other channel with null.",
-          example: { geom: "rule", aes: { y: null } },
-        },
-      });
-    }
-    return errors;
+    return ruleFamilyStructuralErrors(layer, geom, layerPath, layerAes, mapped);
   }
 
   const stat =
@@ -259,89 +119,7 @@ export function layerStructuralErrors(
       ? layer["stat"]
       : (GEOM_DEFAULTS[geom as keyof typeof GEOM_DEFAULTS]?.stat ?? "identity");
 
-  if (
-    geom === "bar" ||
-    geom === "histogram" ||
-    geom === "freqpoly" ||
-    (geom === "line" && stat === "bin")
-  ) {
-    const y = mapped("y");
-    if (y !== undefined && !("stat" in y)) {
-      errors.push({
-        code: "computed-y-mapped",
-        path: `${layerPath}/aes/y`,
-        message: `The ${geom} geom computes y with the ${stat} stat, so aes.y must not map data. Use geom "col" for pre-computed heights, or unset y with null.`,
-        fix: {
-          description: 'Switch the layer to geom "col" (identity stat) to draw mapped y values.',
-          example: { geom: "col" },
-        },
-      });
-    }
-  }
-
-  if (geom === "density") {
-    const y = mapped("y");
-    if (y !== undefined && !("stat" in y)) {
-      errors.push({
-        code: "computed-y-mapped",
-        path: `${layerPath}/aes/y`,
-        message:
-          "The density geom computes y with the density stat, so aes.y must not map data. Map only x, or unset y with null.",
-        fix: {
-          description: "Remove the y mapping (or unset an inherited one with null).",
-          example: { geom: "density", aes: { y: null } },
-        },
-      });
-    }
-  }
-
-  if (geom === "function" || stat === "function") {
-    const y = mapped("y");
-    if (y !== undefined && !("stat" in y)) {
-      errors.push({
-        code: "computed-y-mapped",
-        path: `${layerPath}/aes/y`,
-        message:
-          "The function geom/stat computes y from the named function, so aes.y must not map data. Unset y with null.",
-        fix: {
-          description: "Remove the y mapping (or unset an inherited one with null).",
-          example: { geom: "function", aes: { y: null }, params: { fun: "dnorm", xlim: [-3, 3] } },
-        },
-      });
-    }
-  }
-
-  if (geom === "dotplot" || stat === "bindot") {
-    const y = mapped("y");
-    if (y !== undefined && !("stat" in y)) {
-      errors.push({
-        code: "computed-y-mapped",
-        path: `${layerPath}/aes/y`,
-        message:
-          "The dotplot geom computes y stack positions with the bindot stat, so aes.y must not map data. Map only x, or unset y with null.",
-        fix: {
-          description: "Remove the y mapping (or unset an inherited one with null).",
-          example: { geom: "dotplot", aes: { y: null } },
-        },
-      });
-    }
-  }
-
-  if (geom === "line" && stat === "ecdf") {
-    const y = mapped("y");
-    if (y !== undefined && !("stat" in y)) {
-      errors.push({
-        code: "computed-y-mapped",
-        path: `${layerPath}/aes/y`,
-        message:
-          'The ecdf stat computes y (cumulative proportion), so aes.y must not map data. Map only x, or use y: { stat: "ecdf" }.',
-        fix: {
-          description: 'Remove the y mapping (or set y: { stat: "ecdf" }).',
-          example: { geom: "line", stat: "ecdf", aes: { y: null } },
-        },
-      });
-    }
-  }
+  errors.push(...computedYMappedErrors(geom, stat, layerPath, mapped));
 
   if (
     geom === "bar" ||
