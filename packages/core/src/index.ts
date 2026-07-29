@@ -85,6 +85,8 @@ export {
   FLEXOKI_PALETTE,
   IPSUM_PALETTE,
   niceLinearDomain,
+  PTOL_PALETTE,
+  CANVA_PALETTE,
   ScaleConfigError,
   trainBand,
   trainColor,

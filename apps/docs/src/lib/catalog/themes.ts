@@ -42,6 +42,8 @@ const PALETTE_LABELS = {
   few_light: "Few Light",
   few_dark: "Few Dark",
   fivethirtyeight: "FiveThirtyEight",
+  ptol: "Paul Tol",
+  canva: "Canva",
   hue: "Hue",
   grey: "Grey",
   gray: "Gray",
