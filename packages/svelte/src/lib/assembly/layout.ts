@@ -151,7 +151,29 @@ export function plotRootInlineStyle(input: PlotRootStyleInput): string | undefin
   return `${sizeCss}${input.themeStyle}` || undefined;
 }
 
-export type ClearLegendXInput = {
+/** Edge/gap pad between a pressed legend box and the Clear recovery control. */
+export const CLEAR_CONTROL_GAP_PX = 4;
+/**
+ * Compact control height — matches discrete legend row targets (min 24px AA
+ * target size) rather than the old 44×44 AAA square that dwarfed swatches.
+ */
+export const CLEAR_CONTROL_HEIGHT_PX = 24;
+/** Approximate painted width of the "Clear" label + horizontal padding. */
+export const CLEAR_CONTROL_WIDTH_PX = 44;
+/** Grace period after pointer leaves legend chrome before Clear fades for screenshots. */
+export const CLEAR_HIDE_DELAY_MS = 2500;
+
+export type ClearControlLegendRef = {
+  readonly scale: string;
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+  readonly position?: "right" | "bottom";
+  readonly direction?: "vertical" | "horizontal";
+};
+
+export type ClearControlLayoutInput = {
   /**
    * Host: `interactionConfig.legendFocus !== null`.
    * Must stay even when `pressedScale` is non-null: controller emphasis can
@@ -161,15 +183,80 @@ export type ClearLegendXInput = {
   readonly legendFocusEnabled: boolean;
   /** Host: `effectiveLegendPressed?.scale ?? null`. */
   readonly pressedScale: string | null;
-  /** Scene legends (need scale + x for the clear control anchor). */
-  readonly legends: readonly { readonly scale: string; readonly x: number }[];
+  /** Scene legends — full box + position so Clear anchors off the pressed guide. */
+  readonly legends: readonly ClearControlLegendRef[];
+  readonly sceneWidth: number;
+  readonly sceneHeight: number;
+};
+
+export type ClearControlLayout = {
+  readonly left: number;
+  readonly top: number;
 };
 
 /**
- * X position for the legend clear control, or null to hide it.
+ * Scene-local position for the legend Clear recovery control, or null to hide.
+ *
+ * Placement (collision-safe relative to the pressed legend):
+ * - **right / vertical** — immediately **below** the legend stack (never over title/swatches)
+ * - **bottom / horizontal** — to the **right** of the strip when space allows, else under it
+ *
+ * Always clamps into the scene box so capture/hit-testing still reach the control.
  * null when legend focus is off, nothing is pressed, or no legend matches.
  */
-export function resolveClearLegendX(input: ClearLegendXInput): number | null {
+export function resolveClearControlLayout(
+  input: ClearControlLayoutInput,
+): ClearControlLayout | null {
   if (!input.legendFocusEnabled || input.pressedScale === null) return null;
-  return input.legends.find((legend) => legend.scale === input.pressedScale)?.x ?? null;
+  const legend = input.legends.find((entry) => entry.scale === input.pressedScale);
+  if (legend === undefined) return null;
+
+  const position = legend.position ?? "right";
+  const direction = legend.direction ?? (position === "bottom" ? "horizontal" : "vertical");
+  const gap = CLEAR_CONTROL_GAP_PX;
+  const btnW = CLEAR_CONTROL_WIDTH_PX;
+  const btnH = CLEAR_CONTROL_HEIGHT_PX;
+
+  let left: number;
+  let top: number;
+
+  if (position === "bottom" || direction === "horizontal") {
+    const besideLeft = legend.x + legend.width + gap;
+    const fitsBeside = besideLeft + btnW + gap <= input.sceneWidth;
+    if (fitsBeside) {
+      left = besideLeft;
+      top = legend.y + Math.max(0, (legend.height - btnH) / 2);
+    } else {
+      left = legend.x;
+      top = legend.y + legend.height + gap;
+    }
+  } else {
+    // right / vertical stack: under the full legend box
+    left = legend.x;
+    top = legend.y + legend.height + gap;
+  }
+
+  const maxLeft = Math.max(gap, input.sceneWidth - btnW - gap);
+  const maxTop = Math.max(gap, input.sceneHeight - btnH - gap);
+  return {
+    left: Math.min(Math.max(gap, left), maxLeft),
+    top: Math.min(Math.max(gap, top), maxTop),
+  };
+}
+
+/**
+ * Whether the Clear control should paint (opacity / pointer-events) while a
+ * series remains pressed. Host owns the hide timer; this pure gate only
+ * combines pressed + chrome hover/focus + elapsed hide.
+ */
+export function shouldRevealClearControl(input: {
+  readonly pressed: boolean;
+  /** Pointer over legend targets/clear, or focus within that chrome. */
+  readonly chromeActive: boolean;
+  /** True once the post-leave hide delay has elapsed without re-entry. */
+  readonly hideElapsed: boolean;
+}): boolean {
+  if (!input.pressed) return false;
+  if (input.chromeActive) return true;
+  return !input.hideElapsed;
 }

@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CLEAR_CONTROL_GAP_PX,
+  CLEAR_CONTROL_HEIGHT_PX,
   isContainerWidthProp,
   isDockedTooltipWidth,
   isNarrowToolsWidth,
   isTooltipDocked,
   plotRootInlineStyle,
   plotTooltipDomId,
-  resolveClearLegendX,
+  resolveClearControlLayout,
   resolveCaptureAriaControls,
   resolvePlotSize,
+  shouldRevealClearControl,
   tooltipViewportSize,
 } from "../../src/lib/assembly/layout.js";
 
@@ -238,47 +241,149 @@ describe("tooltipViewportSize", () => {
   });
 });
 
-describe("resolveClearLegendX", () => {
-  const legends = [
-    { scale: "fill", x: 12 },
-    { scale: "color", x: 40 },
-  ];
+describe("resolveClearControlLayout", () => {
+  const rightLegend = {
+    scale: "color",
+    x: 340,
+    y: 24,
+    width: 72,
+    height: 90,
+    position: "right" as const,
+    direction: "vertical" as const,
+  };
+  const bottomLegend = {
+    scale: "fill",
+    x: 48,
+    y: 260,
+    width: 220,
+    height: 28,
+    position: "bottom" as const,
+    direction: "horizontal" as const,
+  };
+  const scene = { sceneWidth: 420, sceneHeight: 300 };
 
-  it("returns the matching legend x when focus is enabled and pressed", () => {
+  it("returns null when focus is off, nothing is pressed, or no legend matches", () => {
     expect(
-      resolveClearLegendX({
-        legendFocusEnabled: true,
-        pressedScale: "color",
-        legends,
-      }),
-    ).toBe(40);
-  });
-
-  it("returns null when legend focus is disabled even if a scale is pressed", () => {
-    // Runtime-disable: controller emphasis can leave a pressed scale briefly.
-    expect(
-      resolveClearLegendX({
+      resolveClearControlLayout({
         legendFocusEnabled: false,
-        pressedScale: "fill",
-        legends,
+        pressedScale: "color",
+        legends: [rightLegend],
+        ...scene,
       }),
     ).toBeNull();
-  });
-
-  it("returns null when nothing is pressed or no legend matches", () => {
     expect(
-      resolveClearLegendX({
+      resolveClearControlLayout({
         legendFocusEnabled: true,
         pressedScale: null,
-        legends,
+        legends: [rightLegend],
+        ...scene,
       }),
     ).toBeNull();
     expect(
-      resolveClearLegendX({
+      resolveClearControlLayout({
         legendFocusEnabled: true,
         pressedScale: "size",
-        legends,
+        legends: [rightLegend],
+        ...scene,
       }),
     ).toBeNull();
+  });
+
+  it("parks Clear below a right/vertical legend (not over the title stack)", () => {
+    expect(
+      resolveClearControlLayout({
+        legendFocusEnabled: true,
+        pressedScale: "color",
+        legends: [rightLegend],
+        ...scene,
+      }),
+    ).toEqual({
+      left: rightLegend.x,
+      top: rightLegend.y + rightLegend.height + CLEAR_CONTROL_GAP_PX,
+    });
+  });
+
+  it("parks Clear to the right of a bottom/horizontal legend when space allows", () => {
+    expect(
+      resolveClearControlLayout({
+        legendFocusEnabled: true,
+        pressedScale: "fill",
+        legends: [bottomLegend],
+        ...scene,
+      }),
+    ).toEqual({
+      left: bottomLegend.x + bottomLegend.width + CLEAR_CONTROL_GAP_PX,
+      top: bottomLegend.y + Math.max(0, (bottomLegend.height - CLEAR_CONTROL_HEIGHT_PX) / 2),
+    });
+  });
+
+  it("wraps Clear under a bottom legend when the right edge has no room", () => {
+    const wideBottom = { ...bottomLegend, x: 200, width: 200 };
+    expect(
+      resolveClearControlLayout({
+        legendFocusEnabled: true,
+        pressedScale: "fill",
+        legends: [wideBottom],
+        sceneWidth: 420,
+        sceneHeight: 320,
+      }),
+    ).toEqual({
+      left: wideBottom.x,
+      top: wideBottom.y + wideBottom.height + CLEAR_CONTROL_GAP_PX,
+    });
+  });
+
+  it("clamps Clear into the scene when the preferred anchor would overflow", () => {
+    const tallRight = { ...rightLegend, y: 250, height: 80 };
+    const layout = resolveClearControlLayout({
+      legendFocusEnabled: true,
+      pressedScale: "color",
+      legends: [tallRight],
+      sceneWidth: 420,
+      sceneHeight: 300,
+    });
+    expect(layout).not.toBeNull();
+    expect(layout!.top).toBeLessThanOrEqual(300 - CLEAR_CONTROL_HEIGHT_PX - CLEAR_CONTROL_GAP_PX);
+    expect(layout!.left).toBeGreaterThanOrEqual(CLEAR_CONTROL_GAP_PX);
+  });
+
+  it("anchors to the pressed scale when multiple legends are present", () => {
+    expect(
+      resolveClearControlLayout({
+        legendFocusEnabled: true,
+        pressedScale: "fill",
+        legends: [rightLegend, bottomLegend],
+        ...scene,
+      }),
+    ).toEqual({
+      left: bottomLegend.x + bottomLegend.width + CLEAR_CONTROL_GAP_PX,
+      top: bottomLegend.y + Math.max(0, (bottomLegend.height - CLEAR_CONTROL_HEIGHT_PX) / 2),
+    });
+  });
+});
+
+describe("shouldRevealClearControl", () => {
+  it("hides when nothing is pressed", () => {
+    expect(
+      shouldRevealClearControl({ pressed: false, chromeActive: true, hideElapsed: false }),
+    ).toBe(false);
+  });
+
+  it("stays visible while chrome is active even after hide would have elapsed", () => {
+    expect(shouldRevealClearControl({ pressed: true, chromeActive: true, hideElapsed: true })).toBe(
+      true,
+    );
+  });
+
+  it("stays visible after leave until the hide delay elapses", () => {
+    expect(
+      shouldRevealClearControl({ pressed: true, chromeActive: false, hideElapsed: false }),
+    ).toBe(true);
+  });
+
+  it("hides after the delay when chrome is idle (screenshot-friendly)", () => {
+    expect(
+      shouldRevealClearControl({ pressed: true, chromeActive: false, hideElapsed: true }),
+    ).toBe(false);
   });
 });
