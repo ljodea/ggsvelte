@@ -32,9 +32,13 @@
 
   onMount(() => {
     let cancelled = false;
-    void loadHighlight().then((loaded) => {
-      if (!cancelled) bundle = loaded;
-    });
+    void loadHighlight()
+      .then((loaded) => {
+        if (!cancelled) bundle = loaded;
+      })
+      .catch(() => {
+        // Keep plain pre/code; loadHighlight clears its cache for retry.
+      });
     return () => {
       cancelled = true;
     };

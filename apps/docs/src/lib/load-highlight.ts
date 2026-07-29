@@ -14,12 +14,16 @@ export type HighlightBundle = {
 let pending: Promise<HighlightBundle> | undefined;
 
 export function loadHighlight(): Promise<HighlightBundle> {
-  pending ??= Promise.all([import("svelte-highlight"), import("./code-languages.js")]).then(
-    ([highlight, languages]) => ({
+  pending ??= Promise.all([import("svelte-highlight"), import("./code-languages.js")])
+    .then(([highlight, languages]) => ({
       Highlight: highlight.default,
       resolveCodeLanguage: languages.resolveCodeLanguage,
       languageFromCodeTabLabel: languages.languageFromCodeTabLabel,
-    }),
-  );
+    }))
+    .catch((error: unknown) => {
+      // Do not cache a rejected promise — a transient chunk miss must retry.
+      pending = undefined;
+      throw error;
+    });
   return pending;
 }
