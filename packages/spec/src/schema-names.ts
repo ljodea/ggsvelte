@@ -75,9 +75,6 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "excel_fill",
   "excel_new",
   // ColorBrewer qualitative (#825)
-  "Set1",
-  "Set2",
-  "Set3",
   "Dark2",
   "Paired",
   "Accent",

@@ -247,8 +247,8 @@ describe("color/fill scale authoring API", () => {
 
 describe("ColorBrewer helpers (#825)", () => {
   it("maps palette to scheme and direction -1 to reverse", () => {
-    expect(scale_color_brewer({ palette: "Set2" })).toEqual({
-      color: { type: "ordinal", scheme: "Set2" },
+    expect(scale_color_brewer({ palette: "Dark2" })).toEqual({
+      color: { type: "ordinal", scheme: "Dark2" },
     });
     expect(scaleColorDistiller({ palette: "Blues", direction: -1 })).toEqual({
       color: { type: "sequential", scheme: "Blues", reverse: true },
@@ -259,7 +259,7 @@ describe("ColorBrewer helpers (#825)", () => {
   });
 
   it("accepts ColorBrewer schemes in tier-1 validation", () => {
-    expect(validScale({ type: "ordinal", scheme: "Set2" })).toBe(true);
+    expect(validScale({ type: "ordinal", scheme: "Dark2" })).toBe(true);
     expect(validScale({ type: "sequential", scheme: "Blues" })).toBe(true);
     expect(validScale({ type: "binned", scheme: "RdYlBu", breaks: [0, 1, 2] })).toBe(true);
     expect(validScale({ type: "ordinal", scheme: "NotAPalette" })).toBe(false);

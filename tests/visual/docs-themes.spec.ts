@@ -158,7 +158,7 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   const cards = region.getByRole("list", { name: "Categorical palettes" }).locator(":scope > li");
   // Unique ramps only — scheme "gray" is a US-spelling alias of "grey", not a twin card.
   // tableau_traffic removed (red/yellow/green KPI triples were a poor showcase ramp).
-  await expect(cards).toHaveCount(51);
+  await expect(cards).toHaveCount(48);
   await expect(cards.getByRole("heading", { level: 3 })).toHaveText([
     "Observable 10",
     "Ipsum",
@@ -203,9 +203,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "Excel",
     "Excel Fill",
     "Excel New",
-    "Set1",
-    "Set2",
-    "Set3",
     "Dark2",
     "Paired",
     "Accent",
@@ -256,9 +253,6 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
     "7 colors",
     "7 colors",
     "6 colors",
-    "9 colors",
-    "8 colors",
-    "12 colors",
     "8 colors",
     "12 colors",
     "8 colors",

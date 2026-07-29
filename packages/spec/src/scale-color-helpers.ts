@@ -128,7 +128,7 @@ export function scaleColorIdentity(options: IdentityColorScaleOptions = {}): Sca
 
 /** ggplot2 palette + direction options for ColorBrewer helpers (#825). */
 export type ColorBrewerScaleOptions = DiscreteColorScaleOptions & {
-  /** ColorBrewer palette name (e.g. "Set2", "Blues"). Maps to `scheme`. */
+  /** ColorBrewer palette name (e.g. "Dark2", "Blues"). Maps to `scheme`. */
   palette?: string;
   /** `1` (default) or `-1` (reverse). */
   direction?: 1 | -1;

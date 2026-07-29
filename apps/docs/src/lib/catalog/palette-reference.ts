@@ -32,7 +32,7 @@ const CONTINUOUS_HELPERS = [
   "ScaleFillBinned",
 ] as const;
 
-const COLORBREWER_QUALITATIVE = new Set(["Set1", "Set2", "Set3", "Dark2", "Paired", "Accent"]);
+const COLORBREWER_QUALITATIVE = new Set(["Dark2", "Paired", "Accent"]);
 
 const VIRIDIS_FAMILY = new Set(["viridis", "magma", "plasma", "inferno", "cividis", "turbo"]);
 

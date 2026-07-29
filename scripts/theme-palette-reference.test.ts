@@ -57,8 +57,8 @@ describe("palette reference catalog", () => {
     expect(tableau?.helpers).toContain("ScaleColorDiscrete");
     expect(tableau?.helpers).toContain("ScaleFillDiscrete");
 
-    const set2 = CATEGORICAL_SCHEME_REFS.find((s) => s.name === "Set2");
-    expect(set2?.helpers).toContain("ScaleColorBrewer");
+    const dark2 = CATEGORICAL_SCHEME_REFS.find((s) => s.name === "Dark2");
+    expect(dark2?.helpers).toContain("ScaleColorBrewer");
 
     const hue = CATEGORICAL_SCHEME_REFS.find((s) => s.name === "hue");
     expect(hue?.helpers).toContain("ScaleColorHue");

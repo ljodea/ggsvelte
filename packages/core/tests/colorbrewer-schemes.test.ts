@@ -10,16 +10,16 @@ import {
 import { colorBrewerStops } from "../src/scales/colorbrewer-palettes.js";
 import { VIRIDIS_RAMP_10 } from "../src/scales/viridis-ramp.js";
 
-/** Fixture: max-n Set2 table (must match colorbrewer-palettes CB_SET2). */
-const SET2 = [
-  "#66c2a5",
-  "#fc8d62",
-  "#8da0cb",
-  "#e78ac3",
-  "#a6d854",
-  "#ffd92f",
-  "#e5c494",
-  "#b3b3b3",
+/** Fixture: max-n Dark2 table (must match colorbrewer-palettes CB_DARK2). */
+const DARK2 = [
+  "#1b9e77",
+  "#d95f02",
+  "#7570b3",
+  "#e7298a",
+  "#66a61e",
+  "#e6ab02",
+  "#a6761d",
+  "#666666",
 ] as const;
 
 /** Fixture: 9-class Blues table (must match colorbrewer-palettes CB_BLUES). */
@@ -37,7 +37,7 @@ const BLUES = [
 
 describe("ColorBrewer scheme resolution (#825)", () => {
   it("resolves qualitative palettes for ordinal stops", () => {
-    expect(resolveOrdinalPaletteStops({ scheme: "Set2" })).toEqual([...SET2]);
+    expect(resolveOrdinalPaletteStops({ scheme: "Dark2" })).toEqual([...DARK2]);
   });
 
   it("resolves sequential ColorBrewer ramps for continuous/binned", () => {
