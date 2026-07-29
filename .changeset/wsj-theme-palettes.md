@@ -1,7 +1,7 @@
 ---
-"@ggsvelte/core": patch
-"@ggsvelte/spec": patch
-"@ggsvelte/svelte": patch
+"@ggsvelte/core": minor
+"@ggsvelte/spec": minor
+"@ggsvelte/svelte": minor
 ---
 
 <!-- markdownlint-disable MD041 -->
@@ -23,4 +23,4 @@ Clean-room port of ggthemes `theme_wsj()` and `wsj_pal()` with
 - Svelte shell `ThemeWsj`; docs `/themes` gains the WSJ portrait (paired
   with the wsj scheme) and `/palettes` gains the five WSJ cards.
 
-Migration: none — additive theme/scheme names only.
+Migration: none — additive
