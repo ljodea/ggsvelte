@@ -20,7 +20,8 @@ test("homepage first viewport leads with a static chart shell and two actions", 
     "A layered grammar of graphics implemented for agents",
   );
   // Hero stays on the prerendered static SVG — no chart-stack import on load.
-  await expect(page.locator(".home-hero .hero-static svg.gg-plot")).toBeVisible();
+  // Both light-site and dark-site shells exist; CSS shows one of them.
+  await expect(page.locator(".home-hero .hero-static svg.gg-plot").first()).toBeVisible();
   await expect(page.locator(".home-hero .gg-plot-root")).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Getting started" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Examples" }).first()).toBeVisible();
@@ -94,7 +95,7 @@ test("homepage preserves SSR hero chart shell without auto-hydrating the chart s
 
   await page.goto("/");
   const hero = page.locator(".home-hero");
-  await expect(hero.locator(".hero-static svg.gg-plot")).toBeVisible();
+  await expect(hero.locator(".hero-static svg.gg-plot").first()).toBeVisible();
   // No auto-upgrade: chart stack stays off the homepage until grammar intent.
   await expect(hero.locator(".gg-plot-root")).toHaveCount(0);
   await expect(hero.locator(".gg-capture")).toHaveCount(0);
