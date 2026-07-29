@@ -214,7 +214,13 @@ const TABLEAU_SEQ_GRAY_RAMP: readonly string[] = [
   "#49525e",
 ];
 
-/** ggthemes tableau_gradient_pal("Gray Warm") — 20 stops, verbatim. */
+/**
+ * ggthemes tableau_gradient_pal("Gray Warm") — 20 stops.
+ * Upstream YAML has `#b047a4` (saturated magenta) at stop 7; neighbors are
+ * `#b7afab` / `#a9a09d`. That is almost certainly a hex slip (`b0a8a4` →
+ * `b047a4`). We ship the interpolated warm-gray `#b0a8a4` so the ramp stays
+ * near-neutral; every other stop is verbatim from tableau.yml.
+ */
 const TABLEAU_SEQ_GRAY_WARM_RAMP: readonly string[] = [
   "#dcd4d0",
   "#d4ccc8",
@@ -222,7 +228,7 @@ const TABLEAU_SEQ_GRAY_WARM_RAMP: readonly string[] = [
   "#c5bdb9",
   "#beb6b2",
   "#b7afab",
-  "#b047a4",
+  "#b0a8a4",
   "#a9a09d",
   "#a29996",
   "#9b938f",

@@ -200,7 +200,7 @@ const RAMPS: Readonly<Record<string, readonly string[]>> = {
     "#c5bdb9",
     "#beb6b2",
     "#b7afab",
-    "#b047a4",
+    "#b0a8a4",
     "#a9a09d",
     "#a29996",
     "#9b938f",
