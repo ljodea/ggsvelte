@@ -92,15 +92,24 @@
     margin-top: 2rem;
   }
 
+  /*
+   * Borders between list rows only. The last link must not draw a bottom
+   * rule — DocsShell's .prev-next already has border-top, and a trailing
+   * row border stacked a second separator under PortableSpec (and every
+   * other final reference entry).
+   */
   nav a {
     display: grid;
     min-height: 5rem;
     align-content: center;
     padding: 1rem 0;
-    border-bottom: 1px solid var(--line);
     color: var(--ink);
     text-decoration: none;
     gap: 0.35rem;
+  }
+
+  nav a + a {
+    border-top: 1px solid var(--line);
   }
 
   nav strong {
