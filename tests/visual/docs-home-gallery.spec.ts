@@ -20,8 +20,8 @@ test("homepage first viewport leads with a static chart shell and two actions", 
     "A layered grammar of graphics implemented for agents",
   );
   // Hero stays on the prerendered static SVG — no chart-stack import on load.
-  // Both light-site and dark-site shells exist; CSS shows one of them.
-  await expect(page.locator(".home-hero .hero-static svg.gg-plot").first()).toBeVisible();
+  // CSS shows the light-site shell under ?theme=light.
+  await expect(page.locator(".home-hero .hero-static--light-site svg.gg-plot")).toBeVisible();
   await expect(page.locator(".home-hero .gg-plot-root")).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Getting started" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Examples" }).first()).toBeVisible();
@@ -93,25 +93,27 @@ test("homepage preserves SSR hero chart shell without auto-hydrating the chart s
   expect(html).toContain("Literacy and crime in France, 1833");
   expect(html).toContain('width="832"');
 
-  await page.goto("/");
+  await page.goto("/?theme=light");
   const hero = page.locator(".home-hero");
-  await expect(hero.locator(".hero-static svg.gg-plot").first()).toBeVisible();
+  // CSS shows the light-site shell; both shells remain in the DOM.
+  const shell = hero.locator(".hero-static--light-site svg.gg-plot");
+  await expect(shell).toBeVisible();
   // No auto-upgrade: chart stack stays off the homepage until grammar intent.
   await expect(hero.locator(".gg-plot-root")).toHaveCount(0);
   await expect(hero.locator(".gg-capture")).toHaveCount(0);
 
   // Axis titles use real units (not the old mistaken "rank" labels).
   await expect(
-    hero.locator(".gg-axis-title", { hasText: "Literate conscripts (%)" }),
+    shell.locator(".gg-axis-title", { hasText: "Literate conscripts (%)" }),
   ).toBeVisible();
   await expect(
-    hero.locator(".gg-axis-title", {
+    shell.locator(".gg-axis-title", {
       hasText: "Population per crime against persons",
     }),
   ).toBeVisible();
 
   // Readable tick size floor (light/dark themes were 8.8px on several presets).
-  const axisFontSize = await hero
+  const axisFontSize = await shell
     .locator(".gg-axis .gg-tick text")
     .first()
     .evaluate((el) => Number(el.getAttribute("font-size") ?? "0"));
