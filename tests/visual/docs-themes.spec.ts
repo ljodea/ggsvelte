@@ -76,9 +76,10 @@ test("themes compares all built-in chart themes as full-width interactive portra
     "Test",
   ]);
 
-  // Specimens mount live plots only near the viewport (#1037) — scroll each in.
+  // Specimens stay on static shells until hover/focus (intent-gated load).
   for (const specimen of await specimens.all()) {
     await specimen.scrollIntoViewIfNeeded();
+    await specimen.locator(".plot-panel").hover();
     await expect(specimen.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
       timeout: 30_000,
     });
@@ -99,6 +100,8 @@ test("chart theme lab picks theme and palette without alias or chrome clutter", 
   const chartTheme = lab.getByLabel("Chart theme", { exact: true });
   const palette = lab.getByLabel("Categorical palette", { exact: true });
   const plot = lab.locator(".gg-plot-root");
+  // Lab stays static until the user engages a control or the plot.
+  await chartTheme.focus();
   await expect(plot).toHaveAttribute("data-gg-ready", "true", { timeout: 30_000 });
   const chartPaper = () => plot.locator(".gg-paper").getAttribute("fill");
 
@@ -191,8 +194,9 @@ test("categorical palettes show ordered swatches and reverse without hex code ch
   await expect(swatches.last()).toHaveAttribute("aria-label", "10: #9498a0");
   await expect(swatches.first().locator("code")).toHaveCount(0);
 
-  // Col chart uses fill (not the old 5-point scatter). Live plot mounts near viewport (#1037).
+  // Col chart uses fill (not the old 5-point scatter). Live plot mounts on intent.
   await observable.scrollIntoViewIfNeeded();
+  await observable.locator(".plot-panel").hover();
   await expect(observable.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
     timeout: 30_000,
   });
@@ -238,6 +242,7 @@ test("sequential color compares direction, custom stops, and a pinned domain on 
 
   for (const card of await cards.all()) {
     await card.scrollIntoViewIfNeeded();
+    await card.locator(".plot-panel").hover();
     await expect(card.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
       timeout: 30_000,
     });

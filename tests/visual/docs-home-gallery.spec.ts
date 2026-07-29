@@ -11,14 +11,17 @@ async function expectNoOverflow(page: import("@playwright/test").Page): Promise<
   );
 }
 
-test("homepage first viewport leads with a live chart and two actions", async ({ page }) => {
+test("homepage first viewport leads with a static chart shell and two actions", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=light");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "A layered grammar of graphics implemented for agents",
   );
-  // Hero starts as a static SVG shell, then upgrades to interactive GGPlot.
-  await expect(page.locator(".home-hero .gg-plot-root")).toBeVisible({ timeout: 30_000 });
+  // Hero stays on the prerendered static SVG — no chart-stack import on load.
+  await expect(page.locator(".home-hero .hero-static svg.gg-plot")).toBeVisible();
+  await expect(page.locator(".home-hero .gg-plot-root")).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Getting started" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Examples" }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Copy install" })).toBeVisible();
@@ -79,40 +82,24 @@ test("homepage wide layout keeps install adjacent to claim without hero void", a
   expect(metrics.actionsTop).toBeGreaterThan(metrics.claimBottom - 1);
 });
 
-test("homepage preserves SSR chart output and hydrates its keyboard interaction", async ({
+test("homepage preserves SSR hero chart shell without auto-hydrating the chart stack", async ({
   page,
   request,
 }) => {
   const response = await request.get("/");
   const html = await response.text();
-  // SSR ships a full-width static SVG shell (not a live GGPlot); live mounts after import.
+  // SSR ships a full-width static SVG shell (not a live GGPlot).
   expect(html).toContain("Literacy and crime in France, 1833");
   expect(html).toContain('width="832"');
 
   await page.goto("/");
-  const plot = page.locator(".home-hero .gg-plot-root");
-  await expect(plot).toHaveAttribute("data-gg-ready", "true", { timeout: 30_000 });
-  const capture = page.locator(".home-hero .gg-capture");
-  await capture.focus();
-  await capture.press("ArrowRight");
-  await expect(page.locator(".home-hero .gg-tooltip")).toBeVisible();
-});
-
-/**
- * Hero tooltip contract: one department at a time, named identity, no vertical
- * axis guide, no raw camelCase wall of multi-member x-group rows.
- */
-test("homepage hero tooltip names a single department without axis crosshair noise", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/?theme=light");
-  const plot = page.locator(".home-hero .gg-plot-root");
-  await expect(plot).toHaveAttribute("data-gg-ready", "true", { timeout: 30_000 });
-
   const hero = page.locator(".home-hero");
+  await expect(hero.locator(".hero-static svg.gg-plot")).toBeVisible();
+  // No auto-upgrade: chart stack stays off the homepage until grammar intent.
+  await expect(hero.locator(".gg-plot-root")).toHaveCount(0);
+  await expect(hero.locator(".gg-capture")).toHaveCount(0);
+
   // Axis titles use real units (not the old mistaken "rank" labels).
-  // Scope to the plot so code-tab JSON string literals don't match.
   await expect(
     hero.locator(".gg-axis-title", { hasText: "Literate conscripts (%)" }),
   ).toBeVisible();
@@ -128,19 +115,6 @@ test("homepage hero tooltip names a single department without axis crosshair noi
     .first()
     .evaluate((el) => Number(el.getAttribute("font-size") ?? "0"));
   expect(axisFontSize).toBeGreaterThanOrEqual(11);
-
-  const capture = hero.locator(".gg-capture");
-  await capture.focus();
-  await capture.press("ArrowRight");
-  const tooltip = hero.locator(".gg-tooltip");
-  await expect(tooltip).toBeVisible();
-  await expect(tooltip.locator(".hero-tooltip-title")).toBeVisible();
-  await expect(tooltip.getByText("pop. per crime")).toBeVisible();
-  await expect(tooltip.getByText("crimePersons")).toHaveCount(0);
-  // Exact mode: no full-panel vertical/horizontal crosshair guides.
-  await expect(hero.locator(".gg-crosshair")).toHaveCount(0);
-  // Single focus member — not an x-group stack of departments.
-  await expect(tooltip.locator(".hero-tooltip")).toHaveCount(1);
 });
 
 test("homepage grammar section SSRs chrome and a static chart shell", async ({ request }) => {
@@ -163,7 +137,8 @@ test("homepage grammar steps change real chart structure in place", async ({ pag
   await expect(page.getByRole("heading", { name: "Declare a layer interactive" })).toBeVisible();
   const output = page.locator(".grammar-output");
   const plot = output.locator(".gg-plot-root");
-  // Live plot upgrades from the static shell after dynamic import.
+  // Live plot upgrades only after user intent (step click / hover).
+  await page.getByRole("button", { name: /Interaction/ }).click();
   await expect(plot).toHaveAttribute("data-gg-ready", "true", {
     timeout: 60_000,
   });
@@ -195,6 +170,8 @@ test("homepage grammar inspect draws xy crosshair and supports legend focus", as
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=dark");
   const output = page.locator(".grammar-output");
+  // Intent-gated: click the open Interaction step to pull the chart stack.
+  await page.getByRole("button", { name: /Interaction/ }).click();
   await expect(output.locator(".gg-plot-root")).toHaveAttribute("data-gg-ready", "true", {
     timeout: 60_000,
   });
