@@ -111,7 +111,10 @@ export function layerStructuralErrors(
   }
 
   if (isRuleFamily) {
-    return ruleFamilyStructuralErrors(layer, geom, layerPath, layerAes, mapped);
+    // Keep unsupported-geom-aesthetic errors already pushed above; rule form
+    // checks append. Returning only the form-check array would drop them.
+    errors.push(...ruleFamilyStructuralErrors(layer, geom, layerPath, layerAes, mapped));
+    return errors;
   }
 
   const stat =

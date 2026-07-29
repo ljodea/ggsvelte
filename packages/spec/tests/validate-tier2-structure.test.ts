@@ -150,6 +150,22 @@ describe("tier 2 — structural grammar checks (opt-in, data-free)", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("rule: layer-own unsupported style aes is kept with form checks (not discarded)", () => {
+    // Regression: early return of ruleFamilyStructuralErrors alone must not
+    // drop unsupported-geom-aesthetic errors already pushed for the layer.
+    expect(
+      codesOf({
+        layers: [
+          {
+            geom: "rule",
+            aes: { size: { field: "pop" } },
+            params: { yintercept: 0 },
+          },
+        ],
+      }),
+    ).toEqual(["unsupported-geom-aesthetic"]);
+  });
+
   it("rule: neither form is an error", () => {
     expect(codesOf({ layers: [{ geom: "rule" }] })).toEqual(["rule-form-missing"]);
   });
