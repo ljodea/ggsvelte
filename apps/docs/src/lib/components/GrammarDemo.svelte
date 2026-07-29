@@ -17,7 +17,7 @@
   const steps = [
     { label: "Data", note: "Rows as plain objects." },
     { label: "Mappings", note: "aes for x, y, and color." },
-    { label: "Layers", note: "GeomSmooth over GeomPoint." },
+    { label: "Layers", note: "GeomSmooth over GeomJitter." },
     { label: "Interaction", note: "just one more layer" },
   ] as const;
   let active = $state(steps.length - 1);

@@ -314,7 +314,7 @@ export function homeGrammarStaticSvgFromData(
     rows as AuthoringRows,
     aes({ x: "flipperLengthMm", y: "bodyMassG", color: "species" }),
   )
-    .geomPoint({ alpha: 0.72 })
+    .geomJitter({ alpha: 0.55 })
     .geomSmooth({ method: "loess", span: 0.75, degree: 1, se: false })
     .theme(theme)
     .labs({
