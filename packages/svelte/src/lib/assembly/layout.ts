@@ -159,19 +159,9 @@ export const CLEAR_CONTROL_GAP_PX = 4;
  */
 export const CLEAR_CONTROL_HEIGHT_PX = 24;
 /** Approximate painted width of the "Clear" label + horizontal padding (layout clamp only). */
-export const CLEAR_CONTROL_WIDTH_PX = 44;
+const CLEAR_CONTROL_WIDTH_PX = 44;
 /** Grace period after pointer leaves legend chrome before Clear fades for screenshots. */
 export const CLEAR_HIDE_DELAY_MS = 2500;
-
-export type ClearControlLegendRef = {
-  readonly scale: string;
-  readonly x: number;
-  readonly y: number;
-  readonly width: number;
-  readonly height: number;
-  readonly position?: "right" | "bottom";
-  readonly direction?: "vertical" | "horizontal";
-};
 
 export type ClearControlLayoutInput = {
   /**
@@ -184,7 +174,15 @@ export type ClearControlLayoutInput = {
   /** Host: `effectiveLegendPressed?.scale ?? null`. */
   readonly pressedScale: string | null;
   /** Scene legends — full box + position so Clear anchors off the pressed guide. */
-  readonly legends: readonly ClearControlLegendRef[];
+  readonly legends: readonly {
+    readonly scale: string;
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+    readonly position?: "right" | "bottom";
+    readonly direction?: "vertical" | "horizontal";
+  }[];
   readonly sceneWidth: number;
   readonly sceneHeight: number;
 };
