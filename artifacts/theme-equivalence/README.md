@@ -35,6 +35,8 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - ggthemes few_light (Light): `#88BDE6 #FBB258 #90CD97 #F6AAC9 #BFA554 #BC99C7 #EDDD46 #F07E6E`
 - ggthemes few_dark (Dark): `#265DAB #DF5C24 #059748 #E5126F #9D722A #7B3A96 #C7B42E #CB2027`
 - ggthemes fivethirtyeight: `#008FD5 #FF2700 #77AB43`
+- ggthemes ptol (full capacity): `#332288 #6699CC #88CCEE #44AA99 #117733 #999933 #DDCC77 #661100 #CC6677 #AA4466 #882255 #AA4499`
+- ggthemes canva (Fresh and bright): `#f98866 #ff420e #80bd9e #89da59`
 
 ## Sources
 
@@ -42,7 +44,7 @@ The named palettes are copied in source order and asserted in `packages/core/tes
 - hrbrthemes Roboto Condensed: `/Users/liamodea/Code/hrbrthemes/R/roboto-condensed.r`
 - hrbrthemes palettes: `/Users/liamodea/Code/hrbrthemes/R/color.r` and `R/flexoki.R`
 - ggthemes Few: `/Users/liamodea/Code/ggthemes/R/few.R`
-- ggthemes palettes: `/Users/liamodea/Code/ggthemes/data-raw/theme-data/tableau.yml`, `colorblind.yml`, `few.yml`, and `fivethirtyeight.yml`
+- ggthemes palettes: `/Users/liamodea/Code/ggthemes/data-raw/theme-data/tableau.yml`, `colorblind.yml`, `few.yml`, `fivethirtyeight.yml`, and `pault.yml`; canva palette from `/Users/liamodea/Code/ggthemes/data/canva_palettes.rda`
 
 Reproduce everything with:
 

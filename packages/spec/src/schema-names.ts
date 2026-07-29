@@ -34,6 +34,9 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "few_light",
   "few_dark",
   "fivethirtyeight",
+  // ggthemes ports (#1159): Paul Tol + Canva default
+  "ptol",
+  "canva",
   // ColorBrewer qualitative (#825)
   "Set1",
   "Set2",
