@@ -129,7 +129,7 @@ export function renderStrip(panel: ScenePanel, scene: Scene, panelIndex: number)
   let sideClip = false;
 
   // Layout reserves strip outside the axis margin band (see
-  // panel-layout-facet-cells-place). Renderers place chrome in that reserved
+  // panel-layout-facet-geometry). Renderers place chrome in that reserved
   // region so strip text does not collide with tick labels.
   if (position === "top") {
     originY = panel.y - band;
