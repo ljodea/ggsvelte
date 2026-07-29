@@ -18,5 +18,7 @@ Also remove the Tableau Traffic categorical scheme (`tableau_traffic` /
 `TABLEAU_TRAFFIC_PALETTE`) — the red/yellow/green KPI triples were a weak
 showcase ramp and are not kept in the docs or skill tables.
 
-Migration: if you set `scheme: "tableau_traffic"`, switch to another ordinal
-scheme (e.g. `tableau10`, `Set1`, or an explicit `range`).
+Migration: <https://ggsvelte.sh/guide/scales-guides>
+
+If you set `scheme: "tableau_traffic"`, switch to another ordinal scheme
+(e.g. `tableau10`, `Set1`, or an explicit `range`).
