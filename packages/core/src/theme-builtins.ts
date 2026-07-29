@@ -597,6 +597,40 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     ticksX: true,
     ticksY: true,
   }),
+  // ggthemes theme_wsj: Wall Street Journal chrome — "brown" paper (#f8f2e4),
+  // dotted black y-grid only, x axis line and ticks, no y line/ticks, big bold
+  // title (rel(2) of base 12). R's title_family = "mono" has no single-family
+  // token here, so the system sans stack carries both; axis.text bold and the
+  // blank axis.title also flatten into the shared roles. Accent is colors6 red
+  // so unmapped marks pair with the wsj palette.
+  wsj: themed({
+    ink: "#000000",
+    paper: "#f8f2e4",
+    panel: "#f8f2e4",
+    accent: "#c72e29",
+    grid: "#000000",
+    axisText: "#000000",
+    axisLine: "#000000",
+    tickColor: "#000000",
+    fontFamily: 'Arial, "Helvetica Neue", Helvetica, sans-serif',
+    fontSize: 12,
+    axisTextSize: 12,
+    fontWeight: 400,
+    titleSize: 24,
+    titleWeight: 700,
+    subtitleSize: 12,
+    subtitleWeight: 400,
+    axisTitleSize: 12,
+    axisTitleWeight: 400,
+    axisLineWidth: 0.5,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.5,
+    gridDasharray: "1.5 3",
+    axisLineX: true,
+    ticksX: true,
+    gridX: false,
+  }),
   // ggthemes theme_gdocs: Google Docs chart defaults — white panel, #cccccc
   // major grid both directions (minor blank), black x-only axis line, no
   // ticks, #757575 text, plain 20px left-aligned title. Accent is Google

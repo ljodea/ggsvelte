@@ -129,6 +129,12 @@ export const THEME_STATIC_SHELLS = [
     sha256: "1dad7c045de60ec7de5961ccaa136799faf2ad63832c2b28a15a962239bdf8e2",
   },
   {
+    id: "theme-wsj",
+    filename: "theme-wsj.svg",
+    path: "/theme-shells/theme-wsj.svg",
+    sha256: "da764fda164a3b8b694b9a04f84ab89370fbd247b304871d73505f172311f316",
+  },
+  {
     id: "theme-gdocs",
     filename: "theme-gdocs.svg",
     path: "/theme-shells/theme-gdocs.svg",
@@ -241,6 +247,36 @@ export const THEME_STATIC_SHELLS = [
     filename: "palette-canva.svg",
     path: "/theme-shells/palette-canva.svg",
     sha256: "6e265313f53296cf01d712406d17eabce90b24c03899bdb205063e7c8301939b",
+  },
+  {
+    id: "palette-wsj",
+    filename: "palette-wsj.svg",
+    path: "/theme-shells/palette-wsj.svg",
+    sha256: "9263567f1cea31f4cb08f1eec7e6a2ecca2896d2910c478fd1571ed004b5a3b7",
+  },
+  {
+    id: "palette-wsj_rgby",
+    filename: "palette-wsj_rgby.svg",
+    path: "/theme-shells/palette-wsj_rgby.svg",
+    sha256: "520653797dc797f28d2974df75c2eda2662fe604e204f353da484b8351eab9b6",
+  },
+  {
+    id: "palette-wsj_red_green",
+    filename: "palette-wsj_red_green.svg",
+    path: "/theme-shells/palette-wsj_red_green.svg",
+    sha256: "7c433ad37c906e6bc3bab5c09d09ebacf87e6e7160660191bfcc8069f8ca7042",
+  },
+  {
+    id: "palette-wsj_black_green",
+    filename: "palette-wsj_black_green.svg",
+    path: "/theme-shells/palette-wsj_black_green.svg",
+    sha256: "4ded2db21d8df7af856affee41423f3a751f87e95f64a599c56efb2d9b618e2b",
+  },
+  {
+    id: "palette-wsj_dem_rep",
+    filename: "palette-wsj_dem_rep.svg",
+    path: "/theme-shells/palette-wsj_dem_rep.svg",
+    sha256: "07ff5b479852fe265fb4693606fc4e30500c153ca121819731e8d15c4b21eb23",
   },
   {
     id: "palette-gdocs",

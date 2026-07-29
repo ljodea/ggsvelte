@@ -200,6 +200,14 @@ export const THEME_SPECIMENS: readonly ThemeSpecimenConfig[] = [
     legendFocus: true,
   },
   {
+    name: "wsj",
+    label: BY_NAME.wsj.label,
+    caption: "Brown paper, dotted black y-grid — Wall Street Journal chrome.",
+    kind: "revenue-cols",
+    scheme: BY_NAME.wsj.scheme,
+    legendFocus: false,
+  },
+  {
     name: "gdocs",
     label: BY_NAME.gdocs.label,
     caption: "Google Docs: black x line, no ticks, light-gray grid, 20px plain title.",

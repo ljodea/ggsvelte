@@ -39,6 +39,12 @@ export const CATEGORICAL_SCHEME_NAMES = [
   // ggthemes ports (#1159): Paul Tol + Canva default
   "ptol",
   "canva",
+  /** ggthemes wsj_pal — scale_colour/fill_wsj palette variants. */
+  "wsj",
+  "wsj_rgby",
+  "wsj_red_green",
+  "wsj_black_green",
+  "wsj_dem_rep",
   // ggthemes ports (#1159): Google Docs + Highcharts + pander
   "gdocs",
   "hc",
@@ -153,6 +159,8 @@ export const THEME_NAMES = [
   "economist_white",
   "solarized_2",
   "solarized_2dark",
+  /** ggthemes theme_wsj (Wall Street Journal). */
+  "wsj",
   "gdocs",
   "hc",
   "hcdark",

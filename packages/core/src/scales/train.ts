@@ -38,6 +38,11 @@ export {
   PTOL_PALETTE,
   SOLARIZED_PALETTE,
   TABLEAU10_PALETTE,
+  WSJ_BLACK_GREEN_PALETTE,
+  WSJ_DEM_REP_PALETTE,
+  WSJ_PALETTE,
+  WSJ_RED_GREEN_PALETTE,
+  WSJ_RGBY_PALETTE,
 } from "./categorical-palettes.js";
 
 export type { BandScale, ColorScale, ContinuousScale, PositionScale } from "./train-types.js";

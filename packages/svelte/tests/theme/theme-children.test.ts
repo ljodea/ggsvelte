@@ -146,6 +146,7 @@ describe("Theme* export parity with THEME_NAMES", () => {
       economist_white: "ThemeEconomistwhite",
       solarized_2: "ThemeSolarized2",
       solarized_2dark: "ThemeSolarized2dark",
+      wsj: "ThemeWsj",
       gdocs: "ThemeGdocs",
       hc: "ThemeHc",
       hcdark: "ThemeHcdark",

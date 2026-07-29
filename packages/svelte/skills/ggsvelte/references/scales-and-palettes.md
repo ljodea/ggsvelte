@@ -159,7 +159,7 @@ byte-identity-preserving: `value` is not routed through any helper.
 
 ## Palettes
 
-### Categorical schemes (26)
+### Categorical schemes (31)
 
 | Scheme               | Description                                                        |
 | -------------------- | ------------------------------------------------------------------ |
@@ -169,13 +169,18 @@ byte-identity-preserving: `value` is not routed through any helper.
 | tableau10            | Tableau 10 qualitative palette                                     |
 | colorblind           | ggthemes 8-color colorblind-safe palette                           |
 | economist            | ggthemes Economist blues/greens (scale_colour/fill_economist)      |
+| solarized            | ggthemes Solarized accents, blue first (scale_*_solarized)         |
 | few                  | ggthemes Few "Medium" — the default `scale_colour_few` palette     |
 | few_light            | ggthemes Few "Light" — for filled areas (`scale_fill_few` default) |
 | few_dark             | ggthemes Few "Dark" — for thin lines and highlighting              |
 | fivethirtyeight      | ggthemes FiveThirtyEight three-color line palette (blue/red/green) |
 | ptol                 | ggthemes Paul Tol qualitative 12 (full-capacity order)             |
 | canva                | ggthemes Canva "Fresh and bright" 4 (the `scale_*_canva` default)  |
-| solarized            | ggthemes Solarized accents, blue first (scale_*_solarized)         |
+| wsj                  | ggthemes WSJ colors6 — the default `scale_*_wsj` palette           |
+| wsj_rgby             | ggthemes WSJ red/green/blue/yellow                                 |
+| wsj_red_green        | ggthemes WSJ green/red good–bad pair                               |
+| wsj_black_green      | ggthemes WSJ black-to-green sentiment scale                        |
+| wsj_dem_rep          | ggthemes WSJ Democrat/Republican/Undecided                         |
 | gdocs                | ggthemes Google Docs colors (6 hues × 4 strengths, verbatim)       |
 | hc                   | ggthemes Highcharts default 10 colors                              |
 | hc_dark              | ggthemes Highcharts darkunica 11 colors                            |
