@@ -9566,14 +9566,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-291",
+    id: "heading:guide-lifecycle:experimental-292",
     kind: "heading",
-    title: "experimental (291)",
+    title: "experimental (292)",
     summary:
-      "experimental (291) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-291",
+      "experimental (292) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-292",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (291)"],
+    exact: ["experimental (292)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
