@@ -2,7 +2,9 @@
   import { base } from "$app/paths";
   import { SCALE_REFERENCE } from "@ggsvelte/spec";
 
+  import { scaleSwatchFor } from "$lib/catalog/scale-swatches";
   import ReferenceLede from "$lib/components/ReferenceLede.svelte";
+  import ScaleColorSwatch from "$lib/components/ScaleColorSwatch.svelte";
 
   import type { PageProps } from "./$types";
 
@@ -11,6 +13,7 @@
   const aliasTarget = $derived(
     entry.aliasOf === undefined ? undefined : SCALE_REFERENCE[entry.aliasOf],
   );
+  const swatch = $derived(scaleSwatchFor(entry));
 
   const aes = $derived(entry.aesthetics[0] ?? "x");
   const plotAes = $derived.by(() => {
@@ -49,6 +52,10 @@
 <article class="scale-detail prose" aria-labelledby="scale-heading">
   <h1 id="scale-heading"><code>{entry.component}</code></h1>
   <ReferenceLede text={entry.summary} />
+
+  {#if swatch !== null}
+    <ScaleColorSwatch {swatch} />
+  {/if}
 
   <h2 id="defaults">Defaults</h2>
   <dl class="defaults">
