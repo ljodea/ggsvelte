@@ -10,10 +10,11 @@
  *
  * Pure data — resolution falls through here from
  * `resolveSequentialPipelineRange` / `resolveOrdinalPaletteStops` after the
- * viridis-family and ColorBrewer tables.
+ * viridis-family and ColorBrewer tables. Named tables stay module-private
+ * (knip): public consumers resolve via {@link tableauRampStops}.
  */
 /** ggthemes tableau_gradient_pal("Blue-Green Sequential") — 7 stops, verbatim. */
-export const TABLEAU_SEQ_BLUE_GREEN_RAMP: readonly string[] = [
+const TABLEAU_SEQ_BLUE_GREEN_RAMP: readonly string[] = [
   "#feffd9",
   "#f2fabf",
   "#dff3b2",
@@ -24,7 +25,7 @@ export const TABLEAU_SEQ_BLUE_GREEN_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Blue Light") — 7 stops, verbatim. */
-export const TABLEAU_SEQ_BLUE_LIGHT_RAMP: readonly string[] = [
+const TABLEAU_SEQ_BLUE_LIGHT_RAMP: readonly string[] = [
   "#e5e5e5",
   "#e0e3e8",
   "#dbe1ea",
@@ -35,7 +36,7 @@ export const TABLEAU_SEQ_BLUE_LIGHT_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Orange Light") — 7 stops, verbatim. */
-export const TABLEAU_SEQ_ORANGE_LIGHT_RAMP: readonly string[] = [
+const TABLEAU_SEQ_ORANGE_LIGHT_RAMP: readonly string[] = [
   "#e5e5e5",
   "#ebe1d9",
   "#f0ddcd",
@@ -46,7 +47,7 @@ export const TABLEAU_SEQ_ORANGE_LIGHT_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Blue") — 20 stops, verbatim. */
-export const TABLEAU_SEQ_BLUE_RAMP: readonly string[] = [
+const TABLEAU_SEQ_BLUE_RAMP: readonly string[] = [
   "#b9ddf1",
   "#afd6ed",
   "#a5cfe9",
@@ -70,7 +71,7 @@ export const TABLEAU_SEQ_BLUE_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Orange") — 20 stops, verbatim. */
-export const TABLEAU_SEQ_ORANGE_RAMP: readonly string[] = [
+const TABLEAU_SEQ_ORANGE_RAMP: readonly string[] = [
   "#ffc685",
   "#fcbe75",
   "#f9b665",
@@ -94,7 +95,7 @@ export const TABLEAU_SEQ_ORANGE_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Green") — 20 stops, verbatim. */
-export const TABLEAU_SEQ_GREEN_RAMP: readonly string[] = [
+const TABLEAU_SEQ_GREEN_RAMP: readonly string[] = [
   "#b3e0a6",
   "#a5db96",
   "#98d687",
@@ -118,7 +119,7 @@ export const TABLEAU_SEQ_GREEN_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Red") — 20 stops, verbatim. */
-export const TABLEAU_SEQ_RED_RAMP: readonly string[] = [
+const TABLEAU_SEQ_RED_RAMP: readonly string[] = [
   "#ffbeb2",
   "#feb4a6",
   "#fdab9b",
@@ -142,7 +143,7 @@ export const TABLEAU_SEQ_RED_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Purple") — 20 stops, verbatim. */
-export const TABLEAU_SEQ_PURPLE_RAMP: readonly string[] = [
+const TABLEAU_SEQ_PURPLE_RAMP: readonly string[] = [
   "#eec9e5",
   "#eac1df",
   "#e6b9d9",
@@ -166,7 +167,7 @@ export const TABLEAU_SEQ_PURPLE_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Brown") — 20 stops, verbatim. */
-export const TABLEAU_SEQ_BROWN_RAMP: readonly string[] = [
+const TABLEAU_SEQ_BROWN_RAMP: readonly string[] = [
   "#eedbbd",
   "#ecd2ad",
   "#ebc994",
@@ -190,7 +191,7 @@ export const TABLEAU_SEQ_BROWN_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Gray") — 20 stops, verbatim. */
-export const TABLEAU_SEQ_GRAY_RAMP: readonly string[] = [
+const TABLEAU_SEQ_GRAY_RAMP: readonly string[] = [
   "#d5d5d5",
   "#cdcecd",
   "#c5c7c6",
@@ -214,7 +215,7 @@ export const TABLEAU_SEQ_GRAY_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Gray Warm") — 20 stops, verbatim. */
-export const TABLEAU_SEQ_GRAY_WARM_RAMP: readonly string[] = [
+const TABLEAU_SEQ_GRAY_WARM_RAMP: readonly string[] = [
   "#dcd4d0",
   "#d4ccc8",
   "#cdc4c0",
@@ -238,7 +239,7 @@ export const TABLEAU_SEQ_GRAY_WARM_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Blue-Teal") — 20 stops, verbatim. */
-export const TABLEAU_SEQ_BLUE_TEAL_RAMP: readonly string[] = [
+const TABLEAU_SEQ_BLUE_TEAL_RAMP: readonly string[] = [
   "#bce4d8",
   "#aedcd5",
   "#a1d5d2",
@@ -262,7 +263,7 @@ export const TABLEAU_SEQ_BLUE_TEAL_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Orange-Gold") — 20 stops, verbatim. */
-export const TABLEAU_SEQ_ORANGE_GOLD_RAMP: readonly string[] = [
+const TABLEAU_SEQ_ORANGE_GOLD_RAMP: readonly string[] = [
   "#f4d166",
   "#f6c760",
   "#f8bc58",
@@ -286,7 +287,7 @@ export const TABLEAU_SEQ_ORANGE_GOLD_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Green-Gold") — 20 stops, verbatim. */
-export const TABLEAU_SEQ_GREEN_GOLD_RAMP: readonly string[] = [
+const TABLEAU_SEQ_GREEN_GOLD_RAMP: readonly string[] = [
   "#f4d166",
   "#e3cd62",
   "#d3c95f",
@@ -310,7 +311,7 @@ export const TABLEAU_SEQ_GREEN_GOLD_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Red-Gold") — 21 stops, verbatim. */
-export const TABLEAU_SEQ_RED_GOLD_RAMP: readonly string[] = [
+const TABLEAU_SEQ_RED_GOLD_RAMP: readonly string[] = [
   "#f4d166",
   "#f5c75f",
   "#f6bc58",
@@ -335,7 +336,7 @@ export const TABLEAU_SEQ_RED_GOLD_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Orange-Blue Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_ORANGE_BLUE_RAMP: readonly string[] = [
+const TABLEAU_DIV_ORANGE_BLUE_RAMP: readonly string[] = [
   "#9e3d22",
   "#d45b21",
   "#f69035",
@@ -346,7 +347,7 @@ export const TABLEAU_DIV_ORANGE_BLUE_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Red-Green Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_RED_GREEN_RAMP: readonly string[] = [
+const TABLEAU_DIV_RED_GREEN_RAMP: readonly string[] = [
   "#a3123a",
   "#e33f43",
   "#f8816b",
@@ -357,7 +358,7 @@ export const TABLEAU_DIV_RED_GREEN_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Green-Blue Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_GREEN_BLUE_RAMP: readonly string[] = [
+const TABLEAU_DIV_GREEN_BLUE_RAMP: readonly string[] = [
   "#24693d",
   "#45934d",
   "#75bc69",
@@ -368,7 +369,7 @@ export const TABLEAU_DIV_GREEN_BLUE_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Red-Blue Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_RED_BLUE_RAMP: readonly string[] = [
+const TABLEAU_DIV_RED_BLUE_RAMP: readonly string[] = [
   "#a90c38",
   "#e03b42",
   "#f87f69",
@@ -379,7 +380,7 @@ export const TABLEAU_DIV_RED_BLUE_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Red-Black Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_RED_BLACK_RAMP: readonly string[] = [
+const TABLEAU_DIV_RED_BLACK_RAMP: readonly string[] = [
   "#ae123a",
   "#e33e43",
   "#f8816b",
@@ -390,7 +391,7 @@ export const TABLEAU_DIV_RED_BLACK_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Gold-Purple Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_GOLD_PURPLE_RAMP: readonly string[] = [
+const TABLEAU_DIV_GOLD_PURPLE_RAMP: readonly string[] = [
   "#ad9024",
   "#c1a33b",
   "#d4b95e",
@@ -401,7 +402,7 @@ export const TABLEAU_DIV_GOLD_PURPLE_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Red-Green-Gold Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_RED_GREEN_GOLD_RAMP: readonly string[] = [
+const TABLEAU_DIV_RED_GREEN_GOLD_RAMP: readonly string[] = [
   "#be2a3e",
   "#e25f48",
   "#f88f4d",
@@ -412,7 +413,7 @@ export const TABLEAU_DIV_RED_GREEN_GOLD_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Sunset-Sunrise Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_SUNSET_SUNRISE_RAMP: readonly string[] = [
+const TABLEAU_DIV_SUNSET_SUNRISE_RAMP: readonly string[] = [
   "#33608c",
   "#9768a5",
   "#e7718a",
@@ -423,7 +424,7 @@ export const TABLEAU_DIV_SUNSET_SUNRISE_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Orange-Blue-White Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_ORANGE_BLUE_WHITE_RAMP: readonly string[] = [
+const TABLEAU_DIV_ORANGE_BLUE_WHITE_RAMP: readonly string[] = [
   "#9e3d22",
   "#e36621",
   "#fcad52",
@@ -434,7 +435,7 @@ export const TABLEAU_DIV_ORANGE_BLUE_WHITE_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Red-Green-White Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_RED_GREEN_WHITE_RAMP: readonly string[] = [
+const TABLEAU_DIV_RED_GREEN_WHITE_RAMP: readonly string[] = [
   "#ae123a",
   "#ee574d",
   "#fdac9e",
@@ -445,7 +446,7 @@ export const TABLEAU_DIV_RED_GREEN_WHITE_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Green-Blue-White Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_GREEN_BLUE_WHITE_RAMP: readonly string[] = [
+const TABLEAU_DIV_GREEN_BLUE_WHITE_RAMP: readonly string[] = [
   "#24693d",
   "#529c51",
   "#8fd180",
@@ -456,7 +457,7 @@ export const TABLEAU_DIV_GREEN_BLUE_WHITE_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Red-Blue-White Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_RED_BLUE_WHITE_RAMP: readonly string[] = [
+const TABLEAU_DIV_RED_BLUE_WHITE_RAMP: readonly string[] = [
   "#a90c38",
   "#ec534b",
   "#feaa9a",
@@ -467,7 +468,7 @@ export const TABLEAU_DIV_RED_BLUE_WHITE_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Red-Black-White Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_RED_BLACK_WHITE_RAMP: readonly string[] = [
+const TABLEAU_DIV_RED_BLACK_WHITE_RAMP: readonly string[] = [
   "#ae123a",
   "#ee574d",
   "#fdac9d",
@@ -478,7 +479,7 @@ export const TABLEAU_DIV_RED_BLACK_WHITE_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Orange-Blue Light Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_ORANGE_BLUE_LIGHT_RAMP: readonly string[] = [
+const TABLEAU_DIV_ORANGE_BLUE_LIGHT_RAMP: readonly string[] = [
   "#ffcc9e",
   "#f9d4b6",
   "#f0dccd",
@@ -489,7 +490,7 @@ export const TABLEAU_DIV_ORANGE_BLUE_LIGHT_RAMP: readonly string[] = [
 ];
 
 /** ggthemes tableau_gradient_pal("Temperature Diverging") — 7 stops, verbatim. */
-export const TABLEAU_DIV_TEMPERATURE_RAMP: readonly string[] = [
+const TABLEAU_DIV_TEMPERATURE_RAMP: readonly string[] = [
   "#529985",
   "#6c9e6e",
   "#99b059",
