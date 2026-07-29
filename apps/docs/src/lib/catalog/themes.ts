@@ -63,6 +63,10 @@ const THEME_LABELS = {
   calc: "Calc",
   excel: "Excel",
   excel_new: "Excel New",
+  base: "Base",
+  igray: "Inverse Gray",
+  map: "Map",
+  solid: "Solid",
   test: "Test",
 } as const satisfies Record<ThemeOptionName, string>;
 
@@ -146,8 +150,8 @@ const THEME_DEMO_SCHEMES = {
   solarized: "solarized",
   solarizeddark: "solarized",
   economist_white: "economist",
-  solarized_2: "tableau10",
-  solarized_2dark: "tableau10",
+  solarized_2: "solarized",
+  solarized_2dark: "solarized",
   wsj: "wsj",
   gdocs: "gdocs",
   hc: "hc",
@@ -156,6 +160,10 @@ const THEME_DEMO_SCHEMES = {
   calc: "calc",
   excel: "excel",
   excel_new: "excel_new",
+  base: "tableau10",
+  igray: "tableau10",
+  map: "colorblind",
+  solid: "colorblind",
   test: "colorblind",
 } as const satisfies Record<ThemeOptionName, keyof typeof CATEGORICAL_SCHEMES>;
 

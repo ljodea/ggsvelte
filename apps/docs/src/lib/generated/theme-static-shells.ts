@@ -138,13 +138,13 @@ export const THEME_STATIC_SHELLS = [
     id: "theme-solarized_2",
     filename: "theme-solarized_2.svg",
     path: "/theme-shells/theme-solarized_2.svg",
-    sha256: "4bf835f7b86779d287e6f86f39fefbd80fe562be6c81e5839dae7a1d98455a2c",
+    sha256: "bdb08e81d575d9e1de5fe110f5b7913de9dd9886921927368f13b1edb629950a",
   },
   {
     id: "theme-solarized_2dark",
     filename: "theme-solarized_2dark.svg",
     path: "/theme-shells/theme-solarized_2dark.svg",
-    sha256: "1dad7c045de60ec7de5961ccaa136799faf2ad63832c2b28a15a962239bdf8e2",
+    sha256: "35e4921ae22822bb3914f78e868d6a581d6ea787a0c21c87bb6f21596038fab3",
   },
   {
     id: "theme-wsj",
@@ -193,6 +193,30 @@ export const THEME_STATIC_SHELLS = [
     filename: "theme-excel_new.svg",
     path: "/theme-shells/theme-excel_new.svg",
     sha256: "9748be9ab56e2a3b5ed44a9a43dffd44c00529f980b18889de19667808b2f01d",
+  },
+  {
+    id: "theme-base",
+    filename: "theme-base.svg",
+    path: "/theme-shells/theme-base.svg",
+    sha256: "e94b14ae8a61d92e36bbc10fbd759e474c349e3d864c50f10247b8d449b08832",
+  },
+  {
+    id: "theme-igray",
+    filename: "theme-igray.svg",
+    path: "/theme-shells/theme-igray.svg",
+    sha256: "57a84545004a89df9ba4b68c7e5b57da565e9ad16cc326627ca145d33b4c750a",
+  },
+  {
+    id: "theme-map",
+    filename: "theme-map.svg",
+    path: "/theme-shells/theme-map.svg",
+    sha256: "04a2e4ae687aaaba48aa844678ca556d2232ab7cbefa75fa932b2eff88cb7aaa",
+  },
+  {
+    id: "theme-solid",
+    filename: "theme-solid.svg",
+    path: "/theme-shells/theme-solid.svg",
+    sha256: "80bd2ea1d0b673d622714d6f6a962fccdc46015b46afa676394b921d2bd73341",
   },
   {
     id: "theme-test",

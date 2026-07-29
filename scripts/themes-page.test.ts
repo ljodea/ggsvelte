@@ -38,8 +38,8 @@ describe("themes catalog", () => {
       { name: "solarized", scheme: "solarized" },
       { name: "solarizeddark", scheme: "solarized" },
       { name: "economist_white", scheme: "economist" },
-      { name: "solarized_2", scheme: "tableau10" },
-      { name: "solarized_2dark", scheme: "tableau10" },
+      { name: "solarized_2", scheme: "solarized" },
+      { name: "solarized_2dark", scheme: "solarized" },
       { name: "wsj", scheme: "wsj" },
       { name: "gdocs", scheme: "gdocs" },
       { name: "hc", scheme: "hc" },
@@ -48,6 +48,10 @@ describe("themes catalog", () => {
       { name: "calc", scheme: "calc" },
       { name: "excel", scheme: "excel" },
       { name: "excel_new", scheme: "excel_new" },
+      { name: "base", scheme: "tableau10" },
+      { name: "igray", scheme: "tableau10" },
+      { name: "map", scheme: "colorblind" },
+      { name: "solid", scheme: "colorblind" },
       { name: "test", scheme: "colorblind" },
     ]);
     expect(THEME_OPTIONS.map((theme) => theme.name)).not.toContain("grey");

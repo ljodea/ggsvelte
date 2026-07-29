@@ -47,7 +47,7 @@ function fixture(html: string): string {
   const facts = [
     `Package version: ${sveltePackage.version}`,
     "Defaults edition: 2",
-    "Registered chart themes (34): default, light, dark, minimal, ggplot2, classic, bw, hrbr, few, clean, fivethirtyeight, economist, tufte, linedraw, void, stata, stata_s1color, stata_mono, solarized, solarizeddark, economist_white, solarized_2, solarized_2dark, wsj, gdocs, hc, hcdark, pander, calc, excel, excel_new, grey, gray, test",
+    "Registered chart themes (38): default, light, dark, minimal, ggplot2, classic, bw, hrbr, few, clean, fivethirtyeight, economist, tufte, linedraw, void, stata, stata_s1color, stata_mono, solarized, solarizeddark, economist_white, solarized_2, solarized_2dark, wsj, gdocs, hc, hcdark, pander, calc, excel, excel_new, base, igray, map, solid, grey, gray, test",
     "[Docs](https://ggsvelte.sh/docs)",
   ].join("\n");
   writeFileSync(join(root, "llms.txt"), facts);

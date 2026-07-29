@@ -916,6 +916,102 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     gridX: false,
     showPanelBorder: false,
   }),
+  // ggthemes theme_base: base-R graphics defaults — white panel with a black
+  // frame (panel.border; axis.line is blank in the theme_grey lineage), black
+  // ticks, no grid, black text, bold rel(1.2) title on base 16. Accent is
+  // black, matching base R's monochrome line/fill defaults.
+  base: themed({
+    ink: "#000000",
+    paper: "#ffffff",
+    panel: "#ffffff",
+    accent: "#000000",
+    grid: "none",
+    axisText: "#000000",
+    tickColor: "#000000",
+    panelBorder: "#000000",
+    fontSize: 16,
+    axisTextSize: 12.8,
+    fontWeight: 400,
+    titleSize: 19.2,
+    titleWeight: 700,
+    subtitleSize: 16,
+    axisTitleSize: 16,
+    tickWidth: 0.5,
+    tickLength: 8,
+    gridWidth: 0,
+    panelBorderWidth: 0.5,
+    ticksX: true,
+    ticksY: true,
+    gridX: false,
+    gridY: false,
+    showPanelBorder: true,
+  }),
+  // ggthemes theme_igray: the theme_gray inverse — white panel over a gray90
+  // (#e5e5e5) surround with a matching gray90 major grid, so the plot sits
+  // closer to the document's typographic color (Stata/Tableau style). Chrome
+  // follows this port's theme_grey lineage (#333/#4d4d4d).
+  igray: themed({
+    ink: "#333333",
+    paper: "#e5e5e5",
+    panel: "#ffffff",
+    grid: "#e5e5e5",
+    axisText: "#4d4d4d",
+    tickColor: "#333333",
+    fontSize: 12,
+    axisTextSize: 9.6,
+    fontWeight: 400,
+    titleSize: 14.4,
+    subtitleSize: 12,
+    axisTitleSize: 12,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.5,
+    ticksX: true,
+    ticksY: true,
+  }),
+  // ggthemes theme_map: every axis/panel/grid element blank — marks only, for
+  // maps. Converges with `void` in this token model (both keep the title);
+  // base 9 typography documented from theme_bw(base_size = 9).
+  map: themed({
+    paper: "none",
+    panel: "none",
+    grid: "none",
+    fontSize: 9,
+    axisTextSize: 9,
+    axisTitleSize: 9,
+    gridWidth: 0,
+    gridX: false,
+    gridY: false,
+    axisLineX: false,
+    axisLineY: false,
+    ticksX: false,
+    ticksY: false,
+    labelsX: false,
+    labelsY: false,
+    showPanelBorder: false,
+    tickLength: 0,
+  }),
+  // ggthemes theme_solid(fill = NA): removes every non-geom element — no
+  // lines, no text, transparent background. This token model has no
+  // suppress-title role, so R's blanked title flattens into the shared
+  // void-like surface (documented); everything else matches.
+  solid: themed({
+    paper: "none",
+    panel: "none",
+    grid: "none",
+    fontSize: 12,
+    gridWidth: 0,
+    gridX: false,
+    gridY: false,
+    axisLineX: false,
+    axisLineY: false,
+    ticksX: false,
+    ticksY: false,
+    labelsX: false,
+    labelsY: false,
+    showPanelBorder: false,
+    tickLength: 0,
+  }),
   // theme_test (#823): pinned high-contrast chrome for package tests / VR.
   // Explicit literals — not an alias of light/classic — so product sweeps
   // cannot retarget snapshot chrome. Stability over brand aesthetics.
