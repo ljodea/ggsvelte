@@ -109,8 +109,6 @@ export {
   resolveLayerFieldEvidence,
   type FieldEvidenceEntry,
   type FieldEvidenceMap,
-  type ResolveFieldEvidenceResult,
-  type ResolveLayerFieldEvidenceResult,
 } from "./validate-data-evidence.js";
 
 export { dataChecks, STAT_COLUMNS } from "./validate-data-checks.js";
