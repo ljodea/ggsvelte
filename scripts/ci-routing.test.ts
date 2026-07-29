@@ -1306,6 +1306,88 @@ describe("success-marker CLI carries shard identity", () => {
   });
 });
 
+/**
+ * GITHUB_OUTPUT append is shared via cli-io.writeGithubOutput. Spawn tests that
+ * only assert stdout cannot catch a dropped append — cover hash-inputs,
+ * emit-github-output, and validate-success-marker here (detect-changes has its
+ * own smoke in detect-changes.test.ts).
+ */
+describe("CLI GITHUB_OUTPUT writes", () => {
+  test("hash-inputs appends the same body it prints to GITHUB_OUTPUT", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "ci-routing-gh-out-"));
+    const outPath = join(dir, "github_output");
+    try {
+      const out = await spawnCiRoutingCli(
+        ["hash-inputs", "--execution", "component_svelte_fx", "--os", "Linux", "--shard", "2/3"],
+        { GITHUB_OUTPUT: outPath },
+      );
+      expect(out.exitCode).toBe(0);
+      expect(readFileSync(outPath, "utf8")).toBe(out.stdout);
+      expect(out.stdout).toContain("hash=");
+      expect(out.stdout).toContain("cache_key=");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("emit-github-output appends the routing body to GITHUB_OUTPUT", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "ci-routing-emit-out-"));
+    const outPath = join(dir, "github_output");
+    try {
+      const proc = Bun.spawn(
+        ["bun", "scripts/ci-routing.ts", "emit-github-output", "--force-all", "--stdin"],
+        {
+          cwd: join(import.meta.dir, ".."),
+          env: { ...process.env, GITHUB_OUTPUT: outPath },
+          stdin: "pipe",
+          stdout: "pipe",
+          stderr: "pipe",
+        },
+      );
+      await proc.stdin.write("packages/spec/src/index.ts\n");
+      await proc.stdin.end();
+      const [stdout, exitCode] = await Promise.all([new Response(proc.stdout).text(), proc.exited]);
+      expect(exitCode).toBe(0);
+      expect(readFileSync(outPath, "utf8")).toBe(stdout);
+      expect(stdout).toContain("unit=true");
+      expect(stdout).toContain("bypass_content_cache=");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("validate-success-marker writes hit=… to GITHUB_OUTPUT", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "ci-routing-validate-out-"));
+    const outPath = join(dir, "github_output");
+    try {
+      // Miss path: no marker file under throwaway cwd → hit=false in both sinks.
+      const proc = Bun.spawn(
+        [
+          "bun",
+          join(import.meta.dir, "ci-routing.ts"),
+          "validate-success-marker",
+          "--execution",
+          "unit",
+          "--hash",
+          "deadbeef",
+        ],
+        {
+          cwd: dir,
+          env: { ...process.env, GITHUB_OUTPUT: outPath },
+          stdout: "pipe",
+          stderr: "pipe",
+        },
+      );
+      const [stdout, exitCode] = await Promise.all([new Response(proc.stdout).text(), proc.exited]);
+      expect(exitCode).toBe(0);
+      expect(stdout).toBe("hit=false\n");
+      expect(readFileSync(outPath, "utf8")).toBe("hit=false\n");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("ci-routing module tree (split-safe)", () => {
   test("subtree files set ci_routing, force full surface, and bypass content cache", () => {
     for (const file of [
@@ -1313,6 +1395,9 @@ describe("ci-routing module tree (split-safe)", () => {
       "scripts/ci-routing/routing.ts",
       "scripts/ci-routing/content-hash.ts",
       "scripts/ci-routing/cli.ts",
+      "scripts/ci-routing/cli-io.ts",
+      "scripts/ci-routing/content-hash-cli.ts",
+      "scripts/ci-routing/detect-changes-cli.ts",
     ]) {
       const flags = classifyChangedPaths([file]);
       expect(flags.ci_routing, file).toBe(true);
@@ -1333,10 +1418,16 @@ describe("ci-routing module tree (split-safe)", () => {
         "scripts/ci-routing/routing.ts",
         "scripts/ci-routing/content-hash.ts",
         "scripts/ci-routing/cli.ts",
+        "scripts/ci-routing/cli-io.ts",
+        "scripts/ci-routing/content-hash-cli.ts",
+        "scripts/ci-routing/detect-changes-cli.ts",
       ]);
       expect(matched, execution).toContain("scripts/ci-routing/routing.ts");
       expect(matched, execution).toContain("scripts/ci-routing/content-hash.ts");
       expect(matched, execution).toContain("scripts/ci-routing/cli.ts");
+      expect(matched, execution).toContain("scripts/ci-routing/cli-io.ts");
+      expect(matched, execution).toContain("scripts/ci-routing/content-hash-cli.ts");
+      expect(matched, execution).toContain("scripts/ci-routing/detect-changes-cli.ts");
     }
   });
 
