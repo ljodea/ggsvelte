@@ -4,14 +4,11 @@
    * spec JSON (what agents emit), fluent-builder TypeScript (spec.ts), and
    * idiomatic Svelte components (Example.svelte) — each with a copy button.
    */
-  import Highlight from "svelte-highlight";
+  import { onMount } from "svelte";
 
   import { briefCopyStatus, COPIED_STATUS, copyText } from "$lib/clipboard";
-  import {
-    languageFromCodeTabLabel,
-    resolveCodeLanguage,
-  } from "$lib/code-languages";
   import { CHECK_ICON_SVG, COPY_ICON_SVG } from "$lib/copy-icons";
+  import { loadHighlight, type HighlightBundle } from "$lib/load-highlight";
   import { nextRovingTabIndex } from "$lib/tab-roving";
 
   interface Tab {
@@ -28,14 +25,29 @@
   const tabsetId = $props.id();
   const panelId = `${tabsetId}-panel`;
   let copyTimer: ReturnType<typeof setTimeout> | undefined;
+  let bundle = $state<HighlightBundle | null>(null);
 
   const activeTab = $derived(tabs[active]);
+  const Highlight = $derived(bundle?.Highlight ?? null);
   const languageModule = $derived(
-    resolveCodeLanguage(
-      activeTab?.language ?? languageFromCodeTabLabel(activeTab?.label),
-    ),
+    bundle === null
+      ? null
+      : bundle.resolveCodeLanguage(
+          activeTab?.language ??
+            bundle.languageFromCodeTabLabel(activeTab?.label),
+        ),
   );
   const copied = $derived(copyStatus === COPIED_STATUS);
+
+  onMount(() => {
+    let cancelled = false;
+    void loadHighlight().then((loaded) => {
+      if (!cancelled) bundle = loaded;
+    });
+    return () => {
+      cancelled = true;
+    };
+  });
 
   async function copy(): Promise<void> {
     const code = tabs[active]?.code ?? "";
@@ -124,7 +136,11 @@
       tabindex="0"
       bind:this={codeNode}
     >
-      <Highlight code={activeTab?.code ?? ""} language={languageModule} />
+      {#if Highlight !== null && languageModule !== null}
+        <Highlight code={activeTab?.code ?? ""} language={languageModule} />
+      {:else}
+        <pre><code>{activeTab?.code ?? ""}</code></pre>
+      {/if}
     </div>
   </div>
 </div>

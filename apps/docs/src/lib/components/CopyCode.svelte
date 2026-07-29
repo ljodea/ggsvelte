@@ -1,9 +1,9 @@
 <script lang="ts">
-  import Highlight from "svelte-highlight";
+  import { onMount } from "svelte";
 
   import { briefCopyStatus, COPIED_STATUS, copyText } from "$lib/clipboard";
-  import { resolveCodeLanguage } from "$lib/code-languages";
   import { CHECK_ICON_SVG, COPY_ICON_SVG } from "$lib/copy-icons";
+  import { loadHighlight, type HighlightBundle } from "$lib/load-highlight";
 
   const {
     code,
@@ -23,8 +23,22 @@
   let source = $state<HTMLElement>();
   let status = $state("");
   let timer: ReturnType<typeof setTimeout> | undefined;
-  const languageModule = $derived(resolveCodeLanguage(language));
+  let bundle = $state<HighlightBundle | null>(null);
+  const Highlight = $derived(bundle?.Highlight ?? null);
+  const languageModule = $derived(
+    bundle === null ? null : bundle.resolveCodeLanguage(language),
+  );
   const copied = $derived(status === COPIED_STATUS);
+
+  onMount(() => {
+    let cancelled = false;
+    void loadHighlight().then((loaded) => {
+      if (!cancelled) bundle = loaded;
+    });
+    return () => {
+      cancelled = true;
+    };
+  });
 
   async function copy(): Promise<void> {
     if (timer !== undefined) clearTimeout(timer);
@@ -51,7 +65,11 @@
     {/if}
   </button>
   <div class="code-body" bind:this={source}>
-    <Highlight {code} language={languageModule} />
+    {#if Highlight !== null && languageModule !== null}
+      <Highlight {code} language={languageModule} />
+    {:else}
+      <pre><code>{code}</code></pre>
+    {/if}
   </div>
   <span class="visually-hidden" role="status">{status}</span>
 </div>
