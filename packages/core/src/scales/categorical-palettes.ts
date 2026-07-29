@@ -78,6 +78,12 @@ export const COLORBLIND_PALETTE: readonly string[] = [
   "#CC79A7",
 ];
 
+/**
+ * ggthemes economist_pal(fill = TRUE) at full capacity (n = 9 selection):
+ * blue-gray, dark blue, blue, light blue, dark green, light green, dark red,
+ * pink, gray. ggthemes re-selects per n; this port flattens to the fixed
+ * full-capacity order (prefix subsets approximate the smaller-n picks).
+ */
 export const ECONOMIST_PALETTE: readonly string[] = [
   "#6794a7",
   "#014d64",
@@ -128,6 +134,7 @@ export const FEW_PALETTE: readonly string[] = [
   "#F15854",
 ];
 
+/** ggthemes few_pal("Light") — Few's light variant for filled areas (scale_fill_few default). */
 export const FEW_LIGHT_PALETTE: readonly string[] = [
   "#88BDE6",
   "#FBB258",
@@ -139,6 +146,7 @@ export const FEW_LIGHT_PALETTE: readonly string[] = [
   "#F07E6E",
 ];
 
+/** ggthemes few_pal("Dark") — Few's dark variant for thin lines / highlighting. */
 export const FEW_DARK_PALETTE: readonly string[] = [
   "#265DAB",
   "#DF5C24",
@@ -150,8 +158,15 @@ export const FEW_DARK_PALETTE: readonly string[] = [
   "#CB2027",
 ];
 
+/** ggthemes fivethirtyeight_pal() — the standard three-color 538 line palette: blue, red, green. */
 export const FIVETHIRTYEIGHT_PALETTE: readonly string[] = ["#008FD5", "#FF2700", "#77AB43"];
 
+/**
+ * ggthemes ptol_pal() at full capacity (n = 12 selection) — Paul Tol's
+ * qualitative palette (SRON/EPS/TN/09-002). ggthemes re-selects the set per
+ * n; this port flattens to the fixed full-capacity order (prefix subsets
+ * approximate the smaller-n picks), as with the economist palette.
+ */
 export const PTOL_PALETTE: readonly string[] = [
   "#332288",
   "#6699CC",
@@ -167,8 +182,19 @@ export const PTOL_PALETTE: readonly string[] = [
   "#AA4499",
 ];
 
+/**
+ * ggthemes canva_pal("Fresh and bright") — the scale_*_canva default.
+ * ggthemes ships 150 named four-color Canva palettes; only the default is
+ * registered (documented subset).
+ */
 export const CANVA_PALETTE: readonly string[] = ["#f98866", "#ff420e", "#80bd9e", "#89da59"];
 
+/**
+ * ggthemes gdocs_pal() — Google Docs chart colors: the six brand hues in
+ * four decreasing strengths. Copied verbatim from the upstream YAML,
+ * including its duplicated "teal 2" entry (#ff994d); the doc comment
+ * upstream claims 20 colors but the table holds 24.
+ */
 export const GDOCS_PALETTE: readonly string[] = [
   "#4285f4",
   "#ea4335",
@@ -196,6 +222,7 @@ export const GDOCS_PALETTE: readonly string[] = [
   "#edf8f9",
 ];
 
+/** ggthemes hc_pal("default") — Highcharts default 10 colors. */
 export const HC_PALETTE: readonly string[] = [
   "#7cb5ec",
   "#434348",
@@ -209,6 +236,7 @@ export const HC_PALETTE: readonly string[] = [
   "#91e8e1",
 ];
 
+/** ggthemes hc_pal("darkunica") — Highcharts dark-unica 11 colors (verbatim, with its trailing repeats). */
 export const HC_DARK_PALETTE: readonly string[] = [
   "#2b908f",
   "#90ee7e",
@@ -223,6 +251,11 @@ export const HC_DARK_PALETTE: readonly string[] = [
   "#aaeeee",
 ];
 
+/**
+ * ggthemes palette_pander() — the pander package's colorblind- and
+ * printer-friendly eight (borrowed from jfly.iam.u-tokyo.ac.jp/color):
+ * the Okabe-Ito hues in pander's order, with #999999 in place of black.
+ */
 export const PANDER_PALETTE: readonly string[] = [
   "#56B4E9",
   "#009E73",
@@ -233,6 +266,7 @@ export const PANDER_PALETTE: readonly string[] = [
   "#999999",
   "#E69F00",
 ];
+
 
 /** Named categorical schemes accepted by the portable spec. */
 export const CATEGORICAL_SCHEMES = {
