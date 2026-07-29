@@ -1,10 +1,16 @@
-import { CATEGORICAL_SCHEMES, VIRIDIS_RAMP_10 } from "@ggsvelte/core";
-import {
-  CATEGORICAL_SCHEME_NAMES,
-  THEME_NAME_ALIASES,
-  THEME_NAMES,
-  type ThemeName,
-} from "@ggsvelte/spec";
+import type { ThemeName } from "@ggsvelte/spec";
+
+import { CATEGORICAL_SCHEMES, VIRIDIS_RAMP_10 } from "./palette-tables.js";
+
+/**
+ * Docs-local mirror of package aliases (grey/gray → ggplot2). Kept as a plain
+ * object so this module never value-imports `@ggsvelte/spec` / TypeBox — that
+ * barrel lands in the chart mega-chunk and was modulepreloaded on /themes.
+ */
+const THEME_NAME_ALIASES = {
+  grey: "ggplot2",
+  gray: "ggplot2",
+} as const satisfies Partial<Record<ThemeName, ThemeName>>;
 
 /** Canonical picker themes — grey/gray alias ggplot2 and stay out of the list. */
 type ThemeOptionName = Exclude<ThemeName, keyof typeof THEME_NAME_ALIASES>;
@@ -17,11 +23,11 @@ type ThemeOptionName = Exclude<ThemeName, keyof typeof THEME_NAME_ALIASES>;
 const CATEGORICAL_SCHEME_DISPLAY_ALIASES = {
   gray: "grey",
 } as const satisfies Partial<
-  Record<(typeof CATEGORICAL_SCHEME_NAMES)[number], (typeof CATEGORICAL_SCHEME_NAMES)[number]>
+  Record<keyof typeof CATEGORICAL_SCHEMES, keyof typeof CATEGORICAL_SCHEMES>
 >;
 
 type PaletteOptionName = Exclude<
-  (typeof CATEGORICAL_SCHEME_NAMES)[number],
+  keyof typeof CATEGORICAL_SCHEMES,
   keyof typeof CATEGORICAL_SCHEME_DISPLAY_ALIASES
 >;
 
@@ -141,28 +147,31 @@ const THEME_DEMO_SCHEMES = {
   excel: "excel",
   excel_new: "excel_new",
   test: "colorblind",
-} as const satisfies Record<ThemeOptionName, (typeof CATEGORICAL_SCHEME_NAMES)[number]>;
+} as const satisfies Record<ThemeOptionName, keyof typeof CATEGORICAL_SCHEMES>;
 
-/** Picker/specimen themes only — API still accepts grey/gray via THEME_NAME_ALIASES. */
-export const THEME_OPTIONS = THEME_NAMES.filter(
-  (name): name is ThemeOptionName => !(name in THEME_NAME_ALIASES),
-).map((name) => ({
+/**
+ * Picker/specimen themes only. Built from THEME_LABELS (not THEME_NAMES from
+ * `@ggsvelte/spec`) so the client never loads the TypeBox schema graph.
+ */
+export const THEME_OPTIONS = (Object.keys(THEME_LABELS) as ThemeOptionName[]).map((name) => ({
   name,
   label: THEME_LABELS[name],
   scheme: THEME_DEMO_SCHEMES[name],
 }));
 
 /** Picker/specimen palettes only — API still accepts gray via the same GREY_PALETTE_10. */
-export const CATEGORICAL_PALETTES = CATEGORICAL_SCHEME_NAMES.filter(
-  (name): name is PaletteOptionName => !(name in CATEGORICAL_SCHEME_DISPLAY_ALIASES),
-).map((name) => {
-  const colors = CATEGORICAL_SCHEMES[name];
-  return {
-    name,
-    label: PALETTE_LABELS[name],
-    capacity: colors.length,
-    colors,
-  };
-});
+export const CATEGORICAL_PALETTES = (
+  Object.keys(CATEGORICAL_SCHEMES) as (keyof typeof CATEGORICAL_SCHEMES)[]
+)
+  .filter((name): name is PaletteOptionName => !(name in CATEGORICAL_SCHEME_DISPLAY_ALIASES))
+  .map((name) => {
+    const colors = CATEGORICAL_SCHEMES[name];
+    return {
+      name,
+      label: PALETTE_LABELS[name],
+      capacity: colors.length,
+      colors,
+    };
+  });
 
 export const VIRIDIS_COLORS = VIRIDIS_RAMP_10;

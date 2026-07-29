@@ -10,6 +10,12 @@ import { defineConfig } from "vite";
  * Without this, layout chrome co-chunks with `@ggsvelte/core` / GGPlot
  * (~120–340KB decoded on every page). Chart pages still load these groups via
  * their own imports.
+ *
+ * Named package groups put *every* matching module into one shared chunk. A
+ * tiny static import of palette hex tables (`catalog/themes`) or teaching
+ * datasets (`@ggsvelte/svelte/data`) then modulepreloads the full ~1MB chart
+ * stack on intent-only pages. Higher-priority carve-outs keep pure data in
+ * their own small chunks so those pages stay light until live charts load.
  */
 export default defineConfig({
   plugins: [sveltekit()],
@@ -28,6 +34,18 @@ export default defineConfig({
               name: "svelte-runtime",
               test: /[\\/]node_modules[\\/]svelte[\\/]/,
               priority: 30,
+            },
+            // Pure teaching datasets — not the GGPlot runtime.
+            {
+              name: "ggsvelte-data",
+              test: /(?:[\\/]node_modules[\\/]@ggsvelte[\\/]svelte[\\/]data[\\/]|[\\/]packages[\\/]svelte[\\/](?:src[\\/]lib[\\/]|dist[\\/])?data[\\/])/,
+              priority: 40,
+            },
+            // Pure palette / ramp tables — not pipeline, render, or scales engine.
+            {
+              name: "ggsvelte-palette-tables",
+              test: /[\\/](?:categorical-palettes|colorbrewer-palettes|viridis-ramp)\.[cm]?[jt]s$/,
+              priority: 40,
             },
             {
               name: "ggsvelte-core",
