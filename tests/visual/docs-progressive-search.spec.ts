@@ -155,10 +155,10 @@ test("prerendered Docs and lesson source remain useful without JavaScript", asyn
   await expect(page.locator(".lesson-source--file code").first()).toContainText(
     'import { kyotoSakura } from "@ggsvelte/svelte/data"',
   );
-  // Every chart is a build-time SVG without JS: first render + five steps
+  // Every chart is a build-time SVG without JS: first render + four steps
   // (Finish it keeps its static fallback until hydrate near-viewport, #972).
   await expect(page.locator(".lesson-block .lesson-output")).toBeVisible();
-  await expect(page.locator("img.lesson-chart")).toHaveCount(6);
+  await expect(page.locator("img.lesson-chart")).toHaveCount(5);
   await expect(
     page.getByRole("heading", {
       level: 3,
