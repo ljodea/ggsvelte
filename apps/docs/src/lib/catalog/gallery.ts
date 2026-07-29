@@ -23,10 +23,19 @@ const previewById = new Map<string, string>(
   GALLERY_PREVIEWS.map((preview) => [preview.id, preview.path]),
 );
 
+/** Resolved static preview path for an example id (including interaction demos). */
+export function previewPathFor(id: string): string {
+  const previewPath = previewById.get(id);
+  if (previewPath === undefined) throw new Error(`Missing generated preview for ${id}`);
+  return previewPath;
+}
+
 export function galleryEntryFor(entry: ExampleManifestEntry): GalleryEntry {
-  const previewPath = previewById.get(entry.id);
-  if (previewPath === undefined) throw new Error(`Missing generated preview for ${entry.id}`);
-  return { ...entry, previewPath, featured: featuredIds.has(entry.id) };
+  return {
+    ...entry,
+    previewPath: previewPathFor(entry.id),
+    featured: featuredIds.has(entry.id),
+  };
 }
 
 /** Manifest entries that belong on the public gallery (not interaction expositions). */
