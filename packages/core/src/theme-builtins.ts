@@ -464,6 +464,69 @@ export const BUILTIN_THEMES: Readonly<Record<ThemeName, ThemeTokens>> = Object.f
     showPanelBorder: false,
     tickLength: 0,
   }),
+  // ggthemes theme_solarized (light = TRUE): theme_bw lineage on Schoonover's
+  // light rebase — base3 panel (#fdf6e3), base2 grid, base1 chrome/text,
+  // transparent plot background, blue accent. ggthemes draws the frame via
+  // panel.background colour (panel.border is blank); here showPanelBorder
+  // carries it. Single-ink model: R's darker title step (rebase0) flattens
+  // into ink (rebase01), as with the other ports.
+  solarized: themed({
+    ink: "#93a1a1",
+    paper: "none",
+    panel: "#fdf6e3",
+    accent: "#268bd2",
+    grid: "#eee8d5",
+    axisText: "#93a1a1",
+    axisLine: "#93a1a1",
+    tickColor: "#93a1a1",
+    panelBorder: "#93a1a1",
+    fontSize: 12,
+    axisTextSize: 12,
+    fontWeight: 400,
+    titleSize: 14.4,
+    subtitleSize: 12,
+    axisTitleSize: 12,
+    axisLineWidth: 0.5,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.5,
+    panelBorderWidth: 0.5,
+    axisLineX: true,
+    axisLineY: true,
+    ticksX: true,
+    ticksY: true,
+    showPanelBorder: true,
+  }),
+  // ggthemes theme_solarized (light = FALSE): same geometry on the dark
+  // rebase — base03 panel (#002b36), base02 grid, base01 chrome. Accents are
+  // shared across light/dark by Solarized's design (only base tones flip).
+  solarizeddark: themed({
+    ink: "#586e75",
+    paper: "none",
+    panel: "#002b36",
+    accent: "#268bd2",
+    grid: "#073642",
+    axisText: "#586e75",
+    axisLine: "#586e75",
+    tickColor: "#586e75",
+    panelBorder: "#586e75",
+    fontSize: 12,
+    axisTextSize: 12,
+    fontWeight: 400,
+    titleSize: 14.4,
+    subtitleSize: 12,
+    axisTitleSize: 12,
+    axisLineWidth: 0.5,
+    tickWidth: 0.5,
+    tickLength: 3.67,
+    gridWidth: 0.5,
+    panelBorderWidth: 0.5,
+    axisLineX: true,
+    axisLineY: true,
+    ticksX: true,
+    ticksY: true,
+    showPanelBorder: true,
+  }),
   // theme_test (#823): pinned high-contrast chrome for package tests / VR.
   // Explicit literals — not an alias of light/classic — so product sweeps
   // cannot retarget snapshot chrome. Stability over brand aesthetics.

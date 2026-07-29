@@ -10,6 +10,7 @@ import {
   COLORBLIND_PALETTE,
   FLEXOKI_PALETTE,
   IPSUM_PALETTE,
+  SOLARIZED_PALETTE,
   TABLEAU10_PALETTE,
 } from "../src/scales/train.ts";
 import {
@@ -18,6 +19,7 @@ import {
   COLORBLIND_PALETTE as COLORBLIND_DIRECT,
   FLEXOKI_PALETTE as FLEXOKI_DIRECT,
   IPSUM_PALETTE as IPSUM_DIRECT,
+  SOLARIZED_PALETTE as SOLARIZED_DIRECT,
   TABLEAU10_PALETTE as TABLEAU10_DIRECT,
 } from "../src/scales/categorical-palettes.ts";
 
@@ -26,6 +28,7 @@ const PALETTES = {
   flexoki: FLEXOKI_PALETTE,
   tableau10: TABLEAU10_PALETTE,
   colorblind: COLORBLIND_PALETTE,
+  solarized: SOLARIZED_PALETTE,
 } as const;
 
 describe("train.ts palette re-export identity", () => {
@@ -36,6 +39,7 @@ describe("train.ts palette re-export identity", () => {
     expect(COLORBLIND_PALETTE).toBe(COLORBLIND_DIRECT);
     expect(FLEXOKI_PALETTE).toBe(FLEXOKI_DIRECT);
     expect(IPSUM_PALETTE).toBe(IPSUM_DIRECT);
+    expect(SOLARIZED_PALETTE).toBe(SOLARIZED_DIRECT);
     expect(TABLEAU10_PALETTE).toBe(TABLEAU10_DIRECT);
   });
 });

@@ -160,6 +160,22 @@ export const THEME_SPECIMENS: readonly ThemeSpecimenConfig[] = [
     legendFocus: false,
   },
   {
+    name: "solarized",
+    label: BY_NAME.solarized.label,
+    caption: "Cream panel and precision accents — Schoonover's light lab.",
+    kind: "generation-area",
+    scheme: BY_NAME.solarized.scheme,
+    legendFocus: true,
+  },
+  {
+    name: "solarizeddark",
+    label: BY_NAME.solarizeddark.label,
+    caption: "Deep teal panel, same accents — Solarized after dark.",
+    kind: "ridership-line",
+    scheme: BY_NAME.solarizeddark.scheme,
+    legendFocus: true,
+  },
+  {
     name: "test",
     label: BY_NAME.test.label,
     caption: "Pinned high-contrast chrome for package tests and VR.",

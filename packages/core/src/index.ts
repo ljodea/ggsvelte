@@ -87,6 +87,7 @@ export {
   IPSUM_PALETTE,
   niceLinearDomain,
   ScaleConfigError,
+  SOLARIZED_PALETTE,
   trainBand,
   trainColor,
   trainContinuous,

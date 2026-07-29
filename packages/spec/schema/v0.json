@@ -6035,6 +6035,10 @@
                 },
                 {
                   "type": "string",
+                  "const": "solarized"
+                },
+                {
+                  "type": "string",
                   "const": "Set1"
                 },
                 {
@@ -8451,6 +8455,14 @@
         },
         {
           "type": "string",
+          "const": "solarized"
+        },
+        {
+          "type": "string",
+          "const": "solarizeddark"
+        },
+        {
+          "type": "string",
           "const": "grey"
         },
         {
@@ -8462,7 +8474,7 @@
           "const": "test"
         }
       ],
-      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"grey\", \"gray\", \"test\"."
+      "description": "A registered theme name: \"default\", \"light\", \"dark\", \"minimal\", \"ggplot2\", \"classic\", \"bw\", \"hrbr\", \"few\", \"clean\", \"fivethirtyeight\", \"economist\", \"tufte\", \"linedraw\", \"void\", \"solarized\", \"solarizeddark\", \"grey\", \"gray\", \"test\"."
     },
     "ThemeSpec": {
       "type": "object",

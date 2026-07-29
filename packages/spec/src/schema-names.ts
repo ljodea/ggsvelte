@@ -27,6 +27,8 @@ export const CATEGORICAL_SCHEME_NAMES = [
   "flexoki",
   "tableau10",
   "colorblind",
+  /** ggthemes scale_colour/fill_solarized — Solarized accents, blue first. */
+  "solarized",
   // ColorBrewer qualitative (#825)
   "Set1",
   "Set2",
@@ -129,6 +131,9 @@ export const THEME_NAMES = [
   "tufte",
   "linedraw",
   "void",
+  // ggthemes theme_solarized: light (default) and dark (light = FALSE) variants.
+  "solarized",
+  "solarizeddark",
   "grey",
   "gray",
   // Snapshot/unit-test complete theme (#823). Last: ordered docs/VR rosters

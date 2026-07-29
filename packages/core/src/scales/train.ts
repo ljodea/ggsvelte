@@ -25,6 +25,7 @@ export {
   COLORBLIND_PALETTE,
   FLEXOKI_PALETTE,
   IPSUM_PALETTE,
+  SOLARIZED_PALETTE,
   TABLEAU10_PALETTE,
 } from "./categorical-palettes.js";
 

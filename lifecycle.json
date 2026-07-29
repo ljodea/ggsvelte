@@ -4163,6 +4163,10 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "SOLARIZED_PALETTE": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "STRIP_BAND": {
           "kind": "value",
           "lifecycle": "experimental"
@@ -6488,6 +6492,14 @@
         "ThemeName": {
           "kind": "type",
           "lifecycle": "experimental"
+        },
+        "ThemeSolarized": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
+        },
+        "ThemeSolarizeddark": {
+          "kind": "value",
+          "lifecycle": "stable-intent"
         },
         "ThemeSpec": {
           "kind": "type",
