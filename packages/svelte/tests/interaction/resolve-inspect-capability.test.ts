@@ -76,6 +76,6 @@ describe("duplicateInspectCapabilityDiagnostics", () => {
     expect(duplicateInspectCapabilityDiagnostics(false)).toEqual([]);
     const list = duplicateInspectCapabilityDiagnostics(true);
     expect(list).toHaveLength(1);
-    expect(list[0]!.code).toBe("INTERACTION_DUPLICATE_INSPECT_CAPABILITY");
+    expect(list.at(0)?.code).toBe("INTERACTION_DUPLICATE_INSPECT_CAPABILITY");
   });
 });
