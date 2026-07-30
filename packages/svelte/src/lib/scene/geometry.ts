@@ -148,6 +148,125 @@ export type CrosshairSegment = {
   readonly y2: number;
 };
 
+/** Axis-aligned box in plot px (same space as focus anchors / glyphHoverBox). */
+export type CrosshairGapBox = GlyphHoverBox;
+
+/**
+ * Extra pad when cutting a guide through a glyph AABB so stroke does not
+ * kiss the label edge. Kept separate from measured boxWidths (which already
+ * include geom_label boxPadding).
+ */
+export const CROSSHAIR_BOX_GAP_PAD = 2;
+
+type GapInterval = { lo: number; hi: number };
+
+function mergeGapIntervals(intervals: GapInterval[]): GapInterval[] {
+  if (intervals.length === 0) return [];
+  const sorted = intervals.toSorted((a, b) => a.lo - b.lo);
+  const out: GapInterval[] = [{ lo: sorted[0]!.lo, hi: sorted[0]!.hi }];
+  for (let i = 1; i < sorted.length; i++) {
+    const cur = sorted[i]!;
+    const last = out.at(-1)!;
+    if (cur.lo <= last.hi) {
+      last.hi = Math.max(last.hi, cur.hi);
+    } else {
+      out.push({ lo: cur.lo, hi: cur.hi });
+    }
+  }
+  return out;
+}
+
+/**
+ * Solid segments along [rangeLo, rangeHi] with holes at each merged gap.
+ * Uses strict endpoints (gap starts exactly at rangeLo drop the leading piece)
+ * to match the historical `gapTop > panel.y` comparison.
+ */
+function segmentsAroundGaps(
+  rangeLo: number,
+  rangeHi: number,
+  gaps: readonly GapInterval[],
+  project: (a: number, b: number) => CrosshairSegment,
+): CrosshairSegment[] {
+  if (!(rangeHi > rangeLo)) return [];
+  const clamped: GapInterval[] = [];
+  for (const gap of gaps) {
+    const lo = Math.max(gap.lo, rangeLo);
+    const hi = Math.min(gap.hi, rangeHi);
+    if (hi > lo) clamped.push({ lo, hi });
+  }
+  const merged = mergeGapIntervals(clamped);
+  if (merged.length === 0) return [project(rangeLo, rangeHi)];
+
+  const segments: CrosshairSegment[] = [];
+  let cursor = rangeLo;
+  for (const gap of merged) {
+    if (gap.lo > cursor) {
+      segments.push(project(cursor, gap.lo));
+    }
+    cursor = Math.max(cursor, gap.hi);
+  }
+  if (cursor < rangeHi) {
+    segments.push(project(cursor, rangeHi));
+  }
+  return segments;
+}
+
+/**
+ * Panel-spanning axis guide with a circular focus gap and rectangular holes
+ * for any obstacle boxes the guide line intersects (sibling GeomText labels).
+ * `gapRadius <= 0` still applies box obstacles (rect hover chrome path).
+ * Empty obstacles degrades to the focus-only path.
+ */
+export function gappedCrosshairSegmentsWithObstacles(
+  axis: "vertical" | "horizontal",
+  focus: { readonly x: number; readonly y: number },
+  panel: PanelBounds,
+  gapRadius: number,
+  obstacles: readonly CrosshairGapBox[],
+): readonly CrosshairSegment[] {
+  const panelBottom = panel.y + panel.height;
+  const panelRight = panel.x + panel.width;
+  const pad = CROSSHAIR_BOX_GAP_PAD;
+  const gaps: GapInterval[] = [];
+
+  if (gapRadius > 0) {
+    if (axis === "vertical") {
+      gaps.push({ lo: focus.y - gapRadius, hi: focus.y + gapRadius });
+    } else {
+      gaps.push({ lo: focus.x - gapRadius, hi: focus.x + gapRadius });
+    }
+  }
+
+  for (const box of obstacles) {
+    const bx0 = box.x - pad;
+    const by0 = box.y - pad;
+    const bx1 = box.x + box.width + pad;
+    const by1 = box.y + box.height + pad;
+    if (axis === "vertical") {
+      if (focus.x >= bx0 && focus.x <= bx1) {
+        gaps.push({ lo: by0, hi: by1 });
+      }
+    } else if (focus.y >= by0 && focus.y <= by1) {
+      gaps.push({ lo: bx0, hi: bx1 });
+    }
+  }
+
+  if (axis === "vertical") {
+    return segmentsAroundGaps(panel.y, panelBottom, gaps, (y1, y2) => ({
+      x1: focus.x,
+      y1,
+      x2: focus.x,
+      y2,
+    }));
+  }
+  return segmentsAroundGaps(panel.x, panelRight, gaps, (x1, x2) => ({
+    x1,
+    y1: focus.y,
+    x2,
+    y2: focus.y,
+  }));
+}
+
 /**
  * Panel-spanning axis guide broken into segments that leave a circular gap
  * around the focus anchor. `gapRadius <= 0` yields one continuous segment
@@ -159,45 +278,85 @@ export function gappedCrosshairSegments(
   panel: PanelBounds,
   gapRadius: number,
 ): readonly CrosshairSegment[] {
-  const panelBottom = panel.y + panel.height;
-  const panelRight = panel.x + panel.width;
+  return gappedCrosshairSegmentsWithObstacles(axis, focus, panel, gapRadius, []);
+}
 
-  if (!(gapRadius > 0)) {
-    return axis === "vertical"
-      ? [{ x1: focus.x, y1: panel.y, x2: focus.x, y2: panelBottom }]
-      : [{ x1: panel.x, y1: focus.y, x2: panelRight, y2: focus.y }];
-  }
+/**
+ * Minimal batch surface for crosshair obstacle collection.
+ * Structural (not core Scene types) so geometry stays free of @ggsvelte/core.
+ * Wide enough to accept GeometryBatch[] (rects may carry a different `anchor`
+ * vocabulary — only `kind === "glyphs"` is read).
+ * Walk scene batches, not the candidate store: uninspectable layers (#1065)
+ * still paint and still need gaps even when they never become targets.
+ */
+export type GlyphObstacleBatch = {
+  readonly kind: string;
+  readonly panelIndex: number;
+  /** Interleaved panel-local x,y (dx/dy already applied). Present on glyphs. */
+  readonly positions?: ArrayLike<number>;
+  readonly boxWidths?: ArrayLike<number>;
+  readonly boxHeights?: ArrayLike<number>;
+  /** Glyph text-anchor; other batch kinds may use different vocabularies. */
+  readonly anchor?: string;
+};
 
-  const segments: CrosshairSegment[] = [];
-  if (axis === "vertical") {
-    const gapTop = focus.y - gapRadius;
-    const gapBottom = focus.y + gapRadius;
-    if (gapTop > panel.y) {
-      segments.push({ x1: focus.x, y1: panel.y, x2: focus.x, y2: gapTop });
+/** Minimal panel surface: id + plot origin (matches scene.panels[i]). */
+export type GlyphObstaclePanel = {
+  readonly id: string;
+  readonly x: number;
+  readonly y: number;
+};
+
+function glyphTextAnchor(anchor: string | undefined): "start" | "middle" | "end" | undefined {
+  if (anchor === "start" || anchor === "middle" || anchor === "end") return anchor;
+  return undefined;
+}
+
+/**
+ * Plot-space glyph AABBs for every measured text/label in `panelId`.
+ * Positions are panel-local; add panel origin so boxes share coordinates with
+ * `inspection.focus.anchor` / viewport panel bounds (viewport is built from
+ * the same scene panels).
+ */
+export function crosshairGlyphObstacles(
+  batches: readonly GlyphObstacleBatch[],
+  panels: readonly GlyphObstaclePanel[],
+  panelId: string,
+): CrosshairGapBox[] {
+  const boxes: CrosshairGapBox[] = [];
+  for (const batch of batches) {
+    if (batch.kind !== "glyphs") continue;
+    const positions = batch.positions;
+    if (positions === undefined) continue;
+    const panel = panels[batch.panelIndex];
+    if (panel === undefined || panel.id !== panelId) continue;
+    const textAnchor = glyphTextAnchor(batch.anchor);
+    const count = Math.floor(positions.length / 2);
+    for (let i = 0; i < count; i++) {
+      const extents = glyphExtentsFromBatch(
+        {
+          kind: batch.kind,
+          boxWidths: batch.boxWidths,
+          boxHeights: batch.boxHeights,
+          anchor: textAnchor,
+        },
+        i,
+      );
+      if (extents === null) continue;
+      const lx = positions[2 * i];
+      const ly = positions[2 * i + 1];
+      if (lx === undefined || ly === undefined) continue;
+      boxes.push(
+        glyphHoverBox(
+          { x: panel.x + lx, y: panel.y + ly },
+          {
+            width: extents.width,
+            height: extents.height,
+            textAnchor: extents.textAnchor,
+          },
+        ),
+      );
     }
-    if (gapBottom < panelBottom) {
-      segments.push({
-        x1: focus.x,
-        y1: gapBottom,
-        x2: focus.x,
-        y2: panelBottom,
-      });
-    }
-    return segments;
   }
-
-  const gapLeft = focus.x - gapRadius;
-  const gapRight = focus.x + gapRadius;
-  if (gapLeft > panel.x) {
-    segments.push({ x1: panel.x, y1: focus.y, x2: gapLeft, y2: focus.y });
-  }
-  if (gapRight < panelRight) {
-    segments.push({
-      x1: gapRight,
-      y1: focus.y,
-      x2: panelRight,
-      y2: focus.y,
-    });
-  }
-  return segments;
+  return boxes;
 }
