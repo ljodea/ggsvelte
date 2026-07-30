@@ -17,9 +17,21 @@ const GRADIENT2_MID = "#F7F7F7";
 const GRADIENT2_HIGH = "#2166AC";
 
 /**
- * ColorBrewer sequential Blues (max-n) — packages/core colorbrewer-palettes.
- * Kept local: not on CATEGORICAL_SCHEMES (qualitative-only).
+ * ColorBrewer tables mirrored from packages/core colorbrewer-palettes.
+ * Local copies: CATEGORICAL_SCHEMES drops Set1/Set2/Set3 from its public type
+ * surface under docs svelte-check, and sequential Blues is not categorical.
  */
+const CB_SET1: readonly string[] = [
+  "#e41a1c",
+  "#377eb8",
+  "#4daf4a",
+  "#984ea3",
+  "#ff7f00",
+  "#ffff33",
+  "#a65628",
+  "#f781bf",
+  "#999999",
+];
 const CB_BLUES: readonly string[] = [
   "#f7fbff",
   "#deebf7",
@@ -98,8 +110,6 @@ export function scaleSwatchFor(entry: ScaleReferenceEntry): ScaleSwatch | null {
   if (entry.family !== "color-fill") return null;
 
   const stem = stemOf(entry.slug);
-  // Bracket access: `.Set1` is not a reliable property form for this key.
-  const set1 = CATEGORICAL_SCHEMES["Set1"];
 
   switch (stem) {
     case "discrete":
@@ -142,7 +152,7 @@ export function scaleSwatchFor(entry: ScaleReferenceEntry): ScaleSwatch | null {
       };
     case "brewer":
       return {
-        colors: set1,
+        colors: CB_SET1,
         kind: "discrete",
         caption: 'Example palette "Set1" (ColorBrewer qualitative)',
       };
