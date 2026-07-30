@@ -80,7 +80,6 @@
       data={filterData}
       aes={{ ...mapping, color: "group" }}
       layers={[{ geom: "point", render: "canvas", params: { size: 1 } }]}
-      key="id"
       width={900}
       height={420}
       onrender={() => (filterPipelineCommits += 1)}
@@ -95,7 +94,6 @@
       data={facetData}
       aes={mapping}
       layers={[{ geom: "point", render: "canvas", params: { size: 1 } }]}
-      key="id"
       select={crossPanelSelect}
       interaction={facetInteraction}
       interactionScope={facetScope}
@@ -113,7 +111,6 @@
       data={facetData.slice(0, 4_000)}
       aes={mapping}
       layers={[{ geom: "point", render: "canvas", params: { size: 1 } }]}
-      key="id"
       zoom={{ mode: "x" }}
       interaction={zoomInteraction}
       interactionScope={zoomScope}

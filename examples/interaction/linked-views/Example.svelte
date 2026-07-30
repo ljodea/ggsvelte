@@ -74,7 +74,6 @@
     <GGPlot
       data={rows}
       aes={{ x: "flipper", y: "mass", color: "species" }}
-      key="id"
       select={{ type: "point", multiple: true }}
       zoom={{ mode: "x" }}
       {interaction}
@@ -96,7 +95,6 @@
     <GGPlot
       data={rows}
       aes={{ x: "flipper", y: "mass" }}
-      key="id"
       select={{ type: "point", multiple: true }}
       zoom={{ mode: "x" }}
       {interaction}

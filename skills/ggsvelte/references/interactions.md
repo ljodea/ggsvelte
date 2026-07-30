@@ -6,9 +6,10 @@
 opt-in host capabilities — they are not PortableSpec fields. Prefer declaration
 children where they exist (`<Inspect>`, `<GuideLegend focus>`). Row identity for
 selection, legend focus, and coordinated intervals **defaults** to an `id`
-column when present, otherwise the row index — ordinary charts omit `key`.
-Pass `key` only as an override for a non-`id` durable field or a custom
-accessor (for example `key="year"` on a time series without an `id` column).
+column when present, otherwise the row index (order-stable only) — ordinary
+charts omit custom identity. Prefer `identity` on `<Inspect>`, object-form
+`select`, or `createPlotInteraction` for a non-`id` durable field or accessor
+(for example `<Inspect identity="year" />`). Plot-level `key` is deprecated.
 
 ## Inspect capability (preferred: child)
 
@@ -24,9 +25,9 @@ accessor (for example `key="year"` on a time series without an `id` column).
 ```
 
 Empty `<Inspect />` enables defaults. Options match `InspectOptions`: `mode`,
-`pin`, `maxDistance`, `contentMode`, `muteSiblings`, `content` (Snippet). Prefer
-the child form in new code; the GGPlot `inspect` prop is a dual-read alias, not
-the primary teaching surface.
+`pin`, `maxDistance`, `contentMode`, `muteSiblings`, `identity` (column or
+accessor), `content` (Snippet). Prefer the child form in new code; the GGPlot
+`inspect` prop is a dual-read alias, not the primary teaching surface.
 
 ### Mark eligibility (opt-out)
 
@@ -37,17 +38,18 @@ and unrelated to the host `<Inspect>` capability.
 
 ## Capability props
 
-| Prop / surface | Input                                                            | What it enables                                                                                                                                                                                                                                                                                                                                                                            |
-| -------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `<Inspect>`    | child of `<GGPlot>` (options as props)                           | Tooltip, semantic crosshair, keyboard traversal, pinning. **Preferred.** Options: `mode` (`"auto" \| "exact" \| "x" \| "y" \| "xy"`), `pin`, `maxDistance` (CSS px), `contentMode` (`"informational" \| "interactive"`), `muteSiblings`, `content` (Snippet, see Tooltip below). Do not put `inspect=` on `<GGPlot>` in new examples.                                                      |
-| `select`       | `false \| "point" \| "interval" \| SelectOptions`                | Point or interval selection. Options: `type` (`"point" \| "interval"`), `mode` (`"x" \| "y" \| "xy"`, interval only), `multiple`, `persistent`, `preset` (faceted intervals, below).                                                                                                                                                                                                       |
-| `zoom`         | `boolean \| ZoomOptions`                                         | Brush zoom. Options: `mode` (`"x" \| "y" \| "xy"`), `trigger` (`"brush"`). Currently requires one unfaceted panel.                                                                                                                                                                                                                                                                         |
-| `focus`        | `boolean \| { preview?: boolean }` on `<GuideLegend>`            | Discrete legend preview, focus, and linked emphasis **for that aesthetic channel**. Emphasis only — never changes included rows. Discrete legends only; continuous ramps stay static. Mute de-emphasizes non-focused marks; dashed rings appear only on sparse point marks (≤48 anchors), never on paths/areas/bars/segments/text. Host-only — not a PortableSpec / `guideLegend()` field. |
-| `filter`       | `boolean \| LegendFilterOptions` on `<GuideLegend>`              | Data-changing filtering on **that aesthetic's** discrete legend: changes included rows and reruns the grammar while preserving stable color identity. Options: `mode` (`"exclude" \| "include"`), `multiple`. Combine with focus: `<GuideLegend channel="color" focus filter />`.                                                                                                          |
-| `key`          | column name or `(row, index) => PropertyKey` (optional override) | Durable row identity for public interaction payloads. **Default:** `id` column when present, else row index. Override only for a non-`id` natural key or a custom accessor. Duplicate or unstable keys are diagnostic errors.                                                                                                                                                              |
-| `tool`         | `"inspect" \| "point" \| "select-area" \| "zoom-area"`           | Controlled initial/active tool; observe changes with `ontoolchange`.                                                                                                                                                                                                                                                                                                                       |
-| `ariaLabel`    | `string`                                                         | Accessible chart name; falls back to the plot title or a generated label.                                                                                                                                                                                                                                                                                                                  |
-| `a11y`         | `A11yMode`                                                       | `"force-svg"` keeps every layer as SVG marks.                                                                                                                                                                                                                                                                                                                                              |
+| Prop / surface | Input                                                                    | What it enables                                                                                                                                                                                                                                                                                                                                                                            |
+| -------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `<Inspect>`    | child of `<GGPlot>` (options as props)                                   | Tooltip, semantic crosshair, keyboard traversal, pinning. **Preferred.** Options: `mode` (`"auto" \| "exact" \| "x" \| "y" \| "xy"`), `pin`, `maxDistance` (CSS px), `contentMode` (`"informational" \| "interactive"`), `muteSiblings`, `identity` (column or accessor), `content` (Snippet, see Tooltip below). Do not put `inspect=` on `<GGPlot>` in new examples.                     |
+| `select`       | `false \| "point" \| "interval" \| SelectOptions`                        | Point or interval selection. Options: `type` (`"point" \| "interval"`), `mode` (`"x" \| "y" \| "xy"`, interval only), `multiple`, `persistent`, `preset` (faceted intervals, below), `identity` (column or accessor).                                                                                                                                                                      |
+| `zoom`         | `boolean \| ZoomOptions`                                                 | Brush zoom. Options: `mode` (`"x" \| "y" \| "xy"`), `trigger` (`"brush"`). Currently requires one unfaceted panel.                                                                                                                                                                                                                                                                         |
+| `focus`        | `boolean \| { preview?: boolean }` on `<GuideLegend>`                    | Discrete legend preview, focus, and linked emphasis **for that aesthetic channel**. Emphasis only — never changes included rows. Discrete legends only; continuous ramps stay static. Mute de-emphasizes non-focused marks; dashed rings appear only on sparse point marks (≤48 anchors), never on paths/areas/bars/segments/text. Host-only — not a PortableSpec / `guideLegend()` field. |
+| `filter`       | `boolean \| LegendFilterOptions` on `<GuideLegend>`                      | Data-changing filtering on **that aesthetic's** discrete legend: changes included rows and reruns the grammar while preserving stable color identity. Options: `mode` (`"exclude" \| "include"`), `multiple`. Combine with focus: `<GuideLegend channel="color" focus filter />`.                                                                                                          |
+| `identity`     | column or `(row, index) => PropertyKey` on Inspect / Select / controller | Durable row identity for public interaction payloads. **Default:** `id` column when present, else row index (order-stable only). Prefer this over plot-level `key`.                                                                                                                                                                                                                        |
+| `key`          | column or accessor on `<GGPlot>` (**deprecated** since 0.21)             | Dual-read until 0.22. Prefer `identity` on Inspect / Select / `createPlotInteraction`.                                                                                                                                                                                                                                                                                                     |
+| `tool`         | `"inspect" \| "point" \| "select-area" \| "zoom-area"`                   | Controlled initial/active tool; observe changes with `ontoolchange`.                                                                                                                                                                                                                                                                                                                       |
+| `ariaLabel`    | `string`                                                                 | Accessible chart name; falls back to the plot title or a generated label.                                                                                                                                                                                                                                                                                                                  |
+| `a11y`         | `A11yMode`                                                               | `"force-svg"` keeps every layer as SVG marks.                                                                                                                                                                                                                                                                                                                                              |
 
 ### Deprecated: plot-level `legendFocus` / `legendFilter`
 
@@ -67,8 +69,9 @@ facet panels:
 - `cross-panel` — the sole origin interval is projected into compatible panels.
 
 `union` and `cross-panel` use the resolved row identity (default `id` / index,
-or an explicit `key` override). The engine always supplies an identity, so
-these presets no longer fail solely because `key` was omitted.
+or an explicit `identity` override on Select / Inspect / controller). The
+engine always supplies an identity, so these presets no longer fail solely
+because identity was omitted.
 
 ## Controller: durable shared state
 
@@ -82,9 +85,10 @@ domains only; each chart translates them to its own render model.
   `clearInterval`, `clearIntervals`, `setZoom(domains, {scope, source?})`,
   `resetZoom`, `reconcileKeys` (call after replacing rows).
 - Reads: `selected(scope)`, `emphasized(scope)`, `isSelected(key, scope)`,
-  `intervals(scope)`, `zoom(scope)`, `snapshot`, `revision` (reactive).
-- `createPlotInteraction({ onchange })` observes every transition
-  (`kind`, `source`, `revision`).
+  `intervals(scope)`, `zoom(scope)`, `snapshot`, `revision` (reactive),
+  `identity` (optional, from create options).
+- `createPlotInteraction({ onchange, identity })` observes every transition
+  (`kind`, `source`, `revision`) and may set a shared row-identity override.
 
 `interactionScope` (`{ keys, x?, y?, intervals? }`) names the identity
 namespaces used for linking: key state crosses charts only through `keys`;

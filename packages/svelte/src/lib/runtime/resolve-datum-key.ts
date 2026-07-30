@@ -2,14 +2,15 @@
  * Resolve durable row identity for interaction (selection, legend focus, pin
  * rebind, linked controllers).
  *
- * Plot authors should not need a `key` prop for ordinary charts:
- * 1. Explicit `key` / accessor on GGPlot wins when provided (override).
- * 2. Else if plot data exposes a PropertyKey-valued `id` column → use `"id"`.
- * 3. Else use the row index (unique within the current row order).
+ * Plot authors should not need a custom identity for ordinary charts:
+ * 1. Interaction-surface identity (Inspect / Select / controller) when set.
+ * 2. Deprecated GGPlot `key` dual-read (until removal).
+ * 3. Else if plot data exposes a PropertyKey-valued `id` column → use `"id"`.
+ * 4. Else use the row index (order-stable only — not reorder-safe).
  *
  * Index identity is enough for single-plot legend focus / inspect / local
  * selection. Custom durable identity across reorders or non-`id` natural keys
- * still uses the explicit `key` override (future: interaction-surface only).
+ * belongs on Inspect / Select / createPlotInteraction — not plot grammar.
  */
 import type { CellValue } from "@ggsvelte/core";
 
@@ -17,12 +18,58 @@ export type DatumKey =
   | PropertyKey
   | ((row: Record<string, CellValue>, index: number) => PropertyKey);
 
+/**
+ * Explicit identity sources. Prefer interaction surfaces over the deprecated
+ * plot-level `key` prop. First defined wins in this order.
+ */
+export type ExplicitDatumKeySources = {
+  /** `<Inspect identity=…>` or `inspect={{ identity: … }}`. */
+  readonly inspect?: DatumKey;
+  /** `select={{ type, identity: … }}`. */
+  readonly select?: DatumKey;
+  /** `createPlotInteraction({ identity })` when bound via `interaction=`. */
+  readonly controller?: DatumKey;
+  /** Deprecated GGPlot `key` dual-read (prefer interaction-surface identity). */
+  readonly legacy?: DatumKey;
+};
+
 export type ResolveDatumKeyInput = {
-  /** Explicit GGPlot `key` prop when the author opts into a custom identity. */
-  readonly explicit?: DatumKey | undefined;
+  /**
+   * Already-picked explicit identity (from {@link pickExplicitDatumKey} or a
+   * single override). Wins over auto `id` / row-index defaults.
+   */
+  readonly explicit?: DatumKey;
   /** Plot data input (row array, DataRef, or bare columns map). */
   readonly data?: unknown;
 };
+
+/**
+ * Pick the first defined identity from interaction surfaces, then legacy
+ * GGPlot `key`. Returns `undefined` when no surface supplies an override.
+ */
+export function pickExplicitDatumKey(sources: ExplicitDatumKeySources): DatumKey | undefined {
+  if (sources.inspect !== undefined) return sources.inspect;
+  if (sources.select !== undefined) return sources.select;
+  if (sources.controller !== undefined) return sources.controller;
+  if (sources.legacy !== undefined) return sources.legacy;
+  return undefined;
+}
+
+/** Read `identity` from `inspect` prop / resolved inspect capability input. */
+export function identityFromInspectInput(
+  input: boolean | { readonly identity?: DatumKey } | undefined,
+): DatumKey | undefined {
+  if (input === undefined || input === false || input === true) return undefined;
+  return input.identity;
+}
+
+/** Read `identity` from object-form `select` (string shorthand has none). */
+export function identityFromSelectInput(
+  input: false | string | { readonly identity?: DatumKey } | undefined,
+): DatumKey | undefined {
+  if (input === undefined || input === false || typeof input === "string") return undefined;
+  return input.identity;
+}
 
 /** Row-index identity — default when no `id` column and no explicit key. */
 function rowIndexDatumKey(_row: Record<string, CellValue>, index: number): PropertyKey {

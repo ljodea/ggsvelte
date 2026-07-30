@@ -19873,14 +19873,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/svelte"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-473",
+    id: "heading:guide-lifecycle:experimental-474",
     kind: "heading",
-    title: "experimental (473)",
+    title: "experimental (474)",
     summary:
-      "experimental (473) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-473",
+      "experimental (474) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-474",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (473)"],
+    exact: ["experimental (474)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-243",
@@ -19910,6 +19910,26 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/upgrading#five-minute-path",
     keywords: ["Upgrade guide", "Release"],
     exact: ["Five-minute path"],
+  },
+  {
+    id: "heading:guide-upgrading:0-20-to-0-21",
+    kind: "heading",
+    title: "0.20 to 0.21",
+    summary:
+      "0.20 to 0.21 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#0-20-to-0-21",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["0.20 to 0.21"],
+  },
+  {
+    id: "heading:guide-upgrading:row-identity-on-interaction",
+    kind: "heading",
+    title: "Row identity on interaction",
+    summary:
+      "Row identity on interaction in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#row-identity-on-interaction",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["Row identity on interaction"],
   },
   {
     id: "heading:guide-upgrading:0-18-to-0-19",
@@ -33225,6 +33245,15 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["ContinuousPositionScaleOptions"],
   },
   {
+    id: "api:ggsvelte-svelte:ControllerDatumIdentity",
+    kind: "api",
+    title: "ControllerDatumIdentity",
+    summary: "@ggsvelte/svelte · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "type", "experimental"],
+    exact: ["ControllerDatumIdentity"],
+  },
+  {
     id: "api:ggsvelte-svelte:Coord",
     kind: "api",
     title: "Coord",
@@ -41742,7 +41771,7 @@ export const DOCS_SEARCH_INDEX = [
     keywords: [
       "interaction",
       "warning",
-      'Omit key — defaults to an id column or row index; Override with key="id" or a stable key accessor when needed',
+      'Ordinary charts omit identity — defaults to an id column or row index; Override with <Inspect identity="id" /> or select={{ type: "point", identity: "id" }}',
     ],
     exact: ["INTERACTION_POINT_REQUIRES_KEY", "interaction:INTERACTION_POINT_REQUIRES_KEY"],
   },
@@ -41756,7 +41785,7 @@ export const DOCS_SEARCH_INDEX = [
     keywords: [
       "interaction",
       "warning",
-      'Omit key — defaults to an id column or row index; Override with key="id" or a stable key accessor when needed',
+      'Ordinary charts omit identity — defaults to an id column or row index; Override with select={{ type: "interval", identity: "id", … }} or <Inspect identity="id" />',
     ],
     exact: [
       "INTERACTION_INTERVAL_PRESET_REQUIRES_KEY",
@@ -41814,7 +41843,7 @@ export const DOCS_SEARCH_INDEX = [
     keywords: [
       "interaction",
       "warning",
-      'Omit key — defaults to an id column or row index; Override with key="id" or a stable key accessor when needed',
+      'Ordinary charts omit identity — defaults to an id column or row index; Override with <Inspect identity="id" /> or createPlotInteraction({ identity: "id" })',
     ],
     exact: ["INTERACTION_LEGEND_REQUIRES_KEY", "interaction:INTERACTION_LEGEND_REQUIRES_KEY"],
   },

@@ -57,7 +57,7 @@ describe("interaction capability normalization", () => {
     expect(withoutKey.diagnostics).toContainEqual(
       expect.objectContaining({
         code: "INTERACTION_LEGEND_REQUIRES_KEY",
-        prop: "key",
+        prop: "identity",
       }),
     );
     expect(withoutKey.legendFocus).toBeNull();
@@ -76,7 +76,7 @@ describe("interaction capability normalization", () => {
       expect(withoutKey.diagnostics).toContainEqual(
         expect.objectContaining({
           code: "INTERACTION_INTERVAL_PRESET_REQUIRES_KEY",
-          prop: "key",
+          prop: "identity",
         }),
       );
     }

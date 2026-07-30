@@ -48,7 +48,12 @@ import {
   resolveInteractionScope,
   toLayerInput,
 } from "./assembly/assemble.js";
-import { resolveDatumKey } from "./runtime/resolve-datum-key.js";
+import {
+  identityFromInspectInput,
+  identityFromSelectInput,
+  pickExplicitDatumKey,
+  resolveDatumKey,
+} from "./runtime/resolve-datum-key.js";
 import {
   collectCompositionDiagnostics,
   compositionAdvisoryDedupKey,
@@ -98,6 +103,7 @@ import type { PlotChromeState } from "./chrome/chrome-state.svelte.js";
 import { isHostPlotLayer } from "./layers/types.js";
 import { deprecatedPropDiagnostic } from "./diagnostics/deprecation.js";
 import {
+  readLegacyPlotKey,
   readLegacyPlotLegendFilter,
   readLegacyPlotLegendFocus,
   resolveCapabilities,
@@ -269,15 +275,26 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   );
 
   /**
-   * Durable row identity: explicit GGPlot `key` override, else auto `id`
-   * column, else row index. Always defined — interaction never requires
-   * authors to pass `key` for ordinary charts.
+   * Durable row identity: Inspect / Select / controller `identity` first,
+   * then deprecated GGPlot `key`, else auto `id` column, else row index.
+   * Always defined — ordinary charts need no custom identity.
    */
   function resolvedDatumKeyNow() {
     const data = host.props.data;
     const embedded = assembled()?.data;
+    const inspectIdentity = identityFromInspectInput(inspectResolved().input);
+    const selectIdentity = identityFromSelectInput(host.props.select);
+    const controllerIdentity = host.props.interaction?.identity;
+    const legacyKey = readLegacyPlotKey(host.props);
+    // exactOptionalPropertyTypes: omit keys rather than pass `undefined`.
+    const explicit = pickExplicitDatumKey({
+      ...(inspectIdentity !== undefined && { inspect: inspectIdentity }),
+      ...(selectIdentity !== undefined && { select: selectIdentity }),
+      ...(controllerIdentity !== undefined && { controller: controllerIdentity }),
+      ...(legacyKey !== undefined && { legacy: legacyKey }),
+    });
     return resolveDatumKey({
-      explicit: host.props.key,
+      ...(explicit !== undefined && { explicit }),
       data: data ?? embedded,
     });
   }
@@ -442,6 +459,27 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       deliveredAdvisories.add(dedupKey);
       deliverDiagnostic(diagnostic);
     }
+  });
+
+  // Deprecated plot-level key → Inspect / Select / controller identity.
+  $effect(() => {
+    const plotProp = readLegacyPlotKey(host.props);
+    if (plotProp === undefined) return;
+    const diagnostic = deprecatedPropDiagnostic({
+      prop: "key",
+      since: "0.21.0",
+      removeIn: "0.22.0",
+      suggestions: [
+        'Use <Inspect identity="year" /> (or inspect={{ identity: "year" }})',
+        'Use select={{ type: "point", identity: "year" }} when selection owns the key',
+        'Use createPlotInteraction({ identity: "year" }) for linked controllers',
+      ],
+      anchor: "row-identity-on-interaction",
+    });
+    const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
+    if (deliveredAdvisories.has(dedupKey)) return;
+    deliveredAdvisories.add(dedupKey);
+    deliverDiagnostic(diagnostic);
   });
 
   // Deprecated plot-level legendFocus → GuideLegend.focus (one minor window).

@@ -38,7 +38,6 @@
     {data}
     aes={{ x: "x", y: "y", group: "series" }}
     layers={[{ geom: "point", render: "canvas", params: { size: 1 } }]}
-    key="id"
     onrender={(model: RenderModel) => {
       candidateCount = model.candidates.size;
       const seed = model.candidates.nearest(

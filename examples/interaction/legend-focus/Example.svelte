@@ -40,7 +40,6 @@
     <GGPlot
       data={rows}
       aes={mapping}
-      key="id"
       {interaction}
       interactionScope={scope}
       width="container"
@@ -56,7 +55,6 @@
     <GGPlot
       data={rows}
       aes={mapping}
-      key="id"
       {interaction}
       interactionScope={scope}
       width="container"
@@ -72,7 +70,6 @@
     <GGPlot
       data={rows}
       aes={mapping}
-      key="id"
       {interaction}
       interactionScope={scope}
       width="container"

@@ -22,7 +22,7 @@ const base = {
   data: rows,
   aes: { x: "x", y: "y" },
   layers: [{ geom: "point" as const }],
-  key: "id",
+  // Default identity: rows expose `id` — no plot-level `key` (deprecated).
   ...size,
 };
 
@@ -167,5 +167,42 @@ describe("handler-without-capability advisory", () => {
     } finally {
       warn.mockRestore();
     }
+  });
+});
+
+describe("deprecated plot-level key advisory", () => {
+  it("advises DEPRECATED_PLOT_PROP when GGPlot key is set", async () => {
+    const { diagnostics, ondiagnostic } = collect();
+    render(GGPlot, {
+      ...base,
+      // oxlint-disable-next-line typescript/no-deprecated -- dual-read under test
+      key: "id",
+      ondiagnostic,
+    });
+    await expect
+      .poll(() => diagnostics.find((d) => d.code === "DEPRECATED_PLOT_PROP" && d.prop === "key"))
+      .toMatchObject({
+        severity: "advisory",
+        prop: "key",
+        since: "0.21.0",
+        removeIn: "0.22.0",
+      });
+  });
+
+  it("stays silent when identity comes from createPlotInteraction", async () => {
+    const { diagnostics, ondiagnostic } = collect();
+    const interaction = createPlotInteraction<string>({ identity: "id" });
+    const { container } = render(GGPlot, {
+      ...base,
+      interaction,
+      interactionScope: { keys: "row-id" },
+      ondiagnostic,
+    });
+    await settled(container);
+    expect(
+      diagnostics.filter(
+        (d) => d.code === "DEPRECATED_PLOT_PROP" && "prop" in d && d.prop === "key",
+      ),
+    ).toHaveLength(0);
   });
 });

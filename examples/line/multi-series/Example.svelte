@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    createPlotInteraction,
     GeomLine,
     GeomPoint,
     GGPlot,
@@ -11,12 +12,18 @@
   } from "@ggsvelte/svelte";
 
   import { wheatAndWages } from "./data.js";
+
+  const interaction = createPlotInteraction({
+    identity: (row) => `${row.year}:${row.series}`,
+  });
+  const scope = { keys: "wheat-rows" } as const;
 </script>
 
 <GGPlot
   data={wheatAndWages}
   aes={{ x: "year", y: "value", color: "series" }}
-  key={(row) => `${row.year}:${row.series}`}
+  {interaction}
+  interactionScope={scope}
   width={640}
   height={400}
 >

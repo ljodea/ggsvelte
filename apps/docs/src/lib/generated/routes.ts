@@ -12021,8 +12021,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "experimental-473",
-        title: "experimental (473)",
+        id: "experimental-474",
+        title: "experimental (474)",
         level: 3,
       },
       {
@@ -12051,6 +12051,16 @@ export const DOCS_ROUTES = [
         id: "five-minute-path",
         title: "Five-minute path",
         level: 2,
+      },
+      {
+        id: "0-20-to-0-21",
+        title: "0.20 to 0.21",
+        level: 2,
+      },
+      {
+        id: "row-identity-on-interaction",
+        title: "Row identity on interaction",
+        level: 3,
       },
       {
         id: "0-18-to-0-19",

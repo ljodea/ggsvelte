@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    createPlotInteraction,
     GeomBar,
     GGPlot,
     GuideLegend,
@@ -10,12 +11,18 @@
   } from "@ggsvelte/svelte";
 
   import { pyxTrial } from "./data.js";
+
+  const interaction = createPlotInteraction({
+    identity: (row) => `${row.bag}:${row.deviation}`,
+  });
+  const scope = { keys: "pyx-rows" } as const;
 </script>
 
 <GGPlot
   data={pyxTrial}
   aes={{ x: "bag", fill: "deviation", weight: "count" }}
-  key={(row) => `${row.bag}:${row.deviation}`}
+  {interaction}
+  interactionScope={scope}
   width={640}
   height={400}
 >

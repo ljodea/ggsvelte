@@ -68,9 +68,12 @@ export interface GGPlotProps<
   /** Plot height in px (falls back to spec.height, then 400). */
   height?: number;
   /**
-   * Optional override for durable row identity (selection, legend focus, pin
-   * rebind, linked controllers). Default: use an `id` column when present,
-   * otherwise the row index. Ordinary charts should omit this prop.
+   * @deprecated since 0.21.0 — use `identity` on `<Inspect>`, object-form
+   * `select={{ type, identity }}`, or `createPlotInteraction({ identity })`.
+   * Still honoured (dual-read) until 0.22.0; emits DEPRECATED_PLOT_PROP.
+   * Default when no surface sets identity: `id` column when present, else
+   * row index. Ordinary charts should omit identity entirely.
+   * Migration: https://ggsvelte.sh/guide/upgrading#row-identity-on-interaction
    */
   key?: Identity;
   /** Opt into inspection, its semantic crosshair, tooltip, and pinning. */
@@ -149,6 +152,18 @@ export function resolveCapabilities(props: {
 }
 
 /**
+ * Read the deprecated plot-level `key` prop during the dual-read window.
+ * Prefer Inspect / Select / createPlotInteraction `identity` instead.
+ */
+export function readLegacyPlotKey(
+  props: EnginePlotProps | GGPlotProps,
+): EnginePlotProps["key"] | undefined {
+  // Dual-read until 0.22.0 — prefer interaction-surface identity.
+  // oxlint-disable-next-line typescript/no-deprecated -- intentional dual-read
+  return props.key;
+}
+
+/**
  * Read the deprecated plot-level `legendFocus` prop during the dual-read
  * window. Isolate the deprecation access so call sites stay clean.
  */
@@ -201,7 +216,11 @@ export function widenPlotProps<
   const handler: ProxyHandler<GGPlotProps<Row, Identity>> = {
     get(target, prop, receiver) {
       // Six precise casts — only these fields change assignability.
-      if (prop === "key") return target.key as EnginePlotProps["key"];
+      if (prop === "key") {
+        // Dual-read until 0.22.0 — prefer interaction-surface identity.
+        // oxlint-disable-next-line typescript/no-deprecated -- intentional dual-read
+        return target.key as EnginePlotProps["key"];
+      }
       if (prop === "interaction") {
         return target.interaction as EnginePlotProps["interaction"];
       }

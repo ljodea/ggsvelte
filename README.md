@@ -76,6 +76,7 @@ and Windows.
 ```svelte
 <script lang="ts">
   import {
+    createPlotInteraction,
     GeomArea,
     GGPlot,
     GuideLegend,
@@ -86,12 +87,18 @@ and Windows.
   } from "@ggsvelte/svelte";
 
   import { crimeanMortality } from "./data.js";
+
+  const interaction = createPlotInteraction({
+    identity: (row) => `${row.month}:${row.cause}`,
+  });
+  const scope = { keys: "crimean-rows" } as const;
 </script>
 
 <GGPlot
   data={crimeanMortality}
   aes={{ x: "month", y: "deaths", fill: "cause" }}
-  key={(row) => `${row.month}:${row.cause}`}
+  {interaction}
+  interactionScope={scope}
 >
   <ThemeEconomist />
   <ScaleXDate labels="%b %Y" />
@@ -172,9 +179,8 @@ and Windows.
 <GGPlot
   data={londonCholera}
   aes={{ x: "density", y: "deathRate", color: "water" }}
-  key="district"
 >
-  <Inspect mode="xy" pin />
+  <Inspect mode="xy" pin identity="district" />
   <ThemeEconomist />
   <ScaleXLog10 labels="~s" />
   <ScaleColorManual
