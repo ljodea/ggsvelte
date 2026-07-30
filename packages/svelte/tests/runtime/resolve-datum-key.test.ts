@@ -153,7 +153,7 @@ describe("pickExplicitDatumKey", () => {
 
 describe("identityFromInspectInput", () => {
   it("returns undefined for absent, false, or true inspect", () => {
-    expect(identityFromInspectInput(undefined)).toBeUndefined();
+    expect(identityFromInspectInput()).toBeUndefined();
     expect(identityFromInspectInput(false)).toBeUndefined();
     expect(identityFromInspectInput(true)).toBeUndefined();
   });
@@ -165,7 +165,7 @@ describe("identityFromInspectInput", () => {
 
 describe("identityFromSelectInput", () => {
   it("returns undefined for absent, false, or string shorthand", () => {
-    expect(identityFromSelectInput(undefined)).toBeUndefined();
+    expect(identityFromSelectInput()).toBeUndefined();
     expect(identityFromSelectInput(false)).toBeUndefined();
     expect(identityFromSelectInput("point")).toBeUndefined();
   });

@@ -216,7 +216,11 @@ export function widenPlotProps<
   const handler: ProxyHandler<GGPlotProps<Row, Identity>> = {
     get(target, prop, receiver) {
       // Six precise casts — only these fields change assignability.
-      if (prop === "key") return target.key as EnginePlotProps["key"];
+      if (prop === "key") {
+        // Dual-read until 0.22.0 — prefer interaction-surface identity.
+        // oxlint-disable-next-line typescript/no-deprecated -- intentional dual-read
+        return target.key as EnginePlotProps["key"];
+      }
       if (prop === "interaction") {
         return target.interaction as EnginePlotProps["interaction"];
       }

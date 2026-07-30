@@ -24,13 +24,13 @@ export type DatumKey =
  */
 export type ExplicitDatumKeySources = {
   /** `<Inspect identity=…>` or `inspect={{ identity: … }}`. */
-  readonly inspect?: DatumKey | undefined;
+  readonly inspect?: DatumKey;
   /** `select={{ type, identity: … }}`. */
-  readonly select?: DatumKey | undefined;
+  readonly select?: DatumKey;
   /** `createPlotInteraction({ identity })` when bound via `interaction=`. */
-  readonly controller?: DatumKey | undefined;
+  readonly controller?: DatumKey;
   /** Deprecated GGPlot `key` dual-read (prefer interaction-surface identity). */
-  readonly legacy?: DatumKey | undefined;
+  readonly legacy?: DatumKey;
 };
 
 export type ResolveDatumKeyInput = {
@@ -38,7 +38,7 @@ export type ResolveDatumKeyInput = {
    * Already-picked explicit identity (from {@link pickExplicitDatumKey} or a
    * single override). Wins over auto `id` / row-index defaults.
    */
-  readonly explicit?: DatumKey | undefined;
+  readonly explicit?: DatumKey;
   /** Plot data input (row array, DataRef, or bare columns map). */
   readonly data?: unknown;
 };
