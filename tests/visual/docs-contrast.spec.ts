@@ -44,44 +44,4 @@ for (const theme of ["light", "dark"] as const) {
       ).toBeGreaterThanOrEqual(4.5);
     }
   });
-
-  test(`homepage primary CTA preserves theme color after visiting in ${theme} mode`, async ({
-    page,
-  }) => {
-    await page.goto(`/?theme=${theme}`);
-    const cta = page.getByRole("link", {
-      name: "Getting started",
-      exact: true,
-    });
-    await cta.click();
-    await page.goBack();
-    await expect(cta).toBeVisible();
-
-    const colors = await cta.evaluate((link) => {
-      const style = getComputedStyle(link);
-      const visitedRules = [...document.styleSheets].flatMap((sheet) => {
-        try {
-          return [...sheet.cssRules]
-            .filter(
-              (rule): rule is CSSStyleRule =>
-                rule instanceof CSSStyleRule &&
-                rule.selectorText.includes("a.ui-button--primary:visited"),
-            )
-            .map((rule) => rule.style.color);
-        } catch {
-          return [];
-        }
-      });
-      return {
-        foreground: style.color,
-        background: style.backgroundColor,
-        visitedRules,
-      };
-    });
-
-    expect(contrastRatio(colors.foreground, colors.background)).toBeGreaterThanOrEqual(4.5);
-    expect(colors.visitedRules).toContain(
-      theme === "dark" ? "rgb(11, 16, 32)" : "rgb(255, 255, 255)",
-    );
-  });
 }

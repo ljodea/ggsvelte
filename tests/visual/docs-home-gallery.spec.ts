@@ -11,113 +11,37 @@ async function expectNoOverflow(page: import("@playwright/test").Page): Promise<
   );
 }
 
-test("homepage first viewport leads with a static chart shell and two actions", async ({
-  page,
-}) => {
+test("homepage first viewport leads with title then featured examples", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/?theme=light");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "A layered grammar of graphics implemented for agents",
   );
-  // Hero stays on the prerendered static SVG — no chart-stack import on load.
-  // CSS shows the light-site shell under ?theme=light.
-  await expect(page.locator(".home-hero .hero-static--light-site svg.gg-plot")).toBeVisible();
-  await expect(page.locator(".home-hero .gg-plot-root")).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "Getting started" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Examples" }).first()).toBeVisible();
-  await expect(page.getByRole("button", { name: "Copy install" })).toBeVisible();
+  // No Guerry hero, install strip, or CTA pair above the fold.
+  await expect(page.locator(".home-hero svg")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Copy install" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Getting started" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Examples", level: 2 })).toBeVisible();
+  await expect(page.locator(".home-featured ol li")).toHaveCount(6);
+  await expect(page.locator(".home-featured header a")).toHaveText("Gallery");
   await expectNoOverflow(page);
 });
 
-/**
- * Narrow-ish desktop (below the wide side-by-side breakpoint): the hero chart
- * is the product, so it owns a full-width row instead of sharing a horizontal
- * plane with the claim. Also: the hero must size to content — a viewport-tall
- * min-height stretched a two-row grid and left a multi-hundred-px void between
- * claim and install.
- */
-test("homepage mid-width stacks the hero chart full-width without empty void", async ({ page }) => {
+test("homepage title sits above the featured gallery without hero chrome", async ({ page }) => {
   await page.setViewportSize({ width: 960, height: 900 });
   await page.goto("/?theme=light");
-  const metrics = await page.locator(".home-hero").evaluate((hero) => {
-    const claim = hero.querySelector(".hero-claim")!.getBoundingClientRect();
-    const plot = hero.querySelector(".hero-plot")!.getBoundingClientRect();
-    const actions = hero.querySelector(".hero-actions")!.getBoundingClientRect();
-    const box = hero.getBoundingClientRect();
+  const metrics = await page.evaluate(() => {
+    const title = document.querySelector(".home-hero h1")!.getBoundingClientRect();
+    const featured = document.querySelector(".home-featured")!.getBoundingClientRect();
     return {
-      claimBottom: claim.bottom,
-      claimLeft: claim.left,
-      plotTop: plot.top,
-      plotLeft: plot.left,
-      plotWidth: plot.width,
-      actionsTop: actions.top,
-      heroWidth: box.width,
-      gapAfterPlot: actions.top - plot.bottom,
+      titleBottom: title.bottom,
+      featuredTop: featured.top,
+      gap: featured.top - title.bottom,
     };
   });
-  // Chart sits below the claim on its own horizontal plane.
-  expect(metrics.plotTop).toBeGreaterThan(metrics.claimBottom - 1);
-  expect(Math.abs(metrics.plotLeft - metrics.claimLeft)).toBeLessThan(24);
-  expect(metrics.plotWidth / metrics.heroWidth).toBeGreaterThan(0.9);
-  // Install follows the chart tightly — no viewport-filling void.
-  // (Hero height itself can exceed the viewport when claim + 400px plot stack;
-  // the failure mode was empty space between plot and actions, not total height.)
-  expect(metrics.gapAfterPlot).toBeLessThan(64);
-});
-
-/** Wide layout may share a row with claim, but must not invent empty vertical space. */
-test("homepage wide layout keeps install adjacent to claim without hero void", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/?theme=light");
-  const metrics = await page.locator(".home-hero").evaluate((hero) => {
-    const claim = hero.querySelector(".hero-claim")!.getBoundingClientRect();
-    const actions = hero.querySelector(".hero-actions")!.getBoundingClientRect();
-    return {
-      claimBottom: claim.bottom,
-      actionsTop: actions.top,
-      gapClaimToActions: actions.top - claim.bottom,
-    };
-  });
-  // claim → actions is a short stack on the left; no 100svh stretch between them.
-  expect(metrics.gapClaimToActions).toBeLessThan(96);
-  expect(metrics.actionsTop).toBeGreaterThan(metrics.claimBottom - 1);
-});
-
-test("homepage preserves SSR hero chart shell without auto-hydrating the chart stack", async ({
-  page,
-  request,
-}) => {
-  const response = await request.get("/");
-  const html = await response.text();
-  // SSR ships a full-width static SVG shell (not a live GGPlot).
-  expect(html).toContain("Literacy and crime in France, 1833");
-  expect(html).toContain('width="832"');
-
-  await page.goto("/?theme=light");
-  const hero = page.locator(".home-hero");
-  // CSS shows the light-site shell; both shells remain in the DOM.
-  const shell = hero.locator(".hero-static--light-site svg.gg-plot");
-  await expect(shell).toBeVisible();
-  // No auto-upgrade: chart stack stays off the homepage until grammar intent.
-  await expect(hero.locator(".gg-plot-root")).toHaveCount(0);
-  await expect(hero.locator(".gg-capture")).toHaveCount(0);
-
-  // Axis titles use real units (not the old mistaken "rank" labels).
-  await expect(
-    shell.locator(".gg-axis-title", { hasText: "Literate conscripts (%)" }),
-  ).toBeVisible();
-  await expect(
-    shell.locator(".gg-axis-title", {
-      hasText: "Population per crime against persons",
-    }),
-  ).toBeVisible();
-
-  // Readable tick size floor (light/dark themes were 8.8px on several presets).
-  const axisFontSize = await shell
-    .locator(".gg-axis .gg-tick text")
-    .first()
-    .evaluate((el) => Number(el.getAttribute("font-size") ?? "0"));
-  expect(axisFontSize).toBeGreaterThanOrEqual(11);
+  expect(metrics.featuredTop).toBeGreaterThan(metrics.titleBottom - 1);
+  // Title → examples should be a short stack (no chart/install block between).
+  expect(metrics.gap).toBeLessThan(160);
 });
 
 test("homepage grammar section SSRs chrome and a static chart shell", async ({ request }) => {
@@ -201,26 +125,20 @@ test("homepage grammar inspect draws xy crosshair and supports legend focus", as
   await expect(legendTarget).toBeFocused();
 });
 
-test("homepage mobile order is claim, specimen, then install", async ({ page }) => {
+test("homepage mobile order is title then featured examples", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/?theme=light");
-  const order = await page.locator(".home-hero > div").evaluateAll((nodes) =>
-    nodes.map((node) => ({
-      classes: [...node.classList],
-      top: node.getBoundingClientRect().top,
-    })),
-  );
-  const topFor = (className: string): number => {
-    const item = order.find((candidate) => candidate.classes.includes(className));
-    expect(item, `${className} is present`).toBeDefined();
-    return item?.top ?? Number.POSITIVE_INFINITY;
-  };
-  expect(topFor("hero-claim")).toBeLessThan(topFor("hero-plot"));
-  expect(topFor("hero-plot")).toBeLessThan(topFor("hero-actions"));
+  const metrics = await page.evaluate(() => {
+    const title = document.querySelector(".home-hero h1")!.getBoundingClientRect();
+    const featured = document.querySelector(".home-featured")!.getBoundingClientRect();
+    return { titleTop: title.top, featuredTop: featured.top };
+  });
+  expect(metrics.titleTop).toBeLessThan(metrics.featuredTop);
+  await expect(page.locator(".home-featured ol li")).toHaveCount(6);
   await expectNoOverflow(page);
 });
 
-test("install copy and code tabs share the manual-copy fallback", async ({ page }) => {
+test("code tabs share the manual-copy fallback", async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
@@ -230,15 +148,12 @@ test("install copy and code tabs share the manual-copy fallback", async ({ page 
     });
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "Copy install" }).click();
-  await expect(page.locator(".hero-actions [role=status]")).toHaveText(
-    "Clipboard unavailable. Code selected for manual copy.",
-  );
-  expect(await page.evaluate(() => getSelection()?.toString())).toContain(
-    "bun add @ggsvelte/svelte",
-  );
   const tabs = page.getByRole("tablist", { name: "Code representations" }).getByRole("tab");
   await expect(tabs.first()).toHaveText("Svelte");
+  await page.getByRole("button", { name: "Copy code" }).first().click();
+  await expect(page.locator(".code-path [role=status]")).toHaveText(
+    "Clipboard unavailable. Code selected for manual copy.",
+  );
 });
 
 test("gallery exposes every generated preview exactly once", async ({ page }) => {
