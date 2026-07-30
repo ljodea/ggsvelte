@@ -1,6 +1,5 @@
 <script lang="ts">
   import {
-    createPlotInteraction,
     GeomArea,
     GGPlot,
     GuideLegend,
@@ -11,18 +10,11 @@
   } from "@ggsvelte/svelte";
 
   import { crimeanMortality } from "./data.js";
-
-  const interaction = createPlotInteraction({
-    identity: (row) => `${row.month}:${row.cause}`,
-  });
-  const scope = { keys: "crimean-rows" } as const;
 </script>
 
 <GGPlot
   data={crimeanMortality}
   aes={{ x: "month", y: "deaths", fill: "cause" }}
-  {interaction}
-  interactionScope={scope}
   width={640}
   height={400}
 >

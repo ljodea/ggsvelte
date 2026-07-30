@@ -1,6 +1,5 @@
 <script lang="ts">
   import {
-    createPlotInteraction,
     GeomBar,
     GGPlot,
     GuideLegend,
@@ -10,18 +9,11 @@
   } from "@ggsvelte/svelte";
 
   import { edgeworthDeaths } from "./data.js";
-
-  const interaction = createPlotInteraction({
-    identity: (row) => `${row.year}:${row.county}`,
-  });
-  const scope = { keys: "edgeworth-rows" } as const;
 </script>
 
 <GGPlot
   data={edgeworthDeaths}
   aes={{ x: "year", fill: "county", weight: "deaths" }}
-  {interaction}
-  interactionScope={scope}
   width={640}
   height={400}
 >
