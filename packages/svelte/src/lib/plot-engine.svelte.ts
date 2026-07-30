@@ -282,11 +282,16 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   function resolvedDatumKeyNow() {
     const data = host.props.data;
     const embedded = assembled()?.data;
+    const inspectIdentity = identityFromInspectInput(inspectResolved().input);
+    const selectIdentity = identityFromSelectInput(host.props.select);
+    const controllerIdentity = host.props.interaction?.identity;
+    const legacyKey = readLegacyPlotKey(host.props);
+    // exactOptionalPropertyTypes: omit keys rather than pass `undefined`.
     const explicit = pickExplicitDatumKey({
-      inspect: identityFromInspectInput(inspectResolved().input),
-      select: identityFromSelectInput(host.props.select),
-      controller: host.props.interaction?.identity,
-      legacy: readLegacyPlotKey(host.props),
+      ...(inspectIdentity !== undefined && { inspect: inspectIdentity }),
+      ...(selectIdentity !== undefined && { select: selectIdentity }),
+      ...(controllerIdentity !== undefined && { controller: controllerIdentity }),
+      ...(legacyKey !== undefined && { legacy: legacyKey }),
     });
     return resolveDatumKey({
       ...(explicit !== undefined && { explicit }),
