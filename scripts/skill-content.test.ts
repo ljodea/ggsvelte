@@ -118,7 +118,9 @@ describe("skill Svelte fences use v0.20 interaction children", () => {
     it(`${file.name} shows no plot-level inspect / legendFocus / legendFilter`, () => {
       const offenders = codeBlocks(file.markdown)
         .filter((block) => block.language === "svelte")
-        .flatMap((block) => ggplotOpenAttrs(block.source).flatMap(plotLevelInteractionOffenders));
+        .flatMap((block) =>
+          ggplotOpenAttrs(block.source).flatMap((attrs) => plotLevelInteractionOffenders(attrs)),
+        );
       expect(offenders).toEqual([]);
     });
   }
