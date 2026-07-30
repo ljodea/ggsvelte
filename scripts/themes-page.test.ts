@@ -139,8 +139,9 @@ describe("themes catalog", () => {
 });
 
 describe("hero temperatures chart config", () => {
-  it("keeps key and month breaks stable for TemperaturesSpecimen", () => {
-    expect(TEMPERATURES_CHART.key).toBe("id");
+  it("keeps month breaks stable for TemperaturesSpecimen (no plot key)", () => {
+    // Row identity defaults to id/index — chart config no longer carries key.
+    expect("key" in TEMPERATURES_CHART).toBe(false);
     expect([...TEMPERATURES_CHART.monthBreaks]).toEqual([...MONTH_BREAKS]);
   });
 });
