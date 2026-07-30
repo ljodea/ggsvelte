@@ -3,6 +3,7 @@
  * resolveCapabilities also has an SSR characterization suite; CI coverage
  * only collects under the chromium project.
  */
+import { fromAny } from "@total-typescript/shoehorn";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -63,7 +64,8 @@ describe("readLegacyPlotLegendFocus / Filter", () => {
 describe("widenPlotProps", () => {
   it("forwards the six PublicKey fields and other props through the proxy", () => {
     const key = (row: { id: string }) => row.id;
-    const interaction = { revision: 0 } as never;
+    // Stand-in controller — intentionally not a full PlotInteractionController.
+    const interaction = fromAny({ revision: 0 });
     const oninspect = (): void => {
       // no-op callback identity for proxy forwarding
     };
