@@ -90,8 +90,8 @@ function resolveConfigInput(
 
   if (mode === undefined && multiple === undefined) return true;
   return {
-    ...(mode !== undefined ? { mode } : {}),
-    ...(multiple !== undefined ? { multiple } : {}),
+    ...(mode === undefined ? {} : { mode }),
+    ...(multiple === undefined ? {} : { multiple }),
   };
 }
 
