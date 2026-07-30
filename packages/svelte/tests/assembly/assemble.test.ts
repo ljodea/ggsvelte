@@ -105,6 +105,13 @@ describe("toLayerInput", () => {
     const other = fromAny({ rows: [{ x: 1 }] });
     expect(toLayerInput({ geom: "point", data: other }).data).toEqual({ columns: other });
   });
+
+  it("falls back to empty values for non-array non-object data", () => {
+    // Runtime guard when a geom data prop is neither rows nor a column bag.
+    expect(toLayerInput({ geom: "point", data: fromAny(null) }).data).toEqual({ values: [] });
+    expect(toLayerInput({ geom: "point", data: fromAny(42) }).data).toEqual({ values: [] });
+    expect(toLayerInput({ geom: "point", data: fromAny("rows") }).data).toEqual({ values: [] });
+  });
 });
 
 describe("assemblePortableSpec", () => {
@@ -326,6 +333,44 @@ describe("assemblePortableSpec", () => {
     expect(row).toBeDefined();
     expect(typeof row.t).toBe("string");
     expect(row.t).toContain("2020-01-15");
+  });
+
+  it("snapshots per-layer data so later mutation does not leak into the layer", () => {
+    const layerRows = [
+      { x: 1, y: 2 },
+      { x: 3, y: 4 },
+    ];
+    const assembled = assemblePortableSpec({
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "point", data: layerRows }],
+    });
+    expect(assembled).not.toBeNull();
+    const first = layerRows[0];
+    expect(first).toBeDefined();
+    first.x = 99;
+    expect(assembled!.layers[0]?.data).toEqual({
+      values: [
+        { x: 1, y: 2 },
+        { x: 3, y: 4 },
+      ],
+    });
+    // Plot-level data stays absent when only layer data is supplied.
+    expect(assembled!.data).toBeUndefined();
+  });
+
+  it("materializes Date cells in per-layer data to portable ISO strings", () => {
+    const day = new Date("2020-06-01T00:00:00.000Z");
+    const assembled = assemblePortableSpec({
+      aes: { x: "t", y: "y" },
+      layers: [{ geom: "point", data: [{ t: day, y: 7 }] }],
+    });
+    expect(assembled).not.toBeNull();
+    const layerData = assembled!.layers[0]?.data as { values: { t: string; y: number }[] };
+    const row = layerData.values[0];
+    expect(row).toBeDefined();
+    expect(typeof row.t).toBe("string");
+    expect(row.t).toContain("2020-06-01");
+    expect(row.y).toBe(7);
   });
 });
 
