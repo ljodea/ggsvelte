@@ -4,6 +4,7 @@
     GeomCol,
     GGPlot,
     Guides,
+    Inspect,
     Labs,
     Scale,
     Theme,
@@ -36,10 +37,10 @@
 <GGPlot
   data={chart.rows}
   aes={{ x: "category", y: "value", fill: "category" }}
-  inspect={{ mode: "exact" }}
   {height}
   ariaLabel={`${label} palette on ${paperTheme} paper`}
 >
+  <Inspect mode="exact" />
   <Theme name={paperTheme} />
   <Scale value={{ fill: { type: "ordinal", scheme: name, reverse } }} />
   <Guides value={{ fill: { type: "none" } }} />

@@ -69,16 +69,18 @@ const recipes = new Map<string, DiagnosticDocEntry["recipe"]>([
       code: `<GGPlot
   data={rows}
   aes={{ x: "weight", y: "economy" }}
-  inspect={true}
   tool="inspect"
-/>`,
+>
+  <Inspect />
+</GGPlot>`,
     },
   ],
   [
     "interaction:INTERACTION_INSPECT_X_ON_COL",
     {
       language: "svelte",
-      code: `<GGPlot data={rows} aes={{ x: "group", y: "amount" }} inspect={{ mode: "exact" }}>
+      code: `<GGPlot data={rows} aes={{ x: "group", y: "amount" }}>
+  <Inspect mode="exact" />
   <GeomCol />
 </GGPlot>`,
     },
@@ -87,7 +89,8 @@ const recipes = new Map<string, DiagnosticDocEntry["recipe"]>([
     "interaction:INTERACTION_INSPECT_X_BISECTS_COL_LABELS",
     {
       language: "svelte",
-      code: `<GGPlot data={rows} aes={{ x: "group", y: "amount" }} inspect={{ mode: "exact" }}>
+      code: `<GGPlot data={rows} aes={{ x: "group", y: "amount" }}>
+  <Inspect mode="exact" />
   <GeomCol />
   <GeomText aes={{ label: "label" }} dy={-8} />
 </GGPlot>`,

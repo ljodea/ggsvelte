@@ -239,7 +239,7 @@ describe("guide sections cover their catalogs", () => {
     expect(INTERACTIONS_MD).toContain("/examples/interactions/inspection");
     expect(INTERACTIONS_MD).toContain("/interactions/linked-views");
     expect(INTERACTIONS_MD).not.toContain("/playground");
-    expect(INTERACTIONS_MD).toContain('inspect={{ mode: "x",');
+    expect(INTERACTIONS_MD).toContain('<Inspect mode="x" pin maxDistance={24} />');
     expect(INTERACTIONS_MD).toContain('select={{ type: "interval", mode: "xy",');
     expect(INTERACTIONS_MD).toContain('key="id"');
     expect(INTERACTIONS_MD).toContain("oninspect");

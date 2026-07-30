@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { GeomPoint, GGPlot, Labs, ThemeLight } from "@ggsvelte/svelte";
+  import {
+    GeomPoint,
+    GGPlot,
+    Inspect,
+    Labs,
+    ThemeLight,
+  } from "@ggsvelte/svelte";
 
   import { penguins } from "./data.js";
 
@@ -12,7 +18,6 @@
   data={penguins}
   aes={{ x: "flipper", y: "mass", color: "species" }}
   key="id"
-  inspect={{ mode: "x", pin: true, maxDistance: 24 }}
   oninspect={(event) => {
     inspectionStatus =
       event.phase === "clear"
@@ -22,6 +27,7 @@
   width="container"
   height={400}
 >
+  <Inspect mode="x" pin maxDistance={24} />
   <ThemeLight />
   <Labs
     title="Inspect a shared x value, then pin"

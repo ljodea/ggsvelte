@@ -1283,10 +1283,10 @@ timestamp helpers, exact-format parser, and epoch helpers return authoring Dates
 
 export const INTERACTIONS_MD = `# Interactions
 
-Static by default. Opt in with \`inspect\`, \`select\`, \`zoom\`, and GuideLegend
-\`focus\` / \`filter\` (or deprecated plot props \`legendFocus\` /
-\`legendFilter\`). With more than one draw tool, an accessible tool rail keeps
-gestures from competing.
+Static by default. Opt in with \`<Inspect>\`, \`select\`, \`zoom\`, and GuideLegend
+\`focus\` / \`filter\` (or the legacy GGPlot \`inspect\` prop, and deprecated plot
+props \`legendFocus\` / \`legendFilter\`). With more than one draw tool, an
+accessible tool rail keeps gestures from competing.
 
 Without a controller, state is private to one chart and callbacks report
 changes. Pass \`createPlotInteraction()\` when plots, controls, or tables share
@@ -1302,18 +1302,23 @@ Contracts: [interaction reference](/guide/interaction-reference).
 
 ## Inspection
 
-\`inspect={true}\` enables the default HTML tooltip, semantic crosshair,
-keyboard traversal, and click-or-Enter pinning. Configure it when the chart
-has a natural comparison axis:
+\`<Inspect />\` enables the default HTML tooltip, semantic crosshair, keyboard
+traversal, and click-or-Enter pinning (same as the legacy \`inspect={true}\`
+prop on \`<GGPlot>\`). Configure it when the chart has a natural comparison
+axis:
 
 \`\`\`svelte fragment
+<script lang="ts">
+  import { GeomLine, GeomPoint, GGPlot, Inspect } from "@ggsvelte/svelte";
+</script>
+
 <GGPlot
   {data}
   aes={{ x: "date", y: "value", color: "series" }}
   key="id"
-  inspect={{ mode: "x", pin: true, maxDistance: 24 }}
   oninspect={(event) => console.log(event)}
 >
+  <Inspect mode="x" pin maxDistance={24} />
   <GeomLine />
   <GeomPoint />
 </GGPlot>
@@ -1326,11 +1331,11 @@ representative per semantic series at the focused axis value; \`exact\` and
 dominant axis for \`x\` or \`y\`, Euclidean distance for \`xy\`, and geometry
 containment plus tolerance for \`exact\`. Rect marks (\`geom_col\` / \`geom_bar\`)
 never draw a point ring; default hover is tooltip-only. Pass
-\`muteSiblings: true\` to mute non-focused bars via the interaction mask.
+\`muteSiblings\` on \`<Inspect>\` to mute non-focused bars via the interaction mask.
 
-For custom HTML, pass a Svelte 5 snippet. Informational content is the default;
-choose \`contentMode: "interactive"\` only when the pinned tooltip contains
-controls that need focus.
+For custom HTML, pass a Svelte 5 snippet on \`content\`. Informational content is
+the default; choose \`contentMode="interactive"\` only when the pinned tooltip
+contains controls that need focus.
 
 \`\`\`svelte fragment
 {#snippet details(inspection)}
@@ -1338,7 +1343,9 @@ controls that need focus.
   <span>{inspection.members.length} series at this value</span>
 {/snippet}
 
-<GGPlot inspect={{ mode: "x", content: details }} />
+<GGPlot {data} aes={{ x: "date", y: "value" }} key="id">
+  <Inspect mode="x" content={details} />
+</GGPlot>
 \`\`\`
 
 ## Point and interval selection
@@ -1605,11 +1612,12 @@ Page scroll is not hijacked by unused tools.
 
 ## Capability props
 
-### \`inspect\`
+### \`inspect\` / \`<Inspect>\`
 
-Enables inspection, the default HTML tooltip, semantic crosshair, keyboard
-traversal, and optional pinning. Inputs are \`true\` or options with \`mode\`,
-\`pin\`, \`maxDistance\`, \`content\`, and \`contentMode\`.
+Prefer the declaration child \`<Inspect />\` (or \`<Inspect mode="x" pin />\`,
+etc.). Options match the legacy GGPlot prop: \`mode\`, \`pin\`, \`maxDistance\`,
+\`content\`, \`contentMode\`, \`muteSiblings\`. Empty \`<Inspect />\` equals
+\`inspect={true}\`. The GGPlot \`inspect\` prop still works.
 
 ### Point selection
 
@@ -1664,17 +1672,18 @@ plot tool rail must stay synchronized:
 
 \`\`\`svelte fragment
 <script lang="ts">
-  import type { InteractionTool } from "@ggsvelte/svelte";
+  import { GGPlot, Inspect, type InteractionTool } from "@ggsvelte/svelte";
 
   let activeTool = $state<InteractionTool>("inspect");
 </script>
 
 <GGPlot
-  inspect={true}
   select={{ type: "interval" }}
   tool={activeTool}
   ontoolchange={(next) => (activeTool = next)}
-/>
+>
+  <Inspect />
+</GGPlot>
 \`\`\`
 
 A controlled unavailable tool requests a change and emits a diagnostic; it
@@ -2760,7 +2769,7 @@ queries remain available as \`model.candidates.queryRect(...)\` candidate ids.
 
 \`\`\`svelte fragment
 <script lang="ts">
-  import { GeomPoint, GGPlot, type RenderModel } from "@ggsvelte/svelte";
+  import { GeomPoint, GGPlot, Inspect, type RenderModel } from "@ggsvelte/svelte";
 
   const rows = [
     { id: "a", x: 1, y: 3 },
@@ -2778,9 +2787,9 @@ queries remain available as \`model.candidates.queryRect(...)\` candidate ids.
   data={rows}
   aes={{ x: "x", y: "y" }}
   key="id"
-  inspect
   onrender={(next) => (model = next)}
 >
+  <Inspect />
   <GeomPoint />
 </GGPlot>
 

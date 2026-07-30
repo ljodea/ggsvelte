@@ -56,7 +56,15 @@ const BASE_COMPONENTS = [
  * chart looks, then how values map to the page, then what it is called. None
  * of these can override another, so this is readability only.
  */
-const GRAMMAR_ORDER = ["theme", "scaleY", "scaleX", "scaleFill", "guides", "labs"] as const;
+const GRAMMAR_ORDER = [
+  "inspect",
+  "theme",
+  "scaleY",
+  "scaleX",
+  "scaleFill",
+  "guides",
+  "labs",
+] as const;
 
 /** Layers that only make sense when the chart is wide enough to place text. */
 export const SAKURA_ANNOTATION_LAYERS = ["leaders", "callouts"] as const;
@@ -159,7 +167,8 @@ ${[...GRAMMAR_ORDER.filter((name) => grammar[name] !== undefined).map((name) => 
     spec,
     source,
     key: attrs.has("key") ? "year" : undefined,
-    inspect: attrs.has("inspect") ? { mode: "exact", pin: true } : undefined,
+    // Host capability: preferred as `<Inspect>` child (not a PortableSpec field).
+    inspect: components.has("Inspect") ? { mode: "exact", pin: true } : undefined,
   };
 }
 

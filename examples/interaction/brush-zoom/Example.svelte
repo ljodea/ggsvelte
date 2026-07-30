@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { GeomPoint, GGPlot, Labs, ThemeLight } from "@ggsvelte/svelte";
+  import {
+    GeomPoint,
+    GGPlot,
+    Inspect,
+    Labs,
+    ThemeLight,
+  } from "@ggsvelte/svelte";
 
   import { field } from "./data.js";
 
@@ -15,7 +21,6 @@
   data={field}
   aes={{ x: "bill", y: "mass", color: "species" }}
   key="id"
-  inspect={true}
   select={{ type: "interval", mode: "xy", persistent: true }}
   zoom={{ mode: "xy" }}
   onselect={(event) => {
@@ -35,6 +40,7 @@
   width="container"
   height={400}
 >
+  <Inspect />
   <ThemeLight />
   <Labs title="Select an interval or brush to zoom" x="x" y="y" color="Group" />
   <GeomPoint size={2.5} alpha={0.8} />

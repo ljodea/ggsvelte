@@ -481,12 +481,15 @@ export const SAKURA_STEPS: readonly SakuraStep[] = [
     // No title/subtitle/caption: chrome would squash the data panel. Citation
     // and the dashed-rule note live as a page footnote instead.
     fragment: `key="year"
-inspect={{ mode: "exact", pin: true }}`,
+  <Inspect mode="exact" pin />`,
     spec: {},
     source: {
+      components: ["Inspect"],
       attrs: {
         key: `  key="year"`,
-        inspect: `  inspect={{ mode: "exact", pin: true }}`,
+      },
+      grammar: {
+        inspect: `  <Inspect mode="exact" pin />`,
       },
     },
   },

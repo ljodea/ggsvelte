@@ -14,6 +14,7 @@
     GeomText,
     GGPlot,
     GuideLegend,
+    Inspect,
     Labs,
     Scale,
     scaleXLog10,
@@ -69,10 +70,10 @@
     data={ridership}
     aes={{ x: "month", y: "riders", color: "mode" }}
     key="id"
-    inspect={{ mode: "x" }}
     {height}
     ariaLabel={`${label} theme Playfair wheat and wages`}
   >
+    <Inspect mode="x" />
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
@@ -92,10 +93,10 @@
     data={attendees}
     aes={{ x: "track", fill: "level", weight: "deaths" }}
     key="id"
-    inspect={{ mode: "exact" }}
     {height}
     ariaLabel={`${label} theme Edgeworth dodged bars`}
   >
+    <Inspect mode="exact" />
     {#if legendFocus}
       <GuideLegend channel="fill" focus />
     {/if}
@@ -114,10 +115,10 @@
     data={generation}
     aes={{ x: "year", y: "twh", fill: "source" }}
     key="id"
-    inspect={{ mode: "x" }}
     {height}
     ariaLabel={`${label} theme Nightingale stacked area`}
   >
+    <Inspect mode="x" />
     {#if legendFocus}
       <GuideLegend channel="fill" focus />
     {/if}
@@ -140,10 +141,10 @@
   <GGPlot
     data={longRunSeries}
     aes={{ x: "year", y: "value" }}
-    inspect={{ mode: "x" }}
     {height}
     ariaLabel={`${label} theme Bowley exports`}
   >
+    <Inspect mode="x" />
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
@@ -156,10 +157,10 @@
     data={penguins}
     aes={{ x: "flipper", y: "mass", color: "species" }}
     key="id"
-    inspect={{ mode: "xy" }}
     {height}
     ariaLabel={`${label} theme penguin scatter`}
   >
+    <Inspect mode="xy" />
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
@@ -178,10 +179,10 @@
     data={countries}
     aes={{ x: "gdp", y: "lifeExp", color: "region" }}
     key="country"
-    inspect={{ mode: "xy" }}
     {height}
     ariaLabel={`${label} theme cholera density scatter`}
   >
+    <Inspect mode="xy" />
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
@@ -205,10 +206,10 @@
   <GGPlot
     data={revenue}
     aes={{ x: "quarter", y: "amount" }}
-    inspect={{ mode: "exact" }}
     {height}
     ariaLabel={`${label} theme Salk trial columns`}
   >
+    <Inspect mode="exact" />
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
@@ -225,10 +226,10 @@
   <GGPlot
     data={cities}
     aes={{ x: "rent", y: "livability" }}
-    inspect={{ mode: "xy" }}
     {height}
     ariaLabel={`${label} theme Langren longitude labels`}
   >
+    <Inspect mode="xy" />
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}

@@ -23,7 +23,7 @@
     sakuraFinishedHeight,
   } from "$lib/generated/lesson-charts";
   import { observeNearViewport } from "$lib/near-viewport";
-  import type { PlotInspectionChange } from "@ggsvelte/svelte";
+  import { Inspect, type PlotInspectionChange } from "@ggsvelte/svelte";
   import { kyotoSakura } from "@ggsvelte/svelte/data";
 
   const {
@@ -180,14 +180,13 @@
     <LivePlot
       spec={finished.spec}
       key={finished.key}
-      inspect={{
-        mode: "exact",
-        pin: true,
-        content: sakuraTooltip,
-      }}
       height={liveHeight}
       {ariaLabel}
-    />
+    >
+      {#if finished.inspect}
+        <Inspect mode="exact" pin content={sakuraTooltip} />
+      {/if}
+    </LivePlot>
   {:else}
     <img
       class="lesson-chart"

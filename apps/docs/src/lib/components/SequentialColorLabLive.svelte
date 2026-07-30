@@ -1,5 +1,12 @@
 <script lang="ts">
-  import { GeomRaster, GGPlot, Labs, Scale, Theme } from "@ggsvelte/svelte";
+  import {
+    GeomRaster,
+    GGPlot,
+    Inspect,
+    Labs,
+    Scale,
+    Theme,
+  } from "@ggsvelte/svelte";
   import type { ColorScaleSpec } from "@ggsvelte/spec";
 
   import { grid } from "$lib/theme-specimens/data";
@@ -18,10 +25,10 @@
 <GGPlot
   data={grid}
   aes={{ x: "x", y: "y", fill: "z" }}
-  inspect={{ mode: "xy" }}
   {height}
   ariaLabel={`${label} sequential color example`}
 >
+  <Inspect mode="xy" />
   <Scale value={{ fill: scale }} />
   <Theme name="light" />
   <Labs

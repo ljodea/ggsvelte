@@ -7,7 +7,6 @@ import { MONTH_BREAKS } from "./catalog.js";
 export const TEMPERATURES_CHART = {
   key: "id",
   aes: { x: "month", y: "temp", color: "city" },
-  inspect: { mode: "x" as const },
   labs: {
     title: "Playfair stocks, bread & exports, 1770–1824",
     x: "Year",
