@@ -81,6 +81,7 @@ describe("widenPlotProps", () => {
     const props: GGPlotProps<{ id: string; x: number }> = {
       data: [{ id: "a", x: 1 }],
       height: 320,
+      // oxlint-disable-next-line typescript/no-deprecated -- widening the dual-read key is the behavior under test
       key,
       interaction,
       oninspect,

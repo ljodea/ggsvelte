@@ -156,6 +156,18 @@ describe("README visual showcase", () => {
     }
   });
 
+  it("keeps controller plumbing off the front door", () => {
+    // createPlotInteraction / interactionScope are the cross-plot
+    // coordination API. A static showcase chart never needs them — a
+    // snippet that carries them is teaching boilerplate as if required.
+    for (const { id, source } of readmeExamples()) {
+      expect(source, id).not.toContain("createPlotInteraction");
+      expect(source, id).not.toContain("interactionScope");
+    }
+    expect(svelteReadme).not.toContain("createPlotInteraction");
+    expect(svelteReadme).not.toContain("interactionScope");
+  });
+
   it("uses no TypeScript, builder, or PortableSpec snippets on the GitHub front door", () => {
     const fenceLanguages = [...readme.matchAll(/^```([^\n]*)$/gm)].map(([, language]) => language);
 
