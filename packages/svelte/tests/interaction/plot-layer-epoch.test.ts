@@ -76,15 +76,15 @@ describe("#609 epoch with non-mark layers registered", () => {
     expect(fixed).toEqual([rowsA]);
   });
 
-  it("pinned inspection clears when geom-child layer-local data is replaced (markLayers epoch path)", async () => {
+  it("markLayers data replace bumps epoch; default identity rebinds pin", async () => {
     // Production path: plot-engine fingerprints
     // inputs.registry.markLayers when the layers prop is absent. Only mark
     // descriptors expose .data — so a geom child's layer-local replacement
-    // must bump dataIdentityEpoch. reconcilePinned returns null on epoch
-    // change for keyless pins, which clears the inspection.
+    // must bump dataIdentityEpoch (new RenderModel). Default row-index
+    // identity then rebinds the pin across that epoch when geometry matches.
     //
     // Setup: no plot `data`/`spec` prop (layer-local only), a non-mark theme
-    // sibling registered, inspect pin enabled, no key (keyless pin).
+    // sibling registered, inspect pin enabled, no explicit key.
     let model: RenderModel | null = null;
     const inspectEvents: Array<{ phase: string; state?: string }> = [];
     const view = render(PlotLayerHost, {
@@ -118,9 +118,8 @@ describe("#609 epoch with non-mark layers registered", () => {
 
     const pinnedModel = model;
     // Swap to a *new array of new row objects* with identical field values.
-    // That bumps the markLayers source-identity fingerprint (epoch) while
-    // leaving candidate axis tokens equal — so a broken registry.layers
-    // epoch would revalidate the keyless pin and leave the tooltip up.
+    // That bumps the markLayers source-identity fingerprint (epoch). Default
+    // row-index keys rebind the pin so the tooltip stays up.
     await view.rerender({
       aes: { x: "x", y: "y" },
       markData: rowsAPrime,
@@ -135,8 +134,7 @@ describe("#609 epoch with non-mark layers registered", () => {
     });
 
     await expect.poll(() => model !== pinnedModel).toBe(true);
-    await expect.poll(() => inspectEvents.some((event) => event.phase === "clear")).toBe(true);
-    expect(view.container.querySelector(".gg-tooltip")).toBeNull();
+    expect(view.container.querySelector(".gg-tooltip")).not.toBeNull();
   });
 
   it("isFacetedPlotIntent host path: facet plot layer disables brush zoom with diagnostic", async () => {

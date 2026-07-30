@@ -27,7 +27,9 @@
     x: "interaction-demo-x",
     y: "interaction-demo-y",
   } as const;
-  const interaction = createPlotInteraction<string>();
+  // Default row identity (id column) yields string keys; type as PropertyKey
+  // so omitting GGPlot `key` still typechecks handlers.
+  const interaction = createPlotInteraction<PropertyKey>();
   const emphasized = $derived(interaction.emphasized(scope));
   // Interval brush stores keys on intervals(), not selected().
   const selectedCount = $derived(
@@ -42,7 +44,7 @@
   const code = `<script lang="ts">
   import { createPlotInteraction, GeomPoint, GGPlot, GuideLegend, Inspect } from "@ggsvelte/svelte";
 
-  const interaction = createPlotInteraction<string>();
+  const interaction = createPlotInteraction();
   const scope = { keys: "rows", x: "x", y: "y" } as const;
 ${closeScript}
 
@@ -63,7 +65,7 @@ ${closeScript}
     phase: "change" | "clear";
     state?: string;
     label?: string;
-    keys?: readonly string[];
+    keys?: readonly PropertyKey[];
   }): void {
     status =
       event.phase === "clear"

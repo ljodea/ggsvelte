@@ -25,14 +25,12 @@ export type ResolveDatumKeyInput = {
 };
 
 /** Row-index identity — default when no `id` column and no explicit key. */
-export function rowIndexDatumKey(_row: Record<string, CellValue>, index: number): PropertyKey {
+function rowIndexDatumKey(_row: Record<string, CellValue>, index: number): PropertyKey {
   return index;
 }
 
-/**
- * True when `value` is a legal PropertyKey for semantic row identity.
- */
-export function isPropertyKeyIdentity(value: unknown): value is PropertyKey {
+/** True when `value` is a legal PropertyKey for semantic row identity. */
+function isPropertyKeyIdentity(value: unknown): value is PropertyKey {
   return typeof value === "string" || typeof value === "number" || typeof value === "symbol";
 }
 
@@ -41,7 +39,7 @@ export function isPropertyKeyIdentity(value: unknown): value is PropertyKey {
  * Does not scan every row for uniqueness — invalid/duplicate keys still emit
  * INTERACTION_* key diagnostics at resolve time.
  */
-export function dataHasIdIdentityColumn(data: unknown): boolean {
+function dataHasIdIdentityColumn(data: unknown): boolean {
   if (data === null || data === undefined) return false;
 
   if (Array.isArray(data)) {
