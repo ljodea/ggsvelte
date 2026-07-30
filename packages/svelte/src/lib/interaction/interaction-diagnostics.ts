@@ -125,8 +125,12 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     code: "INTERACTION_LEGEND_DISCRETE_ONLY",
     message:
       "Legend focus currently applies to discrete color and fill legends; continuous ramps remain static.",
-    prop: "legendFocus",
-    suggestions: ["Use a discrete color or fill mapping", "Keep the continuous ramp static"],
+    prop: "focus",
+    suggestions: [
+      'Enable focus on a discrete guide: <GuideLegend channel="color" focus />',
+      "Use a discrete color or fill mapping",
+      "Keep the continuous ramp static",
+    ],
     docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-legend-discrete-only",
   },
   INTERACTION_INTERVAL_SCALE_UNSUPPORTED: {

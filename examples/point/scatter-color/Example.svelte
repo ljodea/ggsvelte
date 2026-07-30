@@ -2,6 +2,7 @@
   import {
     GeomPoint,
     GGPlot,
+    GuideLegend,
     Labs,
     ScaleColorDiscrete,
     ThemeFew,
@@ -14,7 +15,6 @@
   data={guerry}
   aes={{ x: "literacy", y: "crimePersons", color: "region" }}
   key="department"
-  legendFocus
   width={640}
   height={400}
 >
@@ -27,5 +27,6 @@
     y="Population per crime against persons"
     color="Region"
   />
+  <GuideLegend channel="color" focus />
   <GeomPoint size={3} />
 </GGPlot>

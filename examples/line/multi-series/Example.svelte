@@ -3,6 +3,7 @@
     GeomLine,
     GeomPoint,
     GGPlot,
+    GuideLegend,
     Labs,
     ScaleColorManual,
     ScaleXContinuous,
@@ -16,7 +17,6 @@
   data={wheatAndWages}
   aes={{ x: "year", y: "value", color: "series" }}
   key={(row) => `${row.year}:${row.series}`}
-  legendFocus
   width={640}
   height={400}
 >
@@ -37,6 +37,7 @@
     y="Shillings"
     color="Series"
   />
+  <GuideLegend channel="color" focus />
   <GeomLine linewidth={2} />
   <GeomPoint size={1.6} />
 </GGPlot>

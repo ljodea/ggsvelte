@@ -2,6 +2,7 @@
   import {
     GeomBar,
     GGPlot,
+    GuideLegend,
     Labs,
     ScaleFillDiscrete,
     ScaleXDiscrete,
@@ -15,7 +16,6 @@
   data={pyxTrial}
   aes={{ x: "bag", fill: "deviation", weight: "count" }}
   key={(row) => `${row.bag}:${row.deviation}`}
-  legendFocus
   width={640}
   height={400}
 >
@@ -43,5 +43,6 @@
     y="Sovereigns"
     fill="Deviation"
   />
+  <GuideLegend channel="fill" focus />
   <GeomBar />
 </GGPlot>

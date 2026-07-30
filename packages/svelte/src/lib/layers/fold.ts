@@ -46,6 +46,10 @@ export function foldPlotLayer(draft: AssembleDraft, layer: PlotLayerLike): Assem
   if (layer.kind === "mark") {
     return draft;
   }
+  // Host-only interaction contributions never fold into PortableSpec.
+  if (layer.kind === "legendFocus") {
+    return draft;
+  }
   // Index via string map so unforeseen runtime kinds are undefined (not a
   // silent miss). Typed callers already exhaust GrammarLayerKind.
   const family = (GRAMMAR_FAMILIES as Readonly<Record<string, GrammarFamilyMeta | undefined>>)[

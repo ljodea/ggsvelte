@@ -114,8 +114,9 @@ direct props (`size={3}`); structural props are `data`, `stat`, `position`,
 
 `<GGPlot>` props: `spec`, `data`, `aes`, `layers`, `key`, `width`
 (number | "container"), `height`, `a11y`, `ariaLabel`, the interaction props
-(`inspect`, `select`, `zoom`, `legendFocus`, `legendFilter`, `tool`,
-`interaction`, `interactionScope`), the `on*` handlers, and `children`.
+(`inspect`, `select`, `zoom`, `legendFilter`, `tool`, `interaction`,
+`interactionScope`; `legendFocus` is deprecated — use
+`<GuideLegend channel focus>`), the `on*` handlers, and `children`.
 Instance methods: `resetScales()`, `setZoom()`.
 
 Precedence: `spec` wins over everything else. For mark layers, an explicit
@@ -272,12 +273,12 @@ violin, tile heatmap, hex density, ECDF step, ribbon, flipped boxplot,
 per-layer aes override, sf/map — each as validated JSON plus a Svelte twin:
 [references/recipes.md](references/recipes.md).
 
-## Interactions (Svelte props, not spec fields)
+## Interactions (host props, not PortableSpec fields)
 
-Opt-in `<GGPlot>` props: `inspect` (tooltip/crosshair/keyboard/pinning),
-`select` (point or interval), `zoom` (brush), `legendFocus` (emphasis only),
-`legendFilter` (refilters and reruns the grammar, colors stay stable). Always
-give a stable `key` when selection or linked views must survive filtering or
+Opt-in host capabilities: `inspect` / `select` / `zoom` / `legendFilter` on
+`<GGPlot>`; legend emphasis via `<GuideLegend channel="color" focus />`
+(per aesthetic; host-only, not in `guideLegend()` / PortableSpec). Always give
+a stable `key` when selection or linked views must survive filtering or
 refreshes. Link plots by sharing one `createPlotInteraction()` controller and
 matching `interactionScope` channels; observe everything through
 `oninteraction` or per-capability handlers. Faceted interval presets, the

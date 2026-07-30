@@ -78,8 +78,15 @@ import type { FilterableLegendEntry, LegendFilterState } from "./legend/filter-s
 import type { InteractiveLegendEntry, LegendEntryIdentity } from "./legend/focus.js";
 import { createLegendFocusState } from "./legend/focus-state.svelte.js";
 import type { LegendFocusState } from "./legend/focus-state.svelte.js";
+import {
+  filterInteractiveLegendEntries,
+  resolveLegendFocusCapability,
+  type ResolvedLegendFocusCapability,
+} from "./legend/resolve-legend-focus.js";
 import { createPlotChromeState } from "./chrome/chrome-state.svelte.js";
 import type { PlotChromeState } from "./chrome/chrome-state.svelte.js";
+import { isHostPlotLayer } from "./layers/types.js";
+import { deprecatedPropDiagnostic } from "./diagnostics/deprecation.js";
 import {
   resolveCapabilities,
   type EnginePlotProps,
@@ -203,7 +210,10 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       // Mark layers only: a `layers={[…]}` prop suppresses registry marks, not
       // non-mark plot layers (theme/scale/coord/facet/labs/guides/legend).
       layers: layers ?? host.registry.markLayers.map(toLayerInput),
-      plotLayers: host.registry.layers.filter((layer) => layer.kind !== "mark"),
+      // Grammar only — host-only kinds (legendFocus) never fold into PortableSpec.
+      plotLayers: host.registry.layers.filter(
+        (layer) => layer.kind !== "mark" && !isHostPlotLayer(layer),
+      ),
       ...(a11y !== undefined && { a11y }),
     });
   }
@@ -243,17 +253,33 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     })(),
   );
 
+  /**
+   * Legend focus from `<GuideLegend focus>` (and deprecated plot prop).
+   * SSR recompute: same one-pass empty-registry trap as assembleCurrentSpec —
+   * children register after construction-time $derived may snapshot.
+   */
+  function resolveLegendFocusNow(): ResolvedLegendFocusCapability {
+    return resolveLegendFocusCapability({
+      plotProp: host.props.legendFocus,
+      layers: host.registry.layers,
+    });
+  }
+  const legendFocusResolvedDerived = $derived.by(resolveLegendFocusNow);
+  const legendFocusResolved = (): ResolvedLegendFocusCapability =>
+    typeof window === "undefined" ? resolveLegendFocusNow() : legendFocusResolvedDerived;
+
   const interactionConfig = $derived(
     (() => {
       const tool = host.props.tool;
       // Four fields only — legendFilter is not part of normalizeInteractionConfig.
       // Reading it via caps() re-delivered config diagnostics on every filter toggle.
+      // legendFocus comes from GuideLegend children (host registry), not only the plot prop.
       return normalizeInteractionConfig(
         {
           inspect: host.props.inspect ?? false,
           select: host.props.select ?? false,
           zoom: host.props.zoom ?? false,
-          legendFocus: host.props.legendFocus ?? false,
+          legendFocus: legendFocusResolved().configInput,
           ...(tool !== undefined && { tool }),
         },
         {
@@ -284,6 +310,9 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   // taken inside this derived so late-bound handlers still recompute.
   const wiringDiagnostics = $derived.by((): InteractionDiagnostic[] => {
     const capabilities = caps();
+    // legendFocus "requested" is the GuideLegend/child (or deprecated prop)
+    // opt-in — not the post-key-check resolved config — so keyless focus does
+    // not double-advise HANDLER_WITHOUT_CAPABILITY + LEGEND_REQUIRES_KEY.
     return collectWiringDiagnostics({
       interactionScope: host.props.interactionScope,
       interaction: host.props.interaction,
@@ -298,12 +327,12 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
         inspect: capabilities.inspect,
         select: capabilities.select,
         zoom: capabilities.zoom,
-        legendFocus: capabilities.legendFocus,
+        legendFocus: legendFocusResolved().requested,
         legendFilter: capabilities.legendFilter,
       },
     });
   });
-  // Shared once-per-code-per-prop Set for wiring + composition.
+  // Shared once-per-code-per-prop Set for wiring + composition + deprecations.
   // Delivery order is fixed: config effect (above) → wiring → composition.
   // Grammar-prop deprecation emission removed in 0.13.0 (#704) — props gone.
   const deliveredAdvisories = new Set<string>();
@@ -314,6 +343,26 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       deliveredAdvisories.add(dedupKey);
       deliverDiagnostic(diagnostic);
     }
+  });
+
+  // Deprecated plot-level legendFocus → GuideLegend.focus (one minor window).
+  $effect(() => {
+    const plotProp = host.props.legendFocus;
+    if (plotProp === undefined || plotProp === false) return;
+    const diagnostic = deprecatedPropDiagnostic({
+      prop: "legendFocus",
+      since: "0.19.0",
+      removeIn: "0.20.0",
+      suggestions: [
+        'Use <GuideLegend channel="color" focus /> (or the aesthetic that owns the discrete legend)',
+        "focus={{ preview: false }} on GuideLegend replaces legendFocus={{ preview: false }}",
+      ],
+      anchor: "legend-focus-on-guide-legend",
+    });
+    const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
+    if (deliveredAdvisories.has(dedupKey)) return;
+    deliveredAdvisories.add(dedupKey);
+    deliverDiagnostic(diagnostic);
   });
 
   // Composition advisories (#659 slices 3+5+6): pure collect over
@@ -625,9 +674,13 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   });
 
   // Host-side deriveds kept outside the factory (construction-time free of
-  // the model read).
+  // the model read). Channel filter: only aesthetics with GuideLegend focus
+  // (merged legends match via aesthetics[], not primary scale alone).
   const interactiveLegendEntries = $derived(
-    legendFocusState.computeInteractiveEntries(runtime.model),
+    filterInteractiveLegendEntries(
+      legendFocusState.computeInteractiveEntries(runtime.model),
+      legendFocusResolved().channels,
+    ),
   );
 
   const effectiveLegendPressed: LegendEntryIdentity | null = $derived(

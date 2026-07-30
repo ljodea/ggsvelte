@@ -299,7 +299,7 @@ describe("legend focus capability edges", () => {
     expect(diagnostics).toContainEqual(
       expect.objectContaining({
         code: "INTERACTION_LEGEND_DISCRETE_ONLY",
-        prop: "legendFocus",
+        prop: "focus",
         actual: ["ramp"],
       }),
     );

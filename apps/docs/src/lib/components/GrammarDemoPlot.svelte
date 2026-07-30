@@ -3,6 +3,7 @@
     GeomJitter,
     GeomSmooth,
     GGPlot,
+    GuideLegend,
     Labs,
     Theme,
   } from "@ggsvelte/svelte";
@@ -14,7 +15,7 @@
    * Live homepage grammar plot. Dynamically imported so the section chrome +
    * static SVG shell can SSR without pulling @ggsvelte into the home node.
    *
-   * Default step (Interaction): xy inspect (numeric crosshair) + legendFocus.
+   * Default step (Interaction): xy inspect (numeric crosshair) + GuideLegend focus.
    * Full palmerPenguins (333 complete cases).
    *
    * Labs titles must match `homeGrammarStaticSvgFromData` so the shell→live
@@ -31,7 +32,7 @@
 
 <!--
   mode "xy": full crosshair on two continuous axes (not path auto "x").
-  legendFocus needs stable row keys (`id` on palmerPenguins).
+  GuideLegend focus needs stable row keys (`id` on palmerPenguins).
   GeomJitter + alpha: 333 points stack on integer measurements; seeded jitter
   (default 0.4·resolution) and alpha spread the cloud. degree 1 loess stays
   cheap when remounting.
@@ -45,11 +46,13 @@
     ...(active >= 1 && { color: "species" }),
   }}
   inspect={active >= 3 ? { mode: "xy", pin: true, maxDistance: 24 } : false}
-  legendFocus={active >= 1}
   ariaLabel="Penguin body mass increases with flipper length, grouped by species"
 >
   <Theme name={chartTheme} />
   <Labs x="Flipper length mm" y="Body mass g" color="species" />
+  {#if active >= 1}
+    <GuideLegend channel="color" focus />
+  {/if}
   <GeomJitter alpha={0.88} />
   {#if active >= 2}
     <GeomSmooth method="loess" span={0.75} degree={1} se={false} />

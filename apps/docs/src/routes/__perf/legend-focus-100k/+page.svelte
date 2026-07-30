@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { createPlotInteraction, GGPlot, Labs } from "@ggsvelte/svelte";
+  import {
+    createPlotInteraction,
+    GGPlot,
+    GuideLegend,
+    Labs,
+  } from "@ggsvelte/svelte";
 
   const navigationData = Array.from({ length: 100_000 }, (_, id) => ({
     id,
@@ -34,13 +39,13 @@
       aes={mapping}
       layers={[{ geom: "point", render: "canvas", params: { size: 1 } }]}
       key="id"
-      legendFocus={{ preview: false }}
       interaction={navigationInteraction}
       interactionScope={navigationScope}
       width={620}
       height={360}
       onrender={() => (commitsNavigation += 1)}
     >
+      <GuideLegend channel="color" focus={{ preview: false }} />
       <Labs title="100k navigation view" color="Group" />
     </GGPlot>
   </div>
@@ -51,7 +56,6 @@
         aes={mapping}
         layers={[{ geom: "point", render: "canvas", params: { size: 1 } }]}
         key="id"
-        legendFocus={{ preview: false }}
         {interaction}
         interactionScope={scope}
         width={620}
@@ -62,6 +66,7 @@
           else commitsC += 1;
         }}
       >
+        <GuideLegend channel="color" focus={{ preview: false }} />
         <Labs title={`Linked view ${name}`} color="Group" />
       </GGPlot>
     </div>

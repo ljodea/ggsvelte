@@ -75,7 +75,10 @@ export interface GGPlotProps<
   select?: SelectInput;
   /** Opt into brush zoom. */
   zoom?: ZoomInput;
-  /** Opt into discrete legend preview, focus, and linked emphasis. */
+  /**
+   * @deprecated since 0.19.0 — use `<GuideLegend channel="…" focus />` instead.
+   * Still honoured (plot-wide enablement) until 0.20.0; emits DEPRECATED_PLOT_PROP.
+   */
   legendFocus?: LegendFocusInput;
   /** Opt into data-changing filtering through discrete legend controls. */
   legendFilter?: LegendFilterInput;

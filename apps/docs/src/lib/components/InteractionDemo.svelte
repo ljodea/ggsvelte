@@ -3,6 +3,7 @@
     createPlotInteraction,
     GeomPoint,
     GGPlot,
+    GuideLegend,
     Labs,
     Scale,
   } from "@ggsvelte/svelte";
@@ -38,7 +39,7 @@
 
   const closeScript = ["</", "script>"].join("");
   const code = `<script lang="ts">
-  import { createPlotInteraction, GeomPoint, GGPlot } from "@ggsvelte/svelte";
+  import { createPlotInteraction, GeomPoint, GGPlot, GuideLegend } from "@ggsvelte/svelte";
 
   const interaction = createPlotInteraction<string>();
   const scope = { keys: "rows", x: "x", y: "y" } as const;
@@ -51,10 +52,10 @@ ${closeScript}
   key="id"
   aes={{ x: "period", y: "value", color: "series" }}
   inspect
-  legendFocus
   select={{ type: "interval", mode: "xy" }}
   zoom={{ mode: "x" }}
 >
+  <GuideLegend channel="color" focus />
   <GeomPoint size={4} />
 </GGPlot>`;
 
@@ -89,13 +90,13 @@ ${closeScript}
       inspect
       select={{ type: "interval", mode: "xy" }}
       zoom={{ mode: "x" }}
-      legendFocus
       {interaction}
       interactionScope={scope}
       height={420}
       ariaLabel="Interactive series with inspect, select, zoom, and legend focus"
       onlegendfocus={describeLegend}
     >
+      <GuideLegend channel="color" focus />
       <Scale value={{ color: { type: "ordinal", scheme: "observable10" } }} />
       <Labs x="Period" y="Value" color="Series" />
       <GeomPoint size={4} />

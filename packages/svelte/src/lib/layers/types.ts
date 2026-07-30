@@ -20,6 +20,8 @@ import type {
   ThemeSpec,
 } from "@ggsvelte/spec";
 
+import type { LegendFocusLayerValue } from "../legend/resolve-legend-focus.js";
+
 /**
  * A live mark-layer descriptor: properties are getters over the child's
  * `$props`, so prop updates flow into the plot's derived spec without
@@ -60,10 +62,15 @@ export type Layer =
   | { readonly kind: "facet"; get value(): FacetInput }
   | { readonly kind: "labs"; get value(): Labs }
   | { readonly kind: "guides"; get value(): GuidesSpec }
-  | { readonly kind: "legend"; get value(): LegendSpec };
+  | { readonly kind: "legend"; get value(): LegendSpec }
+  /** Host-only interaction contribution from `<GuideLegend focus>` — not PortableSpec. */
+  | { readonly kind: "legendFocus"; get value(): LegendFocusLayerValue };
 
-/** Non-mark grammar layer kinds (the seven #659 families). */
-export type GrammarLayerKind = Exclude<Layer["kind"], "mark">;
+/** Non-mark grammar layer kinds (the seven #659 families). Host-only kinds excluded. */
+export type GrammarLayerKind = Exclude<Layer["kind"], "mark" | "legendFocus">;
+
+/** Host-only layer kinds that must not fold into PortableSpec. */
+export type HostLayerKind = Extract<Layer["kind"], "legendFocus">;
 
 /**
  * Structural form accepted by fold/assemble: `value` may be a live getter or a
@@ -77,4 +84,10 @@ export type PlotLayerLike =
   | { readonly kind: "facet"; readonly value: FacetInput }
   | { readonly kind: "labs"; readonly value: Labs }
   | { readonly kind: "guides"; readonly value: GuidesSpec }
-  | { readonly kind: "legend"; readonly value: LegendSpec };
+  | { readonly kind: "legend"; readonly value: LegendSpec }
+  | { readonly kind: "legendFocus"; readonly value: LegendFocusLayerValue };
+
+/** True for host-only registry kinds that assemble/fold must ignore. */
+export function isHostPlotLayer(layer: { readonly kind: string }): boolean {
+  return layer.kind === "legendFocus";
+}
