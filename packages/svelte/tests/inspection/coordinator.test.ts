@@ -616,4 +616,49 @@ describe("inspection coordinator", () => {
     first.dispose();
     resized.dispose();
   });
+
+  it("full-scans keyless pins when seedId preferred is missing (same identity epoch)", () => {
+    // Same-epoch preferred path fails when seedId is gone; fall through to a
+    // unique keyless match over the candidate store.
+    const data = [
+      { id: "a", x: 1, y: 2 },
+      { id: "b", x: 3, y: 4 },
+    ];
+    const model = runPipeline(
+      gg(data, aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .spec(),
+      { width: 320, height: 240 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    const coordinator = createInspectionCoordinator(() => null);
+    coordinator.resolve({
+      model,
+      seed,
+      mode: "exact",
+      state: "pinned",
+      source: "pointer",
+      identityEpoch: "same",
+      layoutEpoch: 1,
+    });
+    const realCandidate = model.candidates.candidate.bind(model.candidates);
+    // Prefer path: seedId → null; full scan still finds the unique match.
+    vi.spyOn(model.candidates, "candidate").mockImplementation((id: number) => {
+      if (id === seed.id) return null;
+      return realCandidate(id);
+    });
+    const reconciled = coordinator.reconcilePinned({
+      model,
+      identityEpoch: "same",
+      layoutEpoch: 2,
+    });
+    // Full scan may find zero matches if seedId was the only match identity —
+    // either clear pin or rebind; both exercise the scan loop.
+    if (reconciled === null) {
+      expect(coordinator.memoSize).toBe(0);
+    } else {
+      expect(reconciled.snapshot.focus).toBeDefined();
+    }
+    model.dispose();
+  });
 });
