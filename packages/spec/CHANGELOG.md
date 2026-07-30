@@ -1,5 +1,31 @@
 # @ggsvelte/spec
 
+## 0.19.0
+
+### Minor Changes
+
+- 2054672: <!-- markdownlint-disable MD041 -->
+
+  Remove ColorBrewer Set1/Set2/Set3 categorical schemes
+
+  Migration: <https://ggsvelte.sh/guide/scales-guides>
+
+  Drop the poorly named Set1/Set2/Set3 palettes from the scheme registry,
+  runtime tables, docs catalog, and agent skill. Dark2, Paired, and Accent
+  remain. Specs that used `scheme: "Set1"|"Set2"|"Set3"` (or brewer
+  `palette` of those names) no longer validate — switch to another ordinal
+  scheme (e.g. `Dark2`, `tableau10`, `colorblind`) or an explicit `range`.
+
+### Patch Changes
+
+- 31bdf1c: <!-- markdownlint-disable MD041 -->
+
+  perf(spec): precompute reference catalogs off TypeBox
+
+  Ship GEOM_REFERENCE, SCALE_REFERENCE, STAT/POSITION/GUIDE catalogs and
+  GEOM_PARAM_KEYS as generated plain data so docs SSR and createGeomLayer
+  never load SpecDeclarations. Rebuild with `bun run reference:catalogs:gen`.
+
 ## 0.18.0
 
 ### Minor Changes
