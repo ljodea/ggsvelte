@@ -64,18 +64,24 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
   INTERACTION_POINT_REQUIRES_KEY: {
     severity: "warning",
     code: "INTERACTION_POINT_REQUIRES_KEY",
-    message: "Durable point selection requires a stable key field or accessor.",
+    message: "Durable point selection requires resolved row identity.",
     prop: "key",
-    suggestions: ['Pass key="id"', "Pass a stable key accessor"],
+    suggestions: [
+      "Omit key — defaults to an id column or row index",
+      'Override with key="id" or a stable key accessor when needed',
+    ],
     docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-point-requires-key",
   },
   INTERACTION_INTERVAL_PRESET_REQUIRES_KEY: {
     severity: "warning",
     code: "INTERACTION_INTERVAL_PRESET_REQUIRES_KEY",
     message:
-      "Coordinated interval presets (union, cross-panel) require a stable key field or accessor; without one they combine no rows.",
+      "Coordinated interval presets (union, cross-panel) require resolved row identity; without it they combine no rows.",
     prop: "key",
-    suggestions: ['Pass key="id"', "Pass a stable key accessor"],
+    suggestions: [
+      "Omit key — defaults to an id column or row index",
+      'Override with key="id" or a stable key accessor when needed',
+    ],
     docUrl:
       "https://ggsvelte.sh/guide/interaction-reference#interaction-interval-preset-requires-key",
   },
@@ -116,9 +122,12 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     severity: "warning",
     code: "INTERACTION_LEGEND_REQUIRES_KEY",
     message:
-      "Legend focus requires stable row keys so encoded legend values never become identities.",
+      "Legend focus requires resolved row identity so encoded legend values never become identities.",
     prop: "key",
-    suggestions: ['Pass key="id"', "Pass a stable key accessor"],
+    suggestions: [
+      "Omit key — defaults to an id column or row index",
+      'Override with key="id" or a stable key accessor when needed',
+    ],
     docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-legend-requires-key",
   },
   INTERACTION_LEGEND_DISCRETE_ONLY: {

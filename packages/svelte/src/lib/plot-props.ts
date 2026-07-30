@@ -67,7 +67,11 @@ export interface GGPlotProps<
   width?: number | "container";
   /** Plot height in px (falls back to spec.height, then 400). */
   height?: number;
-  /** Stable semantic identity used by public interaction payloads. */
+  /**
+   * Optional override for durable row identity (selection, legend focus, pin
+   * rebind, linked controllers). Default: use an `id` column when present,
+   * otherwise the row index. Ordinary charts should omit this prop.
+   */
   key?: Identity;
   /** Opt into inspection, its semantic crosshair, tooltip, and pinning. */
   inspect?: InspectInput;

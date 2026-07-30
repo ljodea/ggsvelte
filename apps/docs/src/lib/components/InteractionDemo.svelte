@@ -50,7 +50,6 @@ ${closeScript}
   {interaction}
   interactionScope={scope}
   data={rows}
-  key="id"
   aes={{ x: "period", y: "value", color: "series" }}
   select={{ type: "interval", mode: "xy" }}
   zoom={{ mode: "x" }}
@@ -87,7 +86,6 @@ ${closeScript}
       data={rows}
       aes={{ x: "period", y: "value", color: "series" }}
       layers={[{ geom: "point", params: { size: 4 } }]}
-      key="id"
       select={{ type: "interval", mode: "xy" }}
       zoom={{ mode: "x" }}
       {interaction}

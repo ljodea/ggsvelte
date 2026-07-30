@@ -237,7 +237,7 @@ describe("legend focus capability edges", () => {
     expect(interactions).toEqual([]);
   });
 
-  it("diagnoses a missing stable key without exposing inert legend controls", async () => {
+  it("enables legend focus without an explicit key when rows carry id", async () => {
     const diagnostics: Array<{ code: string }> = [];
     const { container } = render(GGPlot, {
       data: rows,
@@ -249,11 +249,32 @@ describe("legend focus capability edges", () => {
       height: 260,
     });
 
-    await until(() =>
+    await until(() => container.querySelectorAll(".gg-legend-target").length === 2);
+    expect(
       diagnostics.some((diagnostic) => diagnostic.code === "INTERACTION_LEGEND_REQUIRES_KEY"),
-    );
-    expect(container.querySelector(".gg-legend-target")).toBeNull();
+    ).toBe(false);
     expect(container.querySelector(".gg-capture")).toBeNull();
+  });
+
+  it("enables legend focus without an explicit key via row-index default", async () => {
+    const diagnostics: Array<{ code: string }> = [];
+    const { container } = render(GGPlot, {
+      data: [
+        { x: 1, y: 2, group: "North" },
+        { x: 2, y: 3, group: "South" },
+      ],
+      aes: { x: "x", y: "y", color: "group" },
+      layers: [{ geom: "point" }],
+      legendFocus: true,
+      ondiagnostic: (diagnostic: { code: string }) => diagnostics.push(diagnostic),
+      width: 360,
+      height: 260,
+    });
+
+    await until(() => container.querySelectorAll(".gg-legend-target").length === 2);
+    expect(
+      diagnostics.some((diagnostic) => diagnostic.code === "INTERACTION_LEGEND_REQUIRES_KEY"),
+    ).toBe(false);
   });
 
   it("keeps hover and DOM focus inert when preview is disabled", async () => {

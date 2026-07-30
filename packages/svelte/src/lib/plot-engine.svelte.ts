@@ -48,6 +48,7 @@ import {
   resolveInteractionScope,
   toLayerInput,
 } from "./assembly/assemble.js";
+import { resolveDatumKey } from "./runtime/resolve-datum-key.js";
 import {
   collectCompositionDiagnostics,
   compositionAdvisoryDedupKey,
@@ -267,18 +268,35 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     }),
   );
 
+  /**
+   * Durable row identity: explicit GGPlot `key` override, else auto `id`
+   * column, else row index. Always defined — interaction never requires
+   * authors to pass `key` for ordinary charts.
+   */
+  function resolvedDatumKeyNow() {
+    const data = host.props.data;
+    const embedded = assembled()?.data;
+    return resolveDatumKey({
+      explicit: host.props.key,
+      data: data !== undefined ? data : embedded,
+    });
+  }
+  const resolvedDatumKeyDerived = $derived.by(resolvedDatumKeyNow);
+  const resolvedDatumKey = () =>
+    typeof window === "undefined" ? resolvedDatumKeyNow() : resolvedDatumKeyDerived;
+
   const resolvedInteractionScope: PlotInteractionScope = $derived(
     (() => {
       const interaction = host.props.interaction;
       const interactionScope = host.props.interactionScope;
-      const datumKey = host.props.key;
+      const datumKey = resolvedDatumKey();
       return resolveInteractionScope({
         interaction,
         ...(interactionScope !== undefined && { interactionScope }),
         // Single-field default — do not call caps() (would subscribe all five).
         zoom: host.props.zoom ?? false,
         faceted: facetedPlot,
-        ...(datumKey !== undefined && { datumKey }),
+        datumKey,
         assembled: assembled(),
       });
     })(),
@@ -345,7 +363,8 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       },
       {
         faceted: facetedPlot,
-        hasKey: host.props.key !== undefined,
+        // Defaults always resolve a datum key (id column or row index).
+        hasKey: true,
       },
     );
   }
@@ -583,7 +602,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   const semanticKeys = createSemanticKeyService({
     model: () => runtime.model,
     assembled,
-    datumKey: () => host.props.key,
+    datumKey: () => resolvedDatumKey(),
     data: () => host.props.data,
     spec: () => host.props.spec,
     sourceIdentity: (value: unknown) => identityTracker.sourceIdentity(value),
