@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     GeomArea,
+    createPlotInteraction,
     GGPlot,
     GuideLegend,
     Labs,
@@ -10,12 +11,16 @@
   } from "@ggsvelte/svelte";
 
   import { crimeanMortality } from "./data.js";
+
+  const interaction = createPlotInteraction({
+    identity: (row) => `${row.month}:${row.cause}`,
+  });
 </script>
 
 <GGPlot
   data={crimeanMortality}
   aes={{ x: "month", y: "deaths", fill: "cause" }}
-  key={(row) => `${row.month}:${row.cause}`}
+  {interaction}
   width={640}
   height={400}
 >

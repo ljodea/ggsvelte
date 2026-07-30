@@ -16,11 +16,10 @@
 <GGPlot
   data={londonCholera}
   aes={{ x: "density", y: "deathRate", color: "water" }}
-  key="district"
   width="container"
   height={400}
 >
-  <Inspect mode="xy" pin />
+  <Inspect mode="xy" pin identity="district" />
   <ThemeEconomist />
   <ScaleXLog10 labels="~s" />
   <ScaleColorManual

@@ -241,7 +241,7 @@ describe("guide sections cover their catalogs", () => {
     expect(INTERACTIONS_MD).not.toContain("/playground");
     expect(INTERACTIONS_MD).toContain('<Inspect mode="x" pin maxDistance={24} />');
     expect(INTERACTIONS_MD).toContain('select={{ type: "interval", mode: "xy",');
-    expect(INTERACTIONS_MD).toContain('key="id"');
+    expect(INTERACTIONS_MD).toContain('identity: "id"');
     expect(INTERACTIONS_MD).toContain("oninspect");
     expect(INTERACTIONS_MD).toContain("onselect");
     expect(INTERACTIONS_MD).toContain("oninteraction");

@@ -29,7 +29,7 @@ export type ExplicitDatumKeySources = {
   readonly select?: DatumKey | undefined;
   /** `createPlotInteraction({ identity })` when bound via `interaction=`. */
   readonly controller?: DatumKey | undefined;
-  /** @deprecated GGPlot `key` — dual-read until removal. */
+  /** Deprecated GGPlot `key` dual-read (prefer interaction-surface identity). */
   readonly legacy?: DatumKey | undefined;
 };
 

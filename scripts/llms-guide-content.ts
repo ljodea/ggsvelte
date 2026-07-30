@@ -1927,7 +1927,7 @@ rather than creating a second policy.
 
 ## 0.20 to 0.21
 
-### Row identity on interaction surfaces
+### Row identity on interaction
 
 Durable row identity no longer belongs on the grammar root. Ordinary charts
 omit identity entirely: the engine uses an \`id\` column when present, otherwise
