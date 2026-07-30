@@ -130,7 +130,8 @@ describe("skill Svelte fences use v0.20 interaction children", () => {
     expect(interactions).toBeDefined();
     // Table row for filter should name GuideLegend, not GGPlot.
     expect(interactions!.markdown).toMatch(/`filter`\s*\|\s*`boolean[^`]*` on `<GuideLegend>`/);
-    expect(interactions!.markdown).not.toMatch(/\| `legendFilter`\s*\|[^|]*on `<GGPlot>`/);
+    // Middle cell may contain markdown-escaped pipes (`\|`); do not use [^|].
+    expect(interactions!.markdown).not.toMatch(/\| `legendFilter`\s*\|[^\n]*on `<GGPlot>`/);
   });
 });
 

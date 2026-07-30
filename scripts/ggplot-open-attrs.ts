@@ -68,7 +68,14 @@ export function plotLevelInteractionOffenders(attrs: string): string[] {
   const offenders: string[] = [];
   if (/\blegendFocus\b/.test(attrs)) offenders.push("legendFocus");
   if (/\blegendFilter\b/.test(attrs)) offenders.push("legendFilter");
-  // Bare inspect= on GGPlot. oninspect= is a handler (prefix keeps it out).
-  if (/(?<![\w])inspect\s*=/.test(attrs)) offenders.push("inspect=");
+  // Plot-level inspect: value form, boolean bare, or {inspect} shorthand.
+  // Not oninspect= handlers (prefix keeps them out of the bare form).
+  if (
+    /(?<![\w])inspect\s*=/.test(attrs) ||
+    /(?<![\w])\{inspect\}/.test(attrs) ||
+    /(?<![\w])inspect(?=\s|$|\/)/.test(attrs)
+  ) {
+    offenders.push("inspect");
+  }
   return offenders;
 }

@@ -61,7 +61,15 @@ describe("example interaction API (v0.20)", () => {
     expect(plotLevelInteractionOffenders(attrs[0]!)).toEqual([
       "legendFocus",
       "legendFilter",
-      "inspect=",
+      "inspect",
     ]);
+  });
+
+  it("flags bare and braced inspect shorthand", () => {
+    expect(plotLevelInteractionOffenders(" data={rows} inspect ")).toEqual(["inspect"]);
+    expect(plotLevelInteractionOffenders(" {inspect} ")).toEqual(["inspect"]);
+    // Handlers and unrelated identifiers stay clean.
+    expect(plotLevelInteractionOffenders(" oninspect={(e) => {}} ")).toEqual([]);
+    expect(plotLevelInteractionOffenders(" interactionScope={scope} ")).toEqual([]);
   });
 });
