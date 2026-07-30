@@ -46,7 +46,7 @@ export function dataHasIdIdentityColumn(data: unknown): boolean {
 
   if (Array.isArray(data)) {
     if (data.length === 0) return false;
-    const row = data[0];
+    const row: unknown = data[0];
     if (row === null || typeof row !== "object" || Array.isArray(row)) return false;
     return isPropertyKeyIdentity((row as Record<string, unknown>)["id"]);
   }

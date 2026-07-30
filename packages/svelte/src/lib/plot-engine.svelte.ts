@@ -278,7 +278,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     const embedded = assembled()?.data;
     return resolveDatumKey({
       explicit: host.props.key,
-      data: data !== undefined ? data : embedded,
+      data: data ?? embedded,
     });
   }
   const resolvedDatumKeyDerived = $derived.by(resolvedDatumKeyNow);

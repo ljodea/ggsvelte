@@ -41737,9 +41737,13 @@ export const DOCS_SEARCH_INDEX = [
     id: "diagnostic:interaction:INTERACTION_POINT_REQUIRES_KEY",
     kind: "diagnostic",
     title: "INTERACTION_POINT_REQUIRES_KEY · interaction",
-    summary: "Durable point selection requires a stable key field or accessor.",
+    summary: "Durable point selection requires resolved row identity.",
     href: "/guide/errors#interaction-point-requires-key",
-    keywords: ["interaction", "warning", 'Pass key="id"; Pass a stable key accessor'],
+    keywords: [
+      "interaction",
+      "warning",
+      'Omit key — defaults to an id column or row index; Override with key="id" or a stable key accessor when needed',
+    ],
     exact: ["INTERACTION_POINT_REQUIRES_KEY", "interaction:INTERACTION_POINT_REQUIRES_KEY"],
   },
   {
@@ -41747,9 +41751,13 @@ export const DOCS_SEARCH_INDEX = [
     kind: "diagnostic",
     title: "INTERACTION_INTERVAL_PRESET_REQUIRES_KEY · interaction",
     summary:
-      "Coordinated interval presets (union, cross-panel) require a stable key field or accessor; without one they combine no rows.",
+      "Coordinated interval presets (union, cross-panel) require resolved row identity; without it they combine no rows.",
     href: "/guide/errors#interaction-interval-preset-requires-key",
-    keywords: ["interaction", "warning", 'Pass key="id"; Pass a stable key accessor'],
+    keywords: [
+      "interaction",
+      "warning",
+      'Omit key — defaults to an id column or row index; Override with key="id" or a stable key accessor when needed',
+    ],
     exact: [
       "INTERACTION_INTERVAL_PRESET_REQUIRES_KEY",
       "interaction:INTERACTION_INTERVAL_PRESET_REQUIRES_KEY",
@@ -41801,9 +41809,13 @@ export const DOCS_SEARCH_INDEX = [
     kind: "diagnostic",
     title: "INTERACTION_LEGEND_REQUIRES_KEY · interaction",
     summary:
-      "Legend focus requires stable row keys so encoded legend values never become identities.",
+      "Legend focus requires resolved row identity so encoded legend values never become identities.",
     href: "/guide/errors#interaction-legend-requires-key",
-    keywords: ["interaction", "warning", 'Pass key="id"; Pass a stable key accessor'],
+    keywords: [
+      "interaction",
+      "warning",
+      'Omit key — defaults to an id column or row index; Override with key="id" or a stable key accessor when needed',
+    ],
     exact: ["INTERACTION_LEGEND_REQUIRES_KEY", "interaction:INTERACTION_LEGEND_REQUIRES_KEY"],
   },
   {
