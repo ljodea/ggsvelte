@@ -55,6 +55,55 @@ describe("toLayerInput", () => {
       params: { method: "lm" },
     });
   });
+
+  /**
+   * layerDataRef / isWrappedDataRef: geom `data` props must round-trip as
+   * DataRef shapes without double-wrapping already-valid bags.
+   */
+  it("wraps row arrays as { values } and bare column maps as { columns }", () => {
+    const rows = [
+      { x: 1, y: 2 },
+      { x: 3, y: 4 },
+    ];
+    expect(toLayerInput({ geom: "point", data: rows }).data).toEqual({ values: rows });
+    const columns = { x: [1, 3], y: [2, 4] };
+    expect(toLayerInput({ geom: "point", data: columns }).data).toEqual({ columns });
+  });
+
+  it("passes through single-key DataRef bags without double wrapping", () => {
+    const valuesBag = { values: [{ x: 1 }] };
+    expect(toLayerInput({ geom: "point", data: valuesBag }).data).toBe(valuesBag);
+    const columnsBag = { columns: { x: [1], y: [2] } };
+    expect(toLayerInput({ geom: "point", data: columnsBag }).data).toBe(columnsBag);
+    const nameBag = { name: "mpg" };
+    expect(toLayerInput({ geom: "point", data: nameBag }).data).toBe(nameBag);
+  });
+
+  it("does not treat multi-key or malformed single-key objects as DataRefs", () => {
+    // Multi-key object is a bare column map (or mixed) — wrap as columns.
+    const multi = { values: [{ x: 1 }], y: [2] };
+    expect(toLayerInput({ geom: "point", data: multi }).data).toEqual({ columns: multi });
+    // Single-key but wrong value types → not a DataRef; wrap as columns.
+    const nameNotString = { name: 12 };
+    expect(toLayerInput({ geom: "point", data: nameNotString as never }).data).toEqual({
+      columns: nameNotString,
+    });
+    const valuesNotArray = { values: { x: 1 } };
+    expect(toLayerInput({ geom: "point", data: valuesNotArray as never }).data).toEqual({
+      columns: valuesNotArray,
+    });
+    const columnsIsArray = { columns: [1, 2] };
+    expect(toLayerInput({ geom: "point", data: columnsIsArray as never }).data).toEqual({
+      columns: columnsIsArray,
+    });
+    const columnsNull = { columns: null };
+    expect(toLayerInput({ geom: "point", data: columnsNull as never }).data).toEqual({
+      columns: columnsNull,
+    });
+    // Unknown single key is not a DataRef.
+    const other = { rows: [{ x: 1 }] };
+    expect(toLayerInput({ geom: "point", data: other as never }).data).toEqual({ columns: other });
+  });
 });
 
 describe("assemblePortableSpec", () => {
