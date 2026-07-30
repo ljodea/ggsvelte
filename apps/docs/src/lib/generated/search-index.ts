@@ -19873,14 +19873,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/svelte"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-472",
+    id: "heading:guide-lifecycle:experimental-473",
     kind: "heading",
-    title: "experimental (472)",
+    title: "experimental (473)",
     summary:
-      "experimental (472) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-472",
+      "experimental (473) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-473",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (472)"],
+    exact: ["experimental (473)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-243",
@@ -34221,6 +34221,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-svelte",
     keywords: ["@ggsvelte/svelte", ".", "type", "experimental"],
     exact: ["IdentityNumericStyleScaleOptions"],
+  },
+  {
+    id: "api:ggsvelte-svelte:Inspect",
+    kind: "api",
+    title: "Inspect",
+    summary: "@ggsvelte/svelte · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-svelte",
+    keywords: ["@ggsvelte/svelte", ".", "value", "experimental"],
+    exact: ["Inspect"],
   },
   {
     id: "api:ggsvelte-svelte:InspectInput",
