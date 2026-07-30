@@ -1,5 +1,36 @@
 # @ggsvelte/svelte
 
+## 0.19.0
+
+### Minor Changes
+
+- 2054672: <!-- markdownlint-disable MD041 -->
+
+  Remove ColorBrewer Set1/Set2/Set3 categorical schemes
+
+  Migration: <https://ggsvelte.sh/guide/scales-guides>
+
+  Drop the poorly named Set1/Set2/Set3 palettes from the scheme registry,
+  runtime tables, docs catalog, and agent skill. Dark2, Paired, and Accent
+  remain. Specs that used `scheme: "Set1"|"Set2"|"Set3"` (or brewer
+  `palette` of those names) no longer validate — switch to another ordinal
+  scheme (e.g. `Dark2`, `tableau10`, `colorblind`) or an explicit `range`.
+
+### Patch Changes
+
+- 312cb48: <!-- markdownlint-disable MD041 -->
+
+  fix(docs): grammar families are layers in the agent skill
+
+  Scale/Theme/Guide/Labs/Coord/Facet/Legend are Layer kinds in Svelte.
+  PortableSpec `layers[]` holds marks only as serialization, not ontology.
+  Closes the #1200 inverted framing path.
+
+- Updated dependencies [2054672]
+- Updated dependencies [31bdf1c]
+  - @ggsvelte/core@0.19.0
+  - @ggsvelte/spec@0.19.0
+
 ## 0.18.0
 
 ### Minor Changes
