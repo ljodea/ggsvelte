@@ -1,7 +1,8 @@
 /**
  * Pure composition-diagnostic collection (extracted from plot assembly).
- * Node lane — no browser/GGPlot. Expected values are independent of
- * implementation structure (codes, channels, emit order).
+ * Browser lane: CI coverage is browser-only (SSR vitest does not collect).
+ * Expected values are independent of implementation structure (codes,
+ * channels, emit order).
  */
 import { describe, expect, it } from "vitest";
 

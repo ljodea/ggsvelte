@@ -1,6 +1,6 @@
 /**
  * Pure wiring-advisory collection (extracted from plot assembly).
- * Node lane — no browser/GGPlot.
+ * Browser lane: CI coverage is browser-only (SSR vitest does not collect).
  */
 import { describe, expect, it } from "vitest";
 
