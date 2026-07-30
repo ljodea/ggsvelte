@@ -3,10 +3,14 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { LayerRegistry } from "../../src/lib/geoms/registry.svelte.js";
+import { LayerRegistry, registerHostCapability } from "../../src/lib/geoms/registry.svelte.js";
 import { resolveInspectCapability } from "../../src/lib/interaction/resolve-inspect-capability.js";
 
 describe("LayerRegistry capabilities", () => {
+  it("exports registerHostCapability for declaration children (ADR 0001 helper)", () => {
+    expect(typeof registerHostCapability).toBe("function");
+  });
+
   it("returns inspect values in registration order", () => {
     const registry = new LayerRegistry();
     const id1 = registry.registerCapability("inspect", () => ({ mode: "x" as const }));
