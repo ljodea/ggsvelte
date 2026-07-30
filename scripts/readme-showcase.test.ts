@@ -28,6 +28,33 @@ function bothCaptures(match: RegExpExecArray): readonly [string, string] {
   return [first, second];
 }
 
+/**
+ * README snippets are the GitHub front door; the corpus files are the VR
+ * matrix's render targets. VR needs explicit `width`/`height` on `<GGPlot>`,
+ * the front door does not (omitted width is container-responsive, omitted
+ * height defaults to 400) — so snippets drop the root size props and this
+ * comparison strips them from the corpus side before checking sync. Only
+ * whole-line attributes go: geom-level sizes like `<GeomCol width={0.7} />`
+ * share a line with their tag and stay.
+ */
+function stripRootSizeProps(source: string): string {
+  return source
+    .split("\n")
+    .filter((line) => !/^\s*(?:width|height)=(?:\{[^}]*\}|"[^"]*")$/.test(line))
+    .join("\n");
+}
+
+/**
+ * Whitespace-insensitive form: prettier may fold a `<GGPlot …>` open tag onto
+ * one line once the size props are gone, while the corpus keeps it multi-line.
+ */
+function normalizeSnippet(source: string): string {
+  return source
+    .replace(/\s+/g, " ")
+    .replace(/\s(\/?>)/g, "$1")
+    .trim();
+}
+
 function readmeExamples(): readonly ReadmeExample[] {
   return [
     ...readme.matchAll(/<!-- example-source: ([^ ]+) -->\n\n```svelte\n([\s\S]*?)\n```/g),
@@ -75,10 +102,12 @@ describe("README visual showcase", () => {
     }
   });
 
-  it("keeps every showcased snippet identical to its real Svelte example", () => {
+  it("keeps every showcased snippet in sync with its real Svelte example, minus size props", () => {
     for (const { id, source } of readmeExamples()) {
       const exampleSource = readFileSync(join(root, "examples", id, "Example.svelte"), "utf8");
-      expect(source.trim(), id).toBe(exampleSource.trim());
+      expect(normalizeSnippet(source), id).toBe(
+        normalizeSnippet(stripRootSizeProps(exampleSource)),
+      );
       expect(source).toContain('from "@ggsvelte/svelte"');
       expect(source).toContain("<GGPlot");
       expect(source).not.toContain('from "@ggsvelte/spec"');
