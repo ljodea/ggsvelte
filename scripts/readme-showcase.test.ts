@@ -33,15 +33,26 @@ function bothCaptures(match: RegExpExecArray): readonly [string, string] {
  * matrix's render targets. VR needs explicit `width`/`height` on `<GGPlot>`,
  * the front door does not (omitted width is container-responsive, omitted
  * height defaults to 400) — so snippets drop the root size props and this
- * comparison strips them from the corpus side before checking sync. Only
- * whole-line attributes go: geom-level sizes like `<GeomCol width={0.7} />`
- * share a line with their tag and stay.
+ * comparison strips them from the corpus side before checking sync. The
+ * strip is scoped to the root `<GGPlot` open tag (an unindented `<GGPlot`
+ * line through its closing `>`): size props on geoms or nested plots — even
+ * when prettier wraps them onto their own line, as in
+ * `examples/errorbar/summary-bin` — must still appear in README snippets.
  */
 function stripRootSizeProps(source: string): string {
-  return source
-    .split("\n")
-    .filter((line) => !/^\s*(?:width|height)=(?:\{[^}]*\}|"[^"]*")$/.test(line))
-    .join("\n");
+  const sizeAttribute = /^\s*(?:width|height)=(?:\{[^}]*\}|"[^"]*")$/;
+  const out: string[] = [];
+  let inRootOpenTag = false;
+  for (const line of source.split("\n")) {
+    if (line === "<GGPlot") {
+      inRootOpenTag = true;
+    } else if (inRootOpenTag) {
+      if (sizeAttribute.test(line)) continue;
+      if (line.trimEnd().endsWith(">")) inRootOpenTag = false;
+    }
+    out.push(line);
+  }
+  return out.join("\n");
 }
 
 /**
@@ -76,6 +87,36 @@ function linkedPreviews(): ReadonlyMap<string, string> {
     }),
   );
 }
+
+describe("stripRootSizeProps", () => {
+  it("strips size props from the root GGPlot open tag only", () => {
+    const fixture = [
+      "<GGPlot",
+      "  data={rows}",
+      "  width={640}",
+      "  height={400}",
+      ">",
+      "  <GeomErrorbar",
+      '    stat="summary_bin"',
+      "    width={0.35}",
+      "    linewidth={1.4}",
+      "  />",
+      "  <GGPlot",
+      "    data={inner}",
+      "    width={320}",
+      "  >",
+      "    <GeomPoint />",
+      "  </GGPlot>",
+      "</GGPlot>",
+    ].join("\n");
+
+    const stripped = stripRootSizeProps(fixture);
+    expect(stripped).not.toContain("width={640}");
+    expect(stripped).not.toContain("height={400}");
+    expect(stripped).toContain("width={0.35}");
+    expect(stripped).toContain("width={320}");
+  });
+});
 
 describe("README visual showcase", () => {
   it("shows broad example range through trusted generated previews", () => {
