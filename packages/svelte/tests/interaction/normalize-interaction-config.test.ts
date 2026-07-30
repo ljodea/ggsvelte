@@ -143,4 +143,43 @@ describe("interaction capability normalization", () => {
       expect(entry.code).toBe(key);
     }
   });
+
+  it("diagnoses non-finite or negative inspect maxDistance and drops inspect", () => {
+    for (const maxDistance of [Number.NaN, -1, Number.POSITIVE_INFINITY] as const) {
+      const resolved = normalizeInteractionConfig({ inspect: { maxDistance } });
+      expect(resolved.inspect).toBeNull();
+      expect(resolved.diagnostics).toContainEqual(
+        expect.objectContaining({
+          code: "INTERACTION_INVALID_MAX_DISTANCE",
+          actual: maxDistance,
+        }),
+      );
+    }
+    // Finite non-negative keeps inspect (including zero).
+    expect(normalizeInteractionConfig({ inspect: { maxDistance: 0 } }).inspect).toMatchObject({
+      maxDistance: 0,
+    });
+  });
+
+  it("diagnoses keyless point selection and unavailable tools", () => {
+    const point = normalizeInteractionConfig({ select: "point" }, { hasKey: false });
+    expect(point.select).toMatchObject({ type: "point" });
+    expect(point.diagnostics).toContainEqual(
+      expect.objectContaining({ code: "INTERACTION_POINT_REQUIRES_KEY" }),
+    );
+
+    // Point-only available tools; requesting zoom-area falls back to point.
+    const tool = normalizeInteractionConfig(
+      { select: "point", tool: "zoom-area" },
+      { hasKey: true },
+    );
+    expect(tool.availableTools).toEqual(["point"]);
+    expect(tool.initialTool).toBe("point");
+    expect(tool.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: "INTERACTION_TOOL_UNAVAILABLE",
+        actual: "zoom-area",
+      }),
+    );
+  });
 });
