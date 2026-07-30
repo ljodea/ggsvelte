@@ -4,6 +4,8 @@
  * The core opt-out is worthless to a component author if the prop stops at the
  * registry: the getting-started lesson is written in components, and the
  * portable spec it teaches has to carry the same intent as the JSON.
+ *
+ * Browser lane: CI coverage is browser-only (SSR vitest does not collect).
  */
 import { describe, expect, it } from "vitest";
 
