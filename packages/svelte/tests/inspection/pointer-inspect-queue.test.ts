@@ -4,14 +4,41 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
+import type { CandidateFacts } from "@ggsvelte/core";
 import { runPipeline } from "@ggsvelte/core";
 import { aes, gg } from "@ggsvelte/spec";
 
 import { createPointerInspectQueue } from "../../src/lib/inspection/pointer-inspect.js";
-import type { InteractionFrameToken } from "../../src/lib/interaction/reducer.js";
+import type {
+  InteractionAction,
+  InteractionFrameToken,
+} from "../../src/lib/interaction/reducer.js";
+import type { InteractionSource } from "../../src/lib/interaction/interaction.js";
 
 function token(epoch: number): InteractionFrameToken {
   return { epoch, revision: 0 };
+}
+
+type QueuedInspect = Extract<InteractionAction, { type: "inspect" }>;
+
+function noopCancel(): void {
+  // void stub for cancelScheduledPointer
+}
+
+function makeReducer(options: {
+  frameToken?: () => InteractionFrameToken;
+  accepts?: () => boolean;
+  queuePointer?: (
+    action: QueuedInspect | Extract<InteractionAction, { type: "move-area" }>,
+  ) => void;
+  cancelScheduledPointer?: (kind?: "inspect" | "move-area") => void;
+}) {
+  return {
+    frameToken: options.frameToken ?? (() => token(0)),
+    accepts: options.accepts ?? (() => true),
+    queuePointer: options.queuePointer ?? noopCancel,
+    cancelScheduledPointer: options.cancelScheduledPointer ?? noopCancel,
+  };
 }
 
 describe("createPointerInspectQueue", () => {
@@ -29,18 +56,19 @@ describe("createPointerInspectQueue", () => {
   );
 
   it("schedules inspect with a null model and still queues a frame", () => {
-    const queuePointer = vi.fn();
+    const queued: QueuedInspect[] = [];
     const frameToken = vi.fn(() => token(1));
     const queue = createPointerInspectQueue({
       model: () => null,
-      reducer: () => ({
-        frameToken,
-        accepts: () => true,
-        queuePointer,
-        cancelScheduledPointer: vi.fn(),
-      }),
+      reducer: () =>
+        makeReducer({
+          frameToken,
+          queuePointer: (action) => {
+            if (action.type === "inspect") queued.push(action);
+          },
+        }),
       inspectionState: () => "none",
-      setInspection: vi.fn(),
+      setInspection: noopCancel,
     });
     queue.schedule({
       point: { x: 0, y: 0 },
@@ -49,38 +77,36 @@ describe("createPointerInspectQueue", () => {
       maxDistance: 24,
     });
     expect(frameToken).toHaveBeenCalledOnce();
-    expect(queuePointer).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: "inspect",
-        candidate: null,
-        source: "pointer",
-      }),
-    );
+    expect(queued).toHaveLength(1);
+    expect(queued[0]).toMatchObject({
+      type: "inspect",
+      candidate: null,
+      source: "pointer",
+    });
   });
 
   it("clears the queue when reducer.queuePointer throws", () => {
-    const cancelScheduledPointer = vi.fn();
+    const seed = model.candidates.candidate(0)!;
     const queue = createPointerInspectQueue({
       model: () => model,
-      reducer: () => ({
-        frameToken: () => token(2),
-        accepts: () => true,
-        queuePointer: () => {
-          throw new Error("schedule failed");
-        },
-        cancelScheduledPointer,
-      }),
+      reducer: () =>
+        makeReducer({
+          frameToken: () => token(2),
+          queuePointer: () => {
+            throw new Error("schedule failed");
+          },
+        }),
       inspectionState: () => "none",
-      setInspection: vi.fn(),
+      setInspection: noopCancel,
     });
-    expect(() =>
+    expect(() => {
       queue.schedule({
-        point: { x: model.candidates.candidate(0)!.x, y: model.candidates.candidate(0)!.y },
+        point: { x: seed.x, y: seed.y },
         source: "pointer",
         mode: "auto",
         maxDistance: 48,
-      }),
-    ).toThrow(/schedule failed/);
+      });
+    }).toThrow(/schedule failed/);
     // No orphan pending after throw.
     expect(queue.peekPendingPinned()).toBeNull();
     expect(queue.onFrame({ type: "inspect", candidate: null, source: "pointer" })).toBe(true);
@@ -88,16 +114,22 @@ describe("createPointerInspectQueue", () => {
 
   it("routes onFrame drop/stash/apply and pending-pin take/clear", () => {
     let accepts = true;
-    const setInspection = vi.fn();
-    const cancelScheduledPointer = vi.fn();
+    let inspectCalls = 0;
+    const setInspection = (
+      _candidate: CandidateFacts | null,
+      _source: InteractionSource,
+      _state?: "transient" | "pinned",
+      _concreteMode?: "exact" | "x" | "y" | "xy",
+    ): void => {
+      inspectCalls += 1;
+    };
     const queue = createPointerInspectQueue({
       model: () => model,
-      reducer: () => ({
-        frameToken: () => token(3),
-        accepts: () => accepts,
-        queuePointer: vi.fn(),
-        cancelScheduledPointer,
-      }),
+      reducer: () =>
+        makeReducer({
+          frameToken: () => token(3),
+          accepts: () => accepts,
+        }),
       inspectionState: () => "none",
       setInspection,
     });
@@ -106,6 +138,13 @@ describe("createPointerInspectQueue", () => {
     expect(queue.onFrame({ type: "inspect", candidate: null, source: "pointer" })).toBe(true);
 
     const seed = model.candidates.candidate(0)!;
+    const seedRef = {
+      epoch: model.runId,
+      id: seed.id,
+      panelId: seed.panelId,
+      x: seed.x,
+      y: seed.y,
+    };
     queue.schedule({
       point: { x: seed.x, y: seed.y },
       source: "touch",
@@ -117,29 +156,17 @@ describe("createPointerInspectQueue", () => {
     expect(
       queue.onFrame({
         type: "inspect",
-        candidate: { epoch: model.runId, id: seed.id, panelId: seed.panelId, x: seed.x, y: seed.y },
+        candidate: seedRef,
         source: "touch",
       }),
     ).toBe(false);
 
-    // Schedule again; pin host state → stash-pending.
+    // Schedule again under pinned host → stash-pending.
     accepts = true;
-    queue.schedule({
-      point: { x: seed.x, y: seed.y },
-      source: "pointer",
-      mode: "exact",
-      maxDistance: 24,
-    });
-    // Swap inspectionState via a mutable box.
     let hostState: "none" | "transient" | "pinned" = "pinned";
     const stashing = createPointerInspectQueue({
       model: () => model,
-      reducer: () => ({
-        frameToken: () => token(4),
-        accepts: () => true,
-        queuePointer: vi.fn(),
-        cancelScheduledPointer,
-      }),
+      reducer: () => makeReducer({ frameToken: () => token(4) }),
       inspectionState: () => hostState,
       setInspection,
     });
@@ -152,7 +179,7 @@ describe("createPointerInspectQueue", () => {
     expect(
       stashing.onFrame({
         type: "inspect",
-        candidate: { epoch: model.runId, id: seed.id, panelId: seed.panelId, x: seed.x, y: seed.y },
+        candidate: seedRef,
         source: "pointer",
       }),
     ).toBe(true);
@@ -166,12 +193,7 @@ describe("createPointerInspectQueue", () => {
     hostState = "transient";
     const applying = createPointerInspectQueue({
       model: () => model,
-      reducer: () => ({
-        frameToken: () => token(5),
-        accepts: () => true,
-        queuePointer: vi.fn(),
-        cancelScheduledPointer,
-      }),
+      reducer: () => makeReducer({ frameToken: () => token(5) }),
       inspectionState: () => hostState,
       setInspection,
     });
@@ -184,11 +206,11 @@ describe("createPointerInspectQueue", () => {
     expect(
       applying.onFrame({
         type: "inspect",
-        candidate: { epoch: model.runId, id: seed.id, panelId: seed.panelId, x: seed.x, y: seed.y },
+        candidate: seedRef,
         source: "keyboard",
       }),
     ).toBe(true);
-    expect(setInspection).toHaveBeenCalled();
+    expect(inspectCalls).toBeGreaterThan(0);
 
     // cancel discard vs preserve pendingPinned, then scene invalidate.
     applying.schedule({
@@ -200,7 +222,7 @@ describe("createPointerInspectQueue", () => {
     hostState = "pinned";
     applying.onFrame({
       type: "inspect",
-      candidate: { epoch: model.runId, id: seed.id, panelId: seed.panelId, x: seed.x, y: seed.y },
+      candidate: seedRef,
       source: "pointer",
     });
     expect(applying.peekPendingPinned()).not.toBeNull();
@@ -222,18 +244,18 @@ describe("createPointerInspectQueue", () => {
   it("falls back to hitTest when nearest match is null", () => {
     const seed = model.candidates.candidate(1)!;
     const hitTest = vi.spyOn(model.candidates, "hitTest").mockReturnValue(seed);
-    // Point far outside any mark so nearest is null; hitTest still supplies fallback.
-    const queuePointer = vi.fn();
+    const queued: QueuedInspect[] = [];
     const queue = createPointerInspectQueue({
       model: () => model,
-      reducer: () => ({
-        frameToken: () => token(6),
-        accepts: () => true,
-        queuePointer,
-        cancelScheduledPointer: vi.fn(),
-      }),
+      reducer: () =>
+        makeReducer({
+          frameToken: () => token(6),
+          queuePointer: (action) => {
+            if (action.type === "inspect") queued.push(action);
+          },
+        }),
       inspectionState: () => "none",
-      setInspection: vi.fn(),
+      setInspection: noopCancel,
     });
     queue.schedule({
       point: { x: -9999, y: -9999 },
@@ -242,12 +264,8 @@ describe("createPointerInspectQueue", () => {
       maxDistance: 1,
     });
     expect(hitTest).toHaveBeenCalled();
-    expect(queuePointer).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: "inspect",
-        candidate: expect.objectContaining({ id: seed.id }),
-      }),
-    );
+    expect(queued).toHaveLength(1);
+    expect(queued[0]?.candidate?.id).toBe(seed.id);
     hitTest.mockRestore();
   });
 });
