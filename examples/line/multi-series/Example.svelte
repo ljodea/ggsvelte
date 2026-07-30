@@ -24,6 +24,8 @@
   aes={{ x: "year", y: "value", color: "series" }}
   {interaction}
   interactionScope={scope}
+  width={640}
+  height={400}
 >
   <ThemeEconomist />
   <ScaleXContinuous

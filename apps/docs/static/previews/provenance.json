@@ -8,12 +8,12 @@
     },
     "area/stacked": {
       "filename": "area-stacked-light.png",
-      "sourceSha256": "f19cce3575ddb506cc36fb16e640bc551920712946e01e05681367d2ddac40d4",
+      "sourceSha256": "60c0187db1b1cbcc327754b0de0550030977ad9ba123070d932f3f915e85406b",
       "pngSha256": "5a708d0255b3c8c56bbecc0f1dc7849420f5ca6f7cb69785954752b8adb50d1a"
     },
     "bar/dodged": {
       "filename": "bar-dodged-light.png",
-      "sourceSha256": "0a28542509c2b0e6802162c176d4e0f9c08ca0d35015595cdf4719f28d3ff7e3",
+      "sourceSha256": "ef5159af78070f37f005d1ba52e50aa6a6fe35045426eebf3d745a988942b408",
       "pngSha256": "8cb6896fb9bbc0a416a68469e855b558087867d8b1930b4ad1eade6037ecd7de"
     },
     "bar/horizontal": {
@@ -28,7 +28,7 @@
     },
     "bar/stacked": {
       "filename": "bar-stacked-light.png",
-      "sourceSha256": "4d5a1035c982fc6d42c467ff8b500ec6358b3137156e503a5a846de240f2d060",
+      "sourceSha256": "f5b2158a5b2d0af7274fd4be414906efeab6c0691c9ef6cdaa020d67feaedd63",
       "pngSha256": "4c0a7f0b20fcdf9adb777a3c31ec25fbf6d60f30ced058a8f00f22a52bfa4dfd"
     },
     "bin2d/basic": {
@@ -218,7 +218,7 @@
     },
     "line/multi-series": {
       "filename": "line-multi-series-light.png",
-      "sourceSha256": "b984c2c19c8c0456b5d3985f99c686a27bdecc557779d4de45ca1eb92dba3a08",
+      "sourceSha256": "6befc15bf7df2c7179b3936000717e254e2d6ff2b230c417d0832104a3acd01f",
       "pngSha256": "da402afca8515a3005d24268f44cc037a1202ce7248675b03c9afbeac3bfc69d"
     },
     "line/time-axis": {
@@ -288,7 +288,7 @@
     },
     "point/log-scale": {
       "filename": "point-log-scale-light.png",
-      "sourceSha256": "65caf75369bf2b8a9a4d58f2dd77ba43c994f565fed0dea64bd8d193b31f9a7e",
+      "sourceSha256": "343d6c869b8cce2e82d8700175b000003b8b3aacfb3a156aff72a758e46b4521",
       "pngSha256": "e4cca5e252e49ced88e85a92ff84016533cbbc0fbad7d705fbecbd6e9c84c8a2"
     },
     "point/quantile-lines": {
@@ -298,7 +298,7 @@
     },
     "point/scatter-color": {
       "filename": "point-scatter-color-light.png",
-      "sourceSha256": "984edec045c4f6a57a5cdca64633a42766aef8fe6909dd25e022f05fa68900d0",
+      "sourceSha256": "bc6148b5165f3f08d125fdb95a5063d5af0bcc910bc008dbd2f25004cd39060e",
       "pngSha256": "9bbe802827346cc004c03894c8aa27819493a6d7b6bb61ec16eb0b6120b75dd4"
     },
     "point/stat-manual-mean": {

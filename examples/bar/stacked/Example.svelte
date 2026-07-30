@@ -23,6 +23,8 @@
   aes={{ x: "bag", fill: "deviation", weight: "count" }}
   {interaction}
   interactionScope={scope}
+  width={640}
+  height={400}
 >
   <ThemeLight />
   <ScaleXDiscrete
