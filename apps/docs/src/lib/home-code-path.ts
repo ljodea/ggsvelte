@@ -13,8 +13,9 @@
  * Interaction: GrammarDemo step 4 uses xy inspect (numeric crosshair on both
  * axes) plus GuideLegend focus. Prefer `<Inspect>` for the host capability;
  * legend focus is a host-only prop on `<GuideLegend>` (not a PortableSpec field).
- * - Svelte: `<Inspect>` / `key` on <GGPlot>, `focus` on <GuideLegend>
+ * - Svelte: `<Inspect>` child; `focus` on <GuideLegend>
  * - Builder + spec: same host children; inspect via `<Inspect>`
+ * - Row identity defaults to the `id` column on palmerPenguins (no `key` prop)
  * - JSON: agent envelope `{ interactions, spec }` still accepts legendFocus
  *   (deprecated host map until 0.20.0)
  */
@@ -26,7 +27,6 @@ const HOME_CODE_PATH_SVELTE = `<script lang="ts">
 
 <GGPlot
   data={palmerPenguins}
-  key="id"
   aes={{ x: "flipperLengthMm", y: "bodyMassG", color: "species" }}
   width={640}
   height={400}
@@ -57,7 +57,6 @@ const HOME_CODE_PATH_BUILDER = `<script lang="ts">
 
 <GGPlot
   {spec}
-  key="id"
   width={640}
   height={400}
 >

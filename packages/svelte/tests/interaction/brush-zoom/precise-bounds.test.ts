@@ -250,7 +250,8 @@ describe("brush precise bounds", () => {
     expect(selections[0]).toEqual(
       expect.objectContaining({
         domain: { x: [1.5, 2.5], y: [10, 30] },
-        keys: [],
+        // Default row-index identity fills source-row keys for the hit.
+        keys: [1],
         lineageCount: 1,
       }),
     );

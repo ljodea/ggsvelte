@@ -69,7 +69,6 @@
   <GGPlot
     data={ridership}
     aes={{ x: "month", y: "riders", color: "mode" }}
-    key="id"
     {height}
     ariaLabel={`${label} theme Playfair wheat and wages`}
   >
@@ -92,7 +91,6 @@
   <GGPlot
     data={attendees}
     aes={{ x: "track", fill: "level", weight: "deaths" }}
-    key="id"
     {height}
     ariaLabel={`${label} theme Edgeworth dodged bars`}
   >
@@ -114,7 +112,6 @@
   <GGPlot
     data={generation}
     aes={{ x: "year", y: "twh", fill: "source" }}
-    key="id"
     {height}
     ariaLabel={`${label} theme Nightingale stacked area`}
   >
@@ -156,7 +153,6 @@
   <GGPlot
     data={penguins}
     aes={{ x: "flipper", y: "mass", color: "species" }}
-    key="id"
     {height}
     ariaLabel={`${label} theme penguin scatter`}
   >

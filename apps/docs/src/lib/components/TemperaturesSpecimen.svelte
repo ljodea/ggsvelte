@@ -33,13 +33,7 @@
   const chart = TEMPERATURES_CHART;
 </script>
 
-<GGPlot
-  data={temperaturesKeyed}
-  aes={chart.aes}
-  key={chart.key}
-  {height}
-  {ariaLabel}
->
+<GGPlot data={temperaturesKeyed} aes={chart.aes} {height} {ariaLabel}>
   <Inspect mode="x" />
   {#if legendFocus}
     <GuideLegend channel="color" focus />

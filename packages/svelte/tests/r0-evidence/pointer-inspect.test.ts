@@ -210,7 +210,7 @@ describe("R0 pointer-inspect evidence", () => {
     expect(view.container.querySelector(".gg-tooltip")).toBeNull();
   });
 
-  it("clears reducer ownership when a keyless pin cannot reconcile to a fresh data identity", async () => {
+  it("clears reducer ownership when pin keys cannot reconcile to a fresh data identity", async () => {
     let model: RenderModel | null = null;
     const view = render(GGPlot, {
       data: rows,
@@ -231,7 +231,12 @@ describe("R0 pointer-inspect evidence", () => {
       )
       .toBe(true);
 
-    await view.rerender(fromPartial({ data: rows.map((row) => ({ ...row })) }));
+    // New row identities (fresh id values) — default id keys cannot rebind the pin.
+    await view.rerender(
+      fromPartial({
+        data: rows.map((row, index) => ({ ...row, id: `fresh-${String(index)}` })),
+      }),
+    );
     await expect.poll(() => view.container.querySelector(".gg-tooltip")).toBeNull();
     const second = model!.candidates.candidate(1)!;
     pointEvent(capture, "pointermove", second.x, second.y);

@@ -33,14 +33,13 @@
 
 <!--
   mode "xy": full crosshair on two continuous axes (not path auto "x").
-  GuideLegend focus needs stable row keys (`id` on palmerPenguins).
+  GuideLegend focus uses default row identity (`id` on palmerPenguins).
   GeomJitter + alpha: 333 points stack on integer measurements; seeded jitter
   (default 0.4·resolution) and alpha spread the cloud. degree 1 loess stays
   cheap when remounting.
 -->
 <GGPlot
   data={palmerPenguins}
-  key="id"
   aes={{
     x: "flipperLengthMm",
     y: "bodyMassG",

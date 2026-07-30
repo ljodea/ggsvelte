@@ -178,7 +178,7 @@ describe("final R-1/R0 evidence locks", () => {
     outside.remove();
   });
 
-  it("clears keyless state for equal-valued new references and in-place reorders but preserves layout-only changes", async () => {
+  it("default identity: layout-only and equal-valued replace rebind pin", async () => {
     const data = [
       { x: 1, y: 2 },
       { x: 2, y: 4 },
@@ -199,27 +199,10 @@ describe("final R-1/R0 evidence locks", () => {
     await view.rerender(fromPartial({ height: 360 }));
     expect(view.container.querySelector(".gg-tooltip")?.classList).toContain("gg-tooltip-pinned");
 
+    // Default row-index identity rebinds across equal-valued new row objects.
     await view.rerender(fromPartial({ data: data.map((row) => ({ ...row })) }));
-    await expect.poll(() => view.container.querySelector(".gg-tooltip")).toBeNull();
-
-    const reorderData = [
-      { x: 1, y: 2 },
-      { x: 2, y: 4 },
-    ];
-    const reorderView = render(GGPlot, {
-      data: reorderData,
-      aes: { x: "x", y: "y" },
-      layers: [{ geom: "point" }],
-      inspect: true,
-      ...size,
-    });
-    const reorderSurface = reorderView.container.querySelector<HTMLElement>(".gg-capture")!;
-    reorderSurface.focus();
-    keydown(reorderSurface, "Enter");
-    await expect.poll(() => reorderView.container.querySelector(".gg-tooltip")).not.toBeNull();
-    reorderData.reverse();
-    await reorderView.rerender(fromPartial({ data: reorderData }));
-    await expect.poll(() => reorderView.container.querySelector(".gg-tooltip")).toBeNull();
+    await expect.poll(() => view.container.querySelector(".gg-tooltip")).not.toBeNull();
+    expect(view.container.querySelector(".gg-tooltip")?.classList).toContain("gg-tooltip-pinned");
   });
 
   it("diagnoses an unstable key accessor for a surviving source row", async () => {
