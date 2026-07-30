@@ -183,6 +183,42 @@ describe("glyphHoverBox / glyphExtentsFromBatch", () => {
     expect(glyphExtentsFromBatch({ kind: "points" }, 0)).toBeNull();
   });
 
+  it("returns null when glyph extents are missing or non-positive", () => {
+    expect(glyphExtentsFromBatch(null, 0)).toBeNull();
+    expect(glyphExtentsFromBatch(undefined, 0)).toBeNull();
+    expect(
+      glyphExtentsFromBatch({ kind: "glyphs", boxWidths: [0, 10], boxHeights: [8, 8] }, 0),
+    ).toBeNull();
+    expect(
+      glyphExtentsFromBatch({ kind: "glyphs", boxWidths: [12], boxHeights: [0] }, 0),
+    ).toBeNull();
+    // Missing height at the primitive index.
+    expect(
+      glyphExtentsFromBatch({ kind: "glyphs", boxWidths: [12, 20], boxHeights: [8] }, 1),
+    ).toBeNull();
+    // Defaults textAnchor to middle when the batch omits it.
+    expect(glyphExtentsFromBatch({ kind: "glyphs", boxWidths: [12], boxHeights: [8] }, 0)).toEqual({
+      width: 12,
+      height: 8,
+      textAnchor: "middle",
+    });
+  });
+
+  it("falls back to default glyph box size when extents are omitted", () => {
+    expect(glyphHoverBox({ x: 10, y: 20 })).toEqual({
+      x: 10 - 24,
+      y: 20 - 8,
+      width: 48,
+      height: 16,
+    });
+    expect(glyphHoverBox({ x: 10, y: 20 }, { width: 0, height: -1 })).toEqual({
+      x: 10 - 24,
+      y: 20 - 8,
+      width: 48,
+      height: 16,
+    });
+  });
+
   it("sizes the crosshair gap to clear the box diagonal", () => {
     expect(crosshairGapForBox(30, 16)).toBeCloseTo(Math.hypot(15, 8) + 2);
   });
