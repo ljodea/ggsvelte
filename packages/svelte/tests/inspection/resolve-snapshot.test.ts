@@ -225,4 +225,67 @@ describe("inspection snapshot resolve", () => {
     expect(formatted).toMatch(/2000/);
     model.dispose();
   });
+
+  it("reads non-position candidate channels when the seed has no source row", () => {
+    // Stat bins have null rowIndex; tooltip fields must still surface size /
+    // linewidth / alpha / shape / linetype from the candidate bag, and map
+    // unknown channels to null.
+    const data = [
+      { date: "2000-05-01", y: 10, s: 1 },
+      { date: "2000-05-15", y: 20, s: 2 },
+      { date: "2000-06-01", y: 30, s: 3 },
+      { date: "2000-06-15", y: 40, s: 4 },
+    ];
+    const model = runPipeline(
+      gg(data, aes({ x: "date", y: "y", size: "s" }))
+        .geomPoint({ stat: "summary_bin", fun: "median", bins: 4 })
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const seed = model.candidates.candidate(0)!;
+    expect(seed.rowIndex).toBeNull();
+    // Publish every non-position channel the candidateValue switch handles.
+    const seedWithChannels = {
+      ...seed,
+      sizeValue: 4,
+      linewidthValue: 1.5,
+      alphaValue: 0.4,
+      shapeValue: "circle",
+      linetypeValue: "dashed",
+    };
+    // Force layerFields to include each channel (plus an unknown one for null).
+    Object.defineProperty(model, "layerFields", {
+      value: [
+        [
+          { channel: "size", field: "s" },
+          { channel: "linewidth", field: "lw" },
+          { channel: "alpha", field: "a" },
+          { channel: "shape", field: "sh" },
+          { channel: "linetype", field: "lt" },
+          { channel: "fill", field: "f" },
+        ],
+      ],
+    });
+    const inspection = resolveInspection({
+      model,
+      seed: seedWithChannels,
+      mode: "exact",
+      state: "transient",
+      source: "pointer",
+      keyOf: () => null,
+    });
+    expect(inspection.focus.row).toBeNull();
+    const byChannel = Object.fromEntries(
+      inspection.focus.fields.map((field) => [field.channel, field.value]),
+    );
+    expect(byChannel).toMatchObject({
+      size: 4,
+      linewidth: 1.5,
+      alpha: 0.4,
+      shape: "circle",
+      linetype: "dashed",
+      fill: null,
+    });
+    model.dispose();
+  });
 });
