@@ -1,5 +1,67 @@
 # @ggsvelte/svelte
 
+## 0.21.0
+
+### Minor Changes
+
+- 2c9ad6e: <!-- markdownlint-disable MD041 -->
+
+  feat: durable row identity on Inspect / Select / controller
+
+  Custom durable identity now prefers interaction surfaces:
+
+  - `<Inspect identity="…" />` or `inspect={{ identity: "…" }}`
+  - `select={{ type: "point" | "interval", identity: "…" }}`
+  - `createPlotInteraction({ identity: "…" })`
+
+  Resolution order: Inspect → Select → controller → deprecated GGPlot `key` →
+  auto `id` column → row index (order-stable only). Ordinary charts still omit
+  identity entirely.
+
+  `GGPlot key` dual-reads through 0.21.x and emits `DEPRECATED_PLOT_PROP`;
+  removal lands in 0.22.0.
+
+  Migration: <https://ggsvelte.sh/guide/upgrading#row-identity-on-interaction>
+
+### Patch Changes
+
+- b7ced53: <!-- markdownlint-disable MD041 -->
+
+  fix: gap xy inspect guides around nearby GeomText boxes
+
+  Hard-gap vertical and horizontal crosshairs through measured sibling
+  label AABBs in the focus panel so continuous scatter+text charts
+  (Langren/Tufte-style) keep both guides without bisecting name labels.
+
+  Migration: none — presentation only when inspect mode draws axis guides
+  and the panel has GeomText/GeomLabel glyphs.
+
+- daf4174: <!-- markdownlint-disable MD041 -->
+
+  feat: default row identity without requiring GGPlot `key`
+
+  Interaction identity resolves to an `id` column when present, otherwise
+  the row index. Ordinary charts omit `key`; the prop remains an optional
+  override for non-`id` natural keys. Legend focus and point selection no
+  longer require an explicit key for the default path.
+
+  Migration: none required. Remove redundant `key="id"` from charts whose
+  rows already expose an `id` field.
+
+- 8e4d17d: <!-- markdownlint-disable MD041 -->
+
+  docs(skill): teach v0.20 Inspect / GuideLegend interaction API
+
+  Agent skill and site copy preferred the deprecated GGPlot `inspect`,
+  `legendFocus`, and `legendFilter` props. Prefer `<Inspect>` and
+  `<GuideLegend channel focus|filter />` in skill fences, homepage JSON, and
+  the guides reference. Gallery examples already use the children; a contract
+  test keeps them that way.
+
+  Migration: none — teaching only.
+  - @ggsvelte/spec@0.21.0
+  - @ggsvelte/core@0.21.0
+
 ## 0.20.0
 
 ### Minor Changes
