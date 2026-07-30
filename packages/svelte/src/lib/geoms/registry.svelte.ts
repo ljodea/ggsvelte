@@ -85,7 +85,7 @@ export class LayerRegistry {
         return getValue();
       },
     };
-    this.#capabilities.set(id, entry as CapabilityEntry);
+    this.#capabilities.set(id, entry);
     this.#registrationCount += 1;
     this.#version = ++globalVersion;
     return id;
@@ -125,7 +125,11 @@ export class LayerRegistry {
     void this.#version;
     const out: HostCapabilityValue[K][] = [];
     for (const entry of this.#capabilities.values()) {
-      if (entry.kind === kind) out.push(entry.value as HostCapabilityValue[K]);
+      if (entry.kind === kind) {
+        // entry is CapabilityEntry; kind narrow leaves value as the union of all
+        // capability values. Only inspect exists today so this is the inspect bag.
+        out.push(entry.value);
+      }
     }
     return out;
   }

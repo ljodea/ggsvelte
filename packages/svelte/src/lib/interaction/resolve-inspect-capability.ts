@@ -44,7 +44,7 @@ export function resolveInspectCapability(
       multiChild: false,
     };
   }
-  const last = children[children.length - 1]!;
+  const last = children.at(-1)!;
   return {
     input: childToInput(last),
     multiChild: children.length > 1,
