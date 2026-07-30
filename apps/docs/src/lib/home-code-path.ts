@@ -3,8 +3,8 @@
  * Svelte children, the TypeScript builder, and agent JSON.
  *
  * Hand-authored (not loadExample) so the JSON tab can use data: { name } and
- * never dump every row into a mile-tall panel. Matches the interactive demo
- * above the fold — not the hero Guerry chart.
+ * never dump every row into a mile-tall panel. Matches the interactive
+ * grammar demo on the homepage.
  *
  * Data: bundled `palmerPenguins` from `@ggsvelte/svelte/data` (333 complete
  * cases). Field names match the published dataset, not the short theme-specimen

@@ -265,37 +265,6 @@ export function sequentialRasterStaticSvg(input: {
   return svg;
 }
 
-export function homeHeroStaticSvgFromData(
-  rows: readonly Record<string, unknown>[],
-  input?: {
-    readonly theme?: ThemeName;
-    readonly width?: number;
-    readonly height?: number;
-  },
-): string {
-  const theme = input?.theme ?? "default";
-  const width = input?.width ?? DOCS_STATIC_PLOT_WIDTH_PX;
-  const height = input?.height ?? 400;
-  const key = `home-hero:${theme}:${String(width)}x${String(height)}:${String(rows.length)}`;
-  const hit = cache.get(key);
-  if (hit !== undefined) return hit;
-  const spec = gg(rows as AuthoringRows, aes({ x: "literacy", y: "crimePersons", color: "region" }))
-    .geomPoint({ size: 4, alpha: 0.85 })
-    .scales({ color: { type: "ordinal", scheme: "tableau10" } })
-    .theme(theme)
-    .labs({
-      title: "Literacy and crime in France, 1833",
-      subtitle: "85 French departments — higher y means fewer crimes per head",
-      x: "Literate conscripts (%)",
-      y: "Population per crime against persons",
-      color: "Region",
-    })
-    .spec();
-  const svg = namespaceSvgIds(renderToSVGString(spec, { width, height }), key);
-  cache.set(key, svg);
-  return svg;
-}
-
 /**
  * Homepage grammar-demo shell: full palmerPenguins scatter + loess, default
  * interaction step (color + smooth). Static only — no inspect/legendFocus.

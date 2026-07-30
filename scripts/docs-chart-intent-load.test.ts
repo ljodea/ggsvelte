@@ -14,9 +14,10 @@ function read(rel: string): string {
 }
 
 describe("docs chart intent-gated load", () => {
-  it("keeps the homepage hero on the static shell (no HomeHeroPlot mount)", () => {
+  it("homepage has no live chart stack import on the hero", () => {
     const page = read("routes/+page.svelte");
-    expect(page).toContain("heroStaticSvgLightSite");
+    // Title + featured examples only — no Guerry hero plot or HomeHeroPlot.
+    expect(page).not.toContain("heroStaticSvg");
     expect(page).not.toContain("HomeHeroPlot");
     expect(page).not.toMatch(/onMount\s*\(/);
   });
