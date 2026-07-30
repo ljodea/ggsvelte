@@ -20,7 +20,6 @@
 <GGPlot
   data={field}
   aes={{ x: "bill", y: "mass", color: "species" }}
-  key="id"
   select={{ type: "interval", mode: "xy", persistent: true }}
   zoom={{ mode: "xy" }}
   onselect={(event) => {

@@ -17,7 +17,6 @@
 <GGPlot
   data={penguins}
   aes={{ x: "flipper", y: "mass", color: "species" }}
-  key="id"
   oninspect={(event) => {
     inspectionStatus =
       event.phase === "clear"

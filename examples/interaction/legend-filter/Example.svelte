@@ -21,7 +21,6 @@
   <GGPlot
     data={britishFinances}
     aes={{ x: "year", y: "value", color: "series" }}
-    key="id"
     width="container"
     height={430}
     onlegendfilter={(event) => {

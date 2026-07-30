@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    Inspect,
     GeomBar,
     GGPlot,
     GuideLegend,
@@ -15,10 +16,10 @@
 <GGPlot
   data={pyxTrial}
   aes={{ x: "bag", fill: "deviation", weight: "count" }}
-  key={(row) => `${row.bag}:${row.deviation}`}
   width={640}
   height={400}
 >
+  <Inspect identity={(row) => `${row.bag}:${row.deviation}`} />
   <ThemeLight />
   <ScaleXDiscrete
     domain={["1 and 2", "3", "4", "5", "6", "7", "8", "9", "10"]}

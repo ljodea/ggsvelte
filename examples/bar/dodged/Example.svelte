@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    Inspect,
     GeomBar,
     GGPlot,
     GuideLegend,
@@ -14,10 +15,10 @@
 <GGPlot
   data={edgeworthDeaths}
   aes={{ x: "year", fill: "county", weight: "deaths" }}
-  key={(row) => `${row.year}:${row.county}`}
   width={640}
   height={400}
 >
+  <Inspect identity={(row) => `${row.year}:${row.county}`} />
   <ThemeFew />
   <ScaleFillDiscrete scheme="tableau10" />
   <Labs

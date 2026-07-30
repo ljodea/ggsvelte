@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    Inspect,
     GeomLine,
     GeomPoint,
     GGPlot,
@@ -16,10 +17,10 @@
 <GGPlot
   data={wheatAndWages}
   aes={{ x: "year", y: "value", color: "series" }}
-  key={(row) => `${row.year}:${row.series}`}
   width={640}
   height={400}
 >
+  <Inspect identity={(row) => `${row.year}:${row.series}`} />
   <ThemeEconomist />
   <ScaleXContinuous
     breaks={[1600, 1650, 1700, 1750, 1800]}

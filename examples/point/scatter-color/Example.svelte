@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    Inspect,
     GeomPoint,
     GGPlot,
     GuideLegend,
@@ -14,10 +15,10 @@
 <GGPlot
   data={guerry}
   aes={{ x: "literacy", y: "crimePersons", color: "region" }}
-  key="department"
   width={640}
   height={400}
 >
+  <Inspect identity="department" />
   <ThemeFew />
   <ScaleColorDiscrete scheme="tableau10" />
   <Labs

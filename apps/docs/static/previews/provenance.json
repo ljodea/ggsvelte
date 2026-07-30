@@ -8,12 +8,12 @@
     },
     "area/stacked": {
       "filename": "area-stacked-light.png",
-      "sourceSha256": "73beeccad197bd72c30c64c68ad62468d2bec24cddfc365020db44b805ec1723",
+      "sourceSha256": "e41019eee8df45aa758d6e694ae76b69ce40547fb27e2e104963e590e4ecfc1a",
       "pngSha256": "5a708d0255b3c8c56bbecc0f1dc7849420f5ca6f7cb69785954752b8adb50d1a"
     },
     "bar/dodged": {
       "filename": "bar-dodged-light.png",
-      "sourceSha256": "da8c995f706da2e14774b12fe608061e3c7001d046b2bab1faf61d47821da369",
+      "sourceSha256": "f23de7359e3fd06170a946b4f4e0cee9d7e3f12c79d4054bf4ce08bfd554f522",
       "pngSha256": "8cb6896fb9bbc0a416a68469e855b558087867d8b1930b4ad1eade6037ecd7de"
     },
     "bar/horizontal": {
@@ -28,7 +28,7 @@
     },
     "bar/stacked": {
       "filename": "bar-stacked-light.png",
-      "sourceSha256": "dfc0b7cb48dfc8d2591b0108dace3b3ed9b0221d9fce688547b576a965791a20",
+      "sourceSha256": "9be85edde15154c8167ec8b37e79db109ecb7e192521c23d86d268bbd4c24cef",
       "pngSha256": "4c0a7f0b20fcdf9adb777a3c31ec25fbf6d60f30ced058a8f00f22a52bfa4dfd"
     },
     "bin2d/basic": {
@@ -168,32 +168,32 @@
     },
     "interaction/brush-zoom": {
       "filename": "interaction-brush-zoom-light.png",
-      "sourceSha256": "6996cd045e7525f9c64c3779d13d689b382acf6498da2e038fe1b9e26a74d95e",
+      "sourceSha256": "abf36a5635c85583872693b78f4c88b89b83f3cb2e4650206d727b2dedf1f1a9",
       "pngSha256": "1a0ddcf51b7cced3e7a590249f999e3cba23a81adbaa6a95afae3a5497ae3578"
     },
     "interaction/facet-intervals": {
       "filename": "interaction-facet-intervals-light.png",
-      "sourceSha256": "b46256919a0cd1abc2b7b35b45fce728325783b5c55e8cdb9da262f6021b086b",
+      "sourceSha256": "77c1ab0270c3569ad9f1febd57fc42a9783ce1cec13baedb62d786c73cf5eace",
       "pngSha256": "ee7610ff7f47916fac2f509b89d59b89db00dfc1dd9a5efae62fc8abaae53581"
     },
     "interaction/legend-filter": {
       "filename": "interaction-legend-filter-light.png",
-      "sourceSha256": "1fc0b565fe63776cc397a21df2510b7905a1ec301ba594e7a5ccce7321fd0fe6",
+      "sourceSha256": "1cf3b51f956841e6b1b8a7cf0432a60681966c5399b31236634af833249e151d",
       "pngSha256": "83529278279ca7c4bffa4d47d2c57a57ebd8a1de13f3fc798b4971bfb4698853"
     },
     "interaction/legend-focus": {
       "filename": "interaction-legend-focus-light.png",
-      "sourceSha256": "776c12969bcd513265b2085bbf3ffba44a3a2d125595b5f79759bcdec0ca7674",
+      "sourceSha256": "81a87303f9457347c95bfbd7239b65be4ab4504bdd79c643567daad54775cd50",
       "pngSha256": "38aa3c7f47d1c3ab2807039e2377f3c93e292c47c6c19cfe3c2de80e6156091c"
     },
     "interaction/linked-views": {
       "filename": "interaction-linked-views-light.png",
-      "sourceSha256": "5c7d76bf31afd829f2c1b77cb9b77f172fd5ceaeda7cee61f565d6976ac99279",
+      "sourceSha256": "8c23fc8eeec9072b432d52ec1628b8476a0faf1bc4837689395076a5850177f1",
       "pngSha256": "e35c2b1aa843fa95b966f9e7440778d4371f925429d374c738ffaa10938c2f9f"
     },
     "interaction/tooltip": {
       "filename": "interaction-tooltip-light.png",
-      "sourceSha256": "1c09e98b169281f77aff0ff18bb72ccab54f2df0617eb0f4a24dafefdab7ced9",
+      "sourceSha256": "e4d66647873d4bd3f257c72a746939a594a3aa7fac41a43121f9cc88848db85b",
       "pngSha256": "2ada956472d13fac2b0315f486e1a30e2f80a5effd873b3d04dd87005b987940"
     },
     "jitter/basic": {
@@ -218,7 +218,7 @@
     },
     "line/multi-series": {
       "filename": "line-multi-series-light.png",
-      "sourceSha256": "67891f53015c3f32cff5b72765c418a94813df80b2ff5a69b3fe074f5377c122",
+      "sourceSha256": "8a1cb30e1a9786e47484b39472a1fa283b47499996a1e328afdfef8feae0d9db",
       "pngSha256": "da402afca8515a3005d24268f44cc037a1202ce7248675b03c9afbeac3bfc69d"
     },
     "line/time-axis": {
@@ -298,7 +298,7 @@
     },
     "point/scatter-color": {
       "filename": "point-scatter-color-light.png",
-      "sourceSha256": "5c9c94030e4bdaf24df71658225528e1befb14f5722c2da07121b7786db6ad77",
+      "sourceSha256": "210b69f49074dbc49e947ef23f75aa2f2ac17e55b9505f848b46cfc5de5ede7a",
       "pngSha256": "9bbe802827346cc004c03894c8aa27819493a6d7b6bb61ec16eb0b6120b75dd4"
     },
     "point/stat-manual-mean": {

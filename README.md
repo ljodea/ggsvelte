@@ -82,9 +82,9 @@ and Windows.
 <script lang="ts">
   import {
     GeomArea,
-    createPlotInteraction,
     GGPlot,
     GuideLegend,
+    Inspect,
     Labs,
     ScaleFillManual,
     ScaleXDate,
@@ -92,19 +92,15 @@ and Windows.
   } from "@ggsvelte/svelte";
 
   import { crimeanMortality } from "./data.js";
-
-  const interaction = createPlotInteraction({
-    identity: (row) => `${row.month}:${row.cause}`,
-  });
 </script>
 
 <GGPlot
   data={crimeanMortality}
   aes={{ x: "month", y: "deaths", fill: "cause" }}
-  {interaction}
   width={640}
   height={400}
 >
+  <Inspect identity={(row) => `${row.month}:${row.cause}`} />
   <ThemeEconomist />
   <ScaleXDate labels="%b %Y" />
   <ScaleFillManual

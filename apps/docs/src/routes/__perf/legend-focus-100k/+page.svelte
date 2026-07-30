@@ -38,7 +38,6 @@
       data={navigationData}
       aes={mapping}
       layers={[{ geom: "point", render: "canvas", params: { size: 1 } }]}
-      key="id"
       interaction={navigationInteraction}
       interactionScope={navigationScope}
       width={620}
@@ -55,7 +54,6 @@
         data={linkedData}
         aes={mapping}
         layers={[{ geom: "point", render: "canvas", params: { size: 1 } }]}
-        key="id"
         {interaction}
         interactionScope={scope}
         width={620}

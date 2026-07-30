@@ -183,14 +183,14 @@
 
 <div class="finished-chart lesson-output" bind:this={host}>
   {#if LivePlot && finished}
-    <LivePlot
-      spec={finished.spec}
-      key={finished.key}
-      height={liveHeight}
-      {ariaLabel}
-    >
+    <LivePlot spec={finished.spec} height={liveHeight} {ariaLabel}>
       {#if finished.inspect && LiveInspect}
-        <LiveInspect mode="exact" pin content={sakuraTooltip} />
+        <LiveInspect
+          mode="exact"
+          pin
+          identity={finished.key}
+          content={sakuraTooltip}
+        />
       {/if}
     </LivePlot>
   {:else}

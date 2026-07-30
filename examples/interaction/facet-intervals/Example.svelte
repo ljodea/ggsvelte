@@ -46,7 +46,6 @@
   <GGPlot
     data={observations}
     aes={{ x: "bill", y: "mass" }}
-    key="id"
     select={{ type: "interval", mode: "xy", persistent: true, preset }}
     width="container"
     height={430}
