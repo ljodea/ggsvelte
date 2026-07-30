@@ -26,12 +26,32 @@ import { getContext, onDestroy, setContext } from "svelte";
 // LayerDescriptor alias removed in 0.13.0 (#704) — use MarkLayerDescriptor.
 export type { Layer, MarkLayerDescriptor } from "../layers/types.js";
 import type { Layer, MarkLayerDescriptor } from "../layers/types.js";
+import type { InspectCapabilityChild } from "../interaction/resolve-inspect-capability.js";
+
+/**
+ * Host-only interaction capabilities registered by declaration children
+ * (`<Inspect>`, later select/zoom/…). Not members of the grammar `Layer`
+ * union and never folded into PortableSpec.
+ */
+export type HostCapabilityKind = "inspect";
+
+/** Value bags per capability kind (extend when more children land). */
+export type HostCapabilityValue = {
+  readonly inspect: InspectCapabilityChild;
+};
+
+type CapabilityEntry<K extends HostCapabilityKind = HostCapabilityKind> = {
+  readonly kind: K;
+  get value(): HostCapabilityValue[K];
+};
 
 let nextId = 0;
 let globalVersion = 0;
 
 export class LayerRegistry {
   readonly #byId = new Map<number, Layer>();
+  /** Host capabilities — separate from grammar layers (never plotLayers). */
+  readonly #capabilities = new Map<number, CapabilityEntry>();
   #version = $state(0);
   /** Monotonic register count (never decrements). For ADR 0001 test assertions. */
   #registrationCount = 0;
@@ -50,8 +70,30 @@ export class LayerRegistry {
     return id;
   }
 
+  /**
+   * Register a host-only capability (inspect, later select/zoom/…).
+   * Live `value` getter is load-bearing (ADR 0001). Returns entry id.
+   */
+  registerCapability<K extends HostCapabilityKind>(
+    kind: K,
+    getValue: () => HostCapabilityValue[K],
+  ): number {
+    const id = nextId++;
+    const entry: CapabilityEntry<K> = {
+      kind,
+      get value() {
+        return getValue();
+      },
+    };
+    this.#capabilities.set(id, entry as CapabilityEntry);
+    this.#registrationCount += 1;
+    this.#version = ++globalVersion;
+    return id;
+  }
+
   unregister(id: number): void {
     this.#byId.delete(id);
+    this.#capabilities.delete(id);
     this.#version = ++globalVersion;
   }
 
@@ -75,9 +117,23 @@ export class LayerRegistry {
   }
 
   /**
-   * Monotonic count of successful `register` / `registerPlotLayer` calls.
-   * Unregister does not decrement. Tests use this to assert ADR 0001's
-   * zero-re-registration guarantee under live prop updates.
+   * Host capability values of `kind` in registration order (reactive).
+   * Multiple entries of the same kind are all returned so resolve can last-win
+   * and multi-child diagnostics can fire.
+   */
+  capabilities<K extends HostCapabilityKind>(kind: K): readonly HostCapabilityValue[K][] {
+    void this.#version;
+    const out: HostCapabilityValue[K][] = [];
+    for (const entry of this.#capabilities.values()) {
+      if (entry.kind === kind) out.push(entry.value as HostCapabilityValue[K]);
+    }
+    return out;
+  }
+
+  /**
+   * Monotonic count of successful `register` / `registerPlotLayer` /
+   * `registerCapability` calls. Unregister does not decrement. Tests use this
+   * to assert ADR 0001's zero-re-registration guarantee under live prop updates.
    */
   get registrationCount(): number {
     return this.#registrationCount;
@@ -123,6 +179,22 @@ export function registerPlotLayer(layer: Layer): void {
   const registry = getContext<LayerRegistry | undefined>(KEY);
   if (!registry) return;
   const id = registry.registerPlotLayer(layer);
+  onDestroy(() => {
+    registry.unregister(id);
+  });
+}
+
+/**
+ * Register a host-only capability during component init (e.g. `<Inspect>`).
+ * Inert without a <GGPlot> ancestor. Live getter over child props (ADR 0001).
+ */
+export function registerHostCapability<K extends HostCapabilityKind>(
+  kind: K,
+  getValue: () => HostCapabilityValue[K],
+): void {
+  const registry = getContext<LayerRegistry | undefined>(KEY);
+  if (!registry) return;
+  const id = registry.registerCapability(kind, getValue);
   onDestroy(() => {
     registry.unregister(id);
   });
