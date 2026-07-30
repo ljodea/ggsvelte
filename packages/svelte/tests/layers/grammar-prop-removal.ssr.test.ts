@@ -29,16 +29,17 @@ describe("#704 grammar prop removal", () => {
   it("engine no longer emits DEPRECATED_PLOT_PROP for grammar props", () => {
     const source = readFileSync(join(root, "plot-engine.svelte.ts"), "utf8");
     // Grammar-prop emit path removed with the props (#704). Catalog types and
-    // a single dual-read path for the separate legendFocus migration may still
-    // call deprecatedPropDiagnostic — that is not a grammar-prop regression.
+    // dual-read paths for legendFocus/legendFilter migrations may still call
+    // deprecatedPropDiagnostic — that is not a grammar-prop regression.
     expect(source).not.toContain("deprecationDiagnostics");
     for (const prop of GRAMMAR_PROP_NAMES) {
       expect(source, `grammar prop ${prop} still wired for deprecation emit`).not.toMatch(
         new RegExp(`prop:\\s*["']${prop}["']`),
       );
     }
-    // legendFocus dual-read (0.19→0.20) is the only remaining emit site.
+    // legendFocus / legendFilter dual-read (0.19→0.20) emit sites.
     expect(source).toContain('prop: "legendFocus"');
+    expect(source).toContain('prop: "legendFilter"');
   });
 
   it("LayerDescriptor alias is removed (use MarkLayerDescriptor)", () => {

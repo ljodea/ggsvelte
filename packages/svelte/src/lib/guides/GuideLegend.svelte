@@ -4,12 +4,13 @@
    * (#659 slice 6). Presentation of one aesthetic's legend: title, position,
    * direction, key size, collision, and the INTEGER placement rank `order`.
    *
-   * Host interaction: `focus` opts this channel into discrete legend
-   * preview/pin emphasis. It is NOT a PortableSpec field — stripped before
-   * guideLegend() and registered as host layer kind `legendFocus`.
-   * Focus-only children (no presentation options) do not force a guides
-   * entry, so continuous colour scales keep their colorbar without a
-   * guide-aesthetic-incompatible pipeline error.
+   * Host interaction: `focus` and `filter` opt this channel into discrete
+   * legend emphasis / data-changing checkboxes. They are NOT PortableSpec
+   * fields — stripped before guideLegend() and registered as host layer
+   * kinds `legendFocus` / `legendFilter`. Focus- or filter-only children
+   * (no presentation options) do not force a guides entry, so continuous
+   * colour scales keep their colorbar without a guide-aesthetic-incompatible
+   * pipeline error.
    *
    * Not to be confused with <Legend order="sorted"/>, which is the plot-wide
    * entry-SORT enum (LegendSpec). Same word, unrelated concepts.
@@ -18,6 +19,11 @@
   import { guideLegend, type LegendGuideOptions } from "@ggsvelte/spec";
 
   import type { LegendFocusInput } from "../interaction/interaction.js";
+  import type { LegendFilterInput } from "../legend/filter.js";
+  import {
+    isLegendFilterPropEnabled,
+    type LegendFilterLayerValue,
+  } from "../legend/resolve-legend-filter.js";
   import {
     isLegendFocusPropEnabled,
     type LegendFocusLayerValue,
@@ -38,18 +44,24 @@
      * emphasis. Host-only — never appears in PortableSpec.
      */
     focus?: LegendFocusInput;
+    /**
+     * Opt this channel into data-changing filtering through discrete legend
+     * checkboxes. Host-only — never appears in PortableSpec.
+     */
+    filter?: LegendFilterInput;
   };
 
   const props: Props = $props();
 
   createPlotLayer("guides", () => {
     const defined = definedProps(props) as Props;
-    const { focus: _focus, ...withoutFocus } = defined;
-    const { channel, options } = splitChannel(withoutFocus);
-    // Focus-only: do not force type:"legend" (breaks continuous ramps).
+    const { focus: _focus, filter: _filter, ...withoutHost } = defined;
+    const { channel, options } = splitChannel(withoutHost);
+    // Focus/filter-only: do not force type:"legend" (breaks continuous ramps).
     if (
       Object.keys(options).length === 0 &&
-      isLegendFocusPropEnabled(defined.focus)
+      (isLegendFocusPropEnabled(defined.focus) ||
+        isLegendFilterPropEnabled(defined.filter))
     ) {
       return {};
     }
@@ -63,6 +75,16 @@
     return {
       channel: defined.channel,
       input: focus === true ? true : focus,
+    };
+  });
+
+  createPlotLayer("legendFilter", (): LegendFilterLayerValue => {
+    const defined = definedProps(props) as Props;
+    const filter = defined.filter;
+    if (!isLegendFilterPropEnabled(filter)) return null;
+    return {
+      channel: defined.channel,
+      input: filter === true ? true : filter,
     };
   });
 </script>

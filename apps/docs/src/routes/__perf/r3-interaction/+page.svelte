@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { createPlotInteraction, Facet, GGPlot, Labs } from "@ggsvelte/svelte";
+  import {
+    createPlotInteraction,
+    Facet,
+    GGPlot,
+    GuideLegend,
+    Labs,
+  } from "@ggsvelte/svelte";
 
   const FILTER_ROWS = 20_000;
   const FACET_ROWS = 12_000;
@@ -75,11 +81,11 @@
       aes={{ ...mapping, color: "group" }}
       layers={[{ geom: "point", render: "canvas", params: { size: 1 } }]}
       key="id"
-      legendFilter
       width={900}
       height={420}
       onrender={() => (filterPipelineCommits += 1)}
     >
+      <GuideLegend channel="color" filter />
       <Labs title="R3 legend filter pipeline" color="Group" />
     </GGPlot>
   </section>

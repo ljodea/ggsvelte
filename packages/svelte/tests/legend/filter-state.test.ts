@@ -468,20 +468,10 @@ describe("runtime + legend-filter real cycle", () => {
 });
 
 describe("LegendFilters component layout and pointer source", () => {
-  it("combined legend-focus clear + filters reserves both rows", async () => {
-    const view = render(GGPlot, {
-      data: [
-        { id: "a", x: 1, y: 1, group: "north" },
-        { id: "b", x: 2, y: 2, group: "south" },
-      ],
-      aes: { x: "x", y: "y", color: "group" },
-      layers: [{ geom: "point" as const }],
-      key: "id",
-      legendFilter: true,
-      legendFocus: true,
-      width: 360,
-      height: 260,
-    });
+  it("combined GuideLegend focus + filter reserves both rows", async () => {
+    const { default: LegendFocusAndFilterPlot } =
+      await import("../fixtures/LegendFocusAndFilterPlot.svelte");
+    const view = render(LegendFocusAndFilterPlot);
     await until(() => view.container.querySelectorAll(".gg-legend-filters input").length === 2);
     await until(() => view.container.querySelector(".gg-legend-target") !== null);
 

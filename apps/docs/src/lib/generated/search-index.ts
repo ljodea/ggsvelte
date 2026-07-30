@@ -19932,6 +19932,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Legend focus on GuideLegend"],
   },
   {
+    id: "heading:guide-upgrading:legend-filter-on-guidelegend",
+    kind: "heading",
+    title: "Legend filter on GuideLegend",
+    summary:
+      "Legend filter on GuideLegend in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#legend-filter-on-guidelegend",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["Legend filter on GuideLegend"],
+  },
+  {
     id: "heading:guide-upgrading:0-11-to-0-12",
     kind: "heading",
     title: "0.11 to 0.12",

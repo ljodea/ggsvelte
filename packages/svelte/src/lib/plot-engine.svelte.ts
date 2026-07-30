@@ -83,6 +83,11 @@ import type { InteractiveLegendEntry, LegendEntryIdentity } from "./legend/focus
 import { createLegendFocusState } from "./legend/focus-state.svelte.js";
 import type { LegendFocusState } from "./legend/focus-state.svelte.js";
 import {
+  filterFilterableLegendEntries,
+  resolveLegendFilterCapability,
+  type ResolvedLegendFilterCapability,
+} from "./legend/resolve-legend-filter.js";
+import {
   filterInteractiveLegendEntries,
   resolveLegendFocusCapability,
   type ResolvedLegendFocusCapability,
@@ -92,6 +97,7 @@ import type { PlotChromeState } from "./chrome/chrome-state.svelte.js";
 import { isHostPlotLayer } from "./layers/types.js";
 import { deprecatedPropDiagnostic } from "./diagnostics/deprecation.js";
 import {
+  readLegacyPlotLegendFilter,
   readLegacyPlotLegendFocus,
   resolveCapabilities,
   type EnginePlotProps,
@@ -283,19 +289,33 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   const legendFocusResolved = (): ResolvedLegendFocusCapability =>
     typeof window === "undefined" ? resolveLegendFocusNow() : legendFocusResolvedDerived;
 
+  /**
+   * Legend filter from `<GuideLegend filter>` (and deprecated plot prop).
+   * Same SSR recompute path as focus — empty registry on first SSR pass.
+   */
+  function resolveLegendFilterNow(): ResolvedLegendFilterCapability {
+    return resolveLegendFilterCapability({
+      plotProp: readLegacyPlotLegendFilter(host.props),
+      layers: host.registry.layers,
+    });
+  }
+  const legendFilterResolvedDerived = $derived.by(resolveLegendFilterNow);
+  const legendFilterResolved = (): ResolvedLegendFilterCapability =>
+    typeof window === "undefined" ? resolveLegendFilterNow() : legendFilterResolvedDerived;
+
   // Capability defaults for wiring — inspect from prop + <Inspect> children;
-  // legendFocus "requested" from GuideLegend / legacy prop (not host.props.legendFocus
-  // direct — that prop is deprecated and type-aware lint denies it).
+  // legendFocus/legendFilter "requested" from GuideLegend / legacy prop
+  // (not host.props.legendFocus/legendFilter direct — type-aware lint denies
+  // deprecated dual-read outside the isolated readers).
   const caps = (): ResolvedPlotCapabilities => {
     const select = host.props.select;
     const zoom = host.props.zoom;
-    const legendFilter = host.props.legendFilter;
     return resolveCapabilities({
       inspect: inspectResolved().input,
       legendFocus: legendFocusResolved().requested,
+      legendFilter: legendFilterResolved().requested,
       ...(select !== undefined && { select }),
       ...(zoom !== undefined && { zoom }),
-      ...(legendFilter !== undefined && { legendFilter }),
     });
   };
 
@@ -362,7 +382,9 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
         select: capabilities.select,
         zoom: capabilities.zoom,
         legendFocus: legendFocusResolved().requested,
-        legendFilter: capabilities.legendFilter,
+        // legendFilter "requested" is GuideLegend/child (or deprecated prop)
+        // opt-in — not resolveCapabilities(plot prop alone).
+        legendFilter: legendFilterResolved().requested,
       },
     });
   });
@@ -406,6 +428,26 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
         "focus={{ preview: false }} on GuideLegend replaces legendFocus={{ preview: false }}",
       ],
       anchor: "legend-focus-on-guidelegend",
+    });
+    const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
+    if (deliveredAdvisories.has(dedupKey)) return;
+    deliveredAdvisories.add(dedupKey);
+    deliverDiagnostic(diagnostic);
+  });
+
+  // Deprecated plot-level legendFilter → GuideLegend.filter (one minor window).
+  $effect(() => {
+    const plotProp = readLegacyPlotLegendFilter(host.props);
+    if (plotProp === undefined || plotProp === false) return;
+    const diagnostic = deprecatedPropDiagnostic({
+      prop: "legendFilter",
+      since: "0.19.0",
+      removeIn: "0.20.0",
+      suggestions: [
+        'Use <GuideLegend channel="color" filter /> (or the aesthetic that owns the discrete legend)',
+        'filter={{ mode: "include", multiple: false }} on GuideLegend replaces legendFilter={{ … }}',
+      ],
+      anchor: "legend-filter-on-guidelegend",
     });
     const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
     if (deliveredAdvisories.has(dedupKey)) return;
@@ -498,8 +540,8 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   // model is deferred (declared after the runtime).
   const legendFilterState = createLegendFilterState({
     effectiveSpec: () => zoomState.effectiveSpec,
-    // Single-field default — avoid caps() so this derived only tracks legendFilter.
-    legendFilterProp: () => host.props.legendFilter ?? false,
+    // GuideLegend children (or deprecated plot prop) — not plot prop alone.
+    legendFilterProp: () => legendFilterResolved().configInput,
     onlegendfilter: () => host.props.onlegendfilter,
     oninteraction: () => host.props.oninteraction,
     announce: announceSink,
@@ -740,7 +782,14 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   const legendClearActive = $derived(legendFocusEnabled && effectiveLegendPressed !== null);
 
   // Host-side derived for catalog reconcile (closes over runtime.model).
-  const filterableLegendEntries = $derived(legendFilterState.computeEntries(runtime.model));
+  // Channel filter: only aesthetics with GuideLegend filter (merged legends
+  // match via aesthetics[], not primary scale alone).
+  const filterableLegendEntries = $derived(
+    filterFilterableLegendEntries(
+      legendFilterState.computeEntries(runtime.model),
+      legendFilterResolved().channels,
+    ),
+  );
 
   function hoverGlyphExtents(): {
     readonly width: number;

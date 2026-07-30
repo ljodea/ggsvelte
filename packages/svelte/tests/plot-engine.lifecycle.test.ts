@@ -230,9 +230,10 @@ describe("createPlotEngine construction-order contract (#1082)", () => {
     inspect: true,
     select: "point" as const,
     zoom: true,
-    // Dual-read fixture for deprecated plot prop (removed 0.20.0).
+    // Dual-read fixture for deprecated plot props (removed 0.20.0).
     /* oxlint-disable-next-line typescript/no-deprecated -- intentional dual-read */
     legendFocus: true,
+    /* oxlint-disable-next-line typescript/no-deprecated -- intentional dual-read */
     legendFilter: true,
   } as EnginePlotProps;
 
