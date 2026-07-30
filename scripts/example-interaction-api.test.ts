@@ -33,7 +33,9 @@ describe("example interaction API (v0.20)", () => {
     const id = relative(EXAMPLES, path);
     it(`${id}: no plot-level inspect / legendFocus / legendFilter`, () => {
       const source = readFileSync(path, "utf8");
-      const offenders = ggplotOpenAttrs(source).flatMap(plotLevelInteractionOffenders);
+      const offenders = ggplotOpenAttrs(source).flatMap((attrs) =>
+        plotLevelInteractionOffenders(attrs),
+      );
       expect(offenders).toEqual([]);
     });
   }
