@@ -11,6 +11,13 @@ const scope = {
 } as const;
 
 describe("createPlotInteraction", () => {
+  it("exposes optional identity for plots bound to the controller", () => {
+    expect(createPlotInteraction().identity).toBeUndefined();
+    expect(createPlotInteraction({ identity: "year" }).identity).toBe("year");
+    const accessor = (row: { id: string }) => row.id;
+    expect(createPlotInteraction({ identity: accessor }).identity).toBe(accessor);
+  });
+
   it("stores frozen semantic intervals per stable panel identity", () => {
     const controller = createPlotInteraction<string>();
     const intervalScope = { ...scope, intervals: "penguin-facets" } as const;

@@ -82,6 +82,7 @@ and Windows.
 <script lang="ts">
   import {
     GeomArea,
+    createPlotInteraction,
     GGPlot,
     GuideLegend,
     Labs,
@@ -91,12 +92,16 @@ and Windows.
   } from "@ggsvelte/svelte";
 
   import { crimeanMortality } from "./data.js";
+
+  const interaction = createPlotInteraction({
+    identity: (row) => `${row.month}:${row.cause}`,
+  });
 </script>
 
 <GGPlot
   data={crimeanMortality}
   aes={{ x: "month", y: "deaths", fill: "cause" }}
-  key={(row) => `${row.month}:${row.cause}`}
+  {interaction}
   width={640}
   height={400}
 >
@@ -184,11 +189,10 @@ and Windows.
 <GGPlot
   data={londonCholera}
   aes={{ x: "density", y: "deathRate", color: "water" }}
-  key="district"
   width="container"
   height={400}
 >
-  <Inspect mode="xy" pin />
+  <Inspect mode="xy" pin identity="district" />
   <ThemeEconomist />
   <ScaleXLog10 labels="~s" />
   <ScaleColorManual

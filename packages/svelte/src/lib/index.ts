@@ -23,6 +23,7 @@ export type {
 } from "./legend/filter.js";
 export { createPlotInteraction } from "./interaction/controller.svelte.js";
 export type {
+  ControllerDatumIdentity,
   CreatePlotInteractionOptions,
   PlotInteractionController,
   PlotInteractionMutationOptions,

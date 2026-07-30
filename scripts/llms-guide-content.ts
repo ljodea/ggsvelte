@@ -1315,7 +1315,6 @@ axis:
 <GGPlot
   {data}
   aes={{ x: "date", y: "value", color: "series" }}
-  key="id"
   oninspect={(event) => console.log(event)}
 >
   <Inspect mode="x" pin maxDistance={24} />
@@ -1343,20 +1342,20 @@ contains controls that need focus.
   <span>{inspection.members.length} series at this value</span>
 {/snippet}
 
-<GGPlot {data} aes={{ x: "date", y: "value" }} key="id">
+<GGPlot {data} aes={{ x: "date", y: "value" }}>
   <Inspect mode="x" content={details} />
 </GGPlot>
 \`\`\`
 
 ## Point and interval selection
 
-Point selection is durable identity, not a renderer index. Supply a unique,
-stable string, number, or symbol for every source row:
+Point selection is durable identity, not a renderer index. Identity defaults
+to an \`id\` column or row index; override with \`identity\` on Select / Inspect
+for a non-\`id\` natural key:
 
 \`\`\`svelte fragment
 <GGPlot
-  key="id"
-  select={{ type: "point", multiple: true }}
+  select={{ type: "point", multiple: true, identity: "id" }}
   onselect={(event) => {
     if (event.mode === "point") selectedKeys = event.keys;
   }}
@@ -1369,7 +1368,6 @@ count for aggregate marks.
 
 \`\`\`svelte fragment
 <GGPlot
-  key="id"
   select={{ type: "interval", mode: "xy", persistent: true }}
   onselect={(event) => {
     if (event.mode !== "point" && event.phase === "end") {
@@ -1404,21 +1402,19 @@ emitting the callback again. Controlled plots never infer channel names: add an
 <script lang="ts">
   import { createPlotInteraction } from "@ggsvelte/svelte";
 
-  const interaction = createPlotInteraction<string>();
+  const interaction = createPlotInteraction<string>({ identity: "id" });
   const scope = { keys: "penguin-id", x: "flipper-mm", y: "mass-g" } as const;
   const selected = $derived(interaction.selected(scope));
 </script>
 
 <GGPlot
   {data}
-  key="id"
   select={{ type: "point", multiple: true }}
   {interaction}
   interactionScope={scope}
 />
 <GGPlot
   {data}
-  key="id"
   select={{ type: "point", multiple: true }}
   {interaction}
   interactionScope={scope}
@@ -1580,11 +1576,14 @@ description path.
 
 ## Identity and diagnostics
 
-Use \`key="id"\` when the row has a field, or \`key={(row) => row.id}\` for an
-accessor. Keys must be non-null unique \`PropertyKey\` values and stable across
-updates. Invalid or duplicate keys emit structured diagnostics through
-\`ondiagnostic\`; they never silently fall back to array positions. Stable keys
-let pinned inspection and point selection follow a datum when data is updated.
+Ordinary charts omit custom identity: the engine uses an \`id\` column when
+present, otherwise the row index (order-stable only). For a non-\`id\` natural
+key or accessor, set \`identity\` on \`<Inspect>\`, object-form \`select\`, or
+\`createPlotInteraction({ identity })\` — not plot-level \`key\` (deprecated).
+Keys must be non-null unique \`PropertyKey\` values and stable across updates.
+Invalid or duplicate keys emit structured diagnostics through \`ondiagnostic\`.
+Stable identity lets pinned inspection and point selection follow a datum when
+data is updated.
 `;
 
 const interactionDiagnostics = Object.values(INTERACTION_DIAGNOSTIC_CATALOG)
@@ -1623,7 +1622,8 @@ etc.). Options match the legacy GGPlot prop: \`mode\`, \`pin\`, \`maxDistance\`,
 ### Point selection
 
 \`select={{ type: "point", multiple: true }}\` stores stable semantic keys.
-Supply \`key\` for every row.
+Identity defaults to an \`id\` column or row index; override with
+\`select={{ type: "point", identity: "…" }}\` or \`<Inspect identity="…" />\`.
 
 ### Interval selection
 
@@ -1924,6 +1924,62 @@ migration note here.
 The accepted lifecycle and deprecation policy remains in
 [Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
 rather than creating a second policy.
+
+## 0.20 to 0.21
+
+### Row identity on interaction surfaces
+
+Durable row identity no longer belongs on the grammar root. Ordinary charts
+omit identity entirely: the engine uses an \`id\` column when present, otherwise
+the **row index** (order-stable only — not reorder-safe across data refresh).
+
+Custom durable identity (non-\`id\` natural keys, composite accessors, pin
+rebind across reorder) lives on interaction surfaces:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GeomPoint, GGPlot, Inspect } from "@ggsvelte/svelte";
+
+  const rows = [
+    { country: "Japan", year: 812, temp: 6.1 },
+    { country: "Korea", year: 900, temp: 5.8 },
+  ];
+</script>
+
+<!-- Before 0.21: plot-level key. -->
+<GGPlot data={rows} aes={{ x: "year", y: "temp" }} key="country">
+  <Inspect />
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GeomPoint, GGPlot, Inspect } from "@ggsvelte/svelte";
+
+  const rows = [
+    { country: "Japan", year: 812, temp: 6.1 },
+    { country: "Korea", year: 900, temp: 5.8 },
+  ];
+</script>
+
+<!-- After 0.21: identity on Inspect (or select / createPlotInteraction). -->
+<GGPlot data={rows} aes={{ x: "year", y: "temp" }}>
+  <Inspect identity="country" />
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+- Prefer \`<Inspect identity="…" />\` or \`inspect={{ identity: "…" }}\` when
+  inspect is enabled.
+- Prefer \`select={{ type: "point", identity: "…" }}\` (or interval) when
+  selection owns the key without inspect.
+- Prefer \`createPlotInteraction({ identity: "…" })\` when linked plots share
+  one controller and the same identity field.
+- Resolution order: Inspect → Select → controller → deprecated \`key\` →
+  auto \`id\` → row index.
+- \`<GGPlot key>\` still dual-reads through 0.21.x and emits
+  \`DEPRECATED_PLOT_PROP\`; it is removed in 0.22.0.
 
 ## 0.18 to 0.19
 

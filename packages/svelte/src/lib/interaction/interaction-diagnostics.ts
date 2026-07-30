@@ -65,10 +65,10 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     severity: "warning",
     code: "INTERACTION_POINT_REQUIRES_KEY",
     message: "Durable point selection requires resolved row identity.",
-    prop: "key",
+    prop: "identity",
     suggestions: [
-      "Omit key — defaults to an id column or row index",
-      'Override with key="id" or a stable key accessor when needed',
+      "Ordinary charts omit identity — defaults to an id column or row index",
+      'Override with <Inspect identity="id" /> or select={{ type: "point", identity: "id" }}',
     ],
     docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-point-requires-key",
   },
@@ -77,10 +77,10 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     code: "INTERACTION_INTERVAL_PRESET_REQUIRES_KEY",
     message:
       "Coordinated interval presets (union, cross-panel) require resolved row identity; without it they combine no rows.",
-    prop: "key",
+    prop: "identity",
     suggestions: [
-      "Omit key — defaults to an id column or row index",
-      'Override with key="id" or a stable key accessor when needed',
+      "Ordinary charts omit identity — defaults to an id column or row index",
+      'Override with select={{ type: "interval", identity: "id", … }} or <Inspect identity="id" />',
     ],
     docUrl:
       "https://ggsvelte.sh/guide/interaction-reference#interaction-interval-preset-requires-key",
@@ -89,7 +89,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     severity: "error",
     code: "INTERACTION_INVALID_KEY",
     message: "A key accessor returned null, undefined, or a non-PropertyKey value.",
-    prop: "key",
+    prop: "identity",
     suggestions: ["Return a stable string, number, or symbol for every row"],
     docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-invalid-key",
   },
@@ -98,7 +98,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     code: "INTERACTION_DUPLICATE_KEY",
     message:
       "The key accessor returned a duplicate value; durable interaction is disabled for that value.",
-    prop: "key",
+    prop: "identity",
     suggestions: ["Use a field that uniquely identifies each source row"],
     docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-duplicate-key",
   },
@@ -106,7 +106,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     severity: "error",
     code: "INTERACTION_UNSTABLE_KEY",
     message: "The key accessor returned a different value for the same source row.",
-    prop: "key",
+    prop: "identity",
     suggestions: ["Return an immutable field that uniquely identifies each row"],
     docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-unstable-key",
   },
@@ -123,10 +123,10 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     code: "INTERACTION_LEGEND_REQUIRES_KEY",
     message:
       "Legend focus requires resolved row identity so encoded legend values never become identities.",
-    prop: "key",
+    prop: "identity",
     suggestions: [
-      "Omit key — defaults to an id column or row index",
-      'Override with key="id" or a stable key accessor when needed',
+      "Ordinary charts omit identity — defaults to an id column or row index",
+      'Override with <Inspect identity="id" /> or createPlotInteraction({ identity: "id" })',
     ],
     docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-legend-requires-key",
   },

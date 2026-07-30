@@ -68,9 +68,12 @@ export interface GGPlotProps<
   /** Plot height in px (falls back to spec.height, then 400). */
   height?: number;
   /**
-   * Optional override for durable row identity (selection, legend focus, pin
-   * rebind, linked controllers). Default: use an `id` column when present,
-   * otherwise the row index. Ordinary charts should omit this prop.
+   * @deprecated since 0.21.0 — use `identity` on `<Inspect>`, object-form
+   * `select={{ type, identity }}`, or `createPlotInteraction({ identity })`.
+   * Still honoured (dual-read) until 0.22.0; emits DEPRECATED_PLOT_PROP.
+   * Default when no surface sets identity: `id` column when present, else
+   * row index. Ordinary charts should omit identity entirely.
+   * Migration: https://ggsvelte.sh/guide/upgrading#row-identity-on-interaction
    */
   key?: Identity;
   /** Opt into inspection, its semantic crosshair, tooltip, and pinning. */
@@ -146,6 +149,18 @@ export function resolveCapabilities(props: {
     legendFocus: props.legendFocus ?? false,
     legendFilter: props.legendFilter ?? false,
   };
+}
+
+/**
+ * Read the deprecated plot-level `key` prop during the dual-read window.
+ * Prefer Inspect / Select / createPlotInteraction `identity` instead.
+ */
+export function readLegacyPlotKey(
+  props: EnginePlotProps | GGPlotProps,
+): EnginePlotProps["key"] | undefined {
+  // Dual-read until 0.22.0 — prefer interaction-surface identity.
+  // oxlint-disable-next-line typescript/no-deprecated -- intentional dual-read
+  return props.key;
 }
 
 /**

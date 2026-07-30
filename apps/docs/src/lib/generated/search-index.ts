@@ -19912,6 +19912,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Five-minute path"],
   },
   {
+    id: "heading:guide-upgrading:0-20-to-0-21",
+    kind: "heading",
+    title: "0.20 to 0.21",
+    summary:
+      "0.20 to 0.21 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#0-20-to-0-21",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["0.20 to 0.21"],
+  },
+  {
+    id: "heading:guide-upgrading:row-identity-on-interaction-surfaces",
+    kind: "heading",
+    title: "Row identity on interaction surfaces",
+    summary:
+      "Row identity on interaction surfaces in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#row-identity-on-interaction-surfaces",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["Row identity on interaction surfaces"],
+  },
+  {
     id: "heading:guide-upgrading:0-18-to-0-19",
     kind: "heading",
     title: "0.18 to 0.19",
@@ -41742,7 +41762,7 @@ export const DOCS_SEARCH_INDEX = [
     keywords: [
       "interaction",
       "warning",
-      'Omit key — defaults to an id column or row index; Override with key="id" or a stable key accessor when needed',
+      'Ordinary charts omit identity — defaults to an id column or row index; Override with <Inspect identity="id" /> or select={{ type: "point", identity: "id" }}',
     ],
     exact: ["INTERACTION_POINT_REQUIRES_KEY", "interaction:INTERACTION_POINT_REQUIRES_KEY"],
   },
@@ -41756,7 +41776,7 @@ export const DOCS_SEARCH_INDEX = [
     keywords: [
       "interaction",
       "warning",
-      'Omit key — defaults to an id column or row index; Override with key="id" or a stable key accessor when needed',
+      'Ordinary charts omit identity — defaults to an id column or row index; Override with select={{ type: "interval", identity: "id", … }} or <Inspect identity="id" />',
     ],
     exact: [
       "INTERACTION_INTERVAL_PRESET_REQUIRES_KEY",
@@ -41814,7 +41834,7 @@ export const DOCS_SEARCH_INDEX = [
     keywords: [
       "interaction",
       "warning",
-      'Omit key — defaults to an id column or row index; Override with key="id" or a stable key accessor when needed',
+      'Ordinary charts omit identity — defaults to an id column or row index; Override with <Inspect identity="id" /> or createPlotInteraction({ identity: "id" })',
     ],
     exact: ["INTERACTION_LEGEND_REQUIRES_KEY", "interaction:INTERACTION_LEGEND_REQUIRES_KEY"],
   },

@@ -12053,6 +12053,16 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "0-20-to-0-21",
+        title: "0.20 to 0.21",
+        level: 2,
+      },
+      {
+        id: "row-identity-on-interaction-surfaces",
+        title: "Row identity on interaction surfaces",
+        level: 3,
+      },
+      {
         id: "0-18-to-0-19",
         title: "0.18 to 0.19",
         level: 2,

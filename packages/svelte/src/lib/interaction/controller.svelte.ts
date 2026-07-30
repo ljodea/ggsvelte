@@ -1,3 +1,5 @@
+import type { CellValue } from "@ggsvelte/core";
+
 import type {
   InteractionSource,
   PlotInteractionChange,
@@ -35,13 +37,29 @@ export interface PlotInteractionZoomOptions {
   readonly source?: InteractionSource;
 }
 
+/** Row identity override shared by plots bound to this controller. */
+export type ControllerDatumIdentity<Key extends PropertyKey> =
+  | PropertyKey
+  | ((row: Record<string, CellValue>, index: number) => Key);
+
 export interface CreatePlotInteractionOptions<Key extends PropertyKey> {
   readonly onchange?: (transition: PlotInteractionTransition<Key>) => void;
+  /**
+   * Preferred durable row identity for plots that bind this controller.
+   * Per-plot Inspect / Select `identity` overrides this. Prefer these
+   * surfaces over the deprecated GGPlot `key` prop.
+   */
+  readonly identity?: ControllerDatumIdentity<Key>;
 }
 
 export interface PlotInteractionController<Key extends PropertyKey> {
   readonly revision: number;
   readonly snapshot: PlotInteractionSnapshot<Key>;
+  /**
+   * Optional row identity from {@link createPlotInteraction} options.
+   * Plots read this when resolving datum keys; never mutated after create.
+   */
+  readonly identity?: ControllerDatumIdentity<Key>;
   selected(scope: KeyScope): ReadonlyArray<Key>;
   emphasized(scope: KeyScope): ReadonlyArray<Key>;
   isSelected(key: Key, scope: KeyScope): boolean;
@@ -195,6 +213,7 @@ export function createPlotInteraction<Key extends PropertyKey = PropertyKey>(
     get snapshot() {
       return currentSnapshot();
     },
+    ...(options.identity !== undefined && { identity: options.identity }),
     selected(scope) {
       void revision;
       return selections.get(keyScope(scope)) ?? EMPTY_KEYS;

@@ -29,6 +29,13 @@
     maxDistance?: number;
     contentMode?: "informational" | "interactive";
     muteSiblings?: boolean;
+    /**
+     * Durable row identity (column or accessor). Preferred over deprecated
+     * GGPlot `key`. Default when omitted: `id` column or row index.
+     */
+    identity?:
+      | PropertyKey
+      | ((row: Record<string, CellValue>, index: number) => PropertyKey);
     /** Row/Key widen at the non-generic registry boundary (same as engine). */
     content?: Snippet<
       [PlotInspectionChange<Record<string, CellValue>, PropertyKey>]
@@ -42,6 +49,7 @@
     "maxDistance",
     "contentMode",
     "muteSiblings",
+    "identity",
     "content",
   ]);
 

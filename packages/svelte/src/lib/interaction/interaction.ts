@@ -145,6 +145,12 @@ export interface InspectOptions<Row = Record<string, CellValue>, Key = PropertyK
    * flicker when the pointer crosses gaps between rect marks (#633).
    */
   readonly muteSiblings?: boolean;
+  /**
+   * Durable row identity for interaction payloads (pin rebind, selection
+   * keys, legend focus). Preferred over the deprecated GGPlot `key` prop.
+   * Default when omitted: `id` column if present, else row index.
+   */
+  readonly identity?: Key | ((row: Row, index: number) => Key);
   readonly content?: Snippet<[PlotInspectionChange<Row, Key>]>;
 }
 
@@ -155,6 +161,14 @@ export interface SelectOptions {
   readonly persistent?: boolean;
   /** Facet coordination semantics for durable interval selections. */
   readonly preset?: FacetIntervalPreset;
+  /**
+   * Durable row identity for selection keys (and shared plot interaction).
+   * Preferred over the deprecated GGPlot `key` prop. Not selection semantics —
+   * omitted from the resolved select config.
+   */
+  readonly identity?:
+    | PropertyKey
+    | ((row: Record<string, CellValue>, index: number) => PropertyKey);
 }
 
 export interface ZoomOptions {
@@ -176,9 +190,11 @@ export type LegendFocusInput = boolean | LegendFocusOptions;
 export interface ResolvedInteractionConfig<Row = Record<string, CellValue>, Key = PropertyKey> {
   readonly interactive: boolean;
   readonly inspect: Readonly<
-    Required<Omit<InspectOptions<Row, Key>, "content">> & Pick<InspectOptions<Row, Key>, "content">
+    Required<Omit<InspectOptions<Row, Key>, "content" | "identity">> &
+      Pick<InspectOptions<Row, Key>, "content">
   > | null;
-  readonly select: Readonly<Required<SelectOptions>> | null;
+  /** Select config without `identity` (identity is resolved separately for row keys). */
+  readonly select: Readonly<Required<Omit<SelectOptions, "identity">>> | null;
   readonly zoom: Readonly<Required<ZoomOptions>> | null;
   readonly legendFocus: Readonly<Required<LegendFocusOptions>> | null;
   readonly initialTool: InteractionTool;

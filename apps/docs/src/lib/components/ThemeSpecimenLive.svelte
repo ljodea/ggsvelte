@@ -174,11 +174,10 @@
   <GGPlot
     data={countries}
     aes={{ x: "gdp", y: "lifeExp", color: "region" }}
-    key="country"
     {height}
     ariaLabel={`${label} theme cholera density scatter`}
   >
-    <Inspect mode="xy" />
+    <Inspect mode="xy" identity="country" />
     {#if legendFocus}
       <GuideLegend channel="color" focus />
     {/if}
