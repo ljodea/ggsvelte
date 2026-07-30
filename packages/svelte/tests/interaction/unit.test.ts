@@ -161,4 +161,41 @@ describe("chart-local interaction reducer", () => {
     // Inspect frames never bump reducer revision.
     expect(reducer.state.revision).toBe(rev);
   });
+
+  it("cancel-area idles a drag and is a no-op when already idle", () => {
+    const reducer = createInteractionReducer();
+    reducer.dispatch({ type: "set-tool", tool: "select-area" });
+    reducer.dispatch({
+      type: "begin-area",
+      point: { x: 5, y: 5 },
+      panelId: "panel:all",
+    });
+    const epoch = reducer.state.epoch;
+    reducer.dispatch({ type: "cancel-area" });
+    expect(reducer.state.area.kind).toBe("idle");
+    expect(reducer.state.epoch).toBe(epoch + 1);
+    // Second cancel while idle does not bump epoch again.
+    reducer.dispatch({ type: "cancel-area" });
+    expect(reducer.state.epoch).toBe(epoch + 1);
+  });
+
+  it("queuePointer uses queueMicrotask when no scheduleFrame is supplied", async () => {
+    const seen: number[] = [];
+    const reducer = createInteractionReducer({
+      onPointerFrame: (action) => {
+        if (action.type === "inspect" && action.candidate !== null) {
+          seen.push(action.candidate.id);
+        }
+      },
+    });
+    reducer.queuePointer({
+      type: "inspect",
+      candidate: candidate(9),
+      source: "pointer",
+    });
+    expect(seen).toEqual([]);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(seen).toEqual([9]);
+  });
 });

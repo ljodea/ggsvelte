@@ -385,6 +385,31 @@ describe("resolveClearControlLayout", () => {
       top: bottomLegend.y + Math.max(0, (bottomLegend.height - CLEAR_CONTROL_HEIGHT_PX) / 2),
     });
   });
+
+  it("returns the first scene-clamped park when every candidate collides (full-scene legend)", () => {
+    // Degenerate: legend fills the scene so under/above/left all overlap after clamp.
+    const full = {
+      scale: "color",
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 100,
+      position: "right" as const,
+      direction: "vertical" as const,
+    };
+    const layout = resolveClearControlLayout({
+      legendFocusEnabled: true,
+      pressedScale: "color",
+      legends: [full],
+      sceneWidth: 100,
+      sceneHeight: 100,
+    });
+    expect(layout).not.toBeNull();
+    // Still scene-clamped; last-resort prefers the first candidate over hide.
+    expect(layout!.left).toBeGreaterThanOrEqual(CLEAR_CONTROL_GAP_PX);
+    expect(layout!.top).toBeGreaterThanOrEqual(CLEAR_CONTROL_GAP_PX);
+    expect(layout!.top + CLEAR_CONTROL_HEIGHT_PX).toBeLessThanOrEqual(100);
+  });
 });
 
 describe("shouldRevealClearControl", () => {
