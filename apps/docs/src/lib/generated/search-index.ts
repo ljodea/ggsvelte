@@ -17416,6 +17416,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"],
   },
   {
+    id: "heading:guide-interaction-reference:interaction-duplicate-inspect-capability",
+    kind: "heading",
+    title: "INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
+    summary:
+      "INTERACTION_DUPLICATE_INSPECT_CAPABILITY in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#interaction-duplicate-inspect-capability",
+    keywords: ["Interaction reference", "documentation"],
+    exact: ["INTERACTION_DUPLICATE_INSPECT_CAPABILITY"],
+  },
+  {
     id: "heading:guide-interaction-reference:accessibility",
     kind: "heading",
     title: "Accessibility",
@@ -19443,6 +19453,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/errors#interaction-inspect-x-bisects-bar-labels",
     keywords: ["Errors reference", "Reference"],
     exact: ["INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"],
+  },
+  {
+    id: "heading:guide-errors:interaction-duplicate-inspect-capability",
+    kind: "heading",
+    title: "INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
+    summary:
+      "INTERACTION_DUPLICATE_INSPECT_CAPABILITY in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#interaction-duplicate-inspect-capability",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["INTERACTION_DUPLICATE_INSPECT_CAPABILITY"],
   },
   {
     id: "heading:guide-errors:cli-diagnostics-ggsvelte-render",
@@ -41904,6 +41924,23 @@ export const DOCS_SEARCH_INDEX = [
     exact: [
       "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
       "interaction:INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+    ],
+  },
+  {
+    id: "diagnostic:interaction:INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
+    kind: "diagnostic",
+    title: "INTERACTION_DUPLICATE_INSPECT_CAPABILITY · interaction",
+    summary:
+      "Multiple <Inspect> children are registered; only the last one's options apply (REPLACE).",
+    href: "/guide/errors#interaction-duplicate-inspect-capability",
+    keywords: [
+      "interaction",
+      "advisory",
+      "Keep a single <Inspect> child; Merge options onto one <Inspect> instead of stacking siblings",
+    ],
+    exact: [
+      "INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
+      "interaction:INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
     ],
   },
   {

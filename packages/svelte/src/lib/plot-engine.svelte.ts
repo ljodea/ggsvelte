@@ -67,6 +67,10 @@ import {
   type PlotInteractionScope,
   type ResolvedInteractionConfig,
 } from "./interaction/interaction.js";
+import {
+  duplicateInspectCapabilityDiagnostics,
+  resolveInspectCapability,
+} from "./interaction/resolve-inspect-capability.js";
 import { collectWiringDiagnostics } from "./interaction/wiring-advisories.js";
 import { createInspectionState } from "./inspection/inspection-state.svelte.js";
 import type { InspectionState } from "./inspection/inspection-state.svelte.js";
@@ -190,9 +194,19 @@ export type PlotEngine = {
 // ---------------------------------------------------------------------------
 
 export function createPlotEngine(host: PlotEngineHost): PlotEngine {
-  // Capability defaults — pure, lazy per read (do not materialize a full
-  // props snapshot; per-field deps stay on host.props).
-  const caps = (): ResolvedPlotCapabilities => resolveCapabilities(host.props);
+  // Inspect capability: prop + host capability registry children. Pure resolve
+  // stays props-agnostic of registry; engine is the seam (plot-props stays
+  // props-only). SSR: recompute from the plain registry like assembled (#982)
+  // so one-pass construction does not latch empty children as inspect-off.
+  function resolveInspectCurrent() {
+    return resolveInspectCapability({
+      prop: host.props.inspect,
+      children: host.registry.capabilities("inspect"),
+    });
+  }
+  const inspectResolvedDerived = $derived.by(resolveInspectCurrent);
+  const inspectResolved = () =>
+    typeof window === "undefined" ? resolveInspectCurrent() : inspectResolvedDerived;
 
   // Reading descriptors through toLayerInput goes through live getters, so
   // geom prop changes flow into this $derived without re-registration.
@@ -269,27 +283,45 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   const legendFocusResolved = (): ResolvedLegendFocusCapability =>
     typeof window === "undefined" ? resolveLegendFocusNow() : legendFocusResolvedDerived;
 
-  const interactionConfig = $derived(
-    (() => {
-      const tool = host.props.tool;
-      // Four fields only — legendFilter is not part of normalizeInteractionConfig.
-      // Reading it via caps() re-delivered config diagnostics on every filter toggle.
-      // legendFocus comes from GuideLegend children (host registry), not only the plot prop.
-      return normalizeInteractionConfig(
-        {
-          inspect: host.props.inspect ?? false,
-          select: host.props.select ?? false,
-          zoom: host.props.zoom ?? false,
-          legendFocus: legendFocusResolved().configInput,
-          ...(tool !== undefined && { tool }),
-        },
-        {
-          faceted: facetedPlot,
-          hasKey: host.props.key !== undefined,
-        },
-      );
-    })(),
-  );
+  // Capability defaults for wiring — inspect from prop + <Inspect> children;
+  // legendFocus "requested" from GuideLegend / legacy prop (not host.props.legendFocus
+  // direct — that prop is deprecated and type-aware lint denies it).
+  const caps = (): ResolvedPlotCapabilities => {
+    const select = host.props.select;
+    const zoom = host.props.zoom;
+    const legendFilter = host.props.legendFilter;
+    return resolveCapabilities({
+      inspect: inspectResolved().input,
+      legendFocus: legendFocusResolved().requested,
+      ...(select !== undefined && { select }),
+      ...(zoom !== undefined && { zoom }),
+      ...(legendFilter !== undefined && { legendFilter }),
+    });
+  };
+
+  // interactionConfig: inspect from prop + <Inspect> children; legendFocus from
+  // GuideLegend (host registry). SSR hatch matches assembled / inspectResolved.
+  function interactionConfigCurrent(): ResolvedInteractionConfig {
+    const tool = host.props.tool;
+    // Four fields only — legendFilter is not part of normalizeInteractionConfig.
+    // Reading it via caps() re-delivered config diagnostics on every filter toggle.
+    return normalizeInteractionConfig(
+      {
+        inspect: inspectResolved().input,
+        select: host.props.select ?? false,
+        zoom: host.props.zoom ?? false,
+        legendFocus: legendFocusResolved().configInput,
+        ...(tool !== undefined && { tool }),
+      },
+      {
+        faceted: facetedPlot,
+        hasKey: host.props.key !== undefined,
+      },
+    );
+  }
+  const interactionConfigDerived = $derived.by(interactionConfigCurrent);
+  const interactionConfig = (): ResolvedInteractionConfig =>
+    typeof window === "undefined" ? interactionConfigCurrent() : interactionConfigDerived;
 
   function deliverDiagnostic(diagnostic: PlotDiagnostic): void {
     const ondiagnostic = host.props.ondiagnostic;
@@ -301,7 +333,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   }
 
   $effect(() => {
-    for (const diagnostic of interactionConfig.diagnostics) deliverDiagnostic(diagnostic);
+    for (const diagnostic of interactionConfig().diagnostics) deliverDiagnostic(diagnostic);
   });
 
   // Wiring advisories (ADR 0013 audit): prop combinations that silently do
@@ -309,6 +341,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   // fire once per prop per plot instance — a later capability toggle must
   // not re-advise. Pure collect lives in wiring-advisories.ts; snapshot is
   // taken inside this derived so late-bound handlers still recompute.
+  // capabilities.inspect is resolved (prop + <Inspect> children), not raw prop.
   const wiringDiagnostics = $derived.by((): InteractionDiagnostic[] => {
     const capabilities = caps();
     // legendFocus "requested" is the GuideLegend/child (or deprecated prop)
@@ -333,12 +366,26 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       },
     });
   });
-  // Shared once-per-code-per-prop Set for wiring + composition + deprecations.
-  // Delivery order is fixed: config effect (above) → wiring → composition.
+  // Shared once-per-code-per-prop Set for wiring + composition + multi-Inspect
+  // + deprecations. Order: config → wiring → multi-inspect → legendFocus
+  // deprecation → composition.
   // Grammar-prop deprecation emission removed in 0.13.0 (#704) — props gone.
   const deliveredAdvisories = new Set<string>();
   $effect(() => {
     for (const diagnostic of wiringDiagnostics) {
+      const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
+      if (deliveredAdvisories.has(dedupKey)) continue;
+      deliveredAdvisories.add(dedupKey);
+      deliverDiagnostic(diagnostic);
+    }
+  });
+
+  // Multiple <Inspect> children: last wins; advisory once per mount.
+  const multiInspectDiagnostics = $derived.by((): InteractionDiagnostic[] =>
+    duplicateInspectCapabilityDiagnostics(inspectResolved().multiChild),
+  );
+  $effect(() => {
+    for (const diagnostic of multiInspectDiagnostics) {
       const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
       if (deliveredAdvisories.has(dedupKey)) continue;
       deliveredAdvisories.add(dedupKey);
@@ -384,7 +431,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   // Inspect axis guides that fight bar/col geometry (or bisect on-bar labels).
   // Needs assembled layers + resolved inspect.mode; once-per-code:prop like wiring.
   const inspectGeomDiagnostics = $derived.by((): InteractionDiagnostic[] => {
-    const mode = interactionConfig.inspect?.mode;
+    const mode = interactionConfig().inspect?.mode;
     if (mode === undefined) return [];
     return inspectAxisOnBarColDiagnostics(mode, layerGeomsFromSpecLayers(assembled()?.layers));
   });
@@ -414,7 +461,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   const zoomState = createPlotZoomState({
     interaction: () => host.props.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
-    zoomConfig: () => interactionConfig.zoom,
+    zoomConfig: () => interactionConfig().zoom,
     assembled,
     // Model is declared after the runtime; handlers only.
     model: () => runtime.model,
@@ -507,12 +554,12 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   // source rows/spec -> pipeline/scene + CandidateStore -> semantic resolver
   // -> chart-local reducer -> tooltip/crosshair/tools/callbacks. Presentation
   // consumes one resolved inspection and never reconstructs grouping itself.
-  const interactive = $derived(interactionConfig.interactive);
-  const surfaceInteractive = $derived(interactionConfig.availableTools.length > 0);
+  const interactive = $derived(interactionConfig().interactive);
+  const surfaceInteractive = $derived(interactionConfig().availableTools.length > 0);
 
   // Shared enablement predicates (avoid re-typing the same config gates).
-  const inspectEnabled = $derived(interactionConfig.inspect !== null);
-  const legendFocusEnabled = $derived(interactionConfig.legendFocus !== null);
+  const inspectEnabled = $derived(interactionConfig().inspect !== null);
+  const legendFocusEnabled = $derived(interactionConfig().legendFocus !== null);
   const coordFlipped = $derived(assembled()?.coord?.type === "flip");
   let tooltipHovered = $state(false);
 
@@ -521,7 +568,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   const selectionState = createSelectionState({
     interaction: () => host.props.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
-    selectConfig: () => interactionConfig.select,
+    selectConfig: () => interactionConfig().select,
     onselect: () => host.props.onselect,
     oninteraction: () => host.props.oninteraction,
     announce: announceSink,
@@ -535,7 +582,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   const inspectionState = createInspectionState({
     model: () => runtime.model,
     reducer: () => surfaceState.reducer,
-    inspectConfig: () => interactionConfig.inspect,
+    inspectConfig: () => interactionConfig().inspect,
     inspectEnabled: () => inspectEnabled,
     dataIdentityEpoch: () => dataIdentityEpoch,
     keyAt: (index) => semanticKeys.keyAt(index),
@@ -562,7 +609,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     model: () => runtime.model,
     interaction: () => host.props.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
-    selectConfig: () => interactionConfig.select,
+    selectConfig: () => interactionConfig().select,
     effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
     commitZoom: (...args: Parameters<PlotZoomState["commitZoom"]>) => {
       zoomState.commitZoom(...args);
@@ -583,20 +630,20 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   // chrome) so surface does not close over later chromeState (#1082).
   const surfaceAvailableTools = $derived(
     resolveFilteredAvailableTools(
-      interactionConfig.availableTools,
-      interactionConfig.zoom,
+      interactionConfig().availableTools,
+      interactionConfig().zoom,
       runtime.model?.scales ?? null,
     ),
   );
-  const surfacePointSelectEnabled = $derived(canPublishPointSelection(interactionConfig.select));
+  const surfacePointSelectEnabled = $derived(canPublishPointSelection(interactionConfig().select));
   surfaceState = createSurfaceState({
     model: () => runtime.model,
     root: host.root,
     toolProp: () => host.props.tool,
-    initialTool: () => interactionConfig.initialTool,
+    initialTool: () => interactionConfig().initialTool,
     availableTools: () => surfaceAvailableTools,
-    inspectConfig: () => interactionConfig.inspect,
-    selectConfig: () => interactionConfig.select,
+    inspectConfig: () => interactionConfig().inspect,
+    selectConfig: () => interactionConfig().select,
     pointSelectEnabled: () => surfacePointSelectEnabled,
     ontoolchange: () => host.props.ontoolchange,
     surfaceInteractive: () => surfaceInteractive,
@@ -623,7 +670,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     interaction: () => host.props.interaction,
     resolvedInteractionScope: () => resolvedInteractionScope,
     legendFocusEnabled: () => legendFocusEnabled,
-    legendFocusPreviewEnabled: () => interactionConfig.legendFocus?.preview === true,
+    legendFocusPreviewEnabled: () => interactionConfig().legendFocus?.preview === true,
     root: host.root,
     entryKeys: () => legendEntryKeys,
     entries: () => interactiveLegendEntries,
@@ -639,7 +686,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     intervalKeys: () => intervalState.effectiveIntervalKeys,
     intervals: () => intervalState.effectiveIntervals,
     emphasisKeys: () => legendFocusState.effectiveEmphasisKeys,
-    muteSiblingsOnInspect: () => interactionConfig.inspect?.muteSiblings === true,
+    muteSiblingsOnInspect: () => interactionConfig().inspect?.muteSiblings === true,
     // Inspection owns the projection (#1080); wiring no longer re-assembles it.
     inspectionFocus: () => inspectionState.presentationFocus,
   });
@@ -650,10 +697,10 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   // UI, recomputed with the same pure helpers as surfaceAvailableTools above.
   const chromeState = createPlotChromeState({
     model: () => runtime.model,
-    zoomConfig: () => interactionConfig.zoom,
-    selectConfig: () => interactionConfig.select,
-    configuredAvailableTools: () => interactionConfig.availableTools,
-    interactionDiagnostics: () => interactionConfig.diagnostics,
+    zoomConfig: () => interactionConfig().zoom,
+    selectConfig: () => interactionConfig().select,
+    configuredAvailableTools: () => interactionConfig().availableTools,
+    interactionDiagnostics: () => interactionConfig().diagnostics,
     interactive: () => interactive,
     effectiveZoomDomains: () => zoomState.effectiveZoomDomains,
     effectiveIntervals: () => intervalState.effectiveIntervals,
@@ -727,7 +774,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       return assembled();
     },
     get interactionConfig() {
-      return interactionConfig;
+      return interactionConfig();
     },
     get interactive() {
       return interactive;

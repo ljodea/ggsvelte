@@ -24,7 +24,8 @@ export type InteractionDiagnosticCode =
   | "INTERACTION_INSPECT_X_ON_COL"
   | "INTERACTION_INSPECT_X_ON_BAR"
   | "INTERACTION_INSPECT_X_BISECTS_COL_LABELS"
-  | "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS";
+  | "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"
+  | "INTERACTION_DUPLICATE_INSPECT_CAPABILITY";
 
 export interface InteractionDiagnostic {
   readonly severity: "error" | "warning" | "advisory";
@@ -226,5 +227,18 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     ],
     docUrl:
       "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-x-bisects-bar-labels",
+  },
+  INTERACTION_DUPLICATE_INSPECT_CAPABILITY: {
+    severity: "advisory",
+    code: "INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
+    message:
+      "Multiple <Inspect> children are registered; only the last one's options apply (REPLACE).",
+    prop: "Inspect",
+    suggestions: [
+      "Keep a single <Inspect> child",
+      "Merge options onto one <Inspect> instead of stacking siblings",
+    ],
+    docUrl:
+      "https://ggsvelte.sh/guide/interaction-reference#interaction-duplicate-inspect-capability",
   },
 });
