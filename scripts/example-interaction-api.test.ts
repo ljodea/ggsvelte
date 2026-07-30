@@ -72,4 +72,30 @@ describe("example interaction API (v0.20)", () => {
     expect(plotLevelInteractionOffenders(" oninspect={(e) => {}} ")).toEqual([]);
     expect(plotLevelInteractionOffenders(" interactionScope={scope} ")).toEqual([]);
   });
+
+  /**
+   * createPlotInteraction / interactionScope are for linked views and shared
+   * semantic state — not for single-plot gallery charts that only need legend
+   * focus or default row identity. Static examples under every category except
+   * `interaction/` must stay free of that boilerplate (default index/`id`
+   * identity is enough for GuideLegend focus). README snippets are also gated
+   * by scripts/readme-showcase.test.ts; this covers the corpus itself.
+   */
+  it("keeps createPlotInteraction out of non-interaction gallery examples", () => {
+    const offenders = files
+      .map((path) => ({
+        id: relative(EXAMPLES, path).replace(/\/Example\.svelte$/, ""),
+        source: readFileSync(path, "utf8"),
+      }))
+      .filter(({ id }) => !id.startsWith("interaction/"))
+      .filter(
+        ({ source }) =>
+          source.includes("createPlotInteraction") ||
+          source.includes("interactionScope=") ||
+          source.includes("{interaction}"),
+      )
+      .map(({ id }) => id);
+
+    expect(offenders).toEqual([]);
+  });
 });
