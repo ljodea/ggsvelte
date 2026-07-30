@@ -10594,8 +10594,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "focus-on-guidelegend",
-        title: "focus on <GuideLegend>",
+        id: "legendfocus",
+        title: "legendFocus",
         level: 3,
       },
       {

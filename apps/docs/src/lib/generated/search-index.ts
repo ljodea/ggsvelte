@@ -17096,14 +17096,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["zoom"],
   },
   {
-    id: "heading:guide-interaction-reference:focus-on-guidelegend",
+    id: "heading:guide-interaction-reference:legendfocus",
     kind: "heading",
-    title: "focus on <GuideLegend>",
+    title: "legendFocus",
     summary:
-      "focus on <GuideLegend> in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
-    href: "/guide/interaction-reference#focus-on-guidelegend",
+      "legendFocus in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#legendfocus",
     keywords: ["Interaction reference", "documentation"],
-    exact: ["focus on <GuideLegend>"],
+    exact: ["legendFocus"],
   },
   {
     id: "heading:guide-interaction-reference:legendfilter",

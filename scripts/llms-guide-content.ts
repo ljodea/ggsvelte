@@ -1283,7 +1283,8 @@ timestamp helpers, exact-format parser, and epoch helpers return authoring Dates
 
 export const INTERACTIONS_MD = `# Interactions
 
-Static by default. Opt in with \`inspect\`, \`select\`, \`zoom\`, \`legendFocus\`,
+Static by default. Opt in with \`inspect\`, \`select\`, \`zoom\`, GuideLegend
+\`focus\` (or deprecated \`legendFocus\`),
 \`legendFilter\`. With more than one draw tool, an accessible tool rail keeps
 gestures from competing.
 
@@ -1435,21 +1436,22 @@ pixels or renderer indices.
 
 ## Legend focus
 
-\`legendFocus={true}\` adds real HTML controls over discrete color and fill
-legends. Hover and DOM focus preview one chart without mutating shared state.
-Click, touch, Enter, or Space commits the matching stable row keys; the active
-entry or Escape clears them. Arrow keys traverse entries in rendered legend
-order, with Home and End moving to the boundaries.
+\`<GuideLegend channel="color" focus />\` adds real HTML controls over that
+aesthetic's discrete legend. Hover and DOM focus preview one chart without
+mutating shared state. Click, touch, Enter, or Space commits the matching
+stable row keys; the active entry or Escape clears them. Arrow keys traverse
+entries in rendered legend order, with Home and End moving to the boundaries.
 
-\`legendFocus={{ preview: false }}\` keeps committed activation but disables
-transient previews. Continuous ramps remain static. A stable \`key\` is required:
-encoded legend values are reported as values, never used as controller keys.
-Focused and muted marks share one semantic mask across SVG and canvas, and the
-mask does not retrain scales, recompute statistics, change layout, or reassign
+\`focus={{ preview: false }}\` keeps committed activation but disables transient
+previews. Continuous ramps remain static. A stable \`key\` is required: encoded
+legend values are reported as values, never used as controller keys. Focused
+and muted marks share one semantic mask across SVG and canvas, and the mask
+does not retrain scales, recompute statistics, change layout, or reassign
 colors. Author discrete legend appearance with
 [GuideLegend](/reference/guides/legend); see the full
 [guides reference](/reference/guides) and the
-[runnable three-view example](/examples/interaction/legend-focus).
+[runnable three-view example](/examples/interaction/legend-focus). The plot prop
+\`legendFocus\` is deprecated since 0.19.0.
 
 ## Legend filtering
 
@@ -1626,16 +1628,18 @@ panels.
 \`zoom={{ mode: "x" | "y" | "xy" }}\` enables the explicit Zoom area tool.
 Reset zoom and double-click return to the natural domains.
 
-### \`focus\` on \`<GuideLegend>\`
+### \`legendFocus\`
 
-\`<GuideLegend channel="color" focus />\` enables discrete legend preview and
-committed focus for that aesthetic. Use \`focus={{ preview: false }}\` to
-disable hover/focus preview while retaining click, touch, Enter, Space,
-Escape, and arrow-key controls. It requires stable row \`key\` values and does
-not make continuous ramps interactive. Host-only — never a PortableSpec field.
+Prefer \`<GuideLegend channel="color" focus />\` (boolean or
+\`{ preview?: boolean }\`) for discrete legend preview and committed focus on
+that aesthetic. Host-only — never a PortableSpec / \`guideLegend()\` field. Use
+\`focus={{ preview: false }}\` to disable hover/focus preview while retaining
+click, touch, Enter, Space, Escape, and arrow-key controls. Requires stable
+row \`key\` values; continuous ramps stay static.
 
-The plot prop \`legendFocus\` is deprecated since 0.19.0 (removed in 0.20.0);
-see [Legend focus on GuideLegend](/guide/upgrading#legend-focus-on-guidelegend).
+The plot prop \`legendFocus={true}\` is deprecated since 0.19.0 (removed in
+0.20.0) and still enables focus plot-wide during the dual-read window — see
+[Legend focus on GuideLegend](/guide/upgrading#legend-focus-on-guidelegend).
 
 ### \`legendFilter\`
 
