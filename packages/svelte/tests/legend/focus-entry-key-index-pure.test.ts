@@ -45,6 +45,26 @@ describe("buildLegendEntryKeyIndexForPlot", () => {
     expect(keysForLegendEntry(index, { scale: "fill", entryIndex: 0 })).toEqual(["k-web"]);
     expect(keysForLegendEntry(index, { scale: "fill", entryIndex: 1 })).toEqual(["k-store"]);
   });
+
+  it("reads layerScaledConstants through the plot adapter when constants are present", () => {
+    // Constant-only fill (no field mapping) — ForPlot must forward scaled constants.
+    const candidates = [{ layerIndex: 0, lineage: 0, rowIndex: 0 }];
+    const index = buildLegendEntryKeyIndexForPlot({
+      model: {
+        scene: { legends: [discreteFill] },
+        candidates: {
+          size: candidates.length,
+          candidate: (id) => candidates[id] ?? null,
+        },
+        layerFields: [[]],
+        layerScaledConstants: [{ fill: "web" }],
+        lineage: { keys: () => [0] },
+        row: () => ({ id: "row-0" }),
+      },
+      semanticKey: () => "k-const",
+    });
+    expect(keysForLegendEntry(index, { scale: "fill", entryIndex: 0 })).toEqual(["k-const"]);
+  });
 });
 
 function adapter(partial: {

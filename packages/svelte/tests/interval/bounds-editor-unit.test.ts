@@ -107,6 +107,17 @@ describe("precise bounds drafts", () => {
     expect(nonPositiveLog.ok).toBe(false);
     if (nonPositiveLog.ok) throw new Error("expected invalid bounds");
     expect(nonPositiveLog.errors.lower).toContain("greater than zero");
+
+    // Both ends non-positive: upper keeps the log10 message (order still valid).
+    const bothNonPositiveLog = validateBoundsDraft(
+      input({ scale: "linear", transform: "log10", bounds: [1, 10] }),
+      "-2",
+      "-1",
+    );
+    expect(bothNonPositiveLog.ok).toBe(false);
+    if (bothNonPositiveLog.ok) throw new Error("expected invalid bounds");
+    expect(bothNonPositiveLog.errors.lower).toContain("greater than zero");
+    expect(bothNonPositiveLog.errors.upper).toContain("greater than zero");
   });
 
   it("rejects negative sqrt bounds but accepts zero", () => {
@@ -118,6 +129,17 @@ describe("precise bounds drafts", () => {
     expect(negativeSqrt.ok).toBe(false);
     if (negativeSqrt.ok) throw new Error("expected invalid bounds");
     expect(negativeSqrt.errors.lower).toContain("zero or greater");
+
+    // Both ends negative: upper keeps the sqrt message (order still valid).
+    const bothNegativeSqrt = validateBoundsDraft(
+      input({ scale: "linear", transform: "sqrt", bounds: [0, 10] }),
+      "-3",
+      "-1",
+    );
+    expect(bothNegativeSqrt.ok).toBe(false);
+    if (bothNegativeSqrt.ok) throw new Error("expected invalid bounds");
+    expect(bothNegativeSqrt.errors.lower).toContain("zero or greater");
+    expect(bothNegativeSqrt.errors.upper).toContain("zero or greater");
 
     const zeroLower = validateBoundsDraft(
       input({ scale: "linear", transform: "sqrt", bounds: [0, 10] }),
@@ -229,5 +251,46 @@ describe("precise bounds drafts", () => {
     expect(descending.ok).toBe(false);
     if (descending.ok) throw new Error("expected invalid bounds");
     expect(descending.errors.upper).toContain("after");
+  });
+
+  it("rejects invalid band category indices on either end", () => {
+    const band = input({
+      scale: "band",
+      bounds: ["a", "b"],
+      categories: [
+        { value: "a", label: "A" },
+        { value: "b", label: "B" },
+      ],
+    });
+    const badLower = validateBoundsDraft(band, "9", "1");
+    expect(badLower.ok).toBe(false);
+    if (badLower.ok) throw new Error("expected invalid lower category");
+    expect(badLower.errors.lower).toContain("valid lower category");
+
+    const badUpper = validateBoundsDraft(band, "0", "9");
+    expect(badUpper.ok).toBe(false);
+    if (badUpper.ok) throw new Error("expected invalid upper category");
+    expect(badUpper.errors.upper).toContain("valid upper category");
+
+    // Non-integer draft is also invalid.
+    const notInt = validateBoundsDraft(band, "0.5", "1");
+    expect(notInt.ok).toBe(false);
+    if (notInt.ok) throw new Error("expected invalid lower category");
+    expect(notInt.errors.lower).toContain("valid lower category");
+  });
+
+  it("formats band drafts from Date category values via getTime identity", () => {
+    const dayA = new Date(Date.UTC(2024, 0, 1));
+    const dayB = new Date(Date.UTC(2024, 0, 2));
+    // Fresh Date instances — sameCategory must use getTime, not Object.is.
+    const band = input({
+      scale: "band",
+      bounds: [new Date(dayA.getTime()), new Date(dayB.getTime())],
+      categories: [
+        { value: dayA, label: "Jan 1" },
+        { value: dayB, label: "Jan 2" },
+      ],
+    });
+    expect(formatBoundsDraft(band)).toEqual({ lower: "0", upper: "1" });
   });
 });
