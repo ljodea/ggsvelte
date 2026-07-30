@@ -53,7 +53,7 @@ describe("scaleSwatchFor", () => {
   it("shows gradient default stop ramps", () => {
     const gradient = scaleSwatchFor(SCALE_REFERENCE.color_gradient)!;
     expect(gradient.kind).toBe("ramp");
-    expect(gradient.colors[0]!.toLowerCase()).toBe("#132b43");
-    expect(gradient.colors.at(-1)!.toLowerCase()).toBe("#56b1f7");
+    expect(gradient.colors[0]?.toLowerCase()).toBe("#132b43");
+    expect(gradient.colors.at(-1)?.toLowerCase()).toBe("#56b1f7");
   });
 });

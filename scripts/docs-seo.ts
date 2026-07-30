@@ -1,6 +1,6 @@
 import sveltePackage from "../packages/svelte/package.json";
 
-import { buildDocsCrumbs } from "./docs-breadcrumbs.ts";
+import { buildDocsCrumbs } from "./docs-breadcrumbs";
 
 const REPOSITORY_URL = "https://github.com/ljodea/ggsvelte";
 const SOCIAL_IMAGE_PATH = "/previews/interaction-tooltip-light.png";
@@ -86,14 +86,13 @@ export function buildSeoDocument(route: SeoRoute, canonicalBase: string): SeoDoc
         "@type": "BreadcrumbList",
         itemListElement: crumbs.map((crumb, index) => {
           const isLast = index === crumbs.length - 1;
-          const path =
-            crumb.href === undefined ? (isLast ? route.canonicalPath : undefined) : crumb.href;
-          const item = path === undefined ? {} : { item: absoluteUrl(canonicalBase, path) };
+          // Last crumb has no href; use the page canonical. Intermediate crumbs always link.
+          const path = crumb.href ?? (isLast ? route.canonicalPath : undefined);
           return {
             "@type": "ListItem",
             position: index + 1,
             name: crumb.label,
-            ...item,
+            ...(path === undefined ? {} : { item: absoluteUrl(canonicalBase, path) }),
           };
         }),
       });

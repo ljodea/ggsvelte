@@ -45,15 +45,18 @@ function stemOf(slug: string): string {
 
 function expandStops(stops: readonly string[], count = 12): readonly string[] {
   if (stops.length === 0) return stops;
-  if (stops.length === 1) return Array.from({ length: count }, () => stops[0]!);
+  const first = stops[0];
+  if (stops.length === 1 || first === undefined) {
+    return Array.from({ length: count }, () => first ?? "#000000");
+  }
   const out: string[] = [];
   for (let i = 0; i < count; i++) {
     const t = count === 1 ? 0 : i / (count - 1);
     const scaled = t * (stops.length - 1);
     const lo = Math.min(stops.length - 2, Math.floor(scaled));
+    const a = stops[lo] ?? first;
+    const b = stops[lo + 1] ?? a;
     const f = scaled - lo;
-    const a = stops[lo]!;
-    const b = stops[lo + 1]!;
     out.push(lerpHex(a, b, f));
   }
   return out;
