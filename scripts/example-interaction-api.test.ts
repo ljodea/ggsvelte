@@ -9,6 +9,8 @@ import { describe, expect, it } from "bun:test";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
+import { ggplotOpenAttrs, plotLevelInteractionOffenders } from "./ggplot-open-attrs.ts";
+
 const ROOT = join(import.meta.dir, "..");
 const EXAMPLES = join(ROOT, "examples");
 
@@ -18,17 +20,6 @@ function walkExampleSvelte(dir: string): string[] {
     if (statSync(path).isDirectory()) return walkExampleSvelte(path);
     return name === "Example.svelte" ? [path] : [];
   });
-}
-
-/** Attributes on opening <GGPlot …> tags only (not children / handlers body). */
-function ggplotOpenAttrs(source: string): string[] {
-  const attrs: string[] = [];
-  const re = /<GGPlot\b([^>]*)>/g;
-  let match: RegExpExecArray | null;
-  while ((match = re.exec(source)) !== null) {
-    attrs.push(match[1] ?? "");
-  }
-  return attrs;
 }
 
 const files = walkExampleSvelte(EXAMPLES);
@@ -42,14 +33,33 @@ describe("example interaction API (v0.20)", () => {
     const id = relative(EXAMPLES, path);
     it(`${id}: no plot-level inspect / legendFocus / legendFilter`, () => {
       const source = readFileSync(path, "utf8");
-      const offenders: string[] = [];
-      for (const attrs of ggplotOpenAttrs(source)) {
-        if (/\blegendFocus\b/.test(attrs)) offenders.push("legendFocus");
-        if (/\blegendFilter\b/.test(attrs)) offenders.push("legendFilter");
-        // Bare inspect= on GGPlot. oninspect= is a handler (prefix keeps it out).
-        if (/(?<![\w])inspect\s*=/.test(attrs)) offenders.push("inspect=");
-      }
+      const offenders = ggplotOpenAttrs(source).flatMap(plotLevelInteractionOffenders);
       expect(offenders).toEqual([]);
     });
   }
+
+  it("scans attributes after arrow-function handlers (=> regression)", () => {
+    // Devin: /<GGPlot\b([^>]*)>/g stopped at the `>` inside `=>`, so props
+    // after handlers were never scanned.
+    const source = `
+<GGPlot
+  data={rows}
+  onlegendfilter={(event) => {
+    status = event.phase;
+  }}
+  legendFocus
+  legendFilter
+  inspect={true}
+>
+  <GeomPoint />
+</GGPlot>
+`;
+    const attrs = ggplotOpenAttrs(source);
+    expect(attrs).toHaveLength(1);
+    expect(plotLevelInteractionOffenders(attrs[0]!)).toEqual([
+      "legendFocus",
+      "legendFilter",
+      "inspect=",
+    ]);
+  });
 });

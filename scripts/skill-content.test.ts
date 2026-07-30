@@ -47,6 +47,7 @@ import {
 } from "@ggsvelte/spec";
 import type { SpecInput } from "@ggsvelte/spec";
 import { deprecatedGrammarPropPattern } from "../packages/svelte/src/lib/layers/grammar-families.ts";
+import { ggplotOpenAttrs, plotLevelInteractionOffenders } from "./ggplot-open-attrs.ts";
 import { codeBlocks } from "./guide-code-contract.ts";
 
 const ROOT = join(import.meta.dir, "..");
@@ -117,17 +118,7 @@ describe("skill Svelte fences use v0.20 interaction children", () => {
     it(`${file.name} shows no plot-level inspect / legendFocus / legendFilter`, () => {
       const offenders = codeBlocks(file.markdown)
         .filter((block) => block.language === "svelte")
-        .flatMap((block) => {
-          const hits: string[] = [];
-          // Only scan GGPlot open tags — not prose comments about the old API.
-          for (const match of block.source.matchAll(/<GGPlot\b([^>]*)>/g)) {
-            const attrs = match[1] ?? "";
-            if (/\blegendFocus\b/.test(attrs)) hits.push("legendFocus");
-            if (/\blegendFilter\b/.test(attrs)) hits.push("legendFilter");
-            if (/(?<![\w])inspect\s*=/.test(attrs)) hits.push("inspect=");
-          }
-          return hits;
-        });
+        .flatMap((block) => ggplotOpenAttrs(block.source).flatMap(plotLevelInteractionOffenders));
       expect(offenders).toEqual([]);
     });
   }
