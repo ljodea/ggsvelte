@@ -5129,6 +5129,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ControllerDatumIdentity": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "Coord": {
           "kind": "value",
           "lifecycle": "stable-intent"
