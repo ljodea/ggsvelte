@@ -47,6 +47,7 @@ import {
 } from "@ggsvelte/spec";
 import type { SpecInput } from "@ggsvelte/spec";
 import { deprecatedGrammarPropPattern } from "../packages/svelte/src/lib/layers/grammar-families.ts";
+import { ggplotOpenAttrs, plotLevelInteractionOffenders } from "./ggplot-open-attrs.ts";
 import { codeBlocks } from "./guide-code-contract.ts";
 
 const ROOT = join(import.meta.dir, "..");
@@ -105,6 +106,33 @@ describe("skill Svelte fences use child layers, not deprecated grammar props", (
       expect(offenders).toEqual([]);
     });
   }
+});
+
+/**
+ * v0.20 host interaction API: teach <Inspect> and GuideLegend focus/filter,
+ * not the deprecated plot-level inspect / legendFocus / legendFilter props.
+ * Mark-level inspect={false} remains valid (hit-test opt-out).
+ */
+describe("skill Svelte fences use v0.20 interaction children", () => {
+  for (const file of FILES) {
+    it(`${file.name} shows no plot-level inspect / legendFocus / legendFilter`, () => {
+      const offenders = codeBlocks(file.markdown)
+        .filter((block) => block.language === "svelte")
+        .flatMap((block) =>
+          ggplotOpenAttrs(block.source).flatMap((attrs) => plotLevelInteractionOffenders(attrs)),
+        );
+      expect(offenders).toEqual([]);
+    });
+  }
+
+  it("interactions.md capability table prefers GuideLegend filter, not plot legendFilter", () => {
+    const interactions = FILES.find((f) => f.name === "references/interactions.md");
+    expect(interactions).toBeDefined();
+    // Table row for filter should name GuideLegend, not GGPlot.
+    expect(interactions!.markdown).toMatch(/`filter`\s*\|\s*`boolean[^`]*` on `<GuideLegend>`/);
+    // Middle cell may contain markdown-escaped pipes (`\|`); do not use [^|].
+    expect(interactions!.markdown).not.toMatch(/\| `legendFilter`\s*\|[^\n]*on `<GGPlot>`/);
+  });
 });
 
 /**
