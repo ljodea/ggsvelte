@@ -78,6 +78,7 @@ describe("widenPlotProps", () => {
     const oninteraction = (): void => {
       // no-op
     };
+    /* oxlint-disable typescript/no-deprecated -- dual-read `key` widen under test */
     const props: GGPlotProps<{ id: string; x: number }> = {
       data: [{ id: "a", x: 1 }],
       height: 320,
@@ -92,6 +93,7 @@ describe("widenPlotProps", () => {
     const widened = widenPlotProps(props);
     // Six widened fields.
     expect(widened.key).toBe(key);
+    /* oxlint-enable typescript/no-deprecated */
     expect(widened.interaction).toBe(interaction);
     expect(widened.oninspect).toBe(oninspect);
     expect(widened.onselect).toBe(onselect);

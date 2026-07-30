@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import InteractionOverlay from "../../src/lib/scene/InteractionOverlay.svelte";
-import { CROSSHAIR_BOX_GAP_PAD, HOVER_CROSSHAIR_GAP_RADIUS } from "../../src/lib/scene/geometry.js";
+import {
+  CROSSHAIR_BOX_GAP_PAD,
+  HOVER_CROSSHAIR_GAP_RADIUS,
+  glyphHoverBox,
+} from "../../src/lib/scene/geometry.js";
 import { render } from "../helpers/render.js";
 
 function emptyDatum(anchor: { x: number; y: number }) {
@@ -17,21 +21,25 @@ function emptyDatum(anchor: { x: number; y: number }) {
   };
 }
 
+function xyInspection(focus: { x: number; y: number }) {
+  return {
+    type: "inspect" as const,
+    phase: "change" as const,
+    state: "transient" as const,
+    source: "keyboard" as const,
+    panelId: "p0",
+    mode: "xy" as const,
+    focus: emptyDatum(focus),
+    members: [emptyDatum(focus)] as const,
+  };
+}
+
 describe("InteractionOverlay crosshair glyph gaps (#1207)", () => {
   it("hard-gaps vertical guides through sibling label boxes", () => {
     const focus = { x: 120, y: 100 };
     const panel = { x: 40, y: 20, width: 200, height: 160 };
     const label = { x: 100, y: 40, width: 40, height: 14 };
-    const inspection = {
-      type: "inspect" as const,
-      phase: "change" as const,
-      state: "transient" as const,
-      source: "keyboard" as const,
-      panelId: "p0",
-      mode: "xy" as const,
-      focus: emptyDatum(focus),
-      members: [emptyDatum(focus)] as const,
-    };
+    const inspection = xyInspection(focus);
 
     const { container } = render(InteractionOverlay, {
       width: 280,
@@ -69,5 +77,84 @@ describe("InteractionOverlay crosshair glyph gaps (#1207)", () => {
         lo < focus.y + HOVER_CROSSHAIR_GAP_RADIUS && hi > focus.y - HOVER_CROSSHAIR_GAP_RADIUS;
       expect(coversFocus).toBe(false);
     }
+  });
+});
+
+describe("InteractionOverlay glyph box chrome", () => {
+  it("paints a measured hover box for glyph inspection (not a point ring)", () => {
+    const focus = { x: 80, y: 60 };
+    const panel = { x: 20, y: 10, width: 160, height: 120 };
+    const boxW = 36;
+    const boxH = 14;
+    const { container } = render(InteractionOverlay, {
+      width: 220,
+      height: 160,
+      interactive: true,
+      inspection: xyInspection(focus),
+      inspectionPanel: panel,
+      hoverChrome: "box",
+      hoverBoxWidth: boxW,
+      hoverBoxHeight: boxH,
+      hoverBoxAnchor: "middle",
+    });
+
+    expect(container.querySelector(".gg-hover-ring")).toBeNull();
+    const box = container.querySelector<SVGRectElement>(".gg-hover-box");
+    expect(box).not.toBeNull();
+    const expected = glyphHoverBox(focus, {
+      width: boxW,
+      height: boxH,
+      textAnchor: "middle",
+    });
+    expect(Number(box?.getAttribute("x"))).toBeCloseTo(expected.x, 5);
+    expect(Number(box?.getAttribute("y"))).toBeCloseTo(expected.y, 5);
+    expect(Number(box?.getAttribute("width"))).toBe(boxW);
+    expect(Number(box?.getAttribute("height"))).toBe(boxH);
+  });
+
+  it("paints selected and emphasized glyph boxes from presentation anchors", () => {
+    const selected = {
+      x: 50,
+      y: 40,
+      chrome: "box" as const,
+      width: 28,
+      height: 12,
+      textAnchor: "start" as const,
+    };
+    const emphasized = {
+      x: 90,
+      y: 70,
+      chrome: "box" as const,
+      width: 40,
+      height: 16,
+      textAnchor: "end" as const,
+    };
+    const { container } = render(InteractionOverlay, {
+      width: 200,
+      height: 140,
+      interactive: false,
+      selectedAnchors: [selected],
+      emphasizedAnchors: [emphasized],
+    });
+
+    const selectedBox = container.querySelector<SVGRectElement>(".gg-selected-box");
+    const emphasizedBox = container.querySelector<SVGRectElement>(".gg-emphasized-box");
+    expect(selectedBox).not.toBeNull();
+    expect(emphasizedBox).not.toBeNull();
+
+    const expectedSelected = glyphHoverBox(selected, {
+      width: selected.width,
+      height: selected.height,
+      textAnchor: selected.textAnchor,
+    });
+    const expectedEmphasized = glyphHoverBox(emphasized, {
+      width: emphasized.width,
+      height: emphasized.height,
+      textAnchor: emphasized.textAnchor,
+    });
+    expect(Number(selectedBox?.getAttribute("x"))).toBeCloseTo(expectedSelected.x, 5);
+    expect(Number(selectedBox?.getAttribute("width"))).toBe(selected.width);
+    expect(Number(emphasizedBox?.getAttribute("x"))).toBeCloseTo(expectedEmphasized.x, 5);
+    expect(Number(emphasizedBox?.getAttribute("width"))).toBe(emphasized.width);
   });
 });

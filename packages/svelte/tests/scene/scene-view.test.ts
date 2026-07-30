@@ -153,3 +153,52 @@ describe("SceneView focus-mask projection", () => {
     dispose();
   });
 });
+
+describe("SceneView panel chrome branches", () => {
+  it("draws minor grid lines when scales publish minorBreaks", () => {
+    const model = modelFor(
+      gg(rows, aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .scaleXContinuous({ minorBreaks: [1.5] })
+        .scaleYContinuous({ minorBreaks: [15] })
+        .spec(),
+    );
+    const panel = model.scene.panels[0];
+    expect(panel?.grid.minorX?.length).toBeGreaterThan(0);
+    expect(panel?.grid.minorY?.length).toBeGreaterThan(0);
+
+    const { container } = render(SceneView, { scene: model.scene, mode: "full" });
+    const minor = container.querySelector("g.gg-grid-minor");
+    expect(minor).not.toBeNull();
+    expect(minor?.querySelectorAll("line").length).toBeGreaterThan(0);
+    model.dispose();
+  });
+
+  it("clips left facet strips with a side-band clipPath", () => {
+    const facetRows = [
+      { x: 1, y: 10, g: "alpha" },
+      { x: 2, y: 20, g: "beta" },
+    ];
+    const model = modelFor(
+      gg(facetRows, aes({ x: "x", y: "y" }))
+        .geomPoint()
+        .facet({
+          wrap: { field: "g", levels: ["alpha", "beta"] },
+          strip: { position: "left" },
+        })
+        .spec(),
+    );
+    expect(model.scene.panels.every((p) => p.stripPosition === "left")).toBe(true);
+    expect(model.scene.panels[0]?.strip).toBe("alpha");
+
+    const { container } = render(SceneView, { scene: model.scene, mode: "full" });
+    const strip = container.querySelector("g.gg-strip");
+    expect(strip).not.toBeNull();
+    // Left/right strips set clip:true so rotated labels stay in the band.
+    expect(strip?.getAttribute("clip-path")).toMatch(/^url\(#/);
+    const clipId = strip?.getAttribute("clip-path")?.match(/url\(#([^)]+)\)/)?.[1];
+    expect(clipId).toBeTruthy();
+    expect(container.querySelector(`clipPath#${CSS.escape(clipId!)}`)).not.toBeNull();
+    model.dispose();
+  });
+});
