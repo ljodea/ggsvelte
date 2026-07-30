@@ -11,6 +11,18 @@ describe("LayerRegistry capabilities", () => {
     expect(typeof registerHostCapability).toBe("function");
   });
 
+  it("keeps inspect capabilities across mark register/unregister", () => {
+    // capabilities() uses #capabilityVersion only — mark churn must not drop
+    // host capability entries (interactionConfig must not re-deliver diagnostics).
+    const registry = new LayerRegistry();
+    registry.registerCapability("inspect", () => ({ mode: "xy" as const }));
+    const markId = registry.register({ geom: "point" });
+    expect(registry.capabilities("inspect")).toEqual([{ mode: "xy" }]);
+    registry.unregister(markId);
+    expect(registry.capabilities("inspect")).toEqual([{ mode: "xy" }]);
+    expect(registry.markLayers).toEqual([]);
+  });
+
   it("returns inspect values in registration order", () => {
     const registry = new LayerRegistry();
     const id1 = registry.registerCapability("inspect", () => ({ mode: "x" as const }));

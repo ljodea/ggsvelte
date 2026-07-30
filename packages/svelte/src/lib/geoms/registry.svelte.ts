@@ -52,7 +52,15 @@ export class LayerRegistry {
   readonly #byId = new Map<number, Layer>();
   /** Host capabilities — separate from grammar layers (never plotLayers). */
   readonly #capabilities = new Map<number, CapabilityEntry>();
+  /** Bumps only on mark/grammar layer register/unregister. */
   #version = $state(0);
+  /**
+   * Bumps only on host-capability register/unregister. Kept separate from
+   * `#version` so geom mount/unmount does not re-run inspect resolve →
+   * interactionConfig diagnostics (config diagnostics re-deliver per recompute
+   * and must not fire on unrelated layer churn).
+   */
+  #capabilityVersion = $state(0);
   /** Monotonic register count (never decrements). For ADR 0001 test assertions. */
   #registrationCount = 0;
 
@@ -87,14 +95,15 @@ export class LayerRegistry {
     };
     this.#capabilities.set(id, entry);
     this.#registrationCount += 1;
-    this.#version = ++globalVersion;
+    this.#capabilityVersion = ++globalVersion;
     return id;
   }
 
   unregister(id: number): void {
-    this.#byId.delete(id);
-    this.#capabilities.delete(id);
-    this.#version = ++globalVersion;
+    const removedLayer = this.#byId.delete(id);
+    const removedCapability = this.#capabilities.delete(id);
+    if (removedLayer) this.#version = ++globalVersion;
+    if (removedCapability) this.#capabilityVersion = ++globalVersion;
   }
 
   /** Every registered layer in registration order (reactive read). */
@@ -120,9 +129,12 @@ export class LayerRegistry {
    * Host capability values of `kind` in registration order (reactive).
    * Multiple entries of the same kind are all returned so resolve can last-win
    * and multi-child diagnostics can fire.
+   *
+   * Depends on `#capabilityVersion` only — mark/grammar churn must not invalidate
+   * capability readers (see field comment).
    */
   capabilities<K extends HostCapabilityKind>(kind: K): readonly HostCapabilityValue[K][] {
-    void this.#version;
+    void this.#capabilityVersion;
     const out: HostCapabilityValue[K][] = [];
     for (const entry of this.#capabilities.values()) {
       if (entry.kind === kind) {
