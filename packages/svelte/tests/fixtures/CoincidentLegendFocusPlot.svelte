@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createPlotInteraction, GGPlot } from "../../src/lib/index.js";
+  import GuideLegend from "../../src/lib/guides/GuideLegend.svelte";
 
   const scope = { keys: "row-id" } as const;
   const rows = [
@@ -32,11 +33,13 @@
     layers={[{ geom: "point" }]}
     key="id"
     inspect
-    legendFocus
     {interaction}
     interactionScope={scope}
     width={420}
     height={280}
     ariaLabel="Coincident color and fill legends"
-  />
+  >
+    <GuideLegend channel="color" focus />
+    <GuideLegend channel="fill" focus />
+  </GGPlot>
 </div>

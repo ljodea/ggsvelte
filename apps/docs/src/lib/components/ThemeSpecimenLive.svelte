@@ -13,6 +13,7 @@
     GeomSmooth,
     GeomText,
     GGPlot,
+    GuideLegend,
     Labs,
     Scale,
     scaleXLog10,
@@ -69,10 +70,12 @@
     aes={{ x: "month", y: "riders", color: "mode" }}
     key="id"
     inspect={{ mode: "x" }}
-    {legendFocus}
     {height}
     ariaLabel={`${label} theme Playfair wheat and wages`}
   >
+    {#if legendFocus}
+      <GuideLegend channel="color" focus />
+    {/if}
     <Theme {name} />
     <Scale value={{ color: colorScale }} />
     <Labs
@@ -90,10 +93,12 @@
     aes={{ x: "track", fill: "level", weight: "deaths" }}
     key="id"
     inspect={{ mode: "exact" }}
-    {legendFocus}
     {height}
     ariaLabel={`${label} theme Edgeworth dodged bars`}
   >
+    {#if legendFocus}
+      <GuideLegend channel="fill" focus />
+    {/if}
     <Theme {name} />
     <Scale value={{ fill: colorScale }} />
     <Labs
@@ -110,10 +115,12 @@
     aes={{ x: "year", y: "twh", fill: "source" }}
     key="id"
     inspect={{ mode: "x" }}
-    {legendFocus}
     {height}
     ariaLabel={`${label} theme Nightingale stacked area`}
   >
+    {#if legendFocus}
+      <GuideLegend channel="fill" focus />
+    {/if}
     <Theme {name} />
     <Scale
       value={{
@@ -137,6 +144,9 @@
     {height}
     ariaLabel={`${label} theme Bowley exports`}
   >
+    {#if legendFocus}
+      <GuideLegend channel="color" focus />
+    {/if}
     <Theme {name} />
     <Labs title="British exports, 1855–1899" x="Year" y="£ millions" />
     <GeomLine linewidth={1.5} />
@@ -147,10 +157,12 @@
     aes={{ x: "flipper", y: "mass", color: "species" }}
     key="id"
     inspect={{ mode: "xy" }}
-    {legendFocus}
     {height}
     ariaLabel={`${label} theme penguin scatter`}
   >
+    {#if legendFocus}
+      <GuideLegend channel="color" focus />
+    {/if}
     <Theme {name} />
     <Scale value={{ color: colorScale }} />
     <Labs
@@ -167,10 +179,12 @@
     aes={{ x: "gdp", y: "lifeExp", color: "region" }}
     key="country"
     inspect={{ mode: "xy" }}
-    {legendFocus}
     {height}
     ariaLabel={`${label} theme cholera density scatter`}
   >
+    {#if legendFocus}
+      <GuideLegend channel="color" focus />
+    {/if}
     <Theme {name} />
     <Scale
       value={{
@@ -195,6 +209,9 @@
     {height}
     ariaLabel={`${label} theme Salk trial columns`}
   >
+    {#if legendFocus}
+      <GuideLegend channel="color" focus />
+    {/if}
     <Theme {name} />
     <Labs
       title="Salk trial paralytic polio rates"
@@ -212,6 +229,9 @@
     {height}
     ariaLabel={`${label} theme Langren longitude labels`}
   >
+    {#if legendFocus}
+      <GuideLegend channel="color" focus />
+    {/if}
     <Theme {name} />
     <Scale value={{ x: { labels: ".1f" } }} />
     <Labs

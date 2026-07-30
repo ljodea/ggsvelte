@@ -2,6 +2,7 @@
   import {
     GeomPoint,
     GGPlot,
+    GuideLegend,
     Labs,
     ScaleColorManual,
     ScaleXLog10,
@@ -15,7 +16,6 @@
   data={londonCholera}
   aes={{ x: "density", y: "deathRate", color: "water" }}
   key="district"
-  legendFocus
   inspect={{ mode: "xy", pin: true }}
   width="container"
   height={400}
@@ -33,5 +33,6 @@
     y="Cholera deaths per 10,000"
     color="Water supply"
   />
+  <GuideLegend channel="color" focus />
   <GeomPoint size={3.5} />
 </GGPlot>

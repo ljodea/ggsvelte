@@ -4,6 +4,7 @@
     GeomLine,
     GeomPoint,
     GGPlot,
+    GuideLegend,
     Labs,
     ScaleXContinuous,
     ThemeFew,
@@ -40,13 +41,13 @@
       data={rows}
       aes={mapping}
       key="id"
-      legendFocus
       {interaction}
       interactionScope={scope}
       width="container"
       height={310}
       onlegendfocus={describe}
     >
+      <GuideLegend channel="color" focus />
       <ThemeFew />
       <ScaleXContinuous labels="d" />
       <Labs title="SVG points" x="Year" y="Index units" color="Series" />
@@ -56,13 +57,13 @@
       data={rows}
       aes={mapping}
       key="id"
-      legendFocus
       {interaction}
       interactionScope={scope}
       width="container"
       height={310}
       onlegendfocus={describe}
     >
+      <GuideLegend channel="color" focus />
       <ThemeFew />
       <ScaleXContinuous labels="d" />
       <Labs title="Canvas points" x="Year" y="Index units" color="Series" />
@@ -72,13 +73,13 @@
       data={rows}
       aes={mapping}
       key="id"
-      legendFocus
       {interaction}
       interactionScope={scope}
       width="container"
       height={310}
       onlegendfocus={describe}
     >
+      <GuideLegend channel="color" focus />
       <ThemeFew />
       <ScaleXContinuous labels="d" />
       <Labs title="SVG lines" x="Year" y="Index units" color="Series" />

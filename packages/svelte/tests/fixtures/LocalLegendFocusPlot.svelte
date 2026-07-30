@@ -1,5 +1,6 @@
 <script lang="ts">
   import { GGPlot } from "../../src/lib/index.js";
+  import GuideLegend from "../../src/lib/guides/GuideLegend.svelte";
 
   const rows = [
     { id: "a", x: 1, y: 4, group: "north" },
@@ -16,7 +17,6 @@
     aes={{ x: "x", y: "y", color: "group" }}
     layers={[{ geom: "point" }]}
     key="id"
-    legendFocus
     width={360}
     height={260}
     ariaLabel="Local legend focus plot"
@@ -24,5 +24,7 @@
       lastEvent = JSON.stringify(event);
     }}
     onrender={() => (renders += 1)}
-  />
+  >
+    <GuideLegend channel="color" focus />
+  </GGPlot>
 </div>

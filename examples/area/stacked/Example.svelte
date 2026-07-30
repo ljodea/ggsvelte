@@ -2,6 +2,7 @@
   import {
     GeomArea,
     GGPlot,
+    GuideLegend,
     Labs,
     ScaleFillManual,
     ScaleXDate,
@@ -15,7 +16,6 @@
   data={crimeanMortality}
   aes={{ x: "month", y: "deaths", fill: "cause" }}
   key={(row) => `${row.month}:${row.cause}`}
-  legendFocus
   width={640}
   height={400}
 >
@@ -32,5 +32,6 @@
     y="Deaths per 1,000 per year"
     fill="Cause"
   />
+  <GuideLegend channel="fill" focus />
   <GeomArea alpha={0.9} />
 </GGPlot>

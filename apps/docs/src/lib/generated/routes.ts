@@ -12043,6 +12043,16 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
+        id: "0-18-to-0-19",
+        title: "0.18 to 0.19",
+        level: 2,
+      },
+      {
+        id: "legend-focus-on-guidelegend",
+        title: "Legend focus on GuideLegend",
+        level: 3,
+      },
+      {
         id: "0-11-to-0-12",
         title: "0.11 to 0.12",
         level: 2,

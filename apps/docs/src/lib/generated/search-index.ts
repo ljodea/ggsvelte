@@ -19892,6 +19892,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Five-minute path"],
   },
   {
+    id: "heading:guide-upgrading:0-18-to-0-19",
+    kind: "heading",
+    title: "0.18 to 0.19",
+    summary:
+      "0.18 to 0.19 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#0-18-to-0-19",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["0.18 to 0.19"],
+  },
+  {
+    id: "heading:guide-upgrading:legend-focus-on-guidelegend",
+    kind: "heading",
+    title: "Legend focus on GuideLegend",
+    summary:
+      "Legend focus on GuideLegend in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#legend-focus-on-guidelegend",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["Legend focus on GuideLegend"],
+  },
+  {
     id: "heading:guide-upgrading:0-11-to-0-12",
     kind: "heading",
     title: "0.11 to 0.12",
@@ -41757,7 +41777,7 @@ export const DOCS_SEARCH_INDEX = [
     keywords: [
       "interaction",
       "advisory",
-      "Use a discrete color or fill mapping; Keep the continuous ramp static",
+      'Enable focus on a discrete guide: <GuideLegend channel="color" focus />; Use a discrete color or fill mapping; Keep the continuous ramp static',
     ],
     exact: ["INTERACTION_LEGEND_DISCRETE_ONLY", "interaction:INTERACTION_LEGEND_DISCRETE_ONLY"],
   },

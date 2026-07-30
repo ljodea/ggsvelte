@@ -2,6 +2,7 @@
   import {
     GeomBar,
     GGPlot,
+    GuideLegend,
     Labs,
     ScaleFillDiscrete,
     ThemeFew,
@@ -14,7 +15,6 @@
   data={edgeworthDeaths}
   aes={{ x: "year", fill: "county", weight: "deaths" }}
   key={(row) => `${row.year}:${row.county}`}
-  legendFocus
   width={640}
   height={400}
 >
@@ -27,5 +27,6 @@
     y="Deaths per million"
     fill="County"
   />
+  <GuideLegend channel="fill" focus />
   <GeomBar position="dodge" />
 </GGPlot>

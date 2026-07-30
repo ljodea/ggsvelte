@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createPlotInteraction, GGPlot } from "../../src/lib/index.js";
+  import GuideLegend from "../../src/lib/guides/GuideLegend.svelte";
 
   const scope = { keys: "row-id" } as const;
   const otherScope = { keys: "other-row-id" } as const;
@@ -39,7 +40,6 @@
       aes={mapping}
       layers={[{ geom: "point" }]}
       key="id"
-      legendFocus
       {interaction}
       interactionScope={scope}
       width={360}
@@ -47,7 +47,9 @@
       ariaLabel="Legend focus plot A"
       onlegendfocus={() => (callbacksA += 1)}
       onrender={() => (rendersA += 1)}
-    />
+    >
+      <GuideLegend channel="color" focus />
+    </GGPlot>
   </div>
   <div data-plot-b>
     <GGPlot
@@ -55,7 +57,6 @@
       aes={mapping}
       layers={[{ geom: "point", render: "canvas" }]}
       key="id"
-      legendFocus
       {interaction}
       interactionScope={scope}
       width={360}
@@ -63,7 +64,9 @@
       ariaLabel="Legend focus plot B"
       onlegendfocus={() => (callbacksB += 1)}
       onrender={() => (rendersB += 1)}
-    />
+    >
+      <GuideLegend channel="color" focus />
+    </GGPlot>
   </div>
   <div data-plot-c>
     <GGPlot
@@ -71,7 +74,6 @@
       aes={mapping}
       layers={[{ geom: "point" }]}
       key="id"
-      legendFocus
       {interaction}
       interactionScope={scope}
       width={360}
@@ -79,7 +81,9 @@
       ariaLabel="Legend focus plot C"
       onlegendfocus={() => (callbacksC += 1)}
       onrender={() => (rendersC += 1)}
-    />
+    >
+      <GuideLegend channel="color" focus />
+    </GGPlot>
   </div>
   <div data-plot-other>
     <GGPlot
@@ -87,12 +91,13 @@
       aes={mapping}
       layers={[{ geom: "point" }]}
       key="id"
-      legendFocus
       {interaction}
       interactionScope={otherScope}
       width={360}
       height={260}
       ariaLabel="Mismatched legend focus plot"
-    />
+    >
+      <GuideLegend channel="color" focus />
+    </GGPlot>
   </div>
 </div>

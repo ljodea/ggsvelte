@@ -3,6 +3,7 @@
     GeomLine,
     GeomPoint,
     GGPlot,
+    GuideLegend,
     Labs,
     ScaleColorDiscrete,
     ScaleXContinuous,
@@ -36,10 +37,12 @@
   aes={chart.aes}
   key={chart.key}
   inspect={chart.inspect}
-  {legendFocus}
   {height}
   {ariaLabel}
 >
+  {#if legendFocus}
+    <GuideLegend channel="color" focus />
+  {/if}
   <Theme name={theme} />
   <ScaleXContinuous breaks={[...chart.monthBreaks]} />
   <ScaleColorDiscrete {scheme} />

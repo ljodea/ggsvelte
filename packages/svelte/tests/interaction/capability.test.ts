@@ -370,7 +370,7 @@ describe("legendFocusDiscreteOnlyDiagnostics", () => {
     expect(rampDiag).toMatchObject({
       code: "INTERACTION_LEGEND_DISCRETE_ONLY",
       severity: "advisory",
-      prop: "legendFocus",
+      prop: "focus",
       actual: ["ramp"],
     });
     expect(typeof rampDiag.message).toBe("string");
