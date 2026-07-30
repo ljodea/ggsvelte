@@ -27,9 +27,9 @@
     x: "interaction-demo-x",
     y: "interaction-demo-y",
   } as const;
-  // Default row identity (id column) yields string keys; type as PropertyKey
-  // so omitting GGPlot `key` still typechecks handlers.
-  const interaction = createPlotInteraction<PropertyKey>();
+  // Default row identity (id column) yields string keys; widen to string|number
+  // so omitting GGPlot `key` still typechecks against the engine PublicKey.
+  const interaction = createPlotInteraction<string | number>();
   const emphasized = $derived(interaction.emphasized(scope));
   // Interval brush stores keys on intervals(), not selected().
   const selectedCount = $derived(
@@ -65,7 +65,7 @@ ${closeScript}
     phase: "change" | "clear";
     state?: string;
     label?: string;
-    keys?: readonly PropertyKey[];
+    keys?: readonly (string | number)[];
   }): void {
     status =
       event.phase === "clear"
