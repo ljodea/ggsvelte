@@ -171,6 +171,7 @@ and Windows.
     GeomPoint,
     GGPlot,
     GuideLegend,
+    Inspect,
     Labs,
     ScaleColorManual,
     ScaleXLog10,
@@ -184,10 +185,10 @@ and Windows.
   data={londonCholera}
   aes={{ x: "density", y: "deathRate", color: "water" }}
   key="district"
-  inspect={{ mode: "xy", pin: true }}
   width="container"
   height={400}
 >
+  <Inspect mode="xy" pin />
   <ThemeEconomist />
   <ScaleXLog10 labels="~s" />
   <ScaleColorManual

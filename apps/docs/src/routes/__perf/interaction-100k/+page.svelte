@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { RenderModel } from "@ggsvelte/core";
-  import { GGPlot } from "@ggsvelte/svelte";
+  import { GGPlot, Inspect } from "@ggsvelte/svelte";
 
   type Row = Readonly<{
     id: number;
@@ -39,7 +39,6 @@
     aes={{ x: "x", y: "y", group: "series" }}
     layers={[{ geom: "point", render: "canvas", params: { size: 1 } }]}
     key="id"
-    inspect={{ mode: "x", maxDistance: 24 }}
     onrender={(model: RenderModel) => {
       candidateCount = model.candidates.size;
       const seed = model.candidates.nearest(
@@ -58,7 +57,9 @@
     }}
     width={800}
     height={500}
-  />
+  >
+    <Inspect mode="x" maxDistance={24} />
+  </GGPlot>
 </main>
 
 <style>

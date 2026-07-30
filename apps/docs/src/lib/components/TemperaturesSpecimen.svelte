@@ -4,6 +4,7 @@
     GeomPoint,
     GGPlot,
     GuideLegend,
+    Inspect,
     Labs,
     ScaleColorDiscrete,
     ScaleXContinuous,
@@ -36,10 +37,10 @@
   data={temperaturesKeyed}
   aes={chart.aes}
   key={chart.key}
-  inspect={chart.inspect}
   {height}
   {ariaLabel}
 >
+  <Inspect mode="x" />
   {#if legendFocus}
     <GuideLegend channel="color" focus />
   {/if}

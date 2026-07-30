@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { GeomPoint, GGPlot, type RenderModel } from "../../src/lib/index.js";
+  import {
+    GeomPoint,
+    GGPlot,
+    Inspect,
+    type RenderModel,
+  } from "../../src/lib/index.js";
 
   const rows = [
     { id: "a", x: 1, y: 3 },
@@ -17,9 +22,9 @@
   data={rows}
   aes={{ x: "x", y: "y" }}
   key="id"
-  inspect
   onrender={(next) => (model = next)}
 >
+  <Inspect />
   <GeomPoint />
 </GGPlot>
 

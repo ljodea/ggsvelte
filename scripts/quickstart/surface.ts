@@ -56,7 +56,7 @@ const spec = gg(kyotoSakura, aes({ x: "year", y: "bloomDate" }))
  * data is a named ref (`kyotoSakura`) — hosts resolve it from
  * `@ggsvelte/svelte/data`. Small annotation tables (epochs, records) stay as
  * inline `values` because they are chart decoration, not the 838-row series.
- * `key` / `inspect` are GGPlot host props, not PortableSpec fields.
+ * `key` and `<Inspect>` are host-only; not PortableSpec fields.
  */
 export function finishedPortableSpecNamed(): PortableSpec {
   const { spec } = foldSakura(SAKURA_STEPS.length);

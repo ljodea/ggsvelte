@@ -11,16 +11,16 @@
  * aliases.
  *
  * Interaction: GrammarDemo step 4 uses xy inspect (numeric crosshair on both
- * axes) plus GuideLegend focus. Inspect stays a GGPlot host prop; legend focus
- * is a host-only prop on `<GuideLegend>` (not a PortableSpec field).
- * - Svelte: `inspect` / `key` on <GGPlot>, `focus` on <GuideLegend>
- * - Builder + spec: same host children for focus; inspect still on <GGPlot>
+ * axes) plus GuideLegend focus. Prefer `<Inspect>` for the host capability;
+ * legend focus is a host-only prop on `<GuideLegend>` (not a PortableSpec field).
+ * - Svelte: `<Inspect>` / `key` on <GGPlot>, `focus` on <GuideLegend>
+ * - Builder + spec: same host children; inspect via `<Inspect>`
  * - JSON: agent envelope `{ interactions, spec }` still accepts legendFocus
  *   (deprecated host map until 0.20.0)
  */
 
 const HOME_CODE_PATH_SVELTE = `<script lang="ts">
-  import { GeomJitter, GeomSmooth, GGPlot, GuideLegend, Labs } from "@ggsvelte/svelte";
+  import { GeomJitter, GeomSmooth, GGPlot, GuideLegend, Inspect, Labs } from "@ggsvelte/svelte";
   import { palmerPenguins } from "@ggsvelte/svelte/data";
 </script>
 
@@ -28,10 +28,10 @@ const HOME_CODE_PATH_SVELTE = `<script lang="ts">
   data={palmerPenguins}
   key="id"
   aes={{ x: "flipperLengthMm", y: "bodyMassG", color: "species" }}
-  inspect={{ mode: "xy", pin: true, maxDistance: 24 }}
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <GuideLegend channel="color" focus />
   <Labs x="Flipper length mm" y="Body mass g" color="species" />
   <GeomJitter alpha={0.88} />
@@ -39,10 +39,10 @@ const HOME_CODE_PATH_SVELTE = `<script lang="ts">
 </GGPlot>
 `;
 
-/** Builder produces PortableSpec; inspect is a host GGPlot prop; focus is GuideLegend. */
+/** Builder produces PortableSpec; inspect is a host `<Inspect>` child; focus is GuideLegend. */
 const HOME_CODE_PATH_BUILDER = `<script lang="ts">
   import { aes, gg } from "@ggsvelte/spec";
-  import { GGPlot, GuideLegend } from "@ggsvelte/svelte";
+  import { GGPlot, GuideLegend, Inspect } from "@ggsvelte/svelte";
   import { palmerPenguins } from "@ggsvelte/svelte/data";
 
   const spec = gg(
@@ -58,10 +58,10 @@ const HOME_CODE_PATH_BUILDER = `<script lang="ts">
 <GGPlot
   {spec}
   key="id"
-  inspect={{ mode: "xy", pin: true, maxDistance: 24 }}
   width={640}
   height={400}
 >
+  <Inspect mode="xy" pin maxDistance={24} />
   <GuideLegend channel="color" focus />
 </GGPlot>
 `;
@@ -69,7 +69,8 @@ const HOME_CODE_PATH_BUILDER = `<script lang="ts">
 /**
  * Agent envelope: host interaction flags + named-data PortableSpec.
  * `spec` alone is valid PortableSpec; interactions are applied by the host.
- * `inspect: true` still defaults mode "auto"; the homepage host opts into xy.
+ * `inspect: true` still defaults mode "auto"; the homepage host opts into xy
+ * via `<Inspect mode="xy" … />` in the Svelte tabs above.
  * `legendFocus` remains in the envelope as a deprecated host map (0.19–0.20).
  */
 const HOME_CODE_PATH_SPEC_JSON = `{

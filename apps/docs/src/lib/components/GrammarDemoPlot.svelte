@@ -4,6 +4,7 @@
     GeomSmooth,
     GGPlot,
     GuideLegend,
+    Inspect,
     Labs,
     Theme,
   } from "@ggsvelte/svelte";
@@ -45,9 +46,11 @@
     y: "bodyMassG",
     ...(active >= 1 && { color: "species" }),
   }}
-  inspect={active >= 3 ? { mode: "xy", pin: true, maxDistance: 24 } : false}
   ariaLabel="Penguin body mass increases with flipper length, grouped by species"
 >
+  {#if active >= 3}
+    <Inspect mode="xy" pin maxDistance={24} />
+  {/if}
   <Theme name={chartTheme} />
   <Labs x="Flipper length mm" y="Body mass g" color="species" />
   {#if active >= 1}
