@@ -93,7 +93,7 @@ describe("toLayerInput", () => {
       columns: valuesNotArray,
     });
     const columnsIsArray = { columns: [1, 2] };
-    expect(toLayerInput({ geom: "point", data: columnsIsArray as never }).data).toEqual({
+    expect(toLayerInput({ geom: "point", data: columnsIsArray }).data).toEqual({
       columns: columnsIsArray,
     });
     const columnsNull = { columns: null };
