@@ -219,6 +219,24 @@ describe("buildQueuedInspectFrame", () => {
     });
   });
 
+  it("clears the queue when nearest and fallback both miss", () => {
+    let fallbackCalls = 0;
+    const built = buildQueuedInspectFrame({
+      match: null,
+      source: "keyboard",
+      epoch: 3,
+      fallbackCandidate: () => {
+        fallbackCalls += 1;
+        return null;
+      },
+    });
+    expect(fallbackCalls).toBe(1);
+    expect(built).toEqual({
+      queued: { candidate: null, source: "keyboard" },
+      candidate: null,
+    });
+  });
+
   it("builds queued mode + candidate from match without calling fallback", () => {
     let fallbackCalls = 0;
     const built = buildQueuedInspectFrame({
