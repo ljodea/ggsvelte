@@ -208,22 +208,6 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   const inspectResolved = () =>
     typeof window === "undefined" ? resolveInspectCurrent() : inspectResolvedDerived;
 
-  // Capability defaults — pure, lazy per read. Inspect uses resolved prop+child
-  // so wiring advisories see declaration-only <Inspect> as enabled.
-  const caps = (): ResolvedPlotCapabilities => {
-    const select = host.props.select;
-    const zoom = host.props.zoom;
-    const legendFocus = host.props.legendFocus;
-    const legendFilter = host.props.legendFilter;
-    return resolveCapabilities({
-      inspect: inspectResolved().input,
-      ...(select !== undefined && { select }),
-      ...(zoom !== undefined && { zoom }),
-      ...(legendFocus !== undefined && { legendFocus }),
-      ...(legendFilter !== undefined && { legendFilter }),
-    });
-  };
-
   // Reading descriptors through toLayerInput goes through live getters, so
   // geom prop changes flow into this $derived without re-registration.
   // Explicit `spec` short-circuits before registry/children so ignored props
@@ -298,6 +282,22 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   const legendFocusResolvedDerived = $derived.by(resolveLegendFocusNow);
   const legendFocusResolved = (): ResolvedLegendFocusCapability =>
     typeof window === "undefined" ? resolveLegendFocusNow() : legendFocusResolvedDerived;
+
+  // Capability defaults for wiring — inspect from prop + <Inspect> children;
+  // legendFocus "requested" from GuideLegend / legacy prop (not host.props.legendFocus
+  // direct — that prop is deprecated and type-aware lint denies it).
+  const caps = (): ResolvedPlotCapabilities => {
+    const select = host.props.select;
+    const zoom = host.props.zoom;
+    const legendFilter = host.props.legendFilter;
+    return resolveCapabilities({
+      inspect: inspectResolved().input,
+      legendFocus: legendFocusResolved().requested,
+      ...(select !== undefined && { select }),
+      ...(zoom !== undefined && { zoom }),
+      ...(legendFilter !== undefined && { legendFilter }),
+    });
+  };
 
   // interactionConfig: inspect from prop + <Inspect> children; legendFocus from
   // GuideLegend (host registry). SSR hatch matches assembled / inspectResolved.
