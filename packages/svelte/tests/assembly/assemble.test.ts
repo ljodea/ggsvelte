@@ -84,25 +84,26 @@ describe("toLayerInput", () => {
     const multi = { values: [{ x: 1 }], y: [2] };
     expect(toLayerInput({ geom: "point", data: multi }).data).toEqual({ columns: multi });
     // Single-key but wrong value types → not a DataRef; wrap as columns.
-    const nameNotString = { name: 12 };
-    expect(toLayerInput({ geom: "point", data: nameNotString as never }).data).toEqual({
+    // Intentionally wrong shapes use fromAny (CONTRIBUTING fixture rule).
+    const nameNotString = fromAny({ name: 12 });
+    expect(toLayerInput({ geom: "point", data: nameNotString }).data).toEqual({
       columns: nameNotString,
     });
-    const valuesNotArray = { values: { x: 1 } };
-    expect(toLayerInput({ geom: "point", data: valuesNotArray as never }).data).toEqual({
+    const valuesNotArray = fromAny({ values: { x: 1 } });
+    expect(toLayerInput({ geom: "point", data: valuesNotArray }).data).toEqual({
       columns: valuesNotArray,
     });
     const columnsIsArray = { columns: [1, 2] };
     expect(toLayerInput({ geom: "point", data: columnsIsArray }).data).toEqual({
       columns: columnsIsArray,
     });
-    const columnsNull = { columns: null };
-    expect(toLayerInput({ geom: "point", data: columnsNull as never }).data).toEqual({
+    const columnsNull = fromAny({ columns: null });
+    expect(toLayerInput({ geom: "point", data: columnsNull }).data).toEqual({
       columns: columnsNull,
     });
     // Unknown single key is not a DataRef.
-    const other = { rows: [{ x: 1 }] };
-    expect(toLayerInput({ geom: "point", data: other as never }).data).toEqual({ columns: other });
+    const other = fromAny({ rows: [{ x: 1 }] });
+    expect(toLayerInput({ geom: "point", data: other }).data).toEqual({ columns: other });
   });
 });
 
