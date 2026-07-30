@@ -226,8 +226,8 @@ describe("gappedCrosshairSegmentsWithObstacles", () => {
     const segs = gappedCrosshairSegmentsWithObstacles("vertical", focus, panel, 0, [a, b]);
     // gapRadius 0: only obstacle holes. Merged hole → two segments (above + below).
     expect(segs).toHaveLength(2);
-    expect(segs[0]!.y1).toBe(panel.y);
-    expect(segs[1]!.y2).toBe(panel.y + panel.height);
+    expect(segs[0]?.y1).toBe(panel.y);
+    expect(segs[1]?.y2).toBe(panel.y + panel.height);
   });
 
   it("gaps a horizontal guide around an intersecting box", () => {
@@ -260,7 +260,7 @@ describe("gappedCrosshairSegmentsWithObstacles", () => {
     const focusOnly = gappedCrosshairSegments("vertical", focus, panel, gap);
     // Same outer endpoints (panel edge → hole edge).
     expect(withObstacles[0]?.y1).toBe(focusOnly[0]?.y1);
-    expect(withObstacles[withObstacles.length - 1]?.y2).toBe(focusOnly[focusOnly.length - 1]?.y2);
+    expect(withObstacles.at(-1)?.y2).toBe(focusOnly.at(-1)?.y2);
     // Obstacle pad is smaller than the diagonal gap, so segment count matches.
     expect(withObstacles).toHaveLength(focusOnly.length);
   });
