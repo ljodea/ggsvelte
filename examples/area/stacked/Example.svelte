@@ -23,8 +23,6 @@
   aes={{ x: "month", y: "deaths", fill: "cause" }}
   {interaction}
   interactionScope={scope}
-  width={640}
-  height={400}
 >
   <ThemeEconomist />
   <ScaleXDate labels="%b %Y" />

@@ -22,8 +22,6 @@
   aes={{ x: "year", fill: "county", weight: "deaths" }}
   {interaction}
   interactionScope={scope}
-  width={640}
-  height={400}
 >
   <ThemeFew />
   <ScaleFillDiscrete scheme="tableau10" />

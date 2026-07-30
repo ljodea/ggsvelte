@@ -22,8 +22,6 @@
   aes={{ x: "literacy", y: "crimePersons", color: "region" }}
   {interaction}
   interactionScope={scope}
-  width={640}
-  height={400}
 >
   <ThemeFew />
   <ScaleColorDiscrete scheme="tableau10" />

@@ -365,9 +365,13 @@ Authoring a new example:
      the canonical `PortableSpec`; it is validated at tier 2 on import, and
      its JSON is the docs "Spec" tab.
    - **`Example.svelte`** — idiomatic component usage (`<GGPlot ...>` with
-     `<GeomX>` children), importing data from `./data.js`. Render at an
-     explicit `width={640} height={400}` (or `height={vrHeight}` if you set
-     one) — VR needs fixed sizes.
+     `<GeomX>` children), importing data from `./data.js`. Give the corpus
+     file an explicit `width={640} height={400}` (or `height={vrHeight}` if
+     you set one) so VR captures at a fixed size. These props are VR
+     plumbing, not the recommended authoring style: README and npm snippets
+     omit them (`scripts/readme-showcase.test.ts` strips root size props
+     before comparing), and user code should too — omitted width is
+     container-responsive, omitted height is 400.
    - **`meta.json`** — `{ title, description, tags, docsSection, vrHeight? }`
      (validated by the generator; `docsSection` groups the gallery).
    - **`data.ts`** (optional) — static rows or `mulberry32`-seeded

@@ -16,8 +16,6 @@
 <GGPlot
   data={londonCholera}
   aes={{ x: "density", y: "deathRate", color: "water" }}
-  width="container"
-  height={400}
 >
   <Inspect mode="xy" pin identity="district" />
   <ThemeEconomist />

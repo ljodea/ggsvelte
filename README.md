@@ -51,12 +51,7 @@ and Windows.
   import { gammaVirginis } from "./data.js";
 </script>
 
-<GGPlot
-  data={gammaVirginis}
-  aes={{ x: "year", y: "angle" }}
-  width={640}
-  height={400}
->
+<GGPlot data={gammaVirginis} aes={{ x: "year", y: "angle" }}>
   <ThemeTufte />
   <ScaleXContinuous labels="d" />
   <ScaleSizeContinuous range={[3, 8]} />
@@ -104,8 +99,6 @@ and Windows.
   aes={{ x: "month", y: "deaths", fill: "cause" }}
   {interaction}
   interactionScope={scope}
-  width={640}
-  height={400}
 >
   <ThemeEconomist />
   <ScaleXDate labels="%b %Y" />
@@ -144,12 +137,7 @@ and Windows.
   import { galtonChildren } from "./data.js";
 </script>
 
-<GGPlot
-  data={galtonChildren}
-  aes={{ x: "height", fill: "gender" }}
-  width={640}
-  height={400}
->
+<GGPlot data={galtonChildren} aes={{ x: "height", fill: "gender" }}>
   <ThemeMinimal />
   <ScaleFillManual
     domain={["Daughters", "Sons"]}
@@ -191,8 +179,6 @@ and Windows.
 <GGPlot
   data={londonCholera}
   aes={{ x: "density", y: "deathRate", color: "water" }}
-  width="container"
-  height={400}
 >
   <Inspect mode="xy" pin identity="district" />
   <ThemeEconomist />
@@ -232,12 +218,7 @@ and Windows.
   import { familyHeights } from "./data.js";
 </script>
 
-<GGPlot
-  data={familyHeights}
-  aes={{ x: "child", weight: "n" }}
-  width={640}
-  height={400}
->
+<GGPlot data={familyHeights} aes={{ x: "child", weight: "n" }}>
   <ThemeGgplot2 />
   <FacetWrap field="pair" ncol={2} />
   <Labs
@@ -270,12 +251,7 @@ and Windows.
   import { armadaCrews } from "./data.js";
 </script>
 
-<GGPlot
-  data={armadaCrews}
-  aes={{ x: "squadron", fill: "role", weight: "men" }}
-  width={640}
-  height={400}
->
+<GGPlot data={armadaCrews} aes={{ x: "squadron", fill: "role", weight: "men" }}>
   <ThemeFivethirtyeight />
   <ScaleYContinuous labels=".0%" />
   <ScaleFillManual
@@ -313,12 +289,7 @@ and Windows.
   import { greatLakesSurveys, greatLakesTruth } from "./data.js";
 </script>
 
-<GGPlot
-  data={greatLakesSurveys}
-  aes={{ x: "long", y: "lat", color: "year" }}
-  width={640}
-  height={400}
->
+<GGPlot data={greatLakesSurveys} aes={{ x: "long", y: "lat", color: "year" }}>
   <ThemeDark />
   <CoordFixed />
   <ScaleColorContinuous scheme="viridis" labels="d" />
@@ -364,12 +335,7 @@ Guides are separate from scale math:
   import { michelsonRuns } from "./data.js";
 </script>
 
-<GGPlot
-  data={michelsonRuns}
-  aes={{ x: "run", y: "velocity" }}
-  width={640}
-  height={400}
->
+<GGPlot data={michelsonRuns} aes={{ x: "run", y: "velocity" }}>
   <ThemeFew />
   <ScaleXDiscrete domain={["Jun 5", "Jun 7", "Jun 9", "Jun 12", "Jul 2"]} />
   <Labs
@@ -400,12 +366,7 @@ Guides are separate from scale math:
   import { britishExports } from "./data.js";
 </script>
 
-<GGPlot
-  data={britishExports}
-  aes={{ x: "year", y: "value" }}
-  width="container"
-  height={400}
->
+<GGPlot data={britishExports} aes={{ x: "year", y: "value" }}>
   <ThemeFivethirtyeight />
   <Labs
     title="British and Irish exports, 1855–1899"
@@ -437,12 +398,7 @@ Guides are separate from scale math:
   import { polioTrial } from "./data.js";
 </script>
 
-<GGPlot
-  data={polioTrial}
-  aes={{ x: "group", y: "rate" }}
-  width={640}
-  height={400}
->
+<GGPlot data={polioTrial} aes={{ x: "group", y: "rate" }}>
   <ThemeFivethirtyeight />
   <ScaleXDiscrete domain={["Vaccinated", "Placebo", "Not inoculated"]} />
   <Labs
