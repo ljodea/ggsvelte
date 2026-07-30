@@ -12,11 +12,12 @@
   } from "../selection/selection.js";
   import {
     crosshairGapForBox,
-    gappedCrosshairSegments,
+    gappedCrosshairSegmentsWithObstacles,
     glyphHoverBox,
     HOVER_CROSSHAIR_GAP_RADIUS,
     HOVER_RING_RADIUS,
     normalizedRect,
+    type CrosshairGapBox,
   } from "./geometry.js";
   type Panel = {
     readonly x: number;
@@ -42,6 +43,7 @@
     hoverBoxWidth,
     hoverBoxHeight,
     hoverBoxAnchor = "middle",
+    crosshairGapObstacles = [],
     selectedAnchors = [],
     emphasizedAnchors = [],
     brushRect = null,
@@ -64,6 +66,11 @@
     hoverBoxWidth?: number | undefined;
     hoverBoxHeight?: number | undefined;
     hoverBoxAnchor?: "start" | "middle" | "end" | undefined;
+    /**
+     * Sibling GeomText/GeomLabel AABBs in the focus panel. Guides hard-gap
+     * through boxes the line intersects so labels stay readable (#1207).
+     */
+    crosshairGapObstacles?: readonly CrosshairGapBox[];
     selectedAnchors?: readonly PresentationAnchor[];
     emphasizedAnchors?: readonly PresentationAnchor[];
     brushRect?: BrushRect | null;
@@ -82,8 +89,10 @@
       : null,
   );
 
-  // Gap guides at the hover ring/box so they never bisect the focused mark.
-  // Rect chrome keeps continuous guides (`gapRadius = 0`).
+  // Gap guides at the hover ring/box and any intersecting sibling glyph boxes
+  // so they never bisect the focused mark or nearby labels (#1207).
+  // Rect chrome keeps continuous guides at the focus (`gapRadius = 0`) but
+  // still holes through painted text boxes.
   const crosshairGap = $derived(
     hoverChrome === "ring"
       ? HOVER_CROSSHAIR_GAP_RADIUS
@@ -93,21 +102,23 @@
   );
   const verticalCrosshair = $derived(
     inspection !== null && inspectionPanel !== null
-      ? gappedCrosshairSegments(
+      ? gappedCrosshairSegmentsWithObstacles(
           "vertical",
           inspection.focus.anchor,
           inspectionPanel,
           crosshairGap,
+          crosshairGapObstacles,
         )
       : [],
   );
   const horizontalCrosshair = $derived(
     inspection !== null && inspectionPanel !== null
-      ? gappedCrosshairSegments(
+      ? gappedCrosshairSegmentsWithObstacles(
           "horizontal",
           inspection.focus.anchor,
           inspectionPanel,
           crosshairGap,
+          crosshairGapObstacles,
         )
       : [],
   );

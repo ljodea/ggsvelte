@@ -124,7 +124,11 @@ import {
   type PresentationAnchor,
   type PresentationChrome,
 } from "./selection/selection.js";
-import { glyphExtentsFromBatch } from "./scene/geometry.js";
+import {
+  crosshairGlyphObstacles,
+  glyphExtentsFromBatch,
+  type CrosshairGapBox,
+} from "./scene/geometry.js";
 import { createSurfaceState } from "./surface/surface-state.svelte.js";
 import type { SurfaceState } from "./surface/surface-state.svelte.js";
 import { createPlotZoomState } from "./zoom/zoom-state.svelte.js";
@@ -185,6 +189,12 @@ export type PlotEngine = {
   readonly hoverBoxWidth: number | undefined;
   readonly hoverBoxHeight: number | undefined;
   readonly hoverBoxAnchor: "start" | "middle" | "end" | undefined;
+  /**
+   * Sibling GeomText AABBs in the focus panel for crosshair hard-gaps (#1207).
+   * Derived from scene batches (not candidate store) so uninspectable labels
+   * still clear the guide.
+   */
+  readonly crosshairGapObstacles: readonly CrosshairGapBox[];
   readonly interactionMasks: readonly (BatchInteractionMask | null)[];
   readonly interactiveLegendEntries: InteractiveLegendEntry[];
   readonly effectiveLegendPressed: LegendEntryIdentity | null;
@@ -804,6 +814,18 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     return glyphExtentsFromBatch(batch, seed.primitiveIndex);
   }
 
+  // Scene walk (not candidate store): uninspectable label layers still paint
+  // and still need guide gaps (#1065 / #1207). Depends on (scene, panelId)
+  // only — not the focus anchor — so this is a real $derived, not a per-read
+  // getter like hoverGlyphExtents.
+  const EMPTY_CROSSHAIR_GAP_OBSTACLES: readonly CrosshairGapBox[] = Object.freeze([]);
+  const crosshairGapObstacles = $derived.by((): readonly CrosshairGapBox[] => {
+    const model = runtime.model;
+    const panel = inspectionState.inspectionPanel;
+    if (model === null || panel === null) return EMPTY_CROSSHAIR_GAP_OBSTACLES;
+    return crosshairGlyphObstacles(model.scene.batches, model.scene.panels, panel.id);
+  });
+
   // After host entry deriveds exist (irreducible late data for legend focus).
   legendFocusState.installHostDerivedEffects();
 
@@ -858,6 +880,9 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     },
     get hoverBoxAnchor() {
       return hoverGlyphExtents()?.textAnchor;
+    },
+    get crosshairGapObstacles() {
+      return crosshairGapObstacles;
     },
     get interactionMasks() {
       return semanticCandidateProjection.interactionMasks;

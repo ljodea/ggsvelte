@@ -19,6 +19,7 @@
   } from "../selection/selection.js";
   import InteractionOverlay from "./InteractionOverlay.svelte";
   import { shouldShowInertSelectionOverlay } from "../interaction/capability.js";
+  import type { CrosshairGapBox } from "./geometry.js";
   type Panel = {
     readonly x: number;
     readonly y: number;
@@ -44,6 +45,7 @@
     hoverBoxWidth,
     hoverBoxHeight,
     hoverBoxAnchor,
+    crosshairGapObstacles = [],
     selectedAnchors = [],
     emphasizedAnchors = [],
     brushRect = null,
@@ -67,6 +69,8 @@
     hoverBoxWidth?: number | undefined;
     hoverBoxHeight?: number | undefined;
     hoverBoxAnchor?: "start" | "middle" | "end" | undefined;
+    /** Sibling glyph AABBs for crosshair hard-gaps (#1207). */
+    crosshairGapObstacles?: readonly CrosshairGapBox[];
     selectedAnchors?: readonly PresentationAnchor[];
     emphasizedAnchors?: readonly PresentationAnchor[];
     brushRect?: BrushRect | null;
@@ -95,6 +99,7 @@
     {hoverBoxWidth}
     {hoverBoxHeight}
     {hoverBoxAnchor}
+    {crosshairGapObstacles}
     {selectedAnchors}
     {emphasizedAnchors}
     {brushRect}

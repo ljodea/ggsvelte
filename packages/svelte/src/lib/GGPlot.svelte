@@ -234,6 +234,7 @@
       hoverBoxWidth={engine.hoverBoxWidth}
       hoverBoxHeight={engine.hoverBoxHeight}
       hoverBoxAnchor={engine.hoverBoxAnchor}
+      crosshairGapObstacles={engine.crosshairGapObstacles}
       selectedAnchors={engine.selectedAnchors}
       emphasizedAnchors={engine.emphasizedAnchors}
       brushRect={surfaceState.brushRect}
