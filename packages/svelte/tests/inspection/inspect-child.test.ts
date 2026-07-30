@@ -91,7 +91,9 @@ describe("<Inspect> capability child", () => {
     });
     flushSync();
     // Wiring effect runs after children register (ADR 0001 order).
-    await new Promise((r) => setTimeout(r, 50));
+    await new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 50);
+    });
     expect(diagnostics.some((d) => d.code === "INTERACTION_HANDLER_WITHOUT_CAPABILITY")).toBe(
       false,
     );
