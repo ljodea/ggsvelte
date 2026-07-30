@@ -1612,12 +1612,13 @@ Page scroll is not hijacked by unused tools.
 
 ## Capability props
 
-### \`inspect\` / \`<Inspect>\`
+### \`inspect\`
 
 Prefer the declaration child \`<Inspect />\` (or \`<Inspect mode="x" pin />\`,
 etc.). Options match the legacy GGPlot prop: \`mode\`, \`pin\`, \`maxDistance\`,
 \`content\`, \`contentMode\`, \`muteSiblings\`. Empty \`<Inspect />\` equals
-\`inspect={true}\`. The GGPlot \`inspect\` prop still works.
+\`inspect={true}\`. The GGPlot \`inspect\` prop still works. The heading id stays
+\`inspect\` for stable deep links.
 
 ### Point selection
 

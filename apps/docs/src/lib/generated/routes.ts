@@ -10574,8 +10574,8 @@ export const DOCS_ROUTES = [
         level: 2,
       },
       {
-        id: "inspect-inspect",
-        title: "inspect / <Inspect>",
+        id: "inspect",
+        title: "inspect",
         level: 3,
       },
       {
