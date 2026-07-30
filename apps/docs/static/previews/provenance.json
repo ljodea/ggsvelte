@@ -8,12 +8,12 @@
     },
     "area/stacked": {
       "filename": "area-stacked-light.png",
-      "sourceSha256": "e41019eee8df45aa758d6e694ae76b69ce40547fb27e2e104963e590e4ecfc1a",
+      "sourceSha256": "60c0187db1b1cbcc327754b0de0550030977ad9ba123070d932f3f915e85406b",
       "pngSha256": "5a708d0255b3c8c56bbecc0f1dc7849420f5ca6f7cb69785954752b8adb50d1a"
     },
     "bar/dodged": {
       "filename": "bar-dodged-light.png",
-      "sourceSha256": "f23de7359e3fd06170a946b4f4e0cee9d7e3f12c79d4054bf4ce08bfd554f522",
+      "sourceSha256": "ef5159af78070f37f005d1ba52e50aa6a6fe35045426eebf3d745a988942b408",
       "pngSha256": "8cb6896fb9bbc0a416a68469e855b558087867d8b1930b4ad1eade6037ecd7de"
     },
     "bar/horizontal": {
@@ -28,7 +28,7 @@
     },
     "bar/stacked": {
       "filename": "bar-stacked-light.png",
-      "sourceSha256": "9be85edde15154c8167ec8b37e79db109ecb7e192521c23d86d268bbd4c24cef",
+      "sourceSha256": "f5b2158a5b2d0af7274fd4be414906efeab6c0691c9ef6cdaa020d67feaedd63",
       "pngSha256": "4c0a7f0b20fcdf9adb777a3c31ec25fbf6d60f30ced058a8f00f22a52bfa4dfd"
     },
     "bin2d/basic": {
@@ -218,7 +218,7 @@
     },
     "line/multi-series": {
       "filename": "line-multi-series-light.png",
-      "sourceSha256": "8a1cb30e1a9786e47484b39472a1fa283b47499996a1e328afdfef8feae0d9db",
+      "sourceSha256": "6befc15bf7df2c7179b3936000717e254e2d6ff2b230c417d0832104a3acd01f",
       "pngSha256": "da402afca8515a3005d24268f44cc037a1202ce7248675b03c9afbeac3bfc69d"
     },
     "line/time-axis": {
@@ -298,7 +298,7 @@
     },
     "point/scatter-color": {
       "filename": "point-scatter-color-light.png",
-      "sourceSha256": "210b69f49074dbc49e947ef23f75aa2f2ac17e55b9505f848b46cfc5de5ede7a",
+      "sourceSha256": "bc6148b5165f3f08d125fdb95a5063d5af0bcc910bc008dbd2f25004cd39060e",
       "pngSha256": "9bbe802827346cc004c03894c8aa27819493a6d7b6bb61ec16eb0b6120b75dd4"
     },
     "point/stat-manual-mean": {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {
-    Inspect,
+    createPlotInteraction,
     GeomPoint,
     GGPlot,
     GuideLegend,
@@ -10,15 +10,21 @@
   } from "@ggsvelte/svelte";
 
   import { guerry } from "./data.js";
+
+  const interaction = createPlotInteraction({
+    identity: "department",
+  });
+  const scope = { keys: "guerry-rows" } as const;
 </script>
 
 <GGPlot
   data={guerry}
   aes={{ x: "literacy", y: "crimePersons", color: "region" }}
+  {interaction}
+  interactionScope={scope}
   width={640}
   height={400}
 >
-  <Inspect identity="department" />
   <ThemeFew />
   <ScaleColorDiscrete scheme="tableau10" />
   <Labs
