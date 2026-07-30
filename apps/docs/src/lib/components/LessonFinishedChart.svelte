@@ -23,7 +23,7 @@
     sakuraFinishedHeight,
   } from "$lib/generated/lesson-charts";
   import { observeNearViewport } from "$lib/near-viewport";
-  import { Inspect, type PlotInspectionChange } from "@ggsvelte/svelte";
+  import type { PlotInspectionChange } from "@ggsvelte/svelte";
   import { kyotoSakura } from "@ggsvelte/svelte/data";
 
   const {
@@ -56,10 +56,13 @@
   /** Measured container width; drives live plot height via build-time chrome table. */
   let chartWidth = $state(0);
   let host = $state<HTMLElement>();
-  /** Live plot component — dynamically imported when near the viewport (#972). */
+  /** Live plot + Inspect — dynamically imported when near the viewport (#972). */
   let LivePlot = $state<null | (typeof import("@ggsvelte/svelte"))["GGPlot"]>(
     null,
   );
+  let LiveInspect = $state<
+    null | (typeof import("@ggsvelte/svelte"))["Inspect"]
+  >(null);
 
   /**
    * Fold only when the live plot is mounted. Computing the 838-point spec
@@ -142,7 +145,10 @@
       if (loadStarted || cancelled) return;
       loadStarted = true;
       void import("@ggsvelte/svelte").then((mod) => {
-        if (!cancelled) LivePlot = mod.GGPlot;
+        if (!cancelled) {
+          LivePlot = mod.GGPlot;
+          LiveInspect = mod.Inspect;
+        }
       });
     };
 
@@ -183,8 +189,8 @@
       height={liveHeight}
       {ariaLabel}
     >
-      {#if finished.inspect}
-        <Inspect mode="exact" pin content={sakuraTooltip} />
+      {#if finished.inspect && LiveInspect}
+        <LiveInspect mode="exact" pin content={sakuraTooltip} />
       {/if}
     </LivePlot>
   {:else}

@@ -17056,14 +17056,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Capability props"],
   },
   {
-    id: "heading:guide-interaction-reference:inspect",
+    id: "heading:guide-interaction-reference:inspect-inspect",
     kind: "heading",
-    title: "inspect",
+    title: "inspect / <Inspect>",
     summary:
-      "inspect in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
-    href: "/guide/interaction-reference#inspect",
+      "inspect / <Inspect> in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#inspect-inspect",
     keywords: ["Interaction reference", "documentation"],
-    exact: ["inspect"],
+    exact: ["inspect / <Inspect>"],
   },
   {
     id: "heading:guide-interaction-reference:point-selection",

@@ -168,7 +168,7 @@
     },
     "interaction/brush-zoom": {
       "filename": "interaction-brush-zoom-light.png",
-      "sourceSha256": "b299345430be2bb4712083c06d1e861bce1be79bdff1fca7495944cdb44996a7",
+      "sourceSha256": "6996cd045e7525f9c64c3779d13d689b382acf6498da2e038fe1b9e26a74d95e",
       "pngSha256": "1a0ddcf51b7cced3e7a590249f999e3cba23a81adbaa6a95afae3a5497ae3578"
     },
     "interaction/facet-intervals": {
@@ -193,7 +193,7 @@
     },
     "interaction/tooltip": {
       "filename": "interaction-tooltip-light.png",
-      "sourceSha256": "f5553593d7f92780bed8b2d8e448bba4e9c851aab640edfc51a1d2407b86e6b9",
+      "sourceSha256": "1c09e98b169281f77aff0ff18bb72ccab54f2df0617eb0f4a24dafefdab7ced9",
       "pngSha256": "2ada956472d13fac2b0315f486e1a30e2f80a5effd873b3d04dd87005b987940"
     },
     "jitter/basic": {
@@ -288,7 +288,7 @@
     },
     "point/log-scale": {
       "filename": "point-log-scale-light.png",
-      "sourceSha256": "4376eae6453a1497330a5f68fb1625aec2343be593244141476a50160c761699",
+      "sourceSha256": "aa5f322432d15656adeb77f5592d60baa06f39c575c0f7065f0f4ba46fed270f",
       "pngSha256": "e4cca5e252e49ced88e85a92ff84016533cbbc0fbad7d705fbecbd6e9c84c8a2"
     },
     "point/quantile-lines": {
