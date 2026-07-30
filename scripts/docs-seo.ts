@@ -1,5 +1,7 @@
 import sveltePackage from "../packages/svelte/package.json";
 
+import { buildDocsCrumbs } from "./docs-breadcrumbs";
+
 const REPOSITORY_URL = "https://github.com/ljodea/ggsvelte";
 const SOCIAL_IMAGE_PATH = "/previews/interaction-tooltip-light.png";
 
@@ -75,26 +77,24 @@ export function buildSeoDocument(route: SeoRoute, canonicalBase: string): SeoDoc
       route.primaryNavigationOwner === "reference" ||
       route.path.startsWith("/reference") ||
       route.navigation?.section === "Reference";
-    const rootName = reference ? "Reference" : "Docs";
-    const rootPath = reference ? "/reference" : "/docs";
-    if (route.path !== rootPath) {
+    const title = route.navigation?.label ?? route.title.replace(" — ggsvelte", "");
+    const crumbs = buildDocsCrumbs(route.path, title, reference);
+    // Single-crumb pages (e.g. /reference alone) skip BreadcrumbList.
+    if (crumbs.length > 1) {
       structuredData.push({
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
-        itemListElement: [
-          {
+        itemListElement: crumbs.map((crumb, index) => {
+          const isLast = index === crumbs.length - 1;
+          // Last crumb has no href; use the page canonical. Intermediate crumbs always link.
+          const path = crumb.href ?? (isLast ? route.canonicalPath : undefined);
+          return {
             "@type": "ListItem",
-            position: 1,
-            name: rootName,
-            item: absoluteUrl(canonicalBase, rootPath),
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: route.navigation?.label ?? route.title.replace(" — ggsvelte", ""),
-            item: canonical,
-          },
-        ],
+            position: index + 1,
+            name: crumb.label,
+            ...(path === undefined ? {} : { item: absoluteUrl(canonicalBase, path) }),
+          };
+        }),
       });
     }
   }

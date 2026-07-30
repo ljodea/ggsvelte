@@ -81,6 +81,8 @@ describe("generated docs SEO", () => {
     const guide = routes.find((route) => route.path === "/guide/getting-started")!;
     const docs = routes.find((route) => route.path === "/docs")!;
     const gallery = routes.find((route) => route.path === "/examples")!;
+    const scaleDetail = routes.find((route) => route.path === "/reference/scales/fill_distiller")!;
+    const scaleIndex = routes.find((route) => route.path === "/reference/scales")!;
 
     expect(buildSeoDocument(guide, "https://ggsvelte.sh").structuredData).toEqual([
       {
@@ -104,5 +106,54 @@ describe("generated docs SEO", () => {
     ]);
     expect(buildSeoDocument(docs, "https://ggsvelte.sh").structuredData).toEqual([]);
     expect(buildSeoDocument(gallery, "https://ggsvelte.sh").structuredData).toEqual([]);
+
+    // Scale detail: Reference / Scales / ScaleFillDistiller (middle section linked)
+    expect(buildSeoDocument(scaleDetail, "https://ggsvelte.sh").structuredData).toEqual([
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Reference",
+            item: "https://ggsvelte.sh/reference",
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Scales",
+            item: "https://ggsvelte.sh/reference/scales",
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: scaleDetail.navigation?.label ?? "ScaleFillDistiller",
+            item: "https://ggsvelte.sh/reference/scales/fill_distiller",
+          },
+        ],
+      },
+    ]);
+    // Section index stays two-level (no duplicate "Scales" under itself).
+    expect(buildSeoDocument(scaleIndex, "https://ggsvelte.sh").structuredData).toEqual([
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Reference",
+            item: "https://ggsvelte.sh/reference",
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Scales",
+            item: "https://ggsvelte.sh/reference/scales",
+          },
+        ],
+      },
+    ]);
   });
 });
