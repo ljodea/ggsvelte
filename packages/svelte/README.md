@@ -21,12 +21,7 @@ Requires Node.js 22+ and Svelte 5.33.1+.
   import { kyotoSakura } from "@ggsvelte/svelte/data";
 </script>
 
-<GGPlot
-  data={kyotoSakura}
-  aes={{ x: "year", y: "bloomDoy" }}
-  width="container"
-  height={400}
->
+<GGPlot data={kyotoSakura} aes={{ x: "year", y: "bloomDoy" }}>
   <Labs
     title="Kyoto cherry blossom full-bloom dates, 812–2026"
     subtitle="Full bloom moved about ten days earlier after the industrial era"
