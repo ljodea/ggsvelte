@@ -94,6 +94,16 @@ const recipes = new Map<string, DiagnosticDocEntry["recipe"]>([
     },
   ],
   [
+    "interaction:INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
+    {
+      language: "svelte",
+      code: `<GGPlot data={rows} aes={{ x: "x", y: "y" }}>
+  <Inspect mode="xy" />
+  <GeomPoint />
+</GGPlot>`,
+    },
+  ],
+  [
     "cli:invalid-json",
     {
       language: "sh",

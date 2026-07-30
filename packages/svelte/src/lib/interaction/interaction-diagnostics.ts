@@ -238,6 +238,7 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
       "Keep a single <Inspect> child",
       "Merge options onto one <Inspect> instead of stacking siblings",
     ],
-    docUrl: "https://ggsvelte.sh/guide/upgrading#compose-inspect-as-a-child-layer",
+    docUrl:
+      "https://ggsvelte.sh/guide/interaction-reference#interaction-duplicate-inspect-capability",
   },
 });

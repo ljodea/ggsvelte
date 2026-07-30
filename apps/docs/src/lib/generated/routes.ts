@@ -10754,6 +10754,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "interaction-duplicate-inspect-capability",
+        title: "INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
+        level: 3,
+      },
+      {
         id: "accessibility",
         title: "Accessibility",
         level: 2,
@@ -11779,6 +11784,11 @@ export const DOCS_ROUTES = [
       {
         id: "interaction-inspect-x-bisects-bar-labels",
         title: "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+        level: 3,
+      },
+      {
+        id: "interaction-duplicate-inspect-capability",
+        title: "INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
         level: 3,
       },
       {
