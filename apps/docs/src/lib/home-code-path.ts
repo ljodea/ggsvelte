@@ -16,8 +16,8 @@
  * - Svelte: `<Inspect>` child; `focus` on <GuideLegend>
  * - Builder + spec: same host children; inspect via `<Inspect>`
  * - Row identity defaults to the `id` column on palmerPenguins (no `key` prop)
- * - JSON: agent envelope `{ interactions, spec }` still accepts legendFocus
- *   (deprecated host map until 0.20.0)
+ * - JSON: agent envelope `{ interactions, spec }` may flag inspect; legend
+ *   focus/filter are Svelte GuideLegend children, not envelope fields.
  */
 
 const HOME_CODE_PATH_SVELTE = `<script lang="ts">
@@ -68,14 +68,13 @@ const HOME_CODE_PATH_BUILDER = `<script lang="ts">
 /**
  * Agent envelope: host interaction flags + named-data PortableSpec.
  * `spec` alone is valid PortableSpec; interactions are applied by the host.
- * `inspect: true` still defaults mode "auto"; the homepage host opts into xy
- * via `<Inspect mode="xy" … />` in the Svelte tabs above.
- * `legendFocus` remains in the envelope as a deprecated host map (0.19–0.20).
+ * Envelope `inspect: true` defaults mode "auto"; the live homepage uses xy
+ * via `<Inspect mode="xy" … />` in the Svelte tabs. Legend focus is not an
+ * envelope field — use `<GuideLegend channel="color" focus />` in Svelte.
  */
 const HOME_CODE_PATH_SPEC_JSON = `{
   "interactions": {
-    "inspect": true,
-    "legendFocus": true
+    "inspect": true
   },
   "spec": {
     "edition": 2,

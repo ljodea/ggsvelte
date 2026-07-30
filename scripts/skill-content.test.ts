@@ -108,6 +108,40 @@ describe("skill Svelte fences use child layers, not deprecated grammar props", (
 });
 
 /**
+ * v0.20 host interaction API: teach <Inspect> and GuideLegend focus/filter,
+ * not the deprecated plot-level inspect / legendFocus / legendFilter props.
+ * Mark-level inspect={false} remains valid (hit-test opt-out).
+ */
+describe("skill Svelte fences use v0.20 interaction children", () => {
+  for (const file of FILES) {
+    it(`${file.name} shows no plot-level inspect / legendFocus / legendFilter`, () => {
+      const offenders = codeBlocks(file.markdown)
+        .filter((block) => block.language === "svelte")
+        .flatMap((block) => {
+          const hits: string[] = [];
+          // Only scan GGPlot open tags — not prose comments about the old API.
+          for (const match of block.source.matchAll(/<GGPlot\b([^>]*)>/g)) {
+            const attrs = match[1] ?? "";
+            if (/\blegendFocus\b/.test(attrs)) hits.push("legendFocus");
+            if (/\blegendFilter\b/.test(attrs)) hits.push("legendFilter");
+            if (/(?<![\w])inspect\s*=/.test(attrs)) hits.push("inspect=");
+          }
+          return hits;
+        });
+      expect(offenders).toEqual([]);
+    });
+  }
+
+  it("interactions.md capability table prefers GuideLegend filter, not plot legendFilter", () => {
+    const interactions = FILES.find((f) => f.name === "references/interactions.md");
+    expect(interactions).toBeDefined();
+    // Table row for filter should name GuideLegend, not GGPlot.
+    expect(interactions!.markdown).toMatch(/`filter`\s*\|\s*`boolean[^`]*` on `<GuideLegend>`/);
+    expect(interactions!.markdown).not.toMatch(/\| `legendFilter`\s*\|[^|]*on `<GGPlot>`/);
+  });
+});
+
+/**
  * #1200 postmortem: an agent read PortableSpec.layers[] (marks only) plus a
  * false "are not layers" comment and filed issues claiming Scale/Theme/Guide/
  * Labs/Coord/Facet/Legend were "non-layer grammar components." They are Layer

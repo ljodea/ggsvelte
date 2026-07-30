@@ -23,9 +23,10 @@ accessor (for example `key="year"` on a time series without an `id` column).
 </GGPlot>
 ```
 
-Empty `<Inspect />` enables defaults (same as the legacy `inspect={true}` prop).
-Options match `InspectOptions`: `mode`, `pin`, `maxDistance`, `contentMode`,
-`muteSiblings`, `content` (Snippet). The GGPlot `inspect` prop still works.
+Empty `<Inspect />` enables defaults. Options match `InspectOptions`: `mode`,
+`pin`, `maxDistance`, `contentMode`, `muteSiblings`, `content` (Snippet). Prefer
+the child form in new code; the GGPlot `inspect` prop is a dual-read alias, not
+the primary teaching surface.
 
 ### Mark eligibility (opt-out)
 
@@ -38,20 +39,21 @@ and unrelated to the host `<Inspect>` capability.
 
 | Prop / surface | Input                                                            | What it enables                                                                                                                                                                                                                                                                                                                                                                            |
 | -------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `inspect`      | `boolean \| InspectOptions` on `<GGPlot>`, or `<Inspect>` child  | Tooltip, semantic crosshair, keyboard traversal, pinning. Prefer `<Inspect>`. Options: `mode` (`"auto" \| "exact" \| "x" \| "y" \| "xy"`), `pin`, `maxDistance` (CSS px), `contentMode` (`"informational" \| "interactive"`), `muteSiblings`, `content` (Snippet, see Tooltip below).                                                                                                      |
+| `<Inspect>`    | child of `<GGPlot>` (options as props)                           | Tooltip, semantic crosshair, keyboard traversal, pinning. **Preferred.** Options: `mode` (`"auto" \| "exact" \| "x" \| "y" \| "xy"`), `pin`, `maxDistance` (CSS px), `contentMode` (`"informational" \| "interactive"`), `muteSiblings`, `content` (Snippet, see Tooltip below). Do not put `inspect=` on `<GGPlot>` in new examples.                                                      |
 | `select`       | `false \| "point" \| "interval" \| SelectOptions`                | Point or interval selection. Options: `type` (`"point" \| "interval"`), `mode` (`"x" \| "y" \| "xy"`, interval only), `multiple`, `persistent`, `preset` (faceted intervals, below).                                                                                                                                                                                                       |
 | `zoom`         | `boolean \| ZoomOptions`                                         | Brush zoom. Options: `mode` (`"x" \| "y" \| "xy"`), `trigger` (`"brush"`). Currently requires one unfaceted panel.                                                                                                                                                                                                                                                                         |
 | `focus`        | `boolean \| { preview?: boolean }` on `<GuideLegend>`            | Discrete legend preview, focus, and linked emphasis **for that aesthetic channel**. Emphasis only — never changes included rows. Discrete legends only; continuous ramps stay static. Mute de-emphasizes non-focused marks; dashed rings appear only on sparse point marks (≤48 anchors), never on paths/areas/bars/segments/text. Host-only — not a PortableSpec / `guideLegend()` field. |
-| `legendFilter` | `boolean \| LegendFilterOptions` on `<GGPlot>`                   | Data-changing filtering through discrete legend controls: changes the included rows and reruns the grammar while preserving stable color identity. Options: `mode` (`"exclude" \| "include"`), `multiple`.                                                                                                                                                                                 |
+| `filter`       | `boolean \| LegendFilterOptions` on `<GuideLegend>`              | Data-changing filtering on **that aesthetic's** discrete legend: changes included rows and reruns the grammar while preserving stable color identity. Options: `mode` (`"exclude" \| "include"`), `multiple`. Combine with focus: `<GuideLegend channel="color" focus filter />`.                                                                                                          |
 | `key`          | column name or `(row, index) => PropertyKey` (optional override) | Durable row identity for public interaction payloads. **Default:** `id` column when present, else row index. Override only for a non-`id` natural key or a custom accessor. Duplicate or unstable keys are diagnostic errors.                                                                                                                                                              |
 | `tool`         | `"inspect" \| "point" \| "select-area" \| "zoom-area"`           | Controlled initial/active tool; observe changes with `ontoolchange`.                                                                                                                                                                                                                                                                                                                       |
 | `ariaLabel`    | `string`                                                         | Accessible chart name; falls back to the plot title or a generated label.                                                                                                                                                                                                                                                                                                                  |
 | `a11y`         | `A11yMode`                                                       | `"force-svg"` keeps every layer as SVG marks.                                                                                                                                                                                                                                                                                                                                              |
 
-### Deprecated: `legendFocus` on `<GGPlot>`
+### Deprecated: plot-level `legendFocus` / `legendFilter`
 
-Since 0.19.0, prefer `<GuideLegend channel="color" focus />`. The plot prop
-still enables focus plot-wide until 0.20.0 and emits `DEPRECATED_PLOT_PROP`.
+Since 0.19.0, use `<GuideLegend channel="color" focus />` and
+`<GuideLegend channel="color" filter />`. The old GGPlot props still dual-read
+and emit `DEPRECATED_PLOT_PROP` — never teach them as the current API.
 
 After an interval or zoom commit, accessible controls accept exact bounds.
 
@@ -110,13 +112,12 @@ Two `<Inspect>` children last-win with
 
 ## Tooltip
 
-Enabling inspect (`<Inspect />` or the `inspect` prop) renders the default HTML
-tooltip; no extra component is needed. Customize its body with the
-`content` prop on `<Inspect>` (or `inspect.content` on the prop form), which
-receives a `PlotInspectionChange` (`focus`/`members` are `PlotDatum` values
-whose `fields` are `TooltipField` rows: `{ channel, field, value }`). The
-exported `Tooltip` component is the same positioned shell for advanced custom
-rendering. `TooltipContext` is a deprecated (0.1.0) alias of
+Enabling inspect with `<Inspect />` renders the default HTML tooltip; no extra
+component is needed. Customize its body with the `content` prop on `<Inspect>`,
+which receives a `PlotInspectionChange` (`focus`/`members` are `PlotDatum`
+values whose `fields` are `TooltipField` rows: `{ channel, field, value }`).
+The exported `Tooltip` component is the same positioned shell for advanced
+custom rendering. `TooltipContext` is a deprecated (0.1.0) alias of
 `PlotInspectionChange`.
 
 ## Diagnostics
@@ -158,12 +159,11 @@ entry has `severity`, `code`, `message`, `prop`, `suggestions`, `docUrl`):
   data={rows}
   aes={{ x: "date", y: "value", color: "series" }}
   select={{ type: "interval", mode: "x", preset: "cross-panel" }}
-  legendFilter
   {interaction}
   interactionScope={scope}
   oninteraction={(event) => console.log(event.type, event)}
 >
-  <GuideLegend channel="color" focus />
+  <GuideLegend channel="color" focus filter />
   <Facet wrap="region" ncol={3} />
   <GeomPoint />
 </GGPlot>

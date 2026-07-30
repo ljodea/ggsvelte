@@ -114,10 +114,11 @@ direct props (`size={3}`); structural props are `data`, `stat`, `position`,
 
 `<GGPlot>` props: `spec`, `data`, `aes`, `layers`, `key`, `width`
 (number | "container"), `height`, `a11y`, `ariaLabel`, the interaction props
-(`inspect`, `select`, `zoom`, `tool`, `interaction`,
-`interactionScope`; `legendFocus` / `legendFilter` are deprecated — use
-`<GuideLegend channel focus>` / `<GuideLegend channel filter>`), the `on*`
-handlers, and `children`.
+(`select`, `zoom`, `tool`, `interaction`, `interactionScope`; prefer
+`<Inspect>` for inspection and `<GuideLegend channel focus>` /
+`<GuideLegend channel filter>` for legend interaction — do not put
+`inspect` / `legendFocus` / `legendFilter` on `<GGPlot>` in new code), the
+`on*` handlers, and `children`.
 Instance methods: `resetScales()`, `setZoom()`.
 
 Precedence: `spec` wins over everything else. For mark layers, an explicit
@@ -274,10 +275,10 @@ violin, tile heatmap, hex density, ECDF step, ribbon, flipped boxplot,
 per-layer aes override, sf/map — each as validated JSON plus a Svelte twin:
 [references/recipes.md](references/recipes.md).
 
-## Interactions (host props, not PortableSpec fields)
+## Interactions (host props / children, not PortableSpec fields)
 
-Opt-in host capabilities: `inspect` / `select` / `zoom` on `<GGPlot>`; legend
-emphasis and data-changing filter via
+Opt-in host capabilities: `<Inspect />` for tooltips and crosshairs;
+`select` / `zoom` on `<GGPlot>`; legend emphasis and data-changing filter via
 `<GuideLegend channel="color" focus />` / `filter` (per aesthetic; host-only,
 not in `guideLegend()` / PortableSpec). Always give a stable `key` when
 selection or linked views must survive filtering or refreshes. Link plots by
