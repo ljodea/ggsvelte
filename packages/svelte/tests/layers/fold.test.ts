@@ -63,6 +63,18 @@ describe("foldPlotLayer", () => {
     expect(after.theme).toEqual(before.theme);
   });
 
+  it("is a no-op for host-only legend focus/filter layers", () => {
+    // legendFocus / legendFilter never enter PortableSpec — fold must ignore them.
+    // `null` value = GuideLegend focus/filter off; kind still must not fold.
+    const themed = foldPlotLayer(base(), { kind: "theme", value: "dark" });
+    const afterFocus = foldPlotLayer(themed, { kind: "legendFocus", value: null });
+    const afterFilter = foldPlotLayer(afterFocus, { kind: "legendFilter", value: null });
+    expect(afterFocus).toBe(themed);
+    expect(afterFilter).toBe(themed);
+    expect(afterFilter.theme).toBe("dark");
+    expect(afterFilter.layers).toEqual(themed.layers);
+  });
+
   it("preserves registration order when folding multiple layers", () => {
     // Production assemble folds one layer at a time; same order semantics.
     let draft = base();
