@@ -1,6 +1,8 @@
 /**
  * #785: foldPlotLayer is the pure seam that replaces assemble.applyPlotLayer.
  * Operates on AssembleDraft (no fluent builder / TypeBox validate).
+ *
+ * Browser lane: CI coverage is browser-only (SSR vitest does not collect).
  */
 import { describe, expect, it } from "vitest";
 
@@ -36,6 +38,19 @@ describe("foldPlotLayer", () => {
         value: { order: "sorted" },
       }).legend,
     ).toBeDefined();
+    // scale + guides merge-by-channel/key paths (were browser-uncovered).
+    expect(
+      foldPlotLayer(base(), {
+        kind: "scale",
+        value: { x: { type: "continuous" } },
+      }).scales?.x,
+    ).toEqual({ type: "continuous" });
+    expect(
+      foldPlotLayer(base(), {
+        kind: "guides",
+        value: { color: "none" },
+      }).guides?.color,
+    ).toBe("none");
   });
 
   it("is a no-op for mark layers", () => {

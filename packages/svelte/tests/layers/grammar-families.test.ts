@@ -1,6 +1,8 @@
 /**
  * #785: GRAMMAR_FAMILIES is the single metadata home for grammar families.
  * Cross-checks against known constants and partitions — not self-tautologies.
+ *
+ * Browser lane: CI coverage is browser-only (SSR vitest does not collect).
  */
 import { describe, expect, it } from "vitest";
 

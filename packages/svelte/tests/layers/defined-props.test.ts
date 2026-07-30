@@ -1,6 +1,8 @@
 /**
  * Direct unit tests for definedProps (#786).
  * Previously only exercised implicitly via six family factories.
+ *
+ * Browser lane: CI coverage is browser-only (SSR vitest does not collect).
  */
 import { describe, expect, it } from "vitest";
 
