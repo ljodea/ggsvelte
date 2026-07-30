@@ -50,8 +50,8 @@ function stripRootSizeProps(source: string): string {
  */
 function normalizeSnippet(source: string): string {
   return source
-    .replace(/\s+/g, " ")
-    .replace(/\s(\/?>)/g, "$1")
+    .replaceAll(/\s+/g, " ")
+    .replaceAll(/\s(\/?>)/g, "$1")
     .trim();
 }
 
