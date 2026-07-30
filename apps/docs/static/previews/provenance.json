@@ -8,7 +8,7 @@
     },
     "area/stacked": {
       "filename": "area-stacked-light.png",
-      "sourceSha256": "eb73d2621c04396a57136201e3c760525ec8096ba354ab5658402edc8d4177b1",
+      "sourceSha256": "73beeccad197bd72c30c64c68ad62468d2bec24cddfc365020db44b805ec1723",
       "pngSha256": "5a708d0255b3c8c56bbecc0f1dc7849420f5ca6f7cb69785954752b8adb50d1a"
     },
     "bar/dodged": {
@@ -288,7 +288,7 @@
     },
     "point/log-scale": {
       "filename": "point-log-scale-light.png",
-      "sourceSha256": "aa5f322432d15656adeb77f5592d60baa06f39c575c0f7065f0f4ba46fed270f",
+      "sourceSha256": "343d6c869b8cce2e82d8700175b000003b8b3aacfb3a156aff72a758e46b4521",
       "pngSha256": "e4cca5e252e49ced88e85a92ff84016533cbbc0fbad7d705fbecbd6e9c84c8a2"
     },
     "point/quantile-lines": {
