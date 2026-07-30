@@ -78,6 +78,7 @@ export interface GGPlotProps<
   /**
    * @deprecated since 0.19.0 — use `<GuideLegend channel="…" focus />` instead.
    * Still honoured (plot-wide enablement) until 0.20.0; emits DEPRECATED_PLOT_PROP.
+   * Migration: https://ggsvelte.sh/guide/upgrading#legend-focus-on-guidelegend
    */
   legendFocus?: LegendFocusInput;
   /** Opt into data-changing filtering through discrete legend controls. */
@@ -117,10 +118,18 @@ export type ResolvedPlotCapabilities = {
  * Defaults the five interaction capability props to `false` when omitted.
  * Pure — does not clone object-form configs (identity preserved for epoch
  * and reference-equality consumers).
+ *
+ * Input is a plain bag (not `Pick<GGPlotProps, …>`) so dual-read of the
+ * deprecated `legendFocus` prop does not trip `typescript/no-deprecated`
+ * at every resolveCapabilities call site during the 0.19→0.20 window.
  */
-export function resolveCapabilities(
-  props: Pick<GGPlotProps, "inspect" | "select" | "zoom" | "legendFocus" | "legendFilter">,
-): ResolvedPlotCapabilities {
+export function resolveCapabilities(props: {
+  readonly inspect?: InspectInput;
+  readonly select?: SelectInput;
+  readonly zoom?: ZoomInput;
+  readonly legendFocus?: LegendFocusInput;
+  readonly legendFilter?: LegendFilterInput;
+}): ResolvedPlotCapabilities {
   return {
     inspect: props.inspect ?? false,
     select: props.select ?? false,
@@ -128,6 +137,18 @@ export function resolveCapabilities(
     legendFocus: props.legendFocus ?? false,
     legendFilter: props.legendFilter ?? false,
   };
+}
+
+/**
+ * Read the deprecated plot-level `legendFocus` prop during the dual-read
+ * window. Isolate the deprecation access so call sites stay clean.
+ */
+export function readLegacyPlotLegendFocus(
+  props: EnginePlotProps | GGPlotProps,
+): LegendFocusInput | undefined {
+  // Dual-read until 0.20.0 — prefer <GuideLegend focus>.
+  // oxlint-disable-next-line typescript/no-deprecated -- intentional dual-read
+  return props.legendFocus;
 }
 
 /**

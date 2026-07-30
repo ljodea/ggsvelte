@@ -9,14 +9,7 @@ import type { LegendFocusInput } from "../interaction/interaction.js";
 import type { InteractiveLegendEntry } from "./focus.js";
 
 /** Aesthetic channel a GuideLegend may enable for focus (non-position). */
-export type LegendFocusChannel =
-  | "color"
-  | "fill"
-  | "size"
-  | "linewidth"
-  | "alpha"
-  | "shape"
-  | "linetype";
+type LegendFocusChannel = "color" | "fill" | "size" | "linewidth" | "alpha" | "shape" | "linetype";
 
 /** One GuideLegend's host-only focus contribution (null when focus is off). */
 export type LegendFocusLayerValue = {

@@ -10594,8 +10594,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "legendfocus",
-        title: "legendFocus",
+        id: "focus-on-guidelegend",
+        title: "focus on <GuideLegend>",
         level: 3,
       },
       {
@@ -12041,6 +12041,16 @@ export const DOCS_ROUTES = [
         id: "five-minute-path",
         title: "Five-minute path",
         level: 2,
+      },
+      {
+        id: "0-18-to-0-19",
+        title: "0.18 to 0.19",
+        level: 2,
+      },
+      {
+        id: "legend-focus-on-guidelegend",
+        title: "Legend focus on GuideLegend",
+        level: 3,
       },
       {
         id: "0-11-to-0-12",

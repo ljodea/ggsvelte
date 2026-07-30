@@ -8,12 +8,12 @@
     },
     "area/stacked": {
       "filename": "area-stacked-light.png",
-      "sourceSha256": "cf224e6eb23c3364fd7ce91191fba0c2c498da69e9754913ee49a24aa339281d",
+      "sourceSha256": "eb73d2621c04396a57136201e3c760525ec8096ba354ab5658402edc8d4177b1",
       "pngSha256": "5a708d0255b3c8c56bbecc0f1dc7849420f5ca6f7cb69785954752b8adb50d1a"
     },
     "bar/dodged": {
       "filename": "bar-dodged-light.png",
-      "sourceSha256": "092c88ce39dbf2f00907ced437954139cc1d74573931d712678abfe22ad53388",
+      "sourceSha256": "da8c995f706da2e14774b12fe608061e3c7001d046b2bab1faf61d47821da369",
       "pngSha256": "8cb6896fb9bbc0a416a68469e855b558087867d8b1930b4ad1eade6037ecd7de"
     },
     "bar/horizontal": {
@@ -28,7 +28,7 @@
     },
     "bar/stacked": {
       "filename": "bar-stacked-light.png",
-      "sourceSha256": "f6f985fc2566316cee5ab7fcf4ff9b2700141a0bfc355e66ae3cd43f2e68b514",
+      "sourceSha256": "dfc0b7cb48dfc8d2591b0108dace3b3ed9b0221d9fce688547b576a965791a20",
       "pngSha256": "4c0a7f0b20fcdf9adb777a3c31ec25fbf6d60f30ced058a8f00f22a52bfa4dfd"
     },
     "bin2d/basic": {
@@ -183,7 +183,7 @@
     },
     "interaction/legend-focus": {
       "filename": "interaction-legend-focus-light.png",
-      "sourceSha256": "dab5f5b760418f15e286fc6d95b336dbeedf14ad1b4eeb06e32f8a5bcbead9cd",
+      "sourceSha256": "776c12969bcd513265b2085bbf3ffba44a3a2d125595b5f79759bcdec0ca7674",
       "pngSha256": "38aa3c7f47d1c3ab2807039e2377f3c93e292c47c6c19cfe3c2de80e6156091c"
     },
     "interaction/linked-views": {
@@ -218,7 +218,7 @@
     },
     "line/multi-series": {
       "filename": "line-multi-series-light.png",
-      "sourceSha256": "b3d2c1e6f012dedbdd6b8b01bf4081e3e1b116f2b9229e2bc487be88f354380d",
+      "sourceSha256": "67891f53015c3f32cff5b72765c418a94813df80b2ff5a69b3fe074f5377c122",
       "pngSha256": "da402afca8515a3005d24268f44cc037a1202ce7248675b03c9afbeac3bfc69d"
     },
     "line/time-axis": {
@@ -288,7 +288,7 @@
     },
     "point/log-scale": {
       "filename": "point-log-scale-light.png",
-      "sourceSha256": "bee3a418adfa9b9d0a407a796be9fbcd68d68cd6390385f81ab9462711e188b0",
+      "sourceSha256": "4376eae6453a1497330a5f68fb1625aec2343be593244141476a50160c761699",
       "pngSha256": "e4cca5e252e49ced88e85a92ff84016533cbbc0fbad7d705fbecbd6e9c84c8a2"
     },
     "point/quantile-lines": {
@@ -298,7 +298,7 @@
     },
     "point/scatter-color": {
       "filename": "point-scatter-color-light.png",
-      "sourceSha256": "d1344f0d75c319ee825d797e657968bb05d1f88cb9ad0148543b1dc228b1201d",
+      "sourceSha256": "5c9c94030e4bdaf24df71658225528e1befb14f5722c2da07121b7786db6ad77",
       "pngSha256": "9bbe802827346cc004c03894c8aa27819493a6d7b6bb61ec16eb0b6120b75dd4"
     },
     "point/stat-manual-mean": {

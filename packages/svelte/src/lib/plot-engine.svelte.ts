@@ -88,6 +88,7 @@ import type { PlotChromeState } from "./chrome/chrome-state.svelte.js";
 import { isHostPlotLayer } from "./layers/types.js";
 import { deprecatedPropDiagnostic } from "./diagnostics/deprecation.js";
 import {
+  readLegacyPlotLegendFocus,
   resolveCapabilities,
   type EnginePlotProps,
   type ResolvedPlotCapabilities,
@@ -260,7 +261,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
    */
   function resolveLegendFocusNow(): ResolvedLegendFocusCapability {
     return resolveLegendFocusCapability({
-      plotProp: host.props.legendFocus,
+      plotProp: readLegacyPlotLegendFocus(host.props),
       layers: host.registry.layers,
     });
   }
@@ -347,7 +348,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
 
   // Deprecated plot-level legendFocus → GuideLegend.focus (one minor window).
   $effect(() => {
-    const plotProp = host.props.legendFocus;
+    const plotProp = readLegacyPlotLegendFocus(host.props);
     if (plotProp === undefined || plotProp === false) return;
     const diagnostic = deprecatedPropDiagnostic({
       prop: "legendFocus",
@@ -357,7 +358,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
         'Use <GuideLegend channel="color" focus /> (or the aesthetic that owns the discrete legend)',
         "focus={{ preview: false }} on GuideLegend replaces legendFocus={{ preview: false }}",
       ],
-      anchor: "legend-focus-on-guide-legend",
+      anchor: "legend-focus-on-guidelegend",
     });
     const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
     if (deliveredAdvisories.has(dedupKey)) return;

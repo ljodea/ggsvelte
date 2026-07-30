@@ -1626,12 +1626,16 @@ panels.
 \`zoom={{ mode: "x" | "y" | "xy" }}\` enables the explicit Zoom area tool.
 Reset zoom and double-click return to the natural domains.
 
-### \`legendFocus\`
+### \`focus\` on \`<GuideLegend>\`
 
-\`legendFocus={true}\` enables discrete legend preview and committed focus.
-Use \`legendFocus={{ preview: false }}\` to disable hover/focus preview while
-retaining click, touch, Enter, Space, Escape, and arrow-key controls. It
-requires stable row \`key\` values and does not make continuous ramps interactive.
+\`<GuideLegend channel="color" focus />\` enables discrete legend preview and
+committed focus for that aesthetic. Use \`focus={{ preview: false }}\` to
+disable hover/focus preview while retaining click, touch, Enter, Space,
+Escape, and arrow-key controls. It requires stable row \`key\` values and does
+not make continuous ramps interactive. Host-only — never a PortableSpec field.
+
+The plot prop \`legendFocus\` is deprecated since 0.19.0 (removed in 0.20.0);
+see [Legend focus on GuideLegend](/guide/upgrading#legend-focus-on-guidelegend).
 
 ### \`legendFilter\`
 
@@ -1640,7 +1644,7 @@ fill legends. It changes the rows supplied to facets, statistics, scales, and
 rendering while preserving the full legend catalog and categorical color
 identity. Configure \`mode: "exclude" | "include"\` and \`multiple\`; receive
 typed clauses through \`onlegendfilter\`. It is independent of
-presentation-only \`legendFocus\`.
+presentation-only GuideLegend \`focus\`.
 
 ## Controlled tool
 
@@ -1893,6 +1897,61 @@ migration note here.
 The accepted lifecycle and deprecation policy remains in
 [Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
 rather than creating a second policy.
+
+## 0.18 to 0.19
+
+### Legend focus on GuideLegend
+
+Discrete legend focus is no longer a plot-host capability prop. Opt in on the
+guide child that owns the aesthetic:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+
+  const rows = [
+    { id: "a", x: 1, y: 2, series: "North" },
+    { id: "b", x: 2, y: 3, series: "South" },
+  ];
+</script>
+
+<!-- Before 0.19: legendFocus was a plot-host prop. -->
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y", color: "series" }}
+  key="id"
+  legendFocus
+>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GeomPoint, GGPlot, GuideLegend } from "@ggsvelte/svelte";
+
+  const rows = [
+    { id: "a", x: 1, y: 2, series: "North" },
+    { id: "b", x: 2, y: 3, series: "South" },
+  ];
+</script>
+
+<!-- After 0.19: focus lives on GuideLegend for that aesthetic. -->
+<GGPlot data={rows} aes={{ x: "x", y: "y", color: "series" }} key="id">
+  <GuideLegend channel="color" focus />
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+- \`focus\` accepts \`true\` or \`{ preview?: boolean }\` (same shape as the old
+  plot prop). It is host-only — not a PortableSpec / \`guideLegend()\` field.
+- Only channels with an active \`<GuideLegend focus>\` get interactive legend
+  targets. Enable multiple aesthetics with multiple GuideLegend children.
+- A focus-only GuideLegend (no presentation options) does not force
+  \`type: "legend"\`, so continuous colour scales keep their colorbar.
+- \`<GGPlot legendFocus>\` still works plot-wide through 0.19.x and emits
+  \`DEPRECATED_PLOT_PROP\`; it is removed in 0.20.0.
+- Handlers stay plot-level: \`onlegendfocus\`, \`oninteraction\`, and \`key\`.
 
 ## 0.11 to 0.12
 

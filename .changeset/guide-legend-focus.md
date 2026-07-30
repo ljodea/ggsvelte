@@ -14,7 +14,7 @@ Only channels with an active focus child get interactive legend targets
 `<GGPlot legendFocus>` still works plot-wide until 0.20.0 and emits
 `DEPRECATED_PLOT_PROP` with migration guidance.
 
-Migration: <https://ggsvelte.sh/guide/upgrading#legend-focus-on-guide-legend>
+Migration: <https://ggsvelte.sh/guide/upgrading#legend-focus-on-guidelegend>
 
 Replace:
 

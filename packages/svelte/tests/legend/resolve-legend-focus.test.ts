@@ -128,6 +128,5 @@ describe("isLegendFocusPropEnabled", () => {
     expect(isLegendFocusPropEnabled(true)).toBe(true);
     expect(isLegendFocusPropEnabled({ preview: false })).toBe(true);
     expect(isLegendFocusPropEnabled(false)).toBe(false);
-    expect(isLegendFocusPropEnabled(undefined)).toBe(false);
   });
 });

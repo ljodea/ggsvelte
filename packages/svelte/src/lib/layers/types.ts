@@ -69,9 +69,6 @@ export type Layer =
 /** Non-mark grammar layer kinds (the seven #659 families). Host-only kinds excluded. */
 export type GrammarLayerKind = Exclude<Layer["kind"], "mark" | "legendFocus">;
 
-/** Host-only layer kinds that must not fold into PortableSpec. */
-export type HostLayerKind = Extract<Layer["kind"], "legendFocus">;
-
 /**
  * Structural form accepted by fold/assemble: `value` may be a live getter or a
  * plain field. Compatible with registry `Layer` objects and test literals.

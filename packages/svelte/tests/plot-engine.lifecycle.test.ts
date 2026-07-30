@@ -230,9 +230,11 @@ describe("createPlotEngine construction-order contract (#1082)", () => {
     inspect: true,
     select: "point" as const,
     zoom: true,
+    // Dual-read fixture for deprecated plot prop (removed 0.20.0).
+    /* oxlint-disable-next-line typescript/no-deprecated -- intentional dual-read */
     legendFocus: true,
     legendFilter: true,
-  } satisfies EnginePlotProps;
+  } as EnginePlotProps;
 
   it("constructs the full controller graph without TDZ throws (before first flush)", () => {
     // If any factory reads a later binding at construction time, createPlotEngine
