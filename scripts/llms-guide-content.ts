@@ -2770,7 +2770,12 @@ queries remain available as \`model.candidates.queryRect(...)\` candidate ids.
 
 \`\`\`svelte fragment
 <script lang="ts">
-  import { GeomPoint, GGPlot, Inspect, type RenderModel } from "@ggsvelte/svelte";
+  import {
+    GeomPoint,
+    GGPlot,
+    Inspect,
+    type RenderModel,
+  } from "@ggsvelte/svelte";
 
   const rows = [
     { id: "a", x: 1, y: 3 },
