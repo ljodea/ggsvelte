@@ -1,16 +1,11 @@
 /**
  * Default color/fill swatches for /reference/scales/* detail pages.
  *
- * Pure hex tables only — no chart stack. Colors match bare helper defaults
- * when the scale pins a scheme; family examples (ColorBrewer, gradient stops)
- * match the package constructors in scale-color-stops / colorbrewer-palettes.
+ * Pure hex tables only — no chart stack. Defaults come from palette-tables
+ * (same deep paths as /palettes); ColorBrewer sequential Blues and gradient
+ * stop defaults are mirrored here so docs never import core trainers.
  */
 import type { ScaleReferenceEntry } from "@ggsvelte/spec";
-
-import {
-  COLORBREWER_QUALITATIVE,
-  colorBrewerStops,
-} from "../../../../../packages/core/src/scales/colorbrewer-palettes.js";
 
 import { CATEGORICAL_SCHEMES, VIRIDIS_RAMP_10 } from "./palette-tables.js";
 
@@ -21,8 +16,21 @@ const GRADIENT2_LOW = "#B2182B";
 const GRADIENT2_MID = "#F7F7F7";
 const GRADIENT2_HIGH = "#2166AC";
 
-/** ColorBrewer sequential Blues — typical distiller/fermenter palette example. */
-const CB_BLUES: readonly string[] = colorBrewerStops("Blues") ?? [];
+/**
+ * ColorBrewer sequential Blues (max-n) — packages/core colorbrewer-palettes.
+ * Kept local: not on CATEGORICAL_SCHEMES (qualitative-only).
+ */
+const CB_BLUES: readonly string[] = [
+  "#f7fbff",
+  "#deebf7",
+  "#c6dbef",
+  "#9ecae1",
+  "#6baed6",
+  "#4292c6",
+  "#2171b5",
+  "#08519c",
+  "#08306b",
+];
 
 /** Illustrative stops for helpers that require author-supplied colors. */
 const EXAMPLE_MULTI: readonly string[] = ["#440154", "#31688e", "#35b779", "#fde725"];
@@ -90,7 +98,8 @@ export function scaleSwatchFor(entry: ScaleReferenceEntry): ScaleSwatch | null {
   if (entry.family !== "color-fill") return null;
 
   const stem = stemOf(entry.slug);
-  const set1 = COLORBREWER_QUALITATIVE.Set1;
+  // Bracket access: `.Set1` is not a reliable property form for this key.
+  const set1 = CATEGORICAL_SCHEMES["Set1"];
 
   switch (stem) {
     case "discrete":
