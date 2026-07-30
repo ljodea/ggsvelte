@@ -24,9 +24,8 @@
   </h1>
 </section>
 
-<section class="home-featured" aria-labelledby="home-featured-heading">
+<section class="home-featured" aria-label="Examples">
   <header>
-    <h2 id="home-featured-heading">Examples</h2>
     <a href={`${base}/examples`}>Gallery</a>
   </header>
   <ol>
@@ -124,7 +123,12 @@
     padding-block: clamp(2.5rem, 6vw, 5rem) clamp(4rem, 8vw, 7rem);
   }
 
-  .home-featured header,
+  .home-featured header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+  }
+
   .evidence header {
     display: flex;
     align-items: end;
@@ -133,7 +137,6 @@
     margin-bottom: 2rem;
   }
 
-  .home-featured h2,
   .evidence h2 {
     max-width: 13ch;
     margin: 0.25rem 0 0;
