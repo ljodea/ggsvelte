@@ -196,12 +196,14 @@
   {/if}
 
   {#if entry.name === "legend"}
-    <h2 id="legend-focus">Legend focus</h2>
+    <h2 id="legend-focus">Legend focus and filter</h2>
     <p>
-      When the plot enables <code>legendFocus</code>, discrete color and fill
-      legends host HTML controls for preview and commit. Clear legend focus
-      removes presentation emphasis only — it does not reset
-      <code>legendFilter</code> or data. See the
+      Opt in per aesthetic with <code>focus</code> and/or
+      <code>filter</code> on this component (for example
+      <code>&lt;GuideLegend channel="color" focus filter /&gt;</code>). Discrete
+      color and fill legends host HTML controls for preview/commit focus and
+      Show-group filter checkboxes. Clear legend focus removes presentation
+      emphasis only — it does not reset filter clauses or data. See the
       <a href={`${base}/guide/interaction-reference#legendfocus`}
         >interaction reference</a
       >

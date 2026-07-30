@@ -108,13 +108,16 @@ guides({ color: guideLegend({ position: "bottom" }) })
     <a href={`${base}/reference/guides/none`}><code>GuideNone</code></a>.
   </p>
 
-  <h2 id="legend-focus">Legend focus and clear recovery</h2>
+  <h2 id="legend-focus">Legend focus, filter, and clear recovery</h2>
   <p>
     Discrete color and fill legends can host interaction controls when
-    <code>legendFocus</code> or <code>legendFilter</code> is enabled on the
-    plot. Focus is presentation emphasis only; Clear legend focus restores the
-    unfocused view without changing data. Authoring the guide itself is separate
-    — see
+    <code>&lt;GuideLegend focus /&gt;</code> or
+    <code>&lt;GuideLegend filter /&gt;</code> is enabled for that aesthetic
+    (deprecated plot props <code>legendFocus</code> /
+    <code>legendFilter</code> still work plot-wide until 0.20). Focus is
+    presentation emphasis only; Clear legend focus restores the unfocused view
+    without changing data. Filter changes included rows. Authoring the guide
+    itself is separate — see
     <a href={`${base}/reference/guides/legend`}><code>GuideLegend</code></a>,
     the
     <a href={`${base}/guide/interaction-reference#legendfocus`}

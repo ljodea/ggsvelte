@@ -20,6 +20,7 @@ import type {
   ThemeSpec,
 } from "@ggsvelte/spec";
 
+import type { LegendFilterLayerValue } from "../legend/resolve-legend-filter.js";
 import type { LegendFocusLayerValue } from "../legend/resolve-legend-focus.js";
 
 /**
@@ -64,10 +65,12 @@ export type Layer =
   | { readonly kind: "guides"; get value(): GuidesSpec }
   | { readonly kind: "legend"; get value(): LegendSpec }
   /** Host-only interaction contribution from `<GuideLegend focus>` — not PortableSpec. */
-  | { readonly kind: "legendFocus"; get value(): LegendFocusLayerValue };
+  | { readonly kind: "legendFocus"; get value(): LegendFocusLayerValue }
+  /** Host-only interaction contribution from `<GuideLegend filter>` — not PortableSpec. */
+  | { readonly kind: "legendFilter"; get value(): LegendFilterLayerValue };
 
 /** Non-mark grammar layer kinds (the seven #659 families). Host-only kinds excluded. */
-export type GrammarLayerKind = Exclude<Layer["kind"], "mark" | "legendFocus">;
+export type GrammarLayerKind = Exclude<Layer["kind"], "mark" | "legendFocus" | "legendFilter">;
 
 /**
  * Structural form accepted by fold/assemble: `value` may be a live getter or a
@@ -82,9 +85,10 @@ export type PlotLayerLike =
   | { readonly kind: "labs"; readonly value: Labs }
   | { readonly kind: "guides"; readonly value: GuidesSpec }
   | { readonly kind: "legend"; readonly value: LegendSpec }
-  | { readonly kind: "legendFocus"; readonly value: LegendFocusLayerValue };
+  | { readonly kind: "legendFocus"; readonly value: LegendFocusLayerValue }
+  | { readonly kind: "legendFilter"; readonly value: LegendFilterLayerValue };
 
 /** True for host-only registry kinds that assemble/fold must ignore. */
 export function isHostPlotLayer(layer: { readonly kind: string }): boolean {
-  return layer.kind === "legendFocus";
+  return layer.kind === "legendFocus" || layer.kind === "legendFilter";
 }

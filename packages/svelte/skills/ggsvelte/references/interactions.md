@@ -15,16 +15,17 @@ coordinated intervals must survive filtering, reordering, or data refreshes.
 | `select`       | `false \| "point" \| "interval" \| SelectOptions`      | Point or interval selection. Options: `type` (`"point" \| "interval"`), `mode` (`"x" \| "y" \| "xy"`, interval only), `multiple`, `persistent`, `preset` (faceted intervals, below).                                                                                                                                                                                                       |
 | `zoom`         | `boolean \| ZoomOptions`                               | Brush zoom. Options: `mode` (`"x" \| "y" \| "xy"`), `trigger` (`"brush"`). Currently requires one unfaceted panel.                                                                                                                                                                                                                                                                         |
 | `focus`        | `boolean \| { preview?: boolean }` on `<GuideLegend>`  | Discrete legend preview, focus, and linked emphasis **for that aesthetic channel**. Emphasis only — never changes included rows. Discrete legends only; continuous ramps stay static. Mute de-emphasizes non-focused marks; dashed rings appear only on sparse point marks (≤48 anchors), never on paths/areas/bars/segments/text. Host-only — not a PortableSpec / `guideLegend()` field. |
-| `legendFilter` | `boolean \| LegendFilterOptions` on `<GGPlot>`         | Data-changing filtering through discrete legend controls: changes the included rows and reruns the grammar while preserving stable color identity. Options: `mode` (`"exclude" \| "include"`), `multiple`.                                                                                                                                                                                 |
+| `filter`       | `boolean \| LegendFilterOptions` on `<GuideLegend>`    | Data-changing filtering through discrete legend controls **for that aesthetic channel**: changes the included rows and reruns the grammar while preserving stable color identity. Options: `mode` (`"exclude" \| "include"`), `multiple`. Host-only — not a PortableSpec / `guideLegend()` field.                                                                                          |
 | `key`          | column name or `(row, index) => PropertyKey`           | Stable semantic identity for public interaction payloads. Required for durable point selection, coordinated interval presets, and legend focus/filter. Duplicate or unstable keys are diagnostic errors.                                                                                                                                                                                   |
 | `tool`         | `"inspect" \| "point" \| "select-area" \| "zoom-area"` | Controlled initial/active tool; observe changes with `ontoolchange`.                                                                                                                                                                                                                                                                                                                       |
 | `ariaLabel`    | `string`                                               | Accessible chart name; falls back to the plot title or a generated label.                                                                                                                                                                                                                                                                                                                  |
 | `a11y`         | `A11yMode`                                             | `"force-svg"` keeps every layer as SVG marks.                                                                                                                                                                                                                                                                                                                                              |
 
-### Deprecated: `legendFocus` on `<GGPlot>`
+### Deprecated: `legendFocus` / `legendFilter` on `<GGPlot>`
 
-Since 0.19.0, prefer `<GuideLegend channel="color" focus />`. The plot prop
-still enables focus plot-wide until 0.20.0 and emits `DEPRECATED_PLOT_PROP`.
+Since 0.19.0, prefer `<GuideLegend channel="color" focus />` and
+`<GuideLegend channel="color" filter />`. The plot props still enable each
+capability plot-wide until 0.20.0 and emit `DEPRECATED_PLOT_PROP`.
 
 After an interval or zoom commit, accessible controls accept exact bounds.
 
@@ -127,12 +128,11 @@ entry has `severity`, `code`, `message`, `prop`, `suggestions`, `docUrl`):
   aes={{ x: "date", y: "value", color: "series" }}
   key="id"
   select={{ type: "interval", mode: "x", preset: "cross-panel" }}
-  legendFilter
   {interaction}
   interactionScope={scope}
   oninteraction={(event) => console.log(event.type, event)}
 >
-  <GuideLegend channel="color" focus />
+  <GuideLegend channel="color" focus filter />
   <Facet wrap="region" ncol={3} />
   <GeomPoint />
 </GGPlot>

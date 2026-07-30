@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { GGPlot, type LegendFilterEvent } from "../../src/lib/index.js";
+  import {
+    GGPlot,
+    GuideLegend,
+    type LegendFilterEvent,
+  } from "../../src/lib/index.js";
 
   const {
     backend = "svg",
@@ -35,7 +39,6 @@
     data={rows}
     aes={{ x: "x", y: "y", color: "group" }}
     layers={[{ geom: "point", render: backend }]}
-    legendFilter={{ mode, multiple }}
     width={360}
     height={260}
     ariaLabel="Legend filter plot"
@@ -55,5 +58,7 @@
           ? legend.entries.map((entry) => entry.color).join(",")
           : "";
     }}
-  />
+  >
+    <GuideLegend channel="color" filter={{ mode, multiple }} />
+  </GGPlot>
 </div>

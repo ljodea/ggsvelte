@@ -47,7 +47,7 @@ export function foldPlotLayer(draft: AssembleDraft, layer: PlotLayerLike): Assem
     return draft;
   }
   // Host-only interaction contributions never fold into PortableSpec.
-  if (layer.kind === "legendFocus") {
+  if (layer.kind === "legendFocus" || layer.kind === "legendFilter") {
     return draft;
   }
   // Index via string map so unforeseen runtime kinds are undefined (not a

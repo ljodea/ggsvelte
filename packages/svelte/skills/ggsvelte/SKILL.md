@@ -114,9 +114,10 @@ direct props (`size={3}`); structural props are `data`, `stat`, `position`,
 
 `<GGPlot>` props: `spec`, `data`, `aes`, `layers`, `key`, `width`
 (number | "container"), `height`, `a11y`, `ariaLabel`, the interaction props
-(`inspect`, `select`, `zoom`, `legendFilter`, `tool`, `interaction`,
-`interactionScope`; `legendFocus` is deprecated — use
-`<GuideLegend channel focus>`), the `on*` handlers, and `children`.
+(`inspect`, `select`, `zoom`, `tool`, `interaction`,
+`interactionScope`; `legendFocus` / `legendFilter` are deprecated — use
+`<GuideLegend channel focus>` / `<GuideLegend channel filter>`), the `on*`
+handlers, and `children`.
 Instance methods: `resetScales()`, `setZoom()`.
 
 Precedence: `spec` wins over everything else. For mark layers, an explicit
@@ -275,14 +276,15 @@ per-layer aes override, sf/map — each as validated JSON plus a Svelte twin:
 
 ## Interactions (host props, not PortableSpec fields)
 
-Opt-in host capabilities: `inspect` / `select` / `zoom` / `legendFilter` on
-`<GGPlot>`; legend emphasis via `<GuideLegend channel="color" focus />`
-(per aesthetic; host-only, not in `guideLegend()` / PortableSpec). Always give
-a stable `key` when selection or linked views must survive filtering or
-refreshes. Link plots by sharing one `createPlotInteraction()` controller and
-matching `interactionScope` channels; observe everything through
-`oninteraction` or per-capability handlers. Faceted interval presets, the
-controller API, `Tooltip`, handler payloads, and diagnostics:
+Opt-in host capabilities: `inspect` / `select` / `zoom` on `<GGPlot>`; legend
+emphasis and data-changing filter via
+`<GuideLegend channel="color" focus />` / `filter` (per aesthetic; host-only,
+not in `guideLegend()` / PortableSpec). Always give a stable `key` when
+selection or linked views must survive filtering or refreshes. Link plots by
+sharing one `createPlotInteraction()` controller and matching
+`interactionScope` channels; observe everything through `oninteraction` or
+per-capability handlers. Faceted interval presets, the controller API,
+`Tooltip`, handler payloads, and diagnostics:
 [references/interactions.md](references/interactions.md) — read it before
 writing any interactive or linked-view code.
 

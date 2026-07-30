@@ -1283,9 +1283,9 @@ timestamp helpers, exact-format parser, and epoch helpers return authoring Dates
 
 export const INTERACTIONS_MD = `# Interactions
 
-Static by default. Opt in with \`inspect\`, \`select\`, \`zoom\`, GuideLegend
-\`focus\` (or deprecated \`legendFocus\`),
-\`legendFilter\`. With more than one draw tool, an accessible tool rail keeps
+Static by default. Opt in with \`inspect\`, \`select\`, \`zoom\`, and GuideLegend
+\`focus\` / \`filter\` (or deprecated plot props \`legendFocus\` /
+\`legendFilter\`). With more than one draw tool, an accessible tool rail keeps
 gestures from competing.
 
 Without a controller, state is private to one chart and callbacks report
@@ -1455,18 +1455,19 @@ colors. Author discrete legend appearance with
 
 ## Legend filtering
 
-\`legendFocus\` is presentation emphasis only — it does not change data.
-\`legendFilter={true}\` adds Show-group checkboxes on discrete color/fill
-legends and filters rows before facets, stats, scales, layout, and render.
-Hidden groups stay in the legend catalog and keep the same categorical color
-when shown again.
+GuideLegend \`focus\` is presentation emphasis only — it does not change data.
+\`<GuideLegend channel="color" filter />\` adds Show-group checkboxes on that
+aesthetic's discrete legend and filters rows before facets, stats, scales,
+layout, and render. Hidden groups stay in the legend catalog and keep the same
+categorical color when shown again.
 
-Use \`legendFilter={{ mode: "exclude", multiple: true }}\` for the default
-independent checkboxes. \`mode: "include"\` stores the shown values instead;
-\`multiple: false\` makes a toggle isolate one group. \`onlegendfilter\` reports
-the raw typed values and field in a \`LegendFilterClause\`. Reset legend filters
+Use \`filter={{ mode: "exclude", multiple: true }}\` for the default independent
+checkboxes. \`mode: "include"\` stores the shown values instead; \`multiple:
+false\` makes a toggle isolate one group. \`onlegendfilter\` reports the raw
+typed values and field in a \`LegendFilterClause\`. Reset legend filters
 restores the data pipeline; Clear legend focus only removes presentation
-emphasis. See the [stable-color example](/examples/interaction/legend-filter).
+emphasis. The plot prop \`legendFilter\` is deprecated since 0.19.0. See the
+[stable-color example](/examples/interaction/legend-filter).
 
 ## Brush zoom
 
@@ -1643,12 +1644,17 @@ The plot prop \`legendFocus={true}\` is deprecated since 0.19.0 (removed in
 
 ### \`legendFilter\`
 
-\`legendFilter={true}\` adds native Show-group checkboxes to discrete color and
-fill legends. It changes the rows supplied to facets, statistics, scales, and
-rendering while preserving the full legend catalog and categorical color
-identity. Configure \`mode: "exclude" | "include"\` and \`multiple\`; receive
-typed clauses through \`onlegendfilter\`. It is independent of
-presentation-only GuideLegend \`focus\`.
+Prefer \`<GuideLegend channel="color" filter />\` (boolean or
+\`{ mode?: "exclude" | "include", multiple?: boolean }\`) for data-changing
+checkboxes on that aesthetic's discrete legend. Host-only — never a
+PortableSpec / \`guideLegend()\` field. It changes the rows supplied to facets,
+statistics, scales, and rendering while preserving the full legend catalog and
+categorical color identity. Receive typed clauses through \`onlegendfilter\`.
+Independent of presentation-only GuideLegend \`focus\`.
+
+The plot prop \`legendFilter={true}\` is deprecated since 0.19.0 (removed in
+0.20.0) and still enables filter plot-wide during the dual-read window — see
+[Legend filter on GuideLegend](/guide/upgrading#legend-filter-on-guidelegend).
 
 ## Controlled tool
 
@@ -1837,7 +1843,14 @@ export const INTERACTION_REFERENCE_INDEX: readonly InteractionReferenceEntry[] =
     name: "Legend filtering",
     summary: "Include or exclude groups before stats/scales; color identity stable.",
     href: "/guide/interaction-reference#legendfilter",
-    keywords: ["legendFilter", "onlegendfilter", "filter", "checkbox", "stable color"],
+    keywords: [
+      "legendFilter",
+      "filter",
+      "GuideLegend",
+      "onlegendfilter",
+      "checkbox",
+      "stable color",
+    ],
   },
   {
     id: "controlled-tool",
@@ -1956,6 +1969,61 @@ guide child that owns the aesthetic:
 - \`<GGPlot legendFocus>\` still works plot-wide through 0.19.x and emits
   \`DEPRECATED_PLOT_PROP\`; it is removed in 0.20.0.
 - Handlers stay plot-level: \`onlegendfocus\`, \`oninteraction\`, and \`key\`.
+
+### Legend filter on GuideLegend
+
+Discrete legend filter is no longer a plot-host capability prop. Opt in on the
+guide child that owns the aesthetic:
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GeomPoint, GGPlot } from "@ggsvelte/svelte";
+
+  const rows = [
+    { id: "a", x: 1, y: 2, series: "North" },
+    { id: "b", x: 2, y: 3, series: "South" },
+  ];
+</script>
+
+<!-- Before 0.19: legendFilter was a plot-host prop. -->
+<GGPlot
+  data={rows}
+  aes={{ x: "x", y: "y", color: "series" }}
+  key="id"
+  legendFilter
+>
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+\`\`\`svelte fragment
+<script lang="ts">
+  import { GeomPoint, GGPlot, GuideLegend } from "@ggsvelte/svelte";
+
+  const rows = [
+    { id: "a", x: 1, y: 2, series: "North" },
+    { id: "b", x: 2, y: 3, series: "South" },
+  ];
+</script>
+
+<!-- After 0.19: filter lives on GuideLegend for that aesthetic. -->
+<GGPlot data={rows} aes={{ x: "x", y: "y", color: "series" }} key="id">
+  <GuideLegend channel="color" filter />
+  <GeomPoint />
+</GGPlot>
+\`\`\`
+
+- \`filter\` accepts \`true\` or \`{ mode?, multiple? }\` (same shape as the old
+  plot prop). It is host-only — not a PortableSpec / \`guideLegend()\` field.
+- Only channels with an active \`<GuideLegend filter>\` get filter checkboxes.
+  Enable multiple aesthetics with multiple GuideLegend children.
+- A filter-only GuideLegend (no presentation options) does not force
+  \`type: "legend"\`, so continuous colour scales keep their colorbar.
+- \`<GGPlot legendFilter>\` still works plot-wide through 0.19.x and emits
+  \`DEPRECATED_PLOT_PROP\`; it is removed in 0.20.0.
+- Handlers stay plot-level: \`onlegendfilter\`, \`oninteraction\`, and \`key\`.
+- Focus and filter coexist on one GuideLegend:
+  \`<GuideLegend channel="color" focus filter />\`.
 
 ## 0.11 to 0.12
 

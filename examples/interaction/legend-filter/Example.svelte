@@ -3,6 +3,7 @@
     GeomLine,
     GeomPoint,
     GGPlot,
+    GuideLegend,
     Labs,
     ScaleXContinuous,
     ThemeFivethirtyeight,
@@ -21,7 +22,6 @@
     data={britishFinances}
     aes={{ x: "year", y: "value", color: "series" }}
     key="id"
-    legendFilter
     width="container"
     height={430}
     onlegendfilter={(event) => {
@@ -40,13 +40,14 @@
       y="Playfair's index units"
       color="Series"
     />
+    <GuideLegend channel="color" filter />
     <GeomLine linewidth={2.2} />
     <GeomPoint size={3.2} />
   </GGPlot>
   <p class="note gg-demo-chrome">
     <strong>Why this is filtering:</strong> statistics, facets, and domains see
     only the visible rows. For visual comparison without changing data, use
-    <code>legendFocus</code> instead.
+    <code>&lt;GuideLegend focus /&gt;</code> instead.
   </p>
 </div>
 

@@ -12063,6 +12063,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "legend-filter-on-guidelegend",
+        title: "Legend filter on GuideLegend",
+        level: 3,
+      },
+      {
         id: "0-11-to-0-12",
         title: "0.11 to 0.12",
         level: 2,
