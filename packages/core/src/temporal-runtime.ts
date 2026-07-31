@@ -61,12 +61,3 @@ export function resetTemporalRuntimeForTests(): void {
 export function temporalRuntimeGeneration(): number {
   return runtimeGeneration;
 }
-
-export function requireTemporalRuntime(feature: string): TemporalRuntime {
-  if (runtime === null) {
-    throw new Error(
-      `${feature} requires the temporal runtime. Import @ggsvelte/core (full) or @ggsvelte/core/temporal before rendering time scales.`,
-    );
-  }
-  return runtime;
-}

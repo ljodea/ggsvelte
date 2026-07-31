@@ -15,9 +15,10 @@ export function assertTemporalConfiguration(
   conversion: PositionConversionContext,
 ): void {
   if (conversion.forcedDiscrete) return;
-  if (conversion.parser === "auto") return;
-  // Explicit parsers require the full temporal runtime.
-  if (getTemporalRuntime() === null) {
+  // Explicit parsers need the Temporal polyfill; auto + lean ISO does not.
+  // Timezone (and other config) validation still runs for auto — otherwise a
+  // mistyped zone surfaces only as a confusing per-cell parse failure later.
+  if (conversion.parser !== "auto" && getTemporalRuntime() === null) {
     throw new PipelineError(
       "temporal-parse-failed",
       `/scales/${axis}`,

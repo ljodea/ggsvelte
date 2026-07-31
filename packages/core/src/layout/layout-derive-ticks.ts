@@ -6,7 +6,7 @@ import { encodeKey } from "../scales/state.js";
 import type { CellValue } from "../table.js";
 import type { AxisGuidePlan } from "./temporal-guide.js";
 import { planBandAxis, type BandAxisPlan, type BandGuideConfig } from "./band-guide.js";
-import { requireTemporalRuntime } from "../temporal-runtime.js";
+import { getTemporalRuntime } from "../temporal-runtime.js";
 import type { TextMeasurer } from "./measure.js";
 import { truncateToFit } from "./truncate.js";
 import {
@@ -351,7 +351,13 @@ export function deriveTicks(
   }
 
   // Explicit breaks override derivation (out-of-domain breaks are dropped).
-  if (domain.breaks !== undefined && !(domain.type === "time" && domain.temporal !== undefined)) {
+  // When the full temporal runtime is present, planAxis owns breaks for time
+  // domains (sourceBreaks + measured labels). Without the runtime (lean
+  // render entry), honor converted domain.breaks here so they are not
+  // silently replaced by automatic timeTicks.
+  const planTemporalGuides =
+    domain.type === "time" && domain.temporal !== undefined && getTemporalRuntime() !== null;
+  if (domain.breaks !== undefined && !planTemporalGuides) {
     const values = domain.breaks.filter((v) => Number.isFinite(v) && v >= min && v <= max);
     const step = smallestGap(values);
     const fmt: (v: number) => string = format
@@ -369,8 +375,13 @@ export function deriveTicks(
   }
 
   if (domain.type === "time") {
-    if (domain.temporal !== undefined) {
-      const plan = requireTemporalRuntime("planTemporalAxis").planAxis({
+    // Full temporal guide planning needs the polyfill runtime. Lean
+    // `@ggsvelte/core/render` still classifies ISO columns as temporal and
+    // trains a time scale — fall through to timeTicks + formatTime instead of
+    // throwing when planAxis is unavailable.
+    const temporalRuntime = domain.temporal === undefined ? null : getTemporalRuntime();
+    if (domain.temporal !== undefined && temporalRuntime !== null) {
+      const plan = temporalRuntime.planAxis({
         aesthetic: domain.temporal.aesthetic,
         panelIndex: domain.temporal.panelIndex,
         domain: [min, max],
