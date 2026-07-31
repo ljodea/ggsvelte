@@ -68,6 +68,30 @@ describe("resolveLegendFocusCapability", () => {
     });
     expect(resolved.configInput).toEqual({ preview: false });
   });
+
+  it("any explicit preview false wins across prop and children", () => {
+    // plot true + child {preview: false}
+    expect(
+      resolveLegendFocusCapability({
+        plotProp: true,
+        layers: [{ kind: "legendFocus", value: { channel: "color", input: { preview: false } } }],
+      }).configInput,
+    ).toEqual({ preview: false });
+    // plot {preview: false} + child true — the child cannot re-enable preview
+    expect(
+      resolveLegendFocusCapability({
+        plotProp: { preview: false },
+        layers: [{ kind: "legendFocus", value: { channel: "color", input: true } }],
+      }).configInput,
+    ).toEqual({ preview: false });
+  });
+
+  it("plot-prop-alone passes the raw prop reference through", () => {
+    const prop = { preview: false } as const;
+    const resolved = resolveLegendFocusCapability({ plotProp: prop, layers: [] });
+    expect(resolved.requested).toBe(prop);
+    expect(resolved.configInput).toBe(prop);
+  });
 });
 
 describe("filterInteractiveLegendEntries", () => {

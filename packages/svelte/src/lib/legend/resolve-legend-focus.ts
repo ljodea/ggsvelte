@@ -4,9 +4,18 @@
  *
  * Interactions stay off PortableSpec: `focus` is stripped before guideLegend()
  * and travels as registry layer kind `legendFocus`.
+ *
+ * Skeleton (off / children→channels / plot-alone→"all") lives in
+ * resolve-legend-capability.ts; this module owns only the focus-specific
+ * merge: any explicit `preview: false` wins across prop and children.
  */
 import type { LegendFocusInput } from "../interaction/interaction.js";
 import type { InteractiveLegendEntry } from "./focus.js";
+import {
+  filterEntriesByChannels,
+  resolveLegendChannelCapability,
+  type LegendChannelSet,
+} from "./resolve-legend-capability.js";
 
 /** Aesthetic channel a GuideLegend may enable for focus (non-position). */
 type LegendFocusChannel = "color" | "fill" | "size" | "linewidth" | "alpha" | "shape" | "linetype";
@@ -17,7 +26,7 @@ export type LegendFocusLayerValue = {
   readonly input: Exclude<LegendFocusInput, false>;
 } | null;
 
-export type LegendFocusChannelSet = ReadonlySet<string> | "all";
+export type LegendFocusChannelSet = LegendChannelSet;
 
 export type ResolvedLegendFocusCapability = {
   /**
@@ -39,27 +48,6 @@ type LegendFocusLayerLike = {
   /** Live getter or plain field — only read when kind is legendFocus. */
   readonly value?: unknown;
 };
-
-function isEnabledInput(
-  input: LegendFocusInput | undefined,
-): input is Exclude<LegendFocusInput, false> {
-  return input !== undefined && input !== false;
-}
-
-function readChildLayers(
-  layers: readonly LegendFocusLayerLike[],
-): ReadonlyArray<{ channel: string; input: Exclude<LegendFocusInput, false> }> {
-  const out: Array<{ channel: string; input: Exclude<LegendFocusInput, false> }> = [];
-  for (const layer of layers) {
-    if (layer.kind !== "legendFocus") continue;
-    // Layer values may be live getters (registry) — read via property access.
-    const value = (layer as { value: LegendFocusLayerValue }).value;
-    if (value === null || value === undefined) continue;
-    if (!isEnabledInput(value.input)) continue;
-    out.push({ channel: value.channel, input: value.input });
-  }
-  return out;
-}
 
 /** Merge preview flags: any explicit `preview: false` disables preview. */
 function resolvePreview(
@@ -85,29 +73,12 @@ export function resolveLegendFocusCapability(input: {
   readonly plotProp: LegendFocusInput | undefined;
   readonly layers: readonly LegendFocusLayerLike[];
 }): ResolvedLegendFocusCapability {
-  const children = readChildLayers(input.layers);
-  const plotOn = isEnabledInput(input.plotProp);
-
-  if (children.length === 0 && !plotOn) {
-    return { requested: false, configInput: false, channels: new Set() };
-  }
-
-  const preview = resolvePreview(input.plotProp, children);
-  const configInput = toConfigInput(preview);
-
-  if (children.length > 0) {
-    return {
-      requested: configInput,
-      configInput,
-      channels: new Set(children.map((child) => child.channel)),
-    };
-  }
-
-  return {
-    requested: input.plotProp ?? false,
-    configInput: input.plotProp ?? false,
-    channels: "all",
-  };
+  return resolveLegendChannelCapability<LegendFocusInput>({
+    plotProp: input.plotProp,
+    layers: input.layers,
+    layerKind: "legendFocus",
+    mergeChildrenConfig: (plotProp, children) => toConfigInput(resolvePreview(plotProp, children)),
+  });
 }
 
 /**
@@ -115,21 +86,14 @@ export function resolveLegendFocusCapability(input: {
  * enabled channel set. Merged legends expose all aesthetics on
  * `legend.aesthetics` (primary `scale` alone is not enough).
  */
-export function filterInteractiveLegendEntries(
+export const filterInteractiveLegendEntries: (
   entries: readonly InteractiveLegendEntry[],
   channels: LegendFocusChannelSet,
-): InteractiveLegendEntry[] {
-  if (channels === "all") return entries.slice();
-  if (channels.size === 0) return [];
-  return entries.filter((entry) => {
-    const aesthetics = entry.legend.aesthetics ?? [entry.legend.scale];
-    return aesthetics.some((aesthetic) => channels.has(aesthetic));
-  });
-}
+) => InteractiveLegendEntry[] = filterEntriesByChannels;
 
 /** True when `focus` is an active opt-in (boolean true or options object). */
 export function isLegendFocusPropEnabled(
   focus: LegendFocusInput | undefined,
 ): focus is Exclude<LegendFocusInput, false> {
-  return isEnabledInput(focus);
+  return focus !== undefined && focus !== false;
 }

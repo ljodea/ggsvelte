@@ -73,10 +73,8 @@ import {
   type PlotInteractionScope,
   type ResolvedInteractionConfig,
 } from "./interaction/interaction.js";
-import {
-  duplicateInspectCapabilityDiagnostics,
-  resolveInspectCapability,
-} from "./interaction/resolve-inspect-capability.js";
+import { createCapabilityResolution } from "./interaction/capability-resolution.svelte.js";
+import { duplicateInspectCapabilityDiagnostics } from "./interaction/resolve-inspect-capability.js";
 import { collectWiringDiagnostics } from "./interaction/wiring-advisories.js";
 import { createInspectionState } from "./inspection/inspection-state.svelte.js";
 import type { InspectionState } from "./inspection/inspection-state.svelte.js";
@@ -88,16 +86,8 @@ import type { FilterableLegendEntry, LegendFilterState } from "./legend/filter-s
 import type { InteractiveLegendEntry, LegendEntryIdentity } from "./legend/focus.js";
 import { createLegendFocusState } from "./legend/focus-state.svelte.js";
 import type { LegendFocusState } from "./legend/focus-state.svelte.js";
-import {
-  filterFilterableLegendEntries,
-  resolveLegendFilterCapability,
-  type ResolvedLegendFilterCapability,
-} from "./legend/resolve-legend-filter.js";
-import {
-  filterInteractiveLegendEntries,
-  resolveLegendFocusCapability,
-  type ResolvedLegendFocusCapability,
-} from "./legend/resolve-legend-focus.js";
+import { filterFilterableLegendEntries } from "./legend/resolve-legend-filter.js";
+import { filterInteractiveLegendEntries } from "./legend/resolve-legend-focus.js";
 import { createPlotChromeState } from "./chrome/chrome-state.svelte.js";
 import type { PlotChromeState } from "./chrome/chrome-state.svelte.js";
 import { isHostPlotLayer } from "./layers/types.js";
@@ -106,9 +96,7 @@ import {
   readLegacyPlotKey,
   readLegacyPlotLegendFilter,
   readLegacyPlotLegendFocus,
-  resolveCapabilities,
   type EnginePlotProps,
-  type ResolvedPlotCapabilities,
 } from "./plot-props.js";
 import { createPlotAnnouncer } from "./runtime/announcer.svelte.js";
 import type { PlotAnnouncer } from "./runtime/announcer.svelte.js";
@@ -217,19 +205,18 @@ export type PlotEngine = {
 // ---------------------------------------------------------------------------
 
 export function createPlotEngine(host: PlotEngineHost): PlotEngine {
-  // Inspect capability: prop + host capability registry children. Pure resolve
-  // stays props-agnostic of registry; engine is the seam (plot-props stays
-  // props-only). SSR: recompute from the plain registry like assembled (#982)
-  // so one-pass construction does not latch empty children as inspect-off.
-  function resolveInspectCurrent() {
-    return resolveInspectCapability({
-      prop: host.props.inspect,
-      children: host.registry.capabilities("inspect"),
-    });
-  }
-  const inspectResolvedDerived = $derived.by(resolveInspectCurrent);
-  const inspectResolved = () =>
-    typeof window === "undefined" ? resolveInspectCurrent() : inspectResolvedDerived;
+  // Capability resolution seam (inspect / legendFocus / legendFilter / caps):
+  // three independent SSR-safe deriveds behind one factory — see
+  // capability-resolution.svelte.ts for the capabilityVersion-vs-version
+  // isolation contract and the SSR one-pass recompute rationale.
+  const capabilityResolution = createCapabilityResolution({
+    registry: host.registry,
+    props: host.props,
+  });
+  const inspectResolved = capabilityResolution.inspect;
+  const legendFocusResolved = capabilityResolution.legendFocus;
+  const legendFilterResolved = capabilityResolution.legendFilter;
+  const caps = capabilityResolution.caps;
 
   // Reading descriptors through toLayerInput goes through live getters, so
   // geom prop changes flow into this $derived without re-registration.
@@ -318,51 +305,6 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       });
     })(),
   );
-
-  /**
-   * Legend focus from `<GuideLegend focus>` (and deprecated plot prop).
-   * SSR recompute: same one-pass empty-registry trap as assembleCurrentSpec —
-   * children register after construction-time $derived may snapshot.
-   */
-  function resolveLegendFocusNow(): ResolvedLegendFocusCapability {
-    return resolveLegendFocusCapability({
-      plotProp: readLegacyPlotLegendFocus(host.props),
-      layers: host.registry.layers,
-    });
-  }
-  const legendFocusResolvedDerived = $derived.by(resolveLegendFocusNow);
-  const legendFocusResolved = (): ResolvedLegendFocusCapability =>
-    typeof window === "undefined" ? resolveLegendFocusNow() : legendFocusResolvedDerived;
-
-  /**
-   * Legend filter from `<GuideLegend filter>` (and deprecated plot prop).
-   * Same SSR recompute path as focus — empty registry on first SSR pass.
-   */
-  function resolveLegendFilterNow(): ResolvedLegendFilterCapability {
-    return resolveLegendFilterCapability({
-      plotProp: readLegacyPlotLegendFilter(host.props),
-      layers: host.registry.layers,
-    });
-  }
-  const legendFilterResolvedDerived = $derived.by(resolveLegendFilterNow);
-  const legendFilterResolved = (): ResolvedLegendFilterCapability =>
-    typeof window === "undefined" ? resolveLegendFilterNow() : legendFilterResolvedDerived;
-
-  // Capability defaults for wiring — inspect from prop + <Inspect> children;
-  // legendFocus/legendFilter "requested" from GuideLegend / legacy prop
-  // (not host.props.legendFocus/legendFilter direct — type-aware lint denies
-  // deprecated dual-read outside the isolated readers).
-  const caps = (): ResolvedPlotCapabilities => {
-    const select = host.props.select;
-    const zoom = host.props.zoom;
-    return resolveCapabilities({
-      inspect: inspectResolved().input,
-      legendFocus: legendFocusResolved().requested,
-      legendFilter: legendFilterResolved().requested,
-      ...(select !== undefined && { select }),
-      ...(zoom !== undefined && { zoom }),
-    });
-  };
 
   // interactionConfig: inspect from prop + <Inspect> children; legendFocus from
   // GuideLegend (host registry). SSR hatch matches assembled / inspectResolved.
