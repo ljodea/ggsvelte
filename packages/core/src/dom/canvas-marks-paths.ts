@@ -207,4 +207,4 @@ export function drawPathsSubset(
   applyDash(ctx, "solid");
 }
 
-export { applyDash, linetypeAt };
+export { applyDash };
