@@ -33,6 +33,29 @@ export function bucketByGroup(
 }
 
 /**
+ * ggplot2's geom_path parity warning, extended to area (#1271): when ≥2
+ * drawable groups exist and EVERY group holds exactly one observation, each
+ * connected stroke or ribbon degenerates to a point-width mark — usually a
+ * discrete x joining the default grouping interaction (decision 0005).
+ * Message is layer-stable (no per-panel counts) so facets dedupe to one.
+ */
+export function warnSingleObservationGroups(
+  groupRows: readonly number[][],
+  frame: LayerFrame,
+  warnings: PipelineWarning[],
+): void {
+  // ≥2 groups: a legitimately single-point layer (one 1-row group) stays
+  // silent — unlike ggplot2, which also warns there; that case is usually
+  // intentional data, not a grouping accident.
+  if (groupRows.length < 2) return;
+  if (!groupRows.every((rows) => rows.length === 1)) return;
+  warnings.push({
+    code: "group-single-observation",
+    message: `Layer ${frame.binding.index}: each group consists of only one observation, so every connected mark degenerates — often a discrete x or an all-distinct series aesthetic joining the default grouping. Map aes.group (the series field, or a constant for one series) to join rows into ribbons/strokes.`,
+  });
+}
+
+/**
  * Sort each group's row indices by ascending x (path/line/area/smooth).
  *
  * Callers pass groups already filtered by {@link bucketByGroup} (finite x/y).
