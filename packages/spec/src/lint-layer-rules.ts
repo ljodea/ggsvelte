@@ -40,6 +40,12 @@ export function collectLayerLintAdvisories(input: {
   // for many-discrete-colors are memoized across layers/channels that share a
   // field so a high-cardinality column is scanned O(n), not O(L·n).
   const distinctNonNullByField = new Map<string, number>();
+  // Same contract for stacked-area-negative: one scan per y field, not per
+  // layer. Field name is a safe key because lint evidence is one plot-level
+  // map per pass (lintSpec builds or receives a single FieldEvidenceMap), so
+  // a field name always resolves to the same values array within one call.
+  // If lint ever gains layer-scoped evidence, key on the values array instead.
+  const hasNegativeByField = new Map<string, boolean>();
 
   for (let i = 0; i < layers.length; i++) {
     const layer = layers[i];
@@ -99,7 +105,11 @@ export function collectLayerLintAdvisories(input: {
       const y = fieldOf(layerAes, "y");
       const values = y?.info.values;
       if (y !== null && values !== null && values !== undefined) {
-        const hasNegative = values.some((v) => typeof v === "number" && v < 0);
+        let hasNegative = hasNegativeByField.get(y.field);
+        if (hasNegative === undefined) {
+          hasNegative = values.some((v) => typeof v === "number" && v < 0);
+          hasNegativeByField.set(y.field, hasNegative);
+        }
         if (hasNegative) {
           advisories.push({
             code: "stacked-area-negative",
