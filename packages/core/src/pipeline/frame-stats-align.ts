@@ -1,10 +1,10 @@
 /**
- * Shared-x-grid stats → LayerFrame: the align stat (interpolated y per group)
- * and the default-stack zero-fill rescue for sparse stacked areas (#1268).
+ * Align stat → LayerFrame (shared x grid + interpolated y per group), plus
+ * the default-stack auto-align rescue for sparse stacked areas (#1268).
  */
 import type { ColumnTable } from "../table.js";
 
-import { statAlign, statZeroFill, type StatAlignResult } from "../stats/align.js";
+import { statAlign } from "../stats/align.js";
 import { carriedColumns, removedStatWarning } from "./frame-helpers.js";
 import { makeColumnOf } from "./frame-stats-shared.js";
 import { statLayerFrame } from "./layer-frame.js";
@@ -17,19 +17,43 @@ export function buildAlignFrame(
   groups: readonly number[],
   warnings: PipelineWarning[],
 ): LayerFrame {
-  return buildSharedGridFrame(binding, table, groups, warnings, statAlign, "align");
+  const { index } = binding;
+  const carried = carriedColumns(binding, table);
+  const columnOf = makeColumnOf(binding);
+  const result = statAlign({
+    x: positionColumn(table, binding.xField!, binding.xConversion, binding.xTransform),
+    y: positionColumn(table, binding.yField!, binding.yConversion, binding.yTransform),
+    groups,
+    carried,
+  });
+  removedStatWarning(result.dropped, index, "missing or non-finite x/y before align", warnings);
+  return statLayerFrame({
+    binding,
+    table,
+    n: result.x.length,
+    x: { numeric: result.x },
+    y: { numeric: result.y },
+    groups: result.groups,
+    inputGroups: groups,
+    columns: { x: result.x, y: result.y },
+    columnOf: columnOf(result, null),
+    lineage: "none",
+  });
 }
 
 /**
  * Default stacked-area rescue (#1268): when a group's x samples leave an
  * interior hole in the shared grid, the identity path would chord straight
  * across it and render a floating polygon over the varying stack below.
- * Zero-fill missing group×x cells instead (absence = zero, no interpolation)
+ * Auto-apply the align stat instead — the documented remedy for stacking
+ * groups with different continuous x samples (ggplot2 stat_align semantics:
+ * interpolate between a group's observed samples, zero outside its range) —
  * and disclose the heuristic. Exterior-only incompleteness, non-overlapping
- * ranges, single groups, and unstacked positions fall through to identity.
- * Row expansion is O(groups × union-x).
+ * ranges, single groups, unstacked positions, and groups with repeated x
+ * values (identity stacking sums those; align would drop them) fall through
+ * to identity. Row expansion is O(groups × union-x).
  */
-export function maybeStackZeroFillFrame(
+export function maybeStackAlignFrame(
   binding: LayerBinding,
   table: ColumnTable,
   groups: readonly number[],
@@ -49,15 +73,15 @@ export function maybeStackZeroFillFrame(
 
   const x = positionColumn(table, binding.xField, binding.xConversion, binding.xTransform);
   const y = positionColumn(table, binding.yField, binding.yConversion, binding.yTransform);
-  if (!hasInteriorHole(x, y, groups)) return null;
+  if (!needsStackAlign(x, y, groups)) return null;
 
-  const frame = buildSharedGridFrame(binding, table, groups, warnings, statZeroFill, "zero-fill");
+  const frame = buildAlignFrame(binding, table, groups, warnings);
   advisories.push({
-    code: "stack-zero-filled",
+    code: "stack-align-applied",
     path: `layers.${index}`,
     chosen:
-      "missing group×x cells zero-filled onto the shared x grid (groups sampled different x; the gap would render as a floating band)",
-    howToOverride: `Set stat: "align" on layer ${index} to interpolate between a group's observed samples instead, pre-fill the missing cells in the data, or set position: "identity" for overlapping unstacked areas.`,
+      "groups aligned onto the shared x grid — interpolated between a group's observed samples, zero outside its range (groups sampled different x; a raw stack would render floating bands)",
+    howToOverride: `Pre-fill the missing group×x cells in the data to control values exactly, or set position: "identity" on layer ${index} for overlapping unstacked areas. stat: "align" is this same transform, explicit.`,
   });
   return frame;
 }
@@ -66,7 +90,7 @@ export function maybeStackZeroFillFrame(
  * Plot-level risk that the shared x scale trains as band/binned, mirroring
  * `collectMappedXEvidence`: an explicit discrete x type, any bar/col layer
  * with a non-bin stat (bar discretization), or any nominal x field. When any
- * layer carries the risk, the zero-fill rescue must not rewrite frames — a
+ * layer carries the risk, the auto-align rescue must not rewrite frames — a
  * band scale cannot map the numeric-only shared-grid rows. Conservative by
  * design: a false positive only keeps today's identity behavior.
  */
@@ -89,11 +113,13 @@ export function xDiscreteRiskOf(
 }
 
 /**
- * True when ≥2 groups have finite rows and some group's finite x set skips a
- * shared-grid x strictly inside that group's own [min, max] — the shape that
- * chords across the stack.
+ * True when the rescue should fire: ≥2 groups have finite rows, no group
+ * repeats a finite x (identity stacking sums repeats; align's last-wins
+ * collapse would silently shrink the stacked total), and some group's finite
+ * x set skips a shared-grid x strictly inside that group's own [min, max] —
+ * the shape that chords across the stack.
  */
-function hasInteriorHole(x: Float64Array, y: Float64Array, groups: readonly number[]): boolean {
+function needsStackAlign(x: Float64Array, y: Float64Array, groups: readonly number[]): boolean {
   const perGroup = new Map<number, Set<number>>();
   const grid = new Set<number>();
   for (let row = 0; row < x.length; row++) {
@@ -106,6 +132,7 @@ function hasInteriorHole(x: Float64Array, y: Float64Array, groups: readonly numb
       set = new Set();
       perGroup.set(g, set);
     }
+    if (set.has(xv)) return false;
     set.add(xv);
   }
   if (perGroup.size < 2) return false;
@@ -125,36 +152,4 @@ function hasInteriorHole(x: Float64Array, y: Float64Array, groups: readonly numb
     }
   }
   return false;
-}
-
-function buildSharedGridFrame(
-  binding: LayerBinding,
-  table: ColumnTable,
-  groups: readonly number[],
-  warnings: PipelineWarning[],
-  stat: (input: Parameters<typeof statAlign>[0]) => StatAlignResult,
-  label: string,
-): LayerFrame {
-  const { index } = binding;
-  const carried = carriedColumns(binding, table);
-  const columnOf = makeColumnOf(binding);
-  const result = stat({
-    x: positionColumn(table, binding.xField!, binding.xConversion, binding.xTransform),
-    y: positionColumn(table, binding.yField!, binding.yConversion, binding.yTransform),
-    groups,
-    carried,
-  });
-  removedStatWarning(result.dropped, index, `missing or non-finite x/y before ${label}`, warnings);
-  return statLayerFrame({
-    binding,
-    table,
-    n: result.x.length,
-    x: { numeric: result.x },
-    y: { numeric: result.y },
-    groups: result.groups,
-    inputGroups: groups,
-    columns: { x: result.x, y: result.y },
-    columnOf: columnOf(result, null),
-    lineage: "none",
-  });
 }

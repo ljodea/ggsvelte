@@ -19684,14 +19684,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["jitter-seeded"],
   },
   {
-    id: "heading:guide-advisories:stack-zero-filled",
+    id: "heading:guide-advisories:stack-align-applied",
     kind: "heading",
-    title: "stack-zero-filled",
+    title: "stack-align-applied",
     summary:
-      "stack-zero-filled in Advisories. Spec-lint advisories and the pipeline's disclosed heuristics.",
-    href: "/guide/advisories#stack-zero-filled",
+      "stack-align-applied in Advisories. Spec-lint advisories and the pipeline's disclosed heuristics.",
+    href: "/guide/advisories#stack-align-applied",
     keywords: ["Advisories", "Reference"],
-    exact: ["stack-zero-filled"],
+    exact: ["stack-align-applied"],
   },
   {
     id: "heading:guide-advisories:palette-inferred",

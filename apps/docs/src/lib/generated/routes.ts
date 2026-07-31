@@ -11914,8 +11914,8 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
-        id: "stack-zero-filled",
-        title: "stack-zero-filled",
+        id: "stack-align-applied",
+        title: "stack-align-applied",
         level: 3,
       },
       {

@@ -80,22 +80,7 @@ export function seriesFromRows(
   return { xs: Float64Array.from(uniqX), ys: Float64Array.from(uniqY) };
 }
 
-/**
- * Zero-fill variant for the default stacked-area path (#1268): per group,
- * y = observed value at its own grid x (last-wins duplicates), 0 at every
- * other grid x. Unlike statAlign there is NO interior interpolation — a
- * missing cell means zero, so stacked totals at observed x never change.
- * Output size is O(groups × union-x).
- */
-export function statZeroFill(input: StatAlignInput): StatAlignResult {
-  return statOnSharedGrid(input, "zero");
-}
-
 export function statAlign(input: StatAlignInput): StatAlignResult {
-  return statOnSharedGrid(input, "lerp");
-}
-
-function statOnSharedGrid(input: StatAlignInput, fill: "lerp" | "zero"): StatAlignResult {
   const { x, y, groups, carried } = input;
   const byGroup = new Map<number, number[]>();
   let dropped = 0;
@@ -131,18 +116,10 @@ function statOnSharedGrid(input: StatAlignInput, fill: "lerp" | "zero"): StatAli
     const series = seriesFromRows(x, y, rows);
     if (series === null) continue;
     const rep = rows[0]!;
-    // Zero mode: the grid is the union of observed x, so a group's own x
-    // values are exact grid members — a merge pointer finds them.
-    let cursor = 0;
     for (let i = 0; i < grid.length; i++) {
       const xq = grid[i]!;
       outX.push(xq);
-      if (fill === "lerp") {
-        outY.push(lerpSeries(series.xs, series.ys, xq));
-      } else {
-        while (cursor < series.xs.length && series.xs[cursor]! < xq) cursor++;
-        outY.push(cursor < series.xs.length && series.xs[cursor] === xq ? series.ys[cursor]! : 0);
-      }
+      outY.push(lerpSeries(series.xs, series.ys, xq));
       outG.push(g);
       for (const key of Object.keys(carriedOut)) {
         carriedOut[key]!.push(carried[key]![rep]!);

@@ -9,7 +9,7 @@ import { buildAnnotationFrame } from "./frame-annotation.js";
 import { expandEdgeFrame } from "./frame-edge-expand.js";
 import { deriveLayerGroups } from "./frame-helpers.js";
 import { buildIdentityFrame } from "./frame-identity.js";
-import { maybeStackZeroFillFrame } from "./frame-stats-align.js";
+import { maybeStackAlignFrame } from "./frame-stats-align.js";
 import { buildMapFrame } from "./frame-stats-map.js";
 import { buildNonIdentityFrame } from "./frame-stats.js";
 
@@ -51,9 +51,9 @@ export function buildFrame(
   );
   if (nonIdentity !== null) return { ...nonIdentity, inputGroups };
 
-  // Sparse stacked area rescue (#1268): zero-fill interior group×x holes that
-  // the identity path would chord across as floating polygons.
-  const zeroFilled = maybeStackZeroFillFrame(
+  // Sparse stacked area rescue (#1268): align groups with interior x holes
+  // that the identity path would chord across as floating polygons.
+  const aligned = maybeStackAlignFrame(
     binding,
     table,
     inputGroups,
@@ -61,7 +61,7 @@ export function buildFrame(
     advisories,
     xDiscreteRisk,
   );
-  if (zeroFilled !== null) return { ...zeroFilled, inputGroups };
+  if (aligned !== null) return { ...aligned, inputGroups };
 
   const frame = { ...buildIdentityFrame(binding, table, inputGroups), inputGroups };
   expandEdgeFrame(frame, warnings);

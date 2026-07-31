@@ -4111,7 +4111,7 @@ export const SpecDeclarations = {
           [
             Type.Literal("identity", {
               description:
-                "Draw each data row as-is (default). Under position stack/fill, a group whose continuous x samples skip an interior grid point is auto zero-filled onto the shared x grid (missing cell = 0) with a stack-zero-filled advisory, so sparse groups cannot render as floating bands.",
+                "Draw each data row as-is (default). Under position stack/fill, a group whose continuous x samples skip an interior grid point auto-aligns onto the shared x grid (align semantics: interpolate between observed samples, zero outside the group's range) with a stack-align-applied advisory, so sparse groups cannot render as floating bands.",
             }),
             Type.Literal("unique", {
               description: "Drop duplicate rows on mapped aesthetics before drawing (first wins).",
@@ -4123,7 +4123,7 @@ export const SpecDeclarations = {
           ],
           {
             description:
-              'Area stat: "identity" (default; auto zero-fills sparse stacked groups), "unique" (first-wins dedupe), or "align" (shared x grid with interpolation).',
+              'Area stat: "identity" (default; sparse stacked groups auto-align), "unique" (first-wins dedupe), or "align" (shared x grid with interpolation).',
           },
         ),
       ),
@@ -4147,7 +4147,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        'An area layer. Requires x and y channels; rows are sorted by x within each group. Default position "stack". Sparse stacked groups auto zero-fill missing group×x cells; set stat "align" to interpolate between a group\'s observed samples instead.',
+        'An area layer. Requires x and y channels; rows are sorted by x within each group. Default position "stack". Stacked groups whose continuous x samples leave interior holes auto-align onto the shared x grid; pre-fill the data to control every cell.',
     },
   ),
 

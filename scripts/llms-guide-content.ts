@@ -585,11 +585,11 @@ geoms). Outside a group's x span y is 0 (stack-friendly).
 
 Stacked **area** rescues sparse groups on its own: when a group's continuous x
 samples skip an interior grid point (a shape that would render as a floating
-band chorded over the stack below), the default identity stat zero-fills the
-missing group×x cells (missing cell = 0, no interpolation) and emits a
-\`stack-zero-filled\` advisory. Set \`stat: "align"\` when you want
-interpolation between a group's observed samples instead, or pre-fill the
-data to control every cell.
+band chorded over the stack below), the default identity stat auto-applies
+this align transform and emits a \`stack-align-applied\` advisory. The rescue
+stands down when the x scale may train discrete, or when a group repeats an x
+value (identity stacking sums repeats; align keeps the last). Pre-fill the
+data to control every cell exactly.
 
 ## Connect (named path joins)
 

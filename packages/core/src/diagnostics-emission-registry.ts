@@ -111,7 +111,7 @@ export const ADVISORY_EMISSION_REGISTRY = {
   "bin-default-bins": { channel: "advisory" },
   "smooth-method-inferred": { channel: "advisory" },
   "jitter-seeded": { channel: "advisory" },
-  "stack-zero-filled": { channel: "advisory" },
+  "stack-align-applied": { channel: "advisory" },
   "palette-inferred": { channel: "advisory" },
   "canvas-auto": { channel: "advisory" },
   "temporal-year-inferred": { channel: "advisory" },
