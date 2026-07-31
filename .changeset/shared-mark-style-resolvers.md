@@ -16,3 +16,5 @@ resolve per-mark fill/stroke/dash/alpha through these shared functions.
 No rendering behavior changes — emitted SVG, canvas draw calls, and DOM
 output are unchanged. `@ggsvelte/svelte` picks up the internal refactor of
 `Batch.svelte` only.
+
+Migration: none — additive
