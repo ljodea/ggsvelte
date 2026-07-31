@@ -7,11 +7,12 @@
  * objectBoundingBox mapping (one gradient box per <line>/<path>).
  */
 import { canvasGradientStyle, subpathBounds, type ResolvedGradientPaint } from "../mark-paint.js";
+import { resolveSegmentMark, segmentStrokeAt } from "../mark-style.js";
 import type { SegmentsBatch } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
 import { themeVar } from "../theme.js";
 import type { ColorResolver } from "./canvas-dom.js";
-import { applyDash, linetypeAt } from "./canvas-marks-paths.js";
+import { applyDash } from "./canvas-marks-paths.js";
 
 function traceSegment(ctx: CanvasRenderingContext2D, batch: SegmentsBatch, j: number): void {
   if (batch.renderPositions !== undefined && batch.renderPathOffsets !== undefined) {
@@ -27,11 +28,6 @@ function traceSegment(ctx: CanvasRenderingContext2D, batch: SegmentsBatch, j: nu
   const o = j * 4;
   ctx.moveTo(batch.segments[o]!, batch.segments[o + 1]!);
   ctx.lineTo(batch.segments[o + 2]!, batch.segments[o + 3]!);
-}
-
-function segmentSolidAt(batch: SegmentsBatch, j: number, themeInk: string): string {
-  const stroke = batch.strokes?.[j] ?? batch.stroke;
-  return stroke ?? themeInk;
 }
 
 function segmentBounds(
@@ -133,11 +129,17 @@ export function drawSegments(
     const baseAlpha = ctx.globalAlpha;
     for (let j = 0; j < n; j++) {
       if (includes !== undefined && !includes(j)) continue;
-      const solid = segmentSolidAt(batch, j, themeInk);
-      ctx.strokeStyle = resolveSegmentStroke(ctx, solid, paint, segmentBounds(batch, j), resolve);
-      ctx.lineWidth = batch.linewidths?.[j] ?? batch.linewidth;
-      ctx.globalAlpha = baseAlpha * (batch.alphas?.[j] ?? 1);
-      applyDash(ctx, linetypeAt(batch, j));
+      const mark = resolveSegmentMark(batch, j, themeInk);
+      ctx.strokeStyle = resolveSegmentStroke(
+        ctx,
+        mark.stroke,
+        paint,
+        segmentBounds(batch, j),
+        resolve,
+      );
+      ctx.lineWidth = mark.width;
+      ctx.globalAlpha = baseAlpha * mark.alpha;
+      if (typeof ctx.setLineDash === "function") ctx.setLineDash([...mark.dash]);
       ctx.beginPath();
       traceSegment(ctx, batch, j);
       ctx.stroke();
@@ -151,7 +153,7 @@ export function drawSegments(
 
   // Solid mono path, or panel-space paint (bounds unused for panel mapping).
   if (batch.strokes === undefined) {
-    const monoSolid = segmentSolidAt(batch, 0, themeInk);
+    const monoSolid = segmentStrokeAt(batch, 0, themeInk);
     if (paint) {
       // Panel-space ignores bounds; placeholder is unused for mapping.
       ctx.strokeStyle = resolveSegmentStroke(
@@ -184,9 +186,9 @@ export function drawSegments(
       runStart++;
       continue;
     }
-    const color = segmentSolidAt(batch, runStart, themeInk);
+    const color = segmentStrokeAt(batch, runStart, themeInk);
     let runEnd = runStart + 1;
-    while (runEnd < n && segmentSolidAt(batch, runEnd, themeInk) === color) runEnd++;
+    while (runEnd < n && segmentStrokeAt(batch, runEnd, themeInk) === color) runEnd++;
     if (paint) {
       ctx.strokeStyle = resolveSegmentStroke(
         ctx,

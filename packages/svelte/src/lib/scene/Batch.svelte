@@ -13,13 +13,14 @@
     ThemeTokens,
   } from "@ggsvelte/core";
   import {
-    linetypeDash,
-    markLinetype,
     pathData,
     pointShapeGeometry,
     pointShapePathD,
+    resolveGlyphMark,
     resolvePathMark,
     resolvePointMark,
+    resolveRectMark,
+    resolveSegmentMark,
     themeVar,
   } from "@ggsvelte/core";
 
@@ -146,31 +147,27 @@
     fill: string;
     /** Outline color when stroke is set; undefined = no outline. */
     stroke: string | undefined;
+    strokeWidth: number;
     alpha: number;
     dasharray: string | undefined;
   }
 
   const rects: Rect[] = $derived.by(() => {
     if (batch.kind !== "rects") return [];
-    const roleFill =
-      batch.fillRole === "paper" ? themeVar("paper", theme) : accent;
+    const themeColors = { accent, paper: themeVar("paper", theme), ink };
     return Array.from({ length: batch.rects.length / 4 }, (_, j) => {
-      const dash = linetypeDash(markLinetype(batch, j));
-      const stroke =
-        batch.strokes?.[j] ??
-        (batch.stroke === undefined && batch.strokes === undefined
-          ? undefined
-          : (batch.stroke ?? ink));
+      const style = resolveRectMark(batch, j, themeColors);
       return {
         index: j,
         x: batch.rects[j * 4]!,
         y: batch.rects[j * 4 + 1]!,
         width: batch.rects[j * 4 + 2]!,
         height: batch.rects[j * 4 + 3]!,
-        fill: batch.fills?.[j] ?? batch.fill ?? roleFill,
-        stroke,
-        alpha: styleNumber(batch.alphas?.[j] ?? 1),
-        dasharray: dash.length === 0 ? undefined : dash.join(" "),
+        fill: style.fill,
+        stroke: style.stroke,
+        strokeWidth: style.strokeWidth,
+        alpha: styleNumber(style.alpha),
+        dasharray: style.dash.length === 0 ? undefined : style.dash.join(" "),
       };
     });
   });
@@ -192,31 +189,31 @@
 
   const segments: Segment[] = $derived.by(() => {
     if (batch.kind !== "segments") return [];
-    return Array.from({ length: batch.segments.length / 4 }, (_, j) => ({
-      index: j,
-      x1: batch.segments[j * 4]!,
-      y1: batch.segments[j * 4 + 1]!,
-      x2: batch.segments[j * 4 + 2]!,
-      y2: batch.segments[j * 4 + 3]!,
-      ...(batch.renderPositions !== undefined &&
-        batch.renderPathOffsets !== undefined && {
-          d: pathData(
-            batch.renderPositions,
-            batch.renderPathOffsets[j]!,
-            batch.renderPathOffsets[j + 1]!,
-            "linear",
-          ),
-        }),
-      stroke: batch.strokes?.[j] ?? batch.stroke ?? ink,
-      linewidth: styleNumber(batch.linewidths?.[j] ?? batch.linewidth),
-      alpha: styleNumber(batch.alphas?.[j] ?? 1),
-      // Conditional: only set when the batch opts in (rule batches leave undefined).
-      ...(batch.linecap !== undefined && { linecap: batch.linecap }),
-      dasharray: (() => {
-        const dash = linetypeDash(markLinetype(batch, j));
-        return dash.length === 0 ? undefined : dash.join(" ");
-      })(),
-    }));
+    return Array.from({ length: batch.segments.length / 4 }, (_, j) => {
+      const mark = resolveSegmentMark(batch, j, ink);
+      return {
+        index: j,
+        x1: batch.segments[j * 4]!,
+        y1: batch.segments[j * 4 + 1]!,
+        x2: batch.segments[j * 4 + 2]!,
+        y2: batch.segments[j * 4 + 3]!,
+        ...(batch.renderPositions !== undefined &&
+          batch.renderPathOffsets !== undefined && {
+            d: pathData(
+              batch.renderPositions,
+              batch.renderPathOffsets[j]!,
+              batch.renderPathOffsets[j + 1]!,
+              "linear",
+            ),
+          }),
+        stroke: mark.stroke,
+        linewidth: styleNumber(mark.width),
+        alpha: styleNumber(mark.alpha),
+        // Conditional: only set when the batch opts in (rule batches leave undefined).
+        ...(mark.linecap !== undefined && { linecap: mark.linecap }),
+        dasharray: mark.dash.length === 0 ? undefined : mark.dash.join(" "),
+      };
+    });
   });
 
   interface Glyph {
@@ -231,15 +228,18 @@
 
   const glyphs: Glyph[] = $derived.by(() => {
     if (batch.kind !== "glyphs") return [];
-    return batch.texts.map((text, j) => ({
-      index: j,
-      x: batch.positions[j * 2]!,
-      y: batch.positions[j * 2 + 1]!,
-      text,
-      fill: batch.colors?.[j] ?? batch.color ?? ink,
-      size: styleNumber(batch.sizes?.[j] ?? batch.size),
-      alpha: styleNumber(batch.alphas?.[j] ?? 1),
-    }));
+    return batch.texts.map((text, j) => {
+      const mark = resolveGlyphMark(batch, j, ink);
+      return {
+        index: j,
+        x: batch.positions[j * 2]!,
+        y: batch.positions[j * 2 + 1]!,
+        text,
+        fill: mark.fill,
+        size: styleNumber(mark.size),
+        alpha: styleNumber(mark.alpha),
+      };
+    });
   });
 
   const alpha = $derived(batch.alpha === 1 ? undefined : batch.alpha);
@@ -364,9 +364,7 @@
         height={r.height}
         fill={r.fill}
         stroke={r.stroke}
-        stroke-width={r.stroke === undefined
-          ? undefined
-          : (batch.strokeWidths?.[r.index] ?? batch.strokeWidth ?? 1)}
+        stroke-width={r.stroke === undefined ? undefined : r.strokeWidth}
         stroke-dasharray={r.stroke === undefined ? undefined : r.dasharray}
         opacity={itemOpacity(r.alpha, presented.focused)}
         data-gg-focused={focusMask === null ? undefined : presented.focused}

@@ -11,7 +11,12 @@ import {
   pointShapePathD,
   resolvePathMark,
   resolvePointMark,
+  resolveGlyphMark,
+  resolveRectMark,
+  resolveSegmentMark,
+  segmentStrokeAt,
 } from "../src/mark-style.ts";
+import type { GlyphsBatch, RectsBatch, SegmentsBatch } from "../src/scene.ts";
 
 describe("pointShapeGeometry proportions", () => {
   it("triangle uses the shared 1.2 / 1.1 / 0.9 vertices", () => {
@@ -195,5 +200,181 @@ describe("resolvePathMark", () => {
     expect(style.stroke).toBe("#00ff00");
     expect(style.width).toBe(2);
     expect(style.dash).toEqual([6, 4]);
+  });
+});
+
+describe("resolveRectMark", () => {
+  const THEME = { accent: "#accent", paper: "#paper", ink: "#ink" };
+  const base: RectsBatch = {
+    kind: "rects",
+    layerIndex: 0,
+    panelIndex: 0,
+    rects: Float32Array.from([0, 0, 4, 4, 10, 0, 4, 4]),
+    rowIndex: Uint32Array.from([0, 1]),
+    fill: null,
+    alpha: 1,
+  };
+
+  it("data fill wins; null falls to the accent role by default", () => {
+    expect(resolveRectMark({ ...base, fills: ["#d00", "#0d0"] }, 1, THEME).fill).toBe("#0d0");
+    expect(resolveRectMark({ ...base, fill: "#123456" }, 0, THEME).fill).toBe("#123456");
+    expect(resolveRectMark(base, 0, THEME).fill).toBe("#accent");
+  });
+
+  it("fillRole paper substitutes the paper token (boxplot hollow boxes)", () => {
+    expect(resolveRectMark({ ...base, fillRole: "paper" }, 0, THEME).fill).toBe("#paper");
+  });
+
+  it("no outline when stroke and strokes are both absent (bars/cols)", () => {
+    const style = resolveRectMark(base, 0, THEME);
+    expect(style.stroke).toBeUndefined();
+    // Width stays at its default even when unused.
+    expect(style.strokeWidth).toBe(1);
+  });
+
+  it("stroke null means theme ink outline", () => {
+    expect(resolveRectMark({ ...base, stroke: null }, 0, THEME).stroke).toBe("#ink");
+  });
+
+  it("per-rect strokes win; a hole falls back to stroke then ink", () => {
+    const strokes = ["#f0f"] as string[];
+    expect(resolveRectMark({ ...base, strokes }, 0, THEME).stroke).toBe("#f0f");
+    // Hole at index 1 with no constant stroke: strokes is present, so ink applies.
+    expect(resolveRectMark({ ...base, strokes }, 1, THEME).stroke).toBe("#ink");
+    expect(resolveRectMark({ ...base, strokes, stroke: "#777" }, 1, THEME).stroke).toBe("#777");
+  });
+
+  it("resolves per-rect stroke widths over the constant, default 1", () => {
+    const outlined = { ...base, stroke: "#000" };
+    expect(resolveRectMark({ ...outlined, strokeWidth: 3 }, 0, THEME).strokeWidth).toBe(3);
+    expect(
+      resolveRectMark(
+        { ...outlined, strokeWidth: 3, strokeWidths: Float32Array.from([5, 7]) },
+        1,
+        THEME,
+      ).strokeWidth,
+    ).toBe(7);
+  });
+
+  it("maps constant linetype and per-rect linetype indexes to dashes", () => {
+    expect(resolveRectMark(base, 0, THEME).dash).toEqual([]);
+    expect(resolveRectMark({ ...base, linetype: "dashed" }, 0, THEME).dash).toEqual([6, 4]);
+    // LINETYPE_NAMES order: index of "dotted" resolves per-rect over the constant.
+    expect(
+      resolveRectMark(
+        { ...base, linetype: "dashed", linetypeIndexes: Uint8Array.from([0, 2]) },
+        1,
+        THEME,
+      ).dash,
+    ).toEqual([1, 3]);
+  });
+
+  it("alpha defaults to 1 and reads per-rect alphas", () => {
+    expect(resolveRectMark(base, 0, THEME).alpha).toBe(1);
+    expect(
+      resolveRectMark({ ...base, alphas: Float32Array.from([0.25, 0.5]) }, 1, THEME).alpha,
+    ).toBe(0.5);
+  });
+});
+
+describe("resolveSegmentMark", () => {
+  const base: SegmentsBatch = {
+    kind: "segments",
+    layerIndex: 0,
+    panelIndex: 0,
+    segments: Float32Array.from([0, 0, 5, 5, 10, 0, 15, 5]),
+    rowIndex: Uint32Array.from([0, 1]),
+    stroke: null,
+    linewidth: 1,
+    alpha: 1,
+  };
+
+  it("per-segment strokes win, then the constant, then theme ink", () => {
+    expect(resolveSegmentMark({ ...base, strokes: ["#a00", "#0a0"] }, 1, "#ink").stroke).toBe(
+      "#0a0",
+    );
+    expect(resolveSegmentMark({ ...base, stroke: "#00c" }, 0, "#ink").stroke).toBe("#00c");
+    expect(resolveSegmentMark(base, 0, "#ink").stroke).toBe("#ink");
+  });
+
+  it("segmentStrokeAt matches the full resolver stroke on every chain step", () => {
+    const mapped = { ...base, strokes: ["#a00", "#0a0"] as string[], stroke: "#00c" };
+    for (const batch of [base, mapped, { ...base, stroke: "#00c" }]) {
+      for (const index of [0, 1]) {
+        expect(segmentStrokeAt(batch, index, "#ink")).toBe(
+          resolveSegmentMark(batch, index, "#ink").stroke,
+        );
+      }
+    }
+  });
+
+  it("resolves per-segment linewidths over the constant", () => {
+    expect(resolveSegmentMark({ ...base, linewidth: 2 }, 0, "#ink").width).toBe(2);
+    expect(
+      resolveSegmentMark(
+        { ...base, linewidth: 2, linewidths: Float32Array.from([3, 4]) },
+        1,
+        "#ink",
+      ).width,
+    ).toBe(4);
+  });
+
+  it("maps linetype and per-segment indexes to dashes", () => {
+    expect(resolveSegmentMark(base, 0, "#ink").dash).toEqual([]);
+    expect(resolveSegmentMark({ ...base, linetype: "longdash" }, 0, "#ink").dash).toEqual([10, 4]);
+    expect(
+      resolveSegmentMark(
+        { ...base, linetype: "longdash", linetypeIndexes: Uint8Array.from([0, 1]) },
+        1,
+        "#ink",
+      ).dash,
+    ).toEqual([6, 4]);
+  });
+
+  it("linecap stays undefined unless the batch opts in (rule batches keep renderer defaults)", () => {
+    expect(resolveSegmentMark(base, 0, "#ink").linecap).toBeUndefined();
+    expect(resolveSegmentMark({ ...base, linecap: "butt" }, 0, "#ink").linecap).toBe("butt");
+  });
+
+  it("alpha defaults to 1 and reads per-segment alphas", () => {
+    expect(resolveSegmentMark(base, 0, "#ink").alpha).toBe(1);
+    expect(
+      resolveSegmentMark({ ...base, alphas: Float32Array.from([0.25, 0.75]) }, 0, "#ink").alpha,
+    ).toBe(0.25);
+  });
+});
+
+describe("resolveGlyphMark", () => {
+  const base: GlyphsBatch = {
+    kind: "glyphs",
+    layerIndex: 0,
+    panelIndex: 0,
+    positions: Float32Array.from([0, 0, 10, 10]),
+    rowIndex: Uint32Array.from([0, 1]),
+    texts: ["a", "b"],
+    color: null,
+    size: 11,
+    anchor: "middle",
+    alpha: 1,
+  };
+
+  it("per-glyph colors win, then the constant, then theme ink", () => {
+    expect(resolveGlyphMark({ ...base, colors: ["#111", "#222"] }, 1, "#ink").fill).toBe("#222");
+    expect(resolveGlyphMark({ ...base, color: "#333" }, 0, "#ink").fill).toBe("#333");
+    expect(resolveGlyphMark(base, 0, "#ink").fill).toBe("#ink");
+  });
+
+  it("resolves per-glyph sizes over the batch font size", () => {
+    expect(resolveGlyphMark(base, 0, "#ink").size).toBe(11);
+    expect(resolveGlyphMark({ ...base, sizes: Float32Array.from([14, 18]) }, 1, "#ink").size).toBe(
+      18,
+    );
+  });
+
+  it("alpha defaults to 1 and reads per-glyph alphas", () => {
+    expect(resolveGlyphMark(base, 0, "#ink").alpha).toBe(1);
+    expect(
+      resolveGlyphMark({ ...base, alphas: Float32Array.from([0.5, 1]) }, 0, "#ink").alpha,
+    ).toBe(0.5);
   });
 });
