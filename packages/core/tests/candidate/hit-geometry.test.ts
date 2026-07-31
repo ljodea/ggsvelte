@@ -26,14 +26,14 @@ describe("Mark hit-geometry table", () => {
     expect(hit.distance(0, 20, 20, containment)).toBe(0);
     expect(hit.contains(0, 5, 20, containment)).toBe(false);
     expect(hit.distance(0, 5, 20, containment)).toBeNull();
-    expect(hit.intersects(0, 15, 15, 25, 25)).toBe(true);
-    expect(hit.intersects(0, 0, 0, 5, 5)).toBe(false);
+    expect(hit.intersects(0, 15, 15, 25, 25, containment)).toBe(true);
+    expect(hit.intersects(0, 0, 0, 5, 5, containment)).toBe(false);
     expect(hit.aabb(0)).toEqual([10, 10, 50, 50]);
 
     // Negative width/height still forms the same axis-aligned box.
     expect(hit.contains(1, 20, 20, containment)).toBe(true);
     expect(hit.aabb(1)).toEqual([10, 10, 50, 50]);
-    expect(hit.intersects(1, 15, 15, 25, 25)).toBe(true);
+    expect(hit.intersects(1, 15, 15, 25, 25, containment)).toBe(true);
   });
 
   it("points: circle distance respects size + tolerance; glyphs never hit", () => {
@@ -70,12 +70,12 @@ describe("Mark hit-geometry table", () => {
     expect(hit.distance(0, 16, 20, containment)).toBe(6);
     expect(hit.distance(0, 18, 20, containment)).toBeNull();
     expect(hit.contains(0, 10, 20, containment)).toBe(false);
-    expect(hit.intersects(0, 9, 19, 11, 21)).toBe(true);
+    expect(hit.intersects(0, 9, 19, 11, 21, containment)).toBe(true);
     expect(hit.aabb(0)).toEqual([3, 13, 17, 27]);
 
     expect(hit.distance(1, 40, 20, containment)).toBeNull();
     expect(hit.contains(1, 40, 20, containment)).toBe(false);
-    expect(hit.intersects(1, 39, 19, 41, 21)).toBe(true);
+    expect(hit.intersects(1, 39, 19, 41, 21, containment)).toBe(true);
     expect(hit.aabb(1)).toEqual([26, 6, 54, 34]);
   });
 
@@ -99,9 +99,9 @@ describe("Mark hit-geometry table", () => {
 
     expect(hit.distance(0, 5, 5, containment)).toBe(0);
     expect(hit.distance(0, 5, 7, containment)).toBeNull();
-    expect(hit.intersects(0, 4, 4, 6, 6)).toBe(true);
+    expect(hit.intersects(0, 4, 4, 6, 6, containment)).toBe(true);
     // Axis-aligned brush in the segment AABB corner that misses the diagonal.
-    expect(hit.intersects(0, 0, 9, 1, 10)).toBe(false);
+    expect(hit.intersects(0, 0, 9, 1, 10, containment)).toBe(false);
     expect(hit.aabb(0)).toEqual([-1, -1, 11, 11]);
   });
 
@@ -150,7 +150,48 @@ describe("Mark hit-geometry table", () => {
     // Midpoint of a false cross-subpath edge must not hit.
     expect(strokedHit.distance(1, 10, 25, strokeContainment)).toBeNull();
     expect(strokedHit.distance(1, 10, 1, strokeContainment)).not.toBeNull();
-    expect(strokedHit.intersects(1, 8, -2, 12, 2)).toBe(true);
-    expect(strokedHit.intersects(1, 8, 20, 12, 30)).toBe(false);
+    expect(strokedHit.intersects(1, 8, -2, 12, 2, strokeContainment)).toBe(true);
+    expect(strokedHit.intersects(1, 8, 20, 12, 30, strokeContainment)).toBe(false);
+  });
+
+  it("paths: intersects memoizes fill containment per subpath for one probe rect", () => {
+    const filled = scene();
+    filled.batches = [
+      {
+        kind: "paths",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: new Float32Array([20, 20, 80, 20, 50, 80]),
+        rowIndex: new Uint32Array([0, 1, 2]),
+        pathOffsets: new Uint32Array([0, 3]),
+        strokes: [null],
+        fills: [null],
+        closed: true,
+        linewidth: 0,
+        alpha: 1,
+        curve: "linear",
+      },
+    ];
+    const hit = createHitGeometry(buildCandidateStoreIndexes(filled));
+
+    // Rect (40,40)-(60,50): center inside the fill, no anchor or edge in rect.
+    // Two candidates on the same subpath share one cache entry.
+    const containment = new Map<string, boolean>();
+    expect(hit.intersects(0, 40, 40, 60, 50, containment)).toBe(true);
+    expect(hit.intersects(1, 40, 40, 60, 50, containment)).toBe(true);
+    expect(containment.size).toBe(1);
+    expect(containment.get("0:0:3")).toBe(true);
+
+    // The cached value is consulted, not recomputed: poison both directions.
+    const poisonedFalse = new Map<string, boolean>([["0:0:3", false]]);
+    expect(hit.intersects(0, 40, 40, 60, 50, poisonedFalse)).toBe(false);
+    // Center (74,74) is outside the fill, but a poisoned true wins.
+    const poisonedTrue = new Map<string, boolean>([["0:0:3", true]]);
+    expect(hit.intersects(0, 70, 70, 78, 78, poisonedTrue)).toBe(true);
+
+    // Anchor-in-rect early return never touches the fill cache.
+    const untouched = new Map<string, boolean>();
+    expect(hit.intersects(0, 15, 15, 25, 25, untouched)).toBe(true);
+    expect(untouched.size).toBe(0);
   });
 });

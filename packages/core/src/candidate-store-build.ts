@@ -278,9 +278,13 @@ export function assembleCandidateStore(
       }
       const extendedHits: number[] = [];
       query.addExtendedIntersecting(loX, loY, hiX, hiY, extendedHits);
+      // One probe rect per call, so rect-center fill containment per subpath
+      // is shared across candidates. Distinct from the point-containment maps
+      // nearest/hitTest build — the two cache different predicates.
+      const rectContainment = new Map<string, boolean>();
       for (const id of extendedHits) {
         if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) continue;
-        if (query.intersects(id, loX, loY, hiX, hiY)) hits.push(id);
+        if (query.intersects(id, loX, loY, hiX, hiY, rectContainment)) hits.push(id);
       }
       hits.sort((a, b) => traversalRank[a]! - traversalRank[b]!);
       return Uint32Array.from(hits);

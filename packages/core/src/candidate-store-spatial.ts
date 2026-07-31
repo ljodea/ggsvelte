@@ -26,7 +26,8 @@ export function buildCandidateSpatialQuery(indexes: CandidateStoreIndexes): Cand
     },
     exactDistance: (id, px, py, pathContainment) =>
       refine.exactDistance(id, px, py, pathContainment),
-    intersects: (id, loX, loY, hiX, hiY) => refine.intersects(id, loX, loY, hiX, hiY),
+    intersects: (id, loX, loY, hiX, hiY, rectContainment) =>
+      refine.intersects(id, loX, loY, hiX, hiY, rectContainment),
     shortlistNearest: (px, py, mode, maxDistance) =>
       index.shortlistNearest(px, py, mode, maxDistance),
   };
