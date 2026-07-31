@@ -12006,6 +12006,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "ggsvelte-spec-portable",
+        title: "@ggsvelte/spec (./portable)",
+        level: 2,
+      },
+      {
+        id: "experimental-21",
+        title: "experimental (21)",
+        level: 3,
+      },
+      {
         id: "ggsvelte-core",
         title: "@ggsvelte/core",
         level: 2,
@@ -12018,6 +12028,26 @@ export const DOCS_ROUTES = [
       {
         id: "stable-intent-2",
         title: "stable-intent (2)",
+        level: 3,
+      },
+      {
+        id: "ggsvelte-core-render",
+        title: "@ggsvelte/core (./render)",
+        level: 2,
+      },
+      {
+        id: "experimental-41",
+        title: "experimental (41)",
+        level: 3,
+      },
+      {
+        id: "ggsvelte-core-temporal",
+        title: "@ggsvelte/core (./temporal)",
+        level: 2,
+      },
+      {
+        id: "experimental-11",
+        title: "experimental (11)",
         level: 3,
       },
       {
