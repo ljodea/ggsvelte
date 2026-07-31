@@ -73,7 +73,10 @@ import {
   type PlotInteractionScope,
   type ResolvedInteractionConfig,
 } from "./interaction/interaction.js";
-import { createCapabilityResolution } from "./interaction/capability-resolution.svelte.js";
+import {
+  createCapabilityResolution,
+  ssrSafeDerived,
+} from "./interaction/capability-resolution.svelte.js";
 import { duplicateInspectCapabilityDiagnostics } from "./interaction/resolve-inspect-capability.js";
 import { collectWiringDiagnostics } from "./interaction/wiring-advisories.js";
 import { createInspectionState } from "./inspection/inspection-state.svelte.js";
@@ -243,14 +246,8 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     });
   }
 
-  // Svelte 5.33's one-pass SSR can cache a construction-time empty registry
-  // before declaration children initialize. Recompute from the plain registry
-  // on the server; client reads retain normal rune dependency tracking.
-  // Single SSR guard for the whole engine (#982 — previously duplicated across
-  // orchestrator + assembly).
-  const assembledDerived: PortableSpec | null = $derived.by(assembleCurrentSpec);
-  const assembled = (): PortableSpec | null =>
-    typeof window === "undefined" ? assembleCurrentSpec() : assembledDerived;
+  // SSR one-pass recompute rationale lives on ssrSafeDerived (#982).
+  const assembled: () => PortableSpec | null = ssrSafeDerived(assembleCurrentSpec);
 
   // Facet intent: registry facet plot layer (<FacetWrap/> / <FacetGrid/> / <Facet/>),
   // OR assembled.facet (portable-spec embeds). Grammar props removed in 0.13.0 (#704).
@@ -285,9 +282,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       data: data ?? embedded,
     });
   }
-  const resolvedDatumKeyDerived = $derived.by(resolvedDatumKeyNow);
-  const resolvedDatumKey = () =>
-    typeof window === "undefined" ? resolvedDatumKeyNow() : resolvedDatumKeyDerived;
+  const resolvedDatumKey = ssrSafeDerived(resolvedDatumKeyNow);
 
   const resolvedInteractionScope: PlotInteractionScope = $derived(
     (() => {
@@ -327,9 +322,8 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       },
     );
   }
-  const interactionConfigDerived = $derived.by(interactionConfigCurrent);
-  const interactionConfig = (): ResolvedInteractionConfig =>
-    typeof window === "undefined" ? interactionConfigCurrent() : interactionConfigDerived;
+  const interactionConfig: () => ResolvedInteractionConfig =
+    ssrSafeDerived(interactionConfigCurrent);
 
   function deliverDiagnostic(diagnostic: PlotDiagnostic): void {
     const ondiagnostic = host.props.ondiagnostic;
@@ -376,93 +370,92 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       },
     });
   });
-  // Shared once-per-code-per-prop Set for wiring + composition + multi-Inspect
-  // + deprecations. Order: config → wiring → multi-inspect → legendFocus
-  // deprecation → composition.
-  // Grammar-prop deprecation emission removed in 0.13.0 (#704) — props gone.
+  // Shared once-per-dedup-key Set for wiring + multi-Inspect + deprecations +
+  // composition + inspect-geom. Each deliverAdvisoriesOnce call registers ONE
+  // $effect; call order below is the registration (and first-flush delivery)
+  // order. Re-delivering effects (config diagnostics above, chrome area/legend
+  // diagnostics later) stay outside this helper by design.
   const deliveredAdvisories = new Set<string>();
-  $effect(() => {
-    for (const diagnostic of wiringDiagnostics) {
-      const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
-      if (deliveredAdvisories.has(dedupKey)) continue;
-      deliveredAdvisories.add(dedupKey);
-      deliverDiagnostic(diagnostic);
-    }
-  });
+  function deliverAdvisoriesOnce<T extends PlotDiagnostic>(
+    get: () => readonly T[],
+    dedupKeyOf: (diagnostic: T) => string = (diagnostic) =>
+      `${diagnostic.code}:${(diagnostic as { prop?: string }).prop}`,
+  ): void {
+    $effect(() => {
+      for (const diagnostic of get()) {
+        const dedupKey = dedupKeyOf(diagnostic);
+        if (deliveredAdvisories.has(dedupKey)) continue;
+        deliveredAdvisories.add(dedupKey);
+        deliverDiagnostic(diagnostic);
+      }
+    });
+  }
+
+  deliverAdvisoriesOnce(() => wiringDiagnostics);
 
   // Multiple <Inspect> children: last wins; advisory once per mount.
   const multiInspectDiagnostics = $derived.by((): InteractionDiagnostic[] =>
     duplicateInspectCapabilityDiagnostics(inspectResolved().multiChild),
   );
-  $effect(() => {
-    for (const diagnostic of multiInspectDiagnostics) {
-      const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
-      if (deliveredAdvisories.has(dedupKey)) continue;
-      deliveredAdvisories.add(dedupKey);
-      deliverDiagnostic(diagnostic);
-    }
-  });
+  deliverAdvisoriesOnce(() => multiInspectDiagnostics);
 
   // Deprecated plot-level key → Inspect / Select / controller identity.
-  $effect(() => {
+  const deprecatedKeyDiagnostics = $derived.by((): PlotDiagnostic[] => {
     const plotProp = readLegacyPlotKey(host.props);
-    if (plotProp === undefined) return;
-    const diagnostic = deprecatedPropDiagnostic({
-      prop: "key",
-      since: "0.21.0",
-      removeIn: "0.22.0",
-      suggestions: [
-        'Use <Inspect identity="year" /> (or inspect={{ identity: "year" }})',
-        'Use select={{ type: "point", identity: "year" }} when selection owns the key',
-        'Use createPlotInteraction({ identity: "year" }) for linked controllers',
-      ],
-      anchor: "row-identity-on-interaction",
-    });
-    const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
-    if (deliveredAdvisories.has(dedupKey)) return;
-    deliveredAdvisories.add(dedupKey);
-    deliverDiagnostic(diagnostic);
+    if (plotProp === undefined) return [];
+    return [
+      deprecatedPropDiagnostic({
+        prop: "key",
+        since: "0.21.0",
+        removeIn: "0.22.0",
+        suggestions: [
+          'Use <Inspect identity="year" /> (or inspect={{ identity: "year" }})',
+          'Use select={{ type: "point", identity: "year" }} when selection owns the key',
+          'Use createPlotInteraction({ identity: "year" }) for linked controllers',
+        ],
+        anchor: "row-identity-on-interaction",
+      }),
+    ];
   });
+  deliverAdvisoriesOnce(() => deprecatedKeyDiagnostics);
 
   // Deprecated plot-level legendFocus → GuideLegend.focus (one minor window).
-  $effect(() => {
+  const deprecatedLegendFocusDiagnostics = $derived.by((): PlotDiagnostic[] => {
     const plotProp = readLegacyPlotLegendFocus(host.props);
-    if (plotProp === undefined || plotProp === false) return;
-    const diagnostic = deprecatedPropDiagnostic({
-      prop: "legendFocus",
-      since: "0.19.0",
-      removeIn: "0.20.0",
-      suggestions: [
-        'Use <GuideLegend channel="color" focus /> (or the aesthetic that owns the discrete legend)',
-        "focus={{ preview: false }} on GuideLegend replaces legendFocus={{ preview: false }}",
-      ],
-      anchor: "legend-focus-on-guidelegend",
-    });
-    const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
-    if (deliveredAdvisories.has(dedupKey)) return;
-    deliveredAdvisories.add(dedupKey);
-    deliverDiagnostic(diagnostic);
+    if (plotProp === undefined || plotProp === false) return [];
+    return [
+      deprecatedPropDiagnostic({
+        prop: "legendFocus",
+        since: "0.19.0",
+        removeIn: "0.20.0",
+        suggestions: [
+          'Use <GuideLegend channel="color" focus /> (or the aesthetic that owns the discrete legend)',
+          "focus={{ preview: false }} on GuideLegend replaces legendFocus={{ preview: false }}",
+        ],
+        anchor: "legend-focus-on-guidelegend",
+      }),
+    ];
   });
+  deliverAdvisoriesOnce(() => deprecatedLegendFocusDiagnostics);
 
   // Deprecated plot-level legendFilter → GuideLegend.filter (one minor window).
-  $effect(() => {
+  const deprecatedLegendFilterDiagnostics = $derived.by((): PlotDiagnostic[] => {
     const plotProp = readLegacyPlotLegendFilter(host.props);
-    if (plotProp === undefined || plotProp === false) return;
-    const diagnostic = deprecatedPropDiagnostic({
-      prop: "legendFilter",
-      since: "0.19.0",
-      removeIn: "0.20.0",
-      suggestions: [
-        'Use <GuideLegend channel="color" filter /> (or the aesthetic that owns the discrete legend)',
-        'filter={{ mode: "include", multiple: false }} on GuideLegend replaces legendFilter={{ … }}',
-      ],
-      anchor: "legend-filter-on-guidelegend",
-    });
-    const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
-    if (deliveredAdvisories.has(dedupKey)) return;
-    deliveredAdvisories.add(dedupKey);
-    deliverDiagnostic(diagnostic);
+    if (plotProp === undefined || plotProp === false) return [];
+    return [
+      deprecatedPropDiagnostic({
+        prop: "legendFilter",
+        since: "0.19.0",
+        removeIn: "0.20.0",
+        suggestions: [
+          'Use <GuideLegend channel="color" filter /> (or the aesthetic that owns the discrete legend)',
+          'filter={{ mode: "include", multiple: false }} on GuideLegend replaces legendFilter={{ … }}',
+        ],
+        anchor: "legend-filter-on-guidelegend",
+      }),
+    ];
   });
+  deliverAdvisoriesOnce(() => deprecatedLegendFilterDiagnostics);
 
   // Composition advisories (#659 slices 3+5+6): pure collect over
   // registry.layers. Last child still wins (shallow merge / last write);
@@ -470,14 +463,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   const compositionDiagnostics = $derived.by((): CompositionDiagnostic[] =>
     collectCompositionDiagnostics(host.registry.layers),
   );
-  $effect(() => {
-    for (const diagnostic of compositionDiagnostics) {
-      const dedupKey = compositionAdvisoryDedupKey(diagnostic);
-      if (deliveredAdvisories.has(dedupKey)) continue;
-      deliveredAdvisories.add(dedupKey);
-      deliverDiagnostic(diagnostic);
-    }
-  });
+  deliverAdvisoriesOnce(() => compositionDiagnostics, compositionAdvisoryDedupKey);
 
   // Inspect axis guides that fight bar/col geometry (or bisect on-bar labels).
   // Needs assembled layers + resolved inspect.mode; once-per-code:prop like wiring.
@@ -486,14 +472,7 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     if (mode === undefined) return [];
     return inspectAxisOnBarColDiagnostics(mode, layerGeomsFromSpecLayers(assembled()?.layers));
   });
-  $effect(() => {
-    for (const diagnostic of inspectGeomDiagnostics) {
-      const dedupKey = `${diagnostic.code}:${diagnostic.prop}`;
-      if (deliveredAdvisories.has(dedupKey)) continue;
-      deliveredAdvisories.add(dedupKey);
-      deliverDiagnostic(diagnostic);
-    }
-  });
+  deliverAdvisoriesOnce(() => inspectGeomDiagnostics);
 
   // PublicKey → PropertyKey widening lives in widenPlotProps (plot-props.ts).
   // Controllers read host.props handlers directly (already widened).
