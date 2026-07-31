@@ -4110,7 +4110,8 @@ export const SpecDeclarations = {
         Type.Union(
           [
             Type.Literal("identity", {
-              description: "Draw each data row as-is (default).",
+              description:
+                "Draw each data row as-is (default). Under position stack/fill, a group whose continuous x samples skip an interior grid point auto-aligns onto the shared x grid (align semantics: interpolate between observed samples, zero outside the group's range) with a stack-align-applied advisory, so sparse groups cannot render as floating bands.",
             }),
             Type.Literal("unique", {
               description: "Drop duplicate rows on mapped aesthetics before drawing (first wins).",
@@ -4122,7 +4123,7 @@ export const SpecDeclarations = {
           ],
           {
             description:
-              'Area stat: "identity" (default), "unique" (first-wins dedupe), or "align" (shared x grid for stacking).',
+              'Area stat: "identity" (default; sparse stacked groups auto-align), "unique" (first-wins dedupe), or "align" (shared x grid with interpolation).',
           },
         ),
       ),
@@ -4146,7 +4147,7 @@ export const SpecDeclarations = {
     {
       additionalProperties: false,
       description:
-        'An area layer. Requires x and y channels; rows are sorted by x within each group. Default position "stack". Use stat "align" when groups have different continuous x samples.',
+        'An area layer. Requires x and y channels; rows are sorted by x within each group. Default position "stack". Stacked groups whose continuous x samples leave interior holes auto-align onto the shared x grid; pre-fill the data to control every cell.',
     },
   ),
 

@@ -25,6 +25,10 @@ export interface StatAlignResult {
   readonly groups: number[];
   readonly carried: Record<string, CellValue[]>;
   readonly dropped: number;
+  /** Source row per output row: the observed row when the grid x coincides
+   * with a group's own (last-wins) sample; -1 for interpolated or
+   * zero-extended cells. Lets frames keep inspection lineage for real data. */
+  readonly sourceRows: Int32Array;
 }
 
 /** Linear interpolate y at query x given sorted unique (x,y) series. Outside range → 0. */
@@ -51,33 +55,37 @@ export function lerpSeries(xs: Float64Array, ys: Float64Array, query: number): n
   return yLo + t * (y1 - yLo);
 }
 
-/** Collapse a group's rows to sorted unique x with last-wins y. */
+/** Collapse a group's rows to sorted unique x with last-wins y.
+ * `rows` carries the winning source row per unique x (same last-wins). */
 export function seriesFromRows(
   x: Float64Array,
   y: Float64Array,
   rows: readonly number[],
-): { xs: Float64Array; ys: Float64Array } | null {
-  const pts: { x: number; y: number }[] = [];
+): { xs: Float64Array; ys: Float64Array; rows: number[] } | null {
+  const pts: { x: number; y: number; row: number }[] = [];
   for (const row of rows) {
     const xv = x[row]!;
     const yv = y[row]!;
     if (!Number.isFinite(xv) || !Number.isFinite(yv)) continue;
-    pts.push({ x: xv, y: yv });
+    pts.push({ x: xv, y: yv, row });
   }
   if (pts.length === 0) return null;
   pts.sort((a, b) => a.x - b.x || 0);
   // Last-wins for duplicate x
   const uniqX: number[] = [];
   const uniqY: number[] = [];
+  const uniqRow: number[] = [];
   for (const p of pts) {
     if (uniqX.length > 0 && uniqX.at(-1) === p.x) {
       uniqY[uniqY.length - 1] = p.y;
+      uniqRow[uniqRow.length - 1] = p.row;
     } else {
       uniqX.push(p.x);
       uniqY.push(p.y);
+      uniqRow.push(p.row);
     }
   }
-  return { xs: Float64Array.from(uniqX), ys: Float64Array.from(uniqY) };
+  return { xs: Float64Array.from(uniqX), ys: Float64Array.from(uniqY), rows: uniqRow };
 }
 
 export function statAlign(input: StatAlignInput): StatAlignResult {
@@ -107,6 +115,7 @@ export function statAlign(input: StatAlignInput): StatAlignResult {
   const outX: number[] = [];
   const outY: number[] = [];
   const outG: number[] = [];
+  const outRow: number[] = [];
   const carriedOut: Record<string, CellValue[]> = {};
   for (const key of Object.keys(carried)) carriedOut[key] = [];
 
@@ -116,11 +125,18 @@ export function statAlign(input: StatAlignInput): StatAlignResult {
     const series = seriesFromRows(x, y, rows);
     if (series === null) continue;
     const rep = rows[0]!;
+    // Grid and series are both ascending; a merge pointer finds the group's
+    // own samples so those output rows keep their source-row lineage.
+    let cursor = 0;
     for (let i = 0; i < grid.length; i++) {
       const xq = grid[i]!;
       outX.push(xq);
       outY.push(lerpSeries(series.xs, series.ys, xq));
       outG.push(g);
+      while (cursor < series.xs.length && series.xs[cursor]! < xq) cursor++;
+      outRow.push(
+        cursor < series.xs.length && series.xs[cursor] === xq ? series.rows[cursor]! : -1,
+      );
       for (const key of Object.keys(carriedOut)) {
         carriedOut[key]!.push(carried[key]![rep]!);
       }
@@ -133,5 +149,6 @@ export function statAlign(input: StatAlignInput): StatAlignResult {
     groups: outG,
     carried: carriedOut,
     dropped,
+    sourceRows: Int32Array.from(outRow),
   };
 }

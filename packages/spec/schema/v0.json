@@ -4241,7 +4241,7 @@
             {
               "type": "string",
               "const": "identity",
-              "description": "Draw each data row as-is (default)."
+              "description": "Draw each data row as-is (default). Under position stack/fill, a group whose continuous x samples skip an interior grid point auto-aligns onto the shared x grid (align semantics: interpolate between observed samples, zero outside the group's range) with a stack-align-applied advisory, so sparse groups cannot render as floating bands."
             },
             {
               "type": "string",
@@ -4254,7 +4254,7 @@
               "description": "Interpolate each group onto the union of finite x values so continuous-x stack/fill aligns. Outside a group's x range y is 0."
             }
           ],
-          "description": "Area stat: \"identity\" (default), \"unique\" (first-wins dedupe), or \"align\" (shared x grid for stacking)."
+          "description": "Area stat: \"identity\" (default; sparse stacked groups auto-align), \"unique\" (first-wins dedupe), or \"align\" (shared x grid with interpolation)."
         },
         "position": {
           "$ref": "#/$defs/StackablePosition"
@@ -4279,7 +4279,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "An area layer. Requires x and y channels; rows are sorted by x within each group. Default position \"stack\". Use stat \"align\" when groups have different continuous x samples."
+      "description": "An area layer. Requires x and y channels; rows are sorted by x within each group. Default position \"stack\". Stacked groups whose continuous x samples leave interior holes auto-align onto the shared x grid; pre-fill the data to control every cell."
     },
     "RibbonLayer": {
       "type": "object",

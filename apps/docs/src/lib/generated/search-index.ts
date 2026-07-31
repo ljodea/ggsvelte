@@ -18985,6 +18985,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["map-region-missing"],
   },
   {
+    id: "heading:guide-errors:stack-align-skipped",
+    kind: "heading",
+    title: "stack-align-skipped",
+    summary:
+      "stack-align-skipped in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#stack-align-skipped",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["stack-align-skipped"],
+  },
+  {
     id: "heading:guide-errors:smooth-group-dropped",
     kind: "heading",
     title: "smooth-group-dropped",
@@ -19682,6 +19692,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/advisories#jitter-seeded",
     keywords: ["Advisories", "Reference"],
     exact: ["jitter-seeded"],
+  },
+  {
+    id: "heading:guide-advisories:stack-align-applied",
+    kind: "heading",
+    title: "stack-align-applied",
+    summary:
+      "stack-align-applied in Advisories. Spec-lint advisories and the pipeline's disclosed heuristics.",
+    href: "/guide/advisories#stack-align-applied",
+    keywords: ["Advisories", "Reference"],
+    exact: ["stack-align-applied"],
   },
   {
     id: "heading:guide-advisories:palette-inferred",
@@ -41360,6 +41380,20 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["map-region-missing", "warning:map-region-missing"],
+  },
+  {
+    id: "diagnostic:warning:stack-align-skipped",
+    kind: "diagnostic",
+    title: "stack-align-skipped · warning",
+    summary:
+      "Sparse stacked-area groups were left unaligned because the shared-grid expansion exceeds the auto-rescue budget; bands with interior gaps may render as floating polygons.",
+    href: "/guide/errors#stack-align-skipped",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["stack-align-skipped", "warning:stack-align-skipped"],
   },
   {
     id: "diagnostic:warning:smooth-group-dropped",

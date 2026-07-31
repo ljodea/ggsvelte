@@ -116,6 +116,10 @@ export const PIPELINE_WARNING_CATALOG = {
   "map-region-missing": {
     summary: "One or more value rows had no matching map region and were dropped.",
   },
+  "stack-align-skipped": {
+    summary:
+      "Sparse stacked-area groups were left unaligned because the shared-grid expansion exceeds the auto-rescue budget; bands with interior gaps may render as floating polygons.",
+  },
   "smooth-group-dropped": {
     summary: "A smooth group had too few points for the fit and was dropped.",
   },
