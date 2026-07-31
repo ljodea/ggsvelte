@@ -19,7 +19,6 @@
     "svelteplot": "^0.14.2"
   },
   "devDependencies": {
-    "@playwright/test": "1.61.1",
     "@sveltejs/vite-plugin-svelte": "^7.2.0",
     "playwright": "1.61.1",
     "vite": "^8.0.0"

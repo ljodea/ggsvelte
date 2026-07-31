@@ -12,32 +12,24 @@ import type { AxisGuidePlan } from "./layout/temporal-guide.js";
 import type { TemporalAxisPlanInput } from "./layout/temporal-axis-types.js";
 import type { CellValue, ParsedColumnOptions, ParsedColumnView } from "./table-types.js";
 
-export type TemporalColumnParser = (
-  raw: readonly CellValue[],
-  parser: TemporalParserSpec | "auto",
-  options: ParsedColumnOptions,
-) => {
-  readonly decision: ParsedColumnView["decision"];
-  readonly semantic: Float64Array;
-  readonly valid: Uint8Array;
-  readonly kind: ParsedColumnView["temporalKind"];
-  readonly precision: ParsedColumnView["temporalPrecision"];
-};
-
-export type TemporalAxisPlanner = (input: TemporalAxisPlanInput) => AxisGuidePlan;
-
-export type TemporalParserKeyFn = (parser: TemporalParserSpec) => string;
-
-export type TemporalLabelCompiler = (
-  pattern: string,
-  options: { kind: string; locale?: string; timezone?: string },
-) => (value: number) => string;
-
 export interface TemporalRuntime {
-  readonly parseColumn: TemporalColumnParser;
-  readonly planAxis: TemporalAxisPlanner;
-  readonly parserKey: TemporalParserKeyFn;
-  readonly compileLabelFormat: TemporalLabelCompiler;
+  readonly parseColumn: (
+    raw: readonly CellValue[],
+    parser: TemporalParserSpec | "auto",
+    options: ParsedColumnOptions,
+  ) => {
+    readonly decision: ParsedColumnView["decision"];
+    readonly semantic: Float64Array;
+    readonly valid: Uint8Array;
+    readonly kind: ParsedColumnView["temporalKind"];
+    readonly precision: ParsedColumnView["temporalPrecision"];
+  };
+  readonly planAxis: (input: TemporalAxisPlanInput) => AxisGuidePlan;
+  readonly parserKey: (parser: TemporalParserSpec) => string;
+  readonly compileLabelFormat: (
+    pattern: string,
+    options: { kind: string; locale?: string; timezone?: string },
+  ) => (value: number) => string;
 }
 
 let runtime: TemporalRuntime | null = null;

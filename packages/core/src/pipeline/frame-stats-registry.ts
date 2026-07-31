@@ -31,13 +31,3 @@ export function registerStatFrame(stat: string, build: StatFrameBuilder): void {
 export function getStatFrameBuilder(stat: string): StatFrameBuilder | undefined {
   return builders.get(stat);
 }
-
-/** Test helper: clear the registry. */
-export function clearStatFrameRegistry(): void {
-  builders.clear();
-}
-
-/** Test helper: registered stat names. */
-export function registeredStatFrames(): readonly string[] {
-  return [...builders.keys()];
-}

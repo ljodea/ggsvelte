@@ -68,6 +68,11 @@
       "entry": ["*.bench.ts"],
       "project": ["**/*.ts"],
     },
+    "benchmarks/competitive": {
+      // measure-*.ts are scripts; entries/fixtures are dynamic Vite entry points.
+      "entry": ["measure-*.ts", "entries/**/*.ts", "fixtures/**/*.ts"],
+      "project": ["**/*.ts"],
+    },
     "examples": {
       // The corpus: spec.ts/data.ts are consumed by the docs app via the
       // $examples alias and by tests/visual via the generated manifest.

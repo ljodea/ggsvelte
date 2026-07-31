@@ -29,11 +29,3 @@ export function registerGeomBatch(geom: string, build: GeometryBatchBuilder): vo
 export function getGeomBatchBuilder(geom: string): GeometryBatchBuilder | undefined {
   return builders.get(geom);
 }
-
-export function clearGeomBatchRegistry(): void {
-  builders.clear();
-}
-
-export function registeredGeomBatches(): readonly string[] {
-  return [...builders.keys()];
-}
