@@ -96,7 +96,7 @@
     "highlight.js": "^11.11.1",
     "knip": "6.29.0",
     "markdownlint-cli2": "0.23.1",
-    "oxfmt": "0.60.0",
+    "oxfmt": "0.61.0",
     "oxlint": "1.75.0",
     "oxlint-tsgolint": "0.25.0",
     "pnpm": "11.13.0",
