@@ -11914,6 +11914,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "stack-zero-filled",
+        title: "stack-zero-filled",
+        level: 3,
+      },
+      {
         id: "palette-inferred",
         title: "palette-inferred",
         level: 3,

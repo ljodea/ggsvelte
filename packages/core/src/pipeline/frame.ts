@@ -9,6 +9,7 @@ import { buildAnnotationFrame } from "./frame-annotation.js";
 import { expandEdgeFrame } from "./frame-edge-expand.js";
 import { deriveLayerGroups } from "./frame-helpers.js";
 import { buildIdentityFrame } from "./frame-identity.js";
+import { maybeStackZeroFillFrame } from "./frame-stats-align.js";
 import { buildMapFrame } from "./frame-stats-map.js";
 import { buildNonIdentityFrame } from "./frame-stats.js";
 
@@ -22,6 +23,7 @@ export function buildFrame(
   binRange?: [number, number],
   functionDomain?: [number, number],
   datasets?: import("@ggsvelte/spec").PortableSpec["datasets"],
+  xDiscreteRisk = false,
 ): LayerFrame {
   // Annotation frames are rowless (n=0, empty inputGroups). Do not derive or
   // overwrite pre-stat groups — identity index would otherwise retain O(n)
@@ -48,6 +50,18 @@ export function buildFrame(
     functionDomain,
   );
   if (nonIdentity !== null) return { ...nonIdentity, inputGroups };
+
+  // Sparse stacked area rescue (#1268): zero-fill interior group×x holes that
+  // the identity path would chord across as floating polygons.
+  const zeroFilled = maybeStackZeroFillFrame(
+    binding,
+    table,
+    inputGroups,
+    warnings,
+    advisories,
+    xDiscreteRisk,
+  );
+  if (zeroFilled !== null) return { ...zeroFilled, inputGroups };
 
   const frame = { ...buildIdentityFrame(binding, table, inputGroups), inputGroups };
   expandEdgeFrame(frame, warnings);

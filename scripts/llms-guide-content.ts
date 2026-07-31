@@ -583,6 +583,14 @@ gg(data, aes({ x: "t", y: "v", fill: "series" }))
 Available on **area** and **line** only (not point or shared identity-only
 geoms). Outside a group's x span y is 0 (stack-friendly).
 
+Stacked **area** rescues sparse groups on its own: when a group's continuous x
+samples skip an interior grid point (a shape that would render as a floating
+band chorded over the stack below), the default identity stat zero-fills the
+missing group×x cells (missing cell = 0, no interpolation) and emits a
+\`stack-zero-filled\` advisory. Set \`stat: "align"\` when you want
+interpolation between a group's observed samples instead, or pre-fill the
+data to control every cell.
+
 ## Connect (named path joins)
 
 \`stat: "connect"\` (ggplot2 \`stat_connect\`) expands successive finite points

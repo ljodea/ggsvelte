@@ -66,6 +66,10 @@ export const ADVISORY_CATALOG = {
   "jitter-seeded": {
     summary: "The jitter position used its default deterministic seed.",
   },
+  "stack-zero-filled": {
+    summary:
+      "A stacked area layer zero-filled missing group×x cells onto the shared x grid; groups sampled different x, and the gap would render as a floating band.",
+  },
   "palette-inferred": {
     summary: "A color scale used the edition's default palette/ramp.",
   },

@@ -19684,6 +19684,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["jitter-seeded"],
   },
   {
+    id: "heading:guide-advisories:stack-zero-filled",
+    kind: "heading",
+    title: "stack-zero-filled",
+    summary:
+      "stack-zero-filled in Advisories. Spec-lint advisories and the pipeline's disclosed heuristics.",
+    href: "/guide/advisories#stack-zero-filled",
+    keywords: ["Advisories", "Reference"],
+    exact: ["stack-zero-filled"],
+  },
+  {
     id: "heading:guide-advisories:palette-inferred",
     kind: "heading",
     title: "palette-inferred",
