@@ -4,9 +4,18 @@
 // spec <- core <- svelte. The DOM half (canvas renderer, browser measurer)
 // lives behind "@ggsvelte/core/dom".
 //
+// Lean identity-chart surface (no heavy stats / specialty geoms):
+// `@ggsvelte/core/render`.
+//
 // Lifecycle (Hadley lesson 13; meanings in CONTRIBUTING.md): tags collected
 // into lifecycle.json by scripts/gen-lifecycle.ts.
 // @lifecycle-default experimental
+
+// Full grammar: register every stat frame builder and geom batch.
+import "./pipeline/frame-stats-register-all.js";
+import "./pipeline/geometry-register-all.js";
+// Full temporal: Temporal polyfill parsing + guide planner.
+import "./install-temporal.js";
 
 // Data binding
 export {

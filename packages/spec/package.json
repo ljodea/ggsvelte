@@ -35,6 +35,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./portable": {
+      "types": "./dist/portable-entry.d.ts",
+      "default": "./dist/portable-entry.js"
+    },
     "./schema/v0.json": "./schema/v0.json"
   },
   "publishConfig": {

@@ -6,7 +6,8 @@
     "apps/*",
     "examples",
     "spikes/*",
-    "benchmarks"
+    "benchmarks",
+    "benchmarks/competitive"
   ],
   "type": "module",
   "scripts": {

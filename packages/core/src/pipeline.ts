@@ -55,4 +55,12 @@ export type {
 } from "./pipeline/public-api.js";
 export { CANVAS_AUTO_THRESHOLD, PipelineError, batchMarkCount } from "./pipeline/public-api.js";
 
+// Full grammar registration for the default pipeline barrel (tests + main
+// package). Lean charts import `@ggsvelte/core/render` which loads basic geoms
+// only and never evaluates this file.
+import "./pipeline/frame-stats-register-all.js";
+import "./pipeline/geometry-register-all.js";
+// Full temporal polyfill + guide planner (lean render entry skips this).
+import "./install-temporal.js";
+
 export { runPipeline } from "./pipeline/run-pipeline.js";

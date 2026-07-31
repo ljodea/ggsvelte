@@ -1,11 +1,10 @@
 /**
  * Layer grouping and carried discrete columns for stats/identity frames.
  */
-import { parseTemporal, parseTemporalColumn } from "@ggsvelte/spec";
-
 import { deriveGroups, type ChannelGroupingOverrides } from "../grouping.js";
 import { cellToNumber, type CellValue, type Discreteness } from "../table.js";
 import type { ColumnTable } from "../table.js";
+import { getTemporalRuntime } from "../temporal-runtime.js";
 
 import { styleBinIndex } from "./style-bin-index.js";
 import { positionDiscreteness } from "./temporal-position.js";
@@ -57,12 +56,14 @@ function binnedStyleColumn(
   const numeric = parsed.semantic;
   const semanticOf = (value: CellValue): number | undefined => {
     if (binding.binTemporal === true) {
-      if (binding.binParse !== undefined) {
-        const result = parseTemporal(value, binding.binParse, options);
-        return result.ok ? result.epochMs : undefined;
+      const runtime = getTemporalRuntime();
+      if (runtime !== null) {
+        const result = runtime.parseColumn([value], binding.binParse ?? "auto", options);
+        return result.valid[0] === 1 ? result.semantic[0] : undefined;
       }
-      const result = parseTemporalColumn([value], "auto", options);
-      return result.valid[0] === 1 ? result.semantic[0] : undefined;
+      // Lean path: ISO via Date.parse (cellToNumber).
+      const number = cellToNumber(value);
+      return Number.isFinite(number) ? number : undefined;
     }
     const number = cellToNumber(value);
     return Number.isFinite(number) ? number : undefined;

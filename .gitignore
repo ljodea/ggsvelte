@@ -29,3 +29,7 @@ tests/evals/out/
 .ci-content-hash/
 .packages-dist-cache/
 .packages-dist-upload/
+
+# competitive bench outputs (machine-local)
+benchmarks/competitive/results/
+benchmarks/competitive/node_modules/

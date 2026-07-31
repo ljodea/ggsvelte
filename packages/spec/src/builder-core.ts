@@ -11,7 +11,6 @@ import {
   type CoordSfOptions,
   type CoordTransformOptions,
 } from "./coord-helpers.js";
-import { SpecValidationError } from "./errors.js";
 import type { AesInput, FacetInput, LayerInput, SpecInput } from "./normalize.js";
 import { normalize } from "./normalize.js";
 import {
@@ -33,7 +32,6 @@ import type {
   ThemeName,
   ThemeSpec,
 } from "./schema.js";
-import { validate } from "./validate.js";
 import type { GGBuilder } from "./builder.js";
 
 interface BuilderState {
@@ -192,11 +190,12 @@ export class GGBuilderCore {
   }
 
   /**
-   * Compile to a canonical PortableSpec: normalize (canonicalize channel
-   * shorthand, fill geom defaults, resolve aes inheritance) then validate.
-   * Throws SpecValidationError when the result does not satisfy the schema.
+   * Normalize only: channel shorthand, geom defaults, aes inheritance.
+   * Does not load TypeBox — the render pipeline runs structural gates; agents
+   * that need full schema validation should call {@link spec} (full package)
+   * or `validate()` explicitly.
    */
-  spec(): PortableSpec {
+  toPortable(): PortableSpec {
     const {
       data,
       aes: plotAes,
@@ -237,9 +236,6 @@ export class GGBuilderCore {
       ...(width !== undefined && { width }),
       ...(height !== undefined && { height }),
     };
-    const normalized = normalize(input);
-    const result = validate(normalized);
-    if (!result.ok) throw new SpecValidationError(result.errors);
-    return result.spec;
+    return normalize(input);
   }
 }

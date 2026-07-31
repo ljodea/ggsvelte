@@ -1,5 +1,5 @@
 /** Temporal preflight for rowless annotation intercepts. */
-import { parseTemporalColumn } from "@ggsvelte/spec";
+import { getTemporalRuntime } from "../temporal-runtime.js";
 
 import type { CellValue } from "../table.js";
 
@@ -42,7 +42,11 @@ export function preflightTemporalAnnotations(input: {
         (value) => typeof value !== "number" || !Number.isFinite(value),
       );
       if (sourceValues.length === 0) continue;
-      const decision = parseTemporalColumn(
+      const runtime = getTemporalRuntime();
+      // Lean builds without temporal install cannot preflight annotation
+      // strings; full package installs the runtime for time scales.
+      if (runtime === null) continue;
+      const decision = runtime.parseColumn(
         sourceValues,
         conversion.parser,
         conversion.options,

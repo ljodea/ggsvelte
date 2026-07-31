@@ -28,11 +28,27 @@
     "src"
   ],
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/index.js",
+    "./dist/render-entry.js",
+    "./dist/temporal-entry.js",
+    "./dist/install-temporal.js",
+    "./dist/pipeline/frame-stats-register-all.js",
+    "./dist/pipeline/geometry-register-all.js",
+    "./dist/pipeline/geometry-register-basic.js"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./render": {
+      "types": "./dist/render-entry.d.ts",
+      "default": "./dist/render-entry.js"
+    },
+    "./temporal": {
+      "types": "./dist/temporal-entry.d.ts",
+      "default": "./dist/temporal-entry.js"
     },
     "./dom": {
       "types": "./dist/dom/index.d.ts",

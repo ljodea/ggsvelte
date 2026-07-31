@@ -8,11 +8,7 @@
  * Free helpers live in table-coerce.ts; public types in table-types.ts.
  * This module re-exports both for a stable `./table.js` import path.
  */
-import {
-  canonicalTemporalParserKey,
-  parseTemporalColumn,
-  type TemporalParserSpec,
-} from "@ggsvelte/spec";
+import type { TemporalParserSpec } from "@ggsvelte/spec";
 
 import {
   COLUMN_TRANSFORM_EVENT,
@@ -23,8 +19,10 @@ import {
   cellsToNumeric,
   cellsToQuantitative,
   discretenessOf,
+  isISODateString,
   nonTemporalFieldType,
 } from "./table-coerce.js";
+import { getTemporalRuntime } from "./temporal-runtime.js";
 import type {
   CellValue,
   Columns,
@@ -71,15 +69,112 @@ function optionsKey(options: ParsedColumnOptions): string {
   ].join("|");
 }
 
-function parseOptions(options: ParsedColumnOptions) {
-  return {
-    ...(options.timezone !== undefined && { timezone: options.timezone }),
-    ...(options.disambiguation !== undefined && { disambiguation: options.disambiguation }),
-  };
+function requestKey(parser: TemporalParserSpec | "auto", options: ParsedColumnOptions): string {
+  const runtime = getTemporalRuntime();
+  let parserPart = "auto";
+  if (parser !== "auto") {
+    parserPart = runtime === null ? JSON.stringify(parser) : runtime.parserKey(parser);
+  }
+  return `${parserPart}|${optionsKey(options)}`;
 }
 
-function requestKey(parser: TemporalParserSpec | "auto", options: ParsedColumnOptions): string {
-  return `${parser === "auto" ? "auto" : canonicalTemporalParserKey(parser)}|${optionsKey(options)}`;
+/** Polyfill-free auto parse for the lean render entry. */
+function liteParseColumn(
+  raw: readonly CellValue[],
+  parser: TemporalParserSpec | "auto",
+  options: ParsedColumnOptions,
+): {
+  decision: ParsedColumnView["decision"];
+  semantic: Float64Array;
+  valid: Uint8Array;
+  kind: ParsedColumnView["temporalKind"];
+  precision: ParsedColumnView["temporalPrecision"];
+} {
+  if (parser !== "auto") {
+    throw new Error(
+      `Explicit temporal parser ${JSON.stringify(parser)} requires @ggsvelte/core (full) or @ggsvelte/core/temporal.`,
+    );
+  }
+  const inferTemporal = options.inferTemporal !== false;
+  const nonNull = raw.filter((value) => value !== null);
+  if (!inferTemporal) {
+    const { semantic, valid } = fallbackNumeric(raw, false);
+    return {
+      decision: {
+        status: "nominal",
+        parser: null,
+        parserKey: "lite:numeric-only",
+        kind: null,
+        precision: null,
+        evidence: [],
+        nonNullCount: nonNull.length,
+        validatedCount: 0,
+        failedCount: 0,
+        candidates: [],
+      },
+      semantic,
+      valid,
+      kind: undefined,
+      precision: undefined,
+    };
+  }
+  // Detect ISO-like string columns without the Temporal polyfill.
+  let isoCount = 0;
+  let stringCount = 0;
+  for (const value of raw) {
+    if (typeof value !== "string") continue;
+    stringCount++;
+    if (isISODateString(value)) isoCount++;
+  }
+  const temporal = stringCount > 0 && isoCount === stringCount;
+  if (!temporal) {
+    const { semantic, valid } = fallbackNumeric(raw, true);
+    return {
+      decision: {
+        status: "nominal",
+        parser: null,
+        parserKey: "lite:auto",
+        kind: null,
+        precision: null,
+        evidence: [],
+        nonNullCount: nonNull.length,
+        validatedCount: 0,
+        failedCount: 0,
+        candidates: [],
+      },
+      semantic,
+      valid,
+      kind: undefined,
+      precision: undefined,
+    };
+  }
+  const semantic = cellsToNumeric(raw);
+  const valid = new Uint8Array(raw.length);
+  let validatedCount = 0;
+  for (let index = 0; index < semantic.length; index++) {
+    if (Number.isFinite(semantic[index]!)) {
+      valid[index] = 1;
+      validatedCount++;
+    }
+  }
+  return {
+    decision: {
+      status: "temporal",
+      parser: "iso",
+      parserKey: "lite:iso",
+      kind: "date",
+      precision: "date",
+      evidence: nonNull.slice(0, 5) as (string | number | boolean | null)[],
+      nonNullCount: nonNull.length,
+      validatedCount,
+      failedCount: nonNull.length - validatedCount,
+      candidates: ["iso"],
+    },
+    semantic,
+    valid,
+    kind: "date",
+    precision: "date",
+  };
 }
 
 function fallbackNumeric(
@@ -206,7 +301,11 @@ export class ColumnTable {
     }
 
     const raw = this.column(name);
-    const parsed = parseTemporalColumn(raw, parser, parseOptions(options));
+    const runtime = getTemporalRuntime();
+    const parsed =
+      runtime === null
+        ? liteParseColumn(raw, parser, options)
+        : runtime.parseColumn(raw, parser, options);
     const inferTemporal = options.inferTemporal !== false;
     const temporal = parser !== "auto" || (inferTemporal && parsed.decision.status === "temporal");
     const values = temporal
@@ -217,10 +316,12 @@ export class ColumnTable {
       semantic: values.semantic,
       valid: values.valid,
       parserKey: `${parsed.decision.parserKey}|${optionsKey(options)}`,
-      ...(parsed.decision.kind !== null && { temporalKind: parsed.decision.kind }),
-      ...(parsed.decision.precision !== null && {
-        temporalPrecision: parsed.decision.precision,
-      }),
+      ...(parsed.decision.kind !== null &&
+        parsed.decision.kind !== undefined && { temporalKind: parsed.decision.kind }),
+      ...(parsed.decision.precision !== null &&
+        parsed.decision.precision !== undefined && {
+          temporalPrecision: parsed.decision.precision,
+        }),
       decision: parsed.decision,
     };
     this.#parsedCache.set(cacheKey, view);

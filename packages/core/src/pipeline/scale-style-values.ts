@@ -1,18 +1,59 @@
 /** Semantic numeric view for size/linewidth/alpha sequential and binned scales. */
-import {
-  parseTemporal,
-  parseTemporalColumn,
-  type GuideSpec,
-  type StyleAesthetic,
-  type TemporalKind,
-  type TemporalParserSpec,
-} from "@ggsvelte/spec";
+import type { GuideSpec, StyleAesthetic, TemporalKind, TemporalParserSpec } from "@ggsvelte/spec";
 
 import { encodeKey } from "../scales/state.js";
 import type { CellValue } from "../table.js";
 import { cellToNumber } from "../table.js";
+import { getTemporalRuntime } from "../temporal-runtime.js";
 
 import { PipelineError, type PipelineWarning } from "./types.js";
+
+function runtimeParseColumn(
+  values: readonly CellValue[],
+  parser: TemporalParserSpec | "auto",
+  options: { timezone?: string; disambiguation?: "compatible" | "earlier" | "later" | "reject" },
+) {
+  const runtime = getTemporalRuntime();
+  if (runtime !== null) return runtime.parseColumn(values, parser, options);
+  const semantic = new Float64Array(values.length);
+  const valid = new Uint8Array(values.length);
+  for (let i = 0; i < values.length; i++) {
+    const n = cellToNumber(values[i]!);
+    semantic[i] = n;
+    if (Number.isFinite(n)) valid[i] = 1;
+  }
+  return {
+    decision: {
+      status: "nominal" as const,
+      parser: null,
+      parserKey: "lite",
+      kind: null,
+      precision: null,
+      evidence: [],
+      nonNullCount: 0,
+      validatedCount: 0,
+      failedCount: 0,
+      candidates: [],
+    },
+    semantic,
+    valid,
+  };
+}
+
+function runtimeParseOne(
+  value: CellValue,
+  parser: TemporalParserSpec,
+  options: { timezone?: string; disambiguation?: "compatible" | "earlier" | "later" | "reject" },
+): { ok: true; epochMs: number } | { ok: false } {
+  const runtime = getTemporalRuntime();
+  if (runtime !== null) {
+    const parsed = runtime.parseColumn([value], parser, options);
+    if (parsed.valid[0] === 1) return { ok: true, epochMs: parsed.semantic[0]! };
+    return { ok: false };
+  }
+  const n = cellToNumber(value);
+  return Number.isFinite(n) ? { ok: true, epochMs: n } : { ok: false };
+}
 
 export interface NumericStyleConfig {
   type?: "ordinal" | "sequential" | "binned" | "manual" | "identity";
@@ -86,7 +127,7 @@ export function resolveNumericStyleValueView(input: {
     values.length === 0
       ? (config?.domain ?? (config?.type === "binned" ? config?.breaks : undefined) ?? values)
       : values;
-  const parsed = parseTemporalColumn(temporalColumn, config?.parse ?? "auto", options);
+  const parsed = runtimeParseColumn(temporalColumn, config?.parse ?? "auto", options);
   if (parsed.decision.status !== "temporal") {
     const cause =
       parsed.decision.status === "ambiguous"
@@ -134,7 +175,7 @@ export function resolveNumericStyleValueView(input: {
         return undefined;
       }
       if (parser === null) return undefined;
-      const result = parseTemporal(value, parser, options);
+      const result = runtimeParseOne(value as CellValue, parser, options);
       return result.ok ? result.epochMs : undefined;
     },
   };

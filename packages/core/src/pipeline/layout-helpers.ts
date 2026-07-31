@@ -12,7 +12,9 @@ import type {
   TemporalLayoutDomainContext,
   TickFormatter,
 } from "../layout/layout.js";
-import { compileTemporalLabelFormat, formatTime, numberFormatter } from "../layout/format.js";
+import { formatTime } from "../layout/format-time.js";
+import { numberFormatter } from "../layout/format-number.js";
+import { getTemporalRuntime } from "../temporal-runtime.js";
 import { defaultTickFormat, tickStep } from "../layout/ticks.js";
 import { defaultLogTickFormat } from "../layout/ticks.js";
 import { defaultTimeTickFormat } from "../layout/time.js";
@@ -120,7 +122,11 @@ export function makeAxisFormatter(
             kind === "monthDay"
             ? "%b %e"
             : "%Y-%m-%d %H:%M:%S %Z";
-    const format = compileTemporalLabelFormat(defaultPattern, {
+    const compile = getTemporalRuntime()?.compileLabelFormat;
+    if (compile === undefined) {
+      return (value) => formatTime(value as number, defaultPattern);
+    }
+    const format = compile(defaultPattern, {
       kind,
       locale: config?.locale ?? "en-US",
       timezone: config?.timezone ?? "UTC",
@@ -136,7 +142,11 @@ export function makeAxisFormatter(
   }
   if (scale.type === "time") {
     if (config?.dateLabels !== undefined) {
-      const format = compileTemporalLabelFormat(config.dateLabels, {
+      const compile = getTemporalRuntime()?.compileLabelFormat;
+      if (compile === undefined) {
+        return (value) => formatTime(value as number, labels);
+      }
+      const format = compile(config.dateLabels, {
         kind: resolvedTemporalKind ?? config.temporalKind ?? "datetime",
         locale: config.locale ?? "en-US",
         timezone: config.timezone ?? "UTC",

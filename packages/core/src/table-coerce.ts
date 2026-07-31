@@ -1,13 +1,20 @@
 /**
  * Field-type inference and numeric coercion helpers (no table instance).
+ *
+ * Intentionally free of `@js-temporal/polyfill`. ISO-like strings use
+ * `Date.parse`; full temporal registry parsing lives behind the optional
+ * temporal runtime (`installTemporal`).
  */
-import { inferTemporalColumn, parseTemporal } from "@ggsvelte/spec";
-
 import type { CellValue, Discreteness, FieldType } from "./table-types.js";
 
-/** Strict ISO predicate retained for public import compatibility. */
+/** Loose ISO-8601 date/datetime detector (UTC and offset forms). */
+const ISO_LIKE =
+  /^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/;
+
+/** Strict-enough ISO predicate retained for public import compatibility. */
 export function isISODateString(value: string): boolean {
-  return parseTemporal(value, "iso").ok;
+  if (!ISO_LIKE.test(value)) return false;
+  return Number.isFinite(Date.parse(value));
 }
 
 export function nonTemporalFieldType(column: readonly CellValue[]): FieldType {
@@ -35,10 +42,40 @@ export function nonTemporalFieldType(column: readonly CellValue[]): FieldType {
   return "quantitative";
 }
 
-/** Deterministic field type inference using the shared temporal registry. */
+/**
+ * Deterministic field type inference without the Temporal polyfill.
+ * String columns that look like ISO dates are temporal; mixed/other strings
+ * stay nominal. Full registry inference is available after installTemporal().
+ */
 export function inferFieldType(column: readonly CellValue[]): FieldType {
-  const temporal = inferTemporalColumn(column);
-  return temporal.status === "temporal" ? "temporal" : nonTemporalFieldType(column);
+  let sawIso = false;
+  let sawNonIsoString = false;
+  let sawNumber = false;
+  let sawDate = false;
+  for (const value of column) {
+    if (value === null) continue;
+    if (typeof value === "string") {
+      if (isISODateString(value)) sawIso = true;
+      else sawNonIsoString = true;
+      continue;
+    }
+    if (typeof value === "boolean") return "nominal";
+    if (typeof value === "number") {
+      sawNumber = true;
+      continue;
+    }
+    if (value instanceof Date && Number.isFinite(value.getTime())) {
+      sawDate = true;
+      continue;
+    }
+    return "nominal";
+  }
+  if (sawNonIsoString) return "nominal";
+  if (sawIso && !sawNumber) return "temporal";
+  if (sawDate && !sawNumber && !sawIso) return "temporal";
+  if (sawIso && sawNumber) return "nominal";
+  if (sawDate && sawNumber) return "nominal";
+  return "quantitative";
 }
 
 export function discretenessOf(type: FieldType): Discreteness {
@@ -51,8 +88,10 @@ export function cellToNumber(value: CellValue): number {
   if (value instanceof Date) return value.getTime();
   if (typeof value === "boolean") return value ? 1 : 0;
   if (typeof value === "string") {
-    const iso = parseTemporal(value, "iso");
-    if (iso.ok) return iso.epochMs;
+    if (ISO_LIKE.test(value)) {
+      const epoch = Date.parse(value);
+      if (Number.isFinite(epoch)) return epoch;
+    }
     const numeric = Number(value);
     return value.trim() === "" ? Number.NaN : numeric;
   }

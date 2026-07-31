@@ -1,35 +1,16 @@
 /**
- * Non-identity stat branches for LayerFrame construction (count/bin/density/
- * smooth/boxplot/summary). Returns null for identity so the caller can fall through.
+ * Non-identity stat branches for LayerFrame construction.
+ * Returns null for identity so the caller can fall through.
+ *
+ * Builders are registered by {@link registerAllStatFrames} (full package) or
+ * left empty on the lean `@ggsvelte/core/render` entry so identity charts do
+ * not pull loess/density/sf modules into the client graph.
  */
 import type { ColumnTable } from "../table.js";
 
-import { buildAlignFrame } from "./frame-stats-align.js";
-import { buildBindotFrame } from "./frame-stats-bindot.js";
-import { buildBinFrame } from "./frame-stats-bin.js";
-import { buildCountFrame } from "./frame-stats-count.js";
-import { buildDensityFrame } from "./frame-stats-density.js";
-import { buildBin2dFrame } from "./frame-stats-bin-2d.js";
-import { buildBinHexFrame } from "./frame-stats-bin-hex.js";
-import { buildEcdfFrame } from "./frame-stats-ecdf.js";
-import { buildConnectFrame } from "./frame-stats-connect.js";
-import { buildDensity2dFrame } from "./frame-stats-density-2d.js";
-import { buildEllipseFrame } from "./frame-stats-ellipse.js";
-import { buildBoxplotFrame } from "./frame-stats-boxplot.js";
-import { buildSmoothFrame } from "./frame-stats-smooth.js";
-import { buildSummaryFrame } from "./frame-stats-summary.js";
-import { buildSumFrame } from "./frame-stats-sum.js";
-import { buildYDensityFrame } from "./frame-stats-ydensity.js";
-import { buildFunctionFrame } from "./frame-stats-function.js";
-import { buildQqFrame, buildQqLineFrame } from "./frame-stats-qq.js";
-import { buildManualFrame } from "./frame-stats-manual.js";
-import { buildContourFrame } from "./frame-stats-contour.js";
-import { buildQuantileFrame } from "./frame-stats-quantile.js";
-import { buildSummaryBinFrame } from "./frame-stats-summary-bin.js";
-import { buildSfCoordinatesFrame } from "./frame-stats-sf-coordinates.js";
-import { buildSfFrame } from "./frame-stats-sf.js";
-import { buildUniqueFrame } from "./frame-stats-unique.js";
+import { getStatFrameBuilder } from "./frame-stats-registry.js";
 import type { Advisory, LayerBinding, LayerFrame, PipelineWarning } from "./types.js";
+import { PipelineError } from "./types.js";
 
 export function buildNonIdentityFrame(
   binding: LayerBinding,
@@ -43,37 +24,14 @@ export function buildNonIdentityFrame(
   const stat = binding.layer.stat ?? "identity";
   if (stat === "identity") return null;
 
-  // ggplot2 stat_sf: expand portable GeoJSON to drawable parts (#809 phase 7).
-  if (stat === "sf") return buildSfFrame(binding, table, groups, warnings);
-  if (stat === "sf_coordinates") return buildSfCoordinatesFrame(binding, table, groups, warnings);
-  if (stat === "unique") return buildUniqueFrame(binding, table, groups);
-  if (stat === "manual") return buildManualFrame(binding, table, groups, warnings);
-  if (stat === "align") return buildAlignFrame(binding, table, groups, warnings);
-  if (stat === "connect") return buildConnectFrame(binding, table, groups, warnings);
-  if (stat === "ellipse") return buildEllipseFrame(binding, table, groups, warnings);
-  if (stat === "count") return buildCountFrame(binding, table, groups, warnings);
-  if (stat === "bin") return buildBinFrame(binding, table, groups, warnings, advisories, binRange);
-  if (stat === "bin_hex") return buildBinHexFrame(binding, table, groups, warnings, advisories);
-  if (stat === "summary_bin")
-    return buildSummaryBinFrame(binding, table, groups, warnings, advisories, binRange);
-  if (stat === "bindot")
-    return buildBindotFrame(binding, table, groups, warnings, advisories, binRange);
-  if (stat === "bin_2d") return buildBin2dFrame(binding, table, groups, warnings, advisories);
-  if (stat === "density") return buildDensityFrame(binding, table, groups, warnings);
-  if (stat === "sum") return buildSumFrame(binding, table, groups, warnings);
-  if (stat === "ydensity") return buildYDensityFrame(binding, table, groups, warnings);
-  if (stat === "ecdf") return buildEcdfFrame(binding, table, groups, warnings);
-  if (stat === "density_2d" || stat === "density_2d_filled") {
-    return buildDensity2dFrame(binding, table, groups, warnings);
+  const build = getStatFrameBuilder(stat);
+  if (build === undefined) {
+    const path = `/layers/${String(binding.index)}/stat`;
+    throw new PipelineError(
+      "unsupported-param",
+      path,
+      `Stat "${stat}" is not registered in this build. Import @ggsvelte/core (full package) rather than @ggsvelte/core/render, or call registerStatFrame("${stat}", …).`,
+    );
   }
-  if (stat === "smooth") return buildSmoothFrame(binding, table, groups, warnings, advisories);
-  if (stat === "quantile") return buildQuantileFrame(binding, table, groups, warnings);
-  if (stat === "contour") return buildContourFrame(binding, table, groups, warnings);
-  if (stat === "boxplot") return buildBoxplotFrame(binding, table, groups, warnings);
-  if (stat === "summary") return buildSummaryFrame(binding, table, groups, warnings);
-  if (stat === "function") return buildFunctionFrame(binding, table, warnings, functionDomain);
-  if (stat === "qq") return buildQqFrame(binding, table, groups, warnings);
-  if (stat === "qq_line") return buildQqLineFrame(binding, table, groups, warnings);
-
-  return null;
+  return build(binding, table, groups, warnings, advisories, binRange, functionDomain);
 }
