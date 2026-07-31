@@ -129,9 +129,9 @@ export function xDiscreteRiskOf(
 }
 
 /** Absolute expanded-row budget for the auto rescue (explicit stat align has no cap). */
-export const STACK_ALIGN_MAX_ROWS = 20_000;
+const STACK_ALIGN_MAX_ROWS = 20_000;
 /** Relative expanded-row budget: multiple of the layer's finite input rows. */
-export const STACK_ALIGN_MAX_GROWTH = 10;
+const STACK_ALIGN_MAX_GROWTH = 10;
 
 /**
  * Non-null when the rescue should fire: ≥2 groups have finite rows, no group
