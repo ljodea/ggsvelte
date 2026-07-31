@@ -179,7 +179,7 @@ describe("stacked area auto-align (#1268)", () => {
 
   it("does not fire when scales.x.type is band", () => {
     const model = runPipeline(
-      gg(sparse as never, aes({ x: "x", y: "y", fill: "g" }))
+      gg(sparse, aes({ x: "x", y: "y", fill: "g" }))
         .geomArea()
         .scales({ x: { type: "band" } })
         .spec(),
