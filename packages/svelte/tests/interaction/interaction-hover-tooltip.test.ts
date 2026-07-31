@@ -165,6 +165,75 @@ describe("hover + tooltip (overlays, never a pipeline re-run)", () => {
     }
   });
 
+  it("stacked area hover shows no point ring — closed fills are region marks (#1270)", async () => {
+    let model: RenderModel | null = null;
+    const areaRows = [
+      { x: 0, y: 3, g: "a" },
+      { x: 1, y: 3, g: "a" },
+      { x: 2, y: 3, g: "a" },
+      { x: 0, y: 2, g: "b" },
+      { x: 1, y: 2, g: "b" },
+      { x: 2, y: 2, g: "b" },
+    ];
+    const { container } = render(GGPlot, {
+      data: areaRows,
+      aes: { x: "x", y: "y", fill: "g" },
+      layers: [{ geom: "area" }],
+      inspect: true,
+      onrender: (m: RenderModel) => {
+        model = m;
+      },
+      ...size,
+    });
+    const m = requireModel(model);
+    let seed = null;
+    for (let id = 0; id < m.candidates.size; id++) {
+      const candidate = m.candidates.candidate(id);
+      if (candidate?.kind === "paths") {
+        seed = candidate;
+        break;
+      }
+    }
+    if (seed === null) throw new Error("expected a paths candidate");
+    const capture = container.querySelector(".gg-capture")!;
+    pointerMoveAt(capture, seed.x, seed.y);
+    await until(() => container.querySelector(".gg-tooltip") !== null);
+    expect(container.querySelector(".gg-hover-ring")).toBeNull();
+  });
+
+  it("line hover keeps the point ring — open strokes anchor at a vertex (#1270)", async () => {
+    let model: RenderModel | null = null;
+    const lineRows = [
+      { x: 0, y: 1 },
+      { x: 1, y: 3 },
+      { x: 2, y: 2 },
+    ];
+    const { container } = render(GGPlot, {
+      data: lineRows,
+      aes: { x: "x", y: "y" },
+      layers: [{ geom: "line" }],
+      inspect: true,
+      onrender: (m: RenderModel) => {
+        model = m;
+      },
+      ...size,
+    });
+    const m = requireModel(model);
+    let seed = null;
+    for (let id = 0; id < m.candidates.size; id++) {
+      const candidate = m.candidates.candidate(id);
+      if (candidate?.kind === "paths") {
+        seed = candidate;
+        break;
+      }
+    }
+    if (seed === null) throw new Error("expected a paths candidate");
+    const capture = container.querySelector(".gg-capture")!;
+    pointerMoveAt(capture, seed.x, seed.y);
+    await until(() => container.querySelector(".gg-tooltip") !== null);
+    expect(container.querySelector(".gg-hover-ring")).not.toBeNull();
+  });
+
   it("keyboard navigation on the single chart surface shows the tooltip", async () => {
     const { container } = render(GGPlot, {
       data: rows,
