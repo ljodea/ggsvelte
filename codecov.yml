@@ -45,6 +45,8 @@ ignore:
   - "**/dist/**"
   - "**/coverage/**"
   - "packages/svelte/bin/**"
+  - "packages/cli/bin/**"
+  - "packages/cli/tests/**"
   - "packages/svelte/skills/**"
   - "packages/core/tests/**"
   - "packages/spec/tests/**"
@@ -58,6 +60,7 @@ flag_management:
       paths:
         - packages/spec/**
         - packages/core/**
+        - packages/cli/**
       carryforward: true
     - name: svelte
       paths:
@@ -78,3 +81,7 @@ component_management:
       name: packages-svelte
       paths:
         - packages/svelte/**
+    - component_id: packages-cli
+      name: packages-cli
+      paths:
+        - packages/cli/**

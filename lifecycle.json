@@ -8203,6 +8203,21 @@
           "lifecycle": "experimental"
         }
       }
+    },
+    {
+      "package": "@ggsvelte/cli",
+      "entry": ".",
+      "source": "packages/cli/src/index.ts",
+      "exports": {
+        "CLIIO": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "runCLI": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        }
+      }
     }
   ]
 }

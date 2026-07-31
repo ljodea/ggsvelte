@@ -15,6 +15,7 @@ const root = join(import.meta.dir, "..");
 
 /** Fixture mirroring the real published workspace shape (see discovery test). */
 const PACKAGES = [
+  { dir: "packages/cli", name: "@ggsvelte/cli", shipped: ["dist", "bin", "src"] },
   { dir: "packages/core", name: "@ggsvelte/core", shipped: ["dist", "src"] },
   { dir: "packages/spec", name: "@ggsvelte/spec", shipped: ["dist", "schema", "src"] },
   { dir: "packages/svelte", name: "@ggsvelte/svelte", shipped: ["dist", "bin", "skills"] },
@@ -59,13 +60,13 @@ describe("decideChangesetComment", () => {
 
   it("reports missing when shipped package code changes without a changeset", () => {
     const decision = decideChangesetComment(
-      ["packages/core/src/scales.ts", "packages/svelte/bin/ggsvelte-render.js", "README.md"],
+      ["packages/core/src/scales.ts", "packages/cli/bin/ggsvelte-render.js", "README.md"],
       PACKAGES,
     );
     expect(decision.verdict).toBe("missing");
     expect(decision.touched).toEqual([
       "packages/core/src/scales.ts",
-      "packages/svelte/bin/ggsvelte-render.js",
+      "packages/cli/bin/ggsvelte-render.js",
     ]);
   });
 

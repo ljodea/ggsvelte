@@ -64,7 +64,7 @@ describe("R0 release wiring", () => {
     const ci = readCiSurface();
     // CI collects lcov for Codecov. Package tests are CI-only — pre-push was
     // nuked so agents can push without re-running the full unit suite locally.
-    expect(ci).toContain("packages/spec packages/core benchmarks scripts tests/evals");
+    expect(ci).toContain("packages/spec packages/core packages/cli benchmarks scripts tests/evals");
     expect(ci).toContain("--coverage-reporter=lcov");
     expect(ci).toContain("coverage/unit");
     expect(ci).toContain("codecov/codecov-action@");
@@ -259,6 +259,7 @@ describe("R0 release wiring", () => {
     expect(producerJob).toContain("packages/spec/dist");
     expect(producerJob).toContain("packages/core/dist");
     expect(producerJob).toContain("packages/svelte/dist");
+    expect(producerJob).toContain("packages/cli/dist");
     expect(producerJob).toContain("run: bun run build");
     // Consumers download instead of rebuilding packages (via composite).
     const consumerJob = ciJob(ci, "consumer-compat");
@@ -526,6 +527,7 @@ describe("R0 release wiring", () => {
       '"/packages/core"',
       '"/packages/spec"',
       '"/packages/svelte"',
+      '"/packages/cli"',
       '"/apps/docs"',
       '"/examples"',
       '"/benchmarks"',
@@ -559,14 +561,20 @@ describe("R0 release wiring", () => {
       privatePackages?: boolean | { version?: boolean; tag?: boolean };
     };
     expect(config.privatePackages).toBe(false);
-    // fixed (not linked): any release bumps all three so package-identity
+    // fixed (not linked): any release bumps all four so package-identity
     // lockstep versions stay equal even when only one package has a changeset.
-    expect(config.fixed).toEqual([["@ggsvelte/spec", "@ggsvelte/core", "@ggsvelte/svelte"]]);
+    expect(config.fixed).toEqual([
+      ["@ggsvelte/spec", "@ggsvelte/core", "@ggsvelte/svelte", "@ggsvelte/cli"],
+    ]);
     expect(config.linked ?? []).toEqual([]);
   });
 
   it("keeps internal dependencies installable in npm-published manifests", () => {
-    for (const path of ["packages/core/package.json", "packages/svelte/package.json"]) {
+    for (const path of [
+      "packages/core/package.json",
+      "packages/svelte/package.json",
+      "packages/cli/package.json",
+    ]) {
       const manifest = JSON.parse(read(path)) as { dependencies?: Record<string, string> };
       for (const [name, range] of Object.entries(manifest.dependencies ?? {})) {
         if (!name.startsWith("@ggsvelte/")) continue;
@@ -578,11 +586,16 @@ describe("R0 release wiring", () => {
   });
 
   it("ships the CLI bins without npm manifest normalization", () => {
-    const manifest = JSON.parse(read("packages/svelte/package.json")) as {
+    const svelteManifest = JSON.parse(read("packages/svelte/package.json")) as {
       bin?: Record<string, string>;
     };
-    expect(manifest.bin).toEqual({
+    expect(svelteManifest.bin).toEqual({
       "ggsvelte-codemod": "bin/ggsvelte-codemod.js",
+    });
+    const cliManifest = JSON.parse(read("packages/cli/package.json")) as {
+      bin?: Record<string, string>;
+    };
+    expect(cliManifest.bin).toEqual({
       "ggsvelte-render": "bin/ggsvelte-render.js",
     });
   });
@@ -590,9 +603,12 @@ describe("R0 release wiring", () => {
   it("keeps every bin's entry file present and executable-shaped", () => {
     // A bin whose target is missing installs a broken command; npm does not
     // validate the path, so this is the only gate that would catch it.
-    for (const relative of ["bin/ggsvelte-codemod.js", "bin/ggsvelte-render.js"]) {
-      const source = read(`packages/svelte/${relative}`);
-      expect(source.startsWith("#!/usr/bin/env node"), `${relative} needs a shebang`).toBe(true);
+    for (const path of [
+      "packages/svelte/bin/ggsvelte-codemod.js",
+      "packages/cli/bin/ggsvelte-render.js",
+    ]) {
+      const source = read(path);
+      expect(source.startsWith("#!/usr/bin/env node"), `${path} needs a shebang`).toBe(true);
     }
   });
 });

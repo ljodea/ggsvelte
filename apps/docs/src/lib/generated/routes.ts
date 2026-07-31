@@ -538,6 +538,11 @@ export const DOCS_ROUTES = [
     },
     headings: [
       {
+        id: "install",
+        title: "Install",
+        level: 2,
+      },
+      {
         id: "input-and-output",
         title: "Input and output",
         level: 2,
@@ -12075,6 +12080,16 @@ export const DOCS_ROUTES = [
         title: "stable-intent (243)",
         level: 3,
       },
+      {
+        id: "ggsvelte-cli",
+        title: "@ggsvelte/cli",
+        level: 2,
+      },
+      {
+        id: "experimental-2",
+        title: "experimental (2)",
+        level: 3,
+      },
     ],
   },
   {
@@ -12096,6 +12111,16 @@ export const DOCS_ROUTES = [
         id: "five-minute-path",
         title: "Five-minute path",
         level: 2,
+      },
+      {
+        id: "0-22-to-0-23",
+        title: "0.22 to 0.23",
+        level: 2,
+      },
+      {
+        id: "cli-moved-to-ggsvelte-cli",
+        title: "CLI moved to @ggsvelte/cli",
+        level: 3,
       },
       {
         id: "0-20-to-0-21",

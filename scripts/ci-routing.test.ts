@@ -1098,10 +1098,10 @@ describe("sharded executions cache independently", () => {
 describe("git ls-tree digests include mode", () => {
   test("mode-only change changes the entry digest", () => {
     const blob = parseGitLsTreeLine(
-      "100644 blob abcdef0123456789\tpackages/svelte/bin/ggsvelte-render.js",
+      "100644 blob abcdef0123456789\tpackages/cli/bin/ggsvelte-render.js",
     );
     const exec = parseGitLsTreeLine(
-      "100755 blob abcdef0123456789\tpackages/svelte/bin/ggsvelte-render.js",
+      "100755 blob abcdef0123456789\tpackages/cli/bin/ggsvelte-render.js",
     );
     expect(blob).not.toBeNull();
     expect(exec).not.toBeNull();
@@ -1111,7 +1111,7 @@ describe("git ls-tree digests include mode", () => {
       formatTreeEntryDigest(exec!.mode, exec!.oid),
     );
 
-    const path = "packages/svelte/bin/ggsvelte-render.js";
+    const path = "packages/cli/bin/ggsvelte-render.js";
     const hash644 = hashJobInputs(
       "packages_dist",
       new Map([[path, formatTreeEntryDigest("100644", "abcdef0123456789")]]),

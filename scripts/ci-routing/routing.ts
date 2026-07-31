@@ -21,6 +21,7 @@ export type ChangeLane =
   | "spec"
   | "core"
   | "svelte"
+  | "cli"
   | "docs"
   | "docs_render"
   | "examples"
@@ -118,6 +119,7 @@ export const DOCS_CONTENT_SCRIPT_PATTERNS: readonly string[] = [
 export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
   spec: ["packages/spec/**"],
   core: ["packages/core/**"],
+  cli: ["packages/cli/**"],
   svelte: ["packages/svelte/**", "skills/ggsvelte/**"],
   docs: [
     "apps/docs/**",
@@ -447,7 +449,8 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
   // Product-wide force. Intentionally excludes ci.yml / .github/actions so
   // Dependabot action pin bumps stay on the cheap CI-plumbing surface.
   const forceProduct = changes.lockfile || changes.ci_routing;
-  const packageSurface = changes.spec || changes.core || changes.svelte || forceProduct;
+  const packageSurface =
+    changes.spec || changes.core || changes.svelte || changes.cli || forceProduct;
   const docsSurface = changes.docs || changes.examples || forceProduct;
   const browserSurface =
     packageSurface || changes.spikes || changes.visual || changes.performance || forceProduct;
@@ -494,6 +497,7 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
       changes.spec ||
       changes.core ||
       changes.svelte ||
+      changes.cli ||
       changes.scripts ||
       changes.benchmarks ||
       changes.evals ||
@@ -516,7 +520,12 @@ export function planJobs(changes: ChangeFlags, options: PlanOptions = {}): JobPl
     actions_security: changes.workflows || changes.ci_actions || forceProduct,
     // retained-memory imports packages/svelte inspection coordinator.
     bench_smoke:
-      changes.benchmarks || changes.spec || changes.core || changes.svelte || forceProduct,
+      changes.benchmarks ||
+      changes.spec ||
+      changes.core ||
+      changes.svelte ||
+      changes.cli ||
+      forceProduct,
     // Informational only; path-gated and independent of the component job.
     interaction_perf: browserSurface,
     packages_dist: packagesDist,

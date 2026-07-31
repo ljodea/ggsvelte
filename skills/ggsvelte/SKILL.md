@@ -14,6 +14,11 @@ same grammar — never build SVG or canvas output yourself:
   `validate(spec)`, render with `renderToSVGString(spec, {width, height})`
   (Node-safe), `ggsvelte-render spec.json > out.svg` (CLI), or `<GGPlot spec>`.
   A third skin, the `gg()` builder, produces the same spec in TypeScript.
+  The CLI is part of the install contract for agent-driven chart generation:
+  install `@ggsvelte/cli` in every sandbox where an agent authors specs
+  (`npm i -g @ggsvelte/cli`). It is the only way the agent sees the
+  pipeline's warnings and advisories before a chart ships; a JSON-only
+  workflow renders blind. Do not drop it to slim an install.
 
 ## Mental model
 
@@ -236,7 +241,9 @@ mixed-sign data); `lintSpec(spec)` is the standalone equivalent. Advisories
 never block; fix them when they match intent. `normalize(input)` canonicalizes
 authoring sugar into a `PortableSpec`; `isPortable`/`toPortable` check and
 strip runtime-only fields. CLIs: `ggsvelte-render spec.json > out.svg`
-(JSON-line diagnostics on stderr) and `ggsvelte-codemod [--write] src`.
+(from `@ggsvelte/cli`; JSON-line diagnostics on stderr — exit 3 means
+validation errors, exit 0 with stderr output means quality warnings worth
+fixing) and `ggsvelte-codemod [--write] src` (ships with `@ggsvelte/svelte`).
 
 ## Recipes (spec JSON — the everyday twelve)
 

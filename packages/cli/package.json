@@ -1,0 +1,53 @@
+{
+  "name": "@ggsvelte/cli",
+  "version": "0.22.0",
+  "description": "ggsvelte-render: validate and render ggsvelte plot specs (JSON) to SVG from the command line — the feedback loop for agents that author specs in sandboxes.",
+  "keywords": [
+    "agents",
+    "charts",
+    "cli",
+    "dataviz",
+    "ggplot2",
+    "grammar-of-graphics",
+    "headless",
+    "plot",
+    "svg",
+    "validation",
+    "visualization"
+  ],
+  "homepage": "https://ggsvelte.sh/",
+  "bugs": "https://github.com/ljodea/ggsvelte/issues",
+  "license": "MIT",
+  "author": "Liam O'Dea",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ljodea/ggsvelte.git",
+    "directory": "packages/cli"
+  },
+  "bin": {
+    "ggsvelte-render": "bin/ggsvelte-render.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "src"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "dependencies": {
+    "@ggsvelte/core": "^0.22.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

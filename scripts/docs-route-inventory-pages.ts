@@ -297,6 +297,7 @@ export const TOP_LEVEL_ROUTES: readonly DocsRouteRecord[] = [
     shell: "docs",
     navigation: { section: "Reference", label: "CLI reference", order: 62 },
     headings: [
+      { id: "install", title: "Install", level: 2 },
       { id: "input-and-output", title: "Input and output", level: 2 },
       { id: "options", title: "Options", level: 2 },
       ...CLI_REFERENCE_OPTIONS.map((option) => ({

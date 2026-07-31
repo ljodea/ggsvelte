@@ -380,7 +380,7 @@ export type {
 export { paintResourceId } from "./mark-paint.js";
 export type { ResolvedGlow, ResolvedGradientPaint } from "./mark-paint.js";
 
-// CLI implementation (the `ggsvelte-render` bin on the ggsvelte package wraps this)
+// CLI implementation (the `ggsvelte-render` bin on @ggsvelte/cli wraps this)
 export { runCLI } from "./cli.js";
 export type { CLIIO } from "./cli.js";
 

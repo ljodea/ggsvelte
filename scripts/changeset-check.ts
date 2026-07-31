@@ -16,7 +16,7 @@
  * Missing stays non-blocking: internal-only package changes are common and
  * forcing empty changesets is worse than an ignorable comment. Unwarranted
  * blocks: docs/examples/script-only changesets have repeatedly bumped
- * core/spec/svelte with notes that change nothing consumers import.
+ * cli/core/spec/svelte with notes that change nothing consumers import.
  *
  * Pure **edits** of already-queued `.changeset/*.md` files (e.g. promoting
  * patch → minor on a pending entry) do not introduce a new release note and

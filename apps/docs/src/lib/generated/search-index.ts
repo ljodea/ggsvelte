@@ -668,6 +668,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["Command-line reference"],
   },
   {
+    id: "heading:reference-cli:install",
+    kind: "heading",
+    title: "Install",
+    summary:
+      "Install in Command-line reference. Render PortableSpec JSON to SVG with implementation-derived flags, streams, diagnostics, and exit classes.",
+    href: "/reference/cli#install",
+    keywords: ["Command-line reference", "Reference"],
+    exact: ["Install"],
+  },
+  {
     id: "heading:reference-cli:input-and-output",
     kind: "heading",
     title: "Input and output",
@@ -19983,6 +19993,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["stable-intent (243)"],
   },
   {
+    id: "heading:guide-lifecycle:ggsvelte-cli",
+    kind: "heading",
+    title: "@ggsvelte/cli",
+    summary:
+      "@ggsvelte/cli in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#ggsvelte-cli",
+    keywords: ["Lifecycle & editions", "Reference"],
+    exact: ["@ggsvelte/cli"],
+  },
+  {
+    id: "heading:guide-lifecycle:experimental-2",
+    kind: "heading",
+    title: "experimental (2)",
+    summary:
+      "experimental (2) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-2",
+    keywords: ["Lifecycle & editions", "Reference"],
+    exact: ["experimental (2)"],
+  },
+  {
     id: "page:guide-upgrading",
     kind: "page",
     title: "Upgrade guide",
@@ -20000,6 +20030,26 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/upgrading#five-minute-path",
     keywords: ["Upgrade guide", "Release"],
     exact: ["Five-minute path"],
+  },
+  {
+    id: "heading:guide-upgrading:0-22-to-0-23",
+    kind: "heading",
+    title: "0.22 to 0.23",
+    summary:
+      "0.22 to 0.23 in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#0-22-to-0-23",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["0.22 to 0.23"],
+  },
+  {
+    id: "heading:guide-upgrading:cli-moved-to-ggsvelte-cli",
+    kind: "heading",
+    title: "CLI moved to @ggsvelte/cli",
+    summary:
+      "CLI moved to @ggsvelte/cli in Upgrade guide. Check versions, apply fixture-backed changes, and verify each 0.x transition.",
+    href: "/guide/upgrading#cli-moved-to-ggsvelte-cli",
+    keywords: ["Upgrade guide", "Release"],
+    exact: ["CLI moved to @ggsvelte/cli"],
   },
   {
     id: "heading:guide-upgrading:0-20-to-0-21",
@@ -40202,6 +40252,24 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["yq"],
   },
   {
+    id: "api:ggsvelte-cli:CLIIO",
+    kind: "api",
+    title: "CLIIO",
+    summary: "@ggsvelte/cli · type · experimental.",
+    href: "/guide/lifecycle#ggsvelte-cli",
+    keywords: ["@ggsvelte/cli", ".", "type", "experimental"],
+    exact: ["CLIIO"],
+  },
+  {
+    id: "api:ggsvelte-cli:runCLI",
+    kind: "api",
+    title: "runCLI",
+    summary: "@ggsvelte/cli · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-cli",
+    keywords: ["@ggsvelte/cli", ".", "value", "experimental"],
+    exact: ["runCLI"],
+  },
+  {
     id: "lifecycle:experimental",
     kind: "lifecycle",
     title: "experimental",
@@ -42942,7 +43010,7 @@ export const DOCS_SEARCH_INDEX = [
     id: "cli:version",
     kind: "cli",
     title: "--version",
-    summary: "Print the installed @ggsvelte/svelte version",
+    summary: "Print the installed ggsvelte CLI version",
     href: "/reference/cli#version",
     keywords: [],
     exact: ["--version"],

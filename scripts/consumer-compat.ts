@@ -93,6 +93,7 @@ function pack(root: string, artifacts: string): string[] {
     spec: packageVersion(root, "spec"),
     core: packageVersion(root, "core"),
     svelte: packageVersion(root, "svelte"),
+    cli: packageVersion(root, "cli"),
   };
   for (const packageDirectory of publishablePackageDirectories) {
     const invocation = packagePackInvocation(artifacts);
@@ -128,8 +129,8 @@ function main(): void {
     const tarballs = pack(root, artifacts);
     writeConsumerFixture(fixture, svelteVersion, tarballs, packageManager);
     verifyPackageManagerVersion(packageManager, packageManagerVersion, fixture, root);
-    const expectedSveltePackageVersion = packageVersion(root, "svelte");
-    for (const step of commandPlan(packageManager, expectedSveltePackageVersion)) {
+    const expectedCliPackageVersion = packageVersion(root, "cli");
+    for (const step of commandPlan(packageManager, expectedCliPackageVersion)) {
       run(step, fixture, root);
     }
     console.log(`consumer-compat: PASS (${packageManager}, Svelte ${svelteVersion})`);

@@ -80,12 +80,14 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
+    "packages/cli/**",
   ],
   unit: [
     ...UNIVERSAL_CONTENT_INPUTS,
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
+    "packages/cli/**",
     "benchmarks/**",
     "scripts/**",
     "tests/evals/**",
@@ -119,6 +121,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
+    "packages/cli/**",
     "apps/docs/**",
     "examples/**",
     // check:scripts-ci-routing tsc covers scripts/ci-routing/** (#734); the
@@ -143,6 +146,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
+    "packages/cli/**",
     ...DOCS_SURFACE_CONTENT_INPUTS,
   ],
   // Full vite adapter-static docs site + packed pages-link gate.
@@ -151,6 +155,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
+    "packages/cli/**",
     ...DOCS_SURFACE_CONTENT_INPUTS,
   ],
   actions_security: [
@@ -166,6 +171,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
+    "packages/cli/**",
   ],
   interaction_perf: [
     ...UNIVERSAL_CONTENT_INPUTS,
@@ -175,6 +181,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
+    "packages/cli/**",
     "apps/docs/**",
     "examples/**",
   ],
@@ -183,6 +190,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
+    "packages/cli/**",
     "skills/ggsvelte/**",
   ],
   // Same inputs as component_svelte (shared packages/svelte tree); distinct
@@ -192,6 +200,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
+    "packages/cli/**",
     "skills/ggsvelte/**",
   ],
   component_spikes: [
@@ -199,6 +208,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
+    "packages/cli/**",
     "spikes/**",
   ],
   component_journeys: [
@@ -206,6 +216,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
+    "packages/cli/**",
     "apps/docs/**",
     "examples/**",
     "tests/visual/**",
@@ -253,6 +264,7 @@ export const JOB_CONTENT_INPUTS: Record<CacheableExecution, readonly string[]> =
     "packages/spec/**",
     "packages/core/**",
     "packages/svelte/**",
+    "packages/cli/**",
     "scripts/consumer-compat.ts",
     "scripts/consumer-compat-plan.ts",
     "scripts/consumer-compat-fixture.ts",

@@ -91,7 +91,7 @@ upstream, `.md`/`.yaml`/`.svelte` can fold back into oxfmt (`.oxfmtrc.json`
 | publint / @arethetypeswrong/cli              | 0.3.21 / 0.18.5        | package publish shape (skips unbuilt stubs)                                        |
 | actionlint (npm, wasm)                       | 2.0.6                  | workflow lint via `scripts/actionlint.ts` (no shellcheck integration — wasm build) |
 | zizmor                                       | 1.26.1 (uv tool)       | Actions security audit                                                             |
-| @changesets/cli                              | 2.31.0                 | versioning/release (spec+core+svelte fixed lockstep, access public)                |
+| @changesets/cli                              | 2.31.0                 | versioning/release (spec+core+svelte+cli fixed lockstep, access public)            |
 | vitest + @vitest/browser-playwright          | 4.1.10                 | browser-mode component tests (factory `playwright()` provider)                     |
 | playwright / @playwright/test                | 1.61.1 (exact pins)    | must match `ghcr.io/<repo>/ci-runner:v1.61.1-noble` — two-step bump (see below)    |
 | @sveltejs/kit + @sveltejs/adapter-static     | 2.x / 3.x              | apps/docs static docs site (the VR screenshot target)                              |
@@ -202,7 +202,7 @@ a tag main never publishes). The lockstep test encodes that inequality.
 | `bun run bench:budgets`                                       | compare `bench-results.json` against `benchmarks/budgets.json` (provisional budgets, +50%)                                                        |
 | `bun run bench:memory` / `bun run bench:memory:check`         | capture the forced-GC retained-memory sample / enforce `benchmarks/memory-baselines.json`                                                         |
 | `bun run bench` / `bun run bench:smoke`                       | mitata pipeline+renderer benchmarks (full / 1k CI smoke)                                                                                          |
-| `bun packages/svelte/bin/ggsvelte-render.js`                  | the `ggsvelte-render` CLI (spec JSON -> SVG on stdout; JSON-line diagnostics on stderr)                                                           |
+| `bun packages/cli/bin/ggsvelte-render.js`                     | the `ggsvelte-render` CLI (spec JSON -> SVG on stdout; JSON-line diagnostics on stderr)                                                           |
 | `Rscript packages/core/tests/fixtures/*/generate.R`           | regenerate the ggplot2-parity fixtures (grouping, stats/positions; needs R + ggplot2)                                                             |
 | `bun run knip`                                                | unused files/exports/dependencies                                                                                                                 |
 | `bun run lint:package`                                        | publint + attw (esm-only profile) over built packages — build first                                                                               |
@@ -483,10 +483,10 @@ PR gets one opened rather than a silent skip. The three-way decision
 Add a `.changeset/*.md` **only** when the PR changes an npm-published package
 surface — the same paths `scripts/changeset-check.ts` treats as shipped
 (`package.json`, that package’s npm `files` entries under
-`packages/{core,spec,svelte}`, and — for packages that publish compiled
+`packages/{cli,core,spec,svelte}`, and — for packages that publish compiled
 `dist` without listing `src` — the package’s `src/` tree that builds into
-`dist`, e.g. `packages/svelte/src/**`). Spec, core, and svelte version in
-**fixed lockstep**, so one real (or spurious) changeset advances all three
+`dist`, e.g. `packages/svelte/src/**`). Spec, core, svelte, and cli version
+in **fixed lockstep**, so one real (or spurious) changeset advances all four
 package versions.
 
 **Do not** add a changeset for docs site, examples, scripts, tests, CI, or
@@ -499,8 +499,8 @@ warrant a patch. Missing changesets on package code stay advisory only.
 ### Bump level (SemVer)
 
 Pick the level from the **public surface change**, not from how small the
-diff looks. Spec, core, and svelte share one version, so the highest level
-among pending changesets wins.
+diff looks. Spec, core, svelte, and cli share one version, so the highest
+level among pending changesets wins.
 
 | Level     | Use for                                                                                                                                                                            |
 | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
