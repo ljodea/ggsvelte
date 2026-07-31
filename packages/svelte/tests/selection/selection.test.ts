@@ -121,6 +121,14 @@ describe("hoverChromeForKind", () => {
     expect(hoverChromeForKind(null)).toBe("ring");
     expect(hoverChromeForKind("rects")).toBe("none");
   });
+
+  it("mutes closed path fills; open paths keep the ring (#1270)", () => {
+    expect(hoverChromeForKind("paths", true)).toBe("none");
+    expect(hoverChromeForKind("paths", false)).toBe("ring");
+    // closedPath only applies to paths — other kinds are unchanged.
+    expect(hoverChromeForKind("points", true)).toBe("ring");
+    expect(hoverChromeForKind("rects", true)).toBe("none");
+  });
 });
 
 describe("anchorsFromCandidateKeys", () => {
