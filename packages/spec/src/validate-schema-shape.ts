@@ -2,7 +2,10 @@
  * Tier-1 schema shape walk: discriminator-aware layer branches + plot shell.
  *
  * Shared geom branch lookup (`GEOM_BRANCHES`) is also used by validate() to
- * gate tier-2 structural checks with Value.Check on known geoms.
+ * recognise known geoms for the tier-2 structural gate. Branch validity for
+ * that gate comes from the compiled plot check (valid path) or from this
+ * walk's per-layer `Value.Errors` result (invalid path) — not a second
+ * interpreted `Value.Check` per layer (#1279).
  *
  * Orchestrator: validate.ts. Error mapping: validate-map-errors.ts.
  */
@@ -121,39 +124,65 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
+/** One layer's tier-1 shape errors plus whether its geom branch was clean. */
+type LayerShapeResult = {
+  errors: SpecError[];
+  /** True when `Value.Errors(branch, layer)` was empty (branch-valid). */
+  branchOk: boolean;
+};
+
 /** Discriminator-aware layer walk — one layer's tier-1 shape errors. */
-function mapLayerShapeErrors(layer: unknown, layerPath: string): SpecError[] {
+function mapLayerShapeErrors(layer: unknown, layerPath: string): LayerShapeResult {
   if (!isRecord(layer)) {
-    return [
-      {
-        code: "invalid-layer",
-        path: layerPath,
-        message: `Each layer must be an object with a "geom" (got ${typeof layer}).`,
-        fix: { description: "Replace with a layer object.", example: { geom: "point" } },
-      },
-    ];
+    return {
+      branchOk: false,
+      errors: [
+        {
+          code: "invalid-layer",
+          path: layerPath,
+          message: `Each layer must be an object with a "geom" (got ${typeof layer}).`,
+          fix: { description: "Replace with a layer object.", example: { geom: "point" } },
+        },
+      ],
+    };
   }
   const geom = layer["geom"];
   // Own-key check: `in` walks the prototype chain, so a geom named
   // "constructor" would pass this guard and hand Value.Errors a function
   // instead of a schema — reporting invalid-type rather than the did-you-mean.
   if (typeof geom !== "string" || !Object.hasOwn(GEOM_BRANCHES, geom)) {
-    return [unknownGeomError(geom, layerPath)];
+    return { branchOk: false, errors: [unknownGeomError(geom, layerPath)] };
   }
   const branch = GEOM_BRANCHES[geom as keyof typeof GEOM_BRANCHES];
-  return mapValueErrors(Value.Errors(branch, layer), {
-    schema: branch,
-    value: layer,
-    pathPrefix: layerPath,
-  });
+  const raw = Value.Errors(branch, layer);
+  return {
+    branchOk: raw.length === 0,
+    errors: mapValueErrors(raw, {
+      schema: branch,
+      value: layer,
+      pathPrefix: layerPath,
+    }),
+  };
 }
+
+/** Result of the tier-1 shape walk for one invalid plot. */
+export type SchemaShapeResult = {
+  errors: SpecError[];
+  /**
+   * Layer indices whose geom-branch `Value.Errors` walk was empty. Used by
+   * validate() so the tier-2 structural gate does not re-run interpreted
+   * `Value.Check` on the same layers.
+   */
+  branchOkLayerIndices: ReadonlySet<number>;
+};
 
 /**
  * Tier-1 schema walk (caller must set TypeBox Settings for the process).
  * Layer branch walk + plot-level shell so layer noise is not double-reported.
  */
-export function collectSchemaShapeErrors(input: Record<string, unknown>): SpecError[] {
+export function collectSchemaShapeErrors(input: Record<string, unknown>): SchemaShapeResult {
   const errors: SpecError[] = [];
+  const branchOkLayerIndices = new Set<number>();
   const layers = input["layers"];
   if (!Array.isArray(layers)) {
     errors.push({
@@ -174,7 +203,9 @@ export function collectSchemaShapeErrors(input: Record<string, unknown>): SpecEr
     });
   } else {
     for (let i = 0; i < layers.length; i++) {
-      errors.push(...mapLayerShapeErrors(layers[i], `/layers/${i}`));
+      const layerResult = mapLayerShapeErrors(layers[i], `/layers/${i}`);
+      if (layerResult.branchOk) branchOkLayerIndices.add(i);
+      errors.push(...layerResult.errors);
     }
   }
 
@@ -190,12 +221,12 @@ export function collectSchemaShapeErrors(input: Record<string, unknown>): SpecEr
   );
 
   if (errors.length === 0) {
-    // Value.Check failed but neither walk produced a mapped error.
+    // Compiled plot Check failed but neither walk produced a mapped error.
     errors.push({
       code: "invalid-type",
       path: "",
       message: "The spec does not match the schema.",
     });
   }
-  return errors;
+  return { errors, branchOkLayerIndices };
 }

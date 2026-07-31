@@ -5,7 +5,8 @@
  * Tier-1 mechanism (decision 0004): TypeBox 1.x compiled checks plus
  * `Value.Errors` over the same schemas that emit `schema/v0.json` — one
  * artifact, no drift.
- * Layer/plot shape walks: validate-schema-shape.ts (shared GEOM_BRANCHES).
+ * Layer/plot shape walks: validate-schema-shape.ts (shared GEOM_BRANCHES;
+ * also hands per-layer branch-ok indices to the tier-2 structural gate).
  * Raw TypeBox union noise is mapped to the agent error contract in
  * validate-map-errors.ts (schema walk: validate-schema-walk.ts; channel/data
  * form classification: validate-map-forms.ts).
@@ -18,7 +19,6 @@
  */
 import Compile from "typebox/compile";
 import { Settings } from "typebox/system";
-import { Value } from "typebox/value";
 
 import type { SpecError } from "./errors.js";
 import type { SpecAdvisory } from "./lint.js";
@@ -90,10 +90,17 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
     exactOptionalPropertyTypes: true,
   });
   try {
-    // TypeBox's interpreted Value.Check walks the cyclic schema graph repeatedly
-    // for every inline row. Reuse its compiled validator so large plots remain
-    // interactive while preserving Value.Errors for detailed invalid diagnostics.
+    // TypeBox's interpreted Value.Check / Value.Errors walk the cyclic schema
+    // graph for every inline row. Use the compiled plot validator for the
+    // common valid path, and Value.Errors only when building invalid diagnostics.
     const schemaValid: boolean = PLOT_SPEC_VALIDATOR.Check(input);
+
+    // Tier-2 structural gate: run layerStructuralErrors only on branch-valid
+    // layers. When the compiled plot check passed, LayerSpec's geom-discriminated
+    // union already proves every layer matches its GEOM_BRANCHES member — skip
+    // a second interpreted walk. When it failed, reuse the shape walk's per-layer
+    // Value.Errors emptiness set (#1279).
+    let branchOkLayers: ReadonlySet<number> | "all" = "all";
 
     if (!schemaValid) {
       if (!isRecord(input)) {
@@ -115,7 +122,9 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
         };
       }
 
-      errors.push(...collectSchemaShapeErrors(input));
+      const shape = collectSchemaShapeErrors(input);
+      errors.push(...shape.errors);
+      branchOkLayers = shape.branchOkLayerIndices;
     }
 
     // TypeBox-free structural gates (shared with pipeline render path).
@@ -128,8 +137,8 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
     // of the tier-2 contract (the pipeline enforces them at render time with
     // equivalent structured errors); tier 1 stays schema-shape-only so partial
     // specs remain composable.
-    // Eligibility: only record layers with a known geom whose branch passes
-    // Value.Check (shape errors already reported above). Uses shared GEOM_BRANCHES.
+    // Eligibility: record layers with a known geom whose branch is valid
+    // (see branchOkLayers above). Uses shared GEOM_BRANCHES for known-geom keys.
     if (options !== undefined && isRecord(input) && Array.isArray(input["layers"])) {
       const plotAes = isRecord(input["aes"]) ? (input["aes"] as Aes) : undefined;
       const layers = input["layers"] as unknown[];
@@ -138,11 +147,9 @@ export function validate(input: unknown, options?: ValidateOptions): ValidateRes
         if (!isRecord(layer)) continue;
         const geom = layer["geom"];
         // Own-key check, as in validate-schema-shape: `in` walks the prototype
-        // chain, so a geom named "constructor" would reach Value.Check with a
-        // function in place of a schema.
+        // chain, so a geom named "constructor" would look like a known key.
         if (typeof geom !== "string" || !Object.hasOwn(GEOM_BRANCHES, geom)) continue;
-        const branch = GEOM_BRANCHES[geom as keyof typeof GEOM_BRANCHES];
-        if (!Value.Check(branch, layer)) continue; // shape errors already reported
+        if (branchOkLayers !== "all" && !branchOkLayers.has(i)) continue;
         errors.push(...layerStructuralErrors(layer, geom, i, plotAes));
       }
     }
