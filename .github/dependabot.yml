@@ -27,6 +27,7 @@ updates:
   - package-ecosystem: "bun"
     directories:
       - "/"
+      - "/packages/cli"
       - "/packages/core"
       - "/packages/spec"
       - "/packages/svelte"

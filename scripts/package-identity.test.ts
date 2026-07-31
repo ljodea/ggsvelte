@@ -7,6 +7,7 @@ const packagePaths = [
   "packages/spec/package.json",
   "packages/core/package.json",
   "packages/svelte/package.json",
+  "packages/cli/package.json",
 ] as const;
 
 type PublishedManifest = {

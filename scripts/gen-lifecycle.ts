@@ -39,6 +39,7 @@ export const SURFACES: readonly { pkg: string; entry: string; file: string }[] =
   { pkg: "@ggsvelte/core", entry: "./temporal", file: "packages/core/src/temporal-entry.ts" },
   { pkg: "@ggsvelte/core", entry: "./dom", file: "packages/core/src/dom/index.ts" },
   { pkg: "@ggsvelte/svelte", entry: ".", file: "packages/svelte/src/lib/index.ts" },
+  { pkg: "@ggsvelte/cli", entry: ".", file: "packages/cli/src/index.ts" },
 ];
 
 export class LifecycleError extends Error {

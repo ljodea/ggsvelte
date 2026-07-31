@@ -1,0 +1,74 @@
+# @ggsvelte/cli
+
+[![codecov](https://codecov.io/gh/ljodea/ggsvelte/branch/main/graph/badge.svg?component=packages-cli)](https://app.codecov.io/gh/ljodea/ggsvelte/tree/main/packages%2Fcli)
+
+`ggsvelte-render`: validate and render a ggsvelte plot spec (JSON) to SVG from
+the command line. This is the feedback loop for agents that author specs — it
+surfaces the validation errors, warnings, and advisories a JSON-only workflow
+never sees.
+
+## Why this package exists
+
+An embedded analytics agent writes a spec, the host webapp renders it with
+`@ggsvelte/svelte`. Without this CLI in the agent's sandbox, the agent ships
+the spec blind: a spec can be schema-valid yet draw a misleading chart, and
+the pipeline's warnings (degenerate stacks, single-observation groups, scale
+inference problems) fire in the webapp where nobody reads them. With the CLI,
+the agent renders locally, reads the JSONL diagnostics on stderr, and fixes
+the spec before anyone sees it.
+
+If you embed spec-writing agents, treat this package as part of the install
+contract, not an option.
+
+## Install
+
+```sh
+npm install -g @ggsvelte/cli
+# or: bun add -g @ggsvelte/cli
+# or run without installing: bunx --package @ggsvelte/cli ggsvelte-render spec.json
+```
+
+In an agent sandbox image:
+
+```dockerfile
+FROM node:24-slim
+RUN npm install -g @ggsvelte/cli
+# agents can now run: ggsvelte-render spec.json > out.svg
+```
+
+Pin the same minor version as the `@ggsvelte/svelte` your webapp renders
+with — all `@ggsvelte/*` packages version in lockstep.
+
+## Usage
+
+```sh
+ggsvelte-render spec.json > out.svg          # spec from a file
+ggsvelte-render < spec.json > out.svg        # spec from stdin
+ggsvelte-render spec.json --data data.json   # named datasets from a file
+ggsvelte-render spec.json --width 832 --height 400
+```
+
+- SVG goes to stdout. Nothing else ever does.
+- Diagnostics go to stderr as JSON lines:
+  `{"kind":"error",…}` | `{"kind":"warning",…}` | `{"kind":"advisory",…}`.
+  Scale-inference diagnostics set `source: "scale"` so hosts can filter.
+
+## Exit codes
+
+| Code | Meaning                                                      |
+| ---- | ------------------------------------------------------------ |
+| 0    | rendered                                                     |
+| 1    | render failed (pipeline error — spec was structurally valid) |
+| 2    | usage error (bad flags, unreadable input, invalid JSON)      |
+| 3    | invalid spec (validation errors — see stderr JSON lines)     |
+
+An agent loop: render, and on exit 3 apply the `fix.example` from each stderr
+error at its `path`, re-render; on exit 0 still read stderr — warnings and
+advisories are chart-quality feedback.
+
+## Reference
+
+- [CLI reference](https://ggsvelte.sh/reference/cli) — all options and
+  diagnostics
+- Programmatic use without spawning: `runCLI` from this package (re-exported
+  from `@ggsvelte/core`)

@@ -70,7 +70,7 @@ function deprecatedBlocks(source: string): string[] {
 }
 
 describe("deprecated surfaces link migration guidance", () => {
-  const packages = ["spec", "core", "svelte"];
+  const packages = ["spec", "core", "svelte", "cli"];
 
   it("every @deprecated tag carries since-version and a resolving guide link", () => {
     for (const pkg of packages) {

@@ -34,7 +34,7 @@ if (
   !("version" in packageJson) ||
   typeof packageJson.version !== "string"
 ) {
-  throw new Error("@ggsvelte/svelte package.json has no string version");
+  throw new Error("@ggsvelte/cli package.json has no string version");
 }
 const packageVersion = packageJson.version;
 

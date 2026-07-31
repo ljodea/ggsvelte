@@ -14,7 +14,7 @@ export interface CommandStep {
   expect?: string;
 }
 
-export const publishablePackageDirectories = ["spec", "core", "svelte"] as const;
+export const publishablePackageDirectories = ["spec", "core", "svelte", "cli"] as const;
 
 export type PublishablePackageVersions = Readonly<
   Record<(typeof publishablePackageDirectories)[number], string>
@@ -97,7 +97,7 @@ function scriptRunner(packageManager: PackageManager, script: string): CommandSt
 
 export function commandPlan(
   packageManager: PackageManager,
-  expectedSveltePackageVersion: string,
+  expectedCliPackageVersion: string,
 ): CommandStep[] {
   const install: CommandStep =
     packageManager === "npm"
@@ -124,7 +124,7 @@ export function commandPlan(
   build.label = "build and prerender SvelteKit consumer";
   const cliVersion = runner(packageManager, "ggsvelte-render", ["--version"]);
   cliVersion.label = "CLI version";
-  cliVersion.expect = expectedSveltePackageVersion;
+  cliVersion.expect = expectedCliPackageVersion;
   const cliFile = runner(packageManager, "ggsvelte-render", ["plot.json"]);
   cliFile.label = "CLI file input";
   cliFile.expect = "<svg";

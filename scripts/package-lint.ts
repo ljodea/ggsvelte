@@ -27,6 +27,7 @@ const targets: Target[] = [
   { dir: "packages/spec", attw: true },
   { dir: "packages/core", attw: true },
   { dir: "packages/svelte", attw: false }, // .svelte d.ts imports (see header)
+  { dir: "packages/cli", attw: true },
 ];
 
 const root = process.cwd();

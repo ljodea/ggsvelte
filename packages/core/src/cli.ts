@@ -1,6 +1,6 @@
 /**
- * `ggsvelte-render` CLI implementation (plan: the bin lives on the `@ggsvelte/svelte`
- * package — packages/svelte/bin/ggsvelte-render.js is a thin wrapper around
+ * `ggsvelte-render` CLI implementation (the bin lives on the `@ggsvelte/cli`
+ * package — packages/cli/bin/ggsvelte-render.js is a thin wrapper around
  * this pure-entry module, so the logic is testable without spawning).
  *
  * Contract:
@@ -84,7 +84,7 @@ export const CLI_OPTIONS = [
     anchor: "version",
     flag: "--version",
     value: "",
-    description: "Print the installed @ggsvelte/svelte version",
+    description: "Print the installed ggsvelte CLI version",
     kind: "boolean",
     target: "version",
   },

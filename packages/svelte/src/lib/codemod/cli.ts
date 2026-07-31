@@ -4,7 +4,8 @@
  *
  * Pure entry point: all I/O is injected through {@link CodemodIO}, so the whole
  * command is testable without touching a disk. bin/ggsvelte-codemod.js wires
- * process streams and the exit code, exactly as bin/ggsvelte-render.js does.
+ * process streams and the exit code, exactly as @ggsvelte/cli's
+ * bin/ggsvelte-render.js does.
  *
  * ADR 0013: dry-run by default, writes only behind an explicit `--write`, and
  * anything the transform refuses to guess at is reported with the guide anchor

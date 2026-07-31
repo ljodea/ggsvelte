@@ -38,9 +38,12 @@ bun add @ggsvelte/svelte
 \`\`\`
 
 \`@ggsvelte/spec\` (schema, validate, builder) and \`@ggsvelte/core\`
-(pipeline, headless render, CLI) are dependencies of the Svelte package.
-Install them directly for spec-only or headless work. Bundled teaching data
-lives at \`@ggsvelte/svelte/data\`.
+(pipeline, headless render) are dependencies of the Svelte package. Install
+them directly for spec-only or headless work. The \`ggsvelte-render\` CLI is
+its own package — install \`@ggsvelte/cli\` in every sandbox where an agent
+authors specs, so validation errors and chart-quality warnings surface
+before a chart ships. Bundled teaching data lives at
+\`@ggsvelte/svelte/data\`.
 
 ## A complete Svelte file
 
@@ -1165,10 +1168,12 @@ const svg = renderToSVGString(spec, { width: 640, height: 400 });
 \`\`\`
 
 \`\`\`sh fragment
+# npm install -g @ggsvelte/cli
 ggsvelte-render spec.json > chart.svg
 \`\`\`
 
-SVG on stdout; JSON Lines diagnostics on stderr. [CLI reference](/reference/cli).
+SVG on stdout; JSON Lines diagnostics on stderr — the agent feedback loop.
+[CLI reference](/reference/cli).
 
 ## Compatibility
 
@@ -1938,6 +1943,24 @@ migration note here.
 The accepted lifecycle and deprecation policy remains in
 [Lifecycle and editions](/guide/lifecycle#lifecycle-tags); this page applies it
 rather than creating a second policy.
+
+## 0.22 to 0.23
+
+### CLI moved to @ggsvelte/cli
+
+The \`ggsvelte-render\` bin no longer ships with \`@ggsvelte/svelte\`. It is
+its own package, \`@ggsvelte/cli\`, with no Svelte dependency — install it
+wherever the command runs (agent sandboxes above all):
+
+\`\`\`sh fragment
+npm install -g @ggsvelte/cli
+# or add @ggsvelte/cli as a dependency of the project that invokes it
+\`\`\`
+
+The command name, flags, exit codes, and JSONL diagnostics are unchanged.
+\`ggsvelte-codemod\` still ships with \`@ggsvelte/svelte\`. If a sandbox image
+or CI step ran \`ggsvelte-render\` via the Svelte package's bin, add
+\`@ggsvelte/cli\` there before upgrading \`@ggsvelte/svelte\`.
 
 ## 0.20 to 0.21
 

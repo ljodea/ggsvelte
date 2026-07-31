@@ -18,10 +18,13 @@ import { loadSupportMatrix } from "./support-matrix.js";
 
 describe("packed consumer compatibility harness", () => {
   test("installs every publishable tarball rather than workspace source", () => {
-    expect(packageTarballNames({ spec: "0.2.0", core: "0.2.0", svelte: "0.2.1" })).toEqual([
+    expect(
+      packageTarballNames({ spec: "0.2.0", core: "0.2.0", svelte: "0.2.1", cli: "0.2.1" }),
+    ).toEqual([
       "ggsvelte-spec-0.2.0.tgz",
       "ggsvelte-core-0.2.0.tgz",
       "ggsvelte-svelte-0.2.1.tgz",
+      "ggsvelte-cli-0.2.1.tgz",
     ]);
   });
 
@@ -90,7 +93,7 @@ describe("packed consumer compatibility harness", () => {
       writeConsumerFixture(
         directory,
         "5.33.1",
-        ["/tmp/spec.tgz", "/tmp/core.tgz", "/tmp/svelte.tgz"],
+        ["/tmp/spec.tgz", "/tmp/core.tgz", "/tmp/svelte.tgz", "/tmp/cli.tgz"],
         "npm",
       );
       expect(readFileSync(join(directory, "src", "routes", "+page.svelte"), "utf8")).toBe(
@@ -112,6 +115,7 @@ describe("packed consumer compatibility harness", () => {
         join("artifacts", "ggsvelte-spec-0.0.0.tgz"),
         join("artifacts", "ggsvelte-core-0.0.0.tgz"),
         join("artifacts", "ggsvelte-svelte-0.0.0.tgz"),
+        join("artifacts", "ggsvelte-cli-0.0.0.tgz"),
       ],
       "/consumer",
     );
@@ -119,6 +123,7 @@ describe("packed consumer compatibility harness", () => {
     expect(manifest.dependencies["@ggsvelte/spec"]).toContain("ggsvelte-spec-0.0.0.tgz");
     expect(manifest.dependencies["@ggsvelte/core"]).toContain("ggsvelte-core-0.0.0.tgz");
     expect(manifest.dependencies["@ggsvelte/svelte"]).toContain("ggsvelte-svelte-0.0.0.tgz");
+    expect(manifest.dependencies["@ggsvelte/cli"]).toContain("ggsvelte-cli-0.0.0.tgz");
     expect(manifest.devDependencies).toMatchObject({
       "@sveltejs/adapter-static": "3.0.10",
       "@sveltejs/kit": "2.20.8",

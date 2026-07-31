@@ -41,6 +41,11 @@
       "entry": ["tests/**/*.test.ts"],
       "project": ["src/**", "tests/**"],
     },
+    "packages/cli": {
+      // knip infers bin/ and the exports entry from package.json itself.
+      "entry": ["tests/**/*.test.ts"],
+      "project": ["src/**", "bin/**", "tests/**"],
+    },
     "packages/svelte": {
       // tests/migrations are upgrade-guide fixtures: read by
       // scripts/migration-fixtures.test.ts via the filesystem (not imports)

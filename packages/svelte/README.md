@@ -3,8 +3,10 @@
 [![codecov](https://codecov.io/gh/ljodea/ggsvelte/branch/main/graph/badge.svg?component=packages-svelte)](https://app.codecov.io/gh/ljodea/ggsvelte/tree/main/packages%2Fsvelte)
 
 Svelte 5 components for ggsvelte. Re-exports `@ggsvelte/spec` and
-`@ggsvelte/core`, ships the `ggsvelte-render` CLI, and publishes the agent skill
-at `skills/ggsvelte`.
+`@ggsvelte/core` and publishes the agent skill at `skills/ggsvelte`. The
+`ggsvelte-render` CLI ships separately as
+[`@ggsvelte/cli`](../cli) — install it in any sandbox where an agent
+authors specs.
 
 ```sh
 bun add @ggsvelte/svelte

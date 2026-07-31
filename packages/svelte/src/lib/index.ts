@@ -1,8 +1,8 @@
 // ggsvelte — Svelte 5 adapter. Props-first API (<GGPlot spec/props>);
 // declaration-only children (<GeomPoint>/<GeomBar>/...) are optional sugar
 // (decision 0001, mechanism A). Re-exports the spec/core surface so
-// `bun add @ggsvelte/svelte` gets everything. Owns the `ggsvelte-render` CLI bin
-// (bin/ggsvelte-render.js, wrapping @ggsvelte/core's runCLI).
+// `bun add @ggsvelte/svelte` gets everything. The `ggsvelte-render` CLI bin
+// lives on @ggsvelte/cli (wrapping @ggsvelte/core's runCLI).
 //
 // Lifecycle (Hadley lesson 13; meanings in CONTRIBUTING.md): tags collected
 // into lifecycle.json by scripts/gen-lifecycle.ts.

@@ -33,6 +33,7 @@ export function fixtureManifest(
     "@ggsvelte/spec": file(tarballs[0]!),
     "@ggsvelte/core": file(tarballs[1]!),
     "@ggsvelte/svelte": file(tarballs[2]!),
+    "@ggsvelte/cli": file(tarballs[3]!),
   };
   return {
     name: "ggsvelte-packed-consumer",
@@ -69,7 +70,7 @@ export function writeConsumerFixture(
   if (packageManager === "pnpm") {
     writeFileSync(
       join(directory, "pnpm-workspace.yaml"),
-      `packages: []\noverrides:\n  '@ggsvelte/spec': ${JSON.stringify(manifest.dependencies["@ggsvelte/spec"])}\n  '@ggsvelte/core': ${JSON.stringify(manifest.dependencies["@ggsvelte/core"])}\n  '@ggsvelte/svelte': ${JSON.stringify(manifest.dependencies["@ggsvelte/svelte"])}\n`,
+      `packages: []\noverrides:\n  '@ggsvelte/spec': ${JSON.stringify(manifest.dependencies["@ggsvelte/spec"])}\n  '@ggsvelte/core': ${JSON.stringify(manifest.dependencies["@ggsvelte/core"])}\n  '@ggsvelte/svelte': ${JSON.stringify(manifest.dependencies["@ggsvelte/svelte"])}\n  '@ggsvelte/cli': ${JSON.stringify(manifest.dependencies["@ggsvelte/cli"])}\n`,
     );
   }
   writeFileSync(

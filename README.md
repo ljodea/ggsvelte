@@ -422,9 +422,10 @@ Plot theme tokens are independent of site light/dark.
 
 | Package                               | Surface                                                             |
 | ------------------------------------- | ------------------------------------------------------------------- |
-| [`@ggsvelte/svelte`](packages/svelte) | Svelte 5 components, re-exports, CLI, agent skill                   |
+| [`@ggsvelte/svelte`](packages/svelte) | Svelte 5 components, re-exports, agent skill                        |
 | [`@ggsvelte/spec`](packages/spec)     | PortableSpec types, JSON Schema, validate/normalize, fluent builder |
 | [`@ggsvelte/core`](packages/core)     | Pipeline, headless SVG, canvas, hit testing                         |
+| [`@ggsvelte/cli`](packages/cli)       | `ggsvelte-render` CLI: validate + render specs in agent sandboxes   |
 
 ## Reference
 
