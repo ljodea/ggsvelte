@@ -8,7 +8,7 @@ import { registerStatFrame } from "./frame-stats-registry.js";
 
 let registered = false;
 
-export function registerBasicStatFrames(): void {
+function registerBasicStatFrames(): void {
   if (registered) return;
   registered = true;
   registerStatFrame("count", (binding, table, groups, warnings) =>
