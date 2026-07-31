@@ -373,7 +373,7 @@ export function deriveTicks(
     // `@ggsvelte/core/render` still classifies ISO columns as temporal and
     // trains a time scale — fall through to timeTicks + formatTime instead of
     // throwing from requireTemporalRuntime("planTemporalAxis").
-    const temporalRuntime = domain.temporal !== undefined ? getTemporalRuntime() : null;
+    const temporalRuntime = domain.temporal === undefined ? null : getTemporalRuntime();
     if (domain.temporal !== undefined && temporalRuntime !== null) {
       const plan = temporalRuntime.planAxis({
         aesthetic: domain.temporal.aesthetic,
