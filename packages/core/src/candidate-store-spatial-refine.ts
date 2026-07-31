@@ -12,7 +12,14 @@ export type SpatialRefine = {
     py: number,
     pathContainment: Map<string, boolean>,
   ): number | null;
-  intersects(id: number, loX: number, loY: number, hiX: number, hiY: number): boolean;
+  intersects(
+    id: number,
+    loX: number,
+    loY: number,
+    hiX: number,
+    hiY: number,
+    rectContainment: Map<string, boolean>,
+  ): boolean;
 };
 
 /** Build exactDistance / intersects closed over store indexes. */
@@ -20,6 +27,7 @@ export function createSpatialRefine(indexes: CandidateStoreIndexes): SpatialRefi
   const hit = createHitGeometry(indexes);
   return {
     exactDistance: (id, px, py, pathContainment) => hit.distance(id, px, py, pathContainment),
-    intersects: (id, loX, loY, hiX, hiY) => hit.intersects(id, loX, loY, hiX, hiY),
+    intersects: (id, loX, loY, hiX, hiY, rectContainment) =>
+      hit.intersects(id, loX, loY, hiX, hiY, rectContainment),
   };
 }

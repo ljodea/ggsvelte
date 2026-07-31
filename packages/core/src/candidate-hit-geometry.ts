@@ -29,7 +29,14 @@ export type HitGeometry = {
     pathContainment: Map<string, boolean>,
   ): number | null;
   contains(id: number, px: number, py: number, pathContainment: Map<string, boolean>): boolean;
-  intersects(id: number, loX: number, loY: number, hiX: number, hiY: number): boolean;
+  intersects(
+    id: number,
+    loX: number,
+    loY: number,
+    hiX: number,
+    hiY: number,
+    rectContainment: Map<string, boolean>,
+  ): boolean;
   aabb(id: number, pathAabbCache?: Map<string, Aabb>): Aabb;
 };
 
@@ -55,6 +62,7 @@ type KindOps = {
     loY: number,
     hiX: number,
     hiY: number,
+    rectContainment: Map<string, boolean>,
   ): boolean;
   aabb(indexes: CandidateStoreIndexes, id: number, pathAabbCache?: Map<string, Aabb>): Aabb;
 };
@@ -347,7 +355,7 @@ const pathsOps: KindOps = {
       subpath === null ? batch.linewidth : (batch.linewidths?.[subpath] ?? batch.linewidth);
     return d <= linewidth / 2 + indexes.hitTolerance ? d : null;
   },
-  intersects(indexes, id, loX, loY, hiX, hiY) {
+  intersects(indexes, id, loX, loY, hiX, hiY, rectContainment) {
     const batch = batchAt(indexes, id);
     if (batch.kind !== "paths") return false;
     const panel = indexes.scene.panels[indexes.panelIds[id]!]!;
@@ -362,9 +370,19 @@ const pathsOps: KindOps = {
     )
       return true;
     if (batch.fills !== undefined) {
-      const centerX = (loX + hiX) / 2 - panel.x;
-      const centerY = (loY + hiY) / 2 - panel.y;
-      if (insidePath(batch, range[0], range[1], centerX, centerY)) return true;
+      // Rect-CENTER containment is identical for every candidate on this
+      // subpath (a batch belongs to one panel), so cache it per probe rect.
+      // rectContainment is valid for ONE rect and caches a different
+      // predicate than contains' point-containment map — never share the two.
+      const containmentKey = `${indexes.batchIds[id]}:${range[0]}:${range[1]}`;
+      let contained = rectContainment.get(containmentKey);
+      if (contained === undefined) {
+        const centerX = (loX + hiX) / 2 - panel.x;
+        const centerY = (loY + hiY) / 2 - panel.y;
+        contained = insidePath(batch, range[0], range[1], centerX, centerY);
+        rectContainment.set(containmentKey, contained);
+      }
+      if (contained) return true;
     }
     return false;
   },
@@ -426,7 +444,8 @@ export function createHitGeometry(indexes: CandidateStoreIndexes): HitGeometry {
       opsFor(id).distance(indexes, id, px, py, pathContainment),
     contains: (id, px, py, pathContainment) =>
       opsFor(id).contains(indexes, id, px, py, pathContainment),
-    intersects: (id, loX, loY, hiX, hiY) => opsFor(id).intersects(indexes, id, loX, loY, hiX, hiY),
+    intersects: (id, loX, loY, hiX, hiY, rectContainment) =>
+      opsFor(id).intersects(indexes, id, loX, loY, hiX, hiY, rectContainment),
     aabb: (id, pathAabbCache) => opsFor(id).aabb(indexes, id, pathAabbCache),
   };
 }
