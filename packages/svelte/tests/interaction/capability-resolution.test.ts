@@ -1,3 +1,4 @@
+import { fromPartial } from "@total-typescript/shoehorn";
 import { flushSync } from "svelte";
 import { describe, expect, it } from "vitest";
 
@@ -13,7 +14,7 @@ function makeProps(overrides: Record<string, unknown> = {}): EnginePlotProps {
 }
 
 function focusLayer(channel: string): Layer {
-  return { kind: "legendFocus", value: { channel, input: true } } as unknown as Layer;
+  return fromPartial({ kind: "legendFocus", value: { channel, input: true } });
 }
 
 describe("createCapabilityResolution", () => {
@@ -68,10 +69,12 @@ describe("createCapabilityResolution", () => {
     );
     expect(resolution.legendFocus().requested).toBe(false);
     registry.registerPlotLayer(focusLayer("shape"));
-    registry.registerPlotLayer({
-      kind: "legendFilter",
-      value: { channel: "color", input: { mode: "include" as const } },
-    } as unknown as Layer);
+    registry.registerPlotLayer(
+      fromPartial<Layer>({
+        kind: "legendFilter",
+        value: { channel: "color", input: { mode: "include" as const } },
+      }),
+    );
     flushSync();
     expect(resolution.legendFocus().channels).toEqual(new Set(["shape"]));
     expect(resolution.legendFilter().configInput).toEqual({ mode: "include" });
