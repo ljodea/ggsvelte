@@ -35,7 +35,8 @@
     "./dist/install-temporal.js",
     "./dist/pipeline/frame-stats-register-all.js",
     "./dist/pipeline/geometry-register-all.js",
-    "./dist/pipeline/geometry-register-basic.js"
+    "./dist/pipeline/geometry-register-basic.js",
+    "./dist/pipeline/frame-stats-register-basic.js"
   ],
   "exports": {
     ".": {

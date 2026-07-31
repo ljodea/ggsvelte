@@ -124,7 +124,10 @@ export function makeAxisFormatter(
             : "%Y-%m-%d %H:%M:%S %Z";
     const compile = getTemporalRuntime()?.compileLabelFormat;
     if (compile === undefined) {
-      return (value) => formatTime(value as number, defaultPattern);
+      // formatTime has no %Z; use a zone-free lean default.
+      const leanPattern =
+        kind === "date" ? "%Y-%m-%d" : kind === "time" ? "%H:%M:%S" : "%Y-%m-%d %H:%M:%S";
+      return (value) => formatTime(value as number, leanPattern);
     }
     const format = compile(defaultPattern, {
       kind,

@@ -48,17 +48,24 @@ function resolveColorLegendFormat(input: {
       compile === undefined
         ? defaultTimeTickFormat
         : compile(temporalKind === "date" ? "%Y-%m-%d" : "%Y-%m-%d %H:%M:%S %Z", options);
-    if (labelFormat !== undefined && compile !== undefined) {
-      try {
-        return {
-          label: compile(labelFormat, options),
-          fullLabel,
-        };
-      } catch {
+    if (labelFormat !== undefined) {
+      if (compile === undefined) {
         warnings.push({
           code: "invalid-label-format",
-          message: `Unrecognized labels format "${labelFormat}" on scales.${name}; using the default.`,
+          message: `Temporal labels format on scales.${name} requires @ggsvelte/core/temporal (or the full package); using the default.`,
         });
+      } else {
+        try {
+          return {
+            label: compile(labelFormat, options),
+            fullLabel,
+          };
+        } catch {
+          warnings.push({
+            code: "invalid-label-format",
+            message: `Unrecognized labels format "${labelFormat}" on scales.${name}; using the default.`,
+          });
+        }
       }
     }
     const label =

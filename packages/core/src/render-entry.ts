@@ -8,6 +8,7 @@
  * Full grammar: import from `@ggsvelte/core` instead.
  */
 import "./pipeline/geometry-register-basic.js";
+import "./pipeline/frame-stats-register-basic.js";
 
 export { batchMarkCount, CANVAS_AUTO_THRESHOLD, PipelineError } from "./pipeline/public-api.js";
 export { runPipeline } from "./pipeline/run-pipeline.js";

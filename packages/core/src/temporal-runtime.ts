@@ -33,14 +33,22 @@ export interface TemporalRuntime {
 }
 
 let runtime: TemporalRuntime | null = null;
+/** Bumps when the runtime is installed so parse caches can invalidate. */
+let runtimeGeneration = 0;
 
 /** Install full temporal semantics (polyfill + guide planner). Idempotent. */
 export function installTemporalRuntime(next: TemporalRuntime): void {
+  if (runtime === null) runtimeGeneration += 1;
   runtime = next;
 }
 
 export function getTemporalRuntime(): TemporalRuntime | null {
   return runtime;
+}
+
+/** Cache-key fragment: changes when temporal install status changes. */
+export function temporalRuntimeGeneration(): number {
+  return runtimeGeneration;
 }
 
 export function requireTemporalRuntime(feature: string): TemporalRuntime {

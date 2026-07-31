@@ -21,8 +21,8 @@ import {
   discretenessOf,
   nonTemporalFieldType,
 } from "./table-coerce.js";
-import { isIsoLikeString } from "./iso-epoch.js";
-import { getTemporalRuntime } from "./temporal-runtime.js";
+import { isIsoLikeString, isoHasClock } from "./iso-epoch.js";
+import { getTemporalRuntime, temporalRuntimeGeneration } from "./temporal-runtime.js";
 import type {
   CellValue,
   Columns,
@@ -75,7 +75,8 @@ function requestKey(parser: TemporalParserSpec | "auto", options: ParsedColumnOp
   if (parser !== "auto") {
     parserPart = runtime === null ? JSON.stringify(parser) : runtime.parserKey(parser);
   }
-  return `${parserPart}|${optionsKey(options)}`;
+  // Include runtime generation so lite→full install does not reuse lean caches.
+  return `${parserPart}|rt${String(temporalRuntimeGeneration())}|${optionsKey(options)}`;
 }
 
 /** Polyfill-free auto parse for the lean render entry. */
@@ -121,10 +122,14 @@ function liteParseColumn(
   // Detect ISO-like string columns without the Temporal polyfill.
   let isoCount = 0;
   let stringCount = 0;
+  let sawClock = false;
   for (const value of raw) {
     if (typeof value !== "string") continue;
     stringCount++;
-    if (isIsoLikeString(value)) isoCount++;
+    if (isIsoLikeString(value)) {
+      isoCount++;
+      if (isoHasClock(value)) sawClock = true;
+    }
   }
   const temporal = stringCount > 0 && isoCount === stringCount;
   if (!temporal) {
@@ -157,13 +162,15 @@ function liteParseColumn(
       validatedCount++;
     }
   }
+  const kind = sawClock ? "datetime" : "date";
+  const precision = sawClock ? "second" : "date";
   return {
     decision: {
       status: "temporal",
       parser: "iso",
       parserKey: "lite:iso",
-      kind: "date",
-      precision: "date",
+      kind,
+      precision,
       evidence: nonNull.slice(0, 5) as (string | number | boolean | null)[],
       nonNullCount: nonNull.length,
       validatedCount,
@@ -172,8 +179,8 @@ function liteParseColumn(
     },
     semantic,
     valid,
-    kind: "date",
-    precision: "date",
+    kind,
+    precision,
   };
 }
 
