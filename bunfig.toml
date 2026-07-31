@@ -1,3 +1,13 @@
 [install]
 saveTextLockfile = true
 exact = false
+
+# Core unit tests import modules without going through the package barrel;
+# install full temporal + grammar so ColumnTable/pipeline BC tests see the
+# complete runtime (lean `@ggsvelte/core/render` still omits this side effect).
+[test]
+preload = [
+  "./packages/core/src/install-temporal.ts",
+  "./packages/core/src/pipeline/frame-stats-register-all.ts",
+  "./packages/core/src/pipeline/geometry-register-all.ts",
+]

@@ -212,7 +212,7 @@ function parseDetachedValues(
   if (runtime !== null) {
     return runtime.parseColumn(values, conversion.parser, conversion.options);
   }
-  // Lean path: ISO via Date.parse; explicit non-auto parsers need full temporal.
+  // Lean path: ISO via cellToNumber; explicit non-auto parsers need full temporal.
   if (conversion.parser !== "auto") {
     throw new Error(
       `Position parser ${JSON.stringify(conversion.parser)} requires @ggsvelte/core (full) or @ggsvelte/core/temporal.`,

@@ -6,21 +6,17 @@
  *
  * Independent of parseFailure and of data — recovery bounds must themselves
  * be valid or the runtime throws style-binned-breaks / style-domain-invalid.
- *
- * Temporal binned-style configs defer break resolution to validate()/runtime
- * so this module stays free of `@js-temporal/polyfill` (render-path structural
- * gate).
  */
 import type { SpecError } from "./errors.js";
+import { parseTemporalColumn } from "./temporal-column.js";
+import { parseTemporal } from "./temporal-parse.js";
+import { temporalParserUsable } from "./validate-data-checks-temporal.js";
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 const BINNED_STYLE_AESTHETICS = ["size", "linewidth", "alpha", "shape", "linetype"] as const;
-
-const ISO_LIKE =
-  /^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/;
 
 /** Mirror core cellToNumber for non-temporal style boundary resolution. */
 function nonTemporalSemantic(value: unknown): number | undefined {
@@ -31,10 +27,8 @@ function nonTemporalSemantic(value: unknown): number | undefined {
   }
   if (typeof value === "boolean") return value ? 1 : 0;
   if (typeof value === "string") {
-    if (ISO_LIKE.test(value)) {
-      const epochMs = Date.parse(value);
-      if (Number.isFinite(epochMs)) return epochMs;
-    }
+    const iso = parseTemporal(value, "iso");
+    if (iso.ok) return iso.epochMs;
     if (value.trim() === "") return undefined;
     const numeric = Number(value);
     return Number.isFinite(numeric) ? numeric : undefined;
@@ -52,15 +46,38 @@ function resolveBoundarySemantics(
     config["timezone"] !== undefined ||
     config["disambiguation"] !== undefined;
 
-  // Temporal polyfill stays off the structural-gate import graph. Full
-  // validate() / runtime still enforces temporal binned style boundaries.
-  if (requestsTemporal) return null;
+  if (!requestsTemporal) {
+    const mapped: number[] = [];
+    for (const value of values) {
+      const semantic = nonTemporalSemantic(value);
+      if (semantic === undefined) return null;
+      mapped.push(semantic);
+    }
+    return mapped;
+  }
 
+  // Schema-invalid temporal inputs still reach structure checks; defer rather
+  // than throw inside the temporal helpers (same gate as data-aware checks).
+  if (!temporalParserUsable(config["parse"])) return null;
+  if (config["timezone"] !== undefined && typeof config["timezone"] !== "string") return null;
+  if (config["disambiguation"] !== undefined && typeof config["disambiguation"] !== "string") {
+    return null;
+  }
+
+  const options = {
+    ...(typeof config["timezone"] === "string" && { timezone: config["timezone"] }),
+    ...(typeof config["disambiguation"] === "string" && {
+      disambiguation: config["disambiguation"] as "compatible" | "earlier" | "later" | "reject",
+    }),
+  };
+  const parser = (config["parse"] ?? "auto") as Parameters<typeof parseTemporalColumn>[1];
+  const column = parseTemporalColumn(values, parser, options);
   const mapped: number[] = [];
-  for (const value of values) {
-    const semantic = nonTemporalSemantic(value);
-    if (semantic === undefined) return null;
-    mapped.push(semantic);
+  for (let index = 0; index < values.length; index++) {
+    if (column.valid[index] !== 1) return null;
+    const epochMs = column.semantic[index];
+    if (epochMs === undefined || !Number.isFinite(epochMs)) return null;
+    mapped.push(epochMs);
   }
   return mapped;
 }
@@ -104,23 +121,20 @@ export function binnedStyleScaleStructuralErrors(scales: Record<string, unknown>
 
     const breakSemantics = resolveBoundarySemantics(authoredBreaks, config);
     if (breakSemantics === null || !isStrictlyIncreasing(breakSemantics)) {
-      // null: unparseable or temporal-deferred — skip (runtime/validate covers it)
-      // non-increasing: emit when we fully resolved non-temporal numbers
-      if (breakSemantics !== null) {
-        errors.push({
-          code: "scale-binned-breaks",
-          path: `/scales/${aesthetic}/breaks`,
-          message: `The ${aesthetic} boundaries must be finite and strictly increasing.`,
-          fix: {
-            description:
-              "Provide 2+ strictly increasing boundaries that parse under the scale's parser.",
-            example:
-              aesthetic === "size" || aesthetic === "linewidth" || aesthetic === "alpha"
-                ? [0, 10, 20]
-                : [0, 1, 2],
-          },
-        });
-      }
+      errors.push({
+        code: "scale-binned-breaks",
+        path: `/scales/${aesthetic}/breaks`,
+        message: `The ${aesthetic} boundaries must be finite and strictly increasing.`,
+        fix: {
+          description:
+            "Provide 2+ strictly increasing boundaries that parse under the scale's parser.",
+          example:
+            aesthetic === "size" || aesthetic === "linewidth" || aesthetic === "alpha"
+              ? [0, 10, 20]
+              : [0, 1, 2],
+        },
+      });
+      // Malformed breaks are the primary diagnostic; skip domain agreement.
       continue;
     }
 
@@ -129,6 +143,9 @@ export function binnedStyleScaleStructuralErrors(scales: Record<string, unknown>
 
     const domainSemantics = resolveBoundarySemantics(domain, config);
     if (domainSemantics === null || domainSemantics.length !== 2) {
+      // Unparseable domain is a separate runtime style-domain-invalid path; the
+      // censor-recovery check covers type-mismatch. Only emit agreement here when
+      // both sides fully resolve.
       continue;
     }
 

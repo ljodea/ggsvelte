@@ -61,7 +61,7 @@ function binnedStyleColumn(
         const result = runtime.parseColumn([value], binding.binParse ?? "auto", options);
         return result.valid[0] === 1 ? result.semantic[0] : undefined;
       }
-      // Lean path: ISO via Date.parse (cellToNumber).
+      // Lean path: ISO via cellToNumber (polyfill-free).
       const number = cellToNumber(value);
       return Number.isFinite(number) ? number : undefined;
     }

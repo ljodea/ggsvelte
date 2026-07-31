@@ -19,9 +19,9 @@ import {
   cellsToNumeric,
   cellsToQuantitative,
   discretenessOf,
-  isISODateString,
   nonTemporalFieldType,
 } from "./table-coerce.js";
+import { isIsoLikeString } from "./iso-epoch.js";
 import { getTemporalRuntime } from "./temporal-runtime.js";
 import type {
   CellValue,
@@ -124,7 +124,7 @@ function liteParseColumn(
   for (const value of raw) {
     if (typeof value !== "string") continue;
     stringCount++;
-    if (isISODateString(value)) isoCount++;
+    if (isIsoLikeString(value)) isoCount++;
   }
   const temporal = stringCount > 0 && isoCount === stringCount;
   if (!temporal) {

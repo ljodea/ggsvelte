@@ -1,20 +1,18 @@
 /**
  * Field-type inference and numeric coercion helpers (no table instance).
  *
- * Intentionally free of `@js-temporal/polyfill`. ISO-like strings use
- * `Date.parse`; full temporal registry parsing lives behind the optional
- * temporal runtime (`installTemporal`).
+ * Free of `@js-temporal/polyfill` and free of the global date-string parser
+ * (temporal-source-gate). ISO-like strings use {@link isoEpochMs}; full
+ * temporal registry parsing lives behind the optional temporal runtime
+ * (`installTemporal`).
  */
+import { isIsoLikeString, isoEpochMs } from "./iso-epoch.js";
+import { getTemporalRuntime } from "./temporal-runtime.js";
 import type { CellValue, Discreteness, FieldType } from "./table-types.js";
-
-/** Loose ISO-8601 date/datetime detector (UTC and offset forms). */
-const ISO_LIKE =
-  /^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/;
 
 /** Strict-enough ISO predicate retained for public import compatibility. */
 export function isISODateString(value: string): boolean {
-  if (!ISO_LIKE.test(value)) return false;
-  return Number.isFinite(Date.parse(value));
+  return isIsoLikeString(value);
 }
 
 export function nonTemporalFieldType(column: readonly CellValue[]): FieldType {
@@ -43,11 +41,16 @@ export function nonTemporalFieldType(column: readonly CellValue[]): FieldType {
 }
 
 /**
- * Deterministic field type inference without the Temporal polyfill.
- * String columns that look like ISO dates are temporal; mixed/other strings
- * stay nominal. Full registry inference is available after installTemporal().
+ * Deterministic field type inference. With the temporal runtime installed
+ * (full package / tests), uses the shared strict registry. On the lean
+ * render path, only ISO-like strings and Date values count as temporal.
  */
 export function inferFieldType(column: readonly CellValue[]): FieldType {
+  const runtime = getTemporalRuntime();
+  if (runtime !== null) {
+    const decision = runtime.parseColumn(column, "auto", {}).decision;
+    return decision.status === "temporal" ? "temporal" : nonTemporalFieldType(column);
+  }
   let sawIso = false;
   let sawNonIsoString = false;
   let sawNumber = false;
@@ -55,7 +58,7 @@ export function inferFieldType(column: readonly CellValue[]): FieldType {
   for (const value of column) {
     if (value === null) continue;
     if (typeof value === "string") {
-      if (isISODateString(value)) sawIso = true;
+      if (isIsoLikeString(value)) sawIso = true;
       else sawNonIsoString = true;
       continue;
     }
@@ -88,10 +91,8 @@ export function cellToNumber(value: CellValue): number {
   if (value instanceof Date) return value.getTime();
   if (typeof value === "boolean") return value ? 1 : 0;
   if (typeof value === "string") {
-    if (ISO_LIKE.test(value)) {
-      const epoch = Date.parse(value);
-      if (Number.isFinite(epoch)) return epoch;
-    }
+    const epoch = isoEpochMs(value);
+    if (epoch !== undefined) return epoch;
     const numeric = Number(value);
     return value.trim() === "" ? Number.NaN : numeric;
   }
