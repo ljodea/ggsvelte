@@ -923,11 +923,15 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
       return semanticCandidateProjection.emphasizedAnchors;
     },
     get hoverChrome() {
-      // Hover chrome is separate from selection/emphasis anchor rings: paths
-      // still gap the crosshair; only rects mute. Null inspection → default ring.
+      // Hover chrome is separate from selection/emphasis anchor rings: open
+      // path strokes still gap the crosshair; rects and closed path fills
+      // (areas) mute (#1270). Null inspection → default ring.
       const focus = inspectionState.presentationFocus;
       if (focus === null) return "ring";
-      return hoverChromeForKind(focus.kind);
+      const seed = inspectionState.inspectionSeed;
+      const batch = seed === null ? undefined : runtime.model?.scene.batches[seed.batchIndex];
+      const closedPath = batch?.kind === "paths" && batch.closed === true;
+      return hoverChromeForKind(focus.kind, closedPath);
     },
     get hoverBoxWidth() {
       return hoverGlyphExtents()?.width;

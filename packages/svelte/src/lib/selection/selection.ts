@@ -51,12 +51,15 @@ export function presentationChromeForKind(kind?: string | null): PresentationChr
 
 /**
  * Hover overlay chrome (hover ring/box + gapped crosshair).
- * Keep rings for strokes and points so path/line inspect still gaps guides at
- * the focus. Glyphs use a box. Rect marks stay mute-only.
+ * Keep rings for points and OPEN path strokes (line inspect anchors at a
+ * vertex, and the ring gaps the guides there). Closed path fills (area,
+ * density, polygon) are region marks like rects — mute-only, continuous
+ * crosshair, no point-circle (#1270). Glyphs use a box.
  * Missing kind keeps ring so crosshair gap works before the seed attaches.
  */
-export function hoverChromeForKind(kind?: string | null): PresentationChrome {
+export function hoverChromeForKind(kind?: string | null, closedPath = false): PresentationChrome {
   if (kind === "rects") return "none";
+  if (kind === "paths" && closedPath) return "none";
   if (kind === "glyphs") return "box";
   return "ring";
 }
