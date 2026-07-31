@@ -95,7 +95,7 @@
     "axe-core": "^4.11.1",
     "highlight.js": "^11.11.1",
     "knip": "6.29.0",
-    "markdownlint-cli2": "0.23.1",
+    "markdownlint-cli2": "0.23.2",
     "oxfmt": "0.60.0",
     "oxlint": "1.75.0",
     "oxlint-tsgolint": "0.25.0",
