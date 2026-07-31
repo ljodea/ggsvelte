@@ -9,7 +9,7 @@ import { resolveCapabilities } from "../../src/lib/plot-props.js";
 import { withFlushedEffectRoot } from "../helpers/effect-root.svelte.js";
 
 function makeProps(overrides: Record<string, unknown> = {}): EnginePlotProps {
-  return overrides as unknown as EnginePlotProps;
+  return overrides;
 }
 
 function focusLayer(channel: string): Layer {

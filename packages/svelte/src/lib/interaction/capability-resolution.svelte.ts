@@ -48,13 +48,13 @@ export function ssrSafeDerived<T>(compute: () => T): () => T {
 
 export type CapabilityResolution = {
   /** Inspect from prop + `<Inspect>` capability children (last child wins). */
-  inspect(): ResolveInspectCapabilityResult;
+  readonly inspect: () => ResolveInspectCapabilityResult;
   /** Legend focus from GuideLegend layers + deprecated plot prop. */
-  legendFocus(): ResolvedLegendFocusCapability;
+  readonly legendFocus: () => ResolvedLegendFocusCapability;
   /** Legend filter from GuideLegend layers + deprecated plot prop. */
-  legendFilter(): ResolvedLegendFilterCapability;
+  readonly legendFilter: () => ResolvedLegendFilterCapability;
   /** All five capability defaults for wiring advisories. */
-  caps(): ResolvedPlotCapabilities;
+  readonly caps: () => ResolvedPlotCapabilities;
 };
 
 export function createCapabilityResolution(host: {
