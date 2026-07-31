@@ -164,8 +164,8 @@ describe("stacked area auto-align (#1268)", () => {
     );
     expect(autoAlignAdvisories(model).length).toBe(0);
     const areas = model.scene.batches.find((b) => b.kind === "paths");
-    expect(areas).toBeDefined();
-    expect((areas as PathsBatch).positions.length).toBeGreaterThan(0);
+    if (areas === undefined || areas.kind !== "paths") throw new Error("expected a paths batch");
+    expect(areas.positions.length).toBeGreaterThan(0);
   });
 
   it("does not fire for discrete string x", () => {
