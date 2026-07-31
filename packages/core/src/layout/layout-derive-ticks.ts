@@ -351,7 +351,13 @@ export function deriveTicks(
   }
 
   // Explicit breaks override derivation (out-of-domain breaks are dropped).
-  if (domain.breaks !== undefined && !(domain.type === "time" && domain.temporal !== undefined)) {
+  // When the full temporal runtime is present, planAxis owns breaks for time
+  // domains (sourceBreaks + measured labels). Without the runtime (lean
+  // render entry), honor converted domain.breaks here so they are not
+  // silently replaced by automatic timeTicks.
+  const planTemporalGuides =
+    domain.type === "time" && domain.temporal !== undefined && getTemporalRuntime() !== null;
+  if (domain.breaks !== undefined && !planTemporalGuides) {
     const values = domain.breaks.filter((v) => Number.isFinite(v) && v >= min && v <= max);
     const step = smallestGap(values);
     const fmt: (v: number) => string = format
@@ -372,7 +378,7 @@ export function deriveTicks(
     // Full temporal guide planning needs the polyfill runtime. Lean
     // `@ggsvelte/core/render` still classifies ISO columns as temporal and
     // trains a time scale — fall through to timeTicks + formatTime instead of
-    // throwing from requireTemporalRuntime("planTemporalAxis").
+    // throwing when planAxis is unavailable.
     const temporalRuntime = domain.temporal === undefined ? null : getTemporalRuntime();
     if (domain.temporal !== undefined && temporalRuntime !== null) {
       const plan = temporalRuntime.planAxis({
