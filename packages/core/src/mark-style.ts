@@ -6,7 +6,7 @@
  */
 import { LINETYPE_NAMES, POINT_SHAPE_NAMES } from "@ggsvelte/spec";
 
-import type { PathsBatch, PointsBatch } from "./scene.js";
+import type { GlyphsBatch, PathsBatch, PointsBatch, RectsBatch, SegmentsBatch } from "./scene.js";
 import { LINETYPE_DASHES, type Linetype, type PointShape } from "./scales/style.js";
 
 /** Renderer-neutral point-shape geometry (one proportion table). */
@@ -184,6 +184,81 @@ export function resolvePointMark(
       batch.positions[index * 2 + 1]!,
       size,
     ),
+  };
+}
+
+export interface ResolvedRectMark {
+  fill: string;
+  /** Outline color; undefined = no outline (bars/cols — decision 0008 note 7). */
+  stroke: string | undefined;
+  strokeWidth: number;
+  dash: readonly number[];
+  alpha: number;
+}
+
+/** Resolve one rect's fill/outline/dash for any serializer. */
+export function resolveRectMark(
+  batch: RectsBatch,
+  index: number,
+  theme: { accent: string; paper: string; ink: string },
+): ResolvedRectMark {
+  const roleFill = batch.fillRole === "paper" ? theme.paper : theme.accent;
+  const stroke =
+    batch.strokes?.[index] ??
+    (batch.stroke === undefined && batch.strokes === undefined
+      ? undefined
+      : (batch.stroke ?? theme.ink));
+  return {
+    fill: batch.fills?.[index] ?? batch.fill ?? roleFill,
+    stroke,
+    strokeWidth: batch.strokeWidths?.[index] ?? batch.strokeWidth ?? 1,
+    dash: linetypeDash(linetypeAt(batch, index)),
+    alpha: batch.alphas?.[index] ?? 1,
+  };
+}
+
+export interface ResolvedSegmentMark {
+  stroke: string;
+  width: number;
+  dash: readonly number[];
+  alpha: number;
+  /** Present only when the batch opts in (segment geom); undefined leaves
+   *  renderer defaults (SVG/Svelte omit the attribute; canvas ctx default). */
+  linecap: "butt" | "round" | "square" | undefined;
+}
+
+/** Resolve one segment's stroke/dash for any serializer. */
+export function resolveSegmentMark(
+  batch: SegmentsBatch,
+  index: number,
+  themeInk: string,
+): ResolvedSegmentMark {
+  return {
+    stroke: batch.strokes?.[index] ?? batch.stroke ?? themeInk,
+    width: batch.linewidths?.[index] ?? batch.linewidth,
+    dash: linetypeDash(linetypeAt(batch, index)),
+    alpha: batch.alphas?.[index] ?? 1,
+    linecap: batch.linecap,
+  };
+}
+
+export interface ResolvedGlyphMark {
+  fill: string;
+  size: number;
+  alpha: number;
+}
+
+/** Resolve one glyph's fill/size for any serializer (label box chrome stays
+ *  with the SVG emitter — canvas glyphs are deliberate no-ops). */
+export function resolveGlyphMark(
+  batch: GlyphsBatch,
+  index: number,
+  themeInk: string,
+): ResolvedGlyphMark {
+  return {
+    fill: batch.colors?.[index] ?? batch.color ?? themeInk,
+    size: batch.sizes?.[index] ?? batch.size,
+    alpha: batch.alphas?.[index] ?? 1,
   };
 }
 

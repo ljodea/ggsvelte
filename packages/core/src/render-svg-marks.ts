@@ -5,12 +5,13 @@
 import { renderPrimitiveCount } from "./candidate-geometry.js";
 import { type ResolvedGlow, type ResolvedGradientPaint } from "./mark-paint.js";
 import {
-  linetypeDash,
-  markLinetype,
   pointShapeGeometry,
   pointShapePathD,
+  resolveGlyphMark,
   resolvePathMark,
   resolvePointMark,
+  resolveRectMark,
+  resolveSegmentMark,
 } from "./mark-style.js";
 import type {
   GlyphsBatch,
@@ -234,21 +235,20 @@ function renderRects(batch: RectsBatch, theme: ThemeTokens): string {
     `<g class="gg-batch gg-rects" data-layer="${batch.layerIndex}"${alphaAttr(batch.alpha)}>`,
   ];
   const n = batch.rects.length / 4;
-  const themeFill = themeVar(batch.fillRole ?? "accent", theme);
+  const themeColors = {
+    accent: themeVar("accent", theme),
+    paper: themeVar("paper", theme),
+    ink: themeVar("ink", theme),
+  };
   for (let j = 0; j < n; j++) {
-    const fill = batch.fills?.[j] ?? batch.fill ?? themeFill;
-    const strokeColor =
-      batch.strokes?.[j] ??
-      (batch.stroke === undefined && batch.strokes === undefined
-        ? undefined
-        : (batch.stroke ?? themeVar("ink", theme)));
+    const style = resolveRectMark(batch, j, themeColors);
     const strokeAttr =
-      strokeColor === undefined
+      style.stroke === undefined
         ? ""
-        : ` stroke="${strokeColor}" stroke-width="${px(batch.strokeWidths?.[j] ?? batch.strokeWidth ?? 1)}"${dashAttrFromDash(linetypeDash(markLinetype(batch, j)))}`;
-    const alpha = batch.alphas?.[j];
+        : ` stroke="${style.stroke}" stroke-width="${px(style.strokeWidth)}"${dashAttrFromDash(style.dash)}`;
+    const opacity = batch.alphas === undefined ? "" : alphaAttr(style.alpha);
     parts.push(
-      `<rect x="${px(batch.rects[j * 4]!)}" y="${px(batch.rects[j * 4 + 1]!)}" width="${px(batch.rects[j * 4 + 2]!)}" height="${px(batch.rects[j * 4 + 3]!)}" fill="${fill}"${strokeAttr}${alpha === undefined ? "" : alphaAttr(alpha)}/>`,
+      `<rect x="${px(batch.rects[j * 4]!)}" y="${px(batch.rects[j * 4 + 1]!)}" width="${px(batch.rects[j * 4 + 2]!)}" height="${px(batch.rects[j * 4 + 3]!)}" fill="${style.fill}"${strokeAttr}${opacity}/>`,
     );
   }
   parts.push("</g>");
@@ -266,12 +266,11 @@ function renderSegments(
   const n = batch.segments.length / 4;
   const themeInk = themeVar("ink", theme);
   for (let j = 0; j < n; j++) {
-    const solid = batch.strokes?.[j] ?? batch.stroke ?? themeInk;
-    const stroke = paintStroke(solid, batch.strokePaint, mode);
-    const linewidth = batch.linewidths?.[j] ?? batch.linewidth;
-    const alpha = batch.alphas?.[j];
-    const linecap = batch.linecap === undefined ? "" : ` stroke-linecap="${batch.linecap}"`;
-    const style = `${dashAttrFromDash(linetypeDash(markLinetype(batch, j)))}${alpha === undefined ? "" : alphaAttr(alpha)}${linecap}`;
+    const mark = resolveSegmentMark(batch, j, themeInk);
+    const stroke = paintStroke(mark.stroke, batch.strokePaint, mode);
+    const linewidth = mark.width;
+    const linecap = mark.linecap === undefined ? "" : ` stroke-linecap="${mark.linecap}"`;
+    const style = `${dashAttrFromDash(mark.dash)}${batch.alphas === undefined ? "" : alphaAttr(mark.alpha)}${linecap}`;
     if (batch.renderPositions !== undefined && batch.renderPathOffsets !== undefined) {
       const d = pathData(
         batch.renderPositions,
@@ -325,9 +324,9 @@ function renderGlyphs(batch: GlyphsBatch, theme: ThemeTokens): string {
       batch.boxStroke !== undefined ||
       batch.boxStrokes !== undefined);
   for (let j = 0; j < n; j++) {
-    const fill = batch.colors?.[j] ?? batch.color ?? themeInk;
-    const size = batch.sizes?.[j];
-    const alpha = batch.alphas?.[j];
+    const mark = resolveGlyphMark(batch, j, themeInk);
+    const size = batch.sizes === undefined ? undefined : mark.size;
+    const alpha = batch.alphas === undefined ? undefined : mark.alpha;
     const tx = batch.positions[j * 2]!;
     const ty = batch.positions[j * 2 + 1]!;
     if (hasBox) {
@@ -344,7 +343,7 @@ function renderGlyphs(batch: GlyphsBatch, theme: ThemeTokens): string {
       );
     }
     parts.push(
-      `<text x="${px(tx)}" y="${px(ty)}" dy="0.32em" fill="${fill}"${size === undefined ? "" : ` font-size="${px(size)}"`}${alpha === undefined ? "" : alphaAttr(alpha)}>${escapeXML(batch.texts[j]!)}</text>`,
+      `<text x="${px(tx)}" y="${px(ty)}" dy="0.32em" fill="${mark.fill}"${size === undefined ? "" : ` font-size="${px(size)}"`}${alpha === undefined ? "" : alphaAttr(alpha)}>${escapeXML(batch.texts[j]!)}</text>`,
     );
   }
   parts.push("</g>");

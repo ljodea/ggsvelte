@@ -352,10 +352,20 @@ export {
   markLinetype,
   pointShapeGeometry,
   pointShapePathD,
+  resolveGlyphMark,
   resolvePathMark,
   resolvePointMark,
+  resolveRectMark,
+  resolveSegmentMark,
 } from "./mark-style.js";
-export type { PointShapeGeometry, ResolvedPathMark, ResolvedPointMark } from "./mark-style.js";
+export type {
+  PointShapeGeometry,
+  ResolvedGlyphMark,
+  ResolvedPathMark,
+  ResolvedPointMark,
+  ResolvedRectMark,
+  ResolvedSegmentMark,
+} from "./mark-style.js";
 
 // Within-mark paint (#591) — resource ids and resolved gradient/glow
 export { paintResourceId } from "./mark-paint.js";

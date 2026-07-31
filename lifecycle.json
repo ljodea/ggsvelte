@@ -4259,6 +4259,10 @@
           "kind": "type",
           "lifecycle": "experimental"
         },
+        "ResolvedGlyphMark": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
         "ResolvedGradientPaint": {
           "kind": "type",
           "lifecycle": "experimental"
@@ -4268,6 +4272,14 @@
           "lifecycle": "experimental"
         },
         "ResolvedPointMark": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ResolvedRectMark": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ResolvedSegmentMark": {
           "kind": "type",
           "lifecycle": "experimental"
         },
@@ -4851,11 +4863,23 @@
           "kind": "value",
           "lifecycle": "experimental"
         },
+        "resolveGlyphMark": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
         "resolvePathMark": {
           "kind": "value",
           "lifecycle": "experimental"
         },
         "resolvePointMark": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "resolveRectMark": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "resolveSegmentMark": {
           "kind": "value",
           "lifecycle": "experimental"
         },

@@ -9,11 +9,11 @@
  */
 import type { GeometryBatch } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
-import { themeVar } from "../theme.js";
 import type { ColorResolver } from "./canvas-dom.js";
 import { maskIncludes, type PrimitiveFocusMask } from "./canvas-marks-mask.js";
-import { applyDash, drawPaths, drawPathsSubset, linetypeAt } from "./canvas-marks-paths.js";
+import { applyDash, drawPaths, drawPathsSubset } from "./canvas-marks-paths.js";
 import { drawPoints, drawPointsSubset } from "./canvas-marks-points.js";
+import { drawRects } from "./canvas-marks-rects.js";
 import { drawSegments } from "./canvas-marks-segments.js";
 
 export type { CanvasFocusPresentation, PrimitiveFocusMask } from "./canvas-marks-mask.js";
@@ -32,41 +32,9 @@ function drawBatchInner(
     case "paths":
       drawPaths(ctx, batch, theme, resolve);
       break;
-    case "rects": {
-      const themeFill = resolve(themeVar(batch.fillRole ?? "accent", theme));
-      const n = batch.rects.length / 4;
-      const baseAlpha = ctx.globalAlpha;
-      for (let j = 0; j < n; j++) {
-        ctx.globalAlpha = baseAlpha * (batch.alphas?.[j] ?? 1);
-        const fill = batch.fills?.[j] ?? batch.fill;
-        ctx.fillStyle = fill === null || fill === undefined ? themeFill : resolve(fill);
-        ctx.fillRect(
-          batch.rects[j * 4]!,
-          batch.rects[j * 4 + 1]!,
-          batch.rects[j * 4 + 2]!,
-          batch.rects[j * 4 + 3]!,
-        );
-        const strokeColor =
-          batch.strokes?.[j] ??
-          (batch.stroke === undefined && batch.strokes === undefined
-            ? undefined
-            : (batch.stroke ?? themeVar("ink", theme)));
-        if (strokeColor !== undefined) {
-          ctx.strokeStyle = resolve(strokeColor);
-          ctx.lineWidth = batch.strokeWidths?.[j] ?? batch.strokeWidth ?? 1;
-          applyDash(ctx, linetypeAt(batch, j));
-          ctx.strokeRect(
-            batch.rects[j * 4]!,
-            batch.rects[j * 4 + 1]!,
-            batch.rects[j * 4 + 2]!,
-            batch.rects[j * 4 + 3]!,
-          );
-        }
-      }
-      ctx.globalAlpha = baseAlpha;
-      applyDash(ctx, "solid");
+    case "rects":
+      drawRects(ctx, batch, theme, resolve);
       break;
-    }
     case "segments":
       drawSegments(ctx, batch, theme, resolve);
       break;
@@ -92,42 +60,9 @@ function drawBatchSubsetInner(
     case "paths":
       drawPathsSubset(ctx, batch, theme, resolve, mask, focused);
       break;
-    case "rects": {
-      const themeFill = resolve(themeVar(batch.fillRole ?? "accent", theme));
-      const n = batch.rects.length / 4;
-      const baseAlpha = ctx.globalAlpha;
-      for (let j = 0; j < n; j++) {
-        if (!includes(j)) continue;
-        ctx.globalAlpha = baseAlpha * (batch.alphas?.[j] ?? 1);
-        const fill = batch.fills?.[j] ?? batch.fill;
-        ctx.fillStyle = fill === null || fill === undefined ? themeFill : resolve(fill);
-        ctx.fillRect(
-          batch.rects[j * 4]!,
-          batch.rects[j * 4 + 1]!,
-          batch.rects[j * 4 + 2]!,
-          batch.rects[j * 4 + 3]!,
-        );
-        const strokeColor =
-          batch.strokes?.[j] ??
-          (batch.stroke === undefined && batch.strokes === undefined
-            ? undefined
-            : (batch.stroke ?? themeVar("ink", theme)));
-        if (strokeColor !== undefined) {
-          ctx.strokeStyle = resolve(strokeColor);
-          ctx.lineWidth = batch.strokeWidths?.[j] ?? batch.strokeWidth ?? 1;
-          applyDash(ctx, linetypeAt(batch, j));
-          ctx.strokeRect(
-            batch.rects[j * 4]!,
-            batch.rects[j * 4 + 1]!,
-            batch.rects[j * 4 + 2]!,
-            batch.rects[j * 4 + 3]!,
-          );
-        }
-      }
-      ctx.globalAlpha = baseAlpha;
-      applyDash(ctx, "solid");
+    case "rects":
+      drawRects(ctx, batch, theme, resolve, includes);
       break;
-    }
     case "segments":
       drawSegments(ctx, batch, theme, resolve, includes);
       break;
