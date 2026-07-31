@@ -41396,7 +41396,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "diagnostic",
     title: "group-single-observation · warning",
     summary:
-      "Connected path/area marks derived one observation per group (a discrete x joins default grouping), so each stroke or ribbon degenerates; map aes.group to join categories into series.",
+      "Connected path/area marks derived one observation per group (often a discrete x joining default grouping), so each stroke or ribbon degenerates; map aes.group to join rows into series.",
     href: "/guide/errors#group-single-observation",
     keywords: [
       "warning",
