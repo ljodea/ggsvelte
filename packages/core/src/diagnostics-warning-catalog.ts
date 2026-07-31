@@ -116,6 +116,10 @@ export const PIPELINE_WARNING_CATALOG = {
   "map-region-missing": {
     summary: "One or more value rows had no matching map region and were dropped.",
   },
+  "group-single-observation": {
+    summary:
+      "Connected path/area marks derived one observation per group (often a discrete x joining default grouping), so each stroke or ribbon degenerates; map aes.group to join rows into series.",
+  },
   "stack-align-skipped": {
     summary:
       "Sparse stacked-area groups were left unaligned because the shared-grid expansion exceeds the auto-rescue budget; bands with interior gaps may render as floating polygons.",

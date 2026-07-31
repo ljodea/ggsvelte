@@ -7,7 +7,7 @@ import type { PathsBatch } from "../scene.js";
 import type { LayerFrame, PipelineWarning, ResolvedColorScale } from "./types.js";
 import type { Frame } from "./geometry-shared.js";
 import { constantStyle, numericStyleVector, type ResolvedStyleScales } from "./geometry-style.js";
-import { bucketByGroup, sortGroupRowsByX } from "./geometry-shared.js";
+import { bucketByGroup, sortGroupRowsByX, warnSingleObservationGroups } from "./geometry-shared.js";
 import { writeClosedPathGroups } from "./geometry-paths-closed-batch.js";
 import { areaGroupFillOf } from "./geometry-paths-area-fill.js";
 
@@ -22,6 +22,7 @@ export function areaBatch(
   if (frame.ymin === null || frame.ymax === null) return null;
   const groupRows = bucketByGroup(frame, fx, frame.ymax, warnings);
   if (groupRows.length === 0) return null;
+  warnSingleObservationGroups(groupRows, frame, warnings);
   sortGroupRowsByX(groupRows, frame, fx);
 
   const paint = layerPaintFromParams(binding.layer.params);

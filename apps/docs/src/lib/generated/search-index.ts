@@ -18985,6 +18985,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["map-region-missing"],
   },
   {
+    id: "heading:guide-errors:group-single-observation",
+    kind: "heading",
+    title: "group-single-observation",
+    summary:
+      "group-single-observation in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#group-single-observation",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["group-single-observation"],
+  },
+  {
     id: "heading:guide-errors:stack-align-skipped",
     kind: "heading",
     title: "stack-align-skipped",
@@ -41380,6 +41390,20 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["map-region-missing", "warning:map-region-missing"],
+  },
+  {
+    id: "diagnostic:warning:group-single-observation",
+    kind: "diagnostic",
+    title: "group-single-observation · warning",
+    summary:
+      "Connected path/area marks derived one observation per group (often a discrete x joining default grouping), so each stroke or ribbon degenerates; map aes.group to join rows into series.",
+    href: "/guide/errors#group-single-observation",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["group-single-observation", "warning:group-single-observation"],
   },
   {
     id: "diagnostic:warning:stack-align-skipped",

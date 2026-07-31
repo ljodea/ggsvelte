@@ -14,4 +14,8 @@ export {
   removedWarning,
   type Frame,
 } from "./geometry-shared-position.js";
-export { bucketByGroup, sortGroupRowsByX } from "./geometry-shared-bucket.js";
+export {
+  bucketByGroup,
+  sortGroupRowsByX,
+  warnSingleObservationGroups,
+} from "./geometry-shared-bucket.js";

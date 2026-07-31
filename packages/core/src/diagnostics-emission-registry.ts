@@ -69,6 +69,7 @@ export const WARNING_EMISSION_REGISTRY = {
   "density-2d-filled-open-dropped": { channel: "warning" },
   "sf-coordinates-dropped": { channel: "warning" },
   "map-region-missing": { channel: "warning" },
+  "group-single-observation": { channel: "warning" },
   "stack-align-skipped": { channel: "warning" },
   "smooth-group-dropped": { channel: "warning" },
   "quantile-empty": { channel: "warning" },

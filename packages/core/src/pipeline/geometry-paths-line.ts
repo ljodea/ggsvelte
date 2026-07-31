@@ -13,7 +13,12 @@ import {
   numericStyleVector,
   type ResolvedStyleScales,
 } from "./geometry-style.js";
-import { DEFAULT_LINEWIDTH, bucketByGroup, sortGroupRowsByX } from "./geometry-shared.js";
+import {
+  DEFAULT_LINEWIDTH,
+  bucketByGroup,
+  sortGroupRowsByX,
+  warnSingleObservationGroups,
+} from "./geometry-shared.js";
 import { writeLineSubpaths } from "./geometry-paths-line-write.js";
 import { splitStyleSubpaths } from "./geometry-paths-style-subpaths.js";
 
@@ -28,6 +33,7 @@ export function lineBatch(
   const { binding } = frame;
   const groupedRows = bucketByGroup(frame, fx, null, warnings);
   if (groupedRows.length === 0) return null;
+  warnSingleObservationGroups(groupedRows, frame, warnings);
   // geom_line sorts by x; geom_path keeps data/row order (#788).
   if (options.sortByX !== false && binding.layer.geom !== "path") {
     sortGroupRowsByX(groupedRows, frame, fx);
