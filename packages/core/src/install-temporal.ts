@@ -11,13 +11,14 @@ import {
 import { compileTemporalLabelFormat } from "./layout/format-temporal-labels.js";
 import type { TemporalLabelFormatOptions } from "./layout/format-temporal-labels.js";
 import { planTemporalAxis } from "./layout/temporal-guide.js";
-import { installTemporalRuntime } from "./temporal-runtime.js";
+import { getTemporalRuntime, installTemporalRuntime } from "./temporal-runtime.js";
 import type { CellValue } from "./table-types.js";
 
 let installed = false;
 
 export function installTemporal(): void {
-  if (installed) return;
+  // Re-install after test-only runtime clears; skip when already wired.
+  if (installed && getTemporalRuntime() !== null) return;
   installed = true;
   installTemporalRuntime({
     parseColumn: (raw: readonly CellValue[], parser: TemporalParserSpec | "auto", options) => {

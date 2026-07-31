@@ -120,18 +120,28 @@ function liteParseColumn(
     };
   }
   // Detect ISO-like string columns without the Temporal polyfill.
+  // Every non-null cell must be an ISO-like string (or a finite Date); a
+  // mixed column such as ["2024-01-01", 5] must not become temporal — numbers
+  // would coerce to epoch ms near 1970 (parity with inferFieldType lean path
+  // and the full temporal runtime, which fails non-ISO cells).
   let isoCount = 0;
   let stringCount = 0;
   let sawClock = false;
+  let blockingNonString = false;
   for (const value of raw) {
-    if (typeof value !== "string") continue;
-    stringCount++;
-    if (isIsoLikeString(value)) {
-      isoCount++;
-      if (isoHasClock(value)) sawClock = true;
+    if (value === null) continue;
+    if (typeof value === "string") {
+      stringCount++;
+      if (isIsoLikeString(value)) {
+        isoCount++;
+        if (isoHasClock(value)) sawClock = true;
+      }
+      continue;
     }
+    if (value instanceof Date && Number.isFinite(value.getTime())) continue;
+    blockingNonString = true;
   }
-  const temporal = stringCount > 0 && isoCount === stringCount;
+  const temporal = !blockingNonString && stringCount > 0 && isoCount === stringCount;
   if (!temporal) {
     const { semantic, valid } = fallbackNumeric(raw, true);
     return {
