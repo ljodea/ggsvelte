@@ -14,6 +14,7 @@ import {
   resolveGlyphMark,
   resolveRectMark,
   resolveSegmentMark,
+  segmentStrokeAt,
 } from "../src/mark-style.ts";
 import type { GlyphsBatch, RectsBatch, SegmentsBatch } from "../src/scene.ts";
 
@@ -294,6 +295,17 @@ describe("resolveSegmentMark", () => {
     );
     expect(resolveSegmentMark({ ...base, stroke: "#00c" }, 0, "#ink").stroke).toBe("#00c");
     expect(resolveSegmentMark(base, 0, "#ink").stroke).toBe("#ink");
+  });
+
+  it("segmentStrokeAt matches the full resolver stroke on every chain step", () => {
+    const mapped = { ...base, strokes: ["#a00", "#0a0"] as string[], stroke: "#00c" };
+    for (const batch of [base, mapped, { ...base, stroke: "#00c" }]) {
+      for (const index of [0, 1]) {
+        expect(segmentStrokeAt(batch, index, "#ink")).toBe(
+          resolveSegmentMark(batch, index, "#ink").stroke,
+        );
+      }
+    }
   });
 
   it("resolves per-segment linewidths over the constant", () => {

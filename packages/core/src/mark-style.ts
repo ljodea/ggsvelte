@@ -227,6 +227,15 @@ export interface ResolvedSegmentMark {
   linecap: "butt" | "round" | "square" | undefined;
 }
 
+/**
+ * Stroke color alone — the hot-loop subset of resolveSegmentMark. Canvas
+ * run-length collapsing compares this per segment; the full resolver would
+ * pay an object allocation plus a dash-table lookup per comparison.
+ */
+export function segmentStrokeAt(batch: SegmentsBatch, index: number, themeInk: string): string {
+  return batch.strokes?.[index] ?? batch.stroke ?? themeInk;
+}
+
 /** Resolve one segment's stroke/dash for any serializer. */
 export function resolveSegmentMark(
   batch: SegmentsBatch,
@@ -234,7 +243,7 @@ export function resolveSegmentMark(
   themeInk: string,
 ): ResolvedSegmentMark {
   return {
-    stroke: batch.strokes?.[index] ?? batch.stroke ?? themeInk,
+    stroke: segmentStrokeAt(batch, index, themeInk),
     width: batch.linewidths?.[index] ?? batch.linewidth,
     dash: linetypeDash(linetypeAt(batch, index)),
     alpha: batch.alphas?.[index] ?? 1,

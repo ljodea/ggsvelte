@@ -7,7 +7,7 @@
  * objectBoundingBox mapping (one gradient box per <line>/<path>).
  */
 import { canvasGradientStyle, subpathBounds, type ResolvedGradientPaint } from "../mark-paint.js";
-import { resolveSegmentMark } from "../mark-style.js";
+import { resolveSegmentMark, segmentStrokeAt } from "../mark-style.js";
 import type { SegmentsBatch } from "../scene.js";
 import type { ThemeTokens } from "../theme.js";
 import { themeVar } from "../theme.js";
@@ -153,7 +153,7 @@ export function drawSegments(
 
   // Solid mono path, or panel-space paint (bounds unused for panel mapping).
   if (batch.strokes === undefined) {
-    const monoSolid = resolveSegmentMark(batch, 0, themeInk).stroke;
+    const monoSolid = segmentStrokeAt(batch, 0, themeInk);
     if (paint) {
       // Panel-space ignores bounds; placeholder is unused for mapping.
       ctx.strokeStyle = resolveSegmentStroke(
@@ -186,9 +186,9 @@ export function drawSegments(
       runStart++;
       continue;
     }
-    const color = resolveSegmentMark(batch, runStart, themeInk).stroke;
+    const color = segmentStrokeAt(batch, runStart, themeInk);
     let runEnd = runStart + 1;
-    while (runEnd < n && resolveSegmentMark(batch, runEnd, themeInk).stroke === color) runEnd++;
+    while (runEnd < n && segmentStrokeAt(batch, runEnd, themeInk) === color) runEnd++;
     if (paint) {
       ctx.strokeStyle = resolveSegmentStroke(
         ctx,
