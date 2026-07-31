@@ -24,6 +24,9 @@ import { toAuthoringDataRef, type DataInput } from "./builder-data.js";
 import { GGBuilderCore } from "./builder-core.js";
 import { WithBuilderGeoms } from "./builder-geoms.js";
 import { WithBuilderScales } from "./builder-scales.js";
+import { SpecValidationError } from "./errors.js";
+import type { PortableSpec } from "./schema.js";
+import { validate } from "./validate.js";
 
 export type {
   AuthoringCellValue,
@@ -93,8 +96,24 @@ export function aes(mapping: AesInput): AesInput {
   return mapping;
 }
 
-/** Immutable plot builder. Construct with gg(); finish with .spec(). */
-export class GGBuilder extends WithBuilderScales(WithBuilderGeoms(GGBuilderCore)) {}
+/**
+ * Immutable plot builder. Construct with gg(); finish with .spec() (validates)
+ * or .toPortable() (normalize only, no TypeBox).
+ */
+export class GGBuilder extends WithBuilderScales(WithBuilderGeoms(GGBuilderCore)) {
+  /**
+   * Compile to a canonical PortableSpec: normalize then TypeBox-validate.
+   * Throws SpecValidationError when the result does not satisfy the schema.
+   * Prefer {@link toPortable} on chart render paths that already run the
+   * pipeline structural gate — avoids loading typebox/compile into the bundle.
+   */
+  spec(): PortableSpec {
+    const portable = this.toPortable();
+    const result = validate(portable);
+    if (!result.ok) throw new SpecValidationError(result.errors);
+    return result.spec;
+  }
+}
 
 /** Start a plot: gg(data, aes({ x: 'displ', y: 'hwy' })).geomPoint().spec(). */
 export function gg(data?: DataInput, mapping?: AesInput): GGBuilder {

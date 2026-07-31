@@ -1,19 +1,61 @@
 /** Semantic numeric view for sequential/binned color and fill scales. */
-import {
-  parseTemporal,
-  parseTemporalColumn,
-  type ColorScaleSpec,
-  type TemporalKind,
-  type TemporalParserSpec,
-} from "@ggsvelte/spec";
+import type { ColorScaleSpec, TemporalKind, TemporalParserSpec } from "@ggsvelte/spec";
 
 import { encodeKey } from "../scales/state.js";
 import type { CellValue } from "../table.js";
 import { cellToNumber } from "../table.js";
+import { getTemporalRuntime } from "../temporal-runtime.js";
 
 import type { PipelineErrorCode } from "../diagnostics-error-catalog.js";
 
 import { PipelineError, type PipelineWarning } from "./types.js";
+
+function runtimeParseColumn(
+  values: readonly CellValue[],
+  parser: TemporalParserSpec | "auto",
+  options: { timezone?: string; disambiguation?: "compatible" | "earlier" | "later" | "reject" },
+) {
+  const runtime = getTemporalRuntime();
+  if (runtime !== null) return runtime.parseColumn(values, parser, options);
+  const semantic = new Float64Array(values.length);
+  const valid = new Uint8Array(values.length);
+  for (let i = 0; i < values.length; i++) {
+    const n = cellToNumber(values[i]!);
+    semantic[i] = n;
+    if (Number.isFinite(n)) valid[i] = 1;
+  }
+  return {
+    decision: {
+      status: "nominal" as const,
+      parser: null,
+      parserKey: "lite",
+      kind: null,
+      precision: null,
+      evidence: [],
+      nonNullCount: 0,
+      validatedCount: 0,
+      failedCount: 0,
+      candidates: [],
+    },
+    semantic,
+    valid,
+  };
+}
+
+function runtimeParseOne(
+  value: CellValue,
+  parser: TemporalParserSpec,
+  options: { timezone?: string; disambiguation?: "compatible" | "earlier" | "later" | "reject" },
+): { ok: true; epochMs: number } | { ok: false } {
+  const runtime = getTemporalRuntime();
+  if (runtime !== null) {
+    const parsed = runtime.parseColumn([value], parser, options);
+    if (parsed.valid[0] === 1) return { ok: true, epochMs: parsed.semantic[0]! };
+    return { ok: false };
+  }
+  const n = cellToNumber(value);
+  return Number.isFinite(n) ? { ok: true, epochMs: n } : { ok: false };
+}
 
 export interface ColorValueView {
   semantic: Float64Array;
@@ -58,7 +100,7 @@ export function resolveColorValueView(input: {
     ...(config?.timezone !== undefined && { timezone: config.timezone }),
     ...(config?.disambiguation !== undefined && { disambiguation: config.disambiguation }),
   };
-  const parsed = parseTemporalColumn(values, config?.parse ?? "auto", options);
+  const parsed = runtimeParseColumn(values, config?.parse ?? "auto", options);
   const temporal = parsed.decision.status === "temporal";
 
   if (
@@ -145,7 +187,7 @@ export function resolveColorValueView(input: {
           return undefined;
         }
         if (parser === null) return undefined;
-        const result = parseTemporal(value, parser, options);
+        const result = runtimeParseOne(value as CellValue, parser, options);
         return result.ok ? result.epochMs : undefined;
       },
     };

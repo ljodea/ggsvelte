@@ -14,7 +14,8 @@
     "**/node_modules/**",
     "**/.svelte-kit/**",
     "tests/visual/test-results/**",
-    "tests/visual/playwright-report/**"
+    "tests/visual/playwright-report/**",
+    "benchmarks/competitive/**"
   ],
   // Named pedantic opt-outs (M0c, see decision 0007). `lint:type-aware`
   // runs --deny-warnings, so every pedantic warning is effectively a hard

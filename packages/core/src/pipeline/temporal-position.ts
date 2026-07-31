@@ -1,10 +1,8 @@
-import {
-  MONTH_DAY_REFERENCE_YEAR,
-  parseTemporalColumn,
-  type PositionScaleSpec,
-  type TemporalDecision,
-  type TemporalParserSpec,
-  type TemporalScaleKind,
+import type {
+  PositionScaleSpec,
+  TemporalDecision,
+  TemporalParserSpec,
+  TemporalScaleKind,
 } from "@ggsvelte/spec";
 
 import {
@@ -17,6 +15,10 @@ import {
   type ParsedColumnOptions,
 } from "../table.js";
 import type { ColumnTransformConfig } from "../scales/transform.js";
+import { getTemporalRuntime } from "../temporal-runtime.js";
+
+/** Leap reference year for month-day projection (matches @ggsvelte/spec). */
+const MONTH_DAY_REFERENCE_YEAR = 2000;
 
 export interface PositionConversionContext {
   /** Effective parser for detached/post-stat values and author scalars. */
@@ -198,18 +200,62 @@ function mapToTimeOfDayMs(values: readonly CellValue[], base: Float64Array): Flo
   return out;
 }
 
+function parseDetachedValues(
+  values: readonly CellValue[],
+  conversion: PositionConversionContext,
+): {
+  decision: TemporalDecision;
+  semantic: Float64Array;
+  valid: Uint8Array;
+} {
+  const runtime = getTemporalRuntime();
+  if (runtime !== null) {
+    return runtime.parseColumn(values, conversion.parser, conversion.options);
+  }
+  // Lean path: ISO via cellToNumber; explicit non-auto parsers need full temporal.
+  if (conversion.parser !== "auto") {
+    throw new Error(
+      `Position parser ${JSON.stringify(conversion.parser)} requires @ggsvelte/core (full) or @ggsvelte/core/temporal.`,
+    );
+  }
+  const semantic = conversion.forcedNonTemporal
+    ? cellsToQuantitative(values)
+    : cellsToNumeric(values);
+  const valid = new Uint8Array(values.length);
+  let validated = 0;
+  for (let index = 0; index < semantic.length; index++) {
+    if (Number.isFinite(semantic[index]!)) {
+      valid[index] = 1;
+      validated++;
+    }
+  }
+  const nonNull = values.filter((value) => value !== null);
+  return {
+    decision: {
+      status:
+        validated > 0 && nonNull.every((v) => typeof v === "string" || v instanceof Date)
+          ? "temporal"
+          : "nominal",
+      parser: null,
+      parserKey: "lite:position",
+      kind: null,
+      precision: null,
+      evidence: [],
+      nonNullCount: nonNull.length,
+      validatedCount: validated,
+      failedCount: nonNull.length - validated,
+      candidates: [],
+    },
+    semantic,
+    valid,
+  };
+}
+
 export function positionValuesToNumeric(
   values: readonly CellValue[],
   conversion: PositionConversionContext,
 ): ConvertedPositionValues {
-  const parsed = parseTemporalColumn(values, conversion.parser, {
-    ...(conversion.options.timezone !== undefined && {
-      timezone: conversion.options.timezone,
-    }),
-    ...(conversion.options.disambiguation !== undefined && {
-      disambiguation: conversion.options.disambiguation,
-    }),
-  });
+  const parsed = parseDetachedValues(values, conversion);
   const temporal =
     !conversion.forcedNonTemporal &&
     (conversion.parser !== "auto" ||

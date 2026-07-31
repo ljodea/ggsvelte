@@ -5,8 +5,8 @@
 import { encodeKey } from "../scales/state.js";
 import type { CellValue } from "../table.js";
 import type { AxisGuidePlan } from "./temporal-guide.js";
-import { planTemporalAxis } from "./temporal-guide.js";
 import { planBandAxis, type BandAxisPlan, type BandGuideConfig } from "./band-guide.js";
+import { requireTemporalRuntime } from "../temporal-runtime.js";
 import type { TextMeasurer } from "./measure.js";
 import { truncateToFit } from "./truncate.js";
 import {
@@ -370,7 +370,7 @@ export function deriveTicks(
 
   if (domain.type === "time") {
     if (domain.temporal !== undefined) {
-      const plan = planTemporalAxis({
+      const plan = requireTemporalRuntime("planTemporalAxis").planAxis({
         aesthetic: domain.temporal.aesthetic,
         panelIndex: domain.temporal.panelIndex,
         domain: [min, max],

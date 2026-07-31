@@ -1,10 +1,11 @@
 /** Semantic color/fill guide label format resolution. */
 import type { ColorScaleSpec, TemporalKind } from "@ggsvelte/spec";
 
-import { compileTemporalLabelFormat, numberFormatter } from "../layout/format.js";
+import { numberFormatter } from "../layout/format-number.js";
 import { defaultTimeTickFormat } from "../layout/time.js";
 import { defaultTickFormat, tickStep } from "../layout/ticks.js";
 import type { SequentialColorScale } from "../scales/color.js";
+import { getTemporalRuntime } from "../temporal-runtime.js";
 
 import type { PipelineWarning } from "./types.js";
 
@@ -42,30 +43,35 @@ function resolveColorLegendFormat(input: {
       kind: temporalKind,
       ...(config?.timezone !== undefined && { timezone: config.timezone }),
     };
-    const fullLabel = compileTemporalLabelFormat(
-      temporalKind === "date" ? "%Y-%m-%d" : "%Y-%m-%d %H:%M:%S %Z",
-      options,
-    );
+    const compile = getTemporalRuntime()?.compileLabelFormat;
+    const fullLabel =
+      compile === undefined
+        ? defaultTimeTickFormat
+        : compile(temporalKind === "date" ? "%Y-%m-%d" : "%Y-%m-%d %H:%M:%S %Z", options);
     if (labelFormat !== undefined) {
-      try {
-        return {
-          label: compileTemporalLabelFormat(labelFormat, options),
-          fullLabel,
-        };
-      } catch {
+      if (compile === undefined) {
         warnings.push({
           code: "invalid-label-format",
-          message: `Unrecognized labels format "${labelFormat}" on scales.${name}; using the default.`,
+          message: `Temporal labels format on scales.${name} requires @ggsvelte/core/temporal (or the full package); using the default.`,
         });
+      } else {
+        try {
+          return {
+            label: compile(labelFormat, options),
+            fullLabel,
+          };
+        } catch {
+          warnings.push({
+            code: "invalid-label-format",
+            message: `Unrecognized labels format "${labelFormat}" on scales.${name}; using the default.`,
+          });
+        }
       }
     }
     const label =
-      config?.timezone === undefined
+      config?.timezone === undefined || compile === undefined
         ? defaultTimeTickFormat
-        : compileTemporalLabelFormat(
-            temporalKind === "date" ? "%Y-%m-%d" : "%Y-%m-%d %H:%M",
-            options,
-          );
+        : compile(temporalKind === "date" ? "%Y-%m-%d" : "%Y-%m-%d %H:%M", options);
     return { label, fullLabel };
   }
 

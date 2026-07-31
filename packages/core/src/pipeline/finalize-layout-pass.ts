@@ -1,7 +1,8 @@
 /**
  * Finalize phase: two-pass panel layout only.
  */
-import { parseTemporalColumn, type CellValue, type PortableSpec } from "@ggsvelte/spec";
+import type { CellValue, PortableSpec } from "@ggsvelte/spec";
+import { getTemporalRuntime } from "../temporal-runtime.js";
 
 import { perfMark, perfMeasure } from "../perf.js";
 import type { ThemeTokens } from "../theme.js";
@@ -54,24 +55,30 @@ export function finalizePanelLayoutPass(input: {
       if (value !== undefined) scalarValues.push(...(Array.isArray(value) ? value : [value]));
     }
     if (scalarValues.length > 0 && conversion.requestedTime) {
-      const decision = parseTemporalColumn(
-        scalarValues,
-        conversion.parser,
-        conversion.options,
-      ).decision;
-      if (decision.kind !== null) return decision.kind;
-    }
-
-    const config = normalized.scales?.[axis];
-    if (conversion.requestedTime) {
-      for (const values of [config?.domain, config?.breaks]) {
-        if (values === undefined || values.length === 0) continue;
-        const decision = parseTemporalColumn(
-          values,
+      const runtime = getTemporalRuntime();
+      if (runtime !== null) {
+        const decision = runtime.parseColumn(
+          scalarValues,
           conversion.parser,
           conversion.options,
         ).decision;
         if (decision.kind !== null) return decision.kind;
+      }
+    }
+
+    const config = normalized.scales?.[axis];
+    if (conversion.requestedTime) {
+      const runtime = getTemporalRuntime();
+      if (runtime !== null) {
+        for (const values of [config?.domain, config?.breaks]) {
+          if (values === undefined || values.length === 0) continue;
+          const decision = runtime.parseColumn(
+            values,
+            conversion.parser,
+            conversion.options,
+          ).decision;
+          if (decision.kind !== null) return decision.kind;
+        }
       }
     }
 

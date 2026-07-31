@@ -26,8 +26,12 @@
  */
 import type { GGBuilder, SpecInput } from "@ggsvelte/spec";
 
-import type { RenderModel, RunOptions } from "./pipeline.js";
-import { PipelineError, runPipeline } from "./pipeline.js";
+import type { RenderModel, RunOptions } from "./pipeline/public-api.js";
+import { PipelineError } from "./pipeline/public-api.js";
+// Import runPipeline without the full pipeline barrel (which registers every
+// geom/stat). Entry points that need the full grammar import `./pipeline.js`
+// or `./index.js` first; `@ggsvelte/core/render` registers basic geoms only.
+import { runPipeline } from "./pipeline/run-pipeline.js";
 import { countMarks } from "./render-svg-marks.js";
 import { sceneToSVGString } from "./render-svg-scene.js";
 
