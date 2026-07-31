@@ -133,7 +133,6 @@
       "version": "0.22.0",
       "bin": {
         "ggsvelte-codemod": "bin/ggsvelte-codemod.js",
-        "ggsvelte-render": "bin/ggsvelte-render.js",
       },
       "dependencies": {
         "@ggsvelte/core": "^0.16.0",
