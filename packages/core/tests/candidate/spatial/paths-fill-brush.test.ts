@@ -84,7 +84,7 @@ describe("queryRect over filled paths (fill containment refine)", () => {
     batch.positions = new Proxy(positions, {
       get(target, prop) {
         if (typeof prop === "string" && /^\d+$/.test(prop)) reads += 1;
-        return Reflect.get(target, prop);
+        return Reflect.get(target, prop) as unknown;
       },
     });
     // Brush (95,55)-(105,65): center (100,60) inside; anchors and edges sit on
