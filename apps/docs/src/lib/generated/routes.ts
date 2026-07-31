@@ -11552,6 +11552,11 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "stack-align-skipped",
+        title: "stack-align-skipped",
+        level: 3,
+      },
+      {
         id: "smooth-group-dropped",
         title: "smooth-group-dropped",
         level: 3,

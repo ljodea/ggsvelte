@@ -47,6 +47,15 @@ function autoAlignAdvisories(model: ReturnType<typeof runPipeline>) {
   return model.advisories.filter((a) => a.code === "stack-align-applied");
 }
 
+/** True when some candidate carries a non-empty source lineage (ref 0 = empty). */
+function anySourceLineage(model: ReturnType<typeof runPipeline>): boolean {
+  for (let id = 0; id < model.candidates.size; id++) {
+    const candidate = model.candidates.candidate(id);
+    if (candidate !== null && candidate.lineage !== 0) return true;
+  }
+  return false;
+}
+
 describe("stacked area auto-align (#1268)", () => {
   it("aligns an interior hole and matches the explicit align stat", () => {
     const auto = areaModel(sparse);
@@ -205,6 +214,37 @@ describe("stacked area auto-align (#1268)", () => {
       size,
     );
     expect(autoAlignAdvisories(model).length).toBe(1);
+  });
+
+  it("keeps source lineage for observed samples on the rescued layer", () => {
+    // Tooltips already work on stat frames (fields come from frame columns),
+    // but source-row linkage — oninspect callbacks, legend key membership —
+    // needs lineage. Grid points that coincide with a group's own samples
+    // keep their source row; only synthesized cells stay lineage-free.
+    const model = areaModel(sparse);
+    expect(anySourceLineage(model)).toBe(true);
+  });
+
+  it("stands down with a warning when the expansion exceeds the budget", () => {
+    // One dense group over 150 x values plus 150 two-point groups spanning
+    // the range: 151 groups × 150 grid x ≈ 22.6k expanded rows from 450
+    // input rows — past both the absolute and relative budgets.
+    const x: number[] = [];
+    const y: number[] = [];
+    const g: string[] = [];
+    for (let i = 0; i < 150; i++) {
+      x.push(i);
+      y.push(1);
+      g.push("dense");
+    }
+    for (let s = 0; s < 150; s++) {
+      x.push(0, 149);
+      y.push(1, 1);
+      g.push(`s${s}`, `s${s}`);
+    }
+    const model = areaModel({ x, y, g });
+    expect(autoAlignAdvisories(model).length).toBe(0);
+    expect(model.warnings.some((w) => w.code === "stack-align-skipped")).toBe(true);
   });
 
   it("ignores groups with no finite rows when detecting and aligning", () => {
