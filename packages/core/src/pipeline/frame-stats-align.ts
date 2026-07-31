@@ -84,9 +84,11 @@ export function maybeStackAlignFrame(
   if (expanded > Math.max(STACK_ALIGN_MAX_ROWS, STACK_ALIGN_MAX_GROWTH * need.finiteRows)) {
     // Align materializes groups × union-x rows; on very sparse high-n data
     // that can dwarf the input. Keep raw geometry and say so loudly.
+    // Message stays panel-independent (no per-panel counts) so dedupeWarnings
+    // collapses faceted emissions to one disclosure per layer.
     warnings.push({
       code: "stack-align-skipped",
-      message: `Layer ${index}: stacked area groups sample different x values, but auto-align would expand ${need.finiteRows} rows to ${expanded} (groups × shared-grid x) — bands with interior gaps may render as floating polygons. Pre-fill or aggregate the data, or set stat: "align" to force the expansion.`,
+      message: `Layer ${index}: stacked area groups sample different x values, but auto-align would expand the rows past its budget (groups × shared-grid x) — bands with interior gaps may render as floating polygons. Pre-fill or aggregate the data, or set stat: "align" to force the expansion.`,
     });
     return null;
   }

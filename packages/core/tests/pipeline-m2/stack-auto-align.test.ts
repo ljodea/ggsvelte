@@ -247,6 +247,37 @@ describe("stacked area auto-align (#1268)", () => {
     expect(model.warnings.some((w) => w.code === "stack-align-skipped")).toBe(true);
   });
 
+  it("emits the stand-down warning once per layer under facets", () => {
+    // Same over-budget shape duplicated into two panels: the warning message
+    // is panel-independent, so dedupe collapses it to one disclosure.
+    const x: number[] = [];
+    const y: number[] = [];
+    const g: string[] = [];
+    const p: string[] = [];
+    for (const panel of ["p1", "p2"]) {
+      for (let i = 0; i < 150; i++) {
+        x.push(i);
+        y.push(1);
+        g.push("dense");
+        p.push(panel);
+      }
+      for (let s = 0; s < 150; s++) {
+        x.push(0, 149);
+        y.push(1, 1);
+        g.push(`s${s}`, `s${s}`);
+        p.push(panel, panel);
+      }
+    }
+    const model = runPipeline(
+      gg({ x, y, g, p }, aes({ x: "x", y: "y", fill: "g" }))
+        .geomArea()
+        .facet({ wrap: "p" })
+        .spec(),
+      size,
+    );
+    expect(model.warnings.filter((w) => w.code === "stack-align-skipped").length).toBe(1);
+  });
+
   it("ignores groups with no finite rows when detecting and aligning", () => {
     const model = areaModel({
       x: [1, 3, 0, 1, 2, 3, 4, 0, 4],
