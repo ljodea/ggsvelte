@@ -3679,6 +3679,97 @@
       }
     },
     {
+      "package": "@ggsvelte/spec",
+      "entry": "./portable",
+      "source": "packages/spec/src/portable-entry.ts",
+      "exports": {
+        "AesInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AuthoringCellValue": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AuthoringColumns": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AuthoringDataRef": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AuthoringRows": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "DataInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GGBuilder": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeomAreaOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomBarOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomBoxplotOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomColOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomDensityOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomHistogramOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomLineOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomPointOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomSmoothOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GeomTextOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SpecInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "aes": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "gg": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "normalize": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        }
+      }
+    },
+    {
       "package": "@ggsvelte/core",
       "entry": ".",
       "source": "packages/core/src/index.ts",
@@ -4968,6 +5059,228 @@
           "lifecycle": "experimental"
         },
         "trainSequential": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        }
+      }
+    },
+    {
+      "package": "@ggsvelte/core",
+      "entry": "./render",
+      "source": "packages/core/src/render-entry.ts",
+      "exports": {
+        "Advisory": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "AxisValueFormatter": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "CANVAS_AUTO_THRESHOLD": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "GeometryBatch": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "GlyphsBatch": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "LayerBackend": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "MappedField": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "NamedData": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PathsBatch": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PipelineError": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "PipelineWarning": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "PointsBatch": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RectsBatch": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RenderModel": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RenderSVGOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ResolvedColorScale": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "RunOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleDecision": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleDiagnostic": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleDiagnosticFix": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScaleDomainSnapshot": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "Scene": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SceneAxis": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SceneDiscreteLegend": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SceneLegend": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SceneLegendEntry": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "ScenePanel": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SceneRampLegend": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SceneStepsLegend": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SceneTick": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "SegmentsBatch": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TrainedScales": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "batchMarkCount": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "countMarks": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "pathData": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerGeomBatch": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "registerStatFrame": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "renderToSVGString": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "runPipeline": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "sceneLabel": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "sceneToSVGString": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        }
+      }
+    },
+    {
+      "package": "@ggsvelte/core",
+      "entry": "./temporal",
+      "source": "packages/core/src/temporal-entry.ts",
+      "exports": {
+        "AxisGuidePlan": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalAxisPlanInput": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalLabelFormatOptions": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "TemporalTickLabel": {
+          "kind": "type",
+          "lifecycle": "experimental"
+        },
+        "compileTemporalLabelFormat": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "formatTemporalTickSequence": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "formatTime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "getTemporalRuntime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "installTemporal": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "installTemporalRuntime": {
+          "kind": "value",
+          "lifecycle": "experimental"
+        },
+        "planTemporalAxis": {
           "kind": "value",
           "lifecycle": "experimental"
         }

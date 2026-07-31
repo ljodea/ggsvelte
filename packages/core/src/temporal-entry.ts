@@ -4,7 +4,11 @@
  * Installs the Temporal polyfill parse path and temporal axis planner, then
  * re-exports guide helpers for apps that started from `@ggsvelte/core/render`
  * and later need time scales.
+ *
+ * Lifecycle (Hadley lesson 13; meanings in CONTRIBUTING.md): tags collected
+ * into lifecycle.json by scripts/gen-lifecycle.ts.
  */
+// @lifecycle-default experimental
 import "./install-temporal.js";
 
 export { installTemporal } from "./install-temporal.js";

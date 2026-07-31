@@ -6,7 +6,11 @@
  * geoms. Identity charts (scatter, line, bar, area) stay on this graph.
  *
  * Full grammar: import from `@ggsvelte/core` instead.
+ *
+ * Lifecycle (Hadley lesson 13; meanings in CONTRIBUTING.md): tags collected
+ * into lifecycle.json by scripts/gen-lifecycle.ts.
  */
+// @lifecycle-default experimental
 import "./pipeline/geometry-register-basic.js";
 import "./pipeline/frame-stats-register-basic.js";
 

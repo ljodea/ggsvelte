@@ -95,6 +95,16 @@ describe("lifecycle.json", () => {
       }[];
     };
     expect(doc.surfaces).toHaveLength(SURFACES.length);
+    // Lean subpath entries shipped by package.json exports (#1278).
+    for (const entry of [
+      { package: "@ggsvelte/core", entry: "./render" },
+      { package: "@ggsvelte/core", entry: "./temporal" },
+      { package: "@ggsvelte/spec", entry: "./portable" },
+    ] as const) {
+      expect(doc.surfaces.some((s) => s.package === entry.package && s.entry === entry.entry)).toBe(
+        true,
+      );
+    }
     const stableIntent = (pkg: string, entry: string) => {
       const s = doc.surfaces.find((x) => x.package === pkg && x.entry === entry)!;
       return Object.keys(s.exports).filter((k) => s.exports[k]!.lifecycle === "stable-intent");

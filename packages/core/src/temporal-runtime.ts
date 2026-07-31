@@ -46,6 +46,17 @@ export function getTemporalRuntime(): TemporalRuntime | null {
   return runtime;
 }
 
+/**
+ * Test-only: clear the optional runtime so the lean parse path is exercised.
+ * Callers must re-install via {@link installTemporalRuntime} (or the package
+ * install side effect) before other suites that need full temporal semantics.
+ */
+export function resetTemporalRuntimeForTests(): void {
+  if (runtime === null) return;
+  runtime = null;
+  runtimeGeneration += 1;
+}
+
 /** Cache-key fragment: changes when temporal install status changes. */
 export function temporalRuntimeGeneration(): number {
   return runtimeGeneration;
