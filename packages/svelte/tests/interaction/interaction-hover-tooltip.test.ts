@@ -199,6 +199,10 @@ describe("hover + tooltip (overlays, never a pipeline re-run)", () => {
     pointerMoveAt(capture, seed.x, seed.y);
     await until(() => container.querySelector(".gg-tooltip") !== null);
     expect(container.querySelector(".gg-hover-ring")).toBeNull();
+    // Pinning the same band must not resurrect the point ring either.
+    capture.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await until(() => container.querySelector(".gg-tooltip-pinned") !== null);
+    expect(container.querySelector(".gg-hover-ring")).toBeNull();
   });
 
   it("line hover keeps the point ring — open strokes anchor at a vertex (#1270)", async () => {
