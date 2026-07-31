@@ -149,6 +149,20 @@ describe("stacked-area-negative", () => {
     expect(advisories[0]!.message).toContain('"neg"');
   });
 
+  it("uses plot-level evidence even when a layer carries its own same-named column", () => {
+    // Lint evidence is one plot-level map per pass (validate.ts shares
+    // layerResolved.plot only), so a layer's own data never feeds this rule.
+    // The per-field memo in collectLayerLintAdvisories depends on exactly this
+    // contract; if lint gains layer-scoped evidence, this test must change
+    // along with the memo key.
+    const advisories = lintSpec({
+      data: { columns: { x: [1, 2, 3], y: [1, 2, 3], g: ["a", "b", "a"] } },
+      aes: { x: { field: "x" }, y: { field: "y" }, fill: { field: "g" } },
+      layers: [{ geom: "area", data: { columns: { y: [-1, -2, -3] } } }],
+    });
+    expect(advisories).toEqual([]);
+  });
+
   it("fires only on the stacked layer when an identity layer shares the negative field", () => {
     const advisories = lintSpec({
       data: { columns: { x: [1, 2, 3], y: [1, -2, 3], g: ["a", "b", "a"] } },
