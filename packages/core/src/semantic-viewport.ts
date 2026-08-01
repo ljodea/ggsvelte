@@ -174,14 +174,24 @@ function projectedSpan(
   let last: number | undefined;
   if (selection.kind === "band") {
     if (scale.type !== "band") return [0, 1];
-    const centers = bandValuesForKeys(bandValuesByKey, selection.keys).flatMap((value) => {
+    // One pass over the keys, never `Math.min(...centers)`: `keys` is caller-
+    // supplied and unbounded, and spreading it passes one argument per key,
+    // which RangeErrors on a wide enough band brush (same hazard grouping.ts
+    // avoids for `Math.max(...groups)`).
+    let minCenter = Infinity;
+    let maxCenter = -Infinity;
+    for (const key of selection.keys) {
+      const value = bandValuesByKey.get(key);
+      if (value === undefined) continue;
       const center = scale.normalize(value);
-      return center === undefined ? [] : [center];
-    });
-    if (centers.length === 0) return [0, 1];
+      if (center === undefined) continue;
+      if (center < minCenter) minCenter = center;
+      if (center > maxCenter) maxCenter = center;
+    }
+    if (minCenter === Infinity) return [0, 1];
     const halfStep = scale.step / 2;
-    first = Math.max(0, Math.min(...centers) - halfStep);
-    last = Math.min(1, Math.max(...centers) + halfStep);
+    first = Math.max(0, minCenter - halfStep);
+    last = Math.min(1, maxCenter + halfStep);
   } else {
     if (scale.type === "band") return [0, 1];
     const firstValue = scale.normalize(selection.domain[0]);
