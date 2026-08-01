@@ -140,17 +140,21 @@
     </div>
   {:else}
     <ul class="example-grid">
-      {#each results as entry (entry.id)}
+      {#each results as entry, index (entry.id)}
         <li>
           <a href={`${base}/examples/${entry.id}`} aria-label={entry.title}>
             <figure>
               <div class="preview-paper">
+                <!-- First six cover a typical first screen; the rest stay lazy
+                     so cold gallery transfers do not pull ~2MB of PNG up front. -->
                 <img
                   src={`${base}${entry.previewPath}`}
                   alt=""
                   width="640"
                   height={entry.vrHeight ?? 400}
-                  loading="lazy"
+                  loading={index < 6 ? "eager" : "lazy"}
+                  decoding="async"
+                  fetchpriority={index < 6 ? "high" : "low"}
                 />
               </div>
             </figure>
@@ -181,6 +185,11 @@
     padding: 0;
     list-style: none;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  }
+
+  .example-grid > li {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 14rem;
   }
 
   figure {
