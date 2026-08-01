@@ -2,18 +2,18 @@
 
 [![codecov](https://codecov.io/gh/ljodea/ggsvelte/branch/main/graph/badge.svg?component=packages-spec)](https://app.codecov.io/gh/ljodea/ggsvelte/tree/main/packages%2Fspec)
 
-PortableSpec types, published JSON Schema (`schema/v0.json`), `normalize()`,
-two-tier `validate()` with the agent error contract
-(`{ code, path, message, allowed?, fix }` — every fix carries a
-machine-applicable example), `lintSpec()`, and the fluent `gg()/aes()` builder.
-No DOM, no d3. Pre-1.0.
+PortableSpec types, published JSON Schema, `normalize()`, two-tier
+`validate()` with the agent error contract
+(`{ code, path, message, allowed?, fix }`), `lintSpec()`, and the fluent
+`gg()` / `aes()` builder. No DOM, no d3. Pre-1.0.
 
 ```sh
 bun add @ggsvelte/spec     # or: npm install @ggsvelte/spec
 ```
 
 Install alone for validation and authoring without a renderer.
-`@ggsvelte/svelte` re-exports this package.
+[`@ggsvelte/svelte`](https://www.npmjs.com/package/@ggsvelte/svelte)
+re-exports this package.
 
 ## Quick example
 
@@ -42,37 +42,34 @@ const result = validate(spec, {
   lint: true,
 });
 if (!result.ok) {
+  // Apply fix.example at path, then re-validate.
   // { code, path, message, allowed?, fix: { description, example } }
 }
 ```
 
-## Contract
+## Agent contract
 
-- **Emit, validate, fix.** `validate(spec)` is shape; `validate(spec, { profile })`
-  is data-aware without shipping rows; `{ lint: true }` adds advisories. Apply
-  `fix.example` at `path` and re-validate.
-- **Temporal.** Automatic inference covers ISO, `YYYY`, year-month, month-year,
-  and year-quarter after whole-column validation. Ambiguous ordered dates need
-  an explicit parser (`parse: "dmy"`, etc.).
-- **Numeric transforms.** Closed names (`identity` | `log10` | `sqrt`) run
-  before statistics. Domains/limits are semantic; OOB censor/squish runs before
-  the transform. Authored `type: "log"` normalizes to linear + log10.
-- **Color/fill.** `ordinal`, `sequential`, `binned`, `manual`, `identity`.
-  Binned color caps at 64 intervals; manual needs one range color per domain
-  value.
-- **Style channels.** `size` / `linewidth` / `alpha` share sequential–identity
-  families. `shape` and `linetype` use finite named sets — quantitative
-  mappings require explicit binning.
-- **Guides.** Separate from scale math. Top-level `guides` wins over scale-local
-  `guide`. Invalid aesthetic/variant pairs fail validation.
-- **Coords.** `coordTransform` is post-stat projection. `coordFixed({ ratio })`
-  is physical y-unit/x-unit length; free positional facet scales are rejected.
-- **PortableSpec.** No `Date`, callbacks, or regular expressions. Builder
-  `Date` values canonicalize to ISO strings.
+- `validate(spec)` — shape only.
+- `validate(spec, { profile })` — data-aware without shipping rows.
+- `validate(spec, { lint: true })` — advisories for valid-but-questionable specs.
+- Every error carries `fix.example`. Apply it at `path` and re-validate.
+- PortableSpec is JSON-only: no `Date`, callbacks, or regular expressions.
+  Builder `Date` values canonicalize to ISO strings.
+- JSON aes uses `{ field: "col" }` (bare strings are invalid in JSON). The
+  builder and Svelte props accept bare-string shorthand.
 
-Render with [`@ggsvelte/core`](https://www.npmjs.com/package/@ggsvelte/core)
-(headless SVG) or
-[`@ggsvelte/svelte`](https://www.npmjs.com/package/@ggsvelte/svelte)
-(Svelte 5).
+## Render
 
-Repo + docs: <https://github.com/ljodea/ggsvelte> · MIT © Liam O'Dea
+- Headless SVG: [`@ggsvelte/core`](https://www.npmjs.com/package/@ggsvelte/core)
+  (`renderToSVGString`)
+- CLI loop (validation + warnings on stderr):
+  [`@ggsvelte/cli`](https://www.npmjs.com/package/@ggsvelte/cli)
+  (`ggsvelte-render`)
+- Svelte 5:
+  [`@ggsvelte/svelte`](https://www.npmjs.com/package/@ggsvelte/svelte)
+
+Schema: [schema/v0.json](https://ggsvelte.sh/schema/v0.json) · Docs:
+[ggsvelte.sh](https://ggsvelte.sh/) · Repo:
+[github.com/ljodea/ggsvelte](https://github.com/ljodea/ggsvelte)
+
+[MIT](https://github.com/ljodea/ggsvelte/blob/main/LICENSE) © Liam O'Dea

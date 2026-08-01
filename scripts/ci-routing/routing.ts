@@ -191,9 +191,12 @@ export const LANE_PATTERNS: Record<ChangeLane, readonly string[]> = {
     ".github/ISSUE_TEMPLATE/**",
     ".github/DISCUSSION_TEMPLATE/**",
     ".changeset/**",
-    // readme-showcase.test.ts reads these files as contract inputs.
+    // readme-showcase + package-readme tests read these as contract inputs.
     "README.md",
+    "packages/spec/README.md",
+    "packages/core/README.md",
     "packages/svelte/README.md",
+    "packages/cli/README.md",
   ],
   // Cloudflare workers (when present). Own bun tests + type-aware lint/knip.
   // Nothing under workers/** renders charts, so no browser/docs surface.

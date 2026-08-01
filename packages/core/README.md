@@ -3,8 +3,8 @@
 [![codecov](https://codecov.io/gh/ljodea/ggsvelte/branch/main/graph/badge.svg?component=packages-core)](https://app.codecov.io/gh/ljodea/ggsvelte/tree/main/packages%2Fcore)
 
 Grammar pipeline (stats, positions, facets, scales, layout) and pure SVG-string
-renderer. Main entry has no DOM — Node, edge runtimes, workers. Canvas and hit
-index live under `@ggsvelte/core/dom`. Pre-1.0.
+renderer. The main entry has no DOM — Node, edge runtimes, workers. Canvas and
+hit-testing live under `@ggsvelte/core/dom`. Pre-1.0.
 
 ```sh
 bun add @ggsvelte/core     # or: npm install @ggsvelte/core
@@ -15,52 +15,70 @@ For server, CLI, and agent rendering. Svelte apps use
 
 ## Quick example
 
+Author with the builder from `@ggsvelte/spec`, render here:
+
 ```ts
 import { renderToSVGString, runPipeline } from "@ggsvelte/core";
+import { aes, gg } from "@ggsvelte/spec";
 
-const spec = {
-  data: {
-    values: [
-      { year: "1835", value: 12 },
-      { year: "2026", value: 31 },
-    ],
-  },
-  layers: [
-    { geom: "line", aes: { x: { field: "year" }, y: { field: "value" } } },
+const spec = gg(
+  [
+    { year: "1835", value: 12 },
+    { year: "2026", value: 31 },
   ],
-};
+  aes({ x: "year", y: "value" }),
+)
+  .geomLine()
+  .spec();
 
 const svg = renderToSVGString(spec, { width: 640, height: 400 });
 
 const model = runPipeline(spec, { width: 640, height: 400 });
 // model.scene, model.scaleDecisions, model.guidePlans,
-// model.advisories, model.warnings
+// model.advisories, model.warnings, model.candidates
 ```
 
-Browser canvas + hit testing:
+Bare PortableSpec JSON works the same way — channel mappings use
+`{ field: "col" }`, not bare strings:
 
 ```ts
-import { drawStratum } from "@ggsvelte/core/dom";
+import { renderToSVGString } from "@ggsvelte/core";
 
-const candidate = model.candidates.hitTest(plotX, plotY);
+const svg = renderToSVGString(
+  {
+    data: {
+      values: [
+        { year: "1835", value: 12 },
+        { year: "2026", value: 31 },
+      ],
+    },
+    layers: [
+      {
+        geom: "line",
+        aes: { x: { field: "year" }, y: { field: "value" } },
+      },
+    ],
+  },
+  { width: 640, height: 400 },
+);
 ```
 
-## Contract
+## Entries
 
-- **Scale transforms** run before statistics; **coord transforms** project after
-  statistics and invert before scale inversion for interactions.
-- Position scales keep semantic source values; cached `identity` / `log10` /
-  `sqrt` views feed stats and positions once.
-- Non-position color/fill and style channels share one training path; SVG,
-  canvas, and Svelte consume the same resolved mark styles.
-- Auto non-position guides sit on the right while the panel stays readable,
-  else move below. Identity guides stay suppressed unless forced.
-- `coordFixed({ ratio })` fits a centered data rectangle with exact physical
-  unit ratios after chrome allocation; free positional facet scales fail with
-  `coord-fixed-free-scales`.
+| Import                    | Use                                          |
+| ------------------------- | -------------------------------------------- |
+| `@ggsvelte/core`          | Full grammar + temporal + SVG string         |
+| `@ggsvelte/core/render`   | Lean identity-chart surface (no heavy stats) |
+| `@ggsvelte/core/dom`      | Browser canvas draw + hit index              |
+| `@ggsvelte/core/temporal` | Temporal polyfill entry                      |
+
+CLI without installing this package as a library:
+[`ggsvelte-render`](https://www.npmjs.com/package/@ggsvelte/cli) (same pipeline,
+JSONL diagnostics on stderr).
 
 Specs validate through
-[`@ggsvelte/spec`](https://www.npmjs.com/package/@ggsvelte/spec)
-(re-exported errors keep the `{ code, path, message, fix }` shape).
+[`@ggsvelte/spec`](https://www.npmjs.com/package/@ggsvelte/spec).
+Docs: [ggsvelte.sh](https://ggsvelte.sh/) · Repo:
+[github.com/ljodea/ggsvelte](https://github.com/ljodea/ggsvelte)
 
-Repo + docs: <https://github.com/ljodea/ggsvelte> · MIT © Liam O'Dea
+[MIT](https://github.com/ljodea/ggsvelte/blob/main/LICENSE) © Liam O'Dea

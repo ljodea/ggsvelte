@@ -353,6 +353,27 @@ badge is overall project coverage.
   baselines locally, `SKIP=block-output-paths git commit …` and say why in the
   PR.
 
+## Package READMEs (npm front doors)
+
+Each `packages/*/README.md` is what npmjs.com shows for that package. Keep it
+short, package-specific, and correct — not a second docs site.
+
+- **One working example** for the package’s primary use case. Absolute URLs only
+  (no `../other-package` monorepo links — they 404 on npm).
+- **Do not restate full contracts** (scales, guides, deprecation calendars) in
+  the package README; link to [ggsvelte.sh](https://ggsvelte.sh/) instead. Long
+  contract dumps are what drifts.
+- **Guards:** `scripts/package-readme.test.ts` runs TypeScript fences for
+  `@ggsvelte/spec` and `@ggsvelte/core`, bans monorepo-relative links, and
+  blocks removed grammar-prop examples in `@ggsvelte/svelte`. Root README
+  showcase stays in `scripts/readme-showcase.test.ts`.
+- **Ship with a patch** when the example or install path changes — package
+  README is a shipped surface for `scripts/changeset-check.ts` even though
+  npm packs it outside the `files` field.
+
+When a public API change invalidates a package README snippet, update the
+README in the same PR as the code.
+
 ## Examples corpus (one source, three uses)
 
 `examples/<category>/<name>/` is the shared corpus feeding (1) the docs
@@ -482,12 +503,12 @@ PR gets one opened rather than a silent skip. The three-way decision
 
 Add a `.changeset/*.md` **only** when the PR changes an npm-published package
 surface — the same paths `scripts/changeset-check.ts` treats as shipped
-(`package.json`, that package’s npm `files` entries under
-`packages/{cli,core,spec,svelte}`, and — for packages that publish compiled
-`dist` without listing `src` — the package’s `src/` tree that builds into
-`dist`, e.g. `packages/svelte/src/**`). Spec, core, svelte, and cli version
-in **fixed lockstep**, so one real (or spurious) changeset advances all four
-package versions.
+(`package.json`, `README.md`, `LICENSE`, that package’s npm `files` entries
+under `packages/{cli,core,spec,svelte}`, and — for packages that publish
+compiled `dist` without listing `src` — the package’s `src/` tree that builds
+into `dist`, e.g. `packages/svelte/src/**`). Spec, core, svelte, and cli
+version in **fixed lockstep**, so one real (or spurious) changeset advances all
+four package versions.
 
 **Do not** add a changeset for docs site, examples, scripts, tests, CI, or
 guide content alone (`apps/docs/**`, `examples/**`, `scripts/quickstart/**`,

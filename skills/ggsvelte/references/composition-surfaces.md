@@ -3,8 +3,9 @@
 # Composition surfaces: coords, facets, guides, labs
 
 Every surface here is a **grammar layer** (non-mark `Layer` kind). Each exists
-in three equivalent forms: a key in the JSON `PortableSpec`, a deprecated
-`<GGPlot>` prop (removable in 0.13.0), and a declaration-only child component
+in three equivalent forms: a key in the JSON `PortableSpec`, a removed
+`<GGPlot>` prop (gone since 0.13.0; codemod rewrites old sources), and a
+declaration-only child component
 (canonical in Svelte). Child components emit no markup, register on init via
 `createPlotLayer` / `registerPlotLayer`, unregister on destroy, and are inert
 without a `<GGPlot>` ancestor.
@@ -156,9 +157,8 @@ Equivalent complete JSON spec:
 - Mark layers: the `layers` prop, when set, is used INSTEAD of geom children.
   Otherwise geom children register in document order, and registration order
   is z-order (first = bottom).
-- Grammar (non-mark) families fold onto the builder AFTER the matching
-  deprecated prop, in registration order — so a grammar child overrides its
-  prop, and later siblings beat earlier ones.
+- Grammar (non-mark) families fold onto the builder in registration order —
+  later siblings beat earlier ones.
 - REPLACE families — `coord`, `facet`, `theme`: the last registration fully
   replaces earlier ones (and any matching prop). Two or more children of one
   kind emit a `DUPLICATE_PLOT_LAYER` advisory.

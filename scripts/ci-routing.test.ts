@@ -1140,6 +1140,20 @@ describe("unit content inputs cover actionlint config", () => {
     expect(paths).toContain("README.md");
     expect(JOB_CONTENT_INPUTS.unit).toContain("README.md");
   });
+
+  test("unit includes package READMEs (scripts/package-readme.test.ts)", () => {
+    for (const path of [
+      "packages/spec/README.md",
+      "packages/core/README.md",
+      "packages/svelte/README.md",
+      "packages/cli/README.md",
+    ]) {
+      expect(JOB_CONTENT_INPUTS.unit).toContain(path);
+      const flags = classifyChangedPaths([path]);
+      expect(flags.scripts, path).toBe(true);
+      expect(planJobs(flags).unit, path).toBe(true);
+    }
+  });
 });
 
 describe("component_journeys content inputs cover llms modules", () => {
