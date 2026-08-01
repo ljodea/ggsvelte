@@ -33,6 +33,24 @@ function rectBatch(count: number): GeometryBatch {
   };
 }
 
+/** Presentation-only open-path batch (`candidates: false`) with `subpaths` strokes. */
+function outlineBatch(subpaths: number, layerIndex: number): GeometryBatch {
+  const vertices = subpaths * 2;
+  return {
+    kind: "paths",
+    layerIndex,
+    panelIndex: 0,
+    positions: new Float32Array(vertices * 2),
+    rowIndex: new Uint32Array(vertices),
+    pathOffsets: Uint32Array.from({ length: subpaths + 1 }, (_, index) => index * 2),
+    strokes: Array.from({ length: subpaths }, () => null),
+    linewidth: 1,
+    alpha: 1,
+    curve: "linear",
+    candidates: false,
+  };
+}
+
 describe("buildInteractionMasks", () => {
   it("projects semantic emphasis onto immutable per-batch primitive masks", () => {
     const candidates: SemanticCandidateKeys<string>[] = [
@@ -147,6 +165,81 @@ describe("buildInteractionMasks", () => {
     expect(masks[1]?.isFocused(1)).toBe(true);
     expect(masks[1]?.isFocused(2)).toBe(false);
     expect(masks[1]?.isFocused(3)).toBe(false);
+  });
+
+  it("leaves an outline null when no same-layer batch has a mask", () => {
+    const candidates: SemanticCandidateKeys<string>[] = [
+      { batchIndex: 0, primitiveIndex: 0, keys: ["a"] },
+    ];
+    const masks = buildInteractionMasks([pointBatch(1), outlineBatch(1, 7)], ["a"], candidates);
+    expect(masks[0]?.focusedCount).toBe(1);
+    expect(masks[1]).toBeNull();
+  });
+
+  it("lets a later outline source an earlier outline's mirrored mask by batch order", () => {
+    // Pins the cascade: the mask source for an outline is the lowest-indexed
+    // same-layer batch that HAS a mask at that point in the loop — including a
+    // mask mirrored earlier onto another outline. Here outline0 (2 subpaths,
+    // index 0) mirrors from the fill (1 path, index 1) via the ×2 branch, and
+    // outline2 (4 subpaths) then sources outline0 (count 2, 4 = 2×2 → ×2
+    // branch → all focused). Sourcing the fill instead would hit the length-
+    // mismatch branch (4 vs 1) and zero everything.
+    const fill: GeometryBatch = {
+      kind: "paths",
+      layerIndex: 0,
+      panelIndex: 0,
+      positions: new Float32Array(8),
+      rowIndex: new Uint32Array([0, 1, 2, 3]),
+      pathOffsets: new Uint32Array([0, 4]),
+      strokes: [null],
+      fills: ["#f00"],
+      closed: true,
+      linewidth: 0,
+      alpha: 1,
+      curve: "linear",
+    };
+    const candidates: SemanticCandidateKeys<string>[] = [
+      { batchIndex: 1, primitiveIndex: 0, keys: ["a"] },
+    ];
+
+    const masks = buildInteractionMasks(
+      [outlineBatch(2, 0), fill, outlineBatch(4, 0)],
+      ["a"],
+      candidates,
+    );
+    expect(masks[0]?.primitiveCount).toBe(2);
+    expect(masks[0]?.focusedCount).toBe(2);
+    expect(masks[2]?.primitiveCount).toBe(4);
+    expect(masks[2]?.focusedCount).toBe(4);
+  });
+
+  it("resolves outline mask sources without rescanning all batches per outline", () => {
+    // 1 focused point batch on layer 0 plus 200 outlines on layers 1..200 —
+    // none finds a peer. Peer resolution must not scan the whole batch list
+    // once per outline (O(B²) batch reads); a per-layer lookup keeps total
+    // batch-element reads linear in B.
+    const outlines = Array.from({ length: 200 }, (_, index) => outlineBatch(1, index + 1));
+    const batches: GeometryBatch[] = [pointBatch(1), ...outlines];
+    const total = batches.length;
+    let reads = 0;
+    const counted = new Proxy(batches, {
+      get(target, prop) {
+        if (typeof prop === "string" && /^\d+$/.test(prop)) reads += 1;
+        return Reflect.get(target, prop) as unknown;
+      },
+    });
+    const candidates: SemanticCandidateKeys<string>[] = [
+      { batchIndex: 0, primitiveIndex: 0, keys: ["a"] },
+    ];
+
+    const masks = buildInteractionMasks(counted, ["a"], candidates);
+    expect(masks[0]?.focusedCount).toBe(1);
+    expect(masks[1]).toBeNull();
+    // Fixed passes (candidate lookup, mirror loop, one peer-index build, final
+    // freeze) each read ≤ B elements; 8×B fails on even a partial per-outline
+    // rescan (the old code read ~B² ≈ 40k).
+    expect(reads).toBeGreaterThan(0);
+    expect(reads).toBeLessThan(8 * total);
   });
 });
 
