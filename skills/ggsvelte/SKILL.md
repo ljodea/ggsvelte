@@ -117,13 +117,15 @@ z-order (points above smooth here). Every geom takes aesthetics through one
 direct props (`size={3}`); structural props are `data`, `stat`, `position`,
 `positionParams`, `render`.
 
-`<GGPlot>` props: `spec`, `data`, `aes`, `layers`, `key`, `width`
+`<GGPlot>` props: `spec`, `data`, `aes`, `layers`, `width`
 (number | "container"), `height`, `a11y`, `ariaLabel`, the interaction props
 (`select`, `zoom`, `tool`, `interaction`, `interactionScope`; prefer
 `<Inspect>` for inspection and `<GuideLegend channel focus>` /
 `<GuideLegend channel filter>` for legend interaction — do not put
 `inspect` / `legendFocus` / `legendFilter` on `<GGPlot>` in new code), the
-`on*` handlers, and `children`.
+`on*` handlers, and `children`. Plot-level `key` is **deprecated** since
+0.21 — prefer `identity` on `<Inspect>`, object-form `select`, or
+`createPlotInteraction` (default: `id` column when present, else row index).
 Instance methods: `resetScales()`, `setZoom()`.
 
 Precedence: `spec` wins over everything else. For mark layers, an explicit
@@ -287,12 +289,16 @@ per-layer aes override, sf/map — each as validated JSON plus a Svelte twin:
 Opt-in host capabilities: `<Inspect />` for tooltips and crosshairs;
 `select` / `zoom` on `<GGPlot>`; legend emphasis and data-changing filter via
 `<GuideLegend channel="color" focus />` / `filter` (per aesthetic; host-only,
-not in `guideLegend()` / PortableSpec). Always give a stable `key` when
-selection or linked views must survive filtering or refreshes. Link plots by
-sharing one `createPlotInteraction()` controller and matching
-`interactionScope` channels; observe everything through `oninteraction` or
-per-capability handlers. Faceted interval presets, the controller API,
-`Tooltip`, handler payloads, and diagnostics:
+not in `guideLegend()` / PortableSpec). Row identity for selection, legend
+focus, and linked views **defaults** to an `id` column when present, else
+the row index (order-stable only) — ordinary charts omit custom identity.
+Override with `identity` on `<Inspect>`, object-form `select`, or
+`createPlotInteraction` when a non-`id` durable field or accessor is needed
+(for example `<Inspect identity="year" />`). Plot-level `key` is deprecated
+since 0.21. Link plots by sharing one `createPlotInteraction()` controller
+and matching `interactionScope` channels; observe everything through
+`oninteraction` or per-capability handlers. Faceted interval presets, the
+controller API, `Tooltip`, handler payloads, and diagnostics:
 [references/interactions.md](references/interactions.md) — read it before
 writing any interactive or linked-view code.
 
