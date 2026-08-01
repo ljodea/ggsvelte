@@ -13,7 +13,7 @@
     },
     "bar/dodged": {
       "filename": "bar-dodged-light.png",
-      "sourceSha256": "132f2138e87a743a16e6e724426190fb811cabdbde58624c35d4d68ae355b609",
+      "sourceSha256": "69639e2508ec13b2bb23aec4329c3e0a62d58078fa01f4d6d3f51ea5ad29fbfd",
       "pngSha256": "dc33edb3d1d9841ff5cfdaf5961bb77d0941e01e9f98b0e02219bbd527405ed0"
     },
     "bar/horizontal": {
@@ -198,7 +198,7 @@
     },
     "jitter/basic": {
       "filename": "jitter-basic-light.png",
-      "sourceSha256": "e2c57d97130fddf308a01c5a1908a60fc64063da4540f56021b6e77c1d191404",
+      "sourceSha256": "21ecbbf7ca0aa771ac5035bd62fbb8a93cea6a7a25987019a4e96ae79d5f0465",
       "pngSha256": "1b857cf62e2e1386fd32468c7c04c4b9d0fed3f2b81c509ea4224814a20f29e4"
     },
     "label/basic": {
@@ -278,7 +278,7 @@
     },
     "point/jitter": {
       "filename": "point-jitter-light.png",
-      "sourceSha256": "66051ec87a9822d0e5adba97f733f82686cb3b139e1dec7f7a2362fbae2e8634",
+      "sourceSha256": "84446933e59337c87d8f3981ba7aa4915b42a54fb05c77b2c2168e7071790f2f",
       "pngSha256": "a7b100e7cd1e0ef48acf1ba1e64d4cc4c22a9ff728844e86e75905f2e8abe181"
     },
     "point/layer-data-bands": {
@@ -293,7 +293,7 @@
     },
     "point/quantile-lines": {
       "filename": "point-quantile-lines-light.png",
-      "sourceSha256": "51455a4f9c7c27298b104332e477e9ed8718462558e48d23db8366e487caffc7",
+      "sourceSha256": "6eebf9c2ec3fc8796de2bd141c0f91f1552ad648b8a1fe0f5a9ca6987823f192",
       "pngSha256": "db8e483720567e3d6bf182d1837cb3b5da4a8069c518a2e4ff2e969c4fddc03f"
     },
     "point/scatter-color": {
@@ -338,7 +338,7 @@
     },
     "raster/grid": {
       "filename": "raster-grid-light.png",
-      "sourceSha256": "d32e912297d89a761ca43d3ab6bb82d609993a5c3ac28661de680d59c5dcb64a",
+      "sourceSha256": "9a14fc0f669125fd44012ab79cd85fd96ed67529bd73b85f58dcbeb4fbc87211",
       "pngSha256": "437d19b43f75ec428f4d13f563c7de7d145e172c598b8eba31a25d7d406d54b4"
     },
     "rect/regions": {
@@ -363,7 +363,7 @@
     },
     "rule/data-driven": {
       "filename": "rule-data-driven-light.png",
-      "sourceSha256": "b72cb2bce45762d02c4979f055911a7f0193daabcfe56c9a1f5ad568f8b21b75",
+      "sourceSha256": "0c6088c30f06fe690de18270f7fd3546a5b15ae97acdf38608231b39c03ee60c",
       "pngSha256": "d77dbfed1af5e92d8f0383e32c6b9805b3ceda58ca6bffe7a5a7d57c346b3297"
     },
     "segment/annotations": {
@@ -398,8 +398,8 @@
     },
     "smooth/loess-scatter": {
       "filename": "smooth-loess-scatter-light.png",
-      "sourceSha256": "d0407a893f2c238c8b44073c22bd4869975c8f0e812d1e691842911cb9ea7a0c",
-      "pngSha256": "e90887a61e22c1e667c22cb7afd04c4e894d0e8a86ae5578e16756af0cb74d47"
+      "sourceSha256": "49f0876d1e526b58f213002d52ed9b7d687b32466219927950e6134f62937662",
+      "pngSha256": "c5816ec9fae8de6e343aa50b1676f1605842c602cddafe289853f7fa939acc72"
     },
     "spoke/vector-field": {
       "filename": "spoke-vector-field-light.png",

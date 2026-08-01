@@ -11562,6 +11562,16 @@ export const DOCS_ROUTES = [
         level: 3,
       },
       {
+        id: "group-single-observation",
+        title: "group-single-observation",
+        level: 3,
+      },
+      {
+        id: "stack-align-skipped",
+        title: "stack-align-skipped",
+        level: 3,
+      },
+      {
         id: "smooth-group-dropped",
         title: "smooth-group-dropped",
         level: 3,
@@ -11926,6 +11936,11 @@ export const DOCS_ROUTES = [
       {
         id: "jitter-seeded",
         title: "jitter-seeded",
+        level: 3,
+      },
+      {
+        id: "stack-align-applied",
+        title: "stack-align-applied",
         level: 3,
       },
       {
@@ -13139,7 +13154,7 @@ export const DOCS_ROUTES = [
     path: "/examples/smooth/loess-scatter",
     title: "Cocoa percent against bar rating — ggsvelte gallery",
     description:
-      "Loess through 2,530 chocolate reviews, with a confidence band. Copy this pattern when you want a smooth trend on a dense scatter.",
+      "Loess through a sample of chocolate reviews, with a confidence band. Copy this pattern when you want a smooth trend on a dense scatter.",
     canonicalPath: "/examples/smooth/loess-scatter",
     kind: "page",
     index: true,

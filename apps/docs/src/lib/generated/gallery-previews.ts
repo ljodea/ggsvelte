@@ -486,7 +486,7 @@ export const GALLERY_PREVIEWS = [
     id: "smooth/loess-scatter",
     filename: "smooth-loess-scatter-light.png",
     path: "/previews/smooth-loess-scatter-light.png",
-    sha256: "e90887a61e22c1e667c22cb7afd04c4e894d0e8a86ae5578e16756af0cb74d47",
+    sha256: "c5816ec9fae8de6e343aa50b1676f1605842c602cddafe289853f7fa939acc72",
   },
   {
     id: "spoke/vector-field",

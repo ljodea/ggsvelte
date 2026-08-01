@@ -7,11 +7,11 @@
     ThemeTufte,
   } from "@ggsvelte/svelte";
 
-  import { chocolateBars } from "./data.js";
+  import { chocolateBarsSample } from "./data.js";
 </script>
 
 <GGPlot
-  data={chocolateBars}
+  data={chocolateBarsSample}
   aes={{ x: "cocoaPercent", y: "rating" }}
   width={640}
   height={400}
@@ -19,7 +19,7 @@
   <ThemeTufte />
   <Labs
     title="Cocoa percent against bar rating"
-    subtitle="Loess through 2,530 chocolate reviews, with a confidence band"
+    subtitle="Loess through a sample of chocolate reviews, with a confidence band"
     x="Cocoa (%)"
     y="Rating (1–4)"
   />

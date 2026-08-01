@@ -792,7 +792,7 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     title: "Where chocolate reviews cluster",
     description: "A complete cocoa-percent × rating grid of bar counts. Use geom_raster when your table is already a regular grid of fill values.",
     tags: ["raster", "heatmap", "fill", "grid"],
-    docsSection: "Rectangles & tiles",
+    docsSection: "Rectangles & grids",
     hasData: true,
   },
   {
@@ -910,7 +910,7 @@ export const EXAMPLES: readonly ExampleManifestEntry[] = [
     category: "smooth",
     name: "loess-scatter",
     title: "Cocoa percent against bar rating",
-    description: "Loess through 2,530 chocolate reviews, with a confidence band. Copy this pattern when you want a smooth trend on a dense scatter.",
+    description: "Loess through a sample of chocolate reviews, with a confidence band. Copy this pattern when you want a smooth trend on a dense scatter.",
     tags: ["smooth", "loess", "ribbon", "scatter"],
     docsSection: "Statistical summaries",
     hasData: true,

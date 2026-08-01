@@ -1,5 +1,5 @@
 ---
-"@ggsvelte/svelte": patch
+"@ggsvelte/svelte": minor
 ---
 
 # Add TidyTuesday teaching datasets; rewrite worst gallery examples

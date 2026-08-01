@@ -19005,6 +19005,26 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["map-region-missing"],
   },
   {
+    id: "heading:guide-errors:group-single-observation",
+    kind: "heading",
+    title: "group-single-observation",
+    summary:
+      "group-single-observation in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#group-single-observation",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["group-single-observation"],
+  },
+  {
+    id: "heading:guide-errors:stack-align-skipped",
+    kind: "heading",
+    title: "stack-align-skipped",
+    summary:
+      "stack-align-skipped in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#stack-align-skipped",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["stack-align-skipped"],
+  },
+  {
     id: "heading:guide-errors:smooth-group-dropped",
     kind: "heading",
     title: "smooth-group-dropped",
@@ -19712,6 +19732,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/advisories#jitter-seeded",
     keywords: ["Advisories", "Reference"],
     exact: ["jitter-seeded"],
+  },
+  {
+    id: "heading:guide-advisories:stack-align-applied",
+    kind: "heading",
+    title: "stack-align-applied",
+    summary:
+      "stack-align-applied in Advisories. Spec-lint advisories and the pipeline's disclosed heuristics.",
+    href: "/guide/advisories#stack-align-applied",
+    keywords: ["Advisories", "Reference"],
+    exact: ["stack-align-applied"],
   },
   {
     id: "heading:guide-advisories:palette-inferred",
@@ -21606,7 +21636,7 @@ export const DOCS_SEARCH_INDEX = [
     href: "/examples/raster/grid",
     keywords: [
       "Where chocolate reviews cluster",
-      "Rectangles & tiles",
+      "Rectangles & grids",
       "raster",
       "heatmap",
       "fill",
@@ -21813,7 +21843,7 @@ export const DOCS_SEARCH_INDEX = [
     kind: "example",
     title: "Cocoa percent against bar rating",
     summary:
-      "Loess through 2,530 chocolate reviews, with a confidence band. Copy this pattern when you want a smooth trend on a dense scatter.",
+      "Loess through a sample of chocolate reviews, with a confidence band. Copy this pattern when you want a smooth trend on a dense scatter.",
     href: "/examples/smooth/loess-scatter",
     keywords: [
       "Cocoa percent against bar rating",
@@ -42225,6 +42255,34 @@ export const DOCS_SEARCH_INDEX = [
       "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
     ],
     exact: ["map-region-missing", "warning:map-region-missing"],
+  },
+  {
+    id: "diagnostic:warning:group-single-observation",
+    kind: "diagnostic",
+    title: "group-single-observation · warning",
+    summary:
+      "Connected path/area marks derived one observation per group (often a discrete x joining default grouping), so each stroke or ribbon degenerates; map aes.group to join rows into series.",
+    href: "/guide/errors#group-single-observation",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["group-single-observation", "warning:group-single-observation"],
+  },
+  {
+    id: "diagnostic:warning:stack-align-skipped",
+    kind: "diagnostic",
+    title: "stack-align-skipped · warning",
+    summary:
+      "Sparse stacked-area groups were left unaligned because the shared-grid expansion exceeds the auto-rescue budget; bands with interior gaps may render as floating polygons.",
+    href: "/guide/errors#stack-align-skipped",
+    keywords: [
+      "warning",
+      "warning",
+      "Inspect the warning message for its path and count, then correct the named data, scale, or option.",
+    ],
+    exact: ["stack-align-skipped", "warning:stack-align-skipped"],
   },
   {
     id: "diagnostic:warning:smooth-group-dropped",
