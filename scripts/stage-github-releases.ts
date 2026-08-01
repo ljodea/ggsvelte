@@ -110,7 +110,9 @@ async function main(): Promise<number> {
 
   const entries = planGithubReleaseStaging(local, includeKeys, (pkg) => notesForPackage(root, pkg));
   const head = gitHeadSha();
-  const byTag = new Map(local.map((pkg) => [`${pkg.name}@${pkg.version}`, pkg] as const));
+  const byTag = new Map<string, PackageVersion>(
+    local.map((pkg) => [`${pkg.name}@${pkg.version}`, pkg]),
+  );
 
   mkdirSync(join(staging, "notes"), { recursive: true });
   mkdirSync(join(staging, "targets"), { recursive: true });
