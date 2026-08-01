@@ -5,18 +5,25 @@
   "scripts": {
     "measure:bundles": "bun run measure-bundles.ts",
     "measure:browser": "bun run measure-browser.ts",
-    "measure": "bun run measure:bundles && bun run measure:browser"
+    "measure:browser:full": "COMPETITIVE_FULL=1 bun run measure-browser.ts",
+    "measure:bundles:full": "COMPETITIVE_FULL=1 bun run measure-bundles.ts",
+    "measure": "bun run measure:bundles && bun run measure:browser",
+    "test": "bun test scenarios.test.ts"
   },
   "dependencies": {
     "@ggsvelte/core": "workspace:*",
     "@ggsvelte/spec": "workspace:*",
+    "chart.js": "^4.5.1",
     "d3-array": "^3.2.4",
     "d3-axis": "^3.0.0",
     "d3-scale": "^4.0.2",
     "d3-selection": "^3.0.0",
+    "d3-shape": "^3.2.0",
+    "echarts": "^6.0.0",
     "layercake": "^10.0.3",
     "svelte": "^5.56.7",
-    "svelteplot": "^0.14.2"
+    "svelteplot": "^0.14.2",
+    "uplot": "^1.6.32"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.2.0",

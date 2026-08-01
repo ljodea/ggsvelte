@@ -1,70 +1,96 @@
 /**
- * Client bundle sizes for a colored scatter across libraries.
+ * Client bundle sizes across lib × scenario (default bundle cases, or COMPETITIVE_FULL=1).
  * Vite library mode, esbuild minify, gzip -9.
+ *
+ *   bun run measure-bundles.ts
+ *   COMPETITIVE_FULL=1 bun run measure-bundles.ts
  */
 import { build } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { gzipSync } from "node:zlib";
-import { mkdirSync, readFileSync, rmSync, writeFileSync, existsSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
+
+import { bundleCasesForRun, LIBS, libSupports, type LibId, type ScenarioId } from "./scenarios";
 
 const root = import.meta.dirname;
 const outRoot = path.join(root, "results", "bundles");
 if (existsSync(outRoot)) rmSync(outRoot, { recursive: true });
 mkdirSync(outRoot, { recursive: true });
 
-const suites = [
-  {
-    id: "ggsvelte-lean-scatter",
-    entry: path.join(root, "entries/ggsvelte-lean.ts"),
-    svelte: false,
-    note: "@ggsvelte/core/render + @ggsvelte/spec/portable",
-  },
-  {
-    id: "ggsvelte-full-scatter",
-    entry: path.join(root, "entries/ggsvelte-full.ts"),
-    svelte: false,
-    note: "@ggsvelte/core + @ggsvelte/spec builder.spec()",
-  },
-  {
-    id: "svelteplot-scatter",
-    entry: path.join(root, "entries/svelteplot.ts"),
-    svelte: true,
-    note: "Plot + Dot + axes",
-  },
-  {
-    id: "layercake-scatter",
-    entry: path.join(root, "entries/layercake.ts"),
-    svelte: true,
-    note: "LayerCake shell + d3-scale",
-  },
-  {
-    id: "d3-raw-scatter",
-    entry: path.join(root, "entries/d3-raw.ts"),
-    svelte: false,
-    note: "d3-scale + d3-axis + d3-selection + d3-array",
-  },
-] as const;
+const full = Boolean(process.env["COMPETITIVE_FULL"]);
+const cases = bundleCasesForRun(full);
+
+/** Thin entry modules under entries/ named `{lib}__{scenario}.ts`. */
+function entryPath(lib: LibId, scenario: ScenarioId): string {
+  return path.join(root, "entries", `${lib}__${scenario}.ts`);
+}
 
 function kb(n: number): number {
   return Math.round((n / 1024) * 10) / 10;
 }
 
-const results: Record<string, unknown>[] = [];
+type BundleResult = {
+  id: string;
+  lib: string;
+  scenario: string;
+  caseId: string;
+  ok: boolean;
+  note?: string;
+  rawBytes?: number;
+  gzipBytes?: number;
+  rawKB?: number;
+  gzipKB?: number;
+  error?: string;
+};
 
-for (const suite of suites) {
-  const outDir = path.join(outRoot, suite.id);
-  process.stderr.write(`building ${suite.id}...\n`);
+const results: BundleResult[] = [];
+
+const jobs: { lib: (typeof LIBS)[number]; scenario: ScenarioId; caseId: string }[] = [];
+for (const lib of LIBS.filter((l) => l.bundle)) {
+  for (const c of cases) {
+    if (!libSupports(lib, c.scenario)) continue;
+    jobs.push({ lib, scenario: c.scenario, caseId: c.id });
+  }
+}
+
+// Deduplicate lib×scenario (bundle size does not depend on N, only on code path).
+const seen = new Set<string>();
+const uniqueJobs = jobs.filter((j) => {
+  const key = `${j.lib.id}__${j.scenario}`;
+  if (seen.has(key)) return false;
+  seen.add(key);
+  return true;
+});
+
+for (const job of uniqueJobs) {
+  const id = `${job.lib.id}__${job.scenario}`;
+  const entry = entryPath(job.lib.id, job.scenario);
+  if (!existsSync(entry)) {
+    results.push({
+      id,
+      lib: job.lib.id,
+      scenario: job.scenario,
+      caseId: job.caseId,
+      ok: false,
+      note: job.lib.note,
+      error: `missing entry ${path.relative(root, entry)}`,
+    });
+    continue;
+  }
+  const outDir = path.join(outRoot, id);
+  process.stderr.write(`building ${id}...\n`);
   try {
     await build({
       configFile: false,
       logLevel: "error",
-      plugins: suite.svelte
-        ? [svelte({ compilerOptions: { css: "injected" }, emitCss: false })]
-        : [],
+      plugins:
+        job.lib.id === "svelteplot" || job.lib.id === "layercake"
+          ? [svelte({ compilerOptions: { css: "injected" }, emitCss: false })]
+          : [],
       build: {
         lib: {
-          entry: suite.entry,
+          entry,
           formats: ["es"],
           fileName: () => "bundle.js",
         },
@@ -82,9 +108,12 @@ for (const suite of suites) {
     const raw = readFileSync(path.join(outDir, "bundle.js"));
     const gz = gzipSync(raw, { level: 9 });
     results.push({
-      id: suite.id,
+      id,
+      lib: job.lib.id,
+      scenario: job.scenario,
+      caseId: job.caseId,
       ok: true,
-      note: suite.note,
+      note: job.lib.note,
       rawBytes: raw.byteLength,
       gzipBytes: gz.byteLength,
       rawKB: kb(raw.byteLength),
@@ -92,28 +121,32 @@ for (const suite of suites) {
     });
   } catch (err) {
     results.push({
-      id: suite.id,
+      id,
+      lib: job.lib.id,
+      scenario: job.scenario,
+      caseId: job.caseId,
       ok: false,
-      note: suite.note,
+      note: job.lib.note,
       error: err instanceof Error ? err.message : String(err),
     });
   }
 }
 
-console.log("\n=== Competitive scatter bundles (Vite minify, gzip -9) ===\n");
-console.log("id".padEnd(28), "raw KB".padStart(10), "gzip KB".padStart(10));
-console.log("-".repeat(50));
+console.log("\n=== Competitive bundles (Vite minify, gzip -9) ===\n");
+console.log("id".padEnd(40), "raw KB".padStart(10), "gzip KB".padStart(10));
+console.log("-".repeat(62));
 for (const r of results) {
-  if (!r["ok"]) {
-    console.log(String(r["id"]).padEnd(28), "FAIL");
+  if (!r.ok) {
+    console.log(r.id.padEnd(40), "FAIL");
     continue;
   }
-  console.log(
-    String(r["id"]).padEnd(28),
-    String(r["rawKB"]).padStart(10),
-    String(r["gzipKB"]).padStart(10),
-  );
+  console.log(r.id.padEnd(40), String(r.rawKB).padStart(10), String(r.gzipKB).padStart(10));
 }
 
-writeFileSync(path.join(root, "results", "bundles.json"), JSON.stringify(results, null, 2));
+const payload = {
+  generatedAt: new Date().toISOString(),
+  full,
+  results,
+};
+writeFileSync(path.join(root, "results", "bundles.json"), JSON.stringify(payload, null, 2));
 console.log("\nWrote results/bundles.json");

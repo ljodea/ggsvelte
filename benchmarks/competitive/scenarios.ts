@@ -1,0 +1,356 @@
+/**
+ * Competitive bench scenario catalog.
+ *
+ * Goal: avoid over-fitting optimisations to a single colored-scatter path.
+ * Shapes mirror common external suites (uPlot multi-series time line; LightningChart
+ * line/scatter/area load tests) while staying within geoms ggsvelte ships today.
+ *
+ * Data is deterministic (mulberry32) so runs compare across machines and commits.
+ */
+
+export const COLORS = [
+  "#4e79a7",
+  "#f28e2b",
+  "#e15759",
+  "#76b7b2",
+  "#59a14f",
+  "#edc948",
+  "#b07aa1",
+] as const;
+
+export type ScenarioId = "scatter-color" | "line-multiseries" | "area-multiseries" | "bars-stacked";
+
+export type ScenarioKind = ScenarioId;
+
+/** Point budget / series shape for a concrete case. */
+export type ScenarioCase = {
+  readonly id: string;
+  readonly scenario: ScenarioId;
+  /** Total mark / sample budget used in labels and scaling. */
+  readonly n: number;
+  readonly series?: number;
+  readonly pointsPerSeries?: number;
+  readonly categories?: number;
+  readonly stacks?: number;
+  /** Include in the default browser run (full matrix is COMPETITIVE_FULL=1). */
+  readonly defaultBrowser: boolean;
+  /** Include in default bundle matrix. */
+  readonly defaultBundle: boolean;
+  readonly note: string;
+};
+
+export type ScatterColumns = {
+  readonly x: number[];
+  readonly y: number[];
+  readonly cls: string[];
+};
+
+export type SeriesColumns = {
+  readonly x: number[];
+  readonly y: number[];
+  readonly series: string[];
+};
+
+export type BarsColumns = {
+  readonly category: string[];
+  readonly value: number[];
+  readonly stack: string[];
+};
+
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+export function makeScatter(n: number): ScatterColumns {
+  const rnd = mulberry32(0xbadc0de ^ n);
+  const x = Array.from<number>({ length: n });
+  const y = Array.from<number>({ length: n });
+  const cls = Array.from<string>({ length: n });
+  for (let i = 0; i < n; i++) {
+    x[i] = rnd() * 100;
+    y[i] = rnd() * 100;
+    cls[i] = `series-${i % 5}`;
+  }
+  return { x, y, cls };
+}
+
+/** Multi-series line/area: shared x, independent y per series (columnar long form). */
+export function makeMultiSeries(seriesCount: number, pointsPerSeries: number): SeriesColumns {
+  const total = seriesCount * pointsPerSeries;
+  const rnd = mulberry32(0xc0ffee ^ total);
+  const x = Array.from<number>({ length: total });
+  const y = Array.from<number>({ length: total });
+  const series = Array.from<string>({ length: total });
+  // Epoch-seconds style x (uPlot-like) so temporal libs can treat x as time if they want.
+  const start = 1_600_000_000;
+  for (let s = 0; s < seriesCount; s++) {
+    const name = `s${s}`;
+    let level = 10 + s * 5;
+    for (let i = 0; i < pointsPerSeries; i++) {
+      const idx = s * pointsPerSeries + i;
+      x[idx] = start + i;
+      level += (rnd() - 0.5) * 0.8;
+      y[idx] = level + Math.sin(i / 40 + s) * 2;
+      series[idx] = name;
+    }
+  }
+  return { x, y, series };
+}
+
+export function makeStackedBars(categories: number, stacks: number): BarsColumns {
+  const rnd = mulberry32(0xba5e ^ (categories * 17 + stacks));
+  const total = categories * stacks;
+  const category = Array.from<string>({ length: total });
+  const value = Array.from<number>({ length: total });
+  const stack = Array.from<string>({ length: total });
+  for (let c = 0; c < categories; c++) {
+    const cat = `c${String(c).padStart(2, "0")}`;
+    for (let s = 0; s < stacks; s++) {
+      const idx = c * stacks + s;
+      category[idx] = cat;
+      stack[idx] = `stack-${s}`;
+      value[idx] = 1 + rnd() * 20;
+    }
+  }
+  return { category, value, stack };
+}
+
+/**
+ * Fixed case table. IDs are stable keys in results JSON.
+ * Sizes span "interactive dashboard" (1k–10k) through uPlot-scale multi-series (~166k).
+ */
+export const CASES: readonly ScenarioCase[] = [
+  // --- scatter (existing competitive focus, kept + extended) ---
+  {
+    id: "scatter-color-1k",
+    scenario: "scatter-color",
+    n: 1_000,
+    defaultBrowser: true,
+    defaultBundle: true,
+    note: "Colored scatter, 5 series — prior sole competitive geom",
+  },
+  {
+    id: "scatter-color-10k",
+    scenario: "scatter-color",
+    n: 10_000,
+    defaultBrowser: true,
+    defaultBundle: false,
+    note: "Colored scatter mid",
+  },
+  {
+    id: "scatter-color-100k",
+    scenario: "scatter-color",
+    n: 100_000,
+    defaultBrowser: false,
+    defaultBundle: false,
+    note: "Colored scatter high-N (full matrix only)",
+  },
+  // --- multi-series line (uPlot / LightningChart primary shape) ---
+  {
+    id: "line-3x1k",
+    scenario: "line-multiseries",
+    n: 3_000,
+    series: 3,
+    pointsPerSeries: 1_000,
+    defaultBrowser: true,
+    defaultBundle: true,
+    note: "3 series × 1k — small multi-line",
+  },
+  {
+    id: "line-3x10k",
+    scenario: "line-multiseries",
+    n: 30_000,
+    series: 3,
+    pointsPerSeries: 10_000,
+    defaultBrowser: true,
+    defaultBundle: false,
+    note: "3 series × 10k",
+  },
+  {
+    id: "line-3x55k",
+    scenario: "line-multiseries",
+    n: 166_650,
+    series: 3,
+    pointsPerSeries: 55_550,
+    defaultBrowser: false,
+    defaultBundle: false,
+    note: "uPlot bench scale: 3 × 55,550 ≈ 166,650 points",
+  },
+  {
+    id: "line-10x10k",
+    scenario: "line-multiseries",
+    n: 100_000,
+    series: 10,
+    pointsPerSeries: 10_000,
+    defaultBrowser: false,
+    defaultBundle: false,
+    note: "10 series × 10k (ggsvelte internal line-series workload shape)",
+  },
+  // --- area ---
+  {
+    id: "area-3x1k",
+    scenario: "area-multiseries",
+    n: 3_000,
+    series: 3,
+    pointsPerSeries: 1_000,
+    defaultBrowser: true,
+    defaultBundle: true,
+    note: "3 series × 1k area",
+  },
+  {
+    id: "area-3x10k",
+    scenario: "area-multiseries",
+    n: 30_000,
+    series: 3,
+    pointsPerSeries: 10_000,
+    defaultBrowser: false,
+    defaultBundle: false,
+    note: "3 series × 10k area",
+  },
+  // --- bars (grammar strength, not just line paint) ---
+  {
+    id: "bars-stacked-50x4",
+    scenario: "bars-stacked",
+    n: 200,
+    categories: 50,
+    stacks: 4,
+    defaultBrowser: true,
+    defaultBundle: true,
+    note: "50 categories × 4 stacks",
+  },
+] as const;
+
+export type LibId =
+  | "ggsvelte-svg"
+  | "ggsvelte-canvas"
+  | "d3"
+  | "uplot"
+  | "chartjs"
+  | "echarts"
+  | "svelteplot"
+  | "layercake"
+  | "ggsvelte-full";
+
+export type LibMeta = {
+  readonly id: LibId;
+  readonly label: string;
+  /** Browser paint harness implements this lib. */
+  readonly browser: boolean;
+  /** Bundle matrix includes this lib. */
+  readonly bundle: boolean;
+  readonly scenarios: readonly ScenarioId[];
+  readonly note: string;
+};
+
+/**
+ * Competitor set: Svelte peers stay, plus general-purpose canvas/SVG libs from
+ * uPlot / LightningChart comparison tables (MIT/open where practical).
+ */
+export const LIBS: readonly LibMeta[] = [
+  {
+    id: "ggsvelte-svg",
+    label: "ggsvelte SVG (lean)",
+    browser: true,
+    bundle: true,
+    scenarios: ["scatter-color", "line-multiseries", "area-multiseries", "bars-stacked"],
+    note: "@ggsvelte/core/render + @ggsvelte/spec/portable → renderToSVGString",
+  },
+  {
+    id: "ggsvelte-canvas",
+    label: "ggsvelte canvas (lean pipeline)",
+    browser: true,
+    bundle: true,
+    scenarios: ["scatter-color", "line-multiseries", "area-multiseries"],
+    note: "runPipeline + planStrata + drawStratum (canvas marks; axes still SVG-cost elsewhere)",
+  },
+  {
+    id: "ggsvelte-full",
+    label: "ggsvelte full barrel",
+    browser: false,
+    bundle: true,
+    scenarios: ["scatter-color"],
+    note: "Identity scatter via @ggsvelte/core + @ggsvelte/spec (size ceiling)",
+  },
+  {
+    id: "d3",
+    label: "raw D3",
+    browser: true,
+    bundle: true,
+    scenarios: ["scatter-color", "line-multiseries", "area-multiseries", "bars-stacked"],
+    note: "d3-scale + d3-axis + d3-selection + d3-shape/array",
+  },
+  {
+    id: "uplot",
+    label: "uPlot",
+    browser: true,
+    bundle: true,
+    scenarios: ["scatter-color", "line-multiseries", "area-multiseries"],
+    note: "Canvas time-series specialist (~50KB); primary external speed bar",
+  },
+  {
+    id: "chartjs",
+    label: "Chart.js",
+    browser: true,
+    bundle: true,
+    scenarios: ["scatter-color", "line-multiseries", "area-multiseries", "bars-stacked"],
+    note: "Widely used canvas generalist",
+  },
+  {
+    id: "echarts",
+    label: "Apache ECharts",
+    browser: true,
+    bundle: true,
+    scenarios: ["scatter-color", "line-multiseries", "area-multiseries", "bars-stacked"],
+    note: "Large generalist (canvas); size + paint upper reference",
+  },
+  {
+    id: "svelteplot",
+    label: "SveltePlot",
+    browser: false,
+    bundle: true,
+    scenarios: ["scatter-color"],
+    note: "Svelte peer — bundle only until component fixture lands",
+  },
+  {
+    id: "layercake",
+    label: "LayerCake",
+    browser: false,
+    bundle: true,
+    scenarios: ["scatter-color"],
+    note: "Svelte peer — bundle only until component fixture lands",
+  },
+] as const;
+
+export function casesForRun(full: boolean): ScenarioCase[] {
+  return CASES.filter((c) => full || c.defaultBrowser);
+}
+
+export function bundleCasesForRun(full: boolean): ScenarioCase[] {
+  return CASES.filter((c) => full || c.defaultBundle);
+}
+
+export function libSupports(lib: LibMeta, scenario: ScenarioId): boolean {
+  return lib.scenarios.includes(scenario);
+}
+
+export function dataForCase(c: ScenarioCase): ScatterColumns | SeriesColumns | BarsColumns {
+  switch (c.scenario) {
+    case "scatter-color":
+      return makeScatter(c.n);
+    case "line-multiseries":
+    case "area-multiseries":
+      return makeMultiSeries(c.series ?? 3, c.pointsPerSeries ?? Math.floor(c.n / 3));
+    case "bars-stacked":
+      return makeStackedBars(c.categories ?? 50, c.stacks ?? 4);
+  }
+}
+
+export const PLOT_WIDTH = 800;
+export const PLOT_HEIGHT = 500;
