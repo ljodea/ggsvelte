@@ -145,4 +145,97 @@ describe("tier 2 — single field-evidence pass", () => {
     expect(result.ok).toBe(true);
     expect(result.advisories?.some((a) => a.code === "stacked-area-negative")).toBe(true);
   });
+
+  it("resolves a shared named dataset once, not once per layer", () => {
+    // columnsFromDataRef pivots {values} rows into columns, so counting row
+    // reads shows directly whether the pivot repeats per layer.
+    const rows = Array.from({ length: 40 }, (_, i) => ({ x: i, y: i * 2 }));
+    let reads = 0;
+    const counted = new Proxy(rows, {
+      get(target, prop) {
+        if (typeof prop === "string" && /^\d+$/.test(prop)) reads += 1;
+        return Reflect.get(target, prop) as unknown;
+      },
+    });
+    const layers = Array.from({ length: 6 }, () => ({
+      geom: "point",
+      data: { name: "shared" },
+      aes: { x: { field: "x" }, y: { field: "y" } },
+    }));
+    const resolved = evidence.resolveLayerFieldEvidence(
+      { datasets: { shared: { values: counted } }, layers },
+      {},
+      DEFAULT_VALIDATE_LIMITS,
+    );
+    expect(resolved.status).toBe("ok");
+    // One pivot of 40 rows x 2 columns costs 120 reads (40 for key discovery,
+    // 40 per column). Six layers repeating it cost 720.
+    expect(reads).toBeGreaterThan(0);
+    expect(reads).toBeLessThan(240);
+  });
+
+  it("gives layers naming one dataset the same evidence content", () => {
+    const spec = {
+      datasets: {
+        shared: {
+          values: [
+            { x: 1, y: 2 },
+            { x: 3, y: 4 },
+          ],
+        },
+      },
+      layers: [
+        { geom: "point", data: { name: "shared" }, aes: { x: { field: "x" }, y: { field: "y" } } },
+        { geom: "line", data: { name: "shared" }, aes: { x: { field: "x" }, y: { field: "y" } } },
+      ],
+    };
+    const resolved = evidence.resolveLayerFieldEvidence(spec, {}, DEFAULT_VALIDATE_LIMITS);
+    expect(resolved.status).toBe("ok");
+    if (resolved.status !== "ok") return;
+    const [first, second] = resolved.layers;
+    expect(first).not.toBeNull();
+    expect([...first!.keys()].toSorted()).toEqual(["x", "y"]);
+    expect([...second!.keys()].toSorted()).toEqual(["x", "y"]);
+    expect(first!.get("x")!.type).toBe(second!.get("x")!.type);
+    expect([...first!.get("x")!.values]).toEqual([...second!.get("x")!.values]);
+  });
+
+  it("keeps distinct inline layer datasets independent", () => {
+    const resolved = evidence.resolveLayerFieldEvidence(
+      {
+        layers: [
+          { geom: "point", data: { columns: { x: [1, 2] } }, aes: { x: { field: "x" } } },
+          { geom: "point", data: { columns: { x: ["a", "b"] } }, aes: { x: { field: "x" } } },
+        ],
+      },
+      {},
+      DEFAULT_VALIDATE_LIMITS,
+    );
+    expect(resolved.status).toBe("ok");
+    if (resolved.status !== "ok") return;
+    expect([...resolved.layers[0]!.get("x")!.values]).toEqual([1, 2]);
+    expect([...resolved.layers[1]!.get("x")!.values]).toEqual(["a", "b"]);
+  });
+
+  it("still counts a shared named dataset once toward the row limit", () => {
+    const rows = Array.from({ length: 30 }, (_, i) => ({ x: i }));
+    const layer = () => ({ geom: "point", data: { name: "shared" }, aes: { x: { field: "x" } } });
+    const resolved = evidence.resolveLayerFieldEvidence(
+      { datasets: { shared: { values: rows } }, layers: [layer(), layer(), layer()] },
+      {},
+      { ...DEFAULT_VALIDATE_LIMITS, maxRows: 60 },
+    );
+    // 3 x 30 would breach 60; the name is counted once, so this stays ok.
+    expect(resolved.status).toBe("ok");
+  });
+
+  it("treats a named ref missing from datasets as runtime for every layer", () => {
+    const layer = () => ({ geom: "point", data: { name: "absent" }, aes: { x: { field: "x" } } });
+    const resolved = evidence.resolveLayerFieldEvidence(
+      { datasets: {}, layers: [layer(), layer()] },
+      {},
+      DEFAULT_VALIDATE_LIMITS,
+    );
+    expect(resolved.status).toBe("none");
+  });
 });
