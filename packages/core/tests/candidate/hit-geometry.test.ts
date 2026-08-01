@@ -20,20 +20,21 @@ describe("Mark hit-geometry table", () => {
     ];
     const indexes = buildCandidateStoreIndexes(plot);
     const hit = createHitGeometry(indexes);
-    const containment = new Map<string, boolean>();
 
-    expect(hit.contains(0, 20, 20, containment)).toBe(true);
-    expect(hit.distance(0, 20, 20, containment)).toBe(0);
-    expect(hit.contains(0, 5, 20, containment)).toBe(false);
-    expect(hit.distance(0, 5, 20, containment)).toBeNull();
-    expect(hit.intersects(0, 15, 15, 25, 25, containment)).toBe(true);
-    expect(hit.intersects(0, 0, 0, 5, 5, containment)).toBe(false);
+    const inside = hit.probePoint(20, 20);
+    expect(inside.contains(0)).toBe(true);
+    expect(inside.distance(0)).toBe(0);
+    const outside = hit.probePoint(5, 20);
+    expect(outside.contains(0)).toBe(false);
+    expect(outside.distance(0)).toBeNull();
+    expect(hit.probeRect(15, 15, 25, 25).intersects(0)).toBe(true);
+    expect(hit.probeRect(0, 0, 5, 5).intersects(0)).toBe(false);
     expect(hit.aabb(0)).toEqual([10, 10, 50, 50]);
 
     // Negative width/height still forms the same axis-aligned box.
-    expect(hit.contains(1, 20, 20, containment)).toBe(true);
+    expect(inside.contains(1)).toBe(true);
     expect(hit.aabb(1)).toEqual([10, 10, 50, 50]);
-    expect(hit.intersects(1, 15, 15, 25, 25, containment)).toBe(true);
+    expect(hit.probeRect(15, 15, 25, 25).intersects(1)).toBe(true);
   });
 
   it("points: circle distance respects size + tolerance; glyphs never hit", () => {
@@ -64,18 +65,19 @@ describe("Mark hit-geometry table", () => {
     ];
     const indexes = buildCandidateStoreIndexes(plot, { hitTolerance: 2 });
     const hit = createHitGeometry(indexes);
-    const containment = new Map<string, boolean>();
 
-    expect(hit.distance(0, 10, 20, containment)).toBe(0);
-    expect(hit.distance(0, 16, 20, containment)).toBe(6);
-    expect(hit.distance(0, 18, 20, containment)).toBeNull();
-    expect(hit.contains(0, 10, 20, containment)).toBe(false);
-    expect(hit.intersects(0, 9, 19, 11, 21, containment)).toBe(true);
+    const center = hit.probePoint(10, 20);
+    expect(center.distance(0)).toBe(0);
+    expect(center.contains(0)).toBe(false);
+    expect(hit.probePoint(16, 20).distance(0)).toBe(6);
+    expect(hit.probePoint(18, 20).distance(0)).toBeNull();
+    expect(hit.probeRect(9, 19, 11, 21).intersects(0)).toBe(true);
     expect(hit.aabb(0)).toEqual([3, 13, 17, 27]);
 
-    expect(hit.distance(1, 40, 20, containment)).toBeNull();
-    expect(hit.contains(1, 40, 20, containment)).toBe(false);
-    expect(hit.intersects(1, 39, 19, 41, 21, containment)).toBe(true);
+    const glyphCenter = hit.probePoint(40, 20);
+    expect(glyphCenter.distance(1)).toBeNull();
+    expect(glyphCenter.contains(1)).toBe(false);
+    expect(hit.probeRect(39, 19, 41, 21).intersects(1)).toBe(true);
     expect(hit.aabb(1)).toEqual([26, 6, 54, 34]);
   });
 
@@ -95,13 +97,12 @@ describe("Mark hit-geometry table", () => {
     ];
     const indexes = buildCandidateStoreIndexes(plot, { hitTolerance: 0 });
     const hit = createHitGeometry(indexes);
-    const containment = new Map<string, boolean>();
 
-    expect(hit.distance(0, 5, 5, containment)).toBe(0);
-    expect(hit.distance(0, 5, 7, containment)).toBeNull();
-    expect(hit.intersects(0, 4, 4, 6, 6, containment)).toBe(true);
+    expect(hit.probePoint(5, 5).distance(0)).toBe(0);
+    expect(hit.probePoint(5, 7).distance(0)).toBeNull();
+    expect(hit.probeRect(4, 4, 6, 6).intersects(0)).toBe(true);
     // Axis-aligned brush in the segment AABB corner that misses the diagonal.
-    expect(hit.intersects(0, 0, 9, 1, 10, containment)).toBe(false);
+    expect(hit.probeRect(0, 9, 1, 10).intersects(0)).toBe(false);
     expect(hit.aabb(0)).toEqual([-1, -1, 11, 11]);
   });
 
@@ -124,11 +125,11 @@ describe("Mark hit-geometry table", () => {
       },
     ];
     const filledHit = createHitGeometry(buildCandidateStoreIndexes(filled));
-    // pathContainment is per query point (one Map per hitTest/nearest call).
-    expect(filledHit.contains(0, 25, 25, new Map())).toBe(true);
-    expect(filledHit.distance(0, 25, 25, new Map())).not.toBeNull();
+    const insideFill = filledHit.probePoint(25, 25);
+    expect(insideFill.contains(0)).toBe(true);
+    expect(insideFill.distance(0)).not.toBeNull();
     // Outside the polygon: no invisible stroke band when fills are present.
-    expect(filledHit.distance(0, 50, 18, new Map())).toBeNull();
+    expect(filledHit.probePoint(50, 18).distance(0)).toBeNull();
 
     const stroked = scene();
     stroked.batches = [
@@ -146,15 +147,14 @@ describe("Mark hit-geometry table", () => {
       },
     ];
     const strokedHit = createHitGeometry(buildCandidateStoreIndexes(stroked, { hitTolerance: 3 }));
-    const strokeContainment = new Map<string, boolean>();
     // Midpoint of a false cross-subpath edge must not hit.
-    expect(strokedHit.distance(1, 10, 25, strokeContainment)).toBeNull();
-    expect(strokedHit.distance(1, 10, 1, strokeContainment)).not.toBeNull();
-    expect(strokedHit.intersects(1, 8, -2, 12, 2, strokeContainment)).toBe(true);
-    expect(strokedHit.intersects(1, 8, 20, 12, 30, strokeContainment)).toBe(false);
+    expect(strokedHit.probePoint(10, 25).distance(1)).toBeNull();
+    expect(strokedHit.probePoint(10, 1).distance(1)).not.toBeNull();
+    expect(strokedHit.probeRect(8, -2, 12, 2).intersects(1)).toBe(true);
+    expect(strokedHit.probeRect(8, 20, 12, 30).intersects(1)).toBe(false);
   });
 
-  it("paths: intersects memoizes fill containment per subpath for one probe rect", () => {
+  it("paths: a rect probe caches fill containment per subpath, scoped to that probe", () => {
     const filled = scene();
     filled.batches = [
       {
@@ -172,26 +172,37 @@ describe("Mark hit-geometry table", () => {
         curve: "linear",
       },
     ];
+    const batch = filled.batches[0]!;
     const hit = createHitGeometry(buildCandidateStoreIndexes(filled));
 
     // Rect (40,40)-(60,50): center inside the fill, no anchor or edge in rect.
-    // Two candidates on the same subpath share one cache entry.
-    const containment = new Map<string, boolean>();
-    expect(hit.intersects(0, 40, 40, 60, 50, containment)).toBe(true);
-    expect(hit.intersects(1, 40, 40, 60, 50, containment)).toBe(true);
-    expect(containment.size).toBe(1);
-    expect(containment.get("0:0:3")).toBe(true);
+    const probe = hit.probeRect(40, 40, 60, 50);
+    expect(probe.intersects(0)).toBe(true);
 
-    // The cached value is consulted, not recomputed: poison both directions.
-    const poisonedFalse = new Map<string, boolean>([["0:0:3", false]]);
-    expect(hit.intersects(0, 40, 40, 60, 50, poisonedFalse)).toBe(false);
-    // Center (74,74) is outside the fill, but a poisoned true wins.
-    const poisonedTrue = new Map<string, boolean>([["0:0:3", true]]);
-    expect(hit.intersects(0, 70, 70, 78, 78, poisonedTrue)).toBe(true);
+    // Same probe, second candidate on the same subpath: the cached containment
+    // answers without re-reading geometry — move the polygon away and the
+    // probe still reports the cached verdict.
+    if (batch.kind !== "paths") throw new Error("expected paths batch");
+    const original = batch.positions.slice();
+    batch.positions.set([200, 200, 260, 200, 230, 260]);
+    expect(probe.intersects(1)).toBe(true);
+    batch.positions.set(original);
 
-    // Anchor-in-rect early return never touches the fill cache.
-    const untouched = new Map<string, boolean>();
-    expect(hit.intersects(0, 15, 15, 25, 25, untouched)).toBe(true);
-    expect(untouched.size).toBe(0);
+    // A fresh probe for a different rect never inherits that verdict: center
+    // (74,74) sits outside the fill, so a stale shared cache would say true.
+    expect(hit.probeRect(70, 70, 78, 78).intersects(0)).toBe(false);
+
+    // Anchor-in-rect early return stays cheap: it answers before any fill
+    // containment is computed (rect contains the (20,20) anchor).
+    expect(hit.probeRect(15, 15, 25, 25).intersects(0)).toBe(true);
+
+    // Point probes cache the point-containment predicate the same way —
+    // scoped to their own probe, never shared with rect probes.
+    const pointProbe = hit.probePoint(25, 25);
+    expect(pointProbe.contains(0)).toBe(true);
+    batch.positions.set([200, 200, 260, 200, 230, 260]);
+    expect(pointProbe.contains(1)).toBe(true);
+    batch.positions.set(original);
+    expect(hit.probePoint(50, 18).contains(0)).toBe(false);
   });
 });

@@ -8,6 +8,7 @@ import {
   pathSubpathIndex,
   pointHitDistance,
 } from "./candidate-geometry.js";
+import type { HitProbePoint } from "./candidate-hit-geometry.js";
 import { closestPathEdge } from "./candidate-path-geometry.js";
 import type { CandidateFacts } from "./candidate-store-types.js";
 import type { Scene } from "./scene.js";
@@ -32,12 +33,7 @@ export type TopmostHitContext = {
   readonly ys: Float32Array;
   readonly pointBatchIndexes: readonly PointBatchIndex[];
   addExtendedIntersecting(loX: number, loY: number, hiX: number, hiY: number, into: number[]): void;
-  exactDistance(
-    id: number,
-    px: number,
-    py: number,
-    pathContainment: Map<string, boolean>,
-  ): number | null;
+  probePoint(px: number, py: number): HitProbePoint;
   fact(id: number): CandidateFacts | null;
 };
 
@@ -58,16 +54,14 @@ export function resolveTopmostHit(
   ): void => {
     ctx.addExtendedIntersecting(loX, loY, hiX, hiY, into);
   };
-  const exactDistance = (id: number, x: number, y: number, pathContainment: Map<string, boolean>) =>
-    ctx.exactDistance(id, x, y, pathContainment);
   const fact = (id: number) => ctx.fact(id);
+  const probe = ctx.probePoint(px, py);
 
   let best = -1;
   let bestBatch = -1;
   let bestDistance = Infinity;
   let bestPathStart = -1;
   let bestPathEdge = Infinity;
-  const pathContainment = new Map<string, boolean>();
 
   for (let index = pointBatchIndexes.length - 1; index >= 0; index--) {
     const entry = pointBatchIndexes[index]!;
@@ -122,7 +116,7 @@ export function resolveTopmostHit(
       (px < panel.x || px > panel.x + panel.width || py < panel.y || py > panel.y + panel.height)
     )
       continue;
-    const distance = exactDistance(id, px, py, pathContainment);
+    const distance = probe.distance(id);
     if (distance === null) continue;
     const sameBatch = batchIndex === bestBatch;
     const primitive = primitiveIds[id]!;

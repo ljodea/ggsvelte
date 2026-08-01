@@ -3,10 +3,11 @@ import {
   directionalNearestInOrder,
   panelRangeInOrder,
 } from "./candidate-geometry-nearest.js";
+import { createHitGeometry } from "./candidate-hit-geometry.js";
 import { resolveTopmostHit } from "./candidate-hit-resolve.js";
 import { AUTO_MODES, buildCandidateStoreIndexes } from "./candidate-store-indexes.js";
 import type { BucketBoundary, SeriesBoundary } from "./candidate-store-indexes.js";
-import { buildCandidateSpatialQuery } from "./candidate-store-spatial.js";
+import { buildSpatialIndex } from "./candidate-store-spatial-index.js";
 import type {
   CandidateStore,
   CandidateStoreOptions,
@@ -22,8 +23,8 @@ export const EMPTY_UINT32 = new Uint32Array(0);
  * Assembled candidate store: compact indexes + query methods.
  * Construction phases:
  * - candidate-store-indexes.ts — typed arrays, traversal, group buckets
- * - candidate-store-spatial.ts — spatial shortlist + hit-geometry refine
- * - candidate-hit-geometry.ts — one ops table per mark kind
+ * - candidate-store-spatial-index.ts — spatial shortlist trees + shortlist APIs
+ * - candidate-hit-geometry.ts — one ops table per mark kind; probe handles
  * - candidate-hit-resolve.ts — topmost-hit + tie-break policy
  * - candidate-path-geometry.ts — path AABB / edge helpers
  */
@@ -57,7 +58,8 @@ export function assembleCandidateStore(
     permutations,
     buckets,
   } = indexes;
-  const query = buildCandidateSpatialQuery(indexes);
+  const hit = createHitGeometry(indexes);
+  const query = buildSpatialIndex(indexes, hit);
   const { spatial, isPoint, pointBatchIndexes } = query;
 
   return {
@@ -80,8 +82,7 @@ export function assembleCandidateStore(
           addExtendedIntersecting: (loX, loY, hiX, hiY, into) => {
             query.addExtendedIntersecting(loX, loY, hiX, hiY, into);
           },
-          exactDistance: (id, x, y, pathContainment) =>
-            query.exactDistance(id, x, y, pathContainment),
+          probePoint: (x, y) => hit.probePoint(x, y),
           fact: (id) => indexes.fact(id),
         },
         px,
@@ -100,7 +101,7 @@ export function assembleCandidateStore(
       // Ternary must compare search.mode directly so TS narrows away "auto".
       const mode: ResolvedCandidateInspectMode = search.mode === "auto" ? "exact" : search.mode;
       let resultMode: ResolvedCandidateInspectMode = mode;
-      const pathContainment = new Map<string, boolean>();
+      const probe = hit.probePoint(px, py);
       const ids =
         spatial === null
           ? Array.from({ length: n }, (_, id) => n - 1 - id)
@@ -116,7 +117,7 @@ export function assembleCandidateStore(
           continue;
         const distance =
           candidateMode === "exact"
-            ? query.exactDistance(id, px, py, pathContainment)
+            ? probe.distance(id)
             : candidateMode === "x"
               ? Math.abs((flip ? ys[id] : xs[id])! - (flip ? py : px))
               : candidateMode === "y"
@@ -278,13 +279,10 @@ export function assembleCandidateStore(
       }
       const extendedHits: number[] = [];
       query.addExtendedIntersecting(loX, loY, hiX, hiY, extendedHits);
-      // One probe rect per call, so rect-center fill containment per subpath
-      // is shared across candidates. Distinct from the point-containment maps
-      // nearest/hitTest build — the two cache different predicates.
-      const rectContainment = new Map<string, boolean>();
+      const probe = hit.probeRect(loX, loY, hiX, hiY);
       for (const id of extendedHits) {
         if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) continue;
-        if (query.intersects(id, loX, loY, hiX, hiY, rectContainment)) hits.push(id);
+        if (probe.intersects(id)) hits.push(id);
       }
       hits.sort((a, b) => traversalRank[a]! - traversalRank[b]!);
       return Uint32Array.from(hits);

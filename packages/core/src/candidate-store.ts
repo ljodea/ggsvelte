@@ -4,10 +4,10 @@
  * - candidate-store-types.ts — public contracts
  * - candidate-geometry.ts — pure geometry hit helpers
  * - candidate-path-geometry.ts — path AABB / edge helpers for hit shortlists
- * - candidate-hit-geometry.ts — one distance/contains/intersects/aabb ops object per mark kind
+ * - candidate-hit-geometry.ts — one ops object per mark kind, behind probe handles
  * - candidate-hit-resolve.ts — topmost-hit paint-order + tie-break policy
  * - candidate-store-indexes.ts — typed arrays, traversal, group buckets
- * - candidate-store-spatial.ts — spatial shortlist + geometry refine (index + refine)
+ * - candidate-store-spatial-index.ts — spatial shortlist trees + shortlist APIs
  * - candidate-store-build.ts — assembles indexes/spatial into CandidateStore
  *
  * `buildCandidateStore` is a deferred-construction shell over assembleCandidateStore
