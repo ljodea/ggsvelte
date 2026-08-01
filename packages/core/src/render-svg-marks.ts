@@ -25,6 +25,7 @@ import type { PointShape } from "./scales/style.js";
 import type { ThemeTokens } from "./theme.js";
 import { themeVar } from "./theme.js";
 import { stepCorners } from "./path-step.js";
+import { ringCuts } from "./ring-cuts.js";
 import { escapeXML, px } from "./render-svg-format.js";
 
 /** When true, use solid paint fallbacks and skip glow filters. */
@@ -139,6 +140,10 @@ function pathRingData(
 /**
  * Path data for one subpath. When `ringStarts` lists interior ring starts inside
  * [start, end), emits multiple M…Z rings for even-odd polygon holes.
+ *
+ * `ringStarts` must be ascending in vertex order, as {@link PathsBatch} emits
+ * it — the rings come from consecutive cut pairs, so any other order pairs the
+ * wrong vertices.
  */
 export function pathData(
   positions: Float32Array,
@@ -152,12 +157,7 @@ export function pathData(
   if (ringStarts === undefined || ringStarts.length === 0 || !closed) {
     return pathRingData(positions, start, end, curve, closed);
   }
-  const cuts: number[] = [start];
-  for (let i = 0; i < ringStarts.length; i++) {
-    const b = ringStarts[i]!;
-    if (b > start && b < end) cuts.push(b);
-  }
-  cuts.push(end);
+  const cuts = ringCuts(ringStarts, start, end);
   const parts: string[] = [];
   for (let i = 0; i + 1 < cuts.length; i++) {
     const d = pathRingData(positions, cuts[i]!, cuts[i + 1]!, curve, true);

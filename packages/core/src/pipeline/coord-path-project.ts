@@ -1,6 +1,7 @@
 import type { PanelCoordProjector } from "../coord-projector.js";
 import type { PathsBatch } from "../scene.js";
 import { isStepCurve, stepCorners, stepCornersPerSegment } from "../path-step.js";
+import { ringCuts } from "../ring-cuts.js";
 
 import type { PipelineWarning } from "./types.js";
 import {
@@ -232,12 +233,7 @@ export function projectPathBatch(
       sourceRingStarts !== undefined &&
       sourceRingStarts.length > 0;
     if (holeCompound) {
-      const cuts: number[] = [start];
-      for (let i = 0; i < sourceRingStarts.length; i++) {
-        const b = sourceRingStarts[i]!;
-        if (b > start && b < end) cuts.push(b);
-      }
-      cuts.push(end);
+      const cuts = ringCuts(sourceRingStarts, start, end);
       // No interior cuts in this subpath → ordinary single-ring project.
       if (cuts.length === 2) {
         if (!projectRun(start, end)) continue;

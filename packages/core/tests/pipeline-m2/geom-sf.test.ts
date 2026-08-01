@@ -727,6 +727,169 @@ describe("geom_sf", () => {
     expect((d.match(/M/g) ?? []).length).toBe(2);
   });
 
+  it("pathData cuts each subpath only on its own ring starts", () => {
+    // Two compounds, each with a hole: subpath 0 must not cut on subpath 1's
+    // break, and subpath 1 must not cut on subpath 0's.
+    const twoHoles = geo({
+      type: "MultiPolygon",
+      coordinates: [
+        [
+          [
+            [0, 0],
+            [10, 0],
+            [10, 10],
+            [0, 10],
+            [0, 0],
+          ],
+          [
+            [3, 3],
+            [7, 3],
+            [7, 7],
+            [3, 7],
+            [3, 3],
+          ],
+        ],
+        [
+          [
+            [20, 0],
+            [30, 0],
+            [30, 10],
+            [20, 10],
+            [20, 0],
+          ],
+          [
+            [23, 3],
+            [27, 3],
+            [27, 7],
+            [23, 7],
+            [23, 3],
+          ],
+        ],
+      ],
+    });
+    const model = runPipeline(
+      gg({ geometry: [twoHoles] }, aes({}))
+        .geomSf()
+        .spec(),
+      size,
+    );
+    const batch = model.scene.batches[0] as PathsBatch;
+    expect(batch.pathOffsets.length - 1).toBe(2);
+    const breaks = [...batch.ringStarts!];
+    expect(breaks.length).toBe(2);
+    // ringStarts is ascending, and one break lands in each subpath window.
+    expect(breaks[0]!).toBeLessThan(breaks[1]!);
+    expect(breaks[0]!).toBeGreaterThan(batch.pathOffsets[0]!);
+    expect(breaks[0]!).toBeLessThan(batch.pathOffsets[1]!);
+    expect(breaks[1]!).toBeGreaterThan(batch.pathOffsets[1]!);
+    expect(breaks[1]!).toBeLessThan(batch.pathOffsets[2]!);
+
+    for (let s = 0; s < 2; s++) {
+      const d = pathData(
+        batch.positions,
+        batch.pathOffsets[s]!,
+        batch.pathOffsets[s + 1]!,
+        batch.curve,
+        true,
+        batch.ringStarts,
+      );
+      // Exactly two rings — the out-of-window break must not add a third.
+      expect((d.match(/M/g) ?? []).length).toBe(2);
+      expect((d.match(/Z/g) ?? []).length).toBe(2);
+      // Same d the whole-batch break list and a window-local one produce.
+      const own = batch.ringStarts!.filter(
+        (b) => b > batch.pathOffsets[s]! && b < batch.pathOffsets[s + 1]!,
+      );
+      expect(d).toBe(
+        pathData(
+          batch.positions,
+          batch.pathOffsets[s]!,
+          batch.pathOffsets[s + 1]!,
+          batch.curve,
+          true,
+          own,
+        ),
+      );
+    }
+  });
+
+  it("emits ringStarts in ascending vertex order", () => {
+    // Consumers window ringStarts by binary search and pair the cuts into
+    // rings, so both producers must keep it ascending.
+    const nested = geo({
+      type: "MultiPolygon",
+      coordinates: [
+        [
+          [
+            [0, 0],
+            [10, 0],
+            [10, 10],
+            [0, 10],
+            [0, 0],
+          ],
+          [
+            [1, 1],
+            [4, 1],
+            [4, 4],
+            [1, 4],
+            [1, 1],
+          ],
+          [
+            [6, 6],
+            [9, 6],
+            [9, 9],
+            [6, 9],
+            [6, 6],
+          ],
+        ],
+        [
+          [
+            [20, 0],
+            [30, 0],
+            [30, 10],
+            [20, 10],
+            [20, 0],
+          ],
+          [
+            [23, 3],
+            [27, 3],
+            [27, 7],
+            [23, 7],
+            [23, 3],
+          ],
+        ],
+      ],
+    });
+    const spec = gg({ geometry: [nested] }, aes({})).geomSf();
+    const plain = runPipeline(spec.spec(), size);
+    const plainBatch = plain.scene.batches[0] as PathsBatch;
+    const plainBreaks = [...plainBatch.ringStarts!];
+    expect(plainBreaks.length).toBe(3);
+    for (let i = 1; i < plainBreaks.length; i++) {
+      expect(plainBreaks[i]!).toBeGreaterThan(plainBreaks[i - 1]!);
+    }
+
+    // The coord path rewrites ringStarts to post-projection indices; that
+    // remap must stay ascending too.
+    const projected = runPipeline(
+      gg({ geometry: [nested] }, aes({}))
+        .geomSf()
+        .scales({
+          x: { type: "linear", domain: [1, 100], expand: { mult: 0, add: 0 } },
+          y: { type: "linear", domain: [1, 100], expand: { mult: 0, add: 0 } },
+        })
+        .coordTransform({ x: { transform: "log10", expand: false } })
+        .spec(),
+      size,
+    );
+    const projectedBatch = projected.scene.batches[0] as PathsBatch;
+    const projectedBreaks = [...projectedBatch.ringStarts!];
+    expect(projectedBreaks.length).toBeGreaterThan(0);
+    for (let i = 1; i < projectedBreaks.length; i++) {
+      expect(projectedBreaks[i]!).toBeGreaterThan(projectedBreaks[i - 1]!);
+    }
+  });
+
   it("keeps the closing vertex on a closed LineString (open path draw)", () => {
     const closedLine = geo({
       type: "LineString",
