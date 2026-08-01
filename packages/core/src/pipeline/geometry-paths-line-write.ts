@@ -29,19 +29,47 @@ export function writeLineSubpaths(input: {
   const pathOffsets = new Uint32Array(subpaths.length + 1);
   const strokes: (string | null)[] = [];
   let cursor = 0;
-  for (let s = 0; s < subpaths.length; s++) {
-    pathOffsets[s] = cursor;
-    const rows = subpaths[s]!;
-    for (const row of rows) {
-      const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
-      const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
-      positions[cursor * 2] = tx * fx.innerWidth;
-      positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
-      rowIndex[cursor] = frame.rowIndex[row]!;
-      if (frameRowIndex !== undefined) frameRowIndex[cursor] = row;
-      cursor++;
+
+  // Continuous multi-series: monomorphic normalize + pixel map (no band/offset branch).
+  const xNum = frame.xNumeric;
+  const yNum = frame.yNumeric;
+  if (fx.xScale.type !== "band" && fx.yScale.type !== "band" && xNum !== null && yNum !== null) {
+    // PositionScale is ContinuousScale | BandScale; type guard above excludes band.
+    const xScale = fx.xScale;
+    const yScale = fx.yScale;
+    const iw = fx.innerWidth;
+    const ih = fx.innerHeight;
+    const sourceRows = frame.rowIndex;
+    for (let s = 0; s < subpaths.length; s++) {
+      pathOffsets[s] = cursor;
+      const rows = subpaths[s]!;
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i]!;
+        const tx = xScale.normalizeTransformed(xNum[row]!);
+        const ty = yScale.normalizeTransformed(yNum[row]!);
+        positions[cursor * 2] = tx * iw;
+        positions[cursor * 2 + 1] = ih - ty * ih;
+        rowIndex[cursor] = sourceRows[row]!;
+        if (frameRowIndex !== undefined) frameRowIndex[cursor] = row;
+        cursor++;
+      }
+      strokes.push(paintVector(frame, "color", color, [rows[0]!])[0]!);
     }
-    strokes.push(paintVector(frame, "color", color, [rows[0]!])[0]!);
+  } else {
+    for (let s = 0; s < subpaths.length; s++) {
+      pathOffsets[s] = cursor;
+      const rows = subpaths[s]!;
+      for (const row of rows) {
+        const tx = positionOf(fx.xScale, frame.xNumeric, frame.xValues, row);
+        const ty = positionOf(fx.yScale, frame.yNumeric, frame.yValues, row);
+        positions[cursor * 2] = tx * fx.innerWidth;
+        positions[cursor * 2 + 1] = fx.innerHeight - ty * fx.innerHeight;
+        rowIndex[cursor] = frame.rowIndex[row]!;
+        if (frameRowIndex !== undefined) frameRowIndex[cursor] = row;
+        cursor++;
+      }
+      strokes.push(paintVector(frame, "color", color, [rows[0]!])[0]!);
+    }
   }
   pathOffsets[subpaths.length] = cursor;
   return {

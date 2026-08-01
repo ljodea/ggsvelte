@@ -120,6 +120,15 @@ function pathRingData(
   closed: boolean,
 ): string {
   if (end <= start) return "";
+  // Linear open/closed: monomorphic string growth (no per-vertex array slots).
+  // Dense multi-series lines (line-3x10k) spend most SVG time here.
+  if (curve === "linear") {
+    let d = `M${px(positions[start * 2]!)} ${px(positions[start * 2 + 1]!)}`;
+    for (let j = start + 1; j < end; j++) {
+      d += `L${px(positions[j * 2]!)} ${px(positions[j * 2 + 1]!)}`;
+    }
+    return closed ? `${d}Z` : d;
+  }
   const parts: string[] = [`M${px(positions[start * 2]!)} ${px(positions[start * 2 + 1]!)}`];
   for (let j = start + 1; j < end; j++) {
     const x = positions[j * 2]!;
