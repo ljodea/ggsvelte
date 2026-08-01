@@ -19903,14 +19903,14 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["@ggsvelte/core"],
   },
   {
-    id: "heading:guide-lifecycle:experimental-320",
+    id: "heading:guide-lifecycle:experimental-321",
     kind: "heading",
-    title: "experimental (320)",
+    title: "experimental (321)",
     summary:
-      "experimental (320) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
-    href: "/guide/lifecycle#experimental-320",
+      "experimental (321) in Lifecycle & editions. API stability tags per export, and the defaults-edition mechanism.",
+    href: "/guide/lifecycle#experimental-321",
     keywords: ["Lifecycle & editions", "Reference"],
-    exact: ["experimental (320)"],
+    exact: ["experimental (321)"],
   },
   {
     id: "heading:guide-lifecycle:stable-intent-2",
@@ -32746,6 +32746,15 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/lifecycle#ggsvelte-core",
     keywords: ["@ggsvelte/core", ".", "value", "experimental"],
     exact: ["getScaleTransform"],
+  },
+  {
+    id: "api:ggsvelte-core:groupBatchesByPanel",
+    kind: "api",
+    title: "groupBatchesByPanel",
+    summary: "@ggsvelte/core · value · experimental.",
+    href: "/guide/lifecycle#ggsvelte-core",
+    keywords: ["@ggsvelte/core", ".", "value", "experimental"],
+    exact: ["groupBatchesByPanel"],
   },
   {
     id: "api:ggsvelte-core:humanizeFieldTitle",
