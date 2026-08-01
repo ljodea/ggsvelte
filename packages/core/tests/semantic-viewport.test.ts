@@ -659,10 +659,9 @@ describe("RenderModel semantic viewport", () => {
       },
     );
     expect(panel.resolve({ x: { kind: "band", keys } }).x).toEqual(["c0", "c399"]);
-    expect(reads).toBeGreaterThan(0);
-    // Two ends, found by scanning inward from each. Mapping the whole list
-    // reads all 400.
-    expect(reads).toBeLessThan(10);
+    // Exactly two, and independent of the key count: a bound relative to the
+    // fixture size would go green if the fixture ever shrank.
+    expect(reads).toBe(2);
     model.dispose();
   });
 
@@ -688,8 +687,40 @@ describe("RenderModel semantic viewport", () => {
     expect(panel.resolve({ x: { kind: "band", keys } }).x).toEqual(["a", "c"]);
     // Every key unknown: no span at all.
     expect(panel.resolve({ x: { kind: "band", keys: ["ghost-1", "ghost-2"] } }).x).toBeUndefined();
-    // A single known key is both ends.
+    // A single known key is both ends, whether or not unknowns bracket it —
+    // the second reaches the same return only after the backward scan runs.
     expect(panel.resolve({ x: { kind: "band", keys: [encodeKey("b")] } }).x).toEqual(["b", "b"]);
+    expect(
+      panel.resolve({ x: { kind: "band", keys: ["ghost-1", encodeKey("b"), "ghost-2"] } }).x,
+    ).toEqual(["b", "b"]);
+    // No keys at all: nothing to span.
+    expect(panel.resolve({ x: { kind: "band", keys: [] } }).x).toBeUndefined();
+    // A key repeated is still just that value at both ends.
+    expect(
+      panel.resolve({ x: { kind: "band", keys: [encodeKey("b"), encodeKey("b")] } }).x,
+    ).toEqual(["b", "b"]);
+  });
+
+  it("spans a band y axis the same way", () => {
+    const model = runPipeline(
+      gg(
+        [
+          { x: 1, category: "a" },
+          { x: 2, category: "b" },
+          { x: 3, category: "c" },
+        ],
+        aes({ x: "x", y: "category" }),
+      )
+        .geomPoint()
+        .spec(),
+      { width: 400, height: 300 },
+    );
+    const scenePanel = model.scene.panels[0]!;
+    const panel = model.viewport.panel(scenePanel.id)!;
+    expect(
+      panel.resolve({ y: { kind: "band", keys: ["ghost", encodeKey("a"), encodeKey("c")] } }).y,
+    ).toEqual(["a", "c"]);
+    model.dispose();
     model.dispose();
   });
 });
