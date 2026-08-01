@@ -4,6 +4,7 @@ import {
   changelogSectionForVersion,
   filterUnpublished,
   formatUnpublishedFailure,
+  npmVersionExists,
   npmVersionUrl,
   parseNewTags,
   readPublishedPackageVersions,
@@ -114,6 +115,25 @@ describe("changelogSectionForVersion", () => {
   it("returns null when the version is absent", () => {
     expect(changelogSectionForVersion(sample, "9.9.9")).toBeNull();
   });
+
+  it("does not treat ## 0.24.10 as ## 0.24.1 (prefix collision)", () => {
+    const withTen = `# pkg
+
+## 0.24.10
+
+### Patch Changes
+
+- ten
+
+## 0.24.1
+
+### Patch Changes
+
+- one
+`;
+    expect(changelogSectionForVersion(withTen, "0.24.1")).toBe("### Patch Changes\n\n- one");
+    expect(changelogSectionForVersion(withTen, "0.24.10")).toBe("### Patch Changes\n\n- ten");
+  });
 });
 
 describe("formatUnpublishedFailure", () => {
@@ -129,24 +149,27 @@ describe("formatUnpublishedFailure", () => {
 
 describe("npmVersionExists", () => {
   it("returns true on 200", async () => {
-    const { npmVersionExists } = await import("./npm-publish-state");
-    const fetchImpl = (async () => new Response("{}", { status: 200 })) as unknown as typeof fetch;
-    await expect(npmVersionExists("@ggsvelte/core", "0.24.0", { fetchImpl })).resolves.toBe(true);
+    const fetchImpl = (() =>
+      Promise.resolve(new Response("{}", { status: 200 }))) as unknown as typeof fetch;
+    expect(await npmVersionExists("@ggsvelte/core", "0.24.0", { fetchImpl })).toBe(true);
   });
 
   it("returns false on 404", async () => {
-    const { npmVersionExists } = await import("./npm-publish-state");
-    const fetchImpl = (async () =>
-      new Response("Not Found", { status: 404 })) as unknown as typeof fetch;
-    await expect(npmVersionExists("@ggsvelte/core", "9.9.9", { fetchImpl })).resolves.toBe(false);
+    const fetchImpl = (() =>
+      Promise.resolve(new Response("Not Found", { status: 404 }))) as unknown as typeof fetch;
+    expect(await npmVersionExists("@ggsvelte/core", "9.9.9", { fetchImpl })).toBe(false);
   });
 
   it("throws on non-404 errors so the assert cannot green on outages", async () => {
-    const { npmVersionExists } = await import("./npm-publish-state");
-    const fetchImpl = (async () =>
-      new Response("nope", { status: 500 })) as unknown as typeof fetch;
-    await expect(npmVersionExists("@ggsvelte/core", "0.24.0", { fetchImpl })).rejects.toThrow(
-      /npm registry 500/,
-    );
+    const fetchImpl = (() =>
+      Promise.resolve(new Response("nope", { status: 500 }))) as unknown as typeof fetch;
+    let threw: unknown;
+    try {
+      await npmVersionExists("@ggsvelte/core", "0.24.0", { fetchImpl });
+    } catch (err) {
+      threw = err;
+    }
+    expect(threw).toBeInstanceOf(Error);
+    expect(String(threw)).toMatch(/npm registry 500/);
   });
 });

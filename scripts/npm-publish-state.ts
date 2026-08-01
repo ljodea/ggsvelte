@@ -100,24 +100,26 @@ export function parseNewTags(publishStdout: string): string[] {
   const re = /New tag:\s+(\S+)/g;
   for (const match of publishStdout.matchAll(re)) {
     const tag = match[1];
-    if (tag) tags.push(tag);
+    if (tag !== undefined && tag.length > 0) tags.push(tag);
   }
   return tags;
 }
 
 /**
  * Extract the body of a package CHANGELOG section for `## <version>`.
+ * Header match is line-anchored and exact so `## 0.24.1` does not match
+ * `## 0.24.10` (changelogs are newest-first).
  * Returns null when the section is missing (caller decides how loud to be).
  */
 export function changelogSectionForVersion(changelog: string, version: string): string | null {
-  const versionHeader = `## ${version}`;
-  const start = changelog.indexOf(versionHeader);
-  if (start === -1) return null;
-  // Skip the header line itself.
-  let bodyStart = changelog.indexOf("\n", start);
-  if (bodyStart === -1) return "";
-  bodyStart += 1;
-  // Next H2 at line start ends the section.
+  const escaped = version.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const headerRe = new RegExp(`^## ${escaped}\\s*$`, "m");
+  const headerMatch = headerRe.exec(changelog);
+  if (headerMatch === null || headerMatch.index === undefined) return null;
+  const start = headerMatch.index + headerMatch[0].length;
+  // Skip the rest of the header line if any trailing whitespace remained.
+  let bodyStart = start;
+  if (changelog[bodyStart] === "\n") bodyStart += 1;
   const rest = changelog.slice(bodyStart);
   const next = rest.search(/^## /m);
   const body = (next === -1 ? rest : rest.slice(0, next)).trim();

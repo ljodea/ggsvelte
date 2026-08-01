@@ -871,16 +871,20 @@ describe("release.yml concurrent-merge race recovery", () => {
     expect(yml).not.toMatch(/publish:\s*changeset/);
   });
 
-  it("publishes unpublished versions then asserts npm parity when enabled", () => {
+  it("publishes and asserts on the main tip before the version-PR step", () => {
     const yml = release();
     expect(yml).toContain("bun scripts/publish-unpublished.ts");
     expect(yml).toContain("bun scripts/assert-npm-published.ts");
     expect(yml).toContain("vars.NPM_PUBLISH_ENABLED == 'true'");
-    // Both gates share the enable flag; publish must come before assert.
+    // Publish → assert → version PR. Publish must not run after
+    // changesets/action, which leaves the workspace on changeset-release/main
+    // with unreviewed next-version package.json files.
     const publishAt = yml.indexOf("bun scripts/publish-unpublished.ts");
     const assertAt = yml.indexOf("bun scripts/assert-npm-published.ts");
+    const versionAt = yml.indexOf("changesets — open/update Version Packages PR");
     expect(publishAt).toBeGreaterThan(-1);
     expect(assertAt).toBeGreaterThan(publishAt);
+    expect(versionAt).toBeGreaterThan(assertAt);
   });
 
   it("keeps OIDC trusted publishing (no NPM_TOKEN secret)", () => {

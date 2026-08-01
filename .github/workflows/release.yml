@@ -1,4 +1,4 @@
-# Release — changesets version PR + independent publish on every push to main.
+# Release — independent publish + changesets version PR on every push to main.
 # All third-party actions pinned by full commit SHA (zizmor-enforced).
 #
 # DORMANT until two pieces of USER-BLOCKED setup exist:
@@ -14,12 +14,15 @@
 # way packages leave this repo. That needs npm >= 11.5, hence Node 24 below.
 #
 # Flow (when NPM_PUBLISH_ENABLED=true):
-#   1. changesets/action opens/updates the "Version Packages" PR when
-#      .changeset/*.md files are present (version-only — no publish script).
-#   2. publish-unpublished.ts ships any package.json versions already on main
-#      that are missing from npm (idempotent).
-#   3. assert-npm-published.ts FAILS the job if any package version on this
+#   1. publish-unpublished.ts ships any package.json versions already on THIS
+#      commit that are missing from npm (idempotent). Runs BEFORE the version
+#      PR step so we never read package.json from changeset-release/main.
+#   2. assert-npm-published.ts FAILS the job if any package version on this
 #      commit is still missing from npm — no silent skips.
+#   3. changesets/action opens/updates the "Version Packages" PR when
+#      .changeset/*.md files are present (version-only — no publish script).
+#      The action leaves the workspace on changeset-release/main; that is fine
+#      because publish/assert already finished against the main tip.
 #
 # Why publish is NOT left to changesets/action: the action is either/or. If
 # ANY leftover changeset remains on main it only maintains the Version
@@ -71,17 +74,14 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: build packages (published exports point at dist/)
         run: bun run build
-      # Version PR only — never pass `publish` to changesets/action. Publish is
-      # a separate step so leftover changesets cannot suppress shipping
-      # already-bumped versions (the concurrent-merge race).
-      - name: changesets — open/update Version Packages PR
-        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Publishing is gated behind the NPM_PUBLISH_ENABLED repo variable so
       # this workflow stays green until npm trusted publishing (OIDC) is
       # configured for all four packages on npmjs.com. Flip the gate with:
       #   gh variable set NPM_PUBLISH_ENABLED --body true
+      #
+      # MUST run before changesets/action: the action switches the workspace
+      # onto changeset-release/main and leaves next-version package.json files
+      # checked out. Publishing after that would ship unreviewed bumps.
       - name: Publish package versions on main that are missing from npm
         if: vars.NPM_PUBLISH_ENABLED == 'true'
         run: bun scripts/publish-unpublished.ts
@@ -90,3 +90,10 @@ jobs:
       - name: Assert every package.json version is on npm
         if: vars.NPM_PUBLISH_ENABLED == 'true'
         run: bun scripts/assert-npm-published.ts
+      # Version PR only — never pass `publish` to changesets/action. Publish is
+      # a separate step so leftover changesets cannot suppress shipping
+      # already-bumped versions (the concurrent-merge race).
+      - name: changesets — open/update Version Packages PR
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

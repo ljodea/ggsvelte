@@ -38,9 +38,9 @@ function run(
   const status = res.status ?? 1;
   const stdout = res.stdout ?? "";
   const stderr = res.stderr ?? "";
-  if (stdout) process.stdout.write(stdout);
-  if (stderr) process.stderr.write(stderr);
-  if (status !== 0 && !opts.allowFail) {
+  if (stdout.length > 0) process.stdout.write(stdout);
+  if (stderr.length > 0) process.stderr.write(stderr);
+  if (status !== 0 && opts.allowFail !== true) {
     throw new Error(`${command} ${args.join(" ")} exited ${String(status)}`);
   }
   return { status, stdout, stderr };
@@ -158,7 +158,8 @@ async function main(): Promise<number> {
     return 0;
   }
 
-  if (!process.env["GITHUB_TOKEN"]) {
+  const githubToken = process.env["GITHUB_TOKEN"];
+  if (githubToken === undefined || githubToken.length === 0) {
     console.error(
       "publish-unpublished: GITHUB_TOKEN is required so gh can create tags and releases",
     );
