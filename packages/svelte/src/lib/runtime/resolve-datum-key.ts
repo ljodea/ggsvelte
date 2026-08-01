@@ -55,14 +55,6 @@ export function pickExplicitDatumKey(sources: ExplicitDatumKeySources): DatumKey
   return undefined;
 }
 
-/** Read `identity` from `inspect` prop / resolved inspect capability input. */
-export function identityFromInspectInput(
-  input: boolean | { readonly identity?: DatumKey } | undefined,
-): DatumKey | undefined {
-  if (input === undefined || input === false || input === true) return undefined;
-  return input.identity;
-}
-
 /** Read `identity` from object-form `select` (string shorthand has none). */
 export function identityFromSelectInput(
   input: false | string | { readonly identity?: DatumKey } | undefined,

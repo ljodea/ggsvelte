@@ -25,6 +25,7 @@ export type InteractionDiagnosticCode =
   | "INTERACTION_INSPECT_X_ON_BAR"
   | "INTERACTION_INSPECT_X_BISECTS_COL_LABELS"
   | "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"
+  | "INTERACTION_INSPECT_IDENTITY_DROPPED"
   | "INTERACTION_DUPLICATE_INSPECT_CAPABILITY";
 
 export interface InteractionDiagnostic {
@@ -236,6 +237,18 @@ export const INTERACTION_DIAGNOSTIC_CATALOG: Readonly<
     ],
     docUrl:
       "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-x-bisects-bar-labels",
+  },
+  INTERACTION_INSPECT_IDENTITY_DROPPED: {
+    severity: "advisory",
+    code: "INTERACTION_INSPECT_IDENTITY_DROPPED",
+    message:
+      "An <Inspect> child replaced the inspect prop whole (REPLACE), so the prop's `identity` no longer applies; rows fall back to an id column or row index.",
+    prop: "Inspect",
+    suggestions: [
+      "Move identity onto the <Inspect> child",
+      "Drop identity from the inspect prop if the default row identity is intended",
+    ],
+    docUrl: "https://ggsvelte.sh/guide/interaction-reference#interaction-inspect-identity-dropped",
   },
   INTERACTION_DUPLICATE_INSPECT_CAPABILITY: {
     severity: "advisory",

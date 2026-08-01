@@ -17426,6 +17426,16 @@ export const DOCS_SEARCH_INDEX = [
     exact: ["INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"],
   },
   {
+    id: "heading:guide-interaction-reference:interaction-inspect-identity-dropped",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_IDENTITY_DROPPED",
+    summary:
+      "INTERACTION_INSPECT_IDENTITY_DROPPED in Interaction reference. Search interaction props, callbacks, event phases, and diagnostic codes.",
+    href: "/guide/interaction-reference#interaction-inspect-identity-dropped",
+    keywords: ["Interaction reference", "documentation"],
+    exact: ["INTERACTION_INSPECT_IDENTITY_DROPPED"],
+  },
+  {
     id: "heading:guide-interaction-reference:interaction-duplicate-inspect-capability",
     kind: "heading",
     title: "INTERACTION_DUPLICATE_INSPECT_CAPABILITY",
@@ -19483,6 +19493,16 @@ export const DOCS_SEARCH_INDEX = [
     href: "/guide/errors#interaction-inspect-x-bisects-bar-labels",
     keywords: ["Errors reference", "Reference"],
     exact: ["INTERACTION_INSPECT_X_BISECTS_BAR_LABELS"],
+  },
+  {
+    id: "heading:guide-errors:interaction-inspect-identity-dropped",
+    kind: "heading",
+    title: "INTERACTION_INSPECT_IDENTITY_DROPPED",
+    summary:
+      "INTERACTION_INSPECT_IDENTITY_DROPPED in Errors reference. Understand validation, render, interaction, and CLI diagnostics and recover safely.",
+    href: "/guide/errors#interaction-inspect-identity-dropped",
+    keywords: ["Errors reference", "Reference"],
+    exact: ["INTERACTION_INSPECT_IDENTITY_DROPPED"],
   },
   {
     id: "heading:guide-errors:interaction-duplicate-inspect-capability",
@@ -42881,6 +42901,23 @@ export const DOCS_SEARCH_INDEX = [
     exact: [
       "INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
       "interaction:INTERACTION_INSPECT_X_BISECTS_BAR_LABELS",
+    ],
+  },
+  {
+    id: "diagnostic:interaction:INTERACTION_INSPECT_IDENTITY_DROPPED",
+    kind: "diagnostic",
+    title: "INTERACTION_INSPECT_IDENTITY_DROPPED · interaction",
+    summary:
+      "An <Inspect> child replaced the inspect prop whole (REPLACE), so the prop's `identity` no longer applies; rows fall back to an id column or row index.",
+    href: "/guide/errors#interaction-inspect-identity-dropped",
+    keywords: [
+      "interaction",
+      "advisory",
+      "Move identity onto the <Inspect> child; Drop identity from the inspect prop if the default row identity is intended",
+    ],
+    exact: [
+      "INTERACTION_INSPECT_IDENTITY_DROPPED",
+      "interaction:INTERACTION_INSPECT_IDENTITY_DROPPED",
     ],
   },
   {

@@ -49,7 +49,6 @@ import {
   toLayerInput,
 } from "./assembly/assemble.js";
 import {
-  identityFromInspectInput,
   identityFromSelectInput,
   pickExplicitDatumKey,
   resolveDatumKey,
@@ -77,7 +76,10 @@ import {
   createCapabilityResolution,
   ssrSafeDerived,
 } from "./interaction/capability-resolution.svelte.js";
-import { duplicateInspectCapabilityDiagnostics } from "./interaction/resolve-inspect-capability.js";
+import {
+  droppedInspectIdentityDiagnostics,
+  duplicateInspectCapabilityDiagnostics,
+} from "./interaction/resolve-inspect-capability.js";
 import { collectWiringDiagnostics } from "./interaction/wiring-advisories.js";
 import { createInspectionState } from "./inspection/inspection-state.svelte.js";
 import type { InspectionState } from "./inspection/inspection-state.svelte.js";
@@ -266,7 +268,9 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
   function resolvedDatumKeyNow() {
     const data = host.props.data;
     const embedded = assembled()?.data;
-    const inspectIdentity = identityFromInspectInput(inspectResolved().input);
+    // The capability seam resolves this — do not re-read it off `input`, which
+    // cannot tell a dropped prop identity from one that was never set.
+    const inspectIdentity = inspectResolved().identity;
     const selectIdentity = identityFromSelectInput(host.props.select);
     const controllerIdentity = host.props.interaction?.identity;
     const legacyKey = readLegacyPlotKey(host.props);
@@ -398,6 +402,13 @@ export function createPlotEngine(host: PlotEngineHost): PlotEngine {
     duplicateInspectCapabilityDiagnostics(inspectResolved().multiChild),
   );
   deliverAdvisoriesOnce(() => multiInspectDiagnostics);
+
+  // <Inspect> replaced an inspect prop that named `identity`: rows silently
+  // fell back to id column / row index before #1305's follow-up.
+  const droppedIdentityDiagnostics = $derived.by((): InteractionDiagnostic[] =>
+    droppedInspectIdentityDiagnostics(inspectResolved().droppedPropIdentity),
+  );
+  deliverAdvisoriesOnce(() => droppedIdentityDiagnostics);
 
   // Deprecated plot-level key → Inspect / Select / controller identity.
   const deprecatedKeyDiagnostics = $derived.by((): PlotDiagnostic[] => {
