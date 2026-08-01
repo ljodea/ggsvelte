@@ -58,6 +58,11 @@ describe("LayerRegistry capabilities", () => {
       prop: { mode: "xy" },
       children: registry.capabilities("inspect"),
     });
-    expect(resolved).toEqual({ input: { mode: "y" }, multiChild: true });
+    expect(resolved).toEqual({
+      input: { mode: "y" },
+      multiChild: true,
+      identity: undefined,
+      droppedPropIdentity: false,
+    });
   });
 });

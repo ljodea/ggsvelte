@@ -80,6 +80,39 @@ describe("<Inspect> capability child", () => {
       .toBe(true);
   });
 
+  it("advises when a child replaces an inspect prop that named identity", async () => {
+    const diagnostics: PlotDiagnostic[] = [];
+    render(InspectChildPlot, {
+      useInspect: true,
+      propInspect: { identity: "x" },
+      ondiagnostic: (d: PlotDiagnostic) => {
+        diagnostics.push(d);
+      },
+    });
+    await expect
+      .poll(() => diagnostics.some((d) => d.code === "INTERACTION_INSPECT_IDENTITY_DROPPED"))
+      .toBe(true);
+  });
+
+  it("stays quiet when the child carries its own identity", async () => {
+    const diagnostics: PlotDiagnostic[] = [];
+    render(InspectChildPlot, {
+      useInspect: true,
+      propInspect: { identity: "x" },
+      inspectIdentity: "y",
+      ondiagnostic: (d: PlotDiagnostic) => {
+        diagnostics.push(d);
+      },
+    });
+    flushSync();
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 50);
+    });
+    expect(diagnostics.some((d) => d.code === "INTERACTION_INSPECT_IDENTITY_DROPPED")).toBe(false);
+  });
+
   it("oninspect with child-only inspect does not emit HANDLER_WITHOUT_CAPABILITY", async () => {
     const diagnostics: PlotDiagnostic[] = [];
     render(InspectChildPlot, {

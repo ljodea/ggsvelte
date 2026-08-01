@@ -18,6 +18,7 @@
     useSecondInspect = false,
     secondInspectMode,
     propInspect,
+    inspectIdentity,
     captureRegistry,
     onrender,
     ondiagnostic,
@@ -27,7 +28,8 @@
     inspectMode?: InspectMode;
     useSecondInspect?: boolean;
     secondInspectMode?: InspectMode;
-    propInspect?: boolean | { mode?: InspectMode };
+    propInspect?: boolean | { mode?: InspectMode; identity?: PropertyKey };
+    inspectIdentity?: PropertyKey;
     captureRegistry?: (registry: LayerRegistry) => void;
     onrender?: (model: unknown, spec: PortableSpec) => void;
     ondiagnostic?: (diagnostic: PlotDiagnostic) => void;
@@ -54,7 +56,7 @@
     <ThemeRegistryCapture capture={captureRegistry} />
   {/if}
   {#if useInspect}
-    <Inspect mode={inspectMode} />
+    <Inspect mode={inspectMode} identity={inspectIdentity} />
   {/if}
   {#if useSecondInspect}
     <Inspect mode={secondInspectMode} />

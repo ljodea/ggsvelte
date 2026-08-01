@@ -7,7 +7,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  identityFromInspectInput,
   identityFromSelectInput,
   pickExplicitDatumKey,
   resolveDatumKey,
@@ -148,18 +147,6 @@ describe("pickExplicitDatumKey", () => {
   it("treats only undefined as absent — allows accessor functions", () => {
     const accessor = (row: { a: number }, index: number) => `${row.a}:${index}`;
     expect(pickExplicitDatumKey({ inspect: accessor })).toBe(accessor);
-  });
-});
-
-describe("identityFromInspectInput", () => {
-  it("returns undefined for absent, false, or true inspect", () => {
-    expect(identityFromInspectInput()).toBeUndefined();
-    expect(identityFromInspectInput(false)).toBeUndefined();
-    expect(identityFromInspectInput(true)).toBeUndefined();
-  });
-
-  it("reads identity from an InspectOptions bag", () => {
-    expect(identityFromInspectInput({ identity: "year", mode: "xy" })).toBe("year");
   });
 });
 
