@@ -45,6 +45,14 @@ describe("docs example PNG-first (PR3)", () => {
     expect(frame).not.toContain('tabindex="0"');
   });
 
+  it("keeps the static shell until data-gg-ready so the plot box does not poof", () => {
+    const frame = read("lib/components/ExampleLiveFrame.svelte");
+    expect(frame).toContain('data-gg-ready="true"');
+    expect(frame).toContain("liveReady");
+    expect(frame).toContain("aspect-ratio");
+    expect(frame).toContain("MutationObserver");
+  });
+
   it("keeps loadExample for callers that still need the full bundle", () => {
     const examples = read("lib/examples.ts");
     expect(examples).toContain("export async function loadExampleSources");

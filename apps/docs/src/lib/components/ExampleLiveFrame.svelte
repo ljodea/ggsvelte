@@ -5,6 +5,10 @@
    * SPA nav and scroll stay responsive. Near-viewport auto-upgrade pulled the
    * full chart stack as soon as a specimen approached the fold.
    *
+   * The static shell stays mounted (and sized) until the live plot reports
+   * `data-gg-ready="true"`, so users never see an 18×18 icon SVG flash before
+   * the full 640×400 plot.
+   *
    * `?vr` forces an immediate upgrade so visual regression can wait on
    * `.gg-plot-root[data-gg-ready]` without racing intent handlers.
    */
@@ -33,6 +37,7 @@
 
   let host = $state<HTMLDivElement | null>(null);
   let Live = $state<Component | null>(null);
+  let liveReady = $state(false);
   let loadStarted = false;
   let cancelled = false;
 
@@ -70,19 +75,47 @@
       stop();
     };
   });
+
+  // When Live mounts, keep the shell until data-gg-ready flips true.
+  $effect(() => {
+    if (Live === null || host === null) {
+      liveReady = false;
+      return;
+    }
+    const root = host;
+    const already = root.querySelector('.gg-plot-root[data-gg-ready="true"]');
+    if (already !== null) {
+      liveReady = true;
+      return;
+    }
+    liveReady = false;
+    const observer = new MutationObserver(() => {
+      if (root.querySelector('.gg-plot-root[data-gg-ready="true"]') !== null) {
+        liveReady = true;
+        observer.disconnect();
+      }
+    });
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ["data-gg-ready"],
+      subtree: true,
+      childList: true,
+    });
+    return () => observer.disconnect();
+  });
 </script>
 
 <div
   class="gg-example-frame"
   class:full-width={fullWidth}
+  class:live-ready={liveReady}
   bind:this={host}
   style={`--example-vr-width:${String(width)}px;--example-vr-height:${String(height)}px`}
 >
-  {#if Live !== null}
-    <Live />
-  {:else}
+  {#if !liveReady}
     <img
       class="example-preview"
+      class:under-live={Live !== null}
       src={`${base}${previewPath}`}
       alt={title}
       {width}
@@ -90,9 +123,16 @@
       decoding="async"
       fetchpriority="high"
     />
-    <button type="button" class="load-interactive" onclick={startLoad}>
-      Load interactive chart
-    </button>
+    {#if Live === null}
+      <button type="button" class="load-interactive" onclick={startLoad}>
+        Load interactive chart
+      </button>
+    {/if}
+  {/if}
+  {#if Live !== null}
+    <div class="live-host" class:revealed={liveReady}>
+      <Live />
+    </div>
   {/if}
 </div>
 
@@ -103,6 +143,8 @@
     width: 100%;
     max-width: var(--example-vr-width);
     min-width: 0;
+    /* Reserve the live plot box so layout does not jump while the shell upgrades. */
+    aspect-ratio: var(--example-vr-width) / var(--example-vr-height);
   }
 
   .gg-example-frame.full-width {
@@ -116,10 +158,20 @@
     background: #fff;
   }
 
+  .example-preview.under-live {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    z-index: 1;
+  }
+
   .load-interactive {
     position: absolute;
     right: 0.75rem;
     bottom: 0.75rem;
+    z-index: 2;
     margin: 0;
     padding: 0.4rem 0.7rem;
     border: 1px solid var(--line, #ccc);
@@ -134,5 +186,24 @@
   .load-interactive:focus-visible {
     outline: 2px solid var(--ink, #111);
     outline-offset: 2px;
+  }
+
+  .live-host {
+    width: 100%;
+    height: 100%;
+  }
+
+  .live-host:not(.revealed) {
+    /* Keep the plot in the layout tree so it can measure, but hide the flash. */
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .live-host.revealed {
+    position: relative;
+    opacity: 1;
   }
 </style>
