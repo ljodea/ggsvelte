@@ -848,3 +848,47 @@ it("uses job-private Bun caches across CI workflows (issue #319)", () => {
     );
   }
 });
+
+describe("release.yml concurrent-merge race recovery", () => {
+  const release = () => read(".github/workflows/release.yml");
+
+  it("queues releases and never cancels an in-flight publish", () => {
+    const yml = release();
+    expect(yml).toMatch(/concurrency:\s*\n\s*group:\s*release/);
+    expect(yml).toContain("cancel-in-progress: false");
+  });
+
+  it("does not pass publish to changesets/action (publish is decoupled)", () => {
+    // changesets/action is either/or: any leftover .changeset/*.md makes it
+    // skip publish while staying green. Publish lives in a separate step so
+    // concurrent feature merges cannot suppress shipping already-bumped versions.
+    const yml = release();
+    expect(yml).toContain("changesets/action@");
+    expect(yml).toContain("changesets — open/update Version Packages PR");
+    // No changesets/action `publish:` input anywhere in the workflow. The
+    // publish command lives only in publish-unpublished.ts.
+    expect(yml).not.toMatch(/publish:\s*bun node_modules/);
+    expect(yml).not.toMatch(/publish:\s*changeset/);
+  });
+
+  it("publishes unpublished versions then asserts npm parity when enabled", () => {
+    const yml = release();
+    expect(yml).toContain("bun scripts/publish-unpublished.ts");
+    expect(yml).toContain("bun scripts/assert-npm-published.ts");
+    expect(yml).toContain("vars.NPM_PUBLISH_ENABLED == 'true'");
+    // Both gates share the enable flag; publish must come before assert.
+    const publishAt = yml.indexOf("bun scripts/publish-unpublished.ts");
+    const assertAt = yml.indexOf("bun scripts/assert-npm-published.ts");
+    expect(publishAt).toBeGreaterThan(-1);
+    expect(assertAt).toBeGreaterThan(publishAt);
+  });
+
+  it("keeps OIDC trusted publishing (no NPM_TOKEN secret)", () => {
+    const yml = release();
+    expect(yml).toContain("id-token: write");
+    expect(yml).toContain("registry-url: https://registry.npmjs.org");
+    // Comments may name NPM_TOKEN when forbidding it; the secret must not be wired.
+    expect(yml).not.toMatch(/secrets\.NPM_TOKEN/);
+    expect(yml).not.toMatch(/NPM_TOKEN:\s*\$\{\{/);
+  });
+});
