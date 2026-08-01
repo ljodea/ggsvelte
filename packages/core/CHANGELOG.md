@@ -1,5 +1,47 @@
 # @ggsvelte/core
 
+## 0.24.3
+
+### Patch Changes
+
+- a84fd4e: # Band interval project() normalizes only domain extremes
+
+  Migration: none — identical projected spans for contiguous and non-contiguous
+  band selections; lower cost on large category brushes.
+
+  `projectedSpan` used to call `scale.normalize` for every selected key to find
+  min/max centers. Centers are monotone in domain index, so it now tracks the
+  extreme indices in one pass and normalizes only those two values.
+
+- 47a660a: # Band-axis tick thinning no longer rebuilds every tick on each halving
+
+  Migration: none — same chosen labelEvery, tick values, labels, and labeled flags;
+  lower cost when a vertical band axis has many categories.
+
+  Vertical band axes used to call `deriveTicks` once per `labelEvery` doubling
+  during margin degradation. Only the `labeled` flag depends on every, so the
+  loop now flips flags in place after a single derivation.
+
+- 5d8c5b8: # Shortlist filled-area hits by subpath, not every vertex
+
+  Migration: none — same hit ids and brush membership; lower pointer cost on dense areas.
+
+  Filled path geometry (stacked `geom_area`, ribbons, bands) used to put every path
+  vertex into the spatial shortlist. A stacked area of a few thousand rows then
+  paid tens of milliseconds per hover. Index one AABB per filled subpath, expand
+  to the winning vertex only after containment or axis-snap, and keep brush
+  `queryRect` returning every vertex of a hit subpath.
+
+- a8c2292: # Interpolate statAlign from the merge cursor
+
+  Migration: none — same aligned grid, y values, and source-row lineage; lower cost on large G·U expansions.
+
+  `statAlign` no longer binary-searches each group's series once per shared-grid
+  x. The merge cursor already used for source-row lineage supplies the
+  interpolation bracket, so the per-output-row path is linear in the expansion
+  size.
+  - @ggsvelte/spec@0.24.3
+
 ## 0.24.2
 
 ### Patch Changes
