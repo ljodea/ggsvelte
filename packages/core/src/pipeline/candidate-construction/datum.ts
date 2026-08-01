@@ -74,7 +74,7 @@ export function resolveRepresentedSourceRows(input: {
   frameRow: number;
   lineage: LineageStore<number>;
   primitiveIndex: number;
-}): { representedRows: number[]; sourceOrder: number; lineageKey: number } {
+}): { representedRows: readonly number[]; sourceOrder: number; lineageKey: number } {
   const {
     outlierSourceRow,
     sourceRow,
@@ -94,7 +94,7 @@ export function resolveRepresentedSourceRows(input: {
 
   // Outliers already pin an exact source row — do not re-expand via aggregate
   // group×x / bin indexes (those buckets contain every row the box represents).
-  let representedRows =
+  let representedRows: readonly number[] =
     outlierSourceRow === null
       ? (sourceRowsByGroup.get(`${panelIndex}:${layerIndex}:${group}`) ?? [])
       : [outlierSourceRow];

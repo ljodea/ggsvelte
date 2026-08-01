@@ -16,7 +16,12 @@ export class LineageStore<Key extends PropertyKey = PropertyKey> {
 
   intern(keys: Iterable<Key>): LineageRef {
     // Shared frozen arrays (identity-index buckets) intern once; skip re-sort/tokenize.
-    if (Array.isArray(keys) && Object.isFrozen(keys)) {
+    // Look the array up before asking whether it is frozen: `Object.isFrozen`
+    // walks the array in this engine, so guarding a hash lookup with it costs
+    // one pass over the members per call — the very rescan this cache exists to
+    // avoid. Only frozen arrays are ever stored below, and freezing cannot be
+    // undone, so a hit is still sound.
+    if (Array.isArray(keys)) {
       const cached = this.#byArray.get(keys);
       if (cached !== undefined) return cached;
     }
