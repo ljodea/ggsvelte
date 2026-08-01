@@ -196,49 +196,56 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes, hit: HitGeomet
     readonly maxHalfH: number;
     readonly spatial: StaticQuadtree;
   };
-  const classBuckets = new Map<number, number[]>();
-  for (let ei = 0; ei < extN; ei++) {
-    const halfW = (extMaxX[ei]! - extMinX[ei]!) / 2;
-    const halfH = (extMaxY[ei]! - extMinY[ei]!) / 2;
-    const m = Math.max(halfW, halfH, 1e-9);
-    const key = Math.min(31, Math.ceil(Math.log2(m)));
-    const bucket = classBuckets.get(key);
-    if (bucket === undefined) classBuckets.set(key, [ei]);
-    else bucket.push(ei);
-  }
-  const extendedClasses: ExtendedClass[] = [];
-  for (const eis of classBuckets.values()) {
-    const cxs = new Float64Array(eis.length);
-    const cys = new Float64Array(eis.length);
-    let maxHalfW = 0;
-    let maxHalfH = 0;
-    for (let j = 0; j < eis.length; j++) {
-      const ei = eis[j]!;
+  const buildSizeClasses = (eisFilter: (ei: number) => boolean): ExtendedClass[] => {
+    const classBuckets = new Map<number, number[]>();
+    for (let ei = 0; ei < extN; ei++) {
+      if (!eisFilter(ei)) continue;
       const halfW = (extMaxX[ei]! - extMinX[ei]!) / 2;
       const halfH = (extMaxY[ei]! - extMinY[ei]!) / 2;
-      cxs[j] = (extMinX[ei]! + extMaxX[ei]!) / 2;
-      cys[j] = (extMinY[ei]! + extMaxY[ei]!) / 2;
-      if (halfW > maxHalfW) maxHalfW = halfW;
-      if (halfH > maxHalfH) maxHalfH = halfH;
+      const m = Math.max(halfW, halfH, 1e-9);
+      const key = Math.min(31, Math.ceil(Math.log2(m)));
+      const bucket = classBuckets.get(key);
+      if (bucket === undefined) classBuckets.set(key, [ei]);
+      else bucket.push(ei);
     }
-    extendedClasses.push({
-      eis,
-      maxHalfW,
-      maxHalfH,
-      spatial: new StaticQuadtree(cxs, cys),
-    });
-  }
-  classBuckets.clear();
+    const classes: ExtendedClass[] = [];
+    for (const eis of classBuckets.values()) {
+      const cxs = new Float64Array(eis.length);
+      const cys = new Float64Array(eis.length);
+      let maxHalfW = 0;
+      let maxHalfH = 0;
+      for (let j = 0; j < eis.length; j++) {
+        const ei = eis[j]!;
+        const halfW = (extMaxX[ei]! - extMinX[ei]!) / 2;
+        const halfH = (extMaxY[ei]! - extMinY[ei]!) / 2;
+        cxs[j] = (extMinX[ei]! + extMaxX[ei]!) / 2;
+        cys[j] = (extMinY[ei]! + extMaxY[ei]!) / 2;
+        if (halfW > maxHalfW) maxHalfW = halfW;
+        if (halfH > maxHalfH) maxHalfH = halfH;
+      }
+      classes.push({
+        eis,
+        maxHalfW,
+        maxHalfH,
+        spatial: new StaticQuadtree(cxs, cys),
+      });
+    }
+    return classes;
+  };
+  const extendedClasses = buildSizeClasses(() => true);
+  // Filled-path reps only — strip shortlists for axis modes must not pull every
+  // bar/segment whose tall AABB crosses an infinite strip (Devin #1342 review).
+  const filledExtendedClasses = buildSizeClasses((ei) => isFilledPath[extendedIds[ei]!] === 1);
 
-  /** Add extended ids whose AABB intersects the axis-aligned query box. */
-  const addExtendedIntersecting = (
+  const addFromClasses = (
+    classes: readonly ExtendedClass[],
     loX: number,
     loY: number,
     hiX: number,
     hiY: number,
     into: Set<number> | number[],
   ): void => {
-    for (const cls of extendedClasses) {
+    for (const cls of classes) {
       // Intersecting AABBs have centers inside query expanded by *this class's*
       // half-extents — not the global max (avoids one giant bar scanning all E).
       for (const j of cls.spatial.queryRect(
@@ -257,6 +264,27 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes, hit: HitGeomet
     }
   };
 
+  /** Add extended ids whose AABB intersects the axis-aligned query box. */
+  const addExtendedIntersecting = (
+    loX: number,
+    loY: number,
+    hiX: number,
+    hiY: number,
+    into: Set<number> | number[],
+  ): void => {
+    addFromClasses(extendedClasses, loX, loY, hiX, hiY, into);
+  };
+
+  /** Filled-subpath reps only — for axis-strip shortlists that omit filled anchors. */
+  const addFilledPathIntersecting = (
+    loX: number,
+    loY: number,
+    hiX: number,
+    hiY: number,
+    into: Set<number> | number[],
+  ): void => {
+    addFromClasses(filledExtendedClasses, loX, loY, hiX, hiY, into);
+  };
   // Far-plane strip bounds: StaticQuadtree prunes on the finite axis only.
   const STRIP = 1e30;
 
@@ -275,7 +303,8 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes, hit: HitGeomet
     };
     if (mode === "xy") {
       addRect(px - maxDistance, py - maxDistance, px + maxDistance, py + maxDistance);
-      // Filled areas omit anchors from `spatial`; pull subpath reps by AABB.
+      // Filled areas omit anchors from `spatial`; full extended tree still
+      // holds one rep per filled subpath plus rects/segments/stroked paths.
       addExtendedIntersecting(
         px - maxDistance,
         py - maxDistance,
@@ -286,21 +315,21 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes, hit: HitGeomet
     } else if (mode === "x") {
       // Dominant-axis distance is along semantic x (screen y when coord_flip).
       // Axis token maps stay for group(); nearest uses spatial strips.
-      // Filled path verts are not in spatial (#1342) — add extended for the strip.
+      // Filled path verts are not in spatial (#1342) — filled-only strip AABBs.
       if (flip) {
         addRect(-STRIP, py - maxDistance, STRIP, py + maxDistance);
-        addExtendedIntersecting(-STRIP, py - maxDistance, STRIP, py + maxDistance, consider);
+        addFilledPathIntersecting(-STRIP, py - maxDistance, STRIP, py + maxDistance, consider);
       } else {
         addRect(px - maxDistance, -STRIP, px + maxDistance, STRIP);
-        addExtendedIntersecting(px - maxDistance, -STRIP, px + maxDistance, STRIP, consider);
+        addFilledPathIntersecting(px - maxDistance, -STRIP, px + maxDistance, STRIP, consider);
       }
     } else if (mode === "y") {
       if (flip) {
         addRect(px - maxDistance, -STRIP, px + maxDistance, STRIP);
-        addExtendedIntersecting(px - maxDistance, -STRIP, px + maxDistance, STRIP, consider);
+        addFilledPathIntersecting(px - maxDistance, -STRIP, px + maxDistance, STRIP, consider);
       } else {
         addRect(-STRIP, py - maxDistance, STRIP, py + maxDistance);
-        addExtendedIntersecting(-STRIP, py - maxDistance, STRIP, py + maxDistance, consider);
+        addFilledPathIntersecting(-STRIP, py - maxDistance, STRIP, py + maxDistance, consider);
       }
     } else {
       // exact / auto: point anchors within hit reach + extended geometry whose
@@ -311,18 +340,17 @@ export function buildSpatialIndex(indexes: CandidateStoreIndexes, hit: HitGeomet
       if (mode === "auto") {
         // Per-candidate autoMode can still be x/y (e.g. boxplot outliers):
         // include dominant-axis strips so orthogonal distance does not drop them.
-        // Filled path reps are not in spatial — also shortlist them by strip AABB
-        // so a probe far on the orthogonal axis still x/y-snaps (#1342).
+        // Filled path reps: filled-only strip trees (not every bar AABB).
         if (flip) {
           addRect(-STRIP, py - maxDistance, STRIP, py + maxDistance);
           addRect(px - maxDistance, -STRIP, px + maxDistance, STRIP);
-          addExtendedIntersecting(-STRIP, py - maxDistance, STRIP, py + maxDistance, consider);
-          addExtendedIntersecting(px - maxDistance, -STRIP, px + maxDistance, STRIP, consider);
+          addFilledPathIntersecting(-STRIP, py - maxDistance, STRIP, py + maxDistance, consider);
+          addFilledPathIntersecting(px - maxDistance, -STRIP, px + maxDistance, STRIP, consider);
         } else {
           addRect(px - maxDistance, -STRIP, px + maxDistance, STRIP);
           addRect(-STRIP, py - maxDistance, STRIP, py + maxDistance);
-          addExtendedIntersecting(px - maxDistance, -STRIP, px + maxDistance, STRIP, consider);
-          addExtendedIntersecting(-STRIP, py - maxDistance, STRIP, py + maxDistance, consider);
+          addFilledPathIntersecting(px - maxDistance, -STRIP, px + maxDistance, STRIP, consider);
+          addFilledPathIntersecting(-STRIP, py - maxDistance, STRIP, py + maxDistance, consider);
         }
       }
       // exact containment uses the point AABB; auto still needs maxDistance pad

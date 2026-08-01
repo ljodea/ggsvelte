@@ -379,16 +379,19 @@ export function assembleCandidateStore(
       const probe = hit.probeRect(loX, loY, hiX, hiY);
       for (const id of extendedHits) {
         if (panelId !== undefined && scene.panels[panelIds[id]!]!.id !== panelId) continue;
-        if (!probe.intersects(id)) continue;
-        // Filled subpath rep: brush contract returns every vertex on the
-        // subpath without re-walking geometry per id (#1342 / fill-brush tests).
+        // Filled subpath: one AABB shortlist entry, then per-vertex membership
+        // (anchor / adjacent edges / fill-center). Do not expand the whole
+        // span from a rep-only graze — that over-selects and under-selects
+        // mid-band brushes (Devin review on #1342).
         if (isFilledPath[id] === 1) {
           const start = filledSpanStart[id]!;
           const end = filledSpanEnd[id]!;
-          for (let cid = start; cid < end; cid++) hits.push(cid);
+          for (let cid = start; cid < end; cid++) {
+            if (probe.intersects(cid)) hits.push(cid);
+          }
           continue;
         }
-        hits.push(id);
+        if (probe.intersects(id)) hits.push(id);
       }
       hits.sort((a, b) => traversalRank[a]! - traversalRank[b]!);
       return Uint32Array.from(hits);

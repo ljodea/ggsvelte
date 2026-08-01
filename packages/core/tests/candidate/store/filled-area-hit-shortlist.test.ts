@@ -261,6 +261,35 @@ describe("filled-area hit shortlist (#1342)", () => {
     expect(hits).toEqual(Array.from({ length: rows * 2 }, (_, i) => i));
   });
 
+  it("queryRect selects only local vertices when the brush center is outside the fill", () => {
+    // Triangle (20,20) (80,20) (50,80). Brush over the top edge near (50,20)
+    // with center outside the fill — only nearby top-edge vertices, not the
+    // whole subpath (and not empty via rep-only edge checks).
+    const plot = scene();
+    plot.batches = [
+      {
+        kind: "paths",
+        layerIndex: 0,
+        panelIndex: 0,
+        positions: new Float32Array([20, 20, 50, 20, 80, 20, 50, 80]),
+        rowIndex: new Uint32Array([0, 1, 2, 3]),
+        pathOffsets: new Uint32Array([0, 4]),
+        fills: [null],
+        strokes: [null],
+        closed: true,
+        linewidth: 0,
+        alpha: 1,
+        curve: "linear",
+      },
+    ];
+    const store = areaStore(plot);
+    // Brush (45,15)-(55,22): covers the mid top vertex (50,20); center (50,18.5)
+    // is outside the fill (above the top edge). Must not return the bottom tip.
+    const hits = new Set(Array.from(store.queryRect(45, 15, 55, 22)));
+    expect(hits.has(1)).toBe(true); // mid top vertex
+    expect(hits.has(3)).toBe(false); // bottom tip (50,80)
+  });
+
   it("hitTest and nearest(auto) stay sub-millisecond on a dense stacked area", () => {
     // Structural scale: 8 × 2000 closed-band verts = 32k candidates.
     // Pre-fix cost was multi-ms per probe; after fix it must stay under 1ms mean.
