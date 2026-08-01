@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 
 import { DOCS_TASKS } from "../apps/docs/src/lib/catalog/docs-tasks.ts";
 import { GUIDE_CATALOG } from "../apps/docs/src/lib/catalog/guide.ts";
-import { GUIDE_NAVIGATION } from "../apps/docs/src/lib/generated/routes.ts";
+import { GUIDE_NAVIGATION } from "../apps/docs/src/lib/generated/guide-navigation.ts";
 
 // Typed wide rather than `as const`: DOCS_TASKS is a const-asserted literal, so
 // an `as const` expectation compares two readonly tuple types and toEqual has no
